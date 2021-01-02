@@ -30,3 +30,17 @@
 *.exe
 *.out
 *.app
+
+#Microsoft Visual Code IDE
+/.vscode/
+
+#emacs
+*~
+/src/.emacs.desktop.lock
+/src/.emacs.desktop
+
+#sqlite db files
+*.db
+
+#Intel compiler optimizer reports
+*.optrpt
