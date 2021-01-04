@@ -1,8 +1,9 @@
 .DEFAULT_GOAL := main
 
-LIBS = -L/usr/local/lib -lcfitsio -lmpifort
+FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
+LIBS = -L/usr/local/lib -lcfitsio -lmpifort -lmicrohttpd
 
 main:
-	ifort -O3 -Ofast -xHost -mavx -axAVX -qopt-report=2 -coarray=distributed main.f90 -o fitswebqlse $(LIBS)
+	ifort $(FLAGS) src/main.f90 -o fitswebqlse $(LIBS)
 
 #-corray-config-file=./config
