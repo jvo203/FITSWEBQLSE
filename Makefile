@@ -1,5 +1,6 @@
 .DEFAULT_GOAL := fitswebqlse
 
+CC := icc
 FORT := ifort
 TARGET = fitswebqlse
 
@@ -10,6 +11,7 @@ OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
 FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
+CFLAGS = $(FLAGS)
 LIBS = -L/usr/local/lib -lcfitsio -lmpifort -lmicrohttpd
 
 # include dependencies (all .d files)
@@ -19,7 +21,7 @@ LIBS = -L/usr/local/lib -lcfitsio -lmpifort -lmicrohttpd
 	ispc -g -O3 --pic --opt=fast-math --addressing=32 -o $@ $<
 
 %.o: %.c
-	$(CXX) $(CXXFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
+	$(CC) $(CFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
 
 %.o: %.f90
 	$(FORT) $(FLAGS) -MMD -o $@ -c $<
