@@ -1,7 +1,31 @@
-.DEFAULT_GOAL := main
+.DEFAULT_GOAL := fitswebqlse
+
+FORT := ifort
+TARGET = fitswebqlse
+
+SRC = src/main.f90
+OBJ := $(SRC:.f90=.o)
+OBJ := $(OBJ:.c=.o)
+OBJ := $(OBJ:.ispc=.o)
+DEP = $(OBJ:%.o=%.d)
 
 FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
 LIBS = -L/usr/local/lib -lcfitsio -lmpifort -lmicrohttpd
+
+# include dependencies (all .d files)
+-include $(DEP)
+
+%.o: %.ispc
+	ispc -g -O3 --pic --opt=fast-math --addressing=32 -o $@ $<
+
+%.o: %.c
+	$(CXX) $(CXXFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
+
+%.o: %.f90
+	$(FORT) $(FLAGS) -MMD -o $@ -c $<
+
+fitswebqlse: $(OBJ)
+	$(FORT) $(FLAGS) -o $(TARGET) $^ $(LIBS)
 
 main:
 	ifort $(FLAGS) src/main.f90 -o fitswebqlse $(LIBS)
