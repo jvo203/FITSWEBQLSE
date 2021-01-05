@@ -56,7 +56,7 @@ ahc_echo(void *cls,
     return ret;
 }
 
-extern void start_http_(int *status)
+extern void start_http_()
 {
     /*http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                    HTTP_PORT,
@@ -74,7 +74,6 @@ extern void start_http_(int *status)
     if (http_server == NULL)
     {
         printf("Could not start a libmicrohttpd web server.\n");
-        *status = -1;
         return;
     }
     else
@@ -84,6 +83,4 @@ extern void start_http_(int *status)
 
     (void)getc(stdin);
     MHD_stop_daemon(http_server);
-
-    *status = 0;
 }
