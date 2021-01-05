@@ -4,7 +4,7 @@ CC := icc
 FORT := ifort
 TARGET = fitswebqlse
 
-SRC = src/main.f90 src/mongoose.c
+SRC = src/main.f90
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
