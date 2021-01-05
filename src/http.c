@@ -72,7 +72,10 @@ extern int start_http()
                                    MHD_OPTION_END);
 
     if (http_server == NULL)
+    {
         printf("Could not start a libmicrohttpd web server.\n");
+        return -1;
+    }
     else
     {
         printf("µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
@@ -80,4 +83,6 @@ extern int start_http()
 
     (void)getc(stdin);
     MHD_stop_daemon(http_server);
+
+    return 0;
 }
