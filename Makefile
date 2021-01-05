@@ -35,4 +35,4 @@ main:
 #-corray-config-file=./config
 
 clean:
-	rm -f src/*.o src/*.d $(TARGET)
+	rm -f src/*.o src/*.d *.o *.d $(TARGET)
