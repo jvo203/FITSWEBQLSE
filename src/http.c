@@ -14,10 +14,10 @@ static int on_client_connect(void *cls,
                              const struct sockaddr *addr,
                              socklen_t addrlen);
 
-static int on_http_connection(void *cls, struct MHD_Connection *connection,
-                              const char *url, const char *method,
-                              const char *version, const char *upload_data,
-                              size_t *upload_data_size, void **con_cls);
+static enum MHD_Result on_http_connection(void *cls, struct MHD_Connection *connection,
+                                          const char *url, const char *method,
+                                          const char *version, const char *upload_data,
+                                          size_t *upload_data_size, void **con_cls);
 
 static enum MHD_Result
 ahc_echo(void *cls,
@@ -56,7 +56,7 @@ ahc_echo(void *cls,
     return ret;
 }
 
-extern void start_http(int &status)
+extern void start_http_(int *status)
 {
     /*http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                    HTTP_PORT,
@@ -74,7 +74,7 @@ extern void start_http(int &status)
     if (http_server == NULL)
     {
         printf("Could not start a libmicrohttpd web server.\n");
-        status = -1;
+        *status = -1;
         return;
     }
     else
@@ -85,5 +85,5 @@ extern void start_http(int &status)
     (void)getc(stdin);
     MHD_stop_daemon(http_server);
 
-    status = 0;
+    *status = 0;
 }
