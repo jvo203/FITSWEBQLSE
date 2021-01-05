@@ -21,7 +21,7 @@ LIBS = -L/usr/local/lib -lmpifort -lcfitsio -lmicrohttpd
 	ispc -g -O3 --pic --opt=fast-math --addressing=32 -o $@ $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
+	$(CC) $(CFLAGS) -MMD -o $@ -c $<
 
 %.o: %.f90
 	$(FORT) $(FLAGS) -MMD -o $@ -c $<
