@@ -33,3 +33,6 @@ main:
 	ifort $(FLAGS) src/main.f90 -o fitswebqlse $(LIBS)
 
 #-corray-config-file=./config
+
+clean:
+	rm -f src/*.o src/*.d $(TARGET)
