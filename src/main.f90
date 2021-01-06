@@ -20,11 +20,13 @@ program main
     ! start an external libmicrohttpd server
     call start_http
 
-    read *, c
+    if (this_image() == 1) then
+        read *, c
+    end if
 
     ! call MPI_FINALIZE(ierror)
 end program main
 
 subroutine exit_fortran
-    print *, 'EXIT'
+    print *, 'image', this_image(), 'FORTRAN EXIT'
 end subroutine exit_fortran

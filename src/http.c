@@ -62,7 +62,7 @@ ahc_echo(void *cls,
 
 void SIGINTHandler(int sigint)
 {
-    printf("\tCTRL-C detected. Exiting FITSWEBQLSE.\n");
+    printf("\tCTRL-C detected. Exiting the C part.\n");
 
     if (http_server != NULL)
     {
