@@ -1,7 +1,9 @@
-#include <microhttpd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <signal.h>
+
+#include <microhttpd.h>
 
 #define HTTP_PORT 8080
 
@@ -56,8 +58,31 @@ ahc_echo(void *cls,
     return ret;
 }
 
+void SIGINTHandler(int sigint)
+{
+    printf("\tCTRL-C detected. Exiting FITSWEBQLSE.\n");
+
+    if (http_server != NULL)
+    {
+        printf("shutting down the HTTP server... ");
+        //MHD_stop_daemon(http_server);
+
+        //stop accepting new connections
+        MHD_quiesce_daemon(http_server);
+    };
+
+    printf("clean shutdown completed.\n");
+
+    //signal(sigint, previous_handler);
+    //raise(sigint);
+};
+
 extern void start_http_()
 {
+
+    signal(SIGPIPE, SIG_IGN);      //ignore SIGPIPE
+    signal(SIGINT, SIGINTHandler); //intercept CTRL+C to trigger a clean shutdown
+
     /*http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                    HTTP_PORT,
                                    NULL, NULL, &on_http_connection, NULL,
@@ -81,6 +106,6 @@ extern void start_http_()
         printf("µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
     }
 
-    (void)getc(stdin);
+    //(void)getc(stdin);
     MHD_stop_daemon(http_server);
 }
