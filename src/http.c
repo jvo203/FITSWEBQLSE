@@ -5,7 +5,7 @@
 
 #include <microhttpd.h>
 
-extern void quit_fortran_();
+extern void exit_fortran_();
 
 #define HTTP_PORT 8080
 
@@ -76,7 +76,7 @@ void SIGINTHandler(int sigint)
 
     printf("clean shutdown completed.\n");
 
-    quit_fortran_();
+    exit_fortran_();
 };
 
 extern void start_http_()
