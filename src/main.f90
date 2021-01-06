@@ -6,24 +6,26 @@ program main
     character(len=1) :: c
     external sigint_handler ! Must declare as external
     integer rank, size, ierror, tag, status(MPI_STATUS_SIZE), cmd
-    integer, parameter :: SIGINT = 2
+    logical init
 
-    ! call MPI_INIT(ierror)
+    call MPI_Initialized(init, ierror)
+    if (.not. init) call MPI_Init(ierror)
+
     call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
-    if (this_image() == 1) then
-        print *, 'image', this_image(), 'node', rank, '/', size
-    end if
+    ! if (this_image() == 1) then
+    print *, 'image', this_image(), 'node', rank, '/', size
+    ! end if
 
     print *, 'FITSWEBQL SE CLUSTER EDITION POWERED BY FORTRAN 2018'
 
-    call signal(SIGINT, sigint_handler)
+    call register_kill_signal_handler(sigint_handler)
 
     cmd = 0
     ! start an external libmicrohttpd server
-    if (this_image() == 1) then
-        call start_http
-    end if
+    ! if (this_image() == 1) then
+    call start_http
+    !end if
 
     do
         call MPI_RECV(cmd, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
@@ -36,14 +38,16 @@ program main
 end program main
 
 subroutine http_request
-    integer msg
+    integer :: msg
 
+    ! if (this_image() == 1) then
     print *, 'image', this_image(), 'received an http request.'
+    !end if
 
     ! if(this_image() == 1) then
-    msg = 1
-    call MPI_SEND(msg, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, ierror)
-    print *, 'image', this_image(), 'ierror:', ierror
+    !msg = 1
+    !call MPI_SEND(msg, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, ierror)
+    !print *, 'image', this_image(), 'ierror:', ierror
     ! end if
 end subroutine http_request
 
@@ -51,11 +55,13 @@ subroutine exit_fortran
     integer msg
 
     ! if(this_image() == 1) then
-    msg = -1
-    call MPI_SEND(msg, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, ierror)
+    !msg = -1
+    !call MPI_SEND(msg, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, ierror)
     ! end if
 
     print *, 'image', this_image(), 'FORTRAN EXIT'
+
+    stop
 end subroutine exit_fortran
 
 subroutine sigint_handler
@@ -64,5 +70,5 @@ subroutine sigint_handler
     ! shutdown any active http server
     call stop_http
 
-    return
+    call exit_fortran
 end subroutine sigint_handler

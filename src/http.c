@@ -47,8 +47,6 @@ ahc_echo(void *cls,
     struct MHD_Response *response;
     int ret;
 
-    http_request_();
-
     if (0 != strcmp(method, "GET"))
         return MHD_NO; /* unexpected method */
     if (&dummy != *ptr)
@@ -61,6 +59,10 @@ ahc_echo(void *cls,
     if (0 != *upload_data_size)
         return MHD_NO; /* upload data in a GET!? */
     *ptr = NULL;       /* clear context pointer */
+
+    printf("URL:%s\n", url);
+    http_request_();
+
     response = MHD_create_response_from_buffer(strlen(page),
                                                (void *)page,
                                                MHD_RESPMEM_PERSISTENT);
