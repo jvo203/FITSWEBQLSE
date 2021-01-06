@@ -5,7 +5,16 @@
 
 #include <microhttpd.h>
 
+typedef void (*sighandler_t)(int);
+
+extern void register_kill_signal_handler_(sighandler_t handler)
+{
+    signal(SIGINT, handler);
+    signal(SIGTERM, handler);
+}
+
 extern void exit_fortran_();
+extern void http_request_();
 
 #define HTTP_PORT 8080
 
@@ -37,6 +46,8 @@ ahc_echo(void *cls,
     const char *page = cls;
     struct MHD_Response *response;
     int ret;
+
+    http_request_();
 
     if (0 != strcmp(method, "GET"))
         return MHD_NO; /* unexpected method */
@@ -82,8 +93,8 @@ void SIGINTHandler(int sigint)
 extern void start_http_()
 {
 
-    signal(SIGPIPE, SIG_IGN);      //ignore SIGPIPE
-    signal(SIGINT, SIGINTHandler); //intercept CTRL+C to trigger a clean shutdown
+    signal(SIGPIPE, SIG_IGN); //ignore SIGPIPE
+    //signal(SIGINT, SIGINTHandler); //intercept CTRL+C to trigger a clean shutdown
 
     /*http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                    HTTP_PORT,
@@ -107,7 +118,15 @@ extern void start_http_()
     {
         printf("µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
     }
+}
 
-    //(void)getc(stdin);
-    //MHD_stop_daemon(http_server);
+extern void stop_http_()
+{
+    if (http_server != NULL)
+    {
+        printf("shutting down the HTTP server... ");
+        MHD_stop_daemon(http_server);
+        http_server = NULL;
+        printf("done\n");
+    }
 }
