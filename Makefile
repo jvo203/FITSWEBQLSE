@@ -11,7 +11,8 @@ OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
 FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
-CFLAGS = $(FLAGS)
+CFLAGS := $(FLAGS)
+#FLAGS += -coarray=distributed
 LIBS = -L/usr/local/lib -lmpifort -lcfitsio -lmicrohttpd
 
 # include dependencies (all .d files)
