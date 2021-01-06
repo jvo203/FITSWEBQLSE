@@ -25,6 +25,6 @@ program main
     ! call MPI_FINALIZE(ierror)
 end program main
 
-subroutine quit_fortran
+subroutine exit_fortran
     print *, 'EXIT'
-end subroutine quit_fortran
+end subroutine exit_fortran
