@@ -28,10 +28,10 @@ program main
     !end if
 
     do
-        call MPI_RECV(cmd, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
-        print *, 'image', this_image(), 'received message containing: ', cmd
+        call MPI_RECV(cmd, 1, MPI_INT, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+        print *, 'image', this_image(), 'received message containing: ', cmd, ierror
 
-        if (cmd .ge. 0) exit
+        if (cmd < 0) exit
     end do
 
     call MPI_FINALIZE(ierror)
@@ -39,14 +39,18 @@ end program main
 
 subroutine http_request
     integer :: msg
+    integer :: i
 
     ! if (this_image() == 1) then
     print *, 'image', this_image(), 'received an http request.'
     !end if
 
     ! if(this_image() == 1) then
-    !msg = 1
-    !call MPI_SEND(msg, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, ierror)
+    msg = 1
+
+    do i = 0, size - 1
+        if (i .ne. rank) call MPI_SEND(msg, 1, MPI_INT, i, 1, MPI_COMM_WORLD, ierror)
+    end do
     !print *, 'image', this_image(), 'ierror:', ierror
     ! end if
 end subroutine http_request
