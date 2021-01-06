@@ -31,7 +31,7 @@ program main
         call MPI_RECV(cmd, 1, MPI_INT, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
         print *, 'image', this_image(), 'received message containing: ', cmd, ierror
 
-        if (cmd < 0) exit
+        if (cmd .lt. 0) exit
     end do
 
     call MPI_FINALIZE(ierror)
