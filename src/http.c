@@ -74,12 +74,9 @@ void SIGINTHandler(int sigint)
         //MHD_quiesce_daemon(http_server);
     };
 
-    quit_fortran_();
-
     printf("clean shutdown completed.\n");
 
-    //signal(sigint, previous_handler);
-    //raise(sigint);
+    quit_fortran_();
 };
 
 extern void start_http_()
