@@ -65,10 +65,11 @@ void SIGINTHandler(int sigint)
     if (http_server != NULL)
     {
         printf("shutting down the HTTP server... ");
-        //MHD_stop_daemon(http_server);
+        MHD_stop_daemon(http_server);
+        http_server = NULL;
 
         //stop accepting new connections
-        MHD_quiesce_daemon(http_server);
+        //MHD_quiesce_daemon(http_server);
     };
 
     printf("clean shutdown completed.\n");
@@ -107,5 +108,5 @@ extern void start_http_()
     }
 
     //(void)getc(stdin);
-    MHD_stop_daemon(http_server);
+    //MHD_stop_daemon(http_server);
 }
