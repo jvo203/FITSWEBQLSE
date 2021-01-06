@@ -5,6 +5,8 @@
 
 #include <microhttpd.h>
 
+extern void quit_fortran_();
+
 #define HTTP_PORT 8080
 
 #define PAGE "<html><head><title>libmicrohttpd demo</title>" \
@@ -71,6 +73,8 @@ void SIGINTHandler(int sigint)
         //stop accepting new connections
         //MHD_quiesce_daemon(http_server);
     };
+
+    quit_fortran_();
 
     printf("clean shutdown completed.\n");
 

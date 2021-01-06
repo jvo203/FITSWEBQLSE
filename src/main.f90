@@ -12,3 +12,7 @@ program main
     read *, c
 
 end program main
+
+subroutine quit_fortran
+    print *, 'EXIT'
+end subroutine quit_fortran
