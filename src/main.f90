@@ -58,11 +58,6 @@ end subroutine http_request
 subroutine exit_fortran
     integer msg
 
-    ! if(this_image() == 1) then
-    !msg = -1
-    !call MPI_SEND(msg, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, ierror)
-    ! end if
-
     print *, 'image', this_image(), 'FORTRAN EXIT'
 
     stop
