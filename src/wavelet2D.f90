@@ -344,3 +344,35 @@ function i4_wrap(ival, ilo, ihi)
 
     return
 end
+subroutine transform2D(n, x, y)
+!********************************
+!
+! Author:
+! Christopher Zapart
+!
+! Input, integer (kind = 4) N, the dimension of the square block N x N
+!
+! Input, real (kind = 4) X(N,N), the square matrix to be transformed
+!
+! Output, real (kind = 4) Y(N,N), the transformed matrix
+!
+    implicit none
+
+    integer(kind=4) :: n
+    real(kind=4) :: x(n:n)
+    real(kind=4) :: y(n:n)
+    real(kind=4) :: z(n:n)
+    integer(kind=4) m
+
+    m = n
+
+    do while (m .ge. 4)
+        ! transform all the rows
+
+        ! then the columns
+
+        m = m/2
+    end do
+
+    return
+end subroutine
