@@ -48,7 +48,7 @@ subroutine daub4_transform(n, x, y)
     real(kind=4) z(n)
 
     y(1:n) = x(1:n)
-    z(1:n) = 0.0D+00
+    z(1:n) = 0.0E+00
 
     m = n
 
@@ -131,7 +131,7 @@ subroutine daub4_transform_inverse(n, y, x)
     real(kind=4) z(n)
 
     x(1:n) = y(1:n)
-    z(1:n) = 0.0D+00
+    z(1:n) = 0.0E+00
 
     m = 4
 
