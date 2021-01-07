@@ -1,5 +1,6 @@
-#compilation target
+#compilation targets
 /fitswebqlse
+/testWavelets
 
 # Prerequisites
 *.d
