@@ -27,7 +27,30 @@ program Wavelets
     end do
 
     ! an inverse transform to recover the data
-    call daub4_2Dtransform_inverse(N, y, x)
+    call daub4_2Dtransform_inv(N, y, x)
+
+    print *, 'RECOVERED'
+    do i = 1, N
+        print *, x(i, :)
+    end do
+
+    ! reset the source
+    do i = 1, N
+        do j = 1, N
+            x(i, j) = i*j
+        end do
+    end do
+
+    ! an in-place transform
+    call daub4_2Dtransform_inpl(n, x)
+
+    print *, 'AFTER'
+    do i = 1, N
+        print *, x(i, :)
+    end do
+
+    ! an in-place inverse transform
+    call daub4_2Dtransform_inv_inpl(n, x)
 
     print *, 'RECOVERED'
     do i = 1, N

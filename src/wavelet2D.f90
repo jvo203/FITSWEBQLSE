@@ -448,7 +448,7 @@ subroutine daub4_2Dtransform(n, x, y)
 
     return
 end subroutine
-subroutine daub4_2Dtransform_inverse(n, y, x)
+subroutine daub4_2Dtransform_inv(n, y, x)
     !********************************
     ! a 2D DAUB4 inverse wavelet transform of a square floating-point matrix
     !
@@ -557,7 +557,7 @@ end subroutine
 ! in-place versions
 subroutine daub4_2Dtransform_inpl(n, x)
     !********************************
-    ! a 2D DAUB4 wavelet transform of a square floating-point matrix
+    ! a 2D DAUB4 wavelet transform of a square floating-point matrix (in-place)
     !
     !  Licensing:
     !
@@ -659,7 +659,7 @@ subroutine daub4_2Dtransform_inpl(n, x)
 end subroutine
 subroutine daub4_2Dtransform_inv_inpl(n, x)
     !********************************
-    ! a 2D DAUB4 inverse wavelet transform of a square floating-point matrix
+    ! a 2D DAUB4 inverse wavelet transform of a square floating-point matrix (in-place)
     !
     !  Licensing:
     !
