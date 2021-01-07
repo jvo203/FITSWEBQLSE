@@ -359,9 +359,9 @@ subroutine daub4_2Dtransform(n, x, y)
 !  Input, integer (kind = 4) N, the dimension of the square block N x N
 !    N must be a power of 2 and at least 4.
 !
-!  Input, real (kind = 4) X(N,N), the square matrix to be transformed
+!  Input, real (kind = 4) X(N,N), the original square matrix to be transformed
 !
-!  Output, real (kind = 4) Y(N,N), the transformed matrix
+!  Output, real (kind = 4) Y(N,N), the wavelet-transformed matrix
 !
     implicit none
 
@@ -463,7 +463,7 @@ subroutine daub4_2Dtransform_inverse(n, y, x)
     !  Input, integer (kind = 4) N, the dimension of the square block N x N
     !    N must be a power of 2 and at least 4.
     !
-    !  Input, real (kind = 4) Y(N,N), the transformed square matrix
+    !  Input, real (kind = 4) Y(N,N), the wavelet-transformed square matrix
     !
     !  Output, real (kind = 4) X(N,N), the original matrix
     !
