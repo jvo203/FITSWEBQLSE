@@ -419,6 +419,28 @@ subroutine daub4_transform2D(n, x, y)
         end do
 
         ! then the columns
+        do k = 1, n
+            i = 1
+
+            do j = 1, m - 1, 2
+
+                j0 = i4_wrap(j, 1, m)
+                j1 = i4_wrap(j + 1, 1, m)
+                j2 = i4_wrap(j + 2, 1, m)
+                j3 = i4_wrap(j + 3, 1, m)
+
+                z(i) = c(0)*y(j0, k) + c(1)*y(j1, k) &
+                       + c(2)*y(j2, k) + c(3)*y(j3, k)
+
+                z(i + m/2) = c(3)*y(j0, k) - c(2)*y(j1, k) &
+                             + c(1)*y(j2, k) - c(0)*y(j3, k)
+
+                i = i + 1
+
+            end do
+
+            y(1:m, k) = z(1:m)
+        end do
 
         m = m/2
     end do
