@@ -19,16 +19,16 @@
 !    Input, integer ( kind = 4 ) N, the dimension of the vector.
 !    N must be a power of 2 and at least 4.
 !
-!    Input, real ( kind = 8 ) X(N), the vector to be transformed.
+!    Input, real ( kind = 4 ) X(N), the vector to be transformed.
 !
-!    Output, real ( kind = 8 ) Y(N), the transformed vector.
+!    Output, real ( kind = 4 ) Y(N), the transformed vector.
 !
   implicit none
 
   integer(kind=4) n
   integer(kind=4), parameter :: p = 3
 
-  real(kind=8), dimension(0:p) :: c = (/ &
+  real(kind=4), dimension(0:p) :: c = (/ &
                                   0.4829629131445341D+00, &
                                   0.8365163037378079D+00, &
                                   0.2241438680420133D+00, &
@@ -41,9 +41,9 @@
   integer(kind=4) j2
   integer(kind=4) j3
   integer(kind=4) m
-  real(kind=8) x(n)
-  real(kind=8) y(n)
-  real(kind=8) z(n)
+  real(kind=4) x(n)
+  real(kind=4) y(n)
+  real(kind=4) z(n)
 
   y(1:n) = x(1:n)
   z(1:n) = 0.0D+00
@@ -102,16 +102,16 @@ subroutine daub4_transform_inverse(n, y, x)
 !    Input, integer ( kind = 4 ) N, the dimension of the vector.
 !    N must be a power of 2 and at least 4.
 !
-!    Input, real ( kind = 8 ) Y(N), the transformed vector.
+!    Input, real ( kind = 4 ) Y(N), the transformed vector.
 !
-!    Output, real ( kind = 8 ) X(N), the original vector.
+!    Output, real ( kind = 4 ) X(N), the original vector.
 !
     implicit none
 
     integer(kind=4) n
     integer(kind=4), parameter :: p = 3
 
-    real(kind=8), dimension(0:p) :: c = (/ &
+    real(kind=4), dimension(0:p) :: c = (/ &
                                     0.4829629131445341D+00, &
                                     0.8365163037378079D+00, &
                                     0.2241438680420133D+00, &
@@ -124,9 +124,9 @@ subroutine daub4_transform_inverse(n, y, x)
     integer(kind=4) i4_wrap
     integer(kind=4) j
     integer(kind=4) m
-    real(kind=8) x(n)
-    real(kind=8) y(n)
-    real(kind=8) z(n)
+    real(kind=4) x(n)
+    real(kind=4) y(n)
+    real(kind=4) z(n)
 
     x(1:n) = y(1:n)
     z(1:n) = 0.0D+00
@@ -163,4 +163,3 @@ subroutine daub4_transform_inverse(n, y, x)
 
     return
 end
-subroutine daub6_matrix(n, a)
