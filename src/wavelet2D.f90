@@ -381,17 +381,42 @@ subroutine daub4_transform2D(n, x, y)
     integer(kind=4) j3
 
     integer(kind=4) m
-    real(kind=4) :: x(n:n)
-    real(kind=4) :: y(n:n)
-    real(kind=4) :: z(n)
+    real(kind=4), dimension(n, n) :: x
+    real(kind=4), dimension(n, n) :: y
+    real(kind=4), dimension(n) :: z
+
+    integer(kind=4) k
 
     y = x
-    z(1:n) = 0.0E+00
+    z = 0.0E+00
 
     m = n
 
+    ! for each level
     do while (m .ge. 4)
         ! transform all the rows
+        do k = 1, n
+            i = 1
+
+            do j = 1, m - 1, 2
+
+                j0 = i4_wrap(j, 1, m)
+                j1 = i4_wrap(j + 1, 1, m)
+                j2 = i4_wrap(j + 2, 1, m)
+                j3 = i4_wrap(j + 3, 1, m)
+
+                z(i) = c(0)*y(k, j0) + c(1)*y(k, j1) &
+                       + c(2)*y(k, j2) + c(3)*y(k, j3)
+
+                z(i + m/2) = c(3)*y(k, j0) - c(2)*y(k, j1) &
+                             + c(1)*y(k, j2) - c(0)*y(k, j3)
+
+                i = i + 1
+
+            end do
+
+            y(k, 1:m) = z(1:m)
+        end do
 
         ! then the columns
 
