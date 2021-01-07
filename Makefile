@@ -30,8 +30,8 @@ LIBS = -L/usr/local/lib -lmpifort -lcfitsio -lmicrohttpd
 fitswebqlse: $(OBJ)
 	$(FORT) $(FLAGS) -o $(TARGET) $^ $(LIBS)
 
-main:
-	ifort $(FLAGS) src/main.f90 -o fitswebqlse $(LIBS)
+test:
+	ifort $(FLAGS) src/wavelet2D.f90 src/testWavelets.f90 -o testWavelets
 
 #-corray-config-file=./config
 
