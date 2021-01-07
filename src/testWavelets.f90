@@ -19,11 +19,19 @@ program Wavelets
     end do
 
     ! a forward 2D wavelet transform
-    call daub4_transform2D(N, x, y)
+    call daub4_2Dtransform(N, x, y)
 
     print *, 'AFTER'
     do i = 1, N
         print *, y(i, :)
+    end do
+
+    ! an inverse transform to recover the data
+    call daub4_2Dtransform_inverse(N, y, x)
+
+    print *, 'RECOVERED'
+    do i = 1, N
+        print *, x(i, :)
     end do
 
 end program Wavelets

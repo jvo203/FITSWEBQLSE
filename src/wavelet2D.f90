@@ -344,7 +344,7 @@ function i4_wrap(ival, ilo, ihi)
 
     return
 end
-subroutine daub4_transform2D(n, x, y)
+subroutine daub4_2Dtransform(n, x, y)
 !********************************
 ! a 2D DAUB4 wavelet transform of a square floating-point matrix
 !
@@ -357,6 +357,7 @@ subroutine daub4_transform2D(n, x, y)
 !  Christopher Zapart, based on the 1D code by John Burkardt
 !
 !  Input, integer (kind = 4) N, the dimension of the square block N x N
+!    N must be a power of 2 and at least 4.
 !
 !  Input, real (kind = 4) X(N,N), the square matrix to be transformed
 !
@@ -395,7 +396,7 @@ subroutine daub4_transform2D(n, x, y)
     ! for each level
     do while (m .ge. 4)
         ! transform all the rows
-        do k = 1, n
+        do k = 1, m
             i = 1
 
             do j = 1, m - 1, 2
@@ -419,7 +420,7 @@ subroutine daub4_transform2D(n, x, y)
         end do
 
         ! then the columns
-        do k = 1, n
+        do k = 1, m
             i = 1
 
             do j = 1, m - 1, 2
@@ -443,6 +444,111 @@ subroutine daub4_transform2D(n, x, y)
         end do
 
         m = m/2
+    end do
+
+    return
+end subroutine
+subroutine daub4_2Dtransform_inverse(n, y, x)
+    !********************************
+    ! a 2D DAUB4 inverse wavelet transform of a square floating-point matrix
+    !
+    !  Licensing:
+    !
+    !    This code is distributed under the GNU LGPL license.
+    !
+    !  Author:
+    !
+    !  Christopher Zapart, based on the 1D code by John Burkardt
+    !
+    !  Input, integer (kind = 4) N, the dimension of the square block N x N
+    !    N must be a power of 2 and at least 4.
+    !
+    !  Input, real (kind = 4) Y(N,N), the transformed square matrix
+    !
+    !  Output, real (kind = 4) X(N,N), the original matrix
+    !
+    implicit none
+
+    integer(kind=4) n
+    integer(kind=4), parameter :: p = 3
+
+    real(kind=4), dimension(0:p) :: c = (/ &
+                                    0.4829629131445341E+00, &
+                                    0.8365163037378079E+00, &
+                                    0.2241438680420133E+00, &
+                                    -0.1294095225512603E+00/)
+    integer(kind=4) i
+    integer(kind=4) i0
+    integer(kind=4) i1
+    integer(kind=4) i2
+    integer(kind=4) i3
+    integer(kind=4) i4_wrap
+    integer(kind=4) j
+    integer(kind=4) m
+    real(kind=4), dimension(n, n) :: x
+    real(kind=4), dimension(n, n) :: y
+    real(kind=4), dimension(n) :: z
+
+    integer(kind=4) k
+
+    x = y
+    z = 0.0E+00
+
+    m = 4
+
+    ! for each level
+    do while (m .le. n)
+        ! reverse all the columns
+        do k = 1, m
+            j = 1
+
+            do i = 0, m/2 - 1
+
+                i0 = i4_wrap(i, 1, m/2)
+                i2 = i4_wrap(i + 1, 1, m/2)
+
+                i1 = i4_wrap(i + m/2, m/2 + 1, m)
+                i3 = i4_wrap(i + m/2 + 1, m/2 + 1, m)
+
+                z(j) = c(2)*x(i0, k) + c(1)*x(i1, k) &
+                       + c(0)*x(i2, k) + c(3)*x(i3, k)
+
+                z(j + 1) = c(3)*x(i0, k) - c(0)*x(i1, k) &
+                           + c(1)*x(i2, k) - c(2)*x(i3, k)
+
+                j = j + 2
+
+            end do
+
+            x(1:m, k) = z(1:m)
+        end do
+
+        ! then the rows
+        do k = 1, m
+            j = 1
+
+            do i = 0, m/2 - 1
+
+                i0 = i4_wrap(i, 1, m/2)
+                i2 = i4_wrap(i + 1, 1, m/2)
+
+                i1 = i4_wrap(i + m/2, m/2 + 1, m)
+                i3 = i4_wrap(i + m/2 + 1, m/2 + 1, m)
+
+                z(j) = c(2)*x(k, i0) + c(1)*x(k, i1) &
+                       + c(0)*x(k, i2) + c(3)*x(k, i3)
+
+                z(j + 1) = c(3)*x(k, i0) - c(0)*x(k, i1) &
+                           + c(1)*x(k, i2) - c(2)*x(k, i3)
+
+                j = j + 2
+
+            end do
+
+            x(k, 1:m) = z(1:m)
+        end do
+
+        m = m*2
     end do
 
     return
