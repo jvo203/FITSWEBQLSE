@@ -31,9 +31,9 @@ fitswebqlse: $(OBJ)
 	$(FORT) $(FLAGS) -o $(TARGET) $^ $(LIBS)
 
 test:
-	ifort $(FLAGS) src/wavelet2D.f90 src/testWavelets.f90 -o testWavelets
+	ifort -Ofast -xHost -mavx -axAVX -qopt-report=2 src/wavelet2D.f90 src/testWavelets.f90 -o testWavelets
 
 #-corray-config-file=./config
 
 clean:
-	rm -f src/*.o src/*.d *.o *.d $(TARGET)
+	rm -f src/*.o src/*.d *.o *.d $(TARGET) testWavelets
