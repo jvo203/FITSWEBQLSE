@@ -9,7 +9,7 @@ program Wavelets
 
     do i = 1, N
         do j = 1, N
-            x(i, j) = i + j
+            x(i, j) = i*j
         end do
     end do
 
