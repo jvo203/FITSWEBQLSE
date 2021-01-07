@@ -344,25 +344,49 @@ function i4_wrap(ival, ilo, ihi)
 
     return
 end
-subroutine transform2D(n, x, y)
+subroutine daub4_transform2D(n, x, y)
 !********************************
+! a 2D DAUB4 wavelet transform of a square floating-point matrix
 !
-! Author:
-! Christopher Zapart
+!  Licensing:
 !
-! Input, integer (kind = 4) N, the dimension of the square block N x N
+!    This code is distributed under the GNU LGPL license.
 !
-! Input, real (kind = 4) X(N,N), the square matrix to be transformed
+!  Author:
 !
-! Output, real (kind = 4) Y(N,N), the transformed matrix
+!  Christopher Zapart, based on the 1D code by John Burkardt
+!
+!  Input, integer (kind = 4) N, the dimension of the square block N x N
+!
+!  Input, real (kind = 4) X(N,N), the square matrix to be transformed
+!
+!  Output, real (kind = 4) Y(N,N), the transformed matrix
 !
     implicit none
 
     integer(kind=4) :: n
+    integer(kind=4), parameter :: p = 3
+
+    real(kind=4), dimension(0:p) :: c = (/ &
+                                    0.4829629131445341E+00, &
+                                    0.8365163037378079E+00, &
+                                    0.2241438680420133E+00, &
+                                    -0.1294095225512603E+00/)
+    integer(kind=4) i
+    integer(kind=4) i4_wrap
+    integer(kind=4) j
+    integer(kind=4) j0
+    integer(kind=4) j1
+    integer(kind=4) j2
+    integer(kind=4) j3
+
+    integer(kind=4) m
     real(kind=4) :: x(n:n)
     real(kind=4) :: y(n:n)
-    real(kind=4) :: z(n:n)
-    integer(kind=4) m
+    real(kind=4) :: z(n)
+
+    y = x
+    z(1:n) = 0.0E+00
 
     m = n
 
