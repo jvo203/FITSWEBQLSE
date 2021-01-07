@@ -1,7 +1,7 @@
 program Wavelets
     implicit none
 
-    integer(kind=4), parameter :: N = 4
+    integer(kind=4), parameter :: N = 8
     integer i, j
 
     real(kind=4), dimension(N, N) :: x
@@ -14,12 +14,16 @@ program Wavelets
     end do
 
     print *, 'BEFORE'
-    print *, x
+    do i = 1, N
+        print *, x(i, :)
+    end do
 
     ! a forward 2D wavelet transform
     call daub4_transform2D(N, x, y)
 
     print *, 'AFTER'
-    print *, y
+    do i = 1, N
+        print *, y(i, :)
+    end do
 
 end program Wavelets
