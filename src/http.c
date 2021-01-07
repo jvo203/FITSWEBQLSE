@@ -19,7 +19,7 @@ extern void http_request_();
 #define HTTP_PORT 8080
 
 #define PAGE "<html><head><title>libmicrohttpd demo</title>" \
-             "</head><body>libmicrohttpd demo</body></html>"
+             "</head><body>FITSWEBQLSE (libmicrohttpd)</body></html>"
 
 struct MHD_Daemon *http_server = NULL;
 
