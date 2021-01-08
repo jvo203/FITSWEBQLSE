@@ -632,7 +632,7 @@ subroutine daub4_2Dtransform_inpl(n, x, mask)
 
     integer(kind=4) m
     real(kind=4), dimension(n, n), intent(inout) :: x
-    logical, dimension(n, n), intent(out) :: mask
+    logical, optional, dimension(n, n), intent(out) :: mask
     real(kind=4), dimension(n) :: z
     real(kind=4) average
     integer(kind=4) nvalid
@@ -640,18 +640,20 @@ subroutine daub4_2Dtransform_inpl(n, x, mask)
 
     z = 0.0E+00
 
-    ! by default there are no NaNs
-    mask = .true.
+    if (present(mask)) then
+        ! by default there are no NaNs
+        mask = .true.
 
-    !  pick out all the NaN
-    where (isnan(x)) mask = .false.
+        !  pick out all the NaN
+        where (isnan(x)) mask = .false.
 
-    ! calculate the mean of the input array
-    nvalid = count(mask)
-    average = sum(x, mask=mask)/nvalid
+        ! calculate the mean of the input array
+        nvalid = count(mask)
+        average = sum(x, mask=mask)/nvalid
 
-    ! replace NaNs with the average value
-    where (.not. mask) x = average
+        ! replace NaNs with the average value
+        where (.not. mask) x = average
+    end if
 
     m = n
 
@@ -753,7 +755,7 @@ subroutine daub4_2Dtransform_inv_inpl(n, x, mask)
     integer(kind=4) j
     integer(kind=4) m
     real(kind=4), dimension(n, n), intent(inout) :: x
-    logical, dimension(n, n), intent(in) :: mask
+    logical, optional, dimension(n, n), intent(in) :: mask
     real(kind=4), dimension(n) :: z
 
     integer(kind=4) k
@@ -818,7 +820,9 @@ subroutine daub4_2Dtransform_inv_inpl(n, x, mask)
     end do
 
     ! insert back NaN values
-    where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
+    if (present(mask)) then
+        where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
+    end if
 
     return
 end subroutine daub4_2Dtransform_inv_inpl
