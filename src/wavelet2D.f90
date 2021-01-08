@@ -392,6 +392,7 @@ subroutine daub4_2Dtransform(n, x, y)
 
     integer(kind=4) :: n
     integer(kind=4), parameter :: p = 3
+    real(kind=4), parameter :: zero = 1.0E-05
 
     real(kind=4), dimension(0:p) :: c = (/ &
                                     0.4829629131445341E+00, &
@@ -470,6 +471,9 @@ subroutine daub4_2Dtransform(n, x, y)
 
         m = m/2
     end do
+
+    ! truncate values near zero
+    where (abs(y) < zero) y = 0.0
 
     return
 end subroutine
