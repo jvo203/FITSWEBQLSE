@@ -6,6 +6,7 @@ program Wavelets
 
     real(kind=4), dimension(N, N) :: x
     real(kind=4), dimension(N, N) :: y
+    logical, dimension(N, N) :: mask
 
     do i = 1, N
         do j = 1, N
@@ -40,6 +41,9 @@ program Wavelets
             x(i, j) = i*j
         end do
     end do
+
+    ! insert a NaN value
+    x(N/2, N/2) = 1.0/0.0
 
     ! an in-place transform
     call daub4_2Dtransform_inpl(n, x)
