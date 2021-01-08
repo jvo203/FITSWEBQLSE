@@ -80,7 +80,8 @@ subroutine daub4_transform(n, x, y)
     end do
 
     return
-end
+end subroutine daub4_transform
+
 subroutine daub4_transform_inverse(n, y, x)
 
 !*****************************************************************************80
@@ -164,7 +165,8 @@ subroutine daub4_transform_inverse(n, y, x)
     end do
 
     return
-end
+end subroutine daub4_transform_inverse
+
 function i4_modp(i, j)
 
     !*****************************************************************************80
@@ -243,7 +245,8 @@ function i4_modp(i, j)
     i4_modp = value
 
     return
-end
+end function i4_modp
+
 function i4_wrap(ival, ilo, ihi)
 
     !*****************************************************************************80
@@ -343,7 +346,8 @@ function i4_wrap(ival, ilo, ihi)
     i4_wrap = value
 
     return
-end
+end function i4_wrap
+
 elemental function i4_reflect(ival, ilo, ihi)
     integer(kind=4) :: i4_reflect
     integer(kind=4), intent(in) :: ival, ilo, ihi
@@ -368,7 +372,8 @@ elemental function i4_reflect(ival, ilo, ihi)
     i4_reflect = value
 
     return
-end
+end function i4_reflect
+
 subroutine daub4_2Dtransform(n, x, y)
 !********************************
 ! a 2D DAUB4 wavelet transform of a square floating-point matrix
@@ -476,7 +481,8 @@ subroutine daub4_2Dtransform(n, x, y)
     where (abs(y) < zero) y = 0.0
 
     return
-end subroutine
+end subroutine daub4_2Dtransform
+
 subroutine daub4_2Dtransform_inv(n, y, x)
     !********************************
     ! a 2D DAUB4 inverse wavelet transform of a square floating-point matrix
@@ -581,7 +587,7 @@ subroutine daub4_2Dtransform_inv(n, y, x)
     end do
 
     return
-end subroutine
+end subroutine daub4_2Dtransform_inv
 
 ! in-place versions
 subroutine daub4_2Dtransform_inpl(n, x)
@@ -689,7 +695,8 @@ subroutine daub4_2Dtransform_inpl(n, x)
     where (abs(x) < zero) x = 0.0
 
     return
-end subroutine
+end subroutine daub4_2Dtransform_inpl
+
 subroutine daub4_2Dtransform_inv_inpl(n, x)
     !********************************
     ! a 2D DAUB4 inverse wavelet transform of a square floating-point matrix (in-place)
@@ -792,4 +799,4 @@ subroutine daub4_2Dtransform_inv_inpl(n, x)
     end do
 
     return
-end subroutine
+end subroutine daub4_2Dtransform_inv_inpl
