@@ -752,6 +752,9 @@ subroutine daub4_2Dtransform_inpl(n, x, mask)
     ! truncate values near zero
     where (abs(x) < zero) x = 0.0
 
+    ! wavelet shrinkage to denoise / compress the data
+    call wave_shrink(n, x)
+
     return
 end subroutine daub4_2Dtransform_inpl
 
@@ -865,3 +868,74 @@ subroutine daub4_2Dtransform_inv_inpl(n, x, mask)
 
     return
 end subroutine daub4_2Dtransform_inv_inpl
+
+subroutine wave_shrink(n, x)
+    implicit none
+
+    integer(kind=4) :: n
+    real(kind=4), dimension(n, n), intent(inout) :: x
+    integer(kind=4) :: i, j, nvalid
+    real(kind=4) mean, std, tmp
+
+    if (n .lt. 4) return
+
+    ! calculate the mean and standard deviation of
+    ! absolute values of detail coefficients (skipping the coarse coeffs)
+
+    mean = 0.0
+    std = 0.0
+
+    ! the mean
+    do i = 1, n
+        do j = 1, n
+            ! skip the coarse coefficients
+            if ((i .le. 2) .and. (j .le. 2)) cycle
+
+            mean = mean + abs(x(i, j))
+            nvalid = nvalid + 1
+        end do
+    end do
+
+    if (nvalid .gt. 0) then
+        mean = mean/nvalid
+    else
+        return
+    end if
+
+    ! do nothing if all values are 0.0
+    if (mean .eq. 0.0) return
+
+    ! the standard deviation
+    !do i = 1, n
+    !    do j = 1, n
+    !       ! skip the coarse coefficients
+    !       if ((i .le. 2) .and. (j .le. 2)) cycle
+    !
+    !      tmp = abs(x(i, j))
+    !           std = std + (tmp - mean)*(tmp - mean)
+    !      end do
+    ! end do
+
+    !if ((nvalid - 1) .gt. 0) then
+    !    std = sqrt(std/(nvalid - 1))
+    !else if (nvalid .gt. 0) then
+    !    ! I know nvalid .eq. 1 at this point (there is no point dividing by 1)
+    !    std = sqrt(std/nvalid)
+    !else
+    !    return
+    !end if
+
+    ! print *, 'mean:', mean, 'std:', std
+
+    ! prune (shrink the coefficients)
+    do i = 1, n
+        do j = 1, n
+            ! skip the coarse coefficients
+            if ((i .le. 2) .and. (j .le. 2)) cycle
+
+            ! set the small coefficients (one half to be precise) to 0.0
+            if (abs(x(i, j)) .le. mean) x(i, j) = 0.0
+        end do
+    end do
+
+end subroutine wave_shrink

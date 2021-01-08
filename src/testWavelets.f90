@@ -26,6 +26,9 @@ program Wavelets
     ! a forward 2D wavelet transform
     call daub4_2Dtransform(N, x, y, mask)
 
+    ! count the number of 0.0 coefficients
+    print *, '# of zero coefficients:', count(y .eq. 0.0)
+
     print *, 'AFTER'
     do i = 1, N
         print *, y(i, :)
@@ -56,6 +59,9 @@ program Wavelets
 
     ! an in-place transform
     call daub4_2Dtransform_inpl(n, x, mask)
+
+    ! count the number of 0.0 coefficients
+    print *, '# of zero coefficients:', count(x .eq. 0.0)
 
     print *, 'MASK'
     do i = 1, N
