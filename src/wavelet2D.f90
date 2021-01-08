@@ -374,7 +374,7 @@ elemental function i4_reflect(ival, ilo, ihi)
     return
 end function i4_reflect
 
-subroutine daub4_2Dtransform(n, x, y)
+subroutine daub4_2Dtransform(n, x, y, mask)
 !********************************
 ! a 2D DAUB4 wavelet transform of a square floating-point matrix
 !
@@ -392,6 +392,8 @@ subroutine daub4_2Dtransform(n, x, y)
 !  Input, real (kind = 4) X(N,N), the original square matrix to be transformed
 !
 !  Output, real (kind = 4) Y(N,N), the wavelet-transformed matrix
+!
+! Output, logical mask(N,N), a boolean matrix where .false. indicates NaN values in X
 !
     implicit none
 
@@ -415,12 +417,36 @@ subroutine daub4_2Dtransform(n, x, y)
     integer(kind=4) m
     real(kind=4), dimension(n, n), intent(in) :: x
     real(kind=4), dimension(n, n), intent(out) :: y
+    logical, optional, dimension(n, n), intent(out) :: mask
     real(kind=4), dimension(n) :: z
+    real(kind=4) average
+    integer(kind=4) nvalid
 
     integer(kind=4) k
 
     y = x
     z = 0.0E+00
+
+    if (present(mask)) then
+        ! by default there are no NaNs
+        mask = .true.
+
+        !  pick out all the NaN
+        where (isnan(x)) mask = .false.
+
+        ! calculate the mean of the input array
+        nvalid = count(mask)
+
+        ! all values might be NaN in which case set the array to 0.0
+        if (nvalid .gt. 0) then
+            average = sum(x, mask=mask)/nvalid
+        else
+            average = 0.0
+        end if
+
+        ! replace NaNs with the average value
+        where (.not. mask) y = average
+    end if
 
     m = n
 
@@ -483,7 +509,7 @@ subroutine daub4_2Dtransform(n, x, y)
     return
 end subroutine daub4_2Dtransform
 
-subroutine daub4_2Dtransform_inv(n, y, x)
+subroutine daub4_2Dtransform_inv(n, y, x, mask)
     !********************************
     ! a 2D DAUB4 inverse wavelet transform of a square floating-point matrix
     !
@@ -502,6 +528,7 @@ subroutine daub4_2Dtransform_inv(n, y, x)
     !
     !  Output, real (kind = 4) X(N,N), the original matrix
     !
+    use, intrinsic :: ieee_arithmetic
     implicit none
 
     integer(kind=4) n
@@ -520,6 +547,7 @@ subroutine daub4_2Dtransform_inv(n, y, x)
     integer(kind=4) i4_wrap
     integer(kind=4) j
     integer(kind=4) m
+    logical, optional, dimension(n, n), intent(in) :: mask
     real(kind=4), dimension(n, n), intent(out) :: x
     real(kind=4), dimension(n, n), intent(in) :: y
     real(kind=4), dimension(n) :: z
@@ -585,6 +613,11 @@ subroutine daub4_2Dtransform_inv(n, y, x)
 
         m = m*2
     end do
+
+    ! insert back NaN values
+    if (present(mask)) then
+        where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
+    end if
 
     return
 end subroutine daub4_2Dtransform_inv

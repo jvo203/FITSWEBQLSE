@@ -15,13 +15,16 @@ program Wavelets
         end do
     end do
 
+    ! insert a NaN value
+    x(N/2, N/2) = ieee_value(0.0, ieee_quiet_nan)
+
     print *, 'BEFORE'
     do i = 1, N
         print *, x(i, :)
     end do
 
     ! a forward 2D wavelet transform
-    call daub4_2Dtransform(N, x, y)
+    call daub4_2Dtransform(N, x, y, mask)
 
     print *, 'AFTER'
     do i = 1, N
@@ -29,7 +32,7 @@ program Wavelets
     end do
 
     ! an inverse transform to recover the data
-    call daub4_2Dtransform_inv(N, y, x)
+    call daub4_2Dtransform_inv(N, y, x, mask)
 
     print *, 'RECOVERED'
     do i = 1, N
