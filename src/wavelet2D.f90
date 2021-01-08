@@ -222,9 +222,9 @@ function i4_modp(i, j)
     !
     implicit none
 
-    integer(kind=4) i
+    integer(kind=4), intent(in) :: i
     integer(kind=4) i4_modp
-    integer(kind=4) j
+    integer(kind=4), intent(in) :: j
     integer(kind=4) value
 
     if (j == 0) then
@@ -321,9 +321,9 @@ function i4_wrap(ival, ilo, ihi)
 
     integer(kind=4) i4_modp
     integer(kind=4) i4_wrap
-    integer(kind=4) ihi
-    integer(kind=4) ilo
-    integer(kind=4) ival
+    integer(kind=4), intent(in) :: ihi
+    integer(kind=4), intent(in) :: ilo
+    integer(kind=4), intent(in) :: ival
     integer(kind=4) jhi
     integer(kind=4) jlo
     integer(kind=4) value
@@ -341,6 +341,31 @@ function i4_wrap(ival, ilo, ihi)
     end if
 
     i4_wrap = value
+
+    return
+end
+elemental function i4_reflect(ival, ilo, ihi)
+    integer(kind=4) :: i4_reflect
+    integer(kind=4), intent(in) :: ival, ilo, ihi
+    integer(kind=4) :: value
+    integer(kind=4) :: dist
+
+    ! the default return value
+    value = ival
+
+    ! the upper boundary
+    if (ival .gt. ihi) then
+        dist = ival - ihi
+        value = ihi - (dist - 1)
+    end if
+
+    ! the lower boundary
+    if (ival .lt. ilo) then
+        dist = ilo - ival
+        value = ilo + (dist - 1)
+    end if
+
+    i4_reflect = value
 
     return
 end
