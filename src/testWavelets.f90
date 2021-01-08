@@ -1,4 +1,5 @@
 program Wavelets
+    use, intrinsic :: ieee_arithmetic
     implicit none
 
     integer(kind=4), parameter :: N = 8
@@ -43,18 +44,28 @@ program Wavelets
     end do
 
     ! insert a NaN value
-    x(N/2, N/2) = 1.0/0.0
+    x(N/2, N/2) = ieee_value(0.0, ieee_quiet_nan)
+
+    print *, 'X:'
+    do i = 1, N
+        print *, x(i, :)
+    end do
 
     ! an in-place transform
-    call daub4_2Dtransform_inpl(n, x)
+    call daub4_2Dtransform_inpl(n, x, mask)
 
-    print *, 'AFTER'
+    print *, 'MASK'
+    do i = 1, N
+        print *, mask(i, :)
+    end do
+
+    print *, 'COEFFS:'
     do i = 1, N
         print *, x(i, :)
     end do
 
     ! an in-place inverse transform
-    call daub4_2Dtransform_inv_inpl(n, x)
+    call daub4_2Dtransform_inv_inpl(n, x, mask)
 
     print *, 'RECOVERED'
     do i = 1, N
