@@ -649,7 +649,13 @@ subroutine daub4_2Dtransform_inpl(n, x, mask)
 
         ! calculate the mean of the input array
         nvalid = count(mask)
-        average = sum(x, mask=mask)/nvalid
+
+        ! all values might be NaN in which case set the array to 0.0
+        if (nvalid .gt. 0) then
+            average = sum(x, mask=mask)/nvalid
+        else
+            average = 0.0
+        end if
 
         ! replace NaNs with the average value
         where (.not. mask) x = average
