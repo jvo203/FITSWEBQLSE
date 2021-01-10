@@ -1,4 +1,5 @@
 program Wavelets
+    use wavelet2D
     use, intrinsic :: ieee_arithmetic
     implicit none
 
