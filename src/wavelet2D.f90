@@ -1,5 +1,5 @@
 module wavelet2D
-    private i4_wrap, i4_modp
+    private i4_wrap, i4_modp, i4_reflect, i4_periodic
 contains
     subroutine daub4_transform(n, x, y)
 
@@ -39,7 +39,6 @@ contains
                                         0.2241438680420133E+00, &
                                         -0.1294095225512603E+00/)
         integer(kind=4) i
-        ! integer(kind=4) i4_wrap
         integer(kind=4) j
         integer(kind=4) j0
         integer(kind=4) j1
@@ -127,7 +126,6 @@ contains
         integer(kind=4) i1
         integer(kind=4) i2
         integer(kind=4) i3
-        ! integer(kind=4) i4_wrap
         integer(kind=4) j
         integer(kind=4) m
         real(kind=4) x(n)
@@ -325,7 +323,6 @@ contains
         !
         implicit none
 
-        ! integer(kind=4) i4_modp
         integer(kind=4) i4_wrap
         integer(kind=4), intent(in) :: ihi
         integer(kind=4), intent(in) :: ilo
@@ -377,6 +374,32 @@ contains
         return
     end function i4_reflect
 
+    elemental function i4_periodic(ival, ilo, ihi)
+        integer(kind=4) :: i4_periodic
+        integer(kind=4), intent(in) :: ival, ilo, ihi
+        integer(kind=4) :: value
+        integer(kind=4) :: dist
+
+        ! the default return value
+        value = ival
+
+        ! the upper boundary
+        if (ival .gt. ihi) then
+            dist = ival - ihi
+            value = ilo + (dist - 1)
+        end if
+
+        ! the lower boundary
+        if (ival .lt. ilo) then
+            dist = ilo - ival
+            value = ihi - (dist - 1)
+        end if
+
+        i4_periodic = value
+
+        return
+    end function i4_periodic
+
     subroutine daub4_2Dtransform(n, x, y, mask)
 !********************************
 ! a 2D DAUB4 wavelet transform of a square floating-point matrix
@@ -410,7 +433,6 @@ contains
                                         0.2241438680420133E+00, &
                                         -0.1294095225512603E+00/)
         integer(kind=4) i
-        ! integer(kind=4) i4_wrap
         integer(kind=4) j
         integer(kind=4) j0
         integer(kind=4) j1
@@ -461,10 +483,10 @@ contains
 
                 do j = 1, m - 1, 2
 
-                    j0 = i4_wrap(j, 1, m)
-                    j1 = i4_wrap(j + 1, 1, m)
-                    j2 = i4_wrap(j + 2, 1, m)
-                    j3 = i4_wrap(j + 3, 1, m)
+                    j0 = i4_periodic(j, 1, m)
+                    j1 = i4_periodic(j + 1, 1, m)
+                    j2 = i4_periodic(j + 2, 1, m)
+                    j3 = i4_periodic(j + 3, 1, m)
 
                     z(i) = c(0)*y(k, j0) + c(1)*y(k, j1) &
                            + c(2)*y(k, j2) + c(3)*y(k, j3)
@@ -485,10 +507,10 @@ contains
 
                 do j = 1, m - 1, 2
 
-                    j0 = i4_wrap(j, 1, m)
-                    j1 = i4_wrap(j + 1, 1, m)
-                    j2 = i4_wrap(j + 2, 1, m)
-                    j3 = i4_wrap(j + 3, 1, m)
+                    j0 = i4_periodic(j, 1, m)
+                    j1 = i4_periodic(j + 1, 1, m)
+                    j2 = i4_periodic(j + 2, 1, m)
+                    j3 = i4_periodic(j + 3, 1, m)
 
                     z(i) = c(0)*y(j0, k) + c(1)*y(j1, k) &
                            + c(2)*y(j2, k) + c(3)*y(j3, k)
@@ -547,7 +569,6 @@ contains
         integer(kind=4) i1
         integer(kind=4) i2
         integer(kind=4) i3
-        ! integer(kind=4) i4_wrap
         integer(kind=4) j
         integer(kind=4) m
         logical, optional, dimension(n, n), intent(in) :: mask
@@ -570,11 +591,11 @@ contains
 
                 do i = 0, m/2 - 1
 
-                    i0 = i4_wrap(i, 1, m/2)
-                    i2 = i4_wrap(i + 1, 1, m/2)
+                    i0 = i4_periodic(i, 1, m/2)
+                    i2 = i4_periodic(i + 1, 1, m/2)
 
-                    i1 = i4_wrap(i + m/2, m/2 + 1, m)
-                    i3 = i4_wrap(i + m/2 + 1, m/2 + 1, m)
+                    i1 = i4_periodic(i + m/2, m/2 + 1, m)
+                    i3 = i4_periodic(i + m/2 + 1, m/2 + 1, m)
 
                     z(j) = c(2)*x(i0, k) + c(1)*x(i1, k) &
                            + c(0)*x(i2, k) + c(3)*x(i3, k)
@@ -595,11 +616,11 @@ contains
 
                 do i = 0, m/2 - 1
 
-                    i0 = i4_wrap(i, 1, m/2)
-                    i2 = i4_wrap(i + 1, 1, m/2)
+                    i0 = i4_periodic(i, 1, m/2)
+                    i2 = i4_periodic(i + 1, 1, m/2)
 
-                    i1 = i4_wrap(i + m/2, m/2 + 1, m)
-                    i3 = i4_wrap(i + m/2 + 1, m/2 + 1, m)
+                    i1 = i4_periodic(i + m/2, m/2 + 1, m)
+                    i3 = i4_periodic(i + m/2 + 1, m/2 + 1, m)
 
                     z(j) = c(2)*x(k, i0) + c(1)*x(k, i1) &
                            + c(0)*x(k, i2) + c(3)*x(k, i3)
@@ -659,7 +680,6 @@ contains
                                         0.2241438680420133E+00, &
                                         -0.1294095225512603E+00/)
         integer(kind=4) i
-        ! integer(kind=4) i4_wrap
         integer(kind=4) j
         integer(kind=4) j0
         integer(kind=4) j1
@@ -707,10 +727,10 @@ contains
 
                 do j = 1, m - 1, 2
 
-                    j0 = i4_wrap(j, 1, m)
-                    j1 = i4_wrap(j + 1, 1, m)
-                    j2 = i4_wrap(j + 2, 1, m)
-                    j3 = i4_wrap(j + 3, 1, m)
+                    j0 = i4_periodic(j, 1, m)
+                    j1 = i4_periodic(j + 1, 1, m)
+                    j2 = i4_periodic(j + 2, 1, m)
+                    j3 = i4_periodic(j + 3, 1, m)
 
                     z(i) = c(0)*x(k, j0) + c(1)*x(k, j1) &
                            + c(2)*x(k, j2) + c(3)*x(k, j3)
@@ -731,10 +751,10 @@ contains
 
                 do j = 1, m - 1, 2
 
-                    j0 = i4_wrap(j, 1, m)
-                    j1 = i4_wrap(j + 1, 1, m)
-                    j2 = i4_wrap(j + 2, 1, m)
-                    j3 = i4_wrap(j + 3, 1, m)
+                    j0 = i4_periodic(j, 1, m)
+                    j1 = i4_periodic(j + 1, 1, m)
+                    j2 = i4_periodic(j + 2, 1, m)
+                    j3 = i4_periodic(j + 3, 1, m)
 
                     z(i) = c(0)*x(j0, k) + c(1)*x(j1, k) &
                            + c(2)*x(j2, k) + c(3)*x(j3, k)
@@ -796,7 +816,6 @@ contains
         integer(kind=4) i1
         integer(kind=4) i2
         integer(kind=4) i3
-        ! integer(kind=4) i4_wrap
         integer(kind=4) j
         integer(kind=4) m
         real(kind=4), dimension(n, n), intent(inout) :: x
@@ -817,11 +836,11 @@ contains
 
                 do i = 0, m/2 - 1
 
-                    i0 = i4_wrap(i, 1, m/2)
-                    i2 = i4_wrap(i + 1, 1, m/2)
+                    i0 = i4_periodic(i, 1, m/2)
+                    i2 = i4_periodic(i + 1, 1, m/2)
 
-                    i1 = i4_wrap(i + m/2, m/2 + 1, m)
-                    i3 = i4_wrap(i + m/2 + 1, m/2 + 1, m)
+                    i1 = i4_periodic(i + m/2, m/2 + 1, m)
+                    i3 = i4_periodic(i + m/2 + 1, m/2 + 1, m)
 
                     z(j) = c(2)*x(i0, k) + c(1)*x(i1, k) &
                            + c(0)*x(i2, k) + c(3)*x(i3, k)
@@ -842,11 +861,11 @@ contains
 
                 do i = 0, m/2 - 1
 
-                    i0 = i4_wrap(i, 1, m/2)
-                    i2 = i4_wrap(i + 1, 1, m/2)
+                    i0 = i4_periodic(i, 1, m/2)
+                    i2 = i4_periodic(i + 1, 1, m/2)
 
-                    i1 = i4_wrap(i + m/2, m/2 + 1, m)
-                    i3 = i4_wrap(i + m/2 + 1, m/2 + 1, m)
+                    i1 = i4_periodic(i + m/2, m/2 + 1, m)
+                    i3 = i4_periodic(i + m/2 + 1, m/2 + 1, m)
 
                     z(j) = c(2)*x(k, i0) + c(1)*x(k, i1) &
                            + c(0)*x(k, i2) + c(3)*x(k, i3)
