@@ -36,4 +36,4 @@ test:
 #-corray-config-file=./config
 
 clean:
-	rm -f src/*.o src/*.d *.o *.d $(TARGET) testWavelets
+	rm -f src/*.o src/*.d src/*.optrpt *.o *.d *.optrpt $(TARGET) testWavelets
