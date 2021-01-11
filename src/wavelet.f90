@@ -60,10 +60,10 @@ contains
 
             do j = 1, m - 1, 2
 
-                j0 = i4_wrap(j, 1, m)
-                j1 = i4_wrap(j + 1, 1, m)
-                j2 = i4_wrap(j + 2, 1, m)
-                j3 = i4_wrap(j + 3, 1, m)
+                j0 = i4_periodic(j, 1, m)
+                j1 = i4_periodic(j + 1, 1, m)
+                j2 = i4_periodic(j + 2, 1, m)
+                j3 = i4_periodic(j + 3, 1, m)
 
                 z(i) = c(0)*y(j0) + c(1)*y(j1) &
                        + c(2)*y(j2) + c(3)*y(j3)
@@ -143,11 +143,11 @@ contains
 
             do i = 0, m/2 - 1
 
-                i0 = i4_wrap(i, 1, m/2)
-                i2 = i4_wrap(i + 1, 1, m/2)
+                i0 = i4_periodic(i, 1, m/2)
+                i2 = i4_periodic(i + 1, 1, m/2)
 
-                i1 = i4_wrap(i + m/2, m/2 + 1, m)
-                i3 = i4_wrap(i + m/2 + 1, m/2 + 1, m)
+                i1 = i4_periodic(i + m/2, m/2 + 1, m)
+                i3 = i4_periodic(i + m/2 + 1, m/2 + 1, m)
 
                 z(j) = c(2)*x(i0) + c(1)*x(i1) &
                        + c(0)*x(i2) + c(3)*x(i3)
