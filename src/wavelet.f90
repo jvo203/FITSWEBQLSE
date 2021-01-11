@@ -442,7 +442,7 @@ contains
         integer(kind=4) m
         real(kind=4), dimension(n, n), intent(in) :: x
         real(kind=4), dimension(n, n), intent(out) :: y
-        logical, optional, dimension(n, n), intent(out) :: mask
+        logical(kind=1), optional, dimension(n, n), intent(out) :: mask
         real(kind=4), dimension(n) :: z
         real(kind=4) average
         integer(kind=4) nvalid
@@ -571,7 +571,7 @@ contains
         integer(kind=4) i3
         integer(kind=4) j
         integer(kind=4) m
-        logical, optional, dimension(n, n), intent(in) :: mask
+        logical(kind=1), optional, dimension(n, n), intent(in) :: mask
         real(kind=4), dimension(n, n), intent(out) :: x
         real(kind=4), dimension(n, n), intent(in) :: y
         real(kind=4), dimension(n) :: z
@@ -688,7 +688,7 @@ contains
 
         integer(kind=4) m
         real(kind=4), dimension(n, n), intent(inout) :: x
-        logical, optional, dimension(n, n), intent(out) :: mask
+        logical(kind=1), optional, dimension(n, n), intent(out) :: mask
         real(kind=4), dimension(n) :: z
         real(kind=4) average
         integer(kind=4) nvalid
@@ -819,7 +819,7 @@ contains
         integer(kind=4) j
         integer(kind=4) m
         real(kind=4), dimension(n, n), intent(inout) :: x
-        logical, optional, dimension(n, n), intent(in) :: mask
+        logical(kind=1), optional, dimension(n, n), intent(in) :: mask
         real(kind=4), dimension(n) :: z
 
         integer(kind=4) k
