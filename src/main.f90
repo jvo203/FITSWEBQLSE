@@ -23,12 +23,11 @@ program main
 
     cmd = 0
     ! start an external libmicrohttpd server
-    ! if (this_image() == 1) then
-    call start_http
-    !end if
+    ! if (this_image() == 1)
+    if (rank .eq. 0) call start_http
 
     do
-        call MPI_RECV(cmd, 1, MPI_INT, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+        call MPI_RECV(cmd, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
         print *, 'image', this_image(), 'received message containing: ', cmd, ierror
 
         if (cmd .lt. 0) exit
@@ -48,9 +47,12 @@ subroutine http_request
     ! if(this_image() == 1) then
     msg = 1
 
-    do i = 0, size - 1
-        if (i .ne. rank) call MPI_SEND(msg, 1, MPI_INT, i, 1, MPI_COMM_WORLD, ierror)
-    end do
+    ! use MPI_Bcast on rank .eq. 0
+
+    ! do i = 0, size - 1
+    !    if (i .ne. rank) call MPI_SEND(msg, 1, MPI_INT, i, 1, MPI_COMM_WORLD, ierror)
+    !end do
+
     !print *, 'image', this_image(), 'ierror:', ierror
     ! end if
 end subroutine http_request
