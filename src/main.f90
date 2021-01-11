@@ -68,7 +68,7 @@ end subroutine exit_fortran
 subroutine sigint_handler
     print *, 'Process interrupted(SIGINT), exiting...'
 
-    ! shutdown any active http server
+    ! shutdown any active http/ws servers
     call stop_http
 
     call exit_fortran
