@@ -913,8 +913,12 @@ contains
                 ! skip the coarse coefficients
                 if ((i .le. 2) .and. (j .le. 2)) cycle
 
-                mean = mean + abs(x(i, j))
-                nvalid = nvalid + 1
+                tmp = abs(x(i, j))
+                ! only process non-zero values
+                if (tmp .gt. 0.0) then
+                    mean = mean + tmp
+                    nvalid = nvalid + 1
+                end if
             end do
         end do
 
@@ -928,26 +932,27 @@ contains
         if (mean .eq. 0.0) return
 
         ! the standard deviation
-        !do i = 1, n
-        !    do j = 1, n
-        !       ! skip the coarse coefficients
-        !       if ((i .le. 2) .and. (j .le. 2)) cycle
-        !
-        !      tmp = abs(x(i, j))
-        !           std = std + (tmp - mean)*(tmp - mean)
-        !      end do
-        ! end do
+        do i = 1, n
+            do j = 1, n
+                ! skip the coarse coefficients
+                if ((i .le. 2) .and. (j .le. 2)) cycle
 
-        !if ((nvalid - 1) .gt. 0) then
-        !    std = sqrt(std/(nvalid - 1))
-        !else if (nvalid .gt. 0) then
-        !    ! I know nvalid .eq. 1 at this point (there is no point dividing by 1)
-        !    std = sqrt(std/nvalid)
-        !else
-        !    return
-        !end if
+                tmp = abs(x(i, j))
+                ! only process non-zero values
+                if (tmp .gt. 0.0) std = std + (tmp - mean)**2
+            end do
+        end do
 
-        ! print *, 'mean:', mean, 'std:', std
+        if ((nvalid - 1) .gt. 0) then
+            std = sqrt(std/(nvalid - 1))
+        else if (nvalid .gt. 0) then
+            ! nvalid .eq. 1 at this point (there is no point in dividing by 1)
+            std = sqrt(std/nvalid)
+        else
+            return
+        end if
+
+        print *, 'mean:', mean, 'std:', std
 
         ! prune (shrink the coefficients)
         do i = 1, n
