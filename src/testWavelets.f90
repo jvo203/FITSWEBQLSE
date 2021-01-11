@@ -8,7 +8,7 @@ program Wavelets
 
     real(kind=4), dimension(N, N) :: x
     real(kind=4), dimension(N, N) :: y
-    logical, dimension(N, N) :: mask
+    logical(kind=1), dimension(N, N) :: mask
 
     do i = 1, N
         do j = 1, N
