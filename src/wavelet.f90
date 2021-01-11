@@ -918,6 +918,7 @@ contains
                 if (tmp .gt. 0.0) then
                     mean = mean + tmp
                     nvalid = nvalid + 1
+                    print *, 'non-zero coeff.:', tmp
                 end if
             end do
         end do
