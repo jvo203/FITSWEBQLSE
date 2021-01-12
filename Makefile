@@ -13,7 +13,7 @@ DEP = $(OBJ:%.o=%.d)
 FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp
 CFLAGS := $(FLAGS)
 FLAGS += -coarray=distributed
-LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd
+LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets
 # -lmpifort not needed when using mpiifort
 
 # include dependencies (all .d files)
