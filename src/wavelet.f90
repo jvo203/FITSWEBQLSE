@@ -906,6 +906,7 @@ contains
 
         mean = 0.0
         std = 0.0
+        nvalid = 0
 
         ! the mean
         do i = 1, n
@@ -918,7 +919,6 @@ contains
                 if (tmp .gt. 0.0) then
                     mean = mean + tmp
                     nvalid = nvalid + 1
-                    print *, 'non-zero coeff.:', tmp
                 end if
             end do
         end do
@@ -953,7 +953,7 @@ contains
             return
         end if
 
-        print *, 'mean:', mean, 'std:', std
+        print *, '[wave_shrink] mean:', mean, 'std:', std
 
         ! prune (shrink the coefficients)
         do i = 1, n
@@ -962,7 +962,7 @@ contains
                 if ((i .le. 2) .and. (j .le. 2)) cycle
 
                 ! set the small coefficients (one half to be precise) to 0.0
-                if (abs(x(i, j)) .le. mean) x(i, j) = 0.0
+                if (abs(x(i, j)) .le. mean - 0.5*std) x(i, j) = 0.0
             end do
         end do
 
