@@ -12,7 +12,7 @@ DEP = $(OBJ:%.o=%.d)
 
 FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
 CFLAGS := $(FLAGS)
-#FLAGS += -coarray=distributed
+FLAGS += -coarray=distributed
 LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd
 # -lmpifort not needed when using mpiifort
 
@@ -33,6 +33,9 @@ fitswebqlse: $(OBJ)
 
 test:
 	ifort -Ofast -xHost -mavx -axAVX -qopt-report=2 src/wavelet.f90 src/testWavelets.f90 -o testWavelets
+
+mpi:
+	$(FORT) -Ofast -xHost test.f90 -o test
 
 #-corray-config-file=./config
 

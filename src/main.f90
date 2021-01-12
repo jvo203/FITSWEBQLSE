@@ -29,9 +29,9 @@ program main
 
     do
         ! if (rank .ne. 0) then
-        ! call MPI_Bcast(cmd, 1, MPI_INT, 0, MPI_COMM_WORLD, ierror)
-        call MPI_RECV(cmd, 1, MPI_INTEGER, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
-        print *, 'image', this_image(), 'received message containing: ', cmd, ierror
+        ! call MPI_BCAST(cmd, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierror)
+        call MPI_RECV(cmd, 1, MPI_INTEGER, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+        print *, 'rank', rank, 'received message containing', cmd, ', ierror', ierror
         ! end if
         if (cmd .lt. 0) exit
     end do
@@ -41,24 +41,28 @@ program main
 end program main
 
 subroutine http_request
+    use mpi
     integer :: msg
     integer :: i
+    integer(kind=4), parameter :: MPI_CMD = 1000
+    integer :: size, ierror
+
+    call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
     ! if (this_image() == 1) then
     print *, 'image', this_image(), 'received an http request.'
     !end if
 
     ! if(this_image() == 1) then
-    msg = 1
+    msg = 777
 
-    print *, 'MPI_INTEGER:', MPI_INTEGER
-    ! use MPI_Bcast on rank .eq. 0
-    call MPI_Bcast(msg, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierror)
+    ! use MPI_BCAST on rank .eq. 0
+    ! call MPI_BCAST(msg, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierror)
     ! call MPI_SEND(msg, 1, MPI_INTEGER, 0, MPI_CMD, MPI_COMM_WORLD, ierror)
 
-    ! do i = 0, size - 1
-    !    if (i .ne. rank) call MPI_SEND(msg, 1, MPI_INT, i, MPI_CMD, MPI_COMM_WORLD, ierror)
-    !end do
+    do i = 0, size - 1
+        call MPI_SEND(msg, 1, MPI_INTEGER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
+    end do
 
     !print *, 'image', this_image(), 'ierror:', ierror
     ! end if
