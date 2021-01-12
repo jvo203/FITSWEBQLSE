@@ -2,12 +2,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <signal.h>
+#include <pthread.h>
 
 #include <microhttpd.h>
 #include <libwebsockets.h>
 
 typedef void (*sighandler_t)(int);
-static int interrupted = 0;
 
 extern void register_kill_signal_handler_(sighandler_t handler)
 {
@@ -22,6 +22,9 @@ extern void http_request_();
 #define WS_PORT (HTTP_PORT + 1)
 
 // WS
+static volatile int interrupted = 0;
+pthread_t lws_tid;
+
 #define LWS_PLUGIN_STATIC
 #include "protocol_lws_minimal.c"
 
@@ -56,7 +59,7 @@ static const struct lws_http_mount mount = {
 	/* .basic_auth_login_file */	NULL,
 };
 
-void start_ws()
+void* start_ws(void* ignore)
 {
 	struct lws_context_creation_info info;
 	struct lws_context *context;
@@ -86,17 +89,17 @@ void start_ws()
 	context = lws_create_context(&info);
 	if (!context) {
 		lwsl_err("lws init failed\n");
-		return ;
+		return NULL;
 	}
 
+    lwsl_user("entering lws event loop\n");
 	while (n >= 0 && !interrupted)
 		n = lws_service(context, 0);
 
 	lws_context_destroy(context);
-
     lwsl_user("LWS ws server stopped\n");
 
-	return ;
+	return NULL;
 }
 
 // HTML
@@ -206,11 +209,17 @@ extern void start_http_()
     else
     {
         printf("µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
+
+        // create a websockets thread 
+        int stat = pthread_create(&lws_tid, NULL, start_ws, NULL);
+        stat = pthread_detach(lws_tid);
     }
 }
 
 extern void stop_http_()
-{
+{    
+    interrupted = 1; // this should terminate websockets
+
     if (http_server != NULL)
     {
         printf("shutting down the HTTP server... ");
