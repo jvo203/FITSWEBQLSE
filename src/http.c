@@ -62,7 +62,7 @@ static const struct lws_http_mount mount = {
 void* start_ws(void* ignore)
 {
 	struct lws_context_creation_info info;
-	struct lws_context *context;
+    struct lws_context *context;
 	const char *p;
 	int n = 0, logs = LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE
 			/* for LLL_ verbosity above NOTICE to be built into lws,
