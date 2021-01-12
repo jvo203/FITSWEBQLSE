@@ -7,7 +7,8 @@ program main
     character(len=1) :: c
     external sigint_handler ! Must declare as external
     integer :: max_threads
-    integer rank, size, ierror, tag, status(MPI_STATUS_SIZE), cmd
+    integer rank, size, ierror, tag, namelen, status(MPI_STATUS_SIZE), cmd
+    character(len=MPI_MAX_PROCESSOR_NAME) :: name
     integer(kind=4), parameter :: MPI_CMD = 1000
     logical init
 
@@ -18,9 +19,11 @@ program main
 
     call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
-    ! if (this_image() == 1) then
-    print *, 'co-array image', this_image(), 'mpi rank', rank, ':: mpi world size =', size, 'OMP #threads:', max_threads
-    ! end if
+    call MPI_GET_PROCESSOR_NAME(name, namelen, ierror)
+
+    print *, 'co-array image:', this_image(), 'mpi rank:', rank, &
+    &'mpi world size:', size, 'OMP #threads:', max_threads, &
+    &'running on', name
 
     print *, 'FITSWEBQL SE CLUSTER EDITION POWERED BY FORTRAN 2018'
 
