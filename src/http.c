@@ -7,6 +7,7 @@
 #include <libwebsockets.h>
 
 typedef void (*sighandler_t)(int);
+static int interrupted = 0;
 
 extern void register_kill_signal_handler_(sighandler_t handler)
 {
@@ -96,7 +97,7 @@ ahc_echo(void *cls,
 
 void SIGINTHandler(int sigint)
 {
-    printf("\tCTRL-C detected. Exiting the C part.\n");
+    printf("\tCTRL-C detected. Exiting the C part.\n");    
 
     if (http_server != NULL)
     {
@@ -107,6 +108,8 @@ void SIGINTHandler(int sigint)
         //stop accepting new connections
         //MHD_quiesce_daemon(http_server);
     };
+
+    interrupted = 1; // this will terminate websockets
 
     printf("clean shutdown completed.\n");
 
