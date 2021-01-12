@@ -61,7 +61,9 @@ ahc_echo(void *cls,
         return MHD_NO; /* upload data in a GET!? */
     *ptr = NULL;       /* clear context pointer */
 
-    printf("URL:%s\n", url);
+    printf("URL:%s\n", url);    
+
+    // pass the request to FORTRAN
     http_request_();
 
     response = MHD_create_response_from_buffer(strlen(page),
@@ -70,7 +72,8 @@ ahc_echo(void *cls,
     ret = MHD_queue_response(connection,
                              MHD_HTTP_OK,
                              response);
-    MHD_destroy_response(response);
+    MHD_destroy_response(response);    
+
     return ret;
 }
 
