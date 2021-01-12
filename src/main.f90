@@ -6,6 +6,7 @@ program main
     character(len=1) :: c
     external sigint_handler ! Must declare as external
     integer rank, size, ierror, tag, status(MPI_STATUS_SIZE), cmd
+    integer(kind=4), parameter :: MPI_CMD = 1000
     logical init
 
     call MPI_Initialized(init, ierror)
@@ -27,13 +28,14 @@ program main
     if (rank .eq. 0) call start_http
 
     do
-        call MPI_RECV(cmd, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+        call MPI_RECV(cmd, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
         print *, 'image', this_image(), 'received message containing: ', cmd, ierror
 
         if (cmd .lt. 0) exit
     end do
 
-    call MPI_FINALIZE(ierror)
+    ! in a Co-Array program there may be no need for MPI_Finalize
+    ! call MPI_FINALIZE(ierror)
 end program main
 
 subroutine http_request
@@ -48,9 +50,10 @@ subroutine http_request
     msg = 1
 
     ! use MPI_Bcast on rank .eq. 0
+    ! call MPI_Bcast(msg, 1, MPI_INT, 0, MPI_COMM_WORLD, ierror)
 
     ! do i = 0, size - 1
-    !    if (i .ne. rank) call MPI_SEND(msg, 1, MPI_INT, i, 1, MPI_COMM_WORLD, ierror)
+    !    if (i .ne. rank) call MPI_SEND(msg, 1, MPI_INT, i, MPI_CMD, MPI_COMM_WORLD, ierror)
     !end do
 
     !print *, 'image', this_image(), 'ierror:', ierror
