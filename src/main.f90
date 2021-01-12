@@ -14,8 +14,8 @@ program main
 
     max_threads = OMP_GET_MAX_THREADS()
 
-    call MPI_Initialized(init, ierror)
-    if (.not. init) call MPI_Init(ierror)
+    call MPI_INITIALIZED(init, ierror)
+    if (.not. init) call MPI_INIT(ierror)
 
     call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
