@@ -96,7 +96,7 @@ void* start_ws(void* ignore)
 	while (n >= 0 && !interrupted)
 		n = lws_service(context, 0);
 
-	lws_context_destroy(context);
+	lws_context_destroy(context);    
     lwsl_user("LWS ws server stopped\n");
 
 	return NULL;
