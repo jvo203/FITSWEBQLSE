@@ -10,7 +10,7 @@ OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
-FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
+FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp
 CFLAGS := $(FLAGS)
 FLAGS += -coarray=distributed
 LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd

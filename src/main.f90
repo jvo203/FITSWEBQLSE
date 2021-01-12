@@ -1,13 +1,17 @@
 program main
     use mpi
+    use omp_lib
     use, intrinsic :: iso_c_binding
     implicit none
 
     character(len=1) :: c
     external sigint_handler ! Must declare as external
+    integer :: max_threads
     integer rank, size, ierror, tag, status(MPI_STATUS_SIZE), cmd
     integer(kind=4), parameter :: MPI_CMD = 1000
     logical init
+
+    max_threads = OMP_GET_MAX_THREADS()
 
     call MPI_Initialized(init, ierror)
     if (.not. init) call MPI_Init(ierror)
@@ -15,7 +19,7 @@ program main
     call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
     ! if (this_image() == 1) then
-    print *, 'image', this_image(), 'rank', rank, ':: world size =', size
+    print *, 'co-array image', this_image(), 'mpi rank', rank, ':: mpi world size =', size, 'OMP #threads:', max_threads
     ! end if
 
     print *, 'FITSWEBQL SE CLUSTER EDITION POWERED BY FORTRAN 2018'
