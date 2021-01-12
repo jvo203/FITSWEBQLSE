@@ -38,7 +38,7 @@ program main
     end do
 
     ! in a Co-Array program there may be no need for MPI_Finalize
-    ! call MPI_FINALIZE(ierror)
+    call MPI_FINALIZE(ierror)
 end program main
 
 subroutine http_request
