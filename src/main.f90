@@ -1,6 +1,6 @@
 program main
-    use, intrinsic :: iso_c_binding
     use mpi
+    use, intrinsic :: iso_c_binding
     implicit none
 
     character(len=1) :: c
@@ -15,7 +15,7 @@ program main
     call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
     ! if (this_image() == 1) then
-    print *, 'image', this_image(), 'node', rank, '/', size
+    print *, 'image', this_image(), 'rank', rank, ':: world size =', size
     ! end if
 
     print *, 'FITSWEBQL SE CLUSTER EDITION POWERED BY FORTRAN 2018'
@@ -28,9 +28,11 @@ program main
     if (rank .eq. 0) call start_http
 
     do
-        call MPI_RECV(cmd, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+        ! if (rank .ne. 0) then
+        ! call MPI_Bcast(cmd, 1, MPI_INT, 0, MPI_COMM_WORLD, ierror)
+        call MPI_RECV(cmd, 1, MPI_INTEGER, 0, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
         print *, 'image', this_image(), 'received message containing: ', cmd, ierror
-
+        ! end if
         if (cmd .lt. 0) exit
     end do
 
@@ -49,8 +51,10 @@ subroutine http_request
     ! if(this_image() == 1) then
     msg = 1
 
+    print *, 'MPI_INTEGER:', MPI_INTEGER
     ! use MPI_Bcast on rank .eq. 0
-    ! call MPI_Bcast(msg, 1, MPI_INT, 0, MPI_COMM_WORLD, ierror)
+    call MPI_Bcast(msg, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierror)
+    ! call MPI_SEND(msg, 1, MPI_INTEGER, 0, MPI_CMD, MPI_COMM_WORLD, ierror)
 
     ! do i = 0, size - 1
     !    if (i .ne. rank) call MPI_SEND(msg, 1, MPI_INT, i, MPI_CMD, MPI_COMM_WORLD, ierror)

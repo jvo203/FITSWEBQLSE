@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := fitswebqlse
 
 CC := icc
-FORT := ifort
+FORT := mpiifort
 TARGET = fitswebqlse
 
 SRC = src/main.f90 src/http.c src/net.f90 src/wavelet.f90
@@ -12,8 +12,9 @@ DEP = $(OBJ:%.o=%.d)
 
 FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
 CFLAGS := $(FLAGS)
-FLAGS += -coarray=distributed
-LIBS = -L/usr/local/lib -lmpifort -lcfitsio -lmicrohttpd
+#FLAGS += -coarray=distributed
+LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd
+# -lmpifort not needed when using mpiifort
 
 # include dependencies (all .d files)
 -include $(DEP)
