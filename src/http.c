@@ -4,6 +4,7 @@
 #include <signal.h>
 
 #include <microhttpd.h>
+#include <libwebsockets.h>
 
 typedef void (*sighandler_t)(int);
 
@@ -19,6 +20,22 @@ extern void http_request_();
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
 
+// WS
+#define LWS_PLUGIN_STATIC
+#include "protocol_lws_minimal.c"
+
+static struct lws_protocols protocols[] = {
+	{ "http", lws_callback_http_dummy, 0, 0 },
+	LWS_PLUGIN_PROTOCOL_MINIMAL,
+	{ NULL, NULL, 0, 0 } /* terminator */
+};
+
+static const lws_retry_bo_t retry = {
+	.secs_since_valid_ping = 3,
+	.secs_since_valid_hangup = 10,
+};
+
+// HTML
 #define PAGE "<html><head><title>FITSWEBQL SE</title>" \
              "</head><body>FITSWEBQLSE (libmicrohttpd)</body></html>"
 
