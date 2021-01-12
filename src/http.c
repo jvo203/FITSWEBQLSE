@@ -92,7 +92,7 @@ void* start_ws(void* ignore)
 		return NULL;
 	}
 
-    lwsl_user("entering lws event loop\n");
+    lwsl_user("entering LWS event loop\n");
 	while (n >= 0 && !interrupted)
 		n = lws_service(context, 0);
 
