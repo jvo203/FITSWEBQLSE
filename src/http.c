@@ -16,7 +16,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 extern void exit_fortran_();
 extern void http_request_();
 
-#define HTTP_PORT 8081
+#define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
 
 #define PAGE "<html><head><title>libmicrohttpd demo</title>" \
