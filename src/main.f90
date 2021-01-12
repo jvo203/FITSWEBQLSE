@@ -25,7 +25,8 @@ program main
     cmd = 0
     ! start an external libmicrohttpd server
     ! if (this_image() == 1)
-    if (rank .eq. 0) call start_http
+    ! if (rank .eq. 0)
+    call start_http
 
     do
         ! if (rank .ne. 0) then
@@ -56,9 +57,7 @@ subroutine http_request
     ! if(this_image() == 1) then
     msg = 777
 
-    ! use MPI_BCAST on rank .eq. 0
     ! call MPI_BCAST(msg, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierror)
-    ! call MPI_SEND(msg, 1, MPI_INTEGER, 0, MPI_CMD, MPI_COMM_WORLD, ierror)
 
     do i = 0, size - 1
         call MPI_SEND(msg, 1, MPI_INTEGER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
