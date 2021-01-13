@@ -147,12 +147,13 @@ static enum MHD_Result http_not_found(struct MHD_Connection *connection)
         return MHD_NO;
 };
 
-static enum MHD_Result serve_file(struct MHD_Connection *connection, const char *url, int scan)
+static enum MHD_Result serve_file(struct MHD_Connection *connection, const char *url)
 {
     int fd;
     struct stat buf;
     char path[1024];
 
+    /* check for NULL strings */
     if (NULL == url)
         return http_not_found(connection);
 
@@ -228,16 +229,32 @@ static enum MHD_Result on_http_connection(void *cls,
 
     printf("URL:\t%s\n", url);
 
+#ifdef LOCAL
+    if (0 == strcmp(url, "/get_directory"))
+    {
+        char *pointer = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dir");
+
+        if (NULL != pointer)
+        {
+            char *dir = strdup(pointer);
+
+            return get_directory(connection, dir);
+        }
+        else
+            return get_home_directory(connection);
+    };
+#endif
+
     // static resources
     if (url[strlen(url) - 1] != '/')
-        return serve_file(connection, url, 1);
+        return serve_file(connection, url);
     else
     {
         // root document
 #ifdef LOCAL
-        return serve_file(connection, "/local.html", 0);
+        return serve_file(connection, "/local.html");
 #else
-        return serve_file(connection, "/test.html", 0);
+        return serve_file(connection, "/test.html");
 #endif
     }
 
