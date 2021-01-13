@@ -153,18 +153,14 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
     struct stat buf;
     char path[1024];
 
-    printf("[serve_file]: %s\n", url);
+    if (NULL == url)
+        return http_not_found(connection);
 
-    /* WARNING: direct usage of url as filename is for example only!
-   * NEVER pass received data directly as parameter to file manipulation
-   * functions. Always check validity of data before using.
-   */
     if (NULL != strstr(url, "../")) /* Very simplified check! */
         fd = -1;                    /* Do not allow usage of parent directories. */
     else
     {
         snprintf(path, sizeof(path), "htdocs%s", url);
-
         fd = open(path, O_RDONLY);
     }
 
@@ -294,7 +290,7 @@ extern void start_http_()
                                    NULL, NULL, &on_http_connection, NULL,
                                    MHD_OPTION_END);*/
 
-    http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
+    http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                    HTTP_PORT,
                                    NULL,
                                    NULL,
