@@ -29,77 +29,78 @@ pthread_t lws_tid;
 #include "protocol_lws_minimal.c"
 
 static struct lws_protocols protocols[] = {
-	{ "http", lws_callback_http_dummy, 0, 0 },
-	LWS_PLUGIN_PROTOCOL_MINIMAL,
-	{ NULL, NULL, 0, 0 } /* terminator */
+    {"http", lws_callback_http_dummy, 0, 0},
+    LWS_PLUGIN_PROTOCOL_MINIMAL,
+    {NULL, NULL, 0, 0} /* terminator */
 };
 
 static const lws_retry_bo_t retry = {
-	.secs_since_valid_ping = 3,
-	.secs_since_valid_hangup = 10,
+    .secs_since_valid_ping = 3,
+    .secs_since_valid_hangup = 10,
 };
 
 static const struct lws_http_mount mount = {
-	/* .mount_next */		NULL,		/* linked-list "next" */
-	/* .mountpoint */		"/",		/* mountpoint URL */
-	/* .origin */			"./mount-origin",  /* serve from dir */
-	/* .def */			"index.html",	/* default filename */
-	/* .protocol */			NULL,
-	/* .cgienv */			NULL,
-	/* .extra_mimetypes */		NULL,
-	/* .interpret */		NULL,
-	/* .cgi_timeout */		0,
-	/* .cache_max_age */		0,
-	/* .auth_mask */		0,
-	/* .cache_reusable */		0,
-	/* .cache_revalidate */		0,
-	/* .cache_intermediaries */	0,
-	/* .origin_protocol */		LWSMPRO_FILE,	/* files in a dir */
-	/* .mountpoint_len */		1,		/* char count */
-	/* .basic_auth_login_file */	NULL,
+    /* .mount_next */ NULL,         /* linked-list "next" */
+    /* .mountpoint */ "/",          /* mountpoint URL */
+    /* .origin */ "./mount-origin", /* serve from dir */
+    /* .def */ "index.html",        /* default filename */
+    /* .protocol */ NULL,
+    /* .cgienv */ NULL,
+    /* .extra_mimetypes */ NULL,
+    /* .interpret */ NULL,
+    /* .cgi_timeout */ 0,
+    /* .cache_max_age */ 0,
+    /* .auth_mask */ 0,
+    /* .cache_reusable */ 0,
+    /* .cache_revalidate */ 0,
+    /* .cache_intermediaries */ 0,
+    /* .origin_protocol */ LWSMPRO_FILE, /* files in a dir */
+    /* .mountpoint_len */ 1,             /* char count */
+    /* .basic_auth_login_file */ NULL,
 };
 
-void* start_ws(void* ignore)
+void *start_ws(void *ignore)
 {
-	struct lws_context_creation_info info;
+    struct lws_context_creation_info info;
     struct lws_context *context;
-	const char *p;
-	int n = 0, logs = LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE
-			/* for LLL_ verbosity above NOTICE to be built into lws,
+    const char *p;
+    int n = 0, logs = LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE
+        /* for LLL_ verbosity above NOTICE to be built into lws,
 			 * lws must have been configured and built with
 			 * -DCMAKE_BUILD_TYPE=DEBUG instead of =RELEASE */
-			/* | LLL_INFO */ /* | LLL_PARSER */ /* | LLL_HEADER */
-			/* | LLL_EXT */ /* | LLL_CLIENT */ /* | LLL_LATENCY */
-			/* | LLL_DEBUG */;	
+        /* | LLL_INFO */ /* | LLL_PARSER */ /* | LLL_HEADER */
+        /* | LLL_EXT */ /* | LLL_CLIENT */  /* | LLL_LATENCY */
+        /* | LLL_DEBUG */;
 
-	lws_set_log_level(logs, NULL);
-	lwsl_user("starting LWS ws server\n");
+    lws_set_log_level(logs, NULL);
+    lwsl_user("starting LWS ws server\n");
 
-	memset(&info, 0, sizeof info); /* otherwise uninitialized garbage */
-	info.port = WS_PORT;
-	info.mounts = &mount;
-	info.protocols = protocols;
-	info.vhost_name = "localhost";
-	info.options =
-		LWS_SERVER_OPTION_HTTP_HEADERS_SECURITY_BEST_PRACTICES_ENFORCE;
+    memset(&info, 0, sizeof info); /* otherwise uninitialized garbage */
+    info.port = WS_PORT;
+    info.mounts = &mount;
+    info.protocols = protocols;
+    info.vhost_name = "localhost";
+    info.options =
+        LWS_SERVER_OPTION_HTTP_HEADERS_SECURITY_BEST_PRACTICES_ENFORCE;
 
     // assume default websocket timeouts
-	// info.retry_and_idle_policy = &retry;
+    // info.retry_and_idle_policy = &retry;
 
-	context = lws_create_context(&info);
-	if (!context) {
-		lwsl_err("lws init failed\n");
-		return NULL;
-	}
+    context = lws_create_context(&info);
+    if (!context)
+    {
+        lwsl_err("lws init failed\n");
+        return NULL;
+    }
 
     lwsl_user("entering LWS event loop\n");
-	while (n >= 0 && !interrupted)
-		n = lws_service(context, 0);
+    while (n >= 0 && !interrupted)
+        n = lws_service(context, 0);
 
-	lws_context_destroy(context);    
+    lws_context_destroy(context);
     lwsl_user("LWS ws server stopped\n");
 
-	return NULL;
+    return NULL;
 }
 
 // HTML
@@ -145,7 +146,7 @@ ahc_echo(void *cls,
         return MHD_NO; /* upload data in a GET!? */
     *ptr = NULL;       /* clear context pointer */
 
-    printf("URL:%s\n", url);    
+    printf("URL:\t%s\n", url);
 
     // pass the request to FORTRAN
     http_request_();
@@ -156,14 +157,14 @@ ahc_echo(void *cls,
     ret = MHD_queue_response(connection,
                              MHD_HTTP_OK,
                              response);
-    MHD_destroy_response(response);    
+    MHD_destroy_response(response);
 
     return ret;
 }
 
 void SIGINTHandler(int sigint)
 {
-    printf("\tCTRL-C detected. Exiting the C part.\n");    
+    printf("\tCTRL-C detected. Exiting the C part.\n");
 
     interrupted = 1; // this will terminate websockets
 
@@ -175,7 +176,7 @@ void SIGINTHandler(int sigint)
 
         //stop accepting new connections
         //MHD_quiesce_daemon(http_server);
-    };    
+    };
 
     printf("clean shutdown completed.\n");
 
@@ -210,14 +211,14 @@ extern void start_http_()
     {
         printf("µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
 
-        // create a websockets thread 
+        // create a websockets thread
         int stat = pthread_create(&lws_tid, NULL, start_ws, NULL);
         stat = pthread_detach(lws_tid);
     }
 }
 
 extern void stop_http_()
-{    
+{
     interrupted = 1; // this should terminate websockets
 
     if (http_server != NULL)
