@@ -162,7 +162,7 @@ static enum MHD_Result on_http_connection(void *cls,
 #ifdef LOCAL
         return serve_file(connection, "/fitswebql.html", 0);
 #else
-        return serve_file(connection, "/almawebql.html,", 0);
+        return serve_file(connection, "/fitswebqlse.html,", 0);
 #endif
     }
 
