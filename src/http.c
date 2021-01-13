@@ -109,24 +109,25 @@ void *start_ws(void *ignore)
 
 struct MHD_Daemon *http_server = NULL;
 
-static int on_client_connect(void *cls,
-                             const struct sockaddr *addr,
-                             socklen_t addrlen);
+static enum MHD_Result print_out_key(void *cls, enum MHD_ValueKind kind, const char *key, const char *value, size_t value_size)
+{
+    printf("%s: %s\n", key, value);
+    return MHD_YES;
+}
 
-static enum MHD_Result on_http_connection(void *cls, struct MHD_Connection *connection,
-                                          const char *url, const char *method,
-                                          const char *version, const char *upload_data,
-                                          size_t *upload_data_size, void **con_cls);
+static enum MHD_Result serve_file(struct MHD_Connection *connection, const char *url)
+{
+    return MHD_NO;
+}
 
-static enum MHD_Result
-ahc_echo(void *cls,
-         struct MHD_Connection *connection,
-         const char *url,
-         const char *method,
-         const char *version,
-         const char *upload_data,
-         size_t *upload_data_size,
-         void **ptr)
+static enum MHD_Result on_http_connection(void *cls,
+                                          struct MHD_Connection *connection,
+                                          const char *url,
+                                          const char *method,
+                                          const char *version,
+                                          const char *upload_data,
+                                          size_t *upload_data_size,
+                                          void **ptr)
 {
     static int dummy;
     const char *page = cls;
@@ -146,8 +147,28 @@ ahc_echo(void *cls,
         return MHD_NO; /* upload data in a GET!? */
     *ptr = NULL;       /* clear context pointer */
 
+    const char *user_agent = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
+    const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
+    //MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
+
     printf("URL:\t%s\n", url);
 
+    // static resources
+    if (url[strlen(url) - 1] != '/')
+        return serve_file(connection, url);
+    else
+    {
+        // root document
+#ifdef LOCAL
+        return serve_file(connection, "/fitswebql.html");
+#else
+        return serve_file(connection, "/almawebql.html");
+#endif
+    }
+
+    return MHD_NO;
+
+    /*
     // pass the request to FORTRAN
     http_request_();
 
@@ -159,7 +180,7 @@ ahc_echo(void *cls,
                              response);
     MHD_destroy_response(response);
 
-    return ret;
+    return ret;*/
 }
 
 void SIGINTHandler(int sigint)
@@ -198,7 +219,7 @@ extern void start_http_()
                                    HTTP_PORT,
                                    NULL,
                                    NULL,
-                                   &ahc_echo,
+                                   &on_http_connection,
                                    PAGE,
                                    MHD_OPTION_END);
 
