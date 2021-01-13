@@ -115,7 +115,7 @@ static enum MHD_Result print_out_key(void *cls, enum MHD_ValueKind kind, const c
     return MHD_YES;
 }
 
-static enum MHD_Result serve_file(struct MHD_Connection *connection, const char *url)
+static enum MHD_Result serve_file(struct MHD_Connection *connection, const char *url, int scan)
 {
     return MHD_NO;
 }
@@ -155,14 +155,14 @@ static enum MHD_Result on_http_connection(void *cls,
 
     // static resources
     if (url[strlen(url) - 1] != '/')
-        return serve_file(connection, url);
+        return serve_file(connection, url, 1);
     else
     {
         // root document
 #ifdef LOCAL
-        return serve_file(connection, "/fitswebql.html");
+        return serve_file(connection, "/fitswebql.html", 0);
 #else
-        return serve_file(connection, "/almawebql.html");
+        return serve_file(connection, "/almawebql.html,", 0);
 #endif
     }
 
