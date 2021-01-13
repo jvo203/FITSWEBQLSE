@@ -19,6 +19,8 @@
 #define S_ISREG(x) (S_IFREG == (x & S_IFREG))
 #endif /* S_ISREG */
 
+#include "json.h"
+
 typedef void (*sighandler_t)(int);
 
 extern void register_kill_signal_handler_(sighandler_t handler)
