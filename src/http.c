@@ -115,9 +115,33 @@ static enum MHD_Result print_out_key(void *cls, enum MHD_ValueKind kind, const c
     return MHD_YES;
 }
 
+static enum MHD_Result http_not_found(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *errorstr =
+        "<html><body>404 Not Found</body></html>";
+
+    response =
+        MHD_create_response_from_buffer(strlen(errorstr),
+                                        (void *)errorstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_NOT_FOUND,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
 static enum MHD_Result serve_file(struct MHD_Connection *connection, const char *url, int scan)
 {
-    return MHD_NO;
+    return http_not_found(connection);
 }
 
 static enum MHD_Result on_http_connection(void *cls,
@@ -166,8 +190,6 @@ static enum MHD_Result on_http_connection(void *cls,
 #endif
     }
 
-    return MHD_NO;
-
     /*
     // pass the request to FORTRAN
     http_request_();
@@ -181,6 +203,8 @@ static enum MHD_Result on_http_connection(void *cls,
     MHD_destroy_response(response);
 
     return ret;*/
+
+    return http_not_found(connection);
 }
 
 void SIGINTHandler(int sigint)
