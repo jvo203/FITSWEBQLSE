@@ -12,6 +12,7 @@ DEP = $(OBJ:%.o=%.d)
 
 FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp
 CFLAGS := $(FLAGS)
+DEF = -DNOLOCAL
 FLAGS += -coarray=distributed
 LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets
 # -lmpifort not needed when using mpiifort
@@ -23,7 +24,7 @@ LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets
 	ispc -g -O3 --pic --opt=fast-math --addressing=32 -o $@ $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -MMD -o $@ -c $<
+	$(CC) $(CFLAGS) $(DEF) -MMD -o $@ -c $<
 
 %.o: %.f90
 	$(FORT) $(FLAGS) -MMD -o $@ -c $<
