@@ -11,6 +11,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <sys/types.h>
+#include <pwd.h>
+#include <dirent.h>
+
 #ifndef S_ISREG
 #define S_ISREG(x) (S_IFREG == (x & S_IFREG))
 #endif /* S_ISREG */
@@ -194,6 +198,131 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
         MHD_destroy_response(response);
         return ret;
     }
+}
+
+static enum MHD_Result get_directory(struct MHD_Connection *connection, char *dir)
+{
+    printf("get_directory(%s)\n", dir);
+
+    if (NULL == dir)
+        return http_not_found(connection);
+
+    struct dirent **namelist = NULL;
+    int i, n;
+
+    n = scandir(dir, &namelist, 0, alphasort);
+
+    std::ostringstream json;
+
+    char *encoded = json_encode_string(check_null(dir));
+
+    json << "{\"location\" : " << check_null(encoded) << ", \"contents\" : [";
+
+    if (encoded != NULL)
+        free(encoded);
+
+    bool has_contents = false;
+
+    if (n < 0)
+    {
+        perror("scandir");
+
+        json << "]}";
+    }
+    else
+    {
+        for (i = 0; i < n; i++)
+        {
+            //printf("%s\n", namelist[i]->d_name);
+
+            char pathname[1024];
+
+            sprintf(pathname, "%s/%s", dir, check_null(namelist[i]->d_name));
+
+            struct stat64 sbuf;
+
+            int err = stat64(pathname, &sbuf);
+
+            if (err == 0)
+            {
+                char last_modified[255];
+
+                struct tm lm;
+                localtime_r(&sbuf.st_mtime, &lm);
+                strftime(last_modified, sizeof(last_modified) - 1, "%a, %d %b %Y %H:%M:%S %Z", &lm);
+
+                size_t filesize = sbuf.st_size;
+
+                if (S_ISDIR(sbuf.st_mode) && namelist[i]->d_name[0] != '.')
+                {
+                    char *encoded = json_encode_string(check_null(namelist[i]->d_name));
+
+                    json << "{\"type\" : \"dir\", \"name\" : " << check_null(encoded) << ", \"last_modified\" : \"" << last_modified << "\"},";
+                    has_contents = true;
+
+                    if (encoded != NULL)
+                        free(encoded);
+                }
+
+                if (S_ISREG(sbuf.st_mode))
+                    if (!strcasecmp(get_filename_ext(check_null(namelist[i]->d_name)), "fits"))
+                    {
+                        char *encoded = json_encode_string(check_null(namelist[i]->d_name));
+
+                        json << "{\"type\" : \"file\", \"name\" : " << check_null(encoded) << ", \"size\" : " << filesize << ", \"last_modified\" : \"" << last_modified << "\"},";
+                        has_contents = true;
+
+                        if (encoded != NULL)
+                            free(encoded);
+                    };
+            }
+            else
+                perror("stat64");
+
+            free(namelist[i]);
+        };
+
+        //overwrite the the last ',' with a list closing character
+        if (has_contents)
+            json.seekp(-1, std::ios_base::end);
+
+        json << "]}";
+    };
+
+    if (namelist != NULL)
+        free(namelist);
+
+    if (dir != NULL)
+        free(dir);
+
+    struct MHD_Response *response = MHD_create_response_from_buffer(json.tellp(), (void *)json.str().c_str(), MHD_RESPMEM_MUST_COPY);
+
+    MHD_add_response_header(response, "Server", SERVER_STRING);
+    MHD_add_response_header(response, "Cache-Control", "no-cache");
+    MHD_add_response_header(response, "Cache-Control", "no-store");
+    MHD_add_response_header(response, "Pragma", "no-cache");
+    MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
+
+    enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+    MHD_destroy_response(response);
+
+    return ret;
+}
+
+static enum MHD_Result get_home_directory(struct MHD_Connection *connection)
+{
+    struct passwd *passwdEnt = getpwuid(getuid());
+    char *home = passwdEnt->pw_dir;
+
+    if (home != NULL)
+    {
+        char *dir = strdup(home);
+
+        return get_directory(connection, dir);
+    }
+    else
+        return http_not_found(connection);
 }
 
 static enum MHD_Result on_http_connection(void *cls,
