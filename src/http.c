@@ -7,6 +7,14 @@
 #include <microhttpd.h>
 #include <libwebsockets.h>
 
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#ifndef S_ISREG
+#define S_ISREG(x) (S_IFREG == (x & S_IFREG))
+#endif /* S_ISREG */
+
 typedef void (*sighandler_t)(int);
 
 extern void register_kill_signal_handler_(sighandler_t handler)
@@ -141,7 +149,46 @@ static enum MHD_Result http_not_found(struct MHD_Connection *connection)
 
 static enum MHD_Result serve_file(struct MHD_Connection *connection, const char *url, int scan)
 {
-    return http_not_found(connection);
+    int fd;
+    struct stat buf;
+
+    /* WARNING: direct usage of url as filename is for example only!
+   * NEVER pass received data directly as parameter to file manipulation
+   * functions. Always check validity of data before using.
+   */
+    if (NULL != strstr(url, "../")) /* Very simplified check! */
+        fd = -1;                    /* Do not allow usage of parent directories. */
+    else
+        fd = open(url + 1, O_RDONLY);
+    if (-1 != fd)
+    {
+        if ((0 != fstat(fd, &buf)) ||
+            (!S_ISREG(buf.st_mode)))
+        {
+            /* not a regular file, refuse to serve */
+            if (0 != close(fd))
+                abort();
+            fd = -1;
+        }
+    }
+
+    if (-1 == fd)
+        return http_not_found(connection);
+    else
+    {
+        struct MHD_Response *response = MHD_create_response_from_fd64(buf.st_size, fd);
+
+        if (NULL == response)
+        {
+            if (0 != close(fd))
+                abort();
+            return MHD_NO;
+        }
+
+        enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+        MHD_destroy_response(response);
+        return ret;
+    }
 }
 
 static enum MHD_Result on_http_connection(void *cls,
