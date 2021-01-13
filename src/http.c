@@ -151,6 +151,9 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
 {
     int fd;
     struct stat buf;
+    char path[1024];
+
+    printf("[serve_file]: %s\n", url);
 
     /* WARNING: direct usage of url as filename is for example only!
    * NEVER pass received data directly as parameter to file manipulation
@@ -159,7 +162,12 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
     if (NULL != strstr(url, "../")) /* Very simplified check! */
         fd = -1;                    /* Do not allow usage of parent directories. */
     else
-        fd = open(url + 1, O_RDONLY);
+    {
+        snprintf(path, sizeof(path), "htdocs%s", url);
+
+        fd = open(path, O_RDONLY);
+    }
+
     if (-1 != fd)
     {
         if ((0 != fstat(fd, &buf)) ||
@@ -233,7 +241,7 @@ static enum MHD_Result on_http_connection(void *cls,
 #ifdef LOCAL
         return serve_file(connection, "/local.html", 0);
 #else
-        return serve_file(connection, "/test.html,", 0);
+        return serve_file(connection, "/test.html", 0);
 #endif
     }
 
