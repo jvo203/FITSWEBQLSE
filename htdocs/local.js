@@ -11,7 +11,9 @@ function localStorage_read_lastdir(key) {
 
 function show_directory_contents(response) {
 	$("#filesystem").remove();
-	$("#main").append($("<div></div>")
+	/*$("#main").append($("<div></div>")
+		.attr("id", "filesystem"));*/
+	$("#fortran").prepend($("<div></div>")
 		.attr("id", "filesystem"));
 
 	let loc = response.location;
@@ -25,9 +27,9 @@ function show_directory_contents(response) {
 	if (theme == 'bright')
 		$("#breadcrumb").css('background-color', 'darkgrey');
 
-    /*$(window).scroll(function(){
+	/*$(window).scroll(function(){
 	$("#breadcrumb").css({"margin-top": ($(window).scrollTop()) + "px", "margin-left":($(window).scrollLeft()) + "px"});
-    });*/
+	});*/
 
 	//navigation
 	var dir = "";
