@@ -285,12 +285,7 @@ extern void start_http_()
     signal(SIGPIPE, SIG_IGN); //ignore SIGPIPE
     //signal(SIGINT, SIGINTHandler); //intercept CTRL+C to trigger a clean shutdown
 
-    /*http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
-                                   HTTP_PORT,
-                                   NULL, NULL, &on_http_connection, NULL,
-                                   MHD_OPTION_END);*/
-
-    http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
+    http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
                                    HTTP_PORT,
                                    NULL,
                                    NULL,
