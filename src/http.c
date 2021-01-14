@@ -407,7 +407,108 @@ if (strstr (url, "FITSWebQL.html") != NULL)
 		    printf("URL root path: %s\n", root) ;		    		    
 #endif
 
+	    
+		    //get datasetId
+#ifdef LOCAL            
+		    char** datasetId = NULL ;
+		    int va_count = 0 ;		    
+
+		    char* directory = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "dir");
+		    char* extension = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "ext");
+		    char* tmp = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "filename");	    
+		    
+		    //auto-detect multiple lines
+		    if(tmp == NULL)
+		      {			
+			char str_key[255] = "";
+
+			sprintf(str_key, "filename%d", va_count+1) ;
+
+			while((tmp = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, str_key)) != NULL)
+			  {
+			    va_count++ ;
+			    printf("argument %d:%s\n", va_count, tmp) ;
+			    sprintf(str_key, "filename%d", va_count+1) ;
+
+			    datasetId = (char**) realloc(datasetId, va_count*sizeof(char*)) ;
+			    datasetId[va_count-1] = tmp ;
+			  }
+
+			printf("number of arguments: %d\n", va_count) ;
+		      }
+		    else
+		      {
+			va_count = 1 ;
+
+			//allocate datasetId
+			datasetId = (char**) malloc(sizeof(char*)) ;	  
+			datasetId[0] = tmp ;
+		      }
+#else	
+		    char** datasetId = NULL ;
+		    int va_count = 0 ;		    
+		    
+		    char* tmp = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "datasetId");	    
+		    
+		    //auto-detect multiple lines
+		    if(tmp == NULL)
+		      {			
+			char str_key[255] = "";
+
+			sprintf(str_key, "datasetId%d", va_count+1) ;
+
+			while((tmp = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, str_key)) != NULL)
+			  {
+			    va_count++ ;
+			    printf("argument %d:%s\n", va_count, tmp) ;
+			    sprintf(str_key, "datasetId%d", va_count+1) ;
+
+			    datasetId = (char**) realloc(datasetId, va_count*sizeof(char*)) ;
+			    datasetId[va_count-1] = tmp ;
+			  }
+
+			printf("number of arguments: %d\n", va_count) ;
+		      }
+		    else
+		      {
+			va_count = 1 ;
+
+			//allocate datasetId
+			datasetId = (char**) malloc(sizeof(char*)) ;	  
+			datasetId[0] = tmp ;
+		      }
+#endif
+
+#ifdef LOCAL
+// pass the dir/file to FORTRAN
+char filepath[1024];
+memset(filepath, '\0', sizeof(filepath));
+
+if(va_count == 1) {
+if(directory != NULL)
+{
+    if(extension == NULL)
+    snprintf(filepath, sizeof(filepath), "%s/%s.fits", directory, datasetId[0]) ;
+	  else
+	    snprintf(filepath, sizeof(filepath), "%s/%s.%s", directory, datasetId[0], extension) ;
+}
+
+    printf("FITS filepath:\t%s\n", filepath);
+}
+
+// directory/extension need not be freed (libmicrohttpd does that)
+
+#else
+// pass the datasetId to FORTRAN
+
+    // deallocate datasetId
+    #endif
+
+    // deallocate datasetId
+if(datasetId != NULL)
+	free(datasetId) ;
           }
+
  /*
     // pass the request to FORTRAN
     http_request_();
