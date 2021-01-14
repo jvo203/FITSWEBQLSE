@@ -236,7 +236,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     char *encoded = json_encode_string(dir);
 
     snprintf(tmp, sizeof(tmp), "{\"location\" : %s, \"contents\" : [", encoded);
-    strncat(json, tmp, len);
+    strncat(json, tmp, sizeof(tmp));
 
     if (encoded != NULL)
         free(encoded);
@@ -247,7 +247,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     {
         perror("scandir");
 
-        strncat(json, "]}", len);
+        strcat(json, "]}");
     }
     else
     {
@@ -278,7 +278,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
                     char *encoded = json_encode_string(namelist[i]->d_name);
 
                     snprintf(tmp, sizeof(tmp), "{\"type\" : \"dir\", \"name\" : %s, \"last_modified\" : \"%s\"},", encoded, last_modified);
-                    strncat(json, tmp, len);
+                    strncat(json, tmp, sizeof(tmp));
                     has_contents = 1;
 
                     if (encoded != NULL)
@@ -291,7 +291,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
                         char *encoded = json_encode_string(namelist[i]->d_name);
 
                         snprintf(tmp, sizeof(tmp), "{\"type\" : \"file\", \"name\" : %s, \"size\" : %zu, \"last_modified\" : \"%s\"},", encoded, filesize, last_modified);
-                        strncat(json, tmp, len);
+                        strncat(json, tmp, sizeof(tmp));
                         has_contents = 1;
 
                         if (encoded != NULL)
@@ -308,7 +308,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
         if (has_contents)
             json[strlen(json) - 1] = '\0';
 
-        strncat(json, "]}", len);
+        strcat(json, "]}");
     };
 
     if (namelist != NULL)
@@ -395,20 +395,20 @@ static enum MHD_Result on_http_connection(void *cls,
     };
 #endif
 
-    // static resources
-    if (url[strlen(url) - 1] != '/')
-        return serve_file(connection, url);
-    else
-    {
-        // root document
-#ifdef LOCAL
-        return serve_file(connection, "/local.html");
-#else
-        return serve_file(connection, "/test.html");
-#endif
-    }
+if (strstr (url, "FITSWebQL.html") != NULL)
+		  {
+#ifndef LOCAL
+		    //get the root path
+		    char* proot = (char*) strstr (url, "FITSWebQL.html") ;
+		    
+		    int len = proot - url ;
+		    char* root = strndup(url, len) ;		    
 
-    /*
+		    printf("URL root path: %s\n", root) ;		    		    
+#endif
+
+          }
+ /*
     // pass the request to FORTRAN
     http_request_();
 
@@ -421,6 +421,19 @@ static enum MHD_Result on_http_connection(void *cls,
     MHD_destroy_response(response);
 
     return ret;*/
+
+    // static resources
+    if (url[strlen(url) - 1] != '/')
+        return serve_file(connection, url);
+    else
+    {
+        // root document
+#ifdef LOCAL
+        return serve_file(connection, "/local.html");
+#else
+        return serve_file(connection, "/test.html");
+#endif
+    }   
 
     return http_not_found(connection);
 }
