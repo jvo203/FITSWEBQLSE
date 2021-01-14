@@ -773,7 +773,7 @@ contains
         end do
 
         ! truncate values near zero
-        where (abs(x) < zero) x = 0.0
+        where (abs(x) .lt. zero) x = 0.0
 
         ! wavelet shrinkage to denoise / compress the data
         call wave_shrink(n, x)
