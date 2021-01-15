@@ -12,7 +12,7 @@ program main
     logical init
 
     ! receives the URI of the FITS file
-    character(kind=c_char), dimension(:), allocatable :: uri
+    ! character(kind=c_char), dimension(:), allocatable :: uri
     character, dimension(1024) :: filepath
 
     ! stores the URI length
@@ -53,13 +53,31 @@ program main
 
         call MPI_RECV(filepath, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
 
-        if (ierror .eq. 0) print *, 'rank', rank, 'filepath:', filepath
+        if (ierror .eq. 0) then
+            count = length(filepath, 1024)
+
+            if (count .gt. 0) then
+                print *, 'rank', rank, 'filepath:>', filepath(1:count), '<'
+            end if
+        end if
 
         !   deallocate (uri)
     end do
 
     ! in a Co-Array program there may be no need for MPI_Finalize
     call MPI_FINALIZE(ierror)
+contains
+    integer function length(string, n)
+        character, dimension(n), intent(in) :: string
+        integer, intent(in) :: n
+        integer :: i
+
+        do i = 1, n
+            if (string(i) .eq. ' ') exit
+        end do
+
+        length = i - 1
+    end function length
 end program main
 
 subroutine http_request(uri, n) bind(C)
@@ -82,8 +100,8 @@ subroutine http_request(uri, n) bind(C)
 
     ! send the uri to all the images via MPI
     ! MPI_PROBE not available in Intel MPI, switching over to co-arrays
-    filepath = ''
-    filepath = uri
+    filepath = ' '
+    filepath(1:n) = uri(1:n)
     do i = 0, size - 1
         call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
     end do
