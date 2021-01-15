@@ -8,7 +8,7 @@ program main
     integer :: max_threads
     integer rank, size, ierror, tag, namelen, status(MPI_STATUS_SIZE), cmd
     character(len=MPI_MAX_PROCESSOR_NAME) :: name
-    integer(kind=4), parameter :: MPI_CMD = 1000
+    integer(kind=4), parameter :: MPI_URI = 1000
     logical init
 
     max_threads = OMP_GET_MAX_THREADS()
@@ -35,7 +35,7 @@ program main
     call start_http
 
     do
-        call MPI_RECV(cmd, 1, MPI_INTEGER, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+        call MPI_RECV(cmd, 1, MPI_INTEGER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
         print *, 'rank', rank, 'received message containing', cmd, ', ierror', ierror
 
         if (cmd .lt. 0) exit
@@ -52,7 +52,7 @@ subroutine http_request(uri, n) bind(C)
     integer(kind=c_size_t), intent(in), value :: n
     integer :: msg
     integer :: i
-    integer(kind=4), parameter :: MPI_CMD = 1000
+    integer(kind=4), parameter :: MPI_URI = 1000
     integer :: size, ierror
 
     call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
@@ -64,10 +64,8 @@ subroutine http_request(uri, n) bind(C)
     ! if(this_image() == 1) then
     msg = 777
 
-    ! call MPI_BCAST(msg, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierror)
-
     do i = 0, size - 1
-        call MPI_SEND(msg, 1, MPI_INTEGER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
+        call MPI_SEND(msg, 1, MPI_INTEGER, i, MPI_URI, MPI_COMM_WORLD, ierror)
         ! send the uri to all the images via MPI
     end do
 
