@@ -35,11 +35,9 @@ program main
     call start_http
 
     do
-        ! if (rank .ne. 0) then
-        ! call MPI_BCAST(cmd, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierror)
         call MPI_RECV(cmd, 1, MPI_INTEGER, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
         print *, 'rank', rank, 'received message containing', cmd, ', ierror', ierror
-        ! end if
+
         if (cmd .lt. 0) exit
     end do
 
@@ -70,6 +68,7 @@ subroutine http_request(uri, n) bind(C)
 
     do i = 0, size - 1
         call MPI_SEND(msg, 1, MPI_INTEGER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
+        ! send the uri to all the images via MPI
     end do
 
     !print *, 'image', this_image(), 'ierror:', ierror
