@@ -47,10 +47,11 @@ program main
     call MPI_FINALIZE(ierror)
 end program main
 
-subroutine http_request(filepath, n) bind(c)
+subroutine http_request(filepath, n)
     use mpi
     use, intrinsic :: iso_c_binding
-    character(kind=c_char), dimension(n) :: in
+    character(kind=c_char), dimension(n), intent(in) :: filepath
+    integer(kind=4), intent(in) :: n
     integer :: msg
     integer :: i
     integer(kind=4), parameter :: MPI_CMD = 1000
