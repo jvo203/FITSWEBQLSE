@@ -6,10 +6,17 @@ program main
 
     external sigint_handler ! Must declare as external
     integer :: max_threads
-    integer rank, size, ierror, tag, namelen, status(MPI_STATUS_SIZE), cmd
+    integer rank, size, ierror, tag, namelen, status(MPI_STATUS_SIZE)
     character(len=MPI_MAX_PROCESSOR_NAME) :: name
     integer(kind=4), parameter :: MPI_URI = 1000
     logical init
+
+    ! receives the URI of the FITS file
+    character(kind=c_char), dimension(:), allocatable :: uri
+    character, dimension(1024) :: filepath
+
+    ! stores the URI length
+    integer count
 
     max_threads = OMP_GET_MAX_THREADS()
 
@@ -28,17 +35,27 @@ program main
 
     call register_kill_signal_handler(sigint_handler)
 
-    cmd = 0
     ! start an external libmicrohttpd server
     ! if (this_image() == 1)
-    ! if (rank .eq. 0)
     call start_http
 
     do
-        call MPI_RECV(cmd, 1, MPI_INTEGER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
-        print *, 'rank', rank, 'received message containing', cmd, ', ierror', ierror
+        ! first probe for new messages
+        ! MPI_PROBE does not seem to be available in Intel MPI !? !? !?
+        ! try co-arrays
+        !    call MPI_PROBE(MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, ierror)
 
-        if (cmd .lt. 0) exit
+        ! there is an incoming message, obtain the number of characters
+        !   call MPI_GET_COUNT(ierror, MPI_CHARACTER, count)
+
+        ! allocate the character array
+        !   allocate (uri(count))
+
+        call MPI_RECV(filepath, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+
+        if (ierror .eq. 0) print *, 'rank', rank, 'filepath:', filepath
+
+        !   deallocate (uri)
     end do
 
     ! in a Co-Array program there may be no need for MPI_Finalize
@@ -50,27 +67,26 @@ subroutine http_request(uri, n) bind(C)
     use, intrinsic :: iso_c_binding
     character(kind=c_char), dimension(n), intent(in) :: uri
     integer(kind=c_size_t), intent(in), value :: n
-    integer :: msg
     integer :: i
     integer(kind=4), parameter :: MPI_URI = 1000
     integer :: size, ierror
+    integer :: length
+    character, dimension(1024) :: filepath
 
     call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
     ! if (this_image() == 1) then
-    print *, 'image', this_image(), 'received an http request uri: ', uri
+    length = n
+    print *, 'image', this_image(), 'received an http request uri: ', uri, length
     !end if
 
-    ! if(this_image() == 1) then
-    msg = 777
-
+    ! send the uri to all the images via MPI
+    ! MPI_PROBE not available in Intel MPI, switching over to co-arrays
+    filepath = ''
+    filepath = uri
     do i = 0, size - 1
-        call MPI_SEND(msg, 1, MPI_INTEGER, i, MPI_URI, MPI_COMM_WORLD, ierror)
-        ! send the uri to all the images via MPI
+        call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
     end do
-
-    !print *, 'image', this_image(), 'ierror:', ierror
-    ! end if
 end subroutine http_request
 
 subroutine exit_fortran
