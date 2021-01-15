@@ -30,7 +30,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 }
 
 extern void exit_fortran_();
-extern void http_request(size_t n);
+extern void http_request(char *uri, size_t n);
 
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
@@ -401,7 +401,7 @@ static enum MHD_Result on_http_connection(void *cls,
     const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
     //MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
 
-    printf("URL:\t%s\n", url);
+    printf("[C] URL:\t%s\n", url);
 
 #ifdef LOCAL
     if (0 == strcmp(url, "/get_directory"))
@@ -521,7 +521,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 }
 
                 printf("[C] FITS filepath:\t%s\n", filepath);
-                http_request(strlen(filepath));
+                http_request(filepath, strlen(filepath));
             }
 
             // directory/extension should not be freed (libmicrohttpd does that)

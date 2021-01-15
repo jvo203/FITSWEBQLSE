@@ -47,10 +47,10 @@ program main
     call MPI_FINALIZE(ierror)
 end program main
 
-subroutine http_request(n) bind(C)
+subroutine http_request(uri, n) bind(C)
     use mpi
     use, intrinsic :: iso_c_binding
-    ! character(kind=c_char), dimension(n), intent(in) :: filepath
+    character(kind=c_char), dimension(n), intent(in) :: uri
     integer(kind=c_size_t), intent(in), value :: n
     integer :: msg
     integer :: i
@@ -60,7 +60,7 @@ subroutine http_request(n) bind(C)
     call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
     ! if (this_image() == 1) then
-    print *, 'image', this_image(), 'received an http request len:', n
+    print *, 'image', this_image(), 'received an http request uri: ', uri
     !end if
 
     ! if(this_image() == 1) then
