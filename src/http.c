@@ -129,6 +129,30 @@ static enum MHD_Result print_out_key(void *cls, enum MHD_ValueKind kind, const c
     return MHD_YES;
 }
 
+static enum MHD_Result http_ok(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *okstr =
+        "<html><body><div align='center'><p>200 OK Processing a request.</p></div><div align='center'><img src=\"/fortran.webp\" alt=\" Powered by Fortran 2018\" style = \"height:40px; margin-top:25px;\" ></div></ body></ html>";
+
+    response =
+        MHD_create_response_from_buffer(strlen(okstr),
+                                        (void *)okstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_OK,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
 static enum MHD_Result http_not_found(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
@@ -358,7 +382,7 @@ static enum MHD_Result on_http_connection(void *cls,
     static int dummy;
     const char *page = cls;
     struct MHD_Response *response;
-    int ret;
+    enum MHD_Result ret;
 
     if (0 != strcmp(method, "GET"))
         return MHD_NO; /* unexpected method */
@@ -408,10 +432,10 @@ static enum MHD_Result on_http_connection(void *cls,
 #endif
 
         //get datasetId
-#ifdef LOCAL
         char **datasetId = NULL;
         int va_count = 0;
 
+#ifdef LOCAL
         char *directory = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dir");
         char *extension = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ext");
         char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "filename");
@@ -444,9 +468,6 @@ static enum MHD_Result on_http_connection(void *cls,
             datasetId[0] = tmp;
         }
 #else
-        char **datasetId = NULL;
-        int va_count = 0;
-
         char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
 
         //auto-detect multiple lines
@@ -478,35 +499,43 @@ static enum MHD_Result on_http_connection(void *cls,
         }
 #endif
 
-#ifdef LOCAL
-        // pass the dir/file to FORTRAN
-        char filepath[1024];
-        memset(filepath, '\0', sizeof(filepath));
-
-        if (va_count == 1)
+        if (datasetId != NULL)
         {
-            if (directory != NULL)
+            ret = http_ok(connection);
+
+            // pass the filepath to FORTRAN
+#ifdef LOCAL
+            // make a filepath from the dir/extension
+            char filepath[1024];
+            memset(filepath, '\0', sizeof(filepath));
+
+            if (va_count == 1)
             {
-                if (extension == NULL)
-                    snprintf(filepath, sizeof(filepath), "%s/%s.fits", directory, datasetId[0]);
-                else
-                    snprintf(filepath, sizeof(filepath), "%s/%s.%s", directory, datasetId[0], extension);
+                if (directory != NULL)
+                {
+                    if (extension == NULL)
+                        snprintf(filepath, sizeof(filepath), "%s/%s.fits", directory, datasetId[0]);
+                    else
+                        snprintf(filepath, sizeof(filepath), "%s/%s.%s", directory, datasetId[0], extension);
+                }
+
+                printf("FITS filepath:\t%s\n", filepath);
             }
 
-            printf("FITS filepath:\t%s\n", filepath);
-        }
-
-        // directory/extension need not be freed (libmicrohttpd does that)
+            // directory/extension should not be freed (libmicrohttpd does that)
 
 #else
-        // pass the datasetId to FORTRAN
-
-// deallocate datasetId
+            // get the full path from the postgresql db, then call FORTRAN
 #endif
+        }
+        else
+            ret = http_not_found(connection);
 
         // deallocate datasetId
         if (datasetId != NULL)
             free(datasetId);
+
+        return ret;
     }
 
     /*
