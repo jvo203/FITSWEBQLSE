@@ -49,7 +49,7 @@ end program main
 
 subroutine http_request(filepath, n)
     use mpi
-    use, intrinsic :: iso_c_binding
+    use, intrinsic :: iso_c_binding, only: c_char
     character(kind=c_char), dimension(n), intent(in) :: filepath
     integer(kind=4), intent(in) :: n
     integer :: msg
