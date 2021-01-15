@@ -506,20 +506,21 @@ static enum MHD_Result on_http_connection(void *cls,
             // pass the filepath to FORTRAN
 #ifdef LOCAL
             // make a filepath from the dir/extension
+            int i;
             char filepath[1024];
             memset(filepath, '\0', sizeof(filepath));
 
-            if (va_count == 1)
+            for (i = 0; i < va_count; i++)
             {
                 if (directory != NULL)
                 {
                     if (extension == NULL)
-                        snprintf(filepath, sizeof(filepath), "%s/%s.fits", directory, datasetId[0]);
+                        snprintf(filepath, sizeof(filepath), "%s/%s.fits", directory, datasetId[i]);
                     else
-                        snprintf(filepath, sizeof(filepath), "%s/%s.%s", directory, datasetId[0], extension);
+                        snprintf(filepath, sizeof(filepath), "%s/%s.%s", directory, datasetId[i], extension);
                 }
 
-                printf("FITS filepath:\t%s\n", filepath);
+                printf("[C] FITS filepath:\t%s\n", filepath);
             }
 
             // directory/extension should not be freed (libmicrohttpd does that)
