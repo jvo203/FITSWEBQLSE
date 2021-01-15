@@ -527,7 +527,9 @@ static enum MHD_Result on_http_connection(void *cls,
             // directory/extension should not be freed (libmicrohttpd does that)
 
 #else
-            // get the full path from the postgresql db, then call FORTRAN
+            // get the full path from the postgresql db
+            // if a file does not exist form a download URL (jvox...)
+            // then call FORTRAN with a filepath or URL
 #endif
         }
         else
