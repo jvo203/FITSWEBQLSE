@@ -4,7 +4,6 @@ program main
     use, intrinsic :: iso_c_binding
     implicit none
 
-    character(len=1) :: c
     external sigint_handler ! Must declare as external
     integer :: max_threads
     integer rank, size, ierror, tag, namelen, status(MPI_STATUS_SIZE), cmd
@@ -48,8 +47,10 @@ program main
     call MPI_FINALIZE(ierror)
 end program main
 
-subroutine http_request
+subroutine http_request(filepath, n) bind(c)
     use mpi
+    use, intrinsic :: iso_c_binding
+    character(kind=c_char), dimension(n) :: in
     integer :: msg
     integer :: i
     integer(kind=4), parameter :: MPI_CMD = 1000
@@ -58,7 +59,7 @@ subroutine http_request
     call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
     ! if (this_image() == 1) then
-    print *, 'image', this_image(), 'received an http request.'
+    print *, 'image', this_image(), 'received an http request:', filepath
     !end if
 
     ! if(this_image() == 1) then
