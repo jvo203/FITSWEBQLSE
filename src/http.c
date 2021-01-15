@@ -30,7 +30,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 }
 
 extern void exit_fortran_();
-extern void http_request_(char *string, int n);
+extern void http_request(size_t n);
 
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
@@ -521,7 +521,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 }
 
                 printf("[C] FITS filepath:\t%s\n", filepath);
-                http_request_(filepath, strlen(filepath));
+                http_request(strlen(filepath));
             }
 
             // directory/extension should not be freed (libmicrohttpd does that)
