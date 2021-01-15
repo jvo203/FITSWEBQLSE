@@ -72,11 +72,19 @@ contains
         integer, intent(in) :: n
         integer :: i
 
+        if (n .le. 0) then
+            length = 0
+            return
+        end if
+
         do i = 1, n
-            if (string(i) .eq. ' ') exit
+            if (string(i) .eq. ' ') then
+                length = i - 1
+                return
+            end if
         end do
 
-        length = i - 1
+        length = n
     end function length
 end program main
 
