@@ -36,8 +36,7 @@ program main
     call register_kill_signal_handler(sigint_handler)
 
     ! start an external libmicrohttpd server
-    ! if (this_image() == 1)
-    call start_http
+    if (this_image() == 1) call start_http
 
     do
         ! first probe for new messages
@@ -91,8 +90,8 @@ end program main
 subroutine http_request(uri, n) bind(C)
     use mpi
     use, intrinsic :: iso_c_binding
-    character(kind=c_char), dimension(n), intent(in) :: uri
     integer(kind=c_size_t), intent(in), value :: n
+    character(kind=c_char), dimension(n), intent(in) :: uri
     integer :: i
     integer(kind=4), parameter :: MPI_URI = 1000
     integer :: size, ierror
