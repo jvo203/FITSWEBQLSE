@@ -40,28 +40,40 @@ program main
     if (this_image() == 1) call start_http
 
     do
-        ! first probe for new messages
-        ! MPI_PROBE does not seem to be available in Intel MPI !? !? !?
-        ! try co-arrays
-        !    call MPI_PROBE(MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, ierror)
+        block
+            integer i
+            character(len=1024) :: filename
 
-        ! there is an incoming message, obtain the number of characters
-        !   call MPI_GET_COUNT(ierror, MPI_CHARACTER, count)
+            filename = ''
+            ! first probe for new messages
+            ! MPI_PROBE does not seem to be available in Intel MPI !? !? !?
+            ! try co-arrays
+            !    call MPI_PROBE(MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, ierror)
 
-        ! allocate the character array
-        !   allocate (uri(count))
+            ! there is an incoming message, obtain the number of characters
+            !   call MPI_GET_COUNT(ierror, MPI_CHARACTER, count)
 
-        call MPI_RECV(filepath, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+            ! allocate the character array
+            !   allocate (uri(count))
 
-        if (ierror .eq. 0) then
-            count = length(filepath, 1024)
+            call MPI_RECV(filepath, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
 
-            if (count .gt. 0) then
-                print *, 'rank', rank, 'filepath:>', filepath(1:count), '<'
+            if (ierror .eq. 0) then
+                count = length(filepath, 1024)
+
+                if (count .gt. 0) then
+                    print *, 'rank', rank, 'filepath:>', filepath(1:count), '<'
+
+                    do i = 1, count
+                        filename(i:i) = filepath(i)
+                    end do
+
+                    call load_fits_file(filename)
+                end if
             end if
-        end if
 
-        !   deallocate (uri)
+            !   deallocate (uri)
+        end block
     end do
 
     ! in a Co-Array program there may be no need for MPI_Finalize

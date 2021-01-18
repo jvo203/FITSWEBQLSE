@@ -9,11 +9,9 @@ module fits
     real(kind=4) :: dmin[*], dmax[*]
     logical bSuccess[*]
 contains
-    subroutine load_fits_file(filename) ! , dmin, dmax, bSuccess)
+    subroutine load_fits_file(filename)
         implicit none
         character(len=1024), intent(in) :: filename
-        !real(kind=4), intent(out) :: dmin, dmax
-        !logical, intent(out) ::  bSuccess
 
         dmin = 1.0E30
         dmax = -1.0E30
