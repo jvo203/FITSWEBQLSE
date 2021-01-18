@@ -43,7 +43,6 @@ contains
         integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i, j
         integer naxes(3), naxis
         integer npixels
-        integer width, height, depth
         integer tid, start, end, num_per_image, frame, firstpix
 
         real(kind=4), allocatable :: buffer(:)
@@ -140,10 +139,6 @@ contains
             print *, 'NAXIS:', naxis, 'NAXIS:', naxes
         end if
 
-        width = naxes(1)
-        height = naxes(2)
-        depth = naxes(3)
-
         group = 1
         nullval = 0.0
 
@@ -151,7 +146,7 @@ contains
         dmax = -1.0E30
 
         ! allocate the buffer
-        npixels = width*height
+        npixels = naxes(1)*naxes(2)
 
         ! now read the 3D FITS data cube (successive 2D planes)
         if (npixels .eq. 0) then
@@ -163,17 +158,34 @@ contains
         allocate (buffer(npixels))
 
         ! calculate the range for each image
-        if (naxis .eq. 2 .or. depth .eq. 1) then
+        if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
             ! read one 2D image only on the first image
-            if (this_image() == 1) then
-                ! put data into the <pixels> 1D array
-            end if
+            ! not so, do it on all images
+
+            !if (this_image() == 1) then
+            ! put data into the <pixels> 1D array
+            firstpix = 1
+
+            call ftgpve(unit, group, firstpix, npixels, nullval, buffer, anynull, status)
+            ! abort upon an error
+            if (status .ne. 0) go to 200
+
+            ! calculate the min/max values
+            do j = 1, npixels
+                tmp = buffer(j)
+                if (isnan(tmp) .ne. .true.) then
+                    dmin = min(dmin, tmp)
+                    dmax = max(dmax, tmp)
+                end if
+            end do
+
+            !end if
         else
             ! read a range of 2D planes on each image
             tid = this_image()
-            num_per_image = depth/num_images()
+            num_per_image = naxes(3)/num_images()
             start = 1 + (tid - 1)*num_per_image
-            end = min(tid*num_per_image, depth)
+            end = min(tid*num_per_image, naxes(3))
 
             ! print *, 'tid:', tid, 'start:', start, 'end:', end
             do frame = start, end
