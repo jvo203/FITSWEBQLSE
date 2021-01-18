@@ -154,7 +154,6 @@ contains
             go to 200
         end if
 
-        ! float32
         allocate (buffer(npixels))
 
         ! calculate the range for each image
@@ -181,21 +180,41 @@ contains
 
             !end if
         else
-            ! read a range of 2D planes on each image
+            ! read a range of 2D planes in parallel on each image
             tid = this_image()
             num_per_image = naxes(3)/num_images()
             start = 1 + (tid - 1)*num_per_image
             end = min(tid*num_per_image, naxes(3))
-
             ! print *, 'tid:', tid, 'start:', start, 'end:', end
+
+            ! use an OpenMP loop with a reduction for dmin, dmax (TO-DO)
+            ! in which case the pixels buffer needs to be made loop-private
+            ! or alternatively declare <max_threads> buffers
+
+            !$OMP  PARALLEL DO &
+            !$OMP& DEFAULT(SHARED) PRIVATE(frame) &
+            !$OMP& SCHEDULE(DYNAMIC) &
+            !$OMP& REDUCTION(min:tid_dmin) &
+            !$OMP& REDUCTION(max:tid_dmax)
+
+            ! the call to ftgpve is not thread-safe unless the FITS
+            ! file has been opened independently by each thread
+
+            ! ifort OpenMP compiler abort, cannot use OMP PARALLEL DO
+            ! with REDUCTION to reduce co-array variables
             do frame = start, end
+                ! block
+                ! real(kind=4) :: tid_buffer(npixels)
+
                 ! set the starting point
                 firstpix = 1 + (frame - 1)*npixels
                 ! read the entire 2D plane at once
                 call ftgpve(unit, group, firstpix, npixels, nullval, buffer, anynull, status)
                 ! abort upon an error
+                ! cannot branch out in OpenMP
                 if (status .ne. 0) go to 200
 
+                ! if (status .eq. 0) then
                 ! calculate the min/max values
                 do j = 1, npixels
                     tmp = buffer(j)
@@ -204,7 +223,10 @@ contains
                         dmax = max(dmax, tmp)
                     end if
                 end do
+                ! end if
+                ! end block
             end do
+            !$OMP  END PARALLEL DO
         end if
 
         bSuccess = .true.
