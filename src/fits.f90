@@ -20,7 +20,17 @@ contains
         bSuccess = .false.
 
         ! call read_fits_file(filename, dmin, dmax, bSuccess)
-        ! call co_reduce(bSuccess, logical_and)
+        call co_reduce(bSuccess, logical_and)
+
+        if (bSuccess) then
+            call co_min(dmin)
+            call co_max(dmax)
+
+            if (this_image() == 1) then
+                print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax
+            end if
+        end if
+
     end subroutine load_fits_file
 
     pure function logical_and(a, b)
