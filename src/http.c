@@ -29,7 +29,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
     signal(SIGTERM, handler);
 }
 
-extern void exit_fortran_();
+extern void exit_fortran();
 extern void http_request(char *uri, size_t n);
 
 #define HTTP_PORT 8080
@@ -592,10 +592,10 @@ void SIGINTHandler(int sigint)
 
     printf("clean shutdown completed.\n");
 
-    exit_fortran_();
+    exit_fortran();
 };
 
-extern void start_http_()
+extern void start_http()
 {
 
     signal(SIGPIPE, SIG_IGN); //ignore SIGPIPE
@@ -624,7 +624,7 @@ extern void start_http_()
     }
 }
 
-extern void stop_http_()
+extern void stop_http()
 {
     interrupted = 1; // this should terminate websockets
 
