@@ -4,7 +4,7 @@ CC := icc
 FORT := mpiifort
 TARGET = fitswebqlse
 
-SRC = src/main.f90 src/http.c src/json.c src/net.f90 src/wavelet.f90
+SRC = src/main.f90 src/http.c src/json.c src/fits.f90 src/wavelet.f90
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
