@@ -49,9 +49,16 @@ contains
         print *, 'image', this_image(), 'received an http request uri: ', uri, length
         !end if
 
+        if (n .lt. 1) return
+
         ! send the uri to all the images via MPI
-        ! MPI_PROBE not available in Intel MPI, switching over to co-arrays
+        ! MPI_PROBE not available in Intel MPI, switching over to co-arrays ?
+        ! or use a fixed-size character array (1024 characters?)
+
+        ! first initialise the whole string with space characters
+        ! so that the end of the string can be found later on
         filepath = ' '
+
         filepath(1:n) = uri(1:n)
         do i = 0, size - 1
             call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
