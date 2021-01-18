@@ -4,7 +4,7 @@ CC := icc
 FORT := mpiifort
 TARGET = fitswebqlse
 
-SRC = src/main.f90 src/http.c src/json.c src/net.f90 src/fits.f90 src/wavelet.f90
+SRC = src/http.c src/json.c src/wavelet.f90 src/fits.f90 src/net.f90 src/main.f90
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
@@ -41,4 +41,4 @@ mpi:
 #-corray-config-file=./config
 
 clean:
-	rm -f src/*.o src/*.d src/*.optrpt *.o *.d *.optrpt $(TARGET) testWavelets
+	rm -f src/*.mod src/*.o src/*.d src/*.optrpt *.mod *.o *.d *.optrpt $(TARGET) testWavelets

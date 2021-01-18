@@ -32,6 +32,7 @@ contains
 
     subroutine http_request(uri, n) bind(C)
         use mpi
+        use fits
         use, intrinsic :: iso_c_binding
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: uri

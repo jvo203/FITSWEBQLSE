@@ -1,6 +1,7 @@
 program main
     use mpi
     use net
+    use fits
     use omp_lib
     use, intrinsic :: iso_c_binding
     implicit none
