@@ -2,11 +2,11 @@ program main
     use mpi
     use net
     use fits
-    use omp_lib
+    ! use omp_lib
     use, intrinsic :: iso_c_binding
     implicit none
 
-    integer :: max_threads
+    ! integer :: max_threads
     integer rank, size, ierror, tag, namelen, status(MPI_STATUS_SIZE)
     character(len=MPI_MAX_PROCESSOR_NAME) :: name
     integer(kind=4), parameter :: MPI_URI = 1000
@@ -19,7 +19,7 @@ program main
     ! stores the URI length
     integer count
 
-    max_threads = OMP_GET_MAX_THREADS()
+    ! max_threads = OMP_GET_MAX_THREADS()
 
     call MPI_INITIALIZED(init, ierror)
     if (.not. init) call MPI_INIT(ierror)
@@ -29,7 +29,8 @@ program main
     call MPI_GET_PROCESSOR_NAME(name, namelen, ierror)
 
     print *, 'co-array image:', this_image(), 'mpi rank:', rank, &
-    &'mpi world size:', size, 'running on', name, 'with', max_threads, 'OpenMP thread(s).'
+    &'mpi world size:', size, 'running on', name
+    ! , 'with', max_threads, 'OpenMP thread(s).'
 
     print *, 'FITSWEBQL SE CLUSTER EDITION POWERED BY FORTRAN 2018'
 
