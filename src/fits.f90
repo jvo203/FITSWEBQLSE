@@ -38,6 +38,7 @@ contains
         implicit none
         character(len=1024), intent(in) :: filename
         real(kind=4), intent(out) :: dmin, dmax
+        real(kind=4) :: tid_dmin, tid_dmax
         logical, intent(out) ::  bSuccess
 
         integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i, j
@@ -191,6 +192,9 @@ contains
             ! in which case the pixels buffer needs to be made loop-private
             ! or alternatively declare <max_threads> buffers
 
+            tid_dmin = dmin
+            tid_dmax = dmax
+
             !$OMP  PARALLEL DO &
             !$OMP& DEFAULT(SHARED) PRIVATE(frame) &
             !$OMP& SCHEDULE(DYNAMIC) &
@@ -203,30 +207,33 @@ contains
             ! ifort OpenMP compiler abort, cannot use OMP PARALLEL DO
             ! with REDUCTION to reduce co-array variables
             do frame = start, end
-                ! block
-                ! real(kind=4) :: tid_buffer(npixels)
+                block
+                    real(kind=4) :: tid_buffer(npixels)
 
-                ! set the starting point
-                firstpix = 1 + (frame - 1)*npixels
-                ! read the entire 2D plane at once
-                call ftgpve(unit, group, firstpix, npixels, nullval, buffer, anynull, status)
-                ! abort upon an error
-                ! cannot branch out in OpenMP
-                if (status .ne. 0) go to 200
+                    ! set the starting point
+                    firstpix = 1 + (frame - 1)*npixels
+                    ! read the entire 2D plane at once
+                    call ftgpve(unit, group, firstpix, npixels, nullval, tid_buffer, anynull, status)
+                    ! abort upon an error
+                    ! cannot branch out in OpenMP
+                    ! if (status .ne. 0) go to 200
 
-                ! if (status .eq. 0) then
-                ! calculate the min/max values
-                do j = 1, npixels
-                    tmp = buffer(j)
-                    if (isnan(tmp) .ne. .true.) then
-                        dmin = min(dmin, tmp)
-                        dmax = max(dmax, tmp)
+                    if (status .eq. 0) then
+                        ! calculate the min/max values
+                        do j = 1, npixels
+                            tmp = tid_buffer(j)
+                            if (isnan(tmp) .ne. .true.) then
+                                tid_dmin = min(tid_dmin, tmp)
+                                tid_dmax = max(tid_dmax, tmp)
+                            end if
+                        end do
                     end if
-                end do
-                ! end if
-                ! end block
+                end block
             end do
             !$OMP  END PARALLEL DO
+
+            dmin = tid_dmin
+            dmax = tid_dmax
         end if
 
         bSuccess = .true.
