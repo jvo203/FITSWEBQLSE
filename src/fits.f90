@@ -45,8 +45,8 @@ contains
         integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i, j
         integer naxes(3), naxis
         integer npixels
-        integer tid, start, end, num_per_image, frame
         integer(kind=8) firstpix
+        integer tid, start, end, num_per_image, frame
 
         real(kind=4), allocatable :: buffer(:)
         ! logical(kind=1), allocatable :: mask(:)
@@ -140,7 +140,7 @@ contains
         end if
 
         if (this_image() == 1) then
-            print *, 'NAXIS:', naxis, 'NAXIS:', naxes
+            print *, 'NAXIS:', naxis, 'NAXES:', naxes
         end if
 
         group = 1
