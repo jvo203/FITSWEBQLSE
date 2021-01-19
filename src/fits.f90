@@ -45,7 +45,7 @@ contains
         integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i, j
         integer naxis, bitpix
         integer npixels
-        integer(kind=8) naxes(3)
+        integer naxes(3)
         integer(kind=8) firstpix
         integer tid, start, end, num_per_image, frame
 
@@ -119,8 +119,8 @@ contains
         !  Determine the size of the image.
         ! call ftgknj(unit, 'NAXIS', 1, 3, naxes, naxis, status)
 
-        ! new subroutines
-        call FTGIPRLL(unit, 3, bitpix, naxis, naxes, status)
+        ! new subroutines (! LL for kind=8)
+        call FTGIPR(unit, 3, bitpix, naxis, naxes, status)
 
         if (status .ne. 0) then
             ! do this only if naxis is still 0
