@@ -40,11 +40,13 @@ contains
         real(kind=4), intent(out) :: dmin, dmax
         real(kind=4) :: tid_dmin, tid_dmax
         logical, intent(out) ::  bSuccess
+        logical :: tid_bSuccess
 
         integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i, j
         integer naxes(3), naxis
         integer npixels
-        integer tid, start, end, num_per_image, frame, firstpix
+        integer tid, start, end, num_per_image, frame
+        integer(kind=8) firstpix
 
         real(kind=4), allocatable :: buffer(:)
         ! integer(kind=4), allocatable, target :: pixels(:, :)
@@ -180,6 +182,7 @@ contains
             end do
 
             !end if
+            bSuccess = .true.
         else
             ! read a range of 2D planes in parallel on each image
             tid = this_image()
@@ -194,12 +197,14 @@ contains
 
             tid_dmin = dmin
             tid_dmax = dmax
+            tid_bSuccess = .true.
 
             !$OMP  PARALLEL DO &
-            !$OMP& DEFAULT(SHARED) PRIVATE(frame) &
+            !$OMP& DEFAULT(SHARED) PRIVATE(frame, firstpix) &
             !$OMP& SCHEDULE(DYNAMIC) &
             !$OMP& REDUCTION(min:tid_dmin) &
-            !$OMP& REDUCTION(max:tid_dmax)
+            !$OMP& REDUCTION(max:tid_dmax) &
+            !$OMP& REDUCTION(.and.:tid_bSuccess)
 
             ! the call to ftgpve is not thread-safe unless the FITS
             ! file has been opened independently by each thread
@@ -216,6 +221,8 @@ contains
 
                     ! FITSIO is not thread-safe (need one file handle per thread)
                     ! in any case we don't want to overload the hard disks
+                    ! FORTRAN FITSIO does not cope with large files
+                    ! firstpix integer overflows for large offsets
                     !$omp critical
                     call ftgpve(unit, group, firstpix, npixels, nullval, tid_buffer, anynull, status)
                     !$omp end critical
@@ -233,6 +240,9 @@ contains
                                 tid_dmax = max(tid_dmax, tmp)
                             end if
                         end do
+                    else
+                        tid_bSuccess = .false.
+                        ! print *, 'firstpix', firstpix
                     end if
                 end block
             end do
@@ -240,9 +250,8 @@ contains
 
             dmin = tid_dmin
             dmax = tid_dmax
+            bSuccess = tid_bSuccess
         end if
-
-        bSuccess = .true.
 
         ! The FITS file must always be closed before exiting the program.
         ! Any unit numbers allocated with FTGIOU must be freed with FTFIOU.
