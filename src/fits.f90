@@ -247,6 +247,7 @@ contains
             ! dmin = tid_dmin
             ! dmax = tid_dmax
             ! bSuccess = tid_bSuccess
+            bSuccess = .true.
         end if
 
         ! The FITS file must always be closed before exiting the program.
