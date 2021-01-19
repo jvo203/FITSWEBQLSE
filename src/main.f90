@@ -29,7 +29,7 @@ program main
     call MPI_GET_PROCESSOR_NAME(name, namelen, ierror)
 
     print *, 'co-array image:', this_image(), 'mpi rank:', rank, &
-    &'mpi world size:', size, 'running on', name, 'with', max_threads, 'OpenMP threads.'
+    &'mpi world size:', size, 'running on', name, 'with', max_threads, 'OpenMP thread(s).'
 
     print *, 'FITSWEBQL SE CLUSTER EDITION POWERED BY FORTRAN 2018'
 
