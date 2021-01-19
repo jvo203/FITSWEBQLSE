@@ -200,7 +200,7 @@ contains
             tid_bSuccess = .true.
 
             !$OMP  PARALLEL DO &
-            !$OMP& DEFAULT(SHARED) PRIVATE(frame, firstpix) &
+            !$OMP& DEFAULT(SHARED) PRIVATE(frame, firstpix, status) &
             !$OMP& SCHEDULE(DYNAMIC) &
             !$OMP& REDUCTION(min:tid_dmin) &
             !$OMP& REDUCTION(max:tid_dmax) &
