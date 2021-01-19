@@ -49,7 +49,7 @@ contains
         integer(kind=8) firstpix
 
         real(kind=4), allocatable :: buffer(:)
-        logical(kind=1), allocatable :: mask(:)
+        ! logical(kind=1), allocatable :: mask(:)
         ! integer(kind=4), allocatable, target :: pixels(:, :)
 
         real :: nullval, tmp
@@ -159,7 +159,7 @@ contains
         end if
 
         allocate (buffer(npixels))
-        allocate (mask(npixels))
+        ! allocate (mask(npixels))
 
         ! calculate the range for each image
         if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
@@ -175,23 +175,23 @@ contains
             if (status .ne. 0) go to 200
 
             ! calculate the min/max values
-            ! do j = 1, npixels
-            !    tmp = buffer(j)
-            !    if (isnan(tmp) .ne. .true.) then
-            !        dmin = min(dmin, tmp)
-            !        dmax = max(dmax, tmp)
-            !    end if
-            !end do
+            do j = 1, npixels
+                tmp = buffer(j)
+                if (isnan(tmp) .ne. .true.) then
+                    dmin = min(dmin, tmp)
+                    dmax = max(dmax, tmp)
+                end if
+            end do
 
             ! get the NaN mask
             ! by default there are no NaNs
-            mask = .true.
+            ! mask = .true.
 
             !  pick out all the NaN
-            where (isnan(buffer)) mask = .false.
+            ! where (isnan(buffer)) mask = .false.
 
-            dmin = min(dmin, minval(buffer, mask=mask))
-            dmax = max(dmax, maxval(buffer, mask=mask))
+            ! dmin = min(dmin, minval(buffer, mask=mask))
+            ! dmax = max(dmax, maxval(buffer, mask=mask))
 
             !end if
             bSuccess = .true.
@@ -241,13 +241,13 @@ contains
 
                 !if (status .eq. 0) then
                 ! calculate the min/max values
-                ! do j = 1, npixels
-                !    tmp = buffer(j)
-                !    if (isnan(tmp) .ne. .true.) then
-                !        dmin = min(dmin, tmp)
-                !        dmax = max(dmax, tmp)
-                !    end if
-                !end do
+                do j = 1, npixels
+                    tmp = buffer(j)
+                    if (isnan(tmp) .ne. .true.) then
+                        dmin = min(dmin, tmp)
+                        dmax = max(dmax, tmp)
+                    end if
+                end do
                 !else
                 !    tid_bSuccess = .false.
                 !    print *, 'firstpix', firstpix
@@ -255,13 +255,13 @@ contains
 
                 ! get the NaN mask
                 ! by default there are no NaNs
-                mask = .true.
+                ! mask = .true.
 
                 !  pick out all the NaN
-                where (isnan(buffer)) mask = .false.
+                ! where (isnan(buffer)) mask = .false.
 
-                dmin = min(dmin, minval(buffer, mask=mask))
-                dmax = max(dmax, maxval(buffer, mask=mask))
+                ! dmin = min(dmin, minval(buffer, mask=mask))
+                ! dmax = max(dmax, maxval(buffer, mask=mask))
 
                 !end block
             end do
