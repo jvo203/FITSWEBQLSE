@@ -38,7 +38,7 @@ contains
         implicit none
         character(len=1024), intent(in) :: filename
         real(kind=4), intent(out) :: dmin, dmax
-        real(kind=4) :: tid_dmin, tid_dmax
+        ! real(kind=4) :: tid_dmin, tid_dmax
         logical, intent(out) ::  bSuccess
         logical :: tid_bSuccess
 
@@ -195,10 +195,6 @@ contains
             ! in which case the pixels buffer needs to be made loop-private
             ! or alternatively declare <max_threads> buffers
 
-            tid_dmin = dmin
-            tid_dmax = dmax
-            tid_bSuccess = .true.
-
             !$OMP  PARALLEL DO &
             !$OMP& DEFAULT(SHARED) PRIVATE(frame, firstpix, status) &
             !$OMP& SCHEDULE(DYNAMIC) &
@@ -212,45 +208,45 @@ contains
             ! ifort OpenMP compiler abort, cannot use OMP PARALLEL DO
             ! with REDUCTION to reduce co-array variables
             do frame = start, end
-                block
-                    real(kind=4) :: tid_buffer(npixels)
+                ! block
+                !    real(kind=4) :: tid_buffer(npixels)
 
-                    ! set the starting point
-                    firstpix = 1 + (frame - 1)*npixels
-                    ! read the entire 2D plane at once
+                ! set the starting point
+                firstpix = 1 + (frame - 1)*npixels
+                ! read the entire 2D plane at once
 
-                    ! FITSIO is not thread-safe (need one file handle per thread)
-                    ! in any case we don't want to overload the hard disks
-                    ! FORTRAN FITSIO does not cope with large files
-                    ! firstpix integer overflows for large offsets
-                    !$omp critical
-                    call ftgpve(unit, group, firstpix, npixels, nullval, tid_buffer, anynull, status)
-                    !$omp end critical
+                ! FITSIO is not thread-safe (need one file handle per thread)
+                ! in any case we don't want to overload the hard disks
+                ! FORTRAN FITSIO does not cope with large files
+                ! firstpix integer overflows for large offsets
+                !$omp critical
+                call ftgpve(unit, group, firstpix, npixels, nullval, buffer, anynull, status)
+                !$omp end critical
 
-                    ! abort upon an error
-                    ! cannot branch out in OpenMP
-                    ! if (status .ne. 0) go to 200
+                ! abort upon an error
+                ! cannot branch out in OpenMP
+                if (status .ne. 0) go to 200
 
-                    if (status .eq. 0) then
-                        ! calculate the min/max values
-                        do j = 1, npixels
-                            tmp = tid_buffer(j)
-                            if (isnan(tmp) .ne. .true.) then
-                                tid_dmin = min(tid_dmin, tmp)
-                                tid_dmax = max(tid_dmax, tmp)
-                            end if
-                        end do
-                    else
-                        tid_bSuccess = .false.
-                        ! print *, 'firstpix', firstpix
+                !if (status .eq. 0) then
+                ! calculate the min/max values
+                do j = 1, npixels
+                    tmp = buffer(j)
+                    if (isnan(tmp) .ne. .true.) then
+                        dmin = min(dmin, tmp)
+                        dmax = max(dmax, tmp)
                     end if
-                end block
+                end do
+                !else
+                !    tid_bSuccess = .false.
+                !    print *, 'firstpix', firstpix
+                !end if
+                !end block
             end do
             !$OMP  END PARALLEL DO
 
-            dmin = tid_dmin
-            dmax = tid_dmax
-            bSuccess = tid_bSuccess
+            ! dmin = tid_dmin
+            ! dmax = tid_dmax
+            ! bSuccess = tid_bSuccess
         end if
 
         ! The FITS file must always be closed before exiting the program.
