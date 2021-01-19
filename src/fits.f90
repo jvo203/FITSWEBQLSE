@@ -43,8 +43,9 @@ contains
         logical :: tid_bSuccess
 
         integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i, j
-        integer naxes(3), naxis
+        integer naxis, bitpix
         integer npixels
+        integer(kind=8) naxes(3)
         integer(kind=8) firstpix
         integer tid, start, end, num_per_image, frame
 
@@ -116,7 +117,10 @@ contains
         ! status = 107 is returned.
 
         !  Determine the size of the image.
-        call ftgknj(unit, 'NAXIS', 1, 3, naxes, naxis, status)
+        ! call ftgknj(unit, 'NAXIS', 1, 3, naxes, naxis, status)
+
+        ! new subroutines
+        call FTGIPRLL(unit, 3, bitpix, naxis, naxes, status)
 
         if (status .ne. 0) then
             ! do this only if naxis is still 0
@@ -140,7 +144,7 @@ contains
         end if
 
         if (this_image() == 1) then
-            print *, 'NAXIS:', naxis, 'NAXES:', naxes
+            print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
         end if
 
         group = 1
