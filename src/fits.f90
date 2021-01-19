@@ -213,7 +213,13 @@ contains
                     ! set the starting point
                     firstpix = 1 + (frame - 1)*npixels
                     ! read the entire 2D plane at once
+
+                    ! FITSIO is not thread-safe (need one file handle per thread)
+                    ! in any case we don't want to overload the hard disks
+                    !$omp critical
                     call ftgpve(unit, group, firstpix, npixels, nullval, tid_buffer, anynull, status)
+                    !$omp end critical
+
                     ! abort upon an error
                     ! cannot branch out in OpenMP
                     ! if (status .ne. 0) go to 200
