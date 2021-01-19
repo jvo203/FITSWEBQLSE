@@ -175,7 +175,7 @@ contains
             if (status .ne. 0) go to 200
 
             ! calculate the min/max values
-            !do j = 1, npixels
+            ! do j = 1, npixels
             !    tmp = buffer(j)
             !    if (isnan(tmp) .ne. .true.) then
             !        dmin = min(dmin, tmp)
@@ -241,23 +241,34 @@ contains
 
                 !if (status .eq. 0) then
                 ! calculate the min/max values
-                do j = 1, npixels
-                    tmp = buffer(j)
-                    if (isnan(tmp) .ne. .true.) then
-                        dmin = min(dmin, tmp)
-                        dmax = max(dmax, tmp)
-                    end if
-                end do
+                ! do j = 1, npixels
+                !    tmp = buffer(j)
+                !    if (isnan(tmp) .ne. .true.) then
+                !        dmin = min(dmin, tmp)
+                !        dmax = max(dmax, tmp)
+                !    end if
+                !end do
                 !else
                 !    tid_bSuccess = .false.
                 !    print *, 'firstpix', firstpix
                 !end if
+
+                ! get the NaN mask
+                ! by default there are no NaNs
+                mask = .true.
+
+                !  pick out all the NaN
+                where (isnan(buffer)) mask = .false.
+
+                dmin = min(dmin, minval(buffer, mask=mask))
+                dmax = max(dmax, maxval(buffer, mask=mask))
+
                 !end block
             end do
             !$OMP  END PARALLEL DO
 
-            ! dmin = tid_dmin
-            ! dmax = tid_dmax
+            ! dmin = min(dmin, tid_dmin)
+            ! dmax = max(dmax, tid_dmax)
             ! bSuccess = tid_bSuccess
             bSuccess = .true.
         end if
