@@ -203,7 +203,6 @@ contains
             ! dmax = max(dmax, maxval(buffer, mask=mask))
 
             !end if
-            deallocate (buffer)
             bSuccess = .true.
         else
             ! read a range of 2D planes in parallel on each image
@@ -214,36 +213,36 @@ contains
             num_per_image = end - start + 1
             !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
 
-            npixels_per_image = npixels*num_per_image
+            ! npixels_per_image = npixels*num_per_image
+            allocate (buffer(npixels))
+            ! allocate (mask(npixels))
 
-            allocate (buffer(npixels_per_image))
-            ! allocate (mask(npixels_per_image))
+            do frame = start, end
+                ! starting bounds
+                fpixels = (/1, 1, frame, 1/)
 
-            ! starting bounds
-            fpixels = (/1, 1, start, 1/)
+                ! ending bounds
+                lpixels = (/naxes(1), naxes(2), frame, 1/)
 
-            ! ending bounds
-            lpixels = (/naxes(1), naxes(2), end, 1/)
+                ! do not skip over any pixels
+                incs = 1
 
-            ! do not skip over any pixels
-            incs = 1
+                ! skip the do loop, make one call to ftgsve instead
+                call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, buffer, anynull, status)
 
-            ! skip the do loop, make one call to ftgsve instead
-            call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, buffer, anynull, status)
+                ! abort upon an error
+                if (status .ne. 0) go to 200
 
-            ! abort upon an error
-            if (status .ne. 0) go to 200
-
-            ! calculate the min/max values
-            do j = 1, npixels_per_image
-                tmp = buffer(j)
-                if (isnan(tmp) .ne. .true.) then
-                    dmin = min(dmin, tmp)
-                    dmax = max(dmax, tmp)
-                end if
+                ! calculate the min/max values
+                do j = 1, npixels
+                    tmp = buffer(j)
+                    if (isnan(tmp) .ne. .true.) then
+                        dmin = min(dmin, tmp)
+                        dmax = max(dmax, tmp)
+                    end if
+                end do
             end do
 
-            deallocate (buffer)
             bSuccess = .true.
         end if
 
