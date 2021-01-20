@@ -117,9 +117,7 @@ contains
         ! encountered when trying to move to the specified extension, then a
         ! status = 107 is returned.
 
-        !  Determine the size of the image.
-        ! call ftgknj(unit, 'NAXIS', 1, 4, naxes, naxis, status)
-
+        !  Determine the size of the data cube
         ! new subroutines (! LL for kind=8)
         call FTGIPR(unit, 4, bitpix, naxis, naxes, status)
 
