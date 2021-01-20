@@ -12,6 +12,10 @@ contains
     subroutine load_fits_file(filename)
         implicit none
         character(len=1024), intent(in) :: filename
+        real :: start, finish
+
+        ! start the timer
+        call cpu_time(start)
 
         call read_fits_file(filename, dmin, dmax, bSuccess)
         call co_reduce(bSuccess, logical_and)
@@ -20,8 +24,11 @@ contains
             call co_min(dmin)
             call co_max(dmax)
 
+            ! end the timer
+            call cpu_time(finish)
+
             if (this_image() == 1) then
-                print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax
+                print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax, 'elapsed:', (finish - start), '[s]'
             end if
         end if
 
