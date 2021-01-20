@@ -46,9 +46,9 @@ contains
         integer naxis, bitpix
         integer npixels
         integer naxes(4)
-        integer(kind=8) firstpix
+        integer(kind=8) firstpix, npixels_per_image
         integer tid, start, end, num_per_image, frame
-        integer, dimension(3) :: fpixels, lpixels
+        integer, dimension(4) :: fpixels, lpixels, incs
 
         real(kind=4), allocatable :: buffer(:)
         ! logical(kind=1), allocatable :: mask(:)
@@ -163,19 +163,18 @@ contains
             go to 200
         end if
 
-        allocate (buffer(npixels))
-        ! allocate (mask(npixels))
-
         ! calculate the range for each image
         if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
             ! read one 2D image only on the first image
             ! not so, do it on all images
 
+            allocate (buffer(npixels))
+            ! allocate (mask(npixels))
+
             !if (this_image() == 1) then
             ! put data into the <pixels> 1D array
-            firstpix = 1
 
-            call ftgpve(unit, group, firstpix, npixels, nullval, buffer, anynull, status)
+            call ftgpve(unit, group, 1, npixels, nullval, buffer, anynull, status)
             ! abort upon an error
             if (status .ne. 0) go to 200
 
@@ -206,75 +205,38 @@ contains
             num_per_image = naxes(3)/num_images()
             start = 1 + (tid - 1)*num_per_image
             end = min(tid*num_per_image, naxes(3))
-            ! print *, 'tid:', tid, 'start:', start, 'end:', end
+            num_per_image = end - start + 1
+            !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
 
-            ! use an OpenMP loop with a reduction for dmin, dmax (TO-DO)
-            ! in which case the pixels buffer needs to be made loop-private
-            ! or alternatively declare <max_threads> buffers
+            npixels_per_image = npixels*num_per_image
 
-            !$OMP  PARALLEL DO &
-            !$OMP& DEFAULT(SHARED) PRIVATE(frame, firstpix, status) &
-            !$OMP& SCHEDULE(DYNAMIC) &
-            !$OMP& REDUCTION(min:tid_dmin) &
-            !$OMP& REDUCTION(max:tid_dmax) &
-            !$OMP& REDUCTION(.and.:tid_bSuccess)
+            allocate (buffer(npixels_per_image))
+            ! allocate (mask(npixels_per_image))
 
-            ! the call to ftgpve is not thread-safe unless the FITS
-            ! file has been opened independently by each thread
+            ! starting bounds
+            fpixels = (/1, 1, start, 1/)
 
-            ! ifort OpenMP compiler abort, cannot use OMP PARALLEL DO
-            ! with REDUCTION to reduce co-array variables
-            do frame = start, end
-                ! block
-                !    real(kind=4) :: tid_buffer(npixels)
+            ! ending bounds
+            lpixels = (/naxes(1), naxes(2), end, 1/)
 
-                ! set the starting point
-                firstpix = 1 + (frame - 1)*npixels
-                ! read the entire 2D plane at once
+            ! do not skip over any pixels
+            incs = 1
 
-                ! FITSIO is not thread-safe (need one file handle per thread)
-                ! in any case we don't want to overload the hard disks
-                ! FORTRAN FITSIO does not cope with large files
-                ! firstpix integer overflows for large offsets
-                !$omp critical
-                call ftgpve(unit, group, firstpix, npixels, nullval, buffer, anynull, status)
-                !$omp end critical
+            ! skip the do loop, make one call to ftgsve instead
+            call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, buffer, anynull, status)
 
-                ! abort upon an error
-                ! cannot branch out in OpenMP
-                if (status .ne. 0) go to 200
+            ! abort upon an error
+            if (status .ne. 0) go to 200
 
-                !if (status .eq. 0) then
-                ! calculate the min/max values
-                do j = 1, npixels
-                    tmp = buffer(j)
-                    if (isnan(tmp) .ne. .true.) then
-                        dmin = min(dmin, tmp)
-                        dmax = max(dmax, tmp)
-                    end if
-                end do
-                !else
-                !    tid_bSuccess = .false.
-                !    print *, 'firstpix', firstpix
-                !end if
-
-                ! get the NaN mask
-                ! by default there are no NaNs
-                ! mask = .true.
-
-                !  pick out all the NaN
-                ! where (isnan(buffer)) mask = .false.
-
-                ! dmin = min(dmin, minval(buffer, mask=mask))
-                ! dmax = max(dmax, maxval(buffer, mask=mask))
-
-                !end block
+            ! calculate the min/max values
+            do j = 1, npixels_per_image
+                tmp = buffer(j)
+                if (isnan(tmp) .ne. .true.) then
+                    dmin = min(dmin, tmp)
+                    dmax = max(dmax, tmp)
+                end if
             end do
-            !$OMP  END PARALLEL DO
 
-            ! dmin = min(dmin, tid_dmin)
-            ! dmax = max(dmax, tid_dmax)
-            ! bSuccess = tid_bSuccess
             bSuccess = .true.
         end if
 
