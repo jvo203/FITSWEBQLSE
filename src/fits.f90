@@ -48,6 +48,7 @@ contains
         integer naxes(4)
         integer(kind=8) firstpix
         integer tid, start, end, num_per_image, frame
+        integer, dimension(3) :: fpixels, lpixels
 
         real(kind=4), allocatable :: buffer(:)
         ! logical(kind=1), allocatable :: mask(:)
