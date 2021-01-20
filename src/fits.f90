@@ -203,6 +203,7 @@ contains
             ! dmax = max(dmax, maxval(buffer, mask=mask))
 
             !end if
+            deallocate (buffer)
             bSuccess = .true.
         else
             ! read a range of 2D planes in parallel on each image
@@ -242,6 +243,7 @@ contains
                 end if
             end do
 
+            deallocate (buffer)
             bSuccess = .true.
         end if
 
