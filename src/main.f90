@@ -32,7 +32,7 @@ program main
     &'mpi world size:', size, 'running on', name
     ! , 'with', max_threads, 'OpenMP thread(s).'
 
-    print *, 'FITSWEBQL SE CLUSTER EDITION POWERED BY FORTRAN 2018'
+    print *, 'FITSWEBQLSE CLUSTER EDITION POWERED BY FORTRAN 2018'
 
     call register_kill_signal_handler(sigint_handler)
 
