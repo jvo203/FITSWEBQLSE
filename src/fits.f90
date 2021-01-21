@@ -43,6 +43,7 @@ contains
         logical :: logical_and
 
         logical_and = a .and. b
+
     end function logical_and
 
     subroutine read_fits_file(filename, dmin, dmax, bSuccess)
@@ -250,6 +251,7 @@ contains
             call printerror(status)
             return
         end if
+
     end subroutine read_fits_file
 
     !*************************************************************************
