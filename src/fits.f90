@@ -2,7 +2,8 @@ module fits
     implicit none
 
     type dataset
-        character(len=256) :: id
+        ! the id will be made by hashing the dataset uri
+        integer :: id
         integer naxis, bitpix
         integer naxes(4)
         real(kind=4), allocatable :: pixels(:, :)
