@@ -204,38 +204,51 @@ contains
             num_per_image = end - start + 1
             !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
 
-            ! npixels_per_image = npixels*num_per_image
-            allocate (buffer(npixels))
-            allocate (mask(npixels))
+            block
+                real(kind=4), allocatable :: pixels(:)
 
-            do frame = start, end
-                ! starting bounds
-                fpixels = (/1, 1, frame, 1/)
+                ! npixels_per_image = npixels*num_per_image
+                allocate (buffer(npixels))
+                allocate (pixels(npixels))
+                allocate (mask(npixels))
 
-                ! ending bounds
-                lpixels = (/naxes(1), naxes(2), frame, 1/)
+                ! initiate pixels to blank
+                pixels = 0.0
+                ! and reset the NaN mask
+                mask = .false.
 
-                ! do not skip over any pixels
-                incs = 1
+                do frame = start, end
+                    ! starting bounds
+                    fpixels = (/1, 1, frame, 1/)
 
-                ! skip the do loop, make one call to ftgsve instead
-                call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, buffer, anynull, status)
+                    ! ending bounds
+                    lpixels = (/naxes(1), naxes(2), frame, 1/)
 
-                ! abort upon an error
-                if (status .ne. 0) go to 200
+                    ! do not skip over any pixels
+                    incs = 1
 
-                ! calculate the min/max values
-                do j = 1, npixels
-                    tmp = buffer(j)
-                    if (isnan(tmp) .ne. .true.) then
-                        dmin = min(dmin, tmp)
-                        dmax = max(dmax, tmp)
-                        mask(j) = .true.
-                    else
-                        mask(j) = .false.
-                    end if
+                    ! skip the do loop, make one call to ftgsve instead
+                    call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, buffer, anynull, status)
+
+                    ! abort upon an error
+                    if (status .ne. 0) go to 200
+
+                    ! calculate the min/max values
+                    do j = 1, npixels
+                        tmp = buffer(j)
+                        if (isnan(tmp) .ne. .true.) then
+                            dmin = min(dmin, tmp)
+                            dmax = max(dmax, tmp)
+
+                            ! integrate (sum up) pixels and a NaN mask
+                            pixels(j) = pixels(j) + tmp
+                            mask(j) = mask(j) .or. .true.
+                        else
+                            mask(j) = mask(j) .or. .false.
+                        end if
+                    end do
                 end do
-            end do
+            end block
         end if
 
         bSuccess = .true.
