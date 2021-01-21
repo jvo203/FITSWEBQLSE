@@ -2,6 +2,7 @@ module fits
     implicit none
 
     type dataset
+        character(len=256) :: id
         integer naxis, bitpix
         integer naxes(4)
         real(kind=4), allocatable :: pixels(:, :)
