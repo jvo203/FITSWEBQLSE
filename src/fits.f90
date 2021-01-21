@@ -12,10 +12,12 @@ contains
     subroutine load_fits_file(filename)
         implicit none
         character(len=1024), intent(in) :: filename
-        real :: start, finish
+
+        integer(8) :: start, finish, crate, cmax
+        real :: elapsed
 
         ! start the timer
-        call cpu_time(start)
+        call system_clock(count=start, count_rate=crate, count_max=cmax)
 
         call read_fits_file(filename, dmin, dmax, bSuccess)
         call co_reduce(bSuccess, logical_and)
@@ -25,10 +27,12 @@ contains
             call co_max(dmax)
 
             ! end the timer
-            call cpu_time(finish)
+            call system_clock(finish)
+            elapsed = real(finish - start)/real(crate)
 
             if (this_image() == 1) then
-                print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax, 'elapsed:', (finish - start), '[s]'
+                print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax,&
+                & 'elapsed:', elapsed, '[s]'
             end if
         end if
 
@@ -45,7 +49,6 @@ contains
         implicit none
         character(len=1024), intent(in) :: filename
         real(kind=4), intent(out) :: dmin, dmax
-        ! real(kind=4) :: tid_dmin, tid_dmax
         logical, intent(out) ::  bSuccess
         logical :: tid_bSuccess
 
@@ -58,8 +61,7 @@ contains
         integer, dimension(4) :: fpixels, lpixels, incs
 
         real(kind=4), allocatable :: buffer(:)
-        ! logical(kind=1), allocatable :: mask(:)
-        ! integer(kind=4), allocatable, target :: pixels(:, :)
+        logical(kind=1), allocatable :: mask(:)
 
         real :: nullval, tmp
         character record*80
@@ -174,12 +176,10 @@ contains
             ! not so, do it on all images
 
             allocate (buffer(npixels))
-            ! allocate (mask(npixels))
-
-            !if (this_image() == 1) then
-            ! put data into the <pixels> 1D array
+            allocate (mask(npixels))
 
             call ftgpve(unit, group, 1, npixels, nullval, buffer, anynull, status)
+
             ! abort upon an error
             if (status .ne. 0) go to 200
 
@@ -189,21 +189,11 @@ contains
                 if (isnan(tmp) .ne. .true.) then
                     dmin = min(dmin, tmp)
                     dmax = max(dmax, tmp)
+                    mask(j) = .true.
+                else
+                    mask(j) = .false.
                 end if
             end do
-
-            ! get the NaN mask
-            ! by default there are no NaNs
-            ! mask = .true.
-
-            !  pick out all the NaN
-            ! where (isnan(buffer)) mask = .false.
-
-            ! dmin = min(dmin, minval(buffer, mask=mask))
-            ! dmax = max(dmax, maxval(buffer, mask=mask))
-
-            !end if
-            bSuccess = .true.
         else
             ! read a range of 2D planes in parallel on each image
             tid = this_image()
@@ -215,7 +205,7 @@ contains
 
             ! npixels_per_image = npixels*num_per_image
             allocate (buffer(npixels))
-            ! allocate (mask(npixels))
+            allocate (mask(npixels))
 
             do frame = start, end
                 ! starting bounds
@@ -239,12 +229,15 @@ contains
                     if (isnan(tmp) .ne. .true.) then
                         dmin = min(dmin, tmp)
                         dmax = max(dmax, tmp)
+                        mask(j) = .true.
+                    else
+                        mask(j) = .false.
                     end if
                 end do
             end do
-
-            bSuccess = .true.
         end if
+
+        bSuccess = .true.
 
         ! The FITS file must always be closed before exiting the program.
         ! Any unit numbers allocated with FTGIOU must be freed with FTFIOU.
