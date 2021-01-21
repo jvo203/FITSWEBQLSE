@@ -1,6 +1,11 @@
 module fits
     implicit none
 
+    type dataset
+        real(kind=4), allocatable :: pixels(:, :)
+        logical(kind=1), allocatable :: mask(:, :)
+    end type dataset
+
     ! scalar coarray, one "filepath" for each image
     ! character(len=1024) :: fits_uri[*]
 
