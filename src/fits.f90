@@ -6,6 +6,9 @@ module fits
         logical(kind=1), allocatable :: mask(:, :)
     end type dataset
 
+    ! only one FITS dataset at this development stage
+    type(dataset) :: item
+
     ! scalar coarray, one "filepath" for each image
     ! character(len=1024) :: fits_uri[*]
 
@@ -253,6 +256,10 @@ contains
                         end if
                     end do
                 end do
+
+                ! update the FITS dataset (taking advantage of automatic reallocation)
+                item%pixels = reshape(pixels, naxes(1:2))
+                item%mask = reshape(mask, naxes(1:2))
             end block
         end if
 
