@@ -203,6 +203,10 @@ contains
                     mask(j) = .false.
                 end if
             end do
+
+            ! update the FITS dataset (taking advantage of automatic reallocation)
+            item%pixels = reshape(buffer, naxes(1:2))
+            item%mask = reshape(mask, naxes(1:2))
         else
             ! read a range of 2D planes in parallel on each image
             tid = this_image()
