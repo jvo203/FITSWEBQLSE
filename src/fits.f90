@@ -28,6 +28,8 @@ contains
         integer(8) :: start, finish, crate, cmax
         real :: elapsed
 
+        item%id = hash(filename)
+
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
@@ -45,7 +47,7 @@ contains
             if (this_image() == 1) then
                 print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax,&
                 & 'elapsed:', elapsed, '[s]'
-                print *, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
+                print *, 'id:', item%id, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
             end if
         end if
 
