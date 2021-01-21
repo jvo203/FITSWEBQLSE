@@ -2,6 +2,8 @@ module fits
     implicit none
 
     type dataset
+        integer naxis, bitpix
+        integer naxes(4)
         real(kind=4), allocatable :: pixels(:, :)
         logical(kind=1), allocatable :: mask(:, :)
     end type dataset
@@ -41,6 +43,7 @@ contains
             if (this_image() == 1) then
                 print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax,&
                 & 'elapsed:', elapsed, '[s]'
+                print *, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
             end if
         end if
 
@@ -158,7 +161,13 @@ contains
             if (this_image() == 1) then
                 print *, 'READIMAGE failed to read the NAXISn keywords.'
             end if
+
+            go to 200
         end if
+
+        item%bitpix = bitpix
+        item%naxis = naxis
+        item%naxes = naxes
 
         if (this_image() == 1) then
             print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
