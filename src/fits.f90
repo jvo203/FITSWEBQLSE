@@ -21,6 +21,7 @@ module fits
         real crval2, cdelt2, crpix2
         real crval3, cdelt3, crpix3
         real obsra, obsdec, datamin, datamax
+        real cd1_1, cd1_2, cd2_1, cd2_2
 
         ! derived values
         real(kind=4) dmin, dmax
@@ -54,6 +55,8 @@ contains
         print *, 'CUNIT1: ', trim(item%cunit1), ', CTYPE1: ', trim(item%ctype1)
         print *, 'CUNIT2: ', trim(item%cunit2), ', CTYPE2: ', trim(item%ctype2)
         print *, 'CUNIT3: ', trim(item%cunit3), ', CTYPE3: ', trim(item%ctype3)
+        print *, 'CD1_1: ', item%cd1_1, 'CD1_2: ', item%cd1_2
+        print *, 'CD2_1: ', item%cd2_1, 'CD2_2: ', item%cd2_2
 
     end subroutine print_dataset
 
@@ -265,8 +268,8 @@ contains
         status = 0; call FTGKYE(unit, 'DATAMAX', item%datamax, comment, status)
         if (status .ne. 0) item%datamax = ieee_value(0.0, ieee_quiet_nan)
 
+        ! either keyword is valid
         status = 0; call FTGKYS(unit, 'LINE', item%line, comment, status)
-
         status = 0; call FTGKYS(unit, 'J_LINE', item%line, comment, status)
 
         status = 0; call FTGKYS(unit, 'FILTER', item%filter, comment, status)
@@ -290,6 +293,18 @@ contains
         status = 0; call FTGKYS(unit, 'CTYPE2', item%ctype2, comment, status)
 
         status = 0; call FTGKYS(unit, 'CTYPE3', item%ctype3, comment, status)
+
+        status = 0; call FTGKYE(unit, 'CD1_1', item%cd1_1, comment, status)
+        if (status .ne. 0) item%cd1_1 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CD1_2', item%cd1_2, comment, status)
+        if (status .ne. 0) item%cd1_2 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CD2_1', item%cd2_1, comment, status)
+        if (status .ne. 0) item%cd2_1 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CD2_2', item%cd2_2, comment, status)
+        if (status .ne. 0) item%cd2_2 = ieee_value(0.0, ieee_quiet_nan)
 
         ! Try moving to the next extension in the FITS file, if it exists.
         ! The FTMRHD subroutine attempts to move to the next HDU, as specified by
