@@ -240,6 +240,7 @@ contains
 
                 cycle
 
+                ! enable X-RAY settings
 110             block
                     item%is_optical = .false.
                     item%is_xray = .true.
