@@ -218,11 +218,11 @@ contains
                     item%flux = 'ratio'
                 end if
 
-                ! split the record into a key and a value
-                key = record(1:10)
-                value = record(11:80)
-
                 if (this_image() == 1) then
+                    ! split the record into a key and a value
+                    key = record(1:10)
+                    value = record(11:80)
+
                     ! print *, record
                     ! print *, key, '-->', value
                 end if
