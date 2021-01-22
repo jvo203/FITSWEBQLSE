@@ -12,6 +12,8 @@ module fits
         integer naxes(4)
         character frameid*70
         character btype*70, bunit*70
+        real ignrval
+        real crval1, cdelt1, crpix1
 
         ! derived values
         real(kind=4) dmin, dmax
@@ -33,7 +35,8 @@ module fits
     logical bSuccess[*]
 contains
     subroutine print_dataset
-        print *, trim(item%frameid), ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit)
+        print *, trim(item%frameid), ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
+        print *, 'CRVAL1: ', item%crval1, ', CDELT1: ', item%cdelt1, ', CRPIX1: ', item%crpix1
     end subroutine print_dataset
 
     subroutine load_fits_file(filename)
@@ -183,9 +186,13 @@ contains
             end if
         end if
 
-        call FTGKYS(unit, 'FRAMEID', item%frameid, comment, status)
-        call FTGKYS(unit, 'BTYPE', item%btype, comment, status)
-        call FTGKYS(unit, 'BUNIT', item%bunit, comment, status)
+        status = 0; call FTGKYS(unit, 'FRAMEID', item%frameid, comment, status)
+        status = 0; call FTGKYS(unit, 'BTYPE', item%btype, comment, status)
+        status = 0; call FTGKYS(unit, 'BUNIT', item%bunit, comment, status)
+        status = 0; call FTGKYE(unit, 'IGNRVAL', item%ignrval, comment, status)
+        status = 0; call FTGKYE(unit, 'CRVAL1', item%crval1, comment, status)
+        status = 0; call FTGKYE(unit, 'CDELT1', item%cdelt1, comment, status)
+        status = 0; call FTGKYE(unit, 'CRPIX1', item%crpix1, comment, status)
 
         ! Try moving to the next extension in the FITS file, if it exists.
         ! The FTMRHD subroutine attempts to move to the next HDU, as specified by
@@ -194,6 +201,9 @@ contains
         ! move to an absolute HDU number in the FITS file.If the end - of - file is
         ! encountered when trying to move to the specified extension, then a
         ! status = 107 is returned.
+
+        ! reset the status
+        status = 0
 
         !  Determine the size of the data cube
         ! new subroutines (! LL for kind=8)
