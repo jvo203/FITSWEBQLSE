@@ -10,8 +10,9 @@ OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
-FLAGS = -Ofast -parallel -ipo -xHost -mavx -axAVX -qopt-report=2
+FLAGS = -Ofast -ipo -xHost -mavx -axAVX -qopt-report=2
 #-qopenmp
+#-parallel -fast
 CFLAGS := $(FLAGS)
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
