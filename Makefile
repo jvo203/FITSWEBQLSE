@@ -14,7 +14,7 @@ FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
 #-qopenmp
 CFLAGS := $(FLAGS)
 DEF = -DLOCAL
-FLAGS += -align array64byte -coarray=distributed
+FLAGS += -init=snan -align array64byte -coarray=distributed
 LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets
 # -lmpifort not needed when using mpiifort
 

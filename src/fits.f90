@@ -2,7 +2,7 @@ module fits
     use, intrinsic :: ieee_arithmetic
     implicit none
 
-    ! real, parameter :: NaN = ieee_value(0.0, ieee_quiet_nan)
+    !real, parameter :: NaN = ieee_value(0.0, IEEE_SIGNALING_NAN)
 
     type dataset
         ! the id will be made by hashing the dataset uri
@@ -15,7 +15,7 @@ module fits
         integer naxes(4)
         character frameid*70
         character btype*70, bunit*70
-        real :: ignrval
+        real :: ignrval = 0.0/0.0 ! NaN
         real crval1, cdelt1, crpix1
         real crval2, cdelt2, crpix2
         real crval3, cdelt3, crpix3
