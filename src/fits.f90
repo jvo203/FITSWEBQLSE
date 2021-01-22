@@ -3,14 +3,16 @@ module fits
 
     type dataset
         ! the id will be made by hashing the dataset uri
-        integer id
-        integer unit ! a FITS file handle
-        integer naxis, bitpix
+        integer :: id = -1
+        integer :: unit = -1! a FITS file handle
+        integer :: naxis = 0
+        integer :: bitpix = 0
         integer naxes(4)
         real(kind=4) dmin, dmax
         real(kind=4), allocatable :: frame_min(:), frame_max(:)
         real(kind=4), allocatable :: pixels(:, :)
         logical(kind=1), allocatable :: mask(:, :)
+        logical :: error = .false.
     end type dataset
 
     ! only one FITS dataset at this development stage
@@ -50,7 +52,7 @@ contains
             if (this_image() == 1) then
                 print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax,&
                 & 'elapsed:', elapsed, '[s]'
-                print *, 'id:', item%id, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
+                print *, 'id:', item%id, 'error:', item%error, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
             end if
         end if
 
@@ -311,11 +313,15 @@ contains
         end if
 
         bSuccess = .true.
+        item%unit = unit
+        return
 
         ! The FITS file must always be closed before exiting the program.
         ! Any unit numbers allocated with FTGIOU must be freed with FTFIOU.
 200     call ftclos(unit, status)
         call ftfiou(unit, status)
+
+        item%error = .true.
 
         ! Check for any error, and if so print out error messages.
         ! The PRINTERROR subroutine is listed near the end of this file.
