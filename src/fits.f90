@@ -2,8 +2,6 @@ module fits
     use, intrinsic :: ieee_arithmetic
     implicit none
 
-    !real, parameter :: NaN = ieee_value(0.0, IEEE_SIGNALING_NAN)
-
     type dataset
         ! the id will be made by hashing the dataset uri
         integer :: id = -1
@@ -15,7 +13,7 @@ module fits
         integer naxes(4)
         character frameid*70
         character btype*70, bunit*70
-        real :: ignrval = 0.0/0.0 ! NaN
+        real :: ignrval
         real crval1, cdelt1, crpix1
         real crval2, cdelt2, crpix2
         real crval3, cdelt3, crpix3
@@ -196,7 +194,11 @@ contains
         status = 0; call FTGKYS(unit, 'FRAMEID', item%frameid, comment, status)
         status = 0; call FTGKYS(unit, 'BTYPE', item%btype, comment, status)
         status = 0; call FTGKYS(unit, 'BUNIT', item%bunit, comment, status)
-        status = 0; call FTGKYE(unit, 'IGNRVAL', item%ignrval, comment, status)
+
+        status = 0; 
+        call FTGKYE(unit, 'IGNRVAL', item%ignrval, comment, status)
+        if (status .ne. 0) item%ignrval = ieee_value(0.0, ieee_quiet_nan)
+
         status = 0; call FTGKYE(unit, 'CRVAL1', item%crval1, comment, status)
         status = 0; call FTGKYE(unit, 'CDELT1', item%cdelt1, comment, status)
         status = 0; call FTGKYE(unit, 'CRPIX1', item%crpix1, comment, status)
