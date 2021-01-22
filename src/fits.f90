@@ -5,9 +5,15 @@ module fits
         ! the id will be made by hashing the dataset uri
         integer :: id = -1
         integer :: unit = -1! a FITS file handle
+
+        ! FITS header values
         integer :: naxis = 0
         integer :: bitpix = 0
         integer naxes(4)
+        character frameid*70
+        character btype*70, bunit*70
+
+        ! derived values
         real(kind=4) dmin, dmax
         real(kind=4), allocatable :: frame_min(:), frame_max(:)
         real(kind=4), allocatable :: pixels(:, :)
@@ -26,6 +32,10 @@ module fits
     real(kind=4) :: dmin[*], dmax[*]
     logical bSuccess[*]
 contains
+    subroutine print_dataset
+        print *, trim(item%frameid), ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit)
+    end subroutine print_dataset
+
     subroutine load_fits_file(filename)
         implicit none
         character(len=1024), intent(in) :: filename
@@ -53,6 +63,7 @@ contains
                 print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax,&
                 & 'elapsed:', elapsed, '[s]'
                 print *, 'id:', item%id, 'error:', item%error, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
+                call print_dataset
             end if
         end if
 
@@ -112,7 +123,7 @@ contains
         logical(kind=1), allocatable :: mask(:)
 
         real :: nullval, tmp
-        character :: record*80, key*10, value*70
+        character :: record*80, key*10, value*70, comment*70
         logical :: anynull
 
         naxis = 0
@@ -171,6 +182,10 @@ contains
                 ! print *, ' '
             end if
         end if
+
+        call FTGKYS(unit, 'FRAMEID', item%frameid, comment, status)
+        call FTGKYS(unit, 'BTYPE', item%btype, comment, status)
+        call FTGKYS(unit, 'BUNIT', item%bunit, comment, status)
 
         ! Try moving to the next extension in the FITS file, if it exists.
         ! The FTMRHD subroutine attempts to move to the next HDU, as specified by
