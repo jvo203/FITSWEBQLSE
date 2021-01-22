@@ -14,6 +14,8 @@ module fits
         character btype*70, bunit*70
         real ignrval
         real crval1, cdelt1, crpix1
+        real crval2, cdelt2, crpix2
+        real crval3, cdelt3, crpix3
 
         ! derived values
         real(kind=4) dmin, dmax
@@ -37,6 +39,8 @@ contains
     subroutine print_dataset
         print *, trim(item%frameid), ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
         print *, 'CRVAL1: ', item%crval1, ', CDELT1: ', item%cdelt1, ', CRPIX1: ', item%crpix1
+        print *, 'CRVAL2: ', item%crval2, ', CDELT2: ', item%cdelt2, ', CRPIX2: ', item%crpix2
+        print *, 'CRVAL3: ', item%crval3, ', CDELT3: ', item%cdelt3, ', CRPIX3: ', item%crpix3
     end subroutine print_dataset
 
     subroutine load_fits_file(filename)
@@ -193,6 +197,12 @@ contains
         status = 0; call FTGKYE(unit, 'CRVAL1', item%crval1, comment, status)
         status = 0; call FTGKYE(unit, 'CDELT1', item%cdelt1, comment, status)
         status = 0; call FTGKYE(unit, 'CRPIX1', item%crpix1, comment, status)
+        status = 0; call FTGKYE(unit, 'CRVAL2', item%crval2, comment, status)
+        status = 0; call FTGKYE(unit, 'CDELT2', item%cdelt2, comment, status)
+        status = 0; call FTGKYE(unit, 'CRPIX2', item%crpix2, comment, status)
+        status = 0; call FTGKYE(unit, 'CRVAL3', item%crval3, comment, status)
+        status = 0; call FTGKYE(unit, 'CDELT3', item%cdelt3, comment, status)
+        status = 0; call FTGKYE(unit, 'CRPIX3', item%crpix3, comment, status)
 
         ! Try moving to the next extension in the FITS file, if it exists.
         ! The FTMRHD subroutine attempts to move to the next HDU, as specified by
