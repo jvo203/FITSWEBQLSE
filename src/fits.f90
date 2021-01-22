@@ -3,9 +3,12 @@ module fits
 
     type dataset
         ! the id will be made by hashing the dataset uri
-        integer :: id
+        integer id
+        integer unit ! a FITS file handle
         integer naxis, bitpix
         integer naxes(4)
+        real(kind=4) dmin, dmax
+        real(kind=4), allocatable :: frame_min(:), frame_max(:)
         real(kind=4), allocatable :: pixels(:, :)
         logical(kind=1), allocatable :: mask(:, :)
     end type dataset
@@ -17,7 +20,7 @@ module fits
     ! character(len=1024) :: fits_uri[*]
 
     ! co-array variables to be synchronised across all images
-    ! will be held in a structure (TO-DO)
+    ! to be held in a structure <dataset>
     real(kind=4) :: dmin[*], dmax[*]
     logical bSuccess[*]
 contains
