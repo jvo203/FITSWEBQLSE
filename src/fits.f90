@@ -195,19 +195,35 @@ contains
         status = 0; call FTGKYS(unit, 'BTYPE', item%btype, comment, status)
         status = 0; call FTGKYS(unit, 'BUNIT', item%bunit, comment, status)
 
-        status = 0; 
-        call FTGKYE(unit, 'IGNRVAL', item%ignrval, comment, status)
+        status = 0; call FTGKYE(unit, 'IGNRVAL', item%ignrval, comment, status)
         if (status .ne. 0) item%ignrval = ieee_value(0.0, ieee_quiet_nan)
 
         status = 0; call FTGKYE(unit, 'CRVAL1', item%crval1, comment, status)
+        if (status .ne. 0) item%crval1 = ieee_value(0.0, ieee_quiet_nan)
+
         status = 0; call FTGKYE(unit, 'CDELT1', item%cdelt1, comment, status)
+        if (status .ne. 0) item%cdelt1 = ieee_value(0.0, ieee_quiet_nan)
+
         status = 0; call FTGKYE(unit, 'CRPIX1', item%crpix1, comment, status)
+        if (status .ne. 0) item%crpix1 = ieee_value(0.0, ieee_quiet_nan)
+
         status = 0; call FTGKYE(unit, 'CRVAL2', item%crval2, comment, status)
+        if (status .ne. 0) item%crval2 = ieee_value(0.0, ieee_quiet_nan)
+
         status = 0; call FTGKYE(unit, 'CDELT2', item%cdelt2, comment, status)
+        if (status .ne. 0) item%cdelt2 = ieee_value(0.0, ieee_quiet_nan)
+
         status = 0; call FTGKYE(unit, 'CRPIX2', item%crpix2, comment, status)
+        if (status .ne. 0) item%crpix2 = ieee_value(0.0, ieee_quiet_nan)
+
         status = 0; call FTGKYE(unit, 'CRVAL3', item%crval3, comment, status)
+        if (status .ne. 0) item%crval3 = ieee_value(0.0, ieee_quiet_nan)
+
         status = 0; call FTGKYE(unit, 'CDELT3', item%cdelt3, comment, status)
+        if (status .ne. 0) item%cdelt3 = ieee_value(0.0, ieee_quiet_nan)
+
         status = 0; call FTGKYE(unit, 'CRPIX3', item%crpix3, comment, status)
+        if (status .ne. 0) item%crpix3 = ieee_value(0.0, ieee_quiet_nan)
 
         ! Try moving to the next extension in the FITS file, if it exists.
         ! The FTMRHD subroutine attempts to move to the next HDU, as specified by
