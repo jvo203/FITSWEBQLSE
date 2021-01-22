@@ -11,8 +11,11 @@ module fits
         integer :: naxis = 0
         integer :: bitpix = 0
         integer naxes(4)
-        character frameid*70
-        character btype*70, bunit*70
+        character frameid*70, object*70, line*70, filter*70, date_obs*70
+        character btype*70, bunit*70, specsys*70, timesys*70
+        character cunit1*70, ctype1*70
+        character cunit2*70, ctype2*70
+        character cunit3*70, ctype3*70
         real :: ignrval, restfrq, bmaj, bmin, bpa
         real crval1, cdelt1, crpix1
         real crval2, cdelt2, crpix2
@@ -40,11 +43,18 @@ module fits
 contains
     subroutine print_dataset
         print *, trim(item%frameid), ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
+        print *, 'LINE: ', trim(item%line), ', FILTER: ', trim(item%filter),&
+        & ', SPECSYS: ', trim(item%specsys), ', TIMESYS: ', trim(item%timesys),&
+        & ', OBJECT: ', trim(item%object), ', DATE-OBS: ', trim(item%date_obs)
+        print *, 'RESTFRQ: ', item%restfrq, 'BMAJ: ', item%bmaj, ', BMIN: ', item%bmin, ', BPA: ', item%bpa
+        print *, 'OBSRA: ', item%obsra, 'OBSDEC: ', item%obsdec, ', DATAMIN: ', item%datamin, ', DATAMAX: ', item%datamax
         print *, 'CRVAL1: ', item%crval1, ', CDELT1: ', item%cdelt1, ', CRPIX1: ', item%crpix1
         print *, 'CRVAL2: ', item%crval2, ', CDELT2: ', item%cdelt2, ', CRPIX2: ', item%crpix2
         print *, 'CRVAL3: ', item%crval3, ', CDELT3: ', item%cdelt3, ', CRPIX3: ', item%crpix3
-        print *, 'RESTFRQ: ', item%restfrq, 'BMAJ: ', item%bmaj, ', BMIN: ', item%bmin, ', BPA: ', item%bpa
-        print *, 'OBSRA: ', item%obsra, 'OBSDEC: ', item%obsdec, ', DATAMIN: ', item%datamin, ', DATAMAX: ', item%datamax
+        print *, 'CUNIT1: ', trim(item%cunit1), ', CTYPE1: ', trim(item%ctype1)
+        print *, 'CUNIT2: ', trim(item%cunit2), ', CTYPE2: ', trim(item%ctype2)
+        print *, 'CUNIT3: ', trim(item%cunit3), ', CTYPE3: ', trim(item%ctype3)
+
     end subroutine print_dataset
 
     subroutine load_fits_file(filename)
@@ -195,7 +205,9 @@ contains
         end if
 
         status = 0; call FTGKYS(unit, 'FRAMEID', item%frameid, comment, status)
+
         status = 0; call FTGKYS(unit, 'BTYPE', item%btype, comment, status)
+
         status = 0; call FTGKYS(unit, 'BUNIT', item%bunit, comment, status)
 
         status = 0; call FTGKYE(unit, 'IGNRVAL', item%ignrval, comment, status)
@@ -252,6 +264,32 @@ contains
 
         status = 0; call FTGKYE(unit, 'DATAMAX', item%datamax, comment, status)
         if (status .ne. 0) item%datamax = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYS(unit, 'LINE', item%line, comment, status)
+
+        status = 0; call FTGKYS(unit, 'J_LINE', item%line, comment, status)
+
+        status = 0; call FTGKYS(unit, 'FILTER', item%filter, comment, status)
+
+        status = 0; call FTGKYS(unit, 'SPECSYS', item%specsys, comment, status)
+
+        status = 0; call FTGKYS(unit, 'TIMESYS', item%timesys, comment, status)
+
+        status = 0; call FTGKYS(unit, 'OBJECT', item%object, comment, status)
+
+        status = 0; call FTGKYS(unit, 'DATE-OBS', item%date_obs, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CUNIT1', item%cunit1, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CUNIT2', item%cunit2, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CUNIT3', item%cunit3, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CTYPE1', item%ctype1, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CTYPE2', item%ctype2, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CTYPE3', item%ctype3, comment, status)
 
         ! Try moving to the next extension in the FITS file, if it exists.
         ! The FTMRHD subroutine attempts to move to the next HDU, as specified by
