@@ -112,7 +112,7 @@ contains
         logical(kind=1), allocatable :: mask(:)
 
         real :: nullval, tmp
-        character record*80
+        character :: record*80, key*10, value*70
         logical :: anynull
 
         naxis = 0
@@ -153,8 +153,14 @@ contains
         ! Read each 80 - character keyword record, and print it out.
         do i = 1, nkeys
             call ftgrec(unit, i, record, status)
+
+            ! split the record into a key and a value
+            key = record(1:10)
+            value = record(11:80)
+
             if (this_image() == 1) then
                 ! print *, record
+                ! print *, key, '-->', value
             end if
         end do
 
