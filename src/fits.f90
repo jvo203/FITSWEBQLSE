@@ -286,7 +286,7 @@ contains
         status = 0; call FTGKYS(unit, 'BUNIT', item%bunit, comment, status)
 
         status = 0; call FTGKYE(unit, 'IGNRVAL', item%ignrval, comment, status)
-        if (status .ne. 0) item%ignrval = ieee_value(0.0, ieee_quiet_nan)
+        if (status .ne. 0 .and. .not. item%is_xray) item%ignrval = ieee_value(0.0, ieee_quiet_nan)
 
         status = 0; call FTGKYE(unit, 'CRVAL1', item%crval1, comment, status)
         if (status .ne. 0) item%crval1 = ieee_value(0.0, ieee_quiet_nan)
