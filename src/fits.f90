@@ -24,10 +24,13 @@ module fits
         real cd1_1, cd1_2, cd2_1, cd2_2
 
         ! derived values
+        character(len=16) :: flux = ''
         real(kind=4) dmin, dmax
         real(kind=4), allocatable :: frame_min(:), frame_max(:)
         real(kind=4), allocatable :: pixels(:, :)
         logical(kind=1), allocatable :: mask(:, :)
+        logical :: is_optical = .true.
+        logical :: is_xray = .false.
         logical :: error = .false.
     end type dataset
 
@@ -57,7 +60,7 @@ contains
         print *, 'CUNIT3: ', trim(item%cunit3), ', CTYPE3: ', trim(item%ctype3)
         print *, 'CD1_1: ', item%cd1_1, 'CD1_2: ', item%cd1_2
         print *, 'CD2_1: ', item%cd2_1, 'CD2_2: ', item%cd2_2
-
+        print *, 'IS_OPTICAL: ', item%is_optical, ', IS_XRAY: ', item%is_xray, ', FLUX: ', trim(item%flux)
     end subroutine print_dataset
 
     subroutine load_fits_file(filename)
@@ -128,6 +131,17 @@ contains
         RETURN
     END FUNCTION hash
 
+    elemental subroutine lower_case(word)
+        ! convert a word to lower case
+        character(len=*), intent(in out) :: word
+        integer                            :: i, ic, nlen
+        nlen = len(word)
+        do i = 1, nlen
+            ic = ichar(word(i:i))
+            if (ic >= 65 .and. ic < 90) word(i:i) = char(ic + 32)
+        end do
+    end subroutine lower_case
+
     subroutine read_fits_file(filename, dmin, dmax, bSuccess)
         implicit none
         character(len=1024), intent(in) :: filename
@@ -186,18 +200,56 @@ contains
         call ftghsp(unit, nkeys, nspace, status)
 
         ! Read each 80 - character keyword record, and print it out.
-        do i = 1, nkeys
-            call ftgrec(unit, i, record, status)
+        block
+            integer pos
 
-            ! split the record into a key and a value
-            key = record(1:10)
-            value = record(11:80)
+            do i = 1, nkeys
+                call ftgrec(unit, i, record, status)
 
-            if (this_image() == 1) then
-                ! print *, record
-                ! print *, key, '-->', value
-            end if
-        end do
+                pos = index(record, 'ASTRO-F')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'logistic'
+                end if
+
+                pos = index(record, 'HSCPIPE')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'ratio'
+                end if
+
+                ! split the record into a key and a value
+                key = record(1:10)
+                value = record(11:80)
+
+                if (this_image() == 1) then
+                    ! print *, record
+                    ! print *, key, '-->', value
+                end if
+
+                call lower_case(record)
+
+                pos = index(record, 'suzaku')
+                if (pos .ne. 0) go to 110
+
+                pos = index(record, 'hitomi')
+                if (pos .ne. 0) go to 110
+
+                pos = index(record, 'x-ray')
+                if (pos .ne. 0) go to 110
+
+                cycle
+
+110             block
+                    item%is_optical = .false.
+                    item%is_xray = .true.
+                    item%flux = 'legacy'
+                    item%ignrval = -1.0
+                end block
+
+            end do
+
+        end block
 
         ! Print out an END record, and a blank line to mark the end of the header.
         if (status .eq. 0) then
@@ -208,6 +260,25 @@ contains
         end if
 
         status = 0; call FTGKYS(unit, 'FRAMEID', item%frameid, comment, status)
+
+        ! further examine the datasetid for any hints
+        if (status .eq. 0) then
+            block
+                integer pos
+
+                pos = index(item%frameid, 'SUPM')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'ratio'
+                end if
+
+                pos = index(item%frameid, 'MCSM')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'ratio'
+                end if
+            end block
+        end if
 
         status = 0; call FTGKYS(unit, 'BTYPE', item%btype, comment, status)
 
@@ -305,6 +376,40 @@ contains
 
         status = 0; call FTGKYE(unit, 'CD2_2', item%cd2_2, comment, status)
         if (status .ne. 0) item%cd2_2 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYS(unit, 'TELESCOP', value, comment, status)
+
+        ! handle the telescope
+        if (status .eq. 0) then
+            ! first convert the value to lower case
+            call lower_case(value)
+
+            block
+                integer pos
+
+                pos = index(value, 'alma')
+                if (pos .ne. 0) item%is_optical = .false.
+
+                pos = index(value, 'vla')
+                if (pos .ne. 0) item%is_optical = .false.
+
+                pos = index(value, 'ska')
+                if (pos .ne. 0) item%is_optical = .false.
+
+                pos = index(value, 'nro45')
+                if (pos .ne. 0) then
+                    item%is_optical = .false.
+                    item%flux = 'logistic'
+                end if
+
+                pos = index(value, 'chandra')
+                if (pos .ne. 0) then
+                    item%is_optical = .false.
+                    item%is_xray = .true.
+                end if
+            end block
+
+        end if
 
         ! Try moving to the next extension in the FITS file, if it exists.
         ! The FTMRHD subroutine attempts to move to the next HDU, as specified by
