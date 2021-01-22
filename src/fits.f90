@@ -13,7 +13,7 @@ module fits
         integer naxes(4)
         character frameid*70
         character btype*70, bunit*70
-        real :: ignrval
+        real :: ignrval, bmaj, bmin, bpa
         real crval1, cdelt1, crpix1
         real crval2, cdelt2, crpix2
         real crval3, cdelt3, crpix3
@@ -42,6 +42,7 @@ contains
         print *, 'CRVAL1: ', item%crval1, ', CDELT1: ', item%cdelt1, ', CRPIX1: ', item%crpix1
         print *, 'CRVAL2: ', item%crval2, ', CDELT2: ', item%cdelt2, ', CRPIX2: ', item%crpix2
         print *, 'CRVAL3: ', item%crval3, ', CDELT3: ', item%cdelt3, ', CRPIX3: ', item%crpix3
+        print *, 'BMAJ: ', item%bmaj, ', BMIN: ', item%bmin, ', BPA: ', item%bpa
     end subroutine print_dataset
 
     subroutine load_fits_file(filename)
@@ -224,6 +225,15 @@ contains
 
         status = 0; call FTGKYE(unit, 'CRPIX3', item%crpix3, comment, status)
         if (status .ne. 0) item%crpix3 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'BMAJ', item%bmaj, comment, status)
+        if (status .ne. 0) item%bmaj = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'BMIN', item%bmin, comment, status)
+        if (status .ne. 0) item%bmin = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'BPA', item%bpa, comment, status)
+        if (status .ne. 0) item%bpa = ieee_value(0.0, ieee_quiet_nan)
 
         ! Try moving to the next extension in the FITS file, if it exists.
         ! The FTMRHD subroutine attempts to move to the next HDU, as specified by
