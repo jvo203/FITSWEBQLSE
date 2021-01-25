@@ -34,6 +34,9 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 extern void exit_fortran();
 extern void http_request(char *uri, size_t n);
 
+#define WASM_VERSION "20.11.27.2"
+#define VERSION_STRING "SV2021-01-25.0"
+
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
 
@@ -661,6 +664,49 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html,
                     "<link href=\"https://fonts.googleapis.com/css?family=Inconsolata\" "
                     "rel=\"stylesheet\"/>\n");
+    g_string_append(html,
+                    "<link href=\"https://fonts.googleapis.com/css?family=Material+Icons\" "
+                    "rel=\"stylesheet\"/>\n");
+    g_string_append(html, "<script src=\"https://d3js.org/d3.v5.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/reconnecting-websocket.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/"
+                          "numeral.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/ra_dec_conversion.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/sylvester.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/shortcut.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/colourmaps.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/lz4.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/marchingsquares-isocontours.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/marchingsquares-isobands.min.js\"></script>\n");
+
+    // OpenEXR WASM decoder
+    g_string_append(html, "<script "
+                          "src=\"exr." WASM_VERSION ".js\"></script>\n");
+    /*html.append("<script "
+              "src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWebQL@master/" +
+              docs_root +
+              "/"
+              "fitswebql/exr." WASM_VERSION ".min.js\"></script>\n");*/
+    g_string_append(html, "<script> Module.ready"
+                          ".then(status = > console.log(status))"
+                          ".catch(e = > console.error(e)) </script>");
 
     printf("%s\n", html->str);
 
