@@ -122,6 +122,7 @@ void *start_ws(void *ignore)
              "</head><body>FITSWEBQLSE (libmicrohttpd)</body></html>"
 
 struct MHD_Daemon *http_server = NULL;
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char** va_list, int va_count);
 
 static enum MHD_Result print_out_key(void *cls, enum MHD_ValueKind kind, const char *key, const char *value, size_t value_size)
 {
@@ -511,8 +512,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (datasetId != NULL)
         {
-            ret = http_ok(connection);
-            //ret = execute_alma(connection, datasetId, va_count);
+            ret = execute_alma(connection, datasetId, va_count);
 
             // pass the filepath to FORTRAN
 #ifdef LOCAL
@@ -538,6 +538,7 @@ static enum MHD_Result on_http_connection(void *cls,
             // directory/extension should not be freed (libmicrohttpd does that)
 
 #else
+            ret = http_ok(connection);
             // get the full path from the postgresql db
 
             // if a file does not exist form a download URL (jvox...)
@@ -646,4 +647,9 @@ extern void stop_http()
         http_server = NULL;
         printf("done\n");
     }
+}
+
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char** va_list, int va_count)
+{
+    return http_ok(connection);
 }
