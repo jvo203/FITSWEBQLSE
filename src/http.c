@@ -708,6 +708,122 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                           ".then(status = > console.log(status))"
                           ".catch(e = > console.error(e)) </script>");
 
+    // bootstrap
+    g_string_append(html,
+                    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, "
+                    "user-scalable=no, minimum-scale=1, maximum-scale=1\">\n");
+    g_string_append(html, "<link rel=\"stylesheet\" "
+                          "href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/"
+                          "bootstrap.min.css\">\n");
+    g_string_append(html, "<script "
+                          "src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/"
+                          "jquery.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/"
+                          "bootstrap.min.js\"></script>\n");
+
+    // GLSL vertex shader
+    g_string_append(html, "<script id=\"vertex-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/vertex-shader.vert");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html,
+                    "<script id=\"legend-vertex-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/legend-vertex-shader.vert");
+    g_string_append(html, "</script>\n");
+
+    // GLSL fragment shaders
+    g_string_append(html, "<script id=\"common-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/common-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html,
+                    "<script id=\"legend-common-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/legend-common-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    // tone mappings
+    g_string_append(html, "<script id=\"ratio-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/ratio-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"logistic-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/logistic-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"square-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/square-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"legacy-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/legacy-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"linear-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/linear-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    // colourmaps
+    g_string_append(html, "<script id=\"greyscale-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "html/fitswebql/greyscale-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"negative-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/negative-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"red-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/red-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"green-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/green-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"blue-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/blue-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"hot-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/hot-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"rainbow-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/rainbow-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"parula-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/parula-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"inferno-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/inferno-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"magma-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/magma-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"plasma-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/plasma-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"viridis-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/viridis-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"cubehelix-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/cubehelix-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"jet-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/jet-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"haxby-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "html/fitswebql/haxby-shader.frag");
+    g_string_append(html, "</script>\n");
+
     printf("%s\n", html->str);
 
     // deallocate the html content after libmicrohttpd has made a copy of it
