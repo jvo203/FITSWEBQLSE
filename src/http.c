@@ -15,6 +15,8 @@
 #include <pwd.h>
 #include <dirent.h>
 
+#include <glib.h>
+
 #ifndef S_ISREG
 #define S_ISREG(x) (S_IFREG == (x & S_IFREG))
 #endif /* S_ISREG */
@@ -122,7 +124,7 @@ void *start_ws(void *ignore)
              "</head><body>FITSWEBQLSE (libmicrohttpd)</body></html>"
 
 struct MHD_Daemon *http_server = NULL;
-static enum MHD_Result execute_alma(struct MHD_Connection *connection, char** va_list, int va_count);
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count);
 
 static enum MHD_Result print_out_key(void *cls, enum MHD_ValueKind kind, const char *key, const char *value, size_t value_size)
 {
@@ -500,15 +502,15 @@ static enum MHD_Result on_http_connection(void *cls,
         }
 #endif
 
-        char* view = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "view");
-		char* flux = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "flux");
-		char* db = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "db");
-		char* table = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "table");
+        char *view = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "view");
+        char *flux = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "flux");
+        char *db = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "db");
+        char *table = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "table");
 
-		int composite = 0 ;
-		    
-		if(view != NULL)
-		    composite = (strcasecmp("composite",view) == 0) ? 1 : 0 ;
+        int composite = 0;
+
+        if (view != NULL)
+            composite = (strcasecmp("composite", view) == 0) ? 1 : 0;
 
         if (datasetId != NULL)
         {
@@ -649,7 +651,15 @@ extern void stop_http()
     }
 }
 
-static enum MHD_Result execute_alma(struct MHD_Connection *connection, char** va_list, int va_count)
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count)
 {
+    gboolean has_fits = FALSE; // TO DO: look up the datasets hash table
+
+    // the string holding the dynamically generated HTML content
+    GString *html = g_string_new("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n");
+
+    // deallocate the html content after libmicrohttpd has made a copy of it
+    g_string_free(html, TRUE);
+
     return http_ok(connection);
 }
