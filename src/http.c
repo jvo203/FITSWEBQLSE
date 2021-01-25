@@ -499,9 +499,20 @@ static enum MHD_Result on_http_connection(void *cls,
         }
 #endif
 
+        char* view = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "view");
+		char* flux = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "flux");
+		char* db = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "db");
+		char* table = (char*) MHD_lookup_connection_value (connection, MHD_GET_ARGUMENT_KIND, "table");
+
+		int composite = 0 ;
+		    
+		if(view != NULL)
+		    composite = (strcasecmp("composite",view) == 0) ? 1 : 0 ;
+
         if (datasetId != NULL)
         {
             ret = http_ok(connection);
+            //ret = execute_alma(connection, datasetId, va_count);
 
             // pass the filepath to FORTRAN
 #ifdef LOCAL
