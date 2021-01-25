@@ -658,6 +658,12 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // the string holding the dynamically generated HTML content
     GString *html = g_string_new("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n");
 
+    g_string_append(html,
+                    "<link href=\"https://fonts.googleapis.com/css?family=Inconsolata\" "
+                    "rel=\"stylesheet\"/>\n");
+
+    printf("%s\n", html->str);
+
     // deallocate the html content after libmicrohttpd has made a copy of it
     g_string_free(html, TRUE);
 
