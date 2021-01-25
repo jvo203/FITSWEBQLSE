@@ -14,9 +14,10 @@ FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
 #-qopenmp
 #-ipo -parallel -fast
 CFLAGS := $(FLAGS)
+INC = `pkg-config --cflags glib-2.0`
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets
+LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0`
 # -lmpifort not needed when using mpiifort
 
 # include dependencies (all .d files)
@@ -26,7 +27,7 @@ LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets
 	ispc -g -O3 --pic --opt=fast-math --addressing=32 -o $@ $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(DEF) -MMD -o $@ -c $<
+	$(CC) $(CFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
 
 %.o: %.f90
 	$(FORT) $(FLAGS) -MMD -o $@ -c $<
