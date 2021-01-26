@@ -237,6 +237,65 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
             return MHD_NO;
         }
 
+        //detect mime-types
+        char *pos = NULL;
+
+        pos = (char *)strstr(url, ".htm");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "text/html");
+
+        pos = (char *)strstr(url, ".html");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "text/html");
+
+        pos = (char *)strstr(url, ".txt");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "text/plain");
+
+        pos = (char *)strstr(url, ".js");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "application/javascript; charset=utf-8");
+
+        pos = (char *)strstr(url, ".wasm");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "application/wasm");
+
+        pos = (char *)strstr(url, ".ico");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "image/x-icon");
+
+        pos = (char *)strstr(url, ".png");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "image/png");
+
+        pos = (char *)strstr(url, ".gif");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "image/gif");
+
+        pos = (char *)strstr(url, ".webp");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "image/webp");
+
+        pos = (char *)strstr(url, ".jpeg");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "image/jpeg");
+
+        pos = (char *)strstr(url, ".mp4");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "video/mp4");
+
+        pos = (char *)strstr(url, ".css");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "text/css");
+
+        pos = (char *)strstr(url, ".pdf");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "application/pdf");
+
+        pos = (char *)strstr(url, ".svg");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "image/svg+xml");
+
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
         MHD_destroy_response(response);
         return ret;
@@ -744,7 +803,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "fitswebql/exr." WASM_VERSION ".min.js\"></script>\n");*/
     g_string_append(html, "<script> Module.ready"
                           ".then(status = > console.log(status))"
-                          ".catch(e = > console.error(e)) </script>");
+                          ".catch(e = > console.error(e)); </script>\n");
 
     // bootstrap
     g_string_append(html,
@@ -897,12 +956,12 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append_printf(html, "' data-has-fits='%d'></div>\n", (has_fits ? 1 : 0));
 
 #ifdef PRODUCTION
-    g_string_append(html, "<script>var WS_SOCKET = 'wss://';</script>");
+    g_string_append(html, "<script>var WS_SOCKET = 'wss://';</script>\n");
 #else
-    g_string_append(html, "<script>var WS_SOCKET = 'ws://';</script>");
+    g_string_append(html, "<script>var WS_SOCKET = 'ws://';</script>\n");
 #endif
 
-    g_string_append_printf(html, "<script>var WS_PORT = %d;</script>", WS_PORT);
+    g_string_append_printf(html, "<script>var WS_PORT = %d;</script>\n", WS_PORT);
 
     // the page entry point
     g_string_append(
@@ -931,7 +990,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "          if (wsVideo != null)"
               "             wsVideo.close();"
               "    };"
-              "mainRenderer(); </script>");
+              "mainRenderer(); </script>\n");
 
     g_string_append(html, "</body></html>");
 
