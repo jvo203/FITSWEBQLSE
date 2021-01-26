@@ -217,7 +217,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
         return http_not_found(connection);
     else
     {
-        struct MHD_Response *response = MHD_create_response_from_fd64(buf.st_size, fd);
+        struct MHD_Response *response = MHD_create_response_from_fd(buf.st_size, fd);
 
         if (NULL == response)
         {
