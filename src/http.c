@@ -562,6 +562,11 @@ static enum MHD_Result on_http_connection(void *cls,
         if (datasetId != NULL)
             free(datasetId);
 
+#ifndef LOCAL
+        if (root != NULL)
+            free(root);
+#endif
+
         return ret;
     }
 
@@ -879,6 +884,8 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
 #ifndef LOCAL
     g_string_append_printf(html, "data-root-path='%s/' ", root);
+#else
+    g_string_append(html, "data-root-path='' ");
 #endif
 
     g_string_append(html, " data-server-version='" VERSION_STRING "' data-server-string='" SERVER_STRING);
@@ -894,6 +901,39 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 #else
     g_string_append(html, "<script>var WS_SOCKET = 'ws://';</script>");
 #endif
+
+    g_string_append_printf(html, "<script>var WS_PORT = %d;</script>", WS_PORT);
+
+    // the page entry point
+    g_string_append(
+        html, "<script>"
+              "const golden_ratio = 1.6180339887;"
+              "var ALMAWS = null ;"
+              "var wsVideo = null ;"
+              "var wsConn = null;"
+              "var firstTime = true;"
+              "var has_image = false;"
+              "var PROGRESS_VARIABLE = 0.0;"
+              "var PROGRESS_INFO = '' ;"
+              "var RESTFRQ = 0.0;"
+              "var USER_SELFRQ = 0.0;"
+              "var USER_DELTAV = 0.0;"
+              "var ROOT_PATH = '/fitswebql/';"
+              "var idleResize = -1;"
+              "window.onresize = resizeMe;"
+              "window.onbeforeunload = function() {"
+              "    if (wsConn != null)"
+              "    {"
+              "        for (let i = 0; i < va_count; i++)"
+              "            wsConn[i].close();"
+              "    }"
+              ""
+              "          if (wsVideo != null)"
+              "             wsVideo.close();"
+              "    };"
+              "mainRenderer(); </script>");
+
+    g_string_append(html, "</body></html>");
 
     printf("%s\n", html->str);
 
