@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <pwd.h>
 #include <dirent.h>
@@ -652,6 +652,35 @@ extern void stop_http()
         http_server = NULL;
         printf("done\n");
     }
+}
+
+void include_file(GString *str, const char *filename)
+{
+    int fd = -1;
+    void *buffer = NULL;
+
+    struct stat st;
+    stat(filename, &st);
+    long size = st.st_size;
+
+    fd = open(filename, O_RDONLY);
+
+    if (fd != -1)
+    {
+        buffer = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+        if (buffer != MAP_FAILED)
+        {
+            g_string_append_len(str, (const char *)buffer, size);
+
+            if (munmap(buffer, size) == -1)
+                perror("un-mapping error");
+        }
+        else
+            perror("error mapping a file");
+
+        close(fd);
+    };
 }
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count)
