@@ -249,14 +249,10 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     if (NULL == dir)
         return http_not_found(connection);
 
-    char tmp[1024];
-    size_t len = 0x4000;
-    char *json = malloc(len);
+    GString *json = g_string_sized_new(1024);
 
     if (NULL == json)
         return MHD_NO;
-
-    memset(json, '\0', len);
 
     struct dirent **namelist = NULL;
     int i, n;
@@ -265,8 +261,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
 
     char *encoded = json_encode_string(dir);
 
-    snprintf(tmp, sizeof(tmp), "{\"location\" : %s, \"contents\" : [", encoded);
-    strncat(json, tmp, sizeof(tmp));
+    g_string_printf(json, "{\"location\" : %s, \"contents\" : [", encoded);
 
     if (encoded != NULL)
         free(encoded);
@@ -276,8 +271,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     if (n < 0)
     {
         perror("scandir");
-
-        strcat(json, "]}");
+        g_string_append(json, "]}");
     }
     else
     {
@@ -307,8 +301,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
                 {
                     char *encoded = json_encode_string(namelist[i]->d_name);
 
-                    snprintf(tmp, sizeof(tmp), "{\"type\" : \"dir\", \"name\" : %s, \"last_modified\" : \"%s\"},", encoded, last_modified);
-                    strncat(json, tmp, sizeof(tmp));
+                    g_string_append_printf(json, "{\"type\" : \"dir\", \"name\" : %s, \"last_modified\" : \"%s\"},", encoded, last_modified);
                     has_contents = 1;
 
                     if (encoded != NULL)
@@ -320,8 +313,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
                     {
                         char *encoded = json_encode_string(namelist[i]->d_name);
 
-                        snprintf(tmp, sizeof(tmp), "{\"type\" : \"file\", \"name\" : %s, \"size\" : %zu, \"last_modified\" : \"%s\"},", encoded, filesize, last_modified);
-                        strncat(json, tmp, sizeof(tmp));
+                        g_string_append_printf(json, "{\"type\" : \"file\", \"name\" : %s, \"size\" : %zu, \"last_modified\" : \"%s\"},", encoded, filesize, last_modified);
                         has_contents = 1;
 
                         if (encoded != NULL)
@@ -336,9 +328,9 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
 
         //overwrite the the last ',' with a list closing character
         if (has_contents)
-            json[strlen(json) - 1] = '\0';
+            g_string_truncate(json, json->len - 1);
 
-        strcat(json, "]}");
+        g_string_append(json, "]}");
     };
 
     if (namelist != NULL)
@@ -347,7 +339,8 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     if (dir != NULL)
         free(dir);
 
-    struct MHD_Response *response = MHD_create_response_from_buffer(strlen(json), (void *)json, MHD_RESPMEM_MUST_FREE);
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
+    g_string_free(json, FALSE);
 
     MHD_add_response_header(response, "Cache-Control", "no-cache");
     MHD_add_response_header(response, "Cache-Control", "no-store");
