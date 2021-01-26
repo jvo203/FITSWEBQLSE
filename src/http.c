@@ -34,6 +34,17 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 extern void exit_fortran();
 extern void http_request(char *uri, size_t n);
 
+#define VERSION_MAJOR 5
+#define VERSION_MINOR 0
+#define VERSION_SUB 0
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+#define SERVER_STRING                                                  \
+    "FITSWEBQLSE v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR( \
+        VERSION_SUB)
+
 #define WASM_VERSION "20.11.27.2"
 #define VERSION_STRING "ALPHA SV2021-01-26.0"
 
@@ -865,6 +876,24 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         if (composite && va_count <= 3)
             g_string_append(html, "data-composite='1' ");
     }
+
+#ifndef LOCAL
+    g_string_append_printf(html, "data-root-path='%s/' ", root);
+#endif
+
+    g_string_append(html, " data-server-version='" VERSION_STRING "' data-server-string='" SERVER_STRING);
+#ifdef LOCAL
+    g_string_append(html, "' data-server-mode='LOCAL");
+#else
+    g_string_append(html, "' data-server-mode='SERVER");
+#endif
+    g_string_append_printf(html, "' data-has-fits='%d'></div>\n", (has_fits ? 1 : 0));
+
+#ifdef PRODUCTION
+    g_string_append(html, "<script>var WS_SOCKET = 'wss://';</script>");
+#else
+    g_string_append(html, "<script>var WS_SOCKET = 'ws://';</script>");
+#endif
 
     printf("%s\n", html->str);
 
