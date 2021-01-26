@@ -937,8 +937,18 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     printf("%s\n", html->str);
 
-    // deallocate the html content after libmicrohttpd has made a copy of it
-    g_string_free(html, TRUE);
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html->len, (void *)html->str, g_free);
+    // deallocate the html content after libmicrohttpd has taken ownership of the string
+    g_string_free(html, FALSE);
 
-    return http_ok(connection);
+    MHD_add_response_header(response, "Cache-Control", "no-cache");
+    MHD_add_response_header(response, "Cache-Control", "no-store");
+    MHD_add_response_header(response, "Pragma", "no-cache");
+    MHD_add_response_header(response, "Content-Type", "text/html; charset=utf-8");
+
+    enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+    MHD_destroy_response(response);
+
+    return ret;
 }
