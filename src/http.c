@@ -35,7 +35,7 @@ extern void exit_fortran();
 extern void http_request(char *uri, size_t n);
 
 #define WASM_VERSION "20.11.27.2"
-#define VERSION_STRING "SV2021-01-25.0"
+#define VERSION_STRING "ALPHA SV2021-01-26.0"
 
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
@@ -127,7 +127,7 @@ void *start_ws(void *ignore)
              "</head><body>FITSWEBQLSE (libmicrohttpd)</body></html>"
 
 struct MHD_Daemon *http_server = NULL;
-static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count);
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite);
 
 static enum MHD_Result print_out_key(void *cls, enum MHD_ValueKind kind, const char *key, const char *value, size_t value_size)
 {
@@ -510,7 +510,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (datasetId != NULL)
         {
-            ret = execute_alma(connection, datasetId, va_count);
+            ret = execute_alma(connection, datasetId, va_count, composite);
 
             // pass the filepath to FORTRAN
 #ifdef LOCAL
@@ -676,7 +676,7 @@ void include_file(GString *str, const char *filename)
     };
 }
 
-static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count)
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite)
 {
     gboolean has_fits = FALSE; // TO DO: look up the datasets hash table
 
@@ -845,6 +845,26 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "<script id=\"haxby-shader\" type=\"x-shader/x-vertex\">\n");
     include_file(html, "html/fitswebql/haxby-shader.frag");
     g_string_append(html, "</script>\n");
+
+    // FITSWebQL main JavaScript + CSS
+    g_string_append(html, "<script src=\"fitswebqlse.js?" VERSION_STRING "\"></script>\n");
+    g_string_append(html, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING
+                          "\"/>\n");
+
+    // HTML content
+    g_string_append(html, "<title>FITSWEBQLSE</title></head><body>\n");
+    g_string_append_printf(html, "<div id='votable' style='width: 0; height: 0;' data-va_count='%d' ", va_count);
+
+    if (va_count == 1)
+        g_string_append_printf(html, "data-datasetId='%s' ", va_list[0]);
+    else
+    {
+        for (unsigned int i = 0; i < va_count; i++)
+            g_string_append_printf(html, "data-datasetId%d='%s' ", (i + 1), va_list[i]);
+
+        if (composite && va_count <= 3)
+            g_string_append(html, "data-composite='1' ");
+    }
 
     printf("%s\n", html->str);
 
