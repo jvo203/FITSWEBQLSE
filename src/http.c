@@ -46,7 +46,7 @@ extern void http_request(char *uri, size_t n);
         VERSION_SUB)
 
 #define WASM_VERSION "20.11.27.2"
-#define VERSION_STRING "ALPHA SV2021-01-26.0"
+#define VERSION_STRING "SV2021-01-27.0-ALPHA"
 
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
@@ -801,9 +801,11 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               docs_root +
               "/"
               "fitswebql/exr." WASM_VERSION ".min.js\"></script>\n");*/
-    g_string_append(html, "<script> Module.ready"
-                          ".then(status = > console.log(status))"
-                          ".catch(e = > console.error(e)) </script>\n");
+    g_string_append_printf(html, "<script>\n"
+                                 "Module.ready\n"
+                                 "\t.then(status = > console.log(status))\n"
+                                 "\t.catch(e = > console.error(e))\n"
+                                 "</script>\n");
 
     // bootstrap
     g_string_append(html,
