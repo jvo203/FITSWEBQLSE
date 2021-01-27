@@ -464,9 +464,11 @@ static enum MHD_Result on_http_connection(void *cls,
         *ptr = &dummy;
         return MHD_YES;
     }
-    if (0 != *upload_data_size)
+
+    if (0 != *upload_data_size && 0 == strcmp(method, "GET"))
         return MHD_NO; /* upload data in a GET!? */
-    *ptr = NULL;       /* clear context pointer */
+
+    *ptr = NULL; /* clear context pointer */
 
     const char *user_agent = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
     const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
