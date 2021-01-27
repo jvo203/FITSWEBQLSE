@@ -2493,7 +2493,7 @@ function open_websocket_connection(datasetId, index) {
 		// Let us open a web socket
 		var loc = window.location, ws_uri;
 
-		ws_uri = WS_SOCKET + loc.hostname + ':' + WS_PORT + "/" + ROOT_PATH + "websocket/" + encodeURIComponent(datasetId);
+		ws_uri = WS_SOCKET + loc.hostname + ':' + WS_PORT + ROOT_PATH + "websocket/" + encodeURIComponent(datasetId);
 
 		//d3.select("#welcome").append("p").text("ws_uri: " + ws_uri) ;
 
