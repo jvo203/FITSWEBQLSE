@@ -803,8 +803,8 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "fitswebql/exr." WASM_VERSION ".min.js\"></script>\n");*/
     g_string_append_printf(html, "<script>\n"
                                  "Module.ready\n"
-                                 "\t.then(status = > console.log(status))\n"
-                                 "\t.catch(e = > console.error(e))\n"
+                                 "\t.then(status => console.log(status))\n"
+                                 "\t.catch(e => console.error(e));\n"
                                  "</script>\n");
 
     // bootstrap
