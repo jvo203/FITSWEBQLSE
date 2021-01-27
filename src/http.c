@@ -946,7 +946,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 #ifndef LOCAL
     g_string_append_printf(html, "data-root-path='%s/' ", root);
 #else
-    g_string_append(html, "data-root-path='' ");
+    g_string_append(html, "data-root-path='/' ");
 #endif
 
     g_string_append(html, " data-server-version='" VERSION_STRING "' data-server-string='" SERVER_STRING);
@@ -995,8 +995,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "mainRenderer(); </script>\n");
 
     g_string_append(html, "</body></html>");
-
-    printf("%s\n", html->str);
 
     struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html->len, (void *)html->str, g_free);
     // deallocate the html content after libmicrohttpd has taken ownership of the string
