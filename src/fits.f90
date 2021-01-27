@@ -42,8 +42,7 @@ module fits
 
     ! co-array variables to be synchronised across all images
     ! to be held in a structure <dataset>
-    real(kind=4) :: dmin[*], dmax[*]
-    logical bSuccess[*]
+    ! moved to the <load_fits_file> subroutine
 contains
     subroutine print_dataset
         print *, trim(item%frameid), ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
@@ -66,6 +65,9 @@ contains
     subroutine load_fits_file(filename)
         implicit none
         character(len=1024), intent(in) :: filename
+
+        real(kind=4), save :: dmin[*], dmax[*]
+        logical, save :: bSuccess[*]
 
         integer(8) :: start, finish, crate, cmax
         real :: elapsed
