@@ -453,8 +453,10 @@ static enum MHD_Result on_http_connection(void *cls,
     struct MHD_Response *response;
     enum MHD_Result ret;
 
-    if (0 != strcmp(method, "GET"))
-        return MHD_NO; /* unexpected method */
+    // accept both "GET" and "PUT"
+    //if (0 != strcmp(method, "GET"))
+    //    return MHD_NO; /* unexpected method */
+
     if (&dummy != *ptr)
     {
         /* The first time only the headers are valid,
