@@ -95,6 +95,9 @@ contains
             call co_min(dmin)
             call co_max(dmax)
 
+            item%dmin = dmin
+            item%dmax = dmax
+
             ! synchronise the pixels/mask across the images (gather on image 1)
             if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
                 call co_sum(pixels, result_image=1)
@@ -720,13 +723,37 @@ contains
     end subroutine frame_reference_unit
 
     subroutine make_image_statistics
-        real cdelt3
+        real cdelt3, pmin, pmax
+        real pixel
+        integer i, j
 
         if (item%has_velocity) then
             cdelt3 = item%cdelt3*item%frame_multiplier/1000.0
         else
             cdelt3 = 1.0
         end if
+
+        if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+            pmin = item%dmin
+            pmax = item%dmax
+        else
+            pmin = 1.0E30
+            pmax = -1.0E30
+
+            do j = 1, item%naxes(2)
+                do i = 1, item%naxes(1)
+                    if (item%mask(i, j)) then
+                        pixel = item%pixels(i, j)*cdelt3
+                        item%pixels(i, j) = pixel
+
+                        pmin = min(pmin, pixel)
+                        pmax = max(pmax, pixel)
+                    end if
+                end do
+            end do
+        end if
+
+        print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax
 
     end subroutine make_image_statistics
 end module fits
