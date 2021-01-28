@@ -2,6 +2,8 @@ module fits
     use, intrinsic :: ieee_arithmetic
     implicit none
 
+    integer(kind=4), parameter :: NBINS = 1024
+
     type dataset
         ! the id will be made by hashing the dataset uri
         integer :: id = -1
@@ -27,6 +29,9 @@ module fits
         real :: frame_multiplier = 1.0
         logical :: has_velocity = .false.
         logical :: has_frequency = .false.
+
+        ! the 2D image histogram
+        integer hist(NBINS)
 
         ! derived values
         character(len=16) :: flux = ''
