@@ -23,6 +23,11 @@ module fits
         real obsra, obsdec, datamin, datamax
         real cd1_1, cd1_2, cd2_1, cd2_2
 
+        ! extras
+        real :: frame_multiplier = 1.0
+        logical :: has_velocity = .false.
+        logical :: has_frequency = .false.
+
         ! derived values
         character(len=16) :: flux = ''
         real(kind=4) dmin, dmax
@@ -479,6 +484,10 @@ contains
             go to 200
         end if
 
+        ! detect the FITS header types and units (frequency, velocity)
+        call frame_reference_type
+        call frame_reference_unit
+
         item%bitpix = bitpix
         item%naxis = naxis
         item%naxes = naxes
@@ -645,6 +654,27 @@ contains
             call ftgmsg(errmessage)
         end do
     end subroutine printerror
+
+    subroutine frame_reference_type
+        integer pos
+
+        pos = index(item%ctype3, 'F')
+        if (pos .ne. 0) item%has_frequency = .true.
+
+        pos = index(item%ctype3, 'f')
+        if (pos .ne. 0) item%has_frequency = .true.
+
+        pos = index(item%ctype3, 'V')
+        if (pos .ne. 0) item%has_velocity = .true.
+
+        pos = index(item%ctype3, 'v')
+        if (pos .ne. 0) item%has_velocity = .true.
+
+    end subroutine frame_reference_type
+
+    subroutine frame_reference_unit
+
+    end subroutine frame_reference_unit
 
     subroutine make_image_statistics
         ! real cdelt3
