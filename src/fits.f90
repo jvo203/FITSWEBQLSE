@@ -97,6 +97,8 @@ contains
                     item%pixels = reshape(pixels, item%naxes(1:2))
                     item%mask = reshape(mask, item%naxes(1:2))
                     print *, 'gathered {pixels,mask} on image', this_image()
+
+                    call make_image_statistics
                 end if
             end if
 
@@ -644,4 +646,7 @@ contains
         end do
     end subroutine printerror
 
+    subroutine make_image_statistics
+
+    end subroutine make_image_statistics
 end module fits
