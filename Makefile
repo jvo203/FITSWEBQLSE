@@ -29,8 +29,9 @@ ifeq ($(UNAME_S),Darwin)
 
 	CC = gcc
 	FORT = mpif90
-	FLAGS = -march=native -g -Ofast -cpp -fno-finite-math-only -funroll-loops -ftree-vectorize -fcoarray=lib
+	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize
 	CFLAGS := $(FLAGS)
+	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
 endif
 
 # include dependencies (all .d files)
