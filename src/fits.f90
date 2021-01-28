@@ -739,6 +739,9 @@ contains
             cdelt3 = 1.0
         end if
 
+        ! reset the histogram
+        item%hist = 0
+
         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             pmin = item%dmin
             pmax = item%dmax
