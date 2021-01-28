@@ -25,7 +25,12 @@ LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs g
 
 ifeq ($(UNAME_S),Darwin)
 	INC += -I/usr/local/opt/openssl/include
-	LIBS += -L/usr/local/opt/openssl/lib
+	LIBS += -L/usr/local/opt/openssl/lib -lcaf_mpi
+
+	CC = gcc
+	FORT = mpif90
+	FLAGS = -march=native -g -Ofast -cpp -fno-finite-math-only -funroll-loops -ftree-vectorize -fcoarray=lib
+	CFLAGS := $(FLAGS)
 endif
 
 # include dependencies (all .d files)
