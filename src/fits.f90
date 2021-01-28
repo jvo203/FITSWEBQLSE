@@ -647,6 +647,13 @@ contains
     end subroutine printerror
 
     subroutine make_image_statistics
+        ! real cdelt3
+
+        ! if (item%has_velocity) then
+        !    cdelt3 = item%cdelt3*item%frame_multiplier/1000.0
+        !else
+        !    cdelt3 = 1.0
+        !end if
 
     end subroutine make_image_statistics
 end module fits
