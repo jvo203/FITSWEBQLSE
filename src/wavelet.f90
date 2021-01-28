@@ -909,8 +909,8 @@ contains
         nvalid = 0
 
         ! the mean
-        do i = 1, n
-            do j = 1, n
+        do j = 1, n
+            do i = 1, n
                 ! skip the coarse coefficients
                 if ((i .le. 2) .and. (j .le. 2)) cycle
 
@@ -933,8 +933,8 @@ contains
         if (mean .eq. 0.0) return
 
         ! the standard deviation
-        do i = 1, n
-            do j = 1, n
+        do j = 1, n
+            do i = 1, n
                 ! skip the coarse coefficients
                 if ((i .le. 2) .and. (j .le. 2)) cycle
 
@@ -956,8 +956,8 @@ contains
         print *, '[wave_shrink] mean:', mean, 'std:', std
 
         ! prune (shrink the coefficients)
-        do i = 1, n
-            do j = 1, n
+        do j = 1, n
+            do i = 1, n
                 ! skip the coarse coefficients
                 if ((i .le. 2) .and. (j .le. 2)) cycle
 
@@ -985,8 +985,8 @@ contains
         std = 0.0
 
         ! the mean
-        do i = 1, n
-            do j = 1, n
+        do j = 1, n
+            do i = 1, n
                 ! skip the coarse coefficients
                 if ((i .le. 2) .and. (j .le. 2)) cycle
 
@@ -1005,8 +1005,8 @@ contains
         if (mean .eq. 0.0) return
 
         ! the standard deviation
-        do i = 1, n
-            do j = 1, n
+        do j = 1, n
+            do i = 1, n
                 ! skip the coarse coefficients
                 if ((i .le. 2) .and. (j .le. 2)) cycle
 
@@ -1027,8 +1027,8 @@ contains
         print *, 'mean:', mean, 'std:', std
 
         ! prune (shrink the coefficients)
-        do i = 1, n
-            do j = 1, n
+        do j = 1, n
+            do i = 1, n
                 ! skip the coarse coefficients
                 if ((i .le. 2) .and. (j .le. 2)) cycle
 
