@@ -518,7 +518,7 @@ contains
             ! calculate the min/max values
             do j = 1, npixels
                 tmp = buffer(j)
-                if (isnan(tmp) .ne. .true.) then
+                if (isnan(tmp) .neqv. .true.) then
                     dmin = min(dmin, tmp)
                     dmax = max(dmax, tmp)
                     mask(j) = .true.
@@ -571,7 +571,7 @@ contains
                     ! calculate the min/max values
                     do j = 1, npixels
                         tmp = buffer(j)
-                        if (isnan(tmp) .ne. .true.) then
+                        if (isnan(tmp) .neqv. .true.) then
                             dmin = min(dmin, tmp)
                             dmax = max(dmax, tmp)
 
