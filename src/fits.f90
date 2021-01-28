@@ -69,6 +69,9 @@ contains
         real(kind=4), save :: dmin[*], dmax[*]
         logical, save :: bSuccess[*]
 
+        real(kind=4), allocatable :: pixels(:) [:]
+        logical(kind=1), allocatable :: mask(:) [:]
+
         integer(8) :: start, finish, crate, cmax
         real :: elapsed
 
@@ -77,12 +80,25 @@ contains
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
-        call read_fits_file(filename, dmin, dmax, bSuccess)
+        call read_fits_file(filename, dmin, dmax, pixels, mask, bSuccess)
         call co_reduce(bSuccess, logical_and)
 
         if (bSuccess) then
             call co_min(dmin)
             call co_max(dmax)
+
+            ! synchronise the pixels/mask across the images (gather on image 1)
+            if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
+                call co_sum(pixels, result_image=1)
+                call co_reduce(mask, operation=logical_or, result_image=1)
+
+                if (this_image() == 1) then
+                    ! update the FITS dataset (taking advantage of automatic reallocation)
+                    item%pixels = reshape(pixels, item%naxes(1:2))
+                    item%mask = reshape(mask, item%naxes(1:2))
+                    print *, 'gathered {pixels,mask} on image', this_image()
+                end if
+            end if
 
             ! end the timer
             call system_clock(finish)
@@ -105,6 +121,14 @@ contains
         logical_and = a .and. b
 
     end function logical_and
+
+    pure function logical_or(a, b)
+        logical(kind=1), value :: a, b
+        logical(kind=1) :: logical_or
+
+        logical_or = a .or. b
+
+    end function logical_or
 
     !======================================================================
     !    IDX$HASH
@@ -144,7 +168,7 @@ contains
         end do
     end subroutine lower_case
 
-    subroutine read_fits_file(filename, dmin, dmax, bSuccess)
+    subroutine read_fits_file(filename, dmin, dmax, pixels, mask, bSuccess)
         implicit none
         character(len=1024), intent(in) :: filename
         real(kind=4), intent(out) :: dmin, dmax
@@ -160,7 +184,8 @@ contains
         integer, dimension(4) :: fpixels, lpixels, incs
 
         real(kind=4), allocatable :: buffer(:)
-        logical(kind=1), allocatable :: mask(:)
+        real(kind=4), allocatable :: pixels(:) [:]
+        logical(kind=1), allocatable :: mask(:) [:]
 
         real :: nullval, tmp
         character :: record*80, key*10, value*70, comment*70
@@ -481,7 +506,7 @@ contains
             ! not so, do it on all images
 
             allocate (buffer(npixels))
-            allocate (mask(npixels))
+            allocate (mask(npixels) [*])
 
             call ftgpve(unit, group, 1, npixels, nullval, buffer, anynull, status)
 
@@ -513,12 +538,12 @@ contains
             !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
 
             block
-                real(kind=4), allocatable :: pixels(:)
+                ! real(kind=4), allocatable :: pixels(:)
 
                 ! npixels_per_image = npixels*num_per_image
                 allocate (buffer(npixels))
-                allocate (pixels(npixels))
-                allocate (mask(npixels))
+                allocate (pixels(npixels) [*])
+                allocate (mask(npixels) [*])
 
                 ! initiate pixels to blank
                 pixels = 0.0
