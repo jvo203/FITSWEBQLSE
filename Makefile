@@ -3,6 +3,8 @@
 # detect the OS
 UNAME_S := $(shell uname -s)
 
+# default settings on Linux
+# the macOS Darwin target is handled further down the line
 CC := icc
 FORT := mpiifort
 TARGET = fitswebqlse
