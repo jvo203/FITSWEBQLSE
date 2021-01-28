@@ -739,9 +739,6 @@ contains
             cdelt3 = 1.0
         end if
 
-        ! reset the histogram
-        item%hist = 0
-
         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             pmin = item%dmin
             pmax = item%dmax
@@ -761,6 +758,11 @@ contains
                 end do
             end do
         end if
+
+        ! reset the histogram
+        item%hist = 0
+
+        ! make_histogram with a range given by [pmin, pmax]
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax
 
