@@ -65,6 +65,9 @@ contains
         print *, 'CD1_1: ', item%cd1_1, 'CD1_2: ', item%cd1_2
         print *, 'CD2_1: ', item%cd2_1, 'CD2_2: ', item%cd2_2
         print *, 'IS_OPTICAL: ', item%is_optical, ', IS_XRAY: ', item%is_xray, ', FLUX: ', trim(item%flux)
+        print *, 'has_frequency:', item%has_frequency,&
+        & ', has_velocity:', item%has_velocity,&
+        & ', frame_multiplier = ', item%frame_multiplier
     end subroutine print_dataset
 
     subroutine load_fits_file(filename)
@@ -673,7 +676,47 @@ contains
     end subroutine frame_reference_type
 
     subroutine frame_reference_unit
+        if (trim(item%cunit3) .eq. 'Hz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E0
+            return
+        end if
 
+        if (trim(item%cunit3) .eq. 'kHz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E3
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'MHz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E6
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'GHz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E9
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'THz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E12
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'm/s') then
+            item%has_velocity = .true.
+            item%frame_multiplier = 1.0E0
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'km/s') then
+            item%has_velocity = .true.
+            item%frame_multiplier = 1.0E3
+            return
+        end if
     end subroutine frame_reference_unit
 
     subroutine make_image_statistics
