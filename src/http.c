@@ -940,7 +940,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         g_string_append_printf(html, "data-datasetId='%s' ", va_list[0]);
     else
     {
-        for (unsigned int i = 0; i < va_count; i++)
+        unsigned int i;
+
+        for (i = 0; i < va_count; i++)
             g_string_append_printf(html, "data-datasetId%d='%s' ", (i + 1), va_list[i]);
 
         if (composite && va_count <= 3)
