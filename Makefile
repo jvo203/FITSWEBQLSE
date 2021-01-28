@@ -1,5 +1,8 @@
 .DEFAULT_GOAL := fitswebqlse
 
+# detect the OS
+UNAME_S := $(shell uname -s)
+
 CC := icc
 FORT := mpiifort
 TARGET = fitswebqlse
@@ -19,6 +22,11 @@ DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
 LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0`
 # -lmpifort not needed when using mpiifort
+
+ifeq ($(UNAME_S),Darwin)
+	INC += -I/usr/local/opt/openssl/include
+	LIBS += -L/usr/local/opt/openssl/lib
+endif
 
 # include dependencies (all .d files)
 -include $(DEP)
