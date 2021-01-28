@@ -90,7 +90,6 @@ contains
             ! synchronise the pixels/mask across the images (gather on image 1)
             if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
                 call co_sum(pixels, result_image=1)
-                ! call co_reduce(mask, operation=logical_or, result_image=1)
                 call co_reduce(mask, logical_or, result_image=1)
 
                 if (this_image() == 1) then
