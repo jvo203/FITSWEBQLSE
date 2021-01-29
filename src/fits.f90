@@ -809,9 +809,9 @@ contains
 
     INTEGER FUNCTION FindMinimum(x, Start, End)
         IMPLICIT NONE
-        INTEGER, DIMENSION(1:), INTENT(IN) :: x
+        REAL, DIMENSION(1:), INTENT(IN) :: x
         INTEGER, INTENT(IN)                :: Start, End
-        INTEGER                            :: Minimum
+        REAL                               :: Minimum
         INTEGER                            :: Location
         INTEGER                            :: i
 
@@ -833,8 +833,8 @@ contains
 
     SUBROUTINE Swap(a, b)
         IMPLICIT NONE
-        INTEGER, INTENT(INOUT) :: a, b
-        INTEGER                :: Temp
+        REAL, INTENT(INOUT) :: a, b
+        REAL                :: Temp
 
         Temp = a
         a = b
@@ -849,7 +849,7 @@ contains
 
     SUBROUTINE Sort(x, Size)
         IMPLICIT NONE
-        INTEGER, DIMENSION(1:), INTENT(INOUT) :: x
+        REAL, DIMENSION(1:), INTENT(INOUT) :: x
         INTEGER, INTENT(IN)                   :: Size
         INTEGER                               :: i
         INTEGER                               :: Location
@@ -869,9 +869,9 @@ contains
 
     REAL FUNCTION Median(X, N)
         IMPLICIT NONE
-        INTEGER, DIMENSION(1:), INTENT(IN) :: X
+        REAL, DIMENSION(1:), INTENT(IN) :: X
         INTEGER, INTENT(IN)                :: N
-        INTEGER, DIMENSION(1:N)            :: Temp
+        REAL, DIMENSION(1:N)            :: Temp
         INTEGER                            :: i
 
         DO i = 1, N                       ! make a copy
