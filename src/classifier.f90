@@ -6,8 +6,7 @@ contains
         integer, intent(in) :: n
         real, dimension(n), intent(in) :: Slots
 
-        tone_mapping = -1
-        classify_histogram = tone_mapping
+        classify_histogram = -1
 
         if (n .ne. 1024) return
 
