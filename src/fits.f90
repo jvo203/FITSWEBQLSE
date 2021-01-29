@@ -798,7 +798,7 @@ contains
             end if
         end do
 
-        print *, item%hist
+        print *, 'image histogram:', item%hist
 
     end subroutine make_histogram
 end module fits
