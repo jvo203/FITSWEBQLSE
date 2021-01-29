@@ -766,7 +766,7 @@ contains
         ! make a histogram with a range given by [pmin, pmax]
         call make_histogram(data, pmin, pmax)
 
-        pmedian = Median(data, size(data))
+        pmedian = median(data, size(data))
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
 
@@ -868,13 +868,13 @@ contains
     end subroutine vec_quicksort
 
     ! --------------------------------------------------------------------
-    ! REAL FUNCTION  Median() :
+    ! REAL FUNCTION  median() :
     !    This function receives an array X of N entries, sorts it
     !    and computes the median.
     !    The returned value is of REAL type.
     ! --------------------------------------------------------------------
 
-    REAL FUNCTION Median(X, N)
+    REAL FUNCTION median(X, N)
         IMPLICIT NONE
         REAL, DIMENSION(N), INTENT(INOUT) :: X
         INTEGER, INTENT(IN)                :: N
@@ -884,11 +884,11 @@ contains
         CALL vec_quicksort(X)               ! sort the original data
 
         IF (MOD(N, 2) == 0) THEN           ! compute the median
-            Median = (X(N/2) + X(N/2 + 1))/2.0
+            median = (X(N/2) + X(N/2 + 1))/2.0
         ELSE
-            Median = X(N/2 + 1)
+            median = X(N/2 + 1)
         END IF
 
-    END FUNCTION Median
+    END FUNCTION median
 
 end module fits
