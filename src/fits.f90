@@ -729,6 +729,9 @@ contains
     end subroutine frame_reference_unit
 
     subroutine make_image_statistics
+        USE, INTRINSIC :: ISO_C_Binding
+        implicit NONE
+
         real, dimension(:), allocatable :: data
         real cdelt3, pmin, pmax, pmedian
         real mad, madP, madN
@@ -822,7 +825,34 @@ contains
 
         ! histogram classifier
         if (item%flux .eq. '') then
+            block
+                integer(kind=8), dimension(NBINS) :: cdf
+
+                ! C-style array bounds
+                real(kind=c_float), dimension(0:NBINS - 1) :: Slot
+
+                integer(kind=8) total
+
+                ! the first histogram item
+                total = item%hist(1)
+                cdf(1) = item%hist(1)
+
+                ! the remaining items
+                do i = 2, NBINS
+                    cdf(i) = cdf(i - 1) + item%hist(i)
+                    total = total + item%hist(i)
+                end do
+
+                Slot = real(cdf)/real(total)
+                print *, 'Slot:', Slot
+
+                !do i = 0, NBINS - 1
+                !    Slot(i) = real(cdf(i + 1))/real(total)
+                !end do
+            end block
         end if
+
+        print *, 'black = ', black, ', white = ', white, ', sensitivity = ', sensitivity
 
     end subroutine make_image_statistics
 
