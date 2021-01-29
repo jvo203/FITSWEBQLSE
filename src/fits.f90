@@ -825,6 +825,8 @@ contains
         ! histogram classifier
         if (item%flux .eq. '') then
             block
+                use classifier
+
                 integer(kind=8), dimension(NBINS) :: cdf
 
                 ! use C-style array bounds when calling
