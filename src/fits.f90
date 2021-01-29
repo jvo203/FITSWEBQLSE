@@ -731,6 +731,8 @@ contains
     subroutine make_image_statistics
         real, dimension(:), allocatable :: data
         real cdelt3, pmin, pmax, pmedian
+        real mad, madP, madN
+        integer countP, countN
         real pixel
         integer i, j, n
 
@@ -767,9 +769,33 @@ contains
         call make_histogram(data, pmin, pmax)
 
         n = size(data)
+
+        if (n .eq. 0) return
+
         pmedian = median(data, n)
 
         ! now the deviations from the median
+        mad = 0.0; madP = 0.0; madN = 0.0
+        countP = 0; countN = 0
+
+        do i = 1, n
+            pixel = data(i)
+            mad = mad + abs(pixel - pmedian)
+
+            if (pixel > pmedian) then
+                madP = madP + (pixel - pmedian)
+                countP = countP + 1
+            end if
+
+            if (pixel < pmedian) then
+                madN = madN + (pmedian - pixel)
+                countN = countN + 1
+            end if
+        end do
+
+        mad = mad / real(n)
+        if(countP > 0) madP = madP / real(countP)
+        if(countN > 0) madN = madN / real(countN)
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
 
@@ -778,7 +804,7 @@ contains
     subroutine make_histogram(data, pmin, pmax)
         real, dimension(:), intent(in) :: data
         real, intent(in) :: pmin, pmax
-        integer i, j, index, n
+        integer i, index, n
         real value
 
         ! reset the histogram
@@ -787,19 +813,16 @@ contains
         n = size(data)
 
         do i = 1, n
-            ! allow valid entries only
-            if (item%mask(i, j)) then
-                ! bin the value to [0,1]
-                value = (data(i) - pmin)/(pmax - pmin)
+            ! bin the value to [0,1]
+            value = (data(i) - pmin)/(pmax - pmin)
 
-                ! get a histogram bin index
-                index = 1 + int(value*NBINS)
+            ! get a histogram bin index
+            index = 1 + int(value*NBINS)
 
-                ! clamp the index to within [1,NBINS]
-                ! (rounding errors might cause an out-of-bound index value)
-                index = max(min(index, NBINS), 1)
-                item%hist(index) = item%hist(index) + 1
-            end if
+            ! clamp the index to within [1,NBINS]
+            ! (rounding errors might cause an out-of-bounds index value)
+            index = max(min(index, NBINS), 1)
+            item%hist(index) = item%hist(index) + 1
         end do
 
         print *, 'image histogram:', item%hist
