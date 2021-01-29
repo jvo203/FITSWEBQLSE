@@ -798,6 +798,7 @@ contains
         if(countN > 0) madN = madN / real(countN)
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
+        print *, 'mad = ', mad, ', madP = ', madP, ', madN = ', madN
 
     end subroutine make_image_statistics
 
