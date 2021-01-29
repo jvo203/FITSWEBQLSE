@@ -1,14 +1,12 @@
 module classifier
+    use, intrinsic :: ISO_C_BINDING
     implicit none
-contains
-    function classify_histogram(Slots, n)
-        integer :: classify_histogram, tone_mapping
-        integer, intent(in) :: n
-        real, dimension(n), intent(in) :: Slots
+    interface
+        integer(c_int) function histogram_classifier(Slots) BIND(C, name='histogram_classifier')
+            use, intrinsic :: ISO_C_BINDING
 
-        classify_histogram = -1
+            type(C_PTR), value :: Slots
+        end function histogram_classifier
+    end interface
 
-        if (n .ne. 1024) return
-
-    end function classify_histogram
 end module classifier
