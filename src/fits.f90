@@ -825,10 +825,12 @@ contains
         ! histogram classifier
         if (item%flux .eq. '') then
             block
+                use, intrinsic :: ISO_C_BINDING
                 use classifier
 
                 integer(kind=8), dimension(NBINS) :: cdf
-                real, dimension(NBINS) :: Slot
+                real(c_float), dimension(NBINS), target :: Slot
+                integer(c_int) tone_mapping
 
                 integer(kind=8) total
 
@@ -843,7 +845,9 @@ contains
                 end do
 
                 Slot = cdf/real(total)
-                print *, 'Slot:', Slot
+
+                tone_mapping = histogram_classifier(c_loc(Slot))
+                print *, 'tone_mapping = ', tone_mapping
             end block
         end if
 
