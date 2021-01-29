@@ -735,6 +735,8 @@ contains
         integer countP, countN
         real pixel
         integer i, j, n
+        real u, v
+        real black, white, sensitivity, ratio_sensitivity
 
         if (item%has_velocity) then
             cdelt3 = item%cdelt3*item%frame_multiplier/1000.0
@@ -793,12 +795,34 @@ contains
             end if
         end do
 
-        mad = mad / real(n)
-        if(countP > 0) madP = madP / real(countP)
-        if(countN > 0) madN = madN / real(countN)
+        mad = mad/real(n)
+        if (countP > 0) madP = madP/real(countP)
+        if (countN > 0) madN = madN/real(countN)
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
         print *, 'mad = ', mad, ', madP = ', madP, ', madN = ', madN
+
+        ! ALMAWebQL v2 - style
+        u = 7.5
+        black = max(pmin, pmedian - u*madN)
+        white = min(pmax, pmedian + u*madP)
+        sensitivity = 1.0/(white - black)
+        ratio_sensitivity = sensitivity
+
+        if (item%is_optical) then
+            u = 0.5
+            v = 15.0
+            black = max(pmin, pmedian - u*madN)
+            white = min(pmax, pmedian + u*madP)
+            sensitivity = 1.0/(white - black)
+            ratio_sensitivity = sensitivity
+
+            ! TO-DO: auto-brightness
+        end if
+
+        ! histogram classifier
+        if (item%flux .eq. '') then
+        end if
 
     end subroutine make_image_statistics
 
