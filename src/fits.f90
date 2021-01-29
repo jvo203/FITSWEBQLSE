@@ -729,7 +729,6 @@ contains
     end subroutine frame_reference_unit
 
     subroutine make_image_statistics
-        USE, INTRINSIC :: ISO_C_Binding
         implicit NONE
 
         real, dimension(:), allocatable :: data
@@ -830,7 +829,7 @@ contains
 
                 ! use C-style array bounds when calling
                 ! the histogram classifier (ported from C)
-                real(kind=c_float), dimension(0:NBINS - 1) :: Slot
+                real, dimension(0:NBINS - 1) :: Slot
 
                 integer(kind=8) total
 
