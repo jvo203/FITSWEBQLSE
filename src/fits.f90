@@ -828,7 +828,8 @@ contains
             block
                 integer(kind=8), dimension(NBINS) :: cdf
 
-                ! C-style array bounds
+                ! use C-style array bounds when calling
+                ! the histogram classifier (ported from C)
                 real(kind=c_float), dimension(0:NBINS - 1) :: Slot
 
                 integer(kind=8) total
@@ -843,12 +844,8 @@ contains
                     total = total + item%hist(i)
                 end do
 
-                Slot = real(cdf)/real(total)
+                Slot = cdf/real(total)
                 print *, 'Slot:', Slot
-
-                !do i = 0, NBINS - 1
-                !    Slot(i) = real(cdf(i + 1))/real(total)
-                !end do
             end block
         end if
 
