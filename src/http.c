@@ -46,7 +46,7 @@ extern void http_request(char *uri, size_t n);
         VERSION_SUB)
 
 #define WASM_VERSION "20.11.27.2"
-#define VERSION_STRING "SV2021-01-27.0-ALPHA"
+#define VERSION_STRING "SV2021-01-XX.X-ALPHA"
 
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
