@@ -732,7 +732,7 @@ contains
         real, dimension(:), allocatable :: data
         real cdelt3, pmin, pmax, pmedian
         real pixel
-        integer i, j
+        integer i, j, n
 
         if (item%has_velocity) then
             cdelt3 = item%cdelt3*item%frame_multiplier/1000.0
@@ -766,7 +766,10 @@ contains
         ! make a histogram with a range given by [pmin, pmax]
         call make_histogram(data, pmin, pmax)
 
-        pmedian = median(data, size(data))
+        n = size(data)
+        pmedian = median(data, n)
+
+        ! now the deviations from the median
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
 
