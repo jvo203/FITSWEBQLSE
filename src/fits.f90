@@ -828,10 +828,7 @@ contains
                 use classifier
 
                 integer(kind=8), dimension(NBINS) :: cdf
-
-                ! use C-style array bounds when calling
-                ! the histogram classifier (ported from C)
-                real, dimension(0:NBINS - 1) :: Slot
+                real, dimension(NBINS) :: Slot
 
                 integer(kind=8) total
 
