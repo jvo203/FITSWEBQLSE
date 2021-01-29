@@ -773,17 +773,15 @@ contains
     subroutine make_histogram(data, pmin, pmax)
         real, dimension(:), intent(in) :: data
         real, intent(in) :: pmin, pmax
-        integer start, end
-        integer i, j, index
+        integer i, j, index, n
         real value
 
         ! reset the histogram
         item%hist = 0
 
-        start = lbound(data, 1)
-        end = ubound(data, 1)
+        n = size(data)
 
-        do i = start, end
+        do i = 1, n
             ! allow valid entries only
             if (item%mask(i, j)) then
                 ! bin the value to [0,1]
