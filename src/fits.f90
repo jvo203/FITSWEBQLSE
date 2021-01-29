@@ -759,12 +759,18 @@ contains
             end do
         end if
 
-        ! reset the histogram
-        item%hist = 0
-
         ! make_histogram with a range given by [pmin, pmax]
+        call make_histogram(pmin, pmax)
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax
 
     end subroutine make_image_statistics
+
+    subroutine make_histogram(pmin, pmax)
+        real, intent(in) :: pmin, pmax
+
+        ! reset the histogram
+        item%hist = 0
+
+    end subroutine make_histogram
 end module fits
