@@ -793,6 +793,7 @@ contains
                 index = 1 + int(value*NBINS)
 
                 ! clamp the index to within [1,NBINS]
+                ! (rounding errors might cause an out-of-bound index value)
                 index = max(min(index, NBINS), 1)
                 item%hist(index) = item%hist(index) + 1
             end if
