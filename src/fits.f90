@@ -760,26 +760,28 @@ contains
         end if
 
         ! make_histogram with a range given by [pmin, pmax]
-        call make_histogram(pmin, pmax)
+        ! call make_histogram(pmin, pmax)
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax
 
     end subroutine make_image_statistics
 
-    subroutine make_histogram(pmin, pmax)
+    subroutine make_histogram(data, pmin, pmax, n)
+        real, dimension(n), intent(in) :: data
         real, intent(in) :: pmin, pmax
-        integer i, j
-        real pixel
+        integer, intent(in) :: n
+        integer i, j, index
+        real value
 
         ! reset the histogram
         item%hist = 0
 
-        do j = 1, item%naxes(2)
-            do i = 1, item%naxes(1)
-                if (item%mask(i, j)) then
-                    pixel = item%pixels(i, j)
-                end if
-            end do
+        do i = 1, n
+            ! allow valid entries only
+            if (item%mask(i, j)) then
+                value = (data(i) - pmin)/(pmax - pmin)
+
+            end if
         end do
 
     end subroutine make_histogram
