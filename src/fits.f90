@@ -729,6 +729,7 @@ contains
     end subroutine frame_reference_unit
 
     subroutine make_image_statistics
+        real, dimension(:), allocatable :: data
         real cdelt3, pmin, pmax
         real pixel
         integer i, j
@@ -759,30 +760,45 @@ contains
             end do
         end if
 
-        ! make_histogram with a range given by [pmin, pmax]
-        ! call make_histogram(pmin, pmax)
+        ! pick non-NaN valid pixels only according to mask
+        data = pack(item%pixels, item%mask)
+
+        ! make a histogram with a range given by [pmin, pmax]
+        call make_histogram(data, pmin, pmax)
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax
 
     end subroutine make_image_statistics
 
-    subroutine make_histogram(data, pmin, pmax, n)
-        real, dimension(n), intent(in) :: data
+    subroutine make_histogram(data, pmin, pmax)
+        real, dimension(:), intent(in) :: data
         real, intent(in) :: pmin, pmax
-        integer, intent(in) :: n
+        integer start, end
         integer i, j, index
         real value
 
         ! reset the histogram
         item%hist = 0
 
-        do i = 1, n
+        start = lbound(data, 1)
+        end = ubound(data, 1)
+
+        do i = start, end
             ! allow valid entries only
             if (item%mask(i, j)) then
+                ! bin the value to [0,1]
                 value = (data(i) - pmin)/(pmax - pmin)
 
+                ! get a histogram bin index
+                index = 1 + int(value*NBINS)
+
+                ! clamp the index to within [1,NBINS]
+                index = max(min(index, NBINS), 1)
+                item%hist(index) = item%hist(index) + 1
             end if
         end do
+
+        print *, item%hist
 
     end subroutine make_histogram
 end module fits
