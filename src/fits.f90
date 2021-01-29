@@ -879,8 +879,6 @@ contains
             item%hist(index) = item%hist(index) + 1
         end do
 
-        print *, 'image histogram:', item%hist
-
     end subroutine make_histogram
 
     ! quicksort.f -*-f90-*-
