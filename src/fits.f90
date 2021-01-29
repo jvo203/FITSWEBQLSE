@@ -768,9 +768,19 @@ contains
 
     subroutine make_histogram(pmin, pmax)
         real, intent(in) :: pmin, pmax
+        integer i, j
+        real pixel
 
         ! reset the histogram
         item%hist = 0
+
+        do j = 1, item%naxes(2)
+            do i = 1, item%naxes(1)
+                if (item%mask(i, j)) then
+                    pixel = item%pixels(i, j)
+                end if
+            end do
+        end do
 
     end subroutine make_histogram
 end module fits
