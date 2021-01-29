@@ -730,7 +730,7 @@ contains
 
     subroutine make_image_statistics
         real, dimension(:), allocatable :: data
-        real cdelt3, pmin, pmax, med
+        real cdelt3, pmin, pmax, pmedian
         real pixel
         integer i, j
 
@@ -766,9 +766,9 @@ contains
         ! make a histogram with a range given by [pmin, pmax]
         call make_histogram(data, pmin, pmax)
 
-        med = Median(data, size(data))
+        pmedian = Median(data, size(data))
 
-        print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', med
+        print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
 
     end subroutine make_image_statistics
 
