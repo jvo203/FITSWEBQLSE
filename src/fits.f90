@@ -800,4 +800,89 @@ contains
         print *, 'image histogram:', item%hist
 
     end subroutine make_histogram
+
+    ! --------------------------------------------------------------------
+    ! INTEGER FUNCTION  FindMinimum():
+    !    This function returns the location of the minimum in the section
+    ! between Start and End.
+    ! --------------------------------------------------------------------
+
+    INTEGER FUNCTION FindMinimum(x, Start, End)
+        IMPLICIT NONE
+        INTEGER, DIMENSION(1:), INTENT(IN) :: x
+        INTEGER, INTENT(IN)                :: Start, End
+        INTEGER                            :: Minimum
+        INTEGER                            :: Location
+        INTEGER                            :: i
+
+        Minimum = x(Start)                ! assume the first is the min
+        Location = Start                        ! record its position
+        DO i = Start + 1, End                ! start with next elements
+            IF (x(i) < Minimum) THEN        !   if x(i) less than the min?
+                Minimum = x(i)                !      Yes, a new minimum found
+                Location = i                !      record its position
+            END IF
+        END DO
+        FindMinimum = Location                ! return the position
+    END FUNCTION FindMinimum
+
+    ! --------------------------------------------------------------------
+    ! SUBROUTINE  Swap():
+    !    This subroutine swaps the values of its two formal arguments.
+    ! --------------------------------------------------------------------
+
+    SUBROUTINE Swap(a, b)
+        IMPLICIT NONE
+        INTEGER, INTENT(INOUT) :: a, b
+        INTEGER                :: Temp
+
+        Temp = a
+        a = b
+        b = Temp
+    END SUBROUTINE Swap
+
+    ! --------------------------------------------------------------------
+    ! SUBROUTINE  Sort():
+    !    This subroutine receives an array x() and sorts it into ascending
+    ! order.
+    ! --------------------------------------------------------------------
+
+    SUBROUTINE Sort(x, Size)
+        IMPLICIT NONE
+        INTEGER, DIMENSION(1:), INTENT(INOUT) :: x
+        INTEGER, INTENT(IN)                   :: Size
+        INTEGER                               :: i
+        INTEGER                               :: Location
+
+        DO i = 1, Size - 1                        ! except for the last
+            Location = FindMinimum(x, i, Size)        ! find min from this to last
+            CALL Swap(x(i), x(Location))        ! swap this and the minimum
+        END DO
+    END SUBROUTINE Sort
+
+    ! --------------------------------------------------------------------
+    ! REAL FUNCTION  Median() :
+    !    This function receives an array X of N entries, copies its value
+    ! to a local array Temp(), sorts Temp() and computes the median.
+    !    The returned value is of REAL type.
+    ! --------------------------------------------------------------------
+
+    REAL FUNCTION Median(X, N)
+        IMPLICIT NONE
+        INTEGER, DIMENSION(1:), INTENT(IN) :: X
+        INTEGER, INTENT(IN)                :: N
+        INTEGER, DIMENSION(1:N)            :: Temp
+        INTEGER                            :: i
+
+        DO i = 1, N                       ! make a copy
+            Temp(i) = X(i)
+        END DO
+        CALL Sort(Temp, N)               ! sort the copy
+        IF (MOD(N, 2) == 0) THEN           ! compute the median
+            Median = (Temp(N/2) + Temp(N/2 + 1))/2.0
+        ELSE
+            Median = Temp(N/2 + 1)
+        END IF
+    END FUNCTION Median
+
 end module fits
