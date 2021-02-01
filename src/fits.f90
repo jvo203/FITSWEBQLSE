@@ -732,6 +732,16 @@ contains
         end if
     end subroutine frame_reference_unit
 
+    subroutine set_cdelt3(cdelt3)
+        real, intent(out) :: cdelt3
+
+        if (item%has_velocity) then
+            cdelt3 = item%cdelt3*item%frame_multiplier/1000.0
+        else
+            cdelt3 = 1.0
+        end if
+    end subroutine set_cdelt3
+
     subroutine make_image_statistics
         implicit NONE
 
@@ -744,11 +754,7 @@ contains
         real u, v
         real black, white, sensitivity, ratio_sensitivity
 
-        if (item%has_velocity) then
-            cdelt3 = item%cdelt3*item%frame_multiplier/1000.0
-        else
-            cdelt3 = 1.0
-        end if
+        call set_cdelt3(cdelt3)
 
         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             pmin = item%dmin
