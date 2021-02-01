@@ -826,7 +826,6 @@ contains
         end if
 
         ! pick non-NaN valid pixels only according to mask
-        print *, 'packing item%pixels'
         data = pack(item%pixels, item%mask)
 
         ! make a histogram with a range given by [pmin, pmax]
