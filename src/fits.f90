@@ -825,24 +825,9 @@ contains
             end do
         end if
 
-        print *, 'packing item%pixels into data ...', shape(item%pixels), size(item%pixels), shape(item%mask), size(item%mask)
-        print *, 'non-NaN mask count:', count(item%mask)
-        print *, item%mask(1:10, 1)
-
-        if (count(item%mask) .lt. size(item%mask)) then
-            ! pick non-NaN valid pixels only according to mask
-            print *, 'packing item%pixels'
-            data = pack(item%pixels, item%mask)
-        else
-            ! use the data as-is after re-shaping it
-            print *, 'reshaping item%pixels'
-            allocate (data(size(item%pixels)), stat=stat)
-            print *, 'allocate stat:', stat
-            data = reshape(item%pixels, (/size(item%pixels)/))
-            ! data = pack(item%pixels, .true.)
-        end if
-
-        print *, 'done'
+        ! pick non-NaN valid pixels only according to mask
+        print *, 'packing item%pixels'
+        data = pack(item%pixels, item%mask)
 
         ! make a histogram with a range given by [pmin, pmax]
         call make_histogram(data, pmin, pmax)
