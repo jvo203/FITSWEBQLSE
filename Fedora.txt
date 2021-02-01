@@ -12,6 +12,8 @@
 
 	sudo dnf install cfitsio-devel
 
+	sudo dnf install ispc # (not needed yet)
+
 3. Adjust environment variables
 
 	Add
