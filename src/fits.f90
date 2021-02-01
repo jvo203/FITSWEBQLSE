@@ -847,7 +847,23 @@ contains
                 Slot = cdf/real(total)
 
                 tone_mapping = histogram_classifier(c_loc(Slot))
-                print *, 'tone_mapping = ', tone_mapping
+
+                select case (tone_mapping)
+                case (0)
+                    item%flux = 'legacy'
+                case (1)
+                    item%flux = 'linear'
+                case (2)
+                    item%flux = 'logistic'
+                case (3)
+                    item%flux = 'ratio'
+                case (4)
+                    item%flux = 'square'
+                case default
+                    item%flux = 'legacy'
+                end select
+
+                print *, 'tone_mapping = ', tone_mapping, ', flux:', item%flux
             end block
         end if
 
