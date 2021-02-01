@@ -824,8 +824,13 @@ contains
             end do
         end if
 
+        print *, 'packing item%pixels into data ...', shape(item%pixels), size(item%pixels), shape(item%mask), size(item%mask)
+        print *, 'non-NaN mask count:', count(item%mask)
+
         ! pick non-NaN valid pixels only according to mask
         data = pack(item%pixels, item%mask)
+
+        print *, 'done'
 
         ! make a histogram with a range given by [pmin, pmax]
         call make_histogram(data, pmin, pmax)
@@ -835,6 +840,7 @@ contains
         if (n .eq. 0) return
 
         pmedian = median(data, n)
+        print *, 'median = ', pmedian
 
         ! now the deviations from the median
         mad = 0.0; madP = 0.0; madN = 0.0
