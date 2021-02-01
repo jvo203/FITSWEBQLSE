@@ -565,6 +565,7 @@ contains
             !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
 
             block
+                real cdelt3, mean_spec_val, int_spec_val
                 ! real(kind=4), allocatable :: pixels(:)
 
                 ! npixels_per_image = npixels*num_per_image
@@ -576,6 +577,8 @@ contains
                 pixels = 0.0
                 ! and reset the NaN mask
                 mask = .false.
+
+                call set_cdelt3(cdelt3)
 
                 do frame = start, end
                     ! starting bounds
@@ -592,6 +595,9 @@ contains
 
                     ! abort upon an error
                     if (status .ne. 0) go to 200
+
+                    mean_spec_val = 0.0
+                    int_spec_val = 0.0
 
                     ! calculate the min/max values
                     do j = 1, npixels
