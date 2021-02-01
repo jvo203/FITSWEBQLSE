@@ -10,6 +10,8 @@
 
 	sudo dnf install glib2-devel
 
+	sudo dnf install cfitsio-devel
+
 3. Adjust environment variables
 
 	Add
