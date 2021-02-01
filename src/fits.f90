@@ -608,10 +608,6 @@ contains
                 int_spec = 0.0
 
                 do frame = start, end
-                    if (this_image() == 1) then
-                        print *, 'start = ', start, ', end = ', end, ', frame = ', frame
-                    end if
-
                     ! starting bounds
                     fpixels = (/1, 1, frame, 1/)
 
