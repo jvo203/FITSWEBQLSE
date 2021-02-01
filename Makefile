@@ -1,5 +1,9 @@
 .DEFAULT_GOAL := fitswebqlse
 
+# the stack should be unlimited to avoid problems
+# with ifort creating on the stack large temporary arrays
+# ulimit -s unlimited
+
 # detect the OS
 UNAME_S := $(shell uname -s)
 
