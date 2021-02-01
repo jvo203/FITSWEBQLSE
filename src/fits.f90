@@ -801,6 +801,7 @@ contains
         integer i, j, n
         real u, v
         real black, white, sensitivity, ratio_sensitivity
+        integer stat
 
         call get_cdelt3(cdelt3)
 
@@ -826,9 +827,20 @@ contains
 
         print *, 'packing item%pixels into data ...', shape(item%pixels), size(item%pixels), shape(item%mask), size(item%mask)
         print *, 'non-NaN mask count:', count(item%mask)
+        print *, item%mask(1:10, 1)
 
-        ! pick non-NaN valid pixels only according to mask
-        data = pack(item%pixels, item%mask)
+        if (count(item%mask) .lt. size(item%mask)) then
+            ! pick non-NaN valid pixels only according to mask
+            print *, 'packing item%pixels'
+            data = pack(item%pixels, item%mask)
+        else
+            ! use the data as-is after re-shaping it
+            print *, 'reshaping item%pixels'
+            allocate (data(size(item%pixels)), stat=stat)
+            print *, 'allocate stat:', stat
+            data = reshape(item%pixels, (/size(item%pixels)/))
+            ! data = pack(item%pixels, .true.)
+        end if
 
         print *, 'done'
 
