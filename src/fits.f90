@@ -566,6 +566,8 @@ contains
 
             block
                 real cdelt3, mean_spec_val, int_spec_val
+                real pixel_sum
+                integer pixel_count
                 ! real(kind=4), allocatable :: pixels(:)
 
                 ! npixels_per_image = npixels*num_per_image
@@ -599,6 +601,9 @@ contains
                     mean_spec_val = 0.0
                     int_spec_val = 0.0
 
+                    pixel_sum = 0.0
+                    pixel_count = 0
+
                     ! calculate the min/max values
                     do j = 1, npixels
                         tmp = buffer(j)
@@ -609,10 +614,18 @@ contains
                             ! integrate (sum up) pixels and a NaN mask
                             pixels(j) = pixels(j) + tmp
                             mask(j) = mask(j) .or. .true.
+
+                            pixel_sum = pixel_sum + tmp
+                            pixel_count = pixel_count + 1
                         else
                             mask(j) = mask(j) .or. .false.
                         end if
                     end do
+
+                    if (pixel_count > 0) then
+                        mean_spec_val = pixel_sum/real(pixel_count)
+                        int_spec_val = pixel_sum*cdelt3
+                    end if
                 end do
 
                 ! update the FITS dataset (taking advantage of automatic reallocation)
