@@ -89,6 +89,9 @@ contains
         real(kind=4), allocatable :: pixels(:) [:]
         logical(kind=1), allocatable :: mask(:) [:]
 
+        real, allocatable :: mean_spectrum(:) [:]
+        real, allocatable :: integrated_spectrum(:) [:]
+
         integer(8) :: start, finish, crate, cmax
         real :: elapsed
 
@@ -97,7 +100,7 @@ contains
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
-        call read_fits_file(filename, dmin, dmax, pixels, mask, bSuccess)
+        call read_fits_file(filename, dmin, dmax, pixels, mask, mean_spectrum, integrated_spectrum, bSuccess)
         call co_reduce(bSuccess, logical_and)
 
         if (bSuccess) then
@@ -107,16 +110,22 @@ contains
             item%dmin = dmin
             item%dmax = dmax
 
-            ! synchronise the pixels/mask across the images (gather on image 1)
+            ! synchronise the pixels/mask/spectra across the images (gather on image 1)
             if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
                 call co_sum(pixels, result_image=1)
                 call co_reduce(mask, logical_or, result_image=1)
+
+                call co_sum(mean_spectrum, result_image=1)
+                call co_sum(integrated_spectrum, result_image=1)
 
                 if (this_image() == 1) then
                     ! update the FITS dataset (taking advantage of automatic reallocation)
                     item%pixels = reshape(pixels, item%naxes(1:2))
                     item%mask = reshape(mask, item%naxes(1:2))
+
                     print *, 'gathered {pixels,mask} on image', this_image()
+                    print *, 'mean spectrum:', mean_spectrum
+                    print *, 'integrated spectrum:', integrated_spectrum
                 end if
             end if
 
@@ -191,7 +200,7 @@ contains
         end do
     end subroutine lower_case
 
-    subroutine read_fits_file(filename, dmin, dmax, pixels, mask, bSuccess)
+    subroutine read_fits_file(filename, dmin, dmax, pixels, mask, mean_spec, int_spec, bSuccess)
         implicit none
         character(len=1024), intent(in) :: filename
         real(kind=4), intent(out) :: dmin, dmax
@@ -209,6 +218,8 @@ contains
         real(kind=4), allocatable :: buffer(:)
         real(kind=4), allocatable :: pixels(:) [:]
         logical(kind=1), allocatable :: mask(:) [:]
+        real, allocatable :: mean_spec(:) [:]
+        real, allocatable :: int_spec(:) [:]
 
         real :: nullval, tmp
         character :: record*80, key*10, value*70, comment*70
@@ -575,12 +586,19 @@ contains
                 allocate (pixels(npixels) [*])
                 allocate (mask(npixels) [*])
 
+                allocate (mean_spec(naxes(3)) [*])
+                allocate (int_spec(naxes(3)) [*])
+
                 ! initiate pixels to blank
                 pixels = 0.0
                 ! and reset the NaN mask
                 mask = .false.
 
                 call set_cdelt3(cdelt3)
+
+                ! zero-out the spectra
+                mean_spec = 0.0
+                int_spec = 0.0
 
                 do frame = start, end
                     ! starting bounds
@@ -615,6 +633,7 @@ contains
                             pixels(j) = pixels(j) + tmp
                             mask(j) = mask(j) .or. .true.
 
+                            ! needed by the mean and integrated spectra
                             pixel_sum = pixel_sum + tmp
                             pixel_count = pixel_count + 1
                         else
@@ -626,6 +645,9 @@ contains
                         mean_spec_val = pixel_sum/real(pixel_count)
                         int_spec_val = pixel_sum*cdelt3
                     end if
+
+                    mean_spec(frame) = mean_spec_val
+                    int_spec(frame) = int_spec_val
                 end do
 
                 ! update the FITS dataset (taking advantage of automatic reallocation)
