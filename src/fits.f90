@@ -42,6 +42,10 @@ module fits
         logical :: is_optical = .true.
         logical :: is_xray = .false.
         logical :: error = .false.
+
+        ! spectra
+        real, allocatable :: mean_spectrum(:)
+        real, allocatable :: integrated_spectrum(:)
     end type dataset
 
     ! only one FITS dataset at this development stage
@@ -862,8 +866,6 @@ contains
                 case default
                     item%flux = 'legacy'
                 end select
-
-                print *, 'tone_mapping = ', tone_mapping, ', flux:', item%flux
             end block
         end if
 
