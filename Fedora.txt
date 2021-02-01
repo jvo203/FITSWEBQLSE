@@ -1,0 +1,20 @@
+1. Install Intel oneAPI Base + HPC kits (works well on AMD CPUs too, not just Intel's)
+
+2. Install dependencies
+
+	sudo dnf install libmicrohttpd-devel
+
+	sudo dnf install libwebsockets-devel
+
+	sudo dnf install openssl-devel
+
+	sudo dnf install glib-devel
+
+3. Adjust environment variables
+
+	Add
+
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
+
+	to .bashrc and re-login
