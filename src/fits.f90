@@ -527,6 +527,7 @@ contains
 
         if (this_image() == 1) then
             print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
+            print *, '#no. pixels:', naxes(1)*naxes(2)
         end if
 
         group = 1
@@ -600,13 +601,17 @@ contains
                 ! and reset the NaN mask
                 mask = .false.
 
-                call set_cdelt3(cdelt3)
+                call get_cdelt3(cdelt3)
 
                 ! zero-out the spectra
                 mean_spec = 0.0
                 int_spec = 0.0
 
                 do frame = start, end
+                    if (this_image() == 1) then
+                        print *, 'start = ', start, ', end = ', end, ', frame = ', frame
+                    end if
+
                     ! starting bounds
                     fpixels = (/1, 1, frame, 1/)
 
@@ -779,7 +784,7 @@ contains
         end if
     end subroutine frame_reference_unit
 
-    subroutine set_cdelt3(cdelt3)
+    subroutine get_cdelt3(cdelt3)
         real, intent(out) :: cdelt3
 
         if (item%has_velocity) then
@@ -787,7 +792,7 @@ contains
         else
             cdelt3 = 1.0
         end if
-    end subroutine set_cdelt3
+    end subroutine get_cdelt3
 
     subroutine make_image_statistics
         implicit NONE
@@ -801,7 +806,7 @@ contains
         real u, v
         real black, white, sensitivity, ratio_sensitivity
 
-        call set_cdelt3(cdelt3)
+        call get_cdelt3(cdelt3)
 
         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             pmin = item%dmin
