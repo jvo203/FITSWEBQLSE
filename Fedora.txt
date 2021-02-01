@@ -8,7 +8,7 @@
 
 	sudo dnf install openssl-devel
 
-	sudo dnf install glib-devel
+	sudo dnf install glib2-devel
 
 3. Adjust environment variables
 
