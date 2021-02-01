@@ -77,6 +77,11 @@ contains
         print *, 'has_frequency:', item%has_frequency,&
         & ', has_velocity:', item%has_velocity,&
         & ', frame_multiplier = ', item%frame_multiplier
+
+        if (item%naxes(3) .gt. 1) then
+            print *, 'mean spectrum:', item%mean_spectrum
+            print *, 'integrated spectrum:', item%integrated_spectrum
+        end if
     end subroutine print_dataset
 
     subroutine load_fits_file(filename)
@@ -123,9 +128,10 @@ contains
                     item%pixels = reshape(pixels, item%naxes(1:2))
                     item%mask = reshape(mask, item%naxes(1:2))
 
+                    item%mean_spectrum = reshape(mean_spectrum, item%naxes(3:3))
+                    item%integrated_spectrum = reshape(integrated_spectrum, item%naxes(3:3))
+
                     print *, 'gathered {pixels,mask} on image', this_image()
-                    print *, 'mean spectrum:', mean_spectrum
-                    print *, 'integrated spectrum:', integrated_spectrum
                 end if
             end if
 
