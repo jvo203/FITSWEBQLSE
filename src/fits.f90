@@ -42,6 +42,7 @@ module fits
         logical :: is_optical = .true.
         logical :: is_xray = .false.
         logical :: error = .false.
+        logical :: ok = .false.
 
         ! spectra
         real, allocatable :: mean_spectrum(:)
@@ -139,6 +140,9 @@ contains
 
             ! make an image histogram, decide on the flux etc.
             if (this_image() == 1) call make_image_statistics
+
+            ! <ok> should be protected by a mutex ...
+            item%ok = .true.
 
             ! end the timer
             call system_clock(finish)
