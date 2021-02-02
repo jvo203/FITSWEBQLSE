@@ -566,7 +566,22 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "image_spectrum") != NULL)
     {
+        gboolean fetch_data = FALSE;
+
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+        char *widthStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "width");
+        char *heightStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "height");
+        char *quality = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "quality");
+        char *fetch_dataStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "fetch_data");
+
+        if (datasetId == NULL || widthStr == NULL || heightStr == NULL || quality == NULL)
+            return http_not_found(connection);
+
+        if (fetch_dataStr != NULL)
+            if (0 == strcmp(fetch_dataStr, "true"))
+                fetch_data = TRUE;
+
+        printf("datasetId(%s), widthStr(%s), heightStr(%s), quality(%s), fetch_data: %s\n", datasetId, widthStr, heightStr, quality, (fetch_data ? "true" : "false"));
 
         return http_accepted(connection);
     }
