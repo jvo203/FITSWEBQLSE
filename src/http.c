@@ -33,6 +33,8 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 
 extern void exit_fortran();
 extern void http_request(char *uri, size_t n);
+extern int get_error_status();
+extern int get_ok_status();
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
