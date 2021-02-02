@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-01-27.0";
+	return "JS2021-02-02.0";
 }
 
 const wasm_supported = (() => {
@@ -6415,7 +6415,7 @@ function display_preferences(index) {
 	tmpA.append("select")
 		.attr("id", "image_quality")
 		.attr("onchange", "javascript:change_image_quality();")
-		.html("<option value='45'>high</option><option value='1000'>medium</option><option value='10000'>low</option>");
+		.html("<option>high</option><option>medium</option><option>low</option>");
 
 	document.getElementById('image_quality').value = image_quality;
 
