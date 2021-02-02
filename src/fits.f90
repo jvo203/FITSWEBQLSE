@@ -533,7 +533,7 @@ contains
         end if
 
         group = 1
-        nullval = 0.0
+        nullval = 0.0 ! ieee_value(0.0, ieee_quiet_nan)
 
         dmin = 1.0E30
         dmax = -1.0E30
