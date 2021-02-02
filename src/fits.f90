@@ -1,4 +1,5 @@
 module fits
+    use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
     implicit none
 
@@ -86,6 +87,28 @@ contains
             ! print *, 'integrated spectrum:', item%integrated_spectrum
         end if
     end subroutine print_dataset
+
+    integer(c_int) function get_error_status() bind(c)
+
+        if (item%error) then
+            get_error_status = 1
+        else
+            get_error_status = 0
+        end if
+
+        return
+    end function get_error_status
+
+    integer(c_int) function get_ok_status() bind(c)
+
+        if (item%ok) then
+            get_ok_status = 1
+        else
+            get_ok_status = 0
+        end if
+
+        return
+    end function get_ok_status
 
     subroutine load_fits_file(filename)
         implicit none
@@ -910,7 +933,6 @@ contains
         ! histogram classifier
         if (item%flux .eq. '') then
             block
-                use, intrinsic :: ISO_C_BINDING
                 use classifier
 
                 integer(kind=8), dimension(NBINS) :: cdf
