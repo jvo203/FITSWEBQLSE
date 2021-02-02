@@ -595,7 +595,8 @@ static enum MHD_Result on_http_connection(void *cls,
         // if ! item%ok http_accepted
         return http_accepted(connection);
 
-        // finally respond with the full JSON data
+        // respond with the image + JSON data (header, spectrum, histogram)
+        // to save network bandwidth the response should be binary
     }
 
     if (strstr(url, "FITSWebQL.html") != NULL)
