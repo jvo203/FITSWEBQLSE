@@ -79,8 +79,8 @@ contains
         & ', frame_multiplier = ', item%frame_multiplier
 
         if (item%naxes(3) .gt. 1) then
-            print *, 'mean spectrum:', item%mean_spectrum
-            print *, 'integrated spectrum:', item%integrated_spectrum
+            ! print *, 'mean spectrum:', item%mean_spectrum
+            ! print *, 'integrated spectrum:', item%integrated_spectrum
         end if
     end subroutine print_dataset
 
