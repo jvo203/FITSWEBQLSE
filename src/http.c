@@ -564,6 +564,13 @@ static enum MHD_Result on_http_connection(void *cls,
     };
 #endif
 
+    if (strstr(url, "image_spectrum") != NULL)
+    {
+        char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+
+        return http_accepted(connection);
+    }
+
     if (strstr(url, "FITSWebQL.html") != NULL)
     {
 #ifndef LOCAL
