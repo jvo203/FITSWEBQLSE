@@ -13628,7 +13628,7 @@ async*/ function mainRenderer() {
 	}
 
 	if (localStorage.getItem("image_quality") === null) {
-		image_quality = "45";
+		image_quality = "medium";
 		localStorage.setItem("image_quality", image_quality);
 	}
 	else
