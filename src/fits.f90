@@ -128,6 +128,8 @@ contains
         real :: elapsed
 
         item%id = hash(filename)
+        item%ok = .false.
+        item%error = .false.
 
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
