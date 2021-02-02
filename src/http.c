@@ -567,6 +567,7 @@ static enum MHD_Result on_http_connection(void *cls,
     if (strstr(url, "image_spectrum") != NULL)
     {
         gboolean fetch_data = FALSE;
+        int width, height;
 
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
         char *widthStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "width");
@@ -581,7 +582,13 @@ static enum MHD_Result on_http_connection(void *cls,
             if (0 == strcmp(fetch_dataStr, "true"))
                 fetch_data = TRUE;
 
-        printf("datasetId(%s), widthStr(%s), heightStr(%s), quality(%s), fetch_data: %s\n", datasetId, widthStr, heightStr, quality, (fetch_data ? "true" : "false"));
+        width = atoi(widthStr);
+        height = atoi(heightStr);
+
+        printf("datasetId(%s), width(%d), height(%d), quality(%s), fetch_data: %s\n", datasetId, width, height, quality, (fetch_data ? "true" : "false"));
+
+        if (width <= 0 || height <= 0)
+            return http_internal_server_error(connection);
 
         return http_accepted(connection);
     }
