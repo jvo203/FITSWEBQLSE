@@ -14,7 +14,13 @@
 
 	sudo dnf install ispc # (not needed yet)
 
-3. Adjust environment variables
+3. FORTRAN-UNIX
+
+	$ git clone https://github.com/interkosmos/fortran-unix
+	$ cd fortran-unix/
+	$ make
+
+4. Adjust environment variables
 
 	Add
 
