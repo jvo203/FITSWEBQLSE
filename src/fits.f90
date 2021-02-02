@@ -79,6 +79,8 @@ contains
         & ', frame_multiplier = ', item%frame_multiplier
 
         if (item%naxes(3) .gt. 1) then
+            print *, 'frame_min:', item%frame_min
+            print *, 'frame_max:', item%frame_max
             ! print *, 'mean spectrum:', item%mean_spectrum
             ! print *, 'integrated spectrum:', item%integrated_spectrum
         end if
@@ -584,6 +586,7 @@ contains
 
             block
                 real cdelt3, mean_spec_val, int_spec_val
+                real frame_min, frame_max
                 real pixel_sum
                 integer pixel_count
                 ! real(kind=4), allocatable :: pixels(:)
@@ -596,6 +599,10 @@ contains
                 allocate (mean_spec(naxes(3)) [*])
                 allocate (int_spec(naxes(3)) [*])
 
+                ! allocate partial frame_min / frame_max arrays
+                allocate (item%frame_min(start:end))
+                allocate (item%frame_max(start:end))
+
                 ! initiate pixels to blank
                 pixels = 0.0
                 ! and reset the NaN mask
@@ -606,6 +613,9 @@ contains
                 ! zero-out the spectra
                 mean_spec = 0.0
                 int_spec = 0.0
+
+                item%frame_min = 1.0E30
+                item%frame_max = -1.0E30
 
                 do frame = start, end
                     ! starting bounds
@@ -629,12 +639,15 @@ contains
                     pixel_sum = 0.0
                     pixel_count = 0
 
+                    frame_min = 1.0E30
+                    frame_max = -1.0E30
+
                     ! calculate the min/max values
                     do j = 1, npixels
                         tmp = buffer(j)
                         if (isnan(tmp) .neqv. .true.) then
-                            dmin = min(dmin, tmp)
-                            dmax = max(dmax, tmp)
+                            frame_min = min(frame_min, tmp)
+                            frame_max = max(frame_max, tmp)
 
                             ! integrate (sum up) pixels and a NaN mask
                             pixels(j) = pixels(j) + tmp
@@ -647,6 +660,12 @@ contains
                             mask(j) = mask(j) .or. .false.
                         end if
                     end do
+
+                    item%frame_min(frame) = frame_min
+                    item%frame_max(frame) = frame_max
+
+                    dmin = min(dmin, frame_min)
+                    dmax = max(dmax, frame_max)
 
                     if (pixel_count > 0) then
                         mean_spec_val = pixel_sum/real(pixel_count)
