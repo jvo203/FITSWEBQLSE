@@ -533,7 +533,7 @@ contains
         end if
 
         group = 1
-        nullval = 0.0 ! ieee_value(0.0, ieee_quiet_nan)
+        nullval = 0
 
         dmin = 1.0E30
         dmax = -1.0E30
@@ -589,7 +589,6 @@ contains
                 real frame_min, frame_max
                 real pixel_sum
                 integer pixel_count
-                ! real(kind=4), allocatable :: pixels(:)
 
                 ! npixels_per_image = npixels*num_per_image
                 allocate (buffer(npixels))
@@ -600,7 +599,10 @@ contains
                 allocate (int_spec(naxes(3)) [*])
 
                 ! allocate partial frame_min / frame_max arrays
+                if (allocated(item%frame_min)) deallocate (item%frame_min)
                 allocate (item%frame_min(start:end))
+
+                if (allocated(item%frame_max)) deallocate (item%frame_max)
                 allocate (item%frame_max(start:end))
 
                 ! initiate pixels to blank
