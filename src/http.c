@@ -194,6 +194,78 @@ static enum MHD_Result http_not_found(struct MHD_Connection *connection)
         return MHD_NO;
 };
 
+static enum MHD_Result http_accepted(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *errorstr =
+        "<html><body>202 Accepted</body></html>";
+
+    response =
+        MHD_create_response_from_buffer(strlen(errorstr),
+                                        (void *)errorstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_ACCEPTED,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
+static enum MHD_Result http_internal_server_error(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *errorstr =
+        "<html><body>500 Internal Server Error</body></html>";
+
+    response =
+        MHD_create_response_from_buffer(strlen(errorstr),
+                                        (void *)errorstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
+static enum MHD_Result http_not_implemented(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *errorstr =
+        "<html><body>501 Not Implemented</body></html>";
+
+    response =
+        MHD_create_response_from_buffer(strlen(errorstr),
+                                        (void *)errorstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_NOT_IMPLEMENTED,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
 static enum MHD_Result serve_file(struct MHD_Connection *connection, const char *url)
 {
     int fd;
