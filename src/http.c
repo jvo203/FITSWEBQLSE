@@ -592,13 +592,15 @@ static enum MHD_Result on_http_connection(void *cls,
         if (width <= 0 || height <= 0)
             return http_not_implemented(connection);
 
-        // if item%error http_internal_server_error
+        if (get_error_status())
+            return http_internal_server_error(connection);
 
-        // if ! item%ok http_accepted
-        return http_accepted(connection);
+        if (!get_ok_status())
+            return http_accepted(connection);
 
         // respond with the image + JSON data (header, spectrum, histogram)
         // to save network bandwidth the response should be binary
+        return http_not_implemented(connection);
     }
 
     if (strstr(url, "FITSWebQL.html") != NULL)
