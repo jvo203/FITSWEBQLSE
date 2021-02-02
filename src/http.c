@@ -588,9 +588,14 @@ static enum MHD_Result on_http_connection(void *cls,
         printf("datasetId(%s), width(%d), height(%d), quality(%s), fetch_data: %s\n", datasetId, width, height, quality, (fetch_data ? "true" : "false"));
 
         if (width <= 0 || height <= 0)
-            return http_internal_server_error(connection);
+            return http_not_implemented(connection);
 
+        // if item%error http_internal_server_error
+
+        // if ! item%ok http_accepted
         return http_accepted(connection);
+
+        // finally respond with the full JSON data
     }
 
     if (strstr(url, "FITSWebQL.html") != NULL)
