@@ -90,6 +90,12 @@ contains
         end if
     end subroutine print_dataset
 
+    subroutine update_progress(progress, total)
+        integer, intent(in) :: progress, total
+
+        item%progress = 100.0*progress/total
+    end subroutine update_progress
+
     integer(c_int) function get_error_status() bind(c)
 
         if (item%error) then
@@ -729,7 +735,7 @@ contains
                     mean_spec(frame) = mean_spec_val
                     int_spec(frame) = int_spec_val
 
-                    item%progress = 100.0*(frame - start + 1)/num_per_image
+                    call update_progress(frame - start + 1, num_per_image)
                 end do
 
                 ! update the FITS dataset (taking advantage of automatic reallocation)
