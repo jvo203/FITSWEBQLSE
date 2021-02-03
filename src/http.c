@@ -35,7 +35,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 }
 
 extern void exit_fortran();
-extern void http_request(char *uri, size_t n);
+extern void fitswebql_request(char *uri, size_t n);
 extern int get_error_status();
 extern int get_ok_status();
 extern float get_progress();
@@ -812,7 +812,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 }
 
                 printf("[C] FITS filepath:\t%s\n", filepath);
-                http_request(filepath, strlen(filepath));
+                fitswebql_request(filepath, strlen(filepath));
             }
 
             // directory/extension should not be freed (libmicrohttpd does that)
@@ -840,20 +840,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         return ret;
     }
-
-    /*
-    // pass the request to FORTRAN
-    http_request_();
-
-    response = MHD_create_response_from_buffer(strlen(page),
-                                               (void *)page,
-                                               MHD_RESPMEM_PERSISTENT);
-    ret = MHD_queue_response(connection,
-                             MHD_HTTP_OK,
-                             response);
-    MHD_destroy_response(response);
-
-    return ret;*/
 
     // static resources
     if (url[strlen(url) - 1] != '/')

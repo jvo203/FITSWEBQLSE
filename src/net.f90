@@ -30,7 +30,7 @@ contains
         stop
     end subroutine exit_fortran
 
-    subroutine http_request(uri, n) bind(C)
+    subroutine fitswebql_request(uri, n) bind(C)
         use mpi
         use fits
         use, intrinsic :: iso_c_binding
@@ -63,6 +63,6 @@ contains
         do i = 0, size - 1
             call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
         end do
-    end subroutine http_request
+    end subroutine fitswebql_request
 
 end module net
