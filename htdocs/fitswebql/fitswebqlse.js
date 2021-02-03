@@ -11890,9 +11890,9 @@ function show_welcome() {
 		.attr("align", "center")
 		.html('WELCOME TO FITSWEBQL SE α');
 
-	headerDiv.append("div")
+	/*headerDiv.append("div")
 		.attr("align", "right")
-		.html("Powered by<img src=\"/fortran.webp\" alt=\" Powered by Fortran 2018\" style = \"height:40px; margin-top:25px;\" >");
+		.html("Powered by<img src=\"/fortran.webp\" alt=\" Powered by Fortran 2018\" style = \"height:40px; margin-top:25px;\" >");*/
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
