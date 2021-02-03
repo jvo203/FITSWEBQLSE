@@ -44,7 +44,11 @@ module fits
         logical :: is_xray = .false.
         logical :: error = .false.
         logical :: ok = .false.
+
+        ! progress
+        integer(8) :: start_time, crate, cmax
         real :: progress = 0
+        real :: elapsed = 0
 
         ! spectra
         real, allocatable :: mean_spectrum(:)
@@ -92,8 +96,17 @@ contains
 
     subroutine update_progress(progress, total)
         integer, intent(in) :: progress, total
+        integer(8) finish
+        real elapsed
+
+        ! take a time measurement
+        call system_clock(finish)
+        elapsed = real(finish - item%start_time)/real(item%crate)
 
         item%progress = 100.0*progress/total
+        item%elapsed = elapsed
+
+        print *, 'progress:', item%progress, '%, elapsed time ', item%elapsed, ' [s]'
     end subroutine update_progress
 
     integer(c_int) function get_error_status() bind(c)
@@ -602,6 +615,9 @@ contains
             ! skip memory allocation / reading
             go to 200
         end if
+
+        ! start the timer
+        call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
         ! calculate the range for each image
         if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
