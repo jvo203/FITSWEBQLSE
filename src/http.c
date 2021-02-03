@@ -35,6 +35,7 @@ extern void exit_fortran();
 extern void http_request(char *uri, size_t n);
 extern int get_error_status();
 extern int get_ok_status();
+extern float get_progress();
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -573,10 +574,15 @@ static enum MHD_Result on_http_connection(void *cls,
         if (datasetId != NULL)
         {
             datasetId++;
-            printf("[progress] datasetId(%s)\n", datasetId);
-        }
 
-        return http_not_implemented(connection);
+            float progress = get_progress();
+
+            printf("[progress] datasetId(%s): %f\n", datasetId, progress);
+
+            return http_not_implemented(connection);
+        }
+        else
+            return http_not_found(connection);
     }
 
     if (strstr(url, "/image_spectrum") != NULL)
