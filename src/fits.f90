@@ -131,7 +131,10 @@ contains
 
         ! nothing to do, the dataset has already been loaded
         if (item%id .eq. id) then
-            if (this_image() == 1) print *, '[load_fits_file] nothing to do, the dataset has already been loaded'
+            if (this_image() == 1) then
+                print *, '[load_fits_file] nothing to do, the dataset has already been loaded'
+            end if
+
             return
         end if
 
