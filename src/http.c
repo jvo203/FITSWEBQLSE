@@ -508,7 +508,6 @@ static enum MHD_Result send_progress(struct MHD_Connection *connection, float pr
     GString *json = g_string_sized_new(128);
 
     g_string_printf(json, "{\"progress\" : %f, \"elapsed\" : %f}", progress, elapsed);
-    printf("%s\n", json->str);
 
     struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
     g_string_free(json, FALSE);
