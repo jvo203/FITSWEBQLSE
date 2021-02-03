@@ -751,7 +751,8 @@ contains
                     mean_spec(frame) = mean_spec_val
                     int_spec(frame) = int_spec_val
 
-                    call update_progress(frame - start + 1, num_per_image)
+                    ! measure progress only on the root image
+                    if (this_image() == 1) call update_progress(frame - start + 1, num_per_image)
                 end do
 
                 ! update the FITS dataset (taking advantage of automatic reallocation)
