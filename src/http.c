@@ -566,7 +566,20 @@ static enum MHD_Result on_http_connection(void *cls,
     };
 #endif
 
-    if (strstr(url, "image_spectrum") != NULL)
+    if (strstr(url, "/progress/") != NULL)
+    {
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+        {
+            datasetId++;
+            printf("[progress] datasetId(%s)\n", datasetId);
+        }
+
+        return http_not_implemented(connection);
+    }
+
+    if (strstr(url, "/image_spectrum") != NULL)
     {
         gboolean fetch_data = FALSE;
         int width, height;
