@@ -124,10 +124,18 @@ contains
         real, allocatable :: mean_spectrum(:) [:]
         real, allocatable :: integrated_spectrum(:) [:]
 
-        integer(8) :: start, finish, crate, cmax
+        integer(8) :: start, finish, crate, cmax, id
         real :: elapsed
 
-        item%id = hash(filename)
+        id = hash(filename)
+
+        ! nothing to do, the dataset has already been loaded
+        if (item%id .eq. id) then
+            if (this_image() == 1) print *, '[load_fits_file] nothing to do, the dataset has already been loaded'
+            return
+        end if
+
+        item%id = id
         item%ok = .false.
         item%error = .false.
 
