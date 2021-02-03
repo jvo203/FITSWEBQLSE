@@ -11888,7 +11888,7 @@ function show_welcome() {
 
 	headerDiv.append("h2")
 		.attr("align", "center")
-		.html('WELCOME TO FITSWEBQL SE β');
+		.html('WELCOME TO FORTRAN FITSWEBQLSE α');
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
@@ -11902,11 +11902,11 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html('<h4>Server-side code changed from Rust to C/C++ for extra performance</h4>');
+		.html('<h4>Server-side: a hybrid C / Co-Array FORTRAN</h4>');
 
-	ul.append("li")
+	/*ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html('<h4>32-bit floating-point High Dynamic Range images compressed with <a href="https://en.wikipedia.org/wiki/OpenEXR"><em>OpenEXR</em></a></h4>');
+		.html('<h4>32-bit floating-point High Dynamic Range images compressed with <a href="https://en.wikipedia.org/wiki/OpenEXR"><em>OpenEXR</em></a></h4>');*/
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
@@ -11915,7 +11915,7 @@ function show_welcome() {
 	if (!isLocal) {
 		ul.append("li")
 			.attr("class", "list-group-item list-group-item-success")
-			.html('<h4>FITSWebQL SE source code on GitHub: <a href="https://github.com/jvo203/FITSWebQL"><em>https://github.com/jvo203/FITSWebQL</em></a></h4>');
+			.html('<h4>FITSWEBQLSE source code on GitHub: <a href="https://github.com/jvo203/FITSWEBQLSE"><em>https://github.com/jvo203/FITSWEBQLSE</em></a></h4>');
 	}
 
 	bodyDiv.append("h3")
