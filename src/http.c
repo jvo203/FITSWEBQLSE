@@ -499,7 +499,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     return ret;
 }
 
-static enum MHD_Result send_progress(struct MHD_Connection *connection, const char *datasetId, float progress)
+static enum MHD_Result send_progress(struct MHD_Connection *connection, float progress)
 {
 
     return http_not_implemented(connection);
@@ -585,7 +585,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
             printf("[progress] datasetId(%s): %f\n", datasetId, progress);
 
-            return send_progress(connection, datasetId, progress);
+            return send_progress(connection, progress);
         }
         else
             return http_not_found(connection);
