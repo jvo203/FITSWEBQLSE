@@ -168,6 +168,7 @@ contains
 
         item%id = id
         item%progress = 0
+        item%elapsed = 0
         item%ok = .false.
         item%error = .false.
 
