@@ -327,7 +327,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
 
         if (etag != NULL)
         {
-            if (!strcmp(etag, last_etag))
+            if (strcmp(etag, last_etag) == 0)
                 unmodified = true;
         };
 
@@ -335,8 +335,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
         {
             printf("sending HTTP 304\n");
 
-            if (fd != -1)
-                close(fd);
+            close(fd);
 
             struct MHD_Response *response = MHD_create_response_from_buffer(0, NULL, MHD_RESPMEM_PERSISTENT);
 
