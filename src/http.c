@@ -499,6 +499,12 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     return ret;
 }
 
+static enum MHD_Result send_progress(struct MHD_Connection *connection, const char *datasetId, float progress)
+{
+
+    return http_not_implemented(connection);
+}
+
 static enum MHD_Result get_home_directory(struct MHD_Connection *connection)
 {
     struct passwd *passwdEnt = getpwuid(getuid());
@@ -579,7 +585,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
             printf("[progress] datasetId(%s): %f\n", datasetId, progress);
 
-            return http_not_implemented(connection);
+            return send_progress(connection, datasetId, progress);
         }
         else
             return http_not_found(connection);
