@@ -2317,46 +2317,48 @@ function process_viewport(width, height, w, h, bytes, stride, alpha, index, swap
 
 function process_progress_event(data, index) {
 	if (data != null) {
-		var running = data.running;
-		var total = data.total;
+		var progress = data.progress;
 		var elapsed = data.elapsed;
 
-		//console.log(data, index) ;
-
-		if (total > 0) {
-			notifications_received[index - 1] = Math.max(running, notifications_received[index - 1]);
+		if (progress > 0) {
+			notifications_received[index - 1] = Math.max(progress, notifications_received[index - 1]);
 
 			/*if(running > 0)
 			PROGRESS_VARIABLE = running/total ;
 			else*/
-			var PROGRESS_VARIABLE = notifications_received[index - 1] / total;
+			var PROGRESS_VARIABLE = progress;
 
 			if (PROGRESS_VARIABLE != previous_progress[index - 1]) {
 				previous_progress[index - 1] = PROGRESS_VARIABLE;
 
-				PROGRESS_INFO = "&nbsp;" + numeral(PROGRESS_VARIABLE).format('0.0%');
+				PROGRESS_INFO = "&nbsp;" + numeral(PROGRESS_VARIABLE / 100.0).format('0.0%');
 
 				if (!isNaN(elapsed)) {
 					var speed = notifications_received[index - 1] / elapsed;
-					var remaining_time = (total - notifications_received[index - 1]) / speed;//[s]
+					var remaining_time = (100.0 - notifications_received[index - 1]) / speed;//[s]
 
 					//console.log("speed:", speed, "remaining:", remaining_time);				
 					if (remaining_time > 1)
 						PROGRESS_INFO += ", " + numeral(remaining_time).format('00:00:00');
 				}
 
+				console.log(PROGRESS_INFO);
+
 				d3.select("#progress-bar" + index)
-					.attr("aria-valuenow", (100.0 * PROGRESS_VARIABLE))
-					.style("width", (100.0 * PROGRESS_VARIABLE) + "%")
+					.attr("aria-valuenow", (PROGRESS_VARIABLE))
+					.style("width", (PROGRESS_VARIABLE) + "%")
 					.html(PROGRESS_INFO);
 			}
+
+			if (progress >= 100.0)
+				document.getElementById('welcome').style.display = "none";
 		}
-		else {
+		/*else {
 			notifications_completed++;
 
 			if (notifications_completed == va_count)
 				document.getElementById('welcome').style.display = "none";
-		}
+		}*/
 	}
 }
 
