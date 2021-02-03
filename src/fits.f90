@@ -155,23 +155,26 @@ contains
             item%dmin = dmin
             item%dmax = dmax
 
-            ! synchronise the pixels/mask/spectra across the images (gather on image 1)
+            ! synchronise the pixels/mask/spectra across the images
             if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
-                call co_sum(pixels, result_image=1)
-                call co_reduce(mask, logical_or, result_image=1)
+                ! pixels/mask will be shared by all images
+                ! during a parallel image downsizing / compression
+                call co_sum(pixels)
+                call co_reduce(mask, logical_or)
 
+                item%pixels = reshape(pixels, item%naxes(1:2))
+                item%mask = reshape(mask, item%naxes(1:2))
+
+                ! only the root image needs the spectrum information
                 call co_sum(mean_spectrum, result_image=1)
                 call co_sum(integrated_spectrum, result_image=1)
 
                 if (this_image() == 1) then
                     ! update the FITS dataset (taking advantage of automatic reallocation)
-                    item%pixels = reshape(pixels, item%naxes(1:2))
-                    item%mask = reshape(mask, item%naxes(1:2))
-
                     item%mean_spectrum = reshape(mean_spectrum, item%naxes(3:3))
                     item%integrated_spectrum = reshape(integrated_spectrum, item%naxes(3:3))
 
-                    print *, 'gathered {pixels,mask} on image', this_image()
+                    print *, 'synchronised {pixels,mask, mean/integrated spectrum}'
                 end if
             end if
 
