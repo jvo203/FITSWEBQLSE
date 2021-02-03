@@ -502,7 +502,26 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
 
 static enum MHD_Result send_progress(struct MHD_Connection *connection, float progress, float elapsed)
 {
-    return http_not_implemented(connection);
+    if (progress <= 0.0)
+        return http_not_implemented(connection);
+
+    GString *json = g_string_sized_new(128);
+
+    g_string_printf(json, "{\"progress\": %f, \"elapsed\": %f}", progress, elapsed);
+
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
+    g_string_free(json, FALSE);
+
+    MHD_add_response_header(response, "Cache-Control", "no-cache");
+    MHD_add_response_header(response, "Cache-Control", "no-store");
+    MHD_add_response_header(response, "Pragma", "no-cache");
+    MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
+
+    enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+    MHD_destroy_response(response);
+
+    return ret;
 }
 
 static enum MHD_Result get_home_directory(struct MHD_Connection *connection)
@@ -584,7 +603,7 @@ static enum MHD_Result on_http_connection(void *cls,
             float progress = get_progress();
             float elapsed = get_elapsed();
 
-            printf("[progress] datasetId(%s): %f%% in %f [s]\n", datasetId, progress, elapsed);
+            // printf("[progress] datasetId(%s): %f%% in %f [s]\n", datasetId, progress, elapsed);
 
             return send_progress(connection, progress, elapsed);
         }
