@@ -11888,7 +11888,7 @@ function show_welcome() {
 
 	headerDiv.append("h2")
 		.attr("align", "center")
-		.html('WELCOME TO FORTRAN FITSWEBQLSE α');
+		.html('WELCOME TO FITSWEBQL SE α');
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
@@ -11902,7 +11902,7 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html('<h4>Server-side: a hybrid C / Co-Array FORTRAN</h4>');
+		.html('<h4>Server: a hybrid C / Co-Array FORTRAN 2018</h4>');
 
 	/*ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
