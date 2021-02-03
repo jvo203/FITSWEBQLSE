@@ -36,6 +36,7 @@ extern void http_request(char *uri, size_t n);
 extern int get_error_status();
 extern int get_ok_status();
 extern float get_progress();
+extern float get_elapsed();
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -499,9 +500,8 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     return ret;
 }
 
-static enum MHD_Result send_progress(struct MHD_Connection *connection, float progress)
+static enum MHD_Result send_progress(struct MHD_Connection *connection, float progress, float elapsed)
 {
-
     return http_not_implemented(connection);
 }
 
@@ -582,10 +582,11 @@ static enum MHD_Result on_http_connection(void *cls,
             datasetId++;
 
             float progress = get_progress();
+            float elapsed = get_elapsed();
 
-            printf("[progress] datasetId(%s): %f\n", datasetId, progress);
+            printf("[progress] datasetId(%s): %f\% in %f [s]\n", datasetId, progress, elapsed);
 
-            return send_progress(connection, progress);
+            return send_progress(connection, progress, elapsed);
         }
         else
             return http_not_found(connection);
