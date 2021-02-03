@@ -135,6 +135,10 @@ contains
         get_progress = item%progress
     end function get_progress
 
+    real(c_float) function get_elapsed() bind(c)
+        get_elapsed = item%elapsed
+    end function get_elapsed
+
     subroutine load_fits_file(filename)
         implicit none
         character(len=1024), intent(in) :: filename
