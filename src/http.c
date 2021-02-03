@@ -584,7 +584,7 @@ static enum MHD_Result on_http_connection(void *cls,
             float progress = get_progress();
             float elapsed = get_elapsed();
 
-            printf("[progress] datasetId(%s): %f\% in %f [s]\n", datasetId, progress, elapsed);
+            printf("[progress] datasetId(%s): %f%% in %f [s]\n", datasetId, progress, elapsed);
 
             return send_progress(connection, progress, elapsed);
         }
