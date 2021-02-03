@@ -11890,6 +11890,10 @@ function show_welcome() {
 		.attr("align", "center")
 		.html('WELCOME TO FITSWEBQL SE α');
 
+	headerDiv.append("div")
+		.attr("align", "right")
+		.html("Powered by<img src=\"/fortran.webp\" alt=\" Powered by Fortran 2018\" style = \"height:40px; margin-top:25px;\" >");
+
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
 		.attr("class", "modal-body");
@@ -11902,7 +11906,7 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html('<h4>Server: a hybrid C / Co-Array FORTRAN 2018</h4>');
+		.html("<h4>Server: a hybrid C / Co-Array FORTRAN 2018</h4>");
 
 	/*ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
@@ -11910,7 +11914,7 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html('<h4>HDR image rendering with WebGL</h4>');
+		.html('<h4>Client: HDR image rendering with WebGL</h4>');
 
 	if (!isLocal) {
 		ul.append("li")
