@@ -106,7 +106,7 @@ contains
         item%progress = 100.0*progress/total
         item%elapsed = elapsed
 
-        print *, 'progress:', item%progress, '%, elapsed time ', item%elapsed, ' [s]'
+        ! print *, 'progress:', item%progress, '%, elapsed time ', item%elapsed, ' [s]'
     end subroutine update_progress
 
     integer(c_int) function get_error_status() bind(c)
