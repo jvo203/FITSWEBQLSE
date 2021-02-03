@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-02-02.0";
+	return "JS2021-02-03.0";
 }
 
 const wasm_supported = (() => {
@@ -2342,8 +2342,6 @@ function process_progress_event(data, index) {
 						PROGRESS_INFO += ", " + numeral(remaining_time).format('00:00:00');
 				}
 
-				console.log(PROGRESS_INFO);
-
 				d3.select("#progress-bar" + index)
 					.attr("aria-valuenow", (PROGRESS_VARIABLE))
 					.style("width", (PROGRESS_VARIABLE) + "%")
@@ -2472,7 +2470,8 @@ function poll_progress(datasetId, index) {
 			try {
 				process_progress_event(data, index);
 
-				if (data.total == 0 || data.running != data.total)
+				// if (data.total == 0 || data.running != data.total)
+				if (data.progress == 0 || data.progress < 100.0)
 					setTimeout(function () {
 						poll_progress(datasetId, index);
 					}, 250);
