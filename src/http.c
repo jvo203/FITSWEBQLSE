@@ -4,6 +4,9 @@
 #include <signal.h>
 #include <pthread.h>
 
+#define __USE_XOPEN
+#include <time.h>
+
 #include <microhttpd.h>
 #include <libwebsockets.h>
 
@@ -275,6 +278,8 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
     int fd;
     struct stat buf;
     char path[1024];
+    char last_modified[255];
+    char last_etag[255];
 
     /* check for NULL strings */
     if (NULL == url)
@@ -298,6 +303,51 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
                 abort();
             fd = -1;
         }
+
+        struct tm tm = {0};
+        const char *modified = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "If-Modified-Since");
+        const char *etag = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "If-None-Match");
+
+        if (modified != NULL)
+        {
+            if (strptime(modified, "%a, %d %b %Y %H:%M:%S %Z", &tm) != NULL)
+                printf("If-Modified-Since: %s\n", modified);
+        };
+
+        struct tm lm;
+        gmtime_r(&buf.st_mtime, &lm);
+        strftime(last_modified, sizeof(last_modified) - 1, "%a, %d %b %Y %H:%M:%S %Z", &lm);
+        strftime(last_etag, sizeof(last_etag) - 1, "%a%d%b%Y%H%M%S%Z", &lm);
+
+        bool unmodified = false;
+
+        //if(difftime(mktime(&lm), mktime(&tm)) <= 0)
+        if (difftime(timegm(&lm), timegm(&tm)) <= 0)
+            unmodified = true;
+
+        if (etag != NULL)
+        {
+            if (!strcmp(etag, last_etag))
+                unmodified = true;
+        };
+
+        if (unmodified)
+        {
+            printf("sending HTTP 304\n");
+
+            if (fd != -1)
+                close(fd);
+
+            response = MHD_create_response_from_buffer(0, NULL, MHD_RESPMEM_PERSISTENT);
+
+            MHD_add_response_header(response, "Cache-Control", "public, max-age=86400");
+            MHD_add_response_header(response, MHD_HTTP_HEADER_ETAG, last_etag);
+
+            ret = MHD_queue_response(connection, MHD_HTTP_NOT_MODIFIED, response);
+            MHD_destroy_response(response);
+
+            return ret;
+        };
     }
 
     if (-1 == fd)
@@ -371,6 +421,9 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
         pos = (char *)strstr(url, ".svg");
         if (pos != NULL)
             MHD_add_response_header(response, "Content-Type", "image/svg+xml");
+
+        MHD_add_response_header(response, "Cache-Control", "public, max-age=86400"); //86400
+        MHD_add_response_header(response, MHD_HTTP_HEADER_ETAG, last_etag);
 
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
         MHD_destroy_response(response);
