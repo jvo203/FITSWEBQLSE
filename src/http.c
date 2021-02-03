@@ -338,12 +338,12 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
             if (fd != -1)
                 close(fd);
 
-            response = MHD_create_response_from_buffer(0, NULL, MHD_RESPMEM_PERSISTENT);
+            struct MHD_Response *response = MHD_create_response_from_buffer(0, NULL, MHD_RESPMEM_PERSISTENT);
 
             MHD_add_response_header(response, "Cache-Control", "public, max-age=86400");
             MHD_add_response_header(response, MHD_HTTP_HEADER_ETAG, last_etag);
 
-            ret = MHD_queue_response(connection, MHD_HTTP_NOT_MODIFIED, response);
+            enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_NOT_MODIFIED, response);
             MHD_destroy_response(response);
 
             return ret;
