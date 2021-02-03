@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-02-03.0";
+	return "JS2021-02-03.1";
 }
 
 const wasm_supported = (() => {
@@ -13952,13 +13952,13 @@ async*/ function mainRenderer() {
 			.attr("id", "welcomeGroup");
 
 		group.append("h1")
-			.text("FITSWebQL SE");
+			.text("FITSWEBQLSE");
 
 		group.append("p")
 			.text(votable.getAttribute('data-server-version') + "/" + get_js_version());
 
 		group.append("p")
-			.text("Server is processing your request. Please wait...");
+			.text("Processing request, please wait ...");
 
 		if (va_count == 1) {
 			/*group.append("h4")
