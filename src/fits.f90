@@ -44,6 +44,7 @@ module fits
         logical :: is_xray = .false.
         logical :: error = .false.
         logical :: ok = .false.
+        real :: progress = 0
 
         ! spectra
         real, allocatable :: mean_spectrum(:)
@@ -111,6 +112,10 @@ contains
         return
     end function get_ok_status
 
+    real(c_float) function get_progress() bind(c)
+        get_progress = item%progress
+    end function get_progress
+
     subroutine load_fits_file(filename)
         implicit none
         character(len=1024), intent(in) :: filename
@@ -139,6 +144,7 @@ contains
         end if
 
         item%id = id
+        item%progress = 0
         item%ok = .false.
         item%error = .false.
 
@@ -616,6 +622,8 @@ contains
                 end if
             end do
 
+            item%progress = 100
+
             ! update the FITS dataset (taking advantage of automatic reallocation)
             item%pixels = reshape(buffer, naxes(1:2))
             item%mask = reshape(mask, naxes(1:2))
@@ -720,6 +728,8 @@ contains
 
                     mean_spec(frame) = mean_spec_val
                     int_spec(frame) = int_spec_val
+
+                    item%progress = 100.0*(frame - start + 1)/num_per_image
                 end do
 
                 ! update the FITS dataset (taking advantage of automatic reallocation)
