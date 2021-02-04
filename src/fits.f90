@@ -667,9 +667,9 @@ contains
             ! measure progress only on the root image
             if (this_image() == 1) call update_progress(1, 1)
 
-            ! update the FITS dataset (taking advantage of automatic reallocation)
-            ! item%pixels = reshape(local_buffer, naxes(1:2))
-            ! item%mask = reshape(mask, naxes(1:2))
+            ! put a local buffer/mask range onto image 1
+            pixels(firstpix:lastpix) [1] = local_buffer(:)
+            mask(firstpix:lastpix) [1] = local_mask(:)
         else
             ! read a range of 2D planes in parallel on each image
             tid = this_image()
@@ -775,10 +775,6 @@ contains
                     ! measure progress only on the root image
                     if (this_image() == 1) call update_progress(frame - start + 1, num_per_image)
                 end do
-
-                ! update the FITS dataset (taking advantage of automatic reallocation)
-                ! item%pixels = reshape(pixels, naxes(1:2))
-                ! item%mask = reshape(mask, naxes(1:2))
             end block
         end if
 
