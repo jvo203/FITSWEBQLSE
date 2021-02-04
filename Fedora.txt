@@ -24,9 +24,11 @@
 
 	mkdir build && cd build/
 
-	cmake -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_RPATH=/usr/local/lib/ ..
+	cmake -DCMAKE_Fortran_COMPILER=ifort -DUSE_GNU_INSTALL_CONVENTION=TRUE ..
 
 	make
+
+	sudo make install
 
 4. FORTRAN-UNIX
 
