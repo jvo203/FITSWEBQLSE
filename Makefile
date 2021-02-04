@@ -38,7 +38,7 @@ ifeq ($(UNAME_S),Darwin)
 	FORT = mpif90
 	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize
 	CFLAGS := $(FLAGS)
-	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
+	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib `pkg-config --cflags json-fortran`
 endif
 
 # include dependencies (all .d files)
