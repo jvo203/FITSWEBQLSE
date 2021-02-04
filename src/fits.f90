@@ -186,11 +186,18 @@ contains
             item%dmax = dmax
 
             ! synchronise the pixels/mask/spectra across the images
-            if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
-                ! pixels/mask will be shared by all images
-                ! during a parallel image downsizing / compression
-                call co_sum(pixels)
-                call co_reduce(mask, logical_or)
+            if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+                ! depth == 1
+                item%pixels = reshape(pixels, item%naxes(1:2))
+                item%mask = reshape(mask, item%naxes(1:2))
+
+                if (this_image() == 1) then
+                    print *, 'synchronised {pixels,mask}'
+                end if
+            else
+                ! depth > 1
+                call co_sum(pixels, result_image=1)
+                call co_reduce(mask, logical_or, result_image=1)
 
                 item%pixels = reshape(pixels, item%naxes(1:2))
                 item%mask = reshape(mask, item%naxes(1:2))
@@ -636,7 +643,7 @@ contains
             firstpix = 1 + (tid - 1)*num_per_image
             lastpix = min(tid*num_per_image, npixels)
             num_per_image = lastpix - firstpix + 1
-            print *, 'tid:', tid, 'firstpix:', firstpix, 'lastpix:', lastpix, 'num_per_image:', num_per_image
+            ! print *, 'tid:', tid, 'firstpix:', firstpix, 'lastpix:', lastpix, 'num_per_image:', num_per_image
 
             ! local buffers
             allocate (local_buffer(num_per_image))
