@@ -293,7 +293,7 @@ contains
         integer naxis, bitpix
         integer npixels
         integer naxes(4)
-        integer(kind=8) firstpix, npixels_per_image
+        integer(kind=8) firstpix, lastpix, npixels_per_image
         integer tid, start, end, num_per_image, frame
         integer, dimension(4) :: fpixels, lpixels, incs
 
@@ -630,8 +630,13 @@ contains
 
         ! calculate the range for each image
         if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
-            ! read one 2D image only on the first image
-            ! not so, do it on all images
+            ! read one 2D image only in parallel on each image
+            tid = this_image()
+            num_per_image = npixels/num_images()
+            firstpix = 1 + (tid - 1)*num_per_image
+            lastpix = min(tid*num_per_image, npixels)
+            num_per_image = lastpix - firstpix + 1
+            print *, 'tid:', tid, 'firstpix:', firstpix, 'lastpix:', lastpix, 'num_per_image:', num_per_image
 
             ! local buffers
             allocate (local_buffer(npixels))
