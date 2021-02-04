@@ -303,6 +303,7 @@ contains
         integer(kind=8) firstpix, lastpix, npixels_per_image
         integer tid, start, end, num_per_image, frame
         integer, dimension(4) :: fpixels, lpixels, incs
+        logical test_ignrval
 
         ! local (image) buffers
         real(kind=4), allocatable :: local_buffer(:)
@@ -632,6 +633,13 @@ contains
             go to 200
         end if
 
+        ! should we be checking values against ignrval ?
+        if (isnan(item%ignrval)) then
+            test_ignrval = .false.
+        else
+            test_ignrval = .true.
+        end if
+
         ! start the timer
         call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
@@ -662,6 +670,14 @@ contains
             do j = 1, num_per_image
                 tmp = local_buffer(j)
                 if (isnan(tmp) .neqv. .true.) then
+                    if (test_ignrval) then
+                        if (tmp .eq. item%ignrval) then
+                            local_buffer(j) = 0.0
+                            local_mask(j) = .false.
+                            cycle
+                        end if
+                    end if
+
                     dmin = min(dmin, tmp)
                     dmax = max(dmax, tmp)
                     local_mask(j) = .true.
