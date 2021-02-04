@@ -692,6 +692,8 @@ static enum MHD_Result on_http_connection(void *cls,
         if (!get_ok_status())
             return http_accepted(connection);
 
+        // call FORTRAN to get the necessary data
+
         // respond with the image + JSON data (header, spectrum, histogram)
         // to save network bandwidth the response should be binary
         return http_not_implemented(connection);
