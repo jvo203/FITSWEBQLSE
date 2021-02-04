@@ -14,13 +14,25 @@
 
 	sudo dnf install ispc # (not needed yet)
 
-3. FORTRAN-UNIX
+3. JSON-FORTRAN
+
+	git clone https://github.com/jacobwilliams/json-fortran
+
+	cd json-fortran/
+
+	mkdir build && cd build/
+
+	cmake -DCMAKE_Fortran_COMPILER=ifort -DCMAKE_INSTALL_RPATH=/usr/local/lib/ ..
+
+	make
+
+4. FORTRAN-UNIX
 
 	$ git clone https://github.com/interkosmos/fortran-unix
 	$ cd fortran-unix/
 	$ make
 
-4. Adjust environment variables
+5. Adjust environment variables
 
 	Add
 
