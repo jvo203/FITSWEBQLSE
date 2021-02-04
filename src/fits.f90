@@ -297,7 +297,11 @@ contains
         integer tid, start, end, num_per_image, frame
         integer, dimension(4) :: fpixels, lpixels, incs
 
-        real(kind=4), allocatable :: buffer(:)
+        ! local (image) buffers
+        real(kind=4), allocatable :: local_buffer(:)
+        logical(kind=1), allocatable :: local_mask(:)
+
+        ! shared variables
         real(kind=4), allocatable :: pixels(:) [:]
         logical(kind=1), allocatable :: mask(:) [:]
         real, allocatable :: mean_spec(:) [:]
@@ -629,17 +633,22 @@ contains
             ! read one 2D image only on the first image
             ! not so, do it on all images
 
-            allocate (buffer(npixels))
+            ! local buffers
+            allocate (local_buffer(npixels))
+            allocate (local_mask(npixels))
+
+            ! shared buffers
+            allocate (pixels(npixels) [*])
             allocate (mask(npixels) [*])
 
-            call ftgpve(unit, group, 1, npixels, nullval, buffer, anynull, status)
+            call ftgpve(unit, group, 1, npixels, nullval, local_buffer, anynull, status)
 
             ! abort upon an error
             if (status .ne. 0) go to 200
 
             ! calculate the min/max values
             do j = 1, npixels
-                tmp = buffer(j)
+                tmp = local_buffer(j)
                 if (isnan(tmp) .neqv. .true.) then
                     dmin = min(dmin, tmp)
                     dmax = max(dmax, tmp)
@@ -653,7 +662,7 @@ contains
             if (this_image() == 1) call update_progress(1, 1)
 
             ! update the FITS dataset (taking advantage of automatic reallocation)
-            item%pixels = reshape(buffer, naxes(1:2))
+            item%pixels = reshape(local_buffer, naxes(1:2))
             item%mask = reshape(mask, naxes(1:2))
         else
             ! read a range of 2D planes in parallel on each image
@@ -671,7 +680,7 @@ contains
                 integer pixel_count
 
                 ! npixels_per_image = npixels*num_per_image
-                allocate (buffer(npixels))
+                allocate (local_buffer(npixels))
                 allocate (pixels(npixels) [*])
                 allocate (mask(npixels) [*])
 
@@ -710,7 +719,7 @@ contains
                     incs = 1
 
                     ! skip the do loop, make one call to ftgsve instead
-                    call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, buffer, anynull, status)
+                    call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, local_buffer, anynull, status)
 
                     ! abort upon an error
                     if (status .ne. 0) go to 200
@@ -726,7 +735,7 @@ contains
 
                     ! calculate the min/max values
                     do j = 1, npixels
-                        tmp = buffer(j)
+                        tmp = local_buffer(j)
                         if (isnan(tmp) .neqv. .true.) then
                             frame_min = min(frame_min, tmp)
                             frame_max = max(frame_max, tmp)
