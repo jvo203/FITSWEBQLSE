@@ -668,10 +668,13 @@ contains
 
             ! calculate the min/max values
             do j = 1, num_per_image
+
                 tmp = local_buffer(j)
+
                 if (isnan(tmp) .neqv. .true.) then
                     if (test_ignrval) then
                         if (tmp .eq. item%ignrval) then
+                            ! skip the IGNRVAL pixels
                             local_buffer(j) = 0.0
                             local_mask(j) = .false.
                             cycle
@@ -685,6 +688,7 @@ contains
                     local_buffer(j) = 0.0
                     local_mask(j) = .false.
                 end if
+
             end do
 
             ! measure progress only on the root image
@@ -764,8 +768,18 @@ contains
 
                     ! calculate the min/max values
                     do j = 1, npixels
+
                         tmp = local_buffer(j)
+
                         if (isnan(tmp) .neqv. .true.) then
+                            if (test_ignrval) then
+                                if (tmp .eq. item%ignrval) then
+                                    ! skip the IGNRVAL pixels
+                                    mask(j) = mask(j) .or. .false.
+                                    cycle
+                                end if
+                            end if
+
                             frame_min = min(frame_min, tmp)
                             frame_max = max(frame_max, tmp)
 
@@ -779,6 +793,7 @@ contains
                         else
                             mask(j) = mask(j) .or. .false.
                         end if
+
                     end do
 
                     item%frame_min(frame) = frame_min
