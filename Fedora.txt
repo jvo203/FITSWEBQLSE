@@ -2,6 +2,8 @@
 
 2. Install dependencies
 
+	sudo dnf install cmake
+
 	sudo dnf install libmicrohttpd-devel
 
 	sudo dnf install libwebsockets-devel
