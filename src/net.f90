@@ -44,11 +44,11 @@ contains
         character, dimension(1024) :: filepath
 
         ! a JSON message
-        type(json_file)            :: msg
+        ! type(json_file)            :: msg
 
-        call msg%initialize()
+        ! call msg%initialize()
 
-        call msg%destroy()
+        ! call msg%destroy()
 
         call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
