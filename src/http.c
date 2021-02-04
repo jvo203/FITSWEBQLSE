@@ -554,9 +554,6 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
 
 static enum MHD_Result send_progress(struct MHD_Connection *connection, float progress, float elapsed)
 {
-    if (progress <= 0.0)
-        return http_not_implemented(connection);
-
     GString *json = g_string_sized_new(128);
 
     g_string_printf(json, "{\"progress\" : %f, \"elapsed\" : %f}", progress, elapsed);
