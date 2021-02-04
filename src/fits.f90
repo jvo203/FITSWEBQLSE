@@ -649,7 +649,8 @@ contains
                 end if
             end do
 
-            item%progress = 100
+            ! measure progress only on the root image
+            if (this_image() == 1) call update_progress(1, 1)
 
             ! update the FITS dataset (taking advantage of automatic reallocation)
             item%pixels = reshape(buffer, naxes(1:2))
