@@ -639,27 +639,28 @@ contains
             print *, 'tid:', tid, 'firstpix:', firstpix, 'lastpix:', lastpix, 'num_per_image:', num_per_image
 
             ! local buffers
-            allocate (local_buffer(npixels))
-            allocate (local_mask(npixels))
+            allocate (local_buffer(num_per_image))
+            allocate (local_mask(num_per_image))
 
             ! shared buffers
             allocate (pixels(npixels) [*])
             allocate (mask(npixels) [*])
 
-            call ftgpve(unit, group, 1, npixels, nullval, local_buffer, anynull, status)
+            call ftgpve(unit, group, firstpix, num_per_image, nullval, local_buffer, anynull, status)
 
             ! abort upon an error
             if (status .ne. 0) go to 200
 
             ! calculate the min/max values
-            do j = 1, npixels
+            do j = 1, num_per_image
                 tmp = local_buffer(j)
                 if (isnan(tmp) .neqv. .true.) then
                     dmin = min(dmin, tmp)
                     dmax = max(dmax, tmp)
-                    mask(j) = .true.
+                    local_mask(j) = .true.
                 else
-                    mask(j) = .false.
+                    local_buffer(j) = 0.0
+                    local_mask(j) = .false.
                 end if
             end do
 
@@ -667,8 +668,8 @@ contains
             if (this_image() == 1) call update_progress(1, 1)
 
             ! update the FITS dataset (taking advantage of automatic reallocation)
-            item%pixels = reshape(local_buffer, naxes(1:2))
-            item%mask = reshape(mask, naxes(1:2))
+            ! item%pixels = reshape(local_buffer, naxes(1:2))
+            ! item%mask = reshape(mask, naxes(1:2))
         else
             ! read a range of 2D planes in parallel on each image
             tid = this_image()
@@ -776,8 +777,8 @@ contains
                 end do
 
                 ! update the FITS dataset (taking advantage of automatic reallocation)
-                item%pixels = reshape(pixels, naxes(1:2))
-                item%mask = reshape(mask, naxes(1:2))
+                ! item%pixels = reshape(pixels, naxes(1:2))
+                ! item%mask = reshape(mask, naxes(1:2))
             end block
         end if
 
