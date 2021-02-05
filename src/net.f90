@@ -130,7 +130,7 @@ contains
         call inherent_image_dimensions(inner_width, inner_height)
 
         ! get the downscaled image dimensions
-        ! scale = get_image_scale()
+        scale = get_image_scale(width, height, inner_width, inner_height)
 
     end subroutine image_spectrum_request
 
