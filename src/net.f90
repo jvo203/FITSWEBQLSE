@@ -81,13 +81,13 @@ contains
         logical compare_frameid
         integer i
 
-        ! default value
-        compare_frameid = .true.
-
         if (n .ne. len(frameid)) then
             compare_frameid = .false.
             return
         end if
+
+        ! default value
+        compare_frameid = .true.
 
         do i = 1, n
             if (frameid(i:i) .ne. datasetId(i)) then
