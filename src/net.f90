@@ -66,8 +66,8 @@ contains
         ! first initialise the whole string with space characters
         ! so that the end of the string can be found later on
         filepath = ' '
-
         filepath(1:n) = uri(1:n)
+
         do i = 0, size - 1
             call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
         end do
@@ -85,6 +85,16 @@ contains
 
         integer :: length
         character, dimension(1024) :: frameid
+
+        if (n .lt. 1) return
+
+        ! first initialise the whole string with space characters
+        ! so that the end of the string can be found later on
+        frameid = ' '
+        frameid(1:n) = datasetId(1:n)
+
+        print *, '[', datasetId, ']; width=', width, ', height=', height
+
     end subroutine image_spectrum_request
 
 end module net
