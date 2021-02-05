@@ -1195,12 +1195,55 @@ contains
 
     END FUNCTION median
 
-    subroutine true_image_dimensions(width, height)
+    subroutine inherent_image_dimensions(width, height)
         integer, intent(out) :: width, height
+        integer i
+        integer x1, x2, y1, y2
 
         width = item%naxes(1)
         height = item%naxes(2)
 
-    end subroutine true_image_dimensions
+        x1 = 1; x2 = width
+        y1 = 1; y2 = height
+
+        ! go through the 2D image mask item%mask
+        ! truncating the NaN values along the X & Y axes
+
+        ! x1
+        do i = 1, width
+            x1 = i
+
+            if (any(item%mask(i, :))) exit
+        end do
+
+        ! x2
+        do i = width, 1, -1
+            x2 = i
+
+            if (any(item%mask(i, :))) exit
+        end do
+
+        ! y1
+        do i = 1, height
+            y1 = i
+
+            if (any(item%mask(:, i))) exit
+        end do
+
+        ! y2
+        do i = height, 1, -1
+            y2 = i
+
+            if (any(item%mask(:, i))) exit
+        end do
+
+        print *, 'original dimensions:', width, height
+
+        width = x2 - x1 + 1
+        height = y2 - y1 + 1
+
+        print *, 'inherent dimensions:', width, height
+
+    end subroutine inherent_image_dimensions
 
 end module fits
