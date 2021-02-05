@@ -73,6 +73,26 @@ contains
         end do
     end subroutine fitswebql_request
 
+    pure function compare_frameid(frameid, datasetId, n)
+        use, intrinsic :: iso_c_binding
+        CHARACTER(LEN=*), INTENT(IN) :: frameid
+        integer, intent(in) :: n
+        character(kind=c_char), dimension(n), intent(in) :: datasetId
+        logical compare_frameid
+        integer i
+
+        ! default value
+        compare_frameid = .true.
+
+        do i = 1, n
+            if (frameid(i:i) .ne. datasetId(i)) then
+                compare_frameid = .false.
+                return
+            end if
+        end do
+
+    end function compare_frameid
+
     subroutine image_spectrum_request(datasetId, n, width, height) bind(C)
         use mpi
         use fits
@@ -81,14 +101,18 @@ contains
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
         integer(kind=c_int), intent(in), value :: width, height
-        integer :: i
 
         if (n .lt. 1) return
 
         print *, '"', datasetId, '", width', width, ', height', height
 
-        ! compared the datasetId with item%frameid
-        print *, '(', datasetId, ') -- (', trim(item%frameid), ')'
+        ! compare the datasetId with item%frameid
+        if (.not. compare_frameid(trim(item%frameid), datasetId, n)) then
+            print *, 'dataset ids do not match: (', datasetId, ') .ne. (', trim(item%frameid), ')'
+            return
+        end if
+
+        print *, 'datasetId match'
 
     end subroutine image_spectrum_request
 
