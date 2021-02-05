@@ -76,7 +76,7 @@ contains
     pure function compare_frameid(frameid, datasetId, n)
         use, intrinsic :: iso_c_binding
         CHARACTER(LEN=*), INTENT(IN) :: frameid
-        integer, intent(in) :: n
+        integer(kind=c_size_t), intent(in) :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
         logical compare_frameid
         integer i
