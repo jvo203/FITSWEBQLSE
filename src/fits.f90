@@ -1245,4 +1245,31 @@ contains
 
     end subroutine inherent_image_dimensions
 
+    function get_screen_scale(x) result(scale)
+        integer, intent(in) :: x
+        real scale
+
+        scale = floor(0.9*real(x))
+
+    end function get_screen_scale
+
+    function get_image_scale_square(width, height, img_width, img_height) result(scale)
+        integer, intent(in) :: width, height
+        integer, intent(in) :: img_width, img_height
+        real scale, screen_dimension, image_dimension
+
+        screen_dimension = get_screen_scale(min(width, height))
+        image_dimension = max(img_width, img_height)
+        scale = screen_dimension/image_dimension
+    end function get_image_scale_square
+
+    function get_image_scale(width, height, inner_width, inner_height) result(scale)
+        integer, intent(in) :: width, height
+        integer, intent(in) :: inner_width, inner_height
+        real scale
+
+        scale = 1.0
+
+    end function get_image_scale
+
 end module fits
