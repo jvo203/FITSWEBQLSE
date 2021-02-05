@@ -682,7 +682,7 @@ static enum MHD_Result on_http_connection(void *cls,
         width = atoi(widthStr);
         height = atoi(heightStr);
 
-        printf("datasetId(%s), width(%d), height(%d), quality(%s), fetch_data: %s\n", datasetId, width, height, quality, (fetch_data ? "true" : "false"));
+        printf("[C] datasetId(%s), width(%d), height(%d), quality(%s), fetch_data: %s\n", datasetId, width, height, quality, (fetch_data ? "true" : "false"));
 
         if (width <= 0 || height <= 0)
             return http_not_implemented(connection);
@@ -694,6 +694,7 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_accepted(connection);
 
         // call FORTRAN to get the necessary data
+        printf("[C] calling image_spectrum_request\n");
         image_spectrum_request(datasetId, strlen(datasetId), width, height);
 
         // respond with the image + JSON data (header, spectrum, histogram)
