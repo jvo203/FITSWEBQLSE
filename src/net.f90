@@ -117,7 +117,7 @@ contains
             return
         end if
 
-        print *, 'datasetId match'
+        ! dataset ids match, we can proceed with downsizing the image
 
     end subroutine image_spectrum_request
 
