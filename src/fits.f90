@@ -1195,4 +1195,12 @@ contains
 
     END FUNCTION median
 
+    subroutine true_image_dimensions(width, height)
+        integer, intent(out) :: width, height
+
+        width = item%naxes(1)
+        height = item%naxes(2)
+
+    end subroutine true_image_dimensions
+
 end module fits
