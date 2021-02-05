@@ -107,6 +107,10 @@ contains
         character(kind=c_char), dimension(n), intent(in) :: datasetId
         integer(kind=c_int), intent(in), value :: width, height
 
+        integer true_width, true_height
+        integer img_width, img_height
+        real scale
+
         if (n .lt. 1) return
 
         print *, '"', datasetId, '", width', width, ', height', height
@@ -118,6 +122,15 @@ contains
         end if
 
         ! dataset ids match, we can proceed with downsizing the image
+
+        ! by default no downsizing
+        scale = 1.0
+
+        !
+        call true_image_dimensions(true_width, true_height)
+
+        ! get the downscaled image dimensions
+        ! scale = get_image_scale()
 
     end subroutine image_spectrum_request
 
