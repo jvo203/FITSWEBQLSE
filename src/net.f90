@@ -76,7 +76,7 @@ contains
     pure function compare_frameid(frameid, datasetId, n)
         use, intrinsic :: iso_c_binding
         CHARACTER(LEN=*), INTENT(IN) :: frameid
-        integer(kind=c_size_t), intent(in) :: n
+        integer, intent(in) :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
         logical compare_frameid
         integer i
@@ -116,7 +116,7 @@ contains
         print *, '"', datasetId, '", width', width, ', height', height
 
         ! compare the datasetId with item%frameid
-        if (.not. compare_frameid(trim(item%frameid), datasetId, n)) then
+        if (.not. compare_frameid(trim(item%frameid), datasetId, int(n))) then
             print *, 'dataset ids do not match: (', datasetId, ') .ne. (', trim(item%frameid), ')'
             return
         end if
