@@ -80,20 +80,15 @@ contains
         use, intrinsic :: iso_c_binding
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
-        integer(kind=c_int), intent(in) :: width, height
+        integer(kind=c_int), intent(in), value :: width, height
         integer :: i
-
-        integer :: length
-        character, dimension(1024) :: frameid
 
         if (n .lt. 1) return
 
-        ! first initialise the whole string with space characters
-        ! so that the end of the string can be found later on
-        frameid = ' '
-        frameid(1:n) = datasetId(1:n)
+        print *, '"', datasetId, '", width', width, ', height', height
 
-        print *, '[', datasetId, ']; width=', width, ', height=', height
+        ! compared the datasetId with item%frameid
+        print *, '(', datasetId, ') -- (', trim(item%frameid), ')'
 
     end subroutine image_spectrum_request
 
