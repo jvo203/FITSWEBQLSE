@@ -107,7 +107,7 @@ contains
         character(kind=c_char), dimension(n), intent(in) :: datasetId
         integer(kind=c_int), intent(in), value :: width, height
 
-        integer true_width, true_height
+        integer inner_width, inner_height
         integer img_width, img_height
         real scale
 
@@ -127,7 +127,7 @@ contains
         scale = 1.0
 
         !
-        call true_image_dimensions(true_width, true_height)
+        call inherent_image_dimensions(inner_width, inner_height)
 
         ! get the downscaled image dimensions
         ! scale = get_image_scale()
