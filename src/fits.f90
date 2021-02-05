@@ -1263,13 +1263,61 @@ contains
         scale = screen_dimension/image_dimension
     end function get_image_scale_square
 
-    function get_image_scale(width, height, inner_width, inner_height) result(scale)
+    function get_image_scale(width, height, img_width, img_height) result(scale)
         integer, intent(in) :: width, height
-        integer, intent(in) :: inner_width, inner_height
+        integer, intent(in) :: img_width, img_height
         real scale
 
-        scale = 1.0
+        if (img_width .eq. img_height) then
+            scale = get_image_scale_square(width, height, img_width, img_height)
+            return
+        end if
 
+        if (img_height .lt. img_width) then
+            block
+                real screen_dimension, image_dimension
+                real new_image_width
+
+                screen_dimension = 0.9*real(height)
+                image_dimension = img_height
+                scale = screen_dimension/image_dimension
+                new_image_width = scale*img_width
+
+                if (new_image_width .gt. 0.8*real(width)) then
+                    screen_dimension = 0.8*real(width)
+                    image_dimension = img_width
+                    scale = screen_dimension/image_dimension
+                end if
+
+            end block
+
+            return
+        end if
+
+        if (img_width .lt. img_height) then
+            block
+                real screen_dimension, image_dimension
+                real new_image_height
+
+                screen_dimension = 0.8*real(width)
+                image_dimension = img_width
+                scale = screen_dimension/image_dimension
+                new_image_height = scale*img_height
+
+                if (new_image_height > 0.9*real(height)) then
+                    screen_dimension = 0.9*real(height)
+                    image_dimension = img_height
+                    scale = screen_dimension/image_dimension
+                end if
+
+            end block
+
+            return
+        end if
+
+        ! default scale
+        scale = 1.0
+        return
     end function get_image_scale
 
 end module fits
