@@ -36,6 +36,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 
 extern void exit_fortran();
 extern void fitswebql_request(char *uri, size_t n);
+extern void image_spectrum_request(char *datasetId, size_t n, int width, int height);
 extern int get_error_status();
 extern int get_ok_status();
 extern float get_progress();
@@ -693,6 +694,7 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_accepted(connection);
 
         // call FORTRAN to get the necessary data
+        image_spectrum_request(datasetId, strlen(datasetId), width, height);
 
         // respond with the image + JSON data (header, spectrum, histogram)
         // to save network bandwidth the response should be binary
