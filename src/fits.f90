@@ -1197,8 +1197,7 @@ contains
 
     subroutine inherent_image_dimensions(width, height)
         integer, intent(out) :: width, height
-        integer i
-        integer x1, x2, y1, y2
+        integer x1, x2, y1, y2, k
 
         width = item%naxes(1)
         height = item%naxes(2)
@@ -1210,31 +1209,31 @@ contains
         ! truncating the NaN values along the X & Y axes
 
         ! x1
-        do i = 1, width
-            x1 = i
+        do k = 1, width
+            x1 = k
 
-            if (any(item%mask(i, :))) exit
+            if (any(item%mask(k, :))) exit
         end do
 
         ! x2
-        do i = width, 1, -1
-            x2 = i
+        do k = width, 1, -1
+            x2 = k
 
-            if (any(item%mask(i, :))) exit
+            if (any(item%mask(k, :))) exit
         end do
 
         ! y1
-        do i = 1, height
-            y1 = i
+        do k = 1, height
+            y1 = k
 
-            if (any(item%mask(:, i))) exit
+            if (any(item%mask(:, k))) exit
         end do
 
         ! y2
-        do i = height, 1, -1
-            y2 = i
+        do k = height, 1, -1
+            y2 = k
 
-            if (any(item%mask(:, i))) exit
+            if (any(item%mask(:, k))) exit
         end do
 
         print *, 'original dimensions:', width, height
