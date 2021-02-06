@@ -62,7 +62,7 @@ program main
                 count = length(filepath, 1024)
 
                 if (count .gt. 0) then
-                    ! print *, 'rank', rank, 'filepath:>', filepath(1:count), '<'
+                    print *, 'rank', rank, 'filepath:>', filepath(1:count), '<'
 
                     do i = 1, count
                         filename(i:i) = filepath(i)
