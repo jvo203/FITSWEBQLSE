@@ -101,7 +101,7 @@ contains
     subroutine image_spectrum_request(datasetId, n, width, height) bind(C)
         use mpi
         use fits
-        use :: json_module
+        ! use :: json_module
         use, intrinsic :: iso_c_binding
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
