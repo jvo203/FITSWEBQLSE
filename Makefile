@@ -27,7 +27,7 @@ CFLAGS := $(FLAGS)
 INC = `pkg-config --cflags glib-2.0`
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -ljsonfortran
+LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` `pkg-config --libs json-fortran`
 # -lmpifort not needed when using mpiifort
 
 ifeq ($(UNAME_S),Darwin)
