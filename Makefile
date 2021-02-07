@@ -27,7 +27,7 @@ CFLAGS := $(FLAGS)
 INC = `pkg-config --cflags glib-2.0`
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` `pkg-config --libs json-fortran`
+LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0`
 # -lmpifort not needed when using mpiifort
 
 ifeq ($(UNAME_S),Darwin)
@@ -38,7 +38,7 @@ ifeq ($(UNAME_S),Darwin)
 	FORT = mpif90
 	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize
 	CFLAGS := $(FLAGS)
-	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib `pkg-config --cflags json-fortran`
+	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
 endif
 
 # include dependencies (all .d files)
