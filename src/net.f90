@@ -33,7 +33,6 @@ contains
     subroutine fitswebql_request(uri, n) bind(C)
         use mpi
         use fits
-        ! use :: json_module
         use, intrinsic :: iso_c_binding
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: uri
@@ -42,13 +41,6 @@ contains
         integer :: size, ierror
         integer :: length
         character, dimension(1024) :: filepath
-
-        ! a JSON message
-        ! type(json_file)            :: msg
-
-        ! call msg%initialize()
-
-        ! call msg%destroy()
 
         call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
@@ -101,7 +93,6 @@ contains
     subroutine image_spectrum_request(datasetId, n, width, height) bind(C)
         use mpi
         use fits
-        ! use :: json_module
         use, intrinsic :: iso_c_binding
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
