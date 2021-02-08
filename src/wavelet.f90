@@ -1090,5 +1090,10 @@ contains
     subroutine to_fixed_block(x)
         real(kind=4), dimension(4, 4), intent(in) :: x
 
+        ! the maximum exponent
+        integer :: max_exp
+
+        max_exp = maxval(exponent(x))
+        print *, 'max. exponent:', max_exp
     end subroutine to_fixed_block
 end module wavelet
