@@ -400,7 +400,7 @@ contains
         return
     end function i4_periodic
 
-    subroutine daub4_2Dtransform(n, x, y, mask)
+    subroutine daub4_2Dtransform(n, x, y, mask, create_mask)
 !********************************
 ! a 2D DAUB4 wavelet transform of a square floating-point matrix
 !
@@ -420,6 +420,9 @@ contains
 !  Output, real (kind = 4) Y(N,N), the wavelet-transformed matrix
 !
 ! Output, logical mask(N,N), a boolean matrix where .false. indicates NaN values in X
+!
+! Input: logical create_mask - whether or not to creater or re-use the given mask
+! instead of creating it from scratch
 !
         implicit none
 
@@ -442,35 +445,48 @@ contains
         integer(kind=4) m
         real(kind=4), dimension(n, n), intent(in) :: x
         real(kind=4), dimension(n, n), intent(out) :: y
-        logical(kind=1), optional, dimension(n, n), intent(out) :: mask
+        logical(kind=1), optional, dimension(n, n), intent(inout) :: mask
+        logical, optional, intent(in) :: create_mask
         real(kind=4), dimension(n) :: z
         real(kind=4) average
         integer(kind=4) nvalid
-
         integer(kind=4) k
 
         y = x
         z = 0.0E+00
 
         if (present(mask)) then
-            ! by default there are no NaNs
-            mask = .true.
+            block
+                logical need_mask
 
-            !  pick out all the NaN
-            where (isnan(x)) mask = .false.
+                if (present(create_mask)) then
+                    need_mask = create_mask
+                else
+                    need_mask = .true.
+                end if
 
-            ! calculate the mean of the input array
-            nvalid = count(mask)
+                if (need_mask) then
+                    !  pick out all the NaN
+                    where (isnan(x))
+                        mask = .false.
+                    elsewhere
+                        mask = .true.
+                    end where
+                end if
 
-            ! all values might be NaN in which case set the array to 0.0
-            if (nvalid .gt. 0) then
-                average = sum(x, mask=mask)/nvalid
-            else
-                average = 0.0
-            end if
+                ! calculate the mean of the input array
+                nvalid = count(mask)
 
-            ! replace NaNs with the average value
-            where (.not. mask) y = average
+                ! all values might be NaN in which case set the array to 0.0
+                if (nvalid .gt. 0) then
+                    average = sum(x, mask=mask)/nvalid
+                else
+                    average = 0.0
+                end if
+
+                ! replace NaNs with the average value
+                where (.not. mask) y = average
+            end block
         end if
 
         m = n
