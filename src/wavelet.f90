@@ -1126,4 +1126,14 @@ contains
         print *, 'compressed:', compressed
 
     end subroutine to_fixed_block
+
+    elemental subroutine rescale_real(x, e, max_exp, bits)
+        real, intent(inout) :: x
+        integer, intent(in) :: e
+        integer, intent(in) :: max_exp, bits
+        integer i
+
+        i = 2*e - max_exp + bits
+        x = set_exponent(x, i)
+    end subroutine rescale_real
 end module wavelet
