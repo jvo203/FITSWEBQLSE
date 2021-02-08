@@ -1122,12 +1122,11 @@ contains
 
     elemental function quantize(x, e, max_exp, bits)
         real, intent(in) :: x
-        integer, intent(in) :: e
-        integer, intent(in) :: max_exp, bits
-        integer :: quantize
+        integer, intent(in) :: e, max_exp, bits
+        integer(kind=1) :: quantize
         integer i
 
         i = e - max_exp + bits
-        quantize = nint(set_exponent(x, i))
+        quantize = nint(set_exponent(x, i), kind=1)
     end function quantize
 end module wavelet
