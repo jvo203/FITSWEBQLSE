@@ -1081,8 +1081,14 @@ contains
         integer(kind=4) :: n
         real(kind=4), dimension(n, n), intent(in) :: x
         integer(kind=4) :: i, j
-        real(kind=4), dimension(4, 4) :: tmp
 
         if (mod(n, 4) .ne. 0) return
+
+        call to_fixed_block(x(1:4, 1:4))
     end subroutine to_fixed
+
+    subroutine to_fixed_block(x)
+        real(kind=4), dimension(4, 4), intent(in) :: x
+
+    end subroutine to_fixed_block
 end module wavelet
