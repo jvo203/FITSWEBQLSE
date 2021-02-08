@@ -8,7 +8,7 @@ module wavelet
 
     type fixed_block
         integer :: common_exp
-        integer, dimension(4, 4) :: mantissa
+        integer(kind=1), dimension(4, 4) :: mantissa
     end type fixed_block
 contains
     subroutine daub4_transform(n, x, y)
@@ -1098,10 +1098,7 @@ contains
 
     subroutine to_fixed_block(x)
         real(kind=4), dimension(4, 4), intent(in) :: x
-        real(kind=4), dimension(4, 4) :: work
-
-        ! radix (i.e. 2)
-        integer :: rad
+        integer, dimension(4, 4) :: e
 
         ! the maximum exponent
         integer :: max_exp
@@ -1111,29 +1108,26 @@ contains
 
         print *, 'block:', x
 
-        rad = radix(x)
-        max_exp = maxval(exponent(x))
-        print *, 'max. exponent:', max_exp, ', radix:', rad
-
-        ! 8-bit quantization
-        work = x/rad**(max_exp)*rad**8
-        print *, 'work:', work
-        print *, 'quant:', nint(work)
+        e = exponent(x)
+        max_exp = maxval(e)
+        print *, 'max. exponent:', max_exp
 
         compressed%common_exp = max_exp
-        compressed%mantissa = nint(work)
+        ! 8-bit quantization (7 bits + sign)
+        compressed%mantissa = quantize(x, e, max_exp, 7)
 
         print *, 'compressed:', compressed
 
     end subroutine to_fixed_block
 
-    elemental subroutine rescale_real(x, e, max_exp, bits)
-        real, intent(inout) :: x
+    elemental function quantize(x, e, max_exp, bits)
+        real, intent(in) :: x
         integer, intent(in) :: e
         integer, intent(in) :: max_exp, bits
+        integer :: quantize
         integer i
 
-        i = 2*e - max_exp + bits
-        x = set_exponent(x, i)
-    end subroutine rescale_real
+        i = e - max_exp + bits
+        quantize = nint(set_exponent(x, i))
+    end function quantize
 end module wavelet
