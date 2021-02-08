@@ -1,5 +1,10 @@
 module wavelet
     private i4_wrap, i4_modp, i4_reflect, i4_periodic
+
+    ! the minimum X-Y dimension below which the wavelet routines should terminate
+    ! the operation (i.e. 8 -> 4x4 coarse coefficients, ideal for ZFP)
+    ! since ZFP operates on 4x4 blocks
+    integer(kind=4), parameter :: min_dim = 8
 contains
     subroutine daub4_transform(n, x, y)
 
@@ -492,7 +497,7 @@ contains
         m = n
 
         ! for each level
-        do while (m .ge. 4)
+        do while (m .ge. min_dim)
             ! transform all the rows
             do k = 1, m
                 i = 1
@@ -597,7 +602,7 @@ contains
         x = y
         z = 0.0E+00
 
-        m = 4
+        m = min_dim
 
         ! for each level
         do while (m .le. n)
@@ -663,7 +668,7 @@ contains
     end subroutine daub4_2Dtransform_inv
 
 ! in-place versions
-    subroutine daub4_2Dtransform_inpl(n, x, mask)
+    subroutine daub4_2Dtransform_inpl(n, x, mask, create_mask)
         !********************************
         ! a 2D DAUB4 wavelet transform of a square floating-point matrix (in-place)
         !
@@ -683,6 +688,9 @@ contains
         ! Output, logical mask(N,N), a boolean matrix where .false. indicates NaN values in X
         !
         !  the output is stored in-place
+        !
+        ! Input: logical create_mask - whether or not to creater or re-use the given mask
+        ! instead of creating it from scratch
         !
         implicit none
 
@@ -704,7 +712,8 @@ contains
 
         integer(kind=4) m
         real(kind=4), dimension(n, n), intent(inout) :: x
-        logical(kind=1), optional, dimension(n, n), intent(out) :: mask
+        logical(kind=1), optional, dimension(n, n), intent(inout) :: mask
+        logical, optional, intent(in) :: create_mask
         real(kind=4), dimension(n) :: z
         real(kind=4) average
         integer(kind=4) nvalid
@@ -713,30 +722,43 @@ contains
         z = 0.0E+00
 
         if (present(mask)) then
-            ! by default there are no NaNs
-            mask = .true.
+            block
+                logical need_mask
 
-            !  pick out all the NaN
-            where (isnan(x)) mask = .false.
+                if (present(create_mask)) then
+                    need_mask = create_mask
+                else
+                    need_mask = .true.
+                end if
 
-            ! calculate the mean of the input array
-            nvalid = count(mask)
+                if (need_mask) then
+                    !  pick out all the NaN
+                    where (isnan(x))
+                        mask = .false.
+                    elsewhere
+                        mask = .true.
+                    end where
+                end if
 
-            ! all values might be NaN in which case set the array to 0.0
-            if (nvalid .gt. 0) then
-                average = sum(x, mask=mask)/nvalid
-            else
-                average = 0.0
-            end if
+                ! calculate the mean of the input array
+                nvalid = count(mask)
 
-            ! replace NaNs with the average value
-            where (.not. mask) x = average
+                ! all values might be NaN in which case set the array to 0.0
+                if (nvalid .gt. 0) then
+                    average = sum(x, mask=mask)/nvalid
+                else
+                    average = 0.0
+                end if
+
+                ! replace NaNs with the average value
+                where (.not. mask) x = average
+            end block
         end if
 
         m = n
 
         ! for each level
-        do while (m .ge. 4)
+        do while (m .ge. min_dim)
             ! transform all the rows
             do k = 1, m
                 i = 1
@@ -791,9 +813,6 @@ contains
         ! truncate values near zero
         where (abs(x) .lt. zero) x = 0.0
 
-        ! wavelet shrinkage to denoise / compress the data
-        call wave_shrink(n, x)
-
         return
     end subroutine daub4_2Dtransform_inpl
 
@@ -842,7 +861,7 @@ contains
 
         z = 0.0E+00
 
-        m = 4
+        m = min_dim
 
         ! for each level
         do while (m .le. n)
@@ -915,7 +934,7 @@ contains
         integer(kind=4) :: i, j, nvalid
         real(kind=4) mean, std, tmp
 
-        if (n .lt. 4) return
+        if (n .lt. min_dim) return
 
         ! calculate the mean and standard deviation of
         ! absolute values of detail coefficients (skipping the coarse coeffs)
@@ -928,7 +947,7 @@ contains
         do j = 1, n
             do i = 1, n
                 ! skip the coarse coefficients
-                if ((i .le. 2) .and. (j .le. 2)) cycle
+                if ((i .le. min_dim/2) .and. (j .le. min_dim/2)) cycle
 
                 tmp = abs(x(i, j))
                 ! only process non-zero values
@@ -992,7 +1011,7 @@ contains
         integer(kind=4) :: i, j, nvalid
         real(kind=4) mean, std, tmp
 
-        if (n .lt. 4) return
+        if (n .lt. min_dim) return
 
         ! calculate the mean and standard deviation of
         ! of detail coefficients (skipping the coarse coeffs)
@@ -1004,7 +1023,7 @@ contains
         do j = 1, n
             do i = 1, n
                 ! skip the coarse coefficients
-                if ((i .le. 2) .and. (j .le. 2)) cycle
+                if ((i .le. min_dim/2) .and. (j .le. min_dim/2)) cycle
 
                 mean = mean + x(i, j)
                 nvalid = nvalid + 1
