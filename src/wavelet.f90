@@ -5,6 +5,11 @@ module wavelet
     ! the operation (i.e. 8 -> 4x4 coarse coefficients, ideal for ZFP)
     ! since ZFP operates on 4x4 blocks
     integer(kind=4), parameter :: min_dim = 8
+
+    type fixed_block
+        integer :: common_exp
+        integer, dimension(4, 4) :: mantissa
+    end type fixed_block
 contains
     subroutine daub4_transform(n, x, y)
 
@@ -1084,16 +1089,41 @@ contains
 
         if (mod(n, 4) .ne. 0) return
 
-        call to_fixed_block(x(1:4, 1:4))
+        do j = 1, n - 4
+            do i = 1, n - 4
+                call to_fixed_block(x(i:i + 4, j:j + 4))
+            end do
+        end do
     end subroutine to_fixed
 
     subroutine to_fixed_block(x)
         real(kind=4), dimension(4, 4), intent(in) :: x
+        real(kind=4), dimension(4, 4) :: work
+
+        ! radix (i.e. 2)
+        integer :: rad
 
         ! the maximum exponent
         integer :: max_exp
 
+        ! the result
+        type(fixed_block) compressed
+
+        print *, 'block:', x
+
+        rad = radix(x)
         max_exp = maxval(exponent(x))
-        print *, 'max. exponent:', max_exp
+        print *, 'max. exponent:', max_exp, ', radix:', rad
+
+        ! 8-bit quantization
+        work = x/rad**(max_exp)*rad**8
+        print *, 'work:', work
+        print *, 'quant:', nint(work)
+
+        compressed%common_exp = max_exp
+        compressed%mantissa = nint(work)
+
+        print *, 'compressed:', compressed
+
     end subroutine to_fixed_block
 end module wavelet
