@@ -1074,4 +1074,15 @@ contains
         end do
 
     end subroutine wave_shrink2
+
+    subroutine to_fixed(n, x)
+        implicit none
+
+        integer(kind=4) :: n
+        real(kind=4), dimension(n, n), intent(in) :: x
+        integer(kind=4) :: i, j
+        real(kind=4), dimension(4, 4) :: tmp
+
+        if (mod(n, 4) .ne. 0) return
+    end subroutine to_fixed
 end module wavelet
