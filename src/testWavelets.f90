@@ -35,6 +35,9 @@ program Wavelets
         print *, y(i, :)
     end do
 
+    ! ZFP-like compression
+    call to_fixed(N, y)
+
     ! an inverse transform to recover the data
     call daub4_2Dtransform_inv(N, y, x, mask)
 
