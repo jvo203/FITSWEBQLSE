@@ -4,7 +4,7 @@ module wavelet
     ! the minimum X-Y dimension below which the wavelet routines should terminate
     ! the operation (i.e. 8 -> 4x4 coarse coefficients, ideal for ZFP)
     ! since ZFP operates on 4x4 blocks
-    integer(kind=4), parameter :: min_dim = 8
+    integer(kind=4), parameter :: min_dim = 4
     integer(kind=4), parameter :: significant_bits = 7
 
     type fixed_block
