@@ -10,6 +10,8 @@ program Wavelets
     real(kind=4), dimension(N, N) :: y
     logical(kind=1), dimension(N, N) :: mask
 
+    type(fixed_block), dimension(N/4, N/4) :: compressed
+
     do i = 1, N
         do j = 1, N
             x(i, j) = i*j
@@ -36,7 +38,7 @@ program Wavelets
     end do
 
     ! ZFP-like compression
-    call to_fixed(N, y)
+    call to_fixed(N, y, compressed)
 
     ! an inverse transform to recover the data
     call daub4_2Dtransform_inv(N, y, x, mask)
