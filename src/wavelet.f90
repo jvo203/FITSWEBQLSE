@@ -1093,13 +1093,13 @@ contains
 
         if (mod(n, 4) .ne. 0) return
 
-        print *, '[to_fixed] n=', n, '/4:', shiftr(n, 2)
-
-        do j = 1, n - 4
-            do i = 1, n - 4
-                call to_fixed_block(x(i:i + 4, j:j + 4), compressed(shiftr(i, 2), shiftr(j, 2)))
+        do j = 1, n/4
+            do i = 1, n/4
+                call to_fixed_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), compressed(i, j))
+                ! print *, 'I:', i, 'J:', j, 'compressed:', compressed(i, j)
             end do
         end do
+
     end subroutine to_fixed
 
     pure subroutine to_fixed_block(x, compressed)
