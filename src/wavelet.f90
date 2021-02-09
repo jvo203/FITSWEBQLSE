@@ -1088,16 +1088,19 @@ contains
         real(kind=4), dimension(n, n), intent(in) :: x
         integer(kind=4) :: i, j
 
+        ! the result
+        type(fixed_block), dimension(n/4, n/4) :: compressed
+
         if (mod(n, 4) .ne. 0) return
 
         do j = 1, n - 4
             do i = 1, n - 4
-                call to_fixed_block(x(i:i + 4, j:j + 4))
+                call to_fixed_block(x(i:i + 4, j:j + 4), compressed(i/4, j/4))
             end do
         end do
     end subroutine to_fixed
 
-    pure subroutine to_fixed_block(x)
+    pure subroutine to_fixed_block(x, compressed)
         real(kind=4), dimension(4, 4), intent(in) :: x
         integer, dimension(4, 4) :: e
 
@@ -1105,7 +1108,7 @@ contains
         integer :: max_exp
 
         ! the result
-        type(fixed_block) compressed
+        type(fixed_block), intent(out) :: compressed
 
         e = exponent(x)
         max_exp = maxval(e)
