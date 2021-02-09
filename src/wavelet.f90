@@ -5,9 +5,10 @@ module wavelet
     ! the operation (i.e. 8 -> 4x4 coarse coefficients, ideal for ZFP)
     ! since ZFP operates on 4x4 blocks
     integer(kind=4), parameter :: min_dim = 8
+    integer(kind=4), parameter :: significant_bits = 7
 
     type fixed_block
-        integer :: common_exp
+        integer(kind=2) :: common_exp
         integer(kind=1), dimension(4, 4) :: mantissa
     end type fixed_block
 contains
@@ -1096,7 +1097,7 @@ contains
         end do
     end subroutine to_fixed
 
-    subroutine to_fixed_block(x)
+    pure subroutine to_fixed_block(x)
         real(kind=4), dimension(4, 4), intent(in) :: x
         integer, dimension(4, 4) :: e
 
@@ -1106,19 +1107,21 @@ contains
         ! the result
         type(fixed_block) compressed
 
-        print *, 'block:', x
-
         e = exponent(x)
         max_exp = maxval(e)
-        print *, 'max. exponent:', max_exp
 
-        compressed%common_exp = max_exp
+        compressed%common_exp = int(max_exp, kind=2)
         ! 8-bit quantization (7 bits + sign)
-        compressed%mantissa = quantize(x, e, max_exp, 7)
-
-        print *, 'compressed:', compressed
+        compressed%mantissa = quantize(x, e, max_exp, significant_bits)
 
     end subroutine to_fixed_block
+
+    pure subroutine from_fixed_block(compressed, x)
+        type(fixed_block), intent(in) :: compressed
+        real(kind=4), dimension(4, 4), intent(out) :: x
+
+        x = dequantize(compressed%mantissa, compressed%common_exp, significant_bits)
+    end subroutine from_fixed_block
 
     elemental function quantize(x, e, max_exp, bits)
         real, intent(in) :: x
@@ -1129,4 +1132,15 @@ contains
         i = e - max_exp + bits
         quantize = nint(set_exponent(x, i), kind=1)
     end function quantize
+
+    elemental function dequantize(x, max_exp, bits)
+        integer(kind=1), intent(in) :: x
+        integer(kind=2), intent(in) :: max_exp
+        integer, intent(in) :: bits
+        real :: dequantize
+        integer i
+
+        i = max_exp - bits
+        dequantize = scale(real(x), i)
+    end function dequantize
 end module wavelet
