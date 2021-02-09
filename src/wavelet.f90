@@ -1121,6 +1121,28 @@ contains
 
     end subroutine to_fixed_block
 
+    subroutine from_fixed(n, compressed, x)
+        implicit none
+
+        integer(kind=4) :: n
+        type(fixed_block), dimension(n/4, n/4), intent(in) :: compressed
+
+        ! the result
+        real(kind=4), dimension(n, n), intent(out) :: x
+        integer(kind=4) :: i, j
+
+        if (mod(n, 4) .ne. 0) return
+
+        do j = 1, n/4
+            do i = 1, n/4
+                call from_fixed_block(compressed(i, j), x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
+            end do
+        end do
+
+        print *, '[from_fixedX]::X', x
+
+    end subroutine from_fixed
+
     pure subroutine from_fixed_block(compressed, x)
         type(fixed_block), intent(in) :: compressed
         real(kind=4), dimension(4, 4), intent(out) :: x
