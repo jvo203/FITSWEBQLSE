@@ -3,7 +3,7 @@ program Wavelets
     use, intrinsic :: ieee_arithmetic
     implicit none
 
-    integer(kind=4), parameter :: N = 8
+    integer(kind=4), parameter :: N = 16
     integer i, j
 
     real(kind=4), dimension(N, N) :: x
@@ -39,6 +39,9 @@ program Wavelets
 
     ! ZFP-like compression
     call to_fixed(N, y, compressed)
+
+    ! ZFP-like decompression
+    call from_fixed(N, compressed, y)
 
     ! an inverse transform to recover the data
     call daub4_2Dtransform_inv(N, y, x, mask)
