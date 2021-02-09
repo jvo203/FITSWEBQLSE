@@ -1095,7 +1095,7 @@ contains
 
         do j = 1, n - 4
             do i = 1, n - 4
-                call to_fixed_block(x(i:i + 4, j:j + 4), compressed(i/4, j/4))
+                call to_fixed_block(x(i:i + 4, j:j + 4), compressed(rshift(i, 2), rshift(j, 2)))
             end do
         end do
     end subroutine to_fixed
