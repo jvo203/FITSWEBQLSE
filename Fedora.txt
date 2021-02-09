@@ -18,6 +18,9 @@
 
 3. JSON-FORTRAN
 
+	# this library does not work (segmentation faults)
+	# removed
+
 	on macOS with homebrew:
 
 	brew install --with-unicode-support json-fortran
