@@ -37,12 +37,6 @@ program Wavelets
         print *, y(i, :)
     end do
 
-    ! ZFP-like compression
-    call to_fixed(N, y, compressed)
-
-    ! ZFP-like decompression
-    call from_fixed(N, compressed, y)
-
     ! an inverse transform to recover the data
     call daub4_2Dtransform_inv(N, y, x, mask)
 
@@ -86,6 +80,26 @@ program Wavelets
     call daub4_2Dtransform_inv_inpl(n, x, mask)
 
     print *, 'RECOVERED'
+    do i = 1, N
+        print *, x(i, :)
+    end do
+
+    ! ZFP-like fixed-point 4x4 block with a common exponent
+
+    ! reset the source
+    do i = 1, N
+        do j = 1, N
+            x(i, j) = i*j
+        end do
+    end do
+
+    ! ZFP-like compression
+    call to_fixed(N, x, compressed)
+
+    ! ZFP-like decompression
+    call from_fixed(N, compressed, x)
+
+    print *, 'FIXED-POINT DECOMPRESSION'
     do i = 1, N
         print *, x(i, :)
     end do
