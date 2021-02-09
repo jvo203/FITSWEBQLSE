@@ -1093,9 +1093,11 @@ contains
 
         if (mod(n, 4) .ne. 0) return
 
+        print *, '[to_fixed] n=', n, '/4:', shiftr(n, 2)
+
         do j = 1, n - 4
             do i = 1, n - 4
-                call to_fixed_block(x(i:i + 4, j:j + 4), compressed(rshift(i, 2), rshift(j, 2)))
+                call to_fixed_block(x(i:i + 4, j:j + 4), compressed(shiftr(i, 2), shiftr(j, 2)))
             end do
         end do
     end subroutine to_fixed
