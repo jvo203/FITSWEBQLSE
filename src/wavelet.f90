@@ -8,7 +8,7 @@ module wavelet
     integer(kind=4), parameter :: significant_bits = 7
 
     type fixed_block
-        integer(kind=2) :: common_exp
+        integer(kind=1) :: common_exp
         integer(kind=1), dimension(4, 4) :: mantissa
     end type fixed_block
 contains
@@ -1110,7 +1110,7 @@ contains
         e = exponent(x)
         max_exp = maxval(e)
 
-        compressed%common_exp = int(max_exp, kind=2)
+        compressed%common_exp = int(max_exp - 1, kind=1)
         ! 8-bit quantization (7 bits + sign)
         compressed%mantissa = quantize(x, e, max_exp, significant_bits)
 
@@ -1135,12 +1135,12 @@ contains
 
     elemental function dequantize(x, max_exp, bits)
         integer(kind=1), intent(in) :: x
-        integer(kind=2), intent(in) :: max_exp
+        integer(kind=1), intent(in) :: max_exp
         integer, intent(in) :: bits
         real :: dequantize
         integer i
 
-        i = max_exp - bits
+        i = (max_exp + 1) - bits
         dequantize = scale(real(x), i)
     end function dequantize
 end module wavelet
