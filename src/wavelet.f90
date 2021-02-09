@@ -1139,8 +1139,6 @@ contains
             end do
         end do
 
-        print *, '[from_fixedX]::X', x
-
     end subroutine from_fixed
 
     pure subroutine from_fixed_block(compressed, x)
