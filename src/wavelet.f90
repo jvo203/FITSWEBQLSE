@@ -1081,7 +1081,7 @@ contains
 
     end subroutine wave_shrink2
 
-    subroutine to_fixed(n, x)
+    subroutine to_fixed(n, x, compressed)
         implicit none
 
         integer(kind=4) :: n
@@ -1089,7 +1089,7 @@ contains
         integer(kind=4) :: i, j
 
         ! the result
-        type(fixed_block), dimension(n/4, n/4) :: compressed
+        type(fixed_block), dimension(n/4, n/4), intent(out) :: compressed
 
         if (mod(n, 4) .ne. 0) return
 
