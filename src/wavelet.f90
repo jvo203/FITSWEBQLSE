@@ -1120,7 +1120,7 @@ contains
         type(fixed_block), intent(in) :: compressed
         real(kind=4), dimension(4, 4), intent(out) :: x
 
-        x = dequantize(compressed%mantissa, compressed%common_exp, significant_bits)
+        x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
     end subroutine from_fixed_block
 
     elemental function quantize(x, e, max_exp, bits)
@@ -1135,7 +1135,7 @@ contains
 
     elemental function dequantize(x, max_exp, bits)
         integer(kind=1), intent(in) :: x
-        integer(kind=1), intent(in) :: max_exp
+        integer, intent(in) :: max_exp
         integer, intent(in) :: bits
         real :: dequantize
         integer i
