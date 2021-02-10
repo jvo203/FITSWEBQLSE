@@ -11,6 +11,18 @@ module lz4
             integer(kind=c_int), value, intent(in) :: inputSize
         end function LZ4_compressBound
 
+        integer(kind=c_int) function LZ4_compress_HC(src, dst, srcSize,&
+        &dstCapacity, compressionLevel) BIND(C, name='LZ4_compress_HC')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(C_PTR), value :: src
+            type(C_PTR), value :: dst
+            integer(kind=c_int), value, intent(in) :: srcSize
+            integer(kind=c_int), value, intent(in) :: dstCapacity
+            integer(kind=c_int), value, intent(in) :: compressionLevel
+        end function LZ4_compress_HC
+
     end interface
 contains
 ! Fortran entry subroutines
@@ -32,6 +44,10 @@ contains
         print *, 'worst_size = ', worst_size, 'bytes'
 
         allocate (buffer(worst_size))
+
+        ! compress the mask as much as possible
+        ! compressed_size = LZ4_compress_HC((const char *)header, (char *)header_lz4,
+        !                            hdr_len, worst_size, LZ4HC_CLEVEL_MAX);
     end subroutine compress_mask
 
 end module lz4
