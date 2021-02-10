@@ -1072,6 +1072,108 @@ contains
         return
     end subroutine to_daub4_block
 
+    subroutine from_daub4_block(x, mask)
+        !********************************
+        ! a 2D DAUB4 inverse wavelet transform of a square floating-point matrix (in-place)
+        !
+        !  Licensing:
+        !
+        !    This code is distributed under the GNU LGPL license.
+        !
+        !  Author:
+        !
+        !  Christopher Zapart, based on the 1D code by John Burkardt
+        !
+        !  Fixed block dimension N = 4, the dimension of the square block 4 x 4
+        !
+        !  Input and Output, real (kind = 4) X(4,4), the wavelet-transformed square matrix
+        !
+        !  the output is stored in-place in x
+        !
+        use, intrinsic :: ieee_arithmetic
+        implicit none
+
+        integer(kind=4), parameter :: p = 3
+
+        real(kind=4), dimension(0:p) :: c = (/ &
+                                        0.4829629131445341E+00, &
+                                        0.8365163037378079E+00, &
+                                        0.2241438680420133E+00, &
+                                        -0.1294095225512603E+00/)
+        integer(kind=4) i
+        integer(kind=4) i0
+        integer(kind=4) i1
+        integer(kind=4) i2
+        integer(kind=4) i3
+        integer(kind=4) j
+        real(kind=4), dimension(4, 4), intent(inout) :: x
+        logical(kind=1), optional, dimension(4, 4), intent(in) :: mask
+        real(kind=4), dimension(4) :: z
+
+        integer(kind=4) k
+
+        z = 0.0E+00
+
+        ! do only one iteration as n .eq. 4
+
+        ! reverse all the columns
+        do k = 1, 4
+            j = 1
+
+            do i = 0, 2 - 1
+
+                i0 = i4_periodic(i, 1, 2)
+                i2 = i4_periodic(i + 1, 1, 2)
+
+                i1 = i4_periodic(i + 2, 2 + 1, 4)
+                i3 = i4_periodic(i + 2 + 1, 2 + 1, 4)
+
+                z(j) = c(2)*x(i0, k) + c(1)*x(i1, k) &
+                       + c(0)*x(i2, k) + c(3)*x(i3, k)
+
+                z(j + 1) = c(3)*x(i0, k) - c(0)*x(i1, k) &
+                           + c(1)*x(i2, k) - c(2)*x(i3, k)
+
+                j = j + 2
+
+            end do
+
+            x(1:4, k) = z(1:4)
+        end do
+
+        ! then the rows
+        do k = 1, 4
+            j = 1
+
+            do i = 0, 2 - 1
+
+                i0 = i4_periodic(i, 1, 2)
+                i2 = i4_periodic(i + 1, 1, 2)
+
+                i1 = i4_periodic(i + 2, 2 + 1, 4)
+                i3 = i4_periodic(i + 2 + 1, 2 + 1, 4)
+
+                z(j) = c(2)*x(k, i0) + c(1)*x(k, i1) &
+                       + c(0)*x(k, i2) + c(3)*x(k, i3)
+
+                z(j + 1) = c(3)*x(k, i0) - c(0)*x(k, i1) &
+                           + c(1)*x(k, i2) - c(2)*x(k, i3)
+
+                j = j + 2
+
+            end do
+
+            x(k, 1:4) = z(1:4)
+        end do
+
+        ! insert back NaN values
+        if (present(mask)) then
+            where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
+        end if
+
+        return
+    end subroutine from_daub4_block
+
     subroutine wave_shrink(n, x)
         implicit none
 
