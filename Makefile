@@ -58,6 +58,7 @@ fitswebqlse: $(OBJ)
 
 test:
 	ifort -Ofast -xHost -mavx -axAVX -qopt-report=2 src/lz4.f90 src/wavelet.f90 src/testWavelets.f90 -o testWavelets -llz4
+# on macos -L/usr/local/opt/lz4/lib -llz4
 
 mpi:
 	$(FORT) -Ofast -xHost test.f90 -o test
