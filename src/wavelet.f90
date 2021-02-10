@@ -13,6 +13,16 @@ module wavelet
         integer(kind=1) :: common_exp
         integer(kind=1), dimension(4, 4) :: mantissa
     end type fixed_block
+
+    real(kind=4), parameter :: zero = 1.0E-05
+
+    integer(kind=4), parameter :: p = 3
+
+    real(kind=4), dimension(0:p) :: c = (/ &
+                                    0.4829629131445341E+00, &
+                                    0.8365163037378079E+00, &
+                                    0.2241438680420133E+00, &
+                                    -0.1294095225512603E+00/)
 contains
     subroutine daub4_transform(n, x, y)
 
@@ -934,7 +944,7 @@ contains
         return
     end subroutine daub4_2Dtransform_inv_inpl
 
-    subroutine to_daub4_block(x, mask, create_mask)
+    pure subroutine to_daub4_block(x, mask, create_mask)
         !********************************
         ! a 2D DAUB4 wavelet transform of a square floating-point matrix (in-place)
         !
@@ -959,14 +969,6 @@ contains
         !
         implicit none
 
-        integer(kind=4), parameter :: p = 3
-        real(kind=4), parameter :: zero = 1.0E-05
-
-        real(kind=4), dimension(0:p) :: c = (/ &
-                                        0.4829629131445341E+00, &
-                                        0.8365163037378079E+00, &
-                                        0.2241438680420133E+00, &
-                                        -0.1294095225512603E+00/)
         integer(kind=4) i
         integer(kind=4) j
         integer(kind=4) j0
@@ -1074,7 +1076,7 @@ contains
         return
     end subroutine to_daub4_block
 
-    subroutine from_daub4_block(x, mask)
+    pure subroutine from_daub4_block(x, mask)
         !********************************
         ! a 2D DAUB4 inverse wavelet transform of a square floating-point matrix (in-place)
         !
@@ -1095,13 +1097,6 @@ contains
         use, intrinsic :: ieee_arithmetic
         implicit none
 
-        integer(kind=4), parameter :: p = 3
-
-        real(kind=4), dimension(0:p) :: c = (/ &
-                                        0.4829629131445341E+00, &
-                                        0.8365163037378079E+00, &
-                                        0.2241438680420133E+00, &
-                                        -0.1294095225512603E+00/)
         integer(kind=4) i
         integer(kind=4) i0
         integer(kind=4) i1
@@ -1338,16 +1333,13 @@ contains
 
         if (mod(n, 4) .ne. 0) return
 
-        do j = 1, n/4
-            do i = 1, n/4
-                if (present(mask)) then
-                    call to_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
-                    &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), .true.)
-                end if
+        do concurrent(j=1:n/4, i=1:n/4)
+            if (present(mask)) then
+                call to_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
+                &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), .true.)
+            end if
 
-                call to_fixed_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), compressed(i, j))
-                ! print *, 'I:', i, 'J:', j, 'compressed:', compressed(i, j)
-            end do
+            call to_fixed_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), compressed(i, j))
         end do
 
     end subroutine to_fixed
@@ -1384,15 +1376,13 @@ contains
 
         if (mod(n, 4) .ne. 0) return
 
-        do j = 1, n/4
-            do i = 1, n/4
-                call from_fixed_block(compressed(i, j), x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
+        do concurrent(j=1:n/4, i=1:n/4)
+            call from_fixed_block(compressed(i, j), x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
 
-                if (present(mask)) then
-                    call from_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
-                    &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
-                end if
-            end do
+            if (present(mask)) then
+                call from_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
+                &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
+            end if
         end do
 
     end subroutine from_fixed
