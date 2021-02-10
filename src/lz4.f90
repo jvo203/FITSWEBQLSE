@@ -90,6 +90,7 @@ contains
         mask_size = int(sizeof(mask), kind=c_int)
 
         decompressed_size = LZ4_decompress_safe(c_loc(compressed), c_loc(mask), compressed_size, mask_size)
+        print *, 'decompressed_size = ', decompressed_size, 'bytes'
     end subroutine decompress_mask
 
 end module lz4
