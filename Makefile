@@ -32,7 +32,7 @@ LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs g
 
 ifeq ($(UNAME_S),Darwin)
 	INC += -I/usr/local/opt/openssl/include
-	LIBS += -L/usr/local/opt/openssl/lib -lcaf_mpi
+	LIBS += -L/usr/local/opt/openssl/lib -lcaf_mpi -L/usr/local/opt/lz4/lib -llz4
 
 	CC = gcc
 	FORT = mpif90
