@@ -26,6 +26,9 @@ contains
 
         mask_size = int(sizeof(mask), kind=c_int)
         print *, 'sizeof(mask) = ', mask_size, 'bytes'
+
+        worst_size = LZ4_compressBound(mask_size)
+        print *, 'worst_size = ', worst_size, 'bytes'
     end subroutine compress_mask
 
 end module lz4
