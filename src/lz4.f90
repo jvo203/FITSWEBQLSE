@@ -73,4 +73,23 @@ contains
         compressed = reshape(buffer, (/compressed_size/))
     end subroutine compress_mask
 
+    subroutine decompress_mask(compressed, mask)
+        use, intrinsic :: iso_c_binding
+        implicit none
+
+        ! the input
+        character(kind=c_char), contiguous, target, intent(in) :: compressed(:)
+
+        ! the output
+        logical(kind=1), dimension(:, :), contiguous, target, intent(inout) :: mask
+
+        ! internal variables
+        integer(kind=c_int) mask_size, compressed_size, decompressed_size
+
+        compressed_size = int(sizeof(compressed), kind=c_int)
+        mask_size = int(sizeof(mask), kind=c_int)
+
+        decompressed_size = LZ4_decompress_safe(c_loc(compressed), c_loc(mask), compressed_size, mask_size)
+    end subroutine decompress_mask
+
 end module lz4
