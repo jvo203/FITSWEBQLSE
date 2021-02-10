@@ -932,6 +932,146 @@ contains
         return
     end subroutine daub4_2Dtransform_inv_inpl
 
+    subroutine to_daub4_block(x, mask, create_mask)
+        !********************************
+        ! a 2D DAUB4 wavelet transform of a square floating-point matrix (in-place)
+        !
+        !  Licensing:
+        !
+        !    This code is distributed under the GNU LGPL license.
+        !
+        !  Author:
+        !
+        !  Christopher Zapart, based on the 1D code by John Burkardt
+        !
+        !  Fixed block dimension N = 4, the dimension of the square block 4 x 4
+        !
+        !  Input and Output, real (kind = 4) X(4,4), the original square matrix to be transformed
+        !
+        ! Output, logical mask(4,4), a boolean matrix where .false. indicates NaN values in X
+        !
+        !  the output is stored in-place
+        !
+        ! Input: logical create_mask - whether or not to creater or re-use the given mask
+        ! instead of creating it from scratch
+        !
+        implicit none
+
+        integer(kind=4), parameter :: p = 3
+        real(kind=4), parameter :: zero = 1.0E-05
+
+        real(kind=4), dimension(0:p) :: c = (/ &
+                                        0.4829629131445341E+00, &
+                                        0.8365163037378079E+00, &
+                                        0.2241438680420133E+00, &
+                                        -0.1294095225512603E+00/)
+        integer(kind=4) i
+        integer(kind=4) j
+        integer(kind=4) j0
+        integer(kind=4) j1
+        integer(kind=4) j2
+        integer(kind=4) j3
+
+        real(kind=4), dimension(4, 4), intent(inout) :: x
+        logical(kind=1), optional, dimension(4, 4), intent(inout) :: mask
+        logical, optional, intent(in) :: create_mask
+        real(kind=4), dimension(4) :: z
+        real(kind=4) average
+        integer(kind=4) nvalid
+        integer(kind=4) k
+
+        z = 0.0E+00
+
+        if (present(mask)) then
+            block
+                logical need_mask
+
+                if (present(create_mask)) then
+                    need_mask = create_mask
+                else
+                    need_mask = .true.
+                end if
+
+                if (need_mask) then
+                    !  pick out all the NaN
+                    where (isnan(x))
+                        mask = .false.
+                    elsewhere
+                        mask = .true.
+                    end where
+                end if
+
+                ! calculate the mean of the input array
+                nvalid = count(mask)
+
+                ! all values might be NaN in which case set the array to 0.0
+                if (nvalid .gt. 0) then
+                    average = sum(x, mask=mask)/nvalid
+                else
+                    average = 0.0
+                end if
+
+                ! replace NaNs with the average value
+                where (.not. mask) x = average
+            end block
+        end if
+
+        ! do only one iteration as n .eq. 4
+
+        ! transform all the rows
+        do k = 1, 4
+            i = 1
+
+            do j = 1, 4 - 1, 2
+
+                j0 = i4_periodic(j, 1, 4)
+                j1 = i4_periodic(j + 1, 1, 4)
+                j2 = i4_periodic(j + 2, 1, 4)
+                j3 = i4_periodic(j + 3, 1, 4)
+
+                z(i) = c(0)*x(k, j0) + c(1)*x(k, j1) &
+                       + c(2)*x(k, j2) + c(3)*x(k, j3)
+
+                z(i + 2) = c(3)*x(k, j0) - c(2)*x(k, j1) &
+                           + c(1)*x(k, j2) - c(0)*x(k, j3)
+
+                i = i + 1
+
+            end do
+
+            x(k, 1:4) = z(1:4)
+        end do
+
+        ! then the columns
+        do k = 1, 4
+            i = 1
+
+            do j = 1, 4 - 1, 2
+
+                j0 = i4_periodic(j, 1, 4)
+                j1 = i4_periodic(j + 1, 1, 4)
+                j2 = i4_periodic(j + 2, 1, 4)
+                j3 = i4_periodic(j + 3, 1, 4)
+
+                z(i) = c(0)*x(j0, k) + c(1)*x(j1, k) &
+                       + c(2)*x(j2, k) + c(3)*x(j3, k)
+
+                z(i + 2) = c(3)*x(j0, k) - c(2)*x(j1, k) &
+                           + c(1)*x(j2, k) - c(0)*x(j3, k)
+
+                i = i + 1
+
+            end do
+
+            x(1:4, k) = z(1:4)
+        end do
+
+        ! truncate values near zero
+        where (abs(x) .lt. zero) x = 0.0
+
+        return
+    end subroutine to_daub4_block
+
     subroutine wave_shrink(n, x)
         implicit none
 
