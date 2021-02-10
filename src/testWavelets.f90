@@ -118,6 +118,9 @@ program Wavelets
     call compress_mask(mask, buffer)
     print *, 'compressed size:', sizeof(buffer), 'bytes'
 
+    ! decompress mask
+    call decompress_mask(buffer, mask)
+
     ! ZFP-like decompression
     call from_fixed(N, compressed, x, mask)
 
