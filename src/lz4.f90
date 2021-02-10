@@ -1,10 +1,10 @@
 module lz4
     implicit none
 
-    ! interface to C LZ4 API
+    ! C LZ4 API external functions
     interface
 
     end interface
 contains
-! entry subroutines from Fortran
+! Fortran entry subroutines
 end module lz4
