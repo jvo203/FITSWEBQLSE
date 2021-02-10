@@ -15,6 +15,9 @@ contains
         ! inputs
         logical(kind=1), dimension(:, :), contiguous, intent(in) :: mask
 
-        integer(kind=c_int) worst_size, compressed_size
+        integer(kind=c_int) mask_size, worst_size, compressed_size
+
+        mask_size = int(sizeof(mask), kind=c_int)
+        print *, 'sizeof(mask) = ', mask_size, 'bytes'
     end subroutine compress_mask
 end module lz4
