@@ -69,7 +69,7 @@ contains
 
         print *, 'compressed_size = ', compressed_size, 'bytes'
 
-        ! resize the output buffer to match the actual compression size
+        ! resize the output buffer to match the actual compressed size
         output = reshape(buffer, (/compressed_size/))
     end subroutine compress_mask
 
