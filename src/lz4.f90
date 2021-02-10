@@ -25,11 +25,23 @@ module lz4
             integer(kind=c_int), value, intent(in) :: compressionLevel
         end function LZ4_compress_HC
 
+        integer(kind=c_int) function LZ4_decompress_safe(src, dst,&
+        &compressedSize, dstCapacity) BIND(C, name='LZ4_decompress_safe')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(C_PTR), value :: src
+            type(C_PTR), value :: dst
+            integer(kind=c_int), value, intent(in) :: compressedSize
+            integer(kind=c_int), value, intent(in) :: dstCapacity
+
+        end function LZ4_decompress_safe
+
     end interface
 contains
 ! Fortran entry subroutines
 
-    subroutine compress_mask(mask)
+    subroutine compress_mask(mask, buffer)
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -39,7 +51,7 @@ contains
         integer(kind=c_int) mask_size, worst_size, compressed_size
 
         ! the target buffer
-        character(kind=c_char), allocatable, target :: buffer(:)
+        character(kind=c_char), allocatable, target, intent(out) :: buffer(:)
 
         mask_size = int(sizeof(mask), kind=c_int)
         print *, 'sizeof(mask) = ', mask_size, 'bytes'
