@@ -1,4 +1,5 @@
 module lz4
+    use, intrinsic :: iso_c_binding
     implicit none
 
     ! C LZ4 API external functions
