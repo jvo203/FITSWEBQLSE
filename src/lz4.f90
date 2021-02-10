@@ -8,6 +8,7 @@ module lz4
     end interface
 contains
 ! Fortran entry subroutines
+
     subroutine compress_mask(mask)
         use, intrinsic :: iso_c_binding
         implicit none
@@ -20,4 +21,5 @@ contains
         mask_size = int(sizeof(mask), kind=c_int)
         print *, 'sizeof(mask) = ', mask_size, 'bytes'
     end subroutine compress_mask
+
 end module lz4
