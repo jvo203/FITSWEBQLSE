@@ -4,6 +4,12 @@ module lz4
 
     ! C LZ4 API external functions
     interface
+        integer(kind=c_int) function LZ4_compressBound(inputSize) BIND(C, name='LZ4_compressBound')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(kind=c_int), value, intent(in) :: inputSize
+        end function LZ4_compressBound
 
     end interface
 contains
