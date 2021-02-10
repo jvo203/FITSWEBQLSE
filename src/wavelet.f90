@@ -4,8 +4,10 @@ module wavelet
     ! the minimum X-Y dimension below which the wavelet routines should terminate
     ! the operation (i.e. 8 -> 4x4 coarse coefficients, ideal for ZFP)
     ! since ZFP operates on 4x4 blocks
-    integer(kind=4), parameter :: min_dim = 4
+    ! signifant_bits = works with 1 byte
+    ! 1 sign bit + 7 bits for the magnitude
     integer(kind=4), parameter :: significant_bits = 7
+    ! integer(kind=4), parameter :: significant_bits = 5
 
     type fixed_block
         integer(kind=1) :: common_exp
@@ -503,7 +505,7 @@ contains
         m = n
 
         ! for each level
-        do while (m .ge. min_dim)
+        do while (m .ge. 4)
             ! transform all the rows
             do k = 1, m
                 i = 1
@@ -608,7 +610,7 @@ contains
         x = y
         z = 0.0E+00
 
-        m = min_dim
+        m = 4
 
         ! for each level
         do while (m .le. n)
@@ -764,7 +766,7 @@ contains
         m = n
 
         ! for each level
-        do while (m .ge. min_dim)
+        do while (m .ge. 4)
             ! transform all the rows
             do k = 1, m
                 i = 1
@@ -867,7 +869,7 @@ contains
 
         z = 0.0E+00
 
-        m = min_dim
+        m = 4
 
         ! for each level
         do while (m .le. n)
@@ -1182,7 +1184,7 @@ contains
         integer(kind=4) :: i, j, nvalid
         real(kind=4) mean, std, tmp
 
-        if (n .lt. min_dim) return
+        if (n .lt. 4) return
 
         ! calculate the mean and standard deviation of
         ! absolute values of detail coefficients (skipping the coarse coeffs)
@@ -1195,7 +1197,7 @@ contains
         do j = 1, n
             do i = 1, n
                 ! skip the coarse coefficients
-                if ((i .le. min_dim/2) .and. (j .le. min_dim/2)) cycle
+                if ((i .le. 4/2) .and. (j .le. 4/2)) cycle
 
                 tmp = abs(x(i, j))
                 ! only process non-zero values
@@ -1259,7 +1261,7 @@ contains
         integer(kind=4) :: i, j, nvalid
         real(kind=4) mean, std, tmp
 
-        if (n .lt. min_dim) return
+        if (n .lt. 4) return
 
         ! calculate the mean and standard deviation of
         ! of detail coefficients (skipping the coarse coeffs)
@@ -1271,7 +1273,7 @@ contains
         do j = 1, n
             do i = 1, n
                 ! skip the coarse coefficients
-                if ((i .le. min_dim/2) .and. (j .le. min_dim/2)) cycle
+                if ((i .le. 4/2) .and. (j .le. 4/2)) cycle
 
                 mean = mean + x(i, j)
                 nvalid = nvalid + 1
@@ -1327,7 +1329,7 @@ contains
         implicit none
 
         integer(kind=4) :: n
-        real(kind=4), dimension(n, n), intent(in) :: x
+        real(kind=4), dimension(n, n), intent(inout) :: x
         integer(kind=4) :: i, j
 
         ! the result
@@ -1337,6 +1339,7 @@ contains
 
         do j = 1, n/4
             do i = 1, n/4
+                call to_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
                 call to_fixed_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), compressed(i, j))
                 ! print *, 'I:', i, 'J:', j, 'compressed:', compressed(i, j)
             end do
@@ -1378,6 +1381,7 @@ contains
         do j = 1, n/4
             do i = 1, n/4
                 call from_fixed_block(compressed(i, j), x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
+                call from_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
             end do
         end do
 
