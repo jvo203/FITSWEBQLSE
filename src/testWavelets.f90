@@ -94,20 +94,20 @@ program Wavelets
     end do
 
     ! insert a NaN value
-    ! x(N/2, N/2) = ieee_value(0.0, ieee_quiet_nan)
+    x(N/2, N/2) = ieee_value(0.0, ieee_quiet_nan)
 
     !  pick out all the NaN
-    where (isnan(x))
-        mask = .false.
-    elsewhere
-        mask = .true.
-    end where
+    ! where (isnan(x))
+    !    mask = .false.
+    ! elsewhere
+    !    mask = .true.
+    ! end where
 
     ! replace NaNs with 0.0
-    where (.not. mask) x = 0.0
+    ! where (.not. mask) x = 0.0
 
     ! ZFP-like compression
-    call to_fixed(N, x, compressed)
+    call to_fixed(N, x, compressed, mask)
 
     print *, 'sizeof(x):', sizeof(x), ', compressed size:', sizeof(compressed)
     print *, 'compression ratio:', real(sizeof(x))/real(sizeof(compressed))
@@ -116,7 +116,7 @@ program Wavelets
     ! (...)
 
     ! ZFP-like decompression
-    call from_fixed(N, compressed, x)
+    call from_fixed(N, compressed, x, mask)
 
     ! insert back NaN values
     ! where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
