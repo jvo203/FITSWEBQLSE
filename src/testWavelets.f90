@@ -114,7 +114,7 @@ program Wavelets
     print *, 'compression ratio:', real(sizeof(x))/real(sizeof(compressed))
 
     ! call LZ4-HC to compress the mask
-    call compress_mask(N, mask)
+    call compress_mask(mask)
 
     ! ZFP-like decompression
     call from_fixed(N, compressed, x, mask)
