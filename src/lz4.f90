@@ -41,7 +41,7 @@ module lz4
 contains
 ! Fortran entry subroutines
 
-    subroutine compress_mask(mask, output)
+    subroutine compress_mask(mask, compressed)
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -53,7 +53,7 @@ contains
         integer(kind=c_int) mask_size, worst_size, compressed_size
 
         ! the output
-        character(kind=c_char), allocatable, intent(out) :: output(:)
+        character(kind=c_char), allocatable, intent(out) :: compressed(:)
 
         mask_size = int(sizeof(mask), kind=c_int)
         print *, 'sizeof(mask) = ', mask_size, 'bytes'
@@ -70,7 +70,7 @@ contains
         print *, 'compressed_size = ', compressed_size, 'bytes'
 
         ! resize the output buffer to match the actual compressed size
-        output = reshape(buffer, (/compressed_size/))
+        compressed = reshape(buffer, (/compressed_size/))
     end subroutine compress_mask
 
 end module lz4
