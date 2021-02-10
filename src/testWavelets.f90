@@ -1,5 +1,6 @@
 program Wavelets
     use wavelet
+    use lz4
     use, intrinsic :: ieee_arithmetic
     implicit none
 
