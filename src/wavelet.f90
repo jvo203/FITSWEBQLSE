@@ -1325,11 +1325,12 @@ contains
 
     end subroutine wave_shrink2
 
-    subroutine to_fixed(n, x, compressed)
+    subroutine to_fixed(n, x, compressed, mask)
         implicit none
 
         integer(kind=4) :: n
         real(kind=4), dimension(n, n), intent(inout) :: x
+        logical(kind=1), dimension(n, n), optional, intent(inout) :: mask
         integer(kind=4) :: i, j
 
         ! the result
@@ -1339,7 +1340,11 @@ contains
 
         do j = 1, n/4
             do i = 1, n/4
-                call to_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
+                if (present(mask)) then
+                    call to_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
+                    &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), .true.)
+                end if
+
                 call to_fixed_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), compressed(i, j))
                 ! print *, 'I:', i, 'J:', j, 'compressed:', compressed(i, j)
             end do
@@ -1366,11 +1371,12 @@ contains
 
     end subroutine to_fixed_block
 
-    subroutine from_fixed(n, compressed, x)
+    subroutine from_fixed(n, compressed, x, mask)
         implicit none
 
         integer(kind=4) :: n
         type(fixed_block), dimension(n/4, n/4), intent(in) :: compressed
+        logical(kind=1), dimension(n, n), optional, intent(in) :: mask
 
         ! the result
         real(kind=4), dimension(n, n), intent(out) :: x
@@ -1381,7 +1387,11 @@ contains
         do j = 1, n/4
             do i = 1, n/4
                 call from_fixed_block(compressed(i, j), x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
-                call from_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
+
+                if (present(mask)) then
+                    call from_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
+                    &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
+                end if
             end do
         end do
 
