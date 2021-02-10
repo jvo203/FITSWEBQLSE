@@ -23,12 +23,15 @@ contains
         logical(kind=1), dimension(:, :), contiguous, intent(in) :: mask
 
         integer(kind=c_int) mask_size, worst_size, compressed_size
+        character(kind=c_char), allocatable, target :: buffer(:)
 
         mask_size = int(sizeof(mask), kind=c_int)
         print *, 'sizeof(mask) = ', mask_size, 'bytes'
 
         worst_size = LZ4_compressBound(mask_size)
         print *, 'worst_size = ', worst_size, 'bytes'
+
+        allocate (buffer(worst_size))
     end subroutine compress_mask
 
 end module lz4
