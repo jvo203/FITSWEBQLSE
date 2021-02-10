@@ -10,6 +10,7 @@ program Wavelets
     real(kind=4), dimension(N, N) :: x
     real(kind=4), dimension(N, N) :: y
     logical(kind=1), dimension(N, N) :: mask
+    character(kind=c_char), allocatable :: buffer(:)
 
     type(fixed_block), dimension(N/4, N/4) :: compressed
 
@@ -114,7 +115,8 @@ program Wavelets
     print *, 'compression ratio:', real(sizeof(x))/real(sizeof(compressed))
 
     ! call LZ4-HC to compress the mask
-    call compress_mask(mask)
+    call compress_mask(mask, buffer)
+    print *, 'compressed size:', sizeof(buffer), 'bytes'
 
     ! ZFP-like decompression
     call from_fixed(N, compressed, x, mask)
