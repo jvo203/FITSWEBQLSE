@@ -9,11 +9,6 @@ module wavelet
     integer(kind=4), parameter :: significant_bits = 7
     ! integer(kind=4), parameter :: significant_bits = 5
 
-    type fixed_block
-        integer(kind=1) :: common_exp
-        integer(kind=1), dimension(4, 4) :: mantissa
-    end type fixed_block
-
     real(kind=4), parameter :: zero = 1.0E-05
 
     integer(kind=4), parameter :: p = 3
