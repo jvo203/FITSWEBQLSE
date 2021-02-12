@@ -120,11 +120,6 @@ contains
         ! get the downscaled image dimensions
         scale = get_image_scale(width, height, inner_width, inner_height)
 
-        ! disable downscaling for now
-        ! compress the original size first
-        ! and decompress/display it in the web browser
-        scale = 1.0
-
         if (scale .lt. 1.0) then
             img_width = scale*item%naxes(1)
             img_height = scale*item%naxes(2)
@@ -134,6 +129,11 @@ contains
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
+
+        if (scale .lt. 1.0) then
+            print *, 'downscaling not supported yet (TO-DO), ending the response'
+            return
+        end if
 
     end subroutine image_spectrum_request
 
