@@ -693,9 +693,21 @@ static enum MHD_Result on_http_connection(void *cls,
         if (!get_ok_status())
             return http_accepted(connection);
 
+        // mkfifo at /tmp/uuid
+
+        // MHD_create_response_from_pipe(fd)
+
+        // add headers
+
+        // queue the response
+
+        // pass the fd to Fortran
+
         // call FORTRAN to get the necessary data
         printf("[C] calling image_spectrum_request\n");
         image_spectrum_request(datasetId, strlen(datasetId), width, height);
+
+        // unlink the FIFO path
 
         // respond with the image + JSON data (header, spectrum, histogram)
         // to save network bandwidth the response should be binary
