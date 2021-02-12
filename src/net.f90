@@ -142,6 +142,8 @@ contains
             return
         end if
 
+        call write_image(trim(item%flux)//c_null_char)
+
     end subroutine image_spectrum_request
 
 end module net
