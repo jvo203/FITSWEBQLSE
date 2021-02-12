@@ -36,7 +36,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 
 extern void exit_fortran();
 extern void fitswebql_request(char *uri, size_t n);
-extern void image_spectrum_request(char *datasetId, size_t n, int width, int height);
+extern void image_spectrum_request(char *datasetId, size_t n, int width, int height, int fd);
 extern int get_error_status();
 extern int get_ok_status();
 extern float get_progress();
@@ -702,29 +702,35 @@ static enum MHD_Result on_http_connection(void *cls,
         if (0 != status)
             return http_internal_server_error(connection);
 
-        printf("a pipe file descriptors: read: %d, write: %d\n", pipefd[0], pipefd[1]);
-
-        // MHD_create_response_from_pipe(fd)
+        // create a response from the pipe by passing the read end of the pipe
+        struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
 
         // add headers
+        MHD_add_response_header(response, "Cache-Control", "no-cache");
+        MHD_add_response_header(response, "Cache-Control", "no-store");
+        MHD_add_response_header(response, "Pragma", "no-cache");
+        // html reponse for the time being;
+        // will switch to binary later on
+        MHD_add_response_header(response, "Content-Type", "text/html; charset=utf-8");
 
         // queue the response
+        enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+        MHD_destroy_response(response);
 
         // pass the fd to Fortran
 
         // call FORTRAN to get the necessary data
-        printf("[C] calling image_spectrum_request\n");
-        image_spectrum_request(datasetId, strlen(datasetId), width, height);
+        // pass the write end of the pipe
+        printf("[C] calling image_spectrum_request with the pipe file descriptor %d\n", pipefd[1]);
+        image_spectrum_request(datasetId, strlen(datasetId), width, height, pipefd[1]);
 
         // close the write end of the pipe
-        close(pipefd[0]);
-
-        // close the read too for the time being
         close(pipefd[1]);
 
         // respond with the image + JSON data (header, spectrum, histogram)
         // to save network bandwidth the response should be binary
-        return http_not_implemented(connection);
+        return ret;
     }
 
     if (strstr(url, "FITSWebQL.html") != NULL)
