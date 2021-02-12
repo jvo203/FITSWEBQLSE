@@ -711,7 +711,7 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_add_response_header(response, "Pragma", "no-cache");
         // html reponse for the time being;
         // will switch to binary later on
-        MHD_add_response_header(response, "Content-Type", "text/html; charset=utf-8");
+        MHD_add_response_header(response, "Content-Type", "application/octet-stream");
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
