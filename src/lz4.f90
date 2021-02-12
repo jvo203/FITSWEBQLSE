@@ -70,7 +70,7 @@ contains
         print *, 'compressed_size = ', compressed_size, 'bytes'
 
         ! resize the output buffer to match the actual compressed size
-        compressed = reshape(buffer, (/compressed_size/))
+        if (compressed_size .gt. 0) compressed = reshape(buffer, (/compressed_size/))
     end subroutine compress_mask
 
     subroutine decompress_mask(compressed, mask)
@@ -123,7 +123,7 @@ contains
         print *, 'compressed_size = ', compressed_size, 'bytes'
 
         ! resize the output buffer to match the actual compressed size
-        compressed = reshape(buffer, (/compressed_size/))
+        if (compressed_size .gt. 0) compressed = reshape(buffer, (/compressed_size/))
     end subroutine compress_fixed_array
 
     subroutine decompress_fixed_array(compressed, x)
