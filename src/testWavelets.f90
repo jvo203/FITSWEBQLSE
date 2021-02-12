@@ -1,4 +1,5 @@
 program Wavelets
+    use fixed_array
     use wavelet
     use lz4
     use, intrinsic :: ieee_arithmetic
