@@ -90,13 +90,13 @@ contains
 
     end function compare_frameid
 
-    subroutine image_spectrum_request(datasetId, n, width, height) bind(C)
+    subroutine image_spectrum_request(datasetId, n, width, height, fd) bind(C)
         use mpi
         use fits
         use, intrinsic :: iso_c_binding
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
-        integer(kind=c_int), intent(in), value :: width, height
+        integer(kind=c_int), intent(in), value :: width, height, fd
 
         integer inner_width, inner_height
         integer img_width, img_height
@@ -104,7 +104,7 @@ contains
 
         if (n .lt. 1) return
 
-        print *, '"', datasetId, '", width', width, ', height', height
+        print *, '"', datasetId, '", width', width, ', height', height, ', pipe write end', fd
 
         ! compare the datasetId with item%frameid
         if (.not. compare_frameid(trim(item%frameid), datasetId, int(n))) then
