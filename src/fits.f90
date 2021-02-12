@@ -38,7 +38,7 @@ module fits
         character(len=16) :: flux = ''
         real(kind=4) dmin, dmax
         real(kind=4), allocatable :: frame_min(:), frame_max(:)
-        real(kind=4), allocatable :: pixels(:, :)
+        real(kind=c_float), allocatable :: pixels(:, :)
         logical(kind=1), allocatable :: mask(:, :)
         logical :: is_optical = .true.
         logical :: is_xray = .false.
