@@ -93,4 +93,58 @@ contains
         print *, 'decompressed_size = ', decompressed_size, 'bytes'
     end subroutine decompress_mask
 
+    subroutine compress_fixed_array(x, compressed)
+        use, intrinsic :: iso_c_binding
+        use fixed_array
+        implicit none
+
+        ! inputs
+        type(fixed_block), dimension(:, :), contiguous, target, intent(in) :: x
+
+        ! internal variables
+        character(kind=c_char), allocatable, target :: buffer(:)
+        integer(kind=c_int) array_size, worst_size, compressed_size
+
+        ! the output
+        character(kind=c_char), allocatable, intent(out) :: compressed(:)
+
+        array_size = int(sizeof(x), kind=c_int)
+        print *, 'sizeof(x) = ', array_size, 'bytes'
+
+        worst_size = LZ4_compressBound(array_size)
+        print *, 'worst_size = ', worst_size, 'bytes'
+
+        allocate (buffer(worst_size))
+
+        ! compress the mask as much as possible
+        compressed_size = LZ4_compress_HC(c_loc(x), c_loc(buffer),&
+                                  &array_size, worst_size, LZ4HC_CLEVEL_MAX)
+
+        print *, 'compressed_size = ', compressed_size, 'bytes'
+
+        ! resize the output buffer to match the actual compressed size
+        compressed = reshape(buffer, (/compressed_size/))
+    end subroutine compress_fixed_array
+
+    subroutine decompress_fixed_array(compressed, x)
+        use, intrinsic :: iso_c_binding
+        use fixed_array
+        implicit none
+
+        ! the input
+        character(kind=c_char), contiguous, target, intent(in) :: compressed(:)
+
+        ! the output
+        type(fixed_block), dimension(:, :), contiguous, target, intent(inout) :: x
+
+        ! internal variables
+        integer(kind=c_int) array_size, compressed_size, decompressed_size
+
+        compressed_size = int(sizeof(compressed), kind=c_int)
+        array_size = int(sizeof(x), kind=c_int)
+
+        decompressed_size = LZ4_decompress_safe(c_loc(compressed), c_loc(x), compressed_size, array_size)
+        print *, 'decompressed_size = ', decompressed_size, 'bytes'
+    end subroutine decompress_fixed_array
+
 end module lz4
