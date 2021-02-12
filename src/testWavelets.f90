@@ -118,7 +118,6 @@ program Wavelets
 
     ! call LZ4-HC to compress the mask
     call compress_mask(mask, mask_buffer)
-    print *, 'compressed size:', sizeof(mask_buffer), 'bytes'
 
     ! compress the fixed array
     call compress_fixed_array(compressed, array_buffer)
