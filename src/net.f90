@@ -1,4 +1,5 @@
 module net
+    use, intrinsic :: iso_c_binding
     implicit none
 
     interface
@@ -11,6 +12,12 @@ module net
             use, intrinsic :: ISO_C_BINDING
             implicit none
         end subroutine stop_http
+
+        subroutine write_image(flux) BIND(C, name='write_image')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+            character(kind=c_char) flux(*)
+        end subroutine write_image
     end interface
 contains
     subroutine sigint_handler
