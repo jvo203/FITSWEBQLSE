@@ -12,6 +12,7 @@ program Wavelets
     real(kind=4), dimension(N, N) :: y
     logical(kind=1), dimension(N, N) :: mask
     character(kind=c_char), allocatable :: mask_buffer(:)
+    character(kind=c_char), allocatable :: array_buffer(:)
 
     type(fixed_block), dimension(N/4, N/4) :: compressed
 
@@ -119,11 +120,16 @@ program Wavelets
     call compress_mask(mask, mask_buffer)
     print *, 'compressed size:', sizeof(mask_buffer), 'bytes'
 
+    ! compress the fixed array
+    call compress_fixed_array(compressed, array_buffer)
+
     ! decompress mask
     call decompress_mask(mask_buffer, mask)
 
     ! ZFP-like decompression
     call from_fixed(N, compressed, x, mask)
+
+    call decompress_fixed_array(array_buffer, compressed)
 
     ! insert back NaN values
     ! where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
