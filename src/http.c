@@ -716,18 +716,15 @@ static enum MHD_Result on_http_connection(void *cls,
 
         MHD_destroy_response(response);
 
-        // pass the fd to Fortran
-
-        // call FORTRAN to get the necessary data
-        // pass the write end of the pipe
+        // respond with the image + JSON data (header, spectrum, histogram)
+        // pass the write end of the pipe to Fortran
+        // the binary response data will be generated in Fortran
         printf("[C] calling image_spectrum_request with the pipe file descriptor %d\n", pipefd[1]);
         image_spectrum_request(datasetId, strlen(datasetId), width, height, pipefd[1]);
 
         // close the write end of the pipe
         close(pipefd[1]);
 
-        // respond with the image + JSON data (header, spectrum, histogram)
-        // to save network bandwidth the response should be binary
         return ret;
     }
 
