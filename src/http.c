@@ -1239,3 +1239,11 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     return ret;
 }
+
+extern void write_image(const char *flux)
+{
+    if (flux == NULL)
+        return
+
+            printf("[C] flux: %s\n", flux);
+}
