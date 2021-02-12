@@ -32,7 +32,7 @@ module fits
         logical :: has_frequency = .false.
 
         ! the 2D image histogram
-        integer hist(NBINS)
+        integer(kind=c_int) hist(NBINS)
 
         ! derived values
         character(len=16) :: flux = ''
