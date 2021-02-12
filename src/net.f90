@@ -13,10 +13,12 @@ module net
             implicit none
         end subroutine stop_http
 
-        subroutine write_image_spectrum(flux) BIND(C, name='write_image_spectrum')
+        subroutine write_image_spectrum(fd, flux) BIND(C, name='write_image_spectrum')
             use, intrinsic :: ISO_C_BINDING
             implicit none
+
             character(kind=c_char) flux(*)
+            integer(c_int), value :: fd
         end subroutine write_image_spectrum
     end interface
 contains
@@ -142,7 +144,7 @@ contains
             return
         end if
 
-        call write_image_spectrum(trim(item%flux)//c_null_char)
+        call write_image_spectrum(fd, trim(item%flux)//c_null_char)
 
     end subroutine image_spectrum_request
 
