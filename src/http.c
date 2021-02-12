@@ -1245,5 +1245,5 @@ extern void write_image_spectrum(int fd, const char *flux)
     if (flux == NULL)
         return;
 
-    printf("[C] flux: %s\n", flux);
+    printf("[C] fd: %d, flux: %s\n", fd, flux);
 }
