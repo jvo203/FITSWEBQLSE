@@ -666,6 +666,9 @@ static enum MHD_Result on_http_connection(void *cls,
         gboolean fetch_data = FALSE;
         int width, height;
 
+        char *pipe_name;
+        int pipe_fd;
+
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
         char *widthStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "width");
         char *heightStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "height");
@@ -693,7 +696,13 @@ static enum MHD_Result on_http_connection(void *cls,
         if (!get_ok_status())
             return http_accepted(connection);
 
-        // mkfifo at /tmp/uuid
+        // mkfifo at /tmp/XXX
+        pipe_name = tempnam(NULL, NULL);
+
+        if (NULL == pipe_name)
+            return http_internal_server_error(connection);
+
+        printf("a temporary named pipe @ %s\n", pipe_name);
 
         // MHD_create_response_from_pipe(fd)
 
@@ -708,6 +717,8 @@ static enum MHD_Result on_http_connection(void *cls,
         image_spectrum_request(datasetId, strlen(datasetId), width, height);
 
         // unlink the FIFO path
+        unlink(pipe_name);
+        free(pipe_name);
 
         // respond with the image + JSON data (header, spectrum, histogram)
         // to save network bandwidth the response should be binary
