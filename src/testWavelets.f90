@@ -126,10 +126,10 @@ program Wavelets
     ! decompress mask
     call decompress_mask(mask_buffer, mask)
 
+    call decompress_fixed_array(array_buffer, compressed)
+
     ! ZFP-like decompression
     call from_fixed(N, compressed, x, mask)
-
-    call decompress_fixed_array(array_buffer, compressed)
 
     ! insert back NaN values
     ! where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
