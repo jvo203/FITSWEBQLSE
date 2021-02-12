@@ -67,7 +67,7 @@ contains
         compressed_size = LZ4_compress_HC(c_loc(mask), c_loc(buffer),&
                                   &mask_size, worst_size, LZ4HC_CLEVEL_MAX)
 
-        print *, 'compressed_size = ', compressed_size, 'bytes'
+        print *, 'compressed mask size = ', compressed_size, 'bytes'
 
         ! resize the output buffer to match the actual compressed size
         if (compressed_size .gt. 0) compressed = reshape(buffer, (/compressed_size/))
@@ -90,7 +90,7 @@ contains
         mask_size = int(sizeof(mask), kind=c_int)
 
         decompressed_size = LZ4_decompress_safe(c_loc(compressed), c_loc(mask), compressed_size, mask_size)
-        print *, 'decompressed_size = ', decompressed_size, 'bytes'
+        print *, 'decompressed mask size = ', decompressed_size, 'bytes'
     end subroutine decompress_mask
 
     subroutine compress_fixed_array(x, compressed)
@@ -120,7 +120,7 @@ contains
         compressed_size = LZ4_compress_HC(c_loc(x), c_loc(buffer),&
                                   &array_size, worst_size, LZ4HC_CLEVEL_MAX)
 
-        print *, 'compressed_size = ', compressed_size, 'bytes'
+        print *, 'compressed array size = ', compressed_size, 'bytes'
 
         ! resize the output buffer to match the actual compressed size
         if (compressed_size .gt. 0) compressed = reshape(buffer, (/compressed_size/))
@@ -144,7 +144,7 @@ contains
         array_size = int(sizeof(x), kind=c_int)
 
         decompressed_size = LZ4_decompress_safe(c_loc(compressed), c_loc(x), compressed_size, array_size)
-        print *, 'decompressed_size = ', decompressed_size, 'bytes'
+        print *, 'decompressed array size = ', decompressed_size, 'bytes'
     end subroutine decompress_fixed_array
 
 end module lz4
