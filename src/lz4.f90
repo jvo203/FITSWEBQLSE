@@ -109,7 +109,7 @@ contains
         character(kind=c_char), allocatable, intent(out) :: compressed(:)
 
         array_size = int(sizeof(x), kind=c_int)
-        print *, 'sizeof(x) = ', array_size, 'bytes'
+        print *, 'sizeof(array) = ', array_size, 'bytes'
 
         worst_size = LZ4_compressBound(array_size)
         print *, 'worst_size = ', worst_size, 'bytes'
