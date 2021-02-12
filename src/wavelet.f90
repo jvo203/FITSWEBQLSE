@@ -1316,6 +1316,7 @@ contains
     end subroutine wave_shrink2
 
     subroutine to_fixed(n, x, compressed, mask)
+        use fixed_array
         implicit none
 
         integer(kind=4) :: n
@@ -1340,6 +1341,9 @@ contains
     end subroutine to_fixed
 
     pure subroutine to_fixed_block(x, compressed)
+        use fixed_array
+        implicit none
+
         real(kind=4), dimension(4, 4), intent(in) :: x
         integer, dimension(4, 4) :: e
 
@@ -1359,6 +1363,7 @@ contains
     end subroutine to_fixed_block
 
     subroutine from_fixed(n, compressed, x, mask)
+        use fixed_array
         implicit none
 
         integer(kind=4) :: n
@@ -1383,6 +1388,9 @@ contains
     end subroutine from_fixed
 
     pure subroutine from_fixed_block(compressed, x)
+        use fixed_array
+        implicit none
+
         type(fixed_block), intent(in) :: compressed
         real(kind=4), dimension(4, 4), intent(out) :: x
 
