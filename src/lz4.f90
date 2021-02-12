@@ -93,13 +93,13 @@ contains
         print *, 'decompressed mask size = ', decompressed_size, 'bytes'
     end subroutine decompress_mask
 
-    subroutine compress_fixed_array(x, compressed)
+    subroutine compress_fixed_array(array, compressed)
         use, intrinsic :: iso_c_binding
         use fixed_array
         implicit none
 
         ! inputs
-        type(fixed_block), dimension(:, :), contiguous, target, intent(in) :: x
+        type(fixed_block), dimension(:, :), contiguous, target, intent(in) :: array
 
         ! internal variables
         character(kind=c_char), allocatable, target :: buffer(:)
@@ -108,7 +108,7 @@ contains
         ! the output
         character(kind=c_char), allocatable, intent(out) :: compressed(:)
 
-        array_size = int(sizeof(x), kind=c_int)
+        array_size = int(sizeof(array), kind=c_int)
         print *, 'sizeof(array) = ', array_size, 'bytes'
 
         worst_size = LZ4_compressBound(array_size)
@@ -117,7 +117,7 @@ contains
         allocate (buffer(worst_size))
 
         ! compress the mask as much as possible
-        compressed_size = LZ4_compress_HC(c_loc(x), c_loc(buffer),&
+        compressed_size = LZ4_compress_HC(c_loc(array), c_loc(buffer),&
                                   &array_size, worst_size, LZ4HC_CLEVEL_MAX)
 
         print *, 'compressed array size = ', compressed_size, 'bytes'
@@ -126,7 +126,7 @@ contains
         if (compressed_size .gt. 0) compressed = reshape(buffer, (/compressed_size/))
     end subroutine compress_fixed_array
 
-    subroutine decompress_fixed_array(compressed, x)
+    subroutine decompress_fixed_array(compressed, array)
         use, intrinsic :: iso_c_binding
         use fixed_array
         implicit none
@@ -135,15 +135,15 @@ contains
         character(kind=c_char), contiguous, target, intent(in) :: compressed(:)
 
         ! the output
-        type(fixed_block), dimension(:, :), contiguous, target, intent(inout) :: x
+        type(fixed_block), dimension(:, :), contiguous, target, intent(inout) :: array
 
         ! internal variables
         integer(kind=c_int) array_size, compressed_size, decompressed_size
 
         compressed_size = int(sizeof(compressed), kind=c_int)
-        array_size = int(sizeof(x), kind=c_int)
+        array_size = int(sizeof(array), kind=c_int)
 
-        decompressed_size = LZ4_decompress_safe(c_loc(compressed), c_loc(x), compressed_size, array_size)
+        decompressed_size = LZ4_decompress_safe(c_loc(compressed), c_loc(array), compressed_size, array_size)
         print *, 'decompressed array size = ', decompressed_size, 'bytes'
     end subroutine decompress_fixed_array
 
