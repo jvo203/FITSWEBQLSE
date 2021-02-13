@@ -16,6 +16,8 @@
 
 	sudo dnf install lz4-devel
 
+	sudo dnf install zfp-devel
+
 	sudo dnf install ispc # (not needed yet)
 
 3. JSON-FORTRAN
