@@ -148,6 +148,9 @@ contains
             return
         end if
 
+        print *, 'pixels:', item%pixels(:, 1)
+        print *, 'mask:', item%mask(:, 1)
+
         call write_image_spectrum(fd, trim(item%flux)//c_null_char, img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
 
     end subroutine image_spectrum_request
