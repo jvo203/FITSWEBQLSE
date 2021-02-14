@@ -65,7 +65,7 @@ mpi:
 
 zfp:
 #$(CC) $(CFLAGS) tests/zfp_compress.c -o zfp_compress -lzfp
-	ifort -Ofast -xHost -mavx -axAVX -qopt-report=2 tests/zfp_compress.f90 -o zfp_compress
+	ifort -Ofast -xHost -mavx -axAVX -qopt-report=2 tests/zfp_compress.f90 -o zfp_compress -lzfp
 
 #-corray-config-file=./config
 
