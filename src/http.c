@@ -1240,14 +1240,14 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     return ret;
 }
 
-extern void write_image_spectrum(int fd, const char *flux, int width, int height, const float *pixels, const _Bool *mask)
+extern void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, const float *pixels, const _Bool *mask)
 {
     int i;
 
     if (flux == NULL)
         return;
 
-    printf("[C] fd: %d, flux: %s\n", fd, flux);
+    printf("[C] fd: %d, flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f\n", fd, flux, pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity);
 
     for (i = 0; i < width; i++)
         printf("|%f,%d", pixels[i], mask[i]);
