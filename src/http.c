@@ -1250,12 +1250,24 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 extern void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, const float *pixels, const bool *mask)
 {
     int i;
-    char *compressed_pixels = NULL;
+    uchar *compressed_pixels = NULL;
     char *compressed_mask = NULL;
+
+    // ZFP variables
+    uint dimes = 2;
+    zfp_type type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
 
     int mask_size, worst_size, compressed_size;
 
-    if (flux == NULL)
+    if (flux == NULL || pixels == NULL || mask == NULL)
+        return;
+
+    if (width <= 0 || height <= 0)
         return;
 
     printf("[C] fd: %d, flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f\n", fd, flux, pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity);
@@ -1265,13 +1277,49 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     printf("\n");
 
     // compress pixels with ZFP
+    field = zfp_field_2d((void *)pixels, type, width, height);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    zfp_stream_set_precision(zfp, 11);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    compressed_pixels = (uchar *)malloc(bufsize);
+
+    if (compressed_pixels != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = stream_open(compressed_pixels, bufsize);
+        zfp_stream_set_bit_stream(zfp, stream);
+
+        // compress entire array
+        zfpsize = zfp_compress(zfp, field);
+
+        if (zfpsize == 0)
+            printf("ZFP compression failed!\n");
+        else
+            printf("image pixels compressed size: %zd bytes\n", zfpsize);
+
+        /* clean up */
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+        stream_close(stream);
+
+        // the compressed part is available at compressed_pixels[0..zfpsize-1]
+
+        // release memory
+        free(compressed_pixels);
+    }
 
     // compress mask with LZ4-HC
     mask_size = width * height;
 
     worst_size = LZ4_compressBound(mask_size);
 
-    compressed_mask = malloc(worst_size);
+    compressed_mask = (char *)malloc(worst_size);
 
     if (compressed_mask != NULL)
     {
