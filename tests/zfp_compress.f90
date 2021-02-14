@@ -1,5 +1,5 @@
 program main
-    use zforp
+    use zFORp
     use, intrinsic :: iso_c_binding
     implicit none
 
