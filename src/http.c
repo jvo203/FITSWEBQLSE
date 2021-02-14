@@ -21,6 +21,10 @@
 
 #include <glib.h>
 
+// ZFP floating-point compressor
+#include <zfp.h>
+
+// LZ4 character streams compressor
 #include <lz4hc.h>
 
 #ifndef S_ISREG
