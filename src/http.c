@@ -1370,13 +1370,13 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
 
     printf("[C] fd: %d, flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f, width: %d, height: %d\n", fd, flux, pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity, width, height);
 
-    for (i = 0; i < width; i++)
+    /*for (i = 0; i < width; i++)
         printf("|%f,%d", pixels[i], mask[i]);
     printf("\n\n\n");
 
     for (i = width * height - width; i < width * height; i++)
         printf("|%f,%d", pixels[i], mask[i]);
-    printf("\n");
+    printf("\n");*/
 
     // compress pixels with ZFP
     //field = zfp_field_2d((void *)pixels, type, nx, ny);
