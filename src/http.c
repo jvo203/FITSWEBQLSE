@@ -1246,8 +1246,8 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 extern void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, const float *pixels, const bool *mask)
 {
     int i;
-    char *compressed_pixels;
-    char *compressed_mask;
+    char *compressed_pixels = NULL;
+    char *compressed_mask = NULL;
 
     int mask_size, worst_size, compressed_size;
 
@@ -1269,12 +1269,14 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
 
     compressed_mask = malloc(worst_size);
 
-    // compress the mask as much as possible
-    compressed_size = LZ4_compress_HC((const char *)mask, compressed_mask, mask_size, worst_size, LZ4HC_CLEVEL_MAX);
-
-    printf("image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
-
-    // release memory
     if (compressed_mask != NULL)
+    {
+        // compress the mask as much as possible
+        compressed_size = LZ4_compress_HC((const char *)mask, compressed_mask, mask_size, worst_size, LZ4HC_CLEVEL_MAX);
+
+        printf("image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
+
+        // release memory
         free(compressed_mask);
+    }
 }
