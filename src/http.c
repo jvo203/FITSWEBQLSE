@@ -1272,11 +1272,11 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     if (width <= 0 || height <= 0)
         return;
 
-    float _pixels[height][width];
+    float *_pixels = (float *)malloc(width * height * sizeof(float));
 
-    for (i = 0; i < width; i++)
-        for (j = 0; j < height; j++)
-            _pixels[j][i] = i * j;
+    for (j = 0; j < height; j++)
+        for (i = 0; i < width; i++)
+            _pixels[i + width * j] = i * j;
 
     printf("[C] fd: %d, flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f, width: %d, height: %d\n", fd, flux, pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity, width, height);
 
@@ -1290,8 +1290,8 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
 
     // compress pixels with ZFP
     //field = zfp_field_2d((void *)pixels, type, nx, ny);
-    field = zfp_field_2d((void *)&_pixels[0][0], data_type, nx, ny);
-    printf("got here#0, field = \n", field);
+    field = zfp_field_2d((void *)_pixels, data_type, nx, ny);
+    printf("got here#0, field = %p\n", field);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
