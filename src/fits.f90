@@ -31,9 +31,6 @@ module fits
         logical :: has_velocity = .false.
         logical :: has_frequency = .false.
 
-        ! the 2D image histogram
-        integer hist(NBINS)
-
         ! derived values
         character(len=16) :: flux = ''
         real(kind=c_float) dmin, dmax
@@ -44,6 +41,14 @@ module fits
         logical :: is_xray = .false.
         logical :: error = .false.
         logical :: ok = .false.
+
+        ! 2D image statistics
+        real(kind=c_float) pmin, pmax, med
+        real(kind=c_float) mad, madN, madP
+        real(kind=c_float) black, white, sensitivity, ratio_sensitivity
+
+        ! image histogram
+        integer hist(NBINS)
 
         ! progress
         integer(8) :: start_time, crate, cmax
