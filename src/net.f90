@@ -13,12 +13,15 @@ module net
             implicit none
         end subroutine stop_http
 
-        subroutine write_image_spectrum(fd, flux) BIND(C, name='write_image_spectrum')
+        subroutine write_image_spectrum(fd, flux, width, height, pixels, mask)&
+            &BIND(C, name='write_image_spectrum')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
-            character(kind=c_char) flux(*)
-            integer(c_int), value :: fd
+            character(kind=c_char), intent(in) :: flux(*)
+            integer(c_int), value, intent(in) :: fd, width, height
+            real(kind=c_float), dimension(:, :), contiguous, target, intent(in) :: pixels
+            logical(kind=1), dimension(:, :), contiguous, target, intent(in) :: mask
         end subroutine write_image_spectrum
     end interface
 contains
@@ -99,13 +102,13 @@ contains
 
     end function compare_frameid
 
-    subroutine image_spectrum_request(datasetId, n, width, height, fd) bind(C)
+    subroutine image_spectrum_request(datasetId, n, width, height, fetch_data, fd) bind(C)
         use mpi
         use fits
         use, intrinsic :: iso_c_binding
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
-        integer(kind=c_int), intent(in), value :: width, height, fd
+        integer(kind=c_int), intent(in), value :: width, height, fetch_data, fd
 
         integer inner_width, inner_height
         integer img_width, img_height
@@ -113,7 +116,7 @@ contains
 
         if (n .lt. 1) return
 
-        print *, '"', datasetId, '", width', width, ', height', height, ', pipe write end', fd
+        print *, '"', datasetId, '", width', width, ', height', height, ', fetch_data', fetch_data, ', pipe write end', fd
 
         ! compare the datasetId with item%frameid
         if (.not. compare_frameid(trim(item%frameid), datasetId, int(n))) then
@@ -144,7 +147,7 @@ contains
             return
         end if
 
-        call write_image_spectrum(fd, trim(item%flux)//c_null_char)
+        call write_image_spectrum(fd, trim(item%flux)//c_null_char, img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
 
     end subroutine image_spectrum_request
 
