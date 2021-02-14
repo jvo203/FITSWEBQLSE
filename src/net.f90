@@ -156,6 +156,9 @@ contains
 
             ! downscale item%pixels and item%mask into pixels, mask
             ! (TO-DO)
+
+            print *, 'downscaling not supported yet (TO-DO), ending the response'
+            return
         else
             img_width = item%naxes(1)
             img_height = item%naxes(2)
@@ -168,11 +171,6 @@ contains
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
-
-        if (scale .lt. 1.0) then
-            print *, 'downscaling not supported yet (TO-DO), ending the response'
-            return
-        end if
 
         call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
         &item%pmin, item%pmax, item%pmedian,&
