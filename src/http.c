@@ -1347,6 +1347,8 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     else
         printf("a NULL compressed_pixels buffer!\n");
 
+    free(_pixels);
+
     // compress mask with LZ4-HC
     mask_size = width * height;
 
