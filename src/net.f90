@@ -20,8 +20,7 @@ module net
 
             character(kind=c_char), intent(in) :: flux(*)
             integer(c_int), value, intent(in) :: fd, width, height
-            real(kind=c_float), dimension(:, :), contiguous, target, intent(in) :: pixels
-            logical(kind=1), dimension(:, :), contiguous, target, intent(in) :: mask
+            type(C_PTR), value :: pixels, mask
         end subroutine write_image_spectrum
     end interface
 contains
