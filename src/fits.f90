@@ -43,7 +43,7 @@ module fits
         logical :: ok = .false.
 
         ! 2D image statistics
-        real(kind=c_float) pmin, pmax, med
+        real(kind=c_float) pmin, pmax, pmedian
         real(kind=c_float) mad, madN, madP
         real(kind=c_float) black, white, sensitivity, ratio_sensitivity
 
@@ -89,6 +89,14 @@ contains
         print *, 'has_frequency:', item%has_frequency,&
         & ', has_velocity:', item%has_velocity,&
         & ', frame_multiplier = ', item%frame_multiplier
+
+        print *, 'pmin:', item%pmin
+        print *, 'pmax:', item%pmax
+        print *, 'pmedian:', item%pmedian
+        print *, 'black:', item%black
+        print *, 'white:', item%white
+        print *, 'sensitivity:', item%sensitivity
+        print *, 'ratio_sensitivity:', item%ratio_sensitivity
 
         if (item%naxes(3) .gt. 1) then
             ! print *, 'frame_min:', item%frame_min
@@ -1083,6 +1091,14 @@ contains
         end if
 
         print *, 'black = ', black, ', white = ', white, ', sensitivity = ', sensitivity
+
+        item%pmin = pmin
+        item%pmax = pmax
+        item%pmedian = pmedian
+        item%black = black
+        item%white = white
+        item%sensitivity = sensitivity
+        item%ratio_sensitivity = ratio_sensitivity
 
     end subroutine make_image_statistics
 
