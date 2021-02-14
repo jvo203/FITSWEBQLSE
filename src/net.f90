@@ -13,13 +13,18 @@ module net
             implicit none
         end subroutine stop_http
 
-        subroutine write_image_spectrum(fd, flux, width, height, pixels, mask)&
+        subroutine write_image_spectrum(fd, flux, width, height, &
+            pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity,&
+            &pixels, mask)&
             &BIND(C, name='write_image_spectrum')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
             character(kind=c_char), intent(in) :: flux(*)
             integer(c_int), value, intent(in) :: fd, width, height
+            real(c_float), value, intent(in) :: pmin, pmax, pmedian
+            real(c_float), value, intent(in) :: black, white
+            real(c_float), value, intent(in) :: sensitivity, ratio_sensitivity
             type(C_PTR), value :: pixels, mask
         end subroutine write_image_spectrum
     end interface
