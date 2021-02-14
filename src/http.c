@@ -1254,13 +1254,15 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     char *compressed_mask = NULL;
 
     // ZFP variables
-    uint dimes = 2;
     zfp_type type = zfp_type_float;
     zfp_field *field = NULL;
     zfp_stream *zfp = NULL;
     size_t bufsize = 0;
     bitstream *stream = NULL;
     size_t zfpsize = 0;
+    uint precision = 11;
+    uint nx = width;
+    uint ny = height;
 
     int mask_size, worst_size, compressed_size;
 
@@ -1277,42 +1279,61 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     printf("\n");
 
     // compress pixels with ZFP
-    field = zfp_field_2d((void *)pixels, type, width, height);
+    field = zfp_field_2d((void *)pixels, type, nx, ny);
+    printf("got here#0, field = \n", field);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
+    printf("got here#1, zfp = %p\n", zfp);
 
-    zfp_stream_set_precision(zfp, 11);
+    zfp_stream_set_precision(zfp, precision);
+    printf("got here#2\n");
 
     // allocate buffer for compressed data
     bufsize = zfp_stream_maximum_size(zfp, field);
+    printf("got here#3, bufsize = %zd\n", bufsize);
 
     compressed_pixels = (uchar *)malloc(bufsize);
+    printf("got here#4\n");
 
     if (compressed_pixels != NULL)
     {
+        printf("calling stream_open...");
         // associate bit stream with allocated buffer
-        stream = stream_open(compressed_pixels, bufsize);
-        zfp_stream_set_bit_stream(zfp, stream);
+        stream = stream_open((void *)compressed_pixels, bufsize);
+        printf("got here#5, bufsize = %zu, stream = %p\n", bufsize, stream);
 
-        // compress entire array
-        zfpsize = zfp_compress(zfp, field);
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+            printf("got here#6\n");
 
-        if (zfpsize == 0)
-            printf("ZFP compression failed!\n");
-        else
-            printf("image pixels compressed size: %zd bytes\n", zfpsize);
+            zfp_stream_rewind(zfp);
+            printf("got here#7\n");
+
+            // compress entire array
+            zfpsize = zfp_compress(zfp, field);
+            printf("got here#8\n");
+
+            if (zfpsize == 0)
+                printf("ZFP compression failed!\n");
+            else
+                printf("image pixels compressed size: %zd bytes\n", zfpsize);
+
+            stream_close(stream);
+
+            // the compressed part is available at compressed_pixels[0..zfpsize-1]
+        }
 
         /* clean up */
         zfp_field_free(field);
         zfp_stream_close(zfp);
-        stream_close(stream);
-
-        // the compressed part is available at compressed_pixels[0..zfpsize-1]
 
         // release memory
         free(compressed_pixels);
     }
+    else
+        printf("a NULL compressed_pixels buffer!\n");
 
     // compress mask with LZ4-HC
     mask_size = width * height;
