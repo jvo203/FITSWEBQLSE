@@ -1282,6 +1282,10 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
 
     for (i = 0; i < width; i++)
         printf("|%f,%d", pixels[i], mask[i]);
+    printf("\n\n\n");
+
+    for (i = width * height - width; i < width * height; i++)
+        printf("|%f,%d", pixels[i], mask[i]);
     printf("\n");
 
     // compress pixels with ZFP
