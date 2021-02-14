@@ -111,6 +111,7 @@ contains
     subroutine image_spectrum_request(datasetId, n, width, height, fetch_data, fd) bind(C)
         use mpi
         use fits
+        use lz4
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -120,6 +121,8 @@ contains
 
         real(kind=c_float), dimension(:, :), allocatable, target :: pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
+
+        character(kind=c_char), allocatable :: compressed_mask(:)
 
         integer inner_width, inner_height
         integer img_width, img_height
@@ -159,6 +162,8 @@ contains
             ! copy item%pixels and item%mask to pixels, mask
             pixels = item%pixels
             mask = item%mask
+
+            call compress_mask(mask, compressed_mask)
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
