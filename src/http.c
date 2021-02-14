@@ -1274,6 +1274,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
 
     printf("image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
 
+    // release memory
     if (compressed_mask != NULL)
         free(compressed_mask);
 }
