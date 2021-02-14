@@ -27,7 +27,7 @@ CFLAGS := $(FLAGS)
 INC = `pkg-config --cflags glib-2.0`
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4
+LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -lzfp
 # -lmpifort not needed when using mpiifort
 
 ifeq ($(UNAME_S),Darwin)
