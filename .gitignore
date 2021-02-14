@@ -1,6 +1,7 @@
 #compilation targets
 /fitswebqlse
 /testWavelets
+/zfp_compress
 
 # Prerequisites
 *.d
