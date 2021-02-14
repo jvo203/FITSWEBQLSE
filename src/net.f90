@@ -118,6 +118,9 @@ contains
         character(kind=c_char), dimension(n), intent(in) :: datasetId
         integer(kind=c_int), intent(in), value :: width, height, fetch_data, fd
 
+        real(kind=c_float), dimension(:, :), allocatable, target :: pixels
+        logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
+
         integer inner_width, inner_height
         integer img_width, img_height
         real scale
@@ -140,12 +143,22 @@ contains
         ! get the downscaled image dimensions
         scale = get_image_scale(width, height, inner_width, inner_height)
 
+        allocate (pixels(img_width, img_height))
+        allocate (mask(img_width, img_height))
+
         if (scale .lt. 1.0) then
             img_width = scale*item%naxes(1)
             img_height = scale*item%naxes(2)
+
+            ! downscale item%pixels and item%mask onto pixels, mask
+            ! (TO-DO)
         else
             img_width = item%naxes(1)
             img_height = item%naxes(2)
+
+            ! copy item%pixels and item%mask to pixels, mask
+            pixels = item%pixels
+            mask = item%mask
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
@@ -158,7 +171,7 @@ contains
         call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
         &item%pmin, item%pmax, item%pmedian,&
         &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
-        & img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
+        & img_width, img_height, c_loc(pixels), c_loc(mask))
 
     end subroutine image_spectrum_request
 
