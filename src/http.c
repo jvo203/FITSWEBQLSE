@@ -1249,12 +1249,12 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
 extern void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, const float *pixels, const bool *mask)
 {
-    int i;
+    int i, j;
     uchar *compressed_pixels = NULL;
     char *compressed_mask = NULL;
 
     // ZFP variables
-    zfp_type type = zfp_type_float;
+    zfp_type data_type = zfp_type_float;
     zfp_field *field = NULL;
     zfp_stream *zfp = NULL;
     size_t bufsize = 0;
@@ -1272,6 +1272,12 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     if (width <= 0 || height <= 0)
         return;
 
+    float _pixels[height][width];
+
+    for (i = 0; i < width; i++)
+        for (j = 0; j < height; j++)
+            _pixels[j][i] = i * j;
+
     printf("[C] fd: %d, flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f, width: %d, height: %d\n", fd, flux, pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity, width, height);
 
     for (i = 0; i < width; i++)
@@ -1279,14 +1285,16 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     printf("\n");
 
     // compress pixels with ZFP
-    field = zfp_field_2d((void *)pixels, type, nx, ny);
+    //field = zfp_field_2d((void *)pixels, type, nx, ny);
+    field = zfp_field_2d((void *)&_pixels[0][0], data_type, nx, ny);
     printf("got here#0, field = \n", field);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
     printf("got here#1, zfp = %p\n", zfp);
 
-    zfp_stream_set_precision(zfp, precision);
+    zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    //zfp_stream_set_precision(zfp, precision);
     printf("got here#2\n");
 
     // allocate buffer for compressed data
