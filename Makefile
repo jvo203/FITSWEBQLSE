@@ -26,7 +26,8 @@ FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
 CFLAGS := $(FLAGS)
 INC = `pkg-config --cflags glib-2.0`
 DEF = -DLOCAL
-FLAGS += -align array64byte -coarray=distributed
+FLAGS += -coarray=distributed
+# -align array64byte
 LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -lzfp
 # -lmpifort not needed when using mpiifort
 
