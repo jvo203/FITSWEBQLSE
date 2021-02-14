@@ -39,7 +39,7 @@ module fits
         real(kind=c_float) dmin, dmax
         real(kind=4), allocatable :: frame_min(:), frame_max(:)
         real(kind=c_float), allocatable :: pixels(:, :)
-        logical(kind=1), allocatable :: mask(:, :)
+        logical(kind=c_bool), allocatable :: mask(:, :)
         logical :: is_optical = .true.
         logical :: is_xray = .false.
         logical :: error = .false.
