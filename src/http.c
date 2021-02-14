@@ -1270,7 +1270,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     if (width <= 0 || height <= 0)
         return;
 
-    printf("[C] fd: %d, flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f\n", fd, flux, pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity);
+    printf("[C] fd: %d, flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f, width: %d, height: %d\n", fd, flux, pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity, width, height);
 
     for (i = 0; i < width; i++)
         printf("|%f,%d", pixels[i], mask[i]);
