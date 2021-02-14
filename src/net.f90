@@ -122,6 +122,7 @@ contains
         real(kind=c_float), dimension(:, :), allocatable, target :: pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
+        character(kind=c_char), allocatable :: compressed_pixels(:)
         character(kind=c_char), allocatable :: compressed_mask(:)
 
         integer inner_width, inner_height
@@ -153,7 +154,7 @@ contains
             img_width = scale*item%naxes(1)
             img_height = scale*item%naxes(2)
 
-            ! downscale item%pixels and item%mask onto pixels, mask
+            ! downscale item%pixels and item%mask into pixels, mask
             ! (TO-DO)
         else
             img_width = item%naxes(1)
@@ -163,7 +164,7 @@ contains
             pixels = item%pixels
             mask = item%mask
 
-            call compress_mask(mask, compressed_mask)
+            call compress_mask(item%mask, compressed_mask)
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
