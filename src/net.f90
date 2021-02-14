@@ -13,8 +13,10 @@ module net
             implicit none
         end subroutine stop_http
 
-        subroutine write_image_spectrum(fd, flux, width, height, &
-            pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity,&
+        subroutine write_image_spectrum(fd, flux, &
+            pmin, pmax, pmedian, &
+            &black, white, sensitivity, ratio_sensitivity,&
+            &width, height, &
             &pixels, mask)&
             &BIND(C, name='write_image_spectrum')
             use, intrinsic :: ISO_C_BINDING
@@ -22,9 +24,9 @@ module net
 
             character(kind=c_char), intent(in) :: flux(*)
             integer(c_int), value, intent(in) :: fd, width, height
-            real(c_float), value, intent(in) :: pmin, pmax, pmedian
-            real(c_float), value, intent(in) :: black, white
-            real(c_float), value, intent(in) :: sensitivity, ratio_sensitivity
+            real(kind=c_float), value, intent(in) :: pmin, pmax, pmedian
+            real(kind=c_float), value, intent(in) :: black, white
+            real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
             type(C_PTR), value :: pixels, mask
         end subroutine write_image_spectrum
     end interface
@@ -153,7 +155,10 @@ contains
             return
         end if
 
-        call write_image_spectrum(fd, trim(item%flux)//c_null_char, img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
+        call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
+        &item%pmin, item%pmax, item%pmedian,&
+        &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
+        & img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
 
     end subroutine image_spectrum_request
 
