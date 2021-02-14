@@ -1320,7 +1320,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
             zfp_stream_set_bit_stream(zfp, stream);
             printf("got here#6\n");
 
-            zfp_stream_rewind(zfp);
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
             printf("got here#7\n");
 
             // compress entire array
