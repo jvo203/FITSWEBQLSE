@@ -1270,7 +1270,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     compressed_mask = malloc(worst_size);
 
     // compress the mask as much as possible
-    compressed_size = LZ4_compress_HC(mask, compressed_mask, mask_size, worst_size, LZ4HC_CLEVEL_MAX);
+    compressed_size = LZ4_compress_HC((const char *)mask, compressed_mask, mask_size, worst_size, LZ4HC_CLEVEL_MAX);
 
     printf("image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
 
