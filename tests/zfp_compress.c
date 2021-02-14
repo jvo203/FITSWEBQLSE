@@ -32,8 +32,8 @@ int main()
     zfp = zfp_stream_open(NULL);
     printf("got here#1, zfp = %p\n", zfp);
 
-    zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
-    //zfp_stream_set_precision(zfp, precision);
+    //zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    zfp_stream_set_precision(zfp, precision);
     printf("got here#2\n");
 
     // allocate buffer for compressed data
