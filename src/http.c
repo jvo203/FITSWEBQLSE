@@ -1240,7 +1240,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     return ret;
 }
 
-extern void write_image_spectrum(int fd, const char *flux, int width, int height, const float *pixels, const char *mask)
+extern void write_image_spectrum(int fd, const char *flux, int width, int height, const float *pixels, const _Bool *mask)
 {
     if (flux == NULL)
         return;
