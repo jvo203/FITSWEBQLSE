@@ -1242,10 +1242,16 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
 extern void write_image_spectrum(int fd, const char *flux, int width, int height, const float *pixels, const _Bool *mask)
 {
+    int i;
+
     if (flux == NULL)
         return;
 
     printf("[C] fd: %d, flux: %s\n", fd, flux);
+
+    for (i = 0; i < width; i++)
+        printf("|%f,%d", pixels[i], mask[i]);
+    printf("\n");
 
     // compress pixels with ZFP
 
