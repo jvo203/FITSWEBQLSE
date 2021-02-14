@@ -36,7 +36,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 
 extern void exit_fortran();
 extern void fitswebql_request(char *uri, size_t n);
-extern void image_spectrum_request(char *datasetId, size_t n, int width, int height, int fd);
+extern void image_spectrum_request(char *datasetId, size_t n, int width, int height, int fetch_data, int fd);
 extern int get_error_status();
 extern int get_ok_status();
 extern float get_progress();
@@ -663,7 +663,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/image_spectrum") != NULL)
     {
-        gboolean fetch_data = FALSE;
+        int fetch_data = 0;
         int width, height;
 
         int status;
@@ -680,7 +680,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (fetch_dataStr != NULL)
             if (0 == strcmp(fetch_dataStr, "true"))
-                fetch_data = TRUE;
+                fetch_data = 1;
 
         width = atoi(widthStr);
         height = atoi(heightStr);
@@ -720,7 +720,7 @@ static enum MHD_Result on_http_connection(void *cls,
         // pass the write end of the pipe to Fortran
         // the binary response data will be generated in Fortran
         printf("[C] calling image_spectrum_request with the pipe file descriptor %d\n", pipefd[1]);
-        image_spectrum_request(datasetId, strlen(datasetId), width, height, pipefd[1]);
+        image_spectrum_request(datasetId, strlen(datasetId), width, height, fetch_data, pipefd[1]);
 
         // close the write end of the pipe
         close(pipefd[1]);
@@ -1240,7 +1240,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     return ret;
 }
 
-extern void write_image_spectrum(int fd, const char *flux)
+extern void write_image_spectrum(int fd, const char *flux, int width, int height, float *pixels, char *mask)
 {
     if (flux == NULL)
         return;
