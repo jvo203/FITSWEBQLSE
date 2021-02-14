@@ -63,6 +63,9 @@ test:
 mpi:
 	$(FORT) -Ofast -xHost test.f90 -o test
 
+zfp:
+	$(CC) $(CFLAGS) tests/zfp_compress.c -o zfp_compress -lzfp
+
 #-corray-config-file=./config
 
 clean:
