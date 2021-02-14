@@ -106,6 +106,8 @@ contains
         use mpi
         use fits
         use, intrinsic :: iso_c_binding
+        implicit none
+
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
         integer(kind=c_int), intent(in), value :: width, height, fetch_data, fd
