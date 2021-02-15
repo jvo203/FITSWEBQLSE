@@ -1346,7 +1346,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     // transmit the data
     const char *ptr;
     float tmp;
-    uint32_t str_len = strlen(flux);
+    uint32_t flux_len = strlen(flux);
 
     uint32_t img_width = width;
     uint32_t img_height = height;
@@ -1354,10 +1354,10 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     uint32 mask_len = compressed_size;
 
     // the flux length
-    write(fd, &str_len, sizeof(str_len));
+    write(fd, &flux_len, sizeof(flux_len));
 
     // flux
-    write(fd, flux, str_len);
+    write(fd, flux, flux_len);
 
     // pmin
     tmp = pmin;
