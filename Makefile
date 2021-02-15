@@ -65,7 +65,7 @@ mpi:
 
 zfp:
 #$(CC) $(CFLAGS) tests/zfp_compress.c -o zfp_compress -lzfp
-	$(FORT) $(FLAGS) src/zforp.f90 tests/zfp_compress.f90 -o zfp_compress -L/usr/local/lib -L/home/chris/zfp/build/lib64 -lzfp
+	$(FORT) $(FLAGS) src/zforp.f90 tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzfp -L/usr/local/lib -lcfitsio
 #-L/home/chris/zfp/build/lib64 -lzfp
 
 gzfp:
