@@ -63,8 +63,12 @@ contains
         write (*, *) "After compression, bitstream offset at "
         write (*, *) bitstream_offset_bytes
 
-        if (bitstream_offset_bytes .gt. 0) compressed = reshape(buffer, (/bitstream_offset_bytes/))
+        ! deallocations
+        call zFORp_stream_close(stream)
+        call zFORp_bitstream_stream_close(queried_bitstream)
+        call zFORp_field_free(field)
 
+        if (bitstream_offset_bytes .gt. 0) compressed = reshape(buffer, (/bitstream_offset_bytes/))
     end subroutine compress_pixels
 
 end module zfp
