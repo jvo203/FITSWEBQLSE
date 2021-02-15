@@ -13,7 +13,7 @@ CC := icc
 FORT := mpiifort
 TARGET = fitswebqlse
 
-SRC = src/http.c src/json.c src/fixed_array.f90 src/lz4.f90  src/wavelet.f90 src/histogram.c src/classifier.f90 src/fits.f90 src/net.f90 src/main.f90
+SRC = src/http.c src/json.c src/zforp.f90 src/fixed_array.f90 src/lz4.f90  src/wavelet.f90 src/histogram.c src/classifier.f90 src/fits.f90 src/net.f90 src/main.f90
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
@@ -27,7 +27,7 @@ CFLAGS := $(FLAGS)
 INC = `pkg-config --cflags glib-2.0`
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -lzfp
+LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/home/chris/zfp/build/lib64 -lzfp
 # -lmpifort not needed when using mpiifort
 
 ifeq ($(UNAME_S),Darwin)
