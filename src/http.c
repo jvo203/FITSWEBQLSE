@@ -1264,7 +1264,8 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     uint nx = width;
     uint ny = height;
 
-    int mask_size, worst_size, compressed_size;
+    int mask_size, worst_size;
+    int compressed_size = 0;
 
     if (flux == NULL || pixels == NULL || mask == NULL)
         return;
@@ -1323,9 +1324,6 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         /* clean up */
         zfp_field_free(field);
         zfp_stream_close(zfp);
-
-        // release memory
-        free(compressed_pixels);
     }
     else
         printf("a NULL compressed_pixels buffer!\n");
@@ -1343,8 +1341,14 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         compressed_size = LZ4_compress_HC((const char *)mask, compressed_mask, mask_size, worst_size, LZ4HC_CLEVEL_MAX);
 
         printf("image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
-
-        // release memory
-        free(compressed_mask);
     }
+
+    // transmit the data
+
+    // release the memory
+    if (compressed_pixels != NULL)
+        free(compressed_pixels);
+
+    if (compressed_mask != NULL)
+        free(compressed_mask);
 }
