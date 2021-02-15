@@ -1299,7 +1299,6 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
 
     if (compressed_pixels != NULL)
     {
-        printf("calling stream_open...");
         // associate bit stream with allocated buffer
         stream = stream_open((void *)compressed_pixels, bufsize);
 
