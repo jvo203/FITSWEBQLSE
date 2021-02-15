@@ -65,7 +65,7 @@ mpi:
 
 zfp:
 #$(CC) $(CFLAGS) tests/zfp_compress.c -o zfp_compress -lzfp
-	ifort -Ofast -xHost -mavx -axAVX -qopt-report=2 tests/zfp.f90 tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzFORp
+	ifort -Ofast -xHost -mavx -axAVX -qopt-report=2 tests/zforp.f90 tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzfp
 
 gzfp:
 	gfortran -Ofast -I/home/chris/zfp/build/modules tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzFORp
