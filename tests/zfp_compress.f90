@@ -7,8 +7,10 @@ program main
 
     ! input/decompressed arrays
     integer xLen, yLen
-    integer, dimension(:, :), allocatable, target :: input_array
-    integer, dimension(:, :), allocatable, target :: decompressed_array
+    ! integer, dimension(:, :), allocatable, target :: input_array
+    ! integer, dimension(:, :), allocatable, target :: decompressed_array
+    real(c_float), dimension(:, :), allocatable, target :: input_array
+    real(c_float), dimension(:, :), allocatable, target :: decompressed_array
     type(c_ptr) :: array_c_ptr
     integer error, max_abs_error
 
@@ -41,7 +43,8 @@ program main
 
     ! setup zfp_field
     array_c_ptr = c_loc(input_array)
-    zfp_type = zFORp_type_int32
+    ! zfp_type = zFORp_type_int32
+    zfp_type = zFORp_type_float
     field = zFORp_field_2d(array_c_ptr, zfp_type, xLen, yLen)
 
     ! setup bitstream
