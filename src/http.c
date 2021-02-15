@@ -1353,8 +1353,10 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     uint32_t pixels_len = zfpsize;
     uint32 mask_len = compressed_size;
 
-    // the flux
+    // the flux length
     write(fd, &str_len, sizeof(str_len));
+
+    // flux
     write(fd, flux, str_len);
 
     // pmin
