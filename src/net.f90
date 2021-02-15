@@ -111,8 +111,6 @@ contains
     subroutine image_spectrum_request(datasetId, n, width, height, fetch_data, fd) bind(C)
         use mpi
         use fits
-        use lz4
-        use zfp
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -164,9 +162,6 @@ contains
         else
             img_width = item%naxes(1)
             img_height = item%naxes(2)
-
-            call compress_pixels(item%pixels, compressed_pixels)
-            call compress_mask(item%mask, compressed_mask)
 
             call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
                 &item%pmin, item%pmax, item%pmedian,&
