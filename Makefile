@@ -13,7 +13,8 @@ CC := icc
 FORT := mpiifort
 TARGET = fitswebqlse
 
-SRC = src/http.c src/json.c src/zforp.f90 src/fixed_array.f90 src/lz4.f90 src/zfp.f90 src/wavelet.f90 src/histogram.c src/classifier.f90 src/fits.f90 src/net.f90 src/main.f90
+# src/zforp.f90 src/zfp.f90
+SRC = src/http.c src/json.c src/fixed_array.f90 src/lz4.f90 src/wavelet.f90 src/histogram.c src/classifier.f90 src/fits.f90 src/net.f90 src/main.f90
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
