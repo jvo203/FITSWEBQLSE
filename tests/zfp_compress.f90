@@ -12,7 +12,8 @@ program main
     real(c_float), dimension(:, :), allocatable, target :: input_array
     real(c_float), dimension(:, :), allocatable, target :: decompressed_array
     type(c_ptr) :: array_c_ptr
-    integer error, max_abs_error
+    ! integer error, max_abs_error
+    real error, max_abs_error
 
     ! zfp_field
     type(zFORp_field) :: field
