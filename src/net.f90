@@ -155,9 +155,18 @@ contains
                 allocate (mask(img_width, img_height))
 
                 ! downscale item%pixels and item%mask into pixels, mask
-                ! (TO-DO)
+                ! using Lanczos (TO-DO)
+
+                ! call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
+                !    &item%pmin, item%pmax, item%pmedian,&
+                !    &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
+                !    & img_width, img_height, c_loc(pixels), c_loc(mask))
+
+                deallocate (pixels)
+                deallocate (mask)
 
                 print *, 'downscaling not supported yet (TO-DO), ending the response'
+                return
             end block
         else
             img_width = item%naxes(1)
