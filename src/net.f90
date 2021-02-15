@@ -120,9 +120,6 @@ contains
         character(kind=c_char), dimension(n), intent(in) :: datasetId
         integer(kind=c_int), intent(in), value :: width, height, fetch_data, fd
 
-        real(kind=c_float), dimension(:, :), allocatable, target :: pixels
-        logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
-
         character(kind=c_char), allocatable :: compressed_pixels(:)
         character(kind=c_char), allocatable :: compressed_mask(:)
 
@@ -148,33 +145,33 @@ contains
         ! get the downscaled image dimensions
         scale = get_image_scale(width, height, inner_width, inner_height)
 
-        allocate (pixels(img_width, img_height))
-        allocate (mask(img_width, img_height))
-
         if (scale .lt. 1.0) then
-            img_width = scale*item%naxes(1)
-            img_height = scale*item%naxes(2)
+            block
+                real(kind=c_float), dimension(:, :), allocatable, target :: pixels
+                logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
-            ! downscale item%pixels and item%mask into pixels, mask
-            ! (TO-DO)
+                img_width = scale*item%naxes(1)
+                img_height = scale*item%naxes(2)
 
-            print *, 'downscaling not supported yet (TO-DO), ending the response'
-            return
+                allocate (pixels(img_width, img_height))
+                allocate (mask(img_width, img_height))
+
+                ! downscale item%pixels and item%mask into pixels, mask
+                ! (TO-DO)
+
+                print *, 'downscaling not supported yet (TO-DO), ending the response'
+            end block
         else
             img_width = item%naxes(1)
             img_height = item%naxes(2)
-
-            ! copy item%pixels and item%mask to pixels, mask
-            pixels = item%pixels
-            mask = item%mask
 
             call compress_pixels(item%pixels, compressed_pixels)
             call compress_mask(item%mask, compressed_mask)
 
             call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
-        &item%pmin, item%pmax, item%pmedian,&
-        &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
-        & img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
+                &item%pmin, item%pmax, item%pmedian,&
+                &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
+                & img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
