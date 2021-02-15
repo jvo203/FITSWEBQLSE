@@ -1347,12 +1347,43 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     const char *ptr;
     float tmp;
     uint32_t str_len = strlen(flux);
+
     uint32_t img_width = width;
     uint32_t img_height = height;
+    uint32_t pixels_len = zfpsize;
+    uint32 mask_len = compressed_size;
 
     // the flux
     write(fd, &str_len, sizeof(str_len));
     write(fd, flux, str_len);
+
+    // pmin
+    tmp = pmin;
+    write(fd, &tmp, sizeof(tmp));
+
+    // pmax
+    tmp = pmax;
+    write(fd, &tmp, sizeof(tmp));
+
+    // pmedian
+    tmp = pmedian;
+    write(fd, &tmp, sizeof(tmp));
+
+    // sensitivity
+    tmp = sensitivity;
+    write(fd, &tmp, sizeof(tmp));
+
+    // ratio_sensitivity
+    tmp = ratio_sensitivity;
+    write(fd, &tmp, sizeof(tmp));
+
+    // white
+    tmp = white;
+    write(fd, &tmp, sizeof(tmp));
+
+    // black
+    tmp = black;
+    write(fd, &tmp, sizeof(tmp));
 
     // release the memory
     if (compressed_pixels != NULL)
