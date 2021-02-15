@@ -1344,6 +1344,15 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     }
 
     // transmit the data
+    const char *ptr;
+    float tmp;
+    uint32_t str_len = strlen(flux);
+    uint32_t img_width = width;
+    uint32_t img_height = height;
+
+    // the flux
+    write(fd, &str_len, sizeof(str_len));
+    write(fd, flux, str_len);
 
     // release the memory
     if (compressed_pixels != NULL)
