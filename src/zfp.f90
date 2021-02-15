@@ -42,21 +42,28 @@ contains
         zfp_type = zFORp_type_float
         field = zFORp_field_2d(c_loc(pixels), zfp_type, nx, ny)
 
+        print *, 'got here#0'
+
         ! in the worst case assume no compression
         buffer_size_bytes = sizeof(pixels)
+        print *, 'buffer_size_bytes=', buffer_size_bytes
         allocate (buffer(buffer_size_bytes))
         bitstream = zFORp_bitstream_stream_open(c_loc(buffer), buffer_size_bytes)
+        print *, 'got here#1'
 
         ! setup zfp_stream
         stream = zFORp_stream_open(bitstream)
+        print *, 'got here#2'
 
         desired_rate = 8.0
         dims = 2
         wra = 0
         zfp_type = zFORp_type_float
         rate_result = zFORp_stream_set_rate(stream, desired_rate, zfp_type, dims, wra)
+        print *, 'got here#3'
 
         queried_bitstream = zFORp_stream_bit_stream(stream)
+        print *, 'got here#4'
 
         ! compress
         bitstream_offset_bytes = zFORp_compress(stream, field)
