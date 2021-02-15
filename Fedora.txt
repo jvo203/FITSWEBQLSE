@@ -27,11 +27,11 @@
 	* cmake:
 		mkdir -p build
 		cd build
-		cmake -DBUILD_ZFORP=ON FC=ifort ..
+		cmake -DBUILD_ZFORP=ON ..
 		make
 
 	* gmake:
-		gmake BUILD_ZFORP=1
+		gmake BUILD_ZFORP=1 FC=ifort
 
 	The library path is different in each of the above cases.
 
