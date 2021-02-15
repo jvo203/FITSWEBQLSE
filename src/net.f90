@@ -112,6 +112,7 @@ contains
         use mpi
         use fits
         use lz4
+        use zfp
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -167,6 +168,7 @@ contains
             pixels = item%pixels
             mask = item%mask
 
+            call compress_pixels(item%pixels, compressed_pixels)
             call compress_mask(item%mask, compressed_mask)
         end if
 
