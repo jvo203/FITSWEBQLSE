@@ -27,7 +27,7 @@
 	* cmake:
 		mkdir -p build
 		cd build
-		cmake -DBUILD_ZFORP=ON ..
+		cmake -DBUILD_ZFORP=ON FC=ifort ..
 		make
 
 	* gmake:
