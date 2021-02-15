@@ -170,14 +170,14 @@ contains
 
             call compress_pixels(item%pixels, compressed_pixels)
             call compress_mask(item%mask, compressed_mask)
+
+            call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
+        &item%pmin, item%pmax, item%pmedian,&
+        &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
+        & img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
-
-        call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
-        &item%pmin, item%pmax, item%pmedian,&
-        &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
-        & img_width, img_height, c_loc(pixels), c_loc(mask))
 
     end subroutine image_spectrum_request
 
