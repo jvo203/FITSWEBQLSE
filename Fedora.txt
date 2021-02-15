@@ -22,6 +22,8 @@
 
 3. zfp Fortran bindings
 
+# not needed right now (ZFP is only called from C at present)
+
 	git clone https://github.com/LLNL/zfp.git
 
 	* cmake:
