@@ -20,7 +20,22 @@
 
 	sudo dnf install ispc # (not needed yet)
 
-3. JSON-FORTRAN
+3. zfp Fortran bindings
+
+	git clone https://github.com/LLNL/zfp.git
+
+	* cmake:
+		mkdir -p build
+		cd build
+		cmake -DBUILD_ZFORP=ON ..
+		make
+
+	* gmake:
+		gmake BUILD_ZFORP=1
+
+	The library path is different in each of the above cases.
+
+4. JSON-FORTRAN
 
 	# this library does not work (segmentation faults)
 	# removed
@@ -43,13 +58,13 @@
 
 	sudo make install
 
-4. FORTRAN-UNIX
+5. FORTRAN-UNIX
 
 	$ git clone https://github.com/interkosmos/fortran-unix
 	$ cd fortran-unix/
 	$ make
 
-5. Adjust environment variables
+6. Adjust environment variables
 
 	Add
 
