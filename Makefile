@@ -24,7 +24,7 @@ FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
 #-qopenmp
 #-ipo -parallel -fast
 CFLAGS := $(FLAGS)
-INC = `pkg-config --cflags glib-2.0`
+INC = `pkg-config --cflags glib-2.0` -I/home/chris/zfp/include
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
 LIBS = -L/usr/local/lib -lcfitsio -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/home/chris/zfp/build/lib64 -lzfp
