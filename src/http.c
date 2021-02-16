@@ -48,6 +48,7 @@ extern int get_error_status();
 extern int get_ok_status();
 extern float get_progress();
 extern float get_elapsed();
+ssize_t chunked_write(int fd, const void *src, size_t n);
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -1345,7 +1346,6 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
 
     // transmit the data
     float tmp;
-    ssize_t written;
     uint32_t flux_len = strlen(flux);
 
     uint32_t img_width = width;
@@ -1394,11 +1394,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     // pixels
     write(fd, &pixels_len, sizeof(pixels_len));
     if (compressed_pixels != NULL)
-    {
-        // cannot write all the data at once, use smaller 16 KB chunks?
-        written = write(fd, compressed_pixels, 16);
-        printf("pixels written: %zd out of %du bytes.\n", written, pixels_len);
-    }
+        chunked_write(fd, compressed_pixels, 16);
 
     // mask
     /*write(fd, &mask_len, sizeof(mask_len));
@@ -1411,4 +1407,15 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
 
     if (compressed_mask != NULL)
         free(compressed_mask);
+}
+
+ssize_t chunked_write(int fd, const void *src, size_t n)
+{
+    ssize_t written;
+
+    written = write(fd, src, n);
+
+    printf("pixels written: %zd out of %du bytes.\n", written, n);
+
+    return written;
 }
