@@ -743,7 +743,7 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_destroy_response(response);
 
         // the code below should be run in a separate thread
-        // otherwise libmicrohttpd does not have a chance to read from the pipe
+        // otherwise libmicrohttpd will not have a chance to read from the pipe
         // alternatively the pipe capacity should be increased
         // with fcntl(F_SETPIPE_SZ)
 
