@@ -1394,7 +1394,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     // pixels
     write(fd, &pixels_len, sizeof(pixels_len));
     if (compressed_pixels != NULL)
-        chunked_write(fd, compressed_pixels, 16);
+        chunked_write(fd, compressed_pixels, pixels_len);
 
     // mask
     /*write(fd, &mask_len, sizeof(mask_len));
