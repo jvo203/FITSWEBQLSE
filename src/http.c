@@ -53,7 +53,7 @@ extern float get_elapsed();
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 #define CHUNK_SIZE 0x4000
-ssize_t chunked_write(int fd, const char *src, size_t n);
+size_t chunked_write(int fd, const char *src, size_t n);
 
 struct arg_struct
 {
@@ -765,11 +765,6 @@ static enum MHD_Result on_http_connection(void *cls,
             // create and detach the thread
             pthread_create(&tid, NULL, &handle_image_spectrum_request, args);
             pthread_detach(tid);
-            /*image_spectrum_request(datasetId, strlen(datasetId), width, height, fetch_data, pipefd[1]);
-
-            // close the write end of the pipe
-            close(pipefd[1]);
-            */
         }
 
         return ret;
@@ -1436,9 +1431,9 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         chunked_write(fd, compressed_pixels, pixels_len);
 
     // mask
-    /*write(fd, &mask_len, sizeof(mask_len));
+    write(fd, &mask_len, sizeof(mask_len));
     if (compressed_pixels != NULL)
-        write(fd, compressed_mask, mask_len);*/
+        chunked_write(fd, compressed_mask, mask_len);
 
     // release the memory
     if (compressed_pixels != NULL)
@@ -1448,7 +1443,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         free(compressed_mask);
 }
 
-ssize_t chunked_write(int fd, const char *src, size_t n)
+size_t chunked_write(int fd, const char *src, size_t n)
 {
     size_t nchar, remaining, offset;
     ssize_t written;
@@ -1467,12 +1462,10 @@ ssize_t chunked_write(int fd, const char *src, size_t n)
             offset += written;
         }
 
-        printf("pixels written: %zu out of %zu bytes.\n", offset, n);
+        printf("chars written: %zu out of %zu bytes.\n", offset, n);
     }
 
-    printf("pixels written: %zd out of %zu bytes.\n", written, n);
-
-    return written;
+    return offset;
 }
 
 void *handle_image_spectrum_request(void *args)
