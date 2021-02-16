@@ -1344,14 +1344,14 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     }
 
     // transmit the data
-    const char *ptr;
     float tmp;
+    ssize_t written;
     uint32_t flux_len = strlen(flux);
 
     uint32_t img_width = width;
     uint32_t img_height = height;
     uint32_t pixels_len = zfpsize;
-    uint32 mask_len = compressed_size;
+    uint32_t mask_len = compressed_size;
 
     // the flux length
     write(fd, &flux_len, sizeof(flux_len));
@@ -1394,12 +1394,16 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     // pixels
     write(fd, &pixels_len, sizeof(pixels_len));
     if (compressed_pixels != NULL)
-        write(fd, compressed_pixels, pixels_len);
+    {
+        // cannot write all the data at once, use smaller 16 KB chunks?
+        written = write(fd, compressed_pixels, 16);
+        printf("pixels written: %zd out of %du bytes.\n", written, pixels_len);
+    }
 
     // mask
-    write(fd, &mask_len, sizeof(mask_len));
+    /*write(fd, &mask_len, sizeof(mask_len));
     if (compressed_pixels != NULL)
-        write(fd, compressed_mask, mask_len);
+        write(fd, compressed_mask, mask_len);*/
 
     // release the memory
     if (compressed_pixels != NULL)
