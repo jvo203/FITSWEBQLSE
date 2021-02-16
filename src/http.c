@@ -65,6 +65,7 @@ struct arg_struct
 };
 
 void *handle_image_spectrum_request(void *args);
+void *handle_fitswebql_request(void *uri);
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -875,6 +876,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
             for (i = 0; i < va_count; i++)
             {
+                pthread_t tid;
+
                 if (directory != NULL)
                 {
                     if (extension == NULL)
@@ -884,7 +887,9 @@ static enum MHD_Result on_http_connection(void *cls,
                 }
 
                 printf("[C] FITS filepath:\t%s\n", filepath);
-                fitswebql_request(filepath, strlen(filepath));
+
+                pthread_create(&tid, NULL, &handle_fitswebql_request, strdup(filepath));
+                pthread_detach(tid);
             }
 
             // directory/extension should not be freed (libmicrohttpd does that)
@@ -1470,17 +1475,29 @@ size_t chunked_write(int fd, const char *src, size_t n)
     return offset;
 }
 
+void *handle_fitswebql_request(void *uri)
+{
+    if (uri == NULL)
+        pthread_exit(NULL);
+
+    fitswebql_request((char *)uri, strlen((char *)uri));
+
+    free((char *)uri);
+
+    pthread_exit(NULL);
+}
+
 void *handle_image_spectrum_request(void *args)
 {
     if (args == NULL)
-        return NULL;
+        pthread_exit(NULL);
 
     struct arg_struct *params = (struct arg_struct *)args;
 
     if (params->datasetId == NULL)
     {
         free(params);
-        return NULL;
+        pthread_exit(NULL);
     }
 
     image_spectrum_request(params->datasetId, strlen(params->datasetId), params->width, params->height, params->fetch_data, params->fd);
@@ -1493,5 +1510,5 @@ void *handle_image_spectrum_request(void *args)
 
     free(params);
 
-    return NULL;
+    pthread_exit(NULL);
 }
