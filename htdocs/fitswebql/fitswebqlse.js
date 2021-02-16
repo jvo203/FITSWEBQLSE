@@ -10354,18 +10354,13 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					.then(_ => {
 						console.log("processing an OpenEXR HDR image");
 						let start = performance.now();
-						//var image = Module.loadEXRStr(frame);
-						var image = Module.decompressImage(img_width, img_height, frame_pixels, frame_mask);
+
+						var pixels = Module.decompressZFPPixels(img_width, img_height, frame_pixels);
+						var alpha = Module.decompressLZ4Mask(img_width, img_height, frame_mask);
+
 						let elapsed = Math.round(performance.now() - start);
 
-						console.log("image width: ", image.width, "height: ", image.height, "channels: ", image.channels(), "elapsed: ", elapsed, "[ms]");
-
-						var img_width = image.width;
-						var img_height = image.height;
-						var pixels = image.pixels;//new Float32Array(image.plane("Y"));
-						var alpha = image.mask;//new Float32Array(image.plane("A"));
-
-						image.delete();
+						console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
 						process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
