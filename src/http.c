@@ -1285,7 +1285,6 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
 
     // compress pixels with ZFP
     field = zfp_field_2d((void *)pixels, data_type, nx, ny);
-    //field = zfp_field_2d((void *)pixels, data_type, nx, ny);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
@@ -1306,7 +1305,8 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         if (stream != NULL)
         {
             zfp_stream_set_bit_stream(zfp, stream);
-            // zfp_write_header(zfp, field, ZFP_HEADER_FULL); // no need for that
+
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
 
             // compress entire array
             zfpsize = zfp_compress(zfp, field);
@@ -1386,6 +1386,20 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     // black
     tmp = black;
     write(fd, &tmp, sizeof(tmp));
+
+    // the image + mask
+    write(fd, &img_width, sizeof(img_width));
+    write(fd, &img_height, sizeof(img_height));
+
+    // pixels
+    write(fd, &pixels_len, sizeof(pixels_len));
+    if (compressed_pixels != NULL)
+        write(fd, compressed_pixels, pixels_len);
+
+    // mask
+    write(fd, &mask_len, sizeof(mask_len));
+    if (compressed_pixels != NULL)
+        write(fd, compressed_mask, mask_len);
 
     // release the memory
     if (compressed_pixels != NULL)
