@@ -1482,7 +1482,7 @@ void *handle_fitswebql_request(void *uri)
 
     fitswebql_request((char *)uri, strlen((char *)uri));
 
-    free((char *)uri);
+    free(uri);
 
     pthread_exit(NULL);
 }
