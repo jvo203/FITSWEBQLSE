@@ -54,7 +54,17 @@ extern float get_elapsed();
 
 #define CHUNK_SIZE 0x4000
 ssize_t chunked_write(int fd, const char *src, size_t n);
-void *handle_image_spectrum_request(const char *datasetId, int width, int height, int fetch_data, int fd);
+
+struct arg_struct
+{
+    char *datasetId;
+    int width;
+    int height;
+    int fetch_data;
+    int fd;
+};
+
+void *handle_image_spectrum_request(void *args);
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -683,6 +693,8 @@ static enum MHD_Result on_http_connection(void *cls,
         int status;
         int pipefd[2];
 
+        pthread_t tid;
+
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
         char *widthStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "width");
         char *heightStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "height");
@@ -739,10 +751,26 @@ static enum MHD_Result on_http_connection(void *cls,
         // pass the write end of the pipe to Fortran
         // the binary response data will be generated in Fortran
         printf("[C] calling image_spectrum_request with the pipe file descriptor %d\n", pipefd[1]);
-        image_spectrum_request(datasetId, strlen(datasetId), width, height, fetch_data, pipefd[1]);
 
-        // close the write end of the pipe
-        close(pipefd[1]);
+        struct arg_struct *args = malloc(sizeof(struct arg_struct));
+
+        if (args != NULL)
+        {
+            args->datasetId = strdup(datasetId);
+            args->width = width;
+            args->height = height;
+            args->fetch_data = fetch_data;
+            args->fd = pipefd[1];
+
+            // create and detach the thread
+            pthread_create(&tid, NULL, &handle_image_spectrum_request, args);
+            pthread_detach(tid);
+            /*image_spectrum_request(datasetId, strlen(datasetId), width, height, fetch_data, pipefd[1]);
+
+            // close the write end of the pipe
+            close(pipefd[1]);
+            */
+        }
 
         return ret;
     }
@@ -1447,16 +1475,28 @@ ssize_t chunked_write(int fd, const char *src, size_t n)
     return written;
 }
 
-void *handle_image_spectrum_request(const char *datasetId, int width, int height, int fetch_data, int fd)
+void *handle_image_spectrum_request(void *args)
 {
-    if (datasetId == NULL)
-        return;
+    if (args == NULL)
+        return NULL;
 
-    image_spectrum_request(datasetId, strlen(datasetId), width, height, fetch_data, fd);
+    struct arg_struct *params = (struct arg_struct *)args;
+
+    if (params->datasetId == NULL)
+    {
+        free(params);
+        return NULL;
+    }
+
+    image_spectrum_request(params->datasetId, strlen(params->datasetId), params->width, params->height, params->fetch_data, params->fd);
 
     // close the write end of the pipe
-    close(fd);
+    close(params->fd);
 
     // free the duplicated memory
-    free(datasetId);
+    free(params->datasetId);
+
+    free(params);
+
+    return NULL;
 }
