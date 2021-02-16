@@ -10186,10 +10186,28 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 				tone_mapping.black = dv.getFloat32(offset, endianness);
 				offset += 4;
 
-				var img_length = getUint64(dv, offset, endianness);
+				var img_width = dv.getUint32(offset, endianness);
+				offset += 4;
+
+				var img_height = dv.getUint32(offset, endianness);
+				offset += 4;
+
+				console.log('img_width:', img_width, 'img_height:', img_height);
+
+				var pixels_length = dv.getUint32(offset, endianness);
 				offset += 8;
 
-				var frame = new Uint8Array(received_msg, offset, img_length);
+				console.log('pixels length:', pixels_length);
+
+				var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
+				offset += img_length;
+
+				var mask_length = dv.getUint32(offset, endianness);
+				offset += 8;
+
+				console.log('mask length:', mask_length);
+
+				var frame_mask = new Uint8Array(received_msg, offset, mask_length);
 				offset += img_length;
 
 				if (tone_mapping.flux == "legacy") {
