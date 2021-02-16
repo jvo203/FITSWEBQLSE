@@ -52,8 +52,9 @@ extern float get_elapsed();
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-#define CHUNK_SIZE 0x1000
+#define CHUNK_SIZE 0x4000
 ssize_t chunked_write(int fd, const char *src, size_t n);
+void *handle_image_spectrum_request(const char *datasetId, int width, int height, int fetch_data, int fd);
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -728,6 +729,11 @@ static enum MHD_Result on_http_connection(void *cls,
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
 
         MHD_destroy_response(response);
+
+        // the code below should be run in a separate thread
+        // otherwise libmicrohttpd does not have a chance to read from the pipe
+        // alternatively the pipe capacity should be increased
+        // with fcntl(F_SETPIPE_SZ)
 
         // respond with the image + JSON data (header, spectrum, histogram)
         // pass the write end of the pipe to Fortran
@@ -1439,4 +1445,18 @@ ssize_t chunked_write(int fd, const char *src, size_t n)
     printf("pixels written: %zd out of %zu bytes.\n", written, n);
 
     return written;
+}
+
+void *handle_image_spectrum_request(const char *datasetId, int width, int height, int fetch_data, int fd)
+{
+    if (datasetId == NULL)
+        return;
+
+    image_spectrum_request(datasetId, strlen(datasetId), width, height, fetch_data, fd);
+
+    // close the write end of the pipe
+    close(fd);
+
+    // free the duplicated memory
+    free(datasetId);
 }
