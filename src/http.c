@@ -1425,12 +1425,12 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     write(fd, &img_width, sizeof(img_width));
     write(fd, &img_height, sizeof(img_height));
 
-    // pixels
+    // pixels (use a chunked version for larger tranfers)
     write(fd, &pixels_len, sizeof(pixels_len));
     if (compressed_pixels != NULL)
         chunked_write(fd, compressed_pixels, pixels_len);
 
-    // mask
+    // mask (use a chunked version for larger tranfers)
     write(fd, &mask_len, sizeof(mask_len));
     if (compressed_pixels != NULL)
         chunked_write(fd, compressed_mask, mask_len);
