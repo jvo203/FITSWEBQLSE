@@ -48,7 +48,12 @@ extern int get_error_status();
 extern int get_ok_status();
 extern float get_progress();
 extern float get_elapsed();
-ssize_t chunked_write(int fd, const void *src, size_t n);
+
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+#define CHUNK_SIZE 0x1000
+ssize_t chunked_write(int fd, const char *src, size_t n);
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -1409,13 +1414,29 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         free(compressed_mask);
 }
 
-ssize_t chunked_write(int fd, const void *src, size_t n)
+ssize_t chunked_write(int fd, const char *src, size_t n)
 {
+    size_t nchar, remaining, offset;
     ssize_t written;
 
-    written = write(fd, src, n);
+    remaining = n;
+    offset = 0;
 
-    printf("pixels written: %zd out of %du bytes.\n", written, n);
+    while (remaining > 0)
+    {
+        nchar = MIN(remaining, CHUNK_SIZE);
+        written = write(fd, src + offset, nchar);
+
+        if (written > 0)
+        {
+            remaining -= written;
+            offset += written;
+        }
+
+        printf("pixels written: %zu out of %zu bytes.\n", offset, n);
+    }
+
+    printf("pixels written: %zd out of %zu bytes.\n", written, n);
 
     return written;
 }
