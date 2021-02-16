@@ -766,6 +766,8 @@ static enum MHD_Result on_http_connection(void *cls,
             pthread_create(&tid, NULL, &handle_image_spectrum_request, args);
             pthread_detach(tid);
         }
+        else
+            close(pipefd[1]);
 
         return ret;
     }
