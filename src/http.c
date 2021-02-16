@@ -888,7 +888,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 printf("[C] FITS filepath:\t%s\n", filepath);
 
-                pthread_create(&tid, NULL, &handle_fitswebql_request, strdup(filepath));
+                pthread_create(&tid, NULL, &handle_fitswebql_request, strndup(filepath, sizeof(filepath)));
                 pthread_detach(tid);
             }
 
