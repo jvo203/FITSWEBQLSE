@@ -10352,7 +10352,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 				// OpenEXR decoder part				
 				Module.ready
 					.then(_ => {
-						console.log("processing an OpenEXR HDR image");
+						console.log("processing an HDR image");
 						let start = performance.now();
 
 						var pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
