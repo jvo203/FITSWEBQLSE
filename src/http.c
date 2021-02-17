@@ -1297,11 +1297,11 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     char *compressed_mask = NULL;
 
     // ZFP variables
-    zfp_type data_type = zfp_type_float;
+    /*zfp_type data_type = zfp_type_float;
     zfp_field *field = NULL;
     zfp_stream *zfp = NULL;
     size_t bufsize = 0;
-    bitstream *stream = NULL;
+    bitstream *stream = NULL;*/
     size_t zfpsize = 0;
     uint precision = 11;
     uint nx = width;
