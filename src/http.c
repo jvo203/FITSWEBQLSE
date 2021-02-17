@@ -1071,7 +1071,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     // OpenEXR WASM decoder
     g_string_append(html, "<script "
-                          "src=\"exr." WASM_VERSION ".js\"></script>\n");
+                          "src=\"client." WASM_VERSION ".js\"></script>\n");
     /*html.append("<script "
               "src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWebQL@master/" +
               docs_root +
