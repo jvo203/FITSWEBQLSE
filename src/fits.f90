@@ -61,7 +61,7 @@ module fits
     end type dataset
 
     ! only one FITS dataset at this development stage
-    type(dataset), target :: item
+    type(dataset) :: item
 
     ! scalar coarray, one "filepath" for each image
     ! character(len=1024) :: fits_uri[*]
