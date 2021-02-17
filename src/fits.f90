@@ -244,6 +244,8 @@ contains
                 print *, 'id:', item%id, 'error:', item%error, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
                 call print_dataset
             end if
+        else
+            if (this_image() == 1) print *, 'bSucess:', bSuccess
         end if
 
     end subroutine load_fits_file
