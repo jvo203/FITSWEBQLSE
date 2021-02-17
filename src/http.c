@@ -649,7 +649,7 @@ static enum MHD_Result on_http_connection(void *cls,
     const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
     //MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
 
-    printf("[C] URL:\t%s\n", url);
+    // printf("[C] URL:\t%s\n", url);
 
 #ifdef LOCAL
     if (0 == strcmp(url, "/get_directory"))
