@@ -191,6 +191,8 @@ contains
         call read_fits_file(filename, dmin, dmax, pixels, mask, mean_spectrum, integrated_spectrum, bSuccess)
         call co_reduce(bSuccess, logical_and)
 
+        if (this_image() == 1) print *, 'bSuccess:', bSuccess
+
         if (bSuccess) then
             call co_min(dmin)
             call co_max(dmax)
@@ -244,8 +246,6 @@ contains
                 print *, 'id:', item%id, 'error:', item%error, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
                 call print_dataset
             end if
-        else
-            if (this_image() == 1) print *, 'bSucess:', bSuccess
         end if
 
     end subroutine load_fits_file
