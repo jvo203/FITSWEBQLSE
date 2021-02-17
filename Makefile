@@ -29,9 +29,9 @@ INC = `pkg-config --cflags glib-2.0`
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4  -lcfitsio
+LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lzfp -lcfitsio
 # before cfitsio goes
-# -L/usr/local/lib64 -lzfp
+# 
 
 # -lmpifort not needed when using mpiifort
 # -L/home/chris/zfp/build/lib64
