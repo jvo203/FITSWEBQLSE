@@ -961,7 +961,8 @@ extern void start_http()
     signal(SIGPIPE, SIG_IGN); //ignore SIGPIPE
     //signal(SIGINT, SIGINTHandler); //intercept CTRL+C to trigger a clean shutdown
 
-    http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
+    //http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
+    http_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
                                    HTTP_PORT,
                                    NULL,
                                    NULL,
@@ -1070,7 +1071,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     // OpenEXR WASM decoder
     g_string_append(html, "<script "
-                          "src=\"client." WASM_VERSION ".js\"></script>\n");
+                          "src=\"exr." WASM_VERSION ".js\"></script>\n");
     /*html.append("<script "
               "src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWebQL@master/" +
               docs_root +
