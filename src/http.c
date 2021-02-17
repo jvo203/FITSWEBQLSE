@@ -712,7 +712,7 @@ static enum MHD_Result on_http_connection(void *cls,
         width = atoi(widthStr);
         height = atoi(heightStr);
 
-        printf("[C] datasetId(%s), width(%d), height(%d), quality(%s), fetch_data: %s\n", datasetId, width, height, quality, (fetch_data ? "true" : "false"));
+        // printf("[C] datasetId(%s), width(%d), height(%d), quality(%s), fetch_data: %s\n", datasetId, width, height, quality, (fetch_data ? "true" : "false"));
 
         if (width <= 0 || height <= 0)
             return http_not_implemented(connection);
