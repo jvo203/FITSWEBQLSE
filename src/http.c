@@ -78,7 +78,7 @@ void *handle_fitswebql_request(void *uri);
     "FITSWEBQLSE v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR( \
         VERSION_SUB)
 
-#define WASM_VERSION "20.11.27.2"
+#define WASM_VERSION "21.02.XX.X"
 #define VERSION_STRING "SV2021-02-XX.X-ALPHA"
 
 #define HTTP_PORT 8080
