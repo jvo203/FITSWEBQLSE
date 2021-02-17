@@ -1070,7 +1070,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     // OpenEXR WASM decoder
     g_string_append(html, "<script "
-                          "src=\"exr." WASM_VERSION ".js\"></script>\n");
+                          "src=\"client." WASM_VERSION ".js\"></script>\n");
     /*html.append("<script "
               "src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWebQL@master/" +
               docs_root +
@@ -1326,46 +1326,46 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     printf("\n");*/
 
     // compress pixels with ZFP
-    field = zfp_field_2d((void *)pixels, data_type, nx, ny);    
+    field = zfp_field_2d((void *)pixels, data_type, nx, ny);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
-   
+
     //zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
-    zfp_stream_set_precision(zfp, precision);   
+    zfp_stream_set_precision(zfp, precision);
 
     // allocate buffer for compressed data
-    bufsize = zfp_stream_maximum_size(zfp, field);    
+    bufsize = zfp_stream_maximum_size(zfp, field);
 
     compressed_pixels = (uchar *)malloc(bufsize);
-    
+
     if (compressed_pixels != NULL)
-    {       
+    {
         // associate bit stream with allocated buffer
-        stream = stream_open((void *)compressed_pixels, bufsize);       
+        stream = stream_open((void *)compressed_pixels, bufsize);
 
         if (stream != NULL)
         {
-            zfp_stream_set_bit_stream(zfp, stream);            
+            zfp_stream_set_bit_stream(zfp, stream);
 
-            zfp_write_header(zfp, field, ZFP_HEADER_FULL);           
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
 
             // compress entire array
-            zfpsize = zfp_compress(zfp, field);           
+            zfpsize = zfp_compress(zfp, field);
 
             if (zfpsize == 0)
                 printf("ZFP compression failed!\n");
             else
                 printf("image pixels compressed size: %zd bytes\n", zfpsize);
 
-            stream_close(stream);          
+            stream_close(stream);
 
             // the compressed part is available at compressed_pixels[0..zfpsize-1]
         }
 
         /* clean up */
-        zfp_field_free(field);       
-        zfp_stream_close(zfp);      
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
     }
     else
         printf("a NULL compressed_pixels buffer!\n");
@@ -1435,7 +1435,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     // pixels (use a chunked version for larger tranfers)
     write(fd, &pixels_len, sizeof(pixels_len));
     if (compressed_pixels != NULL)
-        chunked_write(fd, (char*)compressed_pixels, pixels_len);
+        chunked_write(fd, (char *)compressed_pixels, pixels_len);
 
     // mask (use a chunked version for larger tranfers)
     write(fd, &mask_len, sizeof(mask_len));
