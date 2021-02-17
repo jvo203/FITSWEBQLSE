@@ -22,6 +22,23 @@
 
 3. zfp Fortran bindings
 
+	on macOS
+	
+	git clone https://github.com/LLNL/zfp.git
+
+	cd zfp
+
+	mkdir -p build
+
+	cd build
+
+	cmake -DZFP_WITH_OPENMP=OFF ..
+
+	make
+
+	sudo make install
+
+
 # not needed right now (ZFP is only called from C at present)
 
 	git clone https://github.com/LLNL/zfp.git
