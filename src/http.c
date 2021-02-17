@@ -1297,11 +1297,11 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     char *compressed_mask = NULL;
 
     // ZFP variables
-    /*zfp_type data_type = zfp_type_float;
+    zfp_type data_type = zfp_type_float;
     zfp_field *field = NULL;
     zfp_stream *zfp = NULL;
     size_t bufsize = 0;
-    bitstream *stream = NULL;*/
+    bitstream *stream = NULL;
     size_t zfpsize = 0;
     uint precision = 11;
     uint nx = width;
@@ -1327,7 +1327,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     printf("\n");*/
 
     // compress pixels with ZFP
-    /*field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+    field = zfp_field_2d((void *)pixels, data_type, nx, ny);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
@@ -1364,12 +1364,12 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
             // the compressed part is available at compressed_pixels[0..zfpsize-1]
         }
 
-        // clean up 
-    zfp_field_free(field);
-    zfp_stream_close(zfp);
-}
-else printf("a NULL compressed_pixels buffer!\n");
-*/
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+    }
+    else
+        printf("a NULL compressed_pixels buffer!\n");
 
     // compress mask with LZ4-HC
     mask_size = width * height;
