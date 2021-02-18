@@ -70,7 +70,7 @@ std::vector<float> decompressZFP(int img_width, int img_height, std::string cons
     zfp_read_header(zfp, field, ZFP_HEADER_MODE);
 
     // decompress entire array
-    zfpsize = zfp_compress(zfp, field);
+    zfpsize = zfp_decompress(zfp, field);
 
     if (zfpsize == 0)
       printf("ZFP decompression failed!\n");
@@ -103,7 +103,7 @@ std::vector<unsigned char> decompressLZ4(int img_width, int img_height, std::str
 
   decompressed_size = LZ4_decompress_safe((char *)bytes.data(), (char *)mask.data(), compressed_size, mask_size);
 
-  std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " pixels." << std::endl;
+  std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " mask pixels." << std::endl;
 
   if (decompressed_size < 0)
     return std::vector<unsigned char>();
