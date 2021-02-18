@@ -32,8 +32,7 @@ extern "C"
 
 using namespace emscripten;
 
-typedef std::vector<uint8_t> UChar;
-typedef std::vector<float> Pixel;
+typedef std::vector<float> Float;
 
 std::vector<float> decompressZFP(int img_width, int img_height, std::string const &bytes)
 {
@@ -46,15 +45,16 @@ std::vector<float> decompressZFP(int img_width, int img_height, std::string cons
   return std::vector<float>();
 }
 
-std::vector<uint8_t> decompressLZ4(int img_width, int img_height, std::string const &bytes)
+std::vector<float> decompressLZ4(int img_width, int img_height, std::string const &bytes)
 {
   std::cout << "[decompressLZ4] " << bytes.size() << " bytes." << std::endl;
 
   int mask_size = img_width * img_height;
 
   std::vector<uint8_t> mask(mask_size);
+  std::vector<float> alpha(mask_size);
 
-  return std::vector<uint8_t>();
+  return std::vector<float>();
 }
 
 std::vector<float> FPunzip(std::string const &bytes)
@@ -160,8 +160,7 @@ val hevc_decode_frame(unsigned int _w, unsigned int _h, std::string const &bytes
 
 EMSCRIPTEN_BINDINGS(Wrapper)
 {
-  register_vector<float>("Pixel");
-  register_vector<uint8_t>("UChar");
+  register_vector<float>("Float");
   function("decompressZFP", &decompressZFP);
   function("decompressLZ4", &decompressLZ4);
   function("FPunzip", &FPunzip);
