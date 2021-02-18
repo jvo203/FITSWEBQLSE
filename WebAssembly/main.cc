@@ -14,6 +14,12 @@ extern "C"
 #include "zfp.h"
 }
 
+extern "C"
+{
+// LZ4 decoder
+#include "lz4.h"
+}
+
 #include <iostream>
 #include <algorithm>
 #include <cstdint>
