@@ -758,6 +758,7 @@ function createAndCompileShader(gl, type, source) {
 		// There are errors, so display them
 		var errors = gl.getShaderInfoLog(shader);
 		console.error('Failed to compile ' + typeName + ' with these errors:' + errors);
+
 		gl.deleteShader(shader);
 		return null;
 	}
