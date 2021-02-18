@@ -33,6 +33,7 @@ extern "C"
 using namespace emscripten;
 
 typedef std::vector<float> Float;
+typedef std::vector<unsigned char> UChar;
 
 std::vector<float> decompressZFP(int img_width, int img_height, std::string const &bytes)
 {
@@ -45,7 +46,7 @@ std::vector<float> decompressZFP(int img_width, int img_height, std::string cons
   return std::vector<float>();
 }
 
-std::vector<float> decompressLZ4(int img_width, int img_height, std::string const &bytes)
+std::vector<unsigned char> decompressLZ4(int img_width, int img_height, std::string const &bytes)
 {
   std::cout << "[decompressLZ4] " << bytes.size() << " bytes." << std::endl;
 
@@ -53,20 +54,16 @@ std::vector<float> decompressLZ4(int img_width, int img_height, std::string cons
   int compressed_size = bytes.size();
   int decompressed_size = 0;
 
-  std::vector<uint8_t> mask(mask_size);
-  std::vector<float> alpha(mask_size);
+  std::vector<unsigned char> mask(mask_size);
 
   decompressed_size = LZ4_decompress_safe((char *)bytes.data(), (char *)mask.data(), compressed_size, mask_size);
 
   std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " pixels." << std::endl;
 
   if (decompressed_size < 0)
-    return std::vector<float>();
+    return std::vector<unsigned char>();
 
-  for (int i = 0; i < decompressed_size; i++)
-    alpha[i] = (mask[i] > 0) ? 1.0f : 0.0f;
-
-  return alpha;
+  return mask;
 }
 
 std::vector<float> FPunzip(std::string const &bytes)
@@ -173,6 +170,7 @@ val hevc_decode_frame(unsigned int _w, unsigned int _h, std::string const &bytes
 EMSCRIPTEN_BINDINGS(Wrapper)
 {
   register_vector<float>("Float");
+  register_vector<unsigned char>("UChar");
   function("decompressZFP", &decompressZFP);
   function("decompressLZ4", &decompressLZ4);
   function("FPunzip", &FPunzip);
