@@ -50,11 +50,23 @@ std::vector<float> decompressLZ4(int img_width, int img_height, std::string cons
   std::cout << "[decompressLZ4] " << bytes.size() << " bytes." << std::endl;
 
   int mask_size = img_width * img_height;
+  int compressed_size = bytes.size();
+  int decompressed_size = 0;
 
   std::vector<uint8_t> mask(mask_size);
   std::vector<float> alpha(mask_size);
 
-  return std::vector<float>();
+  decompressed_size = LZ4_decompress_safe((char *)bytes.data(), (char *)mask.data(), compressed_size, mask_size);
+
+  std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " pixels." << std::endl;
+
+  if (decompressed_size < 0)
+    return std::vector<float>();
+
+  for (int i = 0; i < decompressed_size; i++)
+    alpha[i] = (mask[i] > 0) ? 1.0f : 0.0f;
+
+  return alpha;
 }
 
 std::vector<float> FPunzip(std::string const &bytes)
