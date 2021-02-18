@@ -1445,8 +1445,8 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
-	let image_bounding_dims = true_image_dimensions(mask, img_width, img_height);
-	var pixel_range = image_pixel_range(pixels, mask, img_width, img_height);
+	let image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
+	var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
 	console.log(image_bounding_dims, pixel_range);
 
 	// combine pixels with a mask
