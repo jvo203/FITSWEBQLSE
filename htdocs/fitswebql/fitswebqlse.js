@@ -1444,7 +1444,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
 		init_webgl_viewport_buffers(viewportContainer);
 }
 
-function process_hdr_image(img_width, img_height, pixels, mask, tone_mapping, index) {
+function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
 	let image_bounding_dims = true_image_dimensions(mask, img_width, img_height);
 	var pixel_range = image_pixel_range(pixels, mask, img_width, img_height);
 	console.log(image_bounding_dims, pixel_range);
@@ -1458,7 +1458,7 @@ function process_hdr_image(img_width, img_height, pixels, mask, tone_mapping, in
 		texture[offset] = pixels[i];
 		offset = (offset + 1) | 0;
 
-		texture[offset] = (mask[i] > 0) ? 1.0 : 0.0;
+		texture[offset] = alpha[i];
 		offset = (offset + 1) | 0;
 	}
 
@@ -10357,13 +10357,13 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 						var pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
 
-						var mask = Module.decompressLZ4(img_width, img_height, frame_mask);
+						var alpha = Module.decompressLZ4(img_width, img_height, frame_mask);
 
 						let elapsed = Math.round(performance.now() - start);
 
 						console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-						process_hdr_image(img_width, img_height, pixels, mask, tone_mapping, index);
+						process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
 						if (has_data) {
 							display_histogram(index);
