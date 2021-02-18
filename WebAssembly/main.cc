@@ -35,6 +35,28 @@ using namespace emscripten;
 typedef std::vector<char> Bytes;
 typedef std::vector<float> Pixel;
 
+std::vector<float> decompressZFP(int img_width, int img_height, std::string const &bytes)
+{
+  std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+
+  int img_size = img_width * img_height;
+
+  std::vector<float> pixels(img_size);
+
+  return std::vector<float>();
+}
+
+std::vector<uint8_t> decompressLZ4(int img_width, int img_height, std::string const &bytes)
+{
+  std::cout << "[decompressLZ4] " << bytes.size() << " bytes." << std::endl;
+
+  int mask_size = img_width * img_height;
+
+  std::vector<uint8_t> mask(mask_size);
+
+  return std::vector<uint8_t>();
+}
+
 std::vector<float> FPunzip(std::string const &bytes)
 {
   std::cout << "[fpunzip] " << bytes.size() << " bytes." << std::endl;
@@ -140,6 +162,8 @@ EMSCRIPTEN_BINDINGS(Wrapper)
 {
   register_vector<float>("Pixel");
   register_vector<char>("Bytes");
+  function("decompressZFP", &decompressZFP);
+  function("decompressLZ4", &decompressLZ4);
   function("FPunzip", &FPunzip);
   function("hevc_init_frame", &hevc_init_frame);
   function("hevc_destroy_frame", &hevc_destroy_frame);
