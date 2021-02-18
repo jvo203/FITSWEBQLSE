@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-02-16.0";
+	return "JS2021-02-18.0";
 }
 
 const wasm_supported = (() => {
@@ -10356,6 +10356,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 						let start = performance.now();
 
 						var pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
+
 						var mask = Module.decompressLZ4(img_width, img_height, frame_mask);
 
 						let elapsed = Math.round(performance.now() - start);
