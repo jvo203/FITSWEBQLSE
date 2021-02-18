@@ -43,7 +43,52 @@ std::vector<float> decompressZFP(int img_width, int img_height, std::string cons
 
   std::vector<float> pixels(img_size);
 
-  return std::vector<float>();
+  // ZFP variables
+  zfp_type data_type = zfp_type_float;
+  zfp_field *field = NULL;
+  zfp_stream *zfp = NULL;
+  size_t bufsize = 0;
+  bitstream *stream = NULL;
+  size_t zfpsize = 0;
+  uint nx = img_width;
+  uint ny = img_height;
+
+  // decompress pixels with ZFP
+  field = zfp_field_2d((void *)pixels.data(), data_type, nx, ny);
+
+  // allocate metadata for a compressed stream
+  zfp = zfp_stream_open(NULL);
+
+  // associate bit stream with allocated buffer
+  bufsize = bytes.size();
+  stream = stream_open((void *)bytes.data(), bufsize);
+
+  if (stream != NULL)
+  {
+    zfp_stream_set_bit_stream(zfp, stream);
+
+    zfp_read_header(zfp, field, ZFP_HEADER_MODE);
+
+    // decompress entire array
+    zfpsize = zfp_compress(zfp, field);
+
+    if (zfpsize == 0)
+      printf("ZFP decompression failed!\n");
+    else
+      printf("decompressed %zu image pixels.\n", zfpsize);
+
+    stream_close(stream);
+
+    // the decompressed part is available at pixels[0..zfpsize-1] (a.k.a. pixels.data())
+  }
+  else
+    return std::vector<float>();
+
+  // clean up
+  zfp_field_free(field);
+  zfp_stream_close(zfp);
+
+  return pixels;
 }
 
 std::vector<unsigned char> decompressLZ4(int img_width, int img_height, std::string const &bytes)
