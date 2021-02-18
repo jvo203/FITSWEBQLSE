@@ -81,13 +81,12 @@ std::vector<float> decompressZFP(int img_width, int img_height, std::string cons
 
     // the decompressed part is available at pixels[0..zfpsize-1] (a.k.a. pixels.data())
   }
+  else
+    return std::vector<float>();
 
   // clean up
   zfp_field_free(field);
   zfp_stream_close(zfp);
-
-  if (stream != NULL)
-    return std::vector<float>();
 
   return pixels;
 }
