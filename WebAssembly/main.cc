@@ -32,7 +32,7 @@ extern "C"
 
 using namespace emscripten;
 
-typedef std::vector<char> Bytes;
+typedef std::vector<uint8_t> UChar;
 typedef std::vector<float> Pixel;
 
 std::vector<float> decompressZFP(int img_width, int img_height, std::string const &bytes)
@@ -161,7 +161,7 @@ val hevc_decode_frame(unsigned int _w, unsigned int _h, std::string const &bytes
 EMSCRIPTEN_BINDINGS(Wrapper)
 {
   register_vector<float>("Pixel");
-  register_vector<char>("Bytes");
+  register_vector<uint8_t>("UChar");
   function("decompressZFP", &decompressZFP);
   function("decompressLZ4", &decompressLZ4);
   function("FPunzip", &FPunzip);
