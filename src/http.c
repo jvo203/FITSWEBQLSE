@@ -1357,7 +1357,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
             if (zfpsize == 0)
                 printf("ZFP compression failed!\n");
             else
-                printf("image pixels compressed size: %zd bytes\n", zfpsize);
+                printf("image pixels compressed size: %zu bytes\n", zfpsize);
 
             stream_close(stream);
 
