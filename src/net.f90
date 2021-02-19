@@ -133,9 +133,9 @@ contains
         character(kind=c_char), allocatable :: compressed_pixels(:)
         character(kind=c_char), allocatable :: compressed_mask(:)
 
-        CHARACTER(kind=json_CK, len=:), allocatable :: json_str
+        CHARACTER(kind=json_CK, len=:), allocatable :: str_val
         character(kind=c_char, len=:), allocatable :: c_str
-        integer :: str_len
+        integer :: k, str_len
 
         integer inner_width, inner_height
         integer img_width, img_height
@@ -203,15 +203,20 @@ contains
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
         if (fetch_data .eq. 1) then
-            call to_json(json_str)
+            call to_json(str_val)
 
-            str_len = len(json_str)
+            str_len = len(str_val)
             print *, 'json len:', str_len
 
-            allocate (character(kind=c_char, len=(str_len + 1)) :: c_str)
+            allocate (character(str_len) :: c_str)
 
-            c_str = C_NULL_CHAR
-            ! c_str(1:str_len) = json_str(1:str_len)
+            ! str_val already seems to be NULL terminated
+            ! no need for extra str_len + 1
+            ! c_str(1:str_len) = C_NULL_CHAR
+
+            do concurrent(k=1:str_len)
+                c_str(k:k) = str_val(k:k)
+            end do
 
             call write_header(fd, c_str)
         end if
