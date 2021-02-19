@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-02-18.0";
+	return "JS2021-02-19.0";
 }
 
 const wasm_supported = (() => {
@@ -10379,8 +10379,6 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							for (let i = 0; i < len; i++)
 								alpha[i] = (mask.get(i) > 0) ? 1.0 : 0.0;
 						}
-
-						console.log(pixels, alpha);
 
 						let elapsed = Math.round(performance.now() - start);
 
