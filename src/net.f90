@@ -205,7 +205,7 @@ contains
 
             print *, 'json len:', len(json_str)
 
-            ! call write_header(fd, json_str//c_null_char)
+            call write_header(fd, json_str//C_NULL_CHAR)
         end if
 
     end subroutine image_spectrum_request
