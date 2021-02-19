@@ -1356,28 +1356,48 @@ contains
         CHARACTER(len=:), allocatable :: str_val
 
         type(json_core) :: json
-        type(json_value), pointer :: p, inp
+        type(json_value), pointer :: p
 
         ! initialize the class
-        call json%initialize()
+        ! call json%initialize(non_normals_to_null=.true.)
+        call json%initialize(use_quiet_nan=.true.)
 
         ! initialize the structure:
         call json%create_object(p, '')
 
-        ! add an "inputs" object to the structure:
-        call json%create_object(inp, 'inputs')
-        call json%add(p, inp) !add it to the root
+        ! FITS HEADER
+        call json%add(p, 'HEADER', 'THIS IS A NULL TEST HEADER (TO-DO)')
 
-        ! add some data to inputs:
-        call json%add(inp, 't0', 0.1_wp)
-        call json%add(inp, 'tf', 1.1_wp)
-        call json%add(inp, 'x0', 9999.0000d0)
-        call json%add(inp, 'integer_scalar', 787)
-        call json%add(inp, 'integer_array', [2, 4, 99])
-        call json%add(inp, 'names', ['aaa', 'bbb', 'ccc'])
-        call json%add(inp, 'logical_scalar', .true.)
-        call json%add(inp, 'logical_vector', [.true., .false., .true.])
-        nullify (inp)  !don't need this anymore
+        ! misc. values
+        call json%add(p, 'width', item%naxes(1))
+        call json%add(p, 'height', item%naxes(2))
+        call json%add(p, 'depth', item%naxes(3))
+        call json%add(p, 'polarisation', item%naxes(4))
+        call json%add(p, 'filesize', 0)
+        call json%add(p, 'IGNRVAL', item%ignrval)
+
+        call json%add(p, 'CD1_1', item%cd1_1)
+        call json%add(p, 'CD1_2', item%cd1_2)
+        call json%add(p, 'CD2_1', item%cd2_1)
+        call json%add(p, 'CD2_2', item%cd2_2)
+
+        call json%add(p, 'CRVAL1', item%crval1)
+        call json%add(p, 'CDELT1', item%cdelt1)
+        call json%add(p, 'CRPIX1', item%crpix1)
+        call json%add(p, 'CUNIT1', trim(item%cunit1))
+        call json%add(p, 'CTYPE1', trim(item%ctype1))
+
+        call json%add(p, 'CRVAL2', item%crval2)
+        call json%add(p, 'CDELT2', item%cdelt2)
+        call json%add(p, 'CRPIX2', item%crpix2)
+        call json%add(p, 'CUNIT2', trim(item%cunit2))
+        call json%add(p, 'CTYPE2', trim(item%ctype2))
+
+        call json%add(p, 'CRVAL3', item%crval3)
+        call json%add(p, 'CDELT3', item%cdelt3)
+        call json%add(p, 'CRPIX3', item%crpix3)
+        call json%add(p, 'CUNIT3', trim(item%cunit3))
+        call json%add(p, 'CTYPE3', trim(item%ctype3))
 
         ! serialize to string for further processing / compression
         call json%serialize(p, str_val)
