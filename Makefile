@@ -18,7 +18,7 @@ ERLOFF_SRC := json/erloff/module_m.f90 json/erloff/procedure_m.f90 json/erloff/c
 JSONFF_SRC := json/jsonff/json_value_m.f90 json/jsonff/json_string_m.f90 json/jsonff/fallible_json_value_m.f90 json/jsonff/json_element_m.f90 json/jsonff/json_array_m.f90 json/jsonff/json_false_m.f90 json/jsonff/json_true_m.f90 json/jsonff/json_member_m.f90 json/jsonff/json_null_m.f90 json/jsonff/json_number_m.f90 json/jsonff/json_object_m.f90 json/jsonff/parsed_element_m.f90 json/jsonff/parsers_m.f90 json/jsonff/fallible_json_string_m.f90 json/jsonff.f90
 # json/strff.f90 $(ERLOFF_SRC) $(JSONFF_SRC)
 
-JSON_SRC := json-fortran/json_kinds.F90 json-fortran/json_parameters.F90
+JSON_SRC := json-fortran/json_kinds.F90 json-fortran/json_parameters.F90 json-fortran/json_string_utilities.F90 json-fortran/json_value_module.F90 json-fortran/json_file_module.F90 json-fortran/json_module.F90
 SRC = src/iso_varying_string.f90 $(JSON_SRC) src/http.c src/json.c src/wavelet.f90 src/fixed_array.f90 src/lz4.f90 src/histogram.c src/classifier.f90 src/fits.f90 src/net.f90 src/main.f90
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
