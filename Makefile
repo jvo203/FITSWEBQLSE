@@ -35,7 +35,7 @@ MOD = -I/home/chris/json-fortran/build/include
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lzfp -lcfitsio
+LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lzfp -lcfitsio -L/home/chris/json-fortran/build/lib -ljsonfortran
 # before cfitsio goes
 # 
 
