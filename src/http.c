@@ -1302,6 +1302,9 @@ extern void write_header(int fd, const char *json_str)
 
     str_len = strlen(json_str);
 
+    if(str_len == 0)
+        return;
+
     worst_size = LZ4_compressBound(str_len);
 
     compressed_json = (char *)malloc(worst_size);
