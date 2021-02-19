@@ -1399,7 +1399,25 @@ contains
         call json%add(p, 'CUNIT3', trim(item%cunit3))
         call json%add(p, 'CTYPE3', trim(item%ctype3))
 
-        ! serialize to string for further processing / compression
+        call json%add(p, 'BMAJ', item%bmaj)
+        call json%add(p, 'BMIN', item%bmin)
+        call json%add(p, 'BPA', item%bpa)
+
+        call json%add(p, 'BUNIT', trim(item%bunit))
+        call json%add(p, 'BTYPE', trim(item%btype))
+        call json%add(p, 'SPECSYS', trim(item%specsys))
+
+        call json%add(p, 'RESTFRQ', item%restfrq)
+        call json%add(p, 'OBSRA', item%obsra)
+        call json%add(p, 'OBSDEC', item%obsdec)
+
+        call json%add(p, 'OBJECT', trim(item%object))
+        call json%add(p, 'DATEOBS', trim(item%date_obs))
+        call json%add(p, 'TIMESYS', trim(item%timesys))
+        call json%add(p, 'LINE', trim(item%line))
+        call json%add(p, 'FILTER', trim(item%filter))
+
+        ! serialize to string prior to passing to C
         call json%serialize(p, str_val)
         print *, str_val
 
