@@ -1417,6 +1417,12 @@ contains
         call json%add(p, 'LINE', trim(item%line))
         call json%add(p, 'FILTER', trim(item%filter))
 
+        call json%add(p, 'mean_spectrum', item%mean_spectrum)
+        call json%add(p, 'integrated_spectrum', item%integrated_spectrum)
+
+        ! statistics (image histogram)
+        call json%add(p, 'histogram', item%hist)
+
         ! serialize to string prior to passing to C
         call json%serialize(p, str_val)
         print *, str_val
