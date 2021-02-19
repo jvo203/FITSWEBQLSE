@@ -20,6 +20,12 @@ extern "C"
 #include "lz4.h"
 }
 
+static float *pixelsBuffer = NULL;
+static size_t pixelsLength = 0;
+
+static unsigned char *maskBuffer = NULL;
+static size_t maskLength = 0;
+
 #include <iostream>
 #include <algorithm>
 #include <cstdint>
@@ -109,6 +115,35 @@ std::vector<unsigned char> decompressLZ4(int img_width, int img_height, std::str
     return std::vector<unsigned char>();
 
   return mask;
+}
+
+val decompressLZ4val(int img_width, int img_height, std::string const &bytes)
+{
+  std::cout << "[decompressLZ4val] " << bytes.size() << " bytes." << std::endl;
+
+  int mask_size = img_width * img_height;
+  int compressed_size = bytes.size();
+  int decompressed_size = 0;
+
+  if (maskBuffer != NULL)
+  {
+    free(maskBuffer);
+
+    maskBuffer = NULL;
+    maskLength = 0;
+  }
+
+  maskLength = mask_size;
+  maskBuffer = (unsigned char *)malloc(maskLength);
+
+  if (maskBuffer == NULL)
+    return val(typed_memory_view(maskLength, maskBuffer));
+
+  decompressed_size = LZ4_decompress_safe((char *)bytes.data(), (char *)maskBuffer, compressed_size, mask_size);
+
+  std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " mask pixels." << std::endl;
+
+  return val(typed_memory_view(maskLength, maskBuffer));
 }
 
 std::vector<float> FPunzip(std::string const &bytes)
@@ -218,6 +253,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
   register_vector<unsigned char>("UChar");
   function("decompressZFP", &decompressZFP);
   function("decompressLZ4", &decompressLZ4);
+  function("decompressLZ4val", &decompressLZ4val);
   function("FPunzip", &FPunzip);
   function("hevc_init_frame", &hevc_init_frame);
   function("hevc_destroy_frame", &hevc_destroy_frame);
