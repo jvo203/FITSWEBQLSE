@@ -38,8 +38,9 @@ LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -
 # -L/home/chris/zfp/build/lib64
 
 ifeq ($(UNAME_S),Darwin)
-	INC += -I/usr/local/opt/openssl/include
+	INC += -I/usr/local/opt/openssl/include 
 	LIBS += -L/usr/local/opt/openssl/lib -lcaf_mpi -L/usr/local/opt/lz4/lib -llz4
+	MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc
 	FORT = mpif90
