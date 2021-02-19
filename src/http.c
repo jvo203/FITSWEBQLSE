@@ -1319,7 +1319,7 @@ extern void write_header(int fd, const char *json_str)
             uint32_t json_size = str_len;
 
             write(fd, &json_size, sizeof(json_size));
-            chunked_write(fd, compressed_json, json_size);
+            chunked_write(fd, compressed_json, compressed_size);
         }
     }
 
