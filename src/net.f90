@@ -29,6 +29,14 @@ module net
             real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
             type(C_PTR), value :: pixels, mask
         end subroutine write_image_spectrum
+
+        subroutine write_header(fd, json_str)
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: fd
+            character(kind=c_char), intent(in) :: json_str(*)
+        end subroutine write_header
     end interface
 contains
     subroutine sigint_handler
@@ -194,6 +202,8 @@ contains
         if (fetch_data .eq. 1) then
             call to_json(json_str)
             print *, json_str
+
+            call write_header(fd, json_str//c_null_char)
         end if
 
     end subroutine image_spectrum_request
