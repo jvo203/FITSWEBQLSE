@@ -16,7 +16,7 @@ TARGET = fitswebqlse
 # src/zforp.f90 src/zfp.f90
 ERLOFF_SRC := $(wildcard json/erloff/*.f90) json/erloffff.f90
 JSONFF_SRC := $(wildcard json/jsonff/*.f90) json/jsonff.f90
-SRC = $(ERLOFF_SRC) $(JSONFF_SRC) src/http.c src/json.c src/wavelet.f90 src/fixed_array.f90 src/lz4.f90 src/histogram.c src/classifier.f90 src/fits.f90 src/net.f90 src/main.f90
+SRC = src/http.c src/json.c src/wavelet.f90 src/fixed_array.f90 src/lz4.f90 src/histogram.c src/classifier.f90 src/fits.f90 src/net.f90 src/main.f90
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
