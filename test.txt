@@ -1,0 +1,6 @@
+[C] calling image_spectrum_request with the pipe file descriptor 57
+ "ALMA01025261", width         805 , height        1008 , fetch_data           1
+ , pipe write end          57
+ original dimensions:         512         512
+ inherent dimensions:         512         512
+[C] fd: 57, flux: ratio, pmin: -3.062213, pmax: 126.468994, pmedian: 0.252313, black: -3.062213, white: 14.445250, sensitivity: 0.057119, ratio_sensitivity: 0.057119, width: 512, height: 512
