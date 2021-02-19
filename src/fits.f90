@@ -1345,6 +1345,8 @@ contains
 
     subroutine to_json
         use json_module
+        use, intrinsic :: iso_fortran_env, only: wp => real64
+
         use iso_varying_string, only: varying_string, operator(//)
         implicit NONE
 
@@ -1359,6 +1361,24 @@ contains
 
         ! initialize the structure:
         call json%create_object(p, '')
+
+        ! add an "inputs" object to the structure:
+        call json%create_object(inp, 'inputs')
+        call json%add(p, inp) !add it to the root
+
+        ! add some data to inputs:
+        call json%add(inp, 't0', 0.1_wp)
+        call json%add(inp, 'tf', 1.1_wp)
+        call json%add(inp, 'x0', 9999.0000d0)
+        call json%add(inp, 'integer_scalar', 787)
+        call json%add(inp, 'integer_array', [2, 4, 99])
+        call json%add(inp, 'names', ['aaa', 'bbb', 'ccc'])
+        call json%add(inp, 'logical_scalar', .true.)
+        call json%add(inp, 'logical_vector', [.true., .false., .true.])
+        nullify (inp)  !don't need this anymore
+
+        ! write the file:
+        call json%print(p, 'example.json')
 
         ! cleanup:
         call json%destroy(p)
