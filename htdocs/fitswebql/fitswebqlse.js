@@ -10356,6 +10356,10 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 						console.log("processing an HDR image");
 						let start = performance.now();
 
+						var pixels = Module.decompressZFPval(img_width, img_height, frame_pixels);
+
+						var alpha = Module.decompressLZ4val(img_width, img_height, frame_mask);
+
 						//var len;
 
 						/*var _pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
@@ -10369,8 +10373,6 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 								pixels[i] = _pixels.get(i);
 						}*/
 
-						var pixels = Module.decompressZFPval(img_width, img_height, frame_pixels);
-
 						/*var mask = Module.decompressLZ4(img_width, img_height, frame_mask);
 
 						len = mask.size();
@@ -10381,8 +10383,6 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							for (let i = 0; i < len; i++)
 								alpha[i] = (mask.get(i) > 0) ? 1.0 : 0.0;
 						}*/
-
-						var alpha = Module.decompressLZ4val(img_width, img_height, frame_mask);
 
 						let elapsed = Math.round(performance.now() - start);
 
