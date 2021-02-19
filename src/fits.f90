@@ -1357,7 +1357,7 @@ contains
         use json_module
         implicit NONE
 
-        CHARACTER(len=:), allocatable, intent(out) :: str_val
+        CHARACTER(kind=json_CK, len=:), allocatable, intent(out) :: str_val
 
         type(json_core) :: json
         type(json_value), pointer :: p
