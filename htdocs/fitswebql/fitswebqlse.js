@@ -10250,6 +10250,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							fitsData += String.fromCharCode(uncompressed[i]);
 					};
 
+					console.log('decompressed:', fitsData)
 					fitsData = JSON.parse(fitsData);
 					console.log(fitsData);
 
