@@ -1312,6 +1312,15 @@ extern void write_header(int fd, const char *json_str)
         compressed_size = LZ4_compress_HC((const char *)json_str, compressed_json, str_len, worst_size, LZ4HC_CLEVEL_MAX);
 
         printf("JSON length: %d; compressed: %d bytes\n", str_len, compressed_size);
+
+        //send off the compressed data
+        if (compressed_size > 0)
+        {
+            uint32_t json_size = str_len;
+
+            write(fd, &json_size, sizeof(json_size));
+            chunked_write(fd, compressed_json, json_size);
+        }
     }
 
     if (compressed_json != NULL)
