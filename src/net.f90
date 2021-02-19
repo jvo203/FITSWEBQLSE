@@ -30,7 +30,7 @@ module net
             type(C_PTR), value :: pixels, mask
         end subroutine write_image_spectrum
 
-        subroutine write_header(fd, json_str)
+        subroutine write_header(fd, json_str) BIND(C, name='write_header')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
