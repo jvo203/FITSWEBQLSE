@@ -1378,7 +1378,7 @@ contains
         nullify (inp)  !don't need this anymore
 
         ! write the file:
-        call json%print(p, 'example.json')
+        call json%print(p)
 
         ! cleanup:
         call json%destroy(p)
