@@ -1431,7 +1431,7 @@ contains
         call json%serialize(p, str_val)
 
         ! write the file:
-        call json%print(p, item%frameid//'.json')
+        call json%print(p, trim(item%frameid)//'.json')
 
         ! cleanup:
         call json%destroy(p)

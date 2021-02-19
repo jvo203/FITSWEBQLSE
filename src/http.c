@@ -1140,7 +1140,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     // colourmaps
     g_string_append(html, "<script id=\"greyscale-shader\" type=\"x-shader/x-vertex\">\n");
-    include_file(html, "html/fitswebql/greyscale-shader.frag");
+    include_file(html, "htdocs/fitswebql/greyscale-shader.frag");
     g_string_append(html, "</script>\n");
 
     g_string_append(html, "<script id=\"negative-shader\" type=\"x-shader/x-vertex\">\n");
@@ -1196,7 +1196,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "</script>\n");
 
     g_string_append(html, "<script id=\"haxby-shader\" type=\"x-shader/x-vertex\">\n");
-    include_file(html, "html/fitswebql/haxby-shader.frag");
+    include_file(html, "htdocs/fitswebql/haxby-shader.frag");
     g_string_append(html, "</script>\n");
 
     // FITSWebQL main JavaScript + CSS
