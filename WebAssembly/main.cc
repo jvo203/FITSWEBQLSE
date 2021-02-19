@@ -23,8 +23,8 @@ extern "C"
 static float *pixelBuffer = NULL;
 static size_t pixelLength = 0;
 
-static unsigned char *maskBuffer = NULL;
-static size_t maskLength = 0;
+static float *alphaBuffer = NULL;
+static size_t alphaLength = 0;
 
 #include <iostream>
 #include <algorithm>
@@ -193,28 +193,41 @@ val decompressLZ4val(int img_width, int img_height, std::string const &bytes)
   int compressed_size = bytes.size();
   int decompressed_size = 0;
 
-  if (maskBuffer != NULL && maskLength != mask_size)
-  {
-    free(maskBuffer);
-
-    maskBuffer = NULL;
-    maskLength = 0;
-  }
+  unsigned char *maskBuffer = (unsigned char *)malloc(mask_size);
 
   if (maskBuffer == NULL)
-  {
-    maskLength = mask_size;
-    maskBuffer = (unsigned char *)malloc(maskLength);
-  }
-
-  if (maskBuffer == NULL)
-    return val(typed_memory_view(maskLength, maskBuffer));
+    return val(typed_memory_view(alphaLength, alphaBuffer));
 
   decompressed_size = LZ4_decompress_safe((char *)bytes.data(), (char *)maskBuffer, compressed_size, mask_size);
 
   std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " mask pixels." << std::endl;
 
-  return val(typed_memory_view(maskLength, maskBuffer));
+  // fill-in the mask
+  if (alphaBuffer != NULL && alphaLength != mask_size)
+  {
+    free(alphaBuffer);
+
+    alphaBuffer = NULL;
+    alphaLength = 0;
+  }
+
+  if (alphaBuffer == NULL)
+  {
+    alphaLength = mask_size;
+    alphaBuffer = (float *)calloc(alphaLength, sizeof(float));
+  }
+
+  if (alphaBuffer != NULL)
+  {
+    int i;
+    for (i = 0; i < mask_size; i++)
+      alphaBuffer[i] = (maskBuffer[i] > 0) ? 1.0f : 0.0f;
+  }
+
+  if (maskBuffer != NULL)
+    free(maskBuffer);
+
+  return val(typed_memory_view(alphaLength, alphaBuffer));
 }
 
 std::vector<float> FPunzip(std::string const &bytes)
