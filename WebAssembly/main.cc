@@ -200,7 +200,7 @@ val decompressLZ4val(int img_width, int img_height, std::string const &bytes)
 
   decompressed_size = LZ4_decompress_safe((char *)bytes.data(), (char *)maskBuffer, compressed_size, mask_size);
 
-  std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " mask pixels." << std::endl;
+  std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " bytes." << std::endl;
 
   // fill-in the mask
   if (alphaBuffer != NULL && alphaLength != mask_size)
@@ -218,11 +218,8 @@ val decompressLZ4val(int img_width, int img_height, std::string const &bytes)
   }
 
   if (alphaBuffer != NULL)
-  {
-    int i;
-    for (i = 0; i < mask_size; i++)
+    for (int i = 0; i < mask_size; i++)
       alphaBuffer[i] = (maskBuffer[i] > 0) ? 1.0f : 0.0f;
-  }
 
   if (maskBuffer != NULL)
     free(maskBuffer);
