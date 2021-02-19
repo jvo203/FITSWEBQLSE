@@ -1348,8 +1348,21 @@ contains
         use iso_varying_string, only: varying_string, operator(//)
         implicit NONE
 
-        type(varying_string) :: string
-        type(varying_string) :: json
+        ! type(varying_string) :: string
+        ! type(varying_string) :: json
+
+        type(json_core) :: json
+        type(json_value), pointer :: p, inp
+
+        ! initialize the class
+        call json%initialize()
+
+        ! initialize the structure:
+        call json%create_object(p, '')
+
+        ! cleanup:
+        call json%destroy(p)
+        if (json%failed()) stop 1
     end subroutine to_json
 
 end module fits
