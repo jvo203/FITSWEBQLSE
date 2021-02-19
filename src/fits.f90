@@ -1346,6 +1346,9 @@ contains
     subroutine to_json
         use iso_varying_string, only: varying_string, operator(//)
         implicit NONE
+
+        type(varying_string) :: string
+        type(varying_string) :: json
     end subroutine to_json
 
 end module fits
