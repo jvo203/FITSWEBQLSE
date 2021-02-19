@@ -189,7 +189,9 @@ contains
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
-        call to_json
+        if (fetch_data .eq. 1) then
+            call to_json
+        end if
 
     end subroutine image_spectrum_request
 
