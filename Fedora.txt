@@ -77,6 +77,17 @@
 
 	sudo make install
 
+	# alternatively (testing)
+
+	source /opt/intel/oneapi/setvars.sh
+
+	mkdir build && cd build/
+
+	cmake ..
+
+	make
+
+
 5. FORTRAN-UNIX
 
 	$ git clone https://github.com/interkosmos/fortran-unix
