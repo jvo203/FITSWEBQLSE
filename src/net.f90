@@ -146,7 +146,7 @@ contains
         ! get the downscaled image dimensions
         scale = get_image_scale(width, height, inner_width, inner_height)
 
-        if (scale .lt. 1.0) then           
+        if (scale .lt. 1.0) then
             img_width = scale*item%naxes(1)
             img_height = scale*item%naxes(2)
 
@@ -165,7 +165,7 @@ contains
             deallocate (mask)
 
             print *, 'downscaling not supported yet (TO-DO), ending the response'
-            return            
+            return
         else
             img_width = item%naxes(1)
             img_height = item%naxes(2)
@@ -188,6 +188,8 @@ contains
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
+
+        call to_json
 
     end subroutine image_spectrum_request
 
