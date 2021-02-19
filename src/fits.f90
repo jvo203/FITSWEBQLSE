@@ -1420,6 +1420,9 @@ contains
         ! serialize to string prior to further handling
         call json%serialize(p, str_val)
 
+        ! write the file:
+        call json%print(p, 'example.json')
+
         ! cleanup:
         call json%destroy(p)
         if (json%failed()) stop 1
