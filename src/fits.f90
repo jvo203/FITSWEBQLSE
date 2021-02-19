@@ -1353,6 +1353,8 @@ contains
         ! type(varying_string) :: string
         ! type(varying_string) :: json
 
+        CHARACTER(len=:), allocatable :: str_val
+
         type(json_core) :: json
         type(json_value), pointer :: p, inp
 
@@ -1377,8 +1379,9 @@ contains
         call json%add(inp, 'logical_vector', [.true., .false., .true.])
         nullify (inp)  !don't need this anymore
 
-        ! write the file:
-        call json%print(p)
+        ! serialize to string for further processing / compression
+        call json%serialize(p, str_val)
+        print *, str_val
 
         ! cleanup:
         call json%destroy(p)
