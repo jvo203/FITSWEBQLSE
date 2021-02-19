@@ -308,6 +308,10 @@ function main() {
 		}
 	}
 
+	if (theme == 'dark') {
+		document.getElementById("fortran").style.filter = "invert(100%)";
+	}
+
 	//fetch the home directory first
 	fetch_directory(localStorage_read_lastdir("lastdir"));
 }
