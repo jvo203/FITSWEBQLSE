@@ -338,6 +338,16 @@ contains
         naxes = (/0, 0, 0, 0/)
         bSuccess = .false.
 
+        item%frameid = ''
+        item%object = ''
+        item%line = ''
+        item%filter = ''
+        item%date_obs = ''
+        item%btype = ''
+        item%bunit = ''
+        item%specsys = ''
+        item%timesys = ''
+
         ! The STATUS parameter must always be initialized.
         status = 0
 
@@ -1419,9 +1429,6 @@ contains
 
         ! serialize to string prior to further handling
         call json%serialize(p, str_val)
-
-        ! write the file:
-        call json%print(p, 'example.json')
 
         ! cleanup:
         call json%destroy(p)
