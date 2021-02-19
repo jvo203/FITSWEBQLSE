@@ -72,7 +72,7 @@
 
 	mkdir -p build && cd build/
 
-	cmake -DUSE_GNU_INSTALL_CONVENTION=TRUE ..
+	cmake -DCMAKE_Fortran_COMPILER=ifort -DUSE_GNU_INSTALL_CONVENTION=TRUE ..
 
 	make
 
