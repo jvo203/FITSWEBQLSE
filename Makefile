@@ -31,6 +31,7 @@ FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
 #-ipo -parallel -fast
 CFLAGS := $(FLAGS)
 INC = `pkg-config --cflags glib-2.0`
+MOD = -I/home/chris/json-fortran/build/include
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
@@ -62,7 +63,7 @@ endif
 	$(CC) $(CFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
 
 %.o: %.f90
-	$(FORT) $(FLAGS) -MMD -o $@ -c $<
+	$(FORT) $(FLAGS) $(MOD) -MMD -o $@ -c $<
 
 fitswebqlse: $(OBJ)
 	$(FORT) $(FLAGS) -o $(TARGET) $^ $(LIBS)
