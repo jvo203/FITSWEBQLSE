@@ -309,7 +309,7 @@ function main() {
 	}
 
 	if (theme == 'dark') {
-		document.getElementById("fortran").style.filter = "invert(100%)";
+		document.getElementById("fortran").style.filter = "invert(100%) grayscale(100%)";
 	}
 
 	//fetch the home directory first
