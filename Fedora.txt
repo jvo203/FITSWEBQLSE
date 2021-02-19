@@ -56,34 +56,19 @@
 
 4. JSON-FORTRAN
 
-	# this library does not work (segmentation faults)
-	# removed
+	# the library does not work (segmentation faults) !? (works in Linux)
 
 	on macOS with homebrew:
 
 	brew install --with-unicode-support json-fortran
 
-	manually in Linux:
-
-	git clone https://github.com/jacobwilliams/json-fortran
-
-	cd json-fortran/
-
-	mkdir build && cd build/
-
-	cmake -DCMAKE_Fortran_COMPILER=ifort -DUSE_GNU_INSTALL_CONVENTION=TRUE ..
-
-	make
-
-	sudo make install
-
-	# alternatively (testing)
-
-	git clone https://github.com/jacobwilliams/json-fortran
-
-	cd json-fortran/
+	# Linux: manually using ifort
 
 	source /opt/intel/oneapi/setvars.sh
+
+	git clone https://github.com/jacobwilliams/json-fortran
+
+	cd json-fortran/
 
 	mkdir -p build && cd build/
 
