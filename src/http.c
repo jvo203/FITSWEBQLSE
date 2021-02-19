@@ -1290,6 +1290,34 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     return ret;
 }
 
+extern void write_header(int fd, const char *json_str)
+{
+    char *compressed_json = NULL;
+
+    if (json_str == NULL)
+        return;
+
+    int str_len, worst_size;
+    int compressed_size = 0;
+
+    str_len = strlen(json_str);
+
+    worst_size = LZ4_compressBound(str_len);
+
+    compressed_json = (char *)malloc(worst_size);
+
+    if (compressed_json != NULL)
+    {
+        // compress JSON as much as possible
+        compressed_size = LZ4_compress_HC((const char *)json_str, compressed_json, str_len, worst_size, LZ4HC_CLEVEL_MAX);
+
+        printf("JSON length: %d; compressed: %d bytes\n", str_len, compressed_size);
+    }
+
+    if (compressed_json != NULL)
+        free(compressed_json);
+}
+
 extern void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, const float *pixels, const bool *mask)
 {
     int i, j;
