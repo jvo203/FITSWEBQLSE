@@ -218,7 +218,7 @@ contains
                 c_str(k:k) = str_val(k:k)
             end do
 
-            call write_header(fd, c_str)
+            call write_header(fd, c_str//c_null_char)
         end if
 
     end subroutine image_spectrum_request
