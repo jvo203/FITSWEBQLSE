@@ -20,8 +20,8 @@ extern "C"
 #include "lz4.h"
 }
 
-static float *pixelsBuffer = NULL;
-static size_t pixelsLength = 0;
+static float *pixelBuffer = NULL;
+static size_t pixelLength = 0;
 
 static unsigned char *maskBuffer = NULL;
 static size_t maskLength = 0;
@@ -40,6 +40,74 @@ using namespace emscripten;
 
 typedef std::vector<float> Float;
 typedef std::vector<unsigned char> UChar;
+
+val decompressZFPval(int img_width, int img_height, std::string const &bytes)
+{
+  std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+
+  int img_size = img_width * img_height;
+
+  std::vector<float> pixels(img_size);
+
+  if (pixelBuffer != NULL && pixelLength != img_size)
+  {
+    free(pixelBuffer);
+
+    pixelBuffer = NULL;
+    pixelLength = 0;
+  }
+
+  if (pixelBuffer == NULL)
+  {
+    pixelLength = img_size;
+    pixelBuffer = (float *)calloc(pixelLength, sizeof(float));
+  }
+
+  // ZFP variables
+  zfp_type data_type = zfp_type_float;
+  zfp_field *field = NULL;
+  zfp_stream *zfp = NULL;
+  size_t bufsize = 0;
+  bitstream *stream = NULL;
+  size_t zfpsize = 0;
+  uint nx = img_width;
+  uint ny = img_height;
+
+  // decompress pixels with ZFP
+  field = zfp_field_2d((void *)pixelBuffer, data_type, nx, ny);
+
+  // allocate metadata for a compressed stream
+  zfp = zfp_stream_open(NULL);
+
+  // associate bit stream with allocated buffer
+  bufsize = bytes.size();
+  stream = stream_open((void *)bytes.data(), bufsize);
+
+  if (stream != NULL)
+  {
+    zfp_stream_set_bit_stream(zfp, stream);
+
+    zfp_read_header(zfp, field, ZFP_HEADER_MODE);
+
+    // decompress entire array
+    zfpsize = zfp_decompress(zfp, field);
+
+    if (zfpsize == 0)
+      printf("ZFP decompression failed!\n");
+    else
+      printf("decompressed %zu image pixels.\n", zfpsize);
+
+    stream_close(stream);
+
+    // the decompressed part is available at pixels[0..zfpsize-1] (a.k.a. pixels.data())
+  }
+
+  // clean up
+  zfp_field_free(field);
+  zfp_stream_close(zfp);
+
+  return val(typed_memory_view(pixelLength, pixelBuffer));
+}
 
 std::vector<float> decompressZFP(int img_width, int img_height, std::string const &bytes)
 {
@@ -125,7 +193,7 @@ val decompressLZ4val(int img_width, int img_height, std::string const &bytes)
   int compressed_size = bytes.size();
   int decompressed_size = 0;
 
-  if (maskBuffer != NULL)
+  if (maskBuffer != NULL && maskLength != mask_size)
   {
     free(maskBuffer);
 
@@ -133,8 +201,11 @@ val decompressLZ4val(int img_width, int img_height, std::string const &bytes)
     maskLength = 0;
   }
 
-  maskLength = mask_size;
-  maskBuffer = (unsigned char *)malloc(maskLength);
+  if (maskBuffer == NULL)
+  {
+    maskLength = mask_size;
+    maskBuffer = (unsigned char *)malloc(maskLength);
+  }
 
   if (maskBuffer == NULL)
     return val(typed_memory_view(maskLength, maskBuffer));
@@ -252,6 +323,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
   register_vector<float>("Float");
   register_vector<unsigned char>("UChar");
   function("decompressZFP", &decompressZFP);
+  function("decompressZFPval", &decompressZFPval);
   function("decompressLZ4", &decompressLZ4);
   function("decompressLZ4val", &decompressLZ4val);
   function("FPunzip", &FPunzip);
