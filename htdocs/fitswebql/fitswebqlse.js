@@ -10371,9 +10371,9 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 						var pixels = Module.decompressZFPval(img_width, img_height, frame_pixels);
 
-						var mask = Module.decompressLZ4(img_width, img_height, frame_mask);
+						/*var mask = Module.decompressLZ4(img_width, img_height, frame_mask);
 
-						/*len = mask.size();
+						len = mask.size();
 
 						if (len > 0) {
 							var alpha = new Float32Array(len);
@@ -10381,6 +10381,8 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							for (let i = 0; i < len; i++)
 								alpha[i] = (mask.get(i) > 0) ? 1.0 : 0.0;
 						}*/
+
+						var alpha = Module.decompressLZ4val(img_width, img_height, frame_mask);
 
 						let elapsed = Math.round(performance.now() - start);
 
