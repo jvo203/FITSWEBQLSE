@@ -1343,17 +1343,11 @@ contains
         return
     end function get_image_scale
 
-    subroutine to_json
+    subroutine to_json(str_val)
         use json_module
-        use, intrinsic :: iso_fortran_env, only: wp => real64
-
-        use iso_varying_string, only: varying_string, operator(//)
         implicit NONE
 
-        ! type(varying_string) :: string
-        ! type(varying_string) :: json
-
-        CHARACTER(len=:), allocatable :: str_val
+        CHARACTER(len=:), allocatable, intent(out) :: str_val
 
         type(json_core) :: json
         type(json_value), pointer :: p
@@ -1423,7 +1417,7 @@ contains
         ! statistics (image histogram)
         call json%add(p, 'histogram', item%hist)
 
-        ! serialize to string prior to passing to C
+        ! serialize to string prior to further handling
         call json%serialize(p, str_val)
         print *, str_val
 
