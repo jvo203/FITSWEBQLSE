@@ -210,10 +210,6 @@ contains
 
             allocate (character(str_len) :: c_str)
 
-            ! str_val already seems to be NULL terminated
-            ! no need for extra str_len + 1
-            ! c_str(1:str_len) = C_NULL_CHAR
-
             do concurrent(k=1:str_len)
                 c_str(k:k) = str_val(k:k)
             end do
