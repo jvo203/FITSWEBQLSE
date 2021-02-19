@@ -1343,4 +1343,9 @@ contains
         return
     end function get_image_scale
 
+    subroutine to_json
+        use iso_varying_string, only: varying_string, operator(//)
+        implicit NONE
+    end subroutine to_json
+
 end module fits
