@@ -203,6 +203,8 @@ contains
             call to_json(json_str)
             print *, json_str
 
+            print *, 'json len:', len(json_str)
+
             call write_header(fd, json_str//c_null_char)
         end if
 
