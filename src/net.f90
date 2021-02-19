@@ -119,6 +119,7 @@ contains
     subroutine image_spectrum_request(datasetId, n, width, height, fetch_data, fd) bind(C)
         use mpi
         use fits
+        use json_module
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -132,7 +133,7 @@ contains
         character(kind=c_char), allocatable :: compressed_pixels(:)
         character(kind=c_char), allocatable :: compressed_mask(:)
 
-        CHARACTER(len=:), allocatable :: json_str
+        CHARACTER(kind=json_CK, len=:), allocatable :: json_str
 
         integer inner_width, inner_height
         integer img_width, img_height
@@ -204,7 +205,7 @@ contains
 
             print *, 'json len:', len(json_str)
 
-            call write_header(fd, json_str//c_null_char)
+            ! call write_header(fd, json_str//c_null_char)
         end if
 
     end subroutine image_spectrum_request
