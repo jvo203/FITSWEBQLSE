@@ -134,6 +134,8 @@ contains
         character(kind=c_char), allocatable :: compressed_mask(:)
 
         CHARACTER(kind=json_CK, len=:), allocatable :: json_str
+        character(kind=c_char, len=:), allocatable :: c_str
+        integer :: str_len
 
         integer inner_width, inner_height
         integer img_width, img_height
@@ -203,9 +205,15 @@ contains
         if (fetch_data .eq. 1) then
             call to_json(json_str)
 
-            print *, 'json len:', len(json_str)
+            str_len = len(json_str)
+            print *, 'json len:', str_len
 
-            call write_header(fd, json_str//C_NULL_CHAR)
+            allocate (character(kind=c_char, len=(str_len + 1)) :: c_str)
+
+            c_str = C_NULL_CHAR
+            ! c_str(1:str_len) = json_str(1:str_len)
+
+            call write_header(fd, c_str)
         end if
 
     end subroutine image_spectrum_request
