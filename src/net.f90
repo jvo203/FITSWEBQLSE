@@ -193,6 +193,7 @@ contains
 
         if (fetch_data .eq. 1) then
             call to_json(json_str)
+            print *, json_str
         end if
 
     end subroutine image_spectrum_request
