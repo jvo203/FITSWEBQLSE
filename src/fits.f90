@@ -1419,7 +1419,6 @@ contains
 
         ! serialize to string prior to further handling
         call json%serialize(p, str_val)
-        print *, str_val
 
         ! cleanup:
         call json%destroy(p)

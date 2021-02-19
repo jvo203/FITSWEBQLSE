@@ -124,6 +124,8 @@ contains
         character(kind=c_char), allocatable :: compressed_pixels(:)
         character(kind=c_char), allocatable :: compressed_mask(:)
 
+        CHARACTER(len=:), allocatable :: json_str
+
         integer inner_width, inner_height
         integer img_width, img_height
         real scale
@@ -190,7 +192,7 @@ contains
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
         if (fetch_data .eq. 1) then
-            call to_json
+            call to_json(json_str)
         end if
 
     end subroutine image_spectrum_request
