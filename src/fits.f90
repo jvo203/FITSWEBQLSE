@@ -347,6 +347,7 @@ contains
         item%bunit = ''
         item%specsys = ''
         item%timesys = ''
+        item%flux = ''
 
         ! The STATUS parameter must always be initialized.
         status = 0
