@@ -10358,7 +10358,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 						var len;
 
-						var _pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
+						/*var _pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
 
 						len = _pixels.size();
 
@@ -10367,7 +10367,9 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 							for (let i = 0; i < len; i++)
 								pixels[i] = _pixels.get(i);
-						}
+						}*/
+
+						var pixels = Module.decompressZFPval(img_width, img_height, frame_pixels);
 
 						var mask = Module.decompressLZ4(img_width, img_height, frame_mask);
 
