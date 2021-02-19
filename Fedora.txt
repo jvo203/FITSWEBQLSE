@@ -79,14 +79,19 @@
 
 	# alternatively (testing)
 
+	git clone https://github.com/jacobwilliams/json-fortran
+
+	cd json-fortran/
+
 	source /opt/intel/oneapi/setvars.sh
 
-	mkdir build && cd build/
+	mkdir -p build && cd build/
 
-	cmake ..
+	cmake -DUSE_GNU_INSTALL_CONVENTION=TRUE ..
 
 	make
 
+	make install
 
 5. FORTRAN-UNIX
 
