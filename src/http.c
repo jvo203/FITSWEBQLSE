@@ -1087,7 +1087,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html,
                     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, "
                     "user-scalable=no, minimum-scale=1, maximum-scale=1\">\n");
-    g_string_append(html, "<link rel=\"stylesheet\" "
+
+    // v3.3.7
+    /*g_string_append(html, "<link rel=\"stylesheet\" "
                           "href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/"
                           "bootstrap.min.css\">\n");
     g_string_append(html, "<script "
@@ -1095,7 +1097,12 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                           "jquery.min.js\"></script>\n");
     g_string_append(html, "<script "
                           "src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/"
-                          "bootstrap.min.js\"></script>\n");
+                          "bootstrap.min.js\"></script>\n");*/
+
+    // v 3.4.1
+    g_string_append(html, "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\" integrity=\"sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu\" crossorigin=\"anonymous\">");
+    g_string_append(html, "<script src=\"https://code.jquery.com/jquery-1.12.4.min.js\" integrity=\"sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ\" crossorigin=\"anonymous\"></script>");
+    g_string_append(html, "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js\" integrity=\"sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd\" crossorigin=\"anonymous\"></script>");
 
     // GLSL vertex shader
     g_string_append(html, "<script id=\"vertex-shader\" type=\"x-shader/x-vertex\">\n");
