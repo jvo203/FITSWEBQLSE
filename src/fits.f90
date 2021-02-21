@@ -1365,7 +1365,8 @@ contains
 
         ! initialize the class
         ! call json%initialize(non_normals_to_null=.true.)
-        call json%initialize(use_quiet_nan=.true.)
+        ! call json%initialize(use_quiet_nan=.true.)
+        call json%initialize(non_normal_mode=2)
 
         ! initialize the structure:
         call json%create_object(p, '')
