@@ -667,6 +667,27 @@ static enum MHD_Result on_http_connection(void *cls,
     };
 #endif
 
+    if (strstr(url, "/heartbeat/") != NULL)
+    {
+        char *timestamp = strrchr(url, '/');
+
+        struct MHD_Response *response =
+            MHD_create_response_from_buffer(strlen(timestamp),
+                                            (void *)timestamp,
+                                            MHD_RESPMEM_MUST_COPY);
+        if (NULL != response)
+        {
+            ret =
+                MHD_queue_response(connection, MHD_HTTP_OK,
+                                   response);
+            MHD_destroy_response(response);
+
+            return ret;
+        }
+        else
+            return MHD_NO;
+    }
+
     if (strstr(url, "/progress/") != NULL)
     {
         char *datasetId = strrchr(url, '/');
@@ -1309,7 +1330,7 @@ extern void write_header(int fd, const char *json_str)
 
     str_len = strlen(json_str);
 
-    if(str_len == 0)
+    if (str_len == 0)
         return;
 
     worst_size = LZ4_compressBound(str_len);
