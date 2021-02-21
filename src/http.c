@@ -671,21 +671,28 @@ static enum MHD_Result on_http_connection(void *cls,
     {
         char *timestamp = strrchr(url, '/');
 
-        struct MHD_Response *response =
-            MHD_create_response_from_buffer(strlen(timestamp),
-                                            (void *)timestamp,
-                                            MHD_RESPMEM_MUST_COPY);
-        if (NULL != response)
+        if (timestamp != NULL)
         {
-            ret =
-                MHD_queue_response(connection, MHD_HTTP_OK,
-                                   response);
-            MHD_destroy_response(response);
+            timestamp++;
 
-            return ret;
+            struct MHD_Response *response =
+                MHD_create_response_from_buffer(strlen(timestamp),
+                                                (void *)timestamp,
+                                                MHD_RESPMEM_MUST_COPY);
+            if (NULL != response)
+            {
+                ret =
+                    MHD_queue_response(connection, MHD_HTTP_OK,
+                                       response);
+                MHD_destroy_response(response);
+
+                return ret;
+            }
+            else
+                return MHD_NO;
         }
         else
-            return MHD_NO;
+            return http_not_found(connection);
     }
 
     if (strstr(url, "/progress/") != NULL)
