@@ -15,7 +15,7 @@ module fits
         integer :: unit = -1! a FITS file handle
 
         ! FITS header values
-        character, allocatable :: hdr(:)
+        character(len=:), allocatable :: hdr
         integer :: naxis = 0
         integer :: bitpix = 0
         integer naxes(4)
@@ -491,7 +491,7 @@ contains
         item%flux = ''
 
         ! reset the FITS header
-        ! if (allocated(item%hdr)) item%hdr = ''
+        if (allocated(item%hdr)) deallocate (item%hdr)
 
         ! The STATUS parameter must always be initialized.
         status = 0
@@ -548,10 +548,10 @@ contains
                     key = record(1:10)
                     value = record(11:80)
 
-                    ! if (.not. allocated(item%hdr)) then
-                    !    allocate (item%hdr(80))
-                    !item%hdr = record
-                    ! end if
+                    if (.not. allocated(item%hdr)) then
+                        allocate (character(len=80) :: item%hdr)
+                        ! item%hdr(1:80) = record(1:80)
+                    end if
 
                     ! print *, record
                     ! print *, key, '-->', value
