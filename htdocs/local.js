@@ -56,8 +56,11 @@ function show_directory_contents(response) {
 	$("#filesystem").append($("<table></table>")
 		.attr("id", "files")
 		.attr("class", "table table-hover")
-		.html("<thead><tr style=\"color:inherit\"><th>name</th><th>size</th><th>last modified</th></tr></thead>"));
+		.html("<thead><tr style=\"color:inherit\"><th>name</th><th>size <a href=\"#unit\">[1]</a></th><th>last modified</th></tr></thead>"));
 	//class=\"danger\" style=\"color:black\"
+
+	$("#filesystem").append($("<p>[1] Base 10 (decimal)</p>")
+		.attr("id", "unit"));
 
 	//contents
 	filelist = response.contents;
