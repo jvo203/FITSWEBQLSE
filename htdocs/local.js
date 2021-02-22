@@ -290,7 +290,7 @@ function main() {
 
 		try {
 			for (let i = 0; i < document.styleSheets.length; i++)
-				if (document.styleSheets[i].href.indexOf('fitswebql.css') > 0) {
+				if (document.styleSheets[i].href.indexOf('local.css') > 0) {
 					let stylesheet = document.styleSheets[i];
 					console.log(document.styleSheets[i]);
 
@@ -309,6 +309,9 @@ function main() {
 	}
 
 	if (theme == 'dark') {
+		$("body").css('background-color', 'black');
+		$("body").css('color', 'white');
+
 		document.getElementById("fortran").style.filter = "invert(100%) grayscale(100%)";
 	}
 
