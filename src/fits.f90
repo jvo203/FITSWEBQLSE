@@ -1,6 +1,7 @@
 module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
+    use iso_varying_string
     implicit none
 
     integer(kind=4), parameter :: NBINS = 1024
@@ -15,7 +16,7 @@ module fits
         integer :: unit = -1! a FITS file handle
 
         ! FITS header values
-        character(len=:), allocatable :: hdr
+        type(varying_string) :: hdr
         integer :: naxis = 0
         integer :: bitpix = 0
         integer naxes(4)
@@ -491,7 +492,7 @@ contains
         item%flux = ''
 
         ! reset the FITS header
-        if (allocated(item%hdr)) deallocate (item%hdr)
+        item%hdr = ''
 
         ! The STATUS parameter must always be initialized.
         status = 0
@@ -548,10 +549,7 @@ contains
                     key = record(1:10)
                     value = record(11:80)
 
-                    if (.not. allocated(item%hdr)) then
-                        allocate (character(len=80) :: item%hdr)
-                        ! item%hdr(1:80) = record(1:80)
-                    end if
+                    item%hdr = item%hdr//record
 
                     ! print *, record
                     ! print *, key, '-->', value
@@ -762,7 +760,8 @@ contains
             call ftmrhd(unit, 1, hdutype, status)
 
             if (status .eq. 0) then
-                ! deallocate (item%hdr)
+                ! reset the header
+                item%hdr = ''
 
                 ! success, so jump back and print out keywords in this extension
                 go to 100
@@ -1509,6 +1508,7 @@ contains
 
     subroutine to_json(str_val)
         use json_module
+        use iso_varying_string
         implicit NONE
 
         CHARACTER(kind=json_CK, len=:), allocatable, intent(out) :: str_val
@@ -1523,13 +1523,8 @@ contains
         call json%create_object(p, '')
 
         ! FITS HEADER
-        call json%add(p, 'HEADER', 'N/A')
-        ! if (allocated(item%hdr)) then
-        ! call json%add(p, 'HEADER', item%hdr)
-        !    call json%add(p, 'HEADER', 'N/A')
-        ! else
-        !    call json%add(p, 'HEADER', 'N/A')
-        ! end if
+        call json%add(p, 'HEADER', char(item%hdr))
+        print *, char(item%hdr)
 
         ! misc. values
         call json%add(p, 'width', item%naxes(1))
