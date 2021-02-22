@@ -39,8 +39,13 @@ module fits
         logical(kind=c_bool), allocatable :: mask(:, :)
         logical :: is_optical = .true.
         logical :: is_xray = .false.
+
         logical :: error = .false.
         logical :: ok = .false.
+        logical :: header = .false.
+
+        ! mutexes
+        type(c_ptr) :: header_mtx, ok_mtx, error_mtx, progress_mtx
 
         ! 2D image statistics
         real(kind=c_float) pmin, pmax, pmedian
@@ -184,6 +189,7 @@ contains
         item%elapsed = 0
         item%ok = .false.
         item%error = .false.
+        item%header = .false.
 
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
@@ -638,6 +644,8 @@ contains
         item%bitpix = bitpix
         item%naxis = naxis
         item%naxes = naxes
+
+        item%header = .true.
 
         if (this_image() == 1) then
             print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
