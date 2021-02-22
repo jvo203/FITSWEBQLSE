@@ -183,21 +183,10 @@ contains
             img_width = item%naxes(1)
             img_height = item%naxes(2)
 
-            allocate (pixels(img_width, img_height))
-            allocate (mask(img_width, img_height))
-
-            ! make local copies so that pixels/mask can be pointer targets
-            ! instead of making the whole dataset a target
-            pixels = item%pixels
-            mask = item%mask
-
             call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
                 &item%pmin, item%pmax, item%pmedian,&
                 &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
-                & img_width, img_height, c_loc(pixels), c_loc(mask))
-
-            deallocate (pixels)
-            deallocate (mask)
+                & img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
