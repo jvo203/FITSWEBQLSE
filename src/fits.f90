@@ -45,7 +45,10 @@ module fits
         logical :: header = .false.
 
         ! mutexes
-        type(c_ptr) :: header_mtx, ok_mtx, error_mtx, progress_mtx
+        type(c_ptr) :: header_mtx = C_NULL_PTR
+        type(c_ptr) :: ok_mtx = C_NULL_PTR
+        type(c_ptr) :: error_mtx = C_NULL_PTR
+        type(c_ptr) :: progress_mtx = C_NULL_PTR
 
         ! 2D image statistics
         real(kind=c_float) pmin, pmax, pmedian
