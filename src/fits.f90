@@ -532,6 +532,17 @@ contains
             do i = 1, nkeys
                 call ftgrec(unit, i, record, status)
 
+                if (this_image() == 1) then
+                    ! split the record into a key and a value
+                    key = record(1:10)
+                    value = record(11:80)
+
+                    item%hdr = item%hdr//record
+
+                    ! print *, record
+                    ! print *, key, '-->', value
+                end if
+
                 pos = index(record, 'ASTRO-F')
                 if (pos .ne. 0) then
                     item%is_optical = .true.
@@ -542,17 +553,6 @@ contains
                 if (pos .ne. 0) then
                     item%is_optical = .true.
                     item%flux = 'ratio'
-                end if
-
-                if (this_image() == 1) then
-                    ! split the record into a key and a value
-                    key = record(1:10)
-                    value = record(11:80)
-
-                    item%hdr = item%hdr//record
-
-                    ! print *, record
-                    ! print *, key, '-->', value
                 end if
 
                 call lower_case(record)
@@ -1524,7 +1524,6 @@ contains
 
         ! FITS HEADER
         call json%add(p, 'HEADER', char(item%hdr))
-        print *, char(item%hdr)
 
         ! misc. values
         call json%add(p, 'width', item%naxes(1))
