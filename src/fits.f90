@@ -153,6 +153,45 @@ contains
 
     end subroutine print_dataset
 
+    subroutine set_error_status(error)
+        logical, intent(in) :: error
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%error_mtx))
+
+        item%error = error
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%error_mtx))
+
+    end subroutine set_error_status
+
+    subroutine set_ok_status(ok)
+        logical, intent(in) :: ok
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%ok_mtx))
+
+        item%ok = ok
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%ok_mtx))
+
+    end subroutine set_ok_status
+
+    subroutine set_header_status(header)
+        logical, intent(in) :: header
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%header_mtx))
+
+        item%header = header
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%header_mtx))
+
+    end subroutine set_header_status
+
     subroutine update_progress(progress, total)
         integer, intent(in) :: progress, total
         integer(8) finish
@@ -282,9 +321,9 @@ contains
         item%id = id
         item%progress = 0
         item%elapsed = 0
-        item%ok = .false.
-        item%error = .false.
-        item%header = .false.
+        call set_ok_status(.false.)
+        call set_error_status(.false.)
+        call set_header_status(.false.)
 
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
@@ -334,8 +373,7 @@ contains
             ! make an image histogram, decide on the flux etc.
             if (this_image() == 1) call make_image_statistics
 
-            ! <ok> should be protected by a mutex ...
-            item%ok = .true.
+            call set_ok_status(.true.)
 
             ! end the timer
             call system_clock(finish)
@@ -740,7 +778,7 @@ contains
         item%naxis = naxis
         item%naxes = naxes
 
-        item%header = .true.
+        call set_header_status(.true.)
 
         if (this_image() == 1) then
             print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
@@ -954,7 +992,7 @@ contains
 200     call ftclos(unit, status)
         call ftfiou(unit, status)
 
-        item%error = .true.
+        call set_error_status(.true.)
 
         ! Check for any error, and if so print out error messages.
         ! The PRINTERROR subroutine is listed near the end of this file.
