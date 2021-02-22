@@ -5305,7 +5305,7 @@ function display_scale_range_ui(called_from_menu = false) {
 	
 	d3.select("#yaxis")
 	.attr("data-toggle", "popover")
-	.attr("data-triggre", "hover")
+	.attr("data-trigger", "hover")
 	.attr("title", "fixed scale")
 	.attr("data-content", "hold 's' and move mouse over the Y-Axis, then use mouse drag/scroll-wheel to adjust the Y-Axis scale");
 	
