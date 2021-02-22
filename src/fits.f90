@@ -70,7 +70,7 @@ module fits
     end type dataset
 
     ! only one FITS dataset at this development stage
-    type(dataset) :: item
+    type(dataset), target :: item
 
     ! scalar coarray, one "filepath" for each image
     ! character(len=1024) :: fits_uri[*]
@@ -223,6 +223,9 @@ contains
 
             return
         end if
+
+        ! init mutexes
+        if (item%progress_mtx%i .eq. 0) call g_mutex_init(c_loc(item%progress))
 
         item%id = id
         item%progress = 0
