@@ -15,6 +15,7 @@ module fits
         integer :: unit = -1! a FITS file handle
 
         ! FITS header values
+        character, allocatable :: hdr(:)
         integer :: naxis = 0
         integer :: bitpix = 0
         integer naxes(4)
@@ -477,6 +478,7 @@ contains
         naxes = (/0, 0, 0, 0/)
         bSuccess = .false.
 
+        ! reset the strings
         item%frameid = ''
         item%object = ''
         item%line = ''
@@ -487,6 +489,9 @@ contains
         item%specsys = ''
         item%timesys = ''
         item%flux = ''
+
+        ! reset the FITS header
+        ! if (allocated(item%hdr)) item%hdr = ''
 
         ! The STATUS parameter must always be initialized.
         status = 0
@@ -542,6 +547,11 @@ contains
                     ! split the record into a key and a value
                     key = record(1:10)
                     value = record(11:80)
+
+                    ! if (.not. allocated(item%hdr)) then
+                    !    allocate (item%hdr(80))
+                    !item%hdr = record
+                    ! end if
 
                     ! print *, record
                     ! print *, key, '-->', value
@@ -752,6 +762,8 @@ contains
             call ftmrhd(unit, 1, hdutype, status)
 
             if (status .eq. 0) then
+                ! deallocate (item%hdr)
+
                 ! success, so jump back and print out keywords in this extension
                 go to 100
 
@@ -1511,7 +1523,13 @@ contains
         call json%create_object(p, '')
 
         ! FITS HEADER
-        call json%add(p, 'HEADER', 'THIS IS A NULL TEST HEADER (TO-DO)')
+        call json%add(p, 'HEADER', 'N/A')
+        ! if (allocated(item%hdr)) then
+        ! call json%add(p, 'HEADER', item%hdr)
+        !    call json%add(p, 'HEADER', 'N/A')
+        ! else
+        !    call json%add(p, 'HEADER', 'N/A')
+        ! end if
 
         ! misc. values
         call json%add(p, 'width', item%naxes(1))
