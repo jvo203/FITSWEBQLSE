@@ -150,6 +150,7 @@ contains
             ! print *, 'mean spectrum:', item%mean_spectrum
             ! print *, 'integrated spectrum:', item%integrated_spectrum
         end if
+
     end subroutine print_dataset
 
     subroutine update_progress(progress, total)
@@ -161,13 +162,22 @@ contains
         call system_clock(finish)
         elapsed = real(finish - item%start_time)/real(item%crate)
 
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%progress_mtx))
+
         item%progress = 100.0*progress/total
         item%elapsed = elapsed
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%progress_mtx))
 
         ! print *, 'progress:', item%progress, '%, elapsed time ', item%elapsed, ' [s]'
     end subroutine update_progress
 
     integer(c_int) function get_error_status() bind(c)
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%error_mtx))
 
         if (item%error) then
             get_error_status = 1
@@ -175,10 +185,16 @@ contains
             get_error_status = 0
         end if
 
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%error_mtx))
+
         return
     end function get_error_status
 
     integer(c_int) function get_ok_status() bind(c)
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%ok_mtx))
 
         if (item%ok) then
             get_ok_status = 1
@@ -186,15 +202,48 @@ contains
             get_ok_status = 0
         end if
 
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%ok_mtx))
+
         return
     end function get_ok_status
 
+    integer(c_int) function get_header_status() bind(c)
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%header_mtx))
+
+        if (item%header) then
+            get_header_status = 1
+        else
+            get_header_status = 0
+        end if
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%header_mtx))
+
+        return
+    end function get_header_status
+
     real(c_float) function get_progress() bind(c)
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%progress_mtx))
+
         get_progress = item%progress
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%progress_mtx))
     end function get_progress
 
     real(c_float) function get_elapsed() bind(c)
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%progress_mtx))
+
         get_elapsed = item%elapsed
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%progress_mtx))
     end function get_elapsed
 
     subroutine load_fits_file(filename)
@@ -225,7 +274,10 @@ contains
         end if
 
         ! init mutexes
-        if (item%progress_mtx%i .eq. 0) call g_mutex_init(c_loc(item%progress))
+        if (item%header_mtx%i .eq. 0) call g_mutex_init(c_loc(item%header_mtx))
+        if (item%error_mtx%i .eq. 0) call g_mutex_init(c_loc(item%error_mtx))
+        if (item%ok_mtx%i .eq. 0) call g_mutex_init(c_loc(item%ok_mtx))
+        if (item%progress_mtx%i .eq. 0) call g_mutex_init(c_loc(item%progress_mtx))
 
         item%id = id
         item%progress = 0
