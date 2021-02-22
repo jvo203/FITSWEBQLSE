@@ -81,6 +81,38 @@ module fits
     interface
         ! glib mutex functions
 
+        ! void g_mutex_init (GMutex *mutex);
+        subroutine g_mutex_init(mutex) BIND(C, name='g_mutex_init')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: mutex
+        end subroutine g_mutex_init
+
+        ! void g_mutex_clear (GMutex *mutex);
+        subroutine g_mutex_clear(mutex) BIND(C, name='g_mutex_clear')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: mutex
+        end subroutine g_mutex_clear
+
+        ! void g_mutex_lock (GMutex *mutex);
+        subroutine g_mutex_lock(mutex) BIND(C, name='g_mutex_lock')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: mutex
+        end subroutine g_mutex_lock
+
+        ! void g_mutex_unlock (GMutex *mutex);
+        subroutine g_mutex_unlock(mutex) BIND(C, name='g_mutex_unlock')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: mutex
+        end subroutine g_mutex_unlock
+
     end interface
 contains
     subroutine print_dataset
