@@ -309,9 +309,6 @@ function main() {
 	}
 
 	if (theme == 'dark') {
-		$("body").css('background-color', 'black');
-		$("body").css('color', 'white');
-
 		document.getElementById("fortran").style.filter = "invert(100%) grayscale(100%)";
 	}
 
