@@ -5,6 +5,10 @@ module fits
 
     integer(kind=4), parameter :: NBINS = 1024
 
+    type, bind(c) :: gmutex
+        integer(kind=c_intptr_t) :: i = 0
+    end type gmutex
+
     type dataset
         ! the id will be made by hashing the dataset uri
         integer :: id = -1
@@ -45,10 +49,7 @@ module fits
         logical :: header = .false.
 
         ! mutexes
-        type(c_ptr) :: header_mtx = C_NULL_PTR
-        type(c_ptr) :: ok_mtx = C_NULL_PTR
-        type(c_ptr) :: error_mtx = C_NULL_PTR
-        type(c_ptr) :: progress_mtx = C_NULL_PTR
+        type(gmutex) :: header_mtx, ok_mtx, error_mtx, progress_mtx
 
         ! 2D image statistics
         real(kind=c_float) pmin, pmax, pmedian
@@ -77,6 +78,10 @@ module fits
     ! co-array variables to be synchronised across all images
     ! to be held in a structure <dataset>
     ! moved to the <load_fits_file> subroutine
+    interface
+        ! glib mutex functions
+
+    end interface
 contains
     subroutine print_dataset
         print *, trim(item%frameid), ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
