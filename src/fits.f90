@@ -1680,6 +1680,8 @@ contains
 
         json = '{'
 
+        ! call json%add(p, 'HEADER', 'N/A (pending upon a bug in the external json-fortran library)')
+
         json = json//'}'
 
         print *, char(json)
