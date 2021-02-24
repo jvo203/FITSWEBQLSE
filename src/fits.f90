@@ -1675,6 +1675,16 @@ contains
         print *, '[to_json]::19'
     end subroutine to_json
 
+    subroutine get_json
+        type(varying_string) :: json
+
+        json = '{'
+
+        json = json//'}'
+
+        print *, char(json)
+    end subroutine get_json
+
     subroutine downsize_nn_bool(X, Y)
         use, intrinsic :: iso_c_binding
         implicit none
