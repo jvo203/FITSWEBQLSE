@@ -14,6 +14,7 @@ module fits
         ! the id will be made by hashing the dataset uri
         integer :: id = -1
         integer :: unit = -1! a FITS file handle
+        type(varying_string) :: datasetid
 
         ! FITS header values
         type(varying_string) :: hdr
@@ -118,7 +119,8 @@ module fits
     end interface
 contains
     subroutine print_dataset
-        print *, trim(item%frameid), ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
+        print *, 'datasetid:', char(item%datasetid), ', FRAMEID:', trim(item%frameid),&
+        & ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
         print *, 'LINE: ', trim(item%line), ', FILTER: ', trim(item%filter),&
         & ', SPECSYS: ', trim(item%specsys), ', TIMESYS: ', trim(item%timesys),&
         & ', OBJECT: ', trim(item%object), ', DATE-OBS: ', trim(item%date_obs)
@@ -287,6 +289,33 @@ contains
         call g_mutex_unlock(c_loc(item%progress_mtx))
     end function get_elapsed
 
+    function extract_datasetid(filename) result(datasetid)
+        use iso_varying_string
+        implicit none
+
+        character(len=1024), intent(in) :: filename
+        type(varying_string) :: datasetid
+        integer :: i
+        character :: c
+
+        datasetid = ''
+
+        ! work from the end, processing characters one by one
+        ! exit upon encountering the first '/'
+        do i = 1024, 1, -1
+            c = filename(i:i)
+
+            if (c .eq. ' ') cycle
+
+            if (c .eq. '/') exit
+
+            ! prepend the element to tmp
+            datasetid = c//datasetid
+        end do
+
+        print *, 'datasetid:', char(datasetid)
+    end function extract_datasetid
+
     subroutine load_fits_file(filename)
         implicit none
         character(len=1024), intent(in) :: filename
@@ -320,6 +349,7 @@ contains
         if (item%ok_mtx%i .eq. 0) call g_mutex_init(c_loc(item%ok_mtx))
         if (item%progress_mtx%i .eq. 0) call g_mutex_init(c_loc(item%progress_mtx))
 
+        item%datasetid = extract_datasetid(filename)
         item%id = id
         item%progress = 0
         item%elapsed = 0
@@ -1508,7 +1538,6 @@ contains
 
     subroutine to_json(str_val)
         use json_module
-        use iso_varying_string
         implicit NONE
 
         CHARACTER(kind=json_CK, len=:), allocatable, intent(out) :: str_val
