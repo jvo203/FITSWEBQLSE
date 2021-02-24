@@ -1685,7 +1685,7 @@ contains
         json = '{'
 
         ! call json_add_string(json, 'HEADER', 'N/A (pending upon a bug in the external json-fortran library)')
-        call json_add_string(json, 'HEADER', item%hdr)
+        call json_add_varying_string(json, 'HEADER', item%hdr)
 
         ! remove the last comma
         str_len = len(json)
