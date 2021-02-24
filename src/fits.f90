@@ -1656,7 +1656,7 @@ contains
         print *, '[to_json]::15'
 
         ! write the file:
-        ! call json%print(p, char(item%datasetid)//'.json')
+        call json%print(p, char(item%datasetid)//'.json')
 
         print *, '[to_json]::16'
 
