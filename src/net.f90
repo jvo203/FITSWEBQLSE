@@ -207,7 +207,11 @@ contains
                 c_str(k:k) = str_val(k:k)
             end do
 
+            ! json
             call write_header(fd, c_str//c_null_char)
+
+            ! FITS header
+            call write_header(fd, char(item%hdr)//c_null_char)
         end if
 
     end subroutine image_spectrum_request
