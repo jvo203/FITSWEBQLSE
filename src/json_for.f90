@@ -7,7 +7,7 @@ contains
         type(varying_string), intent(inout) :: json
         character(len=*), intent(in) :: key, val
 
-        json = json//'"'//key//'":"'//val//'"'
+        json = json//'"'//key//'":"'//val//'",'
 
     end subroutine json_add_string
 end module json_for
