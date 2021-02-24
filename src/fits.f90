@@ -320,7 +320,6 @@ contains
         i = index(datasetid, '.FITS')
         if (i .gt. 0) datasetid = extract(datasetid, 1, i - 1)
 
-        print *, 'datasetid:', char(datasetid)
     end function extract_datasetid
 
     subroutine load_fits_file(filename)
