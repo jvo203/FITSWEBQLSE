@@ -10228,7 +10228,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					offset += 4;
 
 					var json = new Uint8Array(received_msg, offset, buffer_len);
-					offset += 4;
+					offset += buffer_len;
 					console.log("FITS json length:", json_len);
 				} catch (err) {
 					has_json = false;
@@ -10244,10 +10244,33 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					offset += 4;
 
 					var header = new Uint8Array(received_msg, offset, buffer_len);
-					offset += 4;
+					offset += buffer_len;
 					console.log("FITS header length:", header_len);
 				} catch (err) {
 					has_header = false;
+				}
+
+				if (has_header) {
+					// decompress the FITS data etc.
+					var Buffer = require('buffer').Buffer;
+					var LZ4 = require('lz4');
+
+					var uncompressed = new Buffer(header_len);
+					uncompressedSize = LZ4.decodeBlock(header, uncompressed);
+					uncompressed = uncompressed.slice(0, uncompressedSize);
+
+					var fitsHeader;
+
+					try {
+						fitsHeader = String.fromCharCode.apply(null, uncompressed);
+					}
+					catch (err) {
+						fitsHeader = '';
+						for (var i = 0; i < uncompressed.length; i++)
+							fitsHeader += String.fromCharCode(uncompressed[i]);
+					};
+
+					// console.log(fitsHeader);
 				}
 
 				if (has_json) {
@@ -10271,6 +10294,12 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					};
 
 					fitsData = JSON.parse(fitsData);
+
+					// replace the dummy FITS header with a real one
+					if (has_header) {
+						fitsData.HEADER = fitsHeader;
+					}
+
 					// console.log(fitsData);
 
 					// handle the fitsData part
