@@ -175,7 +175,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
 static enum MHD_Result print_out_key(void *cls, enum MHD_ValueKind kind, const char *key, const char *value, size_t value_size)
 {
-    printf("%s: %s\n", key, value);
+    printf("[C] %s: %s\n", key, value);
     return MHD_YES;
 }
 
@@ -337,7 +337,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
         if (modified != NULL)
         {
             if (strptime(modified, "%a, %d %b %Y %H:%M:%S %Z", &tm) != NULL)
-                printf("If-Modified-Since: %s\n", modified);
+                printf("[C] If-Modified-Since: %s\n", modified);
         };
 
         struct tm lm;
@@ -359,7 +359,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
 
         if (unmodified)
         {
-            printf("sending HTTP 304\n");
+            printf("[C] %s: sending HTTP 304\n", url);
 
             close(fd);
 
@@ -468,7 +468,7 @@ const char *get_filename_ext(const char *filename)
 
 static enum MHD_Result get_directory(struct MHD_Connection *connection, char *dir)
 {
-    printf("get_directory(%s)\n", dir);
+    printf("[C] get_directory(%s)\n", dir);
 
     if (NULL == dir)
         return http_not_found(connection);
@@ -706,7 +706,7 @@ static enum MHD_Result on_http_connection(void *cls,
             float progress = get_progress();
             float elapsed = get_elapsed();
 
-            // printf("[progress] datasetId(%s): %f%% in %f [s]\n", datasetId, progress, elapsed);
+            // printf("[C] [progress] datasetId(%s): %f%% in %f [s]\n", datasetId, progress, elapsed);
 
             return send_progress(connection, progress, elapsed);
         }
@@ -810,7 +810,7 @@ static enum MHD_Result on_http_connection(void *cls,
         int len = proot - url;
         char *root = strndup(url, len);
 
-        printf("URL root path: %s\n", root);
+        printf("[C] URL root path: %s\n", root);
 #endif
 
         //get datasetId
@@ -832,14 +832,14 @@ static enum MHD_Result on_http_connection(void *cls,
             while ((tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, str_key)) != NULL)
             {
                 va_count++;
-                printf("argument %d:%s\n", va_count, tmp);
+                printf("[C] argument %d:%s\n", va_count, tmp);
                 sprintf(str_key, "filename%d", va_count + 1);
 
                 datasetId = (char **)realloc(datasetId, va_count * sizeof(char *));
                 datasetId[va_count - 1] = tmp;
             }
 
-            printf("number of arguments: %d\n", va_count);
+            printf("[C] number of arguments: %d\n", va_count);
         }
         else
         {
@@ -862,14 +862,14 @@ static enum MHD_Result on_http_connection(void *cls,
             while ((tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, str_key)) != NULL)
             {
                 va_count++;
-                printf("argument %d:%s\n", va_count, tmp);
+                printf("[C] argument %d:%s\n", va_count, tmp);
                 sprintf(str_key, "datasetId%d", va_count + 1);
 
                 datasetId = (char **)realloc(datasetId, va_count * sizeof(char *));
                 datasetId[va_count - 1] = tmp;
             }
 
-            printf("number of arguments: %d\n", va_count);
+            printf("[C] number of arguments: %d\n", va_count);
         }
         else
         {
@@ -970,7 +970,7 @@ void SIGINTHandler(int sigint)
 
     if (http_server != NULL)
     {
-        printf("shutting down the HTTP server... ");
+        printf("[C] shutting down the HTTP server... ");
         MHD_stop_daemon(http_server);
         http_server = NULL;
 
@@ -978,7 +978,7 @@ void SIGINTHandler(int sigint)
         //MHD_quiesce_daemon(http_server);
     };
 
-    printf("clean shutdown completed.\n");
+    printf("[C] clean shutdown completed.\n");
 
     exit_fortran();
 };
@@ -1000,12 +1000,12 @@ extern void start_http()
 
     if (http_server == NULL)
     {
-        printf("Could not start a libmicrohttpd web server.\n");
+        printf("[C] Could not start a libmicrohttpd web server.\n");
         return;
     }
     else
     {
-        printf("µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
+        printf("[C] µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
 
         // create a websockets thread
         int stat = pthread_create(&lws_tid, NULL, start_ws, NULL);
@@ -1019,7 +1019,7 @@ extern void stop_http()
 
     if (http_server != NULL)
     {
-        printf("shutting down the HTTP server... ");
+        printf("[C] shutting down the HTTP server... ");
         MHD_stop_daemon(http_server);
         http_server = NULL;
         printf("done\n");
@@ -1430,9 +1430,9 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
             zfpsize = zfp_compress(zfp, field);
 
             if (zfpsize == 0)
-                printf("ZFP compression failed!\n");
+                printf("[C] ZFP compression failed!\n");
             else
-                printf("image pixels compressed size: %zu bytes\n", zfpsize);
+                printf("[C] image pixels compressed size: %zu bytes\n", zfpsize);
 
             stream_close(stream);
 
@@ -1444,7 +1444,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         zfp_stream_close(zfp);
     }
     else
-        printf("a NULL compressed_pixels buffer!\n");
+        printf("[C] a NULL compressed_pixels buffer!\n");
 
     // compress mask with LZ4-HC
     mask_size = width * height;
@@ -1458,7 +1458,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         // compress the mask as much as possible
         compressed_size = LZ4_compress_HC((const char *)mask, compressed_mask, mask_size, worst_size, LZ4HC_CLEVEL_MAX);
 
-        printf("image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
+        printf("[C] image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
     }
 
     // transmit the data
@@ -1545,7 +1545,7 @@ size_t chunked_write(int fd, const char *src, size_t n)
             offset += written;
         }
 
-        printf("chars written: %zu out of %zu bytes.\n", offset, n);
+        printf("[C] chars written: %zu out of %zu bytes.\n", offset, n);
     }
 
     return offset;
