@@ -2,6 +2,7 @@
 /fitswebqlse
 /testWavelets
 /zfp_compress
+/serialize
 
 # Prerequisites
 *.d
