@@ -1630,7 +1630,7 @@ contains
         if (json%failed()) stop 1
     end subroutine to_json
 
-    subroutine downsize_nn_char(X, Y)
+    subroutine downsize_nn_bool(X, Y)
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -1639,6 +1639,7 @@ contains
         integer, dimension(2) :: src, dst
         integer :: src_width, src_height
         integer :: dst_width, dst_height
+        integer :: i, j
 
         src = shape(X)
         src_width = src(1)
@@ -1648,8 +1649,37 @@ contains
         dst_width = dst(1)
         dst_height = dst(2)
 
-        print *, 'SRC:', src, ', DST:', dst
+        print *, '[downsize_nn_bool] SRC:', src, 'DST:', dst
 
-    end subroutine downsize_nn_char
+        do concurrent(j=1:dst_height, i=1:dst_width)
+            Y(i, j) = X(1 + (i - 1)*(src_width - 1)/(dst_width - 1), 1 + (j - 1)*(src_height - 1)/(dst_height - 1))
+        end do
+    end subroutine downsize_nn_bool
+
+    subroutine downsize_nn_float(X, Y)
+        use, intrinsic :: iso_c_binding
+        implicit none
+
+        real(kind=c_float), dimension(:, :), intent(in) :: X
+        real(kind=c_float), dimension(:, :), intent(out) :: Y
+        integer, dimension(2) :: src, dst
+        integer :: src_width, src_height
+        integer :: dst_width, dst_height
+        integer :: i, j
+
+        src = shape(X)
+        src_width = src(1)
+        src_height = src(2)
+
+        dst = shape(Y)
+        dst_width = dst(1)
+        dst_height = dst(2)
+
+        print *, '[downsize_nn_float] SRC:', src, 'DST:', dst
+
+        do concurrent(j=1:dst_height, i=1:dst_width)
+            Y(i, j) = X(1 + (i - 1)*(src_width - 1)/(dst_width - 1), 1 + (j - 1)*(src_height - 1)/(dst_height - 1))
+        end do
+    end subroutine downsize_nn_float
 
 end module fits
