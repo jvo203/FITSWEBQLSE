@@ -1649,8 +1649,8 @@ contains
 
         print *, '[to_json]::14'
 
-        ! serialize to string prior to further handling
-        call json%serialize(p, str_val)
+        ! print out JSON
+        call json%print(p)
 
         print *, '[to_json]::15'
 
@@ -1659,14 +1659,19 @@ contains
 
         print *, '[to_json]::16'
 
-        ! cleanup:
-        call json%destroy(p)
+        ! serialize to string prior to further handling
+        call json%serialize(p, str_val)
 
         print *, '[to_json]::17'
 
-        if (json%failed()) stop 1
+        ! cleanup:
+        call json%destroy(p)
 
         print *, '[to_json]::18'
+
+        if (json%failed()) stop 1
+
+        print *, '[to_json]::19'
     end subroutine to_json
 
     subroutine downsize_nn_bool(X, Y)
