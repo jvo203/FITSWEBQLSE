@@ -1680,10 +1680,16 @@ contains
         implicit none
 
         type(varying_string) :: json
+        integer :: str_len
 
         json = '{'
 
         call json_add_string(json, 'HEADER', 'N/A (pending upon a bug in the external json-fortran library)')
+
+        ! remove the last comma
+        str_len = len(json)
+
+        if (extract(json, str_len) .eq. ',') json = remove(json, str_len)
 
         json = json//'}'
 
