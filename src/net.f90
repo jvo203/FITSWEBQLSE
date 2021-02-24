@@ -170,6 +170,7 @@ contains
 
             ! downscale item%pixels and item%mask into pixels, mask
             ! using Lanczos (TO-DO)
+            call downsize_nn_char(item%mask, mask)
 
             ! call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
             !    &item%pmin, item%pmax, item%pmedian,&
