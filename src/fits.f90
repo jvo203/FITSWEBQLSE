@@ -1555,14 +1555,22 @@ contains
         type(json_core) :: json
         type(json_value), pointer :: p
 
+        print *, '[to_json]::0'
+
         ! initialize the class
         call json%initialize(non_normal_mode=2)
+
+        print *, '[to_json]::1'
 
         ! initialize the structure:
         call json%create_object(p, '')
 
+        print *, '[to_json]::2'
+
         ! FITS HEADER
         call json%add(p, 'HEADER', char(item%hdr))
+
+        print *, '[to_json]::3'
 
         ! misc. values
         call json%add(p, 'width', item%naxes(1))
@@ -1572,10 +1580,14 @@ contains
         call json%add(p, 'filesize', 0)
         call json%add(p, 'IGNRVAL', item%ignrval)
 
+        print *, '[to_json]::4'
+
         call json%add(p, 'CD1_1', item%cd1_1)
         call json%add(p, 'CD1_2', item%cd1_2)
         call json%add(p, 'CD2_1', item%cd2_1)
         call json%add(p, 'CD2_2', item%cd2_2)
+
+        print *, '[to_json]::5'
 
         call json%add(p, 'CRVAL1', item%crval1)
         call json%add(p, 'CDELT1', item%cdelt1)
@@ -1583,11 +1595,15 @@ contains
         call json%add(p, 'CUNIT1', trim(item%cunit1))
         call json%add(p, 'CTYPE1', trim(item%ctype1))
 
+        print *, '[to_json]::6'
+
         call json%add(p, 'CRVAL2', item%crval2)
         call json%add(p, 'CDELT2', item%cdelt2)
         call json%add(p, 'CRPIX2', item%crpix2)
         call json%add(p, 'CUNIT2', trim(item%cunit2))
         call json%add(p, 'CTYPE2', trim(item%ctype2))
+
+        print *, '[to_json]::7'
 
         call json%add(p, 'CRVAL3', item%crval3)
         call json%add(p, 'CDELT3', item%cdelt3)
@@ -1595,17 +1611,25 @@ contains
         call json%add(p, 'CUNIT3', trim(item%cunit3))
         call json%add(p, 'CTYPE3', trim(item%ctype3))
 
+        print *, '[to_json]::8'
+
         call json%add(p, 'BMAJ', item%bmaj)
         call json%add(p, 'BMIN', item%bmin)
         call json%add(p, 'BPA', item%bpa)
+
+        print *, '[to_json]::9'
 
         call json%add(p, 'BUNIT', trim(item%bunit))
         call json%add(p, 'BTYPE', trim(item%btype))
         call json%add(p, 'SPECSYS', trim(item%specsys))
 
+        print *, '[to_json]::10'
+
         call json%add(p, 'RESTFRQ', item%restfrq)
         call json%add(p, 'OBSRA', item%obsra)
         call json%add(p, 'OBSDEC', item%obsdec)
+
+        print *, '[to_json]::11'
 
         call json%add(p, 'OBJECT', trim(item%object))
         call json%add(p, 'DATEOBS', trim(item%date_obs))
@@ -1613,21 +1637,36 @@ contains
         call json%add(p, 'LINE', trim(item%line))
         call json%add(p, 'FILTER', trim(item%filter))
 
+        print *, '[to_json]::12'
+
         call json%add(p, 'mean_spectrum', item%mean_spectrum)
         call json%add(p, 'integrated_spectrum', item%integrated_spectrum)
+
+        print *, '[to_json]::13'
 
         ! statistics (image histogram)
         call json%add(p, 'histogram', item%hist)
 
+        print *, '[to_json]::14'
+
         ! serialize to string prior to further handling
         call json%serialize(p, str_val)
+
+        print *, '[to_json]::15'
 
         ! write the file:
         call json%print(p, char(item%datasetid)//'.json')
 
+        print *, '[to_json]::16'
+
         ! cleanup:
         call json%destroy(p)
+
+        print *, '[to_json]::17'
+
         if (json%failed()) stop 1
+
+        print *, '[to_json]::18'
     end subroutine to_json
 
     subroutine downsize_nn_bool(X, Y)
