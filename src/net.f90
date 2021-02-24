@@ -130,9 +130,6 @@ contains
         real(kind=c_float), dimension(:, :), allocatable, target :: pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
-        character(kind=c_char), allocatable :: compressed_pixels(:)
-        character(kind=c_char), allocatable :: compressed_mask(:)
-
         CHARACTER(kind=json_CK, len=:), allocatable :: str_val
         character(kind=c_char, len=:), allocatable :: c_str
         integer :: k, str_len
@@ -170,6 +167,10 @@ contains
 
             ! downscale item%pixels and item%mask into pixels, mask
             ! using Lanczos (TO-DO)
+
+            ! the naive Nearest-Neighbour in the short term
+            ! in the long-term pixels should be downscaled with Lanczos
+            ! the logical mask should be downscaled with the naive Nearest-Neighbour
             call downsize_nn_float(item%pixels, pixels)
             call downsize_nn_bool(item%mask, mask)
 
@@ -181,8 +182,6 @@ contains
             deallocate (pixels)
             deallocate (mask)
 
-            ! print *, 'downscaling not supported yet (TO-DO), ending the response'
-            ! return
         else
             img_width = item%naxes(1)
             img_height = item%naxes(2)
