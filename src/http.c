@@ -733,10 +733,10 @@ static enum MHD_Result on_http_connection(void *cls,
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
         char *widthStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "width");
         char *heightStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "height");
-        char *quality = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "quality");
+        char *qualityStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "quality");
         char *fetch_dataStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "fetch_data");
 
-        if (datasetId == NULL || widthStr == NULL || heightStr == NULL || quality == NULL)
+        if (datasetId == NULL || widthStr == NULL || heightStr == NULL)
             return http_not_found(connection);
 
         if (fetch_dataStr != NULL)
@@ -745,6 +745,18 @@ static enum MHD_Result on_http_connection(void *cls,
 
         width = atoi(widthStr);
         height = atoi(heightStr);
+
+        if (qualityStr != NULL)
+        {
+            if (0 == strcmp(qualityStr, "high"))
+                precision = ZFP_HIGH_PRECISION;
+
+            if (0 == strcmp(qualityStr, "medium"))
+                precision = ZFP_MEDIUM_PRECISION;
+
+            if (0 == strcmp(qualityStr, "low"))
+                precision = ZFP_LOW_PRECISION;
+        }
 
         // printf("[C] datasetId(%s), width(%d), height(%d), quality(%s), fetch_data: %s\n", datasetId, width, height, quality, (fetch_data ? "true" : "false"));
 
