@@ -313,10 +313,14 @@ contains
             datasetid = c//datasetid
         end do
 
-        ! get rid of the file extension
+        ! get rid of FITS file extensions
+        ! should be able to handle .fits.gz etc... too
+
+        ! lowercase
         i = index(datasetid, '.fits')
         if (i .gt. 0) datasetid = extract(datasetid, 1, i - 1)
 
+        ! uppercase
         i = index(datasetid, '.FITS')
         if (i .gt. 0) datasetid = extract(datasetid, 1, i - 1)
 
