@@ -1569,7 +1569,7 @@ contains
 
         ! FITS HEADER
         ! call json%add(p, 'HEADER', char(item%hdr))
-        call json%add(p, 'HEADER', 'N/A')
+        call json%add(p, 'HEADER', 'N/A (pending upon a bug in the external json-fortran library)')
 
         print *, '[to_json]::3'
 
