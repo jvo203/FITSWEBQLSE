@@ -1374,10 +1374,10 @@ extern void write_header(int fd, const char *header_str)
         if (compressed_size > 0)
         {
             uint32_t header_size = str_len;
-            uint32_t size = compressed_size;
+            uint32_t transmitted_size = compressed_size;
 
-            write(fd, &header_size, sizeof(header_size)); // header size after decompressing
-            write(fd, &size, sizeof(size));               // compressed buffer size
+            write(fd, &header_size, sizeof(header_size));           // header size after decompressing
+            write(fd, &transmitted_size, sizeof(transmitted_size)); // compressed buffer size
             chunked_write(fd, compressed_header, compressed_size);
         }
     }
