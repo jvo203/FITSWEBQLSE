@@ -24,6 +24,10 @@
 // ZFP floating-point compressor
 #include <zfp.h>
 
+#define ZFP_HIGH_PRECISION 16
+#define ZFP_MEDIUM_PRECISION 11
+#define ZFP_LOW_PRECISION 8
+
 // LZ4 character streams compressor
 #include <lz4hc.h>
 
@@ -719,7 +723,7 @@ static enum MHD_Result on_http_connection(void *cls,
     {
         int fetch_data = 0;
         int width, height;
-        int precision = 11;
+        int precision = ZFP_MEDIUM_PRECISION; // default ZFP precision
 
         int status;
         int pipefd[2];
