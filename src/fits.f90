@@ -313,6 +313,11 @@ contains
             datasetid = c//datasetid
         end do
 
+        ! get rid of the file extension
+        i = index(datasetid, '.fits')
+
+        if (i .gt. 0) datasetid = extract(datasetid, 1, i - 1)
+
         print *, 'datasetid:', char(datasetid)
     end function extract_datasetid
 
