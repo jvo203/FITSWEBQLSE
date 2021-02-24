@@ -3,11 +3,11 @@ module json_for
     implicit none
 
 contains
-    subroutine json_add_string(json, string)
+    subroutine json_add_string(json, key, val)
         type(varying_string), intent(inout) :: json
-        character(len=*), intent(in) :: string
+        character(len=*), intent(in) :: key, val
 
-        json = json//string
+        json = json//'"'//key//'":"'//val//'"'
 
     end subroutine json_add_string
 end module json_for
