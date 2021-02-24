@@ -316,13 +316,13 @@ contains
         ! get rid of FITS file extensions
         ! should be able to handle .fits.gz etc... too
 
-        ! lowercase
+        ! lowercase, ignore starting positions .eq. 1
         i = index(datasetid, '.fits')
-        if (i .gt. 0) datasetid = extract(datasetid, 1, i - 1)
+        if (i .gt. 1) datasetid = extract(datasetid, 1, i - 1)
 
-        ! uppercase
+        ! uppercase, ignore starting positions .eq. 1
         i = index(datasetid, '.FITS')
-        if (i .gt. 0) datasetid = extract(datasetid, 1, i - 1)
+        if (i .gt. 1) datasetid = extract(datasetid, 1, i - 1)
 
     end function extract_datasetid
 
