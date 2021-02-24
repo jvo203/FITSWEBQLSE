@@ -147,8 +147,6 @@ contains
         & ', fetch_data', fetch_data, ', pipe write end', fd
 
         ! compare the datasetId with item%frameid
-        ! if (.not. compare_frameid(trim(item%frameid), datasetId, int(n))) then
-
         ! item%frameid replaced by item%datasetid
         if (.not. compare_frameid(char(item%datasetid), datasetId, int(n))) then
             print *, 'dataset ids do not match: (', datasetId, ') .ne. (', char(item%datasetid), ')'
