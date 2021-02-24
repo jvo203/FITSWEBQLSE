@@ -1568,7 +1568,8 @@ contains
         print *, '[to_json]::2'
 
         ! FITS HEADER
-        call json%add(p, 'HEADER', char(item%hdr))
+        ! call json%add(p, 'HEADER', char(item%hdr))
+        call json%add(p, 'HEADER', 'N/A')
 
         print *, '[to_json]::3'
 
@@ -1650,7 +1651,7 @@ contains
         print *, '[to_json]::14'
 
         ! print out JSON
-        call json%print(p)
+        ! call json%print(p)
 
         print *, '[to_json]::15'
 
