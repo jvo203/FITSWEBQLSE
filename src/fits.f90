@@ -1630,4 +1630,26 @@ contains
         if (json%failed()) stop 1
     end subroutine to_json
 
+    subroutine downsize_nn_char(X, Y)
+        use, intrinsic :: iso_c_binding
+        implicit none
+
+        logical(kind=c_bool), dimension(:, :), intent(in) :: X
+        logical(kind=c_bool), dimension(:, :), intent(out) :: Y
+        integer, dimension(2) :: src, dst
+        integer :: src_width, src_height
+        integer :: dst_width, dst_height
+
+        src = shape(X)
+        src_width = src(1)
+        src_height = src(2)
+
+        dst = shape(Y)
+        dst_width = dst(1)
+        dst_height = dst(2)
+
+        print *, 'SRC:', src, ', DST:', dst
+
+    end subroutine downsize_nn_char
+
 end module fits
