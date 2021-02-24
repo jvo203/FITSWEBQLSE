@@ -10218,29 +10218,45 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 				console.log(tone_mapping);
 
-				var has_data = true;
+				var has_json = true;
 
 				try {
-					var data_len = dv.getUint32(offset, endianness);
+					var json_len = dv.getUint32(offset, endianness);
 					offset += 4;
 
 					var buffer_len = dv.getUint32(offset, endianness);
 					offset += 4;
 
-					var data = new Uint8Array(received_msg, offset, buffer_len);
+					var json = new Uint8Array(received_msg, offset, buffer_len);
 					offset += 4;
-					console.log("FITS data length:", data_len);
+					console.log("FITS json length:", json_len);
 				} catch (err) {
-					has_data = false;
+					has_json = false;
 				}
 
-				if (has_data) {
+				var has_header = true;
+
+				try {
+					var header_len = dv.getUint32(offset, endianness);
+					offset += 4;
+
+					var buffer_len = dv.getUint32(offset, endianness);
+					offset += 4;
+
+					var header = new Uint8Array(received_msg, offset, buffer_len);
+					offset += 4;
+					console.log("FITS header length:", header_len);
+				} catch (err) {
+					has_header = false;
+				}
+
+				if (has_json) {
 					// decompress the FITS data etc.
 					var Buffer = require('buffer').Buffer;
 					var LZ4 = require('lz4');
 
-					var uncompressed = new Buffer(data_len);
-					uncompressedSize = LZ4.decodeBlock(data, uncompressed);
+					var uncompressed = new Buffer(json_len);
+					uncompressedSize = LZ4.decodeBlock(json, uncompressed);
 					uncompressed = uncompressed.slice(0, uncompressedSize);
 
 					var fitsData;
@@ -10394,7 +10410,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 						process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
-						if (has_data) {
+						if (has_json) {
 							display_histogram(index);
 
 							try {
