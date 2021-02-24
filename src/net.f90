@@ -173,16 +173,16 @@ contains
             call downsize_nn_float(item%pixels, pixels)
             call downsize_nn_bool(item%mask, mask)
 
-            ! call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
-            !    &item%pmin, item%pmax, item%pmedian,&
-            !    &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
-            !    & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
+            call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
+                &item%pmin, item%pmax, item%pmedian,&
+                &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
+                & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
 
             deallocate (pixels)
             deallocate (mask)
 
-            print *, 'downscaling not supported yet (TO-DO), ending the response'
-            return
+            ! print *, 'downscaling not supported yet (TO-DO), ending the response'
+            ! return
         else
             img_width = item%naxes(1)
             img_height = item%naxes(2)
