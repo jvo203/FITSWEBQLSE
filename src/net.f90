@@ -195,6 +195,8 @@ contains
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
         if (fetch_data .eq. 1) then
+            call get_json
+
             call to_json(str_val)
 
             str_len = len(str_val)
