@@ -1676,11 +1676,14 @@ contains
     end subroutine to_json
 
     subroutine get_json
+        use json_for
+        implicit none
+
         type(varying_string) :: json
 
         json = '{'
 
-        ! call json%add(p, 'HEADER', 'N/A (pending upon a bug in the external json-fortran library)')
+        call json_add_string(json, 'HEADER', 'N/A (pending upon a bug in the external json-fortran library)')
 
         json = json//'}'
 
