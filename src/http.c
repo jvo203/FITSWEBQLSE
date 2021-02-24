@@ -1344,44 +1344,46 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     return ret;
 }
 
-extern void write_header(int fd, const char *json_str)
+extern void write_header(int fd, const char *header_str)
 {
-    char *compressed_json = NULL;
+    char *compressed_header = NULL;
 
-    if (json_str == NULL)
+    if (header_str == NULL)
         return;
 
     int str_len, worst_size;
     int compressed_size = 0;
 
-    str_len = strlen(json_str);
+    str_len = strlen(header_str);
 
     if (str_len == 0)
         return;
 
     worst_size = LZ4_compressBound(str_len);
 
-    compressed_json = (char *)malloc(worst_size);
+    compressed_header = (char *)malloc(worst_size);
 
-    if (compressed_json != NULL)
+    if (compressed_header != NULL)
     {
         // compress JSON as much as possible
-        compressed_size = LZ4_compress_HC((const char *)json_str, compressed_json, str_len, worst_size, LZ4HC_CLEVEL_MAX);
+        compressed_size = LZ4_compress_HC((const char *)header_str, compressed_header, str_len, worst_size, LZ4HC_CLEVEL_MAX);
 
-        printf("[C] JSON length: %d; compressed: %d bytes\n", str_len, compressed_size);
+        printf("[C] HEADER length: %d; compressed: %d bytes\n", str_len, compressed_size);
 
         //send off the compressed data
         if (compressed_size > 0)
         {
-            uint32_t json_size = str_len;
+            uint32_t header_size = str_len;
+            uint32_t size = compressed_size;
 
-            write(fd, &json_size, sizeof(json_size));
-            chunked_write(fd, compressed_json, compressed_size);
+            write(fd, &header_size, sizeof(header_size)); // header size after decompressing
+            write(fd, &size, sizeof(size));               // compressed buffer size
+            chunked_write(fd, compressed_header, compressed_size);
         }
     }
 
-    if (compressed_json != NULL)
-        free(compressed_json);
+    if (compressed_header != NULL)
+        free(compressed_header);
 }
 
 extern void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *pixels, const bool *mask)
