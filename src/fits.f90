@@ -11,10 +11,10 @@ module fits
     end type gmutex
 
     type dataset
+        type(varying_string) :: datasetid
         ! the id will be made by hashing the dataset uri
         integer :: id = -1
         integer :: unit = -1! a FITS file handle
-        type(varying_string) :: datasetid
 
         ! FITS header values
         type(varying_string) :: hdr
