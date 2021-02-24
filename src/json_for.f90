@@ -16,6 +16,8 @@ contains
 
         str_len = len(val)
 
+        ! allocate twice the amount of memory to be on a safe side
+        ! assume that each source character might need escaping (the worst-case)
         allocate (character(2*str_len) :: tmp)
 
         tmp = ''
