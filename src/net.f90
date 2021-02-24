@@ -16,14 +16,14 @@ module net
         subroutine write_image_spectrum(fd, flux, &
             pmin, pmax, pmedian, &
             &black, white, sensitivity, ratio_sensitivity,&
-            &width, height, &
+            &width, height, precision,&
             &pixels, mask)&
             &BIND(C, name='write_image_spectrum')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
             character(kind=c_char), intent(in) :: flux(*)
-            integer(c_int), value, intent(in) :: fd, width, height
+            integer(c_int), value, intent(in) :: fd, width, height, precision
             real(kind=c_float), value, intent(in) :: pmin, pmax, pmedian
             real(kind=c_float), value, intent(in) :: black, white
             real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
@@ -116,7 +116,7 @@ contains
 
     end function compare_frameid
 
-    subroutine image_spectrum_request(datasetId, n, width, height, fetch_data, fd) bind(C)
+    subroutine image_spectrum_request(datasetId, n, width, height, precision, fetch_data, fd) bind(C)
         use mpi
         use fits
         use json_module
@@ -125,7 +125,7 @@ contains
 
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetId
-        integer(kind=c_int), intent(in), value :: width, height, fetch_data, fd
+        integer(kind=c_int), intent(in), value :: width, height, precision, fetch_data, fd
 
         real(kind=c_float), dimension(:, :), allocatable, target :: pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
@@ -143,7 +143,8 @@ contains
 
         if (n .lt. 1) return
 
-        print *, '"', datasetId, '", width', width, ', height', height, ', fetch_data', fetch_data, ', pipe write end', fd
+        print *, '"', datasetId, '", width', width, ', height', height, ', precision', precision,&
+        & ', fetch_data', fetch_data, ', pipe write end', fd
 
         ! compare the datasetId with item%frameid
         if (.not. compare_frameid(trim(item%frameid), datasetId, int(n))) then
@@ -172,7 +173,7 @@ contains
             ! call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
             !    &item%pmin, item%pmax, item%pmedian,&
             !    &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
-            !    & img_width, img_height, c_loc(pixels), c_loc(mask))
+            !    & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
 
             deallocate (pixels)
             deallocate (mask)
@@ -186,7 +187,7 @@ contains
             call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
                 &item%pmin, item%pmax, item%pmedian,&
                 &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
-                & img_width, img_height, c_loc(item%pixels), c_loc(item%mask))
+                & img_width, img_height, precision, c_loc(item%pixels), c_loc(item%mask))
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height

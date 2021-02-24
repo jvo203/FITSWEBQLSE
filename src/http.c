@@ -43,7 +43,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 
 extern void exit_fortran();
 extern void fitswebql_request(char *uri, size_t n);
-extern void image_spectrum_request(char *datasetId, size_t n, int width, int height, int fetch_data, int fd);
+extern void image_spectrum_request(char *datasetId, size_t n, int width, int height, int precision, int fetch_data, int fd);
 extern int get_error_status();
 extern int get_ok_status();
 extern float get_progress();
@@ -60,6 +60,7 @@ struct arg_struct
     char *datasetId;
     int width;
     int height;
+    int precision;
     int fetch_data;
     int fd;
 };
@@ -718,6 +719,7 @@ static enum MHD_Result on_http_connection(void *cls,
     {
         int fetch_data = 0;
         int width, height;
+        int precision = 11;
 
         int status;
         int pipefd[2];
@@ -788,6 +790,7 @@ static enum MHD_Result on_http_connection(void *cls,
             args->datasetId = strdup(datasetId);
             args->width = width;
             args->height = height;
+            args->precision = precision;
             args->fetch_data = fetch_data;
             args->fd = pipefd[1];
 
@@ -1365,7 +1368,7 @@ extern void write_header(int fd, const char *json_str)
         free(compressed_json);
 }
 
-extern void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, const float *pixels, const bool *mask)
+extern void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *pixels, const bool *mask)
 {
     int i, j;
     uchar *compressed_pixels = NULL;
@@ -1378,7 +1381,6 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     size_t bufsize = 0;
     bitstream *stream = NULL;
     size_t zfpsize = 0;
-    uint precision = 11;
     uint nx = width;
     uint ny = height;
 
@@ -1576,7 +1578,7 @@ void *handle_image_spectrum_request(void *args)
         pthread_exit(NULL);
     }
 
-    image_spectrum_request(params->datasetId, strlen(params->datasetId), params->width, params->height, params->fetch_data, params->fd);
+    image_spectrum_request(params->datasetId, strlen(params->datasetId), params->width, params->height, params->precision, params->fetch_data, params->fd);
 
     // close the write end of the pipe
     close(params->fd);
