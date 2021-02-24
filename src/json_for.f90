@@ -73,9 +73,7 @@ contains
             tmp = tmp//c
         end do
 
-        json = json//trim(tmp)
-
-        json = json//'",'
+        json = json//trim(tmp)//'",'
 
     end subroutine json_add_string
 
@@ -151,9 +149,7 @@ contains
             tmp = tmp//c
         end do
 
-        json = json//trim(tmp)
-
-        json = json//'",'
+        json = json//trim(tmp)//'",'
 
     end subroutine json_add_varying_string
 end module json_for
