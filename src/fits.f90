@@ -315,7 +315,9 @@ contains
 
         ! get rid of the file extension
         i = index(datasetid, '.fits')
+        if (i .gt. 0) datasetid = extract(datasetid, 1, i - 1)
 
+        i = index(datasetid, '.FITS')
         if (i .gt. 0) datasetid = extract(datasetid, 1, i - 1)
 
         print *, 'datasetid:', char(datasetid)
