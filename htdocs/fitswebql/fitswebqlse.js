@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-02-19.0";
+	return "JS2021-02-24.0";
 }
 
 const wasm_supported = (() => {
@@ -10224,7 +10224,11 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					var data_len = dv.getUint32(offset, endianness);
 					offset += 4;
 
-					var data = new Uint8Array(received_msg, offset);
+					var buffer_len = dv.getUint32(offset, endianness);
+					offset += 4;
+
+					var data = new Uint8Array(received_msg, offset, buffer_len);
+					offset += 4;
 					console.log("FITS data length:", data_len);
 				} catch (err) {
 					has_data = false;
