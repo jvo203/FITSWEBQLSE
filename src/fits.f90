@@ -1645,7 +1645,7 @@ contains
 
         json = '{'
 
-        call json_add_string(json, 'HEADER', 'N/A')
+        call json_add_string(json, 'HEADER', 'NULL')
 
         ! misc. values
         call json_add_integer_number(json, 'width', item%naxes(1))
