@@ -134,6 +134,8 @@ contains
         character(kind=c_char, len=:), allocatable :: c_str
         integer :: k, str_len
 
+        type(varying_string) :: json_str
+
         integer inner_width, inner_height
         integer img_width, img_height
         real scale
@@ -195,7 +197,7 @@ contains
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
         if (fetch_data .eq. 1) then
-            call get_json
+            json_str = get_json()
 
             call to_json(str_val)
 
@@ -209,7 +211,8 @@ contains
             end do
 
             ! json
-            call write_header(fd, c_str//c_null_char)
+            ! call write_header(fd, c_str//c_null_char)
+            call write_header(fd, char(json_str)//c_null_char)
 
             ! FITS header
             call write_header(fd, char(item%hdr)//c_null_char)
