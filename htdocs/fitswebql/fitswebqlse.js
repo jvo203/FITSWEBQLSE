@@ -10293,7 +10293,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							fitsData += String.fromCharCode(uncompressed[i]);
 					};
 
-					console.log(fitsData);
+					// console.log(fitsData);
 					fitsData = JSON.parse(fitsData);
 
 					// replace the dummy FITS header with a real one
