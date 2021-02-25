@@ -102,7 +102,7 @@ contains
         if (isnan(val)) then
             tmp = 'null'
         else
-            write (tmp, '(g)') val
+            write (tmp, '(G16.9)') val
         end if
 
         json = json//'"'//key//'":'//trim(tmp)//','
@@ -161,7 +161,7 @@ contains
             if (isnan(val)) then
                 tmp = 'null'
             else
-                write (tmp, '(g)') val
+                write (tmp, '(G16.9)') val
             end if
 
             json = json//trim(tmp)//','
