@@ -79,4 +79,17 @@ contains
 
     end subroutine json_add_string
 
+    subroutine json_add_integer_number(json, key, val)
+        type(varying_string), intent(inout) :: json
+        character(len=*), intent(in) :: key
+        integer, intent(in) :: val
+
+        character(32) :: tmp
+
+        write (tmp, '(i)') val
+
+        json = json//(tmp)//'",'
+
+    end subroutine json_add_integer_number
+
 end module json_for
