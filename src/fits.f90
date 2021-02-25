@@ -1669,8 +1669,8 @@ contains
         call json_add_real_number(json, 'CRVAL2', item%crval2)
         call json_add_real_number(json, 'CDELT2', item%cdelt2)
         call json_add_real_number(json, 'CRPIX2', item%crpix2)
-        call json_add_real_number(json, 'CUNIT2', trim(item%cunit2))
-        call json_add_real_number(json, 'CTYPE2', trim(item%ctype2))
+        call json_add_string(json, 'CUNIT2', trim(item%cunit2))
+        call json_add_string(json, 'CTYPE2', trim(item%ctype2))
 
         call json_add_real_number(json, 'CRVAL3', item%crval3)
         call json_add_real_number(json, 'CDELT3', item%cdelt3)
