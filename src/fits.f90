@@ -1696,6 +1696,12 @@ contains
         call json_add_string(json, 'LINE', trim(item%line))
         call json_add_string(json, 'FILTER', trim(item%filter))
 
+        call json_add_real_array(json, 'mean_spectrum', item%mean_spectrum)
+        call json_add_real_array(json, 'integrated_spectrum', item%integrated_spectrum)
+
+        ! statistics (image histogram)
+        call json_add_integer_array(json, 'histogram', item%hist)
+
         ! remove the last comma
         str_len = len(json)
 
