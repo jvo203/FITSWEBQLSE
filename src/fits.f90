@@ -1710,6 +1710,7 @@ contains
         json = json//'}'
 
         print *, char(json)
+        print *, 'JSON length:', len(json)
     end subroutine get_json
 
     subroutine downsize_nn_bool(X, Y)
