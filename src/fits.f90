@@ -1807,8 +1807,8 @@ contains
             Xs1 = min(Xs0 + 1, real(src_width))
             Ys1 = min(Ys0 + 1, real(src_height))
 
-            I0 = X(Xs0, Ys0)*(Xs1 - Xs) + X(Xs1, Ys0)*(Xs - Xs0)
-            I1 = X(Xs0, Ys1)*(Xs1 - Xs) + X(Xs1, Ys1)*(Xs - Xs0)
+            I0 = X(int(Xs0), int(Ys0))*(Xs1 - Xs) + X(int(Xs1), int(Ys0))*(Xs - Xs0)
+            I1 = X(int(Xs0), int(Ys1))*(Xs1 - Xs) + X(int(Xs1), int(Ys1))*(Xs - Xs0)
 
             ! Linear Interpolation
             Y(Xd, Yd) = I0*(Ys1 - Ys) + I1*(Ys - Ys0)
