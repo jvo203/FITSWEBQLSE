@@ -1781,6 +1781,12 @@ contains
         ! downsized destination coordinates
         integer :: Xd, Yd
 
+        ! nearby-pixels
+        real :: Xs0, Ys0, Xs1, Ys1
+
+        ! interpolated values
+        real I0, I1
+
         src = shape(X)
         src_width = src(1)
         src_height = src(2)
@@ -1792,11 +1798,20 @@ contains
         print *, '[downsize_nn_float] SRC:', src, 'DST:', dst
 
         do concurrent(Yd=1:dst_height, Xd=1:dst_width)
-            Xs = 1.0 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
-            Ys = 1.0 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
+            Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
+            Ys = 1 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
 
-            ! a simple Nearest Neighbour works like this
-            Y(Xd, Yd) = X(nint(Xs), nint(Ys))
+            Xs0 = nint(Xs)
+            Ys0 = nint(Ys)
+
+            Xs1 = min(Xs0 + 1, real(src_width))
+            Ys1 = min(Ys0 + 1, real(src_height))
+
+            I0 = X(Xs0, Ys0)*(Xs1 - Xs) + X(Xs1, Ys0)*(Xs - Xs0)
+            I1 = X(Xs0, Ys1)*(Xs1 - Xs) + X(Xs1, Ys1)*(Xs - Xs0)
+
+            ! Linear Interpolation
+            Y(Xd, Yd) = I0*(Ys1 - Ys) + I1*(Ys - Ys0)
         end do
     end subroutine downsize_linear_float
 
