@@ -1546,11 +1546,12 @@ contains
         return
     end function get_image_scale
 
-    function get_json result(json)
+    subroutine get_json(json)
+        use iso_varying_string
         use json_for
         implicit none
 
-        type(varying_string) :: json
+        type(varying_string), intent(out) :: json
         integer :: str_len
 
         json = '{'
@@ -1621,7 +1622,7 @@ contains
 
         ! print *, char(json)
         print *, 'JSON length:', len(json)
-    end function get_json
+    end subroutine get_json
 
     subroutine to_json(str_val)
         use json_module
