@@ -1619,7 +1619,7 @@ contains
 
         json = json//'}'
 
-        print *, char(json)
+        ! print *, char(json)
         print *, 'JSON length:', len(json)
     end function get_json
 
