@@ -1636,7 +1636,7 @@ contains
 
     end subroutine to_json
 
-    subroutine get_json
+    function get_json result(json)
         use json_for
         implicit none
 
@@ -1711,7 +1711,7 @@ contains
 
         print *, char(json)
         print *, 'JSON length:', len(json)
-    end subroutine get_json
+    end function get_json
 
     subroutine downsize_nn_bool(X, Y)
         use, intrinsic :: iso_c_binding
