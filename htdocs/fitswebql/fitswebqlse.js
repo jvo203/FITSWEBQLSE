@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-02-24.0";
+	return "JS2021-02-25.0";
 }
 
 const wasm_supported = (() => {
@@ -10293,6 +10293,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							fitsData += String.fromCharCode(uncompressed[i]);
 					};
 
+					console.log(fitsData);
 					fitsData = JSON.parse(fitsData);
 
 					// replace the dummy FITS header with a real one
