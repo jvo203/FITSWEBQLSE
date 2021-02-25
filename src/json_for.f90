@@ -92,4 +92,21 @@ contains
 
     end subroutine json_add_integer_number
 
+    subroutine json_add_real_number(json, key, val)
+        type(varying_string), intent(inout) :: json
+        character(len=*), intent(in) :: key
+        real, intent(in) :: val
+
+        character(32) :: tmp
+
+        if (isnan(val)) then
+            tmp = 'null'
+        else
+            write (tmp, '(f)') val
+        end if
+
+        json = json//'"'//key//'":'//trim(tmp)//','
+
+    end subroutine json_add_real_number
+
 end module json_for
