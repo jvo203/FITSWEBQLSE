@@ -75,7 +75,7 @@ contains
             tmp = tmp//c
         end do
 
-        json = json//trim(tmp)//'",'//char(10)
+        json = json//trim(tmp)//'",'
 
     end subroutine json_add_string
 
