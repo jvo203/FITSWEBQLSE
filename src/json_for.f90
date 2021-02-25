@@ -12,7 +12,7 @@ contains
         integer :: i, str_len
         character :: c
 
-        json = json//'"'//key//'" : "'
+        json = json//'"'//key//'":"'
 
         str_len = len(val)
 
@@ -86,9 +86,9 @@ contains
 
         character(32) :: tmp
 
-        write (tmp, '(i)') val
+        write (tmp, '(i0)') val
 
-        json = json//(tmp)//'",'
+        json = json//'"'//key//'":'//trim(tmp)//','
 
     end subroutine json_add_integer_number
 
