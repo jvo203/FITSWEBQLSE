@@ -1792,8 +1792,8 @@ contains
         print *, '[downsize_nn_float] SRC:', src, 'DST:', dst
 
         do concurrent(Yd=1:dst_height, Xd=1:dst_width)
-            Xs = 1 + (Xd - 1)*(src_width - 1)/(dst_width - 1)
-            Ys = 1 + (Yd - 1)*(src_height - 1)/(dst_height - 1)
+            Xs = 1.0 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
+            Ys = 1.0 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
 
             ! a simple Nearest Neighbour works like this
             Y(Xd, Yd) = X(nint(Xs), nint(Ys))
