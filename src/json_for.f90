@@ -2,6 +2,8 @@ module json_for
     use iso_varying_string
     implicit none
 
+    ! was '(G16.9)'
+    character(len=*), parameter :: form = '(E30.16E3)'
 contains
     subroutine json_add_string(json, key, val)
         type(varying_string), intent(inout) :: json
@@ -102,7 +104,7 @@ contains
         if (isnan(val)) then
             tmp = 'null'
         else
-            write (tmp, '(G16.9)') val
+            write (tmp, form) val
         end if
 
         json = json//'"'//key//'":'//trim(tmp)//','
@@ -161,7 +163,7 @@ contains
             if (isnan(val)) then
                 tmp = 'null'
             else
-                write (tmp, '(G16.9)') val
+                write (tmp, form) val
             end if
 
             json = json//trim(tmp)//','
