@@ -1646,7 +1646,14 @@ contains
         json = '{'
 
         call json_add_string(json, 'HEADER', 'N/A')
-        ! call json_add_string(json, 'HEADER', char(item%hdr))
+
+        ! misc. values
+        call json_add_integer_number(json, 'width', item%naxes(1))
+        call json_add_integer_number(json, 'height', item%naxes(2))
+        call json_add_integer_number(json, 'depth', item%naxes(3))
+        call json_add_integer_number(json, 'polarisation', item%naxes(4))
+        call json_add_integer_number(json, 'filesize', 0)
+        ! call json_add_real_number(json, 'IGNRVAL', item%ignrval)
 
         ! remove the last comma
         str_len = len(json)
