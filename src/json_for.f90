@@ -119,7 +119,7 @@ contains
 
         n = size(values)
 
-        json = json//'"'//key//'":"['
+        json = json//'"'//key//'":['
 
         do i = 1, n
             write (tmp, '(i0)') values(i)
@@ -153,7 +153,7 @@ contains
 
         n = size(values)
 
-        json = json//'"'//key//'":"['
+        json = json//'"'//key//'":['
 
         do i = 1, n
             val = values(i)
