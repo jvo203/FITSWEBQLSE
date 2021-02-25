@@ -2,8 +2,8 @@ module json_for
     use iso_varying_string
     implicit none
 
-    ! was '(G16.9)'
-    character(len=*), parameter :: form = '(E30.16E3)'
+    ! character(len=*), parameter :: form = '(E30.16E3)'
+    character(len=*), parameter :: form = '(G16.9)'
 contains
     subroutine json_add_string(json, key, val)
         type(varying_string), intent(inout) :: json
