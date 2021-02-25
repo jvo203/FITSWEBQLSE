@@ -1765,4 +1765,39 @@ contains
         end do
     end subroutine downsize_nn_float
 
+    subroutine downsize_linear_float(X, Y)
+        use, intrinsic :: iso_c_binding
+        implicit none
+
+        real(kind=c_float), dimension(:, :), intent(in) :: X
+        real(kind=c_float), dimension(:, :), intent(out) :: Y
+        integer, dimension(2) :: src, dst
+        integer :: src_width, src_height
+        integer :: dst_width, dst_height
+
+        ! source coordinates
+        real :: Xs, Ys
+
+        ! downsized destination coordinates
+        integer :: Xd, Yd
+
+        src = shape(X)
+        src_width = src(1)
+        src_height = src(2)
+
+        dst = shape(Y)
+        dst_width = dst(1)
+        dst_height = dst(2)
+
+        print *, '[downsize_nn_float] SRC:', src, 'DST:', dst
+
+        do concurrent(Yd=1:dst_height, Xd=1:dst_width)
+            Xs = 1 + (Xd - 1)*(src_width - 1)/(dst_width - 1)
+            Ys = 1 + (Yd - 1)*(src_height - 1)/(dst_height - 1)
+
+            ! a simple Nearest Neighbour works like this
+            Y(Xd, Yd) = X(nint(Xs), nint(Ys))
+        end do
+    end subroutine downsize_linear_float
+
 end module fits
