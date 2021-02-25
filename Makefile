@@ -30,8 +30,7 @@ MOD =
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lzfp -lcfitsio
-# `pkg-config --libs json-fortran`
+LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lzfp -lcfitsio `pkg-config --libs json-fortran`
 
 # -lmpifort not needed when using mpiifort
 # -L/home/chris/zfp/build/lib64
@@ -39,7 +38,7 @@ LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -
 ifeq ($(UNAME_S),Darwin)
 	INC += -I/usr/local/opt/openssl/include 
 	LIBS += -L/usr/local/opt/openssl/lib -lcaf_mpi -L/usr/local/opt/lz4/lib -llz4
-# MOD += `pkg-config --cflags json-fortran`
+	MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc
 	FORT = mpif90
