@@ -113,7 +113,6 @@ contains
         type(varying_string), intent(inout) :: json
         character(len=*), intent(in) :: key
         integer, dimension(:), intent(in) :: values
-        integer :: val
         integer :: i, n
 
         character(32) :: tmp
@@ -123,9 +122,7 @@ contains
         json = json//'"'//key//'":"['
 
         do i = 1, n
-            val = values(i)
-
-            write (tmp, '(i0)') val
+            write (tmp, '(i0)') values(i)
 
             json = json//trim(tmp)//','
         end do
