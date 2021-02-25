@@ -138,6 +138,8 @@ contains
             json = json//']'
         end if
 
+        json = json//','
+
     end subroutine json_add_integer_array
 
     subroutine json_add_real_array(json, key, values)
@@ -175,6 +177,8 @@ contains
             ! end an empty array
             json = json//']'
         end if
+
+        json = json//','
 
     end subroutine json_add_real_array
 
