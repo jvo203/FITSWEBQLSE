@@ -1795,7 +1795,7 @@ contains
         dst_width = dst(1)
         dst_height = dst(2)
 
-        print *, '[downsize_nn_float] SRC:', src, 'DST:', dst
+        print *, '[downsize_linear_float] SRC:', src, 'DST:', dst
 
         do concurrent(Yd=1:dst_height, Xd=1:dst_width)
             Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
