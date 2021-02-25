@@ -1653,7 +1653,48 @@ contains
         call json_add_integer_number(json, 'depth', item%naxes(3))
         call json_add_integer_number(json, 'polarisation', item%naxes(4))
         call json_add_integer_number(json, 'filesize', 0)
-        ! call json_add_real_number(json, 'IGNRVAL', item%ignrval)
+        call json_add_real_number(json, 'IGNRVAL', item%ignrval)
+
+        call json_add_real_number(json, 'CD1_1', item%cd1_1)
+        call json_add_real_number(json, 'CD1_2', item%cd1_2)
+        call json_add_real_number(json, 'CD2_1', item%cd2_1)
+        call json_add_real_number(json, 'CD2_2', item%cd2_2)
+
+        call json_add_real_number(json, 'CRVAL1', item%crval1)
+        call json_add_real_number(json, 'CDELT1', item%cdelt1)
+        call json_add_real_number(json, 'CRPIX1', item%crpix1)
+        call json_add_string(json, 'CUNIT1', trim(item%cunit1))
+        call json_add_string(json, 'CTYPE1', trim(item%ctype1))
+
+        call json_add_real_number(json, 'CRVAL2', item%crval2)
+        call json_add_real_number(json, 'CDELT2', item%cdelt2)
+        call json_add_real_number(json, 'CRPIX2', item%crpix2)
+        call json_add_real_number(json, 'CUNIT2', trim(item%cunit2))
+        call json_add_real_number(json, 'CTYPE2', trim(item%ctype2))
+
+        call json_add_real_number(json, 'CRVAL3', item%crval3)
+        call json_add_real_number(json, 'CDELT3', item%cdelt3)
+        call json_add_real_number(json, 'CRPIX3', item%crpix3)
+        call json_add_string(json, 'CUNIT3', trim(item%cunit3))
+        call json_add_string(json, 'CTYPE3', trim(item%ctype3))
+
+        call json_add_real_number(json, 'BMAJ', item%bmaj)
+        call json_add_real_number(json, 'BMIN', item%bmin)
+        call json_add_real_number(json, 'BPA', item%bpa)
+
+        call json_add_string(json, 'BUNIT', trim(item%bunit))
+        call json_add_string(json, 'BTYPE', trim(item%btype))
+        call json_add_string(json, 'SPECSYS', trim(item%specsys))
+
+        call json_add_real_number(json, 'RESTFRQ', item%restfrq)
+        call json_add_real_number(json, 'OBSRA', item%obsra)
+        call json_add_real_number(json, 'OBSDEC', item%obsdec)
+
+        call json_add_string(json, 'OBJECT', trim(item%object))
+        call json_add_string(json, 'DATEOBS', trim(item%date_obs))
+        call json_add_string(json, 'TIMESYS', trim(item%timesys))
+        call json_add_string(json, 'LINE', trim(item%line))
+        call json_add_string(json, 'FILTER', trim(item%filter))
 
         ! remove the last comma
         str_len = len(json)
