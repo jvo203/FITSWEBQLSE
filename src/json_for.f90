@@ -109,4 +109,41 @@ contains
 
     end subroutine json_add_real_number
 
+    subroutine json_add_real_array(json, key, values)
+        type(varying_string), intent(inout) :: json
+        character(len=*), intent(in) :: key
+        real, dimension(:), intent(in) :: values
+        real :: val
+        integer :: i, n
+
+        character(32) :: tmp
+
+        n = size(values)
+
+        json = json//'"'//key//'":"['
+
+        do i = 1, n
+            val = values(i)
+
+            if (isnan(val)) then
+                tmp = 'null'
+            else
+                write (tmp, '(g0)') val
+            end if
+
+            json = json//trim(tmp)//','
+        end do
+
+        ! replace the last comma with ']'
+        i = len(json)
+
+        if (extract(json, i) .eq. ',') then
+            json = replace(json, i, ']')
+        else
+            ! end an empty array
+            json = json//']'
+        end if
+
+    end subroutine json_add_real_array
+
 end module json_for
