@@ -120,6 +120,7 @@ contains
         use mpi
         use fits
         use json_module
+        use iso_varying_string
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -134,7 +135,7 @@ contains
         character(kind=c_char, len=:), allocatable :: c_str
         integer :: k, str_len
 
-        ! type(varying_string) :: json_str
+        type(varying_string) :: json_str
 
         integer inner_width, inner_height
         integer img_width, img_height
@@ -197,7 +198,7 @@ contains
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
         if (fetch_data .eq. 1) then
-            ! json_str = get_json()
+            call get_json(json_str)
 
             call to_json(str_val)
 
