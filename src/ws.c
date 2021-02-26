@@ -134,14 +134,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		memcpy((char *)vhd->amsg.payload + LWS_PRE, in, len);
 		vhd->current++;
 
-		char *msg = malloc(vhd->amsg.len);
-
-		if (msg != NULL)
-		{
-			lws_strncpy(msg, vhd->amsg.payload, vhd->amsg.len);
-			printf("[C::ws] %s\n", msg);
-			free(msg);
-		}
+		// lwsl_user("[ws] MESSAGE RECEIVED\n");
 
 		/*
 		 * let everybody know we want to write something on them
