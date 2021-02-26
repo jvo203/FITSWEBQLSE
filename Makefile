@@ -20,9 +20,8 @@ OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
-FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
+FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp
 #-mcmodel=medium
-#-qopenmp
 #-ipo -parallel -fast
 CFLAGS := $(FLAGS)
 INC = `pkg-config --cflags glib-2.0`
