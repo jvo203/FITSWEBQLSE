@@ -1697,7 +1697,12 @@ contains
         real :: Xs0, Ys0, Xs1, Ys1
 
         ! interpolated values
-        real I0, I1
+        real :: I0, I1
+
+        ! timing
+        real :: t1, t2
+
+        call cpu_time(t1)
 
         src = shape(X)
         src_width = src(1)
@@ -1706,8 +1711,6 @@ contains
         dst = shape(Y)
         dst_width = dst(1)
         dst_height = dst(2)
-
-        print *, '[downsize_linear] SRC:', src, 'DST:', dst
 
         do concurrent(Yd=1:dst_height, Xd=1:dst_width)
             Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
@@ -1725,6 +1728,11 @@ contains
             ! Linear Interpolation
             Y(Xd, Yd) = I0*(Ys1 - Ys) + I1*(Ys - Ys0)
         end do
+
+        call cpu_time(t2)
+
+        print *, '[downsize_linear] SRC:', src, 'DST:', dst, 'elapsed:', 1000*(t2 - t1), '[ms]'
+
     end subroutine downsize_linear
 
     pure function Lanczos2(x)
@@ -1835,7 +1843,8 @@ contains
 
         call cpu_time(t2)
 
-        print *, '[downsize_lanczos_2] SRC:', src, 'DST:', dst, 'elapsed:', t2 - t1, '[s]'
+        print *, '[downsize_lanczos_2] SRC:', src, 'DST:', dst, 'elapsed:', 1000*(t2 - t1), '[ms]'
+
     end subroutine downsize_lanczos_2
 
 end module fits
