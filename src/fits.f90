@@ -1767,6 +1767,11 @@ contains
         real :: a0, a1, a2, a3
         real :: b0, b1, b2, b3
 
+        ! timing
+        real :: t1, t2
+
+        call cpu_time(t1)
+
         src = shape(X)
         src_width = src(1)
         src_height = src(2)
@@ -1774,8 +1779,6 @@ contains
         dst = shape(Y)
         dst_width = dst(1)
         dst_height = dst(2)
-
-        print *, '[downsize_lanczos_2] SRC:', src, 'DST:', dst
 
         do concurrent(Yd=1:dst_height, Xd=1:dst_width)
             Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
@@ -1827,8 +1830,12 @@ contains
                  a3*X(int(Xs3), int(Ys3))
 
             ! 2-lobed Lanczos
-            Y(Xd, Yd) = b0*I0 + b1*I1*b2*I2 + b3*I3
+            Y(Xd, Yd) = b0*I0 + b1*I1 + b2*I2 + b3*I3
         end do
+
+        call cpu_time(t2)
+
+        print *, '[downsize_lanczos_2] SRC:', src, 'DST:', dst, 'elapsed:', t2 - t1, '[s]'
     end subroutine downsize_lanczos_2
 
 end module fits
