@@ -164,7 +164,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 #define LWS_PLUGIN_PROTOCOL_MINIMAL                   \
 	{                                                 \
-		"lws-minimal",                                \
+		"fitswebqlse",                                \
 			callback_minimal,                         \
 			sizeof(struct per_session_data__minimal), \
 			128,                                      \
