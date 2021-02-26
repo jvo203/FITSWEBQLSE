@@ -69,8 +69,8 @@ module fits
         real :: elapsed = 0
 
         ! spectra
-        real, allocatable :: mean_spectrum(:)
-        real, allocatable :: integrated_spectrum(:)
+        real(kind=c_float), allocatable :: mean_spectrum(:)
+        real(kind=c_float), allocatable :: integrated_spectrum(:)
     end type dataset
 
     ! only one FITS dataset at this development stage
