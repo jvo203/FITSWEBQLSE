@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-02-25.0";
+	return "JS2021-02-26.0";
 }
 
 const wasm_supported = (() => {
@@ -10150,6 +10150,8 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 			}
 
 			if (received_msg instanceof ArrayBuffer) {
+				var fitsHeader, mean_spectrum, integrated_spectrum;
+
 				var dv = new DataView(received_msg);
 				console.log("FITSImage dataview byte length: ", dv.byteLength);
 
@@ -10250,6 +10252,94 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					has_header = false;
 				}
 
+				var has_mean_spectrum = true;
+
+				try {
+					var spectrum_len = dv.getUint32(offset, endianness);
+					offset += 4;
+
+					var buffer_len = dv.getUint32(offset, endianness);
+					offset += 4;
+
+					var buffer = new Uint8Array(received_msg, offset, buffer_len);
+					offset += buffer_len;
+					console.log("FITS mean spectrum length:", spectrum_len);
+
+					// FPZIP decoder part				
+					Module.ready
+						.then(_ => {
+							let start = performance.now();
+							var vec = Module.FPunzip(buffer);
+							let elapsed = Math.round(performance.now() - start);
+
+							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+
+							// copy the data to spectrum
+							let len = vec.size();
+
+							if (len > 0) {
+								mean_spectrum = new Float32Array(len);
+
+								for (let i = 0; i < len; i++)
+									mean_spectrum[i] = vec.get(i);
+							}
+
+							vec.delete();
+
+							// console.log(mean_spectrum);
+						})
+						.catch(e => {
+							console.error(e);
+							has_mean_spectrum = false;
+						});
+				} catch (err) {
+					has_mean_spectrum = false;
+				}
+
+				var has_integrated_spectrum = true;
+
+				try {
+					var spectrum_len = dv.getUint32(offset, endianness);
+					offset += 4;
+
+					var buffer_len = dv.getUint32(offset, endianness);
+					offset += 4;
+
+					var buffer = new Uint8Array(received_msg, offset, buffer_len);
+					offset += buffer_len;
+					console.log("FITS integrated spectrum length:", spectrum_len);
+
+					// FPZIP decoder part				
+					Module.ready
+						.then(_ => {
+							let start = performance.now();
+							var vec = Module.FPunzip(buffer);
+							let elapsed = Math.round(performance.now() - start);
+
+							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+
+							// copy the data to spectrum
+							let len = vec.size();
+
+							if (len > 0) {
+								integrated_spectrum = new Float32Array(len);
+
+								for (let i = 0; i < len; i++)
+									integrated_spectrum[i] = vec.get(i);
+							}
+
+							vec.delete();
+
+							//console.log(integrated_spectrum);
+						})
+						.catch(e => {
+							console.error(e);
+							has_integrated_spectrum = false;
+						});
+				} catch (err) {
+					has_integrated_spectrum = false;
+				}
+
 				if (has_header) {
 					// decompress the FITS data etc.
 					var Buffer = require('buffer').Buffer;
@@ -10258,8 +10348,6 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					var uncompressed = new Buffer(header_len);
 					uncompressedSize = LZ4.decodeBlock(header, uncompressed);
 					uncompressed = uncompressed.slice(0, uncompressedSize);
-
-					var fitsHeader;
 
 					try {
 						fitsHeader = String.fromCharCode.apply(null, uncompressed);
@@ -10296,9 +10384,22 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					// console.log(fitsData);
 					fitsData = JSON.parse(fitsData);
 
-					// replace the dummy FITS header with a real one
+					// replace the dummy FITS header
 					if (has_header) {
 						fitsData.HEADER = fitsHeader;
+					}
+
+					// replace the dummy mean spectrum
+					if (has_mean_spectrum) {
+						fitsData.mean_spectrum = mean_spectrum;
+					}
+
+					// replace the dummy integrated spectrum
+					if (has_integrated_spectrum) {
+						//fitsData.integrated_spectrum = integrated_spectrum;
+						console.log('fitsData.integrated_spectrum:', fitsData.integrated_spectrum);
+						console.log('integrated_spectrum:', integrated_spectrum);
+						console.log('mean_spectrum:', mean_spectrum);
 					}
 
 					// console.log(fitsData);
@@ -11978,7 +12079,7 @@ function show_welcome() {
 
 	headerDiv.append("h2")
 		.attr("align", "center")
-		.html('WELCOME TO FITSWEBQL SE α');
+		.html('WELCOME TO FITSWEBQL SE 改善版');
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
