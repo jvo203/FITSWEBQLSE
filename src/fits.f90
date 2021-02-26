@@ -5,6 +5,7 @@ module fits
     implicit none
 
     integer(kind=4), parameter :: NBINS = 1024
+    real, parameter :: PI = 4.D0*DATAN(1.D0)
 
     type, bind(c) :: gmutex
         integer(kind=c_intptr_t) :: i = 0
@@ -1726,6 +1727,21 @@ contains
         end do
     end subroutine downsize_linear
 
+    pure function Lanczos2(x)
+        real :: Lanczos2
+        real, intent(in) :: x
+        real sinc1, sinc2
+
+        if (abs(x) .lt. 2.0) then
+            sinc1 = sin(PI*x)/(PI*x)
+            sinc2 = sin(PI*x/2.0)/(PI*x/2.0)
+
+            Lanczos2 = sinc1*sinc2
+        else
+            Lanczos2 = 0.0
+        end if
+    end function Lanczos2
+
     subroutine downsize_lanczos_2(X, Y)
         use, intrinsic :: iso_c_binding
         implicit none
@@ -1746,7 +1762,9 @@ contains
         real :: Xs0, Ys0, Xs1, Ys1, Xs2, Ys2, Xs3, Ys3
 
         ! interpolated values
-        real, dimension(0:3) :: I, a, b
+        real :: I0, I1, I2, I3
+        real :: a0, a1, a2, a3
+        real :: b0, b1, b2, b3
 
         src = shape(X)
         src_width = src(1)
