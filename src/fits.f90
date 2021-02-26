@@ -1792,8 +1792,8 @@ contains
             Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
             Ys = 1 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
 
-            Xs0 = nint(Xs)
-            Ys0 = nint(Ys)
+            Xs0 = max(nint(Xs) - 1, 1)
+            Ys0 = max(nint(Ys) - 1, 1)
 
             Xs1 = min(Xs0 + 1, real(src_width))
             Ys1 = min(Ys0 + 1, real(src_height))
