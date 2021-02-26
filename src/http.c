@@ -1353,6 +1353,7 @@ extern void write_spectrum(int fd, const float *spectrum, int n)
     void *compressed;
     size_t bufbytes, outbytes;
     uint32_t length;
+    uint32_t transmitted_size;
     int precision;
     FPZ *fpz;
 
@@ -1393,8 +1394,14 @@ extern void write_spectrum(int fd, const float *spectrum, int n)
 
         if (success)
         {
-            printf("[C] source array size: %zu, compressed: %zu bytes\n", length * sizeof(float), outbytes);
+            printf("[C] float array size: %zu, compressed: %zu bytes\n", length * sizeof(float), outbytes);
+
             // transmit the data
+            uint32_t transmitted_size = outbytes;
+
+            write(fd, &length, sizeof(length));                     // spectrum length after decompressing
+            write(fd, &transmitted_size, sizeof(transmitted_size)); // compressed buffer size
+            chunked_write(fd, compressed, outbytes);
         }
 
         free(compressed);
