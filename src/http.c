@@ -1347,8 +1347,57 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     return ret;
 }
 
-extern void write_spectrum(int fd, const float *spectrum, int length)
+extern void write_spectrum(int fd, const float *spectrum, int n)
 {
+    bool success;
+    void *compressed;
+    size_t bufbytes, outbytes;
+    uint32_t length;
+    int precision;
+    FPZ *fpz;
+
+    length = n;
+    bufbytes = 1024 + length * sizeof(float);
+    outbytes = 0;
+
+    success = false;
+    compressed = malloc(bufbytes);
+
+    if (compressed != NULL)
+    {
+        precision = 32; // use the full 32-bit precision
+
+        // compress to memory
+        fpz = fpzip_write_to_buffer(compressed, bufbytes);
+        fpz->type = FPZIP_TYPE_FLOAT;
+        fpz->prec = precision;
+        fpz->nx = n;
+        fpz->ny = 1;
+        fpz->nz = 1;
+        fpz->nf = 1;
+
+        // write header
+        if (!fpzip_write_header(fpz))
+            fprintf(stderr, "[C] cannot write the FPzip header: %s\n", fpzip_errstr[fpzip_errno]);
+        else
+        {
+            outbytes = fpzip_write(fpz, spectrum);
+
+            if (!outbytes)
+                fprintf(stderr, "[C] FPzip compression failed: %s\n", fpzip_errstr[fpzip_errno]);
+            else
+                success = true;
+        }
+
+        fpzip_write_close(fpz);
+
+        if (success)
+        {
+            // transmit the data
+        }
+
+        free(compressed);
+    }
 }
 
 extern void write_header(int fd, const char *header_str)
