@@ -1344,6 +1344,10 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     return ret;
 }
 
+extern void write_spectrum(int fd, const float *spectrum, int length)
+{
+}
+
 extern void write_header(int fd, const char *header_str)
 {
     char *compressed_header = NULL;
