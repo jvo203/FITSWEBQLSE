@@ -1735,7 +1735,7 @@ contains
 
     end subroutine downsize_linear
 
-    pure function Lanczos2(x)
+    elemental function Lanczos2(x)
         real :: Lanczos2
         real, intent(in) :: x
         real arg, sinc1, sinc2
@@ -1751,7 +1751,7 @@ contains
         end if
     end function Lanczos2
 
-    pure function Lanczos3(x)
+    elemental function Lanczos3(x)
         real :: Lanczos3
         real, intent(in) :: x
         real arg, sinc1, sinc2
