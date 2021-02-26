@@ -119,7 +119,7 @@ contains
     subroutine image_spectrum_request(datasetId, n, width, height, precision, fetch_data, fd) bind(C)
         use mpi
         use fits
-        use json_module
+        ! use json_module
         use iso_varying_string
         use, intrinsic :: iso_c_binding
         implicit none
@@ -131,9 +131,9 @@ contains
         real(kind=c_float), dimension(:, :), allocatable, target :: pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
-        CHARACTER(kind=json_CK, len=:), allocatable :: str_val
-        character(kind=c_char, len=:), allocatable :: c_str
-        integer :: k, str_len
+        ! CHARACTER(kind=json_CK, len=:), allocatable :: str_val
+        ! character(kind=c_char, len=:), allocatable :: c_str
+        ! integer :: k, str_len
 
         type(varying_string) :: json_str
 
@@ -197,23 +197,23 @@ contains
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
         if (fetch_data .eq. 1) then
-            ! call get_json(json_str)
+            call get_json(json_str)
 
-            call to_json(str_val)
+            ! call to_json(str_val)
 
-            str_len = len(str_val)
-            print *, 'json len:', str_len
+            ! str_len = len(str_val)
+            ! print *, 'json len:', str_len
 
-            allocate (character(str_len) :: c_str)
+            ! allocate (character(str_len) :: c_str)
 
-            do concurrent(k=1:str_len)
-                c_str(k:k) = str_val(k:k)
-            end do
+            ! do concurrent(k=1:str_len)
+            !    c_str(k:k) = str_val(k:k)
+            ! end do
 
             ! json
-            call write_header(fd, c_str//c_null_char)
+            ! call write_header(fd, c_str//c_null_char)
 
-            ! call write_header(fd, char(json_str)//c_null_char)
+            call write_header(fd, char(json_str)//c_null_char)
 
             ! FITS header
             call write_header(fd, char(item%hdr)//c_null_char)
