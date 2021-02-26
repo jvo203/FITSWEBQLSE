@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-02-26.1";
+	return "JS2021-02-26.2";
 }
 
 const wasm_supported = (() => {
@@ -2504,7 +2504,7 @@ function open_websocket_connection(datasetId, index) {
 				.attr("fill", "orange")
 				.attr("opacity", 0.8);
 
-			var ALMAWS = new ReconnectingWebSocket(ws_uri, null, { binaryType: 'arraybuffer' });
+			var ALMAWS = new ReconnectingWebSocket(ws_uri, "fitswebqlse", { binaryType: 'arraybuffer' });
 			ALMAWS.binaryType = 'arraybuffer';
 
 			ALMAWS.addEventListener("open", function (evt) {
