@@ -31,6 +31,8 @@
 // FPzip
 #include <fpzip.h>
 
+#define FPZIP_HIGH_PRECISION 24
+
 // LZ4 character streams compressor
 #include <lz4hc.h>
 
@@ -1366,12 +1368,10 @@ extern void write_spectrum(int fd, const float *spectrum, int n)
 
     if (compressed != NULL)
     {
-        precision = 32; // use the full 32-bit precision
-
         // compress to memory
         fpz = fpzip_write_to_buffer(compressed, bufbytes);
         fpz->type = FPZIP_TYPE_FLOAT;
-        fpz->prec = precision;
+        fpz->prec = FPZIP_HIGH_PRECISION;
         fpz->nx = n;
         fpz->ny = 1;
         fpz->nz = 1;
