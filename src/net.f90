@@ -169,11 +169,9 @@ contains
             allocate (mask(img_width, img_height))
 
             ! downscale item%pixels and item%mask into pixels, mask
-            ! using Lanczos (TO-DO)
-
-            ! the naive Nearest-Neighbour in the short term
+            ! pixels: for now Linear Interpolation
             ! in the long-term pixels should be downscaled with Lanczos
-            ! the logical mask should be downscaled with the naive Nearest-Neighbour
+            ! Boolean mask: the naive Nearest-Neighbour method
             call downsize_linear(item%pixels, pixels)
             call downsize_mask(item%mask, mask)
 
