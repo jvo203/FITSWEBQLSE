@@ -172,7 +172,7 @@ contains
             ! pixels: for now Linear Interpolation
             ! in the long-term pixels should be downscaled with Lanczos
             ! call downsize_linear(item%pixels, pixels)
-            call downsize_lanczos_2(item%pixels, pixels)
+            call downsize_lanczos_3(item%pixels, pixels)
 
             ! Boolean mask: the naive Nearest-Neighbour method
             call downsize_mask(item%mask, mask)
