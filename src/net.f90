@@ -37,6 +37,14 @@ module net
             integer(c_int), value, intent(in) :: fd
             character(kind=c_char), intent(in) :: json_str(*)
         end subroutine write_header
+
+        subroutine write_spectrum(fd, spectrum, n) BIND(C, name='write_spectrum')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: fd, n
+            type(C_PTR), value, intent(in) :: spectrum
+        end subroutine write_spectrum
     end interface
 contains
     subroutine sigint_handler
