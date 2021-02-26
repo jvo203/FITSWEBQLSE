@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-02-26.2";
+	return "JS2021-02-26.3";
 }
 
 const wasm_supported = (() => {
@@ -10397,16 +10397,12 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							// replace the dummy mean spectrum
 							if (has_mean_spectrum) {
 								fitsData.mean_spectrum = mean_spectrum;
-							} else {
-								fitsData.mean_spectrum = new Float32Array(fitsData.depth);
-							};
+							}
 
 							// replace the dummy integrated spectrum
 							if (has_integrated_spectrum) {
 								fitsData.integrated_spectrum = integrated_spectrum;
-							} else {
-								fitsData.integrated_spectrum = new Float32Array(fitsData.depth);
-							};
+							}
 
 							// console.log(fitsData);
 
