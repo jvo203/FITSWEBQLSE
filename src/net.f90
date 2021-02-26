@@ -230,10 +230,14 @@ contains
             ! send FPzip-compressed spectra
 
             ! mean spectrum
-            call write_spectrum(fd, c_loc(item%mean_spectrum), size(item%mean_spectrum))
+            if (allocated(item%mean_spectrum)) then
+                call write_spectrum(fd, c_loc(item%mean_spectrum), size(item%mean_spectrum))
+            end if
 
             ! integrated spectrum
-            call write_spectrum(fd, c_loc(item%integrated_spectrum), size(item%integrated_spectrum))
+            if (allocated(item%integrated_spectrum)) then
+                call write_spectrum(fd, c_loc(item%integrated_spectrum), size(item%integrated_spectrum))
+            end if
         end if
 
     end subroutine image_spectrum_request
