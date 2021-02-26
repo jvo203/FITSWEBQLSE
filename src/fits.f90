@@ -1730,11 +1730,12 @@ contains
     pure function Lanczos2(x)
         real :: Lanczos2
         real, intent(in) :: x
-        real sinc1, sinc2
+        real arg, sinc1, sinc2
 
-        if (abs(x) .lt. 2.0) then
-            sinc1 = sin(PI*x)/(PI*x)
-            sinc2 = sin(PI*x/2.0)/(PI*x/2.0)
+        if (abs(x) .lt. 2) then
+            arg = PI*x
+            sinc1 = sin(arg)/arg
+            sinc2 = sin(arg/2)/(arg/2)
 
             Lanczos2 = sinc1*sinc2
         else
@@ -1791,6 +1792,21 @@ contains
 
             Xs3 = min(Xs0 + 3, real(src_width))
             Ys3 = min(Ys0 + 3, real(src_height))
+
+            ! Lanczos coefficients
+            ! they should really be pre-calculated outside the loop
+            a0 = Lanczos2(Xs - Xs0)
+            a1 = Lanczos2(Xs - Xs1)
+            a2 = Lanczos2(Xs - Xs2)
+            a3 = Lanczos2(Xs - Xs3)
+
+            b0 = Lanczos2(Ys - Ys0)
+            b1 = Lanczos2(Ys - Ys1)
+            b2 = Lanczos2(Ys - Ys2)
+            b3 = Lanczos2(Ys - Ys3)
+
+            ! intermediate intensities
+            ! I0 =
 
             ! I0 = X(int(Xs0), int(Ys0))*(Xs1 - Xs) + X(int(Xs1), int(Ys0))*(Xs - Xs0)
             ! I1 = X(int(Xs0), int(Ys1))*(Xs1 - Xs) + X(int(Xs1), int(Ys1))*(Xs - Xs0)
