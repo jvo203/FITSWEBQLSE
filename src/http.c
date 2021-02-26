@@ -28,6 +28,9 @@
 #define ZFP_MEDIUM_PRECISION 11
 #define ZFP_LOW_PRECISION 8
 
+// FPzip
+#include <fpzip.h>
+
 // LZ4 character streams compressor
 #include <lz4hc.h>
 
