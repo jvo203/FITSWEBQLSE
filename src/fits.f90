@@ -1847,4 +1847,100 @@ contains
 
     end subroutine downsize_lanczos_2
 
+    subroutine downsize_lanczos_3(X, Y)
+        use, intrinsic :: iso_c_binding
+        implicit none
+
+        real(kind=c_float), dimension(:, :), intent(in) :: X
+        real(kind=c_float), dimension(:, :), intent(out) :: Y
+        integer, dimension(2) :: src, dst
+        integer :: src_width, src_height
+        integer :: dst_width, dst_height
+
+        ! source coordinates
+        real :: Xs, Ys
+
+        ! downsized destination coordinates
+        integer :: Xd, Yd
+
+        ! nearby-pixels
+        real :: Xs0, Ys0, Xs1, Ys1, Xs2, Ys2, Xs3, Ys3
+
+        ! interpolated values
+        real :: I0, I1, I2, I3
+        real :: a0, a1, a2, a3
+        real :: b0, b1, b2, b3
+
+        ! timing
+        real :: t1, t2
+
+        call cpu_time(t1)
+
+        src = shape(X)
+        src_width = src(1)
+        src_height = src(2)
+
+        dst = shape(Y)
+        dst_width = dst(1)
+        dst_height = dst(2)
+
+        do concurrent(Yd=1:dst_height, Xd=1:dst_width)
+            Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
+            Ys = 1 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
+
+            Xs0 = max(nint(Xs) - 1, 1)
+            Ys0 = max(nint(Ys) - 1, 1)
+
+            Xs1 = min(Xs0 + 1, real(src_width))
+            Ys1 = min(Ys0 + 1, real(src_height))
+
+            Xs2 = min(Xs0 + 2, real(src_width))
+            Ys2 = min(Ys0 + 2, real(src_height))
+
+            Xs3 = min(Xs0 + 3, real(src_width))
+            Ys3 = min(Ys0 + 3, real(src_height))
+
+            ! Lanczos coefficients
+            ! they should really be pre-calculated outside the loop
+            a0 = Lanczos2(Xs - Xs0)
+            a1 = Lanczos2(Xs - Xs1)
+            a2 = Lanczos2(Xs - Xs2)
+            a3 = Lanczos2(Xs - Xs3)
+
+            b0 = Lanczos2(Ys - Ys0)
+            b1 = Lanczos2(Ys - Ys1)
+            b2 = Lanczos2(Ys - Ys2)
+            b3 = Lanczos2(Ys - Ys3)
+
+            ! intermediate intensities
+            I0 = a0*X(int(Xs0), int(Ys0)) + &
+                 a1*X(int(Xs1), int(Ys0)) + &
+                 a2*X(int(Xs2), int(Ys0)) + &
+                 a3*X(int(Xs3), int(Ys0))
+
+            I1 = a0*X(int(Xs0), int(Ys1)) + &
+                 a1*X(int(Xs1), int(Ys1)) + &
+                 a2*X(int(Xs2), int(Ys1)) + &
+                 a3*X(int(Xs3), int(Ys1))
+
+            I2 = a0*X(int(Xs0), int(Ys2)) + &
+                 a1*X(int(Xs1), int(Ys2)) + &
+                 a2*X(int(Xs2), int(Ys2)) + &
+                 a3*X(int(Xs3), int(Ys2))
+
+            I3 = a0*X(int(Xs0), int(Ys3)) + &
+                 a1*X(int(Xs1), int(Ys3)) + &
+                 a2*X(int(Xs2), int(Ys3)) + &
+                 a3*X(int(Xs3), int(Ys3))
+
+            ! 3-lobed Lanczos
+            Y(Xd, Yd) = b0*I0 + b1*I1 + b2*I2 + b3*I3
+        end do
+
+        call cpu_time(t2)
+
+        print *, '[downsize_lanczos_3] SRC:', src, 'DST:', dst, 'elapsed:', 1000*(t2 - t1), '[ms]'
+
+    end subroutine downsize_lanczos_3
+
 end module fits
