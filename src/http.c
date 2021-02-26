@@ -1393,6 +1393,7 @@ extern void write_spectrum(int fd, const float *spectrum, int n)
 
         if (success)
         {
+            printf("[C] source array size: %zu, compressed: %zu bytes\n", length * sizeof(float), outbytes);
             // transmit the data
         }
 
