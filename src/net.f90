@@ -174,8 +174,8 @@ contains
             ! the naive Nearest-Neighbour in the short term
             ! in the long-term pixels should be downscaled with Lanczos
             ! the logical mask should be downscaled with the naive Nearest-Neighbour
-            call downsize_linear_float(item%pixels, pixels)
-            call downsize_nn_bool(item%mask, mask)
+            call downsize_linear(item%pixels, pixels)
+            call downsize_mask(item%mask, mask)
 
             call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
                 &item%pmin, item%pmax, item%pmedian,&
