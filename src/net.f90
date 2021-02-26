@@ -171,8 +171,9 @@ contains
             ! downscale item%pixels and item%mask into pixels, mask
             ! pixels: for now Linear Interpolation
             ! in the long-term pixels should be downscaled with Lanczos
-            ! Boolean mask: the naive Nearest-Neighbour method
             call downsize_linear(item%pixels, pixels)
+
+            ! Boolean mask: the naive Nearest-Neighbour method
             call downsize_mask(item%mask, mask)
 
             call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
