@@ -10266,32 +10266,32 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					console.log("FITS mean spectrum length:", spectrum_len);
 
 					// FPZIP decoder part				
-					Module.ready
-						.then(_ => {
-							let start = performance.now();
-							var vec = Module.FPunzip(buffer);
-							let elapsed = Math.round(performance.now() - start);
+					/*Module.ready
+						.then(_ => {*/
+					let start = performance.now();
+					var vec = Module.FPunzip(buffer);
+					let elapsed = Math.round(performance.now() - start);
 
-							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+					//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
 
-							// copy the data to spectrum
-							let len = vec.size();
+					// copy the data to spectrum
+					let len = vec.size();
 
-							if (len > 0) {
-								mean_spectrum = new Float32Array(len);
+					if (len > 0) {
+						mean_spectrum = new Float32Array(len);
 
-								for (let i = 0; i < len; i++)
-									mean_spectrum[i] = vec.get(i);
-							}
+						for (let i = 0; i < len; i++)
+							mean_spectrum[i] = vec.get(i);
+					}
 
-							vec.delete();
+					vec.delete();
 
-							// console.log(mean_spectrum);
-						})
-						.catch(e => {
-							console.error(e);
-							has_mean_spectrum = false;
-						});
+					// console.log(mean_spectrum);
+					/*})
+					.catch(e => {
+						console.error(e);
+						has_mean_spectrum = false;
+					});*/
 				} catch (err) {
 					has_mean_spectrum = false;
 				}
@@ -10310,32 +10310,32 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 					console.log("FITS integrated spectrum length:", spectrum_len);
 
 					// FPZIP decoder part				
-					Module.ready
-						.then(_ => {
-							let start = performance.now();
-							var vec = Module.FPunzip(buffer);
-							let elapsed = Math.round(performance.now() - start);
+					/*Module.ready
+						.then(_ => {*/
+					let start = performance.now();
+					var vec = Module.FPunzip(buffer);
+					let elapsed = Math.round(performance.now() - start);
 
-							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+					//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
 
-							// copy the data to spectrum
-							let len = vec.size();
+					// copy the data to spectrum
+					let len = vec.size();
 
-							if (len > 0) {
-								integrated_spectrum = new Float32Array(len);
+					if (len > 0) {
+						integrated_spectrum = new Float32Array(len);
 
-								for (let i = 0; i < len; i++)
-									integrated_spectrum[i] = vec.get(i);
-							}
+						for (let i = 0; i < len; i++)
+							integrated_spectrum[i] = vec.get(i);
+					}
 
-							vec.delete();
+					vec.delete();
 
-							//console.log(integrated_spectrum);
-						})
-						.catch(e => {
-							console.error(e);
-							has_integrated_spectrum = false;
-						});
+					//console.log(integrated_spectrum);
+					/*})
+					.catch(e => {
+						console.error(e);
+						has_integrated_spectrum = false;
+					});*/
 				} catch (err) {
 					has_integrated_spectrum = false;
 				}
@@ -10396,10 +10396,10 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 					// replace the dummy integrated spectrum
 					if (has_integrated_spectrum) {
-						//fitsData.integrated_spectrum = integrated_spectrum;
-						console.log('fitsData.integrated_spectrum:', fitsData.integrated_spectrum);
-						console.log('integrated_spectrum:', integrated_spectrum);
-						console.log('mean_spectrum:', mean_spectrum);
+						fitsData.integrated_spectrum = integrated_spectrum;
+						//console.log('fitsData.integrated_spectrum:', fitsData.integrated_spectrum);
+						//console.log('integrated_spectrum:', integrated_spectrum);
+						//console.log('mean_spectrum:', mean_spectrum);
 					}
 
 					// console.log(fitsData);
