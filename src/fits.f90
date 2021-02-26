@@ -1864,6 +1864,7 @@ contains
     end subroutine downsize_lanczos_2
 
     subroutine downsize_lanczos_3(X, Y)
+        use omp_lib
         use, intrinsic :: iso_c_binding
         implicit none
 
