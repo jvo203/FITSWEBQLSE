@@ -10138,6 +10138,9 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 		}
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			// wait for WebAssembly to get compiled
+			/*Module.ready
+				.then(_ => {*/
 			document.getElementById('welcome').style.display = "none";
 			console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
 
@@ -10502,63 +10505,43 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 				}
 
 				// OpenEXR decoder part				
-				Module.ready
-					.then(_ => {
-						console.log("processing an HDR image");
-						let start = performance.now();
+				/*Module.ready
+					.then(_ => {*/
+				{
+					console.log("processing an HDR image");
+					let start = performance.now();
 
-						var pixels = Module.decompressZFPval(img_width, img_height, frame_pixels);
+					var pixels = Module.decompressZFPval(img_width, img_height, frame_pixels);
 
-						var alpha = Module.decompressLZ4val(img_width, img_height, frame_mask);
+					var alpha = Module.decompressLZ4val(img_width, img_height, frame_mask);
 
-						//var len;
+					let elapsed = Math.round(performance.now() - start);
 
-						/*var _pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
+					console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-						len = _pixels.size();
+					process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
-						if (len > 0) {
-							var pixels = new Float32Array(len);
+					if (has_json) {
+						display_histogram(index);
 
-							for (let i = 0; i < len; i++)
-								pixels[i] = _pixels.get(i);
-						}*/
-
-						/*var mask = Module.decompressLZ4(img_width, img_height, frame_mask);
-
-						len = mask.size();
-
-						if (len > 0) {
-							var alpha = new Float32Array(len);
-
-							for (let i = 0; i < len; i++)
-								alpha[i] = (mask.get(i) > 0) ? 1.0 : 0.0;
-						}*/
-
-						let elapsed = Math.round(performance.now() - start);
-
-						console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
-
-						process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
-
-						if (has_json) {
-							display_histogram(index);
-
-							try {
-								display_cd_gridlines();
-							}
-							catch (err) {
-								display_gridlines();
-							};
-
-							display_beam();
+						try {
+							display_cd_gridlines();
 						}
+						catch (err) {
+							display_gridlines();
+						};
 
-						display_legend();
+						display_beam();
+					}
 
-					})
-					.catch(e => console.error(e));
+					display_legend();
+				}
+				/*})
+				.catch(e => console.error(e));*/
 			}
+
+			/*})
+				.catch (e => console.error(e));*/
 		}
 	}
 
