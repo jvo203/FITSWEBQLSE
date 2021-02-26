@@ -133,6 +133,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		vhd->current++;
 
 		char *msg = malloc(vhd->amsg.len);
+
 		if (msg != NULL)
 		{
 			lws_strncpy(msg, vhd->amsg.payload, vhd->amsg.len);
