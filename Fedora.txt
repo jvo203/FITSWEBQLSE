@@ -60,7 +60,7 @@
 
 	cd fpzip
 
-	mkdir build
+	mkdir -p build
 
 	cd build
 
