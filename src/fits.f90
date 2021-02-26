@@ -1726,4 +1726,54 @@ contains
         end do
     end subroutine downsize_linear
 
+    subroutine downsize_lanczos_2(X, Y)
+        use, intrinsic :: iso_c_binding
+        implicit none
+
+        real(kind=c_float), dimension(:, :), intent(in) :: X
+        real(kind=c_float), dimension(:, :), intent(out) :: Y
+        integer, dimension(2) :: src, dst
+        integer :: src_width, src_height
+        integer :: dst_width, dst_height
+
+        ! source coordinates
+        real :: Xs, Ys
+
+        ! downsized destination coordinates
+        integer :: Xd, Yd
+
+        ! nearby-pixels
+        real :: Xs0, Ys0, Xs1, Ys1
+
+        ! interpolated values
+        real I0, I1
+
+        src = shape(X)
+        src_width = src(1)
+        src_height = src(2)
+
+        dst = shape(Y)
+        dst_width = dst(1)
+        dst_height = dst(2)
+
+        print *, '[downsize_lanczos_2] SRC:', src, 'DST:', dst
+
+        do concurrent(Yd=1:dst_height, Xd=1:dst_width)
+            Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
+            Ys = 1 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
+
+            Xs0 = nint(Xs)
+            Ys0 = nint(Ys)
+
+            Xs1 = min(Xs0 + 1, real(src_width))
+            Ys1 = min(Ys0 + 1, real(src_height))
+
+            I0 = X(int(Xs0), int(Ys0))*(Xs1 - Xs) + X(int(Xs1), int(Ys0))*(Xs - Xs0)
+            I1 = X(int(Xs0), int(Ys1))*(Xs1 - Xs) + X(int(Xs1), int(Ys1))*(Xs - Xs0)
+
+            ! Linear Interpolation
+            Y(Xd, Yd) = I0*(Ys1 - Ys) + I1*(Ys - Ys0)
+        end do
+    end subroutine downsize_lanczos_2
+
 end module fits
