@@ -1873,19 +1873,8 @@ contains
         integer :: src_width, src_height
         integer :: dst_width, dst_height
 
-        ! source coordinates
-        real :: Xs, Ys
-
         ! downsized destination coordinates
         integer :: Xd, Yd
-
-        ! nearby-pixels
-        real :: Xs0, Ys0, Xs1, Ys1, Xs2, Ys2, Xs3, Ys3, Xs4, Ys4, Xs5, Ys5
-
-        ! interpolated values
-        real :: I0, I1, I2, I3, I4, I5
-        real :: a0, a1, a2, a3, a4, a5
-        real :: b0, b1, b2, b3, b4, b5
 
         ! timing
         real :: t1, t2
@@ -1901,88 +1890,103 @@ contains
         dst_height = dst(2)
 
         do concurrent(Yd=1:dst_height, Xd=1:dst_width)
-            Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
-            Ys = 1 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
+            block
+                ! source coordinates
+                real :: Xs, Ys
 
-            Xs0 = max(nint(Xs) - 2, 1)
-            Ys0 = max(nint(Ys) - 2, 1)
+                ! nearby-pixels
+                real :: Xs0, Ys0, Xs1, Ys1, Xs2, Ys2, Xs3, Ys3, Xs4, Ys4, Xs5, Ys5
 
-            Xs1 = min(Xs0 + 1, real(src_width))
-            Ys1 = min(Ys0 + 1, real(src_height))
+                ! interpolated values
+                real :: I0, I1, I2, I3, I4, I5
+                real :: a0, a1, a2, a3, a4, a5
+                real :: b0, b1, b2, b3, b4, b5
 
-            Xs2 = min(Xs0 + 2, real(src_width))
-            Ys2 = min(Ys0 + 2, real(src_height))
+                ! computation starts here
+                Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
+                Ys = 1 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
 
-            Xs3 = min(Xs0 + 3, real(src_width))
-            Ys3 = min(Ys0 + 3, real(src_height))
+                Xs0 = max(nint(Xs) - 2, 1)
+                Ys0 = max(nint(Ys) - 2, 1)
 
-            Xs4 = min(Xs0 + 4, real(src_width))
-            Ys4 = min(Ys0 + 4, real(src_height))
+                Xs1 = min(Xs0 + 1, real(src_width))
+                Ys1 = min(Ys0 + 1, real(src_height))
 
-            Xs5 = min(Xs0 + 5, real(src_width))
-            Ys5 = min(Ys0 + 5, real(src_height))
+                Xs2 = min(Xs0 + 2, real(src_width))
+                Ys2 = min(Ys0 + 2, real(src_height))
 
-            ! Lanczos coefficients
-            ! they should really be pre-calculated outside the loop
-            a0 = Lanczos2(Xs - Xs0)
-            a1 = Lanczos2(Xs - Xs1)
-            a2 = Lanczos2(Xs - Xs2)
-            a3 = Lanczos2(Xs - Xs3)
-            a4 = Lanczos2(Xs - Xs4)
-            a5 = Lanczos2(Xs - Xs5)
+                Xs3 = min(Xs0 + 3, real(src_width))
+                Ys3 = min(Ys0 + 3, real(src_height))
 
-            b0 = Lanczos2(Ys - Ys0)
-            b1 = Lanczos2(Ys - Ys1)
-            b2 = Lanczos2(Ys - Ys2)
-            b3 = Lanczos2(Ys - Ys3)
-            b4 = Lanczos2(Ys - Ys4)
-            b5 = Lanczos2(Ys - Ys5)
+                Xs4 = min(Xs0 + 4, real(src_width))
+                Ys4 = min(Ys0 + 4, real(src_height))
 
-            ! intermediate intensities
-            I0 = a0*X(int(Xs0), int(Ys0)) + &
-                 a1*X(int(Xs1), int(Ys0)) + &
-                 a2*X(int(Xs2), int(Ys0)) + &
-                 a3*X(int(Xs3), int(Ys0)) + &
-                 a4*X(int(Xs4), int(Ys0)) + &
-                 a5*X(int(Xs5), int(Ys0))
+                Xs5 = min(Xs0 + 5, real(src_width))
+                Ys5 = min(Ys0 + 5, real(src_height))
 
-            I1 = a0*X(int(Xs0), int(Ys1)) + &
-                 a1*X(int(Xs1), int(Ys1)) + &
-                 a2*X(int(Xs2), int(Ys1)) + &
-                 a3*X(int(Xs3), int(Ys1)) + &
-                 a4*X(int(Xs4), int(Ys1)) + &
-                 a5*X(int(Xs5), int(Ys1))
+                ! Lanczos coefficients
+                ! they should really be pre-calculated outside the loop
+                a0 = Lanczos2(Xs - Xs0)
+                a1 = Lanczos2(Xs - Xs1)
+                a2 = Lanczos2(Xs - Xs2)
+                a3 = Lanczos2(Xs - Xs3)
+                a4 = Lanczos2(Xs - Xs4)
+                a5 = Lanczos2(Xs - Xs5)
 
-            I2 = a0*X(int(Xs0), int(Ys2)) + &
-                 a1*X(int(Xs1), int(Ys2)) + &
-                 a2*X(int(Xs2), int(Ys2)) + &
-                 a3*X(int(Xs3), int(Ys2)) + &
-                 a4*X(int(Xs4), int(Ys2)) + &
-                 a5*X(int(Xs5), int(Ys2))
+                b0 = Lanczos2(Ys - Ys0)
+                b1 = Lanczos2(Ys - Ys1)
+                b2 = Lanczos2(Ys - Ys2)
+                b3 = Lanczos2(Ys - Ys3)
+                b4 = Lanczos2(Ys - Ys4)
+                b5 = Lanczos2(Ys - Ys5)
 
-            I3 = a0*X(int(Xs0), int(Ys3)) + &
-                 a1*X(int(Xs1), int(Ys3)) + &
-                 a2*X(int(Xs2), int(Ys3)) + &
-                 a3*X(int(Xs3), int(Ys3)) + &
-                 a4*X(int(Xs4), int(Ys3)) + &
-                 a5*X(int(Xs5), int(Ys3))
+                ! intermediate intensities
+                I0 = a0*X(int(Xs0), int(Ys0)) + &
+                     a1*X(int(Xs1), int(Ys0)) + &
+                     a2*X(int(Xs2), int(Ys0)) + &
+                     a3*X(int(Xs3), int(Ys0)) + &
+                     a4*X(int(Xs4), int(Ys0)) + &
+                     a5*X(int(Xs5), int(Ys0))
 
-            I4 = a0*X(int(Xs0), int(Ys4)) + &
-                 a1*X(int(Xs1), int(Ys4)) + &
-                 a2*X(int(Xs2), int(Ys4)) + &
-                 a3*X(int(Xs3), int(Ys4)) + &
-                 a4*X(int(Xs4), int(Ys4)) + &
-                 a5*X(int(Xs5), int(Ys4))
+                I1 = a0*X(int(Xs0), int(Ys1)) + &
+                     a1*X(int(Xs1), int(Ys1)) + &
+                     a2*X(int(Xs2), int(Ys1)) + &
+                     a3*X(int(Xs3), int(Ys1)) + &
+                     a4*X(int(Xs4), int(Ys1)) + &
+                     a5*X(int(Xs5), int(Ys1))
 
-            I5 = a0*X(int(Xs0), int(Ys5)) + &
-                 a1*X(int(Xs1), int(Ys5)) + &
-                 a2*X(int(Xs2), int(Ys5)) + &
-                 a3*X(int(Xs3), int(Ys5)) + &
-                 a4*X(int(Xs4), int(Ys5)) + &
-                 a5*X(int(Xs5), int(Ys5))
+                I2 = a0*X(int(Xs0), int(Ys2)) + &
+                     a1*X(int(Xs1), int(Ys2)) + &
+                     a2*X(int(Xs2), int(Ys2)) + &
+                     a3*X(int(Xs3), int(Ys2)) + &
+                     a4*X(int(Xs4), int(Ys2)) + &
+                     a5*X(int(Xs5), int(Ys2))
 
-            ! 3-lobed Lanczos
-            Y(Xd, Yd) = b0*I0 + b1*I1 + b2*I2 + b3*I3 + b4*I4 + b5*I5
+                I3 = a0*X(int(Xs0), int(Ys3)) + &
+                     a1*X(int(Xs1), int(Ys3)) + &
+                     a2*X(int(Xs2), int(Ys3)) + &
+                     a3*X(int(Xs3), int(Ys3)) + &
+                     a4*X(int(Xs4), int(Ys3)) + &
+                     a5*X(int(Xs5), int(Ys3))
+
+                I4 = a0*X(int(Xs0), int(Ys4)) + &
+                     a1*X(int(Xs1), int(Ys4)) + &
+                     a2*X(int(Xs2), int(Ys4)) + &
+                     a3*X(int(Xs3), int(Ys4)) + &
+                     a4*X(int(Xs4), int(Ys4)) + &
+                     a5*X(int(Xs5), int(Ys4))
+
+                I5 = a0*X(int(Xs0), int(Ys5)) + &
+                     a1*X(int(Xs1), int(Ys5)) + &
+                     a2*X(int(Xs2), int(Ys5)) + &
+                     a3*X(int(Xs3), int(Ys5)) + &
+                     a4*X(int(Xs4), int(Ys5)) + &
+                     a5*X(int(Xs5), int(Ys5))
+
+                ! 3-lobed Lanczos
+                Y(Xd, Yd) = b0*I0 + b1*I1 + b2*I2 + b3*I3 + b4*I4 + b5*I5
+
+            end block
         end do
 
         call cpu_time(t2)
