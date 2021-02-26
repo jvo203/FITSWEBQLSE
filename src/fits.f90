@@ -1806,13 +1806,28 @@ contains
             b3 = Lanczos2(Ys - Ys3)
 
             ! intermediate intensities
-            ! I0 =
+            I0 = a0*X(int(Xs0), int(Ys0)) + &
+                 a1*X(int(Xs1), int(Ys0)) + &
+                 a2*X(int(Xs2), int(Ys0)) + &
+                 a3*X(int(Xs3), int(Ys0))
 
-            ! I0 = X(int(Xs0), int(Ys0))*(Xs1 - Xs) + X(int(Xs1), int(Ys0))*(Xs - Xs0)
-            ! I1 = X(int(Xs0), int(Ys1))*(Xs1 - Xs) + X(int(Xs1), int(Ys1))*(Xs - Xs0)
+            I1 = a0*X(int(Xs0), int(Ys1)) + &
+                 a1*X(int(Xs1), int(Ys1)) + &
+                 a2*X(int(Xs2), int(Ys1)) + &
+                 a3*X(int(Xs3), int(Ys1))
+
+            I2 = a0*X(int(Xs0), int(Ys2)) + &
+                 a1*X(int(Xs1), int(Ys2)) + &
+                 a2*X(int(Xs2), int(Ys2)) + &
+                 a3*X(int(Xs3), int(Ys2))
+
+            I3 = a0*X(int(Xs0), int(Ys3)) + &
+                 a1*X(int(Xs1), int(Ys3)) + &
+                 a2*X(int(Xs2), int(Ys3)) + &
+                 a3*X(int(Xs3), int(Ys3))
 
             ! 2-lobed Lanczos
-            ! Y(Xd, Yd) = I0*(Ys1 - Ys) + I1*(Ys - Ys0)
+            Y(Xd, Yd) = b0*I0 + b1*I1*b2*I2 + b3*I3
         end do
     end subroutine downsize_lanczos_2
 
