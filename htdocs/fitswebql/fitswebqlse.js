@@ -10139,409 +10139,409 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			// wait for WebAssembly to get compiled
-			/*Module.ready
-				.then(_ => {*/
-			document.getElementById('welcome').style.display = "none";
-			console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
+			Module.ready
+				.then(_ => {
+					document.getElementById('welcome').style.display = "none";
+					console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
 
-			var received_msg = xmlhttp.response;
+					var received_msg = xmlhttp.response;
 
-			if (received_msg.byteLength == 0) {
-				hide_hourglass();
-				show_not_found();
-				return;
-			}
-
-			if (received_msg instanceof ArrayBuffer) {
-				var fitsHeader, mean_spectrum, integrated_spectrum;
-
-				var dv = new DataView(received_msg);
-				console.log("FITSImage dataview byte length: ", dv.byteLength);
-
-				var tone_mapping = new Object();
-				let p = 0.5;
-				tone_mapping.lmin = Math.log(p);
-				tone_mapping.lmax = Math.log(p + 1.0);
-
-				var offset = 0;
-				var str_length = dv.getUint32(offset, endianness);
-				offset += 4;
-
-				let flux = new Uint8Array(received_msg, offset, str_length);
-				tone_mapping.flux = new TextDecoder("utf-8").decode(flux);
-				offset += str_length;
-
-				tone_mapping.min = dv.getFloat32(offset, endianness);
-				offset += 4;
-
-				tone_mapping.max = dv.getFloat32(offset, endianness);
-				offset += 4;
-
-				tone_mapping.median = dv.getFloat32(offset, endianness);
-				offset += 4;
-
-				tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
-				offset += 4;
-
-				tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
-				offset += 4;
-
-				tone_mapping.white = dv.getFloat32(offset, endianness);
-				offset += 4;
-
-				tone_mapping.black = dv.getFloat32(offset, endianness);
-				offset += 4;
-
-				var img_width = dv.getUint32(offset, endianness);
-				offset += 4;
-
-				var img_height = dv.getUint32(offset, endianness);
-				offset += 4;
-
-				console.log('img_width:', img_width, 'img_height:', img_height);
-
-				var pixels_length = dv.getUint32(offset, endianness);
-				offset += 4;
-
-				console.log('pixels length:', pixels_length);
-
-				var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
-				offset += pixels_length;
-
-				var mask_length = dv.getUint32(offset, endianness);
-				offset += 4;
-
-				console.log('mask length:', mask_length);
-
-				var frame_mask = new Uint8Array(received_msg, offset, mask_length);
-				offset += mask_length;
-
-				if (tone_mapping.flux == "legacy") {
-					tone_mapping.black = tone_mapping.min;
-					tone_mapping.white = tone_mapping.max;
-				}
-
-				console.log(tone_mapping);
-
-				var has_json = true;
-
-				try {
-					var json_len = dv.getUint32(offset, endianness);
-					offset += 4;
-
-					var buffer_len = dv.getUint32(offset, endianness);
-					offset += 4;
-
-					var json = new Uint8Array(received_msg, offset, buffer_len);
-					offset += buffer_len;
-					console.log("FITS json length:", json_len);
-				} catch (err) {
-					has_json = false;
-				}
-
-				var has_header = true;
-
-				try {
-					var header_len = dv.getUint32(offset, endianness);
-					offset += 4;
-
-					var buffer_len = dv.getUint32(offset, endianness);
-					offset += 4;
-
-					var header = new Uint8Array(received_msg, offset, buffer_len);
-					offset += buffer_len;
-					console.log("FITS header length:", header_len);
-				} catch (err) {
-					has_header = false;
-				}
-
-				var has_mean_spectrum = true;
-
-				try {
-					var spectrum_len = dv.getUint32(offset, endianness);
-					offset += 4;
-
-					var buffer_len = dv.getUint32(offset, endianness);
-					offset += 4;
-
-					var buffer = new Uint8Array(received_msg, offset, buffer_len);
-					offset += buffer_len;
-					console.log("FITS mean spectrum length:", spectrum_len);
-
-					// FPZIP decoder part				
-					/*Module.ready
-						.then(_ => {*/
-					let start = performance.now();
-					var vec = Module.FPunzip(buffer);
-					let elapsed = Math.round(performance.now() - start);
-
-					//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
-
-					// copy the data to spectrum
-					let len = vec.size();
-
-					if (len > 0) {
-						mean_spectrum = new Float32Array(len);
-
-						for (let i = 0; i < len; i++)
-							mean_spectrum[i] = vec.get(i);
+					if (received_msg.byteLength == 0) {
+						hide_hourglass();
+						show_not_found();
+						return;
 					}
 
-					vec.delete();
+					if (received_msg instanceof ArrayBuffer) {
+						var fitsHeader, mean_spectrum, integrated_spectrum;
 
-					// console.log(mean_spectrum);
-					/*})
-					.catch(e => {
-						console.error(e);
-						has_mean_spectrum = false;
-					});*/
-				} catch (err) {
-					has_mean_spectrum = false;
-				}
+						var dv = new DataView(received_msg);
+						console.log("FITSImage dataview byte length: ", dv.byteLength);
 
-				var has_integrated_spectrum = true;
+						var tone_mapping = new Object();
+						let p = 0.5;
+						tone_mapping.lmin = Math.log(p);
+						tone_mapping.lmax = Math.log(p + 1.0);
 
-				try {
-					var spectrum_len = dv.getUint32(offset, endianness);
-					offset += 4;
+						var offset = 0;
+						var str_length = dv.getUint32(offset, endianness);
+						offset += 4;
 
-					var buffer_len = dv.getUint32(offset, endianness);
-					offset += 4;
+						let flux = new Uint8Array(received_msg, offset, str_length);
+						tone_mapping.flux = new TextDecoder("utf-8").decode(flux);
+						offset += str_length;
 
-					var buffer = new Uint8Array(received_msg, offset, buffer_len);
-					offset += buffer_len;
-					console.log("FITS integrated spectrum length:", spectrum_len);
+						tone_mapping.min = dv.getFloat32(offset, endianness);
+						offset += 4;
 
-					// FPZIP decoder part				
-					/*Module.ready
-						.then(_ => {*/
-					let start = performance.now();
-					var vec = Module.FPunzip(buffer);
-					let elapsed = Math.round(performance.now() - start);
+						tone_mapping.max = dv.getFloat32(offset, endianness);
+						offset += 4;
 
-					//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+						tone_mapping.median = dv.getFloat32(offset, endianness);
+						offset += 4;
 
-					// copy the data to spectrum
-					let len = vec.size();
+						tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
+						offset += 4;
 
-					if (len > 0) {
-						integrated_spectrum = new Float32Array(len);
+						tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
+						offset += 4;
 
-						for (let i = 0; i < len; i++)
-							integrated_spectrum[i] = vec.get(i);
-					}
+						tone_mapping.white = dv.getFloat32(offset, endianness);
+						offset += 4;
 
-					vec.delete();
+						tone_mapping.black = dv.getFloat32(offset, endianness);
+						offset += 4;
 
-					//console.log(integrated_spectrum);
-					/*})
-					.catch(e => {
-						console.error(e);
-						has_integrated_spectrum = false;
-					});*/
-				} catch (err) {
-					has_integrated_spectrum = false;
-				}
+						var img_width = dv.getUint32(offset, endianness);
+						offset += 4;
 
-				if (has_header) {
-					// decompress the FITS data etc.
-					var Buffer = require('buffer').Buffer;
-					var LZ4 = require('lz4');
+						var img_height = dv.getUint32(offset, endianness);
+						offset += 4;
 
-					var uncompressed = new Buffer(header_len);
-					uncompressedSize = LZ4.decodeBlock(header, uncompressed);
-					uncompressed = uncompressed.slice(0, uncompressedSize);
+						console.log('img_width:', img_width, 'img_height:', img_height);
 
-					try {
-						fitsHeader = String.fromCharCode.apply(null, uncompressed);
-					}
-					catch (err) {
-						fitsHeader = '';
-						for (var i = 0; i < uncompressed.length; i++)
-							fitsHeader += String.fromCharCode(uncompressed[i]);
-					};
+						var pixels_length = dv.getUint32(offset, endianness);
+						offset += 4;
 
-					// console.log(fitsHeader);
-				}
+						console.log('pixels length:', pixels_length);
 
-				if (has_json) {
-					// decompress the FITS data etc.
-					var Buffer = require('buffer').Buffer;
-					var LZ4 = require('lz4');
+						var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
+						offset += pixels_length;
 
-					var uncompressed = new Buffer(json_len);
-					uncompressedSize = LZ4.decodeBlock(json, uncompressed);
-					uncompressed = uncompressed.slice(0, uncompressedSize);
+						var mask_length = dv.getUint32(offset, endianness);
+						offset += 4;
 
-					var fitsData;
+						console.log('mask length:', mask_length);
 
-					try {
-						fitsData = String.fromCharCode.apply(null, uncompressed);
-					}
-					catch (err) {
-						fitsData = '';
-						for (var i = 0; i < uncompressed.length; i++)
-							fitsData += String.fromCharCode(uncompressed[i]);
-					};
+						var frame_mask = new Uint8Array(received_msg, offset, mask_length);
+						offset += mask_length;
 
-					// console.log(fitsData);
-					fitsData = JSON.parse(fitsData);
+						if (tone_mapping.flux == "legacy") {
+							tone_mapping.black = tone_mapping.min;
+							tone_mapping.white = tone_mapping.max;
+						}
 
-					// replace the dummy FITS header
-					if (has_header) {
-						fitsData.HEADER = fitsHeader;
-					}
+						console.log(tone_mapping);
 
-					// replace the dummy mean spectrum
-					if (has_mean_spectrum) {
-						fitsData.mean_spectrum = mean_spectrum;
-					}
+						var has_json = true;
 
-					// replace the dummy integrated spectrum
-					if (has_integrated_spectrum) {
-						fitsData.integrated_spectrum = integrated_spectrum;
-						//console.log('fitsData.integrated_spectrum:', fitsData.integrated_spectrum);
-						//console.log('integrated_spectrum:', integrated_spectrum);
-						//console.log('mean_spectrum:', mean_spectrum);
-					}
-
-					// console.log(fitsData);
-
-					// handle the fitsData part
-					fitsContainer[index - 1] = fitsData;
-					optical_view = fitsData.is_optical;
-
-					if (!isLocal) {
-						let filesize = fitsData.filesize;
-						let strFileSize = numeral(filesize).format('0.0b');
-						d3.select("#FITS").html("full download (" + strFileSize + ")");
-					}
-
-					{
-						frame_reference_unit(index);
-
-						//rescale CRVAL3 and CDELT3
-						fitsData.CRVAL3 *= frame_multiplier;
-						fitsData.CDELT3 *= frame_multiplier;
-
-						frame_reference_type(index);
-
-						console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
-					}
-
-					if (index == va_count)
-						display_dataset_info();
-
-					if (va_count == 1 || composite_view) {
 						try {
+							var json_len = dv.getUint32(offset, endianness);
+							offset += 4;
+
+							var buffer_len = dv.getUint32(offset, endianness);
+							offset += 4;
+
+							var json = new Uint8Array(received_msg, offset, buffer_len);
+							offset += buffer_len;
+							console.log("FITS json length:", json_len);
+						} catch (err) {
+							has_json = false;
+						}
+
+						var has_header = true;
+
+						try {
+							var header_len = dv.getUint32(offset, endianness);
+							offset += 4;
+
+							var buffer_len = dv.getUint32(offset, endianness);
+							offset += 4;
+
+							var header = new Uint8Array(received_msg, offset, buffer_len);
+							offset += buffer_len;
+							console.log("FITS header length:", header_len);
+						} catch (err) {
+							has_header = false;
+						}
+
+						var has_mean_spectrum = true;
+
+						try {
+							var spectrum_len = dv.getUint32(offset, endianness);
+							offset += 4;
+
+							var buffer_len = dv.getUint32(offset, endianness);
+							offset += 4;
+
+							var buffer = new Uint8Array(received_msg, offset, buffer_len);
+							offset += buffer_len;
+							console.log("FITS mean spectrum length:", spectrum_len);
+
+							// FPZIP decoder part				
+							/*Module.ready
+								.then(_ => {*/
+							let start = performance.now();
+							var vec = Module.FPunzip(buffer);
+							let elapsed = Math.round(performance.now() - start);
+
+							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+
+							// copy the data to spectrum
+							let len = vec.size();
+
+							if (len > 0) {
+								mean_spectrum = new Float32Array(len);
+
+								for (let i = 0; i < len; i++)
+									mean_spectrum[i] = vec.get(i);
+							}
+
+							vec.delete();
+
+							// console.log(mean_spectrum);
+							/*})
+							.catch(e => {
+								console.error(e);
+								has_mean_spectrum = false;
+							});*/
+						} catch (err) {
+							has_mean_spectrum = false;
+						}
+
+						var has_integrated_spectrum = true;
+
+						try {
+							var spectrum_len = dv.getUint32(offset, endianness);
+							offset += 4;
+
+							var buffer_len = dv.getUint32(offset, endianness);
+							offset += 4;
+
+							var buffer = new Uint8Array(received_msg, offset, buffer_len);
+							offset += buffer_len;
+							console.log("FITS integrated spectrum length:", spectrum_len);
+
+							// FPZIP decoder part				
+							/*Module.ready
+								.then(_ => {*/
+							let start = performance.now();
+							var vec = Module.FPunzip(buffer);
+							let elapsed = Math.round(performance.now() - start);
+
+							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+
+							// copy the data to spectrum
+							let len = vec.size();
+
+							if (len > 0) {
+								integrated_spectrum = new Float32Array(len);
+
+								for (let i = 0; i < len; i++)
+									integrated_spectrum[i] = vec.get(i);
+							}
+
+							vec.delete();
+
+							//console.log(integrated_spectrum);
+							/*})
+							.catch(e => {
+								console.error(e);
+								has_integrated_spectrum = false;
+							});*/
+						} catch (err) {
+							has_integrated_spectrum = false;
+						}
+
+						if (has_header) {
+							// decompress the FITS data etc.
+							var Buffer = require('buffer').Buffer;
+							var LZ4 = require('lz4');
+
+							var uncompressed = new Buffer(header_len);
+							uncompressedSize = LZ4.decodeBlock(header, uncompressed);
+							uncompressed = uncompressed.slice(0, uncompressedSize);
+
+							try {
+								fitsHeader = String.fromCharCode.apply(null, uncompressed);
+							}
+							catch (err) {
+								fitsHeader = '';
+								for (var i = 0; i < uncompressed.length; i++)
+									fitsHeader += String.fromCharCode(uncompressed[i]);
+							};
+
+							// console.log(fitsHeader);
+						}
+
+						if (has_json) {
+							// decompress the FITS data etc.
+							var Buffer = require('buffer').Buffer;
+							var LZ4 = require('lz4');
+
+							var uncompressed = new Buffer(json_len);
+							uncompressedSize = LZ4.decodeBlock(json, uncompressed);
+							uncompressed = uncompressed.slice(0, uncompressedSize);
+
+							var fitsData;
+
+							try {
+								fitsData = String.fromCharCode.apply(null, uncompressed);
+							}
+							catch (err) {
+								fitsData = '';
+								for (var i = 0; i < uncompressed.length; i++)
+									fitsData += String.fromCharCode(uncompressed[i]);
+							};
+
+							// console.log(fitsData);
+							fitsData = JSON.parse(fitsData);
+
+							// replace the dummy FITS header
+							if (has_header) {
+								fitsData.HEADER = fitsHeader;
+							}
+
+							// replace the dummy mean spectrum
+							if (has_mean_spectrum) {
+								fitsData.mean_spectrum = mean_spectrum;
+							}
+
+							// replace the dummy integrated spectrum
+							if (has_integrated_spectrum) {
+								fitsData.integrated_spectrum = integrated_spectrum;
+								//console.log('fitsData.integrated_spectrum:', fitsData.integrated_spectrum);
+								//console.log('integrated_spectrum:', integrated_spectrum);
+								//console.log('mean_spectrum:', mean_spectrum);
+							}
+
+							// console.log(fitsData);
+
+							// handle the fitsData part
+							fitsContainer[index - 1] = fitsData;
+							optical_view = fitsData.is_optical;
+
+							if (!isLocal) {
+								let filesize = fitsData.filesize;
+								let strFileSize = numeral(filesize).format('0.0b');
+								d3.select("#FITS").html("full download (" + strFileSize + ")");
+							}
+
+							{
+								frame_reference_unit(index);
+
+								//rescale CRVAL3 and CDELT3
+								fitsData.CRVAL3 *= frame_multiplier;
+								fitsData.CDELT3 *= frame_multiplier;
+
+								frame_reference_type(index);
+
+								console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
+							}
+
 							if (index == va_count)
-								display_scale_info();
-						}
-						catch (err) {
-						};
-					};
+								display_dataset_info();
 
-					display_preferences(index);
+							if (va_count == 1 || composite_view) {
+								try {
+									if (index == va_count)
+										display_scale_info();
+								}
+								catch (err) {
+								};
+							};
 
-					display_FITS_header(index);
+							display_preferences(index);
 
-					if (!composite_view)
-						add_line_label(index);
+							display_FITS_header(index);
 
-					frame_start = 0;
-					frame_end = fitsData.depth - 1;
+							if (!composite_view)
+								add_line_label(index);
 
-					if (fitsData.depth > 1) {
-						//insert a spectrum object to the spectrumContainer at <index-1>
-						mean_spectrumContainer[index - 1] = fitsData.mean_spectrum;
-						integrated_spectrumContainer[index - 1] = fitsData.integrated_spectrum;
+							frame_start = 0;
+							frame_end = fitsData.depth - 1;
 
-						spectrum_count++;
+							if (fitsData.depth > 1) {
+								//insert a spectrum object to the spectrumContainer at <index-1>
+								mean_spectrumContainer[index - 1] = fitsData.mean_spectrum;
+								integrated_spectrumContainer[index - 1] = fitsData.integrated_spectrum;
 
-						if (va_count == 1) {
-							setup_axes();
+								spectrum_count++;
 
-							if (intensity_mode == "mean")
-								plot_spectrum([fitsData.mean_spectrum]);
+								if (va_count == 1) {
+									setup_axes();
 
-							if (intensity_mode == "integrated")
-								plot_spectrum([fitsData.integrated_spectrum]);
+									if (intensity_mode == "mean")
+										plot_spectrum([fitsData.mean_spectrum]);
 
-							if (molecules.length > 0)
-								display_molecules();
-						}
-						else {
-							if (spectrum_count == va_count) {
-								console.log("mean spectrumContainer:", mean_spectrumContainer);
-								console.log("integrated spectrumContainer:", integrated_spectrumContainer);
+									if (intensity_mode == "integrated")
+										plot_spectrum([fitsData.integrated_spectrum]);
 
-								//display an RGB legend in place of REF FRQ			
-								display_composite_legend();
+									if (molecules.length > 0)
+										display_molecules();
+								}
+								else {
+									if (spectrum_count == va_count) {
+										console.log("mean spectrumContainer:", mean_spectrumContainer);
+										console.log("integrated spectrumContainer:", integrated_spectrumContainer);
 
-								if (composite_view)
-									display_rgb_legend();
+										//display an RGB legend in place of REF FRQ			
+										display_composite_legend();
 
-								setup_axes();
+										if (composite_view)
+											display_rgb_legend();
 
-								if (intensity_mode == "mean")
-									plot_spectrum(mean_spectrumContainer);
+										setup_axes();
 
-								if (intensity_mode == "integrated")
-									plot_spectrum(integrated_spectrumContainer);
+										if (intensity_mode == "mean")
+											plot_spectrum(mean_spectrumContainer);
 
-								if (molecules.length > 0)
-									display_molecules();
+										if (intensity_mode == "integrated")
+											plot_spectrum(integrated_spectrumContainer);
+
+										if (molecules.length > 0)
+											display_molecules();
+									}
+								}
+							}
+							else {
+								spectrum_count++;
+
+								if (spectrum_count == va_count) {
+									if (composite_view)
+										display_rgb_legend();
+								}
 							}
 						}
-					}
-					else {
-						spectrum_count++;
 
-						if (spectrum_count == va_count) {
-							if (composite_view)
-								display_rgb_legend();
+						// OpenEXR decoder part				
+						/*Module.ready
+							.then(_ => {*/
+						{
+							console.log("processing an HDR image");
+							let start = performance.now();
+
+							var pixels = Module.decompressZFPval(img_width, img_height, frame_pixels);
+
+							var alpha = Module.decompressLZ4val(img_width, img_height, frame_mask);
+
+							let elapsed = Math.round(performance.now() - start);
+
+							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+
+							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+
+							if (has_json) {
+								display_histogram(index);
+
+								try {
+									display_cd_gridlines();
+								}
+								catch (err) {
+									display_gridlines();
+								};
+
+								display_beam();
+							}
+
+							display_legend();
 						}
-					}
-				}
-
-				// OpenEXR decoder part				
-				/*Module.ready
-					.then(_ => {*/
-				{
-					console.log("processing an HDR image");
-					let start = performance.now();
-
-					var pixels = Module.decompressZFPval(img_width, img_height, frame_pixels);
-
-					var alpha = Module.decompressLZ4val(img_width, img_height, frame_mask);
-
-					let elapsed = Math.round(performance.now() - start);
-
-					console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
-
-					process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
-
-					if (has_json) {
-						display_histogram(index);
-
-						try {
-							display_cd_gridlines();
-						}
-						catch (err) {
-							display_gridlines();
-						};
-
-						display_beam();
+						/*})
+						.catch(e => console.error(e));*/
 					}
 
-					display_legend();
-				}
-				/*})
-				.catch(e => console.error(e));*/
-			}
-
-			/*})
-				.catch (e => console.error(e));*/
+				})
+				.catch(e => console.error(e));
 		}
 	}
 
