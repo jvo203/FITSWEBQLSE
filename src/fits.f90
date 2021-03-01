@@ -1950,26 +1950,37 @@ contains
         dst_width = dst(1)
         dst_height = dst(2)
 
-        allocate (W(-1:src_width + 4, -1:src_height + 4))
+        allocate (W(-5:src_width + 6, -5:src_height + 6))
 
         ! copy the image
         W(1:src_width, 1:src_height) = X
 
-        ! then add the boundaries
-        ! (Fourier transform origin, use reflection)
-        W(-1, :) = X(src_width - 1, :)
-        W(0, :) = X(src_width, :)
-        W(src_width + 1, :) = X(1, :)
-        W(src_width + 2, :) = X(2, :)
-        W(src_width + 3, :) = X(3, :)
-        W(src_width + 4, :) = X(4, :)
+        ! then replicate the borders
+        W(-5, :) = X(1, :)
+        W(-4, :) = X(1, :)
+        W(-3, :) = X(1, :)
+        W(-2, :) = X(1, :)
+        W(-1, :) = X(1, :)
+        W(0, :) = X(1, :)
+        W(src_width + 1, :) = X(src_width, :)
+        W(src_width + 2, :) = X(src_width, :)
+        W(src_width + 3, :) = X(src_width, :)
+        W(src_width + 4, :) = X(src_width, :)
+        W(src_width + 5, :) = X(src_width, :)
+        W(src_width + 6, :) = X(src_width, :)
 
-        W(:, -1) = X(:, src_height - 1)
-        W(:, 0) = X(:, src_height)
-        W(:, src_height + 1) = X(:, 1)
-        W(:, src_height + 2) = X(:, 2)
-        W(:, src_height + 3) = X(:, 3)
-        W(:, src_height + 4) = X(:, 4)
+        W(:, -5) = X(:, 1)
+        W(:, -4) = X(:, 1)
+        W(:, -3) = X(:, 1)
+        W(:, -2) = X(:, 1)
+        W(:, -1) = X(:, 1)
+        W(:, 0) = X(:, 1)
+        W(:, src_height + 1) = X(:, src_height)
+        W(:, src_height + 2) = X(:, src_height)
+        W(:, src_height + 3) = X(:, src_height)
+        W(:, src_height + 4) = X(:, src_height)
+        W(:, src_height + 5) = X(:, src_height)
+        W(:, src_height + 6) = X(:, src_height)
 
         ! the corners are not handled, we should be using the IPP
 
