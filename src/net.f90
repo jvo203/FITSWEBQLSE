@@ -177,8 +177,6 @@ contains
             allocate (mask(img_width, img_height))
 
             ! downscale item%pixels and item%mask into pixels, mask
-            ! pixels: for now Linear Interpolation
-            ! in the long-term pixels should be downscaled with Lanczos
             ! call downsize_linear(item%pixels, pixels)
             call downsize_lanczos_2(item%pixels, pixels)
 
