@@ -1681,8 +1681,15 @@ contains
         use, intrinsic :: iso_c_binding
         implicit none
 
+        ! the input array
         real(kind=c_float), dimension(:, :), intent(in) :: X
+
+        ! the output (downsized) array
         real(kind=c_float), dimension(:, :), intent(out) :: Y
+
+        ! a working array to handle image boundaries
+        real(kind=c_float), dimension(:, :), allocatable :: W
+
         integer, dimension(2) :: src, dst
         integer :: src_width, src_height
         integer :: dst_width, dst_height
@@ -1712,6 +1719,15 @@ contains
         dst_width = dst(1)
         dst_height = dst(2)
 
+        allocate (W(src_width + 1, src_height + 1))
+
+        ! copy the image
+        W(1:src_width, 1:src_height) = X
+
+        ! then add the boundaries (Fourier transform origin, reflect)
+        W(src_width + 1, :) = X(1, :)
+        W(:, src_height + 1) = X(:, 1)
+
         do concurrent(Yd=1:dst_height, Xd=1:dst_width)
             Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
             Ys = 1 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
@@ -1719,11 +1735,11 @@ contains
             Xs0 = nint(Xs)
             Ys0 = nint(Ys)
 
-            Xs1 = min(Xs0 + 1, real(src_width))
-            Ys1 = min(Ys0 + 1, real(src_height))
+            Xs1 = Xs0 + 1
+            Ys1 = Ys0 + 1
 
-            I0 = X(int(Xs0), int(Ys0))*(Xs1 - Xs) + X(int(Xs1), int(Ys0))*(Xs - Xs0)
-            I1 = X(int(Xs0), int(Ys1))*(Xs1 - Xs) + X(int(Xs1), int(Ys1))*(Xs - Xs0)
+            I0 = W(int(Xs0), int(Ys0))*(Xs1 - Xs) + W(int(Xs1), int(Ys0))*(Xs - Xs0)
+            I1 = W(int(Xs0), int(Ys1))*(Xs1 - Xs) + W(int(Xs1), int(Ys1))*(Xs - Xs0)
 
             ! Linear Interpolation
             Y(Xd, Yd) = I0*(Ys1 - Ys) + I1*(Ys - Ys0)
