@@ -580,7 +580,7 @@ contains
 
                     item%hdr = item%hdr//record
 
-                    print *, record
+                    ! print *, record
                     ! print *, key, '-->', value
                 end if
 
