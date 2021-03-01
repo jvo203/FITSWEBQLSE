@@ -196,7 +196,8 @@ contains
             call cpu_time(t1)
             call resizeLanczos3(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
             call cpu_time(t2)
-            print *, '[resizeLanczos3] elapsed time:', 1000*(t2 - t1), '[ms]'
+
+            print *, 'resizeLanczos3 elapsed time:', 1000*(t2 - t1), '[ms]'
 
             ! Boolean mask: the naive Nearest-Neighbour method
             call downsize_mask(item%mask, mask)
