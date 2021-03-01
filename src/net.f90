@@ -159,6 +159,9 @@ contains
         integer img_width, img_height
         real scale
 
+        ! timing
+        real :: t1, t2
+
         if (n .lt. 1) return
 
         print *, '"', datasetId, '", width', width, ', height', height, ', precision', precision,&
@@ -189,7 +192,11 @@ contains
             ! downscale item%pixels and item%mask into pixels, mask
             ! call downsize_linear(item%pixels, pixels)
             ! call downsize_lanczos_3(item%pixels, pixels)
+
+            call cpu_time(t1)
             call resizeLanczos3(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+            call cpu_time(t2)
+            print *, '[resizeLanczos3] elapsed time:', 1000*(t2 - t1), '[ms]'
 
             ! Boolean mask: the naive Nearest-Neighbour method
             call downsize_mask(item%mask, mask)
