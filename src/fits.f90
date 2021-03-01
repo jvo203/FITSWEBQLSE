@@ -1636,6 +1636,9 @@ contains
         integer :: dst_width, dst_height
         integer :: i, j
 
+        ! timing
+        real :: t1, t2
+
         src = shape(X)
         src_width = src(1)
         src_height = src(2)
@@ -1644,11 +1647,14 @@ contains
         dst_width = dst(1)
         dst_height = dst(2)
 
-        print *, '[downsize_mask] SRC:', src, 'DST:', dst
-
         do concurrent(j=1:dst_height, i=1:dst_width)
             Y(i, j) = X(1 + (i - 1)*(src_width - 1)/(dst_width - 1), 1 + (j - 1)*(src_height - 1)/(dst_height - 1))
         end do
+
+        call cpu_time(t2)
+
+        print *, '[downsize_mask] SRC:', src, 'DST:', dst, 'elapsed:', 1000*(t2 - t1), '[ms]'
+
     end subroutine downsize_mask
 
     subroutine downsize_nn(X, Y)
