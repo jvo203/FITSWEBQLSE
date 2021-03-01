@@ -211,6 +211,7 @@ contains
 
             ! Boolean mask: the naive Nearest-Neighbour method
             ! call downsize_mask(item%mask, mask)
+
             call cpu_time(t1)
             call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
             call cpu_time(t2)
