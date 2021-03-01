@@ -67,6 +67,16 @@ module net
             integer(c_int), value, intent(in) :: numLobes
         end subroutine resizeLanczos
 
+        ! resizeSuper(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
+        subroutine resizeSuper(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeSuper')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: srcWidth, srcHeight
+            integer(c_int), value, intent(in) :: dstWidth, dstHeight
+            type(C_PTR), value, intent(in) :: pSrc, pDest
+        end subroutine resizeSuper
+
         ! resizeNearest(Ipp8u *pSrc, int srcWidth, int srcHeight, Ipp8u *pDest, int dstWidth, int dstHeight)
         subroutine resizeNearest(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeNearest')
             use, intrinsic :: ISO_C_BINDING
@@ -216,7 +226,7 @@ contains
 
             call cpu_time(t1)
             ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
-            call resizeCubic(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+            call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
             call cpu_time(t2)
             print *, 'resize pixels elapsed time:', 1000*(t2 - t1), '[ms]'
 
