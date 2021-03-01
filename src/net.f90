@@ -45,6 +45,16 @@ module net
             integer(c_int), value, intent(in) :: fd, n
             type(C_PTR), value, intent(in) :: spectrum
         end subroutine write_spectrum
+
+        ! Lanczos3(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight);
+        subroutine Lanczos3(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='Lanczos')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: srcWidth, srcHeight
+            integer(c_int), value, intent(in) :: dstWidth, dstHeight
+            type(C_PTR), value, intent(in) :: pSrc, pDest
+        end subroutine Lanczos3
     end interface
 contains
     subroutine sigint_handler
