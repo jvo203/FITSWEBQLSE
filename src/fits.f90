@@ -1724,7 +1724,8 @@ contains
         ! copy the image
         W(1:src_width, 1:src_height) = X
 
-        ! then add the boundaries (Fourier transform origin, reflect)
+        ! then add the boundaries
+        ! (Fourier transform origin, use reflection)
         W(src_width + 1, :) = X(1, :)
         W(:, src_height + 1) = X(:, 1)
 
