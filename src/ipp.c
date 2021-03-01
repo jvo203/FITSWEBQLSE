@@ -37,7 +37,7 @@ IppStatus resizeLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     }
 
     /* Filter initialization */
-    status = ippiResizeLanczosInit_32f(srcSize, dstSize, 3, pSpec, pInitBuf);
+    status = ippiResizeLanczosInit_32f(srcSize, dstSize, numLobes, pSpec, pInitBuf);
     ippsFree(pInitBuf);
 
     if (status != ippStsNoErr)
