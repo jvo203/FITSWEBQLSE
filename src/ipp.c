@@ -3,9 +3,9 @@
 
 #include <ipp.h>
 
-IppStatus resize32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
-                        Ipp32f *pDst, IppiSize dstSize, Ipp32s dstStep,
-                        int numLobes)
+IppStatus resizeLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
+                               Ipp32f *pDst, IppiSize dstSize, Ipp32s dstStep,
+                               int numLobes)
 {
     IppiResizeSpec_32f *pSpec = 0;
     int specSize = 0, initSize = 0, bufSize = 0;
@@ -101,7 +101,7 @@ extern void resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDe
     dstSize.height = dstHeight;
     Ipp32s dstStep = dstSize.width;
 
-    IppStatus stat = resize32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
+    IppStatus stat = resizeLanczos32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
 
     printf("[C] resizeLanczos%d: %d, %s\n", numLobes, stat, ippGetStatusString(stat));
 }
