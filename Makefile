@@ -13,6 +13,17 @@ CC := icc
 FORT := mpiifort
 TARGET = fitswebqlse
 
+# Intel Integrated Performance Primitives Library
+ifeq ($(UNAME_S),Linux)
+        IPP = -L${IPPROOT}/lib/intel64
+endif
+
+ifeq ($(UNAME_S),Darwin)
+        IPP = -L${IPPROOT}/lib 
+endif
+
+IPP += -lippi -lippdc -lipps -lippcore
+
 # src/zforp.f90 src/zfp.f90
 SRC = src/iso_varying_string.f90 src/ipp.c src/http.c src/json.c src/wavelet.f90 src/fixed_array.f90 src/lz4.f90 src/histogram.c src/classifier.f90 src/json_for.f90 src/fits.f90 src/net.f90 src/main.f90
 OBJ := $(SRC:.f90=.o)
@@ -61,7 +72,7 @@ endif
 	$(FORT) $(FLAGS) $(MOD) -MMD -o $@ -c $<
 
 fitswebqlse: $(OBJ)
-	$(FORT) $(FLAGS) -o $(TARGET) $^ $(LIBS)
+	$(FORT) $(FLAGS) -o $(TARGET) $^ $(LIBS) $(IPP)
 
 test:
 	ifort -Ofast -xHost -mavx -axAVX -qopt-report=2 src/wavelet.f90 src/fixed_array.f90 src/lz4.f90 src/testWavelets.f90 -o testWavelets -llz4
