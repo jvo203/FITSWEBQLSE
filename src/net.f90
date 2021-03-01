@@ -46,8 +46,8 @@ module net
             type(C_PTR), value, intent(in) :: spectrum
         end subroutine write_spectrum
 
-        ! Lanczos3(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight);
-        subroutine Lanczos3(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='Lanczos')
+        ! Lanczos3(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
+        subroutine Lanczos3(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='Lanczos3')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
@@ -188,7 +188,8 @@ contains
 
             ! downscale item%pixels and item%mask into pixels, mask
             ! call downsize_linear(item%pixels, pixels)
-            call downsize_lanczos_3(item%pixels, pixels)
+            ! call downsize_lanczos_3(item%pixels, pixels)
+            call Lanczos3(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
 
             ! Boolean mask: the naive Nearest-Neighbour method
             call downsize_mask(item%mask, mask)
