@@ -56,6 +56,16 @@ module net
             type(C_PTR), value, intent(in) :: pSrc, pDest
             integer(c_int), value, intent(in) :: numLobes
         end subroutine resizeLanczos
+
+        ! resizeNearest(Ipp8u *pSrc, int srcWidth, int srcHeight, Ipp8u *pDest, int dstWidth, int dstHeight)
+        subroutine resizeNearest(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeNearest')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: srcWidth, srcHeight
+            integer(c_int), value, intent(in) :: dstWidth, dstHeight
+            type(C_PTR), value, intent(in) :: pSrc, pDest
+        end subroutine resizeNearest
     end interface
 contains
     subroutine sigint_handler
@@ -197,11 +207,14 @@ contains
             call cpu_time(t1)
             call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
             call cpu_time(t2)
-
             print *, 'resizeLanczos elapsed time:', 1000*(t2 - t1), '[ms]'
 
             ! Boolean mask: the naive Nearest-Neighbour method
-            call downsize_mask(item%mask, mask)
+            ! call downsize_mask(item%mask, mask)
+            call cpu_time(t1)
+            call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
+            call cpu_time(t2)
+            print *, 'resizeNearest elapsed time:', 1000*(t2 - t1), '[ms]'
 
             call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
                 &item%pmin, item%pmax, item%pmedian,&
