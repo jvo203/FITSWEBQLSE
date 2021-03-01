@@ -195,7 +195,7 @@ contains
             ! call downsize_lanczos_3(item%pixels, pixels)
 
             call cpu_time(t1)
-            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 2)
+            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
             call cpu_time(t2)
 
             print *, 'resizeLanczos elapsed time:', 1000*(t2 - t1), '[ms]'
