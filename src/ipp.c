@@ -4,7 +4,8 @@
 #include <ipp.h>
 
 IppStatus resize32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
-                        Ipp32f *pDst, IppiSize dstSize, Ipp32s dstStep)
+                        Ipp32f *pDst, IppiSize dstSize, Ipp32s dstStep,
+                        int numLobes)
 {
     IppiResizeSpec_32f *pSpec = 0;
     int specSize = 0, initSize = 0, bufSize = 0;
@@ -88,7 +89,7 @@ IppStatus resize32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     return status;
 }
 
-extern void resizeLanczos3(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
+extern void resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
 {
     IppiSize srcSize;
     srcSize.width = srcWidth;
@@ -100,7 +101,7 @@ extern void resizeLanczos3(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pD
     dstSize.height = dstHeight;
     Ipp32s dstStep = dstSize.width;
 
-    IppStatus stat = resize32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep);
+    IppStatus stat = resize32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
 
-    printf("[C] resizeLanczos3: %d, %s\n", stat, ippGetStatusString(stat));
+    printf("[C] resizeLanczos%d: %d, %s\n", numLobes, stat, ippGetStatusString(stat));
 }
