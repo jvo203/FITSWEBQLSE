@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <ipp.h>
 
@@ -90,4 +91,17 @@ IppStatus resize32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
 
 extern void Lanczos3(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
 {
+    IppiSize srcSize;
+    srcSize.width = srcWidth;
+    srcSize.height = srcHeight;
+    Ipp32s srcStep = srcSize.width;
+
+    IppiSize dstSize;
+    dstSize.width = dstWidth;
+    dstSize.height = dstHeight;
+    Ipp32s dstStep = dstSize.width;
+
+    IppStatus stat = resize32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep);
+
+    printf("[C]::Lanczos3 %d : %s\n", stat, ippGetStatusString(stat));
 }
