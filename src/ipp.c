@@ -87,3 +87,7 @@ IppStatus resize32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
 
     return status;
 }
+
+extern void Lanczos3(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
+{
+}
