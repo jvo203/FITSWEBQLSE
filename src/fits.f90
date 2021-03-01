@@ -580,7 +580,7 @@ contains
 
                     item%hdr = item%hdr//record
 
-                    ! print *, record
+                    print *, record
                     ! print *, key, '-->', value
                 end if
 
@@ -805,6 +805,7 @@ contains
                 item%hdr = ''
 
                 ! success, so jump back and print out keywords in this extension
+                if (this_image() == 1) print *, "GO TO 100"
                 go to 100
 
             else if (status .eq. 107) then
