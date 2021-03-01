@@ -56,7 +56,7 @@ IppStatus resizeNearest8u_C1R(Ipp8u *pSrc, IppiSize srcSize, Ipp32s srcStep,
             pOneBuf = pBuffer;
 
             pStatus = ippiResizeNearest_8u_C1R(
-                pSrc, srcStep * sizeof(Ipp32f), pDst, dstStep * sizeof(Ipp32f),
+                pSrc, srcStep * sizeof(Ipp8u), pDst, dstStep * sizeof(Ipp8u),
                 dstOffset, dstSize, pSpec, pOneBuf);
         }
     }
