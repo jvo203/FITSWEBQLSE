@@ -178,7 +178,7 @@ contains
 
             ! downscale item%pixels and item%mask into pixels, mask
             ! call downsize_linear(item%pixels, pixels)
-            call downsize_lanczos_2(item%pixels, pixels)
+            call downsize_lanczos_3(item%pixels, pixels)
 
             ! Boolean mask: the naive Nearest-Neighbour method
             call downsize_mask(item%mask, mask)
