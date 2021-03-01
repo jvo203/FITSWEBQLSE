@@ -221,8 +221,6 @@ contains
             allocate (mask(img_width, img_height))
 
             ! downscale item%pixels and item%mask into pixels, mask
-            ! call downsize_linear(item%pixels, pixels)
-            ! call downsize_lanczos_3(item%pixels, pixels)
 
             call cpu_time(t1)
 
@@ -237,7 +235,6 @@ contains
             print *, 'resize pixels elapsed time:', 1000*(t2 - t1), '[ms]'
 
             ! Boolean mask: the naive Nearest-Neighbour method
-            ! call downsize_mask(item%mask, mask)
 
             call cpu_time(t1)
 
