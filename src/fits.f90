@@ -1788,8 +1788,15 @@ contains
         use, intrinsic :: iso_c_binding
         implicit none
 
+        ! the input array
         real(kind=c_float), dimension(:, :), intent(in) :: X
+
+        ! the output (downsized) array
         real(kind=c_float), dimension(:, :), intent(out) :: Y
+
+        ! a working array to handle image boundaries
+        real(kind=c_float), dimension(:, :), allocatable :: W
+
         integer, dimension(2) :: src, dst
         integer :: src_width, src_height
         integer :: dst_width, dst_height
@@ -1821,22 +1828,39 @@ contains
         dst_width = dst(1)
         dst_height = dst(2)
 
+        allocate (W(0:src_width + 2, 0:src_height + 2))
+
+        ! copy the image
+        W(1:src_width, 1:src_height) = X
+
+        ! then add the boundaries
+        ! (Fourier transform origin, use reflection)
+        W(0, :) = X(src_width, :)
+        W(src_width + 1, :) = X(1, :)
+        W(src_width + 2, :) = X(2, :)
+
+        W(:, 0) = X(:, src_height)
+        W(:, src_height + 1) = X(:, 1)
+        W(:, src_height + 2) = X(:, 2)
+
+        ! the corners are not handled, we should be using the IPP
+
         do concurrent(Yd=1:dst_height, Xd=1:dst_width)
 
             Xs = 1 + real(Xd - 1)*real(src_width - 1)/real(dst_width - 1)
             Ys = 1 + real(Yd - 1)*real(src_height - 1)/real(dst_height - 1)
 
-            Xs0 = max(nint(Xs) - 1, 1)
-            Ys0 = max(nint(Ys) - 1, 1)
+            Xs0 = nint(Xs) - 1
+            Ys0 = nint(Ys) - 1
 
-            Xs1 = min(Xs0 + 1, real(src_width))
-            Ys1 = min(Ys0 + 1, real(src_height))
+            Xs1 = Xs0 + 1
+            Ys1 = Ys0 + 1
 
-            Xs2 = min(Xs0 + 2, real(src_width))
-            Ys2 = min(Ys0 + 2, real(src_height))
+            Xs2 = Xs0 + 2
+            Ys2 = Ys0 + 2
 
-            Xs3 = min(Xs0 + 3, real(src_width))
-            Ys3 = min(Ys0 + 3, real(src_height))
+            Xs3 = Xs0 + 3
+            Ys3 = Ys0 + 3
 
             ! Lanczos coefficients
             ! they should really be pre-calculated outside the loop
@@ -1851,25 +1875,25 @@ contains
             b3 = Lanczos2(Ys - Ys3)
 
             ! intermediate intensities
-            I0 = a0*X(int(Xs0), int(Ys0)) + &
-                 a1*X(int(Xs1), int(Ys0)) + &
-                 a2*X(int(Xs2), int(Ys0)) + &
-                 a3*X(int(Xs3), int(Ys0))
+            I0 = a0*W(int(Xs0), int(Ys0)) + &
+                 a1*W(int(Xs1), int(Ys0)) + &
+                 a2*W(int(Xs2), int(Ys0)) + &
+                 a3*W(int(Xs3), int(Ys0))
 
-            I1 = a0*X(int(Xs0), int(Ys1)) + &
-                 a1*X(int(Xs1), int(Ys1)) + &
-                 a2*X(int(Xs2), int(Ys1)) + &
-                 a3*X(int(Xs3), int(Ys1))
+            I1 = a0*W(int(Xs0), int(Ys1)) + &
+                 a1*W(int(Xs1), int(Ys1)) + &
+                 a2*W(int(Xs2), int(Ys1)) + &
+                 a3*W(int(Xs3), int(Ys1))
 
-            I2 = a0*X(int(Xs0), int(Ys2)) + &
-                 a1*X(int(Xs1), int(Ys2)) + &
-                 a2*X(int(Xs2), int(Ys2)) + &
-                 a3*X(int(Xs3), int(Ys2))
+            I2 = a0*W(int(Xs0), int(Ys2)) + &
+                 a1*W(int(Xs1), int(Ys2)) + &
+                 a2*W(int(Xs2), int(Ys2)) + &
+                 a3*W(int(Xs3), int(Ys2))
 
-            I3 = a0*X(int(Xs0), int(Ys3)) + &
-                 a1*X(int(Xs1), int(Ys3)) + &
-                 a2*X(int(Xs2), int(Ys3)) + &
-                 a3*X(int(Xs3), int(Ys3))
+            I3 = a0*W(int(Xs0), int(Ys3)) + &
+                 a1*W(int(Xs1), int(Ys3)) + &
+                 a2*W(int(Xs2), int(Ys3)) + &
+                 a3*W(int(Xs3), int(Ys3))
 
             ! 2-lobed Lanczos
             Y(Xd, Yd) = b0*I0 + b1*I1 + b2*I2 + b3*I3
