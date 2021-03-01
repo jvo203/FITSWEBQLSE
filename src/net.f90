@@ -46,15 +46,16 @@ module net
             type(C_PTR), value, intent(in) :: spectrum
         end subroutine write_spectrum
 
-        ! resizeLanczos3(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
-        subroutine resizeLanczos3(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeLanczos3')
+        ! resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
+        subroutine resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, numLobes) BIND(C, name='resizeLanczos')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
             integer(c_int), value, intent(in) :: srcWidth, srcHeight
             integer(c_int), value, intent(in) :: dstWidth, dstHeight
             type(C_PTR), value, intent(in) :: pSrc, pDest
-        end subroutine resizeLanczos3
+            integer(c_int), value, intent(in) :: numLobes
+        end subroutine resizeLanczos
     end interface
 contains
     subroutine sigint_handler
@@ -194,7 +195,7 @@ contains
             ! call downsize_lanczos_3(item%pixels, pixels)
 
             call cpu_time(t1)
-            call resizeLanczos3(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
             call cpu_time(t2)
 
             print *, 'resizeLanczos3 elapsed time:', 1000*(t2 - t1), '[ms]'
