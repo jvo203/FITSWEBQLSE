@@ -103,5 +103,5 @@ extern void resizeLanczos3(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pD
 
     IppStatus stat = resize32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep);
 
-    printf("[C] resizeLanczos3 %d : %s\n", stat, ippGetStatusString(stat));
+    printf("[C] resizeLanczos3: %d, %s\n", stat, ippGetStatusString(stat));
 }
