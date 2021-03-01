@@ -1639,6 +1639,8 @@ contains
         ! timing
         real :: t1, t2
 
+        call cpu_time(t1)
+
         src = shape(X)
         src_width = src(1)
         src_height = src(2)
