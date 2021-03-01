@@ -161,6 +161,8 @@ IppStatus resizeLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     return status;
 }
 
+// entry functions from Fortran
+
 extern void resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
 {
     IppiSize srcSize;
@@ -176,4 +178,21 @@ extern void resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDe
     IppStatus stat = resizeLanczos32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
 
     printf("[C] resizeLanczos%d: %d, %s\n", numLobes, stat, ippGetStatusString(stat));
+}
+
+extern void resizeNearest(Ipp8u *pSrc, int srcWidth, int srcHeight, Ipp8u *pDest, int dstWidth, int dstHeight)
+{
+    IppiSize srcSize;
+    srcSize.width = srcWidth;
+    srcSize.height = srcHeight;
+    Ipp32s srcStep = srcSize.width;
+
+    IppiSize dstSize;
+    dstSize.width = dstWidth;
+    dstSize.height = dstHeight;
+    Ipp32s dstStep = dstSize.width;
+
+    IppStatus stat = resizeNearest8u_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep);
+
+    printf("[C] resizeNearest: %d, %s\n", stat, ippGetStatusString(stat));
 }
