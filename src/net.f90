@@ -225,17 +225,26 @@ contains
             ! call downsize_lanczos_3(item%pixels, pixels)
 
             call cpu_time(t1)
-            ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
-            call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+
+            if (scale .gt. 0.2) then
+                call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
+            else
+                call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+            end if
+
             call cpu_time(t2)
+
             print *, 'resize pixels elapsed time:', 1000*(t2 - t1), '[ms]'
 
             ! Boolean mask: the naive Nearest-Neighbour method
             ! call downsize_mask(item%mask, mask)
 
             call cpu_time(t1)
+
             call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
+
             call cpu_time(t2)
+
             print *, 'resize mask elapsed time:', 1000*(t2 - t1), '[ms]'
 
             call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
