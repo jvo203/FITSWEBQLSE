@@ -18,7 +18,8 @@ module fits
         integer :: unit = -1! a FITS file handle
 
         ! FITS header values
-        type(varying_string) :: hdr
+        ! type(varying_string) :: hdr
+        character(kind=c_char), dimension(:), allocatable :: hdr
         integer :: naxis = 0
         integer :: bitpix = 0
         integer naxes(4)
@@ -533,7 +534,7 @@ contains
         item%flux = ''
 
         ! reset the FITS header
-        item%hdr = ''
+        if (allocated(item%hdr)) deallocate (item%hdr)
 
         ! The STATUS parameter must always be initialized.
         status = 0
@@ -634,10 +635,9 @@ contains
                 ! print *, 'header length:', len(header)
 
                 if (allocated(header)) then
-                    item%hdr = item%hdr//header
-                    ! item%hdr = item%hdr//'N/A'
-                else
-                    item%hdr = item%hdr//'N/A'
+                    allocate (item%hdr(len(header)))
+                    item%hdr = header
+                    ! item%hdr = 'N/A'
                 end if
 
                 ! print *, char(item%hdr)
@@ -827,7 +827,7 @@ contains
 
             if (status .eq. 0) then
                 ! reset the header
-                item%hdr = ''
+                if (allocated(item%hdr)) deallocate (item%hdr)
 
                 ! success, so jump back and print out keywords in this extension
                 if (this_image() == 1) print *, "GO TO 100"
