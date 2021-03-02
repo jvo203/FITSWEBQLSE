@@ -633,10 +633,10 @@ contains
             end do
 
             ! append the header to the FITS dataset
-            if (this_image() == 1) then
-                print *, item%hdr
-                print *, 'FITS header size:', size(item%hdr)
-            end if
+            ! if (this_image() == 1) then
+            !    print *, item%hdr
+            !    print *, 'FITS header size:', size(item%hdr)
+            ! end if
 
         end block
 
