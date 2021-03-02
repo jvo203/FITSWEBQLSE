@@ -568,20 +568,29 @@ contains
 
         ! Read each 80 - character keyword record, and print it out.
         block
-            integer pos
+            integer pos, offset
+            character(len=:), allocatable :: header
+
+            ! allocate a buffer to hold all records in the current header
+            if (this_image() == 1) then
+                allocate (character(len=80*nkeys) :: header)
+
+                header = ''
+            end if
 
             do i = 1, nkeys
                 call ftgrec(unit, i, record, status)
 
                 if (this_image() == 1) then
                     ! split the record into a key and a value
-                    key = record(1:10)
-                    value = record(11:80)
-
-                    item%hdr = item%hdr//record
+                    !key = record(1:10)
+                    !value = record(11:80)
 
                     ! print *, record
                     ! print *, key, '-->', value
+
+                    ! item%hdr = item%hdr//record
+                    header = header//record
                 end if
 
                 pos = index(record, 'ASTRO-F')
@@ -618,6 +627,22 @@ contains
                 end block
 
             end do
+
+            ! append the header to the FITS dataset
+            if (this_image() == 1) then
+                ! print *, header
+                ! print *, 'header length:', len(header)
+
+                if (allocated(header)) then
+                    item%hdr = item%hdr//header
+                    ! item%hdr = item%hdr//'N/A'
+                else
+                    item%hdr = item%hdr//'N/A'
+                end if
+
+                ! print *, char(item%hdr)
+                print *, 'FITS header length:', len(item%hdr)
+            end if
 
         end block
 
