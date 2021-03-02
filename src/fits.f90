@@ -570,13 +570,11 @@ contains
         ! Read each 80 - character keyword record, and print it out.
         block
             integer pos, offset
-            character(len=:), allocatable :: header
 
-            ! allocate a buffer to hold all records in the current header
+            ! allocate a header character array
             if (this_image() == 1) then
-                allocate (character(len=80*nkeys) :: header)
-
-                header = ''
+                allocate (item%hdr(80*nkeys))
+                item%hdr = ''
             end if
 
             do i = 1, nkeys
@@ -590,8 +588,13 @@ contains
                     ! print *, record
                     ! print *, key, '-->', value
 
-                    ! item%hdr = item%hdr//record
-                    header = header//record
+                    ! copy the characters one by one
+                    ! Fortran string operations are frustrating
+                    do concurrent(pos=1:80)
+                        item%hdr(pos + (i - 1)*80) = record(pos:pos)
+                    end do
+
+                    ! print *, record, '<--->', item%hdr(1 + (i - 1)*80:i*80)
                 end if
 
                 pos = index(record, 'ASTRO-F')
@@ -631,17 +634,8 @@ contains
 
             ! append the header to the FITS dataset
             if (this_image() == 1) then
-                ! print *, header
-                ! print *, 'header length:', len(header)
-
-                if (allocated(header)) then
-                    allocate (item%hdr(len(header)))
-                    item%hdr = header
-                    ! item%hdr = 'N/A'
-                end if
-
-                ! print *, char(item%hdr)
-                print *, 'FITS header length:', len(item%hdr)
+                print *, item%hdr
+                print *, 'FITS header size:', size(item%hdr)
             end if
 
         end block
