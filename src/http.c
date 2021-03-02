@@ -1430,7 +1430,8 @@ extern void write_header(int fd, const char *header_str)
     if (compressed_header != NULL)
     {
         // compress JSON as much as possible
-        compressed_size = LZ4_compress_HC((const char *)header_str, compressed_header, str_len, worst_size, LZ4HC_CLEVEL_MAX);
+        // no, switched to the default compression level (.eq. 0)
+        compressed_size = LZ4_compress_HC((const char *)header_str, compressed_header, str_len, worst_size, 0 /*LZ4HC_CLEVEL_MAX*/);
 
         printf("[C] HEADER length: %d; compressed: %d bytes\n", str_len, compressed_size);
 
