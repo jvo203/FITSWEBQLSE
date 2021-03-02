@@ -281,10 +281,13 @@ contains
             ! json
             ! call write_header(fd, c_str//c_null_char)
 
-            call write_header(fd, char(json_str)//c_null_char)
+            call write_header(fd, char(json_str//c_null_char))
 
             ! FITS header
-            call write_header(fd, char(item%hdr)//c_null_char)
+            print *, 'header length:', len(item%hdr)
+            ! print *, char(item%hdr)
+            ! call write_header(fd, 'NULL'//c_null_char)
+            call write_header(fd, char(item%hdr//c_null_char))
 
             ! send FPzip-compressed spectra
 
