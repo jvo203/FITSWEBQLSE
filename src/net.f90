@@ -285,10 +285,10 @@ contains
 
             ! FITS header
             if (allocated(item%hdr)) then
-                print *, 'header size:', size(item%hdr)
+                print *, 'FITS header size:', size(item%hdr)
                 ! print *, item%hdr
-                ! call write_header(fd, item%hdr//c_null_char)
-                call write_header(fd, 'NULL'//c_null_char)
+                call write_header(fd, item%hdr//c_null_char)
+                ! call write_header(fd, 'NULL'//c_null_char)
             else
                 call write_header(fd, 'NULL'//c_null_char)
             end if
