@@ -569,12 +569,13 @@ contains
 
         ! Read each 80 - character keyword record, and print it out.
         block
-            integer pos, offset
+            integer pos
 
             ! allocate a header character array
             if (this_image() == 1) then
-                allocate (item%hdr(80*nkeys))
-                item%hdr = ''
+                ! one extra character to hold the C '\0'
+                allocate (item%hdr(80*nkeys + 1))
+                item%hdr = c_null_char
             end if
 
             do i = 1, nkeys
@@ -631,12 +632,6 @@ contains
                 end block
 
             end do
-
-            ! append the header to the FITS dataset
-            ! if (this_image() == 1) then
-            !    print *, item%hdr
-            !    print *, 'FITS header size:', size(item%hdr)
-            ! end if
 
         end block
 
