@@ -19,6 +19,8 @@ program main
     ! stores the URI length
     integer count
 
+    call OMP_SET_NUM_THREADS(max(8, OMP_GET_MAX_THREADS()))
+
     max_threads = OMP_GET_MAX_THREADS()
 
     call MPI_INITIALIZED(init, ierror)
