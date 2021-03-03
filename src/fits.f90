@@ -12,13 +12,13 @@ module fits
     end type gmutex
 
     type dataset
-        type(varying_string) :: datasetid
+        ! type(varying_string) :: datasetid
+        character(kind=c_char), dimension(:), allocatable :: datasetid
         ! the id will be made by hashing the dataset uri
         integer :: id = -1
         integer :: unit = -1! a FITS file handle
 
         ! FITS header values
-        ! type(varying_string) :: hdr
         character(kind=c_char), dimension(:), allocatable :: hdr
         integer :: naxis = 0
         integer :: bitpix = 0
@@ -121,7 +121,7 @@ module fits
     end interface
 contains
     subroutine print_dataset
-        print *, 'datasetid:', char(item%datasetid), ', FRAMEID:', trim(item%frameid),&
+        print *, 'datasetid:', item%datasetid, ', FRAMEID:', trim(item%frameid),&
         & ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
         print *, 'LINE: ', trim(item%line), ', FILTER: ', trim(item%filter),&
         & ', SPECSYS: ', trim(item%specsys), ', TIMESYS: ', trim(item%timesys),&
@@ -295,25 +295,40 @@ contains
         use iso_varying_string
         implicit none
 
-        character(len=1024), intent(in) :: filename
+        character(len=*), intent(in) :: filename
         type(varying_string) :: datasetid
-        integer :: i
+        type(varying_string) :: letter
+        integer :: i, str_len
         character :: c
+
+        print *, 'extract_datasetid#1'
 
         datasetid = ''
 
+        print *, 'extract_datasetid#2'
+
         ! work from the end, processing characters one by one
         ! exit upon encountering the first '/'
-        do i = 1024, 1, -1
+        str_len = len(filename)
+
+        print *, 'extract_datasetid#3, len = ', str_len
+
+        do i = str_len, 1, -1
             c = filename(i:i)
 
             if (c .eq. ' ') cycle
 
             if (c .eq. '/') exit
 
+            print *, 'extract_datasetid#i=', i, 'BEFORE'
             ! prepend the element to tmp
-            datasetid = c//datasetid
+            letter = c
+            ! datasetid = letter//datasetid
+            letter = insert(c, 1, datasetid)
+            print *, 'extract_datasetid#i=', i, 'AFTER'
         end do
+
+        print *, 'extract_datasetid#4'
 
         ! get rid of FITS file extensions
         ! should be able to handle .fits.gz etc... too
@@ -344,6 +359,8 @@ contains
         integer(8) :: start, finish, crate, cmax, id
         real :: elapsed
 
+        print *, 'load_fits_file#1 on image', this_image()
+
         id = hash(filename)
 
         ! nothing to do, the dataset has already been loaded
@@ -355,19 +372,28 @@ contains
             return
         end if
 
+        print *, 'load_fits_file#2 on image', this_image()
+
         ! init mutexes
         if (item%header_mtx%i .eq. 0) call g_mutex_init(c_loc(item%header_mtx))
         if (item%error_mtx%i .eq. 0) call g_mutex_init(c_loc(item%error_mtx))
         if (item%ok_mtx%i .eq. 0) call g_mutex_init(c_loc(item%ok_mtx))
         if (item%progress_mtx%i .eq. 0) call g_mutex_init(c_loc(item%progress_mtx))
 
+        print *, 'load_fits_file#3 on image', this_image()
+
         item%datasetid = extract_datasetid(filename)
+        print *, 'load_fits_file#4 on image', this_image()
         item%id = id
         item%progress = 0
         item%elapsed = 0
+        print *, 'load_fits_file#5 on image', this_image()
         call set_ok_status(.false.)
+        print *, 'load_fits_file#6 on image', this_image()
         call set_error_status(.false.)
+        print *, 'load_fits_file#7 on image', this_image()
         call set_header_status(.false.)
+        print *, 'load_fits_file#8 on image', this_image()
 
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
