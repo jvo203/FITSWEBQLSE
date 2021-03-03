@@ -59,7 +59,7 @@ ifeq ($(UNAME_S),Darwin)
 
 	CC = gcc
 	FORT = mpif90
-	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize
+	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
 	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
 endif
