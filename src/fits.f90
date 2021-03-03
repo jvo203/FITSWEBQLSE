@@ -1459,10 +1459,13 @@ contains
     ! --------------------------------------------------------------------
 
     REAL FUNCTION median(X, N)
+        use mod_sort
         IMPLICIT NONE
         REAL, DIMENSION(N), INTENT(INOUT) :: X
         INTEGER, INTENT(IN)                :: N
         INTEGER                            :: i
+
+        integer, dimension(N) :: order
 
         ! timing
         real :: t1, t2
@@ -1470,8 +1473,12 @@ contains
         call cpu_time(t1)
 
         ! CALL quicksort(X, 1, N)               ! sort the original data
-        CALL vec_quicksort(X)               ! sort the original data
+        ! CALL vec_quicksort(X)               ! sort the original data
         ! call psrs_sort(c_loc(X), N)         ! single-threaded vec_quicksort is faster than parallel psrc_sort !!!
+
+        ! native parallel
+        call parallel_sort(X, order)
+        X = X(order(:))
 
         call cpu_time(t2)
 
