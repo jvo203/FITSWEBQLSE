@@ -1470,6 +1470,9 @@ contains
         ! timing
         real :: t1, t2
 
+        ! switch between serial and parallel methods
+        ! based on the size of the input vector X ???
+
         call cpu_time(t1)
 
         ! CALL quicksort(X, 1, N)               ! sort the original data
