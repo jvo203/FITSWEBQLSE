@@ -1455,8 +1455,17 @@ contains
         INTEGER, INTENT(IN)                :: N
         INTEGER                            :: i
 
+        ! timing
+        real :: t1, t2
+
+        call cpu_time(t1)
+
         ! CALL quicksort(X, 1, N)               ! sort the original data
         CALL vec_quicksort(X)               ! sort the original data
+
+        call cpu_time(t2)
+
+        print *, 'sort elapsed time:', 1000*(t2 - t1), '[ms]'
 
         IF (MOD(N, 2) == 0) THEN           ! compute the median
             median = (X(N/2) + X(N/2 + 1))/2.0
