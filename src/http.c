@@ -1517,7 +1517,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         printf("got here#6, bufSize = %zu\n", bufsize);
 
         // associate bit stream with allocated buffer
-        stream = stream_open((void *)compressed_pixels, bufsize); // this line seg. faults in macOS
+        stream = bitstream_open((void *)compressed_pixels, bufsize); // this line seg. faults in macOS
 
         printf("got here#7\n");
 
@@ -1535,7 +1535,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
             else
                 printf("[C] image pixels compressed size: %zu bytes\n", zfpsize);
 
-            stream_close(stream);
+            bitstream_close(stream);
 
             // the compressed part is available at compressed_pixels[0..zfpsize-1]
         }
