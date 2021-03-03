@@ -1486,14 +1486,22 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         printf("|%f,%d", pixels[i], mask[i]);
     printf("\n");*/
 
+    printf("got here#0\n");
+
     // compress pixels with ZFP
     field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+
+    printf("got here#1\n");
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
 
+    printf("got here#2\n");
+
     //zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
     zfp_stream_set_precision(zfp, precision);
+
+    printf("got here#3\n");
 
     // allocate buffer for compressed data
     bufsize = zfp_stream_maximum_size(zfp, field);

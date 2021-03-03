@@ -260,6 +260,7 @@ contains
                 &item%pmin, item%pmax, item%pmedian,&
                 &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
                 & img_width, img_height, precision, c_loc(item%pixels), c_loc(item%mask))
+                            
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
