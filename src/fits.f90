@@ -12,7 +12,6 @@ module fits
     end type gmutex
 
     type dataset
-        ! type(varying_string) :: datasetid
         character(kind=c_char), dimension(:), allocatable :: datasetid
         ! the id will be made by hashing the dataset uri
         integer :: id = -1
@@ -291,60 +290,7 @@ contains
         call g_mutex_unlock(c_loc(item%progress_mtx))
     end function get_elapsed
 
-    function extract_datasetid_old(filename) result(datasetid)
-        use iso_varying_string
-        implicit none
-
-        character(len=*), intent(in) :: filename
-        type(varying_string) :: datasetid
-        type(varying_string) :: letter
-        integer :: i, str_len
-        character :: c
-
-        print *, 'extract_datasetid#1'
-
-        datasetid = ''
-
-        print *, 'extract_datasetid#2'
-
-        ! work from the end, processing characters one by one
-        ! exit upon encountering the first '/'
-        str_len = len(filename)
-
-        print *, 'extract_datasetid#3, len = ', str_len
-
-        do i = str_len, 1, -1
-            c = filename(i:i)
-
-            if (c .eq. ' ') cycle
-
-            if (c .eq. '/') exit
-
-            print *, 'extract_datasetid#i=', i, 'BEFORE'
-            ! prepend the element to tmp
-            letter = c
-            ! datasetid = letter//datasetid
-            letter = insert(c, 1, datasetid)
-            print *, 'extract_datasetid#i=', i, 'AFTER'
-        end do
-
-        print *, 'extract_datasetid#4'
-
-        ! get rid of FITS file extensions
-        ! should be able to handle .fits.gz etc... too
-
-        ! lowercase, ignore starting positions .eq. 1
-        i = index(datasetid, '.fits')
-        if (i .gt. 1) datasetid = extract(datasetid, 1, i - 1)
-
-        ! uppercase, ignore starting positions .eq. 1
-        i = index(datasetid, '.FITS')
-        if (i .gt. 1) datasetid = extract(datasetid, 1, i - 1)
-
-    end function extract_datasetid_old
-
     function extract_datasetid(filename) result(datasetid)
-        use iso_varying_string
         implicit none
 
         character(len=*), intent(in) :: filename
