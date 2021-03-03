@@ -140,14 +140,16 @@ contains
         end do
     end subroutine fitswebql_request
 
-    pure function compare_frameid(frameid, datasetId, n)
+    function compare_frameid(frameid, datasetId)
         use, intrinsic :: iso_c_binding
-        integer, intent(in) :: n
-        character(kind=c_char), dimension(n), intent(in) :: frameid, datasetId
+        character(kind=c_char), dimension(:), intent(in) :: frameid, datasetId
         logical compare_frameid
-        integer i
+        integer i, n
 
-        if (n .ne. len(frameid)) then
+        n = size(datasetId)
+
+        ! the array sizes do not match, aborting
+        if (n .ne. size(frameid)) then
             compare_frameid = .false.
             return
         end if
@@ -199,7 +201,7 @@ contains
 
         ! compare the datasetId with item%frameid
         ! item%frameid replaced by item%datasetid
-        if (.not. compare_frameid(item%datasetid, datasetId, int(n))) then
+        if (.not. compare_frameid(item%datasetid, datasetId)) then
             print *, 'dataset ids do not match: (', datasetId, ') .ne. (', item%datasetid, ')'
             return
         end if
