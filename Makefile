@@ -34,8 +34,7 @@ OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
-FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
-# -qopenmp
+FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp
 #-mcmodel=medium
 #-ipo -parallel -fast
 CFLAGS := $(FLAGS)
