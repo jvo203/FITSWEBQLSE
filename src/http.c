@@ -1486,40 +1486,24 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
         printf("|%f,%d", pixels[i], mask[i]);
     printf("\n");*/
 
-    printf("got here#0\n");
-
     // compress pixels with ZFP
     field = zfp_field_2d((void *)pixels, data_type, nx, ny);
-
-    printf("got here#1\n");
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
 
-    printf("got here#2\n");
-
     //zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
     zfp_stream_set_precision(zfp, precision);
-
-    printf("got here#3\n");
 
     // allocate buffer for compressed data
     bufsize = zfp_stream_maximum_size(zfp, field);
 
-    printf("got here#4\n");
-
     compressed_pixels = (uchar *)malloc(bufsize);
-
-    printf("got here#5\n");
 
     if (compressed_pixels != NULL)
     {
-        printf("got here#6, bufSize = %zu\n", bufsize);
-
         // associate bit stream with allocated buffer
-        stream = bitstream_open((void *)compressed_pixels, bufsize); // this line seg. faults in macOS
-
-        printf("got here#7\n");
+        stream = bitstream_open((void *)compressed_pixels, bufsize);
 
         if (stream != NULL)
         {
