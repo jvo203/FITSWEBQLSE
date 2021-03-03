@@ -291,7 +291,7 @@ contains
         call g_mutex_unlock(c_loc(item%progress_mtx))
     end function get_elapsed
 
-    function extract_datasetid(filename) result(datasetid)
+    function extract_datasetid_old(filename) result(datasetid)
         use iso_varying_string
         implicit none
 
@@ -341,6 +341,63 @@ contains
         i = index(datasetid, '.FITS')
         if (i .gt. 1) datasetid = extract(datasetid, 1, i - 1)
 
+    end function extract_datasetid_old
+
+    function extract_datasetid(filename) result(datasetid)
+        use iso_varying_string
+        implicit none
+
+        character(len=*), intent(in) :: filename
+        character(len=:), allocatable :: string
+        character(kind=c_char), dimension(:), allocatable :: work, datasetid
+        integer :: i, str_len, pos
+        character :: c
+
+        ! work from the end, processing characters one by one
+        ! exit upon encountering the first '/'
+        str_len = len(filename)
+
+        ! allocate the full string length
+        allocate (work(str_len))
+        work = ''
+
+        str_len = 0
+
+        do i = len(filename), 1, -1
+            c = filename(i:i)
+
+            if (c .eq. ' ') cycle
+
+            if (c .eq. '/') exit
+
+            ! shift the character array by one to the right
+            if (str_len .gt. 0) work(2:str_len + 1) = work(1:str_len)
+
+            ! prepend the character c to the array
+            work(1) = c
+
+            ! increment the character array length
+            str_len = str_len + 1
+        end do
+
+        allocate (character(len=str_len) :: string)
+
+        do concurrent(i=1:str_len)
+            string(i:i) = work(i)
+        end do
+
+        ! get rid of FITS file extensions
+        ! should be able to handle .fits.gz etc... too
+
+        ! lowercase, ignore starting positions .eq. 1
+        i = index(string, '.fits')
+        if (i .gt. 1) str_len = i - 1
+
+        ! uppercase, ignore starting positions .eq. 1
+        i = index(string, '.FITS')
+        if (i .gt. 1) str_len = i - 1
+
+        datasetid = reshape(work, (/str_len/))
     end function extract_datasetid
 
     subroutine load_fits_file(filename)
