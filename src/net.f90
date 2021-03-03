@@ -142,9 +142,8 @@ contains
 
     pure function compare_frameid(frameid, datasetId, n)
         use, intrinsic :: iso_c_binding
-        CHARACTER(LEN=*), INTENT(IN) :: frameid
         integer, intent(in) :: n
-        character(kind=c_char), dimension(n), intent(in) :: datasetId
+        character(kind=c_char), dimension(n), intent(in) :: frameid, datasetId
         logical compare_frameid
         integer i
 
@@ -157,7 +156,7 @@ contains
         compare_frameid = .true.
 
         do i = 1, n
-            if (frameid(i:i) .ne. datasetId(i)) then
+            if (frameid(i) .ne. datasetId(i)) then
                 compare_frameid = .false.
                 return
             end if
@@ -200,8 +199,8 @@ contains
 
         ! compare the datasetId with item%frameid
         ! item%frameid replaced by item%datasetid
-        if (.not. compare_frameid(char(item%datasetid), datasetId, int(n))) then
-            print *, 'dataset ids do not match: (', datasetId, ') .ne. (', char(item%datasetid), ')'
+        if (.not. compare_frameid(item%datasetid, datasetId, int(n))) then
+            print *, 'dataset ids do not match: (', datasetId, ') .ne. (', item%datasetid, ')'
             return
         end if
 
@@ -260,7 +259,7 @@ contains
                 &item%pmin, item%pmax, item%pmedian,&
                 &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
                 & img_width, img_height, precision, c_loc(item%pixels), c_loc(item%mask))
-                            
+
         end if
 
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
