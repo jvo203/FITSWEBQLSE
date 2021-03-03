@@ -117,6 +117,15 @@ module fits
             type(c_ptr), value :: mutex
         end subroutine g_mutex_unlock
 
+        ! parallel sort void psrs_sort(float *a, int n);
+        subroutine psrs_sort(a, n) BIND(C, name='psrs_sort')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: a
+            integer(kind=c_int), value, intent(in) :: n
+        end subroutine psrs_sort
+
     end interface
 contains
     subroutine print_dataset
