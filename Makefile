@@ -24,8 +24,11 @@ endif
 
 IPP += -lippi -lippdc -lipps -lippcore
 
+ZFP = zfp
+ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
+
 # src/zforp.f90 src/zfp.f90
-SRC = src/iso_varying_string.f90 src/ipp.c src/http.c src/json.c src/wavelet.f90 src/fixed_array.f90 src/lz4.f90 src/histogram.c src/classifier.f90 src/json_for.f90 src/fits.f90 src/net.f90 src/main.f90
+SRC = $(ZFP_SRC) src/iso_varying_string.f90 src/ipp.c src/http.c src/json.c src/wavelet.f90 src/fixed_array.f90 src/lz4.f90 src/histogram.c src/classifier.f90 src/json_for.f90 src/fits.f90 src/net.f90 src/main.f90
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
@@ -36,12 +39,13 @@ FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2
 #-mcmodel=medium
 #-ipo -parallel -fast
 CFLAGS := $(FLAGS)
-INC = `pkg-config --cflags glib-2.0`
+INC = `pkg-config --cflags glib-2.0` -I./$(ZFP)/include -I./$(ZFP)/src
 MOD =
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lzfp -lfpzip -lcfitsio
+LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lfpzip -lcfitsio
+# -lzfp before cfitsio
 #`pkg-config --libs json-fortran`
 
 # -lmpifort not needed when using mpiifort
