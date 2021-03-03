@@ -1473,12 +1473,12 @@ contains
         call cpu_time(t1)
 
         ! CALL quicksort(X, 1, N)               ! sort the original data
-        ! CALL vec_quicksort(X)               ! sort the original data
+        CALL vec_quicksort(X)               ! sort the original data
         ! call psrs_sort(c_loc(X), N)         ! single-threaded vec_quicksort is faster than parallel psrc_sort !!!
 
-        ! native parallel
-        call parallel_sort(X, order)
-        X = X(order(:))
+        ! native parallel, slower than vec_quicksort !!!
+        ! call parallel_sort(X, order)
+        ! X = X(order(:))
 
         call cpu_time(t2)
 
