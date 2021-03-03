@@ -1506,12 +1506,20 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     // allocate buffer for compressed data
     bufsize = zfp_stream_maximum_size(zfp, field);
 
+    printf("got here#4\n");
+
     compressed_pixels = (uchar *)malloc(bufsize);
+
+    printf("got here#5\n");
 
     if (compressed_pixels != NULL)
     {
+        printf("got here#6, bufSize = %zu\n", bufsize);
+
         // associate bit stream with allocated buffer
-        stream = stream_open((void *)compressed_pixels, bufsize);
+        stream = stream_open((void *)compressed_pixels, bufsize); // this line seg. faults in macOS
+
+        printf("got here#7\n");
 
         if (stream != NULL)
         {
