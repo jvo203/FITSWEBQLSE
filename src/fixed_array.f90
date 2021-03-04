@@ -64,9 +64,9 @@ contains
 
         !  pick out all the NaN
         where (isnan(x))
-            mask = .false.
-        elsewhere
             mask = .true.
+        elsewhere
+            mask = .false.
         end where
 
         ! go through the mask element by element
@@ -74,7 +74,7 @@ contains
         pos = 0
         do j = 1, 4
             do i = 1, 4
-                if (.not. mask(i, j)) then
+                if (mask(i, j)) then
                     ! replace NaN with 0.0
                     x(i, j) = 0.0
 
