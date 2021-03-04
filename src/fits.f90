@@ -152,7 +152,9 @@ contains
         end if
     end subroutine close_fits_file
 
-    subroutine print_dataset
+    subroutine print_dataset(item)
+        type(dataset), intent(in) :: item
+
         print *, 'datasetid:', item%datasetid, ', FRAMEID:', trim(item%frameid),&
         & ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
         print *, 'LINE: ', trim(item%line), ', FILTER: ', trim(item%filter),&
@@ -478,7 +480,7 @@ contains
                 print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax,&
                 & 'elapsed:', elapsed, '[s]'
                 print *, 'id:', item%id, 'error:', item%error, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
-                call print_dataset
+                call print_dataset(item)
             end if
         end if
 
