@@ -123,12 +123,33 @@ contains
     end subroutine from_fixed
 
     pure subroutine from_fixed_block(compressed, x)
+        use, intrinsic :: ieee_arithmetic
         implicit none
 
         type(fixed_block), intent(in) :: compressed
         real(kind=4), dimension(4, 4), intent(out) :: x
 
+        integer :: i, j, pos
+        integer(kind=2) :: bitmask
+
         x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
+
+        ! add NaNs where needed
+        bitmask = compressed%mask
+
+        ! go through the mask element by element
+        ! checking for any NaNs
+        pos = 0
+        do j = 1, 4
+            do i = 1, 4
+                if (.not. btest(bitmask, pos)) then
+                    ! insert back a NaN value
+                    x(i, j) = ieee_value(0.0, ieee_quiet_nan)
+                end if
+
+                pos = pos + 1
+            end do
+        end do
     end subroutine from_fixed_block
 
     elemental function quantize(x, e, max_exp, bits)
