@@ -74,8 +74,8 @@ module fits
         real(kind=c_float), allocatable :: integrated_spectrum(:)
 
         ! compressed planes
-        type(gmutex), allocatable :: planes_mtx(:)
-        type(fixed_block), allocatable :: planes(:, :)
+        type(gmutex), allocatable :: channels_mtx(:)
+        ! type(fixed_block), allocatable :: channels(:, :, :)
     contains
         final :: close_fits_file
     end type dataset
