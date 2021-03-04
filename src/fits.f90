@@ -2,6 +2,7 @@ module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
     use iso_varying_string
+    use fixed_array
     implicit none
 
     integer(kind=4), parameter :: NBINS = 1024
@@ -71,6 +72,10 @@ module fits
         ! spectra
         real(kind=c_float), allocatable :: mean_spectrum(:)
         real(kind=c_float), allocatable :: integrated_spectrum(:)
+
+        ! compressed planes
+        type(gmutex), allocatable :: planes_mtx(:)
+        type(fixed_block), allocatable :: planes(:, :)
     contains
         final :: close_fits_file
     end type dataset
