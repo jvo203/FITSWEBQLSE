@@ -137,6 +137,8 @@ contains
         ! nothing to do if the FITS file has never been opened
         if (item%unit .eq. -1) return
 
+        print *, item%datasetid, 'closing the FITS file'
+
         call ftclos(item%unit, status)
         call ftfiou(item%unit, status)
 
