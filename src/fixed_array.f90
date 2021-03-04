@@ -60,7 +60,7 @@ contains
         integer :: i, j, pos
 
         ! by default there are no NaNs
-        work = X'FFFF'
+        work = X'0000'
 
         !  pick out all the NaN
         where (isnan(x))
@@ -78,8 +78,8 @@ contains
                     ! replace NaN with 0.0
                     x(i, j) = 0.0
 
-                    ! set the bit to .false.
-                    work = ibclr(work, pos)
+                    ! set the bit to .true. where there is a NaN
+                    work = ibset(work, pos)
                 end if
 
                 pos = pos + 1
@@ -142,7 +142,7 @@ contains
         pos = 0
         do j = 1, 4
             do i = 1, 4
-                if (.not. btest(bitmask, pos)) then
+                if (btest(bitmask, pos)) then
                     ! insert back a NaN value
                     x(i, j) = ieee_value(0.0, ieee_quiet_nan)
                 end if
