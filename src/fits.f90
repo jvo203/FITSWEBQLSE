@@ -1635,11 +1635,12 @@ contains
         return
     end function get_image_scale
 
-    subroutine get_json(json)
+    subroutine get_json(item, json)
         use iso_varying_string
         use json_for
         implicit none
 
+        type(dataset), intent(in) :: item
         type(varying_string), intent(out) :: json
         integer :: str_len
 
