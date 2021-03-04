@@ -45,19 +45,48 @@ contains
     pure subroutine to_fixed_block(x, compressed)
         implicit none
 
-        real(kind=4), dimension(4, 4), intent(in) :: x
+        real(kind=4), dimension(4, 4), intent(inout) :: x
         integer, dimension(4, 4) :: e
 
-! the maximum exponent
+        ! the maximum exponent
         integer :: max_exp
 
-! the result
+        ! the result
         type(fixed_block), intent(out) :: compressed
 
-        ! by default there are no NaNs
-        compressed%mask = X'FFFF'
+        ! an internal NaN mask
+        logical(kind=1), dimension(4, 4) :: mask
+        integer(kind=2) :: work
+        integer :: i, j, pos
 
-        ! if any
+        ! by default there are no NaNs
+        work = X'FFFF'
+
+        !  pick out all the NaN
+        where (isnan(x))
+            mask = .false.
+        elsewhere
+            mask = .true.
+        end where
+
+        ! go through the mask element by element
+        ! checking for any NaNs
+        pos = 0
+        do j = 1, 4
+            do i = 1, 4
+                if (.not. mask(i, j)) then
+                    ! replace NaN with 0.0
+                    x(i, j) = 0.0
+
+                    ! set the bit to .false.
+                    work = ibclr(work, pos)
+                end if
+
+                pos = pos + 1
+            end do
+        end do
+
+        compressed%mask = work
 
         e = exponent(x)
         max_exp = maxval(e)
