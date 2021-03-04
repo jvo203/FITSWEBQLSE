@@ -108,7 +108,7 @@ program Wavelets
     end where
 
     ! replace NaNs with 0.0
-    where (.not. mask) x = 0.0
+    ! where (.not. mask) x = 0.0
 
     ! ZFP-like compression
     call to_fixed(N, x, compressed)
@@ -131,7 +131,7 @@ program Wavelets
     call from_fixed(N, compressed, x)
 
     ! insert back NaN values
-    where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
+    ! where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
 
     print *, 'FIXED-POINT DECOMPRESSION'
     do i = 1, N
