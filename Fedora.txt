@@ -22,6 +22,10 @@
 
 3. zfp Fortran bindings
 
+	# this step is not needed anymore
+	# FITSWEBQLSE contains its own version of ZFP
+	# that has been modified to avoid type clashes with cfitsio
+
 	on macOS
 	
 	git clone https://github.com/LLNL/zfp.git
