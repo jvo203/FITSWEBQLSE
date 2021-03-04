@@ -54,6 +54,11 @@ contains
 ! the result
         type(fixed_block), intent(out) :: compressed
 
+        ! by default there are no NaNs
+        compressed%mask = X'FFFF'
+
+        ! if any
+
         e = exponent(x)
         max_exp = maxval(e)
 
