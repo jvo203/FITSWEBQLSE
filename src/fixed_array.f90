@@ -10,7 +10,7 @@ module fixed_array
     ! integer(kind=4), parameter :: significant_bits = 5
 
     type fixed_block
-        ! a NaN mask 4 x 4 bits = 16 bits (2 bytes)
+        ! a NaN mask: 4 x 4 bits = 16 bits (2 bytes)
         integer(kind=2) :: mask
         integer(kind=1) :: common_exp
         integer(kind=1), dimension(4, 4) :: mantissa
