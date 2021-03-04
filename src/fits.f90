@@ -71,6 +71,8 @@ module fits
         ! spectra
         real(kind=c_float), allocatable :: mean_spectrum(:)
         real(kind=c_float), allocatable :: integrated_spectrum(:)
+    contains
+        final :: close_fits_file
     end type dataset
 
     ! only one FITS dataset at this development stage
@@ -128,6 +130,25 @@ module fits
 
     end interface
 contains
+    subroutine close_fits_file(item)
+        type(dataset) :: item
+        integer status
+
+        if (item%unit .eq. -1) return
+
+        call ftclos(item%unit, status)
+        call ftfiou(item%unit, status)
+
+        call set_error_status(.true.)
+
+        ! Check for any error, and if so print out error messages.
+        ! The PRINTERROR subroutine is listed near the end of this file.
+        if (status .gt. 0) then
+            call printerror(status)
+            return
+        end if
+    end subroutine close_fits_file
+
     subroutine print_dataset
         print *, 'datasetid:', item%datasetid, ', FRAMEID:', trim(item%frameid),&
         & ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
