@@ -157,6 +157,14 @@ contains
         end if
     end subroutine close_fits_file
 
+    subroutine delete_dataset(item) BIND(C, name='delete_dataset')
+        type(C_PTR), intent(in), value :: item
+        type(dataset), pointer :: item_ptr
+
+        call c_f_pointer(item, item_ptr)
+        deallocate (item_ptr)
+    end subroutine delete_dataset
+
     subroutine print_dataset(item)
         type(dataset), intent(in) :: item
 
