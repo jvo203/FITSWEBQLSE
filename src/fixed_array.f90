@@ -4,7 +4,7 @@ module fixed_array
     ! the minimum X-Y dimension below which the wavelet routines should terminate
     ! the operation (i.e. 8 -> 4x4 coarse coefficients, ideal for ZFP)
     ! since ZFP operates on 4x4 blocks
-    ! signifant_bits = works with 1 byte
+    ! significant_bits = works with 1 byte
     ! 1 sign bit + 7 bits for the magnitude
     integer(kind=4), parameter :: significant_bits = 7
     ! integer(kind=4), parameter :: significant_bits = 5
