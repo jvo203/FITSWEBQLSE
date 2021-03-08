@@ -38,6 +38,9 @@ program main
 
     call register_kill_signal_handler(sigint_handler)
 
+    ! create a new hash table for storing the datasets
+    call init_hash_table
+
     ! start an external libmicrohttpd server
     if (this_image() == 1) call start_http
 
@@ -77,6 +80,9 @@ program main
             !   deallocate (uri)
         end block
     end do
+
+    ! release the hash table
+    call delete_hash_table
 
     ! in a Co-Array program there may be no need for MPI_Finalize
     call MPI_FINALIZE(ierror)
