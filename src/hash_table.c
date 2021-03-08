@@ -3,7 +3,7 @@
 void init_hash_table()
 {
     g_mutex_init(datasets_mtx);
-    datasets = g_hash_table_new(g_str_hash, g_str_equal);
+    datasets = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
 }
 
 void delete_hash_table()
