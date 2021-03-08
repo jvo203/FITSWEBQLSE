@@ -29,6 +29,7 @@ void insert_item_with_replace(const char *datasetid, void *item)
 bool item_exists(const char *datasetid)
 {
     g_mutex_lock(datasets_mtx);
+
     if (g_hash_table_contains(datasets, datasetid))
     {
         g_mutex_unlock(datasets_mtx);
