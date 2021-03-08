@@ -3,13 +3,19 @@
 void init_hash_table()
 {
     g_mutex_init(datasets_mtx);
-    datasets = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, NULL);
+    datasets = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, free_hash_data);
 }
 
 void delete_hash_table()
 {
     g_hash_table_destroy(datasets);
     g_mutex_clear(datasets_mtx);
+}
+
+void free_hash_data(gpointer item)
+{
+    if (item == NULL)
+        return;
 }
 
 void insert_item(const char *datasetid, void *item)
