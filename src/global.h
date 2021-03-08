@@ -1,4 +1,4 @@
 #include <glib.h>
 
-static GMutex *fits_mtx;
+static GMutex *datasets_mtx;
 static GHashTable *datasets;

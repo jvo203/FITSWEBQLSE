@@ -9,3 +9,8 @@ void delete_hash_table()
 {
     g_hash_table_destroy(datasets);
 }
+
+void replace_item(const char *datasetid, void *item)
+{
+    g_hash_table_replace(datasets, datasetid, item);
+}
