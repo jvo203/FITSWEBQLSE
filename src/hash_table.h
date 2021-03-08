@@ -1,4 +1,5 @@
 #include <stdbool.h>
+
 #include <glib.h>
 
 void init_hash_table();
