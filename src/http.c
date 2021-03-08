@@ -1081,7 +1081,7 @@ void include_file(GString *str, const char *filename)
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite)
 {
-    gboolean has_fits = FALSE; // TO DO: look up the datasets hash table
+    bool has_fits = false; // TO DO: look up the datasets hash table
 
     // the string holding the dynamically generated HTML content
     GString *html = g_string_new("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n");
