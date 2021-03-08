@@ -60,7 +60,7 @@ contains
         integer :: i, j, pos
 
         ! by default there are no NaNs
-        work = X'0000'
+        work = 0
 
         !  pick out all the NaN
         where (isnan(x))
