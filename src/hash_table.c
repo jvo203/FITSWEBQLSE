@@ -27,14 +27,14 @@ void free_hash_data(gpointer item)
 void insert_item(const char *datasetid, void *item)
 {
     g_mutex_lock(&datasets_mtx);
-    g_hash_table_insert(datasets, datasetid, item);
+    g_hash_table_insert(datasets, (gpointer)datasetid, item);
     g_mutex_unlock(&datasets_mtx);
 }
 
 void insert_item_with_replace(const char *datasetid, void *item)
 {
     g_mutex_lock(&datasets_mtx);
-    g_hash_table_replace(datasets, datasetid, item);
+    g_hash_table_replace(datasets, (gpointer)datasetid, item);
     g_mutex_unlock(&datasets_mtx);
 }
 
@@ -42,7 +42,7 @@ bool item_exists(const char *datasetid)
 {
     g_mutex_lock(&datasets_mtx);
 
-    if (g_hash_table_contains(datasets, datasetid))
+    if (g_hash_table_contains(datasets, (gconstpointer)datasetid))
     {
         g_mutex_unlock(&datasets_mtx);
         return true;
