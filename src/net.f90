@@ -8,6 +8,16 @@ module net
             implicit none
         end subroutine start_http
 
+        subroutine init_hash_table() BIND(C, name='init_hash_table')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+        end subroutine init_hash_table
+
+        subroutine delete_hash_table() BIND(C, name='delete_hash_table')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+        end subroutine delete_hash_table
+
         subroutine stop_http() BIND(C, name='stop_http')
             use, intrinsic :: ISO_C_BINDING
             implicit none
