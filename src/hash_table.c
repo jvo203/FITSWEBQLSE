@@ -21,24 +21,24 @@ void free_hash_data(gpointer item)
         return;
 
     // call Fortran to delete the dataset
-    // delete_item(item)
+    delete_dataset(item);
 }
 
-void insert_item(const char *datasetid, void *item)
+void insert_dataset(const char *datasetid, void *item)
 {
     g_mutex_lock(&datasets_mtx);
     g_hash_table_insert(datasets, (gpointer)datasetid, item);
     g_mutex_unlock(&datasets_mtx);
 }
 
-void insert_item_with_replace(const char *datasetid, void *item)
+void insert_dataset_with_replace(const char *datasetid, void *item)
 {
     g_mutex_lock(&datasets_mtx);
     g_hash_table_replace(datasets, (gpointer)datasetid, item);
     g_mutex_unlock(&datasets_mtx);
 }
 
-bool item_exists(const char *datasetid)
+bool dataset_exists(const char *datasetid)
 {
     g_mutex_lock(&datasets_mtx);
 
