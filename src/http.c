@@ -19,7 +19,7 @@
 #include <pwd.h>
 #include <dirent.h>
 
-#include <glib.h>
+#include "global.h"
 
 // ZFP floating-point compressor
 #include <zfp.h>
