@@ -1,9 +1,6 @@
 #include <stdbool.h>
 #include <glib.h>
 
-static GMutex *datasets_mtx;
-static GHashTable *datasets;
-
 void init_hash_table();
 void delete_hash_table();
 void free_hash_data(gpointer item);
