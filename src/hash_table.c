@@ -1,4 +1,4 @@
-#include "global.h"
+#include "hash_table.h"
 
 void init_hash_table()
 {
