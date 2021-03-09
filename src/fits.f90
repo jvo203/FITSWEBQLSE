@@ -396,7 +396,13 @@ contains
         i = index(string, '.FITS')
         if (i .gt. 1) str_len = i - 1
 
-        datasetid = reshape(work, (/str_len/))
+        ! datasetid = reshape(work, (/str_len/))
+
+        ! append the C string ending character
+        ! so that datasetid can be passed to C
+        allocate (datasetid(str_len + 1))
+        datasetid(1:str_len) = work(1:str_len)
+        datasetid(str_len + 1) = c_null_char
     end function extract_datasetid
 
     subroutine load_fits_file(filename)
