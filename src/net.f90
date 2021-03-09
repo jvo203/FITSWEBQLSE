@@ -179,7 +179,7 @@ contains
 
     end function compare_frameid
 
-    subroutine image_spectrum_request(datasetId, n, width, height, precision, fetch_data, fd) bind(C)
+    subroutine image_spectrum_request(item_ptr, width, height, precision, fetch_data, fd) bind(C)
         use mpi
         use fits
         ! use json_module
@@ -187,16 +187,12 @@ contains
         use, intrinsic :: iso_c_binding
         implicit none
 
-        integer(kind=c_size_t), intent(in), value :: n
-        character(kind=c_char), dimension(n), intent(in) :: datasetId
+        type(C_PTR), intent(in), value :: item_ptr
+        type(dataset), pointer :: item
         integer(kind=c_int), intent(in), value :: width, height, precision, fetch_data, fd
 
         real(kind=c_float), dimension(:, :), allocatable, target :: pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
-
-        ! CHARACTER(kind=json_CK, len=:), allocatable :: str_val
-        ! character(kind=c_char, len=:), allocatable :: c_str
-        ! integer :: k, str_len
 
         type(varying_string) :: json_str
 
@@ -207,22 +203,13 @@ contains
         ! timing
         real :: t1, t2
 
-        if (n .lt. 1) return
+        call c_f_pointer(item_ptr, item)
 
-        print *, '"', datasetId, '", width', width, ', height', height, ', precision', precision,&
+        print *, '"', item%datasetId, '", width', width, ', height', height, ', precision', precision,&
         & ', fetch_data', fetch_data, ', pipe write end', fd
 
-        ! compare the datasetId with item%frameid
-        ! item%frameid replaced by item%datasetid
-        if (.not. compare_frameid(item%datasetid, datasetId)) then
-            print *, 'dataset ids do not match: (', datasetId, ') .ne. (', item%datasetid, ')'
-            return
-        end if
-
-        ! dataset ids match, we can proceed with downsizing the image
-
         ! get the inner image bounding box (excluding NaNs)
-        call inherent_image_dimensions(inner_width, inner_height)
+        call inherent_image_dimensions(item, inner_width, inner_height)
 
         ! get the downscaled image dimensions
         scale = get_image_scale(width, height, inner_width, inner_height)
