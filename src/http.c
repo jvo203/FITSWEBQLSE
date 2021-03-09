@@ -713,6 +713,7 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             datasetId++;
 
+            //void *item =
             float progress = get_progress();
             float elapsed = get_elapsed();
 
