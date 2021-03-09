@@ -81,11 +81,10 @@ program main
         end block
     end do
 
-    ! release the hash table
-    call delete_hash_table
-
     ! in a Co-Array program there may be no need for MPI_Finalize
     call MPI_FINALIZE(ierror)
+
+    print *, 'image', this_image(), 'PROGRAM END'
 contains
     integer function length(string, n)
         character, dimension(n), intent(in) :: string
