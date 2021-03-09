@@ -52,7 +52,7 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 
 extern void exit_fortran();
 extern void fitswebql_request(char *uri, size_t n);
-extern void image_spectrum_request(char *datasetId, size_t n, int width, int height, int precision, int fetch_data, int fd);
+extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
 extern int get_error_status(void *item);
 extern int get_ok_status(void *item);
 extern float get_progress(void *item);
@@ -66,7 +66,7 @@ size_t chunked_write(int fd, const char *src, size_t n);
 
 struct arg_struct
 {
-    char *datasetId;
+    void *item;
     int width;
     int height;
     int precision;
@@ -818,7 +818,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (args != NULL)
         {
-            args->datasetId = strdup(datasetId);
+            args->item = get_dataset(datasetId);
             args->width = width;
             args->height = height;
             args->precision = precision;
@@ -1673,19 +1673,16 @@ void *handle_image_spectrum_request(void *args)
 
     struct arg_struct *params = (struct arg_struct *)args;
 
-    if (params->datasetId == NULL)
+    if (params->item == NULL)
     {
         free(params);
         pthread_exit(NULL);
     }
 
-    image_spectrum_request(params->datasetId, strlen(params->datasetId), params->width, params->height, params->precision, params->fetch_data, params->fd);
+    image_spectrum_request(params->item, params->width, params->height, params->precision, params->fetch_data, params->fd);
 
     // close the write end of the pipe
     close(params->fd);
-
-    // free the duplicated memory
-    free(params->datasetId);
 
     free(params);
 
