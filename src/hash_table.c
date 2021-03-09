@@ -27,6 +27,8 @@ void insert_dataset(const char *datasetid, void *item)
     g_mutex_lock(&datasets_mtx);
     g_hash_table_replace(datasets, (gpointer)strdup(datasetid), item);
     g_mutex_unlock(&datasets_mtx);
+
+    printf("[C] inserted %s into the hash table\n", datasetid);
 }
 
 bool insert_if_not_exists(const char *datasetid, void *item)
