@@ -6,7 +6,7 @@ static GHashTable *datasets;
 void init_hash_table()
 {
     g_mutex_init(&datasets_mtx);
-    datasets = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, free_hash_data);
+    datasets = g_hash_table_new_full(g_str_hash, g_str_equal, free, free_hash_data);
 }
 
 void delete_hash_table()
@@ -25,14 +25,7 @@ void free_hash_data(gpointer item)
 void insert_dataset(const char *datasetid, void *item)
 {
     g_mutex_lock(&datasets_mtx);
-    g_hash_table_insert(datasets, (gpointer)datasetid, item);
-    g_mutex_unlock(&datasets_mtx);
-}
-
-void insert_dataset_with_replace(const char *datasetid, void *item)
-{
-    g_mutex_lock(&datasets_mtx);
-    g_hash_table_replace(datasets, (gpointer)datasetid, item);
+    g_hash_table_replace(datasets, (gpointer)strdup(datasetid), item);
     g_mutex_unlock(&datasets_mtx);
 }
 
@@ -45,7 +38,7 @@ bool insert_if_not_exists(const char *datasetid, void *item)
     if (!g_hash_table_contains(datasets, (gconstpointer)datasetid))
     {
         exists = false;
-        g_hash_table_insert(datasets, (gpointer)datasetid, item);
+        g_hash_table_replace(datasets, (gpointer)strdup(datasetid), item);
     }
     else
         exists = true;
