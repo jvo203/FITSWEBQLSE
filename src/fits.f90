@@ -80,9 +80,6 @@ module fits
         final :: close_fits_file
     end type dataset
 
-    ! only one FITS dataset at this development stage
-    ! type(dataset), target :: item
-
     ! scalar coarray, one "filepath" for each image
     ! character(len=1024) :: fits_uri[*]
 
@@ -152,7 +149,7 @@ contains
         ! nothing to do if the FITS file has never been opened
         if (item%unit .eq. -1) return
 
-        print *, item%datasetid, ': closing the FITS file unit'
+        print *, 'image', this_image(), item%datasetid, ': closing the FITS file unit'
 
         call ftclos(item%unit, status)
         call ftfiou(item%unit, status)
@@ -165,7 +162,7 @@ contains
 
         call c_f_pointer(item, item_ptr)
 
-        print *, 'deleting ', item_ptr%datasetid
+        print *, 'image', this_image(), 'deleting ', item_ptr%datasetid
 
         deallocate (item_ptr)
     end subroutine delete_dataset
