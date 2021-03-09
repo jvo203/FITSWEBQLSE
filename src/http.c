@@ -933,8 +933,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 // try to insert a NULL dataset
 
                 if (insert_if_not_exists(datasetId[i], NULL))
-                    ;
-                continue;
+                    continue;
 
                 if (directory != NULL)
                 {
