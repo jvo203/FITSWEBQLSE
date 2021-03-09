@@ -120,8 +120,6 @@ contains
         ! in a Co-Array program there may be no need for MPI_Finalize
         call MPI_FINALIZE(ierror)
 
-        print *, 'image', this_image(), 'PROGRAM END'
-
         stop
     end subroutine exit_fortran
 
