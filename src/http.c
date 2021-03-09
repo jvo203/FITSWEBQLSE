@@ -929,12 +929,12 @@ static enum MHD_Result on_http_connection(void *cls,
             for (i = 0; i < va_count; i++)
             {
                 pthread_t tid;
-                bool exists = false;
 
                 // try to insert a NULL dataset
 
-                if (exists)
-                    continue;
+                if (insert_if_not_exists(datasetId[i], NULL))
+                    ;
+                continue;
 
                 if (directory != NULL)
                 {
