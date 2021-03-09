@@ -929,6 +929,12 @@ static enum MHD_Result on_http_connection(void *cls,
             for (i = 0; i < va_count; i++)
             {
                 pthread_t tid;
+                bool exists = false;
+
+                // try to insert a NULL dataset
+
+                if (exists)
+                    continue;
 
                 if (directory != NULL)
                 {
@@ -1081,7 +1087,12 @@ void include_file(GString *str, const char *filename)
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite)
 {
-    bool has_fits = false; // TO DO: look up the datasets hash table
+    unsigned int i;
+    bool has_fits = true;
+
+    // go through the dataset list looking up entries in the hash table
+    for (i = 0; i < va_count; i++)
+        has_fits = has_fits && dataset_exists(va_list[i]);
 
     // the string holding the dynamically generated HTML content
     GString *html = g_string_new("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n");
@@ -1271,8 +1282,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         g_string_append_printf(html, "data-datasetId='%s' ", va_list[0]);
     else
     {
-        unsigned int i;
-
         for (i = 0; i < va_count; i++)
             g_string_append_printf(html, "data-datasetId%d='%s' ", (i + 1), va_list[i]);
 
