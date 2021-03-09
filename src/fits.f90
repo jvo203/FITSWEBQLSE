@@ -172,6 +172,9 @@ contains
         type(dataset), pointer :: item_ptr
 
         call c_f_pointer(item, item_ptr)
+
+        print *, 'deleting', item_ptr%datasetid
+
         deallocate (item_ptr)
     end subroutine delete_dataset
 
