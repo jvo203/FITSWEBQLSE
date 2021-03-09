@@ -322,7 +322,11 @@ contains
         return
     end function get_header_status
 
-    real(c_float) function get_progress() bind(c)
+    real(c_float) function get_progress(item_ptr) bind(c)
+        type(C_PTR), intent(in), value :: item_ptr
+        type(dataset), pointer :: item
+
+        call c_f_pointer(item_ptr, item)
 
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
@@ -333,7 +337,12 @@ contains
         call g_mutex_unlock(c_loc(item%progress_mtx))
     end function get_progress
 
-    real(c_float) function get_elapsed() bind(c)
+    real(c_float) function get_elapsed(item_ptr) bind(c)
+        type(C_PTR), intent(in), value :: item_ptr
+        type(dataset), pointer :: item
+
+        call c_f_pointer(item_ptr, item)
+
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
 

@@ -55,8 +55,8 @@ extern void fitswebql_request(char *uri, size_t n);
 extern void image_spectrum_request(char *datasetId, size_t n, int width, int height, int precision, int fetch_data, int fd);
 extern int get_error_status();
 extern int get_ok_status();
-extern float get_progress();
-extern float get_elapsed();
+extern float get_progress(void *item);
+extern float get_elapsed(void *item);
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
