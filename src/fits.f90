@@ -15,7 +15,6 @@ module fits
     type dataset
         character(kind=c_char), dimension(:), allocatable :: datasetid
         ! the id will be made by hashing the dataset uri
-        integer :: id = -1
         integer :: unit = -1! a FITS file handle
 
         ! FITS header values
@@ -444,17 +443,6 @@ contains
         integer(8) :: start, finish, crate, cmax, id
         real :: elapsed
 
-        id = hash(filename)
-
-        ! nothing to do, the dataset has already been loaded
-        if (item%id .eq. id) then
-            if (this_image() == 1) then
-                print *, '[load_fits_file] nothing to do, the dataset has already been loaded'
-            end if
-
-            return
-        end if
-
         allocate (item)
 
         ! init mutexes
@@ -464,7 +452,6 @@ contains
         if (item%progress_mtx%i .eq. 0) call g_mutex_init(c_loc(item%progress_mtx))
 
         item%datasetid = extract_datasetid(filename)
-        item%id = id
         item%progress = 0
         item%elapsed = 0
         call set_ok_status(item, .false.)
@@ -530,7 +517,7 @@ contains
             if (this_image() == 1) then
                 print *, 'image # ', this_image(), 'dmin:', dmin, 'dmax:', dmax,&
                 & 'elapsed:', elapsed, '[s]'
-                print *, 'id:', item%id, 'error:', item%error, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
+                print *, item%datasetid, ': error:', item%error, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
                 call print_dataset(item)
             end if
         end if
