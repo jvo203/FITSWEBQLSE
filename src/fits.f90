@@ -211,7 +211,8 @@ contains
 
     end subroutine print_dataset
 
-    subroutine set_error_status(error)
+    subroutine set_error_status(item, error)
+        type(dataset), pointer, intent(inout) :: item
         logical, intent(in) :: error
 
         ! lock the mutex
@@ -224,7 +225,8 @@ contains
 
     end subroutine set_error_status
 
-    subroutine set_ok_status(ok)
+    subroutine set_ok_status(item, ok)
+        type(dataset), pointer, intent(inout) :: item
         logical, intent(in) :: ok
 
         ! lock the mutex
@@ -237,7 +239,8 @@ contains
 
     end subroutine set_ok_status
 
-    subroutine set_header_status(header)
+    subroutine set_header_status(item, header)
+        type(dataset), pointer, intent(inout) :: item
         logical, intent(in) :: header
 
         ! lock the mutex
@@ -250,7 +253,8 @@ contains
 
     end subroutine set_header_status
 
-    subroutine update_progress(progress, total)
+    subroutine update_progress(item, progress, total)
+        type(dataset), pointer, intent(inout) :: item
         integer, intent(in) :: progress, total
         integer(8) finish
         real elapsed
@@ -271,7 +275,11 @@ contains
         ! print *, 'progress:', item%progress, '%, elapsed time ', item%elapsed, ' [s]'
     end subroutine update_progress
 
-    integer(c_int) function get_error_status() bind(c)
+    integer(c_int) function get_error_status(item_ptr) bind(c)
+        type(C_PTR), intent(in), value :: item_ptr
+        type(dataset), pointer :: item
+
+        call c_f_pointer(item_ptr, item)
 
         ! lock the mutex
         call g_mutex_lock(c_loc(item%error_mtx))
@@ -288,7 +296,11 @@ contains
         return
     end function get_error_status
 
-    integer(c_int) function get_ok_status() bind(c)
+    integer(c_int) function get_ok_status(item_ptr) bind(c)
+        type(C_PTR), intent(in), value :: item_ptr
+        type(dataset), pointer :: item
+
+        call c_f_pointer(item_ptr, item)
 
         ! lock the mutex
         call g_mutex_lock(c_loc(item%ok_mtx))
@@ -305,7 +317,11 @@ contains
         return
     end function get_ok_status
 
-    integer(c_int) function get_header_status() bind(c)
+    integer(c_int) function get_header_status(item_ptr) bind(c)
+        type(C_PTR), intent(in), value :: item_ptr
+        type(dataset), pointer :: item
+
+        call c_f_pointer(item_ptr, item)
 
         ! lock the mutex
         call g_mutex_lock(c_loc(item%header_mtx))
