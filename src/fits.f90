@@ -470,9 +470,9 @@ contains
         item%id = id
         item%progress = 0
         item%elapsed = 0
-        call set_ok_status(.false.)
-        call set_error_status(.false.)
-        call set_header_status(.false.)
+        call set_ok_status(item, .false.)
+        call set_error_status(item, .false.)
+        call set_header_status(item, .false.)
 
         call insert_dataset(item%datasetid, c_loc(item))
 
@@ -524,7 +524,7 @@ contains
             ! make an image histogram, decide on the flux etc.
             if (this_image() == 1) call make_image_statistics
 
-            call set_ok_status(.true.)
+            call set_ok_status(item, .true.)
 
             ! end the timer
             call system_clock(finish)
@@ -954,7 +954,7 @@ contains
         item%naxis = naxis
         item%naxes = naxes
 
-        call set_header_status(.true.)
+        call set_header_status(item, .true.)
 
         if (this_image() == 1) then
             print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
@@ -1035,7 +1035,7 @@ contains
             end do
 
             ! measure progress only on the root image
-            if (this_image() == 1) call update_progress(1, 1)
+            if (this_image() == 1) call update_progress(item, 1, 1)
 
             ! put a local buffer/mask range onto image 1
             pixels(firstpix:lastpix) [1] = local_buffer(:)
@@ -1154,7 +1154,7 @@ contains
                     int_spec(frame) = int_spec_val
 
                     ! measure progress only on the root image
-                    if (this_image() == 1) call update_progress(frame - start + 1, num_per_image)
+                    if (this_image() == 1) call update_progress(item, frame - start + 1, num_per_image)
                 end do
             end block
         end if
@@ -1168,7 +1168,7 @@ contains
 200     call ftclos(unit, status)
         call ftfiou(unit, status)
 
-        call set_error_status(.true.)
+        call set_error_status(item, .true.)
 
         ! Check for any error, and if so print out error messages.
         ! The PRINTERROR subroutine is listed near the end of this file.
