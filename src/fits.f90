@@ -124,6 +124,16 @@ module fits
             type(c_ptr), value :: mutex
         end subroutine g_mutex_unlock
 
+        ! glib hash table
+        ! void insert_dataset(const char *datasetid, void *item);
+        subroutine insert_dataset(datasetid, item) BIND(C, name='insert_dataset')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            character(kind=c_char), intent(in) :: datasetid(*)
+            type(c_ptr), value :: item
+        end subroutine insert_dataset
+
         ! parallel sort void psrs_sort(float *a, int n);
         subroutine psrs_sort(a, n) BIND(C, name='psrs_sort')
             use, intrinsic :: ISO_C_BINDING
