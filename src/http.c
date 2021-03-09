@@ -53,8 +53,8 @@ extern void register_kill_signal_handler_(sighandler_t handler)
 extern void exit_fortran();
 extern void fitswebql_request(char *uri, size_t n);
 extern void image_spectrum_request(char *datasetId, size_t n, int width, int height, int precision, int fetch_data, int fd);
-extern int get_error_status();
-extern int get_ok_status();
+extern int get_error_status(void *item);
+extern int get_ok_status(void *item);
 extern float get_progress(void *item);
 extern float get_elapsed(void *item);
 
