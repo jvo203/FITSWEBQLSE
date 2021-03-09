@@ -38,13 +38,18 @@ void insert_dataset_with_replace(const char *datasetid, void *item)
 
 bool insert_if_not_exists(const char *datasetid, void *item)
 {
-    bool exists = false;
+    bool exists;
 
     g_mutex_lock(&datasets_mtx);
+
     if (!g_hash_table_contains(datasets, (gconstpointer)datasetid))
+    {
+        exists = false;
         g_hash_table_insert(datasets, (gpointer)datasetid, NULL);
+    }
     else
         exists = true;
+
     g_mutex_unlock(&datasets_mtx);
 
     return exists;
