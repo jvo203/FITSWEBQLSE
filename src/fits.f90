@@ -171,7 +171,7 @@ contains
     end subroutine delete_dataset
 
     subroutine print_dataset(item)
-        type(dataset), intent(in) :: item
+        type(dataset), pointer, intent(in) :: item
 
         print *, 'datasetid:', item%datasetid, ', FRAMEID:', trim(item%frameid),&
         & ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
