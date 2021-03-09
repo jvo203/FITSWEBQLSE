@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "hash_table.h"
 
 static GMutex datasets_mtx;
@@ -48,6 +50,17 @@ bool insert_if_not_exists(const char *datasetid, void *item)
     g_mutex_unlock(&datasets_mtx);
 
     return exists;
+}
+
+void *get_dataset(const char *datasetid)
+{
+    void *item;
+
+    g_mutex_lock(&datasets_mtx);
+    item = g_hash_table_lookup(datasets, (gconstpointer)datasetid);
+    g_mutex_unlock(&datasets_mtx);
+
+    return item;
 }
 
 bool dataset_exists(const char *datasetid)
