@@ -112,6 +112,9 @@ contains
 
         print *, 'image', this_image(), 'FORTRAN EXIT'
 
+        ! release the hash table
+        call delete_hash_table
+
         stop
     end subroutine exit_fortran
 
