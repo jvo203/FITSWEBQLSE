@@ -81,7 +81,7 @@ module fits
     end type dataset
 
     ! only one FITS dataset at this development stage
-    type(dataset), target :: item
+    ! type(dataset), target :: item
 
     ! scalar coarray, one "filepath" for each image
     ! character(len=1024) :: fits_uri[*]
@@ -522,7 +522,7 @@ contains
             end if
 
             ! make an image histogram, decide on the flux etc.
-            if (this_image() == 1) call make_image_statistics
+            if (this_image() == 1) call make_image_statistics(item)
 
             call set_ok_status(item, .true.)
 
@@ -947,8 +947,8 @@ contains
         end if
 
         ! detect the FITS header types and units (frequency, velocity)
-        call frame_reference_type
-        call frame_reference_unit
+        call frame_reference_type(item)
+        call frame_reference_unit(item)
 
         item%bitpix = bitpix
         item%naxis = naxis
@@ -1075,7 +1075,7 @@ contains
                 ! and reset the NaN mask
                 mask = .false.
 
-                call get_cdelt3(cdelt3)
+                call get_cdelt3(item, cdelt3)
 
                 ! zero-out the spectra
                 mean_spec = 0.0
@@ -1215,7 +1215,8 @@ contains
         end do
     end subroutine printerror
 
-    subroutine frame_reference_type
+    subroutine frame_reference_type(item)
+        type(dataset), pointer, intent(inout) :: item
         integer pos
 
         pos = index(item%ctype3, 'F')
@@ -1232,7 +1233,9 @@ contains
 
     end subroutine frame_reference_type
 
-    subroutine frame_reference_unit
+    subroutine frame_reference_unit(item)
+        type(dataset), pointer, intent(inout) :: item
+
         if (trim(item%cunit3) .eq. 'Hz') then
             item%has_frequency = .true.
             item%frame_multiplier = 1.0E0
@@ -1276,7 +1279,8 @@ contains
         end if
     end subroutine frame_reference_unit
 
-    subroutine get_cdelt3(cdelt3)
+    subroutine get_cdelt3(item, cdelt3)
+        type(dataset), pointer, intent(in) :: item
         real, intent(out) :: cdelt3
 
         if (item%has_velocity) then
@@ -1286,9 +1290,10 @@ contains
         end if
     end subroutine get_cdelt3
 
-    subroutine make_image_statistics
+    subroutine make_image_statistics(item)
         implicit NONE
 
+        type(dataset), pointer, intent(inout) :: item
         real, dimension(:), allocatable :: data
         real cdelt3, pmin, pmax, pmedian
         real mad, madP, madN
@@ -1299,7 +1304,7 @@ contains
         real black, white, sensitivity, ratio_sensitivity
         integer stat
 
-        call get_cdelt3(cdelt3)
+        call get_cdelt3(item, cdelt3)
 
         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             pmin = item%dmin
@@ -1325,7 +1330,7 @@ contains
         data = pack(item%pixels, item%mask)
 
         ! make a histogram with a range given by [pmin, pmax]
-        call make_histogram(data, pmin, pmax)
+        call make_histogram(item, data, pmin, pmax)
 
         n = size(data)
 
@@ -1432,7 +1437,8 @@ contains
 
     end subroutine make_image_statistics
 
-    subroutine make_histogram(data, pmin, pmax)
+    subroutine make_histogram(item, data, pmin, pmax)
+        type(dataset), pointer, intent(inout) :: item
         real, dimension(:), intent(in) :: data
         real, intent(in) :: pmin, pmax
         integer i, index, n
@@ -1566,7 +1572,8 @@ contains
 
     END FUNCTION median
 
-    subroutine inherent_image_dimensions(width, height)
+    subroutine inherent_image_dimensions(item, width, height)
+        type(dataset), pointer, intent(in) :: item
         integer, intent(out) :: width, height
         integer x1, x2, y1, y2, k
 
@@ -1696,7 +1703,7 @@ contains
         use json_for
         implicit none
 
-        type(dataset), intent(in) :: item
+        type(dataset), pointer, intent(in) :: item
         type(varying_string), intent(out) :: json
         integer :: str_len
 
