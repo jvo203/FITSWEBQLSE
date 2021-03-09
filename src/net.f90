@@ -108,12 +108,19 @@ contains
     end subroutine sigint_handler
 
     subroutine exit_fortran() bind(c)
-        integer msg
+        use mpi
+
+        integer msg, ierror
 
         print *, 'image', this_image(), 'FORTRAN EXIT'
 
         ! release the hash table
         call delete_hash_table
+
+        ! in a Co-Array program there may be no need for MPI_Finalize
+        call MPI_FINALIZE(ierror)
+
+        print *, 'image', this_image(), 'PROGRAM END'
 
         stop
     end subroutine exit_fortran
