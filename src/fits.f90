@@ -152,19 +152,11 @@ contains
         ! nothing to do if the FITS file has never been opened
         if (item%unit .eq. -1) return
 
-        print *, item%datasetid, 'closing the FITS file'
+        print *, item%datasetid, ': closing the FITS file unit'
 
         call ftclos(item%unit, status)
         call ftfiou(item%unit, status)
 
-        call set_error_status(.true.)
-
-        ! Check for any error, and if so print out error messages.
-        ! The PRINTERROR subroutine is listed near the end of this file.
-        if (status .gt. 0) then
-            call printerror(status)
-            return
-        end if
     end subroutine close_fits_file
 
     subroutine delete_dataset(item) BIND(C, name='delete_dataset')
@@ -173,7 +165,7 @@ contains
 
         call c_f_pointer(item, item_ptr)
 
-        print *, 'deleting', item_ptr%datasetid
+        print *, 'deleting ', item_ptr%datasetid
 
         deallocate (item_ptr)
     end subroutine delete_dataset
@@ -411,6 +403,8 @@ contains
         implicit none
         character(len=1024), intent(in) :: filename
 
+        type(dataset), pointer :: item
+
         real(kind=4), save :: dmin[*], dmax[*]
         logical, save :: bSuccess[*]
 
@@ -434,6 +428,8 @@ contains
             return
         end if
 
+        allocate (item)
+
         ! init mutexes
         if (item%header_mtx%i .eq. 0) call g_mutex_init(c_loc(item%header_mtx))
         if (item%error_mtx%i .eq. 0) call g_mutex_init(c_loc(item%error_mtx))
@@ -448,10 +444,12 @@ contains
         call set_error_status(.false.)
         call set_header_status(.false.)
 
+        call insert_dataset(item%datasetid, c_loc(item))
+
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
-        call read_fits_file(filename, dmin, dmax, pixels, mask, mean_spectrum, integrated_spectrum, bSuccess)
+        call read_fits_file(item, filename, dmin, dmax, pixels, mask, mean_spectrum, integrated_spectrum, bSuccess)
         call co_reduce(bSuccess, logical_and)
 
         if (this_image() == 1) print *, 'bSuccess:', bSuccess
@@ -566,8 +564,10 @@ contains
         end do
     end subroutine lower_case
 
-    subroutine read_fits_file(filename, dmin, dmax, pixels, mask, mean_spec, int_spec, bSuccess)
+    subroutine read_fits_file(item, filename, dmin, dmax, pixels, mask, mean_spec, int_spec, bSuccess)
         implicit none
+
+        type(dataset), pointer, intent(inout) :: item
         character(len=1024), intent(in) :: filename
         real(kind=4), intent(out) :: dmin, dmax
         logical, intent(out) ::  bSuccess
