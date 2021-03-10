@@ -84,7 +84,7 @@ contains
     subroutine json_add_integer_number(json, key, val)
         type(varying_string), intent(inout) :: json
         character(len=*), intent(in) :: key
-        integer, intent(in) :: val
+        integer(kind=8), intent(in) :: val
 
         character(32) :: tmp
 
