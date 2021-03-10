@@ -72,6 +72,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 									 lws_get_protocol(wsi));
 	int m;
 	char *ws_msg;
+	char *ptr;
 
 	switch (reason)
 	{
@@ -135,7 +136,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		}
 
 		// only ping back heartbeats
-		char *ptr = strstr((char *)ws_msg, "[heartbeat]");
+		ptr = strstr((char *)ws_msg, "[heartbeat]");
 
 		if (ptr == NULL)
 		{
