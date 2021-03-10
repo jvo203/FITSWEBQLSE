@@ -1690,6 +1690,10 @@ contains
         type(dataset), pointer, intent(in) :: item
         type(varying_string), intent(out) :: json
         integer :: str_len
+        integer(kind=8) :: filesize
+
+        ! calculate the FITS file size
+        filesize = size(item%hdr) + item%naxes(1)*item%naxes(2)*item%naxes(3)*item%naxes(4)*abs(item%bitpix)/8
 
         json = '{'
 
@@ -1700,7 +1704,7 @@ contains
         call json_add_integer_number(json, 'height', item%naxes(2))
         call json_add_integer_number(json, 'depth', item%naxes(3))
         call json_add_integer_number(json, 'polarisation', item%naxes(4))
-        call json_add_integer_number(json, 'filesize', 0)
+        call json_add_integer_number(json, 'filesize', filesize)
         call json_add_real_number(json, 'IGNRVAL', item%ignrval)
 
         call json_add_real_number(json, 'CD1_1', item%cd1_1)
