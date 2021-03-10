@@ -84,7 +84,7 @@ contains
     subroutine json_add_integer_number(json, key, val)
         type(varying_string), intent(inout) :: json
         character(len=*), intent(in) :: key
-        integer(kind=8), intent(in) :: val
+        integer, intent(in) :: val
 
         character(32) :: tmp
 
@@ -93,6 +93,19 @@ contains
         json = json//'"'//key//'":'//trim(tmp)//','
 
     end subroutine json_add_integer_number
+
+    subroutine json_add_long_integer_number(json, key, val)
+        type(varying_string), intent(inout) :: json
+        character(len=*), intent(in) :: key
+        integer(kind=8), intent(in) :: val
+
+        character(32) :: tmp
+
+        write (tmp, '(i0)') val
+
+        json = json//'"'//key//'":'//trim(tmp)//','
+
+    end subroutine json_add_long_integer_number
 
     subroutine json_add_real_number(json, key, val)
         type(varying_string), intent(inout) :: json
