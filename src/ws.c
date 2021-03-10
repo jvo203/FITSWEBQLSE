@@ -119,6 +119,24 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		break;
 
 	case LWS_CALLBACK_RECEIVE:
+		// lwsl_user("[ws] MESSAGE RECEIVED\n");
+		char *ws_msg = malloc(len + 1);
+
+		if (ws_msg != NULL)
+		{
+			memcpy(ws_msg, in, len);
+			ws_msg[len] = '\0';
+			lwsl_user("[ws] MESSAGE RECEIVED: %s.\n", ws_msg);
+			//printf("[ws] (%s)\n", ws_msg);
+			free(ws_msg);
+		}
+
+		// only ping back heartbeats
+		char *ptr = strnstr((char *)in, "[heartbeat]", len);
+
+		if (ptr == NULL)
+			break;
+
 		if (vhd->amsg.payload)
 			__minimal_destroy_message(&vhd->amsg);
 
@@ -133,18 +151,6 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 		memcpy((char *)vhd->amsg.payload + LWS_PRE, in, len);
 		vhd->current++;
-
-		// lwsl_user("[ws] MESSAGE RECEIVED\n");
-		char *ws_msg = malloc(len + 1);
-
-		if (ws_msg != NULL)
-		{
-			memcpy(ws_msg, in, len);
-			ws_msg[len] = '\0';
-			lwsl_user("[ws] MESSAGE RECEIVED: %s.\n", ws_msg);
-			//printf("[ws] (%s)\n", ws_msg);
-			free(ws_msg);
-		}
 
 		/*
 		 * let everybody know we want to write something on them
