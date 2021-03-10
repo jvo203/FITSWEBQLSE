@@ -17,8 +17,6 @@
 #include <libwebsockets.h>
 #endif
 
-#include <string.h>
-
 /* one of these created for each message */
 
 struct msg
@@ -128,14 +126,21 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			ws_msg[len] = '\0';
 			lwsl_user("[ws] MESSAGE RECEIVED: %s.\n", ws_msg);
 			//printf("[ws] (%s)\n", ws_msg);
-			free(ws_msg);
+		}
+		else
+		{
+			lwsl_user("OOM: dropping\n");
+			break;
 		}
 
 		// only ping back heartbeats
-		char *ptr = strnstr((char *)in, "[heartbeat]", len);
+		char *ptr = strstr((char *)ws_msg, "[heartbeat]");
 
 		if (ptr == NULL)
+		{
+			free(ws_msg);
 			break;
+		}
 
 		if (vhd->amsg.payload)
 			__minimal_destroy_message(&vhd->amsg);
