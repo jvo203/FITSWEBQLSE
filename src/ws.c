@@ -71,6 +71,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			lws_protocol_vh_priv_get(lws_get_vhost(wsi),
 									 lws_get_protocol(wsi));
 	int m;
+	char *ws_msg;
 
 	switch (reason)
 	{
@@ -118,7 +119,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 	case LWS_CALLBACK_RECEIVE:
 		// lwsl_user("[ws] MESSAGE RECEIVED\n");
-		char *ws_msg = malloc(len + 1);
+		ws_msg = malloc(len + 1);
 
 		if (ws_msg != NULL)
 		{
