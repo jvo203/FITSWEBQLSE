@@ -135,6 +135,16 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		vhd->current++;
 
 		// lwsl_user("[ws] MESSAGE RECEIVED\n");
+		char *ws_msg = malloc(len + 1);
+
+		if (ws_msg != NULL)
+		{
+			memcpy(ws_msg, in, len);
+			ws_msg[len] = '\0';
+			lwsl_user("[ws] MESSAGE RECEIVED: %s.\n", ws_msg);
+			//printf("[ws] (%s)\n", ws_msg);
+			free(ws_msg);
+		}
 
 		/*
 		 * let everybody know we want to write something on them
@@ -160,6 +170,6 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		"fitswebqlse",                                \
 			callback_minimal,                         \
 			sizeof(struct per_session_data__minimal), \
-			128,                                      \
+			1024,                                     \
 			0, NULL, 0                                \
 	}
