@@ -1704,7 +1704,7 @@ contains
         call json_add_integer_number(json, 'height', item%naxes(2))
         call json_add_integer_number(json, 'depth', item%naxes(3))
         call json_add_integer_number(json, 'polarisation', item%naxes(4))
-        call json_add_long_integer_number(json, 'filesize', filesize)
+        call json_add_long_number(json, 'filesize', filesize)
         call json_add_real_number(json, 'IGNRVAL', item%ignrval)
 
         call json_add_real_number(json, 'CD1_1', item%cd1_1)
