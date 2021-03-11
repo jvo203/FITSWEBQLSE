@@ -99,7 +99,7 @@ static volatile int interrupted = 0;
 pthread_t lws_tid;
 
 #define LWS_PLUGIN_STATIC
-#include "ws.c"
+#include "ws_ring.c"
 
 static struct lws_protocols protocols[] = {
     {"http", lws_callback_http_dummy, 0, 0},
