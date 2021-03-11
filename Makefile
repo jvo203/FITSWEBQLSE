@@ -39,6 +39,9 @@ DEP = $(OBJ:%.o=%.d)
 FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -parallel
 #-mcmodel=medium
 #-ipo -parallel -fast
+# -ipo causes segmentation faults ...
+# -fast causes static linking problems
+
 CFLAGS := $(FLAGS)
 INC = `pkg-config --cflags glib-2.0` -I./$(ZFP)/include -I./$(ZFP)/src
 MOD =
