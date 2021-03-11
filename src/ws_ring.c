@@ -203,7 +203,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		lwsl_notice("[ws] %s\n", (const char *)buf);
 
 		// find the last slash
-		ptr = strrchar((const char *)buf, '/');
+		ptr = strrchr((const char *)buf, '/');
 
 		if (ptr == NULL)
 			return -1; // forcibly close the connection
