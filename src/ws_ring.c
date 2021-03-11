@@ -40,6 +40,7 @@ struct per_session_data__minimal
 	struct per_session_data__minimal *pss_list;
 	struct lws *wsi;
 	uint32_t tail;
+	char *datasetid;
 
 	unsigned int culled : 1;
 };
@@ -209,12 +210,13 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			return -1; // forcibly close the connection
 
 		/* add ourselves to the list of live pss held in the vhd */
-		lwsl_user("LWS_CALLBACK_ESTABLISHED FOR %s: wsi %p\n", (ptr + 1), wsi);
+		// lwsl_user("LWS_CALLBACK_ESTABLISHED: wsi %p\n", wsi);
 
 		lws_ll_fwd_insert(pss, pss_list, vhd->pss_list);
 		pss->tail = lws_ring_get_oldest_tail(vhd->ring);
 		pss->wsi = wsi;
-		lwsl_user("[ws] CONNECTION ESTABLISHED\n");
+		pss->datasetid = strdup(ptr + 1);
+		lwsl_user("[ws] CONNECTION ESTABLISHED FOR %s\n", pss->datasetid);
 		break;
 
 	case LWS_CALLBACK_CLOSED:
@@ -222,7 +224,8 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		/* remove our closing pss from the list of live pss */
 		lws_ll_fwd_remove(struct per_session_data__minimal, pss_list,
 						  pss, vhd->pss_list);
-		lwsl_user("[ws] CONNECTION CLOSED\n");
+		lwsl_user("[ws] CONNECTION CLOSED FOR %s\n", pss->datasetid);
+		free(pss->datasetid);
 		break;
 
 	case LWS_CALLBACK_SERVER_WRITEABLE:
