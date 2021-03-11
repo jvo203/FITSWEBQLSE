@@ -202,8 +202,15 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		n = lws_hdr_copy(wsi, buf, sizeof(buf), WSI_TOKEN_GET_URI);
 		lwsl_notice("[ws] %s\n", (const char *)buf);
 
+		// find the last slash
+		ptr = strrchar((const char *)buf, '/');
+
+		if (ptr == NULL)
+			return -1; // forcibly close the connection
+
 		/* add ourselves to the list of live pss held in the vhd */
-		lwsl_user("LWS_CALLBACK_ESTABLISHED: wsi %p\n", wsi);
+		lwsl_user("LWS_CALLBACK_ESTABLISHED FOR %s: wsi %p\n", (ptr + 1), wsi);
+
 		lws_ll_fwd_insert(pss, pss_list, vhd->pss_list);
 		pss->tail = lws_ring_get_oldest_tail(vhd->ring);
 		pss->wsi = wsi;
