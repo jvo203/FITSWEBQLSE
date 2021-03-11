@@ -220,7 +220,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		break;
 
 	case LWS_CALLBACK_CLOSED:
-		lwsl_user("LWS_CALLBACK_CLOSED: wsi %p\n", wsi);
+		// lwsl_user("LWS_CALLBACK_CLOSED: wsi %p\n", wsi);
 		/* remove our closing pss from the list of live pss */
 		lws_ll_fwd_remove(struct per_session_data__minimal, pss_list,
 						  pss, vhd->pss_list);
