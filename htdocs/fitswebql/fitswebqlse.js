@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-03-07.0";
+	return "JS2021-03-11.0";
 }
 
 const wasm_supported = (() => {
@@ -9855,7 +9855,7 @@ function setup_image_selection() {
 						let _width = viewport_zoom_settings.zoomed_size;
 						let _height = viewport_zoom_settings.zoomed_size;
 
-						var request = '[realtime_image_spectrum] dx=' + dx + '&image=false&quality=' + image_quality;
+						var request = '[realtime_image_spectrum] ' + dataId + ' dx=' + dx + '&image=false&quality=' + image_quality;
 						request += '&x1=' + x1 + '&y1=' + y1 + '&x2=' + x2 + '&y2=' + y2 + '&width=' + _width + '&height=' + _height + '&beam=' + zoom_shape + '&intensity=' + intensity_mode + '&frame_start=' + data_band_lo + '&frame_end=' + data_band_hi + '&ref_freq=' + RESTFRQ + '&seq_id=' + sent_seq_id;
 						request += '&timestamp=' + performance.now();
 
@@ -11014,7 +11014,7 @@ function imageTimeout() {
 		let _width = viewport_zoom_settings.zoomed_size;
 		let _height = viewport_zoom_settings.zoomed_size;
 
-		var request = '[realtime_image_spectrum] dx=' + dx + '&image=' + image_update + '&quality=' + image_quality;
+		var request = '[realtime_image_spectrum] ' + dataId + ' dx=' + dx + '&image=' + image_update + '&quality=' + image_quality;
 		request += '&x1=' + x1 + '&y1=' + y1 + '&x2=' + x2 + '&y2=' + y2 + '&width=' + _width + '&height=' + _height + '&beam=' + zoom_shape + '&intensity=' + intensity_mode + '&frame_start=' + data_band_lo + '&frame_end=' + data_band_hi + '&ref_freq=' + RESTFRQ + '&seq_id=' + sent_seq_id;
 		request += '&timestamp=' + performance.now();
 
