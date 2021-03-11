@@ -171,6 +171,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 	int n, m;
 
 	// JVO additions
+	uint8_t buf[LWS_PRE + 2048], *start = &buf[LWS_PRE], *p = start,
+								 *end = &buf[sizeof(buf) - LWS_PRE - 1];
+
 	char *ws_msg;
 	char *ptr;
 	enum lws_write_protocol mode;
@@ -196,6 +199,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		break;
 
 	case LWS_CALLBACK_ESTABLISHED:
+		n = lws_hdr_copy(wsi, buf, sizeof(buf), WSI_TOKEN_GET_URI);
+		lwsl_notice("[ws] %s\n", (const char *)buf);
+
 		/* add ourselves to the list of live pss held in the vhd */
 		lwsl_user("LWS_CALLBACK_ESTABLISHED: wsi %p\n", wsi);
 		lws_ll_fwd_insert(pss, pss_list, vhd->pss_list);
