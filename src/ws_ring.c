@@ -253,6 +253,30 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 		//lwsl_user("LWS_CALLBACK_RECEIVE: free space %d\n", n);
 
+		ws_msg = malloc(len + 1);
+
+		if (ws_msg != NULL)
+		{
+			memcpy(ws_msg, in, len);
+			ws_msg[len] = '\0';
+			lwsl_user("[ws] MESSAGE RECEIVED: %s.\n", ws_msg);
+			printf("[ws] (%s)\n", ws_msg);
+		}
+		else
+		{
+			lwsl_user("OOM: dropping\n");
+			break;
+		}
+
+		// only ping back heartbeats
+		ptr = strstr((char *)ws_msg, "[heartbeat]");
+
+		if (ptr == NULL)
+		{
+			free(ws_msg);
+			break;
+		}
+
 		amsg.len = len;
 		/* notice we over-allocate by LWS_PRE... */
 		amsg.payload = malloc(LWS_PRE + len);
