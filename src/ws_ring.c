@@ -206,6 +206,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		// find the last slash
 		ptr = strrchr((const char *)buf, '/');
 
+		// reject connections without a datasetid
 		if (ptr == NULL)
 			return -1; // forcibly close the connection
 
