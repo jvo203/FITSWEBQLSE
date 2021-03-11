@@ -264,7 +264,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		{
 			memcpy(ws_msg, in, len);
 			ws_msg[len] = '\0';
-			lwsl_user("[ws] MESSAGE RECEIVED: %s.\n", ws_msg);
+			// lwsl_user("[ws] MESSAGE RECEIVED: %s.\n", ws_msg);
 			// printf("[ws] (%s)\n", ws_msg);
 		}
 		else
