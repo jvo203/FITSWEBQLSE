@@ -20,6 +20,7 @@
 #endif
 
 #include <string.h>
+#include <stdbool.h>
 
 #define RING_DEPTH 128
 
@@ -29,6 +30,7 @@ struct msg
 {
 	void *payload; /* is malloc'd */
 	size_t len;
+	bool binary;
 };
 
 /* one of these is created for each client connecting to us */
@@ -171,6 +173,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 	// JVO additions
 	char *ws_msg;
 	char *ptr;
+	enum lws_write_protocol mode;
 
 	switch (reason)
 	{
@@ -216,8 +219,10 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		if (!pmsg)
 			break;
 
+		mode = pmsg->binary ? LWS_WRITE_BINARY : LWS_WRITE_TEXT;
+
 		/* notice we allowed for LWS_PRE in the payload already */
-		m = lws_write(wsi, ((unsigned char *)pmsg->payload) + LWS_PRE, pmsg->len, LWS_WRITE_TEXT);
+		m = lws_write(wsi, ((unsigned char *)pmsg->payload) + LWS_PRE, pmsg->len, mode);
 		if (m < (int)pmsg->len)
 		{
 			lwsl_err("ERROR %d writing to ws socket\n", m);
@@ -260,7 +265,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			memcpy(ws_msg, in, len);
 			ws_msg[len] = '\0';
 			lwsl_user("[ws] MESSAGE RECEIVED: %s.\n", ws_msg);
-			printf("[ws] (%s)\n", ws_msg);
+			// printf("[ws] (%s)\n", ws_msg);
 		}
 		else
 		{
@@ -276,6 +281,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			free(ws_msg);
 			break;
 		}
+
+		// set the text mode
+		amsg.binary = false;
 
 		amsg.len = len;
 		/* notice we over-allocate by LWS_PRE... */
