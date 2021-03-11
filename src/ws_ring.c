@@ -168,6 +168,10 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 	struct msg amsg;
 	int n, m;
 
+	// JVO additions
+	char *ws_msg;
+	char *ptr;
+
 	switch (reason)
 	{
 	case LWS_CALLBACK_PROTOCOL_INIT:
@@ -247,7 +251,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		if (!n)
 			break;
 
-		lwsl_user("LWS_CALLBACK_RECEIVE: free space %d\n", n);
+		//lwsl_user("LWS_CALLBACK_RECEIVE: free space %d\n", n);
 
 		amsg.len = len;
 		/* notice we over-allocate by LWS_PRE... */
