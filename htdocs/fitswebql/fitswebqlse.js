@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-03-12.0";
+	return "JS2021-03-12.1";
 }
 
 const wasm_supported = (() => {
@@ -9393,20 +9393,28 @@ function setup_image_selection() {
 			init_webgl_zoom_buffers();
 
 			// send a "Kalman Filter reset" WebSocket message in order to reset the server-side Kalman Filter
-			var msg = '[kalman_reset] seq_id=' + (++sent_seq_id);
+			var msg = {
+				type: "kalman_reset",
+				seq_id: ++sent_seq_id
+			};
+
 			for (let index = 0; index < va_count; index++) {
 				if (wsConn[index].readyState == 1)
-					wsConn[index].send(msg);
+					wsConn[index].send(JSON.stringify(msg));
 			}
 		})
 		.on("mouseleave", function () {
 			clearTimeout(idleMouse);
 
 			// send a "Kalman Filter reset" WebSocket message in order to reset the server-side Kalman Filter
-			var msg = '[kalman_reset] seq_id=' + (++sent_seq_id);
+			var msg = {
+				type: "kalman_reset",
+				seq_id: ++sent_seq_id
+			};
+
 			for (let index = 0; index < va_count; index++) {
 				if (wsConn[index].readyState == 1)
-					wsConn[index].send(msg);
+					wsConn[index].send(JSON.stringify(msg));
 			}
 
 			// clear the ViewportCanvas in WebGL
