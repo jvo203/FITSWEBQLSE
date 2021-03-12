@@ -292,6 +292,17 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			break;
 		}
 
+		// parse JSON
+		JsonNode *json = json_decode(ws_msg);
+
+		if (json != NULL)
+		{
+			lwsl_user("[ws] JSON parsed OK.\n");
+
+			// release memory
+			json_delete(json);
+		}
+
 		// only ping back heartbeats
 		ptr = strstr((char *)ws_msg, "[heartbeat]");
 
