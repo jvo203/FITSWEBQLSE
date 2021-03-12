@@ -301,6 +301,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			break;
 		}
 
+		// ws_msg is no longer needed
+		free(ws_msg);
+
 		// set the text mode
 		amsg.binary = false;
 
