@@ -38,11 +38,18 @@ enum intensity_mode
 	integrated
 };
 
+enum image_quality
+{
+	low,
+	medium,
+	high
+};
+
 struct image_spectrum_request
 {
 	int dx;
 	bool image;
-	char *quality;
+	enum image_quality quality;
 	int x1;
 	int y1;
 	int x2;
