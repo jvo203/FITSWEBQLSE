@@ -301,8 +301,13 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 			// release memory
 			json_delete(json);
+
+			// stop here
+			free(ws_msg);
+			break;
 		}
 
+		// if we got here it is because the message was not in a JSON format
 		// only ping back heartbeats
 		ptr = strstr((char *)ws_msg, "[heartbeat]");
 
