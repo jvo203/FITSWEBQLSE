@@ -62,24 +62,24 @@ program main
             !   allocate (uri(count))
 
             ! wait for an event
-            event wait(event_count)
-            print *, 'image', this_image(), 'received an event'
+            ! event wait(event_count)
+            ! print *, 'image', this_image(), 'received an event'
 
-            ! call MPI_RECV(filepath, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+            call MPI_RECV(filepath, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
 
-            ! if (ierror .eq. 0) then
-            !    count = length(filepath, 1024)
+            if (ierror .eq. 0) then
+                count = length(filepath, 1024)
 
-            !    if (count .gt. 0) then
-            !        print *, 'rank', rank, 'filepath:>', filepath(1:count), '<'
+                if (count .gt. 0) then
+                    print *, 'rank', rank, 'filepath:>', filepath(1:count), '<'
 
-            !        do i = 1, count
-            !            filename(i:i) = filepath(i)
-            !        end do
+                    do i = 1, count
+                        filename(i:i) = filepath(i)
+                    end do
 
-            !        call load_fits_file(filename)
-            !    end if
-            !end if
+                    call load_fits_file(filename)
+                end if
+            end if
 
             !   deallocate (uri)
         end block
