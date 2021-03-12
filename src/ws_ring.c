@@ -26,24 +26,36 @@
 
 #define RING_DEPTH 128
 
+enum zoom_shape
+{
+	circle,
+	square
+};
+
+enum intensity_mode
+{
+	mean,
+	integrated
+};
+
 struct image_spectrum_request
 {
 	int dx;
 	bool image;
 	char *quality;
-	x1 : x1,
-		 y1 : y1,
-			  x2 : x2,
-				   y2 : y2,
-						width : _width,
-								height : _height,
-										 beam : zoom_shape,
-												intensity : intensity_mode,
-															frame_start : data_band_lo,
-																		  frame_end : data_band_hi,
-																					  ref_freq : RESTFRQ,
-																								 seq_id : sent_seq_id,
-																										  timestamp : performance.now()
+	int x1;
+	int y1;
+	int x2;
+	int y2;
+	int width;
+	int height;
+	enum zoom_shape beam;
+	enum intensity_mode intensity;
+	float frame_start;
+	float frame_end;
+	float ref_freq;
+	int seq_id;
+	float timestamp;
 };
 
 /* one of these created for each message */
