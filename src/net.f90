@@ -1,4 +1,5 @@
 module net
+    use iso_fortran_env
     use, intrinsic :: iso_c_binding
     implicit none
 
@@ -97,6 +98,9 @@ module net
             type(C_PTR), value, intent(in) :: pSrc, pDest
         end subroutine resizeNearest
     end interface
+
+    ! integer(atomic_int_kind) :: event_count
+    type(event_type) :: event_count[*]
 contains
     subroutine sigint_handler
         print *, 'Process interrupted(SIGINT), exiting...'
@@ -153,9 +157,11 @@ contains
         filepath = ' '
         filepath(1:n) = uri(1:n)
 
-        do i = 0, size - 1
-            call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
-        end do
+        event post(event_count)
+
+        ! do i = 0, size - 1
+        !     call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
+        ! end do
     end subroutine fitswebql_request
 
     function compare_frameid(frameid, datasetId)
