@@ -19,6 +19,8 @@
 #include <libwebsockets.h>
 #endif
 
+#include "json.h"
+
 #include <string.h>
 #include <stdbool.h>
 
