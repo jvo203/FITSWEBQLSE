@@ -74,7 +74,10 @@ struct per_session_data__minimal
 	struct per_session_data__minimal *pss_list;
 	struct lws *wsi;
 	uint32_t tail;
+
+	// FITSWEBQL-related
 	char *datasetid;
+	struct image_spectrum_request is_req;
 
 	unsigned int culled : 1;
 };
