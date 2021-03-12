@@ -26,6 +26,26 @@
 
 #define RING_DEPTH 128
 
+struct image_spectrum_request
+{
+	int dx;
+	bool image;
+	char *quality;
+	x1 : x1,
+		 y1 : y1,
+			  x2 : x2,
+				   y2 : y2,
+						width : _width,
+								height : _height,
+										 beam : zoom_shape,
+												intensity : intensity_mode,
+															frame_start : data_band_lo,
+																		  frame_end : data_band_hi,
+																					  ref_freq : RESTFRQ,
+																								 seq_id : sent_seq_id,
+																										  timestamp : performance.now()
+};
+
 /* one of these created for each message */
 
 struct msg
