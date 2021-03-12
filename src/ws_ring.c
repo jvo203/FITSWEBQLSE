@@ -342,6 +342,16 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		{
 			lwsl_user("[ws] JSON parsed OK.\n");
 
+			JsonNode *node = NULL;
+
+			json_foreach(node, json)
+			{
+				char *key = node->key;
+
+				if (key != NULL)
+					printf("%s\t", key);
+			}
+
 			// release memory
 			json_delete(json);
 
