@@ -45,6 +45,12 @@ enum image_quality
 	high
 };
 
+enum request_type
+{
+	realtime_image_spectrum,
+	kalman_init
+};
+
 struct image_spectrum_request
 {
 	int dx;
@@ -85,7 +91,8 @@ struct per_session_data__minimal
 	// FITSWEBQL-related
 	char *datasetid;
 	struct image_spectrum_request is_req;
-	bool new_is_req;
+	enum request_type req_type;
+	bool new_request;
 
 	unsigned int culled : 1;
 };
