@@ -183,7 +183,8 @@ function init_graph() {
         }
     }
 
-    wireTexture = new THREE.TextureLoader().load(ROOT_PATH + 'square.png');
+    //wireTexture = new THREE.TextureLoader().load(ROOT_PATH + 'square.png');
+    wireTexture = new THREE.TextureLoader().load("https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/square.png")
     wireTexture.wrapS = wireTexture.wrapT = THREE.RepeatWrapping;
     //wireTexture.minFilter = wireTexture.magFilter = THREE.LinearFilter;
     wireTexture.repeat.set(segments, segments);
