@@ -48,12 +48,16 @@ program main
     ! start a ØMQ server
     if (this_image() == 1) then
         ! start a ØMQ server
-        socket = zmq_socket(context, ZMQ_PAIR)
+        socket = zmq_socket(context, ZMQ_PUB)
         rc = zmq_connect(socket, 'inproc://fzmq')
     else
         ! start a ØMQ client
-        socket = zmq_socket(context, ZMQ_PAIR)
+        socket = zmq_socket(context, ZMQ_SUB)
         rc = zmq_bind(socket, 'inproc://fzmq')
+
+        ! Subscribe to all messages
+        ! rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, C_NULL_PTR, 0)
+        ! rc = FZMQ_SETSOCKOPT(socket, ZMQ_SUBSCRIBE, C_NULL_PTR, 0)
     end if
 
     ! start an external libmicrohttpd server
