@@ -3,9 +3,9 @@ module net
     use, intrinsic :: iso_c_binding
     implicit none
 
-    type, bind(c) :: realtime_image_spectrum_data
+    type, bind(c) :: image_spectrum_request_f
         integer(kind=c_int) :: dx
-    end type realtime_image_spectrum_data
+    end type image_spectrum_request_f
 
     interface
         subroutine start_http() BIND(C, name='start_http')
@@ -173,8 +173,11 @@ contains
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetid
         type(C_PTR), intent(in), value :: ptr
+        type(image_spectrum_request_f), pointer :: req
 
-        print *, 'realtime_image_spectrum_request for ', datasetid
+        call c_f_pointer(ptr, req)
+
+        print *, 'realtime_image_spectrum_request for ', datasetid, 'dx:', req%dx
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
