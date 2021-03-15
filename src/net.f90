@@ -204,7 +204,7 @@ contains
         f_ptr => null()
 
         msg_len = len(cmd)
-        rc = zmq_msg_init_data(message, c_loc(cmd), msg_len, c_fun_loc(f_ptr), c_null_ptr)
+        rc = zmq_msg_init_data(message, c_loc(cmd), msg_len, c_null_ptr, c_null_ptr)
         nbytes = zmq_msg_send(message, socket, 0)
     end subroutine send_command
 
