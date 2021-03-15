@@ -35,8 +35,8 @@ module net
 
     ! ØMQ
     integer :: rc
-    type(c_ptr)     :: context
-    type(c_ptr)     :: socket
+    type(c_ptr)     :: server_context, client_context
+    type(c_ptr)     :: server_socket, client_socket
 
     interface
         subroutine start_http() BIND(C, name='start_http')
@@ -157,8 +157,13 @@ contains
         call delete_hash_table
 
         print '(a)', '[ØMQ] Terminating ...'
-        rc = zmq_close(socket)
-        rc = zmq_ctx_term(context)
+        rc = zmq_close(client_socket)
+        rc = zmq_ctx_term(client_context)
+
+        if (this_image() .eq. 1) then
+            rc = zmq_close(server_socket)
+            rc = zmq_ctx_term(server_context)
+        end if
 
         ! in a Co-Array program there may be no need for MPI_Finalize
         call MPI_FINALIZE(ierror)
