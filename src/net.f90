@@ -164,6 +164,15 @@ contains
         end do
     end subroutine fitswebql_request
 
+    subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)
+        use, intrinsic :: iso_c_binding
+        integer(kind=c_size_t), intent(in), value :: n
+        character(kind=c_char), dimension(n), intent(in) :: datasetid
+        type(C_PTR), intent(in), value :: ptr
+
+        print *, 'realtime_image_spectrum_request for', datasetid
+    end subroutine realtime_image_spectrum_request
+
     function compare_frameid(frameid, datasetId)
         use, intrinsic :: iso_c_binding
         character(kind=c_char), dimension(:), intent(in) :: frameid, datasetId
