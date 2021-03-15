@@ -7,6 +7,8 @@ program main
     use, intrinsic :: iso_c_binding
     implicit none
 
+    integer(kind=4), parameter :: ZMQ_PORT = 50000
+
     integer :: max_threads
     integer rank, size, ierror, tag, namelen, status(MPI_STATUS_SIZE)
     character(len=MPI_MAX_PROCESSOR_NAME) :: name
@@ -49,11 +51,14 @@ program main
     if (this_image() == 1) then
         ! start a ØMQ server
         socket = zmq_socket(context, ZMQ_PUB)
-        rc = zmq_connect(socket, 'inproc://fzmq')
+        rc = zmq_connect(socket, 'tcp://*:55555') ! 'inproc://fzmq' works OK ...
+
+        print *, this_image(), 'rc', rc
     else
         ! start a ØMQ client
         socket = zmq_socket(context, ZMQ_SUB)
-        rc = zmq_bind(socket, 'inproc://fzmq')
+        rc = zmq_bind(socket, 'tcp://*:55555')
+        print *, this_image(), 'rc', rc
 
         ! Subscribe to all messages
         rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, '')
