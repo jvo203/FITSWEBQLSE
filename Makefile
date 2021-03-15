@@ -48,7 +48,7 @@ MOD =
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
 FLAGS += -align array64byte -coarray=distributed
-LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lfpzip -lcfitsio -lzeromq
+LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lfpzip -lcfitsio -lzmq -lczmq
 # -lzfp before cfitsio
 #`pkg-config --libs json-fortran`
 
