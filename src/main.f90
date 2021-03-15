@@ -62,7 +62,7 @@ program main
 
         ! Subscribe to all messages
         rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, '')
-        print *, this_image(), 'ZMQ_SUBSCRIBE::rc', rc
+        ! print *, this_image(), 'ZMQ_SUBSCRIBE::rc', rc
     end if
 
     ! start an external libmicrohttpd server
