@@ -457,6 +457,17 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 			// stop here
 			free(ws_msg);
+
+			/*
+		 	* let everybody know we want to write something on them
+		 	* as soon as they are ready
+		 	*/
+			lws_start_foreach_llp(struct per_session_data__minimal **,
+								  ppss, vhd->pss_list)
+			{
+				lws_callback_on_writable((*ppss)->wsi);
+			}
+			lws_end_foreach_llp(ppss, pss_list);
 			break;
 		}
 
