@@ -188,6 +188,10 @@ contains
         print *, this_image(), '[ØMQ]', buffer
     end subroutine recv_command
 
+    subroutine send_command(socket)
+        type(c_ptr), intent(inout) :: socket
+    end subroutine send_command
+
     subroutine fitswebql_request(uri, n) bind(C)
         use mpi
         use fits
