@@ -51,7 +51,7 @@ program main
         ! start a ØMQ server
         server_context = zmq_ctx_new()
         server_socket = zmq_socket(server_context, ZMQ_PUB)
-        rc = zmq_bind(server_socket, 'tcp://*:55555')
+        rc = zmq_bind(server_socket, 'tcp://*:50000')
 
         print *, this_image(), 'rc', rc
     end if
@@ -59,7 +59,7 @@ program main
     ! start a ØMQ client
     client_context = zmq_ctx_new()
     client_socket = zmq_socket(client_context, ZMQ_SUB)
-    rc = zmq_connect(client_socket, 'tcp://localhost:55555')
+    rc = zmq_connect(client_socket, 'tcp://localhost:50000')
     print *, this_image(), 'rc', rc
 
     ! Subscribe to all messages
