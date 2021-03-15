@@ -57,7 +57,6 @@ program main
 
         ! Subscribe to all messages
         rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, '')
-        ! rc = FZMQ_SETSOCKOPT(socket, ZMQ_SUBSCRIBE, C_NULL_PTR, 0)
     end if
 
     ! start an external libmicrohttpd server
