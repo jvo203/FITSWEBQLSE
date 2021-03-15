@@ -44,26 +44,27 @@ program main
     ! create a new hash table for storing the datasets
     call init_hash_table
 
-    print '(a)', '[ØMQ] Creating new context ...'
-    context = zmq_ctx_new()
+    print '(a)', '[ØMQ] Creating new PUB/SUB ...'
 
     ! start a ØMQ server
     if (this_image() == 1) then
         ! start a ØMQ server
-        socket = zmq_socket(context, ZMQ_PUB)
-        rc = zmq_bind(socket, 'tcp://*:55555')
+        server_context = zmq_ctx_new()
+        server_socket = zmq_socket(server_context, ZMQ_PUB)
+        rc = zmq_bind(server_socket, 'tcp://*:55555')
 
         print *, this_image(), 'rc', rc
-    else
-        ! start a ØMQ client
-        socket = zmq_socket(context, ZMQ_SUB)
-        rc = zmq_connect(socket, 'tcp://localhost:55555')
-        print *, this_image(), 'rc', rc
-
-        ! Subscribe to all messages
-        rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, '')
-        print *, this_image(), 'ZMQ_SUBSCRIBE::rc', rc
     end if
+
+    ! start a ØMQ client
+    client_context = zmq_ctx_new()
+    client_socket = zmq_socket(client_context, ZMQ_SUB)
+    rc = zmq_connect(client_socket, 'tcp://localhost:55555')
+    print *, this_image(), 'rc', rc
+
+    ! Subscribe to all messages
+    rc = zmq_setsockopt(client_socket, ZMQ_SUBSCRIBE, '')
+    print *, this_image(), 'ZMQ_SUBSCRIBE::rc', rc
 
     ! start an external libmicrohttpd server
     if (this_image() == 1) call start_http
