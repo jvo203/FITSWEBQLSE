@@ -65,9 +65,9 @@ struct image_spectrum_request
 	int height;
 	enum zoom_shape beam;
 	enum intensity_mode intensity;
-	double frame_start;
-	double frame_end;
-	double ref_freq;
+	float frame_start;
+	float frame_end;
+	float ref_freq;
 	int seq_id;
 	float timestamp;
 };
