@@ -106,7 +106,21 @@
 	$ cd fortran-unix/
 	$ make
 
-7. Adjust environment variables
+7. FZMQ (ØMQ bindings)
+
+	git clone https://github.com/richsnyder/fzmq.git
+
+	cd fzmq
+
+	mkdir build && cd build
+
+	cmake ..
+
+	make
+
+	sudo make install
+
+8. Adjust environment variables
 
 	Add
 
