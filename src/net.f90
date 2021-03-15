@@ -27,7 +27,7 @@ module net
         integer(c_int) :: width, height
         integer(kind(circle)) :: beam
         integer(kind(medium)) :: intensity
-        real(c_float) :: frame_start, frame_end, ref_freq
+        real(c_double) :: frame_start, frame_end, ref_freq
         integer(c_int) :: seq_id
         real(c_float) :: timestamp
     end type image_spectrum_request_f
