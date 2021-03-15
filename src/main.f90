@@ -45,6 +45,17 @@ program main
     print '(a)', '[ØMQ] Creating new context ...'
     context = zmq_ctx_new()
 
+    ! start a ØMQ server
+    if (this_image() == 1) then
+        ! start a ØMQ server
+        socket = zmq_socket(context, ZMQ_PAIR)
+        rc = zmq_connect(socket, 'inproc://fzmq')
+    else
+        ! start a ØMQ client
+        socket = zmq_socket(context, ZMQ_PAIR)
+        rc = zmq_bind(socket, 'inproc://fzmq')
+    end if
+
     ! start an external libmicrohttpd server
     if (this_image() == 1) call start_http
 

@@ -156,7 +156,8 @@ contains
         ! release the hash table
         call delete_hash_table
 
-        print '(a)', '[ØMQ] Terminating context ...'
+        print '(a)', '[ØMQ] Terminating ...'
+        rc = zmq_close(socket)
         rc = zmq_ctx_term(context)
 
         ! in a Co-Array program there may be no need for MPI_Finalize
