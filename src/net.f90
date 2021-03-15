@@ -188,8 +188,24 @@ contains
         print *, this_image(), '[ØMQ]', buffer
     end subroutine recv_command
 
-    subroutine send_command(socket)
+    subroutine send_command(socket, cmd)
+        use, intrinsic :: iso_c_binding
+
         type(c_ptr), intent(inout) :: socket
+        character(kind=c_char), intent(in) :: cmd(:)
+
+        integer(kind=c_int)                         :: nbytes
+        integer(kind=c_int)                         :: rc
+        type(zmq_msg_t)                             :: message
+        INTEGER(KIND=C_SIZE_T) :: msg_len
+
+        procedure(func), pointer :: f_ptr
+
+        f_ptr => null()
+
+        msg_len = len(cmd)
+        rc = zmq_msg_init_data(message, c_loc(cmd), msg_len, c_fun_loc(f_ptr), c_null_ptr)
+        nbytes = zmq_msg_send(message, socket, 0)
     end subroutine send_command
 
     subroutine fitswebql_request(uri, n) bind(C)
