@@ -5,6 +5,7 @@ module net
 
     type, bind(c) :: image_spectrum_request_f
         integer(kind=c_int) :: dx
+        logical(kind=c_bool) :: image
     end type image_spectrum_request_f
 
     interface
@@ -177,7 +178,8 @@ contains
 
         call c_f_pointer(ptr, req)
 
-        print *, 'realtime_image_spectrum_request for ', datasetid, ', dx:', req%dx
+        print *, 'realtime_image_spectrum_request for ', datasetid, ', dx:', req%dx, &
+            ', image:', req%image
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
