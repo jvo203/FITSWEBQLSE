@@ -69,6 +69,11 @@ program main
     ! start an external libmicrohttpd server
     if (this_image() .eq. 1) call start_http
 
+    ! ØMQ event loop
+    do
+        call recv_command(client_socket)
+    end do
+
     do
         block
             integer i
@@ -130,4 +135,21 @@ contains
 
         length = n
     end function length
+
+    subroutine recv_command(socket)
+        type(c_ptr), intent(inout) :: socket
+        character(kind=c_char, len=:), pointer :: buffer
+        integer                                :: nbytes
+        integer                                :: rc
+        type(c_ptr)                            :: data
+        type(zmq_msg_t)                        :: message
+
+        rc = zmq_msg_init(message)
+        nbytes = zmq_msg_recv(message, socket, 0)
+        data = zmq_msg_data(message)
+
+        call c_f_pointer(data, buffer)
+
+        print *, this_image(), '[ØMQ]', buffer
+    end subroutine recv_command
 end program main
