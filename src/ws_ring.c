@@ -355,8 +355,8 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			{
 				char *key = node->key;
 
-				if (key != NULL)
-					printf("%s\t", key);
+				// if (key != NULL)
+				//	printf("%s\t", key);
 
 				if (strcmp(key, "type") == 0 && node->tag == JSON_STRING)
 				{
