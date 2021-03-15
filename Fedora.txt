@@ -18,7 +18,7 @@
 
 	sudo dnf install zfp-devel
 
-	sudo dnf install zeromq-devel
+	sudo dnf install zeromq-devel czmq-devel
 
 	sudo dnf install ispc # (not needed yet)
 
