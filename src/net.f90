@@ -3,6 +3,10 @@ module net
     use, intrinsic :: iso_c_binding
     implicit none
 
+    type, bind(c) :: realtime_image_spectrum_data
+        integer(kind=c_int) :: dx
+    end type realtime_image_spectrum_data
+
     interface
         subroutine start_http() BIND(C, name='start_http')
             use, intrinsic :: ISO_C_BINDING
