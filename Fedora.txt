@@ -18,6 +18,8 @@
 
 	sudo dnf install zfp-devel
 
+	sudo dnf install zeromq-devel
+
 	sudo dnf install ispc # (not needed yet)
 
 3. zfp Fortran bindings
