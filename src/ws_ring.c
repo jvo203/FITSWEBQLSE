@@ -357,6 +357,99 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 				if (key != NULL)
 					printf("%s\t", key);
+
+				if (strcmp(key, "type") == 0 && node->tag == JSON_STRING)
+				{
+					// test for realtime_image_spectrum
+					if (strcmp(node->string_, "realtime_image_spectrum") == 0)
+					{
+						pss->req_type = realtime_image_spectrum;
+						pss->new_request = true;
+					}
+
+					// test for kalman_init
+					if (strcmp(node->string_, "kalman_init") == 0)
+					{
+						pss->req_type = kalman_init;
+						pss->new_request = true;
+					}
+				}
+
+				if (strcmp(key, "dx") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.dx = node->number_;
+
+				if (strcmp(key, "image") == 0 && node->tag == JSON_BOOL)
+					pss->is_req.image = node->bool_;
+
+				if (strcmp(key, "quality") == 0 && node->tag == JSON_STRING)
+				{
+					// test for low
+					if (strcmp(node->string_, "low") == 0)
+						pss->is_req.quality = low;
+
+					// test for medium
+					if (strcmp(node->string_, "medium") == 0)
+						pss->is_req.quality = medium;
+
+					// test for high
+					if (strcmp(node->string_, "high") == 0)
+						pss->is_req.quality = high;
+				}
+
+				if (strcmp(key, "x1") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.x1 = node->number_;
+
+				if (strcmp(key, "y1") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.y1 = node->number_;
+
+				if (strcmp(key, "x2") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.x2 = node->number_;
+
+				if (strcmp(key, "y2") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.y2 = node->number_;
+
+				if (strcmp(key, "width") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.width = node->number_;
+
+				if (strcmp(key, "height") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.height = node->number_;
+
+				if (strcmp(key, "beam") == 0 && node->tag == JSON_STRING)
+				{
+					// test for circle
+					if (strcmp(node->string_, "circle") == 0)
+						pss->is_req.beam = circle;
+
+					// test for square
+					if (strcmp(node->string_, "square") == 0)
+						pss->is_req.beam = square;
+				}
+
+				if (strcmp(key, "intensity") == 0 && node->tag == JSON_STRING)
+				{
+					// test for mean
+					if (strcmp(node->string_, "mean") == 0)
+						pss->is_req.intensity = mean;
+
+					// test for integrated
+					if (strcmp(node->string_, "integrated") == 0)
+						pss->is_req.intensity = integrated;
+				}
+
+				if (strcmp(key, "frame_start") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.frame_start = node->number_;
+
+				if (strcmp(key, "frame_end") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.frame_end = node->number_;
+
+				if (strcmp(key, "ref_freq") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.ref_freq = node->number_;
+
+				if (strcmp(key, "seq_id") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.seq_id = node->number_;
+
+				if (strcmp(key, "timestamp") == 0 && node->tag == JSON_NUMBER)
+					pss->is_req.timestamp = node->number_;
 			}
 
 			// release memory
