@@ -51,13 +51,13 @@ program main
     if (this_image() == 1) then
         ! start a ØMQ server
         socket = zmq_socket(context, ZMQ_PUB)
-        rc = zmq_connect(socket, 'tcp://*:55555') ! 'inproc://fzmq' works OK ...
+        rc = zmq_bind(socket, 'tcp://*:55555')
 
         print *, this_image(), 'rc', rc
     else
         ! start a ØMQ client
         socket = zmq_socket(context, ZMQ_SUB)
-        rc = zmq_bind(socket, 'tcp://*:55555')
+        rc = zmq_connect(socket, 'tcp://*:55555')
         print *, this_image(), 'rc', rc
 
         ! Subscribe to all messages
