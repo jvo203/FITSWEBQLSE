@@ -48,7 +48,8 @@ enum image_quality
 enum request_type
 {
 	realtime_image_spectrum,
-	kalman_init
+	kalman_init,
+	kalman_reset
 };
 
 struct image_spectrum_request
@@ -284,6 +285,14 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 	case LWS_CALLBACK_SERVER_WRITEABLE:
 		if (pss->culled)
 			break;
+
+		// is there a new request to be passed to Fortran
+		if (pss->new_request)
+		{
+			lwsl_user("[ws] NEW REQUEST: %d\n", pss->req_type);
+			pss->new_request = false;
+		}
+
 		pmsg = lws_ring_get_element(vhd->ring, &pss->tail);
 		if (!pmsg)
 			break;
@@ -371,6 +380,13 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 					if (strcmp(node->string_, "kalman_init") == 0)
 					{
 						pss->req_type = kalman_init;
+						pss->new_request = true;
+					}
+
+					// test for kalman_reset
+					if (strcmp(node->string_, "kalman_reset") == 0)
+					{
+						pss->req_type = kalman_reset;
 						pss->new_request = true;
 					}
 				}
