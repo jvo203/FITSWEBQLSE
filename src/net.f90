@@ -27,7 +27,9 @@ module net
         integer(c_int) :: width, height
         integer(kind(circle)) :: beam
         integer(kind(medium)) :: intensity
-        real(c_double) :: frame_start, frame_end, ref_freq
+        real(c_float) :: frame_start, frame_end, ref_freq
+        integer(c_int) :: seq_id
+        real(c_float) :: timestamp
     end type image_spectrum_request_f
 
     interface
@@ -201,7 +203,11 @@ contains
         call c_f_pointer(ptr, req)
 
         print *, 'realtime_image_spectrum_request for ', datasetid, ', dx:', req%dx, &
-            ', image:', req%image
+            &', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
+            &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
+            &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
+            &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
+            req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
