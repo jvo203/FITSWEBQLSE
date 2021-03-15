@@ -56,7 +56,7 @@ program main
         rc = zmq_bind(socket, 'inproc://fzmq')
 
         ! Subscribe to all messages
-        ! rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, C_NULL_PTR, 0)
+        rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, '')
         ! rc = FZMQ_SETSOCKOPT(socket, ZMQ_SUBSCRIBE, C_NULL_PTR, 0)
     end if
 
