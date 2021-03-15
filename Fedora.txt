@@ -108,6 +108,8 @@
 
 7. FZMQ (ØMQ bindings)
 
+	pre-requisites: latex, pandoc
+
 	git clone https://github.com/richsnyder/fzmq.git
 
 	cd fzmq
