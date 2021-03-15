@@ -163,6 +163,11 @@ contains
 
         print *, 'image', this_image(), 'deleting ', item_ptr%datasetid
 
+        if (item_ptr%header_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%header_mtx))
+        if (item_ptr%error_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%error_mtx))
+        if (item_ptr%ok_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%ok_mtx))
+        if (item_ptr%progress_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%progress_mtx))
+
         deallocate (item_ptr)
     end subroutine delete_dataset
 
