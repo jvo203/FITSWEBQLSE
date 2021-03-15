@@ -3,6 +3,7 @@ program main
     use net
     use fits
     use omp_lib
+    use :: zmq
     use, intrinsic :: iso_c_binding
     implicit none
 
@@ -40,6 +41,9 @@ program main
 
     ! create a new hash table for storing the datasets
     call init_hash_table
+
+    print '(a)', '[ØMQ] Creating new context ...'
+    context = zmq_ctx_new()
 
     ! start an external libmicrohttpd server
     if (this_image() == 1) call start_http
