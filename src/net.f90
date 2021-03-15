@@ -1,5 +1,6 @@
 module net
     ! use iso_fortran_env
+    use :: zmq
     use, intrinsic :: iso_c_binding
     implicit none
 
@@ -31,6 +32,11 @@ module net
         integer(c_int) :: seq_id
         real(c_float) :: timestamp
     end type image_spectrum_request_f
+
+    ! ØMQ
+    integer :: rc
+    type(c_ptr)     :: context
+    type(c_ptr)     :: socket
 
     interface
         subroutine start_http() BIND(C, name='start_http')
@@ -149,6 +155,9 @@ contains
 
         ! release the hash table
         call delete_hash_table
+
+        print '(a)', '[ØMQ] Terminating context ...'
+        rc = zmq_ctx_term(context)
 
         ! in a Co-Array program there may be no need for MPI_Finalize
         call MPI_FINALIZE(ierror)
