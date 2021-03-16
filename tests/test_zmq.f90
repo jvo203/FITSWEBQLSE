@@ -1,6 +1,6 @@
 program main
     use, intrinsic :: iso_c_binding
-    use, intrinsic :: omp_lib
+    use :: omp_lib
     use :: zmq
     implicit none
     integer, target :: value
@@ -56,7 +56,11 @@ contains
         integer(kind=c_int)                         :: rc
         type(zmq_msg_t)                             :: message
 
-        rc = zmq_msg_init_data(message, c_loc(value), c_sizeof(value), c_null_ptr, c_null_ptr)
+        INTEGER(KIND=C_SIZE_T) :: msg_len
+
+        msg_len = sizeof(value)
+
+        rc = zmq_msg_init_data(message, c_loc(value), msg_len, c_null_funptr, c_null_ptr)
         nbytes = zmq_msg_send(message, socket, 0)
     end subroutine
 
