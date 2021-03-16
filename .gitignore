@@ -3,6 +3,7 @@
 /testWavelets
 /zfp_compress
 /serialize
+/test_zmq
 
 # Prerequisites
 *.d
