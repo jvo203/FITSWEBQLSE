@@ -15,11 +15,9 @@ program main
     integer(kind=4), parameter :: MPI_URI = 1000
     logical init
 
-    character(kind=c_char) :: cmd(1024)
-
     ! receives the URI of the FITS file
     ! character(kind=c_char), dimension(:), allocatable :: uri
-    character, dimension(1024) :: filepath
+    character, dimension(1024) :: cmd
 
     ! stores the URI length
     integer count
@@ -112,19 +110,19 @@ program main
             ! event wait(event_count)
             ! print *, 'image', this_image(), 'received an event'
 
-            call MPI_RECV(filepath, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+            call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
 
             if (ierror .eq. 0) then
-                count = length(filepath, 1024)
+                count = length(cmd, 1024)
 
                 if (count .gt. 1) then
-                    print *, 'rank', rank, '|', filepath(1:count), '|'
+                    print *, 'rank', rank, '|', cmd(1:count), '|'
 
                     ! decipher the command
-                    if (filepath(1) .eq. 'L') then
+                    if (cmd(1) .eq. 'L') then
 
                         do i = 1, count - 1
-                            filename(i:i) = filepath(i + 1)
+                            filename(i:i) = cmd(i + 1)
                         end do
 
                         call load_fits_file(filename)
