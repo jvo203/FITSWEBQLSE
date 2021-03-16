@@ -199,10 +199,6 @@ contains
         type(zmq_msg_t)                             :: message
         INTEGER(KIND=C_SIZE_T) :: msg_len
 
-        procedure(func), pointer :: f_ptr
-
-        f_ptr => null()
-
         msg_len = len(cmd)
         rc = zmq_msg_init_data(message, c_loc(cmd), msg_len, c_null_ptr, c_null_ptr)
         nbytes = zmq_msg_send(message, socket, 0)
