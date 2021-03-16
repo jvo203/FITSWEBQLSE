@@ -270,6 +270,9 @@ contains
 
     subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)
         use, intrinsic :: iso_c_binding
+        use iso_varying_string
+        implicit none
+
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: datasetid
         type(C_PTR), intent(in), value :: ptr
@@ -277,6 +280,8 @@ contains
 
         ! an internal file buffer
         character(2048) :: buffer
+
+        type(varying_string) :: cmd
 
         call c_f_pointer(ptr, req)
 
@@ -287,14 +292,15 @@ contains
             &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
 
-        write (buffer, 10), req%dx, ' ', req%image, ' ', req%x1, ' ', req%y1, ' ', req%x2, ' ', req%y2, ' ',&
+        write (buffer, 10), 'S', req%dx, ' ', req%image, ' ', req%x1, ' ', req%y1, ' ', req%x2, ' ', req%y2, ' ',&
         &req%width, ' ', req%height, ' ', req%beam, ' ', req%intensity, ' ', req%frame_start, ' ',&
         &req%frame_end, ' ', req%ref_freq, ' ', req%seq_id, ' ', req%timestamp, ' '
 
         print *, trim(buffer)
+        ! print *, cmd
 
-10      format(i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-             & (G16.9), a1, (G16.9), a1, (G16.9), a1, i0, a1, (G16.9), a1)
+10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
+                                 & (G16.9), a1, (G16.9), a1, (G16.9), a1, i0, a1, (G16.9), a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
