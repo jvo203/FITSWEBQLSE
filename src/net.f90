@@ -156,14 +156,14 @@ contains
         ! release the hash table
         call delete_hash_table
 
-        print '(a)', '[ØMQ] Terminating ...'
-        rc = zmq_close(client_socket)
-        rc = zmq_ctx_term(client_context)
+        ! print '(a)', '[ØMQ] Terminating ...'
+        ! rc = zmq_close(client_socket)
+        ! rc = zmq_ctx_term(client_context)
 
-        if (this_image() .eq. 1) then
-            rc = zmq_close(server_socket)
-            rc = zmq_ctx_term(server_context)
-        end if
+        ! if (this_image() .eq. 1) then
+        !    rc = zmq_close(server_socket)
+        !    rc = zmq_ctx_term(server_context)
+        !end if
 
         ! in a Co-Array program there may be no need for MPI_Finalize
         call MPI_FINALIZE(ierror)
@@ -275,6 +275,9 @@ contains
         type(C_PTR), intent(in), value :: ptr
         type(image_spectrum_request_f), pointer :: req
 
+        ! an internal file buffer
+        character(2048) :: buffer
+
         call c_f_pointer(ptr, req)
 
         print *, 'realtime_image_spectrum_request for ', datasetid, ', dx:', req%dx, &
@@ -283,6 +286,12 @@ contains
             &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
             &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
+
+        write (buffer, 10), 'S'
+
+        print *, trim(buffer)
+
+10      format(a)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
