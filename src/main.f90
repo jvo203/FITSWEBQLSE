@@ -73,6 +73,7 @@ program main
 
     ! ØMQ event loop
     do
+        print *, this_image(), 'calling recv_command'
         call recv_command(client_socket)
     end do
 

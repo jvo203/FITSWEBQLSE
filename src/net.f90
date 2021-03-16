@@ -180,7 +180,13 @@ contains
         type(zmq_msg_t)                        :: message
 
         rc = zmq_msg_init(message)
+
+        print *, this_image(), 'zmq_msg_init::rc', rc
+
         nbytes = zmq_msg_recv(message, socket, 0)
+
+        print *, this_image(), 'zmq_msg_recv::nbytes', nbytes
+
         data = zmq_msg_data(message)
 
         call c_f_pointer(data, buffer)
