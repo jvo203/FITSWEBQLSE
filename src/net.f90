@@ -200,7 +200,7 @@ contains
         INTEGER(KIND=C_SIZE_T) :: msg_len
 
         msg_len = len(cmd)
-        rc = zmq_msg_init_data(message, c_loc(cmd), msg_len, c_null_ptr, c_null_ptr)
+        rc = zmq_msg_init_data(message, c_loc(cmd), msg_len, c_null_funptr, c_null_ptr)
         nbytes = zmq_msg_send(message, socket, 0)
     end subroutine send_command
 
