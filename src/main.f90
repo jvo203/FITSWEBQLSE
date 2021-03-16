@@ -51,15 +51,17 @@ program main
         ! start a ØMQ server
         server_context = zmq_ctx_new()
         server_socket = zmq_socket(server_context, ZMQ_PUB)
-        rc = zmq_bind(server_socket, 'tcp://*:50000')
+        rc = zmq_connect(server_socket, 'tcp://127.0.0.1:50000')
 
         print *, this_image(), '[ØMQ] rc', rc
     end if
 
+    sync all
+
     ! start a ØMQ client
     client_context = zmq_ctx_new()
     client_socket = zmq_socket(client_context, ZMQ_SUB)
-    rc = zmq_connect(client_socket, 'tcp://localhost:50000')
+    rc = zmq_connect(client_socket, 'tcp://127.0.0.1:50000')
     print *, this_image(), '[ØMQ] rc', rc
 
     ! Subscribe to all messages

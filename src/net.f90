@@ -185,7 +185,11 @@ contains
 
         call c_f_pointer(data, buffer)
 
-        print *, this_image(), '[ØMQ]', buffer
+        if (nbytes .gt. 0) then
+            print *, this_image(), '[ØMQ]', 'msg len:', nbytes, 'buffer:', buffer
+        end if
+
+        rc = zmq_msg_close(message)
     end subroutine recv_command
 
     subroutine send_command(socket, cmd)
@@ -210,6 +214,8 @@ contains
         nbytes = zmq_msg_send(message, socket, 0)
 
         print *, '[ØMQ] nbytes sent', nbytes
+
+        rc = zmq_msg_close(message)
     end subroutine send_command
 
     subroutine fitswebql_request(uri, n) bind(C)
