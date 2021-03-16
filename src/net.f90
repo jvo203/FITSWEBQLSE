@@ -192,7 +192,7 @@ contains
         use, intrinsic :: iso_c_binding
 
         type(c_ptr), intent(inout) :: socket
-        character(kind=c_char), intent(in) :: cmd(:)
+        character(kind=c_char), intent(in), target :: cmd(:)
 
         integer(kind=c_int)                         :: nbytes
         integer(kind=c_int)                         :: rc
