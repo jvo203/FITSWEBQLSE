@@ -252,7 +252,12 @@ contains
         ! first initialise the whole string with space characters
         ! so that the end of the string can be found later on
         filepath = ' '
-        filepath(1:n) = uri(1:n)
+
+        ! add the command
+        filepath(1:1) = 'L'
+
+        ! add the argument
+        filepath(2:1 + n) = uri(1:n)
 
         ! event post(event_count)
 
