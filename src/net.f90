@@ -287,11 +287,11 @@ contains
             &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
 
-        write (buffer, 10), 'S'
+        write (buffer, 10), req%dx, ' ', req%image, ' ', req%x1, ' ', req%y1, ' ', req%x2, ' ', req%y2, ' '
 
         print *, trim(buffer)
 
-10      format(a)
+10      format(i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
