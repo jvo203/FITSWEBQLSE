@@ -15,6 +15,8 @@ program main
     integer(kind=4), parameter :: MPI_URI = 1000
     logical init
 
+    character(kind=c_char) :: cmd(1024)
+
     ! receives the URI of the FITS file
     ! character(kind=c_char), dimension(:), allocatable :: uri
     character, dimension(1024) :: filepath
@@ -54,28 +56,39 @@ program main
         ! start a ØMQ server
         server_context = zmq_ctx_new()
         server_socket = zmq_socket(server_context, ZMQ_PUB)
-        rc = zmq_connect(server_socket, 'inproc://fzmq')
+        rc = zmq_bind(server_socket, 'tcp://127.0.0.1:50000')
+        ! 'inproc://fzmq')
         ! 'tcp://127.0.0.1:50000')
 
         print *, this_image(), '[ØMQ] rc', rc
+
+        call sleep(5)
+    else
+
+        call sleep(5)
+
+        ! start a ØMQ client
+        client_context = zmq_ctx_new()
+        client_socket = zmq_socket(client_context, ZMQ_SUB)
+        rc = zmq_connect(client_socket, 'tcp://127.0.0.1:50000')
+        ! 'tcp://127.0.0.1:50000')
+        ! 'inproc://fzmq')
+        print *, this_image(), '[ØMQ] rc', rc
+
+        ! Subscribe to all messages
+        rc = zmq_setsockopt(client_socket, ZMQ_SUBSCRIBE, '')
+        print *, this_image(), '[ØMQ] ZMQ_SUBSCRIBE::rc', rc
     end if
 
     call sleep(5)
 
-    ! start a ØMQ client
-    client_context = zmq_ctx_new()
-    client_socket = zmq_socket(client_context, ZMQ_SUB)
-    rc = zmq_bind(client_socket, 'inproc://fzmq')
-    ! 'tcp://127.0.0.1:50000')
-    print *, this_image(), '[ØMQ] rc', rc
-
-    ! Subscribe to all messages
-    rc = zmq_setsockopt(client_socket, ZMQ_SUBSCRIBE, '')
-    print *, this_image(), '[ØMQ] ZMQ_SUBSCRIBE::rc', rc
+    ! send a test message
+    cmd = 'this is a test'
+    if (this_image() .eq. 1) call send_command(server_socket, cmd)
 
     ! ØMQ event loop
     do
-        print *, this_image(), 'calling recv_command'
+        ! print *, this_image(), 'calling recv_command'
         call recv_command(client_socket)
     end do
 

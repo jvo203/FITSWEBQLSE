@@ -181,18 +181,18 @@ contains
 
         rc = zmq_msg_init(message)
 
-        print *, this_image(), 'zmq_msg_init::rc', rc
+        ! print *, this_image(), 'zmq_msg_init::rc', rc
 
         nbytes = zmq_msg_recv(message, socket, 0)
 
-        print *, this_image(), 'zmq_msg_recv::nbytes', nbytes
+        ! print *, this_image(), 'zmq_msg_recv::nbytes', nbytes
 
         data = zmq_msg_data(message)
 
         call c_f_pointer(data, buffer)
 
         if (nbytes .gt. 0) then
-            print *, this_image(), '[ØMQ]', 'msg len:', nbytes, 'buffer:', buffer
+            print *, this_image(), '[ØMQ] msg len:', nbytes, 'buffer:', buffer
         end if
 
         rc = zmq_msg_close(message)
