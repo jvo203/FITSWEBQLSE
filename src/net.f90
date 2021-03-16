@@ -231,7 +231,7 @@ contains
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: uri
         integer :: i
-        integer(kind=4), parameter :: MPI_URI = 1000
+        integer(kind=4), parameter :: MPI_CMD = 1000
         integer :: size, ierror
         integer :: length
         character, dimension(1024) :: filepath
@@ -264,13 +264,13 @@ contains
         ! call send_command(server_socket, filepath(1:n))
 
         do i = 0, size - 1
-            call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
+            call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
         end do
     end subroutine fitswebql_request
 
     subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)
         use, intrinsic :: iso_c_binding
-        use iso_varying_string
+        use mpi
         implicit none
 
         integer(kind=c_size_t), intent(in), value :: n
@@ -278,10 +278,15 @@ contains
         type(C_PTR), intent(in), value :: ptr
         type(image_spectrum_request_f), pointer :: req
 
-        ! an internal file buffer
-        character(2048) :: buffer
+        integer(kind=4), parameter :: MPI_CMD = 1000
+        integer :: size, ierror
 
-        type(varying_string) :: cmd
+        ! an internal file buffer
+        character(1024) :: buffer
+        integer :: i, length
+
+        ! a command to send
+        character, dimension(1024) :: cmd
 
         call c_f_pointer(ptr, req)
 
@@ -296,11 +301,29 @@ contains
         &req%width, ' ', req%height, ' ', req%beam, ' ', req%intensity, ' ', req%frame_start, ' ',&
         &req%frame_end, ' ', req%ref_freq, ' ', req%seq_id, ' ', req%timestamp, ' '
 
-        print *, trim(buffer)
+        cmd = ' '
+
+        length = len(trim(buffer)) + 1
+
+        ! add the command
+        do concurrent(i=1:length)
+            cmd(i) = buffer(i:i)
+        end do
+
+        ! append the datasetid
+        cmd(length + 1:length + 1 + n) = datasetid(1:n)
+
         ! print *, cmd
 
+        ! send the command
+        call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
+
+        do i = 0, size - 1
+            call MPI_SEND(cmd, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
+        end do
+
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                                 & (G16.9), a1, (G16.9), a1, (G16.9), a1, i0, a1, (G16.9), a1)
+                  & (G16.9), a1, (G16.9), a1, (G16.9), a1, i0, a1, (G16.9), a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
