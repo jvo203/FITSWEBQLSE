@@ -41,6 +41,7 @@ program main
 
     ! Subscribe to all messages
     rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, '')
+    print *, '[ØMQ] rc', rc
 
     call recv(socket, value)
     print '("[Thread ", i0, "] Received value ", i0)', omp_get_thread_num(), value
