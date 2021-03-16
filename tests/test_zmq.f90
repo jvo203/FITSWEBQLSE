@@ -24,7 +24,7 @@ program main
 
     ! Sender thread.
     print '("[Thread ", i0, "] Thread created")', omp_get_thread_num()
-    socket = zmq_socket(context, ZMQ_PAIR)
+    socket = zmq_socket(context, ZMQ_PUB)
     rc = zmq_connect(socket, 'inproc://fzmq')
 
     value = 123
@@ -36,8 +36,11 @@ program main
 
     ! Receiver thread.
     print '("[Thread ", i0, "] Thread created")', omp_get_thread_num()
-    socket = zmq_socket(context, ZMQ_PAIR)
+    socket = zmq_socket(context, ZMQ_SUB)
     rc = zmq_bind(socket, 'inproc://fzmq')
+
+    ! Subscribe to all messages
+    rc = zmq_setsockopt(socket, ZMQ_SUBSCRIBE, '')
 
     call recv(socket, value)
     print '("[Thread ", i0, "] Received value ", i0)', omp_get_thread_num(), value
