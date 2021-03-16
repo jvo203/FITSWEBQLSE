@@ -48,21 +48,23 @@ program main
     if (this_image() .eq. 1) call start_http
 
     ! start a ØMQ server
-    !if (this_image() .eq. 1) then
-    !    print '(a)', '[ØMQ] Starting PUBLISHER ...'
+    if (this_image() .eq. 1) then
+        print '(a)', '[ØMQ] Starting PUBLISHER ...'
 
-    ! start a ØMQ server
-    !    server_context = zmq_ctx_new()
-    !    server_socket = zmq_socket(server_context, ZMQ_PUB)
-    !    rc = zmq_bind(server_socket, 'tcp://127.0.0.1:50000')
+        ! start a ØMQ server
+        server_context = zmq_ctx_new()
+        server_socket = zmq_socket(server_context, ZMQ_PUB)
+        rc = zmq_connect(server_socket, 'tcp://127.0.0.1:50000')
 
-    !    print *, this_image(), '[ØMQ] rc', rc
-    !end if
+        print *, this_image(), '[ØMQ] rc', rc
+    end if
+
+    call sleep(5)
 
     ! start a ØMQ client
     client_context = zmq_ctx_new()
     client_socket = zmq_socket(client_context, ZMQ_SUB)
-    rc = zmq_connect(client_socket, 'tcp://127.0.0.1:50000')
+    rc = zmq_bind(client_socket, 'tcp://127.0.0.1:50000')
     print *, this_image(), '[ØMQ] rc', rc
 
     ! Subscribe to all messages
