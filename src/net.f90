@@ -256,11 +256,11 @@ contains
 
         ! event post(event_count)
 
-        call send_command(server_socket, filepath(1:n))
+        ! call send_command(server_socket, filepath(1:n))
 
-        !do i = 0, size - 1
-        !    call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
-        !end do
+        do i = 0, size - 1
+            call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
+        end do
     end subroutine fitswebql_request
 
     subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)
