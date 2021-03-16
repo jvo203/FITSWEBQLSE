@@ -117,14 +117,18 @@ program main
             if (ierror .eq. 0) then
                 count = length(filepath, 1024)
 
-                if (count .gt. 0) then
-                    print *, 'rank', rank, 'filepath:>', filepath(1:count), '<'
+                if (count .gt. 1) then
+                    print *, 'rank', rank, '|', filepath(1:count), '|'
 
-                    do i = 1, count
-                        filename(i:i) = filepath(i)
-                    end do
+                    ! decipher the command
+                    if (filepath(1) .eq. 'L') then
 
-                    call load_fits_file(filename)
+                        do i = 1, count - 1
+                            filename(i:i) = filepath(i + 1)
+                        end do
+
+                        call load_fits_file(filename)
+                    end if
                 end if
             end if
 
