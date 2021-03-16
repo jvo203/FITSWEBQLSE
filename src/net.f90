@@ -199,9 +199,17 @@ contains
         type(zmq_msg_t)                             :: message
         INTEGER(KIND=C_SIZE_T) :: msg_len
 
-        msg_len = len(cmd)
+        msg_len = size(cmd)
+
+        print *, '[ØMQ] msg_len:', msg_len
+
         rc = zmq_msg_init_data(message, c_loc(cmd), msg_len, c_null_funptr, c_null_ptr)
+
+        print *, '[ØMQ] zmq_msg_init_data::rc', rc
+
         nbytes = zmq_msg_send(message, socket, 0)
+
+        print *, '[ØMQ] nbytes sent', nbytes
     end subroutine send_command
 
     subroutine fitswebql_request(uri, n) bind(C)
@@ -236,9 +244,11 @@ contains
 
         ! event post(event_count)
 
-        do i = 0, size - 1
-            call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
-        end do
+        call send_command(server_socket, filepath(1:n))
+
+        !do i = 0, size - 1
+        !    call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_URI, MPI_COMM_WORLD, ierror)
+        !end do
     end subroutine fitswebql_request
 
     subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)
