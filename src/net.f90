@@ -288,12 +288,13 @@ contains
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
 
         write (buffer, 10), req%dx, ' ', req%image, ' ', req%x1, ' ', req%y1, ' ', req%x2, ' ', req%y2, ' ',&
-        &req%width, ' ', req%height, ' ', req%beam, ' ', req%intensity, ' ', req%frame_start, ' '
+        &req%width, ' ', req%height, ' ', req%beam, ' ', req%intensity, ' ', req%frame_start, ' ',&
+        &req%frame_end, ' ', req%ref_freq, ' ', req%seq_id, ' ', req%timestamp, ' '
 
         print *, trim(buffer)
 
 10      format(i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                  &(G16.9), ' ')
+             & (G16.9), a1, (G16.9), a1, (G16.9), a1, i0, a1, (G16.9), a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
