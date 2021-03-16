@@ -44,17 +44,20 @@ program main
     ! create a new hash table for storing the datasets
     call init_hash_table
 
+    ! start an external libmicrohttpd server
+    if (this_image() .eq. 1) call start_http
+
     ! start a ØMQ server
-    if (this_image() .eq. 1) then
-        print '(a)', '[ØMQ] Starting PUBLISHER ...'
+    !if (this_image() .eq. 1) then
+    !    print '(a)', '[ØMQ] Starting PUBLISHER ...'
 
-        ! start a ØMQ server
-        server_context = zmq_ctx_new()
-        server_socket = zmq_socket(server_context, ZMQ_PUB)
-        rc = zmq_bind(server_socket, 'tcp://127.0.0.1:50000')
+    ! start a ØMQ server
+    !    server_context = zmq_ctx_new()
+    !    server_socket = zmq_socket(server_context, ZMQ_PUB)
+    !    rc = zmq_bind(server_socket, 'tcp://127.0.0.1:50000')
 
-        print *, this_image(), '[ØMQ] rc', rc
-    end if
+    !    print *, this_image(), '[ØMQ] rc', rc
+    !end if
 
     ! start a ØMQ client
     client_context = zmq_ctx_new()
@@ -65,9 +68,6 @@ program main
     ! Subscribe to all messages
     rc = zmq_setsockopt(client_socket, ZMQ_SUBSCRIBE, '')
     print *, this_image(), '[ØMQ] ZMQ_SUBSCRIBE::rc', rc
-
-    ! start an external libmicrohttpd server
-    if (this_image() .eq. 1) call start_http
 
     ! ØMQ event loop
     do
