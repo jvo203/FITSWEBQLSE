@@ -93,7 +93,8 @@ mpi:
 	$(FORT) -Ofast -xHost test.f90 -o test
 
 zmq:
-	$(FORT) -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp src/zmq.f90 tests/test_zmq.f90 -o test_zmq -lzmq -lczmq
+#$(FORT) -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp src/zmq.f90 tests/test_zmq.f90 -o test_zmq -lzmq -lczmq
+	gfortran -Ofast -fopenmp src/zmq.f90 tests/test_zmq.f90 -o test_zmq -L/usr/local/lib -lzmq -lczmq
 
 zfp:
 #$(CC) $(CFLAGS) tests/zfp_compress.c -o zfp_compress -lzfp
