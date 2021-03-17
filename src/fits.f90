@@ -12,6 +12,35 @@ module fits
         integer(kind=c_intptr_t) :: i = 0
     end type gmutex
 
+    enum, bind(C)
+        enumerator circle
+        enumerator square
+    end enum
+
+    enum, bind(C)
+        enumerator mean
+        enumerator integrated
+    end enum
+
+    enum, bind(C)
+        enumerator low
+        enumerator medium
+        enumerator high
+    end enum
+
+    type, bind(c) :: image_spectrum_request_f
+        integer(kind=c_int) :: dx
+        logical(kind=c_bool) :: image
+        integer(kind(medium)) :: quality
+        integer(c_int) :: x1, y1, x2, y2
+        integer(c_int) :: width, height
+        integer(kind(circle)) :: beam
+        integer(kind(medium)) :: intensity
+        real(c_double) :: frame_start, frame_end, ref_freq
+        integer(c_int) :: seq_id
+        real(c_float) :: timestamp
+    end type image_spectrum_request_f
+
     type dataset
         character(kind=c_char), dimension(:), allocatable :: datasetid
         ! the id will be made by hashing the dataset uri
