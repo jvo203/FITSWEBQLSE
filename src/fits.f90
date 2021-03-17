@@ -547,6 +547,7 @@ contains
         type(c_ptr) :: item_ptr
         type(dataset), pointer :: item
 
+        real, allocatable :: spectrum(:) [:]
         logical, save :: bSuccess[*]
 
         bSuccess = .true.
@@ -563,24 +564,26 @@ contains
         i = i + 1
 
         ! exit if we have overstepped the original command length
-        if (i .gt. str_len) return
-
-        new_len = str_len - i + 1
-
-        ! allocate enough space for the id plus a C string ending character
-        allocate (datasetid(new_len + 1))
-
-        datasetid(1:new_len) = cmd(i:str_len)
-        datasetid(new_len + 1) = c_null_char
-
-        item_ptr = get_dataset(datasetid)
-
-        if (.not. c_associated(item_ptr)) then
-            print *, this_image(), 'OOPS!, cannot find ', datasetid
+        if (i .gt. str_len) then
             bSuccess = .false.
+        else
+            new_len = str_len - i + 1
+
+            ! allocate enough space for the id plus a C string ending character
+            allocate (datasetid(new_len + 1))
+
+            datasetid(1:new_len) = cmd(i:str_len)
+            datasetid(new_len + 1) = c_null_char
+
+            item_ptr = get_dataset(datasetid)
+
+            if (.not. c_associated(item_ptr)) then
+                print *, this_image(), 'OOPS!, cannot find ', datasetid
+                bSuccess = .false.
+            end if
         end if
 
-        ! is there a valid dataset on all nodes
+        ! have we got a valid dataset on all nodes
         call co_reduce(bSuccess, logical_and)
 
         if (.not. bSuccess) then
