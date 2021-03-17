@@ -297,7 +297,7 @@ contains
             &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
 
-        write (buffer, 10), 'S', req%dx, ' ', req%image, ' ', req%x1, ' ', req%y1, ' ', req%x2, ' ', req%y2, ' ',&
+        write (buffer, 10) 'S', req%dx, ' ', req%image, ' ', req%x1, ' ', req%y1, ' ', req%x2, ' ', req%y2, ' ',&
         &req%width, ' ', req%height, ' ', req%beam, ' ', req%intensity, ' ', req%frame_start, ' ',&
         &req%frame_end, ' ', req%ref_freq, ' ', req%seq_id, ' ', req%timestamp, ' '
 
