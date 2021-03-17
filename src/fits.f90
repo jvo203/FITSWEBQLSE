@@ -547,6 +547,10 @@ contains
         type(c_ptr) :: item_ptr
         type(dataset), pointer :: item
 
+        logical, save :: bSuccess[*]
+
+        bSuccess = .true.
+
         str_len = size(cmd)
 
         ! work from the end, processing characters one by one
@@ -569,14 +573,23 @@ contains
         datasetid(1:new_len) = cmd(i:str_len)
         datasetid(new_len + 1) = c_null_char
 
-        if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', datasetid
-
         item_ptr = get_dataset(datasetid)
 
         if (.not. c_associated(item_ptr)) then
             print *, this_image(), 'OOPS!, cannot find ', datasetid
+            bSuccess = .false.
+        end if
+
+        ! is there a valid dataset on all nodes
+        call co_reduce(bSuccess, logical_and)
+
+        if (.not. bSuccess) then
             return
         end if
+
+        call c_f_pointer(item_ptr, item)
+
+        if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', item%datasetid
 
     end subroutine handle_realtime_image_spectrum
 
