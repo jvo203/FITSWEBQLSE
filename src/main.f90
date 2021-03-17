@@ -116,9 +116,11 @@ program main
                 count = length(cmd, 1024)
 
                 if (count .gt. 1) then
-                    print *, 'rank', rank, '|', cmd(1:count), '|'
+                    print *, 'rank', rank, '"', cmd(1:count), '"'
 
                     ! decipher the command
+
+                    ! load FITS file requests
                     if (cmd(1) .eq. 'L') then
 
                         do i = 1, count - 1
@@ -126,6 +128,12 @@ program main
                         end do
 
                         call load_fits_file(filename)
+                    end if
+
+                    ! WebSocket realtime image/spectrum requests
+                    if (cmd(1) .eq. 'S') then
+                        count = reverse_length(cmd, 1024)
+                        print *, 'rank', rank, '"', cmd(1:count), '"'
                     end if
                 end if
             end if
@@ -145,6 +153,7 @@ contains
             return
         end if
 
+        ! search until a blank character is found
         do i = 1, n
             if (string(i) .eq. ' ') then
                 length = i - 1
@@ -154,5 +163,26 @@ contains
 
         length = n
     end function length
+
+    integer function reverse_length(string, n)
+        character, dimension(n), intent(in) :: string
+        integer, intent(in) :: n
+        integer :: i
+
+        if (n .le. 0) then
+            reverse_length = 0
+            return
+        end if
+
+        ! find the first non-blank character from the end
+        do i = n, 1, -1
+            if (string(i) .ne. ' ') then
+                reverse_length = i
+                return
+            end if
+        end do
+
+        reverse_length = 0
+    end function reverse_length
 
 end program main
