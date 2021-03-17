@@ -629,9 +629,9 @@ contains
             buffer(i:i) = cmd(i)
         end do
 
-        if (this_image() .eq. 1) print *, trim(buffer)
-        ! read (buffer, 10) req%dx
-        read (buffer, *) req%dx, req%image, req%quality, req%x1
+        read (buffer, *) req%dx, req%image, req%quality, req%x1, req%y1, req%x2, req%y2, &
+        &req%width, req%height, req%beam, req%intensity, req%frame_start,&
+        &req%frame_end, req%ref_freq, req%seq_id, req%timestamp
 
         if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', item%datasetid,&
         &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
@@ -640,7 +640,6 @@ contains
             &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
 
-10      format(i0)
     end subroutine handle_realtime_image_spectrum
 
     pure function logical_and(a, b)
