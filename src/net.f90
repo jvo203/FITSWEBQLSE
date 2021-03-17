@@ -323,7 +323,7 @@ contains
         end do
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                  & (G16.9), a1, (G16.9), a1, (G16.9), a1, i0, a1, (G16.9), a1)
+             & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
