@@ -3,7 +3,7 @@ module json_for
     implicit none
 
     ! character(len=*), parameter :: form = '(E30.16E3)'
-    character(len=*), parameter :: form = '(G16.9)'
+    character(len=*), parameter :: form = '(G24.16)'
 contains
     subroutine json_add_string(json, key, val)
         type(varying_string), intent(inout) :: json
@@ -86,7 +86,7 @@ contains
         character(len=*), intent(in) :: key
         integer, intent(in) :: val
 
-        character(32) :: tmp
+        character(64) :: tmp
 
         write (tmp, '(i0)') val
 
@@ -99,7 +99,7 @@ contains
         character(len=*), intent(in) :: key
         integer(kind=8), intent(in) :: val
 
-        character(32) :: tmp
+        character(64) :: tmp
 
         write (tmp, '(i0)') val
 
@@ -112,7 +112,7 @@ contains
         character(len=*), intent(in) :: key
         real, intent(in) :: val
 
-        character(32) :: tmp
+        character(64) :: tmp
 
         if (isnan(val)) then
             tmp = 'null'
@@ -130,7 +130,7 @@ contains
         integer, dimension(:), intent(in) :: values
         integer :: i, n
 
-        character(32) :: tmp
+        character(64) :: tmp
 
         n = size(values)
 
@@ -164,7 +164,7 @@ contains
         real :: val
         integer :: i, n
 
-        character(32) :: tmp
+        character(64) :: tmp
 
         n = size(values)
 
