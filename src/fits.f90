@@ -575,6 +575,7 @@ contains
 
         type(c_ptr) :: item_ptr
         type(dataset), pointer :: item
+        type(image_spectrum_request_f) :: req
 
         real, allocatable :: spectrum(:) [:]
         logical, save :: bSuccess[*]
