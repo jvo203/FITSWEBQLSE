@@ -130,6 +130,14 @@ module fits
             type(c_ptr), value :: item
         end subroutine insert_dataset
 
+        ! void *get_dataset(const char *datasetid);
+        type(c_ptr) function get_dataset(datasetid) BIND(C, name='get_dataset')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            character(kind=c_char), intent(in) :: datasetid(*)
+        end function get_dataset
+
         ! parallel sort void psrs_sort(float *a, int n);
         subroutine psrs_sort(a, n) BIND(C, name='psrs_sort')
             use, intrinsic :: ISO_C_BINDING
@@ -535,6 +543,8 @@ contains
 
         character(kind=c_char), dimension(:), allocatable :: datasetid
         integer :: i, str_len, new_len
+
+        type(c_ptr) :: item_ptr
         type(dataset), pointer :: item
 
         str_len = size(cmd)
@@ -560,6 +570,13 @@ contains
         datasetid(new_len + 1) = c_null_char
 
         if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', datasetid
+
+        item_ptr = get_dataset(datasetid)
+
+        if (.not. c_associated(item_ptr)) then
+            print *, this_image(), 'OOPS!, cannot find ', datasetid
+            return
+        end if
 
     end subroutine handle_realtime_image_spectrum
 
