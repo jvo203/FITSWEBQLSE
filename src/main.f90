@@ -133,7 +133,9 @@ program main
                     ! WebSocket realtime image/spectrum requests
                     if (cmd(1) .eq. 'S') then
                         count = reverse_length(cmd, 1024)
-                        print *, 'rank', rank, '"', cmd(2:count), '"'
+                        ! print *, 'rank', rank, '"', cmd(2:count), '"'
+
+                        call calculate_realtime_spectrum(cmd(2:count))
                     end if
                 end if
             end if
