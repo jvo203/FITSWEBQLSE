@@ -622,8 +622,16 @@ contains
 
         call c_f_pointer(item_ptr, item)
 
-        if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', item%datasetid
+        read (cmd, 10) req%dx
 
+        if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', item%datasetid,&
+        &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
+            &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
+            &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
+            &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
+            req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
+
+10      format(i0)
     end subroutine handle_realtime_image_spectrum
 
     pure function logical_and(a, b)
