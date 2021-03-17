@@ -570,6 +570,8 @@ contains
         implicit none
         character, intent(in) :: cmd(:)
 
+        character(1024) :: buffer
+
         character(kind=c_char), dimension(:), allocatable :: datasetid
         integer :: i, str_len, new_len
 
@@ -622,7 +624,13 @@ contains
 
         call c_f_pointer(item_ptr, item)
 
-        read (cmd, 10) req%dx
+        buffer = ''
+        do concurrent(i=1:str_len)
+            buffer(i:i) = cmd(i)
+        end do
+
+        if (this_image() .eq. 1) print *, trim(buffer)
+        read (buffer, 10) req%dx
 
         if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', item%datasetid,&
         &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
