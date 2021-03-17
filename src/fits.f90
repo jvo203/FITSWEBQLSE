@@ -529,12 +529,14 @@ contains
 
     end subroutine load_fits_file
 
-    subroutine calculate_realtime_spectrum(cmd)
+    subroutine handle_realtime_image_spectrum(cmd)
         implicit none
         character, intent(in) :: cmd(:)
 
+        character(kind=c_char), dimension(:), allocatable :: datasetid
+
         type(dataset), pointer :: item
-    end subroutine calculate_realtime_spectrum
+    end subroutine handle_realtime_image_spectrum
 
     pure function logical_and(a, b)
         logical, value :: a, b
