@@ -4,35 +4,6 @@ module net
     use, intrinsic :: iso_c_binding
     implicit none
 
-    enum, bind(C)
-        enumerator circle
-        enumerator square
-    end enum
-
-    enum, bind(C)
-        enumerator mean
-        enumerator integrated
-    end enum
-
-    enum, bind(C)
-        enumerator low
-        enumerator medium
-        enumerator high
-    end enum
-
-    type, bind(c) :: image_spectrum_request_f
-        integer(kind=c_int) :: dx
-        logical(kind=c_bool) :: image
-        integer(kind(medium)) :: quality
-        integer(c_int) :: x1, y1, x2, y2
-        integer(c_int) :: width, height
-        integer(kind(circle)) :: beam
-        integer(kind(medium)) :: intensity
-        real(c_double) :: frame_start, frame_end, ref_freq
-        integer(c_int) :: seq_id
-        real(c_float) :: timestamp
-    end type image_spectrum_request_f
-
     ! ØMQ
     integer :: rc
     type(c_ptr)     :: server_context, client_context
@@ -271,6 +242,7 @@ contains
     subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)
         use, intrinsic :: iso_c_binding
         use mpi
+        use fits
         implicit none
 
         integer(kind=c_size_t), intent(in), value :: n
@@ -323,7 +295,7 @@ contains
         end do
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-             & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
+                       & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
