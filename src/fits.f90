@@ -534,8 +534,33 @@ contains
         character, intent(in) :: cmd(:)
 
         character(kind=c_char), dimension(:), allocatable :: datasetid
-
+        integer :: i, str_len, new_len
         type(dataset), pointer :: item
+
+        str_len = size(cmd)
+
+        ! work from the end, processing characters one by one
+        ! exit upon encountering the first blank ' '
+        do i = str_len, 1, -1
+            if (cmd(i) .eq. ' ') exit
+        end do
+
+        ! move forward by one
+        i = i + 1
+
+        ! exit if we have overstepped the original command length
+        if (i .gt. str_len) return
+
+        new_len = str_len - i + 1
+
+        ! allocate enough space for the id plus a C string ending character
+        allocate (datasetid(new_len + 1))
+
+        datasetid(1:new_len) = cmd(i:str_len)
+        datasetid(new_len + 1) = c_null_char
+
+        if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', datasetid
+
     end subroutine handle_realtime_image_spectrum
 
     pure function logical_and(a, b)
