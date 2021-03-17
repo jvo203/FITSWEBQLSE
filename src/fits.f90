@@ -630,7 +630,8 @@ contains
         end do
 
         if (this_image() .eq. 1) print *, trim(buffer)
-        read (buffer, 10) req%dx
+        ! read (buffer, 10) req%dx
+        read (buffer, *) req%dx, req%image, req%quality, req%x1
 
         if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', item%datasetid,&
         &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
