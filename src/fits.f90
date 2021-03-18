@@ -1419,7 +1419,7 @@ contains
 
     subroutine get_spectrum_range(item, frame_start, frame_end, ref_freq, first, last)
         type(dataset), pointer, intent(in) :: item
-        real, intent(in) :: frame_start, frame_end, ref_freq
+        real(kind=8), intent(in) :: frame_start, frame_end, ref_freq
         integer, intent(out) :: first, last
 
     end subroutine get_spectrum_range
