@@ -678,7 +678,15 @@ contains
 
         ! read a range of 2D planes in parallel on each image
         block
-            integer tid, start, end, num_per_image
+            integer tid, start, end, num_per_image, npixels, frame
+            integer, dimension(4) :: fpixels, lpixels, incs
+            integer status, group
+            integer x1, x2, y1, y2, cx, cy, r, r2
+            logical average, anynull
+            real cdelt3, nullval
+
+            ! local (image) buffers
+            real(kind=4), allocatable :: local_buffer(:)
 
             tid = this_image()
             num_per_image = length/num_images()
@@ -686,6 +694,53 @@ contains
             end = min(tid*num_per_image, last)
             num_per_image = end - start + 1
             ! print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
+
+            ! sanity checks
+            x1 = max(1, req%x1)
+            y1 = max(1, req%y1)
+            x2 = min(item%naxes(1), req%x2)
+            y2 = min(item%naxes(2), req%y2)
+
+            if (req%intensity .eq. mean) then
+                average = .true.
+            else
+                average = .false.
+            end if
+
+            call get_cdelt3(item, cdelt3)
+
+            npixels = (x2 - x1 + 1)*(y2 - y1 + 1)
+
+            allocate (local_buffer(npixels))
+            allocate (pixels(npixels) [*])
+            allocate (mask(npixels) [*])
+
+            group = 1
+            nullval = 0
+
+            do frame = start, end
+                ! starting bounds
+                fpixels = (/x1, y1, frame, 1/)
+
+                ! ending bounds
+                lpixels = (/x2, y2, frame, 1/)
+
+                ! do not skip over any pixels
+                incs = 1
+
+                ! fetch a region from the FITS file
+                call ftgsve(item%unit, group, item%naxis, item%naxes,&
+                & fpixels, lpixels, incs, nullval, local_buffer, anynull, status)
+
+                ! abort loop upon errors
+                if (status .ne. 0) then
+                    print *, this_image(), 'error fetching frame', frame, 'X:', x1, x2, 'Y:', y1, y2
+                    bSuccess = .false.
+                    exit
+                end if
+
+            end do
+
         end block
 
     end subroutine handle_realtime_image_spectrum
