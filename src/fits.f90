@@ -1511,6 +1511,14 @@ contains
 
     end subroutine get_freq2vel_bounds
 
+    subroutine get_frequency_bounds(item, frame_start, frame_end, first, last)
+        type(dataset), pointer, intent(in) :: item
+        real(kind=8), intent(in) :: frame_start, frame_end
+        integer, intent(out) :: first, last
+        integer :: tmp
+
+    end subroutine get_frequency_bounds
+
     subroutine make_image_statistics(item)
         implicit NONE
 
