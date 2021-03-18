@@ -56,12 +56,12 @@ module fits
         character cunit1*70, ctype1*70
         character cunit2*70, ctype2*70
         character cunit3*70, ctype3*70
-        real(kind=8) :: ignrval, restfrq, bmaj, bmin, bpa
-        real(kind=8) crval1, cdelt1, crpix1
-        real(kind=8) crval2, cdelt2, crpix2
-        real(kind=8) crval3, cdelt3, crpix3
-        real(kind=8) obsra, obsdec, datamin, datamax
-        real(kind=8) cd1_1, cd1_2, cd2_1, cd2_2
+        real :: ignrval, restfrq, bmaj, bmin, bpa
+        real crval1, cdelt1, crpix1
+        real crval2, cdelt2, crpix2
+        real crval3, cdelt3, crpix3
+        real obsra, obsdec, datamin, datamax
+        real cd1_1, cd1_2, cd2_1, cd2_2
 
         ! extras
         real :: frame_multiplier = 1.0
