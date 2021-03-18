@@ -1493,8 +1493,8 @@ contains
 
         ! reverse the direction
         if (item%cdelt3 .lt. 0.0) then
-            first = item%naxes(3) - first
-            last = item%naxes(3) - last
+            first = 1 + item%naxes(3) - first
+            last = 1 + item%naxes(3) - last
         end if
 
         ! impose ordering
