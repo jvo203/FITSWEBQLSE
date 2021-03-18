@@ -1511,13 +1511,87 @@ contains
 
     end subroutine get_freq2vel_bounds
 
-    subroutine get_frequency_bounds(item, frame_start, frame_end, first, last)
+    subroutine get_frequency_bounds(item, freq_start, freq_end, first, last)
         type(dataset), pointer, intent(in) :: item
-        real(kind=8), intent(in) :: frame_start, frame_end
+        real(kind=8), intent(in) :: freq_start, freq_end
         integer, intent(out) :: first, last
         integer :: tmp
 
+        real(kind=8) :: f1, f2, band_lo, band_hi
+
+        first = 0
+        last = 0
+
+        if ((freq_start .eq. 0.0) .or. (freq_end .eq. 0.0)) then
+            first = 1
+            last = item%naxes(3)
+            return
+        end if
+
+        f1 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(1.0 - item%crpix3)
+        f2 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(item%naxes(3) - item%crpix3)
+
+        band_lo = min(f1, f2)
+        band_hi = max(f1, f2)
+
+        if (item%cdelt3 .gt. 0.0) then
+            first = 1 + nint((freq_start - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            last = 1 + nint((freq_end - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
+        else
+            first = 1 + nint((band_hi - freq_start)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            last = 1 + nint((band_hi - freq_end)/(band_hi - band_lo)*(item%naxes(3) - 1))
+        end if
+
+        ! impose ordering
+        if (last .lt. first) then
+            tmp = first
+            first = last
+            last = tmp
+        end if
+
+        if (first .lt. 1) first = 1
+        if (last .gt. item%naxes(3)) last = item%naxes(3)
+
+        return
+
     end subroutine get_frequency_bounds
+
+    subroutine get_velocity_bounds(item, vel_start, vel_end, first, last)
+        type(dataset), pointer, intent(in) :: item
+        real(kind=8), intent(in) :: vel_start, vel_end
+        integer, intent(out) :: first, last
+        integer :: tmp
+
+        real(kind=8) :: v1, v2, band_lo, band_hi
+
+        first = 0
+        last = 0
+
+        if (.not. item%header) return
+
+        if (item%naxes(3) .le. 1) return
+
+        if (item%cdelt3 .gt. 0.0) then
+            first = nint((vel_start - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            last = nint((vel_end - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
+        else
+            first = nint((band_hi - vel_start)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            last = nint((band_hi - vel_end)/(band_hi - band_lo)*(item%naxes(3) - 1))
+        end if
+
+        ! impose ordering
+        if (last .lt. first) then
+            tmp = first
+            first = last
+            last = tmp
+        end if
+
+        if (first .lt. 1) first = 1
+        if (last .gt. item%naxes(3)) last = item%naxes(3)
+
+        return
+
+    end subroutine get_velocity_bounds
 
     subroutine make_image_statistics(item)
         implicit NONE
