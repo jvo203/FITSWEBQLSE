@@ -595,8 +595,14 @@ contains
         type(dataset), pointer :: item
         type(image_spectrum_request_f) :: req
 
+        ! co-array variables
+        real(kind=4), allocatable :: pixels(:) [:]
+        logical(kind=1), allocatable :: mask(:) [:]
         real, allocatable :: spectrum(:) [:]
         logical, save :: bSuccess[*]
+
+        ! calculation range
+        integer :: first, last
 
         bSuccess = .true.
 
@@ -1410,6 +1416,12 @@ contains
             cdelt3 = 1.0
         end if
     end subroutine get_cdelt3
+
+    subroutine get_spectrum_range(item, frame_start, frame_end, ref_freq, first, last)
+        type(dataset), pointer, intent(in) :: item
+        real, intent(in) :: frame_start, frame_end, ref_freq
+        integer, intent(out) :: first, last
+    end subroutine get_spectrum_range
 
     subroutine make_image_statistics(item)
         implicit NONE
