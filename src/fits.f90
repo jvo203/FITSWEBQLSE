@@ -668,7 +668,11 @@ contains
         ! get the range of the cube planes
         call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
-        if (this_image() .eq. 1) print *, this_image(), 'first:', first, 'last:', last, 'depth:', item%naxes(3)
+        if (this_image() .eq. 1) print *, 'first:', first, 'last:', last, 'depth:', item%naxes(3)
+
+        ! allocate and zero-out the spectrum
+        allocate (spectrum(first:last) [*])
+        spectrum = 0.0
 
     end subroutine handle_realtime_image_spectrum
 
