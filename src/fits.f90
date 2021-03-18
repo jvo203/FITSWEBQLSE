@@ -291,6 +291,19 @@ contains
 
     end subroutine set_header_status
 
+    subroutine reset_clock(item)
+        type(dataset), pointer, intent(inout) :: item
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%progress_mtx))
+
+        call system_clock(item%start_time)
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%progress_mtx))
+
+    end subroutine reset_clock
+
     subroutine update_progress(item, progress, total)
         type(dataset), pointer, intent(inout) :: item
         integer, intent(in) :: progress, total
@@ -562,6 +575,9 @@ contains
                 print *, item%datasetid, ': error:', item%error, 'pixels:', shape(item%pixels), 'mask:', shape(item%mask)
                 call print_dataset(item)
             end if
+
+            ! reset the timeout clock
+            call reset_clock(item)
         end if
 
     end subroutine load_fits_file
@@ -623,6 +639,9 @@ contains
         end if
 
         call c_f_pointer(item_ptr, item)
+
+        ! reset the timeout clock
+        call reset_clock(item)
 
         buffer = ''
         do concurrent(i=1:str_len)
