@@ -602,7 +602,7 @@ contains
         logical, save :: bSuccess[*]
 
         ! calculation range
-        integer :: first, last
+        integer :: first, last, length
 
         bSuccess = .true.
 
@@ -668,11 +668,25 @@ contains
         ! get the range of the cube planes
         call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
-        if (this_image() .eq. 1) print *, 'first:', first, 'last:', last, 'depth:', item%naxes(3)
+        length = last - first + 1
+
+        if (this_image() .eq. 1) print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
 
         ! allocate and zero-out the spectrum
         allocate (spectrum(first:last) [*])
         spectrum = 0.0
+
+        ! read a range of 2D planes in parallel on each image
+        block
+            integer tid, start, end, num_per_image
+
+            tid = this_image()
+            num_per_image = length/num_images()
+            start = first + (tid - 1)*num_per_image
+            end = min(tid*num_per_image, last)
+            num_per_image = end - start + 1
+            print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
+        end block
 
     end subroutine handle_realtime_image_spectrum
 
