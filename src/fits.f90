@@ -1572,11 +1572,11 @@ contains
         if (item%naxes(3) .le. 1) return
 
         if (item%cdelt3 .gt. 0.0) then
-            first = nint((vel_start - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
-            last = nint((vel_end - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            first = 1 + nint((vel_start - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            last = 1 + nint((vel_end - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
         else
-            first = nint((band_hi - vel_start)/(band_hi - band_lo)*(item%naxes(3) - 1))
-            last = nint((band_hi - vel_end)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            first = 1 + nint((band_hi - vel_start)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            last = 1 + nint((band_hi - vel_end)/(band_hi - band_lo)*(item%naxes(3) - 1))
         end if
 
         ! impose ordering
