@@ -110,7 +110,7 @@ contains
     subroutine json_add_real_number(json, key, val)
         type(varying_string), intent(inout) :: json
         character(len=*), intent(in) :: key
-        real(kind=8), intent(in) :: val
+        real, intent(in) :: val
 
         character(64) :: tmp
 
@@ -160,8 +160,8 @@ contains
     subroutine json_add_real_array(json, key, values)
         type(varying_string), intent(inout) :: json
         character(len=*), intent(in) :: key
-        real(kind=8), dimension(:), intent(in) :: values
-        real(kind=8) :: val
+        real, dimension(:), intent(in) :: values
+        real :: val
         integer :: i, n
 
         character(64) :: tmp
