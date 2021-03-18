@@ -743,6 +743,12 @@ contains
 
         end block
 
+        call co_reduce(bSuccess, logical_and)
+
+        if (.not. bSuccess) then
+            return
+        end if
+
     end subroutine handle_realtime_image_spectrum
 
     pure function logical_and(a, b)
