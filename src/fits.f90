@@ -665,6 +665,11 @@ contains
             &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
 
+        ! get the range of the cube planes
+        call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
+
+        if (this_image() .eq. 1) print *, this_image(), 'first:', first, 'last:', last, 'depth:', item%naxes(3)
+
     end subroutine handle_realtime_image_spectrum
 
     pure function logical_and(a, b)
