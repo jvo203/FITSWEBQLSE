@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-03-12.2";
+	return "JS2021-03-18.0";
 }
 
 const wasm_supported = (() => {
@@ -9868,10 +9868,10 @@ function setup_image_selection() {
 							dx: dx,
 							image: false,
 							quality: image_quality,
-							x1: x1,
-							y1: y1,
-							x2: x2,
-							y2: y2,
+							x1: x1 + 1,
+							y1: y1 + 1,
+							x2: x2 + 1,
+							y2: y2 + 1,
 							width: _width,
 							height: _height,
 							beam: zoom_shape,
@@ -11043,10 +11043,10 @@ function imageTimeout() {
 			dx: dx,
 			image: image_update,
 			quality: image_quality,
-			x1: x1,
-			y1: y1,
-			x2: x2,
-			y2: y2,
+			x1: x1 + 1,
+			y1: y1 + 1,
+			x2: x2 + 1,
+			y2: y2 + 1,
 			width: _width,
 			height: _height,
 			beam: zoom_shape,
