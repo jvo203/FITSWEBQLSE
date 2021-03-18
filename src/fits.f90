@@ -1427,6 +1427,26 @@ contains
         real(kind=8), intent(in) :: frame_start, frame_end, ref_freq
         integer, intent(out) :: first, last
 
+        first = 0
+        last = 0
+
+        if (item%naxes(3) .lt. 1) return
+
+        if (item%has_velocity .and. ref_freq .gt. 0.0) then
+            call get_freq2vel_bounds(frame_start, frame_end, ref_freq, first, last)
+            return
+        end if
+
+        if (item%has_frequency .and. ref_freq .gt. 0.0) then
+            call get_frequency_bounds(frame_start, frame_end, first, last)
+            return
+        end if
+
+        if (item%has_velocity) then
+            call get_velocity_bounds(frame_start, frame_end, first, last)
+            return
+        end if
+
     end subroutine get_spectrum_range
 
     subroutine make_image_statistics(item)
