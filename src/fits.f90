@@ -1430,24 +1430,86 @@ contains
         first = 0
         last = 0
 
-        if (item%naxes(3) .lt. 1) return
+        if (item%naxes(3) .le. 1) return
 
         if (item%has_velocity .and. ref_freq .gt. 0.0) then
-            call get_freq2vel_bounds(frame_start, frame_end, ref_freq, first, last)
+            call get_freq2vel_bounds(item, frame_start, frame_end, ref_freq, first, last)
             return
         end if
 
         if (item%has_frequency .and. ref_freq .gt. 0.0) then
-            call get_frequency_bounds(frame_start, frame_end, first, last)
+            call get_frequency_bounds(item, frame_start, frame_end, first, last)
             return
         end if
 
         if (item%has_velocity) then
-            call get_velocity_bounds(frame_start, frame_end, first, last)
+            call get_velocity_bounds(item, frame_start, frame_end, first, last)
             return
         end if
 
     end subroutine get_spectrum_range
+
+    subroutine get_freq2vel_bounds(item, frame_start, frame_end, ref_freq, first, last)
+        type(dataset), pointer, intent(in) :: item
+        real(kind=8), intent(in) :: frame_start, frame_end, ref_freq
+        integer, intent(out) :: first, last
+        integer :: tmp
+
+        ! the speed of light [m/s]
+        real(kind=8), parameter :: c = 299792458.0
+        real(kind=8) :: fRatio, v1, v2, RESTFRQ
+        real(kind=8) :: x1, x2
+
+        first = 0
+        last = 0
+
+        if (.not. item%header) return
+
+        if (item%naxes(3) .le. 1) return
+
+        if ((item%restfrq .le. 0.0) .and. (ref_freq .le. 0.0)) then
+            first = 1
+            last = item%naxes(3)
+            return
+        end if
+
+        if (ref_freq .gt. 0.0) then
+            RESTFRQ = ref_freq
+        else
+            RESTFRQ = item%restfrq
+        end if
+
+        fRatio = frame_start/RESTFRQ
+        v1 = (1.0 - fRatio*fRatio)/(1.0 + fRatio*fRatio)*c
+
+        fRatio = frame_end/RESTFRQ
+        v2 = (1.0 - fRatio*fRatio)/(1.0 + fRatio*fRatio)*c
+
+        x1 = item%crpix3 + (v1 - item%crval3*item%frame_multiplier)/(item%cdelt3*item%frame_multiplier)
+        x2 = item%crpix3 + (v2 - item%crval3*item%frame_multiplier)/(item%cdelt3*item%frame_multiplier)
+
+        first = nint(x1)
+        last = nint(x2)
+
+        ! reverse the direction
+        if (item%cdelt3 .lt. 0.0) then
+            first = item%naxes(3) - first
+            last = item%naxes(3) - last
+        end if
+
+        ! impose ordering
+        if (last .lt. first) then
+            tmp = first
+            first = last
+            last = tmp
+        end if
+
+        if (first .lt. 1) first = 1
+        if (last .gt. item%naxes(3)) last = item%naxes(3)
+
+        return
+
+    end subroutine get_freq2vel_bounds
 
     subroutine make_image_statistics(item)
         implicit NONE
