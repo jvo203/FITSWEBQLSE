@@ -743,7 +743,10 @@ contains
 
         end block
 
-        call co_reduce(bSuccess, logical_and)
+        call co_reduce(bSuccess, logical_and, result_image=1)
+
+        ! the code below only executes on image 1
+        if (this_image() .ne. 1) return
 
         if (.not. bSuccess) then
             return
