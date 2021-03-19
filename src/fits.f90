@@ -792,12 +792,6 @@ contains
                     if (req%intensity .eq. integrated) spectrum(frame) = pixel_sum*cdelt3
                 end if
 
-                ! push the viewport pixels/mask onto the root image
-                if (req%image) then
-                    pixels(:) [1] = pixels(:) [1] + pixels(:)
-                    mask(:) [1] = mask(:) [1] .or. mask(:)
-                end if
-
                 ! push the partial spectrum onto the root image
                 spectrum(start:end) [1] = spectrum(start:end)
 
@@ -806,6 +800,12 @@ contains
         end block
 
         call co_reduce(bSuccess, logical_and, result_image=1)
+
+        ! reduce the viewport pixels/mask on the root image
+        if (req%image) then
+            call co_sum(pixels, result_image=1)
+            call co_reduce(mask, logical_or, result_image=1)
+        end if
 
         call cpu_time(t2)
 
