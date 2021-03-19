@@ -799,13 +799,13 @@ contains
 
         end block
 
-        call co_reduce(bSuccess, logical_and, result_image=1)
-
         ! reduce the viewport pixels/mask on the root image
         if (req%image) then
             call co_sum(pixels, result_image=1)
             call co_reduce(mask, logical_or, result_image=1)
         end if
+
+        call co_reduce(bSuccess, logical_and, result_image=1)
 
         call cpu_time(t2)
 
