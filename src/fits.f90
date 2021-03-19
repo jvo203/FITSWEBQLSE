@@ -681,12 +681,12 @@ contains
             integer tid, start, end, num_per_image, npixels, frame
             integer, dimension(4) :: fpixels, lpixels, incs
             integer status, group
-            integer x1, x2, y1, y2, cx, cy, r, r2
-            logical average, anynull
-            real cdelt3, nullval
+            integer x1, x2, y1, y2, cx, cy, r, r2, pixel_count, j
+            logical average, anynull, test_ignrval
+            real cdelt3, nullval, tmp, pixel_sum
 
             ! local (image) buffers
-            real(kind=4), allocatable :: local_buffer(:)
+            real(kind=4), allocatable :: buffer(:)
 
             tid = this_image()
             num_per_image = length/num_images()
@@ -711,12 +711,24 @@ contains
 
             npixels = (x2 - x1 + 1)*(y2 - y1 + 1)
 
-            allocate (local_buffer(npixels))
+            allocate (buffer(npixels))
             allocate (pixels(npixels) [*])
             allocate (mask(npixels) [*])
 
+            ! initiate pixels to blank
+            pixels = 0.0
+            ! and reset the NaN mask
+            mask = .false.
+
             group = 1
             nullval = 0
+
+            ! should we be checking values against ignrval ?
+            if (isnan(item%ignrval)) then
+                test_ignrval = .false.
+            else
+                test_ignrval = .true.
+            end if
 
             do frame = start, end
                 ! starting bounds
@@ -730,14 +742,58 @@ contains
 
                 ! fetch a region from the FITS file
                 call ftgsve(item%unit, group, item%naxis, item%naxes,&
-                & fpixels, lpixels, incs, nullval, local_buffer, anynull, status)
+                & fpixels, lpixels, incs, nullval, buffer, anynull, status)
 
-                ! abort loop upon errors
+                ! abort upon errors
                 if (status .ne. 0) then
                     print *, this_image(), 'error fetching frame', frame, 'X:', x1, x2, 'Y:', y1, y2
                     bSuccess = .false.
                     exit
                 end if
+
+                ! process the data
+                pixel_sum = 0.0
+                pixel_count = 0
+
+                do j = 1, npixels
+                    tmp = buffer(j)
+
+                    if (isnan(tmp) .neqv. .true.) then
+                        if (test_ignrval) then
+                            if (tmp .eq. item%ignrval) then
+                                ! skip the IGNRVAL pixels
+                                mask(j) = mask(j) .or. .false.
+                                cycle
+                            end if
+                        end if
+
+                        ! do we need the viewport too?
+                        if (req%image) then
+                            ! integrate (sum up) pixels and a NaN mask
+                            pixels(j) = pixels(j) + tmp
+                            mask(j) = mask(j) .or. .true.
+                        end if
+
+                        ! needed by the mean and integrated spectra
+                        pixel_sum = pixel_sum + tmp
+                        pixel_count = pixel_count + 1
+                    else
+                        mask(j) = mask(j) .or. .false.
+                    end if
+                end do
+
+                if (pixel_count .gt. 0) then
+                    if (req%intensity .eq. mean) spectrum(frame) = pixel_sum/real(pixel_count)
+                    if (req%intensity .eq. integrated) spectrum(frame) = pixel_sum*cdelt3
+                end if
+
+                ! push the viewport pixels/mask onto the root image
+                if (req%image) then
+
+                end if
+
+                ! push the partial spectrum onto the root image
+                spectrum(start:end) [1] = spectrum(start:end)
 
             end do
 
@@ -751,6 +807,8 @@ contains
         if (.not. bSuccess) then
             return
         end if
+
+        print *, 'spectrum:', spectrum
 
     end subroutine handle_realtime_image_spectrum
 
@@ -1359,7 +1417,7 @@ contains
                     dmin = min(dmin, frame_min)
                     dmax = max(dmax, frame_max)
 
-                    if (pixel_count > 0) then
+                    if (pixel_count .gt. 0) then
                         mean_spec_val = pixel_sum/real(pixel_count)
                         int_spec_val = pixel_sum*cdelt3
                     end if
