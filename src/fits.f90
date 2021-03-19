@@ -789,7 +789,8 @@ contains
 
                 ! push the viewport pixels/mask onto the root image
                 if (req%image) then
-
+                    pixels(:) [1] = pixels(:) [1] + pixels(:)
+                    mask(:) [1] = mask(:) [1] .or. mask(:)
                 end if
 
                 ! push the partial spectrum onto the root image
@@ -806,6 +807,11 @@ contains
 
         if (.not. bSuccess) then
             return
+        end if
+
+        if (req%image) then
+            print *, 'viewport pixels', pixels
+            print *, 'viewport mask', mask
         end if
 
         print *, 'spectrum:', spectrum
