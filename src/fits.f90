@@ -604,6 +604,11 @@ contains
         ! calculation range
         integer :: first, last, length
 
+        ! timing
+        real :: t1, t2
+
+        call cpu_time(t1)
+
         bSuccess = .true.
 
         str_len = size(cmd)
@@ -802,6 +807,8 @@ contains
 
         call co_reduce(bSuccess, logical_and, result_image=1)
 
+        call cpu_time(t2)
+
         ! the code below only executes on image 1
         if (this_image() .ne. 1) return
 
@@ -810,11 +817,13 @@ contains
         end if
 
         if (req%image) then
-            print *, 'viewport pixels', pixels
-            print *, 'viewport mask', mask
+            ! print *, 'viewport pixels', pixels
+            ! print *, 'viewport mask', mask
         end if
 
-        print *, 'spectrum:', spectrum
+        ! print *, 'spectrum:', spectrum
+
+        print *, 'handle_realtime_image_spectrum elapsed time:', 1000*(t2 - t1), '[ms]'
 
     end subroutine handle_realtime_image_spectrum
 
