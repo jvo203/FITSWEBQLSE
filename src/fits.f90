@@ -745,14 +745,22 @@ contains
                 ! do not skip over any pixels
                 incs = 1
 
+                ! reset the status
+                status = 0
+
                 ! fetch a region from the FITS file
                 call ftgsve(item%unit, group, item%naxis, item%naxes,&
-                & fpixels, lpixels, incs, nullval, buffer, anynull, status)
+                 & fpixels, lpixels, incs, nullval, buffer, anynull, status)
 
                 ! abort upon errors
                 if (status .ne. 0) then
                     print *, this_image(), 'error fetching frame', frame, 'X:', x1, x2, 'Y:', y1, y2
                     bSuccess = .false.
+
+                    if (status .gt. 0) then
+                        call printerror(status)
+                    end if
+
                     exit
                 end if
 
@@ -785,6 +793,7 @@ contains
                     else
                         mask(j) = mask(j) .or. .false.
                     end if
+
                 end do
 
                 if (pixel_count .gt. 0) then
@@ -792,12 +801,12 @@ contains
                     if (req%intensity .eq. integrated) spectrum(frame) = pixel_sum*cdelt3
                 end if
 
-                ! push the partial spectrum onto the root image
-                spectrum(start:end) [1] = spectrum(start:end)
-
             end do
 
         end block
+
+        ! it is faster to reduce the spectrum on the root image in one call
+        call co_sum(spectrum, result_image=1)
 
         ! reduce the viewport pixels/mask on the root image
         if (req%image) then
