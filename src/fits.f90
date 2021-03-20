@@ -842,7 +842,7 @@ contains
 
         ! print *, 'spectrum:', spectrum
 
-        print *, 'handle_realtime_image_spectrum elapsed time:', 1000*(t2 - t1), '[ms]', 'system clock:', 1000*elapsed, '[ms]'
+        print *, 'handle_realtime_image_spectrum elapsed time:', 1000*(t2 - t1), '[ms]', ' system clock:', 1000*elapsed, '[ms]'
 
     end subroutine handle_realtime_image_spectrum
 
