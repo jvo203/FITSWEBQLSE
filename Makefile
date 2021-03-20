@@ -61,7 +61,7 @@ ifeq ($(UNAME_S),Darwin)
 #MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc-10
-	FORT = mpif90
+	FORT = mpifort
 	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
 	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
