@@ -607,7 +607,13 @@ contains
         ! timing
         real :: t1, t2
 
+        integer(8) :: start_t, finish_t, crate, cmax
+        real :: elapsed
+
         call cpu_time(t1)
+
+        ! start the timer
+        call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
         bSuccess = .true.
 
@@ -818,6 +824,10 @@ contains
 
         call cpu_time(t2)
 
+        ! end the timer
+        call system_clock(finish_t)
+        elapsed = real(finish_t - start_t)/real(crate)
+
         ! the code below only executes on image 1
         if (this_image() .ne. 1) return
 
@@ -832,7 +842,7 @@ contains
 
         ! print *, 'spectrum:', spectrum
 
-        print *, 'handle_realtime_image_spectrum elapsed time:', 1000*(t2 - t1), '[ms]'
+        print *, 'handle_realtime_image_spectrum elapsed time:', 1000*(t2 - t1), '[ms]', 'system clock:', 1000*elapsed, '[ms]'
 
     end subroutine handle_realtime_image_spectrum
 
