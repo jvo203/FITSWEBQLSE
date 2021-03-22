@@ -43,6 +43,7 @@ module fits
 
     type dataset
         character(kind=c_char), dimension(:), allocatable :: datasetid
+        character(len=:), allocatable :: uri
         ! the id will be made by hashing the dataset uri
         integer :: unit = -1! a FITS file handle
 
@@ -509,6 +510,7 @@ contains
         item%datasetid = extract_datasetid(filename)
         item%progress = 0
         item%elapsed = 0
+        allocate (item%uri, source=filename)
         call set_ok_status(item, .false.)
         call set_error_status(item, .false.)
         call set_header_status(item, .false.)
