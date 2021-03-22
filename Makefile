@@ -61,12 +61,13 @@ ifeq ($(UNAME_S),Darwin)
 #MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc-10
-	FORT = gfortran-10
+	FORT = mpifort
 	MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 
 	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
-	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib $(MPI_LINK_FLAGS)
+	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
+#$(MPI_LINK_FLAGS)
 endif
 
 # include dependencies (all .d files)
