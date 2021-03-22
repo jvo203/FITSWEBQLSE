@@ -2030,24 +2030,28 @@ contains
         integer, dimension(N) :: order
 
         ! timing
-        real :: t1, t2
+        integer(8) :: start_t, finish_t, crate, cmax
+        real :: elapsed
 
         ! switch between serial and parallel methods
         ! based on the size of the input vector X ???
 
-        call cpu_time(t1)
+        ! start the timer
+        call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
         ! CALL quicksort(X, 1, N)               ! sort the original data
-        CALL vec_quicksort(X)               ! sort the original data
-        ! call psrs_sort(c_loc(X), N)         ! single-threaded vec_quicksort is faster than parallel psrc_sort !!!
+        ! CALL vec_quicksort(X)               ! sort the original data
+        call psrs_sort(c_loc(X), N)         ! single-threaded vec_quicksort is faster than parallel psrc_sort !!!
 
         ! native parallel, slower than vec_quicksort !!!
         ! call parallel_sort(X, order)
         ! X = X(order(:))
 
-        call cpu_time(t2)
+        ! end the timer
+        call system_clock(finish_t)
+        elapsed = real(finish_t - start_t)/real(crate)
 
-        print *, 'sort elapsed time:', 1000*(t2 - t1), '[ms]'
+        print *, 'sort elapsed time:', 1000*elapsed
 
         IF (MOD(N, 2) == 0) THEN           ! compute the median
             median = (X(N/2) + X(N/2 + 1))/2.0
