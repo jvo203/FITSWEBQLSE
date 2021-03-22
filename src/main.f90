@@ -23,7 +23,7 @@ program main
     integer count
 
     ! ideally take the number of threads from the command-line argument
-    call OMP_SET_NUM_THREADS(max(8, OMP_GET_MAX_THREADS()))
+    ! call OMP_SET_NUM_THREADS(max(8, OMP_GET_MAX_THREADS()))
 
     max_threads = OMP_GET_MAX_THREADS()
 
