@@ -1,0 +1,21 @@
+Example MPI settings
+
+.bashrc:
+
+export FOR_COARRAY_CONFIG_FILE=~/mpi_config
+
+mpi_config:
+
+# with HyperThreading -n 64 can be used but HT is not recommended
+# -rr : Round-Robin to avoid HT
+
+-genvall -genv I_MPI_FABRICS=shm:tcp -machinefile /home/chris/mpi_machines -n 32 /mnt/fits/chris/FITSWEBQLSE/fitswebqlse
+
+mpi_machines:
+
+grid60:8
+grid61:8
+grid62:8
+grid63:8
+
+
