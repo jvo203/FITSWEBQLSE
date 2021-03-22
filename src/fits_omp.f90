@@ -613,12 +613,8 @@ contains
         integer :: first, last, length
 
         ! timing
-        real :: t1, t2
-
         integer(8) :: start_t, finish_t, crate, cmax
         real :: elapsed
-
-        call cpu_time(t1)
 
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
@@ -830,8 +826,6 @@ contains
 
         call co_reduce(bSuccess, logical_and, result_image=1)
 
-        call cpu_time(t2)
-
         ! end the timer
         call system_clock(finish_t)
         elapsed = real(finish_t - start_t)/real(crate)
@@ -850,7 +844,7 @@ contains
 
         ! print *, 'spectrum:', spectrum
 
-        print *, 'handle_realtime_image_spectrum elapsed time:', 1000*(t2 - t1), '[ms]', ' system clock:', 1000*elapsed, '[ms]'
+        print *, 'handle_realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
 
     end subroutine handle_realtime_image_spectrum
 
