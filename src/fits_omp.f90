@@ -309,7 +309,7 @@ contains
         type(dataset), pointer, intent(inout) :: item
         integer, intent(in) :: progress, total
         integer(8) finish
-        real elapsed
+        real new_progress, elapsed
 
         ! take a time measurement
         call system_clock(finish)
@@ -318,11 +318,17 @@ contains
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
 
-        item%progress = 100.0*progress/total
+        new_progress = 100.0*progress/total
+
+        ! skip updating if there is no real progress
+        ! some OpenMP threads may be using old values
+        if (new_progress .lt. item%progress) go to 05
+
+        item%progress = new_progress
         item%elapsed = elapsed
 
         ! unlock the mutex
-        call g_mutex_unlock(c_loc(item%progress_mtx))
+05      call g_mutex_unlock(c_loc(item%progress_mtx))
 
         ! print *, 'progress:', item%progress, '%, elapsed time ', item%elapsed, ' [s]'
     end subroutine update_progress
