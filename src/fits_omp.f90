@@ -2017,7 +2017,7 @@ contains
     REAL FUNCTION median(X, N)
         use mod_sort
         IMPLICIT NONE
-        REAL, DIMENSION(N), INTENT(INOUT) :: X
+        REAL, DIMENSION(N), INTENT(INOUT), TARGET :: X
         INTEGER, INTENT(IN)                :: N
         INTEGER                            :: i
 
