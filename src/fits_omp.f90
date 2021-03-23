@@ -2046,10 +2046,10 @@ contains
 
         ! CALL quicksort(X, 1, N)               ! sort the original data
         ! CALL vec_quicksort(X)               ! sort the original data
-        call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
+        ! call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
 
         ! native parallel, slower than vec_quicksort !!!
-        ! call parallel_sort(X, order)
+        call parallel_sort(X, order)
         ! X = X(order(:))
 
         ! end the timer
