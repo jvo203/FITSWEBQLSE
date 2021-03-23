@@ -733,6 +733,41 @@ contains
             if (.not. allocated(item%thread_units)) then
                 allocate (item%thread_units(max_threads))
                 item%thread_units = -1
+
+                ! open the thread-local FITS file if necessary
+                do i = 1, max_threads
+                    if (item%thread_units(tid) .eq. -1) then
+                        block
+                            ! file operations
+                            integer unit, readwrite, blocksize, status
+
+                            ! The STATUS parameter must always be initialized.
+                            status = 0
+
+                            ! Get an unused Logical Unit Number to use to open the FITS file.
+                            call ftgiou(unit, status)
+
+                            if (status .ne. 0) then
+                                thread_bSuccess = .false.
+                                cycle
+                            end if
+
+                            ! open the FITS file, with read - only access.The returned BLOCKSIZE
+                            ! parameter is obsolete and should be ignored.
+                            readwrite = 0
+                            call ftopen(unit, item%uri, readwrite, blocksize, status)
+
+                            if (status .ne. 0) then
+                                thread_bSuccess = .false.
+                                cycle
+                            end if
+
+                            item%thread_units(tid) = unit
+
+                        end block
+
+                    end if
+                end do
             end if
 
             ! sanity checks
@@ -784,39 +819,6 @@ contains
             do frame = start, end
                 ! get a current OpenMP thread (starting from 0 as in C)
                 tid = 1 + OMP_GET_THREAD_NUM()
-
-                ! open the thread-local FITS file if necessary
-                if (item%thread_units(tid) .eq. -1) then
-                    block
-                        ! file operations
-                        integer unit, readwrite, blocksize, status
-
-                        ! The STATUS parameter must always be initialized.
-                        status = 0
-
-                        ! Get an unused Logical Unit Number to use to open the FITS file.
-                        call ftgiou(unit, status)
-
-                        if (status .ne. 0) then
-                            thread_bSuccess = .false.
-                            cycle
-                        end if
-
-                        ! open the FITS file, with read - only access.The returned BLOCKSIZE
-                        ! parameter is obsolete and should be ignored.
-                        readwrite = 0
-                        call ftopen(unit, item%uri, readwrite, blocksize, status)
-
-                        if (status .ne. 0) then
-                            thread_bSuccess = .false.
-                            cycle
-                        end if
-
-                        item%thread_units(tid) = unit
-
-                    end block
-
-                end if
 
                 print *, 'tid:', tid
                 cycle
