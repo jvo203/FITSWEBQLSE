@@ -721,6 +721,8 @@ contains
             logical(kind=1), allocatable :: thread_mask(:, :)
             logical thread_bSuccess
 
+            integer, allocatable :: thread_units(:)
+
             tid = this_image()
             num_per_image = length/num_images()
             start = first + (tid - 1)*num_per_image
@@ -769,6 +771,11 @@ contains
                     end if
                 end do
             end if
+
+            ! found a problem here, all but the first units are allocated
+            allocate (thread_units(max_threads))
+            thread_units = item%thread_units
+            print *, 'thread_units:', thread_units
 
             ! sanity checks
             x1 = max(1, req%x1)
@@ -838,8 +845,7 @@ contains
                 ! & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
 
                 call ftgsve(item%unit, group, item%naxis, item%naxes,&
-                & fpixels, lpixels, incs, nullval, buffer, anynull, status)
-                thread_buffer(:, tid) = buffer
+                & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
 
                 !$OMP END CRITICAL
 
