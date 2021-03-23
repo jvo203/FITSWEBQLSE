@@ -838,6 +838,7 @@ contains
                     & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
                 else
                     thread_bSuccess = .false.
+                    cycle
                 end if
 
                 ! abort upon errors
