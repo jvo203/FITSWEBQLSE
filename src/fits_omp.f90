@@ -730,6 +730,11 @@ contains
 
             max_threads = OMP_GET_MAX_THREADS()
 
+            if (.not. allocated(item%thread_units)) then
+                allocate (item%thread_units(max_threads))
+                item%thread_units = -1
+            end if
+
             ! sanity checks
             x1 = max(1, req%x1)
             y1 = max(1, req%y1)
