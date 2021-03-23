@@ -602,6 +602,7 @@ contains
     end subroutine load_fits_file
 
     subroutine handle_realtime_image_spectrum(cmd)
+        use omp_lib
         implicit none
         character, intent(in) :: cmd(:)
 
@@ -704,7 +705,7 @@ contains
 
         ! read a range of 2D planes in parallel on each image
         block
-            integer tid, start, end, num_per_image, npixels, frame
+            integer max_threads, tid, start, end, num_per_image, npixels, frame
             integer, dimension(4) :: fpixels, lpixels, incs
             integer status, group
             integer x1, x2, y1, y2, cx, cy, r, r2, pixel_count, j
@@ -720,6 +721,8 @@ contains
             end = min(tid*num_per_image, last)
             num_per_image = end - start + 1
             ! print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
+
+            max_threads = OMP_GET_MAX_THREADS()
 
             ! sanity checks
             x1 = max(1, req%x1)
@@ -757,6 +760,9 @@ contains
             end if
 
             do frame = start, end
+                ! get a current OpenMP thread (starting from 0 as in C)
+                tid = OMP_GET_THREAD_NUM()
+
                 ! starting bounds
                 fpixels = (/x1, y1, frame, 1/)
 
