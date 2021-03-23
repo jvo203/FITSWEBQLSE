@@ -715,10 +715,11 @@ contains
             ! local (image) buffers
             real(kind=4), allocatable :: buffer(:)
 
-            ! thread-local arrays
+            ! thread-local variables
             real(kind=4), allocatable :: thread_buffer(:, :)
             real(kind=4), allocatable :: thread_pixels(:, :)
             logical(kind=1), allocatable :: thread_mask(:, :)
+            logical thread_bSuccess
 
             tid = this_image()
             num_per_image = length/num_images()
@@ -760,6 +761,7 @@ contains
 
             thread_pixels = 0.0
             thread_mask = .false.
+            thread_bSuccess = .true.
 
             group = 1
             nullval = 0
@@ -771,9 +773,10 @@ contains
                 test_ignrval = .true.
             end if
 
+            ! the <do> loop needs to be made parallel with OpenMP
             do frame = start, end
                 ! get a current OpenMP thread (starting from 0 as in C)
-                tid = OMP_GET_THREAD_NUM()
+                tid = 1 + OMP_GET_THREAD_NUM()
 
                 ! starting bounds
                 fpixels = (/x1, y1, frame, 1/)
@@ -794,21 +797,26 @@ contains
                 ! abort upon errors
                 if (status .ne. 0) then
                     print *, this_image(), 'error fetching frame', frame, 'X:', x1, x2, 'Y:', y1, y2
-                    bSuccess = .false.
+                    thread_bSuccess = .false.
 
                     if (status .gt. 0) then
                         call printerror(status)
                     end if
 
-                    exit
+                    cycle
+                else
+                    thread_bSuccess = thread_bSuccess .and. .true.
                 end if
+
+                ! put the received data <buffer> into a thread-local buffer
+                thread_buffer(:, tid) = buffer(:)
 
                 ! process the data
                 pixel_sum = 0.0
                 pixel_count = 0
 
                 do j = 1, npixels
-                    tmp = buffer(j)
+                    tmp = thread_buffer(j, tid)
 
                     if (isnan(tmp) .neqv. .true.) then
                         if (test_ignrval) then
@@ -822,15 +830,15 @@ contains
                         ! do we need the viewport too?
                         if (req%image) then
                             ! integrate (sum up) pixels and a NaN mask
-                            pixels(j) = pixels(j) + tmp
-                            mask(j) = mask(j) .or. .true.
+                            thread_pixels(j, tid) = thread_pixels(j, tid) + tmp
+                            thread_mask(j, tid) = thread_mask(j, tid) .or. .true.
                         end if
 
                         ! needed by the mean and integrated spectra
                         pixel_sum = pixel_sum + tmp
                         pixel_count = pixel_count + 1
                     else
-                        mask(j) = mask(j) .or. .false.
+                        thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
                     end if
 
                 end do
@@ -841,6 +849,16 @@ contains
                 end if
 
             end do
+
+            ! first reduce the pixels/mask locally
+            if (req%image) then
+                do j = 1, max_threads
+                    pixels(:) = pixels(:) + thread_pixels(:, j)
+                    mask(:) = mask(:) .or. thread_mask(:, j)
+                end do
+            end if
+
+            bSuccess = thread_bSuccess
 
         end block
 
