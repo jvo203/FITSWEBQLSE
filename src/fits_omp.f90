@@ -785,14 +785,11 @@ contains
                 ! get a current OpenMP thread (starting from 0 as in C)
                 tid = 1 + OMP_GET_THREAD_NUM()
 
-                print *, 'tid:', tid
-                cycle
-
                 ! open the thread-local FITS file if necessary
                 if (item%thread_units(tid) .eq. -1) then
                     block
                         ! file operations
-                        integer unit, readwrite, blocksize
+                        integer unit, readwrite, blocksize, status
 
                         ! The STATUS parameter must always be initialized.
                         status = 0
@@ -820,6 +817,9 @@ contains
                     end block
 
                 end if
+
+                print *, 'tid:', tid
+                cycle
 
                 ! starting bounds
                 fpixels = (/x1, y1, frame, 1/)
