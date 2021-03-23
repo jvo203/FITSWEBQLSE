@@ -812,7 +812,9 @@ contains
             end if
 
             ! the <do> loop needs to be made parallel with OpenMP
-            !$OMP PARALLEL SHARED(item) PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count) REDUCTION(.or.:thread_bSuccess)
+            !$OMP PARALLEL SHARED(item)&
+            !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
+            !$OMP& REDUCTION(.or.:thread_bSuccess)
             !$OMP DO
             do frame = start, end
                 ! get a current OpenMP thread (starting from 0 as in C)
