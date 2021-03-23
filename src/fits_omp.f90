@@ -712,9 +712,6 @@ contains
             logical average, anynull, test_ignrval
             real cdelt3, nullval, tmp, pixel_sum
 
-            ! file operations
-            integer unit, readwrite, blocksize
-
             ! local (image) buffers
             real(kind=4), allocatable :: buffer(:)
 
@@ -782,35 +779,45 @@ contains
             end if
 
             ! the <do> loop needs to be made parallel with OpenMP
+            !$OMP PARALLEL
+            !$OMP DO PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count) REDUCTION(.or.:thread_bSuccess)
             do frame = start, end
                 ! get a current OpenMP thread (starting from 0 as in C)
                 tid = 1 + OMP_GET_THREAD_NUM()
 
+                print *, 'tid:', tid
+                cycle
+
                 ! open the thread-local FITS file if necessary
                 if (item%thread_units(tid) .eq. -1) then
+                    block
+                        ! file operations
+                        integer unit, readwrite, blocksize
 
-                    ! The STATUS parameter must always be initialized.
-                    status = 0
+                        ! The STATUS parameter must always be initialized.
+                        status = 0
 
-                    ! Get an unused Logical Unit Number to use to open the FITS file.
-                    call ftgiou(unit, status)
+                        ! Get an unused Logical Unit Number to use to open the FITS file.
+                        call ftgiou(unit, status)
 
-                    if (status .ne. 0) then
-                        thread_bSuccess = .false.
-                        cycle
-                    end if
+                        if (status .ne. 0) then
+                            thread_bSuccess = .false.
+                            cycle
+                        end if
 
-                    ! open the FITS file, with read - only access.The returned BLOCKSIZE
-                    ! parameter is obsolete and should be ignored.
-                    readwrite = 0
-                    call ftopen(unit, item%uri, readwrite, blocksize, status)
+                        ! open the FITS file, with read - only access.The returned BLOCKSIZE
+                        ! parameter is obsolete and should be ignored.
+                        readwrite = 0
+                        call ftopen(unit, item%uri, readwrite, blocksize, status)
 
-                    if (status .ne. 0) then
-                        thread_bSuccess = .false.
-                        cycle
-                    end if
+                        if (status .ne. 0) then
+                            thread_bSuccess = .false.
+                            cycle
+                        end if
 
-                    item%thread_units(tid) = unit
+                        item%thread_units(tid) = unit
+
+                    end block
 
                 end if
 
@@ -855,7 +862,6 @@ contains
                         if (test_ignrval) then
                             if (tmp .eq. item%ignrval) then
                                 ! skip the IGNRVAL pixels
-                                mask(j) = mask(j) .or. .false.
                                 cycle
                             end if
                         end if
@@ -864,7 +870,7 @@ contains
                         if (req%image) then
                             ! integrate (sum up) pixels and a NaN mask
                             thread_pixels(j, tid) = thread_pixels(j, tid) + tmp
-                            thread_mask(j, tid) = thread_mask(j, tid) .or. .true.
+                            thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
                         end if
 
                         ! needed by the mean and integrated spectra
@@ -882,6 +888,7 @@ contains
                 end if
 
             end do
+            !$OMP END PARALLEL
 
             ! first reduce the pixels/mask locally
             if (req%image) then
