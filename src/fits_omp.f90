@@ -814,14 +814,11 @@ contains
             end if
 
             ! the <do> loop needs to be made parallel with OpenMP
-            !$OMP PARALLEL
-            !$OMP DO PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count) REDUCTION(.or.:thread_bSuccess)
+            !$OMP PARALLEL SHARED(item) PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count) REDUCTION(.or.:thread_bSuccess)
+            !$OMP DO
             do frame = start, end
                 ! get a current OpenMP thread (starting from 0 as in C)
                 tid = 1 + OMP_GET_THREAD_NUM()
-
-                print *, 'tid:', tid
-                cycle
 
                 ! starting bounds
                 fpixels = (/x1, y1, frame, 1/)
@@ -835,9 +832,16 @@ contains
                 ! reset the status
                 status = 0
 
+                !$OMP CRITICAL
                 ! fetch a region from the FITS file
-                call ftgsve(item%thread_units(tid), group, item%naxis, item%naxes,&
-                 & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+                ! call ftgsve(item%thread_units(tid), group, item%naxis, item%naxes,&
+                ! & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+
+                call ftgsve(item%unit, group, item%naxis, item%naxes,&
+                & fpixels, lpixels, incs, nullval, buffer, anynull, status)
+                thread_buffer(:, tid) = buffer
+
+                !$OMP END CRITICAL
 
                 ! abort upon errors
                 if (status .ne. 0) then
@@ -890,6 +894,7 @@ contains
                 end if
 
             end do
+            !OMP END DO
             !$OMP END PARALLEL
 
             ! first reduce the pixels/mask locally
