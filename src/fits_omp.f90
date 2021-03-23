@@ -748,7 +748,6 @@ contains
                             call ftgiou(unit, status)
 
                             if (status .ne. 0) then
-                                thread_bSuccess = .false.
                                 cycle
                             end if
 
@@ -758,7 +757,6 @@ contains
                             call ftopen(unit, item%uri, readwrite, blocksize, status)
 
                             if (status .ne. 0) then
-                                thread_bSuccess = .false.
                                 cycle
                             end if
 
@@ -833,8 +831,12 @@ contains
                 status = 0
 
                 ! fetch a region from the FITS file
-                call ftgsve(item%thread_units(tid), group, item%naxis, item%naxes,&
-                & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+                if (item%thread_units(tid) .ne. -1) then
+                    call ftgsve(item%thread_units(tid), group, item%naxis, item%naxes,&
+                    & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+                else
+                    thread_bSuccess = .false.
+                end if
 
                 ! abort upon errors
                 if (status .ne. 0) then
