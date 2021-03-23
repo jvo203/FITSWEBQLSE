@@ -882,7 +882,7 @@ contains
                         if (req%image) then
                             ! integrate (sum up) pixels and a NaN mask
                             thread_pixels(j, tid) = thread_pixels(j, tid) + tmp
-                            thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
+                            thread_mask(j, tid) = thread_mask(j, tid) .or. .true.
                         end if
 
                         ! needed by the mean and integrated spectra
