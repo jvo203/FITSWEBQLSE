@@ -875,8 +875,6 @@ contains
                         ! needed by the mean and integrated spectra
                         pixel_sum = pixel_sum + tmp
                         pixel_count = pixel_count + 1
-                    else
-                        thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
                     end if
 
                 end do
