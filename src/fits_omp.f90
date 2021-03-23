@@ -715,6 +715,11 @@ contains
             ! local (image) buffers
             real(kind=4), allocatable :: buffer(:)
 
+            ! thread-local arrays
+            real(kind=4), allocatable :: thread_buffer(:, :)
+            real(kind=4), allocatable :: thread_pixels(:, :)
+            logical(kind=1), allocatable :: thread_mask(:, :)
+
             tid = this_image()
             num_per_image = length/num_images()
             start = first + (tid - 1)*num_per_image
@@ -748,6 +753,13 @@ contains
             pixels = 0.0
             ! and reset the NaN mask
             mask = .false.
+
+            allocate (thread_buffer(npixels, max_threads))
+            allocate (thread_pixels(npixels, max_threads))
+            allocate (thread_mask(npixels, max_threads))
+
+            thread_pixels = 0.0
+            thread_mask = .false.
 
             group = 1
             nullval = 0
