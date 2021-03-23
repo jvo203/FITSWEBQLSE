@@ -46,6 +46,7 @@ module fits
         character(len=:), allocatable :: uri
         ! the id will be made by hashing the dataset uri
         integer :: unit = -1! a FITS file handle
+        integer, dimension(:), allocatable :: thread_units
 
         ! FITS header values
         character(kind=c_char), dimension(:), allocatable :: hdr
@@ -190,6 +191,9 @@ contains
 
         call ftclos(item%unit, status)
         call ftfiou(item%unit, status)
+
+        ! close any remaining thread file units
+        if (.not. allocated(item%thread_units)) return
 
     end subroutine close_fits_file
 
