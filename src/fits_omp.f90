@@ -721,8 +721,6 @@ contains
             logical(kind=1), allocatable :: thread_mask(:, :)
             logical thread_bSuccess
 
-            integer, allocatable :: thread_units(:)
-
             tid = this_image()
             num_per_image = length/num_images()
             start = first + (tid - 1)*num_per_image
@@ -738,7 +736,7 @@ contains
 
                 ! open the thread-local FITS file if necessary
                 do i = 1, max_threads
-                    if (item%thread_units(tid) .eq. -1) then
+                    if (item%thread_units(i) .eq. -1) then
                         block
                             ! file operations
                             integer unit, readwrite, blocksize, status
@@ -764,18 +762,13 @@ contains
                                 cycle
                             end if
 
-                            item%thread_units(tid) = unit
+                            item%thread_units(i) = unit
 
                         end block
 
                     end if
                 end do
             end if
-
-            ! found a problem here, all but the first units are allocated
-            allocate (thread_units(max_threads))
-            thread_units = item%thread_units
-            print *, 'thread_units:', thread_units
 
             ! sanity checks
             x1 = max(1, req%x1)
@@ -839,15 +832,9 @@ contains
                 ! reset the status
                 status = 0
 
-                !$OMP CRITICAL
                 ! fetch a region from the FITS file
-                ! call ftgsve(item%thread_units(tid), group, item%naxis, item%naxes,&
-                ! & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
-
-                call ftgsve(item%unit, group, item%naxis, item%naxes,&
+                call ftgsve(item%thread_units(tid), group, item%naxis, item%naxes,&
                 & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
-
-                !$OMP END CRITICAL
 
                 ! abort upon errors
                 if (status .ne. 0) then
@@ -942,7 +929,7 @@ contains
             ! print *, 'viewport mask', mask
         end if
 
-        print *, 'spectrum:', spectrum
+        ! print *, 'spectrum:', spectrum
 
         print *, 'handle_realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
 
