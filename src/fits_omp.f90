@@ -712,6 +712,9 @@ contains
             logical average, anynull, test_ignrval
             real cdelt3, nullval, tmp, pixel_sum
 
+            ! file operations
+            integer unit, readwrite, blocksize
+
             ! local (image) buffers
             real(kind=4), allocatable :: buffer(:)
 
@@ -783,6 +786,34 @@ contains
                 ! get a current OpenMP thread (starting from 0 as in C)
                 tid = 1 + OMP_GET_THREAD_NUM()
 
+                ! open the thread-local FITS file if necessary
+                if (item%thread_units(tid) .eq. -1) then
+
+                    ! The STATUS parameter must always be initialized.
+                    status = 0
+
+                    ! Get an unused Logical Unit Number to use to open the FITS file.
+                    call ftgiou(unit, status)
+
+                    if (status .ne. 0) then
+                        thread_bSuccess = .false.
+                        cycle
+                    end if
+
+                    ! open the FITS file, with read - only access.The returned BLOCKSIZE
+                    ! parameter is obsolete and should be ignored.
+                    readwrite = 0
+                    call ftopen(unit, item%uri, readwrite, blocksize, status)
+
+                    if (status .ne. 0) then
+                        thread_bSuccess = .false.
+                        cycle
+                    end if
+
+                    item%thread_units(tid) = unit
+
+                end if
+
                 ! starting bounds
                 fpixels = (/x1, y1, frame, 1/)
 
@@ -796,8 +827,8 @@ contains
                 status = 0
 
                 ! fetch a region from the FITS file
-                call ftgsve(item%unit, group, item%naxis, item%naxes,&
-                 & fpixels, lpixels, incs, nullval, buffer, anynull, status)
+                call ftgsve(item%thread_units(tid), group, item%naxis, item%naxes,&
+                 & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
 
                 ! abort upon errors
                 if (status .ne. 0) then
@@ -812,9 +843,6 @@ contains
                 else
                     thread_bSuccess = thread_bSuccess .and. .true.
                 end if
-
-                ! put the received data <buffer> into a thread-local buffer
-                thread_buffer(:, tid) = buffer(:)
 
                 ! process the data
                 pixel_sum = 0.0
@@ -894,7 +922,7 @@ contains
             ! print *, 'viewport mask', mask
         end if
 
-        ! print *, 'spectrum:', spectrum
+        print *, 'spectrum:', spectrum
 
         print *, 'handle_realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
 
