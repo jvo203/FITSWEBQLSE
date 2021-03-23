@@ -182,7 +182,7 @@ module fits
 contains
     subroutine close_fits_file(item)
         type(dataset) :: item
-        integer status
+        integer i, status
 
         ! nothing to do if the FITS file has never been opened
         if (item%unit .eq. -1) return
@@ -194,6 +194,13 @@ contains
 
         ! close any remaining thread file units
         if (.not. allocated(item%thread_units)) return
+
+        do i = 1, size(item%thread_units)
+            if (item%thread_units(i) .eq. -1) cycle
+
+            call ftclos(item%thread_units(i), status)
+            call ftfiou(item%thread_units(i), status)
+        end do
 
     end subroutine close_fits_file
 
