@@ -2048,9 +2048,9 @@ contains
         ! CALL vec_quicksort(X)               ! sort the original data
         ! call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
 
-        ! native parallel, slower than vec_quicksort !!!
+        ! Fortran native parallel (OpenMP)
         call parallel_sort(X, order)
-        ! X = X(order(:))
+        X = X(order(:))
 
         ! end the timer
         call system_clock(finish_t)
