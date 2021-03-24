@@ -538,6 +538,7 @@ contains
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
         call read_fits_file(item, filename, dmin, dmax, pixels, mask, mean_spectrum, integrated_spectrum, bSuccess)
+        
         call co_reduce(bSuccess, logical_and)
 
         if (this_image() == 1) print *, 'bSuccess:', bSuccess
@@ -582,7 +583,11 @@ contains
             ! make an image histogram, decide on the flux etc.
             if (this_image() == 1) call make_image_statistics(item)
 
+            print *, this_image(), 'load_fits_file#1'
+
             call set_ok_status(item, .true.)
+
+            print *, this_image(), 'load_fits_file#2'
 
             ! end the timer
             call system_clock(finish)
@@ -1873,7 +1878,11 @@ contains
         real black, white, sensitivity, ratio_sensitivity
         integer stat
 
+        print *, this_image(), 'make_image_statistics::START'
+
         call get_cdelt3(item, cdelt3)
+
+        print *, this_image(), 'make_image_statistics#1'
 
         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             pmin = item%dmin
@@ -1895,18 +1904,31 @@ contains
             end do
         end if
 
+        print *, this_image(), 'make_image_statistics#2', pmin, pmax, size(item%mask), count(item%mask)
+        ! allocate(data(count(item%mask)))
+
         ! pick non-NaN valid pixels only according to mask
         data = pack(item%pixels, item%mask)
 
-        ! make a histogram with a range given by [pmin, pmax]
-        call make_histogram(item, data, pmin, pmax)
+        print *, this_image(), 'make_image_statistics#3'
 
-        n = size(data)
+        ! make a histogram with a range given by [pmin, pmax]
+        call make_histogram(item, data, pmin, pmax)        
+
+        print *, this_image(), 'make_image_statistics#4'
+
+        n = size(data)        
+
+        print *, this_image(), 'make_image_statistics#5', n
 
         if (n .eq. 0) return
 
+        print *, this_image(), 'make_image_statistics#6'
+
         pmedian = median(data, n)
         print *, 'median = ', pmedian
+
+        print *, this_image(), 'make_image_statistics#7'
 
         ! now the deviations from the median
         mad = 0.0; madP = 0.0; madN = 0.0
@@ -1927,9 +1949,13 @@ contains
             end if
         end do
 
+        print *, this_image(), 'make_image_statistics#8'
+
         mad = mad/real(n)
         if (countP > 0) madP = madP/real(countP)
         if (countN > 0) madN = madN/real(countN)
+
+        print *, this_image(), 'make_image_statistics#9'
 
         print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
         print *, 'mad = ', mad, ', madP = ', madP, ', madN = ', madN
@@ -1951,6 +1977,8 @@ contains
 
             ! TO-DO: auto-brightness
         end if
+
+        print *, this_image(), 'make_image_statistics#10'
 
         ! histogram classifier
         if (item%flux .eq. '') then
@@ -1994,6 +2022,8 @@ contains
             end block
         end if
 
+        print *, this_image(), 'make_image_statistics#11'
+
         print *, 'black = ', black, ', white = ', white, ', sensitivity = ', sensitivity
 
         item%pmin = pmin
@@ -2003,6 +2033,8 @@ contains
         item%white = white
         item%sensitivity = sensitivity
         item%ratio_sensitivity = ratio_sensitivity
+
+        print *, this_image(), 'make_image_statistics::END'
 
     end subroutine make_image_statistics
 

@@ -3,7 +3,6 @@ program main
     use net
     use fits
     use omp_lib
-    use :: zmq
     use, intrinsic :: iso_c_binding
     implicit none
 
@@ -89,7 +88,7 @@ program main
     !    call recv_command(client_socket)
     !end do
 
-    !if(this_image() .ne. 1) then
+    if(this_image() .ne. 1) then
     do
         block
             integer i
@@ -111,9 +110,10 @@ program main
             ! event wait(event_count)
             ! print *, 'image', this_image(), 'received an event'
             
-            call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
-            !call co_broadcast(command, source_image = 1)
-            !cmd = command
+            ierror = 0
+            !call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+            call co_broadcast(command, source_image = 1)
+            cmd = command
 
             if (ierror .eq. 0) then
                 
@@ -153,11 +153,11 @@ program main
             !   deallocate (uri)
         end block
         end do
-!else
-!do
-!    call sleep(1)
-!end do
-!end if
+else
+do
+    call sleep(1)
+end do
+end if
 
 contains
     integer function length(string, n)

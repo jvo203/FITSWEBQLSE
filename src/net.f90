@@ -1,16 +1,10 @@
 module net
     ! use iso_fortran_env
     use fits
-    use :: zmq
     use, intrinsic :: iso_c_binding
     implicit none
 
-    ! character, dimension(1024) :: command[*]
-
-    ! ØMQ
-    integer :: rc
-    type(c_ptr)     :: server_context, client_context
-    type(c_ptr)     :: server_socket, client_socket
+    character, dimension(1024) :: command
 
     interface
         subroutine start_http() BIND(C, name='start_http')
@@ -145,59 +139,6 @@ contains
         stop
     end subroutine exit_fortran
 
-    subroutine recv_command(socket)
-        type(c_ptr), intent(inout) :: socket
-        character(kind=c_char, len=:), pointer :: buffer
-        integer                                :: nbytes
-        integer                                :: rc
-        type(c_ptr)                            :: data
-        type(zmq_msg_t)                        :: message
-
-        rc = zmq_msg_init(message)
-
-        ! print *, this_image(), 'zmq_msg_init::rc', rc
-
-        nbytes = zmq_msg_recv(message, socket, 0)
-
-        ! print *, this_image(), 'zmq_msg_recv::nbytes', nbytes
-
-        data = zmq_msg_data(message)
-
-        call c_f_pointer(data, buffer)
-
-        if (nbytes .gt. 0) then
-            print *, this_image(), '[ØMQ] msg len:', nbytes, 'buffer:', buffer
-        end if
-
-        rc = zmq_msg_close(message)
-    end subroutine recv_command
-
-    subroutine send_command(socket, cmd)
-        use, intrinsic :: iso_c_binding
-
-        type(c_ptr), intent(inout) :: socket
-        character(kind=c_char), intent(in), target :: cmd(:)
-
-        integer(kind=c_int)                         :: nbytes
-        integer(kind=c_int)                         :: rc
-        type(zmq_msg_t)                             :: message
-        INTEGER(KIND=C_SIZE_T) :: msg_len
-
-        msg_len = size(cmd)
-
-        print *, '[ØMQ] msg_len:', msg_len
-
-        rc = zmq_msg_init_data(message, c_loc(cmd), msg_len, c_null_funptr, c_null_ptr)
-
-        print *, '[ØMQ] zmq_msg_init_data::rc', rc
-
-        nbytes = zmq_msg_send(message, socket, 0)
-
-        print *, '[ØMQ] nbytes sent', nbytes
-
-        rc = zmq_msg_close(message)
-    end subroutine send_command
-
     subroutine fitswebql_request(uri, n) bind(C)
         use mpi
         use fits
@@ -238,21 +179,21 @@ contains
 
         ! call send_command(server_socket, filepath(1:n))
 
-        do i = 0, size - 1
-            call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
-        end do
-
-        return
-
-        !command = filepath
-        !call co_broadcast(command, source_image = 1)
-
-        !filename = ''
-        !do i = 1, n
-        !    filename(i:i) = uri(i)
+        !do i = 0, size - 1
+        !    call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
         !end do
 
-        !call load_fits_file(filename)
+        !return
+
+        command = filepath
+        call co_broadcast(command, source_image = 1)
+
+        filename = ''
+        do i = 1, n
+            filename(i:i) = uri(i)
+        end do
+
+        call load_fits_file(filename)
     end subroutine fitswebql_request
 
     subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)

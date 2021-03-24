@@ -607,3 +607,64 @@ function extract_datasetid_old(filename) result(datasetid)
     if (i .gt. 1) datasetid = extract(datasetid, 1, i - 1)
 
 end function extract_datasetid_old
+
+use :: zmq
+
+! ØMQ
+    ! integer :: rc
+    ! type(c_ptr)     :: server_context, client_context
+    ! type(c_ptr)     :: server_socket, client_socket
+
+
+subroutine recv_command(socket)
+    type(c_ptr), intent(inout) :: socket
+    character(kind=c_char, len=:), pointer :: buffer
+    integer                                :: nbytes
+    integer                                :: rc
+    type(c_ptr)                            :: data
+    type(zmq_msg_t)                        :: message
+
+    rc = zmq_msg_init(message)
+
+    ! print *, this_image(), 'zmq_msg_init::rc', rc
+
+    nbytes = zmq_msg_recv(message, socket, 0)
+
+    ! print *, this_image(), 'zmq_msg_recv::nbytes', nbytes
+
+    data = zmq_msg_data(message)
+
+    call c_f_pointer(data, buffer)
+
+    if (nbytes .gt. 0) then
+        print *, this_image(), '[ØMQ] msg len:', nbytes, 'buffer:', buffer
+    end if
+
+    rc = zmq_msg_close(message)
+end subroutine recv_command
+
+subroutine send_command(socket, cmd)
+    use, intrinsic :: iso_c_binding
+
+    type(c_ptr), intent(inout) :: socket
+    character(kind=c_char), intent(in), target :: cmd(:)
+
+    integer(kind=c_int)                         :: nbytes
+    integer(kind=c_int)                         :: rc
+    type(zmq_msg_t)                             :: message
+    INTEGER(KIND=C_SIZE_T) :: msg_len
+
+    msg_len = size(cmd)
+
+    print *, '[ØMQ] msg_len:', msg_len
+
+    rc = zmq_msg_init_data(message, c_loc(cmd), msg_len, c_null_funptr, c_null_ptr)
+
+    print *, '[ØMQ] zmq_msg_init_data::rc', rc
+
+    nbytes = zmq_msg_send(message, socket, 0)
+
+    print *, '[ØMQ] nbytes sent', nbytes
+
+    rc = zmq_msg_close(message)
+end subroutine send_command
