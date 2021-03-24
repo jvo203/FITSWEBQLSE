@@ -538,7 +538,7 @@ contains
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
         call read_fits_file(item, filename, dmin, dmax, pixels, mask, mean_spectrum, integrated_spectrum, bSuccess)
-        
+
         call co_reduce(bSuccess, logical_and)
 
         if (this_image() == 1) print *, 'bSuccess:', bSuccess
@@ -816,7 +816,7 @@ contains
             else
                 test_ignrval = .true.
             end if
-            
+
             !$OMP PARALLEL SHARED(item)&
             !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
             !$OMP& REDUCTION(.or.:thread_bSuccess)
@@ -1912,11 +1912,11 @@ contains
         print *, this_image(), 'make_image_statistics#3'
 
         ! make a histogram with a range given by [pmin, pmax]
-        call make_histogram(item, data, pmin, pmax)        
+        call make_histogram(item, data, pmin, pmax)
 
         print *, this_image(), 'make_image_statistics#4'
 
-        n = size(data)        
+        n = size(data)
 
         print *, this_image(), 'make_image_statistics#5', n
 
