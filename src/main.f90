@@ -117,6 +117,10 @@ program main
 
             if (ierror .eq. 0) then
 
+                count = length(cmd, 1024)
+
+                print *, 'rank', rank, 'ierror', ierror
+
                 if (count .gt. 1) then
                     print *, 'rank', rank, '"', cmd(1:count), '"'
 
@@ -140,7 +144,6 @@ program main
                         call handle_realtime_image_spectrum(cmd(2:count))
                     end if
                 end if
-
             end if
 
             !   deallocate (uri)
