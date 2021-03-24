@@ -112,13 +112,16 @@ program main
 
             ierror = 0
             call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
-
+            
             if (ierror .eq. 0) then
+                
                 if (cmd(1) .eq. 'L') then
                     count = length(cmd, 1024)
                 else
                     count = 0
                 end if
+                
+                print *, 'rank',i,'ierror', ierror 
 
                 if (count .gt. 1) then
                     print *, 'rank', rank, '"', cmd(1:count), '"'
