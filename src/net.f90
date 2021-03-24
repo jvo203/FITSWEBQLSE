@@ -253,7 +253,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-          & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
+                    & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
@@ -386,6 +386,7 @@ contains
             ! json
             ! call write_header(fd, c_str//c_null_char)
 
+            print *, char(json_str//c_null_char)
             call write_header(fd, char(json_str//c_null_char))
 
             ! FITS header
