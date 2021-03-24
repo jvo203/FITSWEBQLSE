@@ -5,16 +5,16 @@ module json_for
     ! character(len=*), parameter :: form = '(E30.16E3)'
     character(len=*), parameter :: form = '(G24.16)'
 contains
-    elemental logical function isnan(x)
-        real(kind=4), intent(in) :: x
+    !elemental logical function isnan(x)
+    !    real(kind=4), intent(in) :: x
 
-        if (abs(x)*0.0 /= 0.0) then
-            isnan = .true.
-        else
-            isnan = .false.
-        end if
+    !     if (abs(x)*0.0 /= 0.0) then
+    !        isnan = .true.
+    !    else
+    !        isnan = .false.
+    !    end if
 
-    end function isnan
+    !end function isnan
 
     subroutine json_add_string(json, key, val)
         type(varying_string), intent(inout) :: json
