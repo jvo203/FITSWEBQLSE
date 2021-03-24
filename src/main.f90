@@ -121,7 +121,7 @@ program main
                     count = 0
                 end if
                 
-                print *, 'rank',i,'ierror', ierror 
+                print *, 'rank',rank,'ierror', ierror 
 
                 if (count .gt. 1) then
                     print *, 'rank', rank, '"', cmd(1:count), '"'
