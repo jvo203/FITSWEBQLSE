@@ -246,14 +246,14 @@ contains
         call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
         ! disabled sending the command (problems in the MPI event loop???)
-        !do i = 0, size - 1
-        !    call MPI_SEND(cmd, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
-        !end do
+        do i = 0, size - 1
+            call MPI_SEND(cmd, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
+        end do
 
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                                             & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
+                                                  & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
