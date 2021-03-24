@@ -1,5 +1,6 @@
 module net
     ! use iso_fortran_env
+    use fits
     use :: zmq
     use, intrinsic :: iso_c_binding
     implicit none
