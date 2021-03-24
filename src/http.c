@@ -1426,17 +1426,15 @@ extern void write_spectrum(int fd, const float *spectrum, int n)
     }
 }
 
-extern void write_header(int fd, const char *header_str)
+extern void write_header(int fd, const char *header_str, int str_len)
 {
     char *compressed_header = NULL;
 
     if (header_str == NULL)
         return;
 
-    int str_len, worst_size;
+    int worst_size;
     int compressed_size = 0;
-
-    str_len = strlen(header_str);
 
     if (str_len == 0)
         return;
