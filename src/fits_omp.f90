@@ -1045,6 +1045,14 @@ contains
         item%timesys = ''
         item%flux = ''
 
+        item%cunit1 = ''
+        item%cunit2 = ''
+        item%cunit3 = ''
+
+        item%ctype1 = ''
+        item%ctype2 = ''
+        item%ctype3 = ''
+
         ! reset the FITS header
         if (allocated(item%hdr)) deallocate (item%hdr)
 
