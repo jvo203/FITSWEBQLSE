@@ -1905,7 +1905,6 @@ contains
         end if
 
         print *, this_image(), 'make_image_statistics#2', pmin, pmax, size(item%mask), count(item%mask)
-        ! allocate(data(count(item%mask)))
 
         ! pick non-NaN valid pixels only according to mask
         data = pack(item%pixels, item%mask)
