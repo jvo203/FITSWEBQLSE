@@ -727,6 +727,7 @@ contains
             end = min(tid*num_per_image, last)
             num_per_image = end - start + 1
             ! print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
+            ! return
 
             max_threads = OMP_GET_MAX_THREADS()
 
