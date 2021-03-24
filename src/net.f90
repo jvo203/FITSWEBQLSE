@@ -289,7 +289,7 @@ contains
         call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
         do i = 0, size - 1
-            call MPI_SEND(cmd, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
+            call MPI_SEND(cmd, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)            
         end do
 
         return
