@@ -31,7 +31,8 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 # src/psrs_sort.c
 # src/iso_varying_string.f90
 # src/zmq.f90
-SRC = $(ZFP_SRC) src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/iso_varying_string.f90 src/m_mrgrnk.f90 src/mod_sort.f90 src/wavelet.f90 src/fixed_array.f90 src/lz4.f90 src/histogram.c src/classifier.f90 src/json_for.f90 src/fits_omp.f90 src/net.f90 src/main.f90
+# src/wavelet.f90
+SRC = $(ZFP_SRC) src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/iso_varying_string.f90 src/m_mrgrnk.f90 src/mod_sort.f90 src/fixed_array.f90 src/lz4.f90 src/histogram.c src/classifier.f90 src/json_for.f90 src/fits_omp.f90 src/net.f90 src/main.f90
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
