@@ -61,13 +61,17 @@ ifeq ($(UNAME_S),Darwin)
 #MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc-10
-	FORT = mpifort
+	FORT = nagfor
 	MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 
 	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
-	FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
-#$(MPI_LINK_FLAGS)
+
+	ifeq ($(FORT),nagfor)
+		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp $(MPI_LINK_FLAGS)
+	else
+		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
+	endif
 endif
 
 # include dependencies (all .d files)
@@ -80,7 +84,7 @@ endif
 	$(CC) $(CFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
 
 %.o: %.f90
-	$(FORT) $(FLAGS) $(MOD) -MMD -o $@ -c $<
+	$(FORT) $(FLAGS) $(MOD) -o $@ -c $<
 
 fitswebqlse: $(OBJ)
 	$(FORT) $(FLAGS) -o $(TARGET) $^ $(LIBS) $(IPP)
