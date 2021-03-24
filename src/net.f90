@@ -5,6 +5,8 @@ module net
     use, intrinsic :: iso_c_binding
     implicit none
 
+    ! character, dimension(1024) :: command[*]
+
     ! ØMQ
     integer :: rc
     type(c_ptr)     :: server_context, client_context
@@ -207,6 +209,7 @@ contains
         integer :: size, ierror
         integer :: length
         character, dimension(1024) :: filepath
+        character(len=1024) :: filename
 
         call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
@@ -238,6 +241,18 @@ contains
         do i = 0, size - 1
             call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
         end do
+
+        return
+
+        !command = filepath
+        !call co_broadcast(command, source_image = 1)
+
+        !filename = ''
+        !do i = 1, n
+        !    filename(i:i) = uri(i)
+        !end do
+
+        !call load_fits_file(filename)
     end subroutine fitswebql_request
 
     subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)
@@ -289,9 +304,10 @@ contains
         ! send the command
         call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
-        do i = 0, size - 1
-            call MPI_SEND(cmd, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)            
-        end do
+        ! disabled sending the command (problems in the MPI event loop???)
+        !do i = 0, size - 1
+        !    call MPI_SEND(cmd, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)            
+        !end do
 
         return
 

@@ -89,6 +89,7 @@ program main
     !    call recv_command(client_socket)
     !end do
 
+    !if(this_image() .ne. 1) then
     do
         block
             integer i
@@ -109,10 +110,11 @@ program main
             ! wait for an event
             ! event wait(event_count)
             ! print *, 'image', this_image(), 'received an event'
-
-            ierror = 0
-            call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
             
+            call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+            !call co_broadcast(command, source_image = 1)
+            !cmd = command
+
             if (ierror .eq. 0) then
                 
                 if (cmd(1) .eq. 'L') then
@@ -139,18 +141,23 @@ program main
                     end if
 
                     ! WebSocket realtime image/spectrum requests
-                    ! if (cmd(1) .eq. 'S') then
-                    !     count = reverse_length(cmd, 1024)
-                    !    ! print *, 'rank', rank, '"', cmd(2:count), '"'
+                    if (cmd(1) .eq. 'S') then
+                         count = reverse_length(cmd, 1024)
+                        ! print *, 'rank', rank, '"', cmd(2:count), '"'
 
-                    !    call handle_realtime_image_spectrum(cmd(2:count))
-                    !end if
+                        call handle_realtime_image_spectrum(cmd(2:count))
+                    end if
                 end if
             end if
 
             !   deallocate (uri)
         end block
-    end do
+        end do
+!else
+!do
+!    call sleep(1)
+!end do
+!end if
 
 contains
     integer function length(string, n)
