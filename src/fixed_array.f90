@@ -16,16 +16,16 @@ module fixed_array
         integer(kind=1), dimension(4, 4) :: mantissa
     end type fixed_block
 contains
-    !elemental logical function isnan(x)
-    !real(kind=4), intent(in) :: x
+    elemental logical function isnan(x)
+        real(kind=4), intent(in) :: x
 
-    !if(abs(x)*0.0 /= 0.0) then
-    !    isnan = .true.
-    !else
-    !    isnan = .false.
-    !end if
+        if (abs(x)*0.0 /= 0.0) then
+            isnan = .true.
+        else
+            isnan = .false.
+        end if
 
-    !end function isnan
+    end function isnan
 
     subroutine to_fixed(n, x, compressed, mask)
         ! use wavelet
