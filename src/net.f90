@@ -271,7 +271,7 @@ contains
 
         write (buffer, 10) 'S', req%dx, ' ', req%image, ' ', req%quality, ' ', req%x1, ' ', req%y1, ' ', req%x2, ' ', req%y2, ' ',&
         &req%width, ' ', req%height, ' ', req%beam, ' ', req%intensity, ' ', req%frame_start, ' ',&
-        &req%frame_end, ' ', req%ref_freq, ' ', req%seq_id, ' ', req%timestamp, ' '
+        &req%frame_end, ' ', req%ref_freq, ' ', req%seq_id, ' ', req%timestamp, ' '        
 
         cmd = ' '
 
@@ -284,8 +284,6 @@ contains
 
         ! append the datasetid
         cmd(length + 1:length + 1 + n) = datasetid(1:n)
-
-        ! print *, cmd
 
         ! send the command
         call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
