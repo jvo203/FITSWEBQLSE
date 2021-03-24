@@ -44,11 +44,11 @@ module net
             type(C_PTR), value :: pixels, mask
         end subroutine write_image_spectrum
 
-        subroutine write_header(fd, json_str) BIND(C, name='write_header')
+        subroutine write_header(fd, json_str, str_len) BIND(C, name='write_header')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
-            integer(c_int), value, intent(in) :: fd
+            integer(c_int), value, intent(in) :: fd, str_len
             character(kind=c_char), intent(in) :: json_str(*)
         end subroutine write_header
 
@@ -253,7 +253,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                    & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
+                                             & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
@@ -387,16 +387,17 @@ contains
             ! call write_header(fd, c_str//c_null_char)
 
             print *, char(json_str//c_null_char)
-            call write_header(fd, char(json_str//c_null_char))
+            ! call write_header(fd, char(json_str//c_null_char))
+            call write_header(fd, char(json_str), len(json_str))
 
             ! FITS header
             if (allocated(item%hdr)) then
                 print *, 'FITS header size:', size(item%hdr)
                 ! print *, item%hdr
-                call write_header(fd, item%hdr)
+                call write_header(fd, item%hdr, size(item%hdr))
                 ! call write_header(fd, 'NULL'//c_null_char)
             else
-                call write_header(fd, 'NULL'//c_null_char)
+                call write_header(fd, 'NULL', 4)
             end if
 
             ! send FPzip-compressed spectra
