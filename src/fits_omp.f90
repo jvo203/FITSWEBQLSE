@@ -810,8 +810,7 @@ contains
             else
                 test_ignrval = .true.
             end if
-
-            ! the <do> loop needs to be made parallel with OpenMP
+            
             !$OMP PARALLEL SHARED(item)&
             !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
             !$OMP& REDUCTION(.or.:thread_bSuccess)
@@ -2125,11 +2124,11 @@ contains
 
         ! CALL quicksort(X, 1, N)               ! sort the original data
         ! CALL vec_quicksort(X)               ! sort the original data
-        ! call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
+        call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
 
         ! Fortran native parallel (OpenMP)
-        call parallel_sort(X, order)
-        X = X(order(:))
+        ! call parallel_sort(X, order)
+        ! X = X(order(:))
 
         ! end the timer
         call system_clock(finish_t)
