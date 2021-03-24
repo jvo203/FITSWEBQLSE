@@ -110,10 +110,15 @@ program main
             ! event wait(event_count)
             ! print *, 'image', this_image(), 'received an event'
 
+            ierror = 0
             call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
 
             if (ierror .eq. 0) then
-                count = length(cmd, 1024)
+                if (cmd(1) .eq. 'L') then
+                    count = length(cmd, 1024)
+                else
+                    count = 0
+                end if
 
                 if (count .gt. 1) then
                     print *, 'rank', rank, '"', cmd(1:count), '"'
@@ -131,12 +136,12 @@ program main
                     end if
 
                     ! WebSocket realtime image/spectrum requests
-                    if (cmd(1) .eq. 'S') then
-                        count = reverse_length(cmd, 1024)
-                        ! print *, 'rank', rank, '"', cmd(2:count), '"'
+                    ! if (cmd(1) .eq. 'S') then
+                    !     count = reverse_length(cmd, 1024)
+                    !    ! print *, 'rank', rank, '"', cmd(2:count), '"'
 
-                        call handle_realtime_image_spectrum(cmd(2:count))
-                    end if
+                    !    call handle_realtime_image_spectrum(cmd(2:count))
+                    !end if
                 end if
             end if
 
@@ -146,6 +151,8 @@ program main
 
 contains
     integer function length(string, n)
+        implicit none
+
         character, dimension(n), intent(in) :: string
         integer, intent(in) :: n
         integer :: i
