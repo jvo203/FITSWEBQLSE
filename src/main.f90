@@ -119,8 +119,6 @@ program main
 
                 count = length(cmd, 1024)
 
-                print *, 'rank', rank, 'ierror', ierror
-
                 if (count .gt. 1) then
                     print *, 'rank', rank, '"', cmd(1:count), '"'
 
