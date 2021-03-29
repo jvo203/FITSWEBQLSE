@@ -151,7 +151,7 @@ static const struct lws_protocol_vhost_options pvo_ops = {
 static const struct lws_protocol_vhost_options pvo = {
     NULL,          /* "next" pvo linked-list */
     &pvo_ops,      /* "child" pvo linked-list */
-    "lws-minimal", /* protocol name we belong to on this vhost */
+    "fitswebqlse", /* protocol name we belong to on this vhost */
     ""             /* ignored */
 };
 
