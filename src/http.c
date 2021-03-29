@@ -176,7 +176,7 @@ void *start_ws(void *ignore)
     info.mounts = &mount;
     info.protocols = protocols;
     info.pvo = &pvo; /* per-vhost options */
-    info.vhost_name = "localhost";
+    //info.vhost_name = "localhost";
     info.options =
         LWS_SERVER_OPTION_HTTP_HEADERS_SECURITY_BEST_PRACTICES_ENFORCE;
 
