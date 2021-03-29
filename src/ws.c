@@ -17,6 +17,7 @@
 #include <stdbool.h>
 
 #define RING_DEPTH 128
+#define WS_THREADS 8
 
 enum zoom_shape
 {
@@ -96,7 +97,7 @@ struct per_vhost_data__minimal
 	const struct lws_protocols *protocol;
 
 	struct per_session_data__minimal *pss_list; /* linked-list of live pss*/
-	pthread_t pthread_spam[2];
+	pthread_t pthread_webql[WS_THREADS];
 
 	pthread_mutex_t lock_ring; /* serialize access to the ring buffer */
 	struct lws_ring *ring;	   /* {lock_ring} ringbuffer holding unsent content */
@@ -135,15 +136,15 @@ __minimal_destroy_message(void *_msg)
  */
 
 static void *
-thread_spam(void *d)
+thread_webql(void *d)
 {
 	struct per_vhost_data__minimal *vhd =
 		(struct per_vhost_data__minimal *)d;
 	struct msg amsg;
 	int len = 128, index = 1, n, whoami = 0;
 
-	for (n = 0; n < (int)LWS_ARRAY_SIZE(vhd->pthread_spam); n++)
-		if (pthread_equal(pthread_self(), vhd->pthread_spam[n]))
+	for (n = 0; n < (int)LWS_ARRAY_SIZE(vhd->pthread_webql); n++)
+		if (pthread_equal(pthread_self(), vhd->pthread_webql[n]))
 			whoami = n + 1;
 
 	do
@@ -193,7 +194,7 @@ thread_spam(void *d)
 
 	} while (!vhd->finished);
 
-	lwsl_notice("thread_spam %d exiting\n", whoami);
+	lwsl_notice("thread_webql %d exiting\n", whoami);
 
 	pthread_exit(NULL);
 
@@ -254,9 +255,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 		/* start the content-creating threads */
 
-		for (n = 0; n < (int)LWS_ARRAY_SIZE(vhd->pthread_spam); n++)
-			if (pthread_create(&vhd->pthread_spam[n], NULL,
-							   thread_spam, vhd))
+		for (n = 0; n < (int)LWS_ARRAY_SIZE(vhd->pthread_webql); n++)
+			if (pthread_create(&vhd->pthread_webql[n], NULL,
+							   thread_webql, vhd))
 			{
 				lwsl_err("thread creation failed\n");
 				r = 1;
@@ -267,9 +268,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 	case LWS_CALLBACK_PROTOCOL_DESTROY:
 	init_fail:
 		vhd->finished = 1;
-		for (n = 0; n < (int)LWS_ARRAY_SIZE(vhd->pthread_spam); n++)
-			if (vhd->pthread_spam[n])
-				pthread_join(vhd->pthread_spam[n], &retval);
+		for (n = 0; n < (int)LWS_ARRAY_SIZE(vhd->pthread_webql); n++)
+			if (vhd->pthread_webql[n])
+				pthread_join(vhd->pthread_webql[n], &retval);
 
 		if (vhd->ring)
 			lws_ring_destroy(vhd->ring);
