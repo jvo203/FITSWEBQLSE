@@ -114,7 +114,7 @@ static void usleep(unsigned long l)
 #endif
 
 /*
- * This runs under both lws service and "spam threads" contexts.
+ * This runs under both lws service and "webql threads" contexts.
  * Access is serialized by vhd->lock_ring.
  */
 
@@ -129,9 +129,9 @@ __minimal_destroy_message(void *_msg)
 }
 
 /*
- * This runs under the "spam thread" thread context only.
+ * This runs under the "webql thread" thread context only.
  *
- * We spawn two threads that generate messages with this.
+ * We spawn <WS_THREADS> threads that generate messages with this.
  *
  */
 
