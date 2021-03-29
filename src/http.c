@@ -132,6 +132,29 @@ static const struct lws_http_mount mount = {
     /* .basic_auth_login_file */ NULL,
 };
 
+/*
+ * This demonstrates how to pass a pointer into a specific protocol handler
+ * running on a specific vhost.  In this case, it's our default vhost and
+ * we pass the pvo named "config" with the value a const char * "myconfig".
+ *
+ * This is the preferred way to pass configuration into a specific vhost +
+ * protocol instance.
+ */
+
+static const struct lws_protocol_vhost_options pvo_ops = {
+    NULL,
+    NULL,
+    "config",          /* pvo name */
+    (void *)"myconfig" /* pvo value */
+};
+
+static const struct lws_protocol_vhost_options pvo = {
+    NULL,          /* "next" pvo linked-list */
+    &pvo_ops,      /* "child" pvo linked-list */
+    "lws-minimal", /* protocol name we belong to on this vhost */
+    ""             /* ignored */
+};
+
 void *start_ws(void *ignore)
 {
     struct lws_context_creation_info info;
@@ -152,6 +175,7 @@ void *start_ws(void *ignore)
     info.port = WS_PORT;
     info.mounts = &mount;
     info.protocols = protocols;
+    info.pvo = &pvo; /* per-vhost options */
     info.vhost_name = "localhost";
     info.options =
         LWS_SERVER_OPTION_HTTP_HEADERS_SECURITY_BEST_PRACTICES_ENFORCE;
