@@ -71,7 +71,7 @@ ifeq ($(UNAME_S),Darwin)
 #MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc-10
-	FORT = mpifort-10
+	FORT = mpifort
 
 	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
