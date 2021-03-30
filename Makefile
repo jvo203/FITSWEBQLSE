@@ -72,12 +72,12 @@ ifeq ($(UNAME_S),Darwin)
 
 	CC = gcc-10
 	FORT = mpifort-10
-	MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 
 	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
 
 	ifeq ($(FORT),nagfor)
+		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp -colour $(MPI_LINK_FLAGS)
 	else
 		FLAGS += -cpp -fallow-invalid-boz -fcoarray=single
