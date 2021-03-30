@@ -134,6 +134,12 @@
 
 	./install.sh --prefix-root /usr/local --num-threads 16 --yes-to-all
 
+	Add
+
+	source /usr/local/opencoarrays/2.9.2/setup.sh
+
+	to $PATH in .bashrc
+
 9. Adjust environment variables
 
 	Add
