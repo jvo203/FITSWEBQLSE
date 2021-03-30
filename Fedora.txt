@@ -124,6 +124,8 @@
 
 8. OpenCoarrays
 
+	pre-requisites: gcc, gfortran
+
 	wget https://github.com/sourceryinstitute/OpenCoarrays/releases/download/2.9.2/OpenCoarrays-2.9.2.tar.gz
 
 	tar xvzf OpenCoarrays-2.9.2.tar.gz
