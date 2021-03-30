@@ -88,7 +88,7 @@ endif
 ifeq ($(CC),gcc)
 	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
-	LIBS += -lcaf_mpi
+	LIBS += -L/usr/local/opencoarrays/2.9.2/lib64 -lcaf_mpi
 
 	ifeq ($(FORT),nagfor)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
