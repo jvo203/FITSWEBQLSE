@@ -122,7 +122,17 @@
 
 	sudo make install
 
-8. Adjust environment variables
+8. OpenCoarrays
+
+	wget https://github.com/sourceryinstitute/OpenCoarrays/releases/download/2.9.2/OpenCoarrays-2.9.2.tar.gz
+
+	tar xvzf OpenCoarrays-2.9.2.tar.gz
+
+	cd OpenCoarrays-2.9.2
+
+	./install.sh
+
+9. Adjust environment variables
 
 	Add
 
