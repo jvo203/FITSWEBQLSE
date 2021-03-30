@@ -13,8 +13,8 @@ CC := icc
 FORT := mpiifort
 
 # Linux gcc/gfortran with opencoarrays
-#CC := gcc
-#FORT := mpifort
+CC := gcc
+FORT := mpifort
 
 TARGET = fitswebqlse
 
