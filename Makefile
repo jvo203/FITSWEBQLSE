@@ -80,7 +80,7 @@ ifeq ($(UNAME_S),Darwin)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp -colour $(MPI_LINK_FLAGS)
 	else
-		FLAGS += -cpp -fallow-invalid-boz -fcoarray=single
+		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
 	endif
 endif
 
