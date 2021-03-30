@@ -80,7 +80,7 @@ ifeq ($(UNAME_S),Darwin)
 	ifeq ($(FORT),nagfor)
 		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp -colour $(MPI_LINK_FLAGS)
 	else
-		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
+		FLAGS += -cpp -fallow-invalid-boz -fcoarray=single
 	endif
 endif
 
