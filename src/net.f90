@@ -134,7 +134,7 @@ contains
         !end if
 
         ! in a Co-Array program there may be no need for MPI_Finalize
-        ! call MPI_FINALIZE(ierror)
+        call MPI_FINALIZE(ierror)
         ! call MPI_ABORT(MPI_COMM_WORLD, 0, ierror)
 
         stop
@@ -254,7 +254,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                                        & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
+                                                       & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
