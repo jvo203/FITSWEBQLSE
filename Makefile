@@ -11,6 +11,11 @@ UNAME_S := $(shell uname -s)
 # the macOS Darwin target is handled further down the line
 CC := icc
 FORT := mpiifort
+
+# Linux gcc/gfortran with opencoarrays
+CC := gcc
+FORT := mpifort
+
 TARGET = fitswebqlse
 
 # Intel Integrated Performance Primitives Library
@@ -66,13 +71,27 @@ ifeq ($(UNAME_S),Darwin)
 #MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc-10
-	FORT = nagfor
+	FORT = mpifort-10
 	MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 
 	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
 
 	ifeq ($(FORT),nagfor)
+		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp -colour $(MPI_LINK_FLAGS)
+	else
+		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
+	endif
+endif
+
+# detect the GNU Compiler under Linux
+ifeq ($(CC),gcc)
+	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	CFLAGS := $(FLAGS)
+	LIBS += -lcaf_mpi
+
+	ifeq ($(FORT),nagfor)
+		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp -colour $(MPI_LINK_FLAGS)
 	else
 		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
