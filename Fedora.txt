@@ -130,7 +130,7 @@
 
 	cd OpenCoarrays-2.9.2
 
-	./install.sh
+	./install.sh --prefix-root /usr/local --num-threads 16 --yes-to-all
 
 9. Adjust environment variables
 
