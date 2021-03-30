@@ -1674,7 +1674,7 @@ size_t chunked_write(int fd, const char *src, size_t n)
 
         // the connection might have been closed, bail out
         if (written < 0)
-            return;
+            return offset;
     }
 
     return offset;
