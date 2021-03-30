@@ -74,7 +74,7 @@ ifeq ($(UNAME_S),Darwin)
 	FORT = mpifort-10
 	MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 
-	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
 
 	ifeq ($(FORT),nagfor)
@@ -86,7 +86,7 @@ endif
 
 # detect the GNU Compiler under Linux
 ifeq ($(CC),gcc)
-	FLAGS = -march=native -g -Ofast -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
 	LIBS += -L/usr/local/opencoarrays/2.9.2/lib64 -lcaf_mpi
 
