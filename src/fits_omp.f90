@@ -624,7 +624,9 @@ contains
         real(kind=4), allocatable :: pixels(:) [:]
         logical(kind=1), allocatable :: mask(:) [:]
         real, allocatable :: spectrum(:) [:]
-        logical, save :: bSuccess[*]
+
+        !logical, save :: bSuccess[*] ! linking errors to caf_token
+        logical, allocatable :: bSuccess[:]
 
         ! calculation range
         integer :: first, last, length
@@ -635,6 +637,9 @@ contains
 
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+        ! co-allocate bSuccess
+        allocate (bSuccess[*])
 
         bSuccess = .true.
 
