@@ -140,6 +140,12 @@
 
 	to $PATH in .bashrc
 
+	Append
+
+	/usr/local/opencoarrays/2.9.2/lib64
+
+	to $LD_LIBRARY_PATH in .bashrc
+
 9. Adjust environment variables
 
 	Add
