@@ -1053,7 +1053,8 @@ extern void close_pipe(int fd)
     // close a pipe (to be called from Fortran)
     status = close(fd);
 
-    printf("[C] close_pipe status: %d\n", status);
+    if (0 != status)
+        printf("[C] close_pipe status: %d\n", status);
 }
 
 extern void start_http()
