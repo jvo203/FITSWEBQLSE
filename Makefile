@@ -44,19 +44,23 @@ OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
-FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp
+ifeq ($(CC),icc)
+	FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp
 # -parallel
 #-mcmodel=medium
 #-ipo -parallel -fast
 # -ipo causes segmentation faults ...
 # -fast causes static linking problems
 
-CFLAGS := $(FLAGS)
+	CFLAGS := $(FLAGS)
+	FLAGS += -align array64byte -coarray=distributed
+endif
+
 INC = `pkg-config --cflags glib-2.0` -I./$(ZFP)/include -I./$(ZFP)/src
 MOD =
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
-FLAGS += -align array64byte -coarray=distributed
+
 LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lfpzip -lcfitsio
 # -lzmq -lczmq
 # -lzfp before cfitsio
@@ -86,8 +90,8 @@ endif
 
 # detect the GNU Compiler under Linux
 ifeq ($(CC),gcc)
-	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
-	CFLAGS := $(FLAGS)
+	override CFLAGS += -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	FLAGS := $(CFLAGS)
 	LIBS += -L/usr/local/opencoarrays/2.9.2/lib64 -lcaf_mpi
 
 	ifeq ($(FORT),nagfor)
