@@ -299,13 +299,27 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 			if (pss->req_type == realtime_image_spectrum)
 			{
-				// reset the pipe
-				pss->is_req.fd = -1;
+				int status;
+				int pipefd[2];
 
 				printf("[C] dx:%d, image:%d, quality:%d, x1:%d, y1:%d, x2:%d, y2:%d, width:%d, height:%d, beam:%d, intensity:%d, frame_start:%f, frame_end:%f, ref_freq:%f, seq_id:%d, timestamp:%f\n", pss->is_req.dx, pss->is_req.image, pss->is_req.quality, pss->is_req.x1, pss->is_req.y1, pss->is_req.x2, pss->is_req.y2, pss->is_req.width, pss->is_req.height, pss->is_req.beam, pss->is_req.intensity, pss->is_req.frame_start, pss->is_req.frame_end, pss->is_req.ref_freq, pss->is_req.seq_id, pss->is_req.timestamp);
 
-				// pass the request to FORTRAN
-				realtime_image_spectrum_request(pss->datasetid, strlen(pss->datasetid), &(pss->is_req));
+				// open a pipe
+				status = pipe(pipefd);
+
+				if (0 == status)
+				{
+					// pass the write end of the pipe
+					pss->is_req.fd = pipefd[1];
+
+					// pass the request to FORTRAN
+					realtime_image_spectrum_request(pss->datasetid, strlen(pss->datasetid), &(pss->is_req));
+				}
+				else
+				{
+					// reset the pipe
+					pss->is_req.fd = -1;
+				}
 			}
 
 			pss->new_request = false;
