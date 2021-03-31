@@ -68,7 +68,7 @@ ifeq ($(CC),icc)
 # -fast causes static linking problems
 
 	CFLAGS := $(FLAGS)
-	FLAGS += -align array64byte -coarray=distributed
+	FLAGS += -align array64byte -coarray=distributed -mt_mpi
 endif
 
 INC = `pkg-config --cflags glib-2.0` -I./$(ZFP)/include -I./$(ZFP)/src
