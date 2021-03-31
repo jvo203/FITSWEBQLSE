@@ -697,14 +697,14 @@ contains
 
         read (buffer, *) req%dx, req%image, req%quality, req%x1, req%y1, req%x2, req%y2, &
         &req%width, req%height, req%beam, req%intensity, req%frame_start,&
-        &req%frame_end, req%ref_freq, req%seq_id, req%timestamp
+        &req%frame_end, req%ref_freq, req%seq_id, req%timestamp, req%fd
 
         if (this_image() .eq. 1) print *, this_image(), 'handle_realtime_image_spectrum for ', item%datasetid,&
         &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
             &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
             &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
             &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
-            req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp
+            req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
 
         ! get the range of the cube planes
         call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
