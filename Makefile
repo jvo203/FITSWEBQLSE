@@ -7,14 +7,27 @@
 # detect the OS
 UNAME_S := $(shell uname -s)
 
-# default settings on Linux
-# the macOS Darwin target is handled further down the line
-CC := icc
-FORT := mpiifort
+# detect the CPU vendor
+CPU_S := $(shell cat /proc/cpuinfo)
 
-# Linux gcc/gfortran with opencoarrays
-CC := gcc
-FORT := mpifort
+# the macOS Darwin target is handled further down the line
+# default settings on Linux
+ifeq ($(UNAME_S),Linux)
+
+# an Intel CPU
+ifneq (,$(findstring GenuineIntel,$(CPU_S)))
+	CC := icc
+	FORT := mpiifort
+endif
+
+# an AMD CPU
+ifneq (,$(findstring AuthenticAMD,$(CPU_S)))
+	# Linux gcc/gfortran with opencoarrays
+	CC := gcc
+	FORT := mpifort
+endif
+
+endif
 
 TARGET = fitswebqlse
 
