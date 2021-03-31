@@ -157,3 +157,7 @@ export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
 ulimit -s unlimited
 
 	to .bashrc and re-login
+
+10. Example running using one MPI host:
+
+	mpiexec -silent-abort -n 1 ./fitswebqlse
