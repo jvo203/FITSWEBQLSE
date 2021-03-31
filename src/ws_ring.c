@@ -54,6 +54,7 @@ enum request_type
 
 struct image_spectrum_request
 {
+	// input
 	int dx;
 	bool image;
 	enum image_quality quality;
@@ -70,6 +71,9 @@ struct image_spectrum_request
 	double ref_freq;
 	int seq_id;
 	float timestamp;
+
+	// output
+	int fd;
 };
 
 extern void realtime_image_spectrum_request(char *datasetid, size_t n, void *req);
