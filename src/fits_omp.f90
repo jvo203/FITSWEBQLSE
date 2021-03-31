@@ -182,6 +182,14 @@ module fits
             integer(kind=c_int), value, intent(in) :: n
         end subroutine psrs_sort
 
+        ! void close_pipe(int fd);
+        subroutine close_pipe(fd) BIND(C, name='close_pipe')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(kind=c_int), value, intent(in) :: fd
+        end subroutine close_pipe
+
     end interface
 contains
     subroutine close_fits_file(item)
