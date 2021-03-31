@@ -938,6 +938,7 @@ contains
         if (this_image() .ne. 1) return
 
         if (.not. bSuccess) then
+            if (req%fd .ne. -1) call close_pipe(req%fd)
             return
         end if
 
@@ -949,6 +950,8 @@ contains
         ! print *, 'spectrum:', spectrum
 
         print *, 'handle_realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
+
+        if (req%fd .ne. -1) call close_pipe(req%fd)
 
     end subroutine handle_realtime_image_spectrum
 
