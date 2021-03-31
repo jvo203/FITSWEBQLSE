@@ -314,6 +314,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 					// pass the request to FORTRAN
 					realtime_image_spectrum_request(pss->datasetid, strlen(pss->datasetid), &(pss->is_req));
+
+					// close the reader end
+					close(pipefd[0]);
 				}
 				else
 				{
