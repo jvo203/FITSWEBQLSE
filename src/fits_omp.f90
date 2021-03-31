@@ -29,6 +29,7 @@ module fits
     end enum
 
     type, bind(c) :: image_spectrum_request_f
+        ! input
         integer(kind=c_int) :: dx
         logical(kind=c_bool) :: image
         integer(kind(medium)) :: quality
@@ -39,6 +40,9 @@ module fits
         real(c_double) :: frame_start, frame_end, ref_freq
         integer(c_int) :: seq_id
         real(c_float) :: timestamp
+
+        ! output
+        integer(kind=c_int) :: fd
     end type image_spectrum_request_f
 
     type dataset
