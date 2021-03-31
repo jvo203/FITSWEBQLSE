@@ -1046,6 +1046,12 @@ void SIGINTHandler(int sigint)
     exit_fortran();
 };
 
+extern void close_pipe(int fd)
+{
+    // close a pipe (to be called from Fortran)
+    close(fd);
+}
+
 extern void start_http()
 {
 
