@@ -327,15 +327,10 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 					// close the read end of the pipe
 					close(pipefd[0]);
+				}
 
-					// reset the pipe
-					pss->is_req.fd = -1;
-				}
-				else
-				{
-					// reset the pipe
-					pss->is_req.fd = -1;
-				}
+				// reset the pipe
+				pss->is_req.fd = -1;
 			}
 
 			pss->new_request = false;
