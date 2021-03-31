@@ -1048,8 +1048,12 @@ void SIGINTHandler(int sigint)
 
 extern void close_pipe(int fd)
 {
+    int status;
+
     // close a pipe (to be called from Fortran)
-    close(fd);
+    status = close(fd);
+
+    printf("[C] close_pipe status: %d\n", status);
 }
 
 extern void start_http()
