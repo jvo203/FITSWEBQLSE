@@ -40,6 +40,7 @@ module fits
         real(c_double) :: frame_start, frame_end, ref_freq
         integer(c_int) :: seq_id
         real(c_float) :: timestamp
+        type(c_ptr) :: datasetid
 
         ! output
         integer(kind=c_int) :: fd
