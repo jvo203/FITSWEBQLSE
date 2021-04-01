@@ -962,7 +962,7 @@ contains
             ! print *, 'viewport mask', mask
         end if
 
-        ! print *, 'spectrum:', spectrum
+        print *, 'spectrum:', spectrum
 
         if (req%fd .ne. -1) call close_pipe(req%fd)
 
