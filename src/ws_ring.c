@@ -346,7 +346,8 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 						// pass the write end of the pipe
 						req->fd = pipefd[1];
 
-						// a FORTRAN launch thread, the thread will close the write end of the pipe
+						// a FORTRAN launch thread
+						// on success the thread will close the write end of the pipe
 						stat = pthread_create(&for_tid, NULL, launch_image_spectrum_request, req);
 
 						if (0 == stat)
