@@ -335,6 +335,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 					if (req != NULL)
 					{
+						// first copy the contents
+						memcpy(req, &(pss->is_req), sizeof(struct image_spectrum_request));
+
 						// add the datasetid to be passed to FORTRAN
 						req->datasetid = strdup(pss->datasetid);
 
@@ -342,7 +345,6 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 						req->fd = pipefd[1];
 
 						// a FORTRAN launch thread
-						// create a websockets thread
 						int stat = pthread_create(&for_tid, NULL, launch_image_spectrum_request, req);
 						stat = pthread_detach(for_tid);
 
