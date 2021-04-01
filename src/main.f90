@@ -88,70 +88,66 @@ program main
     !    call recv_command(client_socket)
     !end do
 
-    ! if(this_image() .ne. 1) then
-    do
-        block
-            integer i
-            character(len=1024) :: filename
+    if (this_image() .ne. 1) then
+        do
+            block
+                integer i
+                character(len=1024) :: filename
 
-            filename = ''
-            ! first probe for new messages
-            ! MPI_PROBE does not seem to be available in Intel MPI !? !? !?
-            ! try co-arrays
-            !    call MPI_PROBE(MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, ierror)
+                filename = ''
+                ! first probe for new messages
+                ! MPI_PROBE does not seem to be available in Intel MPI !? !? !?
+                ! try co-arrays
+                !    call MPI_PROBE(MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, ierror)
 
-            ! there is an incoming message, obtain the number of characters
-            !   call MPI_GET_COUNT(ierror, MPI_CHARACTER, count)
+                ! there is an incoming message, obtain the number of characters
+                !   call MPI_GET_COUNT(ierror, MPI_CHARACTER, count)
 
-            ! allocate the character array
-            !   allocate (uri(count))
+                ! allocate the character array
+                !   allocate (uri(count))
 
-            ! wait for an event
-            ! event wait(event_count)
-            ! print *, 'image', this_image(), 'received an event'
+                ! wait for an event
+                ! event wait(event_count)
+                ! print *, 'image', this_image(), 'received an event'
 
-            ierror = 0
-            call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
-            ! call co_broadcast(command, source_image = 1)
-            ! cmd = command
+                ierror = 0
+                call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+                ! call co_broadcast(command, source_image = 1)
+                ! cmd = command
 
-            if (ierror .eq. 0) then
+                if (ierror .eq. 0) then
 
-                count = length(cmd, 1024)
+                    count = length(cmd, 1024)
 
-                if (count .gt. 1) then
-                    print *, 'rank', rank, '"', cmd(1:count), '"'
+                    if (count .gt. 1) then
+                        print *, 'rank', rank, '"', cmd(1:count), '"'
 
-                    ! decipher the command
+                        ! decipher the command
 
-                    ! load FITS file requests
-                    if (cmd(1) .eq. 'L') then
+                        ! load FITS file requests
+                        if (cmd(1) .eq. 'L') then
 
-                        do i = 1, count - 1
-                            filename(i:i) = cmd(i + 1)
-                        end do
+                            do i = 1, count - 1
+                                filename(i:i) = cmd(i + 1)
+                            end do
 
-                        call load_fits_file(filename)
-                    end if
+                            call load_fits_file(filename)
+                        end if
 
-                    ! WebSocket realtime image/spectrum requests
-                    if (cmd(1) .eq. 'S') then
-                        count = reverse_length(cmd, 1024)
-                        ! print *, 'rank', rank, '"', cmd(2:count), '"'
+                        ! WebSocket realtime image/spectrum requests
+                        if (cmd(1) .eq. 'S') then
+                            count = reverse_length(cmd, 1024)
+                            ! print *, 'rank', rank, '"', cmd(2:count), '"'
 
-                        call handle_realtime_image_spectrum(cmd(2:count))
+                            call handle_realtime_image_spectrum(cmd(2:count))
+                        end if
                     end if
                 end if
-            end if
 
-            !   deallocate (uri)
-        end block
-    end do
-!else
-!do
-    !   call sleep(1)
-!end do
-!end if
+                !   deallocate (uri)
+            end block
+        end do
+    end if
 
 contains
     integer function length(string, n)
