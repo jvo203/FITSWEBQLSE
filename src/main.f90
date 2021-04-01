@@ -140,7 +140,7 @@ program main
                             count = reverse_length(cmd, 1024)
                             ! print *, 'rank', rank, '"', cmd(2:count), '"'
 
-                            ! call handle_realtime_image_spectrum(cmd(2:count))
+                            call handle_realtime_image_spectrum(cmd(2:count))
                         end if
                     end if
                 end if
