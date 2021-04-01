@@ -1082,8 +1082,11 @@ extern void start_http()
         printf("[C] µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
 
         // create a websockets thread
-        int stat = pthread_create(&lws_tid, NULL, start_ws, NULL);
-        stat = pthread_detach(lws_tid);
+        /*int stat = pthread_create(&lws_tid, NULL, start_ws, NULL);
+        stat = pthread_detach(lws_tid);*/
+
+        // a blocking mode
+        start_ws(NULL);
     }
 }
 
