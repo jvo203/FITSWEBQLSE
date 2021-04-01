@@ -89,7 +89,7 @@ void *handle_fitswebql_request(void *uri);
         VERSION_SUB)
 
 #define WASM_VERSION "21.02.XX.X"
-#define VERSION_STRING "SV2021-03-XX.X-ALPHA"
+#define VERSION_STRING "SV2021-04-XX.X-ALPHA"
 
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
