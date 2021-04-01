@@ -619,6 +619,7 @@ contains
     end subroutine load_fits_file
 
     subroutine handle_realtime_image_spectrum(cmd)
+        use mpi
         use omp_lib
         implicit none
         character, intent(in) :: cmd(:)
@@ -647,6 +648,8 @@ contains
         integer(8) :: start_t, finish_t, crate, cmax
         real :: elapsed
 
+        integer :: rank, ierror
+
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
@@ -656,6 +659,9 @@ contains
         bSuccess = .true.
 
         str_len = size(cmd)
+
+        call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierror)
+        print *, 'rank:', rank, cmd, 'str_len:', str_len
 
         ! work from the end, processing characters one by one
         ! exit upon encountering the first blank ' '
