@@ -111,7 +111,8 @@ program main
                 ! print *, 'image', this_image(), 'received an event'
 
                 ierror = 0
-                call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+                ! call MPI_RECV(cmd, 1024, MPI_CHARACTER, MPI_ANY_SOURCE, MPI_URI, MPI_COMM_WORLD, MPI_STATUS_IGNORE, ierror)
+                call MPI_BCAST(cmd, 1024, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierror)
                 ! call co_broadcast(command, source_image = 1)
                 ! cmd = command
 
