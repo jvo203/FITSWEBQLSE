@@ -153,8 +153,6 @@ contains
         character, dimension(1024) :: filepath
         character(len=1024) :: filename
 
-        call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
-
         ! if (this_image() == 1) then
         length = n
         print *, 'image', this_image(), 'received an http request uri: ', uri, length
@@ -179,6 +177,8 @@ contains
         ! event post(event_count)
 
         ! call send_command(server_socket, filepath(1:n))
+
+        ! call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
         !do i = 0, size - 1
         !    call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
@@ -244,7 +244,7 @@ contains
         cmd(length + 1:length + 1 + n) = datasetid(1:n)
 
         ! send the command
-        call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
+        ! call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
         ! disabled sending the command (problems in the MPI event loop???)
         ! do i = 0, size - 1
@@ -258,7 +258,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                        & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                                       & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
