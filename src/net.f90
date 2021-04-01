@@ -151,7 +151,7 @@ contains
         integer :: size, ierror
         integer :: length
         character, dimension(1024) :: filepath
-        !character(len=1024) :: filename
+        character(len=1024) :: filename
 
         call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
 
@@ -180,21 +180,21 @@ contains
 
         ! call send_command(server_socket, filepath(1:n))
 
-        do i = 0, size - 1
-            call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
-        end do
+        !do i = 0, size - 1
+        !    call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
+        !end do
 
-        return
+        call MPI_BCAST(filepath, 1024, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierror)
 
         !command = filepath
         !call co_broadcast(command, source_image = 1)
 
-        !filename = ''
-        !do i = 1, n
-        !    filename(i:i) = uri(i)
-        !end do
+        filename = ''
+        do i = 1, n
+            filename(i:i) = uri(i)
+        end do
 
-        !call load_fits_file(filename)
+        call load_fits_file(filename)
     end subroutine fitswebql_request
 
     subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)
@@ -254,7 +254,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-             & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                                      & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
