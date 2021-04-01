@@ -79,6 +79,11 @@ struct image_spectrum_request
 
 extern void realtime_image_spectrum_request(char *datasetid, size_t n, void *req);
 
+void *launch_image_spectrum_request(void *req)
+{
+	return NULL;
+}
+
 /* one of these created for each message */
 
 struct msg
