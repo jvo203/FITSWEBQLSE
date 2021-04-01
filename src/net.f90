@@ -253,10 +253,12 @@ contains
 
         call MPI_BCAST(cmd, 1024, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierror)
 
+        call handle_realtime_image_spectrum(cmd(2:length + 1 + n))
+
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-              & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                        & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
