@@ -322,7 +322,6 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 				int pipefd[2];
 				ssize_t n;
 				char buf[1024];
-				pthread_t for_tid;
 
 				printf("[C] dx:%d, image:%d, quality:%d, x1:%d, y1:%d, x2:%d, y2:%d, width:%d, height:%d, beam:%d, intensity:%d, frame_start:%f, frame_end:%f, ref_freq:%f, seq_id:%d, timestamp:%f\n", pss->is_req.dx, pss->is_req.image, pss->is_req.quality, pss->is_req.x1, pss->is_req.y1, pss->is_req.x2, pss->is_req.y2, pss->is_req.width, pss->is_req.height, pss->is_req.beam, pss->is_req.intensity, pss->is_req.frame_start, pss->is_req.frame_end, pss->is_req.ref_freq, pss->is_req.seq_id, pss->is_req.timestamp);
 
@@ -335,6 +334,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 					if (req != NULL)
 					{
+						int stat;
+						pthread_t for_tid;
+
 						// first copy the contents
 						memcpy(req, &(pss->is_req), sizeof(struct image_spectrum_request));
 
@@ -344,21 +346,31 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 						// pass the write end of the pipe
 						req->fd = pipefd[1];
 
-						// a FORTRAN launch thread
-						int stat = pthread_create(&for_tid, NULL, launch_image_spectrum_request, req);
-						stat = pthread_detach(for_tid);
+						// a FORTRAN launch thread, the thread will close the write end of the pipe
+						stat = pthread_create(&for_tid, NULL, launch_image_spectrum_request, req);
 
-						n = read(pipefd[0], buf, sizeof(buf));
+						if (0 == stat)
+						{
 
-						if (0 == n)
-							printf("[C] PIPE_END_OF_STREAM\n");
+							n = read(pipefd[0], buf, sizeof(buf));
 
-						if (n < 0)
-							printf("[C] PIPE_END_WITH_ERROR\n");
+							if (0 == n)
+								printf("[C] PIPE_END_OF_STREAM\n");
+
+							if (n < 0)
+								printf("[C] PIPE_END_WITH_ERROR\n");
+
+							stat = pthread_join(for_tid, NULL);
+						}
+						else
+						{
+							// close the write end of the pipe
+							close(pipefd[1]);
+						}
 					}
 					else
 					{
-						// close the write end of the pipe too
+						// close the write end of the pipe
 						close(pipefd[1]);
 					}
 
