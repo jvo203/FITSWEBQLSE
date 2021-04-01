@@ -79,15 +79,20 @@ struct image_spectrum_request
 
 extern void realtime_image_spectrum_request(char *datasetid, size_t n, void *req);
 
-void *launch_image_spectrum_request(void *req)
+void *launch_image_spectrum_request(void *ptr)
 {
+	struct image_spectrum_request *req = (struct image_spectrum_request *)ptr;
+
 	if (req == NULL)
 		return NULL;
 
 	// pass the request to FORTRAN
-	realtime_image_spectrum_request(((struct image_spectrum_request *)req)->datasetid, strlen(((struct image_spectrum_request *)req)->datasetid), req);
+	realtime_image_spectrum_request(req->datasetid, strlen(req->datasetid), req);
 
-	free(NULL);
+	if (req->datasetid != NULL)
+		free(req->datasetid);
+
+	free(req);
 
 	return NULL;
 }
