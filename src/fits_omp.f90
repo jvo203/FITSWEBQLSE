@@ -737,6 +737,9 @@ contains
             ! local (image) buffers
             real(kind=4), allocatable :: buffer(:)
 
+            ! thread-shared
+            real, allocatable :: shared_spectrum(:)
+
             ! thread-local variables
             real(kind=4), allocatable :: thread_buffer(:, :)
             real(kind=4), allocatable :: thread_pixels(:, :)
@@ -819,6 +822,9 @@ contains
             allocate (thread_buffer(npixels, max_threads))
             allocate (thread_pixels(npixels, max_threads))
             allocate (thread_mask(npixels, max_threads))
+
+            allocate (shared_spectrum(first:last))
+            shared_spectrum = 0.0
 
             thread_pixels = 0.0
             thread_mask = .false.
@@ -907,8 +913,8 @@ contains
                 end do
 
                 if (pixel_count .gt. 0) then
-                    if (req%intensity .eq. mean) spectrum(frame) = pixel_sum/real(pixel_count)
-                    if (req%intensity .eq. integrated) spectrum(frame) = pixel_sum*cdelt3
+                    if (req%intensity .eq. mean) shared_spectrum(frame) = pixel_sum/real(pixel_count)
+                    if (req%intensity .eq. integrated) shared_spectrum(frame) = pixel_sum*cdelt3
                 end if
 
             end do
@@ -923,6 +929,7 @@ contains
                 end do
             end if
 
+            spectrum = shared_spectrum
             bSuccess = thread_bSuccess
 
         end block
