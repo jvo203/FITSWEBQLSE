@@ -660,6 +660,9 @@ contains
         integer(8) :: start_t, finish_t, crate, cmax
         real :: elapsed
 
+        ! FPZIP spectrum precision
+        integer(c_int) :: precision
+
         integer :: rank, ierror
 
         ! start the timer
@@ -981,6 +984,14 @@ contains
         end if
 
         ! print *, 'spectrum:', spectrum
+
+        if (req%image) then
+            precision = FPZIP_HIGH_PRECISION
+        else
+            precision = FPZIP_MEDIUM_PRECISION
+        end if
+
+        ! call write_spectrum(fd, c_loc(item%mean_spectrum), size(item%mean_spectrum), FPZIP_HIGH_PRECISION)
 
         if (req%fd .ne. -1) call close_pipe(req%fd)
 
