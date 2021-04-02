@@ -1406,14 +1406,13 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     return ret;
 }
 
-extern void write_spectrum(int fd, const float *spectrum, int n)
+extern void write_spectrum(int fd, const float *spectrum, int n, int precision)
 {
     bool success;
     void *compressed;
     size_t bufbytes, outbytes;
     uint32_t length;
     uint32_t transmitted_size;
-    int precision;
     FPZ *fpz;
 
     length = n;
@@ -1428,7 +1427,7 @@ extern void write_spectrum(int fd, const float *spectrum, int n)
         // compress to memory
         fpz = fpzip_write_to_buffer(compressed, bufbytes);
         fpz->type = FPZIP_TYPE_FLOAT;
-        fpz->prec = FPZIP_HIGH_PRECISION;
+        fpz->prec = precision;
         fpz->nx = n;
         fpz->ny = 1;
         fpz->nz = 1;
