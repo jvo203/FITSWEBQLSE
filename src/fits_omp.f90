@@ -648,7 +648,7 @@ contains
         ! co-array variables
         real(kind=4), allocatable :: pixels(:) [:]
         logical(kind=1), allocatable :: mask(:) [:]
-        real, allocatable :: spectrum(:) [:]
+        real, allocatable, target :: spectrum(:) [:]
 
         !logical, save :: bSuccess[*] ! linking errors to caf_token
         logical, allocatable :: bSuccess[:]
@@ -991,9 +991,11 @@ contains
             precision = FPZIP_MEDIUM_PRECISION
         end if
 
-        ! call write_spectrum(fd, c_loc(item%mean_spectrum), size(item%mean_spectrum), FPZIP_HIGH_PRECISION)
+        if (req%fd .ne. -1) then
+            call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
 
-        if (req%fd .ne. -1) call close_pipe(req%fd)
+            call close_pipe(req%fd)
+        end if
 
         print *, 'handle_realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
 
