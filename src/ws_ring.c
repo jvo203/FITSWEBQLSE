@@ -392,15 +392,12 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + compressed_size;
 
 								amsg.len = msg_len;
+
 								/* notice we over-allocate by LWS_PRE... */
 								amsg.payload = malloc(LWS_PRE + msg_len);
+
 								if (amsg.payload != NULL)
 								{
-									memset((char *)amsg.payload + LWS_PRE, 0, msg_len);
-
-									/* ...and we copy the payload in at +LWS_PRE */
-									//memcpy((char *)amsg.payload + LWS_PRE, in, msg_len);
-
 									float ts = pss->is_req.timestamp;
 									uint32_t id = pss->is_req.seq_id;
 									uint32_t msg_type =
@@ -414,7 +411,23 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 									// histogram
 									float elapsed = 0.0f;
 
+									/* ...and we copy the payload in at +LWS_PRE */
 									size_t ws_offset = LWS_PRE;
+
+									memcpy((char *)amsg.payload + ws_offset, &ts, sizeof(float));
+									ws_offset += sizeof(float);
+
+									memcpy((char *)amsg.payload + ws_offset, &id, sizeof(uint32_t));
+									ws_offset += sizeof(uint32_t);
+
+									memcpy((char *)amsg.payload + ws_offset, &msg_type, sizeof(uint32_t));
+									ws_offset += sizeof(uint32_t);
+
+									memcpy((char *)amsg.payload + ws_offset, &elapsed, sizeof(float));
+									ws_offset += sizeof(float);
+
+									memcpy((char *)amsg.payload + ws_offset, buf + 8, compressed_size);
+									ws_offset += compressed_size;
 
 									if (!lws_ring_insert(vhd->ring, &amsg, 1))
 									{
