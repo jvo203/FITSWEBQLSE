@@ -397,8 +397,25 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								if (amsg.payload != NULL)
 								{
 									memset((char *)amsg.payload + LWS_PRE, 0, msg_len);
+
 									/* ...and we copy the payload in at +LWS_PRE */
 									//memcpy((char *)amsg.payload + LWS_PRE, in, msg_len);
+
+									float ts = pss->is_req.timestamp;
+									uint32_t id = pss->is_req.seq_id;
+									uint32_t msg_type =
+										0; // 0 - spectrum, 1 - viewport,
+									// 2 -
+									// image, 3
+									// - full
+									// spectrum
+									// refresh,
+									// 4 -
+									// histogram
+									float elapsed = 0.0f;
+
+									size_t ws_offset = LWS_PRE;
+
 									if (!lws_ring_insert(vhd->ring, &amsg, 1))
 									{
 										__minimal_destroy_message(&amsg);
