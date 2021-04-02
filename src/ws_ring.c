@@ -321,7 +321,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 				int status;
 				int pipefd[2];
 				ssize_t n;
-				char buf[1024];
+
+				size_t offset;
+				char buf[0x4000];
 
 				printf("[C] dx:%d, image:%d, quality:%d, x1:%d, y1:%d, x2:%d, y2:%d, width:%d, height:%d, beam:%d, intensity:%d, frame_start:%f, frame_end:%f, ref_freq:%f, seq_id:%d, timestamp:%f\n", pss->is_req.dx, pss->is_req.image, pss->is_req.quality, pss->is_req.x1, pss->is_req.y1, pss->is_req.x2, pss->is_req.y2, pss->is_req.width, pss->is_req.height, pss->is_req.beam, pss->is_req.intensity, pss->is_req.frame_start, pss->is_req.frame_end, pss->is_req.ref_freq, pss->is_req.seq_id, pss->is_req.timestamp);
 
@@ -352,10 +354,13 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 						if (0 == stat)
 						{
+							offset = 0;
 
-							while ((n = read(pipefd[0], buf, sizeof(buf))) > 0)
+							while ((n = read(pipefd[0], buf + offset, sizeof(buf) - offset)) > 0)
 							{
-								printf("[C] PIPE_RECV %zd BYTES\n", n);
+								offset += n;
+
+								printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu\n", n, offset);
 							}
 
 							if (0 == n)
