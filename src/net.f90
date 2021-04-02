@@ -6,6 +6,9 @@ module net
 
     character, dimension(1024) :: command
 
+    integer(c_int), parameter :: FPZIP_MEDIUM_PRECISION = 16
+    integer(c_int), parameter :: FPZIP_HIGH_PRECISION = 24
+
     interface
         subroutine start_http() BIND(C, name='start_http')
             use, intrinsic :: ISO_C_BINDING
@@ -52,11 +55,11 @@ module net
             character(kind=c_char), intent(in) :: json_str(*)
         end subroutine write_header
 
-        subroutine write_spectrum(fd, spectrum, n) BIND(C, name='write_spectrum')
+        subroutine write_spectrum(fd, spectrum, n, prec) BIND(C, name='write_spectrum')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
-            integer(c_int), value, intent(in) :: fd, n
+            integer(c_int), value, intent(in) :: fd, n, prec
             type(C_PTR), value, intent(in) :: spectrum
         end subroutine write_spectrum
 
@@ -258,7 +261,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-     & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                                                       & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
@@ -409,12 +412,12 @@ contains
 
             ! mean spectrum
             if (allocated(item%mean_spectrum)) then
-                call write_spectrum(fd, c_loc(item%mean_spectrum), size(item%mean_spectrum))
+                call write_spectrum(fd, c_loc(item%mean_spectrum), size(item%mean_spectrum), FPZIP_HIGH_PRECISION)
             end if
 
             ! integrated spectrum
             if (allocated(item%integrated_spectrum)) then
-                call write_spectrum(fd, c_loc(item%integrated_spectrum), size(item%integrated_spectrum))
+                call write_spectrum(fd, c_loc(item%integrated_spectrum), size(item%integrated_spectrum), FPZIP_HIGH_PRECISION)
             end if
         end if
 
