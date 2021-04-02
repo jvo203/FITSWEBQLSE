@@ -31,6 +31,7 @@
 // FPzip
 #include <fpzip.h>
 
+#define FPZIP_MEDIUM_PRECISION 16
 #define FPZIP_HIGH_PRECISION 24
 
 // LZ4 character streams compressor
