@@ -378,7 +378,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 							compressed_size = 0;
 
 							// process the received data, prepare WebSocket response(s)
-							if (offset >= 8)
+							if (offset > 8)
 							{
 								memcpy(&length, buf, sizeof(uint32_t));
 								memcpy(&compressed_size, buf + 4, sizeof(uint32_t));
