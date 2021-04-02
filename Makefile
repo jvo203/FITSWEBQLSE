@@ -7,26 +7,29 @@
 # detect the OS
 UNAME_S := $(shell uname -s)
 
-# detect the CPU vendor
-CPU_S := $(shell cat /proc/cpuinfo)
-
 # the macOS Darwin target is handled further down the line
-
-# default settings on Linux
 ifeq ($(UNAME_S),Linux)
 
-	# found an AMD CPU
-	ifneq (,$(findstring AuthenticAMD,$(CPU_S)))
-		# GNU gcc / gfortran with OpenCoarrays
-		CC := gcc
-		FORT := mpifort
-	endif
+	# detect the CPU vendor
+	CPU_S := $(shell cat /proc/cpuinfo)	
 
-	# found an Intel CPU
-	ifneq (,$(findstring GenuineIntel,$(CPU_S)))
-		# Intel oneAPI icc / ifort 
-		CC := icc
-		FORT := mpiifort
+	# default settings on Linux
+	ifeq ($(UNAME_S),Linux)
+
+		# found an AMD CPU
+		ifneq (,$(findstring AuthenticAMD,$(CPU_S)))
+			# GNU gcc / gfortran with OpenCoarrays
+			CC := gcc
+			FORT := mpifort
+		endif
+
+		# found an Intel CPU
+		ifneq (,$(findstring GenuineIntel,$(CPU_S)))
+			# Intel oneAPI icc / ifort 
+			CC := icc
+			FORT := mpiifort
+		endif
+
 	endif
 
 endif
