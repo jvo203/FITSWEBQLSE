@@ -985,13 +985,13 @@ contains
 
         ! print *, 'spectrum:', spectrum
 
-        if (req%image) then
-            precision = FPZIP_HIGH_PRECISION
-        else
-            precision = FPZIP_MEDIUM_PRECISION
-        end if
-
         if (req%fd .ne. -1) then
+            if (req%image) then
+                precision = FPZIP_HIGH_PRECISION
+            else
+                precision = FPZIP_MEDIUM_PRECISION
+            end if
+
             call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
 
             call close_pipe(req%fd)
