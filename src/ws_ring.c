@@ -327,6 +327,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 				uint32_t length;
 				uint32_t compressed_size;
+				size_t msg_len;
 
 				printf("[C] dx:%d, image:%d, quality:%d, x1:%d, y1:%d, x2:%d, y2:%d, width:%d, height:%d, beam:%d, intensity:%d, frame_start:%f, frame_end:%f, ref_freq:%f, seq_id:%d, timestamp:%f\n", pss->is_req.dx, pss->is_req.image, pss->is_req.quality, pss->is_req.x1, pss->is_req.y1, pss->is_req.x2, pss->is_req.y2, pss->is_req.width, pss->is_req.height, pss->is_req.beam, pss->is_req.intensity, pss->is_req.frame_start, pss->is_req.frame_end, pss->is_req.ref_freq, pss->is_req.seq_id, pss->is_req.timestamp);
 
@@ -384,6 +385,29 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								memcpy(&compressed_size, buf + 4, sizeof(uint32_t));
 
 								printf("[C] length: %u, compressed_size: %u\n", length, compressed_size);
+
+								// set the binary mode
+								amsg.binary = true;
+
+								msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + compressed_size;
+
+								amsg.len = msg_len;
+								/* notice we over-allocate by LWS_PRE... */
+								amsg.payload = malloc(LWS_PRE + msg_len);
+								if (amsg.payload != NULL)
+								{
+									memset((char *)amsg.payload + LWS_PRE, 0, msg_len);
+									/* ...and we copy the payload in at +LWS_PRE */
+									//memcpy((char *)amsg.payload + LWS_PRE, in, msg_len);
+									if (!lws_ring_insert(vhd->ring, &amsg, 1))
+									{
+										__minimal_destroy_message(&amsg);
+										lwsl_user("dropping!\n");
+										break;
+									}
+								}
+								else
+									lwsl_user("OOM: dropping\n");
 							}
 						}
 						else
