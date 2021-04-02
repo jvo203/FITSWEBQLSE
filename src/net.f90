@@ -6,9 +6,6 @@ module net
 
     character, dimension(1024) :: command
 
-    integer(c_int), parameter :: FPZIP_MEDIUM_PRECISION = 16
-    integer(c_int), parameter :: FPZIP_HIGH_PRECISION = 24
-
     interface
         subroutine start_http() BIND(C, name='start_http')
             use, intrinsic :: ISO_C_BINDING
@@ -54,14 +51,6 @@ module net
             integer(c_int), value, intent(in) :: fd, str_len
             character(kind=c_char), intent(in) :: json_str(*)
         end subroutine write_header
-
-        subroutine write_spectrum(fd, spectrum, n, prec) BIND(C, name='write_spectrum')
-            use, intrinsic :: ISO_C_BINDING
-            implicit none
-
-            integer(c_int), value, intent(in) :: fd, n, prec
-            type(C_PTR), value, intent(in) :: spectrum
-        end subroutine write_spectrum
 
         ! resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
         subroutine resizeCubic(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeCubic')
@@ -261,7 +250,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                                                       & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                                                           & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
