@@ -12,6 +12,7 @@ ifeq ($(UNAME_S),Linux)
 
 	# detect the CPU vendor
 	CPU_S := $(shell cat /proc/cpuinfo)	
+	CPU_S := AuthenticAMD
 
 	# default settings on Linux
 	ifeq ($(UNAME_S),Linux)
