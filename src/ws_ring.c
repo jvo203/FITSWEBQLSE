@@ -355,7 +355,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 							while ((n = read(pipefd[0], buf, sizeof(buf))) > 0)
 							{
-								printf("[C] PIPE %zd bytes\n", n);
+								printf("[C] PIPE_RECV %zd BYTES\n", n);
 							}
 
 							if (0 == n)
