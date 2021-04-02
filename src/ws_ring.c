@@ -353,7 +353,10 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 						if (0 == stat)
 						{
 
-							n = read(pipefd[0], buf, sizeof(buf));
+							while ((n = read(pipefd[0], buf, sizeof(buf))) > 0)
+							{
+								printf("[C] PIPE %zd bytes\n", n);
+							}
 
 							if (0 == n)
 								printf("[C] PIPE_END_OF_STREAM\n");
