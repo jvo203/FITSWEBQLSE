@@ -325,6 +325,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 				size_t offset;
 				char buf[0x4000];
 
+				uint32_t length;
+				uint32_t compressed_size;
+
 				printf("[C] dx:%d, image:%d, quality:%d, x1:%d, y1:%d, x2:%d, y2:%d, width:%d, height:%d, beam:%d, intensity:%d, frame_start:%f, frame_end:%f, ref_freq:%f, seq_id:%d, timestamp:%f\n", pss->is_req.dx, pss->is_req.image, pss->is_req.quality, pss->is_req.x1, pss->is_req.y1, pss->is_req.x2, pss->is_req.y2, pss->is_req.width, pss->is_req.height, pss->is_req.beam, pss->is_req.intensity, pss->is_req.frame_start, pss->is_req.frame_end, pss->is_req.ref_freq, pss->is_req.seq_id, pss->is_req.timestamp);
 
 				// open a pipe
@@ -370,6 +373,18 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								printf("[C] PIPE_END_WITH_ERROR\n");
 
 							stat = pthread_join(for_tid, NULL);
+
+							length = 0;
+							compressed_size = 0;
+
+							// process the received data, prepare WebSocket response(s)
+							if (offset >= 8)
+							{
+								memcpy(&length, buf, sizeof(uint32_t));
+								memcpy(&compressed_size, buf + 4, sizeof(uint32_t));
+
+								printf("[C] length: %u, compressed_size: %u\n", length, compressed_size);
+							}
 						}
 						else
 						{
