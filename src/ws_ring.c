@@ -433,7 +433,6 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 									{
 										__minimal_destroy_message(&amsg);
 										lwsl_user("dropping!\n");
-										break;
 									}
 								}
 								else
