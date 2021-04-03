@@ -64,7 +64,7 @@ OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
 ifeq ($(CC),icc)
-	FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp
+	FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=medium -shared-intel
 # -parallel
 #-mcmodel=medium
 #-ipo -parallel -fast
@@ -97,7 +97,7 @@ ifeq ($(UNAME_S),Darwin)
 	CC = gcc-10
 	FORT = mpifort
 
-	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	FLAGS = -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
 
 	ifeq ($(FORT),nagfor)
@@ -110,7 +110,7 @@ endif
 
 # detect the GNU Compiler under Linux
 ifeq ($(CC),gcc)
-	override CFLAGS += -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	override CFLAGS += -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	FLAGS := $(CFLAGS)
 	LIBS += -L/usr/local/opencoarrays/2.9.2/lib64 -lcaf_mpi
 
