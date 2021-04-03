@@ -164,3 +164,4 @@ ulimit -s unlimited
 
 	mpiexec --hostfile ~/mpi_machines -n 4 ./fitswebqlse
 
+	mpiexec -silent-abort -machinefile /home/chris/mpi_machines -rr -n 8 ./fitswebqlse
