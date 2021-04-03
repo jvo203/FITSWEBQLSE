@@ -72,7 +72,7 @@ ifeq ($(CC),icc)
 # -fast causes static linking problems
 
 	CFLAGS := $(FLAGS)
-	FLAGS += -align array64byte -coarray=distributed
+	FLAGS += -heap-arrays 32 -align array64byte -coarray=distributed
 #-mt_mpi
 endif
 
@@ -104,7 +104,7 @@ ifeq ($(UNAME_S),Darwin)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp -colour $(MPI_LINK_FLAGS)
 	else
-		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
+		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib -fmax-stack-var-size=32768
 	endif
 endif
 
@@ -118,7 +118,7 @@ ifeq ($(CC),gcc)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp -colour $(MPI_LINK_FLAGS)
 	else
-		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib
+		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib -fmax-stack-var-size=32768
 	endif
 endif
 
