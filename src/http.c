@@ -1265,6 +1265,10 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     include_file(html, "htdocs/fitswebql/negative-shader.frag");
     g_string_append(html, "</script>\n");
 
+    g_string_append(html, "<script id=\"amber-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/amber-shader.frag");
+    g_string_append(html, "</script>\n");
+
     g_string_append(html, "<script id=\"red-shader\" type=\"x-shader/x-vertex\">\n");
     include_file(html, "htdocs/fitswebql/red-shader.frag");
     g_string_append(html, "</script>\n");
