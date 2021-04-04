@@ -953,10 +953,12 @@ contains
             spectrum = shared_spectrum
             bSuccess = thread_bSuccess
 
+            ! upload the partial spectrum onto the root image
+            spectrum(start:end) [1] = spectrum(start:end)
         end block
 
         ! it is faster to reduce the spectrum on the root image in one call
-        call co_sum(spectrum, result_image=1)
+        ! call co_sum(spectrum, result_image=1)
 
         ! reduce the viewport pixels/mask on the root image
         if (req%image) then
