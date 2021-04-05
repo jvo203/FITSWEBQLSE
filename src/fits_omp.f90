@@ -1003,6 +1003,15 @@ contains
 
     end subroutine handle_realtime_image_spectrum
 
+    subroutine largestTriangleThreeBuckets(data, threshold, spectrum)
+        implicit NONE
+
+        real, intent(in) :: data(:)
+        integer, intent(in) :: threshold
+        real, intent(out), allocatable :: spectrum
+
+    end subroutine largestTriangleThreeBuckets
+
     pure function logical_and(a, b)
         logical, value :: a, b
         logical :: logical_and
