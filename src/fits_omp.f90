@@ -1096,8 +1096,6 @@ contains
         spectrum(1 + sampledIndex) = data(dataLength)
         sampledIndex = sampledIndex + 1
 
-        print *, spectrum
-
     end subroutine LTTB
 
     pure function logical_and(a, b)
