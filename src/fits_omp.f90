@@ -1001,12 +1001,12 @@ contains
                 ! downsize the spectrum
                 call LTTB(spectrum, threshold, reduced_spectrum)
 
-                ! call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
+                call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
             else
-                ! call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+                call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
             end if
 
-            call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+            ! call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
 
             call close_pipe(req%fd)
         end if
@@ -1037,7 +1037,7 @@ contains
         a = 0
 
         ! Bucket size. Leave room for start and end data points
-        every = (dataLength - 2)/(threshold - 2)
+        every = real(dataLength - 2)/real(threshold - 2)
 
         do i = 0, threshold - 2 - 1
             block
@@ -1071,7 +1071,6 @@ contains
                 pointAY = data(1 + a)
 
                 maxArea = -1
-                nextA = 0
 
                 do while (rangeOffs < rangeTo)
                     ! Calculate triangle area over three buckets
@@ -1096,10 +1095,6 @@ contains
         ! always add the last element
         spectrum(1 + sampledIndex) = data(dataLength)
         sampledIndex = sampledIndex + 1
-
-        print *, 'threshold:', threshold, 'sampledIndex:', sampledIndex
-
-        spectrum = reshape(spectrum, (/sampledIndex/))
 
         print *, spectrum
 
