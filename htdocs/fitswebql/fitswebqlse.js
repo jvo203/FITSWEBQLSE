@@ -10542,7 +10542,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-							console.log(pixels, alpha);
+							//console.log(pixels, alpha);
 
 							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
