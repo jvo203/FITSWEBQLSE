@@ -654,7 +654,8 @@ contains
         logical, allocatable :: bSuccess[:]
 
         ! calculation range
-        integer :: first, last, length
+        integer :: first, last, length, threshold
+        real, allocatable, target :: reduced_spectrum(:)
 
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
@@ -992,6 +993,12 @@ contains
                 precision = FPZIP_HIGH_PRECISION
             else
                 precision = FPZIP_MEDIUM_PRECISION
+            end if
+
+            threshold = req%dx/2
+
+            if (size(spectrum) .gt. threshold) then
+                ! downsize the spectrum
             end if
 
             call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
