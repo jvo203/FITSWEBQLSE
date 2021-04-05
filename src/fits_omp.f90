@@ -999,6 +999,7 @@ contains
 
             if (size(spectrum) .gt. threshold) then
                 ! downsize the spectrum
+                call LTTB(spectrum, threshold, reduced_spectrum)
             end if
 
             call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
@@ -1010,14 +1011,18 @@ contains
 
     end subroutine handle_realtime_image_spectrum
 
-    subroutine largestTriangleThreeBuckets(data, threshold, spectrum)
+    subroutine LTTB(data, threshold, spectrum)
         implicit NONE
 
         real, intent(in) :: data(:)
         integer, intent(in) :: threshold
-        real, intent(out), allocatable :: spectrum
+        real, intent(out), allocatable :: spectrum(:)
 
-    end subroutine largestTriangleThreeBuckets
+        print *, 'downsizing spectrum with Largest-Triangle-Three-Buckets'
+
+        allocate (spectrum(threshold))
+
+    end subroutine LTTB
 
     pure function logical_and(a, b)
         logical, value :: a, b
