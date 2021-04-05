@@ -95,7 +95,7 @@ val decompressZFPval(int img_width, int img_height, std::string const &bytes)
     if (zfpsize == 0)
       printf("ZFP decompression failed!\n");
     else
-      printf("decompressed %zu image pixels.\n", zfpsize);
+      printf("decompressed %zu bytes (image pixels).\n", zfpsize);
 
     stream_close(stream);
 
@@ -105,6 +105,8 @@ val decompressZFPval(int img_width, int img_height, std::string const &bytes)
   // clean up
   zfp_field_free(field);
   zfp_stream_close(zfp);
+
+  printf("pixelLength: %zu\n", pixelLength);
 
   return val(typed_memory_view(pixelLength, pixelBuffer));
 }
