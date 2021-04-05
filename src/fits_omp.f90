@@ -1000,9 +1000,11 @@ contains
             if (size(spectrum) .gt. threshold) then
                 ! downsize the spectrum
                 call LTTB(spectrum, threshold, reduced_spectrum)
-            end if
 
-            call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+                call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
+            else
+                call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+            end if
 
             call close_pipe(req%fd)
         end if
@@ -1018,9 +1020,86 @@ contains
         integer, intent(in) :: threshold
         real, intent(out), allocatable :: spectrum(:)
 
+        ! internal variables
+        integer i, sampledIndex, a, nextA, dataLength
+        real maxAreaPoint, maxArea, area, every
+
         print *, 'downsizing spectrum with Largest-Triangle-Three-Buckets'
 
+        dataLength = size(data)
         allocate (spectrum(threshold))
+
+        ! always add the first point
+        spectrum(1) = data(1)
+        sampledIndex = 1
+        a = 0
+
+        ! Bucket size. Leave room for start and end data points
+        every = (dataLength - 2)/(threshold - 2)
+
+        do i = 0, threshold - 2 - 1
+            block
+                integer avgRangeStart, avgRangeEnd, avgRangeLength
+                real avgX, avgY, pointAX, pointAY
+                integer rangeOffs, rangeTo
+
+                avgRangeStart = floor((i + 1)*every) + 1
+                avgRangeEnd = floor((i + 2)*every) + 1
+                avgRangeEnd = min(avgRangeEnd, dataLength)
+                avgRangeLength = avgRangeEnd - avgRangeStart
+
+                avgX = 0.0
+                avgY = 0.0
+
+                do while (avgRangeStart < avgRangeEnd)
+                    avgX = avgX + avgRangeStart
+                    avgY = avgY + data(1 + avgRangeStart)
+                    avgRangeStart = avgRangeStart + 1
+                end do
+
+                avgX = avgX/avgRangeLength
+                avgY = avgY/avgRangeLength
+
+                ! Get the range for this bucket
+                rangeOffs = floor((i + 0)*every) + 1
+                rangeTo = floor((i + 1)*every) + 1
+
+                ! Point a
+                pointAX = a
+                pointAY = data(1 + a)
+
+                maxArea = -1
+                area = -1
+
+                do while (rangeOffs < rangeTo)
+                    ! Calculate triangle area over three buckets
+                    area = abs((pointAX - avgX)*(data(1 + rangeOffs) - pointAY) -&
+                    &(pointAX - rangeOffs)*(avgY - pointAY))*0.5
+
+                    if (area .gt. maxArea) then
+                        maxArea = area
+                        maxAreaPoint = data(1 + rangeOffs)
+                        nextA = rangeOffs ! Next a is this b
+                    end if
+
+                    rangeOffs = rangeOffs + 1
+                end do
+
+                spectrum(1 + sampledIndex) = maxAreaPoint ! Pick this point from the bucket
+                sampledIndex = sampledIndex + 1
+                a = nextA ! This a is the next a (chosen b)
+            end block
+        end do
+
+        ! always add the last element
+        spectrum(1 + sampledIndex) = data(dataLength)
+        sampledIndex = sampledIndex + 1
+
+        print *, 'threshold:', threshold, 'sampledIndex:', sampledIndex
+
+        spectrum = reshape(spectrum, (/sampledIndex/))
+
+        print *, spectrum
 
     end subroutine LTTB
 
