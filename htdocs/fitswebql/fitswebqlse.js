@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-04-05.0";
+	return "JS2021-04-05.1";
 }
 
 const wasm_supported = (() => {
@@ -10541,6 +10541,8 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							let elapsed = Math.round(performance.now() - start);
 
 							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+
+							console.log(pixels, alpha);
 
 							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
