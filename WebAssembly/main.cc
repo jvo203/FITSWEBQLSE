@@ -45,7 +45,7 @@ val decompressZFPval(int img_width, int img_height, std::string const &bytes)
 {
   std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
 
-  int img_size = img_width * img_height;
+  size_t img_size = size_t(img_width) * size_t(img_height);
 
   std::vector<float> pixels(img_size);
 
@@ -113,7 +113,7 @@ std::vector<float> decompressZFP(int img_width, int img_height, std::string cons
 {
   std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
 
-  int img_size = img_width * img_height;
+  size_t img_size = size_t(img_width) * size_t(img_height);
 
   std::vector<float> pixels(img_size);
 
@@ -169,7 +169,7 @@ std::vector<unsigned char> decompressLZ4(int img_width, int img_height, std::str
 {
   std::cout << "[decompressLZ4] " << bytes.size() << " bytes." << std::endl;
 
-  int mask_size = img_width * img_height;
+  size_t mask_size = size_t(img_width) * size_t(img_height);
   int compressed_size = bytes.size();
   int decompressed_size = 0;
 
@@ -189,7 +189,7 @@ val decompressLZ4val(int img_width, int img_height, std::string const &bytes)
 {
   std::cout << "[decompressLZ4val] " << bytes.size() << " bytes." << std::endl;
 
-  int mask_size = img_width * img_height;
+  size_t mask_size = size_t(img_width) * size_t(img_height);
   int compressed_size = bytes.size();
   int decompressed_size = 0;
 
