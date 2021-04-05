@@ -23,6 +23,7 @@ LDFLAGS=-lz --llvm-lto 1
 
 EMFLAGS=--bind
 EMFLAGS+=-s ALLOW_MEMORY_GROWTH=1
+#-s MAXIMUM_MEMORY=4GB
 #EMFLAGS+=-s WASM_MEM_MAX=4GB
 EMFLAGS+=-s NO_EXIT_RUNTIME=1
 EMFLAGS+=-s NO_FILESYSTEM=1
@@ -48,13 +49,13 @@ DEP = $(OBJ:%.o=%.d)
 -include $(DEP)
 
 %.o: %.c
-	emcc -O3 $(FFMPEG_FLAGS) $(DEFS) $(INCLUDE) -MMD -o $@ -c $<
+	emcc -O3 $(FFMPEG_FLAGS) $(EMFLAGS) $(DEFS) $(INCLUDE) -MMD -o $@ -c $<
 
 %.o: %.cpp
-	em++ $(EMFLAGS) $(DEFS) $(INCLUDE) $(CXXFLAGS) -MMD -o $@ -c $<
+	em++ -O3 $(EMFLAGS) $(DEFS) $(INCLUDE) $(CXXFLAGS) -MMD -o $@ -c $<
 
 wasm: $(FFMPEG_OBJ) $(OBJ)
-	em++ $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) -L$(LIBRARY) $(CXXFLAGS) $(LDFLAGS)
+	em++ -O3 $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) -L$(LIBRARY) $(CXXFLAGS) $(LDFLAGS)
 
 # -s "EXPORTED_FUNCTIONS=['_hevc_init','_hevc_destroy','_hevc_decode_nal_unit']"
 
