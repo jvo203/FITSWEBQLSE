@@ -406,6 +406,8 @@ function largestTriangleThreeBuckets(data, threshold) {
 
 	sampled[sampledIndex++] = data[dataLength - 1]; // Always add last
 
+	console.log(sampled)
+
 	return sampled;
 }
 

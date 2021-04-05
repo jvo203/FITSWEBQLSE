@@ -1001,10 +1001,12 @@ contains
                 ! downsize the spectrum
                 call LTTB(spectrum, threshold, reduced_spectrum)
 
-                call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
+                ! call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
             else
-                call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+                ! call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
             end if
+
+            call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
 
             call close_pipe(req%fd)
         end if
@@ -1069,7 +1071,7 @@ contains
                 pointAY = data(1 + a)
 
                 maxArea = -1
-                area = -1
+                nextA = 0
 
                 do while (rangeOffs < rangeTo)
                     ! Calculate triangle area over three buckets
