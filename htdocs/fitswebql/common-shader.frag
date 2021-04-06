@@ -116,13 +116,23 @@ vec4 colormap_rainbow(float x, float alpha) {
 }
 
 vec4 colormap_amber(float x, float alpha) {
+    float k;
+    float delta = 1.0 / 255.0;
+
     if (x < 0.0) {
         return vec4(0.0, 0.0, 0.0, 0.0);
     } else if (1.0 < x) {
         return vec4(0.0, 0.0, 0.0, 0.0);
     }
 
-    return vec4(x, x*204.0/255.0, 0, alpha);
+    k = 0.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.0, 0.0, 0.0, alpha);
+        vec4 v2 = vec4(0.00027022, 0.00019212, 0.00020587, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    return vec4(x, x*204.0/255.0, 0.0, alpha);
 }
 
 vec4 colormap_parula(float x, float alpha) {
