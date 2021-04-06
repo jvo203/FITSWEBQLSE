@@ -122,7 +122,7 @@ vec4 colormap_amber(float x, float alpha) {
         return vec4(0.0, 0.0, 0.0, 0.0);
     }
 
-    return vec4(x*204.0/255.0, x*204.0/255.0, 0, alpha);
+    return vec4(x, x*204.0/255.0, 0, alpha);
 }
 
 vec4 colormap_parula(float x, float alpha) {
