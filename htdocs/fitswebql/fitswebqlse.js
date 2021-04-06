@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-04-05.1";
+	return "JS2021-04-06.0";
 }
 
 const wasm_supported = (() => {
@@ -1459,7 +1459,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 		texture[offset] = pixels[i];
 		offset = (offset + 1) | 0;
 
-		texture[offset] = alpha[i];
+		texture[offset] = (alpha[i] > 0) ? 1.0 : 0.0;
 		offset = (offset + 1) | 0;
 	}
 
@@ -10542,7 +10542,6 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-							//console.log(pixels, alpha);
 
 							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
