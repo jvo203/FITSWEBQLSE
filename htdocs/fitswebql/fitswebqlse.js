@@ -5435,9 +5435,9 @@ function change_ui_theme() {
 	if (theme == 'bright')
 		colourmap = "haxby";
 	else
-		colourmap = "green";
+		colourmap = "amber";
 
-	localStorage.setItem("colourmap", colourmap);
+	localStorage.setItem("fortran_colourmap", colourmap);
 
 	location.reload(); // was reload(false)
 	//resizeMe() ;
@@ -5445,7 +5445,7 @@ function change_ui_theme() {
 
 function change_colourmap(index, recursive) {
 	colourmap = document.getElementById('colourmap' + index).value;
-	localStorage.setItem("colourmap", colourmap);
+	localStorage.setItem("fortran_colourmap", colourmap);
 
 	if (imageContainer[index - 1] != null) {
 		clear_webgl_image_buffers(index);
@@ -13772,7 +13772,7 @@ async*/ function mainRenderer() {
 			colourmap = "haxby" ;*/
 
 			theme = "dark";
-			colourmap = "green";
+			colourmap = "amber";
 		}
 		/*else
 		{
@@ -13781,7 +13781,7 @@ async*/ function mainRenderer() {
 		}*/
 
 		localStorage.setItem("ui_theme", theme);
-		localStorage.setItem("colourmap", colourmap);
+		localStorage.setItem("fortran_colourmap", colourmap);
 	}
 	else
 		theme = localStorage.getItem("ui_theme");
@@ -13809,19 +13809,19 @@ async*/ function mainRenderer() {
 	else
 		intensity_mode = localStorage.getItem("intensity_mode");
 
-	if (localStorage.getItem("colourmap") === null) {
+	if (localStorage.getItem("fortran_colourmap") === null) {
 		if (theme == 'bright')
 			colourmap = "haxby";
 		else
-			colourmap = "green";
+			colourmap = "amber";
 
-		localStorage.setItem("colourmap", colourmap);
+		localStorage.setItem("fortran_colourmap", colourmap);
 	}
 	else
-		colourmap = localStorage.getItem("colourmap");
+		colourmap = localStorage.getItem("fortran_colourmap");
 
 	if (colourmap === null)
-		colourmap = "green";
+		colourmap = "amber";
 
 	//add a colourmap URL override
 	let pos = window.location.search.indexOf('colourmap=');
