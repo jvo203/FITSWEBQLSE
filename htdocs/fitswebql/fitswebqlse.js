@@ -691,8 +691,8 @@ function replot_y_axis() {
 	svg.append("g")
 		.attr("class", "axis")
 		.attr("id", "yaxis")
-		.style("fill", "#996699")
-		.style("stroke", "#996699")
+		.style("fill", axisColour)
+		.style("stroke", axisColour)
 		//.style("stroke-width", emStrokeWidth)
 		.attr("transform", "translate(" + (0.75 * range.xMin - 1) + ",0)")
 		.call(yAxis);
@@ -5244,8 +5244,8 @@ function display_scale_range_ui(called_from_menu = false) {
 		.style("stroke", 'white')
 		.transition()
 		.duration(500)
-		.style("fill", "#996699")
-		.style("stroke", "#996699");
+		.style("fill", axisColour)
+		.style("stroke", axisColour);
 
 	var div = d3.select("body")
 		.append("div")
@@ -6334,8 +6334,8 @@ function display_preferences(index) {
 				.style("stroke", "white")
 				.transition()
 				.duration(500)
-				.style("fill", "#996699")
-				.style("stroke", "#996699");
+				.style("fill", axisColour)
+				.style("stroke", axisColour);
 
 			if (!autoscale)
 				set_autoscale_range(true);
@@ -7310,8 +7310,8 @@ function setup_axes() {
 		svg.append("g")
 			.attr("class", "axis")
 			.attr("id", "iaxis")
-			.style("fill", "#996699")
-			.style("stroke", "#996699")
+			.style("fill", axisColour)
+			.style("stroke", axisColour)
 			//.style("stroke-width", emStrokeWidth)
 			.attr("transform", "translate(0," + (height - 1) + ")")
 			.call(iAxis);
@@ -7346,8 +7346,8 @@ function setup_axes() {
 		svg.append("g")
 			.attr("class", "axis")
 			.attr("id", "xaxis")
-			.style("fill", "#996699")
-			.style("stroke", "#996699")
+			.style("fill", axisColour)
+			.style("stroke", axisColour)
 			//.style("stroke-width", emStrokeWidth)
 			.attr("transform", "translate(0," + (height - 1) + ")")
 			.call(xAxis);
@@ -7387,8 +7387,8 @@ function setup_axes() {
 		svg.append("g")
 			.attr("class", "axis")
 			.attr("id", "yaxis")
-			.style("fill", "#996699")
-			.style("stroke", "#996699")
+			.style("fill", axisColour)
+			.style("stroke", axisColour)
 			//.style("stroke-width", emStrokeWidth)
 			.attr("transform", "translate(" + (0.75 * range.xMin - 1) + ",0)")
 			.call(yAxis);
@@ -7409,8 +7409,8 @@ function setup_axes() {
 		svg.append("g")
 			.attr("class", "axis")
 			.attr("id", "vaxis")
-			.style("fill", "#996699")
-			.style("stroke", "#996699")
+			.style("fill", axisColour)
+			.style("stroke", axisColour)
 			//.style("stroke-width", emStrokeWidth)
 			.attr("transform", "translate(0," + vpos + ")")
 			.call(vAxis);
@@ -7542,8 +7542,8 @@ function setup_axes() {
 				.attr("opacity", 0.0);
 
 			/*d3.select("#yaxis")
-			.style("fill", "#996699")
-			.style("stroke", "#996699");*/
+			.style("fill", axisColour)
+			.style("stroke", axisColour);*/
 		})
 		.on("mouseenter", function () {
 			if (autoscale)
@@ -7639,8 +7639,8 @@ function x_axis_mouseenter(offset) {
 		.attr("opacity", 0.0);
 
 	d3.select("#yaxis")
-		.style("fill", "#996699")
-		.style("stroke", "#996699");
+		.style("fill", axisColour)
+		.style("stroke", axisColour);
 
 	d3.select("#frequency").attr("opacity", 0.5);
 
@@ -7768,16 +7768,16 @@ function x_axis_mouseleave() {
 	d3.select("#freq_bar").attr("opacity", 0.0);
 
 	d3.select("#xaxis")
-		.style("fill", "#996699")
-		.style("stroke", "#996699");
+		.style("fill", axisColour)
+		.style("stroke", axisColour);
 
 	/*d3.select("#yaxis")
-	  .style("fill", "#996699")
-	  .style("stroke", "#996699");*/
+	  .style("fill", axisColour)
+	  .style("stroke", axisColour);*/
 
 	d3.select("#vaxis")
-		.style("fill", "#996699")
-		.style("stroke", "#996699");
+		.style("fill", axisColour)
+		.style("stroke", axisColour);
 
 	//d3.select("#freq_bar").attr("opacity", 0.0);
 
@@ -9545,8 +9545,8 @@ function setup_image_selection() {
 					.attr("opacity", 0.0);
 
 				d3.select("#yaxis")
-					.style("fill", "#996699")
-					.style("stroke", "#996699");
+					.style("fill", axisColour)
+					.style("stroke", axisColour);
 			}
 
 			if (freqdrag || d3.event.shiftKey) {
@@ -13773,6 +13773,7 @@ async*/ function mainRenderer() {
 
 			theme = "dark";
 			colourmap = "amber";
+			axisColour = "rgba(255,204,0,1.0)"
 		}
 		/*else
 		{
@@ -13783,8 +13784,14 @@ async*/ function mainRenderer() {
 		localStorage.setItem("ui_theme", theme);
 		localStorage.setItem("fortran_colourmap", colourmap);
 	}
-	else
+	else {
 		theme = localStorage.getItem("ui_theme");
+
+		if (theme == 'bright')
+			axisColour = "#000000";
+		else
+			axisColour = "rgba(255,204,0,1.0)"; // axisColour
+	}
 
 	noise_sensitivity = 50; //get_noise_sensitivity(localStorage.getItem("noise_sensitivity")) ;
 
