@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-04-06.1";
+	return "JS2021-04-07.0";
 }
 
 const wasm_supported = (() => {
@@ -13773,7 +13773,7 @@ async*/ function mainRenderer() {
 
 			theme = "dark";
 			colourmap = "amber";
-			axisColour = "rgba(255,204,0,1.0)"
+			axisColour = "rgba(255,204,0,0.7)"
 		}
 		/*else
 		{
@@ -13790,7 +13790,7 @@ async*/ function mainRenderer() {
 		if (theme == 'bright')
 			axisColour = "#000000";
 		else
-			axisColour = "rgba(255,204,0,1.0)"; // axisColour
+			axisColour = "rgba(255,204,0,0.7)"; // axisColour
 	}
 
 	noise_sensitivity = 50; //get_noise_sensitivity(localStorage.getItem("noise_sensitivity")) ;
