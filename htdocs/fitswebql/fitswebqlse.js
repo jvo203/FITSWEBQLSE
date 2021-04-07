@@ -13773,7 +13773,7 @@ async*/ function mainRenderer() {
 
 			theme = "dark";
 			colourmap = "amber";
-			axisColour = "rgba(255,204,0,0.7)"
+			axisColour = "rgba(255,204,0,0.7)";
 		}
 		/*else
 		{
