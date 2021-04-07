@@ -116,7 +116,7 @@ vec4 colormap_rainbow(float x, float alpha) {
 }
 
 vec4 colormap_amber(float x, float alpha) {
-    float k;
+    /*float k;
     float delta = 1.0 / 255.0;
 
     if (x < 0.0) {
@@ -412,8 +412,645 @@ vec4 colormap_amber(float x, float alpha) {
         return mix(v1, v2, x/delta-k);
     }
 
+    k = 41.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.18661211, 0.09352465, 0.10763847, alpha);
+        vec4 v2 = vec4(0.19202947, 0.09593829, 0.11023995, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 42.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.19202947, 0.09593829, 0.11023995, alpha);
+        vec4 v2 = vec4(0.19745187, 0.09832799, 0.11279954, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 43.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.19745187, 0.09832799, 0.11279954, alpha);
+        vec4 v2 = vec4(0.20287943, 0.10069459, 0.11531721, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 44.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.20287943, 0.10069459, 0.11531721, alpha);
+        vec4 v2 = vec4(0.20831240, 0.10303874, 0.11779278, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 45.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.20831240, 0.10303874, 0.11779278, alpha);
+        vec4 v2 = vec4(0.21375116, 0.10536102, 0.12022597, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 46.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.21375116, 0.10536102, 0.12022597, alpha);
+        vec4 v2 = vec4(0.21919587, 0.10766210, 0.12261658, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 47.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.21919587, 0.10766210, 0.12261658, alpha);
+        vec4 v2 = vec4(0.22464664, 0.10994267, 0.12496437, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 48.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.22464664, 0.10994267, 0.12496437, alpha);
+        vec4 v2 = vec4(0.23010363, 0.11220334, 0.12726904, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 49.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.23010363, 0.11220334, 0.12726904, alpha);
+        vec4 v2 = vec4(0.23556699, 0.11444473, 0.12953028, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 50.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.23556699, 0.11444473, 0.12953028, alpha);
+        vec4 v2 = vec4(0.24103680, 0.11666745, 0.13174774, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 51.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.24103680, 0.11666745, 0.13174774, alpha);
+        vec4 v2 = vec4(0.24651314, 0.11887210, 0.13392105, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 52.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.24651314, 0.11887210, 0.13392105, alpha);
+        vec4 v2 = vec4(0.25199607, 0.12105931, 0.13604983, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 53.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.25199607, 0.12105931, 0.13604983, alpha);
+        vec4 v2 = vec4(0.25748561, 0.12322967, 0.13813367, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 54.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.25748561, 0.12322967, 0.13813367, alpha);
+        vec4 v2 = vec4(0.26298174, 0.12538380, 0.14017214, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 55.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.26298174, 0.12538380, 0.14017214, alpha);
+        vec4 v2 = vec4(0.26848445, 0.12752234, 0.14216482, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 56.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.26848445, 0.12752234, 0.14216482, alpha);
+        vec4 v2 = vec4(0.27399366, 0.12964590, 0.14411126, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 57.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.27399366, 0.12964590, 0.14411126, alpha);
+        vec4 v2 = vec4(0.27950930, 0.13175513, 0.14601098, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 58.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.27950930, 0.13175513, 0.14601098, alpha);
+        vec4 v2 = vec4(0.28503126, 0.13385066, 0.14786352, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 59.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.28503126, 0.13385066, 0.14786352, alpha);
+        vec4 v2 = vec4(0.29055939, 0.13593316, 0.14966839, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 60.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.29055939, 0.13593316, 0.14966839, alpha);
+        vec4 v2 = vec4(0.29609353, 0.13800331, 0.15142512, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 61.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.29609353, 0.13800331, 0.15142512, alpha);
+        vec4 v2 = vec4(0.30163360, 0.14006170, 0.15313309, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 62.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.30163360, 0.14006170, 0.15313309, alpha);
+        vec4 v2 = vec4(0.30717934, 0.14210906, 0.15479185, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 63.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.30717934, 0.14210906, 0.15479185, alpha);
+        vec4 v2 = vec4(0.31273046, 0.14414615, 0.15640093, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 64.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.31273046, 0.14414615, 0.15640093, alpha);
+        vec4 v2 = vec4(0.31828674, 0.14617366, 0.15795977, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 65.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.31828674, 0.14617366, 0.15795977, alpha);
+        vec4 v2 = vec4(0.32384799, 0.14819226, 0.15946776, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 66.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.32384799, 0.14819226, 0.15946776, alpha);
+        vec4 v2 = vec4(0.32941373, 0.15020285, 0.16092455, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 67.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.32941373, 0.15020285, 0.16092455, alpha);
+        vec4 v2 = vec4(0.33498380, 0.15220606, 0.16232943, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 68.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.33498380, 0.15220606, 0.16232943, alpha);
+        vec4 v2 = vec4(0.34055769, 0.15420281, 0.16368203, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 69.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.34055769, 0.15420281, 0.16368203, alpha);
+        vec4 v2 = vec4(0.34613510, 0.15619386, 0.16498174, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 70.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.34613510, 0.15619386, 0.16498174, alpha);
+        vec4 v2 = vec4(0.35171555, 0.15818010, 0.16622814, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 71.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.35171555, 0.15818010, 0.16622814, alpha);
+        vec4 v2 = vec4(0.35729867, 0.16016233, 0.16742062, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 72.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.35729867, 0.16016233, 0.16742062, alpha);
+        vec4 v2 = vec4(0.36288386, 0.16214158, 0.16855888, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 73.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.36288386, 0.16214158, 0.16855888, alpha);
+        vec4 v2 = vec4(0.36847077, 0.16411861, 0.16964223, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 74.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.36847077, 0.16411861, 0.16964223, alpha);
+        vec4 v2 = vec4(0.37405875, 0.16609447, 0.17067038, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 75.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.37405875, 0.16609447, 0.17067038, alpha);
+        vec4 v2 = vec4(0.37964722, 0.16807017, 0.17164291, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 76.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.37964722, 0.16807017, 0.17164291, alpha);
+        vec4 v2 = vec4(0.38523568, 0.17004663, 0.17255932, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 77.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.38523568, 0.17004663, 0.17255932, alpha);
+        vec4 v2 = vec4(0.39082346, 0.17202491, 0.17341924, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 78.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.39082346, 0.17202491, 0.17341924, alpha);
+        vec4 v2 = vec4(0.39640989, 0.17400610, 0.17422240, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 79.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.39640989, 0.17400610, 0.17422240, alpha);
+        vec4 v2 = vec4(0.40199427, 0.17599129, 0.17496847, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 80.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.40199427, 0.17599129, 0.17496847, alpha);
+        vec4 v2 = vec4(0.40757589, 0.17798159, 0.17565714, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 81.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.40757589, 0.17798159, 0.17565714, alpha);
+        vec4 v2 = vec4(0.41315403, 0.17997814, 0.17628817, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 82.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.41315403, 0.17997814, 0.17628817, alpha);
+        vec4 v2 = vec4(0.41872790, 0.18198211, 0.17686136, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 83.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.41872790, 0.18198211, 0.17686136, alpha);
+        vec4 v2 = vec4(0.42429670, 0.18399471, 0.17737654, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 84.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.42429670, 0.18399471, 0.17737654, alpha);
+        vec4 v2 = vec4(0.42985959, 0.18601716, 0.17783360, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 85.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.42985959, 0.18601716, 0.17783360, alpha);
+        vec4 v2 = vec4(0.43541572, 0.18805071, 0.17823249, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 86.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.43541572, 0.18805071, 0.17823249, alpha);
+        vec4 v2 = vec4(0.44096419, 0.19009664, 0.17857321, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 87.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.44096419, 0.19009664, 0.17857321, alpha);
+        vec4 v2 = vec4(0.44650409, 0.19215623, 0.17885582, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 88.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.44650409, 0.19215623, 0.17885582, alpha);
+        vec4 v2 = vec4(0.45203447, 0.19423082, 0.17908043, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 89.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.45203447, 0.19423082, 0.17908043, alpha);
+        vec4 v2 = vec4(0.45755437, 0.19632171, 0.17924723, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 90.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.45755437, 0.19632171, 0.17924723, alpha);
+        vec4 v2 = vec4(0.46306280, 0.19843027, 0.17935646, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 91.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.46306280, 0.19843027, 0.17935646, alpha);
+        vec4 v2 = vec4(0.46855878, 0.20055783, 0.17940843, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 92.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.46855878, 0.20055783, 0.17940843, alpha);
+        vec4 v2 = vec4(0.47404130, 0.20270573, 0.17940344, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 93.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.47404130, 0.20270573, 0.17940344, alpha);
+        vec4 v2 = vec4(0.47950929, 0.20487536, 0.17934205, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 94.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.47950929, 0.20487536, 0.17934205, alpha);
+        vec4 v2 = vec4(0.48496170, 0.20706810, 0.17922481, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 95.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.48496170, 0.20706810, 0.17922481, alpha);
+        vec4 v2 = vec4(0.49039751, 0.20928527, 0.17905222, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 96.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.49039751, 0.20928527, 0.17905222, alpha);
+        vec4 v2 = vec4(0.49581562, 0.21152825, 0.17882502, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 97.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.49581562, 0.21152825, 0.17882502, alpha);
+        vec4 v2 = vec4(0.50121496, 0.21379838, 0.17854403, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 98.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.50121496, 0.21379838, 0.17854403, alpha);
+        vec4 v2 = vec4(0.50659449, 0.21609694, 0.17820994, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 99.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.50659449, 0.21609694, 0.17820994, alpha);
+        vec4 v2 = vec4(0.51195309, 0.21842528, 0.17782382, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 100.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.51195309, 0.21842528, 0.17782382, alpha);
+        vec4 v2 = vec4(0.51728973, 0.22078464, 0.17738660, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 101.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.51728973, 0.22078464, 0.17738660, alpha);
+        vec4 v2 = vec4(0.52260336, 0.22317627, 0.17689933, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 102.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.52260336, 0.22317627, 0.17689933, alpha);
+        vec4 v2 = vec4(0.52789290, 0.22560139, 0.17636323, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 103.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.52789290, 0.22560139, 0.17636323, alpha);
+        vec4 v2 = vec4(0.53315736, 0.22806114, 0.17577943, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 104.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.53315736, 0.22806114, 0.17577943, alpha);
+        vec4 v2 = vec4(0.53839571, 0.23055665, 0.17514930, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 105.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.53839571, 0.23055665, 0.17514930, alpha);
+        vec4 v2 = vec4(0.54360697, 0.23308898, 0.17447413, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 106.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.54360697, 0.23308898, 0.17447413, alpha);
+        vec4 v2 = vec4(0.54879018, 0.23565914, 0.17375540, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 107.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.54879018, 0.23565914, 0.17375540, alpha);
+        vec4 v2 = vec4(0.55394442, 0.23826810, 0.17299454, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 108.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.55394442, 0.23826810, 0.17299454, alpha);
+        vec4 v2 = vec4(0.55906877, 0.24091674, 0.17219313, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 109.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.55906877, 0.24091674, 0.17219313, alpha);
+        vec4 v2 = vec4(0.56416240, 0.24360589, 0.17135272, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 110.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.56416240, 0.24360589, 0.17135272, alpha);
+        vec4 v2 = vec4(0.56922447, 0.24633631, 0.17047496, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 111.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.56922447, 0.24633631, 0.17047496, alpha);
+        vec4 v2 = vec4(0.57425419, 0.24910869, 0.16956153, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 112.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.57425419, 0.24910869, 0.16956153, alpha);
+        vec4 v2 = vec4(0.57925084, 0.25192364, 0.16861412, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 113.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.57925084, 0.25192364, 0.16861412, alpha);
+        vec4 v2 = vec4(0.58421372, 0.25478172, 0.16763450, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 114.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.58421372, 0.25478172, 0.16763450, alpha);
+        vec4 v2 = vec4(0.58914218, 0.25768338, 0.16662440, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 115.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.58914218, 0.25768338, 0.16662440, alpha);
+        vec4 v2 = vec4(0.59403562, 0.26062904, 0.16558565, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 116.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.59403562, 0.26062904, 0.16558565, alpha);
+        vec4 v2 = vec4(0.59889351, 0.26361899, 0.16452001, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 117.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.59889351, 0.26361899, 0.16452001, alpha);
+        vec4 v2 = vec4(0.60371532, 0.26665350, 0.16342934, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 118.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.60371532, 0.26665350, 0.16342934, alpha);
+        vec4 v2 = vec4(0.60850062, 0.26973274, 0.16231538, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 119.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.60850062, 0.26973274, 0.16231538, alpha);
+        vec4 v2 = vec4(0.61324900, 0.27285682, 0.16118009, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 120.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.61324900, 0.27285682, 0.16118009, alpha);
+        vec4 v2 = vec4(0.61796012, 0.27602577, 0.16002512, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 121.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.61796012, 0.27602577, 0.16002512, alpha);
+        vec4 v2 = vec4(0.62263366, 0.27923956, 0.15885242, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 122.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.62263366, 0.27923956, 0.15885242, alpha);
+        vec4 v2 = vec4(0.62726938, 0.28249810, 0.15766372, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 123.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.62726938, 0.28249810, 0.15766372, alpha);
+        vec4 v2 = vec4(0.63186707, 0.28580123, 0.15646078, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 124.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.63186707, 0.28580123, 0.15646078, alpha);
+        vec4 v2 = vec4(0.63642657, 0.28914875, 0.15524553, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 125.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.63642657, 0.28914875, 0.15524553, alpha);
+        vec4 v2 = vec4(0.64094774, 0.29254039, 0.15401956, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 126.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.64094774, 0.29254039, 0.15401956, alpha);
+        vec4 v2 = vec4(0.64543053, 0.29597585, 0.15278463, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 127.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.64543053, 0.29597585, 0.15278463, alpha);
+        vec4 v2 = vec4(0.64987489, 0.29945476, 0.15154265, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 128.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.64987489, 0.29945476, 0.15154265, alpha);
+        vec4 v2 = vec4(0.65428082, 0.30297672, 0.15029515, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 129.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.65428082, 0.30297672, 0.15029515, alpha);
+        vec4 v2 = vec4(0.65864836, 0.30654129, 0.14904382, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 130.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.65864836, 0.30654129, 0.14904382, alpha);
+        vec4 v2 = vec4(0.66297757, 0.31014801, 0.14779035, alpha);
+        return mix(v1, v2, x/delta-k);
+    }
+
+    k = 131.0;
+    if(x < (k+1.0)*delta) {
+        vec4 v1 = vec4(0.66297757, 0.31014801, 0.14779035, alpha);
+        vec4 v2 = vec4(0.66726857, 0.31379636, 0.14653648, alpha);
+        return mix(v1, v2, x/delta-k);
+    }*/
+
     return vec4(x, x*204.0/255.0, 0.0, alpha);
-    //return vec4(1.0, 0.0, 0.0, alpha);
+    //return vec4(0.0, 0.5, 0.0, alpha);
 }
 
 vec4 colormap_parula(float x, float alpha) {
