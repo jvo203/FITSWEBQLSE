@@ -2477,12 +2477,16 @@ contains
         type(dataset), pointer, intent(in) :: item
         type(varying_string), intent(out) :: json
         integer :: str_len
-        integer(kind=8) :: filesize
+        real :: filesize
 
         ! calculate the FITS file size
-        filesize = size(item%hdr) + item%naxes(1)*item%naxes(2)*item%naxes(3)*item%naxes(4)*abs(item%bitpix)/8
+        filesize = real(size(item%hdr)) + real(item%naxes(1))*real(item%naxes(2))&
+                  &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8)
 
         json = '{'
+
+        print *, 'header size:', size(item%hdr), 'flux:', trim(item%flux),&
+        & ', filesize:', filesize, ', cunit3:', trim(item%cunit3), ',json:', char(json)
 
         ! call json_add_string(json, 'HEADER', 'NULL')
 
@@ -2491,7 +2495,7 @@ contains
         call json_add_integer_number(json, 'height', item%naxes(2))
         call json_add_integer_number(json, 'depth', item%naxes(3))
         call json_add_integer_number(json, 'polarisation', item%naxes(4))
-        call json_add_long_number(json, 'filesize', filesize)
+        call json_add_real_number(json, 'filesize', filesize)
         call json_add_real_number(json, 'IGNRVAL', item%ignrval)
 
         call json_add_real_number(json, 'CD1_1', item%cd1_1)
@@ -2513,33 +2517,30 @@ contains
 
         call json_add_real_number(json, 'CRVAL3', item%crval3)
         call json_add_real_number(json, 'CDELT3', item%cdelt3)
-        call json_add_real_number(json, 'CRPIX3', item%crpix3)
-        call json_add_string(json, 'CUNIT3', trim(item%cunit3))
-        call json_add_string(json, 'CTYPE3', trim(item%ctype3))
+        ! call json_add_real_number(json, 'CRPIX3', item%crpix3)
+        ! call json_add_string(json, 'CUNIT3', trim(item%cunit3))
+        ! call json_add_string(json, 'CTYPE3', trim(item%ctype3))
 
-        call json_add_real_number(json, 'BMAJ', item%bmaj)
-        call json_add_real_number(json, 'BMIN', item%bmin)
-        call json_add_real_number(json, 'BPA', item%bpa)
+        ! call json_add_real_number(json, 'BMAJ', item%bmaj)
+        ! call json_add_real_number(json, 'BMIN', item%bmin)
+        ! call json_add_real_number(json, 'BPA', item%bpa)
 
-        call json_add_string(json, 'BUNIT', trim(item%bunit))
-        call json_add_string(json, 'BTYPE', trim(item%btype))
-        call json_add_string(json, 'SPECSYS', trim(item%specsys))
+        ! call json_add_string(json, 'BUNIT', trim(item%bunit))
+        ! call json_add_string(json, 'BTYPE', trim(item%btype))
+        ! call json_add_string(json, 'SPECSYS', trim(item%specsys))
 
-        call json_add_real_number(json, 'RESTFRQ', item%restfrq)
-        call json_add_real_number(json, 'OBSRA', item%obsra)
-        call json_add_real_number(json, 'OBSDEC', item%obsdec)
+        ! call json_add_real_number(json, 'RESTFRQ', item%restfrq)
+        ! call json_add_real_number(json, 'OBSRA', item%obsra)
+        ! call json_add_real_number(json, 'OBSDEC', item%obsdec)
 
-        call json_add_string(json, 'OBJECT', trim(item%object))
-        call json_add_string(json, 'DATEOBS', trim(item%date_obs))
-        call json_add_string(json, 'TIMESYS', trim(item%timesys))
-        call json_add_string(json, 'LINE', trim(item%line))
-        call json_add_string(json, 'FILTER', trim(item%filter))
-
-        ! call json_add_real_array(json, 'mean_spectrum', item%mean_spectrum)
-        ! call json_add_real_array(json, 'integrated_spectrum', item%integrated_spectrum)
+        ! call json_add_string(json, 'OBJECT', trim(item%object))
+        ! call json_add_string(json, 'DATEOBS', trim(item%date_obs))
+        ! call json_add_string(json, 'TIMESYS', trim(item%timesys))
+        ! call json_add_string(json, 'LINE', trim(item%line))
+        ! call json_add_string(json, 'FILTER', trim(item%filter))
 
         ! statistics (image histogram)
-        call json_add_integer_array(json, 'histogram', item%hist)
+        ! call json_add_integer_array(json, 'histogram', item%hist)
 
         ! remove the last comma
         str_len = len(json)
@@ -2548,9 +2549,9 @@ contains
 
         json = json//'}'
 
-        ! print *, char(json)
+        print *, char(json)
         print *, 'JSON length:', len(json)
-        print *, 'header size:', size(item%hdr)
+        print *, 'header size:', size(item%hdr), 'flux:', trim(item%flux)
     end subroutine get_json
 
 end module fits
