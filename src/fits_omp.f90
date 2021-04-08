@@ -1209,10 +1209,7 @@ contains
         item%ctype3 = ''
 
         ! reset the FITS header
-        if (allocated(item%hdr)) then
-            deallocate (item%hdr)
-            print *, 'HEADER DEALLOCATED'
-        end if
+        if (allocated(item%hdr)) deallocate (item%hdr)
 
         ! The STATUS parameter must always be initialized.
         status = 0
@@ -1252,7 +1249,7 @@ contains
             ! allocate a header character array
             if (this_image() == 1) then
                 ! one extra character to hold the C '\0'
-                allocate (item%hdr(80*nkeys + 1))
+                if (.not. allocated(item%hdr)) allocate (item%hdr(80*nkeys + 1))
                 item%hdr = c_null_char
                 print *, 'item%hdr::allocated space for', (80*nkeys + 1), 'characters; size:', size(item%hdr)
             end if
@@ -1495,7 +1492,10 @@ contains
 
             if (status .eq. 0) then
                 ! reset the header
-                if (allocated(item%hdr)) deallocate (item%hdr)
+                if (allocated(item%hdr)) then
+                    print *, 'DEALLOCATING item%hdr'
+                    deallocate (item%hdr)
+                end if
 
                 ! success, so jump back and print out keywords in this extension
                 if (this_image() == 1) print *, "GO TO 100"
