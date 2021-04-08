@@ -1251,7 +1251,7 @@ contains
                 ! one extra character to hold the C '\0'
                 allocate (item%hdr(80*nkeys + 1))
                 item%hdr = c_null_char
-                print *, 'item%hdr::allocated space for',(80*nkeys + 1), 'characters', 'size:', size(item%hdr)
+                print *, 'item%hdr::allocated space for', (80*nkeys + 1), 'characters; size:', size(item%hdr)
             end if
 
             do i = 1, nkeys
