@@ -49,7 +49,7 @@ module fits
         integer(kind=c_int) :: fd
     end type image_spectrum_request_f
 
-    type dataset
+    type, bind(c) :: dataset
         character(kind=c_char), dimension(:), allocatable :: datasetid
         character(len=:), allocatable :: uri
         ! the id will be made by hashing the dataset uri
