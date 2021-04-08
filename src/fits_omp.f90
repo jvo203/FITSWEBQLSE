@@ -100,7 +100,7 @@ module fits
         real(kind=c_float) black, white, sensitivity, ratio_sensitivity
 
         ! image histogram
-        integer hist(NBINS)
+        integer, allocatable :: hist(:)
 
         ! progress
         integer(8) :: start_time, crate, cmax
@@ -2211,6 +2211,8 @@ contains
         integer i, index, n
         real value
 
+        allocate (item%hist(NBINS))
+
         ! reset the histogram
         item%hist = 0
 
@@ -2485,8 +2487,8 @@ contains
 
         json = '{'
 
-        print *, 'header size:', size(item%hdr), 'flux:', trim(item%flux),&
-        & ', filesize:', filesize, ', cunit3:', trim(item%cunit3), ',json:', char(json)
+        ! print *, 'header size:', size(item%hdr), 'flux:', trim(item%flux),&
+        ! & ', filesize:', filesize, ', cunit3:', trim(item%cunit3), ',json:', char(json)
 
         ! call json_add_string(json, 'HEADER', 'NULL')
 
@@ -2517,37 +2519,38 @@ contains
 
         call json_add_real_number(json, 'CRVAL3', item%crval3)
         call json_add_real_number(json, 'CDELT3', item%cdelt3)
-        ! call json_add_real_number(json, 'CRPIX3', item%crpix3)
-        ! call json_add_string(json, 'CUNIT3', trim(item%cunit3))
-        ! call json_add_string(json, 'CTYPE3', trim(item%ctype3))
+        call json_add_real_number(json, 'CRPIX3', item%crpix3)
+        call json_add_string(json, 'CUNIT3', trim(item%cunit3))
+        call json_add_string(json, 'CTYPE3', trim(item%ctype3))
 
-        ! call json_add_real_number(json, 'BMAJ', item%bmaj)
-        ! call json_add_real_number(json, 'BMIN', item%bmin)
-        ! call json_add_real_number(json, 'BPA', item%bpa)
+        call json_add_real_number(json, 'BMAJ', item%bmaj)
+        call json_add_real_number(json, 'BMIN', item%bmin)
+        call json_add_real_number(json, 'BPA', item%bpa)
 
-        ! call json_add_string(json, 'BUNIT', trim(item%bunit))
-        ! call json_add_string(json, 'BTYPE', trim(item%btype))
-        ! call json_add_string(json, 'SPECSYS', trim(item%specsys))
+        call json_add_string(json, 'BUNIT', trim(item%bunit))
+        call json_add_string(json, 'BTYPE', trim(item%btype))
+        call json_add_string(json, 'SPECSYS', trim(item%specsys))
 
-        ! call json_add_real_number(json, 'RESTFRQ', item%restfrq)
-        ! call json_add_real_number(json, 'OBSRA', item%obsra)
-        ! call json_add_real_number(json, 'OBSDEC', item%obsdec)
+        call json_add_real_number(json, 'RESTFRQ', item%restfrq)
+        call json_add_real_number(json, 'OBSRA', item%obsra)
+        call json_add_real_number(json, 'OBSDEC', item%obsdec)
 
-        ! call json_add_string(json, 'OBJECT', trim(item%object))
-        ! call json_add_string(json, 'DATEOBS', trim(item%date_obs))
-        ! call json_add_string(json, 'TIMESYS', trim(item%timesys))
-        ! call json_add_string(json, 'LINE', trim(item%line))
-        ! call json_add_string(json, 'FILTER', trim(item%filter))
+        call json_add_string(json, 'OBJECT', trim(item%object))
+        call json_add_string(json, 'DATEOBS', trim(item%date_obs))
+        call json_add_string(json, 'TIMESYS', trim(item%timesys))
+        call json_add_string(json, 'LINE', trim(item%line))
+        call json_add_string(json, 'FILTER', trim(item%filter))
 
         ! statistics (image histogram)
-        ! call json_add_integer_array(json, 'histogram', item%hist)
+        call json_add_integer_array(json, 'histogram', item%hist)
+        ! print *, item%hist
 
         ! remove the last comma
         str_len = len(json)
 
         if (extract(json, str_len) .eq. ',') json = remove(json, str_len)
 
-        json = json//'}'
+        json = char(json)//'}'
 
         print *, char(json)
         print *, 'JSON length:', len(json)

@@ -25,7 +25,7 @@ contains
         integer :: i, str_len
         character :: c
 
-        json = json//'"'//key//'":"'
+        json = char(json)//'"'//key//'":"'
 
         str_len = len(val)
 
@@ -88,7 +88,7 @@ contains
             tmp = tmp//c
         end do
 
-        json = json//trim(tmp)//'",'
+        json = char(json)//trim(tmp)//'",'
 
     end subroutine json_add_string
 
@@ -97,11 +97,13 @@ contains
         character(len=*), intent(in) :: key
         integer, intent(in) :: val
 
-        character(64) :: tmp
+        character(len=64) :: tmp
+
+        tmp = ''
 
         write (tmp, '(i0)') val
 
-        json = json//'"'//key//'":'//trim(tmp)//','
+        json = char(json)//'"'//key//'":'//trim(tmp)//','
 
     end subroutine json_add_integer_number
 
@@ -110,11 +112,13 @@ contains
         character(len=*), intent(in) :: key
         integer(kind=8), intent(in) :: val
 
-        character(64) :: tmp
+        character(len=64) :: tmp
+
+        tmp = ''
 
         write (tmp, '(i0)') val
 
-        json = json//'"'//key//'":'//trim(tmp)//','
+        json = char(json)//'"'//key//'":'//trim(tmp)//','
 
     end subroutine json_add_long_number
 
@@ -123,7 +127,9 @@ contains
         character(len=*), intent(in) :: key
         real, intent(in) :: val
 
-        character(64) :: tmp
+        character(len=64) :: tmp
+
+        tmp = ''
 
         if (isnan(val)) then
             tmp = 'null'
@@ -131,7 +137,7 @@ contains
             write (tmp, form) val
         end if
 
-        json = json//'"'//key//'":'//trim(tmp)//','
+        json = char(json)//'"'//key//'":'//trim(tmp)//','
 
     end subroutine json_add_real_number
 
@@ -141,16 +147,17 @@ contains
         integer, dimension(:), intent(in) :: values
         integer :: i, n
 
-        character(64) :: tmp
+        character(len=64) :: tmp
 
         n = size(values)
 
-        json = json//'"'//key//'":['
+        json = char(json)//'"'//key//'":['
 
         do i = 1, n
+            tmp = ''
             write (tmp, '(i0)') values(i)
 
-            json = json//trim(tmp)//','
+            json = char(json)//trim(tmp)//','
         end do
 
         ! replace the last comma with ']'
@@ -161,10 +168,10 @@ contains
             json = replace(json, i, ']')
         else
             ! end an empty array
-            json = json//']'
+            json = char(json)//']'
         end if
 
-        json = json//','
+        json = char(json)//','
 
     end subroutine json_add_integer_array
 
@@ -175,13 +182,14 @@ contains
         real :: val
         integer :: i, n
 
-        character(64) :: tmp
+        character(len=64) :: tmp
 
         n = size(values)
 
-        json = json//'"'//key//'":['
+        json = char(json)//'"'//key//'":['
 
         do i = 1, n
+            tmp = ''
             val = values(i)
 
             if (isnan(val)) then
@@ -190,7 +198,7 @@ contains
                 write (tmp, form) val
             end if
 
-            json = json//trim(tmp)//','
+            json = char(json)//trim(tmp)//','
         end do
 
         ! replace the last comma with ']'
@@ -201,10 +209,10 @@ contains
             json = replace(json, i, ']')
         else
             ! end an empty array
-            json = json//']'
+            json = char(json)//']'
         end if
 
-        json = json//','
+        json = char(json)//','
 
     end subroutine json_add_real_array
 
