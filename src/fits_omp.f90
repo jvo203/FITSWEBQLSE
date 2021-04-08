@@ -79,7 +79,7 @@ module fits
         logical :: has_frequency = .false.
 
         ! derived values
-        character(len=16) :: flux = ''
+        character(len=16) :: flux
         real(kind=c_float) dmin, dmax
         real(kind=4), allocatable :: frame_min(:), frame_max(:)
         real(kind=c_float), allocatable :: pixels(:, :)
