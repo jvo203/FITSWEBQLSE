@@ -1209,7 +1209,10 @@ contains
         item%ctype3 = ''
 
         ! reset the FITS header
-        if (allocated(item%hdr)) deallocate (item%hdr)
+        if (allocated(item%hdr)) then
+            deallocate (item%hdr)
+            print *, 'HEADER DEALLOCATED'
+        end if
 
         ! The STATUS parameter must always be initialized.
         status = 0
@@ -2547,6 +2550,7 @@ contains
 
         ! print *, char(json)
         print *, 'JSON length:', len(json)
+        print *, 'header size:', size(item%hdr)
     end subroutine get_json
 
 end module fits
