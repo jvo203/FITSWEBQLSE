@@ -2478,14 +2478,19 @@ contains
         type(dataset), pointer, intent(in) :: item
         character(len=:), allocatable, intent(inout) :: json
 
+        print *, item%hist
+
         json = '{'
 
-        call json_add_integer_number(json, 'width', item%naxes(1))
-        call json_add_integer_number(json, 'height', item%naxes(2))
-        call json_add_integer_number(json, 'depth', item%naxes(3))
-        call json_add_integer_number(json, 'polarisation', item%naxes(4))
+        call json_test(json, 'width', 1011)
 
-        print *, item%hist
+        ! call json_add_integer_number(json, 'width', 1011)
+        ! call json_add_integer_number(json, 'width', item%naxes(1))
+        ! call json_add_integer_number(json, 'height', item%naxes(2))
+        ! call json_add_integer_number(json, 'depth', item%naxes(3))
+        ! call json_add_integer_number(json, 'polarisation', item%naxes(4))
+
+        print *, item%hist, 'size:', size(item%hist)
         print *, json
 
     end subroutine get_json_str

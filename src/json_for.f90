@@ -20,14 +20,30 @@ contains
         character(len=*), intent(in) :: key
         integer, intent(in) :: val
 
-        character(len=64) :: tmp
+        ! character(len=64) :: tmp
+        character(len=:), allocatable :: tmp
 
         tmp = ''
 
         write (tmp, '(i0)') val
 
-        json = json//'"'//key//'":'//trim(tmp)//','
+        ! json = json//'"'//key//'":'//trim(tmp)//','
+        ! json = trim(tmp)
 
     end subroutine json_add_integer_number
+
+    subroutine json_test(json, key, val)
+        character(len=:), allocatable, intent(inout) :: json
+        character(len=*), intent(in) :: key
+        integer, intent(in) :: val
+
+        CHARACTER*80 TMP
+
+        write (FMT='(i0)', UNIT=TMP) val
+
+        print *, key, ':', val, trim(TMP)
+        json = json//key
+
+    end subroutine json_test
 
 end module json_for
