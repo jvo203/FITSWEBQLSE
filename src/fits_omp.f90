@@ -2579,6 +2579,36 @@ contains
         call add_json_string(json, 'CUNIT1', trim(item%cunit1)//c_null_char)
         call add_json_string(json, 'CTYPE1', trim(item%ctype1)//c_null_char)
 
+        call add_json_real(json, 'CRVAL2', item%crval2)
+        call add_json_real(json, 'CDELT2', item%cdelt2)
+        call add_json_real(json, 'CRPIX2', item%crpix2)
+        call add_json_string(json, 'CUNIT2', trim(item%cunit2)//c_null_char)
+        call add_json_string(json, 'CTYPE2', trim(item%ctype2)//c_null_char)
+
+        call add_json_real(json, 'CRVAL3', item%crval3)
+        call add_json_real(json, 'CDELT3', item%cdelt3)
+        call add_json_real(json, 'CRPIX3', item%crpix3)
+        call add_json_string(json, 'CUNIT3', trim(item%cunit3)//c_null_char)
+        call add_json_string(json, 'CTYPE3', trim(item%ctype3)//c_null_char)
+
+        call add_json_real(json, 'BMAJ', item%bmaj)
+        call add_json_real(json, 'BMIN', item%bmin)
+        call add_json_real(json, 'BPA', item%bpa)
+
+        call add_json_string(json, 'BUNIT', trim(item%bunit)//c_null_char)
+        call add_json_string(json, 'BTYPE', trim(item%btype)//c_null_char)
+        call add_json_string(json, 'SPECSYS', trim(item%specsys)//c_null_char)
+
+        call add_json_real(json, 'RESTFRQ', item%restfrq)
+        call add_json_real(json, 'OBSRA', item%obsra)
+        call add_json_real(json, 'OBSDEC', item%obsdec)
+
+        call add_json_string(json, 'OBJECT', trim(item%object)//c_null_char)
+        call add_json_string(json, 'DATEOBS', trim(item%date_obs)//c_null_char)
+        call add_json_string(json, 'TIMESYS', trim(item%timesys)//c_null_char)
+        call add_json_string(json, 'LINE', trim(item%line)//c_null_char)
+        call add_json_string(json, 'FILTER', trim(item%filter)//c_null_char)
+
         call end_json(json)
 
         get_json = json
