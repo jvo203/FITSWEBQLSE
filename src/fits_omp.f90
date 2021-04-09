@@ -2576,8 +2576,8 @@ contains
         call add_json_real(json, 'CRVAL1', item%crval1)
         call add_json_real(json, 'CDELT1', item%cdelt1)
         call add_json_real(json, 'CRPIX1', item%crpix1)
-        ! call add_json_string(json, 'CUNIT1', trim(item%cunit1))
-        ! call add_json_string(json, 'CTYPE1', trim(item%ctype1))
+        call add_json_string(json, 'CUNIT1', trim(item%cunit1)//c_null_char)
+        call add_json_string(json, 'CTYPE1', trim(item%ctype1)//c_null_char)
 
         call end_json(json)
 
