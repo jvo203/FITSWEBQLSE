@@ -68,7 +68,7 @@ extern void add_json_real(GString *json, char *key, float val)
         return;
 
     if (!isnan(val))
-        g_string_append_printf(json, "\"%s\" : %g,", key, val);
+        g_string_append_printf(json, "\"%s\" : %.16g,", key, val);
     else
         g_string_append_printf(json, "\"%s\" : null,", key);
 }
