@@ -1,4 +1,5 @@
 #include <glib.h>
+#include <math.h>
 
 #include "json.h"
 
@@ -66,5 +67,8 @@ extern void add_json_real(GString *json, char *key, float val)
     if (json == NULL)
         return;
 
-    g_string_append_printf(json, "\"%s\" : %g,", key, val);
+    if (!isnan(val))
+        g_string_append_printf(json, "\"%s\" : %g,", key, val);
+    else
+        g_string_append_printf(json, "\"%s\" : null,", key);
 }
