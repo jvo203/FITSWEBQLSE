@@ -2568,6 +2568,17 @@ contains
         call add_json_long(json, 'filesize', filesize)
         call add_json_real(json, 'IGNRVAL', item%ignrval)
 
+        call add_json_real(json, 'CD1_1', item%cd1_1)
+        call add_json_real(json, 'CD1_2', item%cd1_2)
+        call add_json_real(json, 'CD2_1', item%cd2_1)
+        call add_json_real(json, 'CD2_2', item%cd2_2)
+
+        call add_json_real(json, 'CRVAL1', item%crval1)
+        call add_json_real(json, 'CDELT1', item%cdelt1)
+        call add_json_real(json, 'CRPIX1', item%crpix1)
+        ! call add_json_string(json, 'CUNIT1', trim(item%cunit1))
+        ! call add_json_string(json, 'CTYPE1', trim(item%ctype1))
+
         call end_json(json)
 
         get_json = json
