@@ -2495,7 +2495,16 @@ contains
 
     end subroutine get_json_str
 
-    subroutine get_json(item, json)
+    type(C_PTR) function get_json(item)
+        implicit none
+
+        type(dataset), pointer, intent(in) :: item
+        type(C_PTR) :: json
+
+        get_json = json
+    end function get_json
+
+    subroutine get_json_var(item, json)
         use iso_varying_string
         use json_for
         implicit none
@@ -2579,6 +2588,6 @@ contains
         print *, char(json)
         print *, 'JSON length:', len(json)
         ! print *, 'header size:', size(item%hdr), 'flux:', trim(item%flux)
-    end subroutine get_json
+    end subroutine get_json_var
 
 end module fits
