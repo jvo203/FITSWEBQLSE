@@ -2501,6 +2501,10 @@ contains
         type(dataset), pointer, intent(in) :: item
         type(C_PTR) :: json
 
+        json = begin_json()
+
+        call end_json(json)
+
         get_json = json
     end function get_json
 
