@@ -158,6 +158,16 @@ module fits
             integer(c_int), value, intent(in) :: val
         end subroutine add_json_integer
 
+        ! void add_json_integer_array(GString *json, char *key, int *val, int n)
+        subroutine add_json_integer_array(json, key, val, n) BIND(C, name='add_json_integer_array')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json, val
+            character(kind=c_char), intent(in) :: key(*)
+            integer(c_int), value, intent(in) :: n
+        end subroutine add_json_integer_array
+
         ! void add_json_string(GString *json, char *key, char *val)
         subroutine add_json_string(json, key, val) BIND(C, name='add_json_string')
             use, intrinsic :: ISO_C_BINDING
@@ -2608,6 +2618,8 @@ contains
         call add_json_string(json, 'TIMESYS', trim(item%timesys)//c_null_char)
         call add_json_string(json, 'LINE', trim(item%line)//c_null_char)
         call add_json_string(json, 'FILTER', trim(item%filter)//c_null_char)
+
+        call add_json_integer_array(json, 'histogram', c_loc(item%hist), size(item%hist))
 
         call end_json(json)
 
