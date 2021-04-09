@@ -52,3 +52,11 @@ extern void add_json_integer(GString *json, char *key, int val)
 
     g_string_append_printf(json, "\"%s\" : %d,", key, val);
 }
+
+extern void add_json_long(GString *json, char *key, long val)
+{
+    if (json == NULL)
+        return;
+
+    g_string_append_printf(json, "\"%s\" : %zd,", key, val);
+}

@@ -148,6 +148,25 @@ module fits
             type(c_ptr), value :: json
         end subroutine end_json
 
+        ! void add_json_integer(GString *json, char *key, int val)
+        subroutine add_json_integer(json, key, val) BIND(C, name='add_json_integer')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+            character(kind=c_char), intent(in) :: key(*)
+            integer(c_int), value, intent(in) :: val
+        end subroutine add_json_integer
+
+        ! void add_json_string(GString *json, char *key, char *val)
+        subroutine add_json_string(json, key, val) BIND(C, name='add_json_string')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+            character(kind=c_char), intent(in) :: key(*), val(*)
+        end subroutine add_json_string
+
         ! void g_mutex_init (GMutex *mutex);
         subroutine g_mutex_init(mutex) BIND(C, name='g_mutex_init')
             use, intrinsic :: ISO_C_BINDING
@@ -2513,8 +2532,19 @@ contains
 
         type(dataset), pointer, intent(in) :: item
         type(C_PTR) :: json
+        integer(kind=8) :: filesize
+
+        ! calculate the FITS file size
+        filesize = nint(real(size(item%hdr)) + real(item%naxes(1))*real(item%naxes(2))&
+                       &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
 
         json = begin_json()
+
+        ! misc. values
+        call add_json_integer(json, 'width', item%naxes(1))
+        call add_json_integer(json, 'height', item%naxes(2))
+        call add_json_integer(json, 'depth', item%naxes(3))
+        call add_json_integer(json, 'polarisation', item%naxes(4))
 
         call end_json(json)
 
