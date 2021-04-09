@@ -60,3 +60,11 @@ extern void add_json_long(GString *json, char *key, long val)
 
     g_string_append_printf(json, "\"%s\" : %zd,", key, val);
 }
+
+extern void add_json_real(GString *json, char *key, float val)
+{
+    if (json == NULL)
+        return;
+
+    g_string_append_printf(json, "\"%s\" : %g,", key, val);
+}
