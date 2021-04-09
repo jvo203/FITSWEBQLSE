@@ -26,7 +26,7 @@ extern void end_json(GString *json)
         g_string_truncate(json, json->len - 1);
 
         // end JSON
-        g_string_printf(json, "}");
+        g_string_append_printf(json, "}");
     }
 }
 
