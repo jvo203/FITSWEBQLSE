@@ -133,7 +133,20 @@ module fits
             type(C_PTR), value, intent(in) :: spectrum
         end subroutine write_spectrum
 
-        ! glib mutex functions
+        ! glib functions
+        !  GString *begin_json()
+        type(C_PTR) function begin_json() BIND(C, name='begin_json')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+        end function begin_json
+
+        ! void end_json(GString *json)
+        subroutine end_json(json) BIND(C, name='end_json')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+        end subroutine end_json
 
         ! void g_mutex_init (GMutex *mutex);
         subroutine g_mutex_init(mutex) BIND(C, name='g_mutex_init')
