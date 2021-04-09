@@ -1473,6 +1473,8 @@ extern void write_json(int fd, GString *json)
     if (json == NULL)
         return;
 
+    printf("[C] JSON(%s)\n", json->str);
+
     write_header(fd, json->str, json->len);
 }
 
