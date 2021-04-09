@@ -1,6 +1,8 @@
 #include <glib.h>
 
-GString *begin_json()
+#include "json.h"
+
+extern GString *begin_json()
 {
     GString *json = g_string_sized_new(4096);
 
@@ -10,13 +12,13 @@ GString *begin_json()
     return json;
 }
 
-void delete_json(GString *json)
+extern void delete_json(GString *json)
 {
     if (json != NULL)
         g_string_free(json, TRUE);
 }
 
-void end_json(GString *json)
+extern void end_json(GString *json)
 {
     if (json != NULL)
     {
@@ -28,7 +30,7 @@ void end_json(GString *json)
     }
 }
 
-void add_json_string(GString *json, char *key, char *val)
+extern void add_json_string(GString *json, char *key, char *val)
 {
     if (json == NULL)
         return;
@@ -43,7 +45,7 @@ void add_json_string(GString *json, char *key, char *val)
     }
 }
 
-void add_json_integer(GString *json, char *key, int val)
+extern void add_json_integer(GString *json, char *key, int val)
 {
     if (json == NULL)
         return;
