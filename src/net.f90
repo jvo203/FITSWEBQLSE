@@ -52,6 +52,14 @@ module net
             type(C_PTR), value :: json
         end subroutine write_json
 
+        ! void delete_json(GString *json)
+        subroutine delete_json(json) BIND(C, name='delete_json')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+        end subroutine delete_json
+
         subroutine write_header(fd, json_str, str_len) BIND(C, name='write_header')
             use, intrinsic :: ISO_C_BINDING
             implicit none
@@ -258,7 +266,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                                  & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                                       & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
