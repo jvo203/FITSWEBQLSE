@@ -72,3 +72,24 @@ extern void add_json_real(GString *json, char *key, float val)
     else
         g_string_append_printf(json, "\"%s\" : null,", key);
 }
+
+extern void add_json_integer_array(GString *json, char *key, int *val, int n)
+{
+    int i;
+
+    if (json == NULL)
+        return;
+
+    g_string_append_printf(json, "\"%s\" : [", key);
+
+    if (n > 0)
+    {
+        for (i = 0; i < n; i++)
+            g_string_append_printf(json, "%d,", val[i]);
+
+        // remove the final ","
+        g_string_truncate(json, json->len - 1);
+    }
+
+    g_string_append_printf(json, "],");
+}
