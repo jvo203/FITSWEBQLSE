@@ -2482,7 +2482,7 @@ contains
 
         json = '{'
 
-        call json_test(json, 'width', 1011)
+        ! call json_test(json, 'width', 1011)
 
         ! call json_add_integer_number(json, 'width', 1011)
         ! call json_add_integer_number(json, 'width', item%naxes(1))
