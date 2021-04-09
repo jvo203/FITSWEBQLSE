@@ -250,7 +250,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                         & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                                             & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
@@ -294,7 +294,8 @@ contains
         real(kind=c_float), dimension(:, :), allocatable, target :: pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
-        type(varying_string) :: json_str
+        ! type(varying_string) :: json_str
+        character(len=:), allocatable :: json_str
 
         integer inner_width, inner_height
         integer img_width, img_height
@@ -367,7 +368,9 @@ contains
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
         if (fetch_data .eq. 1) then
-            call get_json(item, json_str)
+            ! call get_json(item, json_str)
+            allocate (character(4096) :: json_str)
+            call get_json_str(item, json_str)
 
             ! call to_json(str_val)
 
@@ -385,7 +388,7 @@ contains
 
             ! print *, char(json_str//c_null_char)
             ! call write_header(fd, char(json_str//c_null_char))
-            call write_header(fd, char(json_str), len(json_str))
+            call write_header(fd, json_str, len(json_str))
 
             ! FITS header
             if (allocated(item%hdr)) then

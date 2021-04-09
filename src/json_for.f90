@@ -25,7 +25,11 @@ contains
         integer :: i, str_len
         character :: c
 
-        json = char(json)//'"'//key//'":"'
+        print *, 'VAL|', val, '|'
+
+        ! json = char(json)//'"'//key//'":"'//val//'",'
+        json = char(json)//'"'//key//'":"N/A",'
+        return
 
         str_len = len(val)
 

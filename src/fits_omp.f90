@@ -2471,6 +2471,20 @@ contains
         return
     end function get_image_scale
 
+    subroutine get_json_str(item, json)
+        use json_for
+        implicit none
+
+        type(dataset), pointer, intent(in) :: item
+        character(len=:), allocatable, intent(inout) :: json
+
+        json = '{'
+
+        print *, item%hist
+        print *, json
+
+    end subroutine get_json_str
+
     subroutine get_json(item, json)
         use iso_varying_string
         use json_for
@@ -2479,16 +2493,16 @@ contains
         type(dataset), pointer, intent(in) :: item
         type(varying_string), intent(out) :: json
         integer :: str_len
-        real :: filesize
+        integer(kind=8) :: filesize
 
         ! calculate the FITS file size
-        filesize = real(size(item%hdr)) + real(item%naxes(1))*real(item%naxes(2))&
-                  &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8)
+        filesize = nint(real(size(item%hdr)) + real(item%naxes(1))*real(item%naxes(2))&
+                       &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
 
         json = '{'
 
-        ! print *, 'header size:', size(item%hdr), 'flux:', trim(item%flux),&
-        ! & ', filesize:', filesize, ', cunit3:', trim(item%cunit3), ',json:', char(json)
+        print *, 'header size:', size(item%hdr), 'flux:', trim(item%flux),&
+        & ', filesize:', filesize, ', cunit3:', trim(item%cunit3), ',json:', char(json), trim(item%cunit1)
 
         ! call json_add_string(json, 'HEADER', 'NULL')
 
@@ -2497,7 +2511,7 @@ contains
         call json_add_integer_number(json, 'height', item%naxes(2))
         call json_add_integer_number(json, 'depth', item%naxes(3))
         call json_add_integer_number(json, 'polarisation', item%naxes(4))
-        call json_add_real_number(json, 'filesize', filesize)
+        call json_add_long_number(json, 'filesize', filesize)
         call json_add_real_number(json, 'IGNRVAL', item%ignrval)
 
         call json_add_real_number(json, 'CD1_1', item%cd1_1)
@@ -2508,38 +2522,38 @@ contains
         call json_add_real_number(json, 'CRVAL1', item%crval1)
         call json_add_real_number(json, 'CDELT1', item%cdelt1)
         call json_add_real_number(json, 'CRPIX1', item%crpix1)
-        call json_add_string(json, 'CUNIT1', trim(item%cunit1))
-        call json_add_string(json, 'CTYPE1', trim(item%ctype1))
+        ! call json_add_string(json, 'CUNIT1', trim(item%cunit1))
+        ! call json_add_string(json, 'CTYPE1', trim(item%ctype1))
 
         call json_add_real_number(json, 'CRVAL2', item%crval2)
         call json_add_real_number(json, 'CDELT2', item%cdelt2)
         call json_add_real_number(json, 'CRPIX2', item%crpix2)
-        call json_add_string(json, 'CUNIT2', trim(item%cunit2))
-        call json_add_string(json, 'CTYPE2', trim(item%ctype2))
+        ! call json_add_string(json, 'CUNIT2', trim(item%cunit2))
+        ! call json_add_string(json, 'CTYPE2', trim(item%ctype2))
 
         call json_add_real_number(json, 'CRVAL3', item%crval3)
         call json_add_real_number(json, 'CDELT3', item%cdelt3)
         call json_add_real_number(json, 'CRPIX3', item%crpix3)
-        call json_add_string(json, 'CUNIT3', trim(item%cunit3))
-        call json_add_string(json, 'CTYPE3', trim(item%ctype3))
+        ! call json_add_string(json, 'CUNIT3', trim(item%cunit3))
+        ! call json_add_string(json, 'CTYPE3', trim(item%ctype3))
 
         call json_add_real_number(json, 'BMAJ', item%bmaj)
         call json_add_real_number(json, 'BMIN', item%bmin)
         call json_add_real_number(json, 'BPA', item%bpa)
 
-        call json_add_string(json, 'BUNIT', trim(item%bunit))
-        call json_add_string(json, 'BTYPE', trim(item%btype))
-        call json_add_string(json, 'SPECSYS', trim(item%specsys))
+        ! call json_add_string(json, 'BUNIT', trim(item%bunit))
+        ! call json_add_string(json, 'BTYPE', trim(item%btype))
+        ! call json_add_string(json, 'SPECSYS', trim(item%specsys))
 
         call json_add_real_number(json, 'RESTFRQ', item%restfrq)
         call json_add_real_number(json, 'OBSRA', item%obsra)
         call json_add_real_number(json, 'OBSDEC', item%obsdec)
 
-        call json_add_string(json, 'OBJECT', trim(item%object))
-        call json_add_string(json, 'DATEOBS', trim(item%date_obs))
-        call json_add_string(json, 'TIMESYS', trim(item%timesys))
-        call json_add_string(json, 'LINE', trim(item%line))
-        call json_add_string(json, 'FILTER', trim(item%filter))
+        ! call json_add_string(json, 'OBJECT', trim(item%object))
+        ! call json_add_string(json, 'DATEOBS', trim(item%date_obs))
+        ! call json_add_string(json, 'TIMESYS', trim(item%timesys))
+        ! call json_add_string(json, 'LINE', trim(item%line))
+        ! call json_add_string(json, 'FILTER', trim(item%filter))
 
         ! statistics (image histogram)
         call json_add_integer_array(json, 'histogram', item%hist)
