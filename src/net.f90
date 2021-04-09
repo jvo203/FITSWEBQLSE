@@ -258,7 +258,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                             & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                                  & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
@@ -379,6 +379,7 @@ contains
         if (fetch_data .eq. 1) then
             json = get_json(item)
             call write_json(fd, json)
+            call delete_json(json)
 
             ! call get_json(item, json_str)
             ! call get_json_str(item, json_str)
