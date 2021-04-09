@@ -266,7 +266,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                                       & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                                            & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
@@ -299,7 +299,6 @@ contains
         use mpi
         use fits
         ! use json_module
-        use iso_varying_string
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -310,8 +309,6 @@ contains
         real(kind=c_float), dimension(:, :), allocatable, target :: pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
-        type(varying_string) :: json_str
-        ! character(len=:), allocatable :: json_str
         type(C_PTR) :: json
 
         integer inner_width, inner_height
@@ -385,30 +382,11 @@ contains
         print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
         if (fetch_data .eq. 1) then
+
+            ! JSON string
             json = get_json(item)
             call write_json(fd, json)
             call delete_json(json)
-
-            ! call get_json(item, json_str)
-            ! call get_json_str(item, json_str)
-
-            ! call to_json(str_val)
-
-            ! str_len = len(str_val)
-            ! print *, 'json len:', str_len
-
-            ! allocate (character(str_len) :: c_str)
-
-            ! do concurrent(k=1:str_len)
-            !    c_str(k:k) = str_val(k:k)
-            ! end do
-
-            ! json
-            ! call write_header(fd, c_str//c_null_char)
-
-            ! print *, char(json_str//c_null_char)
-            ! call write_header(fd, char(json_str//c_null_char))
-            ! call write_header(fd, char(json_str), len(json_str))
 
             ! FITS header
             if (allocated(item%hdr)) then
