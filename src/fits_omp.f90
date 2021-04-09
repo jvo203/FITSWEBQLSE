@@ -1,7 +1,6 @@
 module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
-    use iso_varying_string
     use fixed_array
     implicit none
 
@@ -2532,30 +2531,6 @@ contains
         scale = 1.0
         return
     end function get_image_scale
-
-    subroutine get_json_str(item, json)
-        use json_for
-        implicit none
-
-        type(dataset), pointer, intent(in) :: item
-        character(len=:), allocatable, intent(inout) :: json
-
-        print *, item%hist
-
-        json = '{'
-
-        ! call json_test(json, 'width', 1011)
-
-        ! call json_add_integer_number(json, 'width', 1011)
-        ! call json_add_integer_number(json, 'width', item%naxes(1))
-        ! call json_add_integer_number(json, 'height', item%naxes(2))
-        ! call json_add_integer_number(json, 'depth', item%naxes(3))
-        ! call json_add_integer_number(json, 'polarisation', item%naxes(4))
-
-        print *, item%hist, 'size:', size(item%hist)
-        print *, json
-
-    end subroutine get_json_str
 
     type(C_PTR) function get_json(item)
         implicit none
