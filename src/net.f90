@@ -44,6 +44,14 @@ module net
             type(C_PTR), value :: pixels, mask
         end subroutine write_image_spectrum
 
+        subroutine write_json(fd, json) BIND(C, name='write_json')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: fd
+            type(C_PTR), value :: json
+        end subroutine write_json
+
         subroutine write_header(fd, json_str, str_len) BIND(C, name='write_header')
             use, intrinsic :: ISO_C_BINDING
             implicit none
@@ -250,7 +258,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-         & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                   & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
