@@ -167,6 +167,16 @@ module fits
             character(kind=c_char), intent(in) :: key(*), val(*)
         end subroutine add_json_string
 
+        ! void add_json_long(GString *json, char *key, long val)
+        subroutine add_json_long(json, key, val) BIND(C, name='add_json_long')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+            character(kind=c_char), intent(in) :: key(*)
+            integer(c_long), value, intent(in) :: val
+        end subroutine add_json_long
+
         ! void g_mutex_init (GMutex *mutex);
         subroutine g_mutex_init(mutex) BIND(C, name='g_mutex_init')
             use, intrinsic :: ISO_C_BINDING
@@ -2545,6 +2555,7 @@ contains
         call add_json_integer(json, 'height', item%naxes(2))
         call add_json_integer(json, 'depth', item%naxes(3))
         call add_json_integer(json, 'polarisation', item%naxes(4))
+        call add_json_long(json, 'filesize', filesize)
 
         call end_json(json)
 
