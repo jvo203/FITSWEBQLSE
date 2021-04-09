@@ -184,7 +184,7 @@ module fits
 
             type(c_ptr), value :: json
             character(kind=c_char), intent(in) :: key(*)
-            integer(c_float), value, intent(in) :: val
+            real(kind=c_float), value, intent(in) :: val
         end subroutine add_json_real
 
         ! void g_mutex_init (GMutex *mutex);
