@@ -1468,6 +1468,14 @@ extern void write_spectrum(int fd, const float *spectrum, int n, int precision)
     }
 }
 
+extern void write_json(int fd, GString *json)
+{
+    if (json == NULL)
+        return;
+
+    write_header(fd, json->str, json->len);
+}
+
 extern void write_header(int fd, const char *header_str, int str_len)
 {
     char *compressed_header = NULL;
