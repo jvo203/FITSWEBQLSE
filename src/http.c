@@ -8,6 +8,19 @@
 #define __USE_XOPEN
 #include <time.h>
 
+#include <sqlite3.h>
+
+#ifndef LOCAL
+    #if defined(__APPLE__) && defined(__MACH__)
+        #include <libpq-fe.h>
+    #else
+        #include <libpq-fe.h>
+        //#include <pgsql/libpq-fe.h>
+    #endif
+#endif
+
+static sqlite3 *splat_db = NULL;
+
 #include <microhttpd.h>
 #include <libwebsockets.h>
 
@@ -1080,6 +1093,15 @@ extern void start_http()
     }
     else
     {
+        int rc = sqlite3_open_v2("splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
+
+  if (rc)
+  {
+    fprintf(stderr, "Can't open local splatalogue database: %s\n", sqlite3_errmsg(splat_db));
+    sqlite3_close(splat_db);
+    splat_db = NULL;
+  }
+
         printf("[C] µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
 
         // create a websockets thread
@@ -1102,6 +1124,12 @@ extern void stop_http()
         http_server = NULL;
         printf("done\n");
     }
+
+    if (splat_db != NULL)
+  {
+    sqlite3_close(splat_db);
+    splat_db = NULL;
+  }
 }
 
 void include_file(GString *str, const char *filename)
