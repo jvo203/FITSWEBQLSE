@@ -71,13 +71,37 @@ extern int get_error_status(void *item);
 extern int get_ok_status(void *item);
 extern float get_progress(void *item);
 extern float get_elapsed(void *item);
-extern void write_header(int fd, const char *header_str, int str_len);
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-#define CHUNK_SIZE 0x4000
+#include <zlib.h>
+
+/* CHUNK is the size of the memory chunk used by the zlib & other routines. */
+
+#define CHUNK 0x4000
+#define _windowBits 15
+#define GZIP_ENCODING 16
+
+/* The following macro calls a zlib routine and checks the return
+   value. If the return value ("status") is not OK, it prints an error
+   message and exits the program. Zlib's error statuses are all less
+   than zero. */
+
+#define CALL_ZLIB(x)                                                        \
+  {                                                                         \
+    int status;                                                             \
+    status = x;                                                             \
+    if (status < 0)                                                         \
+    {                                                                       \
+      fprintf(stderr, "%s:%d: %s returned a bad status of %d.\n", __FILE__, \
+              __LINE__, #x, status);                                        \
+      /*exit(EXIT_FAILURE);*/                                               \
+    }                                                                       \
+  }
+
 size_t chunked_write(int fd, const char *src, size_t n);
+extern void write_header(int fd, const char *header_str, int str_len);
 
 struct arg_struct
 {
@@ -1718,7 +1742,7 @@ size_t chunked_write(int fd, const char *src, size_t n)
 
     while (remaining > 0)
     {
-        nchar = MIN(remaining, CHUNK_SIZE);
+        nchar = MIN(remaining, CHUNK);
         written = write(fd, src + offset, nchar);
 
         if (written > 0)
