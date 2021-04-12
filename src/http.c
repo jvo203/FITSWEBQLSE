@@ -11,12 +11,12 @@
 #include <sqlite3.h>
 
 #ifndef LOCAL
-    #if defined(__APPLE__) && defined(__MACH__)
-        #include <libpq-fe.h>
-    #else
-        #include <libpq-fe.h>
-        //#include <pgsql/libpq-fe.h>
-    #endif
+#if defined(__APPLE__) && defined(__MACH__)
+#include <libpq-fe.h>
+#else
+#include <libpq-fe.h>
+//#include <pgsql/libpq-fe.h>
+#endif
 #endif
 
 static sqlite3 *splat_db = NULL;
@@ -88,17 +88,17 @@ extern float get_elapsed(void *item);
    message and exits the program. Zlib's error statuses are all less
    than zero. */
 
-#define CALL_ZLIB(x)                                                        \
-  {                                                                         \
-    int status;                                                             \
-    status = x;                                                             \
-    if (status < 0)                                                         \
-    {                                                                       \
-      fprintf(stderr, "%s:%d: %s returned a bad status of %d.\n", __FILE__, \
-              __LINE__, #x, status);                                        \
-      /*exit(EXIT_FAILURE);*/                                               \
-    }                                                                       \
-  }
+#define CALL_ZLIB(x)                                                              \
+    {                                                                             \
+        int status;                                                               \
+        status = x;                                                               \
+        if (status < 0)                                                           \
+        {                                                                         \
+            fprintf(stderr, "%s:%d: %s returned a bad status of %d.\n", __FILE__, \
+                    __LINE__, #x, status);                                        \
+            /*exit(EXIT_FAILURE);*/                                               \
+        }                                                                         \
+    }
 
 size_t chunked_write(int fd, const char *src, size_t n);
 extern void write_header(int fd, const char *header_str, int str_len);
@@ -796,18 +796,18 @@ static enum MHD_Result on_http_connection(void *cls,
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
         char *freqStartStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "freq_start");
         char *freqEndStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "freq_end");
-       
+
         bool compress = false;
         double freq_start = 0.0;
         double freq_end = 0.0;
 
-        if(freqStartStr != NULL)
+        if (freqStartStr != NULL)
             freq_start = atof(freqStartStr);
 
-        if(freqEndStr != NULL)
+        if (freqEndStr != NULL)
             freq_end = atof(freqEndStr);
 
-        printf("[C] Accept-Encoding:\t%s, datasetId:\t%s; freq_start: %g, freq_end: %g\n", encoding, datasetId, freq_start, freq_end);
+        printf("[C] Accept-Encoding:\t%s; datasetId:\t%s; freq_start: %g, freq_end: %g\n", encoding, datasetId, freq_start, freq_end);
 
         //if (datasetId == NULL || freqStartStr == NULL || freqEndStr == NULL)
         //    return http_not_found(connection);
@@ -1143,12 +1143,12 @@ extern void start_http()
     {
         int rc = sqlite3_open_v2("splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
 
-  if (rc)
-  {
-    fprintf(stderr, "Can't open local splatalogue database: %s\n", sqlite3_errmsg(splat_db));
-    sqlite3_close(splat_db);
-    splat_db = NULL;
-  }
+        if (rc)
+        {
+            fprintf(stderr, "Can't open local splatalogue database: %s\n", sqlite3_errmsg(splat_db));
+            sqlite3_close(splat_db);
+            splat_db = NULL;
+        }
 
         printf("[C] µHTTP daemon listening on port %d... Press CTRL-C to stop it.\n", HTTP_PORT);
 
@@ -1174,10 +1174,10 @@ extern void stop_http()
     }
 
     if (splat_db != NULL)
-  {
-    sqlite3_close(splat_db);
-    splat_db = NULL;
-  }
+    {
+        sqlite3_close(splat_db);
+        splat_db = NULL;
+    }
 }
 
 void include_file(GString *str, const char *filename)
