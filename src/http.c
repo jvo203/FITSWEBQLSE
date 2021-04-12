@@ -71,6 +71,7 @@ extern int get_error_status(void *item);
 extern int get_ok_status(void *item);
 extern float get_progress(void *item);
 extern float get_elapsed(void *item);
+extern void write_header(int fd, const char *header_str, int str_len);
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
