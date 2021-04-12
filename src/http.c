@@ -720,9 +720,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
     const char *user_agent = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
     const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
+    const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
     //MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
-
-    // printf("[C] URL:\t%s\n", url);
 
 #ifdef LOCAL
     if (0 == strcmp(url, "/get_directory"))
@@ -790,6 +789,30 @@ static enum MHD_Result on_http_connection(void *cls,
         }
         else
             return http_not_found(connection);
+    }
+
+    if (strstr(url, "/get_molecules") != NULL)
+    {
+        char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+        char *freqStartStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "freq_start");
+        char *freqEndStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "freq_end");
+       
+        bool compress = false;
+        double freq_start = 0.0;
+        double freq_end = 0.0;
+
+        if(freqStartStr != NULL)
+            freq_start = atof(freqStartStr);
+
+        if(freqEndStr != NULL)
+            freq_end = atof(freqEndStr);
+
+        printf("[C] Accept-Encoding:\t%s, datasetId:\t%s; freq_start: %g, freq_end: %g\n", encoding, datasetId, freq_start, freq_end);
+
+        //if (datasetId == NULL || freqStartStr == NULL || freqEndStr == NULL)
+        //    return http_not_found(connection);
+
+        return http_not_found(connection);
     }
 
     if (strstr(url, "/image_spectrum") != NULL)
