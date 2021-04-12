@@ -5,7 +5,7 @@ module net
     implicit none
 
     character, dimension(1024) :: command
-
+    integer(kind=4), parameter :: MPI_CMD = 1000
     type(gmutex), target :: mpi_mtx
 
     interface
@@ -159,7 +159,6 @@ contains
         integer(kind=c_size_t), intent(in), value :: n
         character(kind=c_char), dimension(n), intent(in) :: uri
         integer :: i
-        integer(kind=4), parameter :: MPI_CMD = 1000
         integer :: size, ierror
         integer :: length
         character, dimension(1024) :: filepath
@@ -196,6 +195,12 @@ contains
         !    call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
         !end do
 
+        ! init mutex
+        if (mpi_mtx%i .eq. 0) call g_mutex_init(c_loc(mpi_mtx))
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(mpi_mtx))
+
         call MPI_BCAST(filepath, 1024, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierror)
 
         !command = filepath
@@ -207,6 +212,10 @@ contains
         end do
 
         call load_fits_file(filename)
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(mpi_mtx))
+
     end subroutine fitswebql_request
 
     subroutine realtime_image_spectrum_request(datasetid, n, ptr) bind(C)
@@ -220,7 +229,6 @@ contains
         type(C_PTR), intent(in), value :: ptr
         type(image_spectrum_request_f), pointer :: req
 
-        integer(kind=4), parameter :: MPI_CMD = 1000
         integer :: size, ierror
 
         ! an internal file buffer
@@ -242,6 +250,12 @@ contains
         write (buffer, 10) 'S', req%dx, ' ', req%image, ' ', req%quality, ' ', req%x1, ' ', req%y1, ' ', req%x2, ' ', req%y2, ' ',&
         &req%width, ' ', req%height, ' ', req%beam, ' ', req%intensity, ' ', req%frame_start, ' ',&
         &req%frame_end, ' ', req%ref_freq, ' ', req%seq_id, ' ', req%timestamp, ' ', req%fd, ' '
+
+        ! init mutex
+        if (mpi_mtx%i .eq. 0) call g_mutex_init(c_loc(mpi_mtx))
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(mpi_mtx))
 
         cmd = ' '
 
@@ -267,10 +281,13 @@ contains
 
         call handle_realtime_image_spectrum(cmd(2:length + n))
 
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(mpi_mtx))
+
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-          & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+     & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
