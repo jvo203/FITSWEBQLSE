@@ -185,26 +185,14 @@ contains
         ! add the argument
         filepath(2:1 + n) = uri(1:n)
 
-        ! event post(event_count)
-
-        ! call send_command(server_socket, filepath(1:n))
-
-        ! call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
-
-        !do i = 0, size - 1
-        !    call MPI_SEND(filepath, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
-        !end do
-
         ! init mutex
         if (mpi_mtx%i .eq. 0) call g_mutex_init(c_loc(mpi_mtx))
 
         ! lock the mutex
         call g_mutex_lock(c_loc(mpi_mtx))
 
+        ! send the command
         call MPI_BCAST(filepath, 1024, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierror)
-
-        !command = filepath
-        !call co_broadcast(command, source_image = 1)
 
         filename = ''
         do i = 1, n
@@ -270,13 +258,6 @@ contains
         cmd(length + 1:length + 1 + n) = datasetid(1:n)
 
         ! send the command
-        ! call MPI_COMM_SIZE(MPI_COMM_WORLD, size, ierror)
-
-        ! disabled sending the command (problems in the MPI event loop???)
-        ! do i = 0, size - 1
-        !    call MPI_SEND(cmd, 1024, MPI_CHARACTER, i, MPI_CMD, MPI_COMM_WORLD, ierror)
-        ! end do
-
         call MPI_BCAST(cmd, 1024, MPI_CHARACTER, 0, MPI_COMM_WORLD, ierror)
 
         call handle_realtime_image_spectrum(cmd(2:length + n))
