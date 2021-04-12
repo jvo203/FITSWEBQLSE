@@ -6,6 +6,8 @@ module net
 
     character, dimension(1024) :: command
 
+    type(gmutex), target :: mpi_mtx
+
     interface
         subroutine start_http() BIND(C, name='start_http')
             use, intrinsic :: ISO_C_BINDING
@@ -145,6 +147,8 @@ contains
         call MPI_FINALIZE(ierror)
         ! call MPI_ABORT(MPI_COMM_WORLD, 0, ierror)
 
+        if (mpi_mtx%i .ne. 0) call g_mutex_clear(c_loc(mpi_mtx))
+
         stop
     end subroutine exit_fortran
 
@@ -266,7 +270,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-                                            & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+          & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
