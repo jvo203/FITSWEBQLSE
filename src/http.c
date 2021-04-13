@@ -72,6 +72,7 @@ extern int get_header_status(void *item);
 extern int get_ok_status(void *item);
 extern float get_progress(void *item);
 extern float get_elapsed(void *item);
+extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
@@ -802,6 +803,9 @@ static enum MHD_Result on_http_connection(void *cls,
         double freq_start = 0.0;
         double freq_end = 0.0;
 
+        double *freq_start_ptr = &freq_start;
+        double *freq_end_ptr = &freq_end;
+
         if (freqStartStr != NULL)
             freq_start = atof(freqStartStr);
 
@@ -826,6 +830,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
             if (!get_header_status(item))
                 return http_accepted(connection);
+
+            get_frequency_range(item, freq_start_ptr, freq_end_ptr);
         }
 
         return http_not_found(connection);
