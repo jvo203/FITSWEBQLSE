@@ -1960,6 +1960,7 @@ contains
         call c_f_pointer(item_ptr, item)
 
         if (item%has_velocity) then
+
             v1 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(1.0 - item%crpix3)
             v2 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(item%naxes(3) - item%crpix3)
 
@@ -1973,6 +1974,12 @@ contains
         end if
 
         if (item%has_frequency) then
+
+            f1 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(1.0 - item%crpix3)
+            f2 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(item%naxes(3) - item%crpix3)
+
+            freq_start = MIN(f1, f2)/1.0E9 ! [Hz -> GHz]
+            freq_end = MAX(f1, f2)/1.0E9 ! [Hz -> GHz]
 
             return
         end if
