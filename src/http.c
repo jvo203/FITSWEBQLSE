@@ -117,15 +117,21 @@ struct arg_struct
 
 struct splat_req
 {
+    bool first;
     bool compression;
     double freq_start;
     double freq_end;
     int fd;
+
+    // optional gzip compression
+    z_stream z;
+    unsigned char out[CHUNK];
 };
 
 void *handle_image_spectrum_request(void *args);
 void *handle_fitswebql_request(void *uri);
 void *stream_molecules(void *args);
+static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -826,6 +832,9 @@ static enum MHD_Result on_http_connection(void *cls,
             freq_end = atof(freqEndStr);
 
         printf("[C] Accept-Encoding: %s\n", encoding);
+
+        if (splat_db == NULL)
+            return http_internal_server_error(connection);
 
         if (datasetId == NULL)
             return http_not_found(connection);
