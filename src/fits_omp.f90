@@ -1948,6 +1948,37 @@ contains
 
     end subroutine get_spectrum_range
 
+    subroutine get_frequency_range(item_ptr, freq_start, freq_end) bind(c)
+        type(C_PTR), intent(in), value :: item_ptr
+        type(dataset), pointer :: item
+        real(kind=c_double) :: freq_start, freq_end
+
+        ! the speed of light [m/s]
+        real(kind=8), parameter :: c = 299792458.0
+        real(kind=8) :: f1, f2, v1, v2
+
+        call c_f_pointer(item_ptr, item)
+
+        if (item%has_velocity) then
+            v1 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(1.0 - item%crpix3)
+            v2 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(item%naxes(3) - item%crpix3)
+
+            f1 = item%restfrq*sqrt((1.0 - v1/c)/(1.0 + v1/c))
+            f2 = item%restfrq*sqrt((1.0 - v2/c)/(1.0 + v2/c))
+
+            freq_start = MIN(f1, f2)/1.0E9 ! [Hz -> GHz]
+            freq_end = MAX(f1, f2)/1.0E9 ! [Hz -> GHz]
+
+            return
+        end if
+
+        if (item%has_frequency) then
+
+            return
+        end if
+
+    end subroutine get_frequency_range
+
     subroutine get_freq2vel_bounds(item, frame_start, frame_end, ref_freq, first, last)
         type(dataset), pointer, intent(in) :: item
         real(kind=8), intent(in) :: frame_start, frame_end, ref_freq
