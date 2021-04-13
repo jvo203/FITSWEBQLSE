@@ -115,8 +115,17 @@ struct arg_struct
     int fd;
 };
 
+struct splat_req
+{
+    bool compression;
+    double freq_start;
+    double freq_end;
+    int fd;
+};
+
 void *handle_image_spectrum_request(void *args);
 void *handle_fitswebql_request(void *uri);
+void *stream_molecules(void *req);
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -806,6 +815,10 @@ static enum MHD_Result on_http_connection(void *cls,
         double *freq_start_ptr = &freq_start;
         double *freq_end_ptr = &freq_end;
 
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
         if (freqStartStr != NULL)
             freq_start = atof(freqStartStr);
 
@@ -838,9 +851,50 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (freq_start > 0.0 && freq_end > 0.0)
         {
-            // TO-DO: open a pipe, pass {fd, freq_start, freq_end} to a pthread
+            // open a pipe, pass {compress, fd, freq_start, freq_end} to a pthread
 
-            return http_not_implemented(connection);
+            // open a pipe
+            status = pipe(pipefd);
+
+            if (0 != status)
+                return http_internal_server_error(connection);
+
+            // create a response from the pipe by passing the read end of the pipe
+            struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+            // add headers
+            MHD_add_response_header(response, "Cache-Control", "no-cache");
+            MHD_add_response_header(response, "Cache-Control", "no-store");
+            MHD_add_response_header(response, "Pragma", "no-cache");
+            MHD_add_response_header(response, "Content-Type", "application/json");
+
+            if (compress)
+                MHD_add_response_header(response, "Content-Encoding", "gzip");
+
+            // queue the response
+            enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+            MHD_destroy_response(response);
+
+            printf("[C] calling stream_molecules with the pipe file descriptor %d\n", pipefd[1]);
+
+            struct splat_req *req = malloc(sizeof(struct splat_req));
+
+            if (req != NULL)
+            {
+                req->compression = compress;
+                req->freq_start = freq_start;
+                req->freq_end = freq_end;
+                req->fd = pipefd[1];
+
+                // create and detach the thread
+                pthread_create(&tid, NULL, &stream_molecules, req);
+                pthread_detach(tid);
+            }
+            else
+                close(pipefd[1]);
+
+            return ret;
         }
         else
             return http_not_found(connection);
@@ -854,7 +908,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         int status;
         int pipefd[2];
-
         pthread_t tid;
 
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
