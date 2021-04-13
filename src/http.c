@@ -125,7 +125,7 @@ struct splat_req
 
 void *handle_image_spectrum_request(void *args);
 void *handle_fitswebql_request(void *uri);
-void *stream_molecules(void *req);
+void *stream_molecules(void *args);
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -878,17 +878,17 @@ static enum MHD_Result on_http_connection(void *cls,
 
             printf("[C] calling stream_molecules with the pipe file descriptor %d\n", pipefd[1]);
 
-            struct splat_req *req = malloc(sizeof(struct splat_req));
+            struct splat_req *args = malloc(sizeof(struct splat_req));
 
-            if (req != NULL)
+            if (args != NULL)
             {
-                req->compression = compress;
-                req->freq_start = freq_start;
-                req->freq_end = freq_end;
-                req->fd = pipefd[1];
+                args->compression = compress;
+                args->freq_start = freq_start;
+                args->freq_end = freq_end;
+                args->fd = pipefd[1];
 
                 // create and detach the thread
-                pthread_create(&tid, NULL, &stream_molecules, req);
+                pthread_create(&tid, NULL, &stream_molecules, args);
                 pthread_detach(tid);
             }
             else
@@ -1899,6 +1899,21 @@ void *handle_image_spectrum_request(void *args)
     close(params->fd);
 
     free(params);
+
+    pthread_exit(NULL);
+}
+
+void *stream_molecules(void *args)
+{
+    if (args == NULL)
+        pthread_exit(NULL);
+
+    struct splat_req *req = (struct splat_req *)args;
+
+    // close the write end of the pipe
+    close(req->fd);
+
+    free(req);
 
     pthread_exit(NULL);
 }
