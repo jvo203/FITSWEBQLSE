@@ -68,6 +68,7 @@ extern void exit_fortran();
 extern void fitswebql_request(char *uri, size_t n);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
 extern int get_error_status(void *item);
+extern int get_header_status(void *item);
 extern int get_ok_status(void *item);
 extern float get_progress(void *item);
 extern float get_elapsed(void *item);
@@ -809,8 +810,23 @@ static enum MHD_Result on_http_connection(void *cls,
 
         printf("[C] Accept-Encoding:\t%s; datasetId:\t%s; freq_start: %g, freq_end: %g\n", encoding, datasetId, freq_start, freq_end);
 
-        //if (datasetId == NULL || freqStartStr == NULL || freqEndStr == NULL)
-        //    return http_not_found(connection);
+        if (datasetId == NULL)
+            return http_not_found(connection);
+
+        if (freq_start == 0.0 || freq_end == 0.0)
+        {
+            // get the frequency range from the FITS header
+            void *item = get_dataset(datasetId);
+
+            if (item == NULL)
+                return http_not_found(connection);
+
+            if (get_error_status(item))
+                return http_internal_server_error(connection);
+
+            if (!get_header_status(item))
+                return http_accepted(connection);
+        }
 
         return http_not_found(connection);
     }
