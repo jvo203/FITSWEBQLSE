@@ -836,7 +836,14 @@ static enum MHD_Result on_http_connection(void *cls,
 
         printf("[C] get_molecules: datasetId(%s); freq_start: %gGHz, freq_end: %gGHz\n", datasetId, freq_start, freq_end);
 
-        return http_not_found(connection);
+        if (freq_start > 0.0 && freq_end > 0.0)
+        {
+            // TO-DO: open a pipe, pass {fd, freq_start, freq_end} to a pthread
+
+            return http_not_implemented(connection);
+        }
+        else
+            return http_not_found(connection);
     }
 
     if (strstr(url, "/image_spectrum") != NULL)
