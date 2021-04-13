@@ -812,7 +812,7 @@ static enum MHD_Result on_http_connection(void *cls,
         if (freqEndStr != NULL)
             freq_end = atof(freqEndStr);
 
-        printf("[C] Accept-Encoding:\t%s; datasetId:\t%s; freq_start: %g, freq_end: %g\n", encoding, datasetId, freq_start, freq_end);
+        printf("[C] Accept-Encoding: %s\n", encoding);
 
         if (datasetId == NULL)
             return http_not_found(connection);
@@ -833,6 +833,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
             get_frequency_range(item, freq_start_ptr, freq_end_ptr);
         }
+
+        printf("[C] get_molecules: datasetId(%s); freq_start: %gGHz, freq_end: %gGHz\n", datasetId, freq_start, freq_end);
 
         return http_not_found(connection);
     }
