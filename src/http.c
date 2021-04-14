@@ -1943,13 +1943,13 @@ void *stream_molecules(void *args)
         CALL_ZLIB(deflateInit2(&(req->z), Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
     }
 
-    /*rc = sqlite3_exec(splat_db, strSQL, sqlite_callback, req, &zErrMsg);
+    rc = sqlite3_exec(splat_db, strSQL, sqlite_callback, req, &zErrMsg);
 
     if (rc != SQLITE_OK)
     {
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
         sqlite3_free(zErrMsg);
-    }*/
+    }
 
     if (req->first)
         snprintf(chunk_data, sizeof(chunk_data), "{\"molecules\" : []}");
@@ -1978,7 +1978,7 @@ void *stream_molecules(void *args)
         CALL_ZLIB(deflateEnd(&(req->z)));
     }
     else
-        write(req->fd, (const char *)chunk_data, strlen(chunk_data));
+        chunked_write(req->fd, (const char *)chunk_data, strlen(chunk_data));
 
     // close the write end of the pipe
     close(req->fd);
@@ -1986,4 +1986,104 @@ void *stream_molecules(void *args)
     free(req);
 
     pthread_exit(NULL);
+}
+
+static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
+{
+    struct splat_req *req = (struct splat_req *)userp;
+
+    if (argc == 8)
+    {
+        /*printf("sqlite_callback::molecule:\t");
+      for (int i = 0; i < argc; i++)
+      printf("%s:%s\t", azColName[i], argv[i]);
+      printf("\n");*/
+
+        GString *json = g_string_sized_new(1024);
+
+        if (req->first)
+        {
+            req->first = false;
+
+            g_string_printf(json, "{\"molecules\" : [");
+        }
+        else
+            g_string_printf(json, ",");
+
+        // json-encode a spectral line
+        char *encoded;
+
+        // species
+        encoded = json_encode_string(argv[0]);
+        g_string_append_printf(json, "{\"species\" : %s,", encoded);
+        if (encoded != NULL)
+            free(encoded);
+
+        // name
+        encoded = json_encode_string(argv[1]);
+        g_string_append_printf(json, "\"name\" : %s,", encoded);
+        if (encoded != NULL)
+            free(encoded);
+
+        // frequency
+        g_string_append_printf(json, "\"frequency\" : %s,", argv[2]);
+
+        // quantum numbers
+        encoded = json_encode_string(argv[3]);
+        g_string_append_printf(json, "\"quantum\" : %s,", encoded);
+        if (encoded != NULL)
+            free(encoded);
+
+        // cdms_intensity
+        encoded = json_encode_string(argv[4]);
+        g_string_append_printf(json, "\"cdms\" : %s,", encoded);
+        if (encoded != NULL)
+            free(encoded);
+
+        // lovas_intensity
+        encoded = json_encode_string(argv[5]);
+        g_string_append_printf(json, "\"lovas\" : %s,", encoded);
+        if (encoded != NULL)
+            free(encoded);
+
+        // E_L
+        encoded = json_encode_string(argv[6]);
+        g_string_append_printf(json, "\"E_L\" : %s,", encoded);
+        if (encoded != NULL)
+            free(encoded);
+
+        // linelist
+        encoded = json_encode_string(argv[7]);
+        g_string_append_printf(json, "\"list\" : %s}", encoded);
+        if (encoded != NULL)
+            free(encoded);
+
+        // printf("%s\n", json.c_str());
+
+        if (req->compression)
+        {
+            req->z.avail_in = json->len;                 // size of input
+            req->z.next_in = (unsigned char *)json->str; // input char array
+
+            do
+            {
+                req->z.avail_out = CHUNK;   // size of output
+                req->z.next_out = req->out; // output char array
+                CALL_ZLIB(deflate(&(req->z), Z_NO_FLUSH));
+                size_t have = CHUNK - req->z.avail_out;
+
+                if (have > 0)
+                {
+                    // printf("ZLIB avail_out: %zu\n", have);
+                    chunked_write(req->fd, (const char *)req->out, have);
+                }
+            } while (req->z.avail_out == 0);
+        }
+        else
+            chunked_write(req->fd, (const char *)json->str, json->len);
+
+        g_string_free(json, TRUE);
+    }
+
+    return 0;
 }
