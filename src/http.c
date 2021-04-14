@@ -871,8 +871,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (freq_start > 0.0 && freq_end > 0.0)
         {
-            // open a pipe, pass {compress, fd, freq_start, freq_end} to a pthread
-
             // open a pipe
             status = pipe(pipefd);
 
