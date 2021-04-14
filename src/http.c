@@ -10,6 +10,14 @@
 
 #include <sqlite3.h>
 
+inline const char *denull(const char *str)
+{
+    if (str != NULL)
+        return str;
+    else
+        return "\"\"";
+};
+
 #ifndef LOCAL
 #if defined(__APPLE__) && defined(__MACH__)
 #include <libpq-fe.h>
@@ -1995,9 +2003,9 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
     if (argc == 8)
     {
         /*printf("sqlite_callback::molecule:\t");
-      for (int i = 0; i < argc; i++)
-      printf("%s:%s\t", azColName[i], argv[i]);
-      printf("\n");*/
+        for (int i = 0; i < argc; i++)
+            printf("%s:%s\t", azColName[i], argv[i]);
+        printf("\n");*/
 
         GString *json = g_string_sized_new(1024);
 
@@ -2014,47 +2022,47 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
         char *encoded;
 
         // species
-        encoded = json_encode_string(argv[0]);
-        g_string_append_printf(json, "{\"species\" : %s,", encoded);
+        encoded = json_encode_string(denull(argv[0]));
+        g_string_append_printf(json, "{\"species\" : %s,", denull(encoded));
         if (encoded != NULL)
             free(encoded);
 
         // name
-        encoded = json_encode_string(argv[1]);
-        g_string_append_printf(json, "\"name\" : %s,", encoded);
+        encoded = json_encode_string(denull(argv[1]));
+        g_string_append_printf(json, "\"name\" : %s,", denull(encoded));
         if (encoded != NULL)
             free(encoded);
 
         // frequency
-        g_string_append_printf(json, "\"frequency\" : %s,", argv[2]);
+        g_string_append_printf(json, "\"frequency\" : %s,", denull(argv[2]));
 
         // quantum numbers
-        encoded = json_encode_string(argv[3]);
-        g_string_append_printf(json, "\"quantum\" : %s,", encoded);
+        encoded = json_encode_string(denull(argv[3]));
+        g_string_append_printf(json, "\"quantum\" : %s,", denull(encoded));
         if (encoded != NULL)
             free(encoded);
 
         // cdms_intensity
-        encoded = json_encode_string(argv[4]);
-        g_string_append_printf(json, "\"cdms\" : %s,", encoded);
+        encoded = json_encode_string(denull(argv[4]));
+        g_string_append_printf(json, "\"cdms\" : %s,", denull(encoded));
         if (encoded != NULL)
             free(encoded);
 
         // lovas_intensity
-        encoded = json_encode_string(argv[5]);
-        g_string_append_printf(json, "\"lovas\" : %s,", encoded);
+        encoded = json_encode_string(denull(argv[5]));
+        g_string_append_printf(json, "\"lovas\" : %s,", denull(encoded));
         if (encoded != NULL)
             free(encoded);
 
         // E_L
-        encoded = json_encode_string(argv[6]);
-        g_string_append_printf(json, "\"E_L\" : %s,", encoded);
+        encoded = json_encode_string(denull(argv[6]));
+        g_string_append_printf(json, "\"E_L\" : %s,", denull(encoded));
         if (encoded != NULL)
             free(encoded);
 
         // linelist
-        encoded = json_encode_string(argv[7]);
-        g_string_append_printf(json, "\"list\" : %s}", encoded);
+        encoded = json_encode_string(denull(argv[7]));
+        g_string_append_printf(json, "\"list\" : %s}", denull(encoded));
         if (encoded != NULL)
             free(encoded);
 
