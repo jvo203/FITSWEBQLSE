@@ -1919,6 +1919,24 @@ void *stream_molecules(void *args)
 
     struct splat_req *req = (struct splat_req *)args;
 
+    req->first = true;
+
+    if (req->compression)
+    {
+        req->z.zalloc = Z_NULL;
+        req->z.zfree = Z_NULL;
+        req->z.opaque = Z_NULL;
+        req->z.next_in = Z_NULL;
+        req->z.avail_in = 0;
+
+        CALL_ZLIB(deflateInit2(&(req->z), Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
+    }
+
+    if (req->compression)
+    {
+        CALL_ZLIB(deflateEnd(&(req->z)));
+    }
+
     // close the write end of the pipe
     close(req->fd);
 
