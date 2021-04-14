@@ -833,6 +833,9 @@ static enum MHD_Result on_http_connection(void *cls,
 
         printf("[C] Accept-Encoding: %s\n", encoding);
 
+        if (strstr(encoding, "gzip") != NULL)
+            compress = true;
+
         if (splat_db == NULL)
             return http_internal_server_error(connection);
 
