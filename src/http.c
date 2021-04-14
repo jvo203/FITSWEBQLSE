@@ -1919,6 +1919,13 @@ void *stream_molecules(void *args)
 
     struct splat_req *req = (struct splat_req *)args;
 
+    char strSQL[256];
+    int rc;
+    char *zErrMsg = 0;
+
+    snprintf(strSQL, sizeof(strSQL), "SELECT * FROM lines WHERE frequency>=%f AND frequency<=%f;", req->freq_start, req->freq_end);
+    printf("%s\n", strSQL);
+
     req->first = true;
 
     if (req->compression)
