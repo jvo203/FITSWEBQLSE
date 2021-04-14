@@ -2066,8 +2066,6 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
         if (encoded != NULL)
             free(encoded);
 
-        // printf("%s\n", json.c_str());
-
         if (req->compression)
         {
             req->z.avail_in = json->len;                 // size of input
