@@ -883,9 +883,11 @@ static enum MHD_Result on_http_connection(void *cls,
             struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
 
             // add headers
-            MHD_add_response_header(response, "Cache-Control", "no-cache");
+            /*MHD_add_response_header(response, "Cache-Control", "no-cache");
             MHD_add_response_header(response, "Cache-Control", "no-store");
-            MHD_add_response_header(response, "Pragma", "no-cache");
+            MHD_add_response_header(response, "Pragma", "no-cache");*/
+
+            MHD_add_response_header(response, "Cache-Control", "public, max-age=86400");
             MHD_add_response_header(response, "Content-Type", "application/json");
 
             if (compress)
