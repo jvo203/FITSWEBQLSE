@@ -81,7 +81,7 @@ MOD =
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
 
-LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lfpzip -lcfitsio -lsqlite3
+LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lfpzip -lcfitsio -lsqlite3 -lz
 # -lzmq -lczmq
 # -lzfp before cfitsio
 #`pkg-config --libs json-fortran`
