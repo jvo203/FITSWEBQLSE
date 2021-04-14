@@ -1920,6 +1920,7 @@ void *stream_molecules(void *args)
     struct splat_req *req = (struct splat_req *)args;
 
     char strSQL[256];
+    char chunk_data[256];
     int rc;
     char *zErrMsg = 0;
 
@@ -1939,10 +1940,42 @@ void *stream_molecules(void *args)
         CALL_ZLIB(deflateInit2(&(req->z), Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
     }
 
+    /*rc = sqlite3_exec(splat_db, strSQL, sqlite_callback, req, &zErrMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+    }*/
+
+    if (req->first)
+        snprintf(chunk_data, sizeof(chunk_data), "{\"molecules\" : []}");
+    else
+        snprintf(chunk_data, sizeof(chunk_data), "]}");
+
     if (req->compression)
     {
+        req->z.avail_in = strlen(chunk_data);
+        req->z.next_in = (unsigned char *)chunk_data;
+
+        do
+        {
+            req->z.avail_out = CHUNK;   // size of output
+            req->z.next_out = req->out; // output char array
+            CALL_ZLIB(deflate(&(req->z), Z_FINISH));
+            size_t have = CHUNK - req->z.avail_out;
+
+            if (have > 0)
+            {
+                // printf("Z_FINISH avail_out: %zu\n", have);
+                chunked_write(req->fd, (const char *)req->out, have);
+            }
+        } while (req->z.avail_out == 0);
+
         CALL_ZLIB(deflateEnd(&(req->z)));
     }
+    else
+        chunked_write(req->fd, (const char *)chunk_data, strlen(chunk_data));
 
     // close the write end of the pipe
     close(req->fd);
