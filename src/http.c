@@ -1975,7 +1975,7 @@ void *stream_molecules(void *args)
         CALL_ZLIB(deflateEnd(&(req->z)));
     }
     else
-        chunked_write(req->fd, (const char *)chunk_data, strlen(chunk_data));
+        write(req->fd, (const char *)chunk_data, strlen(chunk_data));
 
     // close the write end of the pipe
     close(req->fd);
