@@ -24,6 +24,8 @@
 
 	sudo dnf install ispc # (not needed yet)
 
+	sudo dnf install zlib-devel
+
 3. zfp Fortran bindings
 
 	# this step is not needed anymore
