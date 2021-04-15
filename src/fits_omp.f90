@@ -1048,17 +1048,6 @@ contains
             return
         end if
 
-        ! the image part
-        if (req%image .and. (req%fd .ne. -1)) then
-            ! print *, 'viewport pixels', pixels
-            ! print *, 'viewport mask', mask
-
-            native_size = dimx*dimy
-            viewport_size = req%width*req%height
-
-            print *, 'native:', native_size, 'viewport:', viewport_size
-        end if
-
         ! the spectrum part
         if (req%fd .ne. -1) then
             if (req%image) then
@@ -1079,6 +1068,19 @@ contains
             end if
 
             ! call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+
+            ! the viewport part
+            if (req%image) then
+                ! print *, 'viewport pixels', pixels
+                ! print *, 'viewport mask', mask
+
+                native_size = dimx*dimy
+                viewport_size = req%width*req%height
+
+                print *, 'native:', native_size, 'viewport:', viewport_size
+
+                ! write_viewport(req%fd, ...)
+            end if
 
             call close_pipe(req%fd)
         end if
