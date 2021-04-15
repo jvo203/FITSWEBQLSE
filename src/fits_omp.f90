@@ -714,6 +714,7 @@ contains
         real(kind=c_float), dimension(:, :), allocatable, target :: view_pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: view_mask
         integer :: dimx, dimy, native_size, viewport_size
+        real :: scale
 
         !logical, save :: bSuccess[*] ! linking errors to caf_token
         logical, allocatable :: bSuccess[:]
@@ -1074,8 +1075,18 @@ contains
 
                 native_size = dimx*dimy
                 viewport_size = req%width*req%height
+                scale = real(req%width)/real(dimx)
 
-                print *, 'native:', native_size, 'viewport:', viewport_size
+                print *, 'native:', native_size, 'viewport:', viewport_size, 'scale:', scale
+
+                if (native_size .gt. viewport_size) then
+                    ! downsize the pixels/mask from {dimx,dimy} to {req%width,req%height}
+
+                    allocate (view_pixels(req%width, req%height))
+                    allocate (view_mask(req%width, req%height))
+                else
+                    ! no need for downsizing
+                end if
 
                 ! write_viewport(req%fd, ...)
             end if
