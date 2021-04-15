@@ -711,6 +711,10 @@ contains
         logical(kind=1), allocatable :: mask(:) [:]
         real, allocatable, target :: spectrum(:) [:]
 
+        real(kind=c_float), dimension(:, :), allocatable, target :: view_pixels
+        logical(kind=c_bool), dimension(:, :), allocatable, target :: view_mask
+        integer :: dimx, dimy, native_size, viewport_size
+
         !logical, save :: bSuccess[*] ! linking errors to caf_token
         logical, allocatable :: bSuccess[:]
 
@@ -891,7 +895,9 @@ contains
 
             call get_cdelt3(item, cdelt3)
 
-            npixels = (x2 - x1 + 1)*(y2 - y1 + 1)
+            dimx = abs(x2 - x1 + 1)
+            dimy = abs(y2 - y1 + 1)
+            npixels = dimx*dimy
 
             allocate (buffer(npixels))
             allocate (pixels(npixels) [*])
@@ -1042,13 +1048,18 @@ contains
             return
         end if
 
-        if (req%image) then
+        ! the image part
+        if (req%image .and. (req%fd .ne. -1)) then
             ! print *, 'viewport pixels', pixels
             ! print *, 'viewport mask', mask
+
+            native_size = dimx*dimy
+            viewport_size = req%width*req%height
+
+            print *, 'native:', native_size, 'viewport:', viewport_size
         end if
 
-        ! print *, 'spectrum:', spectrum
-
+        ! the spectrum part
         if (req%fd .ne. -1) then
             if (req%image) then
                 precision = FPZIP_HIGH_PRECISION
