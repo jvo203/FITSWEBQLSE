@@ -1067,8 +1067,6 @@ contains
                 call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
             end if
 
-            ! call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
-
             ! the viewport part
             if (req%image) then
                 ! print *, 'viewport pixels', pixels
