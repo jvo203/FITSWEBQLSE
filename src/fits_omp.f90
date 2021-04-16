@@ -758,8 +758,8 @@ contains
         type(image_spectrum_request_f) :: req
 
         ! co-array variables
-        real(kind=4), allocatable :: pixels(:) [:]
-        logical(kind=1), allocatable :: mask(:) [:]
+        real(kind=4), allocatable, target :: pixels(:) [:]
+        logical(kind=1), allocatable, target :: mask(:) [:]
         real, allocatable, target :: spectrum(:) [:]
 
         real(kind=c_float), dimension(:, :), allocatable, target :: view_pixels
