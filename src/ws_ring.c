@@ -447,7 +447,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 									memcpy(&view_height, buf + 8 + compressed_size + 4, sizeof(uint32_t));
 									view_size = view_width * view_height;
 
-									if (view_size > 0)
+									if (view_size > 0 && offset == (8 + compressed_size + 8 + view_size * sizeof(float) + view_size))
 									{
 										lwsl_user("processing %dx%d viewport.\n", view_width, view_height);
 									}
