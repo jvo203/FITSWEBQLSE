@@ -324,7 +324,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 				size_t offset = 0;
 
 				//char *buf = NULL;
-				char buf[0x20000];
+				char buf[0x40000];
 
 				uint32_t length, view_width, view_height;
 				uint32_t compressed_size;
