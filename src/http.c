@@ -1745,7 +1745,7 @@ extern void write_viewport(int fd, int width, int height, const float *pixels, c
     zfp = zfp_stream_open(NULL);
 
     //zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
-    zfp_stream_set_precision(zfp, ZFP_HIGH_PRECISION);
+    zfp_stream_set_precision(zfp, ZFP_MEDIUM_PRECISION);
 
     // allocate buffer for compressed data
     bufsize = zfp_stream_maximum_size(zfp, field);
