@@ -440,10 +440,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								{
 									memcpy(&view_width, buf + 8 + compressed_size, sizeof(uint32_t));
 									memcpy(&view_height, buf + 8 + compressed_size + 4, sizeof(uint32_t));
-									view_size = view_width * view_height;
+									view_size = offset - (8 + compressed_size);
 
-									// have we read precisely all the data (not more, not less)?
-									if (view_size > 0 && offset == (8 + compressed_size + 8 + view_size * sizeof(float) + view_size))
+									if (view_width > 0 && view_height > 0)
 									{
 										lwsl_user("processing %dx%d viewport.\n", view_width, view_height);
 
@@ -453,7 +452,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 										// header
 										msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
 										// body
-										msg_len += sizeof(uint32_t) + sizeof(uint32_t) + view_size * sizeof(float) + view_size;
+										msg_len += view_size;
 
 										amsg.len = msg_len;
 
@@ -485,8 +484,8 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 											memcpy((char *)amsg.payload + ws_offset, &elapsed, sizeof(float));
 											ws_offset += sizeof(float);
 
-											memcpy((char *)amsg.payload + ws_offset, buf + 8 + compressed_size, sizeof(uint32_t) + sizeof(uint32_t) + view_size * sizeof(float) + view_size);
-											ws_offset += sizeof(uint32_t) + sizeof(uint32_t) + view_size * sizeof(float) + view_size;
+											memcpy((char *)amsg.payload + ws_offset, buf + 8 + compressed_size, view_size);
+											ws_offset += view_size;
 
 											if (!lws_ring_insert(vhd->ring, &amsg, 1))
 											{
