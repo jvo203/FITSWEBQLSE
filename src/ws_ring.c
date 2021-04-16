@@ -441,7 +441,10 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								// check if there is an optional viewport too
 								if (offset > 8 + compressed_size + 8)
 								{
-									lwsl_user("processing a viewport.\n");
+									memcpy(&view_width, buf + 8 + compressed_size, sizeof(uint32_t));
+									memcpy(&view_height, buf + 8 + compressed_size + 4, sizeof(uint32_t));
+
+									lwsl_user("processing a %dx%d viewport.\n", view_width, view_height);
 								}
 							}
 						}
