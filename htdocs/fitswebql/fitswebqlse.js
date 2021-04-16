@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-04-08.0";
+	return "JS2021-04-16.0";
 }
 
 const wasm_supported = (() => {
@@ -2594,10 +2594,22 @@ function open_websocket_connection(datasetId, index) {
 					//viewport
 					if (type == 1) {
 						hide_cursor();
-						var offset = 12;
-						var frame = new Uint8Array(received_msg, offset);
+						var offset = 16;
+						var view_width = dv.getUint32(offset, endianness);
+						offset += 4;
 
-						console.log('received viewport frame length = ' + frame.length + ' bytes.');
+						var view_height = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						var view_size = view_width * view_height;
+
+						var pixels = new Float32Array(received_msg, offset, view_size);
+						offset += view_size * 4;
+
+						var mask = new Uint8Array(received_msg, offset);
+
+						console.log('VIEWPORT', view_width, view_height, pixels, mask);
+						//console.log('received viewport frame length = ' + frame.length + ' bytes.');
 
 						// OpenEXR decoder part				
 						Module.ready
