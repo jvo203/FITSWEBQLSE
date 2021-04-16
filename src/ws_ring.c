@@ -361,7 +361,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 							buf = malloc(0x20000);
 
 							if (buf != NULL)
-								while ((n = read(pipefd[0], buf + offset, sizeof(buf) - offset)) > 0)
+								while ((n = read(pipefd[0], buf + offset, 0x20000 - offset)) > 0)
 								{
 									offset += n;
 
