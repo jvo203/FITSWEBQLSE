@@ -325,7 +325,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 				size_t offset;
 				char buf[0x4000];
 
-				uint32_t length;
+				uint32_t length, view_width, view_height;
 				uint32_t compressed_size;
 				size_t msg_len;
 
@@ -437,6 +437,12 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								}
 								else
 									lwsl_user("OOM: dropping\n");
+
+								// check if there is an optional viewport too
+								if (offset > 8 + compressed_size + 8)
+								{
+									lwsl_user("processing a viewport.\n");
+								}
 							}
 						}
 						else
