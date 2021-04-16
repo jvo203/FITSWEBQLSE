@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-04-16.0";
+	return "JS2021-04-16.1";
 }
 
 const wasm_supported = (() => {
@@ -1426,7 +1426,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
 		texture[offset] = pixels[i];
 		offset = (offset + 1) | 0;
 
-		texture[offset] = alpha[i];
+		texture[offset] = (alpha[i] > 0) ? 1.0 : 0.0;
 		offset = (offset + 1) | 0;
 	}
 
@@ -2606,13 +2606,14 @@ function open_websocket_connection(datasetId, index) {
 						var pixels = new Float32Array(received_msg, offset, view_size);
 						offset += view_size * 4;
 
-						var mask = new Uint8Array(received_msg, offset);
+						var alpha = new Uint8Array(received_msg, offset);
 
-						console.log('VIEWPORT', view_width, view_height, pixels, mask);
-						//console.log('received viewport frame length = ' + frame.length + ' bytes.');
+						//console.log('VIEWPORT', view_width, view_height, pixels, alpha);
+
+						process_hdr_viewport(view_width, view_height, pixels, alpha);
 
 						// OpenEXR decoder part				
-						Module.ready
+						/*Module.ready
 							.then(_ => {
 								console.log("processing an OpenEXR HDR viewport");
 								let start = performance.now();
@@ -2630,7 +2631,7 @@ function open_websocket_connection(datasetId, index) {
 
 								process_hdr_viewport(img_width, img_height, pixels, alpha);
 							})
-							.catch(e => console.error(e));
+							.catch(e => console.error(e));*/
 
 						return;
 					}
@@ -10553,7 +10554,6 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							let elapsed = Math.round(performance.now() - start);
 
 							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
-
 
 							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
