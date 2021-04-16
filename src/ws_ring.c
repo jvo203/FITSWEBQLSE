@@ -320,14 +320,14 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			{
 				int status;
 				int pipefd[2];
-				ssize_t n;
+				ssize_t n = 0;
 
-				size_t offset;
-				char buf[0x4000];
+				size_t offset = 0;
+				char *buf = NULL;
 
 				uint32_t length, view_width, view_height;
 				uint32_t compressed_size;
-				size_t msg_len;
+				size_t msg_len, view_size;
 
 				printf("[C] dx:%d, image:%d, quality:%d, x1:%d, y1:%d, x2:%d, y2:%d, width:%d, height:%d, beam:%d, intensity:%d, frame_start:%f, frame_end:%f, ref_freq:%f, seq_id:%d, timestamp:%f\n", pss->is_req.dx, pss->is_req.image, pss->is_req.quality, pss->is_req.x1, pss->is_req.y1, pss->is_req.x2, pss->is_req.y2, pss->is_req.width, pss->is_req.height, pss->is_req.beam, pss->is_req.intensity, pss->is_req.frame_start, pss->is_req.frame_end, pss->is_req.ref_freq, pss->is_req.seq_id, pss->is_req.timestamp);
 
@@ -358,14 +358,15 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 						if (0 == stat)
 						{
-							offset = 0;
+							buf = malloc(0x20000);
 
-							while ((n = read(pipefd[0], buf + offset, sizeof(buf) - offset)) > 0)
-							{
-								offset += n;
+							if (buf != NULL)
+								while ((n = read(pipefd[0], buf + offset, sizeof(buf) - offset)) > 0)
+								{
+									offset += n;
 
-								printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu\n", n, offset);
-							}
+									printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu\n", n, offset);
+								}
 
 							if (0 == n)
 								printf("[C] PIPE_END_OF_STREAM\n");
@@ -443,10 +444,17 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								{
 									memcpy(&view_width, buf + 8 + compressed_size, sizeof(uint32_t));
 									memcpy(&view_height, buf + 8 + compressed_size + 4, sizeof(uint32_t));
+									view_size = view_width * view_height;
 
-									lwsl_user("processing a %dx%d viewport.\n", view_width, view_height);
+									if (view_size > 0)
+									{
+										lwsl_user("processing %dx%d viewport.\n", view_width, view_height);
+									}
 								}
 							}
+
+							if (buf != NULL)
+								free(buf);
 						}
 						else
 						{
