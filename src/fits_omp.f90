@@ -1084,6 +1084,18 @@ contains
 
                     allocate (view_pixels(req%width, req%height))
                     allocate (view_mask(req%width, req%height))
+
+                    if (scale .gt. 0.2) then
+                        call resizeLanczos(c_loc(pixels), dimx, dimy,&
+                        & c_loc(view_pixels), req%width, req%height, 3)
+                    else
+                        call resizeSuper(c_loc(pixels), dimx, dimy,&
+                        & c_loc(view_pixels), req%width, req%height)
+                    end if
+
+                    call resizeNearest(c_loc(mask), dimx, dimy,&
+                    & c_loc(view_mask), req%width, req%height)
+
                 else
                     ! no need for downsizing
                 end if
