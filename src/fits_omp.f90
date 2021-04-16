@@ -132,6 +132,16 @@ module fits
             type(C_PTR), value, intent(in) :: spectrum
         end subroutine write_spectrum
 
+        ! void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask)
+        subroutine write_viewport(fd, width, height, pixels, mask) BIND(C, name='write_viewport')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: fd, width, height
+            type(C_PTR), value :: pixels, mask
+
+        end subroutine write_viewport
+
         ! glib functions
         !  GString *begin_json()
         type(C_PTR) function begin_json() BIND(C, name='begin_json')
