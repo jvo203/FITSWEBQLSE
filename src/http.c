@@ -1648,6 +1648,21 @@ extern void write_spectrum(int fd, const float *spectrum, int n, int precision)
     }
 }
 
+extern void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask)
+{
+    size_t length;
+    uint32_t view_width, view_height;
+
+    view_width = width;
+    view_height = height;
+    length = view_width * view_height;
+
+    write(fd, &view_width, sizeof(view_width));
+    write(fd, &view_height, sizeof(view_height));
+    chunked_write(fd, (const char *)pixels, length * sizeof(float));
+    chunked_write(fd, (const char *)mask, length);
+}
+
 extern void write_json(int fd, GString *json)
 {
     if (json == NULL)
