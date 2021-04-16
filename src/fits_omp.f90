@@ -1985,8 +1985,8 @@ contains
         real(kind=8), intent(in) :: frame_start, frame_end, ref_freq
         integer, intent(out) :: first, last
 
-        first = 0
-        last = 0
+        first = 1
+        last = 1
 
         if (item%naxes(3) .le. 1) return
 
