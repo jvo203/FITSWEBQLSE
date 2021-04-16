@@ -433,7 +433,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 									}
 								}
 								else
-									lwsl_user("OOM: dropping spectrum\n");
+									lwsl_user("OOM: skipping spectrum\n");
 
 								// check if there is an optional viewport too
 								if (offset > 8 + compressed_size + 8)
@@ -495,7 +495,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 											}
 										}
 										else
-											lwsl_user("OOM: dropping viewport\n");
+											lwsl_user("OOM: skipping viewport\n");
 									}
 								}
 							}
