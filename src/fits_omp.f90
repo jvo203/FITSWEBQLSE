@@ -263,6 +263,47 @@ module fits
             integer(kind=c_int), value, intent(in) :: fd
         end subroutine close_pipe
 
+        ! resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
+        subroutine resizeCubic(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeCubic')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: srcWidth, srcHeight
+            integer(c_int), value, intent(in) :: dstWidth, dstHeight
+            type(C_PTR), value, intent(in) :: pSrc, pDest
+        end subroutine resizeCubic
+
+        ! resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
+        subroutine resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, numLobes) BIND(C, name='resizeLanczos')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: srcWidth, srcHeight
+            integer(c_int), value, intent(in) :: dstWidth, dstHeight
+            type(C_PTR), value, intent(in) :: pSrc, pDest
+            integer(c_int), value, intent(in) :: numLobes
+        end subroutine resizeLanczos
+
+        ! resizeSuper(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
+        subroutine resizeSuper(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeSuper')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: srcWidth, srcHeight
+            integer(c_int), value, intent(in) :: dstWidth, dstHeight
+            type(C_PTR), value, intent(in) :: pSrc, pDest
+        end subroutine resizeSuper
+
+        ! resizeNearest(Ipp8u *pSrc, int srcWidth, int srcHeight, Ipp8u *pDest, int dstWidth, int dstHeight)
+        subroutine resizeNearest(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeNearest')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: srcWidth, srcHeight
+            integer(c_int), value, intent(in) :: dstWidth, dstHeight
+            type(C_PTR), value, intent(in) :: pSrc, pDest
+        end subroutine resizeNearest
+
     end interface
 contains
     subroutine close_fits_file(item)
