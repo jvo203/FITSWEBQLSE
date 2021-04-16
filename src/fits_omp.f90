@@ -1147,11 +1147,12 @@ contains
                     call resizeNearest(c_loc(mask), dimx, dimy,&
                     & c_loc(view_mask), req%width, req%height)
 
+                    call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask))
                 else
                     ! no need for downsizing
+                    call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask))
                 end if
 
-                ! write_viewport(req%fd, ...)
             end if
 
             call close_pipe(req%fd)
