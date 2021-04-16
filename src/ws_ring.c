@@ -321,8 +321,8 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 				int status;
 				int pipefd[2];
 				ssize_t n = 0;
-
 				size_t offset = 0;
+
 				//char *buf = NULL;
 				char buf[0x20000];
 
