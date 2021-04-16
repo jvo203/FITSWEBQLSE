@@ -402,15 +402,10 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								{
 									float ts = pss->is_req.timestamp;
 									uint32_t id = pss->is_req.seq_id;
-									uint32_t msg_type =
-										0; // 0 - spectrum, 1 - viewport,
-									// 2 -
-									// image, 3
-									// - full
-									// spectrum
-									// refresh,
-									// 4 -
-									// histogram
+									uint32_t msg_type = 0;
+									// 0 - spectrum, 1 - viewport,
+									// 2 - image, 3 - full, spectrum,  refresh,
+									// 4 - histogram
 									float elapsed = 0.0f;
 
 									/* ...and we copy the payload in at +LWS_PRE */
@@ -447,9 +442,60 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 									memcpy(&view_height, buf + 8 + compressed_size + 4, sizeof(uint32_t));
 									view_size = view_width * view_height;
 
+									// have we read precisely all the data (not more, not less)?
 									if (view_size > 0 && offset == (8 + compressed_size + 8 + view_size * sizeof(float) + view_size))
 									{
 										lwsl_user("processing %dx%d viewport.\n", view_width, view_height);
+
+										// set the binary mode
+										amsg.binary = true;
+
+										// header
+										msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
+										// body
+										msg_len += sizeof(uint32_t) + sizeof(uint32_t) + view_size * sizeof(float) + view_size;
+
+										amsg.len = msg_len;
+
+										/* notice we over-allocate by LWS_PRE... */
+										amsg.payload = malloc(LWS_PRE + msg_len);
+
+										if (amsg.payload != NULL)
+										{
+											float ts = pss->is_req.timestamp;
+											uint32_t id = pss->is_req.seq_id;
+											uint32_t msg_type = 1;
+											// 0 - spectrum, 1 - viewport,
+											// 2 - image, 3 - full, spectrum,  refresh,
+											// 4 - histogram
+											float elapsed = 0.0f;
+
+											/* ...and we copy the payload in at +LWS_PRE */
+											size_t ws_offset = LWS_PRE;
+
+											memcpy((char *)amsg.payload + ws_offset, &ts, sizeof(float));
+											ws_offset += sizeof(float);
+
+											memcpy((char *)amsg.payload + ws_offset, &id, sizeof(uint32_t));
+											ws_offset += sizeof(uint32_t);
+
+											memcpy((char *)amsg.payload + ws_offset, &msg_type, sizeof(uint32_t));
+											ws_offset += sizeof(uint32_t);
+
+											memcpy((char *)amsg.payload + ws_offset, &elapsed, sizeof(float));
+											ws_offset += sizeof(float);
+
+											memcpy((char *)amsg.payload + ws_offset, buf + 8 + compressed_size, sizeof(uint32_t) + sizeof(uint32_t) + view_size * sizeof(float) + view_size);
+											ws_offset += sizeof(uint32_t) + sizeof(uint32_t) + view_size * sizeof(float) + view_size;
+
+											if (!lws_ring_insert(vhd->ring, &amsg, 1))
+											{
+												__minimal_destroy_message(&amsg);
+												lwsl_user("dropping!\n");
+											}
+										}
+										else
+											lwsl_user("OOM: dropping\n");
 									}
 								}
 							}
