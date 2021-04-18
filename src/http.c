@@ -1639,8 +1639,8 @@ extern void write_spectrum(int fd, const float *spectrum, int n, int precision)
             // transmit the data
             uint32_t transmitted_size = outbytes;
 
-            write(fd, &length, sizeof(length));                     // spectrum length after decompressing
-            write(fd, &transmitted_size, sizeof(transmitted_size)); // compressed buffer size
+            chunked_write(fd, &length, sizeof(length));                     // spectrum length after decompressing
+            chunked_write(fd, &transmitted_size, sizeof(transmitted_size)); // compressed buffer size
             chunked_write(fd, compressed, outbytes);
         }
 
@@ -1689,8 +1689,8 @@ extern void write_header(int fd, const char *header_str, int str_len)
             uint32_t header_size = str_len;
             uint32_t transmitted_size = compressed_size;
 
-            write(fd, &header_size, sizeof(header_size));           // header size after decompressing
-            write(fd, &transmitted_size, sizeof(transmitted_size)); // compressed buffer size
+            chunked_write(fd, &header_size, sizeof(header_size));           // header size after decompressing
+            chunked_write(fd, &transmitted_size, sizeof(transmitted_size)); // compressed buffer size
             chunked_write(fd, compressed_header, compressed_size);
         }
     }
@@ -1789,16 +1789,16 @@ extern void write_viewport(int fd, int width, int height, const float *pixels, c
     uint32_t pixels_len = zfpsize;
     uint32_t mask_len = compressed_size;
 
-    write(fd, &view_width, sizeof(view_width));
-    write(fd, &view_height, sizeof(view_height));
+    chunked_write(fd, &view_width, sizeof(view_width));
+    chunked_write(fd, &view_height, sizeof(view_height));
 
     // pixels (use a chunked version for larger tranfers)
-    write(fd, &pixels_len, sizeof(pixels_len));
+    chunked_write(fd, &pixels_len, sizeof(pixels_len));
     if (compressed_pixels != NULL)
         chunked_write(fd, (char *)compressed_pixels, pixels_len);
 
     // mask (use a chunked version for larger tranfers)
-    write(fd, &mask_len, sizeof(mask_len));
+    chunked_write(fd, &mask_len, sizeof(mask_len));
     if (compressed_mask != NULL)
         chunked_write(fd, compressed_mask, mask_len);
 
@@ -1914,50 +1914,50 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     uint32_t mask_len = compressed_size;
 
     // the flux length
-    write(fd, &flux_len, sizeof(flux_len));
+    chunked_write(fd, &flux_len, sizeof(flux_len));
 
     // flux
-    write(fd, flux, flux_len);
+    chunked_write(fd, flux, flux_len);
 
     // pmin
     tmp = pmin;
-    write(fd, &tmp, sizeof(tmp));
+    chunked_write(fd, &tmp, sizeof(tmp));
 
     // pmax
     tmp = pmax;
-    write(fd, &tmp, sizeof(tmp));
+    chunked_write(fd, &tmp, sizeof(tmp));
 
     // pmedian
     tmp = pmedian;
-    write(fd, &tmp, sizeof(tmp));
+    chunked_write(fd, &tmp, sizeof(tmp));
 
     // sensitivity
     tmp = sensitivity;
-    write(fd, &tmp, sizeof(tmp));
+    chunked_write(fd, &tmp, sizeof(tmp));
 
     // ratio_sensitivity
     tmp = ratio_sensitivity;
-    write(fd, &tmp, sizeof(tmp));
+    chunked_write(fd, &tmp, sizeof(tmp));
 
     // white
     tmp = white;
-    write(fd, &tmp, sizeof(tmp));
+    chunked_write(fd, &tmp, sizeof(tmp));
 
     // black
     tmp = black;
-    write(fd, &tmp, sizeof(tmp));
+    chunked_write(fd, &tmp, sizeof(tmp));
 
     // the image + mask
-    write(fd, &img_width, sizeof(img_width));
-    write(fd, &img_height, sizeof(img_height));
+    chunked_write(fd, &img_width, sizeof(img_width));
+    chunked_write(fd, &img_height, sizeof(img_height));
 
     // pixels (use a chunked version for larger tranfers)
-    write(fd, &pixels_len, sizeof(pixels_len));
+    chunked_write(fd, &pixels_len, sizeof(pixels_len));
     if (compressed_pixels != NULL)
         chunked_write(fd, (char *)compressed_pixels, pixels_len);
 
     // mask (use a chunked version for larger tranfers)
-    write(fd, &mask_len, sizeof(mask_len));
+    chunked_write(fd, &mask_len, sizeof(mask_len));
     if (compressed_mask != NULL)
         chunked_write(fd, compressed_mask, mask_len);
 
@@ -1988,11 +1988,11 @@ size_t chunked_write(int fd, const char *src, size_t n)
             offset += written;
         }
 
-        printf("[C] chars written: %zu out of %zu bytes.\n", offset, n);
-
         // the connection might have been closed, bail out
         if (written < 0)
             return offset;
+
+        printf("[C] chars written: %zu out of %zu bytes.\n", offset, n);
     }
 
     return offset;
