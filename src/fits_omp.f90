@@ -10,6 +10,10 @@ module fits
     integer(c_int), parameter :: FPZIP_MEDIUM_PRECISION = 16
     integer(c_int), parameter :: FPZIP_HIGH_PRECISION = 24
 
+    integer(c_int), parameter :: ZFP_HIGH_PRECISION = 16
+    integer(c_int), parameter :: ZFP_MEDIUM_PRECISION = 11
+    integer(c_int), parameter :: ZFP_LOW_PRECISION = 8
+
     type, bind(c) :: gmutex
         integer(kind=c_intptr_t) :: i = 0
     end type gmutex
@@ -133,11 +137,11 @@ module fits
         end subroutine write_spectrum
 
         ! void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask)
-        subroutine write_viewport(fd, width, height, pixels, mask) BIND(C, name='write_viewport')
+        subroutine write_viewport(fd, width, height, pixels, mask, precision) BIND(C, name='write_viewport')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
-            integer(c_int), value, intent(in) :: fd, width, height
+            integer(c_int), value, intent(in) :: fd, width, height, precision
             type(C_PTR), value :: pixels, mask
 
         end subroutine write_viewport
@@ -764,6 +768,7 @@ contains
 
         real(kind=c_float), dimension(:, :), allocatable, target :: view_pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: view_mask
+        integer(kind=c_int) :: precision
         integer :: dimx, dimy, native_size, viewport_size
         real :: scale
 
@@ -777,9 +782,6 @@ contains
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
         real :: elapsed
-
-        ! FPZIP spectrum precision
-        integer(c_int) :: precision
 
         integer :: rank, ierror
 
@@ -1124,6 +1126,15 @@ contains
                 ! print *, 'viewport pixels', pixels
                 ! print *, 'viewport mask', mask
 
+                select case (req%quality)
+                case (low)
+                    precision = ZFP_LOW_PRECISION
+                case (high)
+                    precision = ZFP_HIGH_PRECISION
+                case default
+                    precision = ZFP_MEDIUM_PRECISION
+                end select
+
                 native_size = dimx*dimy
                 viewport_size = req%width*req%height
                 scale = real(req%width)/real(dimx)
@@ -1147,10 +1158,10 @@ contains
                     call resizeNearest(c_loc(mask), dimx, dimy,&
                     & c_loc(view_mask), req%width, req%height)
 
-                    call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask))
+                    call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
                 else
                     ! no need for downsizing
-                    call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask))
+                    call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
                 end if
 
             end if
