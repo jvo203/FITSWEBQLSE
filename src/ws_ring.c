@@ -323,8 +323,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 				ssize_t n = 0;
 				size_t offset = 0;
 
-				//char *buf = NULL;
-				char buf[0x40000];
+				char *buf = NULL;
+				size_t buf_size = 0x2000;
+				//char buf[0x40000];
 
 				uint32_t length, view_width, view_height;
 				uint32_t compressed_size;
@@ -359,15 +360,18 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 						if (0 == stat)
 						{
-							//buf = malloc(0x20000);
+							buf = malloc(buf_size);
 
-							//if (buf != NULL)
-							while ((n = read(pipefd[0], buf + offset, sizeof(buf) - offset)) > 0)
-							{
-								offset += n;
+							if (buf != NULL)
+								while ((n = read(pipefd[0], buf + offset, buf_size - offset)) > 0)
+								{
+									offset += n;
 
-								printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu\n", n, offset);
-							}
+									printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+
+									if (offset == buf_size)
+										printf("[C] OFFSET == BUF_SIZE\n");
+								}
 
 							if (0 == n)
 								printf("[C] PIPE_END_OF_STREAM\n");
@@ -499,8 +503,8 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								}
 							}
 
-							//if (buf != NULL)
-							//	free(buf);
+							if (buf != NULL)
+								free(buf);
 						}
 						else
 						{
