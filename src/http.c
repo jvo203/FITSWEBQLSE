@@ -1699,7 +1699,7 @@ extern void write_header(int fd, const char *header_str, int str_len)
         free(compressed_header);
 }
 
-extern void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask)
+extern void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask, int precision)
 {
     uchar *compressed_pixels = NULL;
     char *compressed_mask = NULL;
@@ -1730,7 +1730,7 @@ extern void write_viewport(int fd, int width, int height, const float *pixels, c
     zfp = zfp_stream_open(NULL);
 
     //zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
-    zfp_stream_set_precision(zfp, ZFP_MEDIUM_PRECISION);
+    zfp_stream_set_precision(zfp, precision);
 
     // allocate buffer for compressed data
     bufsize = zfp_stream_maximum_size(zfp, field);
