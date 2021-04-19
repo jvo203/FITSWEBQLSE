@@ -14,6 +14,9 @@ ifeq ($(UNAME_S),Linux)
 	CPU_S := $(shell cat /proc/cpuinfo)	
 #CPU_S := AuthenticAMD
 
+	# detect OS version
+	OS_S := $(shell cat /proc/version)
+
 	# default settings on Linux
 	ifeq ($(UNAME_S),Linux)
 
@@ -26,9 +29,15 @@ ifeq ($(UNAME_S),Linux)
 
 		# found an Intel CPU
 		ifneq (,$(findstring GenuineIntel,$(CPU_S)))
-			# Intel oneAPI icc / ifort 
-			CC := icc
-			FORT := mpiifort
+			ifneq (,$(findstring Clear,$(OS_S)))
+				# GNU gcc / gfortran with OpenCoarrays since there are problems with ifort on Intel Clear Linux
+				CC := gcc
+				FORT := mpifort
+			else
+				# Intel oneAPI icc / ifort 
+				CC := icc
+				FORT := mpiifort
+			endif
 		endif
 
 	endif
