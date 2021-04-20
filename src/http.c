@@ -1991,7 +1991,7 @@ size_t chunked_write(int fd, const char *src, size_t n)
         // the connection might have been closed, bail out
         if (written < 0)
         {
-            printf("[C] write returned %du, aborting.\n", written);
+            printf("[C] write returned %ld, aborting.\n", written);
             return offset;
         }
 
