@@ -75,6 +75,9 @@ struct image_spectrum_request
 
 	// output
 	int fd;
+
+	// housekeeping (do not use in FORTRAN)
+	pthread_mutex_t *ring_lock;
 };
 
 extern void realtime_image_spectrum_request(char *datasetid, size_t n, void *req);
