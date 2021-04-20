@@ -136,7 +136,7 @@ struct per_vhost_data__minimal
 
 	struct per_session_data__minimal *pss_list; /* linked-list of live pss*/
 
-	pthread_mutex_t *ring_lock;
+	pthread_mutex_t ring_lock;
 	struct lws_ring *ring; /* ringbuffer holding unsent messages */
 };
 
@@ -271,6 +271,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		vhd->protocol = lws_get_protocol(wsi);
 		vhd->vhost = lws_get_vhost(wsi);
 
+		pthread_mutex_init(&vhd->ring_lock, NULL);
 		vhd->ring = lws_ring_create(sizeof(struct msg), RING_DEPTH,
 									__minimal_destroy_message);
 		if (!vhd->ring)
@@ -279,6 +280,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 	case LWS_CALLBACK_PROTOCOL_DESTROY:
 		lws_ring_destroy(vhd->ring);
+		pthread_mutex_destroy(&vhd->ring_lock);
 		break;
 
 	case LWS_CALLBACK_ESTABLISHED:
