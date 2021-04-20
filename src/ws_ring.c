@@ -88,7 +88,7 @@ struct websocket_image_spectrum_response
 	struct lws_ring *ring;		// the ringbuffer for message
 };
 
-// take a pointer to struct websocket_image_spectrum_response
+// takes a pointer to <struct websocket_image_spectrum_response>
 void *handle_image_spectrum_response(void *ptr);
 
 extern void realtime_image_spectrum_request(char *datasetid, size_t n, void *req);
