@@ -77,6 +77,20 @@ struct image_spectrum_request
 	int fd;
 };
 
+struct websocket_image_spectrum_response
+{
+	float timestamp;
+	int seq_id;
+	int fd; // the read end of the pipe
+
+	// WebSockets
+	pthread_mutex_t *ring_lock; // a mutex to protect the ringbuffer
+	struct lws_ring *ring;		// the ringbuffer for message
+};
+
+// take a pointer to struct websocket_image_spectrum_response
+void *handle_image_spectrum_response(void *ptr);
+
 extern void realtime_image_spectrum_request(char *datasetid, size_t n, void *req);
 
 void *launch_image_spectrum_request(void *ptr)
