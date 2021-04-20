@@ -136,6 +136,7 @@ struct per_vhost_data__minimal
 
 	struct per_session_data__minimal *pss_list; /* linked-list of live pss*/
 
+	pthread_mutex_t *ring_lock;
 	struct lws_ring *ring; /* ringbuffer holding unsent messages */
 };
 
