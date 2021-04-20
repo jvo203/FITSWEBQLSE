@@ -357,6 +357,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 						// pass the write end of the pipe
 						req->fd = pipefd[1];
 
+						// references the ring buffer mutex (when inserting new messages by multiple threads)
+						req->ring_lock = NULL; // NULL for now
+
 						// a FORTRAN launch thread
 						// on success the thread will close the write end of the pipe
 						stat = pthread_create(&for_tid, NULL, launch_image_spectrum_request, req);
