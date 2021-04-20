@@ -51,8 +51,6 @@ module fits
         ! output
         integer(kind=c_int) :: fd
 
-        ! not to be used in FORTRAN
-        type(c_ptr) :: ring_lock
     end type image_spectrum_request_f
 
     type dataset
