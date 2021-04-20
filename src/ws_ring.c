@@ -450,11 +450,13 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 									memcpy((char *)amsg.payload + ws_offset, buf + 8, compressed_size);
 									ws_offset += compressed_size;
 
+									pthread_mutex_lock(&vhd->ring_lock);
 									if (!lws_ring_insert(vhd->ring, &amsg, 1))
 									{
 										__minimal_destroy_message(&amsg);
 										lwsl_user("dropping!\n");
 									}
+									pthread_mutex_unlock(&vhd->ring_lock);
 								}
 								else
 									lwsl_user("OOM: skipping spectrum\n");
@@ -511,11 +513,13 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 											memcpy((char *)amsg.payload + ws_offset, buf + 8 + compressed_size, view_size);
 											ws_offset += view_size;
 
+											pthread_mutex_lock(&vhd->ring_lock);
 											if (!lws_ring_insert(vhd->ring, &amsg, 1))
 											{
 												__minimal_destroy_message(&amsg);
 												lwsl_user("dropping!\n");
 											}
+											pthread_mutex_unlock(&vhd->ring_lock);
 										}
 										else
 											lwsl_user("OOM: skipping viewport\n");
@@ -549,7 +553,10 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			pss->new_request = false;
 		}
 
+		pthread_mutex_lock(&vhd->ring_lock);
 		pmsg = lws_ring_get_element(vhd->ring, &pss->tail);
+		pthread_mutex_unlock(&vhd->ring_lock);
+
 		if (!pmsg)
 			break;
 
@@ -563,6 +570,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			return -1;
 		}
 
+		pthread_mutex_lock(&vhd->ring_lock);
 		lws_ring_consume_and_update_oldest_tail(
 			vhd->ring,						  /* lws_ring object */
 			struct per_session_data__minimal, /* type of objects with tails */
@@ -577,16 +585,23 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		if (lws_ring_get_element(vhd->ring, &pss->tail))
 			/* come back as soon as we can write more */
 			lws_callback_on_writable(pss->wsi);
+		pthread_mutex_unlock(&vhd->ring_lock);
 		break;
 
 	case LWS_CALLBACK_RECEIVE:
+		pthread_mutex_lock(&vhd->ring_lock);
 		n = (int)lws_ring_get_count_free_elements(vhd->ring);
+		pthread_mutex_unlock(&vhd->ring_lock);
+
 		if (!n)
 		{
 			/* forcibly make space */
+			pthread_mutex_lock(&vhd->ring_lock);
 			cull_lagging_clients(vhd);
 			n = (int)lws_ring_get_count_free_elements(vhd->ring);
+			pthread_mutex_unlock(&vhd->ring_lock);
 		}
+
 		if (!n)
 			break;
 
@@ -770,12 +785,15 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 		/* ...and we copy the payload in at +LWS_PRE */
 		memcpy((char *)amsg.payload + LWS_PRE, in, len);
+		pthread_mutex_lock(&vhd->ring_lock);
 		if (!lws_ring_insert(vhd->ring, &amsg, 1))
 		{
+			pthread_mutex_unlock(&vhd->ring_lock);
 			__minimal_destroy_message(&amsg);
 			lwsl_user("dropping!\n");
 			break;
 		}
+		pthread_mutex_unlock(&vhd->ring_lock);
 
 		/*
 		 * let everybody know we want to write something on them
