@@ -133,6 +133,7 @@ struct per_session_data__minimal
 	struct image_spectrum_request is_req;
 	enum request_type req_type;
 	bool new_request;
+	pthread_t is_tid;
 
 	unsigned int culled : 1;
 };
@@ -316,7 +317,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		break;
 
 	case LWS_CALLBACK_CLOSED:
-		// lwsl_user("LWS_CALLBACK_CLOSED: wsi %p\n", wsi);
+		// wait for any joinable threads
+		pthread_join(pss->is_tid, NULL);
+
 		/* remove our closing pss from the list of live pss */
 		lws_ll_fwd_remove(struct per_session_data__minimal, pss_list,
 						  pss, vhd->pss_list);
