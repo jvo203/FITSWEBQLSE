@@ -346,6 +346,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 			if (pss->req_type == realtime_image_spectrum)
 			{
+				if (pthread_mutex_trylock(&pss->is_mtx) != 0)
+					goto exit_request;
+
 				int status;
 				int pipefd[2];
 				ssize_t n = 0;
@@ -548,15 +551,21 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 							if (buf != NULL)
 								free(buf);
+
+							pthread_mutex_unlock(&pss->is_mtx);
 						}
 						else
 						{
+							pthread_mutex_unlock(&pss->is_mtx);
+
 							// close the write end of the pipe
 							close(pipefd[1]);
 						}
 					}
 					else
 					{
+						pthread_mutex_unlock(&pss->is_mtx);
+
 						// close the write end of the pipe
 						close(pipefd[1]);
 					}
@@ -564,12 +573,16 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 					// close the read end of the pipe
 					close(pipefd[0]);
 				}
+				else
+					pthread_mutex_unlock(&pss->is_mtx);
 
 				// reset the pipe
 				//pss->is_req.fd = -1;
 			}
 
 			pss->new_request = false;
+
+		exit_request:;
 		}
 
 		pthread_mutex_lock(&vhd->ring_lock);
