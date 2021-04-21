@@ -566,7 +566,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 				}
 
 				// reset the pipe
-				pss->is_req.fd = -1;
+				//pss->is_req.fd = -1;
 			}
 
 			pss->new_request = false;
@@ -841,3 +841,15 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			0,                                        \
 			0, NULL, 0                                \
 	}
+
+void *handle_image_spectrum_response(void *ptr)
+{
+	struct msg amsg;
+
+	if (ptr == NULL)
+		return NULL;
+
+	struct websocket_image_spectrum_response *resp = (struct websocket_image_spectrum_response *)ptr;
+
+	return NULL;
+}
