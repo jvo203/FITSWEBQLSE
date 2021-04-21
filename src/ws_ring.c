@@ -421,6 +421,9 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 						}
 						else
 						{
+							// close the read end of the pipe
+							close(pipefd[0]);
+
 							pthread_mutex_unlock(&pss->is_mtx);
 
 							// close the write end of the pipe
@@ -429,14 +432,14 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 					}
 					else
 					{
+						// close the read end of the pipe
+						close(pipefd[0]);
+
 						pthread_mutex_unlock(&pss->is_mtx);
 
 						// close the write end of the pipe
 						close(pipefd[1]);
 					}
-
-					// close the read end of the pipe
-					close(pipefd[0]);
 				}
 				else
 					pthread_mutex_unlock(&pss->is_mtx);
