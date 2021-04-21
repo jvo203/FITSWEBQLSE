@@ -136,7 +136,6 @@ struct per_session_data__minimal
 	bool new_request;
 
 	// image_spectrum_request thread/mutex
-	pthread_t is_tid;
 	pthread_mutex_t is_mtx;
 
 	unsigned int culled : 1;
@@ -322,8 +321,11 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		break;
 
 	case LWS_CALLBACK_CLOSED:
-		// wait for any joinable threads
-		pthread_join(pss->is_tid, NULL);
+		// wait for any threads to finish
+		pthread_mutex_lock(&pss->is_mtx);
+		pthread_mutex_unlock(&pss->is_mtx);
+
+		// destroy the mutex
 		pthread_mutex_destroy(&pss->is_mtx);
 
 		/* remove our closing pss from the list of live pss */
