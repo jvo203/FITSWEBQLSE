@@ -364,7 +364,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 					if (req != NULL)
 					{
 						int stat;
-						pthread_t for_tid;
+						pthread_t for_tid, c_tid;
 
 						// first copy the contents
 						memcpy(req, &(pss->is_req), sizeof(struct image_spectrum_request));
@@ -384,7 +384,40 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 							// detach the thread so that there is no need to join it
 							pthread_detach(for_tid);
 
-							// launch a response thread
+							struct websocket_image_spectrum_response *resp = (struct websocket_image_spectrum_response *)malloc(sizeof(struct websocket_image_spectrum_response));
+
+							if (resp != NULL)
+							{
+								// fill-in the response structure
+								resp->timestamp = pss->is_req.timestamp;
+								resp->seq_id = pss->is_req.seq_id;
+								resp->fd = pipefd[0]; //pass the read end of the pipe
+
+								resp->is_mtx = &pss->is_mtx;
+								resp->ring_lock = &vhd->ring_lock;
+								resp->ring = vhd->ring;
+
+								// launch a response thread, which will unlock pss->is_mtx
+								stat = pthread_create(&c_tid, NULL, handle_image_spectrum_response, resp);
+
+								// and detach it
+								if (0 == stat)
+									pthread_detach(c_tid);
+								else
+								{
+									// close the read end of the pipe
+									close(pipefd[0]);
+
+									pthread_mutex_unlock(&pss->is_mtx);
+								}
+							}
+							else
+							{
+								// close the read end of the pipe
+								close(pipefd[0]);
+
+								pthread_mutex_unlock(&pss->is_mtx);
+							}
 						}
 						else
 						{
@@ -757,8 +790,8 @@ void *handle_image_spectrum_response(void *ptr)
 
 		if (amsg.payload != NULL)
 		{
-			float ts = resp->timestamp; //pss->is_req.timestamp;
-			uint32_t id = resp->seq_id; //pss->is_req.seq_id;
+			float ts = resp->timestamp;
+			uint32_t id = resp->seq_id;
 			uint32_t msg_type = 0;
 			// 0 - spectrum, 1 - viewport,
 			// 2 - image, 3 - full, spectrum,  refresh,
@@ -820,8 +853,8 @@ void *handle_image_spectrum_response(void *ptr)
 
 				if (amsg.payload != NULL)
 				{
-					float ts = resp->timestamp; //pss->is_req.timestamp;
-					uint32_t id = resp->seq_id; //pss->is_req.seq_id;
+					float ts = resp->timestamp;
+					uint32_t id = resp->seq_id;
 					uint32_t msg_type = 1;
 					// 0 - spectrum, 1 - viewport,
 					// 2 - image, 3 - full, spectrum,  refresh,
@@ -862,6 +895,12 @@ void *handle_image_spectrum_response(void *ptr)
 
 	if (buf != NULL)
 		free(buf);
+
+	// close the read end of the pipe
+	if (resp->fd != -1)
+		close(resp->fd);
+
+	free(resp);
 
 	pthread_mutex_unlock(resp->is_mtx);
 
