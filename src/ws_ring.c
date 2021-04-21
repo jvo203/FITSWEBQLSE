@@ -84,6 +84,7 @@ struct websocket_image_spectrum_response
 	int fd; // the read end of the pipe
 
 	// WebSockets
+	pthread_mutex_t *is_mtx;
 	pthread_mutex_t *ring_lock; // a mutex to protect the ringbuffer
 	struct lws_ring *ring;		// the ringbuffer for message
 };
