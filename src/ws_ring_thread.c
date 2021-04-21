@@ -77,6 +77,21 @@ struct image_spectrum_request
 	int fd;
 };
 
+struct websocket_image_spectrum_response
+{
+	float timestamp;
+	int seq_id;
+	int fd; // the read end of the pipe
+
+	// WebSockets
+	pthread_mutex_t *is_mtx;
+	pthread_mutex_t *ring_lock; // a mutex to protect the ringbuffer
+	struct lws_ring *ring;		// the ringbuffer for message
+};
+
+// takes a pointer to <struct websocket_image_spectrum_response>
+void *handle_image_spectrum_response(void *ptr);
+
 extern void realtime_image_spectrum_request(char *datasetid, size_t n, void *req);
 
 void *launch_image_spectrum_request(void *ptr)
@@ -120,6 +135,9 @@ struct per_session_data__minimal
 	enum request_type req_type;
 	bool new_request;
 
+	// image_spectrum_request thread/mutex
+	pthread_mutex_t is_mtx;
+
 	unsigned int culled : 1;
 };
 
@@ -133,6 +151,7 @@ struct per_vhost_data__minimal
 
 	struct per_session_data__minimal *pss_list; /* linked-list of live pss*/
 
+	pthread_mutex_t ring_lock;
 	struct lws_ring *ring; /* ringbuffer holding unsent messages */
 };
 
@@ -267,6 +286,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		vhd->protocol = lws_get_protocol(wsi);
 		vhd->vhost = lws_get_vhost(wsi);
 
+		pthread_mutex_init(&vhd->ring_lock, NULL);
 		vhd->ring = lws_ring_create(sizeof(struct msg), RING_DEPTH,
 									__minimal_destroy_message);
 		if (!vhd->ring)
@@ -275,6 +295,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 	case LWS_CALLBACK_PROTOCOL_DESTROY:
 		lws_ring_destroy(vhd->ring);
+		pthread_mutex_destroy(&vhd->ring_lock);
 		break;
 
 	case LWS_CALLBACK_ESTABLISHED:
@@ -295,11 +316,18 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		pss->tail = lws_ring_get_oldest_tail(vhd->ring);
 		pss->wsi = wsi;
 		pss->datasetid = strdup(ptr + 1);
+		pthread_mutex_init(&pss->is_mtx, NULL);
 		lwsl_user("[ws] CONNECTION ESTABLISHED FOR %s\n", pss->datasetid);
 		break;
 
 	case LWS_CALLBACK_CLOSED:
-		// lwsl_user("LWS_CALLBACK_CLOSED: wsi %p\n", wsi);
+		// wait for any threads to finish
+		pthread_mutex_lock(&pss->is_mtx);
+		pthread_mutex_unlock(&pss->is_mtx);
+
+		// destroy the mutex
+		pthread_mutex_destroy(&pss->is_mtx);
+
 		/* remove our closing pss from the list of live pss */
 		lws_ll_fwd_remove(struct per_session_data__minimal, pss_list,
 						  pss, vhd->pss_list);
@@ -318,18 +346,11 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 			if (pss->req_type == realtime_image_spectrum)
 			{
+				if (pthread_mutex_trylock(&pss->is_mtx) != 0)
+					goto exit_request;
+
 				int status;
 				int pipefd[2];
-				ssize_t n = 0;
-				size_t offset = 0;
-
-				char *buf = NULL;
-				size_t buf_size = 0x2000;
-				//char buf[0x40000];
-
-				uint32_t length, view_width, view_height;
-				uint32_t compressed_size;
-				size_t msg_len, view_size;
 
 				printf("[C] dx:%d, image:%d, quality:%d, x1:%d, y1:%d, x2:%d, y2:%d, width:%d, height:%d, beam:%d, intensity:%d, frame_start:%f, frame_end:%f, ref_freq:%f, seq_id:%d, timestamp:%f\n", pss->is_req.dx, pss->is_req.image, pss->is_req.quality, pss->is_req.x1, pss->is_req.y1, pss->is_req.x2, pss->is_req.y2, pss->is_req.width, pss->is_req.height, pss->is_req.beam, pss->is_req.intensity, pss->is_req.frame_start, pss->is_req.frame_end, pss->is_req.ref_freq, pss->is_req.seq_id, pss->is_req.timestamp);
 
@@ -343,7 +364,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 					if (req != NULL)
 					{
 						int stat;
-						pthread_t for_tid;
+						pthread_t for_tid, c_tid;
 
 						// first copy the contents
 						memcpy(req, &(pss->is_req), sizeof(struct image_spectrum_request));
@@ -360,187 +381,82 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 						if (0 == stat)
 						{
-							buf = malloc(buf_size);
+							// detach the thread so that there is no need to join it
+							pthread_detach(for_tid);
 
-							if (buf != NULL)
-								while ((n = read(pipefd[0], buf + offset, buf_size - offset)) > 0)
-								{
-									offset += n;
+							struct websocket_image_spectrum_response *resp = (struct websocket_image_spectrum_response *)malloc(sizeof(struct websocket_image_spectrum_response));
 
-									printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
-
-									if (offset == buf_size)
-									{
-										printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
-
-										size_t new_size = buf_size << 1;
-										char *tmp = realloc(buf, new_size);
-
-										if (tmp != NULL)
-										{
-											buf = tmp;
-											buf_size = new_size;
-										}
-									}
-								}
-
-							if (0 == n)
-								printf("[C] PIPE_END_OF_STREAM\n");
-
-							if (n < 0)
-								printf("[C] PIPE_END_WITH_ERROR\n");
-
-							stat = pthread_join(for_tid, NULL);
-
-							length = 0;
-							compressed_size = 0;
-
-							// process the received data, prepare WebSocket response(s)
-							if (offset > 8)
+							if (resp != NULL)
 							{
-								memcpy(&length, buf, sizeof(uint32_t));
-								memcpy(&compressed_size, buf + 4, sizeof(uint32_t));
+								// fill-in the response structure
+								resp->timestamp = pss->is_req.timestamp;
+								resp->seq_id = pss->is_req.seq_id;
+								resp->fd = pipefd[0]; //pass the read end of the pipe
 
-								printf("[C] length: %u, compressed_size: %u\n", length, compressed_size);
+								resp->is_mtx = &pss->is_mtx;
+								resp->ring_lock = &vhd->ring_lock;
+								resp->ring = vhd->ring;
 
-								// set the binary mode
-								amsg.binary = true;
+								// launch a response thread, which will unlock pss->is_mtx
+								stat = pthread_create(&c_tid, NULL, handle_image_spectrum_response, resp);
 
-								msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + compressed_size;
-
-								amsg.len = msg_len;
-
-								/* notice we over-allocate by LWS_PRE... */
-								amsg.payload = malloc(LWS_PRE + msg_len);
-
-								if (amsg.payload != NULL)
-								{
-									float ts = pss->is_req.timestamp;
-									uint32_t id = pss->is_req.seq_id;
-									uint32_t msg_type = 0;
-									// 0 - spectrum, 1 - viewport,
-									// 2 - image, 3 - full, spectrum,  refresh,
-									// 4 - histogram
-									float elapsed = 0.0f;
-
-									/* ...and we copy the payload in at +LWS_PRE */
-									size_t ws_offset = LWS_PRE;
-
-									memcpy((char *)amsg.payload + ws_offset, &ts, sizeof(float));
-									ws_offset += sizeof(float);
-
-									memcpy((char *)amsg.payload + ws_offset, &id, sizeof(uint32_t));
-									ws_offset += sizeof(uint32_t);
-
-									memcpy((char *)amsg.payload + ws_offset, &msg_type, sizeof(uint32_t));
-									ws_offset += sizeof(uint32_t);
-
-									memcpy((char *)amsg.payload + ws_offset, &elapsed, sizeof(float));
-									ws_offset += sizeof(float);
-
-									memcpy((char *)amsg.payload + ws_offset, buf + 8, compressed_size);
-									ws_offset += compressed_size;
-
-									if (!lws_ring_insert(vhd->ring, &amsg, 1))
-									{
-										__minimal_destroy_message(&amsg);
-										lwsl_user("dropping!\n");
-									}
-								}
+								// and detach it
+								if (0 == stat)
+									pthread_detach(c_tid);
 								else
-									lwsl_user("OOM: skipping spectrum\n");
-
-								// check if there is an optional viewport too
-								if (offset > 8 + compressed_size + 8)
 								{
-									memcpy(&view_width, buf + 8 + compressed_size, sizeof(uint32_t));
-									memcpy(&view_height, buf + 8 + compressed_size + 4, sizeof(uint32_t));
-									view_size = offset - (8 + compressed_size);
+									// close the read end of the pipe
+									close(pipefd[0]);
 
-									if (view_width > 0 && view_height > 0)
-									{
-										lwsl_user("processing %dx%d viewport.\n", view_width, view_height);
-
-										// set the binary mode
-										amsg.binary = true;
-
-										// header
-										msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
-										// body
-										msg_len += view_size;
-
-										amsg.len = msg_len;
-
-										/* notice we over-allocate by LWS_PRE... */
-										amsg.payload = malloc(LWS_PRE + msg_len);
-
-										if (amsg.payload != NULL)
-										{
-											float ts = pss->is_req.timestamp;
-											uint32_t id = pss->is_req.seq_id;
-											uint32_t msg_type = 1;
-											// 0 - spectrum, 1 - viewport,
-											// 2 - image, 3 - full, spectrum,  refresh,
-											// 4 - histogram
-											float elapsed = 0.0f;
-
-											/* ...and we copy the payload in at +LWS_PRE */
-											size_t ws_offset = LWS_PRE;
-
-											memcpy((char *)amsg.payload + ws_offset, &ts, sizeof(float));
-											ws_offset += sizeof(float);
-
-											memcpy((char *)amsg.payload + ws_offset, &id, sizeof(uint32_t));
-											ws_offset += sizeof(uint32_t);
-
-											memcpy((char *)amsg.payload + ws_offset, &msg_type, sizeof(uint32_t));
-											ws_offset += sizeof(uint32_t);
-
-											memcpy((char *)amsg.payload + ws_offset, &elapsed, sizeof(float));
-											ws_offset += sizeof(float);
-
-											memcpy((char *)amsg.payload + ws_offset, buf + 8 + compressed_size, view_size);
-											ws_offset += view_size;
-
-											if (!lws_ring_insert(vhd->ring, &amsg, 1))
-											{
-												__minimal_destroy_message(&amsg);
-												lwsl_user("dropping!\n");
-											}
-										}
-										else
-											lwsl_user("OOM: skipping viewport\n");
-									}
+									pthread_mutex_unlock(&pss->is_mtx);
 								}
 							}
+							else
+							{
+								// close the read end of the pipe
+								close(pipefd[0]);
 
-							if (buf != NULL)
-								free(buf);
+								pthread_mutex_unlock(&pss->is_mtx);
+							}
 						}
 						else
 						{
+							// close the read end of the pipe
+							close(pipefd[0]);
+
+							pthread_mutex_unlock(&pss->is_mtx);
+
 							// close the write end of the pipe
 							close(pipefd[1]);
 						}
 					}
 					else
 					{
+						// close the read end of the pipe
+						close(pipefd[0]);
+
+						pthread_mutex_unlock(&pss->is_mtx);
+
 						// close the write end of the pipe
 						close(pipefd[1]);
 					}
-
-					// close the read end of the pipe
-					close(pipefd[0]);
 				}
+				else
+					pthread_mutex_unlock(&pss->is_mtx);
 
 				// reset the pipe
-				pss->is_req.fd = -1;
+				//pss->is_req.fd = -1;
 			}
 
 			pss->new_request = false;
+
+		exit_request:;
 		}
 
+		pthread_mutex_lock(&vhd->ring_lock);
 		pmsg = lws_ring_get_element(vhd->ring, &pss->tail);
+		pthread_mutex_unlock(&vhd->ring_lock);
+
 		if (!pmsg)
 			break;
 
@@ -554,6 +470,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			return -1;
 		}
 
+		pthread_mutex_lock(&vhd->ring_lock);
 		lws_ring_consume_and_update_oldest_tail(
 			vhd->ring,						  /* lws_ring object */
 			struct per_session_data__minimal, /* type of objects with tails */
@@ -568,16 +485,23 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		if (lws_ring_get_element(vhd->ring, &pss->tail))
 			/* come back as soon as we can write more */
 			lws_callback_on_writable(pss->wsi);
+		pthread_mutex_unlock(&vhd->ring_lock);
 		break;
 
 	case LWS_CALLBACK_RECEIVE:
+		pthread_mutex_lock(&vhd->ring_lock);
 		n = (int)lws_ring_get_count_free_elements(vhd->ring);
+		pthread_mutex_unlock(&vhd->ring_lock);
+
 		if (!n)
 		{
 			/* forcibly make space */
+			pthread_mutex_lock(&vhd->ring_lock);
 			cull_lagging_clients(vhd);
 			n = (int)lws_ring_get_count_free_elements(vhd->ring);
+			pthread_mutex_unlock(&vhd->ring_lock);
 		}
+
 		if (!n)
 			break;
 
@@ -761,12 +685,15 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 
 		/* ...and we copy the payload in at +LWS_PRE */
 		memcpy((char *)amsg.payload + LWS_PRE, in, len);
+		pthread_mutex_lock(&vhd->ring_lock);
 		if (!lws_ring_insert(vhd->ring, &amsg, 1))
 		{
+			pthread_mutex_unlock(&vhd->ring_lock);
 			__minimal_destroy_message(&amsg);
 			lwsl_user("dropping!\n");
 			break;
 		}
+		pthread_mutex_unlock(&vhd->ring_lock);
 
 		/*
 		 * let everybody know we want to write something on them
@@ -795,3 +722,190 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 			0,                                        \
 			0, NULL, 0                                \
 	}
+
+void *handle_image_spectrum_response(void *ptr)
+{
+	struct msg amsg;
+
+	ssize_t n = 0;
+	size_t offset = 0;
+
+	char *buf = NULL;
+	size_t buf_size = 0x2000;
+
+	uint32_t length, view_width, view_height;
+	uint32_t compressed_size;
+	size_t msg_len, view_size;
+
+	// do not check if ptr == NULL (the program will not pass NULL)
+	struct websocket_image_spectrum_response *resp = (struct websocket_image_spectrum_response *)ptr;
+
+	buf = malloc(buf_size);
+
+	if (buf != NULL)
+		while ((n = read(resp->fd, buf + offset, buf_size - offset)) > 0)
+		{
+			offset += n;
+
+			printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+
+			if (offset == buf_size)
+			{
+				printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
+
+				size_t new_size = buf_size << 1;
+				char *tmp = realloc(buf, new_size);
+
+				if (tmp != NULL)
+				{
+					buf = tmp;
+					buf_size = new_size;
+				}
+			}
+		}
+
+	if (0 == n)
+		printf("[C] PIPE_END_OF_STREAM\n");
+
+	if (n < 0)
+		printf("[C] PIPE_END_WITH_ERROR\n");
+
+	length = 0;
+	compressed_size = 0;
+
+	// process the received data, prepare WebSocket response(s)
+	if (offset > 8)
+	{
+		memcpy(&length, buf, sizeof(uint32_t));
+		memcpy(&compressed_size, buf + 4, sizeof(uint32_t));
+
+		printf("[C] length: %u, compressed_size: %u\n", length, compressed_size);
+
+		// set the binary mode
+		amsg.binary = true;
+
+		msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + compressed_size;
+
+		amsg.len = msg_len;
+
+		/* notice we over-allocate by LWS_PRE... */
+		amsg.payload = malloc(LWS_PRE + msg_len);
+
+		if (amsg.payload != NULL)
+		{
+			float ts = resp->timestamp;
+			uint32_t id = resp->seq_id;
+			uint32_t msg_type = 0;
+			// 0 - spectrum, 1 - viewport,
+			// 2 - image, 3 - full, spectrum,  refresh,
+			// 4 - histogram
+			float elapsed = 0.0f;
+
+			/* ...and we copy the payload in at +LWS_PRE */
+			size_t ws_offset = LWS_PRE;
+
+			memcpy((char *)amsg.payload + ws_offset, &ts, sizeof(float));
+			ws_offset += sizeof(float);
+
+			memcpy((char *)amsg.payload + ws_offset, &id, sizeof(uint32_t));
+			ws_offset += sizeof(uint32_t);
+
+			memcpy((char *)amsg.payload + ws_offset, &msg_type, sizeof(uint32_t));
+			ws_offset += sizeof(uint32_t);
+
+			memcpy((char *)amsg.payload + ws_offset, &elapsed, sizeof(float));
+			ws_offset += sizeof(float);
+
+			memcpy((char *)amsg.payload + ws_offset, buf + 8, compressed_size);
+			ws_offset += compressed_size;
+
+			pthread_mutex_lock(resp->ring_lock);
+			if (!lws_ring_insert(resp->ring, &amsg, 1))
+			{
+				__minimal_destroy_message(&amsg);
+				lwsl_user("dropping!\n");
+			}
+			pthread_mutex_unlock(resp->ring_lock);
+		}
+		else
+			lwsl_user("OOM: skipping spectrum\n");
+
+		// check if there is an optional viewport too
+		if (offset > 8 + compressed_size + 8)
+		{
+			memcpy(&view_width, buf + 8 + compressed_size, sizeof(uint32_t));
+			memcpy(&view_height, buf + 8 + compressed_size + 4, sizeof(uint32_t));
+			view_size = offset - (8 + compressed_size);
+
+			if (view_width > 0 && view_height > 0)
+			{
+				lwsl_user("processing %dx%d viewport.\n", view_width, view_height);
+
+				// set the binary mode
+				amsg.binary = true;
+
+				// header
+				msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
+				// body
+				msg_len += view_size;
+
+				amsg.len = msg_len;
+
+				/* notice we over-allocate by LWS_PRE... */
+				amsg.payload = malloc(LWS_PRE + msg_len);
+
+				if (amsg.payload != NULL)
+				{
+					float ts = resp->timestamp;
+					uint32_t id = resp->seq_id;
+					uint32_t msg_type = 1;
+					// 0 - spectrum, 1 - viewport,
+					// 2 - image, 3 - full, spectrum,  refresh,
+					// 4 - histogram
+					float elapsed = 0.0f;
+
+					/* ...and we copy the payload in at +LWS_PRE */
+					size_t ws_offset = LWS_PRE;
+
+					memcpy((char *)amsg.payload + ws_offset, &ts, sizeof(float));
+					ws_offset += sizeof(float);
+
+					memcpy((char *)amsg.payload + ws_offset, &id, sizeof(uint32_t));
+					ws_offset += sizeof(uint32_t);
+
+					memcpy((char *)amsg.payload + ws_offset, &msg_type, sizeof(uint32_t));
+					ws_offset += sizeof(uint32_t);
+
+					memcpy((char *)amsg.payload + ws_offset, &elapsed, sizeof(float));
+					ws_offset += sizeof(float);
+
+					memcpy((char *)amsg.payload + ws_offset, buf + 8 + compressed_size, view_size);
+					ws_offset += view_size;
+
+					pthread_mutex_lock(resp->ring_lock);
+					if (!lws_ring_insert(resp->ring, &amsg, 1))
+					{
+						__minimal_destroy_message(&amsg);
+						lwsl_user("dropping!\n");
+					}
+					pthread_mutex_unlock(resp->ring_lock);
+				}
+				else
+					lwsl_user("OOM: skipping viewport\n");
+			}
+		}
+	}
+
+	if (buf != NULL)
+		free(buf);
+
+	// close the read end of the pipe
+	if (resp->fd != -1)
+		close(resp->fd);
+
+	pthread_mutex_unlock(resp->is_mtx);
+
+	free(resp);
+
+	return NULL;
+}
