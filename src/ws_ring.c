@@ -903,9 +903,9 @@ void *handle_image_spectrum_response(void *ptr)
 	if (resp->fd != -1)
 		close(resp->fd);
 
-	free(resp);
-
 	pthread_mutex_unlock(resp->is_mtx);
+
+	free(resp);
 
 	return NULL;
 }
