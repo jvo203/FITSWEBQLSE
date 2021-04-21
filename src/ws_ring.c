@@ -133,7 +133,10 @@ struct per_session_data__minimal
 	struct image_spectrum_request is_req;
 	enum request_type req_type;
 	bool new_request;
+
+	// image_spectrum_request thread/mutex
 	pthread_t is_tid;
+	pthread_mutex_t is_mtx;
 
 	unsigned int culled : 1;
 };
@@ -313,12 +316,14 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		pss->tail = lws_ring_get_oldest_tail(vhd->ring);
 		pss->wsi = wsi;
 		pss->datasetid = strdup(ptr + 1);
+		pthread_mutex_init(&pss->is_mtx, NULL);
 		lwsl_user("[ws] CONNECTION ESTABLISHED FOR %s\n", pss->datasetid);
 		break;
 
 	case LWS_CALLBACK_CLOSED:
 		// wait for any joinable threads
 		pthread_join(pss->is_tid, NULL);
+		pthread_mutex_destroy(&pss->is_mtx);
 
 		/* remove our closing pss from the list of live pss */
 		lws_ll_fwd_remove(struct per_session_data__minimal, pss_list,
