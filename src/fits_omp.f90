@@ -893,7 +893,7 @@ contains
             start = first + (tid - 1)*num_per_image
             end = min(tid*num_per_image, last)
             num_per_image = end - start + 1
-            ! print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
+            print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
             ! return
 
             max_threads = OMP_GET_MAX_THREADS()
@@ -976,8 +976,8 @@ contains
 
             ! skip the OMP loop on other ranks for 2D images (not 3D cubes)
             if ((this_image() .gt. 1) .and. (length .eq. 1)) then
-                print *, this_image(), 'GOTO 1000'
-                goto 1000
+                ! print *, this_image(), 'GOTO 1000'
+                ! goto 1000
             end if
 
             group = 1
@@ -1131,7 +1131,7 @@ contains
 
             ! the viewport part
             if (req%image) then
-                print *, 'viewport pixels', pixels
+                ! print *, 'viewport pixels', pixels
                 ! print *, 'viewport mask', mask
 
                 select case (req%quality)
