@@ -974,6 +974,12 @@ contains
             thread_mask = .false.
             thread_bSuccess = .true.
 
+            ! skip the OMP loop on other ranks for 2D images (not 3D cubes)
+            if ((this_image() .gt. 1) .and. (length .eq. 1)) then
+                print *, this_image(), 'GOTO 1000'
+                goto 1000
+            end if
+
             group = 1
             nullval = 0
 
@@ -1074,10 +1080,11 @@ contains
             end if
 
             spectrum = shared_spectrum
-            bSuccess = thread_bSuccess
 
             ! upload the partial spectrum onto the root image
             spectrum(start:end) [1] = spectrum(start:end)
+
+1000        bSuccess = thread_bSuccess
         end block
 
         ! it is faster to reduce the spectrum on the root image in one call
@@ -1124,7 +1131,7 @@ contains
 
             ! the viewport part
             if (req%image) then
-                ! print *, 'viewport pixels', pixels
+                print *, 'viewport pixels', pixels
                 ! print *, 'viewport mask', mask
 
                 select case (req%quality)
