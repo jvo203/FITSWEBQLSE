@@ -707,6 +707,25 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 		lws_end_foreach_llp(ppss, pss_list);
 		break;
 
+	case LWS_CALLBACK_EVENT_WAIT_CANCELLED:
+		if (!vhd)
+			break;
+		/*
+		 * When the "is_resp" threads add a message to the ringbuffer,
+		 * they create this event in the lws service thread context
+		 * using lws_cancel_service().
+		 *
+		 * We respond by scheduling a writable callback for all
+		 * connected clients.
+		 */
+		lws_start_foreach_llp(struct per_session_data__minimal **,
+							  ppss, vhd->pss_list)
+		{
+			lws_callback_on_writable((*ppss)->wsi);
+		}
+		lws_end_foreach_llp(ppss, pss_list);
+		break;
+
 	default:
 		break;
 	}
