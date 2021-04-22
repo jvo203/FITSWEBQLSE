@@ -85,8 +85,7 @@ struct websocket_image_spectrum_response
 
 	// WebSockets
 	pthread_mutex_t *is_mtx;
-	pthread_mutex_t *ring_lock; // a mutex to protect the ringbuffer
-	struct lws_ring *ring;		// the ringbuffer for message
+	struct per_vhost_data__minimal *vhd;
 };
 
 // takes a pointer to <struct websocket_image_spectrum_response>
@@ -394,8 +393,7 @@ callback_minimal(struct lws *wsi, enum lws_callback_reasons reason,
 								resp->fd = pipefd[0]; //pass the read end of the pipe
 
 								resp->is_mtx = &pss->is_mtx;
-								resp->ring_lock = &vhd->ring_lock;
-								resp->ring = vhd->ring;
+								resp->vhd = vhd;
 
 								// launch a response thread, which will unlock pss->is_mtx
 								stat = pthread_create(&c_tid, NULL, handle_image_spectrum_response, resp);
@@ -838,13 +836,13 @@ void *handle_image_spectrum_response(void *ptr)
 			memcpy((char *)amsg.payload + ws_offset, buf + 8, compressed_size);
 			ws_offset += compressed_size;
 
-			pthread_mutex_lock(resp->ring_lock);
-			if (!lws_ring_insert(resp->ring, &amsg, 1))
+			pthread_mutex_lock(&resp->vhd->ring_lock);
+			if (!lws_ring_insert(resp->vhd->ring, &amsg, 1))
 			{
 				__minimal_destroy_message(&amsg);
 				lwsl_user("dropping!\n");
 			}
-			pthread_mutex_unlock(resp->ring_lock);
+			pthread_mutex_unlock(&resp->vhd->ring_lock);
 		}
 		else
 			lwsl_user("OOM: skipping spectrum\n");
@@ -901,13 +899,13 @@ void *handle_image_spectrum_response(void *ptr)
 					memcpy((char *)amsg.payload + ws_offset, buf + 8 + compressed_size, view_size);
 					ws_offset += view_size;
 
-					pthread_mutex_lock(resp->ring_lock);
-					if (!lws_ring_insert(resp->ring, &amsg, 1))
+					pthread_mutex_lock(&resp->vhd->ring_lock);
+					if (!lws_ring_insert(resp->vhd->ring, &amsg, 1))
 					{
 						__minimal_destroy_message(&amsg);
 						lwsl_user("dropping!\n");
 					}
-					pthread_mutex_unlock(resp->ring_lock);
+					pthread_mutex_unlock(&resp->vhd->ring_lock);
 				}
 				else
 					lwsl_user("OOM: skipping viewport\n");
