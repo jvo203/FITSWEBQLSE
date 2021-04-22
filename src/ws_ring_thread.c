@@ -842,6 +842,8 @@ void *handle_image_spectrum_response(void *ptr)
 				__minimal_destroy_message(&amsg);
 				lwsl_user("dropping!\n");
 			}
+			else
+				lws_cancel_service(resp->vhd->context);
 			pthread_mutex_unlock(&resp->vhd->ring_lock);
 		}
 		else
@@ -905,6 +907,8 @@ void *handle_image_spectrum_response(void *ptr)
 						__minimal_destroy_message(&amsg);
 						lwsl_user("dropping!\n");
 					}
+					else
+						lws_cancel_service(resp->vhd->context);
 					pthread_mutex_unlock(&resp->vhd->ring_lock);
 				}
 				else
