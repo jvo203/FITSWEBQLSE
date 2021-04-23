@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-04-16.2";
+	return "JS2021-04-23.0";
 }
 
 const wasm_supported = (() => {
@@ -2477,7 +2477,10 @@ function poll_progress(datasetId, index) {
 						poll_progress(datasetId, index);
 					}, 250);
 			} catch (e) {
-				console.log(e);
+				console.log(e, data);
+				setTimeout(function () {
+					poll_progress(datasetId, index);
+				}, 250);
 			}
 		}
 	}
