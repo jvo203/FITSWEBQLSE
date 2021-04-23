@@ -709,8 +709,8 @@ contains
                 item%mask = reshape(mask, item%naxes(1:2))
 
                 ! only the root image needs the spectrum information
-                call co_sum(mean_spectrum, result_image=1)
-                call co_sum(integrated_spectrum, result_image=1)
+                ! call co_sum(mean_spectrum, result_image=1)
+                ! call co_sum(integrated_spectrum, result_image=1)
 
                 if (this_image() == 1) then
                     ! update the FITS dataset (taking advantage of automatic reallocation)
@@ -1995,14 +1995,22 @@ contains
                 ! abort upon an error
                 if (.not. thread_bSuccess) go to 200
 
-                mean_spec(start:end) = thread_mean_spec(start:end)
-                int_spec(start:end) = thread_int_spec(start:end)
+                if ((start .ge. 1) .and. (end .ge. 1)) then
 
-                ! reduce the pixels/mask locally
-                do j = 1, max_threads
-                    pixels(:) = pixels(:) + thread_pixels(:, j)
-                    mask(:) = mask(:) .or. thread_mask(:, j)
-                end do
+                    mean_spec(start:end) = thread_mean_spec(start:end)
+                    int_spec(start:end) = thread_int_spec(start:end)
+
+                    ! direct partial uploads onto the root image
+                    mean_spec(start:end) [1] = mean_spec(start:end)
+                    int_spec(start:end) [1] = int_spec(start:end)
+
+                    ! reduce the pixels/mask locally
+                    do j = 1, max_threads
+                        pixels(:) = pixels(:) + thread_pixels(:, j)
+                        mask(:) = mask(:) .or. thread_mask(:, j)
+                    end do
+
+                end if
 
             end block
         end if
