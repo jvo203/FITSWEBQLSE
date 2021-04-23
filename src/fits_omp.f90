@@ -1333,6 +1333,15 @@ contains
         real, allocatable :: mean_spec(:) [:]
         real, allocatable :: int_spec(:) [:]
 
+        ! thread-shared
+        real, allocatable :: mean_shared_spectrum(:), int_shared_spectrum(:)
+
+        ! thread-local variables
+        real(kind=4), allocatable :: thread_buffer(:, :)
+        real(kind=4), allocatable :: thread_pixels(:, :)
+        logical(kind=1), allocatable :: thread_mask(:, :)
+        logical thread_bSuccess
+
         real :: nullval, tmp
         character :: record*80, key*10, value*70, comment*70
         logical :: anynull
@@ -1854,6 +1863,19 @@ contains
                 pixels = 0.0
                 ! and reset the NaN mask
                 mask = .false.
+
+                allocate (thread_buffer(npixels, max_threads))
+                allocate (thread_pixels(npixels, max_threads))
+                allocate (thread_mask(npixels, max_threads))
+
+                allocate (mean_shared_spectrum(start:end))
+                allocate (int_shared_spectrum(start:end))
+                mean_shared_spectrum = 0.0
+                int_shared_spectrum = 0.0
+
+                thread_pixels = 0.0
+                thread_mask = .false.
+                thread_bSuccess = .true.
 
                 call get_cdelt3(item, cdelt3)
 
