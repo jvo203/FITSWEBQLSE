@@ -856,7 +856,7 @@ static enum MHD_Result on_http_connection(void *cls,
             void *item = get_dataset(datasetId);
 
             if (item == NULL)
-                return http_not_found(connection);
+                return http_accepted(connection);
 
             if (get_error_status(item))
                 return http_internal_server_error(connection);
@@ -966,7 +966,7 @@ static enum MHD_Result on_http_connection(void *cls,
         void *item = get_dataset(datasetId);
 
         if (item == NULL)
-            return http_not_found(connection);
+            return http_accepted(connection);
 
         if (get_error_status(item))
             return http_internal_server_error(connection);
