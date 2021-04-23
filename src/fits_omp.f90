@@ -915,14 +915,17 @@ contains
             print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
             ! return
 
-            max_threads = OMP_GET_MAX_THREADS()
+            ! max_threads = OMP_GET_MAX_THREADS()
+            ! interleave computation with disk access
+            ! cap the number of threads to avoid system overload
+            max_threads = min(OMP_GET_MAX_THREADS(), 2)
 
             if (.not. allocated(item%thread_units)) then
-                allocate (item%thread_units(max_threads))
+                allocate (item%thread_units(OMP_GET_MAX_THREADS()))
                 item%thread_units = -1
 
                 ! open the thread-local FITS file if necessary
-                do i = 1, max_threads
+                do i = 1, OMP_GET_MAX_THREADS()
                     if (item%thread_units(i) .eq. -1) then
                         block
                             ! file operations
@@ -1011,7 +1014,7 @@ contains
 
             !$OMP PARALLEL SHARED(item)&
             !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
-            !$OMP& REDUCTION(.or.:thread_bSuccess)
+            !$OMP& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
             !$OMP DO
             do frame = start, end
                 ! get a current OpenMP thread (starting from 0 as in C)
@@ -1806,6 +1809,8 @@ contains
             ! num_per_image = end - start + 1
             !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
 
+            ! interleave computation with disk access
+            ! cap the number of threads to avoid system overload
             max_threads = min(OMP_GET_MAX_THREADS(), 2)
 
             if (.not. allocated(item%thread_units)) then
