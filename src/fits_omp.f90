@@ -1765,10 +1765,27 @@ contains
         else
             ! read a range of 2D planes in parallel on each image
             tid = this_image()
-            num_per_image = naxes(3)/num_images()
-            start = 1 + (tid - 1)*num_per_image
-            end = min(tid*num_per_image, naxes(3))
-            num_per_image = end - start + 1
+
+            if (naxes(3) .ge. num_images()) then
+                num_per_image = naxes(3)/num_images()
+                start = 1 + (tid - 1)*num_per_image
+                end = min(tid*num_per_image, naxes(3))
+                num_per_image = end - start + 1
+            else
+                num_per_image = -1
+                start = tid
+
+                if (tid .le. naxes(3)) then
+                    end = tid
+                else
+                    end = 0
+                end if
+            end if
+
+            ! num_per_image = naxes(3)/num_images()
+            ! start = 1 + (tid - 1)*num_per_image
+            ! end = min(tid*num_per_image, naxes(3))
+            ! num_per_image = end - start + 1
             !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
 
             block
