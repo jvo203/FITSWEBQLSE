@@ -803,12 +803,12 @@ static enum MHD_Result on_http_connection(void *cls,
             void *item = get_dataset(datasetId);
 
             if (item == NULL)
-                return http_not_found(connection);
+                return http_accepted(connection);
 
             float progress = get_progress(item);
             float elapsed = get_elapsed(item);
 
-            // printf("[C] [progress] datasetId(%s): %f%% in %f [s]\n", datasetId, progress, elapsed);
+            printf("[C] [progress] datasetId(%s): %f%% in %f [s]\n", datasetId, progress, elapsed);
 
             return send_progress(connection, progress, elapsed);
         }
