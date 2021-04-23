@@ -559,7 +559,7 @@ contains
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
 
-        if(item%total .gt. 0) then
+        if (item%total .gt. 0) then
             get_progress = 100.0*item%progress/item%total
         else
             get_progress = 0.0
@@ -1806,14 +1806,14 @@ contains
             ! num_per_image = end - start + 1
             !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
 
-            max_threads = OMP_GET_MAX_THREADS()
+            max_threads = min(OMP_GET_MAX_THREADS(), 2)
 
             if (.not. allocated(item%thread_units)) then
-                allocate (item%thread_units(max_threads))
+                allocate (item%thread_units(OMP_GET_MAX_THREADS()))
                 item%thread_units = -1
 
                 ! open the thread-local FITS file if necessary
-                do i = 1, max_threads
+                do i = 1, OMP_GET_MAX_THREADS()
                     if (item%thread_units(i) .eq. -1) then
                         block
                             ! file operations
@@ -1899,7 +1899,7 @@ contains
                 !$OMP& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
                 !$OMP& REDUCTION(.or.:thread_bSuccess)&
                 !$OMP& REDUCTION(max:dmax)&
-                !$OMP& REDUCTION(min:dmin)
+                !$OMP& REDUCTION(min:dmin) NUM_THREADS(max_threads)
                 !$OMP DO
                 do frame = start, end
                     ! get a current OpenMP thread (starting from 0 as in C)
