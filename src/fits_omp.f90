@@ -1334,7 +1334,7 @@ contains
         real, allocatable :: int_spec(:) [:]
 
         ! thread-shared
-        real, allocatable :: mean_shared_spectrum(:), int_shared_spectrum(:)
+        real, allocatable :: thread_mean_spec(:), thread_int_spec(:)
 
         ! thread-local variables
         real(kind=4), allocatable :: thread_buffer(:, :)
@@ -1382,6 +1382,8 @@ contains
         if (status .ne. 0) then
             return
         end if
+
+        item%unit = unit
 
         ! open the FITS file, with read - only access.The returned BLOCKSIZE
         ! parameter is obsolete and should be ignored.
@@ -1868,10 +1870,10 @@ contains
                 allocate (thread_pixels(npixels, max_threads))
                 allocate (thread_mask(npixels, max_threads))
 
-                allocate (mean_shared_spectrum(start:end))
-                allocate (int_shared_spectrum(start:end))
-                mean_shared_spectrum = 0.0
-                int_shared_spectrum = 0.0
+                allocate (thread_mean_spec(start:end))
+                allocate (thread_int_spec(start:end))
+                thread_mean_spec = 0.0
+                thread_int_spec = 0.0
 
                 thread_pixels = 0.0
                 thread_mask = .false.
@@ -1886,7 +1888,17 @@ contains
                 item%frame_min = 1.0E30
                 item%frame_max = -1.0E30
 
+                !$OMP PARALLEL SHARED(item)&
+                !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, frame_min, frame_max)&
+                !$OMP& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
+                !$OMP& REDUCTION(.or.:thread_bSuccess)&
+                !$OMP& REDUCTION(max:dmax)&
+                !$OMP& REDUCTION(min:dmin)
+                !$OMP DO
                 do frame = start, end
+                    ! get a current OpenMP thread (starting from 0 as in C)
+                    tid = 1 + OMP_GET_THREAD_NUM()
+
                     ! starting bounds
                     fpixels = (/1, 1, frame, 1/)
 
@@ -1896,11 +1908,30 @@ contains
                     ! do not skip over any pixels
                     incs = 1
 
-                    ! skip the do loop, make one call to ftgsve instead
-                    call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, local_buffer, anynull, status)
+                    ! reset the status
+                    status = 0
 
-                    ! abort upon an error
-                    if (status .ne. 0) go to 200
+                    if (item%thread_units(tid) .ne. -1) then
+                        call ftgsve(item%thread_units(tid), group, naxis, naxes,&
+                        & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+                    else
+                        thread_bSuccess = .false.
+                        cycle
+                    end if
+
+                    ! abort upon errors
+                    if (status .ne. 0) then
+                        print *, this_image(), 'error reading frame', frame
+                        thread_bSuccess = .false.
+
+                        if (status .gt. 0) then
+                            call printerror(status)
+                        end if
+
+                        cycle
+                    else
+                        thread_bSuccess = thread_bSuccess .and. .true.
+                    end if
 
                     mean_spec_val = 0.0
                     int_spec_val = 0.0
@@ -1914,13 +1945,13 @@ contains
                     ! calculate the min/max values
                     do j = 1, npixels
 
-                        tmp = local_buffer(j)
+                        tmp = thread_buffer(j, tid)
 
                         if (isnan(tmp) .neqv. .true.) then
                             if (test_ignrval) then
                                 if (tmp .eq. item%ignrval) then
                                     ! skip the IGNRVAL pixels
-                                    mask(j) = mask(j) .or. .false.
+                                    ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
                                     cycle
                                 end if
                             end if
@@ -1929,14 +1960,14 @@ contains
                             frame_max = max(frame_max, tmp)
 
                             ! integrate (sum up) pixels and a NaN mask
-                            pixels(j) = pixels(j) + tmp
-                            mask(j) = mask(j) .or. .true.
+                            thread_pixels(j, tid) = thread_pixels(j, tid) + tmp
+                            thread_mask(j, tid) = thread_mask(j, tid) .or. .true.
 
                             ! needed by the mean and integrated spectra
                             pixel_sum = pixel_sum + tmp
                             pixel_count = pixel_count + 1
                         else
-                            mask(j) = mask(j) .or. .false.
+                            ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
                         end if
 
                     end do
@@ -1952,17 +1983,31 @@ contains
                         int_spec_val = pixel_sum*cdelt3
                     end if
 
-                    mean_spec(frame) = mean_spec_val
-                    int_spec(frame) = int_spec_val
+                    thread_mean_spec(frame) = mean_spec_val
+                    thread_int_spec(frame) = int_spec_val
 
                     ! measure progress only on the root image
                     if (this_image() == 1) call update_progress(item, frame - start + 1, num_per_image)
                 end do
+                !OMP END DO
+                !$OMP END PARALLEL
+
+                ! abort upon an error
+                if (.not. thread_bSuccess) go to 200
+
+                mean_spec(start:end) = thread_mean_spec(start:end)
+                int_spec(start:end) = thread_int_spec(start:end)
+
+                ! reduce the pixels/mask locally
+                do j = 1, max_threads
+                    pixels(:) = pixels(:) + thread_pixels(:, j)
+                    mask(:) = mask(:) .or. thread_mask(:, j)
+                end do
+
             end block
         end if
 
         bSuccess = .true.
-        item%unit = unit
         return
 
         ! The FITS file must always be closed before exiting the program.
