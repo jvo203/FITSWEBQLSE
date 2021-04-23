@@ -22,7 +22,12 @@ program main
     integer count
 
     ! ideally take the number of threads from the command-line argument
-    ! call OMP_SET_NUM_THREADS(max(8, OMP_GET_MAX_THREADS()))
+
+    ! reduce the number of OpenMP threads on the root image
+    ! so as to ease the pressure on the HTTP/WebSockets parts
+    if (this_image() .eq. 1) then
+        call OMP_SET_NUM_THREADS(max(1, OMP_GET_MAX_THREADS() - 1))
+    end if
 
     max_threads = OMP_GET_MAX_THREADS()
 
