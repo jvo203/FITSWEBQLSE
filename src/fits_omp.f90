@@ -108,7 +108,8 @@ module fits
 
         ! progress
         integer(8) :: start_time, crate, cmax
-        real :: progress = 0
+        integer :: progress = 0
+        integer :: total = 0
         real :: elapsed = 0
 
         ! spectra
@@ -461,7 +462,7 @@ contains
         type(dataset), pointer, intent(inout) :: item
         integer, intent(in) :: progress, total
         integer(8) finish
-        real new_progress, elapsed
+        real elapsed
 
         ! take a time measurement
         call system_clock(finish)
@@ -470,13 +471,14 @@ contains
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
 
-        new_progress = 100.0*progress/total
+        ! new_progress = 100.0*progress/total
 
         ! skip updating if there is no real progress
         ! some OpenMP threads may be using old values
-        if (new_progress .lt. item%progress) go to 05
+        ! if (new_progress .lt. item%progress) go to 05
 
-        item%progress = new_progress
+        item%progress = item%progress + 1
+        item%total = total
         item%elapsed = elapsed
 
         ! unlock the mutex
@@ -557,7 +559,7 @@ contains
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
 
-        get_progress = item%progress
+        get_progress = 100.0*item%progress/item%total
 
         ! unlock the mutex
         call g_mutex_unlock(c_loc(item%progress_mtx))
