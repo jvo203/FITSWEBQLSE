@@ -228,7 +228,7 @@ contains
         return
 
 10      format(a1, i0, a1, l1, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1, i0, a1,&
-          & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
+                         & (G24.16), a1, (G24.16), a1, (G24.16), a1, i0, a1, (G24.16), a1, i0, a1)
     end subroutine realtime_image_spectrum_request
 
     function compare_frameid(frameid, datasetId)
@@ -361,6 +361,7 @@ contains
             end if
 
             ! send FPzip-compressed spectra
+            print *, 'calling image_spectrum_request subroutine'
 
             ! mean spectrum
             if (allocated(item%mean_spectrum)) then
