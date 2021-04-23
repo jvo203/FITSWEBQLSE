@@ -559,7 +559,11 @@ contains
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
 
-        get_progress = 100.0*item%progress/item%total
+        if(item%total .gt. 0) then
+            get_progress = 100.0*item%progress/item%total
+        else
+            get_progress = 0.0
+        end if
 
         ! unlock the mutex
         call g_mutex_unlock(c_loc(item%progress_mtx))
