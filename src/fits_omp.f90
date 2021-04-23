@@ -889,10 +889,23 @@ contains
             logical thread_bSuccess
 
             tid = this_image()
-            num_per_image = length/num_images()
-            start = first + (tid - 1)*num_per_image
-            end = min(tid*num_per_image, last)
-            num_per_image = end - start + 1
+
+            if (length .ge. num_images()) then
+                num_per_image = length/num_images()
+                start = first + (tid - 1)*num_per_image
+                end = min(tid*num_per_image, last)
+                num_per_image = end - start + 1
+            else
+                num_per_image = -1
+                start = tid
+
+                if (tid .le. length) then
+                    end = tid
+                else
+                    end = 0
+                end if
+            end if
+
             print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
             ! return
 
@@ -976,8 +989,8 @@ contains
 
             ! skip the OMP loop on other ranks for 2D images (not 3D cubes)
             if ((this_image() .gt. 1) .and. (length .eq. 1)) then
-                ! print *, this_image(), 'GOTO 1000'
-                ! goto 1000
+                print *, this_image(), 'GOTO 1000'
+                goto 1000
             end if
 
             group = 1
