@@ -1305,6 +1305,7 @@ contains
     end subroutine lower_case
 
     subroutine read_fits_file(item, filename, dmin, dmax, pixels, mask, mean_spec, int_spec, bSuccess)
+        use omp_lib
         implicit none
 
         type(dataset), pointer, intent(inout) :: item
@@ -1318,7 +1319,7 @@ contains
         integer npixels
         integer naxes(4)
         integer(kind=8) firstpix, lastpix, npixels_per_image
-        integer tid, start, end, num_per_image, frame
+        integer max_threads, tid, start, end, num_per_image, frame
         integer, dimension(4) :: fpixels, lpixels, incs
         logical test_ignrval
 
@@ -1787,6 +1788,46 @@ contains
             ! end = min(tid*num_per_image, naxes(3))
             ! num_per_image = end - start + 1
             !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
+
+            max_threads = OMP_GET_MAX_THREADS()
+
+            if (.not. allocated(item%thread_units)) then
+                allocate (item%thread_units(max_threads))
+                item%thread_units = -1
+
+                ! open the thread-local FITS file if necessary
+                do i = 1, max_threads
+                    if (item%thread_units(i) .eq. -1) then
+                        block
+                            ! file operations
+                            integer unit, readwrite, blocksize, status
+
+                            ! The STATUS parameter must always be initialized.
+                            status = 0
+
+                            ! Get an unused Logical Unit Number to use to open the FITS file.
+                            call ftgiou(unit, status)
+
+                            if (status .ne. 0) then
+                                cycle
+                            end if
+
+                            ! open the FITS file, with read - only access.The returned BLOCKSIZE
+                            ! parameter is obsolete and should be ignored.
+                            readwrite = 0
+                            call ftopen(unit, item%uri, readwrite, blocksize, status)
+
+                            if (status .ne. 0) then
+                                cycle
+                            end if
+
+                            item%thread_units(i) = unit
+
+                        end block
+
+                    end if
+                end do
+            end if
 
             block
                 real cdelt3, mean_spec_val, int_spec_val
