@@ -25,9 +25,9 @@ program main
 
     ! reduce the number of OpenMP threads on the root image
     ! so as to ease the pressure on the HTTP/WebSockets parts
-    if (this_image() .eq. 1) then
-        call OMP_SET_NUM_THREADS(max(1, OMP_GET_MAX_THREADS() - 1))
-    end if
+    ! if (this_image() .eq. 1) then
+    !    call OMP_SET_NUM_THREADS(max(1, OMP_GET_MAX_THREADS() - 1))
+    ! end if
 
     max_threads = OMP_GET_MAX_THREADS()
 
