@@ -915,10 +915,10 @@ contains
             print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
             ! return
 
-            ! max_threads = OMP_GET_MAX_THREADS()
             ! interleave computation with disk access
+            max_threads = OMP_GET_MAX_THREADS()/2 ! ignore Hyper-Threading
             ! cap the number of threads to avoid system overload
-            max_threads = min(OMP_GET_MAX_THREADS(), 2)
+            ! max_threads = min(OMP_GET_MAX_THREADS(), 4)
 
             if (.not. allocated(item%thread_units)) then
                 allocate (item%thread_units(OMP_GET_MAX_THREADS()))
