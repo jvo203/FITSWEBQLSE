@@ -26,6 +26,8 @@
 
 	sudo dnf install zlib-devel
 
+	brew install libcpuid
+
 3. zfp Fortran bindings
 
 	# this step is not needed anymore
