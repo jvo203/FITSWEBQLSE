@@ -26,7 +26,7 @@
 
 	sudo dnf install zlib-devel
 
-	brew install libcpuid
+	sudo dnf install libcpuid-devel	(macos: brew install libcpuid)
 
 3. zfp Fortran bindings
 
