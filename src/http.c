@@ -1231,7 +1231,7 @@ extern int get_physical_cores()
 
     cpuid_get_raw_data(&raw);
     cpu_identify(&raw, &data);
-    printf("No. of Physical Core(s) : %d\n", data.num_cores);
+    printf("[C] No. of Physical Core(s) : %d\n", data.num_cores);
 
     return data.num_cores;
 }
