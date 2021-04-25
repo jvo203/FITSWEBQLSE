@@ -85,12 +85,12 @@ ifeq ($(CC),icc)
 #-mt_mpi
 endif
 
-INC = `pkg-config --cflags glib-2.0` -I./$(ZFP)/include -I./$(ZFP)/src
+INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` -I./$(ZFP)/include -I./$(ZFP)/src
 MOD =
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
 
-LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` -llz4 -L/usr/local/lib64 -lfpzip -lcfitsio -lsqlite3 -lz
+LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` -llz4 -L/usr/local/lib64 -lfpzip -lcfitsio -lsqlite3 -lz
 # -lzmq -lczmq
 # -lzfp before cfitsio
 #`pkg-config --libs json-fortran`
