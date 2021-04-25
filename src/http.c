@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <pthread.h>
+#include <libcpuid.h>
 
 #define __USE_XOPEN
 #include <time.h>
@@ -1221,6 +1222,18 @@ extern void close_pipe(int fd)
 
     if (0 != status)
         printf("[C] close_pipe status: %d\n", status);
+}
+
+extern int get_physical_cores()
+{
+    struct cpu_raw_data_t raw;
+    struct cpu_id_t data;
+
+    cpuid_get_raw_data(&raw);
+    cpu_identify(&raw, &data);
+    printf("No. of Physical Core(s) : %d\n", data.num_cores);
+
+    return data.num_cores;
 }
 
 extern void start_http()
