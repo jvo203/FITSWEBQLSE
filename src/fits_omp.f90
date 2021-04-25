@@ -130,6 +130,13 @@ module fits
     ! to be held in a structure <dataset>
     ! moved to the <load_fits_file> subroutine
     interface
+        ! int get_physical_cores()
+        integer(c_int) function get_physical_cores() BIND(C, name='get_physical_cores')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+        end function get_physical_cores
+
         subroutine write_spectrum(fd, spectrum, n, prec) BIND(C, name='write_spectrum')
             use, intrinsic :: ISO_C_BINDING
             implicit none
@@ -916,7 +923,11 @@ contains
             ! return
 
             ! interleave computation with disk access
-            max_threads = OMP_GET_MAX_THREADS()/2 ! ignore Hyper-Threading
+            ! max_threads = OMP_GET_MAX_THREADS()/2 ! ignore Hyper-Threading
+
+            ! get #physical cores (ignore HT)
+            max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
             ! cap the number of threads to avoid system overload
             ! max_threads = min(OMP_GET_MAX_THREADS(), 4)
 
