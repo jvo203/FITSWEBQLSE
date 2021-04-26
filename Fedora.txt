@@ -28,6 +28,20 @@
 
 	sudo dnf install libcpuid-devel	(macos: brew install libcpuid)
 
+	Intel Clear Linux (building from source):
+
+	wget https://github.com/anrieff/libcpuid/releases/download/v0.5.1/libcpuid-0.5.1.tar.gz
+
+	tar zxvf libcpuid-0.5.1.tar.gz
+
+	cd libcpuid-0.5.1
+
+	./configure
+
+	make
+
+	sudo make install
+
 3. zfp Fortran bindings
 
 	# this step is not needed anymore
