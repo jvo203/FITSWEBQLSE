@@ -27,21 +27,22 @@ contains
 
     !end function isnan
 
-    subroutine to_fixed(n, x, compressed, mask)
+    subroutine to_fixed(n, m, x, compressed) !, mask)
         ! use wavelet
         implicit none
 
-        integer(kind=4) :: n
-        real(kind=4), dimension(n, n), intent(inout) :: x
-        logical(kind=1), dimension(n, n), optional, intent(inout) :: mask
+        integer(kind=4) :: n, m
+        real(kind=4), dimension(n, m), intent(inout) :: x
+        ! logical(kind=1), dimension(n, n), optional, intent(inout) :: mask
         integer(kind=4) :: i, j
 
         ! the result
-        type(fixed_block), dimension(n/4, n/4), intent(out) :: compressed
+        type(fixed_block), dimension(n/4, m/4), intent(out) :: compressed
 
         if (mod(n, 4) .ne. 0) return
+        if (mod(m, 4) .ne. 0) return
 
-        do concurrent(j=1:n/4, i=1:n/4)
+        do concurrent(j=1:m/4, i=1:n/4)
             !if (present(mask)) then
             !    call to_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
             !    &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), .true.)
