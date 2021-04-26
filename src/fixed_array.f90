@@ -103,20 +103,20 @@ contains
         max_exp = maxval(e)
 
         compressed%common_exp = int(max_exp - 1, kind=1)
-! 8-bit quantization (7 bits + sign)
+        ! 8-bit quantization (7 bits + sign)
         compressed%mantissa = quantize(x, e, max_exp, significant_bits)
 
     end subroutine to_fixed_block
 
-    subroutine from_fixed(n, compressed, x, mask)
+    subroutine from_fixed(n, compressed, x) !, mask)
         !use wavelet
         implicit none
 
         integer(kind=4) :: n
         type(fixed_block), dimension(n/4, n/4), intent(in) :: compressed
-        logical(kind=1), dimension(n, n), optional, intent(in) :: mask
+        ! logical(kind=1), dimension(n, n), optional, intent(in) :: mask
 
-! the result
+        ! the result
         real(kind=4), dimension(n, n), intent(out) :: x
         integer(kind=4) :: i, j
 
