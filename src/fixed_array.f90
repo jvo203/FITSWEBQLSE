@@ -48,7 +48,7 @@ contains
 
         ! by default compressed is dimension(n/4, m/4)
         cn = n/4
-        cm = n/4
+        cm = m/4
 
         ! but the input dimensions might not be divisible by 4
         if (mod(n, 4) .ne. 0) cn = cn + 1

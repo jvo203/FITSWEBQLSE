@@ -1338,7 +1338,7 @@ contains
 
         integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i, j
         integer naxis, bitpix
-        integer npixels
+        integer npixels, cn, cm
         integer naxes(4)
         integer(kind=8) firstpix, lastpix, npixels_per_image
         integer max_threads, tid, start, end, num_per_image, frame
@@ -1725,6 +1725,14 @@ contains
 
         ! allocate the buffer
         npixels = naxes(1)*naxes(2)
+
+        ! by default compressed is dimension(n/4, m/4)
+        cn = n/4
+        cm = m/4
+
+        ! but the input dimensions might not be divisible by 4
+        if (mod(n, 4) .ne. 0) cn = cn + 1
+        if (mod(m, 4) .ne. 0) cm = cm + 1
 
         ! now read the 3D FITS data cube (successive 2D planes)
         if (npixels .eq. 0) then
