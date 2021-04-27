@@ -88,6 +88,8 @@ module fits
         real(kind=4), allocatable :: frame_min(:), frame_max(:)
         real(kind=c_float), allocatable :: pixels(:, :)
         logical(kind=c_bool), allocatable :: mask(:, :)
+        type(fixed_block), dimension(:, :, :), allocatable :: compressed
+
         logical :: is_optical = .true.
         logical :: is_xray = .false.
 
