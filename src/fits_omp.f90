@@ -1726,7 +1726,7 @@ contains
         ! allocate the buffer
         npixels = naxes(1)*naxes(2)
 
-        ! by default compressed is dimension(n/4, m/4)
+        ! by default compressed is dimension(naxes(1)/4, naxes(2)/4)
         cn = naxes(1)/4
         cm = naxes(2)/4
 
@@ -1883,6 +1883,11 @@ contains
                 allocate (pixels(npixels) [*])
                 allocate (mask(npixels) [*])
 
+                ! compressed pixels
+                if (allocated(item%compressed)) deallocate (item%compressed)
+                allocate (item%compressed(cn, cm, start:end))
+
+                ! spectra
                 allocate (mean_spec(naxes(3)) [*])
                 allocate (int_spec(naxes(3)) [*])
 
