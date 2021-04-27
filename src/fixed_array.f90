@@ -27,7 +27,7 @@ contains
 
     !end function isnan
 
-    subroutine to_fixed(n, m, x, compressed) !, mask)
+    subroutine to_fixed(x, compressed) !, mask)
         ! use wavelet
         implicit none
 
@@ -37,7 +37,12 @@ contains
         integer(kind=4) :: i, j
 
         ! the result
-        type(fixed_block), dimension(n/4, m/4), intent(out) :: compressed
+        type(fixed_block), dimension(:, :), intent(out) :: compressed
+
+        n = size(x, 1)
+        m = size(x, 2)
+
+        ! by default compressed is dimension(n/4, m/4)
 
         if (mod(n, 4) .ne. 0) return
         if (mod(m, 4) .ne. 0) return
