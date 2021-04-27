@@ -111,7 +111,7 @@ program Wavelets
     ! where (.not. mask) x = 0.0
 
     ! ZFP-like compression
-    call to_fixed(N, x, compressed)
+    call to_fixed(x, compressed)
 
     print *, 'sizeof(x):', sizeof(x), ', compressed size:', sizeof(compressed)
     print *, 'compression ratio:', real(sizeof(x))/real(sizeof(compressed))
