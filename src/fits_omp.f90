@@ -1832,7 +1832,10 @@ contains
 
             ! interleave computation with disk access
             ! cap the number of threads to avoid system overload
-            max_threads = min(OMP_GET_MAX_THREADS(), 2)
+            ! max_threads = min(OMP_GET_MAX_THREADS(), 2)
+
+            ! get #physical cores (ignore HT)
+            max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
             if (.not. allocated(item%thread_units)) then
                 allocate (item%thread_units(OMP_GET_MAX_THREADS()))
