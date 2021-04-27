@@ -1362,6 +1362,7 @@ contains
         real(kind=4), allocatable :: thread_buffer(:, :)
         real(kind=4), allocatable :: thread_pixels(:, :)
         logical(kind=1), allocatable :: thread_mask(:, :)
+        real(kind=4), allocatable :: thread_x(:, :, :)
         logical thread_bSuccess
 
         real :: nullval, tmp
@@ -1832,10 +1833,10 @@ contains
 
             ! interleave computation with disk access
             ! cap the number of threads to avoid system overload
-            ! max_threads = min(OMP_GET_MAX_THREADS(), 2)
+            max_threads = min(OMP_GET_MAX_THREADS(), 4)
 
             ! get #physical cores (ignore HT)
-            max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+            ! max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
             if (.not. allocated(item%thread_units)) then
                 allocate (item%thread_units(OMP_GET_MAX_THREADS()))
@@ -1909,6 +1910,7 @@ contains
                 allocate (thread_buffer(npixels, max_threads))
                 allocate (thread_pixels(npixels, max_threads))
                 allocate (thread_mask(npixels, max_threads))
+                allocate (thread_x(item%naxes(1), item%naxes(2), max_threads))
 
                 allocate (thread_mean_spec(start:end))
                 allocate (thread_int_spec(start:end))
@@ -2013,12 +2015,12 @@ contains
                     end do
 
                     ! compress the pixels
-                    if (allocated(item%compressed)) then
+                    if (allocated(item%compressed) .and. allocated(thread_x)) then
                         block
-                            real(kind=4), dimension(:, :), allocatable :: x
+                            ! real(kind=4), dimension(:, :), allocatable :: x
 
-                            x = reshape(thread_buffer(:, tid), item%naxes(1:2))
-                            call to_fixed(x, item%compressed(:, :, frame))
+                            thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                            call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame))
                         end block
                     end if
 
