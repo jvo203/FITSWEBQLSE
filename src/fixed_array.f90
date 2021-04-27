@@ -47,9 +47,15 @@ contains
         m = size(x, 2)
 
         ! by default compressed is dimension(n/4, m/4)
+        cn = n/4
+        cm = n/4
 
-        if (mod(n, 4) .ne. 0) return
-        if (mod(m, 4) .ne. 0) return
+        ! but the input dimensions might not be divisible by 4
+        if (mod(n, 4) .ne. 0) cn = cn + 1
+        if (mod(m, 4) .ne. 0) cm = cm + 1
+
+        if (size(compressed, 1) .lt. cn) return
+        if (size(compressed, 2) .lt. cm) return
 
         do concurrent(j=1:m/4, i=1:n/4)
             !if (present(mask)) then
