@@ -31,10 +31,14 @@ contains
         ! use wavelet
         implicit none
 
-        integer(kind=4) :: n, m
-        real(kind=4), dimension(n, m), intent(inout) :: x
+        integer(kind=4) :: n, m ! input dimensions
+
+        real(kind=4), dimension(:, :), intent(inout) :: x
         ! logical(kind=1), dimension(n, n), optional, intent(inout) :: mask
         integer(kind=4) :: i, j
+
+        ! compressed output dimensions
+        integer(kind=4) :: cn, cm
 
         ! the result
         type(fixed_block), dimension(:, :), intent(out) :: compressed
