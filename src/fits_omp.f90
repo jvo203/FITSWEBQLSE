@@ -2009,6 +2009,11 @@ contains
 
                     end do
 
+                    ! compress the pixels
+                    if (allocated(item%compressed)) then
+                        call to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)), item%compressed(:, :, frame))
+                    end if
+
                     item%frame_min(frame) = frame_min
                     item%frame_max(frame) = frame_max
 
