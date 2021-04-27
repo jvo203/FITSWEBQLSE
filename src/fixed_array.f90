@@ -54,8 +54,15 @@ contains
         if (mod(n, 4) .ne. 0) cn = cn + 1
         if (mod(m, 4) .ne. 0) cm = cm + 1
 
-        if (size(compressed, 1) .lt. cn) return
-        if (size(compressed, 2) .lt. cm) return
+        if (size(compressed, 1) .lt. cn) then
+            print *, 'compressed array dimension(1) mismatch:', size(compressed, 1), '.ne.', cn
+            return
+        end if
+
+        if (size(compressed, 2) .lt. cm) then
+            print *, 'compressed array dimension(2) mismatch:', size(compressed, 2), '.ne.', cm
+            return
+        end if
 
         do concurrent(j=1:m/4, i=1:n/4)
             !if (present(mask)) then
