@@ -2011,7 +2011,12 @@ contains
 
                     ! compress the pixels
                     if (allocated(item%compressed)) then
-                        call to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)), item%compressed(:, :, frame))
+                        block
+                            real(kind=4), dimension(:, :), allocatable :: x
+
+                            x = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                            call to_fixed(x, item%compressed(:, :, frame))
+                        end block
                     end if
 
                     item%frame_min(frame) = frame_min
