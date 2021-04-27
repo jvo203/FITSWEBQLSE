@@ -2016,12 +2016,8 @@ contains
 
                     ! compress the pixels
                     if (allocated(item%compressed) .and. allocated(thread_x)) then
-                        block
-                            ! real(kind=4), dimension(:, :), allocatable :: x
-
-                            thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
-                            call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame))
-                        end block
+                        thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                        call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame))
                     end if
 
                     item%frame_min(frame) = frame_min
