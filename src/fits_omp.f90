@@ -1727,12 +1727,12 @@ contains
         npixels = naxes(1)*naxes(2)
 
         ! by default compressed is dimension(n/4, m/4)
-        cn = n/4
-        cm = m/4
+        cn = naxes(1)/4
+        cm = naxes(2)/4
 
         ! but the input dimensions might not be divisible by 4
-        if (mod(n, 4) .ne. 0) cn = cn + 1
-        if (mod(m, 4) .ne. 0) cm = cm + 1
+        if (mod(naxes(1), 4) .ne. 0) cn = cn + 1
+        if (mod(naxes(2), 4) .ne. 0) cm = cm + 1
 
         ! now read the 3D FITS data cube (successive 2D planes)
         if (npixels .eq. 0) then
