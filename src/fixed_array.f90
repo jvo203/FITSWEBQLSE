@@ -71,7 +71,8 @@ contains
             !end if
 
             ! TO-DO: checking the bounds
-            call to_fixed_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), compressed(i, j))
+            call to_fixed_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
+            & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))), compressed(i, j))
         end do
 
     end subroutine to_fixed
