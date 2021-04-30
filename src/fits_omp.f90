@@ -1148,9 +1148,8 @@ contains
 
                                 x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
 
-                                x = exp(x) - 0.5
                                 ! recover the original range
-                                x = frame_min + x*(frame_max - frame_min)
+                                x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min)
 
                                 ! a NaN mask
                                 bitmask = compressed%mask
