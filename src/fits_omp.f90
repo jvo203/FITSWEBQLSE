@@ -934,7 +934,7 @@ contains
             ! cap the number of threads to avoid system overload
             ! max_threads = min(OMP_GET_MAX_THREADS(), 4)
 
-            if (.not. allocated(item%thread_units) .and. .not. allocated(item%compressed)) then
+            if (.not. allocated(item%thread_units)) then ! .and. .not. allocated(item%compressed)) then
                 allocate (item%thread_units(OMP_GET_MAX_THREADS()))
                 item%thread_units = -1
 
