@@ -66,6 +66,7 @@ contains
 
         ! first pre-condition the input array
         x = (x - pmin)/(pmax - pmin) ! in [0,1]
+        x = log(0.5 + x)
 
         do concurrent(j=1:m/4, i=1:n/4)
             !if (present(mask)) then
