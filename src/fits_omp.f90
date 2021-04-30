@@ -1140,12 +1140,13 @@ contains
 
                                 x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
 
-                                ! add NaNs where needed
+                                ! a NaN mask
                                 bitmask = compressed%mask
 
                                 pos = 0
                                 do j = 1, 4
                                     do i = 1, 4
+                                        ! test a NaN mask
                                         if (.not. btest(bitmask, pos)) then
                                             ! we have a valid pixel
                                             pixel_sum = pixel_sum + x(i, j)
