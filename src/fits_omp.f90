@@ -1025,86 +1025,90 @@ contains
                 test_ignrval = .true.
             end if
 
-            !$OMP PARALLEL SHARED(item)&
-            !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
-            !$OMP& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
-            !$OMP DO
-            do frame = start, end
-                ! get a current OpenMP thread (starting from 0 as in C)
-                tid = 1 + OMP_GET_THREAD_NUM()
+            if (.not. allocated(item%compressed)) then
+                !$OMP PARALLEL SHARED(item)&
+                !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
+                !$OMP& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
+                !$OMP DO
+                do frame = start, end
+                    ! get a current OpenMP thread (starting from 0 as in C)
+                    tid = 1 + OMP_GET_THREAD_NUM()
 
-                ! starting bounds
-                fpixels = (/x1, y1, frame, 1/)
+                    ! starting bounds
+                    fpixels = (/x1, y1, frame, 1/)
 
-                ! ending bounds
-                lpixels = (/x2, y2, frame, 1/)
+                    ! ending bounds
+                    lpixels = (/x2, y2, frame, 1/)
 
-                ! do not skip over any pixels
-                incs = 1
+                    ! do not skip over any pixels
+                    incs = 1
 
-                ! reset the status
-                status = 0
+                    ! reset the status
+                    status = 0
 
-                ! fetch a region from the FITS file
-                if (item%thread_units(tid) .ne. -1) then
-                    call ftgsve(item%thread_units(tid), group, item%naxis, item%naxes,&
-                    & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
-                else
-                    thread_bSuccess = .false.
-                    cycle
-                end if
-
-                ! abort upon errors
-                if (status .ne. 0) then
-                    print *, this_image(), 'error fetching frame', frame, 'X:', x1, x2, 'Y:', y1, y2
-                    thread_bSuccess = .false.
-
-                    if (status .gt. 0) then
-                        call printerror(status)
+                    ! fetch a region from the FITS file
+                    if (item%thread_units(tid) .ne. -1) then
+                        call ftgsve(item%thread_units(tid), group, item%naxis, item%naxes,&
+                        & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+                    else
+                        thread_bSuccess = .false.
+                        cycle
                     end if
 
-                    cycle
-                else
-                    thread_bSuccess = thread_bSuccess .and. .true.
-                end if
+                    ! abort upon errors
+                    if (status .ne. 0) then
+                        print *, this_image(), 'error fetching frame', frame, 'X:', x1, x2, 'Y:', y1, y2
+                        thread_bSuccess = .false.
 
-                ! process the data
-                pixel_sum = 0.0
-                pixel_count = 0
+                        if (status .gt. 0) then
+                            call printerror(status)
+                        end if
 
-                do j = 1, npixels
-                    tmp = thread_buffer(j, tid)
+                        cycle
+                    else
+                        thread_bSuccess = thread_bSuccess .and. .true.
+                    end if
 
-                    if (isnan(tmp) .neqv. .true.) then
-                        if (test_ignrval) then
-                            if (tmp .eq. item%ignrval) then
-                                ! skip the IGNRVAL pixels
-                                cycle
+                    ! process the data
+                    pixel_sum = 0.0
+                    pixel_count = 0
+
+                    do j = 1, npixels
+                        tmp = thread_buffer(j, tid)
+
+                        if (isnan(tmp) .neqv. .true.) then
+                            if (test_ignrval) then
+                                if (tmp .eq. item%ignrval) then
+                                    ! skip the IGNRVAL pixels
+                                    cycle
+                                end if
                             end if
+
+                            ! do we need the viewport too?
+                            if (req%image) then
+                                ! integrate (sum up) pixels and a NaN mask
+                                thread_pixels(j, tid) = thread_pixels(j, tid) + tmp
+                                thread_mask(j, tid) = thread_mask(j, tid) .or. .true.
+                            end if
+
+                            ! needed by the mean and integrated spectra
+                            pixel_sum = pixel_sum + tmp
+                            pixel_count = pixel_count + 1
                         end if
 
-                        ! do we need the viewport too?
-                        if (req%image) then
-                            ! integrate (sum up) pixels and a NaN mask
-                            thread_pixels(j, tid) = thread_pixels(j, tid) + tmp
-                            thread_mask(j, tid) = thread_mask(j, tid) .or. .true.
-                        end if
+                    end do
 
-                        ! needed by the mean and integrated spectra
-                        pixel_sum = pixel_sum + tmp
-                        pixel_count = pixel_count + 1
+                    if (pixel_count .gt. 0) then
+                        if (req%intensity .eq. mean) shared_spectrum(frame) = pixel_sum/real(pixel_count)
+                        if (req%intensity .eq. integrated) shared_spectrum(frame) = pixel_sum*cdelt3
                     end if
 
                 end do
-
-                if (pixel_count .gt. 0) then
-                    if (req%intensity .eq. mean) shared_spectrum(frame) = pixel_sum/real(pixel_count)
-                    if (req%intensity .eq. integrated) shared_spectrum(frame) = pixel_sum*cdelt3
-                end if
-
-            end do
-            !OMP END DO
-            !$OMP END PARALLEL
+                !OMP END DO
+                !$OMP END PARALLEL
+            else
+                ! decompress the data in real time
+            end if
 
             ! first reduce the pixels/mask locally
             if (req%image) then
