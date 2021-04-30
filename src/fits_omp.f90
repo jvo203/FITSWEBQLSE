@@ -2108,7 +2108,7 @@ contains
                     ! compress the pixels
                     if (allocated(item%compressed) .and. allocated(thread_x)) then
                         thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
-                        call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame))
+                        call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), frame_min, frame_max)
                     end if
 
                     item%frame_min(frame) = frame_min
