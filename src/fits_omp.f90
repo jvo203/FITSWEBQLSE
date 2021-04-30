@@ -887,7 +887,7 @@ contains
             integer max_threads, tid, start, end, num_per_image, npixels, frame
             integer, dimension(4) :: fpixels, lpixels, incs
             integer status, group
-            integer x1, x2, y1, y2, cx, cy, r, r2, pixel_count, j
+            integer x1, x2, y1, y2, cx, cy, r, r2, pixel_count, i, j
             integer start_x, start_y, end_x, end_y
             logical average, anynull, test_ignrval
             real cdelt3, nullval, tmp, pixel_sum
@@ -1117,7 +1117,28 @@ contains
 
                 print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y
 
-                ! decompress each 4x4 block
+                !$OMP PARALLEL SHARED(item)&
+                !$OMP& PRIVATE(i, j, tmp, pixel_sum, pixel_count)&
+                !$OMP& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
+                !$OMP DO
+                do frame = start, end
+                    block
+                        real(kind=4), dimension(4, 4) :: x
+
+                        ! decompress each 4x4 block
+                        do j = start_y, end_y
+                            do i = start_x, end_x
+                                call from_fixed_block(item%compressed(i, j, frame), x)
+                            end do
+                        end do
+
+                        ! process the data
+                        pixel_sum = 0.0
+                        pixel_count = 0
+                    end block
+                end do
+                !OMP END DO
+                !$OMP END PARALLEL
             end if
 
             ! first reduce the pixels/mask locally
