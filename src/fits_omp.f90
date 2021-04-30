@@ -1122,16 +1122,20 @@ contains
                 !$OMP& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
                 !$OMP DO
                 do frame = start, end
+                    ! get a current OpenMP thread (starting from 0 as in C)
+                    tid = 1 + OMP_GET_THREAD_NUM()
+
                     block
                         type(fixed_block) :: compressed
                         real(kind=4), dimension(4, 4) :: x
 
-                        integer :: i, j, pos, ix, iy, src_x, src_y
+                        integer :: i, j, pos, ix, iy, src_x, src_y, offset
                         integer(kind=2) :: bitmask
 
                         ! process the data
                         pixel_sum = 0.0
                         pixel_count = 0
+                        offset = 1
 
                         ! decompress each 4x4 block
                         do iy = start_y, end_y
@@ -1161,9 +1165,19 @@ contains
                                             ! we have a valid pixel
                                             pixel_sum = pixel_sum + x(i, j)
                                             pixel_count = pixel_count + 1
+
+                                            ! do we need the viewport too?
+                                            if (req%image) then
+                                                ! integrate (sum up) pixels and a NaN mask
+                                                if (offset .le. npixels) then
+                                                    thread_pixels(offset, tid) = thread_pixels(offset, tid) + x(i, j)
+                                                    thread_mask(offset, tid) = thread_mask(offset, tid) .or. .true.
+                                                end if
+                                            end if
                                         end if
 
                                         pos = pos + 1
+                                        offset = offset + 1
                                     end do
                                 end do
                             end do
