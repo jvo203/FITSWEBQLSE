@@ -1126,7 +1126,7 @@ contains
                         type(fixed_block) :: compressed
                         real(kind=4), dimension(4, 4) :: x
 
-                        integer :: i, j, pos, ix, iy
+                        integer :: i, j, pos, ix, iy, src_x, src_y
                         integer(kind=2) :: bitmask
 
                         ! process the data
@@ -1148,6 +1148,16 @@ contains
                                     do i = 1, 4
                                         ! test a NaN mask
                                         if (.not. btest(bitmask, pos)) then
+                                            ! we have a non-NaN pixel
+
+                                            ! calculate the original pixel coordinates
+                                            src_x = i + shiftl(ix - 1, 2)
+                                            src_y = j + shiftl(iy - 1, 2)
+
+                                            ! check if a pixel resides within the bounding box (or a circle)
+                                            if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
+                                            if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
+
                                             ! we have a valid pixel
                                             pixel_sum = pixel_sum + x(i, j)
                                             pixel_count = pixel_count + 1
