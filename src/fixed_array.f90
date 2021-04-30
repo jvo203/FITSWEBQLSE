@@ -27,12 +27,12 @@ contains
 
     !end function isnan
 
-    subroutine to_fixed(x, compressed) !, mask)
+    subroutine to_fixed(x, compressed, pmin, pmax) !, mask)
         ! use wavelet
         implicit none
 
         integer(kind=4) :: n, m ! input dimensions
-
+        real, intent(in) :: pmin, pmax
         real(kind=4), dimension(:, :), intent(inout) :: x
         ! logical(kind=1), dimension(n, n), optional, intent(inout) :: mask
         integer(kind=4) :: i, j
@@ -63,6 +63,9 @@ contains
             print *, 'compressed array dimension(2) mismatch:', size(compressed, 2), '.ne.', cm
             return
         end if
+
+        ! first pre-condition the input array
+        x = (x - pmin)/(pmax - pmin) ! in [0,1]
 
         do concurrent(j=1:m/4, i=1:n/4)
             !if (present(mask)) then
