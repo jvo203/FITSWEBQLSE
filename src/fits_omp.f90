@@ -934,7 +934,7 @@ contains
             ! cap the number of threads to avoid system overload
             ! max_threads = min(OMP_GET_MAX_THREADS(), 4)
 
-            if (.not. allocated(item%thread_units)) then
+            if (.not. allocated(item%thread_units) .and. .not. allocated(item%compressed)) then
                 allocate (item%thread_units(OMP_GET_MAX_THREADS()))
                 item%thread_units = -1
 
@@ -1116,6 +1116,8 @@ contains
                 end_y = 1 + (y2 - 1)/4
 
                 print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y
+
+                ! decompress each 4x4 block
             end if
 
             ! first reduce the pixels/mask locally
