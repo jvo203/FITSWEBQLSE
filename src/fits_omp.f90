@@ -1129,13 +1129,13 @@ contains
                         type(fixed_block) :: compressed
                         real(kind=4), dimension(4, 4) :: x
 
-                        integer :: i, j, pos, ix, iy, src_x, src_y, offset
+                        integer :: i, j, pos, ix, iy, src_x, src_y
+                        integer :: offset_x, offset_y, offset
                         integer(kind=2) :: bitmask
 
                         ! process the data
                         pixel_sum = 0.0
                         pixel_count = 0
-                        offset = 1
 
                         ! decompress each 4x4 block
                         do iy = start_y, end_y
@@ -1168,6 +1168,10 @@ contains
 
                                             ! do we need the viewport too?
                                             if (req%image) then
+                                                offset_x = 1 + src_x - x1
+                                                offset_y = src_y - y1
+                                                offset = offset_y*dimx + offset_x
+
                                                 ! integrate (sum up) pixels and a NaN mask
                                                 if (offset .le. npixels) then
                                                     thread_pixels(offset, tid) = thread_pixels(offset, tid) + x(i, j)
@@ -1177,7 +1181,6 @@ contains
                                         end if
 
                                         pos = pos + 1
-                                        offset = offset + 1
                                     end do
                                 end do
                             end do
