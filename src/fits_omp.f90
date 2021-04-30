@@ -888,6 +888,7 @@ contains
             integer, dimension(4) :: fpixels, lpixels, incs
             integer status, group
             integer x1, x2, y1, y2, cx, cy, r, r2, pixel_count, j
+            integer start_x, start_y, end_x, end_y
             logical average, anynull, test_ignrval
             real cdelt3, nullval, tmp, pixel_sum
 
@@ -1107,7 +1108,14 @@ contains
                 !OMP END DO
                 !$OMP END PARALLEL
             else
-                ! decompress the data in real time
+                ! real-time data decompression
+                start_x = 1 + (x1 - 1)/4
+                start_y = 1 + (y1 - 1)/4
+
+                end_x = 1 + (x2 - 1)/4
+                end_y = 1 + (y2 - 1)/4
+
+                print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y
             end if
 
             ! first reduce the pixels/mask locally
