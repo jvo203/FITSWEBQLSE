@@ -1026,7 +1026,7 @@ contains
                 test_ignrval = .true.
             end if
 
-            if (.not. allocated(item%compressed)) then
+            if (.not. allocated(item%compressed) .or. req%image) then
                 !$OMP PARALLEL SHARED(item)&
                 !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
                 !$OMP& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
