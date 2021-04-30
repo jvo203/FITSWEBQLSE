@@ -1118,23 +1118,51 @@ contains
                 print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y
 
                 !$OMP PARALLEL SHARED(item)&
-                !$OMP& PRIVATE(i, j, tmp, pixel_sum, pixel_count)&
+                !$OMP& PRIVATE(tmp, pixel_sum, pixel_count)&
                 !$OMP& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
                 !$OMP DO
                 do frame = start, end
                     block
+                        type(fixed_block) :: compressed
                         real(kind=4), dimension(4, 4) :: x
 
-                        ! decompress each 4x4 block
-                        do j = start_y, end_y
-                            do i = start_x, end_x
-                                call from_fixed_block(item%compressed(i, j, frame), x)
-                            end do
-                        end do
+                        integer :: i, j, pos, ix, iy
+                        integer(kind=2) :: bitmask
 
                         ! process the data
                         pixel_sum = 0.0
                         pixel_count = 0
+
+                        ! decompress each 4x4 block
+                        do iy = start_y, end_y
+                            do ix = start_x, end_x
+                                compressed = item%compressed(ix, iy, frame)
+
+                                x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
+
+                                ! add NaNs where needed
+                                bitmask = compressed%mask
+
+                                pos = 0
+                                do j = 1, 4
+                                    do i = 1, 4
+                                        if (.not. btest(bitmask, pos)) then
+                                            ! we have a valid pixel
+                                            pixel_sum = pixel_sum + x(i, j)
+                                            pixel_count = pixel_count + 1
+                                        end if
+
+                                        pos = pos + 1
+                                    end do
+                                end do
+                            end do
+                        end do
+
+                        if (pixel_count .gt. 0) then
+                            if (req%intensity .eq. mean) shared_spectrum(frame) = pixel_sum/real(pixel_count)
+                            if (req%intensity .eq. integrated) shared_spectrum(frame) = pixel_sum*cdelt3
+                        end if
+
                     end block
                 end do
                 !OMP END DO
