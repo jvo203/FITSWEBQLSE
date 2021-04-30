@@ -1148,6 +1148,10 @@ contains
 
                                 x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
 
+                                x = exp(x) - 0.5
+                                ! recover the original range
+                                x = frame_min + x*(frame_max - frame_min)
+
                                 ! a NaN mask
                                 bitmask = compressed%mask
 
@@ -1167,9 +1171,10 @@ contains
                                             if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
 
                                             ! we have a valid pixel
-                                            tmp = exp(x(i, j)) - 0.5
+                                            tmp = x(i, j)
+                                            !tmp = exp(x(i, j)) - 0.5
                                             ! recover the original range
-                                            tmp = frame_min + tmp*(frame_max - frame_min)
+                                            !tmp = frame_min + tmp*(frame_max - frame_min)
 
                                             pixel_sum = pixel_sum + tmp
                                             pixel_count = pixel_count + 1
