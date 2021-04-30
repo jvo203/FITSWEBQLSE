@@ -37,6 +37,10 @@ ifeq ($(UNAME_S),Linux)
 				# Intel oneAPI icc / ifort 
 				CC := icc
 				FORT := mpiifort
+
+				# not so fast, ifort is buggy!!!
+				CC := gcc
+				FORT := mpifort
 			endif
 		endif
 
