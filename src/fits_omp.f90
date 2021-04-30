@@ -1128,10 +1128,14 @@ contains
                     block
                         type(fixed_block) :: compressed
                         real(kind=4), dimension(4, 4) :: x
+                        real :: frame_min, frame_max, tmp
 
                         integer :: i, j, pos, ix, iy, src_x, src_y
                         integer :: offset_x, offset_y, offset
                         integer(kind=2) :: bitmask
+
+                        frame_min = item%frame_min(frame)
+                        frame_max = item%frame_max(frame)
 
                         ! process the data
                         pixel_sum = 0.0
@@ -1163,7 +1167,11 @@ contains
                                             if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
 
                                             ! we have a valid pixel
-                                            pixel_sum = pixel_sum + x(i, j)
+                                            tmp = exp(x(i, j)) - 0.5
+                                            ! recover the original range
+                                            tmp = frame_min + tmp*(frame_max - frame_min)
+
+                                            pixel_sum = pixel_sum + tmp
                                             pixel_count = pixel_count + 1
 
                                             ! do we need the viewport too?
@@ -1174,7 +1182,7 @@ contains
 
                                                 ! integrate (sum up) pixels and a NaN mask
                                                 if ((offset .ge. 1) .and. (offset .le. npixels)) then
-                                                    thread_pixels(offset, tid) = thread_pixels(offset, tid) + x(i, j)
+                                                    thread_pixels(offset, tid) = thread_pixels(offset, tid) + tmp
                                                     thread_mask(offset, tid) = thread_mask(offset, tid) .or. .true.
                                                 end if
                                             end if
