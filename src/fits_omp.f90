@@ -1126,6 +1126,8 @@ contains
                     tid = 1 + OMP_GET_THREAD_NUM()
 
                     block
+                        use wavelet
+
                         type(fixed_block) :: compressed
                         real(kind=4), dimension(4, 4) :: x
                         real :: frame_min, frame_max, tmp
@@ -1148,6 +1150,7 @@ contains
 
                                 x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
 
+                                call from_daub4_block(x)
                                 ! recover the original range
                                 ! x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min)
 
