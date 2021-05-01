@@ -6,14 +6,14 @@ module fixed_array
     ! since ZFP operates on 4x4 blocks
     ! significant_bits = works with 1 byte
     ! 1 sign bit + 7 bits for the magnitude
-    integer(kind=4), parameter :: significant_bits = 7
+    integer(kind=4), parameter :: significant_bits = 7 ! was 7
     ! integer(kind=4), parameter :: significant_bits = 5
 
     type fixed_block
         ! a NaN mask: 4 x 4 bits = 16 bits (2 bytes)
         integer(kind=2) :: mask
         integer(kind=1) :: common_exp
-        integer(kind=1), dimension(4, 4) :: mantissa
+        integer(kind=1), dimension(4, 4) :: mantissa ! was 1 byte
     end type fixed_block
 contains
     !elemental logical function isnan(x)
