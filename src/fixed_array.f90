@@ -65,7 +65,7 @@ contains
         end if
 
         ! first pre-condition the input array
-        ! x = log(0.5 + (x - pmin)/(pmax - pmin))
+        x = log(0.5 + (x - pmin)/(pmax - pmin))
 
         do concurrent(j=1:m/4, i=1:n/4)
             !if (present(mask)) then
