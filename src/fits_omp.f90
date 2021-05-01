@@ -782,6 +782,10 @@ contains
         logical(kind=1), allocatable, target :: mask(:) [:]
         real, allocatable, target :: spectrum(:) [:]
 
+        ! use img%pixels, img%mask to form a viewport {tmp_pixels, tmp_mask} defined by (x1,y1) ~ (x2,y2)
+        real(kind=c_float), dimension(:, :), allocatable, target :: tmp_pixels
+        logical(kind=c_bool), dimension(:, :), allocatable, target :: tmp_mask
+
         real(kind=c_float), dimension(:, :), allocatable, target :: view_pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: view_mask
         integer(kind=c_int) :: precision
