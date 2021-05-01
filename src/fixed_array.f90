@@ -65,7 +65,7 @@ contains
         end if
 
         ! first pre-condition the input array
-        x = log(0.5 + (x - pmin)/(pmax - pmin))
+        ! x = log(0.5 + (x - pmin)/(pmax - pmin))
 
         do concurrent(j=1:m/4, i=1:n/4)
             !if (present(mask)) then
@@ -81,7 +81,7 @@ contains
     end subroutine to_fixed
 
     pure subroutine to_fixed_block(x, compressed)
-        use wavelet
+        ! use wavelet
         implicit none
 
         real(kind=4), dimension(4, 4), intent(inout) :: x
@@ -127,7 +127,8 @@ contains
 
         compressed%mask = work
 
-        call to_daub4_block(x)
+        ! a wavelet transform
+        ! call to_daub4_block(x)
 
         e = exponent(x)
         max_exp = maxval(e)
