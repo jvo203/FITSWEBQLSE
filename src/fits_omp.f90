@@ -1169,6 +1169,14 @@ contains
                                         ! test a NaN mask
                                         if (.not. btest(bitmask, pos)) then
                                             ! we have a non-NaN pixel
+                                            tmp = x(i, j)
+
+                                            if (test_ignrval) then
+                                                if (tmp .eq. item%ignrval) then
+                                                    ! skip the IGNRVAL pixels
+                                                    cycle
+                                                end if
+                                            end if
 
                                             ! calculate the original pixel coordinates
                                             src_x = i + shiftl(ix - 1, 2)
@@ -1179,8 +1187,6 @@ contains
                                             if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
 
                                             ! we have a valid pixel
-                                            tmp = x(i, j)
-
                                             pixel_sum = pixel_sum + tmp
                                             pixel_count = pixel_count + 1
 
