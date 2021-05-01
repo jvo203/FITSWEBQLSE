@@ -1150,9 +1150,11 @@ contains
 
                                 x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
 
+                                ! an inverse wavelet transform
                                 call from_daub4_block(x)
+
                                 ! recover the original range
-                                ! x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min)
+                                x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min)
 
                                 ! a NaN mask
                                 bitmask = compressed%mask
