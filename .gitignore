@@ -4,6 +4,7 @@
 /zfp_compress
 /serialize
 /test_zmq
+/zfp_block
 
 # Prerequisites
 *.d
