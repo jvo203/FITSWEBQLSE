@@ -170,7 +170,7 @@ zfp:
 #-L/home/chris/zfp/build/lib64 -lzfp
 
 block:
-	$(FORT) $(FLAGS) tests/zfp_block.f90 -o zfp_block
+	$(FORT) $(FLAGS) tests/zfp_block.f90 -o zfp_block $(LIBS)
 
 gzfp:
 	gfortran -Ofast -I/home/chris/zfp/build/modules tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzFORp
