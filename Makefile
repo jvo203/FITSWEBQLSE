@@ -166,8 +166,9 @@ zmq:
 
 zfp:
 #$(CC) $(CFLAGS) tests/zfp_compress.c -o zfp_compress -lzfp
-	$(FORT) $(FLAGS) src/zforp.f90 tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzfp -L/usr/local/lib -lcfitsio
+#$(FORT) $(FLAGS) src/zforp.f90 tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzfp -L/usr/local/lib -lcfitsio
 #-L/home/chris/zfp/build/lib64 -lzfp
+	$(FORT) $(FLAGS) tests/zfp_block.f90 -o zfp_block
 
 gzfp:
 	gfortran -Ofast -I/home/chris/zfp/build/modules tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzFORp
