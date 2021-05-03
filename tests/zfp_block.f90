@@ -1,16 +1,19 @@
 program main
     use, intrinsic :: iso_c_binding
 
+    integer(kind=4), parameter :: significant_bits = 16
+
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
+    integer, dimension(4, 4) :: qint, i
     integer :: max_exp
 
     ! loop counters
-    integer i, j
+    integer ix, iy
 
-    do j = 1, 4
-        do i = 1, 4
-            x(i, j) = i*i
+    do iy = 1, 4
+        do ix = 1, 4
+            x(ix, iy) = ix*iy
         end do
     end do
 
@@ -21,5 +24,11 @@ program main
 
     print *, 'e:', e
     print *, 'max_exp:', max_exp
+
+    i = e - max_exp + significant_bits
+    qint = nint(set_exponent(x, i))
+
+    print *, 'i:', i
+    print *, 'qint:', qint
 
 end program main
