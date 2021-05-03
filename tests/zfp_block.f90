@@ -1,7 +1,7 @@
 program main
     use, intrinsic :: iso_c_binding
 
-    integer(kind=4), parameter :: significant_bits = 16
+    integer(kind=4), parameter :: fraction_bits = 23
 
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
@@ -25,7 +25,7 @@ program main
     print *, 'e:', e
     print *, 'max_exp:', max_exp
 
-    i = e - max_exp + significant_bits
+    i = e - max_exp + fraction_bits
     qint = nint(set_exponent(x, i))
 
     print *, 'i:', i
