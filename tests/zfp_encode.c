@@ -52,6 +52,7 @@ int main()
     int offset;
 
     float fblock[BLOCK_SIZE];
+    int iblock[BLOCK_SIZE];
 
     offset = 0;
     for (i = 0; i < 4; i++)
@@ -74,4 +75,14 @@ int main()
     unsigned int e = maxprec ? emax + EBIAS : 0;
 
     printf("emax: %d, maxprec: %d, e: %u\n", emax, maxprec, e);
+
+    if (!e)
+    {
+        // all-zeroes, no need to encode, padding with minbits - bits
+        printf("all-zeroes, padding stream with %d\n", minbits - bits);
+    }
+    else
+    {
+        // encoding the block
+    }
 }
