@@ -46,6 +46,17 @@ int exponent_block(const float *p, unsigned int n)
     return exponent(max);
 }
 
+/* forward block-floating-point transform to signed integers */
+void fwd_cast(int *iblock, const float *fblock, unsigned int n, int emax)
+{
+    /* compute power-of-two scale factor s */
+    Scalar s = _t1(quantize, Scalar)(1, emax);
+    /* compute p-bit int y = s*x where x is floating and |y| <= 2^(p-2) - 1 */
+    do
+        *iblock++ = (Int)(s * *fblock++);
+    while (--n);
+}
+
 int main()
 {
     int i, j;
