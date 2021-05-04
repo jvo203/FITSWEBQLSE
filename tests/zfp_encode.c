@@ -110,5 +110,9 @@ int main()
 
         /* perform forward block-floating-point transform */
         fwd_cast(iblock, fblock, BLOCK_SIZE, emax);
+
+        for (i = 0; i < BLOCK_SIZE; i++)
+            printf("%d\t", iblock[i]);
+        printf("\n");
     }
 }
