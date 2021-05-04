@@ -72,4 +72,6 @@ int main()
     int emax = exponent_block(fblock, BLOCK_SIZE);
     int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
     unsigned int e = maxprec ? emax + EBIAS : 0;
+
+    printf("emax: %d, maxprec: %d, e: %u\n", emax, maxprec, e);
 }
