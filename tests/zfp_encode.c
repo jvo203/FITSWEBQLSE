@@ -20,9 +20,9 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
-unsigned int precision(int maxexp, uint maxprec, int minexp, int dims)
+unsigned int precision(int maxexp, unsigned int maxprec, int minexp, int dims)
 {
-    return MIN(maxprec, (uint)MAX(0, maxexp - minexp + 2 * (dims + 1)));
+    return MIN(maxprec, (unsigned int)MAX(0, maxexp - minexp + 2 * (dims + 1)));
 }
 
 int exponent(float x)
