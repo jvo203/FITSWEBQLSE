@@ -5,6 +5,7 @@
 /serialize
 /test_zmq
 /zfp_block
+/zfp_encode
 
 # Prerequisites
 *.d
