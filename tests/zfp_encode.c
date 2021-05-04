@@ -83,6 +83,13 @@ int main()
     }
     else
     {
-        // encoding the block
+        // continue encoding the block
+
+        /* encode common exponent; LSB indicates that exponent is nonzero */
+        bits += EBITS;
+        printf("stream_write: %u, bits: %u\n", 2 * e + 1, bits);
+
+        /* perform forward block-floating-point transform */
+        fwd_cast(iblock, fblock, BLOCK_SIZE, emax);
     }
 }
