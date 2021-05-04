@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <limits.h>
 #include <math.h>
 
 #define ZFP_MAX_PREC 64
@@ -13,6 +15,7 @@
 
 #define FREXP(x, e) frexpf(x, e)
 #define FABS(x) fabsf(x)
+#define LDEXP(x, e) ldexpf(x, e)
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
@@ -46,14 +49,19 @@ int exponent_block(const float *p, unsigned int n)
     return exponent(max);
 }
 
+float quantize(float x, int e)
+{
+    return LDEXP(x, (CHAR_BIT * (int)sizeof(float) - 2) - e);
+}
+
 /* forward block-floating-point transform to signed integers */
 void fwd_cast(int *iblock, const float *fblock, unsigned int n, int emax)
 {
     /* compute power-of-two scale factor s */
-    Scalar s = _t1(quantize, Scalar)(1, emax);
+    float s = quantize(1, emax);
     /* compute p-bit int y = s*x where x is floating and |y| <= 2^(p-2) - 1 */
     do
-        *iblock++ = (Int)(s * *fblock++);
+        *iblock++ = (int)(s * *fblock++);
     while (--n);
 }
 
