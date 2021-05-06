@@ -10,6 +10,7 @@
 #include <string.h>
 
 typedef unsigned char uchar;
+typedef unsigned int uint;
 typedef int8_t int8;
 typedef uint8_t uint8;
 typedef int16_t int16;
