@@ -114,5 +114,7 @@ int main()
         for (i = 0; i < BLOCK_SIZE; i++)
             printf("%d\t", iblock[i]);
         printf("\n");
+
+        bits += encode_block(minbits - bits, maxbits - bits, maxprec, iblock);
     }
 }
