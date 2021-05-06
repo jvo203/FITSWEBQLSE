@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+typedef unsigned char uchar;
 typedef int8_t int8;
 typedef uint8_t uint8;
 typedef int16_t int16;
@@ -36,7 +37,7 @@ typedef uint64_t uint64;
 #define index(i, j) ((i) + 4 * (j))
 
 /* order coefficients (i, j) by i + j, then i^2 + j^2 */
-static const unsigned char perm_2[16] = {
+static const uchar perm_2[16] = {
     index(0, 0), /*  0 : 0 */
 
     index(1, 0), /*  1 : 1 */
@@ -66,9 +67,9 @@ static const unsigned char perm_2[16] = {
 
 #undef index
 
-unsigned int precision(int maxexp, unsigned int maxprec, int minexp, int dims)
+uint precision(int maxexp, uint maxprec, int minexp, int dims)
 {
-    return MIN(maxprec, (unsigned int)MAX(0, maxexp - minexp + 2 * (dims + 1)));
+    return MIN(maxprec, (uint)MAX(0, maxexp - minexp + 2 * (dims + 1)));
 }
 
 int exponent(float x)
@@ -83,7 +84,7 @@ int exponent(float x)
     return -EBIAS;
 }
 
-int exponent_block(const float *p, unsigned int n)
+int exponent_block(const float *p, uint n)
 {
     float max = 0;
     do
@@ -101,7 +102,7 @@ float quantize(float x, int e)
 }
 
 /* forward block-floating-point transform to signed integers */
-void fwd_cast(int *iblock, const float *fblock, unsigned int n, int emax)
+void fwd_cast(int *iblock, const float *fblock, uint n, int emax)
 {
     /* compute power-of-two scale factor s */
     float s = quantize(1, emax);
@@ -112,7 +113,7 @@ void fwd_cast(int *iblock, const float *fblock, unsigned int n, int emax)
 }
 
 /* forward lifting transform of 4-vector */
-void fwd_lift(int *p, unsigned int s)
+void fwd_lift(int *p, uint s)
 {
     int x, y, z, w;
     x = *p;
@@ -157,15 +158,15 @@ void fwd_lift(int *p, unsigned int s)
 }
 
 /* map two's complement signed integer to negabinary unsigned integer */
-static unsigned int int2uint(int x)
+uint int2uint(int x)
 {
-    return ((unsigned int)x + NBMASK) ^ NBMASK;
+    return ((uint)x + NBMASK) ^ NBMASK;
 }
 
 /* forward decorrelating 2D transform */
 void fwd_xform(int *p)
 {
-    unsigned int x, y;
+    uint x, y;
     /* transform along x */
     for (y = 0; y < 4; y++)
         fwd_lift(p + 4 * y, 1);
@@ -175,7 +176,7 @@ void fwd_xform(int *p)
 }
 
 /* reorder signed coefficients and convert to unsigned integer */
-void fwd_order(unsigned int *ublock, const int *iblock, const unsigned char *perm, uint n)
+void fwd_order(uint *ublock, const int *iblock, const uchar *perm, uint n)
 {
     do
         *ublock++ = int2uint(iblock[*perm++]);
@@ -215,10 +216,10 @@ uint encode_ints(uint maxbits, uint maxprec, const uint *data, uint size)
 }
 
 /* encode block of integers */
-unsigned int encode_block(int minbits, int maxbits, int maxprec, int *iblock)
+uint encode_block(int minbits, int maxbits, int maxprec, int *iblock)
 {
     int bits;
-    unsigned int ublock[BLOCK_SIZE];
+    uint ublock[BLOCK_SIZE];
 
     /* perform decorrelating transform */
     fwd_xform(iblock);
@@ -270,11 +271,11 @@ int main()
     int minbits = maxbits;
     int minexp = ZFP_MIN_EXP;
 
-    unsigned int bits = 1;
+    uint bits = 1;
     /* compute maximum exponent */
     int emax = exponent_block(fblock, BLOCK_SIZE);
     int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
-    unsigned int e = maxprec ? emax + EBIAS : 0;
+    uint e = maxprec ? emax + EBIAS : 0;
 
     printf("emax: %d, maxprec: %d, e: %u\n", emax, maxprec, e);
 
