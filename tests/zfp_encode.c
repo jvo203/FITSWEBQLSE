@@ -65,6 +65,63 @@ void fwd_cast(int *iblock, const float *fblock, unsigned int n, int emax)
     while (--n);
 }
 
+/* forward lifting transform of 4-vector */
+void fwd_lift(int *p, unsigned int s)
+{
+    int x, y, z, w;
+    x = *p;
+    p += s;
+    y = *p;
+    p += s;
+    z = *p;
+    p += s;
+    w = *p;
+    p += s;
+
+    /*
+  ** non-orthogonal transform
+  **        ( 4  4  4  4) (x)
+  ** 1/16 * ( 5  1 -1 -5) (y)
+  **        (-4  4  4 -4) (z)
+  **        (-2  6 -6  2) (w)
+  */
+    x += w;
+    x >>= 1;
+    w -= x;
+    z += y;
+    z >>= 1;
+    y -= z;
+    x += z;
+    x >>= 1;
+    z -= x;
+    w += y;
+    w >>= 1;
+    y -= w;
+    w += y >> 1;
+    y -= w >> 1;
+
+    p -= s;
+    *p = w;
+    p -= s;
+    *p = z;
+    p -= s;
+    *p = y;
+    p -= s;
+    *p = x;
+}
+
+/* forward decorrelating 2D transform */
+void fwd_xform(int *p)
+{
+    unsigned int x, y;
+    /* transform along x */
+    for (y = 0; y < 4; y++)
+        fwd_lift(p + 4 * y, 1);
+    /* transform along y */
+    for (x = 0; x < 4; x++)
+        fwd_lift(p + 1 * x, 4);
+}
+
 #define index(i, j) ((i) + 4 * (j))
 
 /* order coefficients (i, j) by i + j, then i^2 + j^2 */
@@ -103,15 +160,19 @@ unsigned int encode_block(int minbits, int maxbits, int maxprec, int *iblock)
 {
     int bits;
     unsigned int ublock[BLOCK_SIZE];
+
     /* perform decorrelating transform */
     fwd_xform(iblock);
+
     /* reorder signed coefficients and convert to unsigned integer */
-    fwd_order(ublock, iblock, perm_2, BLOCK_SIZE); // for DIMS == 2
+    //fwd_order(ublock, iblock, perm_2, BLOCK_SIZE); // for DIMS == 2
+
     /* encode integer coefficients */
-    if (BLOCK_SIZE <= 64)
-        bits = encode_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
-    else
-        bits = encode_many_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
+    //if (BLOCK_SIZE <= 64)
+    //    bits = encode_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
+    //else
+    //    bits = encode_many_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
+
     /* write at least minbits bits by padding with zeros */
     if (bits < minbits)
     {
