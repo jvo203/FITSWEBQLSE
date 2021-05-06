@@ -191,9 +191,18 @@ typedef struct bitstream
     size_t pos;
 } bitstream;
 
+/* write single bit (must be 0 or 1) */
 uint stream_write_bit(bitstream *s, uint bit)
 {
     s->bits[s->pos++] = bit;
+
+    return bit;
+}
+
+/* read single bit (0 or 1) */
+uint stream_read_bit(bitstream *s)
+{
+    return s->bits[s->pos++];
 }
 
 uint64 stream_write_bits(bitstream *s, uint64 value, uint n)
@@ -277,8 +286,8 @@ uint encode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
 
 int main()
 {
-    int i, j;
-    int offset;
+    uint i, j;
+    uint offset;
 
     float fblock[BLOCK_SIZE];
     int iblock[BLOCK_SIZE];
@@ -305,6 +314,14 @@ int main()
 
     printf("rate: %f, bits: %u, rate: %d\n", rate, bits, maxbits / BLOCK_SIZE);
 
+    // BITSTREAM
+    bitstream stream;
+    memset(stream.bits, 0, 1024);
+    stream.pos = 0;
+
+    // --------------------------------------------------
+    // ENCODER
+
     bits = 1;
     /* compute maximum exponent */
     int emax = exponent_block(fblock, BLOCK_SIZE);
@@ -312,10 +329,6 @@ int main()
     uint e = maxprec ? emax + EBIAS : 0;
 
     printf("emax: %d, maxprec: %d, e: %u\n", emax, maxprec, e);
-
-    bitstream stream;
-    memset(stream.bits, 0, 1024);
-    stream.pos = 0;
 
     if (!e)
     {
@@ -356,12 +369,25 @@ int main()
         printf("%u ", stream.bits[i]);
     printf("\n");
 
-    // reset the bitstream / arrays ahead of decoding
+    // rewind the bitstream / reset arrays ahead of decoding
     stream.pos = 0;
 
     for (i = 0; i < BLOCK_SIZE; i++)
     {
         fblock[i] = 0.0f;
         iblock[i] = 0;
+    }
+
+    // -------------------------------------------------
+    // DECODER
+    bits = 1;
+
+    if (!stream_read_bit(&stream))
+    {
+        printf("setting all values to ZERO\n");
+
+        // set all values to zero
+        for (i = 0; i < BLOCK_SIZE; i++)
+            fblock[i] = 0.0f;
     }
 }
