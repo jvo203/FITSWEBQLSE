@@ -4,6 +4,18 @@
 #include <limits.h>
 #include <math.h>
 
+#include <stdint.h>
+#include <inttypes.h>
+
+typedef int8_t int8;
+typedef uint8_t uint8;
+typedef int16_t int16;
+typedef uint16_t uint16;
+typedef int32_t int32;
+typedef uint32_t uint32;
+typedef int64_t int64;
+typedef uint64_t uint64;
+
 #define ZFP_MAX_PREC 64
 #define ZFP_MIN_EXP -1074
 
@@ -170,6 +182,38 @@ void fwd_order(unsigned int *ublock, const int *iblock, const unsigned char *per
     while (--n);
 }
 
+/* compress sequence of size unsigned integers */
+uint encode_ints(uint maxbits, uint maxprec, const uint *data, uint size)
+{
+    /* make a copy of bit stream to avoid aliasing */
+    //bitstream s = *stream;
+    uint intprec = CHAR_BIT * (uint)sizeof(uint);
+    uint kmin = intprec > maxprec ? intprec - maxprec : 0;
+    uint bits = maxbits;
+    uint i, k, m, n;
+    uint64 x;
+
+    /* encode one bit plane at a time from MSB to LSB */
+    for (k = intprec, n = 0; bits && k-- > kmin;)
+    {
+        /* step 1: extract bit plane #k to x */
+        x = 0;
+        for (i = 0; i < size; i++)
+            x += (uint64)((data[i] >> k) & 1u) << i;
+        /* step 2: encode first n bits of bit plane */
+        m = MIN(n, bits);
+        bits -= m;
+        x = stream_write_bits(&s, x, m);
+        /* step 3: unary run-length encode remainder of bit plane */
+        for (; n < size && bits && (bits--, stream_write_bit(&s, !!x)); x >>= 1, n++)
+            for (; n < size - 1 && bits && (bits--, !stream_write_bit(&s, x & 1u)); x >>= 1, n++)
+                ;
+    }
+
+    //*stream = s;
+    return maxbits - bits;
+}
+
 /* encode block of integers */
 unsigned int encode_block(int minbits, int maxbits, int maxprec, int *iblock)
 {
@@ -189,7 +233,7 @@ unsigned int encode_block(int minbits, int maxbits, int maxprec, int *iblock)
 
     /* encode integer coefficients */
     //if (BLOCK_SIZE <= 64)
-    //    bits = encode_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
+    bits = encode_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
     //else
     //    bits = encode_many_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
 
