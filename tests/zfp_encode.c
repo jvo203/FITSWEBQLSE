@@ -183,11 +183,22 @@ void fwd_order(uint *ublock, const int *iblock, const uchar *perm, uint n)
     while (--n);
 }
 
-/* compress sequence of size unsigned integers */
-uint encode_ints(uint maxbits, uint maxprec, const uint *data, uint size)
+typedef struct bitstream
 {
-    /* make a copy of bit stream to avoid aliasing */
-    //bitstream s = *stream;
+    uchar bits[1024];
+    size_t pos;
+} bitstream;
+
+//typedef struct bitstream bitstream;
+
+/* append n zero-bits to stream */
+void stream_pad(bitstream *stream, uint n){
+
+};
+
+/* compress sequence of size unsigned integers */
+uint encode_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data, uint size)
+{
     uint intprec = CHAR_BIT * (uint)sizeof(uint);
     uint kmin = intprec > maxprec ? intprec - maxprec : 0;
     uint bits = maxbits;
@@ -204,10 +215,10 @@ uint encode_ints(uint maxbits, uint maxprec, const uint *data, uint size)
         /* step 2: encode first n bits of bit plane */
         m = MIN(n, bits);
         bits -= m;
-        x = stream_write_bits(&s, x, m);
+        x = stream_write_bits(stream, x, m);
         /* step 3: unary run-length encode remainder of bit plane */
-        for (; n < size && bits && (bits--, stream_write_bit(&s, !!x)); x >>= 1, n++)
-            for (; n < size - 1 && bits && (bits--, !stream_write_bit(&s, x & 1u)); x >>= 1, n++)
+        for (; n < size && bits && (bits--, stream_write_bit(stream, !!x)); x >>= 1, n++)
+            for (; n < size - 1 && bits && (bits--, !stream_write_bit(stream, x & 1u)); x >>= 1, n++)
                 ;
     }
 
@@ -216,7 +227,7 @@ uint encode_ints(uint maxbits, uint maxprec, const uint *data, uint size)
 }
 
 /* encode block of integers */
-uint encode_block(int minbits, int maxbits, int maxprec, int *iblock)
+uint encode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int *iblock)
 {
     int bits;
     uint ublock[BLOCK_SIZE];
@@ -234,14 +245,14 @@ uint encode_block(int minbits, int maxbits, int maxprec, int *iblock)
 
     /* encode integer coefficients */
     //if (BLOCK_SIZE <= 64)
-    bits = encode_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
+    bits = encode_ints(stream, maxbits, maxprec, ublock, BLOCK_SIZE);
     //else
     //    bits = encode_many_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
 
     /* write at least minbits bits by padding with zeros */
     if (bits < minbits)
     {
-        //stream_pad(stream, minbits - bits);
+        stream_pad(stream, minbits - bits);
         printf("all-zeroes, padding stream with %d\n", minbits - bits);
         bits = minbits;
     }
@@ -279,15 +290,17 @@ int main()
 
     printf("emax: %d, maxprec: %d, e: %u\n", emax, maxprec, e);
 
+    bitstream stream;
+
     if (!e)
     {
         // all-zeroes, no need to encode, padding with minbits - bits
 
         /* write single zero-bit to indicate that all values are zero */
-        //stream_write_bit(zfp->stream, 0);
+        stream_write_bit(&stream, 0);
         if (minbits > bits)
         {
-            //stream_pad(stream, minbits - bits);
+            stream_pad(&stream, minbits - bits);
             bits = minbits;
         }
         printf("all-zeroes, padding stream with %d\n", minbits - bits);
@@ -298,6 +311,7 @@ int main()
 
         /* encode common exponent; LSB indicates that exponent is nonzero */
         bits += EBITS;
+        stream_write_bits(&stream, 2 * e + 1, bits);
         printf("stream_write: %u, bits: %u\n", 2 * e + 1, bits);
 
         /* perform forward block-floating-point transform */
@@ -308,7 +322,7 @@ int main()
             printf("%d\t", iblock[i]);
         printf("\n");
 
-        bits += encode_block(minbits - bits, maxbits - bits, maxprec, iblock);
+        bits += encode_block(&stream, minbits - bits, maxbits - bits, maxprec, iblock);
     }
 
     printf("emitted %u bits\n", bits);
