@@ -12,6 +12,7 @@
 
 #define EBITS 8                        /* single-precision floating-point */
 #define EBIAS ((1 << (EBITS - 1)) - 1) /* exponent bias */
+#define NBMASK 0xaaaaaaaau             /* negabinary mask */
 
 #define FREXP(x, e) frexpf(x, e)
 #define FABS(x) fabsf(x)
@@ -19,6 +20,39 @@
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
+
+#define index(i, j) ((i) + 4 * (j))
+
+/* order coefficients (i, j) by i + j, then i^2 + j^2 */
+static const unsigned char perm_2[16] = {
+    index(0, 0), /*  0 : 0 */
+
+    index(1, 0), /*  1 : 1 */
+    index(0, 1), /*  2 : 1 */
+
+    index(1, 1), /*  3 : 2 */
+
+    index(2, 0), /*  4 : 2 */
+    index(0, 2), /*  5 : 2 */
+
+    index(2, 1), /*  6 : 3 */
+    index(1, 2), /*  7 : 3 */
+
+    index(3, 0), /*  8 : 3 */
+    index(0, 3), /*  9 : 3 */
+
+    index(2, 2), /* 10 : 4 */
+
+    index(3, 1), /* 11 : 4 */
+    index(1, 3), /* 12 : 4 */
+
+    index(3, 2), /* 13 : 5 */
+    index(2, 3), /* 14 : 5 */
+
+    index(3, 3), /* 15 : 6 */
+};
+
+#undef index
 
 unsigned int precision(int maxexp, unsigned int maxprec, int minexp, int dims)
 {
@@ -110,6 +144,12 @@ void fwd_lift(int *p, unsigned int s)
     *p = x;
 }
 
+/* map two's complement signed integer to negabinary unsigned integer */
+static unsigned int int2uint(int x)
+{
+    return ((unsigned int)x + NBMASK) ^ NBMASK;
+}
+
 /* forward decorrelating 2D transform */
 void fwd_xform(int *p)
 {
@@ -122,38 +162,13 @@ void fwd_xform(int *p)
         fwd_lift(p + 1 * x, 4);
 }
 
-#define index(i, j) ((i) + 4 * (j))
-
-/* order coefficients (i, j) by i + j, then i^2 + j^2 */
-static const unsigned char perm_2[16] = {
-    index(0, 0), /*  0 : 0 */
-
-    index(1, 0), /*  1 : 1 */
-    index(0, 1), /*  2 : 1 */
-
-    index(1, 1), /*  3 : 2 */
-
-    index(2, 0), /*  4 : 2 */
-    index(0, 2), /*  5 : 2 */
-
-    index(2, 1), /*  6 : 3 */
-    index(1, 2), /*  7 : 3 */
-
-    index(3, 0), /*  8 : 3 */
-    index(0, 3), /*  9 : 3 */
-
-    index(2, 2), /* 10 : 4 */
-
-    index(3, 1), /* 11 : 4 */
-    index(1, 3), /* 12 : 4 */
-
-    index(3, 2), /* 13 : 5 */
-    index(2, 3), /* 14 : 5 */
-
-    index(3, 3), /* 15 : 6 */
-};
-
-#undef index
+/* reorder signed coefficients and convert to unsigned integer */
+void fwd_order(unsigned int *ublock, const int *iblock, const unsigned char *perm, uint n)
+{
+    do
+        *ublock++ = int2uint(iblock[*perm++]);
+    while (--n);
+}
 
 /* encode block of integers */
 unsigned int encode_block(int minbits, int maxbits, int maxprec, int *iblock)
@@ -165,7 +180,12 @@ unsigned int encode_block(int minbits, int maxbits, int maxprec, int *iblock)
     fwd_xform(iblock);
 
     /* reorder signed coefficients and convert to unsigned integer */
-    //fwd_order(ublock, iblock, perm_2, BLOCK_SIZE); // for DIMS == 2
+    fwd_order(ublock, iblock, perm_2, BLOCK_SIZE); // for DIMS == 2
+
+    printf("ublock:\n");
+    for (int i = 0; i < BLOCK_SIZE; i++)
+        printf("%u\t", ublock[i]);
+    printf("\n");
 
     /* encode integer coefficients */
     //if (BLOCK_SIZE <= 64)
@@ -196,6 +216,7 @@ int main()
         for (j = 0; j < 4; j++)
             fblock[offset++] = (i + 1) * (j + 1);
 
+    printf("fblock:\n");
     for (i = 0; i < BLOCK_SIZE; i++)
         printf("%f\t", fblock[i]);
     printf("\n");
@@ -230,6 +251,7 @@ int main()
         /* perform forward block-floating-point transform */
         fwd_cast(iblock, fblock, BLOCK_SIZE, emax);
 
+        printf("iblock:\n");
         for (i = 0; i < BLOCK_SIZE; i++)
             printf("%d\t", iblock[i]);
         printf("\n");
