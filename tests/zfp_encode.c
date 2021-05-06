@@ -185,15 +185,30 @@ void fwd_order(uint *ublock, const int *iblock, const uchar *perm, uint n)
 
 typedef struct bitstream
 {
-    uchar bits[1024];
+    uint bits[1024];
     size_t pos;
 } bitstream;
 
-//typedef struct bitstream bitstream;
+uint stream_write_bit(bitstream *s, uint bit)
+{
+    s->bits[s->pos++] = bit;
+}
+
+uint64 stream_write_bits(bitstream *s, uint64 value, uint n)
+{
+    uint i;
+
+    for (i = 0; i < n; i++, value >>= 1)
+        stream_write_bit(s, value & 1);
+}
 
 /* append n zero-bits to stream */
-void stream_pad(bitstream *stream, uint n){
+void stream_pad(bitstream *stream, uint n)
+{
+    uint i;
 
+    for (i = 0; i < n; i++)
+        stream->bits[stream->pos++] = 0u;
 };
 
 /* compress sequence of size unsigned integers */
@@ -222,7 +237,6 @@ uint encode_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data
                 ;
     }
 
-    //*stream = s;
     return maxbits - bits;
 }
 
@@ -291,6 +305,7 @@ int main()
     printf("emax: %d, maxprec: %d, e: %u\n", emax, maxprec, e);
 
     bitstream stream;
+    stream.pos = 0;
 
     if (!e)
     {
