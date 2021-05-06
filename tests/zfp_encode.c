@@ -8,10 +8,10 @@
 #define ZFP_MIN_EXP -1074
 
 #define DIMS 2
+#define BLOCK_SIZE (1 << (2 * DIMS)) /* values per block */
+
 #define EBITS 8                        /* single-precision floating-point */
 #define EBIAS ((1 << (EBITS - 1)) - 1) /* exponent bias */
-
-#define BLOCK_SIZE 16
 
 #define FREXP(x, e) frexpf(x, e)
 #define FABS(x) fabsf(x)
@@ -65,6 +65,63 @@ void fwd_cast(int *iblock, const float *fblock, unsigned int n, int emax)
     while (--n);
 }
 
+#define index(i, j) ((i) + 4 * (j))
+
+/* order coefficients (i, j) by i + j, then i^2 + j^2 */
+static const unsigned char perm_2[16] = {
+    index(0, 0), /*  0 : 0 */
+
+    index(1, 0), /*  1 : 1 */
+    index(0, 1), /*  2 : 1 */
+
+    index(1, 1), /*  3 : 2 */
+
+    index(2, 0), /*  4 : 2 */
+    index(0, 2), /*  5 : 2 */
+
+    index(2, 1), /*  6 : 3 */
+    index(1, 2), /*  7 : 3 */
+
+    index(3, 0), /*  8 : 3 */
+    index(0, 3), /*  9 : 3 */
+
+    index(2, 2), /* 10 : 4 */
+
+    index(3, 1), /* 11 : 4 */
+    index(1, 3), /* 12 : 4 */
+
+    index(3, 2), /* 13 : 5 */
+    index(2, 3), /* 14 : 5 */
+
+    index(3, 3), /* 15 : 6 */
+};
+
+#undef index
+
+/* encode block of integers */
+unsigned int encode_block(int minbits, int maxbits, int maxprec, int *iblock)
+{
+    int bits;
+    unsigned int ublock[BLOCK_SIZE];
+    /* perform decorrelating transform */
+    fwd_xform(iblock);
+    /* reorder signed coefficients and convert to unsigned integer */
+    fwd_order(ublock, iblock, perm_2, BLOCK_SIZE); // for DIMS == 2
+    /* encode integer coefficients */
+    if (BLOCK_SIZE <= 64)
+        bits = encode_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
+    else
+        bits = encode_many_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
+    /* write at least minbits bits by padding with zeros */
+    if (bits < minbits)
+    {
+        //stream_pad(stream, minbits - bits);
+        printf("all-zeroes, padding stream with %d\n", minbits - bits);
+        bits = minbits;
+    }
+    return bits;
+}
+
 int main()
 {
     int i, j;
@@ -98,6 +155,7 @@ int main()
     if (!e)
     {
         // all-zeroes, no need to encode, padding with minbits - bits
+        //stream_pad(stream, minbits - bits);
         printf("all-zeroes, padding stream with %d\n", minbits - bits);
     }
     else
