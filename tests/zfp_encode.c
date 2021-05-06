@@ -213,6 +213,17 @@ uint64 stream_write_bits(bitstream *s, uint64 value, uint n)
         stream_write_bit(s, value & 1);
 }
 
+uint64 stream_read_bits(bitstream *s, uint n)
+{
+    uint i;
+    uint64 value;
+
+    for (i = 0, value = 0; i < n; i++)
+        value += (uint64)stream_read_bit(s) << i;
+
+    return value;
+}
+
 /* append n zero-bits to stream */
 void stream_pad(bitstream *stream, uint n)
 {
@@ -390,4 +401,24 @@ int main()
         for (i = 0; i < BLOCK_SIZE; i++)
             fblock[i] = 0.0f;
     }
+    else
+    {
+        int iblock[BLOCK_SIZE];
+        int emax;
+
+        /* decode common exponent */
+        bits += EBITS;
+        emax = (int)stream_read_bits(&stream, EBITS) - EBIAS;
+        maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
+
+        printf("emax: %d, maxprec: %d\n", emax, maxprec);
+
+        /* decode integer block */
+        //bits += decode_block(&stream, minbits - bits, maxbits - bits, maxprec, iblock);
+
+        /* perform inverse block-floating-point transform */
+        //inv_cast(iblock, fblock, BLOCK_SIZE, emax);
+    }
+
+    printf("decoded %u bits:\n", bits);
 }
