@@ -355,4 +355,13 @@ int main()
     for (i = 0; i < bits; i++)
         printf("%u ", stream.bits[i]);
     printf("\n");
+
+    // reset the bitstream / arrays ahead of decoding
+    stream.pos = 0;
+
+    for (i = 0; i < BLOCK_SIZE; i++)
+    {
+        fblock[i] = 0.0f;
+        iblock[i] = 0;
+    }
 }
