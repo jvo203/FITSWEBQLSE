@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include <string.h>
+
 typedef unsigned char uchar;
 typedef int8_t int8;
 typedef uint8_t uint8;
@@ -291,12 +293,19 @@ int main()
         printf("%f\t", fblock[i]);
     printf("\n");
 
-    int maxbits = 8;
-    int rate = maxbits / BLOCK_SIZE;
-    int minbits = maxbits;
+    double rate = 8.0;
+    uint n = 1u << (2 * DIMS);
+    uint bits = (uint)floor(n * rate + 0.5);
+    bits = MAX(bits, 1 + 8u);
+
+    int minbits = bits;
+    int maxbits = bits;
+    //int rate = maxbits / BLOCK_SIZE;
     int minexp = ZFP_MIN_EXP;
 
-    uint bits = 1;
+    printf("rate: %f, bits: %u, rate: %d\n", rate, bits, maxbits / BLOCK_SIZE);
+
+    bits = 1;
     /* compute maximum exponent */
     int emax = exponent_block(fblock, BLOCK_SIZE);
     int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
@@ -305,6 +314,7 @@ int main()
     printf("emax: %d, maxprec: %d, e: %u\n", emax, maxprec, e);
 
     bitstream stream;
+    memset(stream.bits, 0, 1024);
     stream.pos = 0;
 
     if (!e)
@@ -340,5 +350,9 @@ int main()
         bits += encode_block(&stream, minbits - bits, maxbits - bits, maxprec, iblock);
     }
 
-    printf("emitted %u bits\n", bits);
+    printf("emitted %u bits:\n", bits);
+
+    for (i = 0; i < bits; i++)
+        printf("%u ", stream.bits[i]);
+    printf("\n");
 }
