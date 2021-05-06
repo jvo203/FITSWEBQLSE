@@ -421,4 +421,9 @@ int main()
     }
 
     printf("decoded %u bits:\n", bits);
+
+    printf("fblock:\n");
+    for (i = 0; i < BLOCK_SIZE; i++)
+        printf("%f\t", fblock[i]);
+    printf("\n");
 }
