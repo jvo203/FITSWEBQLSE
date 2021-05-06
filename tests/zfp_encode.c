@@ -282,7 +282,14 @@ int main()
     if (!e)
     {
         // all-zeroes, no need to encode, padding with minbits - bits
-        //stream_pad(stream, minbits - bits);
+
+        /* write single zero-bit to indicate that all values are zero */
+        //stream_write_bit(zfp->stream, 0);
+        if (minbits > bits)
+        {
+            //stream_pad(stream, minbits - bits);
+            bits = minbits;
+        }
         printf("all-zeroes, padding stream with %d\n", minbits - bits);
     }
     else
@@ -303,4 +310,6 @@ int main()
 
         bits += encode_block(minbits - bits, maxbits - bits, maxprec, iblock);
     }
+
+    printf("emitted %u bits\n", bits);
 }
