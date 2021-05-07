@@ -1,5 +1,6 @@
 program main
     use, intrinsic :: iso_c_binding
+    use wavelet
 
     integer(kind=4), parameter :: fraction_bits = 23
     integer(kind=4), dimension(4, 4), parameter :: fwd_coeffs =&
@@ -27,6 +28,10 @@ program main
     end do
 
     print *, x
+    ! call to_daub4_block(x)
+    ! print *, 'fwt:', x
+    ! call from_daub4_block(x)
+    ! print *, 'iwt:', x
 
     e = exponent(x)
     max_exp = maxval(e)
