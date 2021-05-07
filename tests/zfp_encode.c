@@ -296,6 +296,7 @@ uint stream_read_bit(bitstream *s)
     return s->bits[s->pos++];
 }
 
+/* write 0 <= n <= 64 low bits of value and return remaining bits */
 uint64 stream_write_bits(bitstream *s, uint64 value, uint n)
 {
     uint i;
@@ -306,6 +307,7 @@ uint64 stream_write_bits(bitstream *s, uint64 value, uint n)
     return value >> n;
 }
 
+/* read 0 <= n <= 64 bits */
 uint64 stream_read_bits(bitstream *s, uint n)
 {
     uint i;
@@ -341,8 +343,6 @@ uint encode_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data
     uint i, k, m, n;
     uint64 x;
 
-    printf("intprec:%u size: %u, kmin: %u, bits: %u\n", intprec, size, kmin, bits);
-
     /* encode one bit plane at a time from MSB to LSB */
     for (k = intprec, n = 0; bits && k-- > kmin;)
     {
@@ -357,6 +357,35 @@ uint encode_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data
         /* step 3: unary run-length encode remainder of bit plane */
         for (; n < size && bits && (bits--, stream_write_bit(stream, !!x)); x >>= 1, n++)
             for (; n < size - 1 && bits && (bits--, !stream_write_bit(stream, x & 1u)); x >>= 1, n++)
+                ;
+    }
+
+    return maxbits - bits;
+}
+
+/* compress sequence of size > 64 unsigned integers */
+uint encode_many_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data, uint size)
+{
+    uint intprec = CHAR_BIT * (uint)sizeof(uint);
+    uint kmin = intprec > maxprec ? intprec - maxprec : 0;
+    uint bits = maxbits;
+    uint i, k, m, n, c;
+
+    /* encode one bit plane at a time from MSB to LSB */
+    for (k = intprec, n = 0; bits && k-- > kmin;)
+    {
+        /* step 1: encode first n bits of bit plane #k */
+        m = MIN(n, bits);
+        bits -= m;
+        for (i = 0; i < m; i++)
+            stream_write_bit(stream, (data[i] >> k) & 1u);
+        /* step 2: count remaining one-bits in bit plane */
+        c = 0;
+        for (i = m; i < size; i++)
+            c += (data[i] >> k) & 1u;
+        /* step 3: unary run-length encode remainder of bit plane */
+        for (; n < size && bits && (--bits, stream_write_bit(stream, !!c)); c--, n++)
+            for (; n < size - 1 && bits && (--bits, !stream_write_bit(stream, (data[n] >> k) & 1u)); n++)
                 ;
     }
 
@@ -383,10 +412,12 @@ uint decode_ints(bitstream *stream, uint maxbits, uint maxprec, uint *data, uint
         m = MIN(n, bits);
         bits -= m;
         x = stream_read_bits(stream, m);
+
         /* unary run-length decode remainder of bit plane */
         for (; n < size && bits && (bits--, stream_read_bit(stream)); x += (uint64)1 << n++)
             for (; n < size - 1 && bits && (bits--, !stream_read_bit(stream)); n++)
                 ;
+
         /* deposit bit plane from x */
         for (i = 0; x; i++, x >>= 1)
             data[i] += (uint)(x & 1u) << k;
@@ -413,16 +444,16 @@ uint encode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
     printf("\n");
 
     /* encode integer coefficients */
-    //if (BLOCK_SIZE <= 64)
-    bits = encode_ints(stream, maxbits, maxprec, ublock, BLOCK_SIZE);
-    //else
-    //    bits = encode_many_ints(/*stream,*/ maxbits, maxprec, ublock, BLOCK_SIZE);
+    /*if (BLOCK_SIZE <= 64)
+        bits = encode_ints(stream, maxbits, maxprec, ublock, BLOCK_SIZE);
+    else*/
+    bits = encode_many_ints(stream, maxbits, maxprec, ublock, BLOCK_SIZE);
 
     /* write at least minbits bits by padding with zeros */
     if (bits < minbits)
     {
         stream_pad(stream, minbits - bits);
-        printf("all-zeroes, padding stream with %d\n", minbits - bits);
+        printf("all-zeroes, padding stream with %d bits\n", minbits - bits);
         bits = minbits;
     }
 
@@ -443,6 +474,7 @@ uint decode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
     /* read at least minbits bits */
     if (bits < minbits)
     {
+        printf("stream_skip %d bits\n", minbits - bits);
         stream_skip(stream, minbits - bits);
         bits = minbits;
     }
