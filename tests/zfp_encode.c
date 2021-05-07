@@ -350,10 +350,12 @@ uint encode_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data
         x = 0;
         for (i = 0; i < size; i++)
             x += (uint64)((data[i] >> k) & 1u) << i;
+
         /* step 2: encode first n bits of bit plane */
         m = MIN(n, bits);
         bits -= m;
         x = stream_write_bits(stream, x, m);
+
         /* step 3: unary run-length encode remainder of bit plane */
         for (; n < size && bits && (bits--, stream_write_bit(stream, !!x)); x >>= 1, n++)
             for (; n < size - 1 && bits && (bits--, !stream_write_bit(stream, x & 1u)); x >>= 1, n++)
@@ -379,10 +381,12 @@ uint encode_many_ints(bitstream *stream, uint maxbits, uint maxprec, const uint 
         bits -= m;
         for (i = 0; i < m; i++)
             stream_write_bit(stream, (data[i] >> k) & 1u);
+
         /* step 2: count remaining one-bits in bit plane */
         c = 0;
         for (i = m; i < size; i++)
             c += (data[i] >> k) & 1u;
+
         /* step 3: unary run-length encode remainder of bit plane */
         for (; n < size && bits && (--bits, stream_write_bit(stream, !!c)); c--, n++)
             for (; n < size - 1 && bits && (--bits, !stream_write_bit(stream, (data[n] >> k) & 1u)); n++)
