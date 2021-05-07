@@ -341,7 +341,7 @@ uint encode_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data
     uint i, k, m, n;
     uint64 x;
 
-    printf("intprec:%u size: %u\n", intprec, size);
+    printf("intprec:%u size: %u, kmin: %u, bits: %u\n", intprec, size, kmin, bits);
 
     /* encode one bit plane at a time from MSB to LSB */
     for (k = intprec, n = 0; bits && k-- > kmin;)
