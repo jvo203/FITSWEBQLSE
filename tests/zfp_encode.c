@@ -115,6 +115,7 @@ void fwd_cast(int *iblock, const float *fblock, uint n, int emax)
 {
     /* compute power-of-two scale factor s */
     float s = quantize(1, emax);
+    printf("scale factor %f\n", s);
     /* compute p-bit int y = s*x where x is floating and |y| <= 2^(p-2) - 1 */
     do
         *iblock++ = (int)(s * *fblock++);

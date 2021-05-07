@@ -2,6 +2,7 @@ program main
     use, intrinsic :: iso_c_binding
 
     integer(kind=4), parameter :: fraction_bits = 23
+    integer(kind=4), dimension(4, 4) :: fwd_coeffs = reshape([4, 5, -4, -2, 4, 1, 4, 6, 4, -1, 4, -6, 4, -5, -4, 2], [4, 4])
 
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
@@ -30,5 +31,8 @@ program main
 
     print *, 'i:', i
     print *, 'qint:', qint
+
+    qint = matmul(fwd_coeffs, qint)/16
+    print *, 'decorrelation:', qint
 
 end program main
