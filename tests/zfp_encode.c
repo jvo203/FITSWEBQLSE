@@ -421,6 +421,7 @@ uint encode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
         printf("all-zeroes, padding stream with %d\n", minbits - bits);
         bits = minbits;
     }
+
     return bits;
 }
 /* decode block of integers */
