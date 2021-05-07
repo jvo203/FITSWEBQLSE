@@ -170,7 +170,7 @@ zfp:
 #-L/home/chris/zfp/build/lib64 -lzfp
 
 block:
-	$(FORT) $(FLAGS) tests/zfp_block.f90 -o zfp_block $(LIBS)
+	$(FORT) $(FLAGS) src/wavelet.f90 tests/zfp_block.f90 -o zfp_block $(LIBS)
 
 encode:
 	$(CC) $(CFLAGS) tests/zfp_encode.c -o zfp_encode
