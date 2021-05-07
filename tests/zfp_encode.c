@@ -312,6 +312,33 @@ uint encode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
     }
     return bits;
 }
+/* decode block of integers */
+uint decode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int *iblock)
+{
+    int bits;
+    uint ublock[BLOCK_SIZE];
+
+    /* decode integer coefficients */
+    //if (BLOCK_SIZE <= 64)
+    bits = decode_ints(stream, maxbits, maxprec, ublock, BLOCK_SIZE);
+    //else
+    //    bits = _t1(decode_many_ints, UInt)(stream, maxbits, maxprec, ublock, BLOCK_SIZE);
+
+    /* read at least minbits bits */
+    /*if (bits < minbits)
+    {
+        stream_skip(stream, minbits - bits);
+        bits = minbits;
+    }*/
+
+    /* reorder unsigned coefficients and convert to signed integer */
+    //inv_order(ublock, iblock, perm_2, BLOCK_SIZE);
+
+    /* perform decorrelating transform */
+    //inv_xform(iblock);
+
+    return bits;
+}
 
 int main()
 {
@@ -432,7 +459,7 @@ int main()
         printf("emax: %d, maxprec: %d\n", emax, maxprec);
 
         /* decode integer block */
-        //bits += decode_block(&stream, minbits - bits, maxbits - bits, maxprec, iblock);
+        bits += decode_block(&stream, minbits - bits, maxbits - bits, maxprec, iblock);
 
         /* perform inverse block-floating-point transform */
         inv_cast(iblock, fblock, BLOCK_SIZE, emax);
