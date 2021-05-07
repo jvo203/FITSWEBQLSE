@@ -251,6 +251,12 @@ void stream_pad(bitstream *stream, uint n)
         stream->bits[stream->pos++] = 0u;
 };
 
+/* skip over the next n bits (n >= 0) */
+void stream_skip(bitstream *stream, uint n)
+{
+    stream->pos += n;
+}
+
 /* compress sequence of size unsigned integers */
 uint encode_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data, uint size)
 {
@@ -357,11 +363,11 @@ uint decode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
     //    bits = _t1(decode_many_ints, UInt)(stream, maxbits, maxprec, ublock, BLOCK_SIZE);
 
     /* read at least minbits bits */
-    /*if (bits < minbits)
+    if (bits < minbits)
     {
         stream_skip(stream, minbits - bits);
         bits = minbits;
-    }*/
+    }
 
     /* reorder unsigned coefficients and convert to signed integer */
     //inv_order(ublock, iblock, perm_2, BLOCK_SIZE);
