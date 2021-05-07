@@ -280,6 +280,38 @@ uint encode_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data
     return maxbits - bits;
 }
 
+/* decompress sequence of size unsigned integers */
+uint decode_ints(bitstream *stream, uint maxbits, uint maxprec, uint *data, uint size)
+{
+    uint intprec = CHAR_BIT * (uint)sizeof(uint);
+    uint kmin = intprec > maxprec ? intprec - maxprec : 0;
+    uint bits = maxbits;
+    uint i, k, m, n;
+    uint64 x;
+
+    /* initialize data array to all zeros */
+    for (i = 0; i < size; i++)
+        data[i] = 0;
+
+    /* decode one bit plane at a time from MSB to LSB */
+    for (k = intprec, n = 0; bits && k-- > kmin;)
+    {
+        /* decode first n bits of bit plane #k */
+        m = MIN(n, bits);
+        bits -= m;
+        x = stream_read_bits(stream, m);
+        /* unary run-length decode remainder of bit plane */
+        for (; n < size && bits && (bits--, stream_read_bit(stream)); x += (uint64)1 << n++)
+            for (; n < size - 1 && bits && (bits--, !stream_read_bit(stream)); n++)
+                ;
+        /* deposit bit plane from x */
+        for (i = 0; x; i++, x >>= 1)
+            data[i] += (uint)(x & 1u) << k;
+    }
+
+    return maxbits - bits;
+}
+
 /* encode block of integers */
 uint encode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int *iblock)
 {
@@ -465,7 +497,7 @@ int main()
         inv_cast(iblock, fblock, BLOCK_SIZE, emax);
     }
 
-    printf("decoded %u bits:\n", bits);
+    printf("decoded %u bits\n", bits);
 
     printf("fblock:\n");
     for (i = 0; i < BLOCK_SIZE; i++)
