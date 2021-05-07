@@ -174,7 +174,7 @@ block:
 
 encode:
 	$(CC) $(CFLAGS) tests/zfp_encode.c -o zfp_encode
-#gcc -O0 tests/zfp_encode.c -o zfp_encode -lm
+#icc -O0 tests/zfp_encode.c -o zfp_encode -lm
 
 gzfp:
 	gfortran -Ofast -I/home/chris/zfp/build/modules tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzFORp
