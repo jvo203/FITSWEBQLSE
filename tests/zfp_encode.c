@@ -302,7 +302,7 @@ uint64 stream_write_bits(bitstream *s, uint64 value, uint n)
     uint i;
 
     for (i = 0; i < n; i++, value >>= 1)
-        stream_write_bit(s, value & 1);
+        stream_write_bit(s, value & 1u);
 
     return value >> n;
 }
