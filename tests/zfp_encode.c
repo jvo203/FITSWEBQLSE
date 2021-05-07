@@ -695,11 +695,11 @@ int main()
 
     printf("perm_2:\n");
     for (i = 0; i < 16; i++)
-        printf("%u ", perm_2[i]);
+        printf("%u, ", perm_2[i]);
     printf("\n");
 
     printf("perm_f:\n");
     for (i = 0; i < 16; i++)
-        printf("%u ", perm_f[i]);
+        printf("%u, ", perm_f[i]);
     printf("\n");
 }
