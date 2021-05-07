@@ -183,6 +183,20 @@ uint int2uint(int x)
     return ((uint)x + NBMASK) ^ NBMASK;
 }
 
+/* map two's complement signed integer to negabinary unsigned integer */
+int uint2int(uint x)
+{
+    return (int)((x ^ NBMASK) - NBMASK);
+}
+
+/* reorder unsigned coefficients and convert to signed integer */
+void inv_order(const uint *ublock, int *iblock, const uchar *perm, uint n)
+{
+    do
+        iblock[*perm++] = uint2int(*ublock++);
+    while (--n);
+}
+
 /* forward decorrelating 2D transform */
 void fwd_xform(int *p)
 {
@@ -369,8 +383,13 @@ uint decode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
         bits = minbits;
     }
 
+    printf("ublock:\n");
+    for (int i = 0; i < BLOCK_SIZE; i++)
+        printf("%u\t", ublock[i]);
+    printf("\n");
+
     /* reorder unsigned coefficients and convert to signed integer */
-    //inv_order(ublock, iblock, perm_2, BLOCK_SIZE);
+    inv_order(ublock, iblock, perm_2, BLOCK_SIZE);
 
     /* perform decorrelating transform */
     //inv_xform(iblock);
