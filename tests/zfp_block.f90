@@ -6,8 +6,10 @@ program main
     & reshape([4, 5, -4, -2, 4, 1, 4, 6, 4, -1, 4, -6, 4, -5, -4, 2], [4, 4])
     integer(kind=4), dimension(4, 4), parameter :: inv_coeffs =&
     & reshape([4, 4, 4, 4, 6, 2, -2, -6, -4, 4, 4, -4, -1, 5, -5, 1], [4, 4])
-    integer(kind=4), dimension(16), parameter :: perm =&
-    & []
+    integer(kind=4), dimension(16), parameter :: perm_2 =&
+    & [0, 1, 4, 5, 2, 8, 6, 9, 3, 12, 10, 7, 13, 11, 14, 15]
+    integer(kind=4), dimension(16), parameter :: perm_f =&
+    & [0, 4, 1, 5, 8, 2, 9, 6, 12, 3, 10, 13, 7, 14, 11, 1]
 
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
@@ -42,6 +44,8 @@ program main
     print *, 'decorrelation:', qint
 
     ! reordering
+    ordered = reshape(qint, [16])
+    print *, 'ordered:', ordered(perm_f + 1)
 
     ! inverse works OK
     qint = matmul(inv_coeffs, qint)/4
