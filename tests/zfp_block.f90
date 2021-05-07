@@ -2,11 +2,17 @@ program main
     use, intrinsic :: iso_c_binding
 
     integer(kind=4), parameter :: fraction_bits = 23
-    integer(kind=4), dimension(4, 4) :: fwd_coeffs = reshape([4, 5, -4, -2, 4, 1, 4, 6, 4, -1, 4, -6, 4, -5, -4, 2], [4, 4])
+    integer(kind=4), dimension(4, 4), parameter :: fwd_coeffs =&
+    & reshape([4, 5, -4, -2, 4, 1, 4, 6, 4, -1, 4, -6, 4, -5, -4, 2], [4, 4])
+    integer(kind=4), dimension(4, 4), parameter :: inv_coeffs =&
+    & reshape([4, 4, 4, 4, 6, 2, -2, -6, -4, 4, 4, -4, -1, 5, -5, 1], [4, 4])
+    integer(kind=4), dimension(16), parameter :: perm =&
+    & []
 
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
     integer, dimension(4, 4) :: qint, i
+    integer, dimension(16) :: ordered
     integer :: max_exp
 
     ! loop counters
@@ -34,5 +40,11 @@ program main
 
     qint = matmul(fwd_coeffs, qint)/16
     print *, 'decorrelation:', qint
+
+    ! reordering
+
+    ! inverse works OK
+    qint = matmul(inv_coeffs, qint)/4
+    print *, 'reverse decorrelation:', qint
 
 end program main
