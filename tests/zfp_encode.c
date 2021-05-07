@@ -659,4 +659,8 @@ int main()
     for (i = 0; i < BLOCK_SIZE; i++)
         printf("%f\t", fblock[i]);
     printf("\n");
+
+    for (i = 0; i < 16; i++)
+        printf("%u ", perm_2[i]);
+    printf("\n");
 }
