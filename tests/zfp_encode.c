@@ -177,6 +177,53 @@ void fwd_lift(int *p, uint s)
     *p = x;
 }
 
+/* private functions ------------------------------------------------------- */
+
+/* inverse lifting transform of 4-vector */
+void inv_lift(int *p, uint s)
+{
+    int x, y, z, w;
+    x = *p;
+    p += s;
+    y = *p;
+    p += s;
+    z = *p;
+    p += s;
+    w = *p;
+    p += s;
+
+    /*
+  ** non-orthogonal transform
+  **       ( 4  6 -4 -1) (x)
+  ** 1/4 * ( 4  2  4  5) (y)
+  **       ( 4 -2  4 -5) (z)
+  **       ( 4 -6 -4  1) (w)
+  */
+    y += w >> 1;
+    w -= y >> 1;
+    y += w;
+    w <<= 1;
+    w -= y;
+    z += x;
+    x <<= 1;
+    x -= z;
+    y += z;
+    z <<= 1;
+    z -= y;
+    w += x;
+    x <<= 1;
+    x -= w;
+
+    p -= s;
+    *p = w;
+    p -= s;
+    *p = z;
+    p -= s;
+    *p = y;
+    p -= s;
+    *p = x;
+}
+
 /* map two's complement signed integer to negabinary unsigned integer */
 uint int2uint(int x)
 {
@@ -187,6 +234,14 @@ uint int2uint(int x)
 int uint2int(uint x)
 {
     return (int)((x ^ NBMASK) - NBMASK);
+}
+
+/* reorder signed coefficients and convert to unsigned integer */
+void fwd_order(uint *ublock, const int *iblock, const uchar *perm, uint n)
+{
+    do
+        *ublock++ = int2uint(iblock[*perm++]);
+    while (--n);
 }
 
 /* reorder unsigned coefficients and convert to signed integer */
@@ -209,12 +264,16 @@ void fwd_xform(int *p)
         fwd_lift(p + 1 * x, 4);
 }
 
-/* reorder signed coefficients and convert to unsigned integer */
-void fwd_order(uint *ublock, const int *iblock, const uchar *perm, uint n)
+/* inverse decorrelating 2D transform */
+void inv_xform(int *p)
 {
-    do
-        *ublock++ = int2uint(iblock[*perm++]);
-    while (--n);
+    uint x, y;
+    /* transform along y */
+    for (x = 0; x < 4; x++)
+        inv_lift(p + 1 * x, 4);
+    /* transform along x */
+    for (y = 0; y < 4; y++)
+        inv_lift(p + 4 * y, 1);
 }
 
 typedef struct bitstream
@@ -392,7 +451,7 @@ uint decode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
     inv_order(ublock, iblock, perm_2, BLOCK_SIZE);
 
     /* perform decorrelating transform */
-    //inv_xform(iblock);
+    inv_xform(iblock);
 
     return bits;
 }
