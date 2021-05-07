@@ -104,6 +104,12 @@ float quantize(float x, int e)
     return LDEXP(x, (CHAR_BIT * (int)sizeof(float) - 2) - e);
 }
 
+/* map integer x relative to exponent e to floating-point number */
+float dequantize(int x, int e)
+{
+    return LDEXP((float)x, e - (CHAR_BIT * (int)sizeof(float) - 2));
+}
+
 /* forward block-floating-point transform to signed integers */
 void fwd_cast(int *iblock, const float *fblock, uint n, int emax)
 {
@@ -112,6 +118,17 @@ void fwd_cast(int *iblock, const float *fblock, uint n, int emax)
     /* compute p-bit int y = s*x where x is floating and |y| <= 2^(p-2) - 1 */
     do
         *iblock++ = (int)(s * *fblock++);
+    while (--n);
+}
+
+/* inverse block-floating-point transform from signed integers */
+void inv_cast(const int *iblock, float *fblock, uint n, int emax)
+{
+    /* compute power-of-two scale factor s */
+    float s = dequantize(1, emax);
+    /* compute p-bit float x = s*y where |y| <= 2^(p-2) - 1 */
+    do
+        *fblock++ = (float)(s * *iblock++);
     while (--n);
 }
 
@@ -418,7 +435,7 @@ int main()
         //bits += decode_block(&stream, minbits - bits, maxbits - bits, maxprec, iblock);
 
         /* perform inverse block-floating-point transform */
-        //inv_cast(iblock, fblock, BLOCK_SIZE, emax);
+        inv_cast(iblock, fblock, BLOCK_SIZE, emax);
     }
 
     printf("decoded %u bits:\n", bits);
