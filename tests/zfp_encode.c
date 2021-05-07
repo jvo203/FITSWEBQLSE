@@ -302,6 +302,8 @@ uint64 stream_write_bits(bitstream *s, uint64 value, uint n)
 
     for (i = 0; i < n; i++, value >>= 1)
         stream_write_bit(s, value & 1);
+
+    return value >> n;
 }
 
 uint64 stream_read_bits(bitstream *s, uint n)
@@ -338,6 +340,8 @@ uint encode_ints(bitstream *stream, uint maxbits, uint maxprec, const uint *data
     uint bits = maxbits;
     uint i, k, m, n;
     uint64 x;
+
+    printf("intprec:%u size: %u\n", intprec, size);
 
     /* encode one bit plane at a time from MSB to LSB */
     for (k = intprec, n = 0; bits && k-- > kmin;)
