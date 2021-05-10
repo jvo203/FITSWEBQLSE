@@ -119,6 +119,7 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
 inline void fwd_lift(varying int *p, const uniform uint s)
 {
     varying int x, y, z, w;
+
     x = *p;
     p += s;
     y = *p;
@@ -149,6 +150,52 @@ inline void fwd_lift(varying int *p, const uniform uint s)
     y -= w;
     w += y >> 1;
     y -= w >> 1;
+
+    p -= s;
+    *p = w;
+    p -= s;
+    *p = z;
+    p -= s;
+    *p = y;
+    p -= s;
+    *p = x;
+}
+
+/* inverse lifting transform of 4-vector */
+void inv_lift(varying int *p, uint s)
+{
+    varying int x, y, z, w;
+
+    x = *p;
+    p += s;
+    y = *p;
+    p += s;
+    z = *p;
+    p += s;
+    w = *p;
+    p += s;
+
+    /*
+  ** non-orthogonal transform
+  **       ( 4  6 -4 -1) (x)
+  ** 1/4 * ( 4  2  4  5) (y)
+  **       ( 4 -2  4 -5) (z)
+  **       ( 4 -6 -4  1) (w)
+  */
+    y += w >> 1;
+    w -= y >> 1;
+    y += w;
+    w <<= 1;
+    w -= y;
+    z += x;
+    x <<= 1;
+    x -= z;
+    y += z;
+    z <<= 1;
+    z -= y;
+    w += x;
+    x <<= 1;
+    x -= w;
 
     p -= s;
     *p = w;
@@ -199,6 +246,19 @@ void fwd_xform(varying int *p)
     /* transform along y */
     for (x = 0; x < 4; x++)
         fwd_lift(p + 1 * x, 4);
+}
+
+/* inverse decorrelating 2D transform */
+void inv_xform(varying int *p)
+{
+    uniform uint x, y;
+
+    /* transform along y */
+    for (x = 0; x < 4; x++)
+        inv_lift(p + 1 * x, 4);
+    /* transform along x */
+    for (y = 0; y < 4; y++)
+        inv_lift(p + 4 * y, 1);
 }
 
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec)
