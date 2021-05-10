@@ -72,7 +72,7 @@ inline int exponent(float x)
     return -EBIAS;
 }
 
-inline int exponent_block(varying float p[16])
+inline int exponent_block(const varying float p[16])
 {
     float max = 0;
 
@@ -121,25 +121,17 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
         fblock[i] = (float)(s * iblock[i]);
 }
 
-export void vec_encode_block(uniform float src[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
+void encode_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp)
 {
-    // process each block in parallel
-    foreach(j=0 ... height, i=0 ... width)
-    {
-        float fblock[BLOCK_SIZE];
         int iblock[BLOCK_SIZE];
         uint ublock[BLOCK_SIZE];
-
-        // copy the source data
-        for(int k=0; k<BLOCK_SIZE; k++)
-            fblock[k] = src[k];
 
         /* compute maximum exponent */
         int emax = exponent_block(fblock);
         int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
         uint e = maxprec ? emax + EBIAS : 0;
 
-        print("block (%,%), emax: %, maxprec: %, e: %\n", i, j, emax, maxprec, e);
+        print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
 
         /* perform forward block-floating-point transform */
         fwd_cast(iblock, fblock, emax);
@@ -148,5 +140,19 @@ export void vec_encode_block(uniform float src[], uniform int minbits, uniform i
         for (int k = 0; k < BLOCK_SIZE; k++)
             print("%\t", iblock[k]);
         print("\n");
+}
+
+export void encode_array(uniform float src[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
+{
+    // process each block in parallel
+    foreach(j=0 ... height, i=0 ... width)
+    {
+        float fblock[BLOCK_SIZE];
+        
+        // copy the source data
+        for(int k=0; k<BLOCK_SIZE; k++)
+            fblock[k] = src[k];
+
+        encode_block(fblock, minbits, maxbits, minexp);
     }
 }
