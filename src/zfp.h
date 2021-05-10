@@ -32,7 +32,7 @@ namespace ispc { /* namespace */
 #if defined(__cplusplus) && (! defined(__ISPC_NO_EXTERN_C) || !__ISPC_NO_EXTERN_C )
 extern "C" {
 #endif // __cplusplus
-    extern void vec_encode_block(float * fBlock, int32_t * iBlock, uint32_t * uBlock);
+    extern void vec_encode_block(float * fblock, int32_t * iblock, uint32_t * ublock, int32_t minbits, int32_t maxbits, int32_t minexp, int32_t width, int32_t height);
 #if defined(__cplusplus) && (! defined(__ISPC_NO_EXTERN_C) || !__ISPC_NO_EXTERN_C )
 } /* end extern C */
 #endif // __cplusplus

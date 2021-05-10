@@ -10,13 +10,12 @@ typedef unsigned int8 uchar;
 #define EBIAS ((1 << (EBITS - 1)) - 1) /* exponent bias */
 #define NBMASK 0xaaaaaaaau             /* negabinary mask */
 
+#define FREXP(x, e) frexp(x, e)
+#define FABS(x) abs(x)
+#define LDEXP(x, e) ldexp(x, e)
 
-#define FREXP(x, e) frexpf(x, e)
-#define FABS(x) fabsf(x)
-#define LDEXP(x, e) ldexpf(x, e)
-
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
+#define MIN(x, y) min(x, y)
+#define MAX(x, y) max(x, y)
 
 #define index(i, j) ((i) + 4 * (j))
 
@@ -51,7 +50,58 @@ static const uchar PERM[16] = {
 
 #undef index
 
-export void vec_encode_block(uniform float fBlock[], uniform int32 iBlock[], uniform uint32 uBlock[])
-{
 
+inline uint precision(int maxexp, uint maxprec, int minexp, int dims)
+{
+    return MIN(maxprec, (uint)MAX(0, maxexp - minexp + 2 * (dims + 1)));
+}
+
+inline int exponent(float x)
+{
+    if (x > 0)
+    {
+        int e;
+        FREXP(x, &e);
+        /* clamp exponent in case x is denormal */
+        return MAX(e, 1 - EBIAS);
+    }
+
+    return -EBIAS;
+}
+
+inline int exponent_block(const float *p, uint n)
+{
+    float max = 0;
+
+    for(int i=0; i<n; i++)
+    {
+        float f = FABS(p[i]);
+
+        if (max < f)
+            max = f;
+    }
+
+    /*do
+    {
+        float f = FABS(*p++);
+
+        if (max < f)
+            max = f;
+    } while (--n);*/
+
+    return exponent(max);
+}
+
+export void vec_encode_block(uniform float fblock[], uniform int iblock[], uniform uint ublock[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
+{
+    // process each block in parallel
+    foreach(j=0 ... height, i=0 ... width)
+    {
+        /* compute maximum exponent */
+        int emax = exponent_block(fblock, BLOCK_SIZE);
+        int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
+        uint e = maxprec ? emax + EBIAS : 0;
+
+        print("block (%,%), emax: %, maxprec: %, e: %\n", i, j, emax, maxprec, e);
+    }
 }
