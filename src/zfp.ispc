@@ -60,16 +60,13 @@ inline uint precision(int maxexp, uint maxprec, int minexp, int dims)
 
 inline int exponent(float x)
 {
-    if (x > 0)
-    {
-        int e;
-        FREXP(x, &e);
+    int e, val;
+    FREXP(x, &e);
 
-        /* clamp exponent in case x is denormal */
-        return MAX(e, 1 - EBIAS);
-    }
-
-    return -EBIAS;
+    /* clamp exponent in case x is denormal */
+    val = (x > 0) ? MAX(e, 1 - EBIAS) : -EBIAS;
+   
+    return val;
 }
 
 inline int exponent_block(const varying float p[16])
@@ -79,9 +76,7 @@ inline int exponent_block(const varying float p[16])
     for(uniform int i=0; i<BLOCK_SIZE; i++)
     {
         float f = FABS(p[i]);
-
-        if (max < f)
-            max = f;
+        max = (max < f) ? f : max;
     }
 
     return exponent(max);
