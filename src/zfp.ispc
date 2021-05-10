@@ -121,9 +121,12 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
         fblock[i] = (float)(s * iblock[i]);
 }
 
-void encode_integer_block(const varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec)
+void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec)
 {
     uint ublock[BLOCK_SIZE];
+
+    /* perform decorrelating transform */
+    //fwd_xform(iblock);
 
     print("ublock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
