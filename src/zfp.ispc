@@ -22,7 +22,7 @@ typedef unsigned int8 uchar;
 #define index(i, j) ((i) + 4 * (j))
 
 /* order coefficients (i, j) by i + j, then i^2 + j^2 */
-static const uchar PERM[16] = {
+static const uniform uchar PERM[16] = {
     index(0, 0), /*  0 : 0 */
 
     index(1, 0), /*  1 : 1 */
@@ -93,7 +93,6 @@ inline float dequantize(int x, int e)
     return LDEXP((float)x, e - (CHAR_BIT * (int)sizeof(uniform float) - 2));
 }
 
-
 /* forward block-floating-point transform to signed integers */
 inline void fwd_cast(varying int iblock[BLOCK_SIZE], const varying float fblock[BLOCK_SIZE], varying int emax)
 {
@@ -161,6 +160,33 @@ inline void fwd_lift(varying int *p, const uniform uint s)
     *p = x;
 }
 
+/* map two's complement signed integer to negabinary unsigned integer */
+inline uint int2uint(int x)
+{
+    return ((uint)x + NBMASK) ^ NBMASK;
+}
+
+/* map two's complement signed integer to negabinary unsigned integer */
+inline int uint2int(uint x)
+{
+    return (int)((x ^ NBMASK) - NBMASK);
+}
+
+/* reorder signed coefficients and convert to unsigned integer */
+inline void fwd_order(varying uint ublock[BLOCK_SIZE], const varying int iblock[BLOCK_SIZE], const uniform uchar perm[BLOCK_SIZE])
+{
+    for(uniform int i=0; i<BLOCK_SIZE; i++)
+        ublock[i] = int2uint(iblock[perm[i]]);
+}
+
+/* reorder unsigned coefficients and convert to signed integer */
+inline void inv_order(const uint *ublock, int *iblock, const uchar *perm, uint n)
+{
+    do
+        iblock[*perm++] = uint2int(*ublock++);
+    while (--n);
+}
+
 /* forward decorrelating 2D transform */
 void fwd_xform(varying int *p)
 {
@@ -188,7 +214,7 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
     print("\n");
 
     /* reorder signed coefficients and convert to unsigned integer */
-    //fwd_order(ublock, iblock, PERM, BLOCK_SIZE); // for DIMS == 2
+    fwd_order(ublock, iblock, PERM); // for DIMS == 2
 
     print("ublock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
