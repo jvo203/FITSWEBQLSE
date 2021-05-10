@@ -76,7 +76,7 @@ inline int exponent_block(const varying float p[16])
 {
     float max = 0;
 
-    for(int i=0; i<BLOCK_SIZE; i++)
+    for(uniform int i=0; i<BLOCK_SIZE; i++)
     {
         float f = FABS(p[i]);
 
@@ -106,7 +106,7 @@ inline void fwd_cast(varying int iblock[BLOCK_SIZE], const varying float fblock[
     float s = quantize(1, emax);
 
     /* compute p-bit int y = s*x where x is floating and |y| <= 2^(p-2) - 1 */
-    for(int i=0; i<BLOCK_SIZE; i++)
+    for(uniform int i=0; i<BLOCK_SIZE; i++)
         iblock[i] = (int)(s * fblock[i]);
 }
 
@@ -117,7 +117,7 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
     float s = dequantize(1, emax);
 
     /* compute p-bit float x = s*y where |y| <= 2^(p-2) - 1 */
-    for(int i=0; i<BLOCK_SIZE; i++)
+    for(uniform int i=0; i<BLOCK_SIZE; i++)
         fblock[i] = (float)(s * iblock[i]);
 }
 
