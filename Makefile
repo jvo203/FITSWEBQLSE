@@ -107,7 +107,7 @@ ifeq ($(UNAME_S),Darwin)
 	LIBS += -L/usr/local/opt/openssl/lib -lcaf_mpi -L/usr/local/opt/lz4/lib -llz4
 #MOD += `pkg-config --cflags json-fortran`
 
-	CC = gcc-10
+	CC = gcc-11
 	FORT = mpifort
 
 	FLAGS = -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
