@@ -116,21 +116,25 @@ int exponent(float x)
     {
         int e;
         FREXP(x, &e);
+
         /* clamp exponent in case x is denormal */
         return MAX(e, 1 - EBIAS);
     }
+
     return -EBIAS;
 }
 
 int exponent_block(const float *p, uint n)
 {
     float max = 0;
+
     do
     {
         float f = FABS(*p++);
         if (max < f)
             max = f;
     } while (--n);
+
     return exponent(max);
 }
 
@@ -150,7 +154,7 @@ void fwd_cast(int *iblock, const float *fblock, uint n, int emax)
 {
     /* compute power-of-two scale factor s */
     float s = quantize(1, emax);
-    printf("scale factor %f\n", s);
+
     /* compute p-bit int y = s*x where x is floating and |y| <= 2^(p-2) - 1 */
     do
         *iblock++ = (int)(s * *fblock++);

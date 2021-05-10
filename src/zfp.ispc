@@ -64,6 +64,7 @@ inline int exponent(float x)
     {
         int e;
         FREXP(x, &e);
+        
         /* clamp exponent in case x is denormal */
         return MAX(e, 1 - EBIAS);
     }
@@ -88,24 +89,24 @@ inline int exponent_block(varying float p[16])
 
 inline float quantize(float x, int e)
 {
-    return LDEXP(x, (CHAR_BIT * (int)sizeof(float) - 2) - e);
+    return LDEXP(x, (CHAR_BIT * (int)sizeof(uniform float) - 2) - e);
 }
 
 /* map integer x relative to exponent e to floating-point number */
 inline float dequantize(int x, int e)
 {
-    return LDEXP((float)x, e - (CHAR_BIT * (int)sizeof(float) - 2));
+    return LDEXP((float)x, e - (CHAR_BIT * (int)sizeof(uniform float) - 2));
 }
 
 
 /* forward block-floating-point transform to signed integers */
-inline void fwd_cast(int *iblock, const float *fblock, uint n, int emax)
+inline void fwd_cast(varying int iblock[BLOCK_SIZE], const varying float fblock[BLOCK_SIZE], int emax)
 {
     /* compute power-of-two scale factor s */
     float s = quantize(1, emax);
-    
+
     /* compute p-bit int y = s*x where x is floating and |y| <= 2^(p-2) - 1 */
-    for(int i=0; i<n; i++)
+    for(int i=0; i<BLOCK_SIZE; i++)
         iblock[i] = (int)(s * fblock[i]);
 }
 
@@ -141,6 +142,11 @@ export void vec_encode_block(uniform float src[], uniform int minbits, uniform i
         print("block (%,%), emax: %, maxprec: %, e: %\n", i, j, emax, maxprec, e);
 
         /* perform forward block-floating-point transform */
-        //fwd_cast(iblock, fblock, BLOCK_SIZE, emax);
+        fwd_cast(iblock, fblock, emax);
+
+        print("iblock:\n");
+        for (int k = 0; k < BLOCK_SIZE; k++)
+            print("%\t", iblock[k]);
+        print("\n");
     }
 }
