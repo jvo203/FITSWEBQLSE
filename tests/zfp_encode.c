@@ -509,6 +509,11 @@ uint encode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
     /* perform decorrelating transform */
     fwd_xform(iblock);
 
+    printf("iblock:\n");
+    for (int i = 0; i < BLOCK_SIZE; i++)
+        printf("%d\t", iblock[i]);
+    printf("\n");
+
     /* reorder signed coefficients and convert to unsigned integer */
     fwd_order(ublock, iblock, perm_2, BLOCK_SIZE); // for DIMS == 2
 

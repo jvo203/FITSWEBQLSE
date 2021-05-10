@@ -128,6 +128,14 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
     /* perform decorrelating transform */
     //fwd_xform(iblock);
 
+    print("iblock:\n");
+    for (int k = 0; k < BLOCK_SIZE; k++)
+        print("%\t", iblock[k]);
+    print("\n");
+
+    /* reorder signed coefficients and convert to unsigned integer */
+    //fwd_order(ublock, iblock, perm_2, BLOCK_SIZE); // for DIMS == 2
+
     print("ublock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
         print("%\t", ublock[k]);
@@ -148,10 +156,10 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     /* perform forward block-floating-point transform */
     fwd_cast(iblock, fblock, emax);
 
-    /*print("iblock:\n");
+    print("iblock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
         print("%\t", iblock[k]);
-    print("\n");*/
+    print("\n");
 
     encode_integer_block(iblock, minbits, maxbits, maxprec);
 }
