@@ -134,7 +134,7 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
     print("\n");
 
     /* reorder signed coefficients and convert to unsigned integer */
-    //fwd_order(ublock, iblock, perm_2, BLOCK_SIZE); // for DIMS == 2
+    //fwd_order(ublock, iblock, PERM, BLOCK_SIZE); // for DIMS == 2
 
     print("ublock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
