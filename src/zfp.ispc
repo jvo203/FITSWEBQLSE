@@ -142,7 +142,7 @@ void encode_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, u
         print("\n");
 }
 
-export void encode_array(uniform float src[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
+export void encode_array(uniform float src[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
 {
     // process each block in parallel
     foreach(j=0 ... height, i=0 ... width)
