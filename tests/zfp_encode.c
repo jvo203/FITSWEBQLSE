@@ -711,5 +711,5 @@ int main()
 
     printf("Vectorised ZFP ENCODE\n");
 
-    vec_encode_block(fblock, minbits, maxbits, minexp, 1, 1);
+    encode_array(fblock, minbits, maxbits, minexp, 1, 1, 1);
 }
