@@ -120,11 +120,12 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
 inline void fwd_lift(varying int p[BLOCK_SIZE], const uniform uint offset, const uniform uint s)
 {
     varying int x, y, z, w;
+    uniform uint idx = offset;
 
-    x = p[offset];
-    y = p[offset+s];
-    z = p[offset+2*s];
-    w = p[offset+3*s];
+    x = p[idx];idx += s;
+    y = p[idx];idx += s;
+    z = p[idx];idx += s;
+    w = p[idx];
 
      /*
   ** non-orthogonal transform
@@ -148,10 +149,10 @@ inline void fwd_lift(varying int p[BLOCK_SIZE], const uniform uint offset, const
     w += y >> 1;
     y -= w >> 1;
 
-    p[offset+3*s] = w;
-    p[offset+2*s] = z;
-    p[offset+s] = y;
-    p[offset] = x;
+    p[idx] = w;idx -= s;
+    p[idx] = z;idx -= s;
+    p[idx] = y;idx -= s;
+    p[idx] = x;
 }
 
 /* inverse lifting transform of 4-vector */
@@ -159,11 +160,12 @@ inline void fwd_lift(varying int p[BLOCK_SIZE], const uniform uint offset, const
 void inv_lift(varying int p[BLOCK_SIZE], const uniform uint offset, const uniform uint s)
 {
     varying int x, y, z, w;
+    uniform uint idx = offset;
 
-    x = p[offset];
-    y = p[offset+s];
-    z = p[offset+2*s];
-    w = p[offset+3*s];
+    x = p[idx];idx += s;
+    y = p[idx];idx += s;
+    z = p[idx];idx += s;
+    w = p[idx];
 
     /*
   ** non-orthogonal transform
@@ -187,10 +189,10 @@ void inv_lift(varying int p[BLOCK_SIZE], const uniform uint offset, const unifor
     x <<= 1;
     x -= w;
 
-    p[offset+3*s] = w;
-    p[offset+2*s] = z;
-    p[offset+s] = y;
-    p[offset] = x;
+    p[idx] = w;idx -= s;
+    p[idx] = z;idx -= s;
+    p[idx] = y;idx -= s;
+    p[idx] = x;
 }
 
 /* map two's complement signed integer to negabinary unsigned integer */
@@ -242,7 +244,7 @@ void inv_xform(varying int p[BLOCK_SIZE])
     /* transform along y */
     for (x = 0; x < 4; x++)
         inv_lift(p, 1 * x, 4);
-        
+
     /* transform along x */
     for (y = 0; y < 4; y++)
         inv_lift(p, 4 * y, 1);
