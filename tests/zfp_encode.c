@@ -707,5 +707,22 @@ int main()
 
     printf("Vectorised ZFP ENCODE\n");
     uint ublock[BLOCK_SIZE];
+
+    for (i = 0; i < BLOCK_SIZE; i++)
+    {
+        iblock[i] = 0;
+        ublock[i] = 0;
+    }
+
     vec_encode_block(fblock, iblock, ublock, minbits, maxbits, minexp, 1, 1);
+
+    printf("iblock:\n");
+    for (i = 0; i < BLOCK_SIZE; i++)
+        printf("%d\t", iblock[i]);
+    printf("\n");
+
+    printf("ublock:\n");
+    for (i = 0; i < BLOCK_SIZE; i++)
+        printf("%u\t", ublock[i]);
+    printf("\n");
 }
