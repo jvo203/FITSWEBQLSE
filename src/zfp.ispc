@@ -121,7 +121,17 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
         fblock[i] = (float)(s * iblock[i]);
 }
 
-void encode_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp)
+void encode_integer_block(const varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp)
+{
+    uint ublock[BLOCK_SIZE];
+
+    print("ublock:\n");
+    for (int k = 0; k < BLOCK_SIZE; k++)
+        print("%\t", ublock[k]);
+    print("\n");
+}
+
+void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp)
 {
         /* compute maximum exponent */
         int emax = exponent_block(fblock);
@@ -131,7 +141,6 @@ void encode_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, u
         print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
 
         int iblock[BLOCK_SIZE];
-        uint ublock[BLOCK_SIZE];
 
         /* perform forward block-floating-point transform */
         fwd_cast(iblock, fblock, emax);
@@ -140,6 +149,8 @@ void encode_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, u
         for (int k = 0; k < BLOCK_SIZE; k++)
             print("%\t", iblock[k]);
         print("\n");
+
+        encode_integer_block(iblock, minbits, maxbits, minexp);
 }
 
 export void encode_array(uniform float src[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
@@ -154,6 +165,6 @@ export void encode_array(uniform float src[], uniform int minbits, uniform int m
         for(int k=0; k<BLOCK_SIZE; k++)
             fblock[k] = src[k];
 
-        encode_block(fblock, minbits, maxbits, minexp);
+        encode_float_block(fblock, minbits, maxbits, minexp);
     }
 }
