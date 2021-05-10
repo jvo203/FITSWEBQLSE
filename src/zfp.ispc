@@ -121,7 +121,7 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
         fblock[i] = (float)(s * iblock[i]);
 }
 
-void encode_integer_block(const varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp)
+void encode_integer_block(const varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec)
 {
     uint ublock[BLOCK_SIZE];
 
@@ -150,7 +150,7 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
         print("%\t", iblock[k]);
     print("\n");
 
-    encode_integer_block(iblock, minbits, maxbits, minexp);
+    encode_integer_block(iblock, minbits, maxbits, maxprec);
 }
 
 export void encode_array(uniform float src[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
