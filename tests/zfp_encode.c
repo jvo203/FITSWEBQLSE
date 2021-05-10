@@ -704,4 +704,8 @@ int main()
     for (i = 0; i < 16; i++)
         printf("%u, ", perm_f[i]);
     printf("\n");
+
+    printf("Vectorised ZFP ENCODE\n");
+    uint ublock[BLOCK_SIZE];
+    vec_encode_block(fblock, iblock, ublock, minbits, maxbits, minexp, 1, 1);
 }
