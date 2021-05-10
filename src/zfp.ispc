@@ -123,15 +123,15 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
 
 void encode_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp)
 {
-        int iblock[BLOCK_SIZE];
-        uint ublock[BLOCK_SIZE];
-
         /* compute maximum exponent */
         int emax = exponent_block(fblock);
         int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
         uint e = maxprec ? emax + EBIAS : 0;
 
         print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
+
+        int iblock[BLOCK_SIZE];
+        uint ublock[BLOCK_SIZE];
 
         /* perform forward block-floating-point transform */
         fwd_cast(iblock, fblock, emax);
@@ -147,6 +147,7 @@ export void encode_array(uniform float src[], uniform int minbits, uniform int m
     // process each block in parallel
     foreach(j=0 ... height, i=0 ... width)
     {
+        // a private 4x4 block
         float fblock[BLOCK_SIZE];
         
         // copy the source data
