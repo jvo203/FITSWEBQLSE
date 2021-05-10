@@ -119,7 +119,7 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
 /* forward lifting transform of 4-vector */
 inline void fwd_lift(varying int *p, const uniform uint s)
 {
-    int x, y, z, w;
+    varying int x, y, z, w;
     x = *p;
     p += s;
     y = *p;
