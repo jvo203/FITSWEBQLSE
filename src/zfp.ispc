@@ -1,5 +1,7 @@
 typedef unsigned int8 uchar;
 
+#define CHAR_BIT 8
+
 #define ZFP_MAX_PREC 64
 #define ZFP_MIN_EXP -1074
 
@@ -81,15 +83,18 @@ inline int exponent_block(const float *p, uint n)
             max = f;
     }
 
-    /*do
-    {
-        float f = FABS(*p++);
-
-        if (max < f)
-            max = f;
-    } while (--n);*/
-
     return exponent(max);
+}
+
+inline float quantize(float x, int e)
+{
+    return LDEXP(x, (CHAR_BIT * (int)sizeof(float) - 2) - e);
+}
+
+/* map integer x relative to exponent e to floating-point number */
+inline float dequantize(int x, int e)
+{
+    return LDEXP((float)x, e - (CHAR_BIT * (int)sizeof(float) - 2));
 }
 
 export void vec_encode_block(uniform float fblock[], uniform int iblock[], uniform uint ublock[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
@@ -103,5 +108,8 @@ export void vec_encode_block(uniform float fblock[], uniform int iblock[], unifo
         uint e = maxprec ? emax + EBIAS : 0;
 
         print("block (%,%), emax: %, maxprec: %, e: %\n", i, j, emax, maxprec, e);
+
+        /* perform forward block-floating-point transform */
+        //fwd_cast(iblock, fblock, BLOCK_SIZE, emax);
     }
 }
