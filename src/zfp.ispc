@@ -116,12 +116,69 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
         fblock[i] = (float)(s * iblock[i]);
 }
 
+/* forward lifting transform of 4-vector */
+void fwd_lift(varying int *p, const uniform uint s)
+{
+    int x, y, z, w;
+    x = *p;
+    p += s;
+    y = *p;
+    p += s;
+    z = *p;
+    p += s;
+    w = *p;
+    p += s;
+
+    /*
+  ** non-orthogonal transform
+  **        ( 4  4  4  4) (x)
+  ** 1/16 * ( 5  1 -1 -5) (y)
+  **        (-4  4  4 -4) (z)
+  **        (-2  6 -6  2) (w)
+  */
+    x += w;
+    x >>= 1;
+    w -= x;
+    z += y;
+    z >>= 1;
+    y -= z;
+    x += z;
+    x >>= 1;
+    z -= x;
+    w += y;
+    w >>= 1;
+    y -= w;
+    w += y >> 1;
+    y -= w >> 1;
+
+    p -= s;
+    *p = w;
+    p -= s;
+    *p = z;
+    p -= s;
+    *p = y;
+    p -= s;
+    *p = x;
+}
+
+/* forward decorrelating 2D transform */
+void fwd_xform(varying int *p)
+{
+    uniform uint x, y;
+    /* transform along x */
+    for (y = 0; y < 4; y++)
+        fwd_lift(p + 4 * y, 1);
+    /* transform along y */
+    for (x = 0; x < 4; x++)
+        fwd_lift(p + 1 * x, 4);
+}
+
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec)
 {
     uint ublock[BLOCK_SIZE];
 
     /* perform decorrelating transform */
-    //fwd_xform(iblock);
+    fwd_xform(iblock);
 
     print("iblock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
