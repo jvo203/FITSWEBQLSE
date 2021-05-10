@@ -145,10 +145,10 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     /* perform forward block-floating-point transform */
     fwd_cast(iblock, fblock, emax);
 
-    print("iblock:\n");
+    /*print("iblock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
         print("%\t", iblock[k]);
-    print("\n");
+    print("\n");*/
 
     encode_integer_block(iblock, minbits, maxbits, maxprec);
 }
