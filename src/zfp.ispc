@@ -21,7 +21,7 @@ typedef unsigned int8 uchar;
 #define index(i, j) ((i) + 4 * (j))
 
 /* order coefficients (i, j) by i + j, then i^2 + j^2 */
-const uchar perm_2[16] = {
+static const uchar perm_2[16] = {
     index(0, 0), /*  0 : 0 */
 
     index(1, 0), /*  1 : 1 */
