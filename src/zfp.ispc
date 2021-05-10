@@ -64,7 +64,7 @@ inline int exponent(float x)
     {
         int e;
         FREXP(x, &e);
-        
+
         /* clamp exponent in case x is denormal */
         return MAX(e, 1 - EBIAS);
     }
@@ -111,13 +111,13 @@ inline void fwd_cast(varying int iblock[BLOCK_SIZE], const varying float fblock[
 }
 
 /* inverse block-floating-point transform from signed integers */
-inline void inv_cast(const int *iblock, float *fblock, uint n, int emax)
+inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[BLOCK_SIZE], int emax)
 {
     /* compute power-of-two scale factor s */
     float s = dequantize(1, emax);
 
     /* compute p-bit float x = s*y where |y| <= 2^(p-2) - 1 */
-    for(int i=0; i<n; i++)
+    for(int i=0; i<BLOCK_SIZE; i++)
         fblock[i] = (float)(s * iblock[i]);
 }
 
