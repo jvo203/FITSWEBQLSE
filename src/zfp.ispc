@@ -116,20 +116,17 @@ inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[
 }
 
 /* forward lifting transform of 4-vector */
-inline void fwd_lift(varying int *p, const uniform uint s)
+/* efficient gather / scatter */
+inline void fwd_lift(varying int p[BLOCK_SIZE], const uniform uint offset, const uniform uint s)
 {
     varying int x, y, z, w;
 
-    x = *p;
-    p += s;
-    y = *p;
-    p += s;
-    z = *p;
-    p += s;
-    w = *p;
-    p += s;
+    x = p[offset];
+    y = p[offset+s];
+    z = p[offset+2*s];
+    w = p[offset+3*s];
 
-    /*
+     /*
   ** non-orthogonal transform
   **        ( 4  4  4  4) (x)
   ** 1/16 * ( 5  1 -1 -5) (y)
@@ -151,29 +148,22 @@ inline void fwd_lift(varying int *p, const uniform uint s)
     w += y >> 1;
     y -= w >> 1;
 
-    p -= s;
-    *p = w;
-    p -= s;
-    *p = z;
-    p -= s;
-    *p = y;
-    p -= s;
-    *p = x;
+    p[offset+3*s] = w;
+    p[offset+2*s] = z;
+    p[offset+s] = y;
+    p[offset] = x;
 }
 
 /* inverse lifting transform of 4-vector */
-void inv_lift(varying int *p, uint s)
+/* efficient gather / scatter */
+void inv_lift(varying int p[BLOCK_SIZE], const uniform uint offset, const uniform uint s)
 {
     varying int x, y, z, w;
 
-    x = *p;
-    p += s;
-    y = *p;
-    p += s;
-    z = *p;
-    p += s;
-    w = *p;
-    p += s;
+    x = p[offset];
+    y = p[offset+s];
+    z = p[offset+2*s];
+    w = p[offset+3*s];
 
     /*
   ** non-orthogonal transform
@@ -197,14 +187,10 @@ void inv_lift(varying int *p, uint s)
     x <<= 1;
     x -= w;
 
-    p -= s;
-    *p = w;
-    p -= s;
-    *p = z;
-    p -= s;
-    *p = y;
-    p -= s;
-    *p = x;
+    p[offset+3*s] = w;
+    p[offset+2*s] = z;
+    p[offset+s] = y;
+    p[offset] = x;
 }
 
 /* map two's complement signed integer to negabinary unsigned integer */
@@ -235,30 +221,31 @@ inline void inv_order(const uint *ublock, int *iblock, const uchar *perm, uint n
 }
 
 /* forward decorrelating 2D transform */
-void fwd_xform(varying int *p)
+void fwd_xform(varying int p[BLOCK_SIZE])
 {
     uniform uint x, y;
 
     /* transform along x */
     for (y = 0; y < 4; y++)
-        fwd_lift(p + 4 * y, 1);
+        fwd_lift(p, 4 * y, 1);
 
     /* transform along y */
     for (x = 0; x < 4; x++)
-        fwd_lift(p + 1 * x, 4);
+        fwd_lift(p, 1 * x, 4);
 }
 
 /* inverse decorrelating 2D transform */
-void inv_xform(varying int *p)
+void inv_xform(varying int p[BLOCK_SIZE])
 {
     uniform uint x, y;
 
     /* transform along y */
     for (x = 0; x < 4; x++)
-        inv_lift(p + 1 * x, 4);
+        inv_lift(p, 1 * x, 4);
+        
     /* transform along x */
     for (y = 0; y < 4; y++)
-        inv_lift(p + 4 * y, 1);
+        inv_lift(p, 4 * y, 1);
 }
 
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec)
