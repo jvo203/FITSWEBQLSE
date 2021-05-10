@@ -71,11 +71,11 @@ inline int exponent(float x)
     return -EBIAS;
 }
 
-inline int exponent_block(const float *p, uint n)
+inline int exponent_block(varying float p[16])
 {
     float max = 0;
 
-    for(int i=0; i<n; i++)
+    for(int i=0; i<BLOCK_SIZE; i++)
     {
         float f = FABS(p[i]);
 
@@ -97,13 +97,44 @@ inline float dequantize(int x, int e)
     return LDEXP((float)x, e - (CHAR_BIT * (int)sizeof(float) - 2));
 }
 
-export void vec_encode_block(uniform float fblock[], uniform int iblock[], uniform uint ublock[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
+
+/* forward block-floating-point transform to signed integers */
+inline void fwd_cast(int *iblock, const float *fblock, uint n, int emax)
+{
+    /* compute power-of-two scale factor s */
+    float s = quantize(1, emax);
+    
+    /* compute p-bit int y = s*x where x is floating and |y| <= 2^(p-2) - 1 */
+    for(int i=0; i<n; i++)
+        iblock[i] = (int)(s * fblock[i]);
+}
+
+/* inverse block-floating-point transform from signed integers */
+inline void inv_cast(const int *iblock, float *fblock, uint n, int emax)
+{
+    /* compute power-of-two scale factor s */
+    float s = dequantize(1, emax);
+
+    /* compute p-bit float x = s*y where |y| <= 2^(p-2) - 1 */
+    for(int i=0; i<n; i++)
+        fblock[i] = (float)(s * iblock[i]);
+}
+
+export void vec_encode_block(uniform float src[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
 {
     // process each block in parallel
     foreach(j=0 ... height, i=0 ... width)
     {
+        float fblock[BLOCK_SIZE];
+        int iblock[BLOCK_SIZE];
+        uint ublock[BLOCK_SIZE];
+
+        // copy the source data
+        for(int k=0; k<BLOCK_SIZE; k++)
+            fblock[k] = src[k];
+
         /* compute maximum exponent */
-        int emax = exponent_block(fblock, BLOCK_SIZE);
+        int emax = exponent_block(fblock);
         int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
         uint e = maxprec ? emax + EBIAS : 0;
 
