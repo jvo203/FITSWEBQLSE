@@ -9,6 +9,8 @@
 
 #include <string.h>
 
+#include "../src/zfp.h"
+
 typedef unsigned char uchar;
 typedef unsigned int uint;
 typedef int8_t int8;
