@@ -100,7 +100,7 @@ inline float dequantize(int x, int e)
 
 
 /* forward block-floating-point transform to signed integers */
-inline void fwd_cast(varying int iblock[BLOCK_SIZE], const varying float fblock[BLOCK_SIZE], int emax)
+inline void fwd_cast(varying int iblock[BLOCK_SIZE], const varying float fblock[BLOCK_SIZE], varying int emax)
 {
     /* compute power-of-two scale factor s */
     float s = quantize(1, emax);
@@ -111,7 +111,7 @@ inline void fwd_cast(varying int iblock[BLOCK_SIZE], const varying float fblock[
 }
 
 /* inverse block-floating-point transform from signed integers */
-inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[BLOCK_SIZE], int emax)
+inline void inv_cast(const varying int iblock[BLOCK_SIZE], varying float fblock[BLOCK_SIZE], varying int emax)
 {
     /* compute power-of-two scale factor s */
     float s = dequantize(1, emax);
