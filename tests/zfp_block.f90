@@ -9,6 +9,7 @@ program main
     & reshape([4, 4, 4, 4, 6, 2, -2, -6, -4, 4, 4, -4, -1, 5, -5, 1], [4, 4])
     integer(kind=4), dimension(16), parameter :: PERM =&
     & [0, 1, 4, 5, 2, 8, 6, 9, 3, 12, 10, 7, 13, 11, 14, 15]
+    integer(kind=4), parameter :: NBMASK = Z'aaaaaaaa'
 
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
@@ -136,17 +137,17 @@ contains
 
         integer, dimension(16), intent(inout) :: p
 
-        ! reverse the order
-        p = p(1 + PERM)
-
-        ! convert to unsigned integer
-        call int2uint(p)
+        ! re-order and convert to unsigned integer
+        p = int2uint(p(1 + PERM))
 
     end subroutine fwd_order
 
-    elemental subroutine int2uint(x)
+    elemental integer function int2uint(x)
         implicit none
-        integer, intent(inout) :: x
+        integer, intent(in) :: x
 
-    end subroutine int2uint
+        ! ((uint)x + NBMASK) ^ NBMASK
+        int2uint = IEOR(x + NBMASK, NBMASK)
+
+    end function int2uint
 end program main
