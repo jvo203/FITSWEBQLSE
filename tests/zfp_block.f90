@@ -68,8 +68,6 @@ contains
         integer, intent(in) :: offset, s
         integer :: idx, x, y, z, w
 
-        print *, 'offset:', offset, 'scale:', s
-
         idx = 1 + offset
 
         x = p(idx)
@@ -83,43 +81,25 @@ contains
 
         w = p(idx)
 
-        print *, '--> x:', x, 'y:', y, 'z:', z, 'w:', w
-
         ! non-orthogonal transform
         !        ( 4  4  4  4) (x)
         ! 1/16 * ( 5  1 -1 -5) (y)
         !        (-4  4  4 -4) (z)
         !        (-2  6 -6  2) (w)
         x = x + w
-        print *, 'x:', x
-        x = shiftr(x, 1)
-        print *, 'x:', x
+        x = shifta(x, 1)
         w = w - x
-        print *, 'w:', w
         z = z + y
-        print *, 'z:', z
-        z = shiftr(z, 1)
-        print *, 'z:', z
+        z = shifta(z, 1)
         y = y - z
-        print *, 'y:', y
         x = x + z
-        print *, 'x:', x
-        x = shiftr(x, 1)
-        print *, 'x:', x
+        x = shifta(x, 1)
         z = z - x
-        print *, 'z:', z
         w = w + y
-        print *, 'w:', w
-        w = shiftr(w, 1)
-        print *, 'x:', x
+        w = shifta(w, 1)
         y = y - w
-        print *, 'y:', y
-        w = w + shiftr(y, 1)
-        print *, 'w:', w
-        y = y - shiftr(w, 1)
-        print *, 'y:', y
-
-        print *, '<-- x:', x, 'y:', y, 'z:', z, 'w:', w
+        w = w + shifta(y, 1)
+        y = y - shifta(w, 1)
 
         p(idx) = w
         idx = idx - s
