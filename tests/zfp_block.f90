@@ -57,7 +57,7 @@ program main
     ! qint = matmul(inv_coeffs, qint)/4
     ! print *, 'reverse decorrelation:', qint
 contains
-    subroutine fwd_lift(p, offset, s)
+    pure subroutine fwd_lift(p, offset, s)
         implicit none
 
         integer, dimension(16), intent(inout) :: p
@@ -114,7 +114,7 @@ contains
 
     end subroutine fwd_lift
 
-    subroutine fwd_xform(p)
+    pure subroutine fwd_xform(p)
         implicit none
 
         integer, dimension(16), intent(inout) :: p
