@@ -185,6 +185,8 @@ void fwd_lift(int *p, uint s)
     w = *p;
     p += s;
 
+    printf("--> x:%d, y:%d, z:%d, w:%d\n", x, y, z, w);
+
     /*
   ** non-orthogonal transform
   **        ( 4  4  4  4) (x)
@@ -206,6 +208,8 @@ void fwd_lift(int *p, uint s)
     y -= w;
     w += y >> 1;
     y -= w >> 1;
+
+    printf("<-- x:%d, y:%d, z:%d, w:%d\n", x, y, z, w);
 
     p -= s;
     *p = w;
@@ -296,12 +300,20 @@ void inv_order(const uint *ublock, int *iblock, const uchar *perm, uint n)
 void fwd_xform(int *p)
 {
     uint x, y;
+
     /* transform along x */
     for (y = 0; y < 4; y++)
+    {
+        printf("offset: %u, scale: %d\n", 4 * y, 1);
         fwd_lift(p + 4 * y, 1);
+    }
+
     /* transform along y */
     for (x = 0; x < 4; x++)
+    {
+        printf("offset: %u, scale: %d\n", 1 * x, 4);
         fwd_lift(p + 1 * x, 4);
+    }
 }
 
 /* inverse decorrelating 2D transform */
