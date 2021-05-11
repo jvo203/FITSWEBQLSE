@@ -49,8 +49,8 @@ program main
     call fwd_xform(iblock)
     print *, 'iblock:', iblock
 
-    ! re-order and convert to unsigned
-    iblock = iblock(1 + PERM)
+    ! reorder signed coefficients and convert to unsigned integer
+    call fwd_order(iblock)
     print *, 'iblock:', iblock
 
     ! inverse works OK
@@ -130,4 +130,23 @@ contains
             call fwd_lift(p, 1*x, 4)
         end do
     end subroutine fwd_xform
+
+    pure subroutine fwd_order(p)
+        implicit none
+
+        integer, dimension(16), intent(inout) :: p
+
+        ! reverse the order
+        p = p(1 + PERM)
+
+        ! convert to unsigned integer
+        call int2uint(p)
+
+    end subroutine fwd_order
+
+    elemental subroutine int2uint(x)
+        implicit none
+        integer, intent(inout) :: x
+
+    end subroutine int2uint
 end program main
