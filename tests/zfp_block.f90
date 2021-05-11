@@ -82,6 +82,10 @@ contains
         ! 1/16 * ( 5  1 -1 -5) (y)
         !        (-4  4  4 -4) (z)
         !        (-2  6 -6  2) (w)
+
+        ! shiftr does not preserve the sign bit
+        ! therefore shifta is used in the code below
+
         x = x + w
         x = shifta(x, 1)
         w = w - x
