@@ -48,8 +48,10 @@ program main
     print *, 'iblock:', iblock
 
     ! decorrelate
-    call decorrelate(iblock)
-    print *, 'decorrelate:', iblock
+    call fwd_xform(iblock)
+    print *, 'iblock:', iblock
+
+    ! negate and re-order
 
     ! reordering
     ! ordered = reshape(qint, [16])
@@ -59,10 +61,73 @@ program main
     ! qint = matmul(inv_coeffs, qint)/4
     ! print *, 'reverse decorrelation:', qint
 contains
-    pure subroutine decorrelate(iblock)
+    pure subroutine fwd_lift(p, offset, s)
         implicit none
 
-        integer, dimension(4*4), intent(inout) :: iblock
+        integer, dimension(16), intent(inout) :: p
+        integer, intent(in) :: offset, s
+        integer :: idx, x, y, z, w
 
-    end subroutine decorrelate
+        idx = 1 + offset
+
+        x = p(idx)
+        idx = idx + s
+
+        y = p(idx)
+        idx = idx + s
+
+        z = p(idx)
+        idx = idx + s
+
+        w = p(idx)
+
+        ! non-orthogonal transform
+        !        ( 4  4  4  4) (x)
+        ! 1/16 * ( 5  1 -1 -5) (y)
+        !        (-4  4  4 -4) (z)
+        !        (-2  6 -6  2) (w)
+        x = x + w
+        x = shiftr(x, 1)
+        w = w - x
+        z = z + y
+        z = shiftr(z, 1)
+        y = y - z
+        x = x + z
+        x = shiftr(x, 1)
+        z = z - x
+        w = w + y
+        w = shiftr(w, 1)
+        y = y - w
+        w = w + shiftr(y, 1)
+        y = y - shiftr(w, 1)
+
+        p(idx) = w
+        idx = idx - s
+
+        p(idx) = z
+        idx = idx - s
+
+        p(idx) = y
+        idx = idx - s
+
+        p(idx) = x
+
+    end subroutine fwd_lift
+
+    pure subroutine fwd_xform(p)
+        implicit none
+
+        integer, dimension(16), intent(inout) :: p
+        integer :: x, y
+
+        ! transform along x
+        do y = 0, 3
+            call fwd_lift(p, 4*y, 1)
+        end do
+
+        ! transform along y
+        do x = 0, 3
+            call fwd_lift(p, 1*x, 4)
+        end do
+    end subroutine fwd_xform
 end program main
