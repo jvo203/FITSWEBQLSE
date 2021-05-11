@@ -2,7 +2,7 @@ program main
     use, intrinsic :: iso_c_binding
     use wavelet
 
-    integer(kind=4), parameter :: fraction_bits = 23
+    integer(kind=4), parameter :: fraction_bits = 30
     integer(kind=4), dimension(4, 4), parameter :: fwd_coeffs =&
     & reshape([4, 5, -4, -2, 4, 1, 4, 6, 4, -1, 4, -6, 4, -5, -4, 2], [4, 4])
     integer(kind=4), dimension(4, 4), parameter :: inv_coeffs =&
@@ -15,7 +15,7 @@ program main
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
     integer, dimension(4, 4) :: qint, i
-    integer, dimension(16) :: ordered
+    integer, dimension(16) :: iblock
     integer :: max_exp
 
     ! loop counters
@@ -42,18 +42,27 @@ program main
     i = e - max_exp + fraction_bits
     qint = nint(set_exponent(x, i))
 
-    print *, 'i:', i
-    print *, 'qint:', qint
+    iblock = reshape(qint, [16])
 
-    qint = matmul(fwd_coeffs, qint)/16
-    print *, 'decorrelation:', qint
+    print *, 'i:', i
+    print *, 'iblock:', iblock
+
+    ! decorrelate
+    call decorrelate(iblock)
+    print *, 'decorrelate:', iblock
 
     ! reordering
-    ordered = reshape(qint, [16])
-    print *, 'ordered:', ordered(perm_f + 1)
+    ! ordered = reshape(qint, [16])
+    ! print *, 'ordered:', ordered(perm_f + 1)
 
     ! inverse works OK
-    qint = matmul(inv_coeffs, qint)/4
-    print *, 'reverse decorrelation:', qint
+    ! qint = matmul(inv_coeffs, qint)/4
+    ! print *, 'reverse decorrelation:', qint
+contains
+    pure subroutine decorrelate(iblock)
+        implicit none
 
+        integer, dimension(4*4), intent(inout) :: iblock
+
+    end subroutine decorrelate
 end program main
