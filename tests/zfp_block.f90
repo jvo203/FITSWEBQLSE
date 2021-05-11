@@ -142,12 +142,25 @@ contains
 
     end subroutine fwd_order
 
+    ! map two's complement signed integer to negabinary unsigned integer
     elemental integer function int2uint(x)
         implicit none
+
         integer, intent(in) :: x
 
         ! ((uint)x + NBMASK) ^ NBMASK
         int2uint = IEOR(x + NBMASK, NBMASK)
 
     end function int2uint
+
+    ! map two's complement signed integer to negabinary unsigned integer
+    elemental integer function uint2int(x)
+        implicit none
+
+        integer, intent(in) :: x
+
+        ! (int)((x ^ NBMASK) - NBMASK)
+        uint2int = IEOR(x, NBMASK) - NBMASK
+
+    end function uint2int
 end program main
