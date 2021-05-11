@@ -83,6 +83,8 @@ contains
 
         w = p(idx)
 
+        print *, '--> x:', x, 'y:', y, 'z:', z, 'w:', w
+
         ! non-orthogonal transform
         !        ( 4  4  4  4) (x)
         ! 1/16 * ( 5  1 -1 -5) (y)
@@ -102,6 +104,8 @@ contains
         y = y - w
         w = w + shiftr(y, 1)
         y = y - shiftr(w, 1)
+
+        print *, '<-- x:', x, 'y:', y, 'z:', z, 'w:', w
 
         p(idx) = w
         idx = idx - s
