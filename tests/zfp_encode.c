@@ -195,33 +195,33 @@ void fwd_lift(int *p, uint s)
   **        (-2  6 -6  2) (w)
   */
     x += w;
-    printf("x:%d", x);
+    printf("x:%d\n", x);
     x >>= 1;
-    printf("x:%d", x);
+    printf("x:%d\n", x);
     w -= x;
-    printf("w:%d", w);
+    printf("w:%d\n", w);
     z += y;
-    printf("z:%d", z);
+    printf("z:%d\n", z);
     z >>= 1;
-    printf("z:%d", z);
+    printf("z:%d\n", z);
     y -= z;
-    printf("y:%d", y);
+    printf("y:%d\n", y);
     x += z;
-    printf("x:%d", x);
+    printf("x:%d\n", x);
     x >>= 1;
-    printf("x:%d", x);
+    printf("x:%d\n", x);
     z -= x;
-    printf("z:%d", z);
+    printf("z:%d\n", z);
     w += y;
-    printf("w:%d", w);
+    printf("w:%d\n", w);
     w >>= 1;
-    printf("w:%d", w);
+    printf("w:%d\n", w);
     y -= w;
-    printf("y:%d", y);
+    printf("y:%d\n", y);
     w += y >> 1;
-    printf("w:%d", w);
+    printf("w:%d\n", w);
     y -= w >> 1;
-    printf("y:%d", y);
+    printf("y:%d\n", y);
 
     printf("<-- x:%d, y:%d, z:%d, w:%d\n", x, y, z, w);
 
