@@ -52,7 +52,7 @@ program main
 
     ! reorder signed coefficients and convert to unsigned integer
     call fwd_order(iblock)
-    print *, 'iblock:', iblock
+    print *, 'ublock:', iblock
 
     ! inverse works OK
     ! qint = matmul(inv_coeffs, qint)/4
