@@ -3,12 +3,11 @@ program main
     use wavelet
 
     integer(kind=4), parameter :: fraction_bits = 30
-    integer(kind=4), dimension(4, 4), parameter :: fwd_coeffs =&
-    & reshape([4, 5, -4, -2, 4, 1, 4, 6, 4, -1, 4, -6, 4, -5, -4, 2], [4, 4])
-    integer(kind=4), dimension(4, 4), parameter :: inv_coeffs =&
-    & reshape([4, 4, 4, 4, 6, 2, -2, -6, -4, 4, 4, -4, -1, 5, -5, 1], [4, 4])
+    integer(kind=4), parameter :: EBIAS = 127
+
     integer(kind=4), dimension(16), parameter :: PERM =&
     & [0, 1, 4, 5, 2, 8, 6, 9, 3, 12, 10, 7, 13, 11, 14, 15]
+
     integer(kind=4), parameter :: NBMASK = Z'aaaaaaaa'
 
     real(kind=4), dimension(4, 4) :: x
