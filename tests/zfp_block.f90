@@ -20,6 +20,7 @@ program main
     ! the second bit (pos .eq. 1) : if the first bit is '0' then '0' : non-NaN, '1' : NaN
     integer(kind=16) :: bitstream
     integer :: pos
+    integer :: bits
 
     ! loop counters
     integer ix, iy
@@ -54,7 +55,12 @@ program main
     pos = pos + 2
 
     ! emit the biased exponent (8 bits)
-    call mvbits(int(max_exp + EBIAS, kind=16), 0, 8, bitstream, pos)
+    ! call mvbits(int(max_exp + EBIAS, kind=16), 0, 8, bitstream, pos)
+
+    bits = max_exp + EBIAS
+    write (*, '(a,b32.32)') 'biased max_exp ', bits
+
+    bitstream = stream_write_bits(bitstream, bits, 8)
     pos = pos + 8
 
     i = e - max_exp + fraction_bits
@@ -72,6 +78,8 @@ program main
     ! reorder signed coefficients and convert to unsigned integer
     call fwd_order(iblock)
     print *, 'ublock:', iblock
+
+    bitstream = pad_stream(bitstream, 128 - pos)
 
     write (*, '(a,b128.128)') 'bitstream ', bitstream
     print *, 'pos', pos
@@ -185,4 +193,63 @@ contains
         uint2int = IEOR(x, NBMASK) - NBMASK
 
     end function uint2int
+
+    function stream_write_bit(stream, bit)
+        integer(kind=16), intent(in) :: stream
+        integer, intent(in) ::bit
+
+        integer(kind=16) :: stream_write_bit
+
+        ! make place for the new bit
+        stream_write_bit = shiftl(stream, 1)
+
+        ! set the LSB bit
+        if (bit .eq. 1) then
+            stream_write_bit = ibset(stream_write_bit, 0)
+        end if
+
+    end function stream_write_bit
+
+    function stream_write_bits(stream, bits, n)
+        integer(kind=16), intent(in) :: stream
+        integer, intent(inout) ::bits
+        integer, intent(in) :: n
+
+        integer(kind=16) :: stream_write_bits
+        integer :: i
+
+        stream_write_bits = stream
+
+        if (n .lt. 1) then
+            return
+        end if
+
+        ! write out bits from the LSB to MSB
+        do i = 1, n
+            stream_write_bits = stream_write_bit(stream_write_bits, iand(bits, 1))
+            bits = shiftr(bits, 1)
+        end do
+
+        return
+    end function stream_write_bits
+
+    function pad_stream(stream, n)
+        integer(kind=16), intent(in) :: stream
+        integer, intent(in) :: n
+
+        integer(kind=16) :: pad_stream
+        integer :: i
+
+        pad_stream = stream
+
+        if (n .lt. 1) then
+            return
+        end if
+
+        do i = 1, n
+            pad_stream = shiftl(pad_stream, 1)
+        end do
+
+        return
+    end function pad_stream
 end program main
