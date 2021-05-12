@@ -54,6 +54,8 @@ program main
     pos = pos + 2
 
     ! emit the biased exponent (8 bits)
+    call mvbits(int(max_exp + EBIAS, kind=16), 0, 8, bitstream, pos)
+    pos = pos + 8
 
     i = e - max_exp + fraction_bits
     qint = nint(set_exponent(x, i))
@@ -71,7 +73,8 @@ program main
     call fwd_order(iblock)
     print *, 'ublock:', iblock
 
-    write (*, '(a,b128.128)') 'bitstream: ', bitstream
+    write (*, '(a,b128.128)') 'bitstream ', bitstream
+    print *, 'pos', pos
 
     ! inverse works OK
     ! qint = matmul(inv_coeffs, qint)/4
