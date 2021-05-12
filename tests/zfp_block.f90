@@ -1,6 +1,5 @@
 program main
     use, intrinsic :: iso_c_binding
-    use wavelet
 
     integer(kind=4), parameter :: fraction_bits = 30
     integer(kind=4), parameter :: EBIAS = 127
@@ -15,6 +14,12 @@ program main
     integer, dimension(4, 4) :: qint, i
     integer, dimension(16) :: iblock
     integer :: max_exp
+
+    ! bitstream
+    ! the first bit (pos .eq. 0) : '0' - all values are either non-NaN or NaN
+    ! the second bit (pos .eq. 1) : if the first bit is '0' then '0' : non-NaN, '1' : NaN
+    integer(kind=16) :: bitstream
+    integer :: pos
 
     ! loop counters
     integer ix, iy
@@ -37,6 +42,19 @@ program main
     print *, 'e:', e
     print *, 'max_exp:', max_exp
 
+    ! clear the bitstream
+    bitstream = 0
+    pos = 0
+
+    ! bitstream = ibset(bitstream, 0)
+    ! call mvbits(int(3, kind=16), 0, 3, bitstream, pos)
+
+    ! all values are non-NaN, emit '00';
+    ! no need to do anything since initially bitstream = 0
+    pos = pos + 2
+
+    ! emit the biased exponent (8 bits)
+
     i = e - max_exp + fraction_bits
     qint = nint(set_exponent(x, i))
 
@@ -52,6 +70,8 @@ program main
     ! reorder signed coefficients and convert to unsigned integer
     call fwd_order(iblock)
     print *, 'ublock:', iblock
+
+    write (*, '(a,b128.128)') 'bitstream: ', bitstream
 
     ! inverse works OK
     ! qint = matmul(inv_coeffs, qint)/4
