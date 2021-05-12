@@ -202,6 +202,23 @@ contains
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: pos
 
+        integer(kind=2) :: val, i, k, bit
+
+        ! iterate over 32 bits from MSB to LSB
+        do k = 31, 0, -1
+
+            val = 0
+            ! gather k-plane bits from the input data
+            do i = 1, 16
+                bit = int(ibits(data(i), k, 1), kind=2)
+                ! print *, 'i', i, 'bit', bit, data(i)
+                val = ior(shiftl(val, 1), bit)
+            end do
+
+            ! display the value (validation)
+            write (*, '(a,i0,a,b16.16,a,i0)') 'k: ', k, ', val: ', val, ' <--> ', val
+        end do
+
     end subroutine encode_ints
 
     function stream_write_bit(stream, bit)
