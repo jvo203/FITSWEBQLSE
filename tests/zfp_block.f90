@@ -79,6 +79,9 @@ program main
     call fwd_order(iblock)
     print *, 'ublock:', iblock
 
+    ! encode 16-bit planes (from MSB to LSB)
+    call encode_ints(iblock, bitstream, pos)
+
     bitstream = pad_stream(bitstream, 128 - pos)
 
     write (*, '(a,b128.128)') 'bitstream ', bitstream
@@ -194,6 +197,13 @@ contains
 
     end function uint2int
 
+    subroutine encode_ints(data, stream, pos)
+        integer, dimension(16), intent(in) :: data
+        integer(kind=16), intent(inout) :: stream
+        integer, intent(inout) :: pos
+
+    end subroutine encode_ints
+
     function stream_write_bit(stream, bit)
         integer(kind=16), intent(in) :: stream
         integer, intent(in) ::bit
@@ -212,7 +222,7 @@ contains
 
     function stream_write_bits(stream, bits, n)
         integer(kind=16), intent(in) :: stream
-        integer, intent(inout) ::bits
+        integer, intent(inout) :: bits
         integer, intent(in) :: n
 
         integer(kind=16) :: stream_write_bits
