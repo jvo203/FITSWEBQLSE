@@ -104,10 +104,9 @@ program main
 
     bits = stream_read_bits(bitstream, pos, 8)
     pos = pos - 8
-    write (*, '(a,b32.32)') 'bits ', bits
-
     max_exp = bits - EBIAS
     print *, 'max_exp', max_exp
+
 contains
     pure subroutine fwd_lift(p, offset, s)
         implicit none
@@ -387,11 +386,8 @@ contains
 
         if (n .lt. 1) return
 
-        ! write out bits from the LSB to MSB
-        do i = 1, n
-            call stream_write_bit(stream, iand(bits, 1))
-            bits = shiftr(bits, 1)
-        end do
+        stream = shiftl(stream, n)
+        call mvbits(int(bits, kind=16), 0, 8, stream, 0)
 
         return
     end subroutine stream_write_bits
@@ -443,14 +439,7 @@ contains
 
         if (n .lt. 1) return
 
-        do i = 0, n - 1
-            stream_read_bits = shiftl(stream_read_bits, 1)
-            stream_read_bits = ior(stream_read_bit(stream, pos - i), stream_read_bits)
-        end do
-
-        ! print *, 'reading', n, 'bits starting at', pos - n + 1
-        ! write (*, '(a,b128.128)') 'stream_read_bits ', ibits(stream, pos - n + 1, n)
-        ! stream_read_bits = int(ibits(stream, pos - n + 1, n))
+        stream_read_bits = int(ibits(stream, pos - n + 1, n))
 
         return
     end function stream_read_bits
