@@ -402,7 +402,7 @@ contains
 
         if (n .lt. 1) return
 
-        print *, 'padding the stream with', n, 'bits'
+        print *, 'padding the stream with', n, '0 bits'
 
         stream = shiftl(stream, n)
 
