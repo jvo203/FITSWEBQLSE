@@ -41,10 +41,6 @@ program main
     end do
 
     print *, x
-    ! call to_daub4_block(x)
-    ! print *, 'fwt:', x
-    ! call from_daub4_block(x)
-    ! print *, 'iwt:', x
 
     e = exponent(x)
     max_exp = maxval(e)
@@ -99,9 +95,7 @@ program main
     write (*, '(a,b128.128)') 'bitstream ', bitstream
     print *, 'pos', pos
 
-    ! inverse works OK
-    ! qint = matmul(inv_coeffs, qint)/4
-    ! print *, 'reverse decorrelation:', qint
+    ! reverse the process
 contains
     pure subroutine fwd_lift(p, offset, s)
         implicit none
