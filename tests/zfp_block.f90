@@ -96,6 +96,7 @@ program main
     print *, 'pos', pos
 
     ! reverse the process
+    pos = max_bits
 contains
     pure subroutine fwd_lift(p, offset, s)
         implicit none
