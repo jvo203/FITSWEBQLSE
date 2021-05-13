@@ -387,7 +387,7 @@ contains
         if (n .lt. 1) return
 
         stream = shiftl(stream, n)
-        call mvbits(int(bits, kind=16), 0, 8, stream, 0)
+        call mvbits(int(bits, kind=16), 0, n, stream, 0)
 
         return
     end subroutine stream_write_bits
