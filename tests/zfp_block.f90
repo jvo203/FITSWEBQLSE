@@ -96,11 +96,18 @@ program main
     print *, 'pos', pos
 
     ! reverse the process
-    pos = max_bits
+    pos = max_bits - 1
 
     ! read the NaN mask bit
     print *, 'NaN mask', stream_read_bit(bitstream, pos)
     pos = pos - 1
+
+    bits = stream_read_bits(bitstream, pos, 8)
+    pos = pos - 8
+    write (*, '(a,b32.32)') 'bits ', bits
+
+    max_exp = bits - EBIAS
+    print *, 'max_exp', max_exp
 contains
     pure subroutine fwd_lift(p, offset, s)
         implicit none
@@ -380,8 +387,8 @@ contains
 
         if (n .lt. 1) return
 
-        ! write out bits from the MSB to LSB
-        do i = n, 1, -1
+        ! write out bits from the LSB to MSB
+        do i = 1, n
             call stream_write_bit(stream, iand(bits, 1))
             bits = shiftr(bits, 1)
         end do
@@ -423,5 +430,29 @@ contains
         return
 
     end function stream_read_bit
+
+    integer function stream_read_bits(stream, pos, n)
+        implicit none
+
+        integer(kind=16), intent(in) :: stream
+        integer, intent(in) :: pos, n
+
+        integer :: i
+
+        stream_read_bits = 0
+
+        if (n .lt. 1) return
+
+        do i = 0, n - 1
+            stream_read_bits = shiftl(stream_read_bits, 1)
+            stream_read_bits = ior(stream_read_bit(stream, pos - i), stream_read_bits)
+        end do
+
+        ! print *, 'reading', n, 'bits starting at', pos - n + 1
+        ! write (*, '(a,b128.128)') 'stream_read_bits ', ibits(stream, pos - n + 1, n)
+        ! stream_read_bits = int(ibits(stream, pos - n + 1, n))
+
+        return
+    end function stream_read_bits
 
 end program main
