@@ -259,7 +259,7 @@ contains
         integer, intent(inout) :: pos
         integer, intent(in) :: N
 
-        integer :: i, nbits
+        integer :: i, t, nbits
 
         ! quotient, remainder
         integer :: q, r
@@ -284,18 +284,27 @@ contains
         pos = pos + 1
 
         ! Remainder Code
-        if (r .lt. 2**(b + 1) - M) then
+        t = 2**b - M
+        if (r .lt. t) then
             nbits = b - 1
+
+            print *, 'coding the remainder using', nbits, 'nbits'
+
+            ! check if there is space to write
+            if (pos + nbits .gt. max_bits) return
+            stream = stream_write_bits(stream, r, nbits)
+            pos = pos + nbits
         else
             nbits = b
+            r = r + t
+
+            print *, 'coding remainder+', r, 'using', nbits, 'nbits'
+
+            ! check if there is space to write
+            if (pos + nbits .gt. max_bits) return
+            stream = stream_write_bits(stream, r, nbits)
+            pos = pos + nbits
         end if
-
-        print *, 'coding the remainder using', nbits, 'nbits'
-
-        ! check if there is space to write
-        if (pos + nbits .gt. max_bits) return
-        stream = stream_write_bits(stream, q, nbits)
-        pos = pos + nbits
 
     end subroutine golomb_encode
 
