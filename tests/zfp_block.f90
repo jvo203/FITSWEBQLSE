@@ -256,13 +256,43 @@ contains
         integer, intent(inout) :: pos
         integer, intent(in) :: N
 
+        integer :: i, nbits
+
         ! quotient, remainder
         integer :: q, r
 
         q = N/M
         r = modulo(N, M)
 
-        print *, 'Golomb: N', N, 'q', q, 'r', r
+        print *, 'Golomb encoder: N', N, 'q', q, 'r', r
+
+        ! Quotient Code
+        if (q .gt. 0) then
+            do i = 1, q
+                ! check if there is space to write
+                if (pos .eq. max_bits) return
+                stream = stream_write_bit(stream, 1)
+                pos = pos + 1
+            end do
+        end if
+
+        if (pos .eq. max_bits) return
+        stream = stream_write_bit(stream, 0)
+        pos = pos + 1
+
+        ! Remainder Code
+        if (r .lt. 2**(b + 1) - M) then
+            nbits = b
+        else
+            nbits = b + 1
+        end if
+
+        print *, 'coding the remainder using', nbits, 'nbits'
+
+        ! check if there is space to write
+        if (pos + nbits .gt. max_bits) return
+        stream = stream_write_bits(stream, q, nbits)
+        pos = pos + nbits
 
     end subroutine golomb_encode
 
