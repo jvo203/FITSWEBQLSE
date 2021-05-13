@@ -88,7 +88,7 @@ program main
     call fwd_order(iblock)
     print *, 'ublock:', iblock
 
-    ! encode 16-bit planes (from MSB to LSB)
+    ! encode 32-bit integers
     call encode_ints(iblock, bitstream, pos)
 
     if (pos .lt. max_bits) then
