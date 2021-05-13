@@ -97,6 +97,10 @@ program main
 
     ! reverse the process
     pos = max_bits
+
+    ! read the NaN mask bit
+    print *, 'NaN mask', stream_read_bit(bitstream, pos)
+    pos = pos - 1
 contains
     pure subroutine fwd_lift(p, offset, s)
         implicit none
@@ -403,4 +407,21 @@ contains
 
         return
     end subroutine pad_stream
+
+    integer function stream_read_bit(stream, pos)
+        implicit none
+
+        integer(kind=16), intent(in) :: stream
+        integer, intent(in) :: pos
+
+        if (btest(stream, pos)) then
+            stream_read_bit = 1
+        else
+            stream_read_bit = 0
+        end if
+
+        return
+
+    end function stream_read_bit
+
 end program main
