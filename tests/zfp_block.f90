@@ -59,9 +59,9 @@ program main
     ! bitstream = ibset(bitstream, 0)
     ! call mvbits(int(3, kind=16), 0, 3, bitstream, pos)
 
-    ! all values are non-NaN, emit '00';
+    ! all values are non-NaN, emit '0';
     ! no need to do anything since initially bitstream = 0
-    pos = pos + 2
+    pos = pos + 1
 
     ! emit the biased exponent (8 bits)
     ! call mvbits(int(max_exp + EBIAS, kind=16), 0, 8, bitstream, pos)
@@ -69,7 +69,7 @@ program main
     bits = max_exp + EBIAS
     write (*, '(a,b32.32)') 'biased max_exp ', bits
 
-    bitstream = stream_write_bits(bitstream, bits, 8)
+    call stream_write_bits(bitstream, bits, 8)
     pos = pos + 8
 
     i = e - max_exp + fraction_bits
@@ -92,7 +92,7 @@ program main
     call encode_ints(iblock, bitstream, pos)
 
     if (pos .lt. max_bits) then
-        bitstream = pad_stream(bitstream, max_bits - pos)
+        call pad_stream(bitstream, max_bits - pos)
         pos = max_bits
     end if
 
@@ -251,7 +251,7 @@ contains
             end do
 
             ! display the value (validation)
-            write (*, '(a,i0,a,b16.16)') 'k: ', k, ', val: ', val
+            ! write (*, '(a,i0,a,b16.16)') 'k: ', k, ', val: ', val
         end do
 
         ! flush the encoder
@@ -274,20 +274,20 @@ contains
         q = N/M
         r = modulo(N, M)
 
-        print *, 'Golomb encoder: N', N, 'q', q, 'r', r
+        print *, 'Golomb encoder: N', N, 'pos', pos, 'q', q, 'r', r
 
         ! Quotient Code
         if (q .gt. 0) then
             do i = 1, q
                 ! check if there is space to write
                 if (pos .eq. max_bits) return
-                stream = stream_write_bit(stream, 1)
+                call stream_write_bit(stream, 1)
                 pos = pos + 1
             end do
         end if
 
         if (pos .eq. max_bits) return
-        stream = stream_write_bit(stream, 0)
+        call stream_write_bit(stream, 0)
         pos = pos + 1
 
         ! Remainder Code
@@ -299,7 +299,7 @@ contains
 
             ! check if there is space to write
             if (pos + nbits .gt. max_bits) return
-            stream = stream_write_bits(stream, r, nbits)
+            call stream_write_bits(stream, r, nbits)
             pos = pos + nbits
         else
             nbits = b
@@ -309,7 +309,7 @@ contains
 
             ! check if there is space to write
             if (pos + nbits .gt. max_bits) return
-            stream = stream_write_bits(stream, r, nbits)
+            call stream_write_bits(stream, r, nbits)
             pos = pos + nbits
         end if
 
@@ -330,94 +330,82 @@ contains
         q = N/Rice_M
         r = N
 
-        print *, 'Rice encoder: N', N, 'q', q
+        print *, 'Rice encoder: N', N, 'pos', pos, 'q', q
 
         ! Quotient Code
         if (q .gt. 0) then
             do i = 1, q
                 ! check if there is space to write
                 if (pos .eq. max_bits) return
-                stream = stream_write_bit(stream, 1)
+                call stream_write_bit(stream, 1)
                 pos = pos + 1
             end do
         end if
 
         if (pos .eq. max_bits) return
-        stream = stream_write_bit(stream, 0)
+        call stream_write_bit(stream, 0)
         pos = pos + 1
 
         ! Remainder Code
         ! check if there is space to write
         if (pos + Rice_k .gt. max_bits) return
-        stream = stream_write_bits(stream, r, Rice_k)
+        call stream_write_bits(stream, r, Rice_k)
         pos = pos + Rice_k
 
     end subroutine Rice_encode
 
-    function stream_write_bit(stream, bit)
+    subroutine stream_write_bit(stream, bit)
         implicit none
 
-        integer(kind=16), intent(in) :: stream
+        integer(kind=16), intent(inout) :: stream
         integer, intent(in) ::bit
 
-        integer(kind=16) :: stream_write_bit
-
         ! make place for the new bit
-        stream_write_bit = shiftl(stream, 1)
+        stream = shiftl(stream, 1)
 
         ! set the LSB bit
         if (bit .eq. 1) then
-            stream_write_bit = ibset(stream_write_bit, 0)
+            stream = ibset(stream, 0)
         end if
 
-    end function stream_write_bit
+    end subroutine stream_write_bit
 
-    function stream_write_bits(stream, bits, n)
+    subroutine stream_write_bits(stream, bits, n)
         implicit none
 
-        integer(kind=16), intent(in) :: stream
+        integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: bits
         integer, intent(in) :: n
 
-        integer(kind=16) :: stream_write_bits
         integer :: i
 
-        stream_write_bits = stream
-
-        if (n .lt. 1) then
-            return
-        end if
+        if (n .lt. 1) return
 
         ! write out bits from the MSB to LSB
         do i = n, 1, -1
-            stream_write_bits = stream_write_bit(stream_write_bits, iand(bits, 1))
+            call stream_write_bit(stream, iand(bits, 1))
             bits = shiftr(bits, 1)
         end do
 
         return
-    end function stream_write_bits
+    end subroutine stream_write_bits
 
-    function pad_stream(stream, n)
+    subroutine pad_stream(stream, n)
         implicit none
 
-        integer(kind=16), intent(in) :: stream
+        integer(kind=16), intent(inout) :: stream
         integer, intent(in) :: n
 
-        integer(kind=16) :: pad_stream
         integer :: i
 
-        pad_stream = stream
-
-        if (n .lt. 1) then
-            return
-        end if
+        if (n .lt. 1) return
 
         print *, 'padding the stream with', n, 'bits'
 
         do i = 1, n
-            pad_stream = shiftl(pad_stream, 1)
+            stream = shiftl(stream, 1)
         end do
 
         return
-    end function pad_stream
+    end subroutine pad_stream
 end program main
