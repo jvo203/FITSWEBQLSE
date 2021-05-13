@@ -333,8 +333,8 @@ contains
             return
         end if
 
-        ! write out bits from the LSB to MSB
-        do i = 1, n
+        ! write out bits from the MSB to LSB
+        do i = n, 1, -1
             stream_write_bits = stream_write_bit(stream_write_bits, iand(bits, 1))
             bits = shiftr(bits, 1)
         end do
