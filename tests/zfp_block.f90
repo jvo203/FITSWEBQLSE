@@ -404,9 +404,7 @@ contains
 
         print *, 'padding the stream with', n, 'bits'
 
-        do i = 1, n
-            stream = shiftl(stream, 1)
-        end do
+        stream = shiftl(stream, n)
 
         return
     end subroutine pad_stream
