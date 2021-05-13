@@ -440,6 +440,7 @@ contains
         stream_read_bits = int(ibits(stream, pos - n + 1, n))
 
         return
+
     end function stream_read_bits
 
 end program main
