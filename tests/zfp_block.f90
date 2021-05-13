@@ -10,6 +10,10 @@ program main
 
     integer(kind=4), parameter :: NBMASK = Z'aaaaaaaa'
 
+    ! Golomb encoding
+    integer, parameter :: M = 10
+    integer, parameter :: b = 2
+
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
     integer, dimension(4, 4) :: qint, i
@@ -199,11 +203,18 @@ contains
     end function uint2int
 
     subroutine encode_ints(data, stream, pos)
+        implicit none
+
         integer, dimension(16), intent(in) :: data
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: pos
 
         integer(kind=2) :: val, i, k, bit
+
+        ! a counter for runs of '0'
+        integer :: zcount
+
+        zcount = 0
 
         ! iterate over 32 bits from MSB to LSB
         do k = 31, 0, -1
@@ -213,6 +224,19 @@ contains
             do i = 1, 16
                 bit = int(ibits(data(i), k, 1), kind=2)
                 ! print *, 'i', i, 'bit', bit, data(i)
+
+                if (bit .eq. 1) then
+                    ! the runs of zeroes has finished
+
+                    ! Golomb-encode the zcount
+                    call golomb_encode(stream, pos, zcount)
+
+                    ! reset the zeroes counters
+                    zcount = 0
+                else
+                    zcount = zcount + 1
+                end if
+
                 val = ior(shiftl(val, 1), bit)
             end do
 
@@ -220,9 +244,31 @@ contains
             write (*, '(a,i0,a,b16.16)') 'k: ', k, ', val: ', val
         end do
 
+        ! flush the encoder
+        call golomb_encode(stream, pos, zcount)
+
     end subroutine encode_ints
 
+    subroutine golomb_encode(stream, pos, N)
+        implicit none
+
+        integer(kind=16), intent(inout) :: stream
+        integer, intent(inout) :: pos
+        integer, intent(in) :: N
+
+        ! quotient, remainder
+        integer :: q, r
+
+        q = N/M
+        r = modulo(N, M)
+
+        print *, 'Golomb: N', N, 'q', q, 'r', r
+
+    end subroutine golomb_encode
+
     function stream_write_bit(stream, bit)
+        implicit none
+
         integer(kind=16), intent(in) :: stream
         integer, intent(in) ::bit
 
@@ -239,6 +285,8 @@ contains
     end function stream_write_bit
 
     function stream_write_bits(stream, bits, n)
+        implicit none
+
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: bits
         integer, intent(in) :: n
@@ -262,6 +310,8 @@ contains
     end function stream_write_bits
 
     function pad_stream(stream, n)
+        implicit none
+
         integer(kind=16), intent(in) :: stream
         integer, intent(in) :: n
 
