@@ -12,7 +12,7 @@ program main
 
     ! Golomb encoding
     integer, parameter :: M = 10
-    integer, parameter :: b = 2
+    integer, parameter :: b = 4
 
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
@@ -285,9 +285,9 @@ contains
 
         ! Remainder Code
         if (r .lt. 2**(b + 1) - M) then
-            nbits = b
+            nbits = b - 1
         else
-            nbits = b + 1
+            nbits = b
         end if
 
         print *, 'coding the remainder using', nbits, 'nbits'
