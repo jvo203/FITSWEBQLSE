@@ -87,7 +87,10 @@ program main
     ! encode 16-bit planes (from MSB to LSB)
     call encode_ints(iblock, bitstream, pos)
 
-    bitstream = pad_stream(bitstream, max_bits - pos)
+    if (pos .lt. max_bits) then
+        bitstream = pad_stream(bitstream, max_bits - pos)
+        pos = max_bits
+    end if
 
     write (*, '(a,b128.128)') 'bitstream ', bitstream
     print *, 'pos', pos
@@ -353,6 +356,8 @@ contains
         if (n .lt. 1) then
             return
         end if
+
+        print *, 'padding the stream with', n, 'bits'
 
         do i = 1, n
             pad_stream = shiftl(pad_stream, 1)
