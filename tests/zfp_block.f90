@@ -14,6 +14,10 @@ program main
     integer, parameter :: M = 10
     integer, parameter :: b = 4
 
+    ! Rice encoding
+    integer, parameter :: Rice_M = 8
+    integer, parameter :: Rice_k = 3
+
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
     integer, dimension(4, 4) :: qint, i
@@ -232,7 +236,10 @@ contains
                     ! the runs of zeroes has finished
 
                     ! Golomb-encode the zcount
-                    call golomb_encode(stream, pos, zcount)
+                    ! call Golomb_encode(stream, pos, zcount)
+
+                    ! alternatively RIce-encode the zcount
+                    call Rice_encode(stream, pos, zcount)
 
                     ! reset the zeroes counters
                     zcount = 0
@@ -252,7 +259,7 @@ contains
 
     end subroutine encode_ints
 
-    subroutine golomb_encode(stream, pos, N)
+    subroutine Golomb_encode(stream, pos, N)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -306,7 +313,46 @@ contains
             pos = pos + nbits
         end if
 
-    end subroutine golomb_encode
+    end subroutine Golomb_encode
+
+    subroutine Rice_encode(stream, pos, N)
+        implicit none
+
+        integer(kind=16), intent(inout) :: stream
+        integer, intent(inout) :: pos
+        integer, intent(in) :: N
+
+        integer :: i
+
+        ! quotient, remainder
+        integer :: q, r
+
+        q = N/M
+        r = N
+
+        print *, 'Rice encoder: N', N, 'q', q
+
+        ! Quotient Code
+        if (q .gt. 0) then
+            do i = 1, q
+                ! check if there is space to write
+                if (pos .eq. max_bits) return
+                stream = stream_write_bit(stream, 1)
+                pos = pos + 1
+            end do
+        end if
+
+        if (pos .eq. max_bits) return
+        stream = stream_write_bit(stream, 0)
+        pos = pos + 1
+
+        ! Remainder Code
+        ! check if there is space to write
+        if (pos + Rice_k .gt. max_bits) return
+        stream = stream_write_bits(stream, r, Rice_k)
+        pos = pos + Rice_k
+
+    end subroutine Rice_encode
 
     function stream_write_bit(stream, bit)
         implicit none
