@@ -1,6 +1,7 @@
 program main
     use, intrinsic :: iso_c_binding
 
+    integer(kind=4), parameter :: max_bits = 128
     integer(kind=4), parameter :: fraction_bits = 30
     integer(kind=4), parameter :: EBIAS = 127
 
@@ -82,7 +83,7 @@ program main
     ! encode 16-bit planes (from MSB to LSB)
     call encode_ints(iblock, bitstream, pos)
 
-    bitstream = pad_stream(bitstream, 128 - pos)
+    bitstream = pad_stream(bitstream, max_bits - pos)
 
     write (*, '(a,b128.128)') 'bitstream ', bitstream
     print *, 'pos', pos
@@ -216,7 +217,7 @@ contains
             end do
 
             ! display the value (validation)
-            write (*, '(a,i0,a,b16.16,a,i0)') 'k: ', k, ', val: ', val, ' <--> ', val
+            write (*, '(a,i0,a,b16.16)') 'k: ', k, ', val: ', val
         end do
 
     end subroutine encode_ints
