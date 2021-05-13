@@ -255,7 +255,7 @@ contains
         end do
 
         ! flush the encoder
-        call golomb_encode(stream, pos, zcount)
+        call Rice_encode(stream, pos, zcount)
 
     end subroutine encode_ints
 
@@ -327,7 +327,7 @@ contains
         ! quotient, remainder
         integer :: q, r
 
-        q = N/M
+        q = N/Rice_M
         r = N
 
         print *, 'Rice encoder: N', N, 'q', q
