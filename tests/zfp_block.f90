@@ -324,7 +324,7 @@ contains
 
         integer :: i
 
-        ! quotient, remainder
+        ! quotient, pseudo-remainder
         integer :: q, r
 
         q = N/Rice_M
