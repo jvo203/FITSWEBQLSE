@@ -11,12 +11,12 @@ program main
     integer(kind=4), parameter :: NBMASK = Z'aaaaaaaa'
 
     ! Golomb encoding
-    integer, parameter :: M = 10
-    integer, parameter :: b = 4
+    integer, parameter :: G_M = 10
+    integer, parameter :: G_b = 4
 
     ! Rice encoding
-    integer, parameter :: Rice_M = 8
-    integer, parameter :: Rice_k = 3
+    integer, parameter :: R_k = 3
+    integer, parameter :: R_M = 2**R_k
 
     real(kind=4), dimension(4, 4) :: x
     integer, dimension(4, 4) :: e
@@ -276,8 +276,8 @@ contains
         ! quotient, remainder
         integer :: q, r
 
-        q = N/M
-        r = modulo(N, M)
+        q = N/G_M
+        r = modulo(N, G_M)
 
         print *, 'Golomb encoder: N', N, 'pos', pos, 'q', q, 'r', r
 
@@ -296,9 +296,9 @@ contains
         pos = pos + 1
 
         ! Remainder Code
-        t = 2**b - M
+        t = 2**G_b - G_M
         if (r .lt. t) then
-            nbits = b - 1
+            nbits = G_b - 1
 
             print *, 'coding the remainder using', nbits, 'nbits'
 
@@ -307,7 +307,7 @@ contains
             call stream_write_bits(stream, r, nbits)
             pos = pos + nbits
         else
-            nbits = b
+            nbits = G_b
             r = r + t
 
             print *, 'coding remainder+', r, 'using', nbits, 'nbits'
@@ -332,7 +332,7 @@ contains
         ! quotient, pseudo-remainder
         integer :: q, r
 
-        q = N/Rice_M
+        q = shiftr(N, R_k) ! divide by R_M = 2**R_k
         r = N
 
         print *, 'Rice encoder: N', N, 'pos', pos, 'q', q
@@ -353,9 +353,9 @@ contains
 
         ! Remainder Code
         ! check if there is space to write
-        if (pos + Rice_k .gt. max_bits) return
-        call stream_write_bits(stream, r, Rice_k)
-        pos = pos + Rice_k
+        if (pos + R_k .gt. max_bits) return
+        call stream_write_bits(stream, r, R_k)
+        pos = pos + R_k
 
     end subroutine Rice_encode
 
