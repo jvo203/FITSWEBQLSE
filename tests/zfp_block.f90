@@ -100,10 +100,8 @@ program main
 
     ! read the NaN mask bit
     print *, 'NaN mask', stream_read_bit(bitstream, pos)
-    pos = pos - 1
 
     bits = stream_read_bits(bitstream, pos, 8)
-    pos = pos - 8
     max_exp = bits - EBIAS
     print *, 'max_exp', max_exp
 
@@ -450,13 +448,15 @@ contains
         implicit none
 
         integer(kind=16), intent(in) :: stream
-        integer, intent(in) :: pos
+        integer, intent(inout) :: pos
 
         if (btest(stream, pos)) then
             stream_read_bit = 1
         else
             stream_read_bit = 0
         end if
+
+        pos = pos - 1
 
         return
 
@@ -466,7 +466,8 @@ contains
         implicit none
 
         integer(kind=16), intent(in) :: stream
-        integer, intent(in) :: pos, n
+        integer, intent(inout) :: pos
+        integer, intent(in) :: n
 
         integer :: i
 
@@ -475,6 +476,8 @@ contains
         if (n .lt. 1) return
 
         stream_read_bits = int(ibits(stream, pos - n + 1, n))
+
+        pos = pos - n
 
         return
 
