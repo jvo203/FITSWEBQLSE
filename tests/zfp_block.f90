@@ -68,9 +68,9 @@ program main
     call stream_write_bits(bitstream, bits, 8)
     pos = pos + 8
 
+    ! quantize
     i = e - max_exp + fraction_bits
     qint = nint(set_exponent(x, i))
-
     iblock = reshape(qint, [16])
 
     print *, 'i:', i
@@ -116,6 +116,8 @@ program main
     ! perform decorrelating transform
     call inv_xform(iblock)
     print *, 'iblock:', iblock
+
+    ! de-quantize
 
 contains
     pure subroutine fwd_lift(p, offset, s)
@@ -174,6 +176,64 @@ contains
         p(idx) = x
 
     end subroutine fwd_lift
+
+    ! inverse lifting transform of 4 - vector
+    pure subroutine inv_lift(p, offset, s)
+        implicit none
+
+        integer, dimension(16), intent(inout) :: p
+        integer, intent(in) :: offset, s
+        integer :: idx, x, y, z, w
+
+        idx = 1 + offset
+
+        x = p(idx)
+        idx = idx + s
+
+        y = p(idx)
+        idx = idx + s
+
+        z = p(idx)
+        idx = idx + s
+
+        w = p(idx)
+
+        ! non - orthogonal transform
+        ! (4 6 - 4 - 1) (x)
+        ! 1/4*(4 2 4 5) (y)
+        ! (4 - 2 4 - 5) (z)
+        ! (4 - 6 - 4 1) (w)
+
+        ! shiftr does not preserve the sign bit
+        ! therefore shifta is used in the code below
+
+        y = y + shifta(w, 1)
+        w = w - shifta(y, 1)
+        y = y + w
+        w = shiftl(w, 1)
+        w = w - y
+        z = z + x
+        x = shiftl(x, 1)
+        x = x - z
+        y = y + z
+        z = shiftl(z, 1)
+        z = z - y
+        w = w + x
+        x = shiftl(x, 1)
+        x = x - w
+
+        p(idx) = w
+        idx = idx - s
+
+        p(idx) = z
+        idx = idx - s
+
+        p(idx) = y
+        idx = idx - s
+
+        p(idx) = x
+
+    end subroutine inv_lift
 
     pure subroutine fwd_xform(p)
         implicit none
