@@ -350,7 +350,26 @@ contains
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
+        integer :: s, x, bit
+
         Rice_decode = -1
+
+        s = 0
+        ! count the number of consecutive '1', stop at '0'
+
+        do
+            bit = stream_read_bit(stream, pos)
+
+            if (bit .lt. 0) return
+
+            if (bit .eq. 0) exit
+
+            s = s + 1
+        end do
+
+        x = stream_read_bits(stream, pos, R_k)
+
+        Rice_decode = shiftl(s, R_k) + x
 
         return
     end function Rice_decode
@@ -451,7 +470,7 @@ contains
         integer, intent(inout) :: pos
 
         if (pos .lt. 0) then
-            stream_read_bit = 0
+            stream_read_bit = -1
             return
         end if
 
@@ -476,7 +495,7 @@ contains
 
         integer :: i
 
-        stream_read_bits = 0
+        stream_read_bits = -1
 
         if (n .lt. 1) return
 
