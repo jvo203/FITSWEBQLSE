@@ -65,8 +65,7 @@ program main
     bits = max_exp + EBIAS
     write (*, '(a,b32.32)') 'biased max_exp ', bits
 
-    call stream_write_bits(bitstream, bits, 8)
-    pos = pos + 8
+    call stream_write_bits(bitstream, bits, 8, pos)
 
     ! quantize
     i = e - max_exp + fraction_bits
@@ -88,8 +87,7 @@ program main
     call encode_ints(iblock, bitstream, pos)
 
     if (pos .lt. max_bits) then
-        call pad_stream(bitstream, max_bits - pos)
-        pos = max_bits
+        call pad_stream(bitstream, max_bits - pos, pos)
     end if
 
     write (*, '(a,b128.128)') 'bitstream ', bitstream
@@ -435,28 +433,29 @@ contains
             do i = 1, q
                 ! check if there is space to write
                 if (pos .eq. max_bits) return
-                call stream_write_bit(stream, 1)
-                pos = pos + 1
+                call stream_write_bit(stream, 1, pos)
             end do
         end if
 
         if (pos .eq. max_bits) return
-        call stream_write_bit(stream, 0)
-        pos = pos + 1
+
+        call stream_write_bit(stream, 0, pos)
 
         ! Remainder Code
         t = 2**G_b - G_M
 
         if (r .lt. t) then
+
             nbits = G_b - 1
 
             print *, 'coding the remainder using', nbits, 'nbits'
 
             ! check if there is space to write
             if (pos + nbits .gt. max_bits) return
-            call stream_write_bits(stream, r, nbits)
-            pos = pos + nbits
+            call stream_write_bits(stream, r, nbits, pos)
+
         else
+
             nbits = G_b
             r = r + t
 
@@ -464,8 +463,8 @@ contains
 
             ! check if there is space to write
             if (pos + nbits .gt. max_bits) return
-            call stream_write_bits(stream, r, nbits)
-            pos = pos + nbits
+            call stream_write_bits(stream, r, nbits, pos)
+
         end if
 
     end subroutine Golomb_encode
@@ -538,20 +537,20 @@ contains
             do i = 1, q
                 ! check if there is space to write
                 if (pos .eq. max_bits) return
-                call stream_write_bit(stream, 1)
-                pos = pos + 1
+
+                call stream_write_bit(stream, 1, pos)
             end do
         end if
 
         if (pos .eq. max_bits) return
-        call stream_write_bit(stream, 0)
-        pos = pos + 1
+
+        call stream_write_bit(stream, 0, pos)
 
         ! Remainder Code
         ! check if there is space to write
         if (pos + R_k .gt. max_bits) return
-        call stream_write_bits(stream, r, R_k)
-        pos = pos + R_k
+
+        call stream_write_bits(stream, r, R_k, pos)
 
     end subroutine Rice_encode
 
@@ -588,11 +587,12 @@ contains
 
     end function Rice_decode
 
-    subroutine stream_write_bit(stream, bit)
+    subroutine stream_write_bit(stream, bit, pos)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
-        integer, intent(in) ::bit
+        integer, intent(in) :: bit
+        integer, intent(inout) :: pos
 
         ! make place for the new bit
         stream = shiftl(stream, 1)
@@ -602,30 +602,40 @@ contains
             stream = ibset(stream, 0)
         end if
 
+        pos = pos + 1
+
+        return
+
     end subroutine stream_write_bit
 
-    subroutine stream_write_bits(stream, bits, n)
+    subroutine stream_write_bits(stream, bits, n, pos)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: bits
         integer, intent(in) :: n
+        integer, intent(inout) :: pos
 
         integer :: i
 
         if (n .lt. 1) return
 
         stream = shiftl(stream, n)
+
         call mvbits(int(bits, kind=16), 0, n, stream, 0)
 
+        pos = pos + n
+
         return
+
     end subroutine stream_write_bits
 
-    subroutine pad_stream(stream, n)
+    subroutine pad_stream(stream, n, pos)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
         integer, intent(in) :: n
+        integer, intent(inout) :: pos
 
         integer :: i
 
@@ -634,6 +644,7 @@ contains
         print *, 'padding the stream with', n, '0 bits'
 
         stream = shiftl(stream, n)
+        pos = pos + n
 
         return
     end subroutine pad_stream
