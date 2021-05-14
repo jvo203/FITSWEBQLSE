@@ -273,22 +273,12 @@ contains
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
-        integer :: i, k, bit
+        integer :: i, k
 
         ! a counter for runs of '0'
         integer :: zcount
 
         data = 0
-
-        ! do
-        !    zcount = Golomb_decode(stream, pos)
-
-        !    if (zcount .lt. 0) exit
-
-        !    print *, 'zcount', zcount
-        !end do
-
-        bit = 0
         zcount = -1
 
         ! iterate over 32 bits from MSB to LSB
