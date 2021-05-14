@@ -109,6 +109,10 @@ program main
     call decode_ints(iblock, bitstream, pos)
     print *, 'ublock:', iblock
 
+    ! reorder unsigned coefficients and convert to signed integer
+    call inv_order(iblock)
+    print *, 'iblock:', iblock
+
 contains
     pure subroutine fwd_lift(p, offset, s)
         implicit none
@@ -184,6 +188,7 @@ contains
         end do
     end subroutine fwd_xform
 
+    ! reorder signed coefficients and convert to unsigned integer
     pure subroutine fwd_order(p)
         implicit none
 
@@ -193,6 +198,17 @@ contains
         p = int2uint(p(1 + PERM))
 
     end subroutine fwd_order
+
+    ! reorder unsigned coefficients and convert to signed integer
+    pure subroutine inv_order(p)
+        implicit none
+
+        integer, dimension(16), intent(inout) :: p
+
+        ! convert to signed integer and re-order
+        p(1 + PERM) = uint2int(p)
+
+    end subroutine inv_order
 
     ! map two's complement signed integer to negabinary unsigned integer
     elemental integer function int2uint(x)
