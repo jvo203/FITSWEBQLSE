@@ -120,6 +120,11 @@ program main
     ! de-quantize
     qint = reshape(iblock, (/4, 4/))
 
+    i = max_exp - fraction_bits
+    x = scale(real(qint), i)
+
+    print *, x
+
 contains
     pure subroutine fwd_lift(p, offset, s)
         implicit none
