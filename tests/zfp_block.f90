@@ -369,6 +369,8 @@ contains
 
         x = stream_read_bits(stream, pos, R_k)
 
+        if (x .lt. 0) return
+
         Rice_decode = shiftl(s, R_k) + x
 
         return
