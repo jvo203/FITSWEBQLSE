@@ -154,7 +154,7 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
         VERSION_SUB)
 
 #define WASM_VERSION "21.04.XX.X"
-#define VERSION_STRING "SV2021-04-XX.X-ALPHA"
+#define VERSION_STRING "SV2021-05-XX.X-ALPHA"
 
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
