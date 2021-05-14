@@ -118,6 +118,7 @@ program main
     print *, 'iblock:', iblock
 
     ! de-quantize
+    qint = reshape(iblock, [4, 4])
 
 contains
     pure subroutine fwd_lift(p, offset, s)
