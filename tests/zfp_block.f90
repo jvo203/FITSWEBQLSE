@@ -272,7 +272,7 @@ contains
         implicit none
 
         integer, dimension(16), intent(out) :: data
-        integer(kind=16), intent(inout) :: stream
+        integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
         ! a counter for runs of '0'
@@ -284,6 +284,8 @@ contains
             zcount = Rice_decode(stream, pos)
 
             if (zcount .lt. 0) exit
+
+            print *, 'zcount', zcount
         end do
 
     end subroutine decode_ints
@@ -343,6 +345,17 @@ contains
         end if
 
     end subroutine Golomb_encode
+
+    integer function Rice_decode(stream, pos)
+        implicit none
+
+        integer(kind=16), intent(in) :: stream
+        integer, intent(inout) :: pos
+
+        Rice_decode = -1
+
+        return
+    end function Rice_decode
 
     subroutine Rice_encode(stream, pos, N)
         implicit none
