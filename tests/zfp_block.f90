@@ -71,7 +71,7 @@ program main
     ! quantize
     i = e - max_exp + fraction_bits
     qint = nint(set_exponent(x, i))
-    iblock = reshape(qint, [16])
+    iblock = reshape(qint, (/16/))
 
     print *, 'i:', i
     print *, 'iblock:', iblock
@@ -118,7 +118,7 @@ program main
     print *, 'iblock:', iblock
 
     ! de-quantize
-    qint = reshape(iblock, [4, 4])
+    qint = reshape(iblock, (/4, 4/))
 
 contains
     pure subroutine fwd_lift(p, offset, s)
