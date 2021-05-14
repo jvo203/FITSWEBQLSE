@@ -286,19 +286,25 @@ contains
 
             ! set k-plane bits
             do i = 1, 16
+
                 ! decode the next zero-run length
                 if (zcount .lt. 0) then
+
                     zcount = Golomb_decode(stream, pos)
+
                     if (zcount .lt. 0) return
+
                     print *, 'zcount', zcount
+
                 end if
 
                 zcount = zcount - 1
 
                 if (zcount .lt. 0) then
-                    ! emit '1'
+                    ! set the appropriate bit to '1'
                     data(i) = ibset(data(i), k)
                 end if
+
             end do
         end do
 
