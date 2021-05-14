@@ -254,7 +254,7 @@ contains
                     zcount = zcount + 1
                 end if
 
-                val = ior(shiftl(val, 1), bit)
+                ! val = ior(shiftl(val, 1), bit)
             end do
 
             ! display the value (validation)
@@ -273,17 +273,43 @@ contains
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
+        integer :: i, k, bit
+
         ! a counter for runs of '0'
         integer :: zcount
 
         data = 0
 
-        do
-            zcount = Golomb_decode(stream, pos)
+        ! do
+        !    zcount = Golomb_decode(stream, pos)
 
-            if (zcount .lt. 0) exit
+        !    if (zcount .lt. 0) exit
 
-            print *, 'zcount', zcount
+        !    print *, 'zcount', zcount
+        !end do
+
+        bit = 0
+        zcount = -1
+
+        ! iterate over 32 bits from MSB to LSB
+        do k = 31, 0, -1
+
+            ! set k-plane bits
+            do i = 1, 16
+                ! decode the next zero-run length
+                if (zcount .lt. 0) then
+                    zcount = Golomb_decode(stream, pos)
+                    if (zcount .lt. 0) return
+                    print *, 'zcount', zcount
+                end if
+
+                zcount = zcount - 1
+
+                if (zcount .lt. 0) then
+                    ! emit '1'
+                    data(i) = ibset(data(i), k)
+                end if
+            end do
         end do
 
     end subroutine decode_ints
