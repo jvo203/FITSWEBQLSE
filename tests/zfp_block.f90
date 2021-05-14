@@ -450,6 +450,11 @@ contains
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
+        if (pos .lt. 0) then
+            stream_read_bit = 0
+            return
+        end if
+
         if (btest(stream, pos)) then
             stream_read_bit = 1
         else
@@ -474,6 +479,8 @@ contains
         stream_read_bits = 0
 
         if (n .lt. 1) return
+
+        if (pos - n + 1 .lt. 0) return
 
         stream_read_bits = int(ibits(stream, pos - n + 1, n))
 
