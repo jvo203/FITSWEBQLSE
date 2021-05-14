@@ -242,11 +242,8 @@ contains
                 if (bit .eq. 1) then
                     ! the runs of zeroes has finished
 
-                    ! Golomb-encode the zcount
+                    ! Golomb or Rice-encode the zcount
                     call Golomb_encode(stream, pos, zcount)
-
-                    ! alternatively Rice-encode the zcount
-                    ! call Rice_encode(stream, pos, zcount)
 
                     ! reset the zeroes counters
                     zcount = 0
