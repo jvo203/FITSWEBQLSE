@@ -113,6 +113,10 @@ program main
     call inv_order(iblock)
     print *, 'iblock:', iblock
 
+    ! perform decorrelating transform
+    call inv_xform(iblock)
+    print *, 'iblock:', iblock
+
 contains
     pure subroutine fwd_lift(p, offset, s)
         implicit none
@@ -186,7 +190,27 @@ contains
         do x = 0, 3
             call fwd_lift(p, 1*x, 4)
         end do
+
     end subroutine fwd_xform
+
+    ! inverse decorrelating 2D transform
+    pure subroutine inv_xform(p)
+        implicit none
+
+        integer, dimension(16), intent(inout) :: p
+        integer :: x, y
+
+        ! transform along y
+        do x = 0, 3
+            call inv_lift(p, 1*x, 4)
+        end do
+
+        ! transform along x
+        do y = 0, 3
+            call inv_lift(p, 4*y, 1)
+        end do
+
+    end subroutine inv_xform
 
     ! reorder signed coefficients and convert to unsigned integer
     pure subroutine fwd_order(p)
