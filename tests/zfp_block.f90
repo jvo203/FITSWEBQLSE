@@ -107,6 +107,10 @@ program main
     max_exp = bits - EBIAS
     print *, 'max_exp', max_exp
 
+    ! decode 32-bit integers
+    call decode_ints(iblock, bitstream, pos)
+    print *, 'ublock:', iblock
+
 contains
     pure subroutine fwd_lift(p, offset, s)
         implicit none
@@ -263,6 +267,26 @@ contains
         call Rice_encode(stream, pos, zcount)
 
     end subroutine encode_ints
+
+    subroutine decode_ints(data, stream, pos)
+        implicit none
+
+        integer, dimension(16), intent(out) :: data
+        integer(kind=16), intent(inout) :: stream
+        integer, intent(inout) :: pos
+
+        ! a counter for runs of '0'
+        integer :: zcount
+
+        data = 0
+
+        do
+            zcount = Rice_decode(stream, pos)
+
+            if (zcount .lt. 0) exit
+        end do
+
+    end subroutine decode_ints
 
     subroutine Golomb_encode(stream, pos, N)
         implicit none
