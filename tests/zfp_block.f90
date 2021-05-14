@@ -243,10 +243,10 @@ contains
                     ! the runs of zeroes has finished
 
                     ! Golomb-encode the zcount
-                    ! call Golomb_encode(stream, pos, zcount)
+                    call Golomb_encode(stream, pos, zcount)
 
-                    ! alternatively RIce-encode the zcount
-                    call Rice_encode(stream, pos, zcount)
+                    ! alternatively Rice-encode the zcount
+                    ! call Rice_encode(stream, pos, zcount)
 
                     ! reset the zeroes counters
                     zcount = 0
@@ -262,7 +262,7 @@ contains
         end do
 
         ! flush the encoder
-        call Rice_encode(stream, pos, zcount)
+        call Golomb_encode(stream, pos, zcount)
 
     end subroutine encode_ints
 
@@ -279,7 +279,7 @@ contains
         data = 0
 
         do
-            zcount = Rice_decode(stream, pos)
+            zcount = Golomb_decode(stream, pos)
 
             if (zcount .lt. 0) exit
 
@@ -321,6 +321,7 @@ contains
 
         ! Remainder Code
         t = 2**G_b - G_M
+
         if (r .lt. t) then
             nbits = G_b - 1
 
@@ -344,15 +345,15 @@ contains
 
     end subroutine Golomb_encode
 
-    integer function Rice_decode(stream, pos)
+    integer function Golomb_decode(stream, pos)
         implicit none
 
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
-        integer :: s, x, bit
+        integer :: s, x, bit, t
 
-        Rice_decode = -1
+        Golomb_decode = -1
 
         s = 0
         ! count the number of consecutive '1', stop at '0'
@@ -367,14 +368,28 @@ contains
             s = s + 1
         end do
 
-        x = stream_read_bits(stream, pos, R_k)
+        x = stream_read_bits(stream, pos, G_b - 1)
 
         if (x .lt. 0) return
 
-        Rice_decode = shiftl(s, R_k) + x
+        t = 2**G_b - G_M
+
+        if (x .lt. t) then
+            Golomb_decode = s*G_M + x
+            return
+        end if
+
+        bit = stream_read_bit(stream, pos)
+
+        if (bit .lt. 0) return
+
+        x = shiftl(x, 1) + bit
+
+        Golomb_decode = s*G_M + x - t
 
         return
-    end function Rice_decode
+
+    end function Golomb_decode
 
     subroutine Rice_encode(stream, pos, N)
         implicit none
@@ -414,6 +429,39 @@ contains
         pos = pos + R_k
 
     end subroutine Rice_encode
+
+    integer function Rice_decode(stream, pos)
+        implicit none
+
+        integer(kind=16), intent(in) :: stream
+        integer, intent(inout) :: pos
+
+        integer :: s, x, bit
+
+        Rice_decode = -1
+
+        s = 0
+        ! count the number of consecutive '1', stop at '0'
+
+        do
+            bit = stream_read_bit(stream, pos)
+
+            if (bit .lt. 0) return
+
+            if (bit .eq. 0) exit
+
+            s = s + 1
+        end do
+
+        x = stream_read_bits(stream, pos, R_k)
+
+        if (x .lt. 0) return
+
+        Rice_decode = shiftl(s, R_k) + x
+
+        return
+
+    end function Rice_decode
 
     subroutine stream_write_bit(stream, bit)
         implicit none
