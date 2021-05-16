@@ -629,6 +629,7 @@ contains
             s = s + 1
         end do
 
+        x = 0
         x = stream_read_bits(stream, pos, G_b - 1)
 
         if (x .lt. 0) return
@@ -640,6 +641,7 @@ contains
             return
         end if
 
+        bit = 0
         bit = stream_read_bit(stream, pos)
 
         if (bit .lt. 0) return
@@ -712,6 +714,7 @@ contains
             s = s + 1
         end do
 
+        x = 0
         x = stream_read_bits(stream, pos, R_k)
 
         if (x .lt. 0) return
