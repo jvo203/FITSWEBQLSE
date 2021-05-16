@@ -58,11 +58,59 @@ contains
 
         do concurrent(j=1:m/4, i=1:n/4)
             ! IMPORTANT: checking the bounds
-            compressed(i, j) = zfp_compress_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
-            & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))))
+            call zfp_compress_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
+            & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))), compressed(i, j))
         end do
 
     end subroutine zfp_compress_array
+
+    pure subroutine zfp_compress_block(x, compressed)
+        implicit none
+
+        real(kind=4), dimension(4, 4), intent(inout) :: x
+        integer, dimension(4, 4) :: e
+
+        ! the maximum exponent
+        integer :: max_exp
+
+        ! the result
+        type(zfp_block), intent(out) :: compressed
+
+        ! an internal NaN mask
+        logical(kind=1), dimension(4, 4) :: mask
+        integer(kind=2) :: bitmask
+        integer :: i, j, pos
+
+        ! by default there are no NaNs
+        bitmask = 0
+
+        !  pick out all the NaN
+        where (isnan(x))
+            mask = .true.
+        elsewhere
+            mask = .false.
+        end where
+
+        ! go through the mask element by element
+        ! checking for any NaNs
+        pos = 0
+        do j = 1, 4
+            do i = 1, 4
+                if (mask(i, j)) then
+                    ! replace NaN with 0.0
+                    x(i, j) = 0.0
+
+                    ! set the bit to .true. where there is a NaN
+                    bitmask = ibset(bitmask, pos)
+                end if
+
+                pos = pos + 1
+            end do
+        end do
+
+        return
+
+    end subroutine zfp_compress_block
 
     pure subroutine fwd_lift(p, offset, s)
         implicit none
