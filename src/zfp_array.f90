@@ -170,8 +170,7 @@ contains
 
         if (stream_read_bit(compressed%bitstream, pos) .eq. 1) then
             ! decode the NaN mask
-            ! TO-DO
-            ! bitmask = decode_mask(compressed%bitstream, pos)
+            bitmask = decode_mask(compressed%bitstream, pos)
         end if
 
         bits = stream_read_bits(compressed%bitstream, pos, 8)
@@ -471,7 +470,8 @@ contains
 
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
-        integer(kind=16) :: bitmask
+
+        integer(kind=2) :: bitmask
 
         integer :: i
 
