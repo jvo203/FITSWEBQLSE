@@ -131,8 +131,7 @@ contains
         call stream_write_bits(compressed%bitstream, bits, 8, pos)
 
         ! quantize floating-point numbers
-        qint = e - max_exp + fraction_bits
-        qint = nint(set_exponent(x, qint))
+        qint = nint(set_exponent(x, e - max_exp + fraction_bits))
         iblock = reshape(qint, (/16/))
 
         ! decorrelate
@@ -151,6 +150,47 @@ contains
         return
 
     end subroutine zfp_compress_block
+
+    subroutine zfp_decompress_block(compressed, x, bitmask)
+        implicit none
+
+        type(zfp_block), intent(in) :: compressed
+        real(kind=4), dimension(4, 4), intent(out) :: x
+        integer(kind=2), intent(out) :: bitmask
+
+        integer, dimension(4, 4) :: e
+        integer, dimension(4, 4) :: qint
+        integer, dimension(16) :: iblock
+        integer :: pos, bits
+
+        ! the maximum exponent
+        integer :: max_exp
+
+        pos = max_bits - 1
+
+        if (stream_read_bit(compressed%bitstream, pos) .eq. 1) then
+            ! decode the NaN mask
+            ! TO-DO
+            ! bitmask = decode_mask(compressed%bitstream, pos)
+        end if
+
+        bits = stream_read_bits(compressed%bitstream, pos, 8)
+        max_exp = bits - EBIAS
+
+        ! decode 32-bit integers
+        call decode_ints(iblock, compressed%bitstream, pos)
+
+        ! reorder unsigned coefficients and convert to signed integer
+        call inv_order(iblock)
+
+        ! perform decorrelating transform
+        call inv_xform(iblock)
+
+        ! de-quantize
+        qint = reshape(iblock, (/4, 4/))
+        x = scale(real(qint), max_exp - fraction_bits)
+
+    end subroutine zfp_decompress_block
 
     pure subroutine fwd_lift(p, offset, s)
         implicit none
