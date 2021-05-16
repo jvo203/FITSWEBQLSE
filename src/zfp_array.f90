@@ -466,6 +466,45 @@ contains
 
     end subroutine encode_ints
 
+    function decode_mask(stream, pos) result(bitmask)
+        implicit none
+
+        integer(kind=16), intent(in) :: stream
+        integer, intent(inout) :: pos
+        integer(kind=16) :: bitmask
+
+        integer :: i
+
+        ! a counter for runs of '0'
+        integer :: zcount
+
+        bitmask = 0
+        zcount = -1
+
+        do i = 0, 15
+
+            ! decode the next zero-run length
+            if (zcount .lt. 0) then
+
+                zcount = Golomb_decode(stream, pos)
+
+                if (zcount .lt. 0) return
+
+            end if
+
+            zcount = zcount - 1
+
+            if (zcount .lt. 0) then
+                ! set the appropriate bit to '1'
+                bitmask = ibset(bitmask, i)
+            end if
+
+        end do
+
+        return
+
+    end function decode_mask
+
     subroutine decode_ints(data, stream, pos)
         implicit none
 
