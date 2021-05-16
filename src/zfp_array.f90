@@ -115,7 +115,11 @@ contains
         compressed%bitstream = 0
         pos = 0
 
-        if (bitmask .ne. 0) then
+        if (bitmask .eq. 0) then
+            ! all values are non-NaN, emit '0';
+            ! no need to do anything since initially bitstream = 0
+            pos = pos + 1
+        else
             ! emit '1'
             call stream_write_bit(compressed%bitstream, 1, pos)
 
