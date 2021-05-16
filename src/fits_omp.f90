@@ -1,7 +1,7 @@
 module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
-    use fixed_array
+    use zfp_array
     implicit none
 
     integer(kind=4), parameter :: NBINS = 1024
@@ -88,7 +88,7 @@ module fits
         real(kind=4), allocatable :: frame_min(:), frame_max(:)
         real(kind=c_float), allocatable :: pixels(:, :)
         logical(kind=c_bool), allocatable :: mask(:, :)
-        type(fixed_block), dimension(:, :, :), allocatable :: compressed
+        type(zfp_block), dimension(:, :, :), allocatable :: compressed
 
         logical :: is_optical = .true.
         logical :: is_xray = .false.
@@ -118,9 +118,6 @@ module fits
         real(kind=c_float), allocatable :: mean_spectrum(:)
         real(kind=c_float), allocatable :: integrated_spectrum(:)
 
-        ! compressed planes
-        type(gmutex), allocatable :: channels_mtx(:)
-        ! type(fixed_block), allocatable :: channels(:, :, :)
     contains
         final :: close_fits_file
     end type dataset
@@ -1031,10 +1028,10 @@ contains
             end if
 
             if (.not. allocated(item%compressed)) then ! .or. req%image) then
-                !$OMP PARALLEL SHARED(item)&
-                !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
-                !$OMP& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
-                !$OMP DO
+                !$omp PARALLEL SHARED(item)&
+                !$omp& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
+                !$omp& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
+                !$omp DO
                 do frame = start, end
                     ! get a current OpenMP thread (starting from 0 as in C)
                     tid = 1 + OMP_GET_THREAD_NUM()
@@ -1110,7 +1107,7 @@ contains
 
                 end do
                 !OMP END DO
-                !$OMP END PARALLEL
+                !$omp END PARALLEL
             else
                 ! real-time data decompression
                 start_x = 1 + (x1 - 1)/4
@@ -1121,27 +1118,26 @@ contains
 
                 print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y
 
-                !$OMP PARALLEL SHARED(item)&
-                !$OMP& PRIVATE(tmp, pixel_sum, pixel_count)&
-                !$OMP& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
-                !$OMP DO
+                !$omp PARALLEL SHARED(item)&
+                !$omp& PRIVATE(tmp, pixel_sum, pixel_count)&
+                !$omp& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
+                !$omp DO
                 do frame = start, end
                     ! get a current OpenMP thread (starting from 0 as in C)
                     tid = 1 + OMP_GET_THREAD_NUM()
 
                     block
-                        use wavelet
-
-                        type(fixed_block) :: compressed
+                        type(zfp_block) :: compressed
                         real(kind=4), dimension(4, 4) :: x
-                        real :: frame_min, frame_max, tmp
+                        integer(kind=2) :: bitmask
+
+                        ! real :: frame_min, frame_max, tmp
 
                         integer :: i, j, pos, ix, iy, src_x, src_y
                         integer :: offset_x, offset_y, offset
-                        integer(kind=2) :: bitmask
 
-                        frame_min = item%frame_min(frame)
-                        frame_max = item%frame_max(frame)
+                        ! frame_min = item%frame_min(frame)
+                        ! frame_max = item%frame_max(frame)
 
                         ! process the data
                         pixel_sum = 0.0
@@ -1152,16 +1148,13 @@ contains
                             do ix = start_x, end_x
                                 compressed = item%compressed(ix, iy, frame)
 
-                                x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
+                                call zfp_decompress_block(compressed, x, bitmask)
 
-                                ! an inverse wavelet transform
-                                ! call from_daub4_block(x)
-
+                                ! x = dequantize(compressed%mantissa, int(compressed%common_exp), significant_bits)
                                 ! recover the original range
                                 ! x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min)
-
                                 ! a NaN mask
-                                bitmask = compressed%mask
+                                ! bitmask = compressed%mask
 
                                 pos = 0
                                 do j = 1, 4
@@ -1218,7 +1211,7 @@ contains
                     end block
                 end do
                 !OMP END DO
-                !$OMP END PARALLEL
+                !$omp END PARALLEL
             end if
 
             ! first reduce the pixels/mask locally
@@ -2045,13 +2038,13 @@ contains
                 item%frame_min = 1.0E30
                 item%frame_max = -1.0E30
 
-                !$OMP PARALLEL SHARED(item)&
-                !$OMP& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, frame_min, frame_max)&
-                !$OMP& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
-                !$OMP& REDUCTION(.or.:thread_bSuccess)&
-                !$OMP& REDUCTION(max:dmax)&
-                !$OMP& REDUCTION(min:dmin) NUM_THREADS(max_threads)
-                !$OMP DO
+                !$omp PARALLEL SHARED(item)&
+                !$omp& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, frame_min, frame_max)&
+                !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
+                !$omp& REDUCTION(.or.:thread_bSuccess)&
+                !$omp& REDUCTION(max:dmax)&
+                !$omp& REDUCTION(min:dmin) NUM_THREADS(max_threads)
+                !$omp DO
                 do frame = start, end
                     ! get a current OpenMP thread (starting from 0 as in C)
                     tid = 1 + OMP_GET_THREAD_NUM()
@@ -2132,7 +2125,7 @@ contains
                     ! compress the pixels
                     if (allocated(item%compressed) .and. allocated(thread_x)) then
                         thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
-                        call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), frame_min, frame_max)
+                        call zfp_compress_array(thread_x(:, :, tid), item%compressed(:, :, frame))
                     end if
 
                     item%frame_min(frame) = frame_min
@@ -2153,7 +2146,7 @@ contains
                     if (this_image() == 1) call update_progress(item, frame - start + 1, num_per_image)
                 end do
                 !OMP END DO
-                !$OMP END PARALLEL
+                !$omp END PARALLEL
 
                 ! abort upon an error
                 if (.not. thread_bSuccess) go to 200
