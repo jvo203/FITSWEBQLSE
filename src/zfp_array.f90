@@ -67,8 +67,13 @@ contains
     pure subroutine zfp_compress_block(x, compressed)
         implicit none
 
+        ! the input 4x4 block to be compressed with ZFP
         real(kind=4), dimension(4, 4), intent(inout) :: x
+
         integer, dimension(4, 4) :: e
+        integer, dimension(4, 4) :: qint
+        integer, dimension(16) :: iblock
+        integer :: pos, bits
 
         ! the maximum exponent
         integer :: max_exp
@@ -79,7 +84,7 @@ contains
         ! an internal NaN mask
         logical(kind=1), dimension(4, 4) :: mask
         integer(kind=2) :: bitmask
-        integer :: i, j, pos
+        integer :: i, j
 
         ! by default there are no NaNs
         bitmask = 0
@@ -91,8 +96,7 @@ contains
             mask = .false.
         end where
 
-        ! go through the mask element by element
-        ! checking for any NaNs
+        ! go through the mask element by element checking for any NaNs
         pos = 0
         do j = 1, 4
             do i = 1, 4
@@ -107,6 +111,42 @@ contains
                 pos = pos + 1
             end do
         end do
+
+        compressed%bitstream = 0
+        pos = 0
+
+        if (bitmask .ne. 0) then
+            ! emit '1'
+            call stream_write_bit(compressed%bitstream, 1, pos)
+
+            ! run-length-encode the 16-bit NaN mask
+            ! TO-DO !!!
+        end if
+
+        e = exponent(x)
+        max_exp = maxval(e)
+        bits = max_exp + EBIAS
+
+        ! write the exponent
+        call stream_write_bits(compressed%bitstream, bits, 8, pos)
+
+        ! quantize floating-point numbers
+        qint = e - max_exp + fraction_bits
+        qint = nint(set_exponent(x, qint))
+        iblock = reshape(qint, (/16/))
+
+        ! decorrelate
+        call fwd_xform(iblock)
+
+        ! reorder signed coefficients and convert to unsigned integer
+        call fwd_order(iblock)
+
+        ! encode 32-bit integers
+        call encode_ints(iblock, compressed%bitstream, pos)
+
+        if (pos .lt. max_bits) then
+            call pad_stream(compressed%bitstream, max_bits - pos, pos)
+        end if
 
         return
 
@@ -308,14 +348,14 @@ contains
 
     end function uint2int
 
-    subroutine encode_ints(data, stream, pos)
+    pure subroutine encode_ints(data, stream, pos)
         implicit none
 
         integer, dimension(16), intent(in) :: data
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: pos
 
-        integer(kind=2) :: val, i, k, bit
+        integer :: i, k, bit
 
         ! a counter for runs of '0'
         integer :: zcount
@@ -325,11 +365,9 @@ contains
         ! iterate over 32 bits from MSB to LSB
         do k = 31, 0, -1
 
-            val = 0
             ! gather k-plane bits from the input data
             do i = 1, 16
-                bit = int(ibits(data(i), k, 1), kind=2)
-                ! print *, 'i', i, 'bit', bit, data(i)
+                bit = int(ibits(data(i), k, 1))
 
                 if (bit .eq. 1) then
                     ! the runs of zeroes has finished
@@ -343,11 +381,8 @@ contains
                     zcount = zcount + 1
                 end if
 
-                ! val = ior(shiftl(val, 1), bit)
             end do
 
-            ! display the value (validation)
-            ! write (*, '(a,i0,a,b16.16)') 'k: ', k, ', val: ', val
         end do
 
         ! flush the encoder
@@ -399,7 +434,7 @@ contains
 
     end subroutine decode_ints
 
-    subroutine Golomb_encode(stream, pos, N)
+    pure subroutine Golomb_encode(stream, pos, N)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -413,8 +448,6 @@ contains
 
         q = N/G_M
         r = modulo(N, G_M)
-
-        print *, 'Golomb encoder: N', N, 'pos', pos, 'q', q, 'r', r
 
         ! Quotient Code
         if (q .gt. 0) then
@@ -436,8 +469,6 @@ contains
 
             nbits = G_b - 1
 
-            print *, 'coding the remainder using', nbits, 'nbits'
-
             ! check if there is space to write
             if (pos + nbits .gt. max_bits) return
             call stream_write_bits(stream, r, nbits, pos)
@@ -446,8 +477,6 @@ contains
 
             nbits = G_b
             r = r + t
-
-            print *, 'coding remainder+', r, 'using', nbits, 'nbits'
 
             ! check if there is space to write
             if (pos + nbits .gt. max_bits) return
@@ -575,7 +604,7 @@ contains
 
     end function Rice_decode
 
-    subroutine stream_write_bit(stream, bit, pos)
+    pure subroutine stream_write_bit(stream, bit, pos)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -596,7 +625,7 @@ contains
 
     end subroutine stream_write_bit
 
-    subroutine stream_write_bits(stream, bits, n, pos)
+    pure subroutine stream_write_bits(stream, bits, n, pos)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -618,7 +647,7 @@ contains
 
     end subroutine stream_write_bits
 
-    subroutine pad_stream(stream, n, pos)
+    pure subroutine pad_stream(stream, n, pos)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -628,8 +657,6 @@ contains
         integer :: i
 
         if (n .lt. 1) return
-
-        print *, 'padding the stream with', n, '0 bits'
 
         stream = shiftl(stream, n)
         pos = pos + n
