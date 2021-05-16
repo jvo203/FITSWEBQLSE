@@ -355,6 +355,32 @@ contains
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: pos
 
+        integer :: i, k, bit
+
+        ! a counter for runs of '0'
+        integer :: zcount
+
+        zcount = 0
+
+        ! iterate over 16 bits in the mask
+        do i = 0, 15
+
+            bit = int(ibits(mask, i, 1))
+
+            if (bit .eq. 1) then
+                ! the runs of zeroes has finished
+
+                ! Golomb or Rice-encode the zcount
+                call Golomb_encode(stream, pos, zcount)
+
+                ! reset the zeroes counter
+                zcount = 0
+            else
+                zcount = zcount + 1
+            end if
+
+        end do
+
     end subroutine encode_mask
 
     pure subroutine encode_ints(data, stream, pos)
@@ -376,6 +402,7 @@ contains
 
             ! gather k-plane bits from the input data
             do i = 1, 16
+
                 bit = int(ibits(data(i), k, 1))
 
                 if (bit .eq. 1) then
@@ -384,7 +411,7 @@ contains
                     ! Golomb or Rice-encode the zcount
                     call Golomb_encode(stream, pos, zcount)
 
-                    ! reset the zeroes counters
+                    ! reset the zeroes counter
                     zcount = 0
                 else
                     zcount = zcount + 1
