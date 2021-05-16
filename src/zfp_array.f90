@@ -22,6 +22,48 @@ module zfp_array
     end type zfp_block
 
 contains
+    subroutine zfp_compress_array(x, compressed)
+        implicit none
+
+        integer(kind=4) :: n, m ! input dimensions
+        real(kind=4), dimension(:, :), intent(inout) :: x
+        integer(kind=4) :: i, j
+
+        ! compressed output dimensions
+        integer(kind=4) :: cn, cm
+
+        ! the result
+        type(zfp_block), dimension(:, :), intent(out) :: compressed
+
+        n = size(x, 1)
+        m = size(x, 2)
+
+        ! by default compressed is dimension(n/4, m/4)
+        cn = n/4
+        cm = m/4
+
+        ! but the input dimensions might not be divisible by 4
+        if (mod(n, 4) .ne. 0) cn = cn + 1
+        if (mod(m, 4) .ne. 0) cm = cm + 1
+
+        if (size(compressed, 1) .lt. cn) then
+            print *, 'compressed array dimension(1) mismatch:', size(compressed, 1), '.ne.', cn
+            return
+        end if
+
+        if (size(compressed, 2) .lt. cm) then
+            print *, 'compressed array dimension(2) mismatch:', size(compressed, 2), '.ne.', cm
+            return
+        end if
+
+        do concurrent(j=1:m/4, i=1:n/4)
+            ! IMPORTANT: checking the bounds
+            compressed(i, j) = zfp_compress_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
+            & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))))
+        end do
+
+    end subroutine zfp_compress_array
+
     pure subroutine fwd_lift(p, offset, s)
         implicit none
 
