@@ -537,8 +537,6 @@ contains
 
                     if (zcount .lt. 0) return
 
-                    print *, 'zcount', zcount
-
                 end if
 
                 zcount = zcount - 1
@@ -651,7 +649,7 @@ contains
 
     end function Golomb_decode
 
-    subroutine Rice_encode(stream, pos, N)
+    pure subroutine Rice_encode(stream, pos, N)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -665,8 +663,6 @@ contains
 
         q = shiftr(N, R_k) ! divide by R_M = 2**R_k
         r = N
-
-        print *, 'Rice encoder: N', N, 'pos', pos, 'q', q
 
         ! Quotient Code
         if (q .gt. 0) then
