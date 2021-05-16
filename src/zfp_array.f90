@@ -120,7 +120,7 @@ contains
             call stream_write_bit(compressed%bitstream, 1, pos)
 
             ! run-length-encode the 16-bit NaN mask
-            ! TO-DO !!!
+            call encode_mask(bitmask, compressed%bitstream, pos)
         end if
 
         e = exponent(x)
@@ -347,6 +347,15 @@ contains
         uint2int = IEOR(x, NBMASK) - NBMASK
 
     end function uint2int
+
+    pure subroutine encode_mask(mask, stream, pos)
+        implicit none
+
+        integer(kind=2), intent(in) :: mask
+        integer(kind=16), intent(inout) :: stream
+        integer, intent(inout) :: pos
+
+    end subroutine encode_mask
 
     pure subroutine encode_ints(data, stream, pos)
         implicit none
