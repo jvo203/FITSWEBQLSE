@@ -84,7 +84,7 @@ contains
         ! an internal NaN mask
         logical(kind=1), dimension(4, 4) :: mask
         integer(kind=2) :: bitmask
-        integer :: i, j
+        integer :: i, j, tmp
 
         ! by default there are no NaNs
         bitmask = 0
@@ -125,6 +125,8 @@ contains
 
             ! run-length-encode the 16-bit NaN mask
             call encode_mask(bitmask, compressed%bitstream, pos)
+            ! tmp = int(bitmask, kind=4)
+            call stream_write_bits(compressed%bitstream, tmp, 16, pos)
         end if
 
         e = exponent(x)
@@ -175,6 +177,7 @@ contains
         if (stream_read_bit(compressed%bitstream, pos) .eq. 1) then
             ! decode the NaN mask
             bitmask = decode_mask(compressed%bitstream, pos)
+            ! bitmask = int(stream_read_bits(compressed%bitstream, pos, 16), kind=2)
         end if
 
         ! reset all the bits
@@ -427,6 +430,9 @@ contains
 
         end do
 
+        ! flush the encoder
+        call Golomb_encode(stream, pos, zcount)
+
     end subroutine encode_mask
 
     function decode_mask(stream, pos) result(bitmask)
@@ -465,6 +471,8 @@ contains
 
         end do
 
+        zcount = Golomb_decode(stream, pos)
+
         return
 
     end function decode_mask
@@ -495,7 +503,7 @@ contains
                     ! the runs of zeroes has finished
 
                     ! Golomb or Rice-encode the zcount
-                    call Golomb_encode(stream, pos, zcount)
+                    call Rice_encode(stream, pos, zcount)
 
                     ! reset the zeroes counter
                     zcount = 0
@@ -508,7 +516,7 @@ contains
         end do
 
         ! flush the encoder
-        call Golomb_encode(stream, pos, zcount)
+        call Rice_encode(stream, pos, zcount)
 
     end subroutine encode_ints
 
@@ -536,7 +544,7 @@ contains
                 ! decode the next zero-run length
                 if (zcount .lt. 0) then
 
-                    zcount = Golomb_decode(stream, pos)
+                    zcount = Rice_decode(stream, pos)
 
                     if (zcount .lt. 0) return
 
