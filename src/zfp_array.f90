@@ -177,6 +177,9 @@ contains
             bitmask = decode_mask(compressed%bitstream, pos)
         end if
 
+        ! reset all the bits
+        bits = 0
+
         bits = stream_read_bits(compressed%bitstream, pos, 8)
         max_exp = bits - EBIAS
 
