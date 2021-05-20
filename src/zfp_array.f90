@@ -56,15 +56,18 @@ contains
             return
         end if
 
-        do concurrent(j=1:m/4, i=1:n/4)
-            ! IMPORTANT: checking the bounds
-            call zfp_compress_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
-            & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))), compressed(i, j))
+        !do concurrent(j=1:m/4, i=1:n/4)
+        do j = 1, m/4
+            do i = 1, n/4
+                ! IMPORTANT: checking the bounds
+                call zfp_compress_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
+                & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))), compressed(i, j))
+            end do
         end do
 
     end subroutine zfp_compress_array
 
-    pure subroutine zfp_compress_block(x, compressed)
+    subroutine zfp_compress_block(x, compressed)
         implicit none
 
         ! the input 4x4 block to be compressed with ZFP
@@ -86,23 +89,28 @@ contains
         integer(kind=2) :: bitmask
         integer :: i, j, tmp
 
+        integer :: nvalid
+        real(kind=4) :: average
+
         ! by default there are no NaNs
         bitmask = 0
 
         !  pick out all the NaN
         where (isnan(x))
-            mask = .true.
-        elsewhere
             mask = .false.
+        elsewhere
+            mask = .true.
         end where
+
+        print *, 'INPUX X', x, 'MASK', mask
 
         ! go through the mask element by element checking for any NaNs
         pos = 0
         do j = 1, 4
             do i = 1, 4
-                if (mask(i, j)) then
+                if (.not. mask(i, j)) then
                     ! replace NaN with 0.0
-                    x(i, j) = 0.0
+                    ! x(i, j) = 0.0
 
                     ! set the bit to .true. where there is a NaN
                     bitmask = ibset(bitmask, pos)
@@ -111,6 +119,23 @@ contains
                 pos = pos + 1
             end do
         end do
+
+        if (any(mask)) then
+            ! calculate the mean of the input array
+            nvalid = count(mask)
+
+            ! all values might be NaN in which case set the array to 0.0
+            if (nvalid .gt. 0) then
+                average = sum(x, mask=mask)/nvalid
+            else
+                average = 0.0
+            end if
+
+            ! replace NaNs with the average value
+            where (.not. mask) x = average
+        end if
+
+        print *, 'WITHOUT NaN', x
 
         compressed%bitstream = 0
         pos = 0
@@ -133,6 +158,8 @@ contains
         max_exp = maxval(e)
         bits = max_exp + EBIAS
 
+        print *, 'e', e, 'max_exp', max_exp
+
         ! write the exponent
         call stream_write_bits(compressed%bitstream, bits, 8, pos)
 
@@ -140,11 +167,17 @@ contains
         qint = nint(set_exponent(x, e - max_exp + fraction_bits))
         iblock = reshape(qint, (/16/))
 
+        print *, 'iblock', iblock
+
         ! decorrelate
         call fwd_xform(iblock)
 
+        print *, 'iblock', iblock
+
         ! reorder signed coefficients and convert to unsigned integer
         call fwd_order(iblock)
+
+        print *, 'ublock', iblock
 
         ! encode 32-bit integers
         call encode_ints(iblock, compressed%bitstream, pos)
@@ -189,15 +222,25 @@ contains
         ! decode 32-bit integers
         call decode_ints(iblock, compressed%bitstream, pos)
 
+        print *, 'DECODER'
+
+        print *, 'ublock', iblock
+
         ! reorder unsigned coefficients and convert to signed integer
         call inv_order(iblock)
+
+        print *, 'iblock', iblock
 
         ! perform decorrelating transform
         call inv_xform(iblock)
 
+        print *, 'iblock', iblock
+
         ! de-quantize
         qint = reshape(iblock, (/4, 4/))
         x = scale(real(qint), max_exp - fraction_bits)
+
+        print *, 'X', x
 
     end subroutine zfp_decompress_block
 
