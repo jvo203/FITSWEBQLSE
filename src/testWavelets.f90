@@ -1,11 +1,12 @@
 program Wavelets
     use fixed_array
+    use zfp_array
     use wavelet
     use lz4
     use, intrinsic :: ieee_arithmetic
     implicit none
 
-    integer(kind=4), parameter :: N = 16
+    integer(kind=4), parameter :: N = 4
     integer i, j
 
     real(kind=4), dimension(N, N) :: x
