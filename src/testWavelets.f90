@@ -17,6 +17,10 @@ program Wavelets
 
     type(fixed_block), dimension(N/4, N/4) :: compressed
 
+    ! FORTRAN-native ZFP
+    type(zfp_block) :: compressed2
+    integer(kind=2) :: bitmask
+
     do i = 1, N
         do j = 1, N
             x(i, j) = i*j
@@ -141,5 +145,11 @@ program Wavelets
 
     print *, compressed
     print *, mask
+
+    call zfp_compress_block(x, compressed2)
+    call zfp_decompress_block(compressed2, x, bitmask)
+
+    print *, 'native ZFP decompression', x
+    write (*, '(a,b32.32)') 'bitmask ', bitmask
 
 end program Wavelets
