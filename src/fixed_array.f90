@@ -27,12 +27,12 @@ contains
 
     !end function isnan
 
-    subroutine to_fixed(x, compressed, pmin, pmax) !, mask)
+    subroutine to_fixed(x, compressed) ! , pmin, pmax) !, mask)
         ! use wavelet
         implicit none
 
         integer(kind=4) :: n, m ! input dimensions
-        real, intent(in) :: pmin, pmax
+        ! real, intent(in) :: pmin, pmax
         real(kind=4), dimension(:, :), intent(inout) :: x
         ! logical(kind=1), dimension(n, n), optional, intent(inout) :: mask
         integer(kind=4) :: i, j
