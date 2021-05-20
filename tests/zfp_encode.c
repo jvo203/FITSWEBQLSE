@@ -587,6 +587,8 @@ int main()
         for (j = 0; j < 4; j++)
             fblock[offset++] = (i + 1) * (j + 1);
 
+    fblock[5] = 6.4f;
+
     printf("fblock:\n");
     for (i = 0; i < BLOCK_SIZE; i++)
         printf("%f\t", fblock[i]);
@@ -717,6 +719,13 @@ int main()
     printf("\n");
 
     printf("Vectorised ZFP ENCODE\n");
+
+    offset = 0;
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 4; j++)
+            fblock[offset++] = (i + 1) * (j + 1);
+
+    fblock[5] = 6.4f;
 
     encode_array(fblock, minbits, maxbits, minexp, 1, 1, 1);
 }
