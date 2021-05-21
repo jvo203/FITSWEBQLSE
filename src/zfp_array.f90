@@ -56,18 +56,18 @@ contains
             return
         end if
 
-        !do concurrent(j=1:m/4, i=1:n/4)
-        do j = 1, m/4
-            do i = 1, n/4
-                ! IMPORTANT: checking the bounds
-                call zfp_compress_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
-                & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))), compressed(i, j))
-            end do
+        do concurrent(j=1:m/4, i=1:n/4)
+            ! do j = 1, m/4
+            ! do i = 1, n/4
+            ! IMPORTANT: checking the bounds
+            call zfp_compress_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
+            & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))), compressed(i, j))
+            ! end do
         end do
 
     end subroutine zfp_compress_array
 
-    subroutine zfp_compress_block(x, compressed)
+    pure subroutine zfp_compress_block(x, compressed)
         implicit none
 
         ! the input 4x4 block to be compressed with ZFP
@@ -102,8 +102,6 @@ contains
             mask = .true.
         end where
 
-        print *, 'INPUX X', x, 'MASK', mask
-
         ! go through the mask element by element checking for any NaNs
         pos = 0
         do j = 1, 4
@@ -135,8 +133,6 @@ contains
             where (.not. mask) x = average
         end if
 
-        print *, 'WITHOUT NaN', x
-
         compressed%bitstream = 0
         pos = 0
 
@@ -159,8 +155,6 @@ contains
         max_exp = maxval(e)
         bits = max_exp + EBIAS
 
-        print *, 'e', e, 'max_exp', max_exp
-
         ! write the exponent
         call stream_write_bits(compressed%bitstream, bits, 8, pos)
 
@@ -168,17 +162,11 @@ contains
         qint = nint(set_exponent(x, e - max_exp + fraction_bits))
         iblock = reshape(qint, (/16/))
 
-        print *, 'iblock', iblock
-
         ! decorrelate
         call fwd_xform(iblock)
 
-        print *, 'iblock', iblock
-
         ! reorder signed coefficients and convert to unsigned integer
         call fwd_order(iblock)
-
-        print *, 'ublock', iblock
 
         ! encode 32-bit integers
         call encode_ints(iblock, compressed%bitstream, pos)
@@ -224,25 +212,15 @@ contains
         ! decode 32-bit integers
         call decode_ints(iblock, compressed%bitstream, pos)
 
-        print *, 'DECODER'
-
-        print *, 'ublock', iblock
-
         ! reorder unsigned coefficients and convert to signed integer
         call inv_order(iblock)
-
-        print *, 'iblock', iblock
 
         ! perform decorrelating transform
         call inv_xform(iblock)
 
-        print *, 'iblock', iblock
-
         ! de-quantize
         qint = reshape(iblock, (/4, 4/))
         x = scale(real(qint), max_exp - fraction_bits)
-
-        print *, 'X', x
 
     end subroutine zfp_decompress_block
 
@@ -548,7 +526,7 @@ contains
                     ! the runs of zeroes has finished
 
                     ! Golomb or Rice-encode the zcount
-                    call Golomb_encode(stream, pos, zcount)
+                    call Rice_encode(stream, pos, zcount)
 
                     ! reset the zeroes counter
                     zcount = 0
@@ -561,7 +539,7 @@ contains
         end do
 
         ! flush the encoder
-        call Golomb_encode(stream, pos, zcount)
+        call Rice_encode(stream, pos, zcount)
 
     end subroutine encode_ints
 
@@ -589,7 +567,7 @@ contains
                 ! decode the next zero-run length
                 if (zcount .lt. 0) then
 
-                    zcount = Golomb_decode(stream, pos)
+                    zcount = Rice_decode(stream, pos)
 
                     if (zcount .lt. 0) return
 
