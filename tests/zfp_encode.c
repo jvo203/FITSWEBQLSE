@@ -418,9 +418,11 @@ uint encode_many_ints(bitstream *stream, uint maxbits, uint maxprec, const uint 
     /* encode one bit plane at a time from MSB to LSB */
     for (k = intprec, n = 0; bits && k-- > kmin;)
     {
+        printf("k:%u, n:%u, bits:%u\t", k, n, bits);
         /* step 1: encode first n bits of bit plane #k */
         m = MIN(n, bits);
         bits -= m;
+        printf("m:%u, bits:%u\n", m, bits);
         for (i = 0; i < m; i++)
             stream_write_bit(stream, (data[i] >> k) & 1u);
 
@@ -428,6 +430,7 @@ uint encode_many_ints(bitstream *stream, uint maxbits, uint maxprec, const uint 
         c = 0;
         for (i = m; i < size; i++)
             c += (data[i] >> k) & 1u;
+        printf("c:%u\n", c);
 
         /* step 3: unary run-length encode remainder of bit plane */
         for (; n < size && bits && (--bits, stream_write_bit(stream, !!c)); c--, n++)
