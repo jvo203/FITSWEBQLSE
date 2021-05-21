@@ -608,7 +608,7 @@ int main()
 
     // BITSTREAM
     bitstream stream;
-    memset(stream.bits, 0, 1024);
+    memset(stream.bits, 0, 1024 * sizeof(uint));
     stream.pos = 0;
 
     // --------------------------------------------------
