@@ -108,7 +108,7 @@ contains
             do i = 1, 4
                 if (.not. mask(i, j)) then
                     ! replace NaN with 0.0
-                    ! x(i, j) = 0.0
+                    x(i, j) = 0.0
 
                     ! set the bit to .true. where there is a NaN
                     bitmask = ibset(bitmask, pos)
@@ -130,7 +130,7 @@ contains
             end if
 
             ! replace NaNs with the average value
-            where (.not. mask) x = average
+            ! where (.not. mask) x = average
         end if
 
         compressed%bitstream = 0
@@ -195,6 +195,9 @@ contains
         integer :: max_exp
 
         pos = max_bits - 1
+
+        ! by default there are no NaNs
+        bitmask = 0
 
         if (stream_read_bit(compressed%bitstream, pos) .eq. 1) then
             ! decode the NaN mask
