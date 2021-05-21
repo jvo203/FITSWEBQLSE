@@ -430,7 +430,7 @@ contains
         integer :: i, k, bit
 
         ! a counter for runs of '0'
-        integer :: zcount
+        integer :: zcount, status
 
         zcount = 0
 
@@ -443,7 +443,9 @@ contains
                 ! the runs of zeroes has finished
 
                 ! Golomb or Rice-encode the zcount
-                call Golomb_encode(stream, pos, zcount)
+                call Golomb_encode(stream, pos, zcount, status)
+
+                if (status .eq. -1) return
 
                 ! reset the zeroes counter
                 zcount = 0
@@ -454,7 +456,7 @@ contains
         end do
 
         ! flush the encoder
-        call Golomb_encode(stream, pos, zcount)
+        call Golomb_encode(stream, pos, zcount, status)
 
     end subroutine encode_mask
 
@@ -510,7 +512,7 @@ contains
         integer :: i, k, bit
 
         ! a counter for runs of '0'
-        integer :: zcount
+        integer :: zcount, status
 
         zcount = 0
 
@@ -526,7 +528,9 @@ contains
                     ! the runs of zeroes has finished
 
                     ! Golomb or Rice-encode the zcount
-                    call Golomb_encode(stream, pos, zcount)
+                    call Golomb_encode(stream, pos, zcount, status)
+
+                    if (status .eq. -1) return
 
                     ! reset the zeroes counter
                     zcount = 0
@@ -539,7 +543,9 @@ contains
         end do
 
         ! flush the encoder
-        call Golomb_encode(stream, pos, zcount)
+        call Golomb_encode(stream, pos, zcount, status)
+
+        return
 
     end subroutine encode_ints
 
@@ -585,17 +591,20 @@ contains
 
     end subroutine decode_ints
 
-    pure subroutine Golomb_encode(stream, pos, N)
+    pure subroutine Golomb_encode(stream, pos, N, status)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: pos
         integer, intent(in) :: N
+        integer, intent(inout) :: status
 
         integer :: i, t, nbits
 
         ! quotient, remainder
         integer :: q, r
+
+        status = -1
 
         q = N/G_M
         r = modulo(N, G_M)
@@ -634,6 +643,8 @@ contains
             call stream_write_bits(stream, r, nbits, pos)
 
         end if
+
+        status = 0
 
     end subroutine Golomb_encode
 
