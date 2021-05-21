@@ -149,9 +149,10 @@ contains
             call stream_write_bit(compressed%bitstream, 1, pos)
 
             ! run-length-encode the 16-bit NaN mask
-            call encode_mask(bitmask, compressed%bitstream, pos)
+            ! call encode_mask(bitmask, compressed%bitstream, pos)
+
             ! tmp = int(bitmask, kind=4)
-            call stream_write_bits(compressed%bitstream, tmp, 16, pos)
+            ! call stream_write_bits(compressed%bitstream, tmp, 16, pos)
         end if
 
         e = exponent(x)
@@ -209,7 +210,8 @@ contains
 
         if (stream_read_bit(compressed%bitstream, pos) .eq. 1) then
             ! decode the NaN mask
-            bitmask = decode_mask(compressed%bitstream, pos)
+            ! bitmask = decode_mask(compressed%bitstream, pos)
+
             ! bitmask = int(stream_read_bits(compressed%bitstream, pos, 16), kind=2)
         end if
 
@@ -463,7 +465,7 @@ contains
                 ! the runs of zeroes has finished
 
                 ! Golomb or Rice-encode the zcount
-                call Rice_encode(stream, pos, zcount)
+                call Golomb_encode(stream, pos, zcount)
 
                 ! reset the zeroes counter
                 zcount = 0
@@ -474,7 +476,7 @@ contains
         end do
 
         ! flush the encoder
-        call Rice_encode(stream, pos, zcount)
+        call Golomb_encode(stream, pos, zcount)
 
     end subroutine encode_mask
 
@@ -499,7 +501,7 @@ contains
             ! decode the next zero-run length
             if (zcount .lt. 0) then
 
-                zcount = Rice_decode(stream, pos)
+                zcount = Golomb_decode(stream, pos)
 
                 if (zcount .lt. 0) return
 
@@ -514,7 +516,7 @@ contains
 
         end do
 
-        zcount = Rice_decode(stream, pos)
+        zcount = Golomb_decode(stream, pos)
 
         return
 
@@ -546,7 +548,7 @@ contains
                     ! the runs of zeroes has finished
 
                     ! Golomb or Rice-encode the zcount
-                    call Rice_encode(stream, pos, zcount)
+                    call Golomb_encode(stream, pos, zcount)
 
                     ! reset the zeroes counter
                     zcount = 0
@@ -559,7 +561,7 @@ contains
         end do
 
         ! flush the encoder
-        call Rice_encode(stream, pos, zcount)
+        call Golomb_encode(stream, pos, zcount)
 
     end subroutine encode_ints
 
@@ -587,7 +589,7 @@ contains
                 ! decode the next zero-run length
                 if (zcount .lt. 0) then
 
-                    zcount = Rice_decode(stream, pos)
+                    zcount = Golomb_decode(stream, pos)
 
                     if (zcount .lt. 0) return
 
