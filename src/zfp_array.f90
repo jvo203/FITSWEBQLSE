@@ -151,8 +151,8 @@ contains
             ! run-length-encode the 16-bit NaN mask
             ! call encode_mask(bitmask, compressed%bitstream, pos)
 
-            ! tmp = int(bitmask, kind=4)
-            ! call stream_write_bits(compressed%bitstream, tmp, 16, pos)
+            tmp = int(bitmask, kind=4)
+            call stream_write_bits(compressed%bitstream, tmp, 16, pos)
         end if
 
         e = exponent(x)
@@ -212,7 +212,7 @@ contains
             ! decode the NaN mask
             ! bitmask = decode_mask(compressed%bitstream, pos)
 
-            ! bitmask = int(stream_read_bits(compressed%bitstream, pos, 16), kind=2)
+            bitmask = int(stream_read_bits(compressed%bitstream, pos, 16), kind=2)
         end if
 
         ! reset all the bits
@@ -516,7 +516,7 @@ contains
 
         end do
 
-        zcount = Golomb_decode(stream, pos)
+        ! zcount = Golomb_decode(stream, pos)
 
         return
 
