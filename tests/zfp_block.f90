@@ -332,12 +332,13 @@ contains
         integer(kind=2) :: val, i, k, bit
 
         ! a counter for runs of '0'
-        integer :: zcount
+        integer :: zcount, status
 
         zcount = 0
 
         ! iterate over 32 bits from MSB to LSB
         do k = 31, 0, -1
+            print *, 'k', k
 
             val = 0
             ! gather k-plane bits from the input data
@@ -349,7 +350,8 @@ contains
                     ! the runs of zeroes has finished
 
                     ! Golomb or Rice-encode the zcount
-                    call Golomb_encode(stream, pos, zcount)
+                    status = Golomb_encode(stream, pos, zcount)
+                    if (status .eq. -1) return
 
                     ! reset the zeroes counters
                     zcount = 0
@@ -365,7 +367,7 @@ contains
         end do
 
         ! flush the encoder
-        call Golomb_encode(stream, pos, zcount)
+        status = Golomb_encode(stream, pos, zcount)
 
     end subroutine encode_ints
 
@@ -413,7 +415,7 @@ contains
 
     end subroutine decode_ints
 
-    subroutine Golomb_encode(stream, pos, N)
+    integer function Golomb_encode(stream, pos, N)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -424,6 +426,8 @@ contains
 
         ! quotient, remainder
         integer :: q, r
+
+        Golomb_encode = -1
 
         q = N/G_M
         r = modulo(N, G_M)
@@ -469,7 +473,11 @@ contains
 
         end if
 
-    end subroutine Golomb_encode
+        Golomb_encode = 0
+
+        return
+
+    end function Golomb_encode
 
     integer function Golomb_decode(stream, pos)
         implicit none
