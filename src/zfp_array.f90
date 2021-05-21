@@ -597,7 +597,7 @@ contains
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: pos
         integer, intent(in) :: N
-        integer, intent(inout) :: status
+        integer, intent(out) :: status
 
         integer :: i, t, nbits
 
@@ -696,17 +696,20 @@ contains
 
     end function Golomb_decode
 
-    pure subroutine Rice_encode(stream, pos, N)
+    pure subroutine Rice_encode(stream, pos, N, status)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: pos
         integer, intent(in) :: N
+        integer, intent(out) :: status
 
         integer :: i
 
         ! quotient, pseudo-remainder
         integer :: q, r
+
+        status = -1
 
         q = shiftr(N, R_k) ! divide by R_M = 2**R_k
         r = N
@@ -730,6 +733,10 @@ contains
         if (pos + R_k .gt. max_bits) return
 
         call stream_write_bits(stream, r, R_k, pos)
+
+        status = 0
+
+        return
 
     end subroutine Rice_encode
 
