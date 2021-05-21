@@ -40,6 +40,8 @@ program main
         end do
     end do
 
+    x(4/2, 4/2) = 6.4
+
     print *, x
 
     e = exponent(x)
