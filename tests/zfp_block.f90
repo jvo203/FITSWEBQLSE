@@ -332,9 +332,10 @@ contains
         integer(kind=2) :: val, i, k, bit
 
         ! a counter for runs of '0'
-        integer :: zcount, status
+        integer :: zcount, status, bit_count
 
         zcount = 0
+        bit_count = 0
 
         ! iterate over 32 bits from MSB to LSB
         do k = 31, 0, -1
@@ -358,6 +359,9 @@ contains
                 else
                     zcount = zcount + 1
                 end if
+
+                bit_count = bit_count + 1
+                print *, 'bit_count', bit_count
 
                 ! val = ior(shiftl(val, 1), bit)
             end do
