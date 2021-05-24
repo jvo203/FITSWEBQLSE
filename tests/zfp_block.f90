@@ -86,7 +86,7 @@ program main
     print *, 'ublock:', iblock
 
     ! encode 32-bit integers
-    call encode_ints(iblock, bitstream, pos)
+    call encode_many_ints(iblock, bitstream, pos)
 
     if (pos .lt. max_bits) then
         call pad_stream(bitstream, max_bits - pos, pos)
@@ -321,6 +321,52 @@ contains
         uint2int = IEOR(x, NBMASK) - NBMASK
 
     end function uint2int
+
+    subroutine encode_many_ints(data, stream, pos)
+        implicit none
+
+        integer, dimension(16), intent(in) :: data
+        integer(kind=16), intent(inout) :: stream
+        integer, intent(inout) :: pos
+
+        integer :: i, k, bit, n, m
+
+        ! a counter for runs of '1'
+        integer :: zcount, status, bit_count
+
+        zcount = 0
+        bit_count = 0
+        n = 0
+
+        ! iterate over 32 bits from MSB to LSB
+        do k = 31, 0, -1
+            print *, 'k', k
+
+            ! gather k-plane bits from the input data
+            do i = 1, 16
+                bit = ibits(data(i), k, 1)
+                ! print *, 'i', i, 'bit', bit, data(i)
+
+                if (bit .eq. 1) then
+                    ! the runs of zeroes has finished
+
+                    ! Golomb or Rice-encode the zcount
+                    status = Golomb_encode(stream, pos, zcount)
+                    if (status .eq. -1) return
+
+                    ! reset the zeroes counters
+                    zcount = 0
+                else
+                    zcount = zcount + 1
+                end if
+
+                bit_count = bit_count + 1
+                print *, 'bit_count', bit_count
+            end do
+
+        end do
+
+    end subroutine encode_many_ints
 
     subroutine encode_ints(data, stream, pos)
         implicit none
