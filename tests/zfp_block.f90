@@ -369,28 +369,28 @@ contains
 
             ! unary run-length encode the remaining bits
             if (bcount .gt. 0) then
-            do c = 1, bcount
-                print *, 'c', c
+                do c = 1, bcount
+                    print *, 'c', c
 
-                ! emit '1'
-                if (pos .eq. max_bits) return
-                call stream_write_bit(stream, 1, pos)
+                    ! emit '1'
+                    if (pos .eq. max_bits) return
+                    call stream_write_bit(stream, 1, pos)
 
-                ! keep emitting '0' until '1' is encountered
-1001            n = n + 1
-                if (n .gt. 16) exit
+                    ! keep emitting '0' until '1' is encountered
+1001                n = n + 1
+                    if (n .gt. 16) exit
 
-                bit = ibits(data(n), k, 1)
+                    bit = ibits(data(n), k, 1)
 
-                if (pos .eq. max_bits) return
-                call stream_write_bit(stream, bit, pos)
+                    if (pos .eq. max_bits) return
+                    call stream_write_bit(stream, bit, pos)
 
-                if (bit .eq. 0) go to 1001
-            end do
+                    if (bit .eq. 0) go to 1001
+                end do
             else
-            ! emit '0'
-            if (pos .eq. max_bits) return
-            call stream_write_bit(stream, 0, pos)
+                ! emit '0'
+                if (pos .eq. max_bits) return
+                call stream_write_bit(stream, 0, pos)
             end if
 
         end do
