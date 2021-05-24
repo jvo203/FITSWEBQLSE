@@ -95,6 +95,8 @@ program main
     write (*, '(a,b128.128)') 'bitstream ', bitstream
     print *, 'pos', pos
 
+    call exit
+
     ! reverse the process
     pos = max_bits - 1
 
@@ -329,20 +331,17 @@ contains
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: pos
 
-        integer :: i, k, bit, c, n, m
+        integer :: i, k, bit, c, n
 
         ! a counter for runs of '1'
         integer :: bcount
 
         bcount = 0
         n = 0
-        m = 0
 
         ! iterate over 32 bits from MSB to LSB
         do k = 31, 0, -1
-            m = min(n, max_bits - pos)
-
-            print *, 'k', k, 'n', n, 'm', m, 'pos', pos
+            print *, 'k', k, 'n', n, 'pos', pos
 
             ! gather / emit up to n bits from the k-th bit plane
             do i = 1, n
@@ -387,7 +386,9 @@ contains
 
                     if (bit .eq. 0) go to 1001
                 end do
-            else
+            end if
+
+            if (n .lt. 16) then
                 ! emit '0'
                 if (pos .eq. max_bits) return
                 call stream_write_bit(stream, 0, pos)
@@ -404,13 +405,15 @@ contains
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
-        integer :: i, k
+        integer :: i, k, bit, c, n
 
-        ! a counter for runs of '0'
-        integer :: zcount
+        ! a counter for runs of '1'
+        integer :: bcount
+
+        bcount = 0
+        n = 0
 
         data = 0
-        zcount = -1
 
         ! iterate over 32 bits from MSB to LSB
         do k = 31, 0, -1
@@ -419,22 +422,14 @@ contains
             do i = 1, 16
 
                 ! decode the next zero-run length
-                if (zcount .lt. 0) then
-
-                    zcount = Golomb_decode(stream, pos)
-
-                    if (zcount .lt. 0) return
-
-                    print *, 'zcount', zcount
+                if (bcount .lt. 0) then
 
                 end if
 
-                zcount = zcount - 1
-
-                if (zcount .lt. 0) then
-                    ! set the appropriate bit to '1'
-                    data(i) = ibset(data(i), k)
-                end if
+                ! if (zcount .lt. 0) then
+                ! set the appropriate bit to '1'
+                data(i) = ibset(data(i), k)
+                ! end if
 
             end do
         end do
