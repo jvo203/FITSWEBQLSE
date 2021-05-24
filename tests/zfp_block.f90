@@ -344,7 +344,7 @@ contains
         do k = 31, 0, -1
             m = min(n, max_bits - pos)
 
-            print *, 'k', k, 'n', n, 'm', m
+            print *, 'k', k, 'n', n, 'm', m, 'pos', pos
 
             ! gather / emit up to n bits from the k-th bit plane
             do i = 1, m
