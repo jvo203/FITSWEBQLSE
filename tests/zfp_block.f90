@@ -368,6 +368,7 @@ contains
             print *, '"1" bcount', bcount
 
             ! unary run-length encode the remaining bits
+            if (bcount .gt. 0) then
             do c = 1, bcount
                 print *, 'c', c
 
@@ -386,6 +387,11 @@ contains
 
                 if (bit .eq. 0) go to 1001
             end do
+            else
+            ! emit '0'
+            if (pos .eq. max_bits) return
+            call stream_write_bit(stream, 0, pos)
+            end if
 
         end do
 
