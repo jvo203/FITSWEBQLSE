@@ -95,8 +95,6 @@ program main
     write (*, '(a,b128.128)') 'bitstream ', bitstream
     print *, 'pos', pos
 
-    call exit
-
     ! reverse the process
     pos = max_bits - 1
 
@@ -108,7 +106,7 @@ program main
     print *, 'max_exp', max_exp
 
     ! decode 32-bit integers
-    call decode_ints(iblock, bitstream, pos)
+    call decode_many_ints(iblock, bitstream, pos)
     print *, 'ublock:', iblock
 
     ! reorder unsigned coefficients and convert to signed integer
@@ -355,6 +353,8 @@ contains
                 call stream_write_bit(stream, bit, pos)
             end do
 
+            if (n .eq. 16) cycle
+
             ! reset the '1' bit counter
             bcount = 0
 
@@ -396,6 +396,50 @@ contains
         end do
 
     end subroutine encode_many_ints
+
+    subroutine decode_many_ints(data, stream, pos)
+        implicit none
+
+        integer, dimension(16), intent(out) :: data
+        integer(kind=16), intent(in) :: stream
+        integer, intent(inout) :: pos
+
+        integer :: i, k
+
+        ! a counter for runs of '0'
+        integer :: zcount
+
+        data = 0
+        zcount = -1
+
+        ! iterate over 32 bits from MSB to LSB
+        do k = 31, 0, -1
+
+            ! set k-plane bits
+            do i = 1, 16
+
+                ! decode the next zero-run length
+                if (zcount .lt. 0) then
+
+                    zcount = Golomb_decode(stream, pos)
+
+                    if (zcount .lt. 0) return
+
+                    print *, 'zcount', zcount
+
+                end if
+
+                zcount = zcount - 1
+
+                if (zcount .lt. 0) then
+                    ! set the appropriate bit to '1'
+                    data(i) = ibset(data(i), k)
+                end if
+
+            end do
+        end do
+
+    end subroutine decode_many_ints
 
     subroutine encode_ints(data, stream, pos)
         implicit none
