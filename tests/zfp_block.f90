@@ -342,6 +342,8 @@ contains
         do k = 31, 0, -1
             print *, 'k', k
 
+            m = min(n, max_bits - pos)
+
             ! gather k-plane bits from the input data
             do i = 1, 16
                 bit = ibits(data(i), k, 1)
