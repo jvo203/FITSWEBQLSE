@@ -329,12 +329,12 @@ contains
         integer(kind=16), intent(inout) :: stream
         integer, intent(inout) :: pos
 
-        integer :: i, k, bit, n, m
+        integer :: i, k, bit, c, n, m
 
         ! a counter for runs of '1'
-        integer :: zcount, status, bit_count
+        integer :: bcount, bit_count
 
-        zcount = 0
+        bcount = 0
         bit_count = 0
         n = 0
 
@@ -344,27 +344,57 @@ contains
 
             m = min(n, max_bits - pos)
 
-            ! gather k-plane bits from the input data
-            do i = 1, 16
+            ! gather / emit up to n bits from the k-th bit plane
+            do i = 1, m
                 bit = ibits(data(i), k, 1)
-                ! print *, 'i', i, 'bit', bit, data(i)
 
-                if (bit .eq. 1) then
-                    ! the runs of zeroes has finished
-
-                    ! Golomb or Rice-encode the zcount
-                    status = Golomb_encode(stream, pos, zcount)
-                    if (status .eq. -1) return
-
-                    ! reset the zeroes counters
-                    zcount = 0
-                else
-                    zcount = zcount + 1
-                end if
+                ! check if there is space to write
+                if (pos .eq. max_bits) return
+                call stream_write_bit(stream, bit, pos)
 
                 bit_count = bit_count + 1
                 print *, 'bit_count', bit_count
             end do
+
+            ! reset the '1' bit counter
+            bcount = 0
+
+            ! count remaining '1's in the k-th bit plane
+            do i = m, 16
+                bit = ibits(data(i), k, 1)
+
+                if (bit .eq. 1) bcount = bcount + 1
+            end do
+
+            print *, '#1', bcount
+
+            if (bcount .gt. 0) then
+                ! unary run-length encode the remaining bits
+                do c = bcount, 1, -1
+                    print *, 'c', c
+
+                    ! emit '1'
+                    if (pos .eq. max_bits) return
+                    call stream_write_bit(stream, 1, pos)
+
+                    bit_count = bit_count + 1
+                    print *, 'bit_count', bit_count
+
+                    ! keep emitting '0' until '1' is encountered
+1001                n = n + 1
+                    if (n .gt. 16) exit
+
+                    ! bit = ibits(data(n), k, 1)
+
+                    if (pos .eq. max_bits) return
+                    call stream_write_bit(stream, bit, pos)
+
+                    bit_count = bit_count + 1
+                    print *, 'bit_count', bit_count
+
+                    if (bit .eq. 0) go to 1001
+                end do
+            end if
 
         end do
 
