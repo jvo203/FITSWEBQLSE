@@ -347,7 +347,7 @@ contains
             print *, 'k', k, 'n', n, 'm', m, 'pos', pos
 
             ! gather / emit up to n bits from the k-th bit plane
-            do i = 1, m
+            do i = 1, n
                 bit = ibits(data(i), k, 1)
 
                 ! check if there is space to write
@@ -359,7 +359,7 @@ contains
             bcount = 0
 
             ! count remaining '1's in the k-th bit plane
-            do i = m + 1, 16
+            do i = n + 1, 16
                 bit = ibits(data(i), k, 1)
 
                 if (bit .eq. 1) bcount = bcount + 1
