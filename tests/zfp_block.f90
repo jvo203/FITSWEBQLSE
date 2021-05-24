@@ -384,7 +384,7 @@ contains
 1001                n = n + 1
                     if (n .gt. 16) exit
 
-                    ! bit = ibits(data(n), k, 1)
+                    bit = ibits(data(n), k, 1)
 
                     if (pos .eq. max_bits) return
                     call stream_write_bit(stream, bit, pos)
