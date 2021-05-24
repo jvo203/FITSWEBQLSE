@@ -95,6 +95,8 @@ program main
     write (*, '(a,b128.128)') 'bitstream ', bitstream
     print *, 'pos', pos
 
+    call exit
+
     ! reverse the process
     pos = max_bits - 1
 
