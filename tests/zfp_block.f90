@@ -334,17 +334,17 @@ contains
         integer :: i, k, bit, c, n, m
 
         ! a counter for runs of '1'
-        integer :: bcount, bit_count
+        integer :: bcount
 
         bcount = 0
-        bit_count = 0
         n = 0
+        m = 0
 
         ! iterate over 32 bits from MSB to LSB
         do k = 31, 0, -1
-            print *, 'k', k
-
             m = min(n, max_bits - pos)
+
+            print *, 'k', k, 'n', n, 'm', m
 
             ! gather / emit up to n bits from the k-th bit plane
             do i = 1, m
@@ -353,50 +353,39 @@ contains
                 ! check if there is space to write
                 if (pos .eq. max_bits) return
                 call stream_write_bit(stream, bit, pos)
-
-                bit_count = bit_count + 1
-                print *, 'bit_count', bit_count
             end do
 
             ! reset the '1' bit counter
             bcount = 0
 
             ! count remaining '1's in the k-th bit plane
-            do i = m, 16
+            do i = m + 1, 16
                 bit = ibits(data(i), k, 1)
 
                 if (bit .eq. 1) bcount = bcount + 1
             end do
 
-            print *, '#1', bcount
+            print *, '"1" bcount', bcount
 
-            if (bcount .gt. 0) then
-                ! unary run-length encode the remaining bits
-                do c = bcount, 1, -1
-                    print *, 'c', c
+            ! unary run-length encode the remaining bits
+            do c = 1, bcount
+                print *, 'c', c
 
-                    ! emit '1'
-                    if (pos .eq. max_bits) return
-                    call stream_write_bit(stream, 1, pos)
+                ! emit '1'
+                if (pos .eq. max_bits) return
+                call stream_write_bit(stream, 1, pos)
 
-                    bit_count = bit_count + 1
-                    print *, 'bit_count', bit_count
+                ! keep emitting '0' until '1' is encountered
+1001            n = n + 1
+                if (n .gt. 16) exit
 
-                    ! keep emitting '0' until '1' is encountered
-1001                n = n + 1
-                    if (n .gt. 16) exit
+                bit = ibits(data(n), k, 1)
 
-                    bit = ibits(data(n), k, 1)
+                if (pos .eq. max_bits) return
+                call stream_write_bit(stream, bit, pos)
 
-                    if (pos .eq. max_bits) return
-                    call stream_write_bit(stream, bit, pos)
-
-                    bit_count = bit_count + 1
-                    print *, 'bit_count', bit_count
-
-                    if (bit .eq. 0) go to 1001
-                end do
-            end if
+                if (bit .eq. 0) go to 1001
+            end do
 
         end do
 
