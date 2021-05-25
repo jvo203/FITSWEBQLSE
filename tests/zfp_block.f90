@@ -428,29 +428,26 @@ contains
 
             if (n .eq. 16) cycle
 
-            m = n
-
             ! read one bit, test it for '1'
 1002        bit = stream_read_bit(stream, pos)
             if (bit .lt. 0) return
 
             if (bit .eq. 1) then
-                n = n + 1
                 ! keep on reading '0' until '1' is encountered
 
-                print *, 'a new sequence starting @', m + 1
+                print *, 'a new sequence starting @', n + 1
 
 1003            bit = stream_read_bit(stream, pos)
                 if (bit .lt. 0) return
 
-                m = m + 1
-                if (m .gt. 16) go to 1004
+                n = n + 1
+                if (n .gt. 16) go to 1004
 
                 if (bit .eq. 1) then
-                    print *, 'setting bit @', m
-                    data(m) = ibset(data(m), k)
+                    print *, 'setting bit @', n
+                    data(n) = ibset(data(n), k)
 
-                    if (m .eq. 16) go to 1004
+                    if (n .eq. 16) go to 1004
 
                     go to 1002
                 else
