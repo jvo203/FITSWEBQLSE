@@ -169,7 +169,7 @@ contains
         call fwd_order(iblock)
 
         ! encode 32-bit integers
-        call encode_ints(iblock, compressed%bitstream, pos)
+        call encode_many_ints(iblock, compressed%bitstream, pos)
 
         if (pos .lt. max_bits) then
             call pad_stream(compressed%bitstream, max_bits - pos, pos)
@@ -213,7 +213,7 @@ contains
         max_exp = bits - EBIAS
 
         ! decode 32-bit integers
-        call decode_ints(iblock, compressed%bitstream, pos)
+        call decode_many_ints(iblock, compressed%bitstream, pos)
 
         ! reorder unsigned coefficients and convert to signed integer
         call inv_order(iblock)
@@ -593,6 +593,138 @@ contains
         end do
 
     end subroutine decode_ints
+
+    pure subroutine encode_many_ints(data, stream, pos)
+        implicit none
+
+        integer, dimension(16), intent(in) :: data
+        integer(kind=16), intent(inout) :: stream
+        integer, intent(inout) :: pos
+
+        integer :: i, k, bit, c, n
+
+        ! a counter for runs of '1'
+        integer :: bcount
+
+        bcount = 0
+        n = 0
+
+        ! iterate over 32 bits from MSB to LSB
+        do k = 31, 0, -1
+
+            ! gather / emit up to n bits from the k-th bit plane
+            do i = 1, n
+                bit = ibits(data(i), k, 1)
+
+                ! check if there is space to write
+                if (pos .eq. max_bits) return
+                call stream_write_bit(stream, bit, pos)
+            end do
+
+            if (n .eq. 16) cycle
+
+            ! reset the '1' bit counter
+            bcount = 0
+
+            ! count remaining '1's in the k-th bit plane
+            do i = n + 1, 16
+                bit = ibits(data(i), k, 1)
+
+                if (bit .eq. 1) bcount = bcount + 1
+            end do
+
+            ! unary run-length encode the remaining bits
+            if (bcount .gt. 0) then
+                do c = 1, bcount
+
+                    ! emit '1'
+                    if (pos .eq. max_bits) return
+                    call stream_write_bit(stream, 1, pos)
+
+                    ! keep emitting '0' until '1' is encountered
+1001                n = n + 1
+                    if (n .gt. 16) exit
+
+                    bit = ibits(data(n), k, 1)
+
+                    if (pos .eq. max_bits) return
+                    call stream_write_bit(stream, bit, pos)
+
+                    if (bit .eq. 0) go to 1001
+                end do
+            end if
+
+            if (n .lt. 16) then
+                ! emit '0'
+                if (pos .eq. max_bits) return
+                call stream_write_bit(stream, 0, pos)
+            end if
+
+        end do
+
+    end subroutine encode_many_ints
+
+    subroutine decode_many_ints(data, stream, pos)
+        implicit none
+
+        integer, dimension(16), intent(out) :: data
+        integer(kind=16), intent(in) :: stream
+        integer, intent(inout) :: pos
+
+        integer :: i, k, bit, c, n
+
+        ! a counter for runs of '1'
+        integer :: bcount
+
+        bcount = 0
+        n = 0
+
+        ! zero-out the integer data array
+        data = 0
+
+        ! iterate over 32 bits from MSB to LSB
+        do k = 31, 0, -1
+            ! read the first n bits
+            do i = 1, n
+                bit = stream_read_bit(stream, pos)
+                if (bit .lt. 0) return
+
+                if (bit .eq. 1) data(i) = ibset(data(i), k)
+            end do
+
+            if (n .eq. 16) cycle
+
+            ! read one bit, test it for '1'
+1002        bit = stream_read_bit(stream, pos)
+            if (bit .lt. 0) return
+
+            if (bit .eq. 1) then
+                ! keep on reading '0' until '1' is encountered
+
+1003            bit = stream_read_bit(stream, pos)
+                if (bit .lt. 0) return
+
+                n = n + 1
+                if (n .gt. 16) go to 1004
+
+                if (bit .eq. 1) then
+                    data(n) = ibset(data(n), k)
+
+                    if (n .eq. 16) go to 1004
+
+                    go to 1002
+                else
+                    go to 1003
+                end if
+            else
+                go to 1004
+            end if
+
+1004        continue
+
+        end do
+
+    end subroutine decode_many_ints
 
     pure subroutine Golomb_encode(stream, pos, N, status)
         implicit none
