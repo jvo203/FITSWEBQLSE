@@ -403,7 +403,7 @@ contains
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
-        integer :: i, k, bit, c, n, m
+        integer :: i, k, bit, c, n
 
         ! a counter for runs of '1'
         integer :: bcount
