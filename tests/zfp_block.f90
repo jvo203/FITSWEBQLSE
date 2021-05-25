@@ -438,6 +438,8 @@ contains
                 n = n + 1
                 ! keep on reading '0' until '1' is encountered
 
+                print *, 'a new sequence starting @', m + 1
+
 1003            bit = stream_read_bit(stream, pos)
                 if (bit .lt. 0) return
 
@@ -445,7 +447,11 @@ contains
                 if (m .gt. 16) go to 1004
 
                 if (bit .eq. 1) then
+                    print *, 'setting bit @', m
                     data(m) = ibset(data(m), k)
+
+                    if (m .eq. 16) go to 1004
+
                     go to 1002
                 else
                     go to 1003
