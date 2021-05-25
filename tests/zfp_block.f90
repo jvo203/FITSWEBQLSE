@@ -403,7 +403,7 @@ contains
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
-        integer :: i, k, bit, c, n
+        integer :: i, k, bit, c, n, m
 
         ! a counter for runs of '1'
         integer :: bcount
@@ -416,17 +416,46 @@ contains
 
         ! iterate over 32 bits from MSB to LSB
         do k = 31, 0, -1
+            print *, 'k', k, 'n', n, 'pos', pos
 
             ! read the first n bits
             do i = 1, n
                 bit = stream_read_bit(stream, pos)
-
                 if (bit .lt. 0) return
 
                 if (bit .eq. 1) data(i) = ibset(data(i), k)
             end do
 
             if (n .eq. 16) cycle
+
+            m = n
+
+            ! read one bit, test it for '1'
+1002        bit = stream_read_bit(stream, pos)
+            if (bit .lt. 0) return
+
+            if (bit .eq. 1) then
+                n = n + 1
+                ! keep on reading '0' until '1' is encountered
+
+1003            bit = stream_read_bit(stream, pos)
+                if (bit .lt. 0) return
+
+                m = m + 1
+                if (m .gt. 16) go to 1004
+
+                if (bit .eq. 1) then
+                    data(m) = ibset(data(m), k)
+                    go to 1002
+                else
+                    go to 1003
+                end if
+            else
+                go to 1004
+            end if
+
+1004        continue
+
         end do
 
     end subroutine decode_many_ints
