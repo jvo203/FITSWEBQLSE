@@ -411,25 +411,22 @@ contains
         bcount = 0
         n = 0
 
+        ! zero-out the integer data array
         data = 0
 
         ! iterate over 32 bits from MSB to LSB
         do k = 31, 0, -1
 
-            ! set k-plane bits
-            do i = 1, 16
+            ! read the first n bits
+            do i = 1, n
+                bit = stream_read_bit(stream, pos)
 
-                ! decode the next zero-run length
-                if (bcount .lt. 0) then
+                if (bit .lt. 0) return
 
-                end if
-
-                ! if (zcount .lt. 0) then
-                ! set the appropriate bit to '1'
-                data(i) = ibset(data(i), k)
-                ! end if
-
+                if (bit .eq. 1) data(i) = ibset(data(i), k)
             end do
+
+            if (n .eq. 16) cycle
         end do
 
     end subroutine decode_many_ints
