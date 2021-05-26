@@ -761,5 +761,7 @@ int main()
 
     fblock[5] = 6.4f;
 
-    encode_array(fblock, minbits, maxbits, minexp, 1, 1, 1);
+    char bitstream[BLOCK_SIZE]; // 8 bits per value, a total of 128 bits
+
+    encode_array(fblock, bitstream, minbits, maxbits, minexp, 1, 1, 1);
 }
