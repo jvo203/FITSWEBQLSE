@@ -293,7 +293,7 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     encode_integer_block(iblock, minbits, maxbits, maxprec);
 }
 
-export void encode_array(uniform float src[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
+export void encode_array(uniform float src[], uniform uchar bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
 {
     // process each block in parallel
     foreach(j=0 ... height, i=0 ... width)
