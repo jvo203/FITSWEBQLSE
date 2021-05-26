@@ -298,12 +298,28 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
     // process each block in parallel
     foreach(j=0 ... height, i=0 ... width)
     {
+        // a private bitstream
+        uchar stream[BLOCK_SIZE];
+        int pos; // a current position in the bitstream
+        bool has_nan;
+
         // a private 4x4 block
         float fblock[BLOCK_SIZE];
         
+        has_nan = false;
+
         // copy the source data
         for(int k=0; k<BLOCK_SIZE; k++)
-            fblock[k] = src[k];
+        {
+            float tmp = src[k];
+
+            cif(isnan(tmp))
+            has_nan = true;
+
+            fblock[k] = tmp;
+        }
+
+        print("has_nan: %\n", has_nan);
 
         encode_float_block(fblock, minbits, maxbits, minexp);
     }
