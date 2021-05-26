@@ -314,7 +314,7 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
             float tmp = src[k];
 
             cif(isnan(tmp))
-            has_nan = true;
+                has_nan = true;
 
             fblock[k] = tmp;
         }
