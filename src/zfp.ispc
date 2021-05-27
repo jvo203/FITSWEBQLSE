@@ -301,25 +301,26 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
         // a private bitstream
         uchar stream[BLOCK_SIZE];
         int pos; // a current position in the bitstream
-        bool has_nan;
 
+        unsigned int bit, bitmask;
+        
         // a private 4x4 block
         float fblock[BLOCK_SIZE];
-        
-        has_nan = false;
+
+        bitmask = 0u;
 
         // copy the source data
         for(int k=0; k<BLOCK_SIZE; k++)
         {
             float tmp = src[k];
 
-            cif(isnan(tmp))
-                has_nan = true;
+            bit = isnan(tmp) ? 1u : 0u;
+            bitmask = (bitmask << 1) | bit;
 
             fblock[k] = tmp;
         }
 
-        print("has_nan: %\n", has_nan);
+        print("bitmask: %\n", bitmask);
 
         encode_float_block(fblock, minbits, maxbits, minexp);
     }
