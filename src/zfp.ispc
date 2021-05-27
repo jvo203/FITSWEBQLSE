@@ -20,6 +20,12 @@ typedef unsigned int8 uchar;
 #define MIN(x, y) min(x, y)
 #define MAX(x, y) max(x, y)
 
+bool isinf(float tmp)
+{
+  unsigned int i = intbits(tmp) ;  
+  return ( (i & 0x7fffffff) == 0x7f800000 ) || ( (i & 0xffffffff) == 0xff800000 ) ;
+}
+
 #define index(i, j) ((i) + 4 * (j))
 
 /* order coefficients (i, j) by i + j, then i^2 + j^2 */
@@ -341,11 +347,12 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
         for(int k=0; k<BLOCK_SIZE; k++)
         {
             float tmp = src[k];
+            bool nan = isnan(tmp) || isinf(tmp);
 
-            bit = isnan(tmp) ? 1u : 0u;
+            bit = nan ? 1u : 0u;
             bitmask = (bitmask << 1) | bit;
 
-            fblock[k] = isnan(tmp) ? 0.0 : tmp;
+            fblock[k] = nan ? 0.0 : tmp;
         }
 
         print("bitmask: %\n", bitmask);
