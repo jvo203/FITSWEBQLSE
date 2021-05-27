@@ -2,6 +2,7 @@ typedef unsigned int8 uchar;
 
 #define CHAR_BIT 8
 
+#define MAX_BITS 128
 #define ZFP_MAX_PREC 64
 #define ZFP_MIN_EXP -1074
 
@@ -293,16 +294,31 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     encode_integer_block(iblock, minbits, maxbits, maxprec);
 }
 
+/* write single bit (must be 0 or 1) */
+uint stream_write_bit(uint stream[4], uint bit, int pos)
+{
+    int idx;
+
+    idx = pos >> 3; // divide by 8 to get a byte index
+
+    print("|%|, pos: %, idx: %", bit, pos, idx);
+
+    // left-shift the selected byte only and append the next bit
+    stream[idx] = (stream[idx] << 1) | bit;
+
+    return bit;
+}
+
 export void encode_array(uniform float src[], uniform uchar bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
 {
     // process each block in parallel
     foreach(j=0 ... height, i=0 ... width)
     {
         // a private bitstream
-        uchar stream[BLOCK_SIZE];
+        uint stream[4];
         int pos; // a current position in the bitstream
 
-        unsigned int bit, bitmask;
+        uint bit, bitmask;
         
         // a private 4x4 block
         float fblock[BLOCK_SIZE];
@@ -321,6 +337,19 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
         }
 
         print("bitmask: %\n", bitmask);
+
+        pos = 0;
+
+        cif(bitmask == 0u)
+            stream_write_bit(stream, 0u, pos++);
+        else
+        {
+            stream_write_bit(stream, 1u, pos++);
+
+            // write the 16-bit mask too
+        }
+
+        print("pos:%\n", pos);
 
         encode_float_block(fblock, minbits, maxbits, minexp);
     }
