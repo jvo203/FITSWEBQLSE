@@ -295,7 +295,7 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
 }
 
 /* write single bit (must be 0 or 1) */
-uint stream_write_bit(uint stream[4], uint bit, int pos)
+uint stream_write_bit(varying uint stream[4], uint bit, int pos)
 {
     int idx;
 
@@ -307,6 +307,18 @@ uint stream_write_bit(uint stream[4], uint bit, int pos)
     stream[idx] = (stream[idx] << 1) | bit;
 
     return bit;
+}
+
+/* write 0 <= n <= 32 low bits of value and return remaining bits */
+uint stream_write_bits(varying uint stream[4], uint value, uint n, int pos)
+{
+    uint i;
+    uint ret;
+
+    for (i = 0; i < n; i++, value >>= 1)
+        stream_write_bit(stream, value & 1u, pos++);
+
+    return value >> n;
 }
 
 export void encode_array(uniform float src[], uniform uchar bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
@@ -333,7 +345,7 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
             bit = isnan(tmp) ? 1u : 0u;
             bitmask = (bitmask << 1) | bit;
 
-            fblock[k] = tmp;
+            fblock[k] = isnan(tmp) ? 0.0 : tmp;
         }
 
         print("bitmask: %\n", bitmask);
@@ -347,6 +359,8 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
             stream_write_bit(stream, 1u, pos++);
 
             // write the 16-bit mask too
+            stream_write_bits(stream, bitmask, 16, pos);
+            pos += 16;
         }
 
         print("pos:%\n", pos);
