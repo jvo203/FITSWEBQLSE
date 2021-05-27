@@ -760,6 +760,7 @@ int main()
             fblock[offset++] = (i + 1) * (j + 1);
 
     fblock[5] = 6.4f;
+    fblock[3] = 0.0 / 0.0f;
 
     uchar bitstream[BLOCK_SIZE]; // 8 bits per value, a total of 128 bits
 

@@ -363,7 +363,7 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
             pos += 16;
         }
 
-        print("pos:%\n", pos);
+        print("\npos:%\n", pos);
 
         encode_float_block(fblock, minbits, maxbits, minexp);
     }
