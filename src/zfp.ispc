@@ -257,13 +257,13 @@ void inv_xform(varying int p[BLOCK_SIZE])
 }
 
 /* write single bit (must be 0 or 1) */
-uint stream_write_bit(varying uint stream[4], uint bit, int pos)
+uint stream_write_bit(varying uint stream[4], int pos, uint bit)
 {
     int idx;
 
-    idx = pos >> 3; // divide by 8 to get a byte index
+    idx = pos >> 5; // divide by 32 to get a byte index
 
-    print("|%|, pos: %, idx: %", bit, pos, idx);
+    print("stream_write_bit|%|, pos: %, idx: %\n", bit, pos, idx);
 
     // left-shift the selected byte only and append the next bit
     stream[idx] = (stream[idx] << 1) | bit;
@@ -272,13 +272,13 @@ uint stream_write_bit(varying uint stream[4], uint bit, int pos)
 }
 
 /* write 0 <= n <= 32 low bits of value and return remaining bits */
-uint stream_write_bits(varying uint stream[4], uint value, uint n, int pos)
+uint stream_write_bits(varying uint stream[4], int pos, uint value, uint n)
 {
     uint i;
     uint ret;
 
     for (i = 0; i < n; i++, value >>= 1)
-        stream_write_bit(stream, value & 1u, pos++);
+        stream_write_bit(stream, pos++, value & 1u);
 
     return value >> n;
 }
@@ -289,8 +289,48 @@ void stream_pad(varying uint stream[4], int pos, uint n)
     uint i;
 
     for (i = 0; i < n; i++)
-        stream_write_bit(stream, 0u, pos++);
+        stream_write_bit(stream, pos++, 0u);
 };
+
+
+/* compress sequence of size > 64 unsigned integers */
+int encode_many_ints(varying uint stream[4], int pos, uint maxbits, uint maxprec, varying const uint data[BLOCK_SIZE])
+{
+    uint intprec = CHAR_BIT * (uint)sizeof(uniform uint);
+    uint kmin = intprec > maxprec ? intprec - maxprec : 0;
+    uint bits = maxbits;
+    uint i, k, m, n, c;
+
+    /* encode one bit plane at a time from MSB to LSB */
+    for (k = intprec, n = 0; bits && k-- > kmin;)
+    {
+        print("k:%, n:%, bits:%\t", k, n, bits);
+        /* step 1: encode first n bits of bit plane #k */
+        m = MIN(n, bits);
+        bits -= m;
+        print("m:%, bits:%\n", m, bits);
+        for (i = 0; i < m; i++)
+            stream_write_bit(stream, pos++, (data[i] >> k) & 1u);
+
+        /* step 2: count remaining one-bits in bit plane */
+        c = 0;
+        for (i = m; i < BLOCK_SIZE; i++)
+            c += (data[i] >> k) & 1u;
+        print("c:%\n", c);
+
+        /* step 3: unary run-length encode remainder of bit plane */
+        for (; n < BLOCK_SIZE && bits && (--bits, stream_write_bit(stream, pos++, !!c)); c--, n++)
+        {
+            print("outer loop;");
+            for (; n < BLOCK_SIZE - 1 && bits && (--bits, !stream_write_bit(stream, pos++, (data[n] >> k) & 1u)); n++)
+                print("inner loop;");
+        }
+
+        print("\n");
+    }
+
+    return pos;
+}
 
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, varying uint stream[4], int pos)
 {
@@ -312,9 +352,9 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
         print("%\t", ublock[k]);
     print("\n");
 
-    pos = encode_many_ints(stream, pos, maxbits, maxprec, ublock, BLOCK_SIZE);
+    pos = encode_many_ints(stream, pos, maxbits, maxprec, ublock);
 
-    print("\npos:%\n", pos);
+    print("\npos:%, minbits:%\n", pos, minbits);
 
     /* write at least minbits bits by padding with zeros */
     if (pos < minbits)
@@ -344,7 +384,7 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     print("\n");
 
     // emit the 8-bit exponent
-    stream_write_bits(stream, 2 * e + 1, 8, pos);
+    stream_write_bits(stream, pos, 2 * e + 1, 8);
     pos += 8;
 
     encode_integer_block(iblock, minbits, maxbits, maxprec, stream, pos);
@@ -390,13 +430,13 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
         stream[3] = 0;
 
         cif(bitmask == 0u)
-            stream_write_bit(stream, 0u, pos++);
+            stream_write_bit(stream, pos++, 0u);
         else
         {
-            stream_write_bit(stream, 1u, pos++);
+            stream_write_bit(stream, pos++, 1u);
 
             // write the 16-bit mask too
-            stream_write_bits(stream, bitmask, 16, pos);
+            stream_write_bits(stream, pos, bitmask, 16);
             pos += 16;
         }
 
