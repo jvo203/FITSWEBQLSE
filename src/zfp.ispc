@@ -295,7 +295,6 @@ void stream_pad(varying uint stream[4], int pos, uint n)
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, varying uint stream[4], int pos)
 {
     uint ublock[BLOCK_SIZE];
-    uint bits;
 
     /* perform decorrelating transform */
     fwd_xform(iblock);
@@ -313,16 +312,15 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
         print("%\t", ublock[k]);
     print("\n");
 
-    bits = encode_many_ints(stream, pos, maxbits, maxprec, ublock, BLOCK_SIZE);
+    pos = encode_many_ints(stream, pos, maxbits, maxprec, ublock, BLOCK_SIZE);
 
     print("\npos:%\n", pos);
 
     /* write at least minbits bits by padding with zeros */
-    if (bits < minbits)
+    if (pos < minbits)
     {
-        stream_pad(stream, pos, minbits - bits);
-        print("all-zeroes, padding stream with % bits\n", minbits - bits);
-        bits = minbits;
+        stream_pad(stream, pos, minbits - pos);
+        print("all-zeroes, padding stream with % bits\n", minbits - pos);
     }
 }
 
