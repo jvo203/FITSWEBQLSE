@@ -257,49 +257,6 @@ void inv_xform(varying int p[BLOCK_SIZE])
         inv_lift(p, 4 * y, 1);
 }
 
-void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec)
-{
-    uint ublock[BLOCK_SIZE];
-
-    /* perform decorrelating transform */
-    fwd_xform(iblock);
-
-    print("iblock:\n");
-    for (int k = 0; k < BLOCK_SIZE; k++)
-        print("%\t", iblock[k]);
-    print("\n");
-
-    /* reorder signed coefficients and convert to unsigned integer */
-    fwd_order(ublock, iblock, PERM); // for DIMS == 2
-
-    print("ublock:\n");
-    for (int k = 0; k < BLOCK_SIZE; k++)
-        print("%\t", ublock[k]);
-    print("\n");
-}
-
-void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp)
-{
-    /* compute maximum exponent */
-    int emax = exponent_block(fblock);
-    int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
-    uint e = maxprec ? emax + EBIAS : 0;
-
-    print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
-
-    int iblock[BLOCK_SIZE];
-
-    /* perform forward block-floating-point transform */
-    fwd_cast(iblock, fblock, emax);
-
-    print("iblock:\n");
-    for (int k = 0; k < BLOCK_SIZE; k++)
-        print("%\t", iblock[k]);
-    print("\n");
-
-    encode_integer_block(iblock, minbits, maxbits, maxprec);
-}
-
 /* write single bit (must be 0 or 1) */
 uint stream_write_bit(varying uint stream[4], uint bit, int pos)
 {
@@ -325,6 +282,55 @@ uint stream_write_bits(varying uint stream[4], uint value, uint n, int pos)
         stream_write_bit(stream, value & 1u, pos++);
 
     return value >> n;
+}
+
+void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, varying uint stream[4], int pos)
+{
+    uint ublock[BLOCK_SIZE];
+
+    /* perform decorrelating transform */
+    fwd_xform(iblock);
+
+    print("iblock:\n");
+    for (int k = 0; k < BLOCK_SIZE; k++)
+        print("%\t", iblock[k]);
+    print("\n");
+
+    /* reorder signed coefficients and convert to unsigned integer */
+    fwd_order(ublock, iblock, PERM); // for DIMS == 2
+
+    print("ublock:\n");
+    for (int k = 0; k < BLOCK_SIZE; k++)
+        print("%\t", ublock[k]);
+    print("\n");
+}
+
+void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp, varying uint stream[4], int pos)
+{
+    /* compute maximum exponent */
+    int emax = exponent_block(fblock);
+    int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
+    uint e = maxprec ? emax + EBIAS : 0;
+
+    print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
+
+    int iblock[BLOCK_SIZE];
+
+    /* perform forward block-floating-point transform */
+    fwd_cast(iblock, fblock, emax);
+
+    print("iblock:\n");
+    for (int k = 0; k < BLOCK_SIZE; k++)
+        print("%\t", iblock[k]);
+    print("\n");
+
+    // emit the 8-bit exponent
+    stream_write_bits(stream, 2 * e + 1, 8, pos);
+    pos += 8;
+
+    print("\npos:%\n", pos);
+
+    encode_integer_block(iblock, minbits, maxbits, maxprec, stream, pos);
 }
 
 export void encode_array(uniform float src[], uniform uchar bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
@@ -377,8 +383,6 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
             pos += 16;
         }
 
-        print("\npos:%\n", pos);
-
-        encode_float_block(fblock, minbits, maxbits, minexp);
+        encode_float_block(fblock, minbits, maxbits, minexp, stream, pos);
     }
 }
