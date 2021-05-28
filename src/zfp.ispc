@@ -358,6 +358,10 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
         print("bitmask: %\n", bitmask);
 
         pos = 0;
+        stream[0] = 0;
+        stream[1]=0;
+        stream[2] = 0;
+        stream[3] = 0;
 
         cif(bitmask == 0u)
             stream_write_bit(stream, 0u, pos++);
