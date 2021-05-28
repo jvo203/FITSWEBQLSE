@@ -357,7 +357,10 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
 
         print("bitmask: %\n", bitmask);
 
+        // reset the stream position
         pos = 0;
+
+        // zero-out the bitstream
         stream[0] = 0;
         stream[1]=0;
         stream[2] = 0;
