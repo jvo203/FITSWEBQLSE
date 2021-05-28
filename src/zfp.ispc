@@ -2,7 +2,6 @@ typedef unsigned int8 uchar;
 
 #define CHAR_BIT 8
 
-#define MAX_BITS 128
 #define ZFP_MAX_PREC 64
 #define ZFP_MIN_EXP -1074
 
@@ -284,9 +283,19 @@ uint stream_write_bits(varying uint stream[4], uint value, uint n, int pos)
     return value >> n;
 }
 
+/* append n zero-bits to stream */
+void stream_pad(varying uint stream[4], int pos, uint n)
+{
+    uint i;
+
+    for (i = 0; i < n; i++)
+        stream_write_bit(stream, 0u, pos++);
+};
+
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, varying uint stream[4], int pos)
 {
     uint ublock[BLOCK_SIZE];
+    uint bits;
 
     /* perform decorrelating transform */
     fwd_xform(iblock);
@@ -303,6 +312,18 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
     for (int k = 0; k < BLOCK_SIZE; k++)
         print("%\t", ublock[k]);
     print("\n");
+
+    bits = encode_many_ints(stream, pos, maxbits, maxprec, ublock, BLOCK_SIZE);
+
+    print("\npos:%\n", pos);
+
+    /* write at least minbits bits by padding with zeros */
+    if (bits < minbits)
+    {
+        stream_pad(stream, pos, minbits - bits);
+        print("all-zeroes, padding stream with % bits\n", minbits - bits);
+        bits = minbits;
+    }
 }
 
 void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp, varying uint stream[4], int pos)
@@ -327,8 +348,6 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     // emit the 8-bit exponent
     stream_write_bits(stream, 2 * e + 1, 8, pos);
     pos += 8;
-
-    print("\npos:%\n", pos);
 
     encode_integer_block(iblock, minbits, maxbits, maxprec, stream, pos);
 }
