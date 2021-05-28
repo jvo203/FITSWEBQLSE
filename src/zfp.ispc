@@ -263,7 +263,7 @@ uint stream_write_bit(varying uint stream[4], int pos, uint bit)
 
     idx = pos >> 5; // divide by 32 to get a byte index
 
-    print("stream_write_bit|%|, pos: %, idx: %\n", bit, pos, idx);
+    // print("stream_write_bit|%|, pos: %, idx: %\n", bit, pos, idx);
 
     // left-shift the selected byte only and append the next bit
     stream[idx] = (stream[idx] << 1) | bit;
@@ -304,11 +304,11 @@ int encode_many_ints(varying uint stream[4], int pos, uint maxbits, uint maxprec
     /* encode one bit plane at a time from MSB to LSB */
     for (k = intprec, n = 0; bits && k-- > kmin;)
     {
-        print("k:%, n:%, bits:%\t", k, n, bits);
+        // print("k:%, n:%, bits:%\t", k, n, bits);
         /* step 1: encode first n bits of bit plane #k */
         m = MIN(n, bits);
         bits -= m;
-        print("m:%, bits:%\n", m, bits);
+        // print("m:%, bits:%\n", m, bits);
         for (i = 0; i < m; i++)
             stream_write_bit(stream, pos++, (data[i] >> k) & 1u);
 
@@ -316,17 +316,11 @@ int encode_many_ints(varying uint stream[4], int pos, uint maxbits, uint maxprec
         c = 0;
         for (i = m; i < BLOCK_SIZE; i++)
             c += (data[i] >> k) & 1u;
-        print("c:%\n", c);
+        // print("c:%\n", c);
 
         /* step 3: unary run-length encode remainder of bit plane */
         for (; n < BLOCK_SIZE && bits && (--bits, stream_write_bit(stream, pos++, !!c)); c--, n++)
-        {
-            print("outer loop;");
-            for (; n < BLOCK_SIZE - 1 && bits && (--bits, !stream_write_bit(stream, pos++, (data[n] >> k) & 1u)); n++)
-                print("inner loop;");
-        }
-
-        print("\n");
+            for (; n < BLOCK_SIZE - 1 && bits && (--bits, !stream_write_bit(stream, pos++, (data[n] >> k) & 1u)); n++) ;
     }
 
     return pos;
@@ -339,28 +333,28 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
     /* perform decorrelating transform */
     fwd_xform(iblock);
 
-    print("iblock:\n");
+    /* print("iblock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
         print("%\t", iblock[k]);
-    print("\n");
+    print("\n"); */
 
     /* reorder signed coefficients and convert to unsigned integer */
     fwd_order(ublock, iblock, PERM); // for DIMS == 2
 
-    print("ublock:\n");
+    /* print("ublock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
         print("%\t", ublock[k]);
-    print("\n");
+    print("\n"); */
 
     pos = encode_many_ints(stream, pos, maxbits - pos, maxprec, ublock);
 
-    print("\npos:%, minbits:%\n", pos, minbits);
+    // print("\npos:%, minbits:%\n", pos, minbits);
 
     /* write at least minbits bits by padding with zeros */
-    if (pos < minbits)
+    cif (pos < minbits)
     {
         stream_pad(stream, pos, minbits - pos);
-        print("all-zeroes, padding stream with % bits\n", minbits - pos);
+        // print("all-zeroes, padding stream with % bits\n", minbits - pos);
     }
 }
 
@@ -371,17 +365,17 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
     uint e = maxprec ? emax + EBIAS : 0;
 
-    print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
+    // print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
 
     int iblock[BLOCK_SIZE];
 
     /* perform forward block-floating-point transform */
     fwd_cast(iblock, fblock, emax);
 
-    print("iblock:\n");
+    /* print("iblock:\n");
     for (int k = 0; k < BLOCK_SIZE; k++)
         print("%\t", iblock[k]);
-    print("\n");
+    print("\n"); */
 
     // emit the 8-bit exponent
     stream_write_bits(stream, pos, 2 * e + 1, 8);
@@ -418,7 +412,7 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
             fblock[k] = nan ? 0.0 : tmp;
         }
 
-        print("bitmask: %\n", bitmask);
+        // print("bitmask: %\n", bitmask);
 
         // reset the stream position
         pos = 0;
