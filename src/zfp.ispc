@@ -352,7 +352,7 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
         print("%\t", ublock[k]);
     print("\n");
 
-    pos = encode_many_ints(stream, pos, maxbits, maxprec, ublock);
+    pos = encode_many_ints(stream, pos, maxbits - pos, maxprec, ublock);
 
     print("\npos:%, minbits:%\n", pos, minbits);
 
