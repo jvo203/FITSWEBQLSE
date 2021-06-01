@@ -762,11 +762,11 @@ int main()
     fblock[5] = 6.4f;
     //fblock[3] = 0.0 / 0.0f;
 
-    uchar bitstream[BLOCK_SIZE]; // 8 bits per value, a total of 128 bits
+    uint bitstream[4]; // 8 bits per value, a total of 128 bits
 
     encode_array(fblock, bitstream, minbits, maxbits, minexp, 1, 1, 1);
 
     // visualise all the bits
-    for (i = 0; i < 8; i++)
-        printBits(sizeof(uchar), &bitstream[i]);
+    for (i = 0; i < 4; i++)
+        printBits(sizeof(uint), &bitstream[i]);
 }

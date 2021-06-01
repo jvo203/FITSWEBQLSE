@@ -263,7 +263,7 @@ uint stream_write_bit(varying uint stream[4], int pos, uint bit)
 
     idx = pos >> 5; // divide by 32 to get a byte index
 
-    // print("stream_write_bit|%|, pos: %, idx: %\n", bit, pos, idx);
+    print("stream_write_bit|%|, pos: %, idx: %\n", bit, pos, idx);
 
     // left-shift the selected byte only and append the next bit
     stream[idx] = (stream[idx] << 1) | bit;
@@ -384,7 +384,7 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     encode_integer_block(iblock, minbits, maxbits, maxprec, stream, pos);
 }
 
-export void encode_array(uniform float src[], uniform uchar bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
+export void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
 {
     // process each block in parallel
     foreach(j=0 ... height, i=0 ... width)
@@ -419,7 +419,7 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
 
         // zero-out the bitstream
         stream[0] = 0;
-        stream[1]=0;
+        stream[1] = 0;
         stream[2] = 0;
         stream[3] = 0;
 
@@ -435,5 +435,15 @@ export void encode_array(uniform float src[], uniform uchar bitstream[], uniform
         }
 
         encode_float_block(fblock, minbits, maxbits, minexp, stream, pos);
+
+        for(int k=0;k<4;k++)
+            print("%\t", stream[i]);
+        print("\n");
+
+        // copy the bitstream back to the main memory
+        bitstream[0] = stream[0];
+        bitstream[1] = stream[1];
+        bitstream[2] = stream[2];
+        bitstream[3] = stream[3];
     }
 }
