@@ -257,7 +257,8 @@ void inv_xform(varying int p[BLOCK_SIZE])
 }
 
 /* write single bit (must be 0 or 1) */
-uint stream_write_bit(varying uint stream[4], int pos, uint bit)
+// was varying uint stream[4]
+uint stream_write_bit(uniform uint *stream, int pos, uint bit)
 {
     int idx;
 
@@ -272,7 +273,7 @@ uint stream_write_bit(varying uint stream[4], int pos, uint bit)
 }
 
 /* write 0 <= n <= 32 low bits of value and return remaining bits */
-uint stream_write_bits(varying uint stream[4], int pos, uint value, uint n)
+uint stream_write_bits(uniform uint *stream, int pos, uint value, uint n)
 {
     uint i;
     uint ret;
@@ -284,7 +285,7 @@ uint stream_write_bits(varying uint stream[4], int pos, uint value, uint n)
 }
 
 /* append n zero-bits to stream */
-void stream_pad(varying uint stream[4], int pos, uint n)
+void stream_pad(uniform uint *stream, int pos, uint n)
 {
     uint i;
 
@@ -294,7 +295,7 @@ void stream_pad(varying uint stream[4], int pos, uint n)
 
 
 /* compress sequence of size > 64 unsigned integers */
-int encode_many_ints(varying uint stream[4], int pos, uint maxbits, uint maxprec, varying const uint data[BLOCK_SIZE])
+int encode_many_ints(uniform uint *stream, int pos, uint maxbits, uint maxprec, varying const uint data[BLOCK_SIZE])
 {
     uint intprec = CHAR_BIT * (uint)sizeof(uniform uint);
     uint kmin = intprec > maxprec ? intprec - maxprec : 0;
@@ -326,7 +327,7 @@ int encode_many_ints(varying uint stream[4], int pos, uint maxbits, uint maxprec
     return pos;
 }
 
-void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, varying uint stream[4], int pos)
+void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, uniform uint *stream, int pos)
 {
     uint ublock[BLOCK_SIZE];
 
@@ -358,7 +359,7 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
     }
 }
 
-void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp, varying uint stream[4], int pos)
+void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp, uniform uint *stream, int pos)
 {
     /* compute maximum exponent */
     int emax = exponent_block(fblock);
@@ -389,8 +390,6 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
     // process each block in parallel
     foreach(j=0 ... height, i=0 ... width)
     {
-        // a private bitstream
-        uint stream[4];
         int pos; // a current position in the bitstream
 
         uint bit, bitmask;
@@ -418,32 +417,22 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
         pos = 0;
 
         // zero-out the bitstream
-        stream[0] = 0;
-        stream[1] = 0;
-        stream[2] = 0;
-        stream[3] = 0;
+        bitstream[0] = 0;
+        bitstream[1] = 0;
+        bitstream[2] = 0;
+        bitstream[3] = 0;
 
         cif(bitmask == 0u)
-            stream_write_bit(stream, pos++, 0u);
+            stream_write_bit(bitstream, pos++, 0u);
         else
         {
-            stream_write_bit(stream, pos++, 1u);
+            stream_write_bit(bitstream, pos++, 1u);
 
             // write the 16-bit mask too
-            stream_write_bits(stream, pos, bitmask, 16);
+            stream_write_bits(bitstream, pos, bitmask, 16);
             pos += 16;
         }
 
-        encode_float_block(fblock, minbits, maxbits, minexp, stream, pos);
-
-        for(int k=0;k<4;k++)
-            print("%\t", stream[i]);
-        print("\n");
-
-        // copy the bitstream back to the main memory
-        bitstream[0] = stream[0];
-        bitstream[1] = stream[1];
-        bitstream[2] = stream[2];
-        bitstream[3] = stream[3];
+        encode_float_block(fblock, minbits, maxbits, minexp, bitstream, pos);
     }
 }
