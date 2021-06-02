@@ -778,6 +778,9 @@ int main()
 
     float data[total_size];
 
+    for (i = 0; i < total_size; i++)
+        data[i] = sinf(2.0f * 3.141529f / 27.0f * (float)i);
+
     int cn = width / 4;
     int cm = height / 4;
 
