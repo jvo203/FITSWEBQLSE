@@ -174,7 +174,7 @@ block:
 
 encode:
 	ispc -g -O3 --pic --opt=fast-math --addressing=32 src/zfp.ispc -o src/zfp.o -h src/zfp.h
-	$(CC) $(CFLAGS) tests/zfp_encode.c src/zfp.o -o zfp_encode
+	$(CC) $(CFLAGS) tests/zfp_encode.c src/zfp.o -o zfp_encode -lm
 #icc -O0 tests/zfp_encode.c -o zfp_encode -lm
 
 gzfp:
