@@ -264,7 +264,7 @@ uint stream_write_bit(uniform uint *stream, int pos, uint bit)
 
     idx = pos >> 5; // divide by 32 to get a byte index
 
-    print("stream_write_bit|%|, pos: %, idx: %\n", bit, pos, idx);
+    // print("stream_write_bit|%|, pos: %, idx: %\n", bit, pos, idx);
 
     // left-shift the selected byte only and append the next bit
     stream[idx] = (stream[idx] << 1) | bit;
