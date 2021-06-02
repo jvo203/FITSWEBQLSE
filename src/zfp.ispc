@@ -390,7 +390,7 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
     uniform int cn, cm;
 
     cn = width / 4;
-    cm = width / 4;
+    cm = height / 4;
 
     // the input dimensions might not be divisible by 4
     cif (width % 4 != 0)
@@ -420,20 +420,19 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
 
         uniform int x,y;
 
+        int src_x = i * 4;
+        int src_y = j * 4;
+
         // copy the source data
         for(y=0; y<4; y++)
-        {
-            int src_y = j * 4 + y;
-
+        {        
             for(x=0; x<4; x++);
             {
-                float tmp;
+                float tmp;                            
 
-                int src_x = i * 4 + x;                
-
-                cif(src_x < width && src_y < height)
+                cif((src_x + x) < width && (src_y + y) < height)
                 {
-                    int src_offset = src_y * width + src_x;
+                    int src_offset = (src_y + y) * width + (src_x + x);
                     tmp = src[src_offset];
                 }
                 else
