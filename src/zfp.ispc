@@ -385,11 +385,27 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     encode_integer_block(iblock, minbits, maxbits, maxprec, stream, pos);
 }
 
-export void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
+export void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
 {
+    uniform int cn, cm;
+
+    cn = width / 4;
+    cm = width / 4;
+
+    // the input dimensions might not be divisible by 4
+    cif (width % 4 != 0)
+        cn = cn + 1;
+
+    cif (height % 4 != 0)
+        cm = cm + 1;
+
     // process each block in parallel
-    foreach(j=0 ... height, i=0 ... width)
+    foreach(j=0 ... cm, i=0 ... cn)
     {
+        // bitstream array destination index / offset
+        int bit_idx = j * cn + i;
+        int bit_off = bit_idx * 4; // 4 x 32-bit integers per block (128 bits)
+
         int pos; // a current position in the bitstream
 
         uint bit, bitmask;
@@ -417,22 +433,22 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
         pos = 0;
 
         // zero-out the bitstream
-        bitstream[0] = 0;
-        bitstream[1] = 0;
-        bitstream[2] = 0;
-        bitstream[3] = 0;
+        bitstream[bit_off] = 0;
+        bitstream[bit_off + 1] = 0;
+        bitstream[bit_off + 2] = 0;
+        bitstream[bit_off + 3] = 0;
 
         cif(bitmask == 0u)
-            stream_write_bit(bitstream, pos++, 0u);
+            stream_write_bit(bitstream + bit_off, pos++, 0u);
         else
         {
-            stream_write_bit(bitstream, pos++, 1u);
+            stream_write_bit(bitstream + bit_off, pos++, 1u);
 
             // write the 16-bit mask too
-            stream_write_bits(bitstream, pos, bitmask, 16);
+            stream_write_bits(bitstream + bit_off, pos, bitmask, 16);
             pos += 16;
         }
 
-        encode_float_block(fblock, minbits, maxbits, minexp, bitstream, pos);
+        encode_float_block(fblock, minbits, maxbits, minexp, bitstream + bit_off, pos);
     }
 }
