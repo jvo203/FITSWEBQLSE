@@ -769,4 +769,26 @@ int main()
     // visualise all the bits
     for (i = 0; i < 4; i++)
         printBits(sizeof(uint), &bitstream[i]);
+
+    // a custom array not divisible into 4x4 blocks
+    int width = 117;
+    int height = 47;
+    size_t total_size = width * height;
+
+    float data[total_size];
+
+    int cn = width / 4;
+    int cm = height / 4;
+
+    // the input dimensions might not be divisible by 4
+    if (width % 4 != 0)
+        cn = cn + 1;
+
+    if (height % 4 != 0)
+        cm = cm + 1;
+
+    size_t compressed_size = cn * cm * 4 * sizeof(uint);
+    uint compressed[compressed_size];
+
+    printf("width: %d, height: %d\tcn: %d, cm: %d\n", width, height, cn, cm);
 }
