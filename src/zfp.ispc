@@ -448,6 +448,9 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
             }
         }
 
+        for(int k=0; k<BLOCK_SIZE; k++)
+            print("%,%\n", k, fblock[k]);
+
         /*for(int k=0; k<BLOCK_SIZE; k++)
         {
             float tmp = src[k];
