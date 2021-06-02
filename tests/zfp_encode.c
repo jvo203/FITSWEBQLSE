@@ -764,7 +764,7 @@ int main()
 
     uint bitstream[4]; // 8 bits per value, a total of 128 bits
 
-    encode_array(fblock, bitstream, minbits, maxbits, minexp, 4, 4, 4);
+    encode_array(fblock, bitstream, minbits, maxbits, minexp, 4, 4);
 
     // visualise all the bits
     for (i = 0; i < 4; i++)
@@ -773,7 +773,6 @@ int main()
     // a custom array not divisible into 4x4 blocks
     int width = 117;
     int height = 47;
-    int stride = width;
     size_t total_size = width * height;
 
     float data[total_size];
@@ -796,5 +795,5 @@ int main()
 
     printf("width: %d, height: %d\tcn: %d, cm: %d\n", width, height, cn, cm);
 
-    encode_array(data, compressed, minbits, maxbits, minexp, width, height, stride);
+    encode_array(data, compressed, minbits, maxbits, minexp, width, height);
 }

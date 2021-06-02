@@ -385,7 +385,7 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     encode_integer_block(iblock, minbits, maxbits, maxprec, stream, pos);
 }
 
-export void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int stride)
+export void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
 {
     uniform int cn, cm;
 
@@ -445,7 +445,7 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
                 bitmask = (bitmask << 1) | bit;
 
                 fblock[dst_offset++] = nan ? 0.0 : tmp;
-            }            
+            }
         }
 
         /*for(int k=0; k<BLOCK_SIZE; k++)
