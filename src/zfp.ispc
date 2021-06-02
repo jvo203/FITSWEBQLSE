@@ -459,10 +459,7 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
 
             fblock[k] = nan ? 0.0 : tmp;
         }*/
-
-        //print("bitmask: %\n", bitmask);
-        print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
-
+        
         // reset the stream position
         pos = 0;
 
@@ -484,5 +481,14 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
         }
 
         encode_float_block(fblock, minbits, maxbits, minexp, bitstream, bit_off, pos);
+
+        //print("bitmask: %\n", bitmask);
+        //if (i == 2 && j == 9)
+        print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
+        print("\t%\n", bitstream[bit_off + 0]);
+        print("\t%\n", bitstream[bit_off + 1]);
+        print("\t%\n", bitstream[bit_off + 2]);
+        print("\t%\n", bitstream[bit_off + 3]);
+
     }
 }

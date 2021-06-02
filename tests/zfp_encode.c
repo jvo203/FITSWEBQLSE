@@ -798,16 +798,19 @@ int main()
     encode_array(data, compressed, minbits, maxbits, minexp, width, height);
 
     // print out the compressed bitstreams
-    /*for (int j = 0; j < cm; j++)
+    for (int j = 0; j < cm; j++)
         for (i = 0; i < cn; i++)
         {
             int bit_idx = j * cn + i;
             int bit_off = bit_idx * 4; // 4 x 32-bit integers per block (128 bits)
 
-            printf("cn: %d, cm: %d, bit_idx: %d, bit_off: %d\n", i, j, bit_idx, bit_off);
+            if (i == 2 && j == 9)
+            {
+                printf("cn: %d, cm: %d, bit_idx: %d, bit_off: %d\n", i, j, bit_idx, bit_off);
 
-            // visualise all the bits
-            for (k = 0; k < 4; k++)
-                printBits(sizeof(uint), &bitstream[bit_off + k]);
-        }*/
+                // visualise all the bits
+                for (k = 0; k < 4; k++)
+                    printBits(sizeof(uint), &bitstream[bit_off + k]);
+            }
+        }
 }
