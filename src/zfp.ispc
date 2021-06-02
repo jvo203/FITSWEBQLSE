@@ -399,7 +399,7 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
     if (height % 4 != 0)
         cm = cm + 1;
 
-    print("ISPC:\tcn: %, cm: %\n", cn, cm);
+    // print("ISPC:\tcn: %, cm: %\n", cn, cm);
 
     // process each block in parallel
     foreach(j=0 ... cm, i=0 ... cn)
@@ -482,13 +482,12 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
 
         encode_float_block(fblock, minbits, maxbits, minexp, bitstream, bit_off, pos);
 
-        //print("bitmask: %\n", bitmask);
-        //if (i == 2 && j == 9)
-        print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
+        //print("bitmask: %\n", bitmask);        
+        /*print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
         print("\t%\n", bitstream[bit_off + 0]);
         print("\t%\n", bitstream[bit_off + 1]);
         print("\t%\n", bitstream[bit_off + 2]);
-        print("\t%\n", bitstream[bit_off + 3]);
+        print("\t%\n", bitstream[bit_off + 3]);*/
 
     }
 }
