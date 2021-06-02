@@ -610,7 +610,7 @@ uint decode_block(bitstream *stream, int minbits, int maxbits, int maxprec, int 
 
 int main()
 {
-    uint i, j;
+    uint i, j, k;
     uint offset;
 
     float fblock[BLOCK_SIZE];
@@ -796,4 +796,18 @@ int main()
     printf("width: %d, height: %d\tcn: %d, cm: %d\n", width, height, cn, cm);
 
     encode_array(data, compressed, minbits, maxbits, minexp, width, height);
+
+    // print out the compressed bitstreams
+    /*for (int j = 0; j < cm; j++)
+        for (i = 0; i < cn; i++)
+        {
+            int bit_idx = j * cn + i;
+            int bit_off = bit_idx * 4; // 4 x 32-bit integers per block (128 bits)
+
+            printf("cn: %d, cm: %d, bit_idx: %d, bit_off: %d\n", i, j, bit_idx, bit_off);
+
+            // visualise all the bits
+            for (k = 0; k < 4; k++)
+                printBits(sizeof(uint), &bitstream[bit_off + k]);
+        }*/
 }
