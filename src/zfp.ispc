@@ -413,10 +413,34 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
         // a private 4x4 block
         float fblock[BLOCK_SIZE];
 
+        // zero-out the block (the non-existent edge values will be set to 0.0)
+        for(int k=0; k<BLOCK_SIZE; k++)
+            fblock[k] = 0.0;
+
         bitmask = 0u;
 
+        // pointer to the beginning of the 4x4 block
+        int src_offset = 4 * (j * width + i) ;
+        int dst_offset = 0;
+
         // copy the source data
-        for(int k=0; k<BLOCK_SIZE; k++)
+        for(int y=0; y<4; y++)
+        {
+            for(int x=0; x<4; x++);
+            {
+                float tmp = src[src_offset++];
+                bool nan = isnan(tmp) || isinf(tmp);
+
+                bit = nan ? 1u : 0u;
+                bitmask = (bitmask << 1) | bit;
+
+                fblock[dst_offset++] = nan ? 0.0 : tmp;
+            }
+
+            src_offset += stride;
+        }
+
+        /*for(int k=0; k<BLOCK_SIZE; k++)
         {
             float tmp = src[k];
             bool nan = isnan(tmp) || isinf(tmp);
@@ -425,7 +449,7 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
             bitmask = (bitmask << 1) | bit;
 
             fblock[k] = nan ? 0.0 : tmp;
-        }
+        }*/
 
         // print("bitmask: %\n", bitmask);
 
