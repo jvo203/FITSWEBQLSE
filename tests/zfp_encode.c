@@ -795,5 +795,5 @@ int main()
 
     printf("width: %d, height: %d\tcn: %d, cm: %d\n", width, height, cn, cm);
 
-    encode_array(data, compressed, minbits, maxbits, minexp, width, height);
+    // encode_array(data, compressed, minbits, maxbits, minexp, width, height);
 }
