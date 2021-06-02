@@ -810,7 +810,10 @@ int main()
 
                 // visualise all the bits
                 for (k = 0; k < 4; k++)
-                    printBits(sizeof(uint), &bitstream[bit_off + k]);
+                {
+                    printf("%d\t", compressed[bit_off + k]);
+                    printBits(sizeof(uint), &compressed[bit_off + k]);
+                }
             }
         }
 }
