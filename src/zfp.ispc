@@ -399,6 +399,8 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
     cif (height % 4 != 0)
         cm = cm + 1;
 
+    print("ISPC:\tcn: %, cm: %\n", cn, cm);
+
     // process each block in parallel
     foreach(j=0 ... cm, i=0 ... cn)
     {
@@ -415,24 +417,25 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
 
         bitmask = 0u;
 
-        // pointer to the beginning of the 4x4 block        
+        // 4x4 destination offset      
         int dst_offset = 0;
-
-        uniform int x,y;
 
         int src_x = i * 4;
         int src_y = j * 4;
 
-        // copy the source data
-        for(y=0; y<4; y++)
-        {        
-            for(x=0; x<4; x++);
-            {
-                float tmp;                            
+        // print("src_x: %, src_y: %\n", src_x, src_y);
 
-                cif((src_x + x) < width && (src_y + y) < height)
-                {
-                    int src_offset = (src_y + y) * width + (src_x + x);
+        // copy the source data
+        for(uniform iy=0;iy<4;iy++)
+            for(uniform ix=0;ix<4;ix++)
+            {                
+                float tmp;
+                int src_offset = (src_y + iy) * width + (src_x + ix);
+
+                // print("ix: %, iy: %, src_offset: %\n", ix, iy, src_offset);
+
+                cif((src_x + ix) < width && (src_y + iy) < height)
+                {                                        
                     tmp = src[src_offset];
                 }
                 else
@@ -444,11 +447,7 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
                 bitmask = (bitmask << 1) | bit;
 
                 fblock[dst_offset++] = nan ? 0.0 : tmp;
-            }
-        }
-
-        for(int k=0; k<BLOCK_SIZE; k++)
-            print("%,%\n", k, fblock[k]);
+            }    
 
         /*for(int k=0; k<BLOCK_SIZE; k++)
         {
