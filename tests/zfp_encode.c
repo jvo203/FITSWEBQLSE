@@ -811,7 +811,7 @@ int main()
                 // visualise all the bits
                 for (k = 0; k < 4; k++)
                 {
-                    printf("%d\t", compressed[bit_off + k]);
+                    printf("%u\t", compressed[bit_off + k]);
                     printBits(sizeof(uint), &compressed[bit_off + k]);
                 }
             }
