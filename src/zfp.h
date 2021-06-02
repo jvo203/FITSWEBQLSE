@@ -32,7 +32,7 @@ namespace ispc { /* namespace */
 #if defined(__cplusplus) && (! defined(__ISPC_NO_EXTERN_C) || !__ISPC_NO_EXTERN_C )
 extern "C" {
 #endif // __cplusplus
-    extern void encode_array(float * src, uint32_t * bitstream, int32_t minbits, int32_t maxbits, int32_t minexp, int32_t width, int32_t height, int32_t stride);
+    extern void encode_array(float * src, uint32_t * bitstream, int32_t minbits, int32_t maxbits, int32_t minexp, int32_t width, int32_t height);
 #if defined(__cplusplus) && (! defined(__ISPC_NO_EXTERN_C) || !__ISPC_NO_EXTERN_C )
 } /* end extern C */
 #endif // __cplusplus
