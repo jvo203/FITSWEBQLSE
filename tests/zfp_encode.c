@@ -804,7 +804,7 @@ int main()
             int bit_idx = j * cn + i;
             int bit_off = bit_idx * 4; // 4 x 32-bit integers per block (128 bits)
 
-            if (i == 2 && j == 9)
+            //if (i == 2 && j == 9)
             {
                 printf("cn: %d, cm: %d, bit_idx: %d, bit_off: %d\n", i, j, bit_idx, bit_off);
 
