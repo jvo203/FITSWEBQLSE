@@ -280,6 +280,7 @@ uint stream_read_bit(uniform uint *stream, int bit_off, int pos)
     int idx;
 
     idx = pos >> 5; // divide by 32 to get an int index
+    // int shift = 
 
     // left-shift the selected byte only and append the next bit
     //stream[bit_off + idx] = (stream[bit_off + idx] << 1) | bit;
