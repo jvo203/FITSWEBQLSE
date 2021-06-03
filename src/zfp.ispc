@@ -280,14 +280,14 @@ uint stream_read_bit(uniform uint *stream, int bit_off, int pos)
     int idx;
 
     idx = pos >> 5; // divide by 32 to get an int index
-    // int shift = 
+    int shift = 31 - pos % 32; 
 
     // left-shift the selected byte only and append the next bit
-    //stream[bit_off + idx] = (stream[bit_off + idx] << 1) | bit;
+    bit = stream[bit_off + idx] & (1u << shift);
 
-    print("stream_read_bit|%|, pos: %, idx: %\n", bit, pos, idx);
+    // print("stream_read_bit|%|, pos: %, idx: %, shift: %\n", bit, pos, idx, shift);
 
-    return bit;
+    return (bit > 0) ? 1u : 0u;
 }
 
 /* write 0 <= n <= 32 low bits of value and return remaining bits */
