@@ -494,17 +494,26 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
 
 export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform float dst[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
 {
+    uniform int cn_start, cn_end;
+    uniform int cm_start, cm_end;
+
+    cn_start = x1 / 4;
+    cn_end = x2 / 4;
+    cm_start = y1 / 4;
+    cm_end = y2 / 4;
+
+    print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
+
     uniform float sum = 0.0;
     uniform int64 count = 0.0;
 
-
-  if(count > 0)
+    if(count > 0)
     {
-      if(average)
-	      return sum / (float) count ;
-      else
-	      return sum * cdelt3 ;
+        if(average)
+	        return sum / (float) count ;
+        else
+	        return sum * cdelt3 ;
     }
-  else
-    return 0.0f ;
+    else
+        return 0.0f ;
 }
