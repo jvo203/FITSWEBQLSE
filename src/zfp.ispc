@@ -568,6 +568,13 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
 
         // read the first bit
         bit = stream_read_bit(bitstream, bit_off, pos++);
+
+        if(bit)
+        {
+            // read the 16-bit mask
+            bitmask = stream_read_bits(bitstream, bit_off, pos, 16);
+            pos += 16;
+        }
     }
 
     uniform float sum = 0.0;
