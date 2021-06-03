@@ -408,8 +408,8 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     print("\n"); */
 
     // emit the 8-bit exponent
-    stream_write_bits(stream, bit_off, pos, 2 * e + 1, 8);
-    pos += 8;
+    stream_write_bits(stream, bit_off, pos, 2 * e + 1, EBITS);
+    pos += EBITS;
 
     encode_integer_block(iblock, minbits, maxbits, maxprec, stream, bit_off, pos);
 }
@@ -575,6 +575,12 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
             bitmask = stream_read_bits(bitstream, bit_off, pos, 16);
             pos += 16;
         }
+
+        int emax = (int)stream_read_bits(bitstream, bit_off, pos, EBITS) - EBIAS;
+        int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
+        pos += EBITS;
+
+        print("emax: %, maxprec: %, pos: %\n", emax, maxprec, pos);
     }
 
     uniform float sum = 0.0;
