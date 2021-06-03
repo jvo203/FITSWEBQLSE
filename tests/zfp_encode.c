@@ -816,4 +816,21 @@ int main()
                 }
             }
         }
+
+    // the decoder part (partial block decoding, not the whole array)
+    int x1 = 14;
+    int x2 = 41;
+    int y1 = 5;
+    int y2 = 40;
+
+    int dimx = (x2 - x1) + 1;
+    int dimy = (y2 - y1) + 1;
+    size_t view_size = dimx * dimy;
+
+    printf("dimx: %d, dimy: %d\n", dimx, dimy);
+
+    float viewport[view_size];
+
+    for (int k = 0; k < view_size; k++)
+        viewport[k] = 0.0f;
 }
