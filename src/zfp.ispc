@@ -262,12 +262,29 @@ uint stream_write_bit(uniform uint *stream, int bit_off, int pos, uint bit)
 {
     int idx;
 
-    idx = pos >> 5; // divide by 32 to get a byte index
+    idx = pos >> 5; // divide by 32 to get an int index
 
     // print("stream_write_bit|%|, pos: %, idx: %\n", bit, pos, idx);
 
     // left-shift the selected byte only and append the next bit
     stream[bit_off + idx] = (stream[bit_off + idx] << 1) | bit;
+
+    return bit;
+}
+
+
+/* read single bit (must be 0 or 1) */
+uint stream_read_bit(uniform uint *stream, int bit_off, int pos)
+{
+    uint bit;
+    int idx;
+
+    idx = pos >> 5; // divide by 32 to get an int index
+
+    // left-shift the selected byte only and append the next bit
+    //stream[bit_off + idx] = (stream[bit_off + idx] << 1) | bit;
+
+    print("stream_read_bit|%|, pos: %, idx: %\n", bit, pos, idx);
 
     return bit;
 }
@@ -534,6 +551,11 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
 
         print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
 
+        // reset the stream position
+        pos = 0;
+
+        // read the first bit
+        bit = stream_read_bit(bitstream, bit_off, pos++);
     }
 
     uniform float sum = 0.0;
