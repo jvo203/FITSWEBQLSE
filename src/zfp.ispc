@@ -492,8 +492,20 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
     }
 }
 
-export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform float dst[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform float dst[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
 {
+    uniform int cn, cm;
+
+    cn = width / 4;
+    cm = height / 4;
+
+    // the input dimensions might not be divisible by 4
+    if (width % 4 != 0)
+        cn = cn + 1;
+
+    if (height % 4 != 0)
+        cm = cm + 1;
+
     uniform int cn_start, cn_end;
     uniform int cm_start, cm_end;
 
@@ -503,6 +515,26 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
     cm_end = y2 / 4;
 
     print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
+
+    // process each block in parallel
+    foreach(j=cm_start ... cm_end + 1, i=cn_start ... cn_end + 1)
+    {
+        // bitstream array destination index / offset
+        int bit_idx = j * cn + i;
+        int bit_off = bit_idx * 4; // 4 x 32-bit integers per block (128 bits)
+
+        int pos; // a current position in the bitstream
+
+        uint bit, bitmask;
+        
+        // a private 4x4 block
+        float fblock[BLOCK_SIZE];
+
+        bitmask = 0u;
+
+        print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
+
+    }
 
     uniform float sum = 0.0;
     uniform int64 count = 0.0;
