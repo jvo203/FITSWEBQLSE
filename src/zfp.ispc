@@ -302,6 +302,17 @@ uint stream_write_bits(uniform uint *stream, int bit_off, int pos, uint value, u
     return value >> n;
 }
 
+/* read 0 <= n <= 32 bits */
+uint stream_read_bits(uniform uint *stream, int bit_off, int pos, uint n)
+{
+    uint i, value;
+    
+    for (i = 0, value = 0; i < n; i++)
+        value += stream_read_bit(stream, bit_off, pos++) << i;
+
+    return value;
+}
+
 /* append n zero-bits to stream */
 void stream_pad(uniform uint *stream, int bit_off, int pos, uint n)
 {
