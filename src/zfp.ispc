@@ -491,3 +491,20 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
 
     }
 }
+
+export uniform float viewport_spectrum(uniform uint bitstream[], uniform float dst[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+{
+    uniform float sum = 0.0;
+    uniform int64 count = 0.0;
+
+
+  if(count > 0)
+    {
+      if(average)
+	      return sum / (float) count ;
+      else
+	      return sum * cdelt3 ;
+    }
+  else
+    return 0.0f ;
+}
