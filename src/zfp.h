@@ -33,7 +33,7 @@ namespace ispc { /* namespace */
 extern "C" {
 #endif // __cplusplus
     extern void encode_array(float * src, uint32_t * bitstream, int32_t minbits, int32_t maxbits, int32_t minexp, int32_t width, int32_t height);
-    extern float viewport_spectrum(uint32_t * bitstream, float * dst, int32_t minbits, int32_t maxbits, int32_t minexp, int32_t x1, int32_t x2, int32_t y1, int32_t y2, bool average, float cdelt3);
+    extern float viewport_spectrum_rect(uint32_t * bitstream, float * dst, int32_t minbits, int32_t maxbits, int32_t minexp, int32_t x1, int32_t x2, int32_t y1, int32_t y2, bool average, float cdelt3);
 #if defined(__cplusplus) && (! defined(__ISPC_NO_EXTERN_C) || !__ISPC_NO_EXTERN_C )
 } /* end extern C */
 #endif // __cplusplus
