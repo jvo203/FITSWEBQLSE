@@ -358,7 +358,7 @@ int encode_many_ints(uniform uint *stream, int bit_off, int pos, uint maxbits, u
 /* decompress sequence of size > 64 unsigned integers */
 void decode_many_ints(varying uint data[BLOCK_SIZE], uniform uint *stream, int bit_off, int pos, uint maxbits, uint maxprec)
 {
-    uint intprec = CHAR_BIT * (uint)sizeof(uint);
+    uint intprec = CHAR_BIT * (uint)sizeof(uniform uint);
     uint kmin = intprec > maxprec ? intprec - maxprec : 0;
     uint bits = maxbits;
     uint i, k, m, n;
@@ -370,6 +370,8 @@ void decode_many_ints(varying uint data[BLOCK_SIZE], uniform uint *stream, int b
     /* decode one bit plane at a time from MSB to LSB */
     for (k = intprec, n = 0; bits && k-- > kmin;)
     {
+        print("k:%, n:%, bits:%\t", k, n, bits);
+
         /* decode first n bits of bit plane #k */
         m = MIN(n, bits);
         bits -= m;
@@ -384,10 +386,10 @@ void decode_many_ints(varying uint data[BLOCK_SIZE], uniform uint *stream, int b
                 ;
     }
 
-    print("data:\n");
+    /*print("data:\n");
     for (k = 0; k < BLOCK_SIZE; k++)
         print("%\t", data[k]);
-    print("\n");
+    print("\n");*/
 }
 
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, uniform uint *stream, int bit_off, int pos)
@@ -648,10 +650,10 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
        
         decode_float_block(fblock, bitstream, bit_off, pos, minbits, maxbits, maxprec, emax);
 
-        /*print("fblock:\n");
+        print("fblock:\n");
         for (int k = 0; k < BLOCK_SIZE; k++)
             print("%\t", fblock[k]);
-        print("\n");*/
+        print("\n");
     }
 
     uniform float sum = 0.0;
