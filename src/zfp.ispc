@@ -376,16 +376,14 @@ void decode_many_ints(varying uint data[BLOCK_SIZE], uniform uint *stream, int b
         bits -= m;
 
         for (i = 0; i < m; i++)
-            if (stream_read_bit(stream))
+            if (stream_read_bit(stream, bit_off, pos++))
                 data[i] += (uint)1 << k;
 
         /* unary run-length decode remainder of bit plane */
-        for (; n < BLOCK_SIZE && bits && (--bits, stream_read_bit(stream)); data[n] += (uint)1 << k, n++)
-            for (; n < BLOCK_SIZE - 1 && bits && (--bits, !stream_read_bit(stream)); n++)
+        for (; n < BLOCK_SIZE && bits && (--bits, stream_read_bit(stream, bit_off, pos++)); data[n] += (uint)1 << k, n++)
+            for (; n < BLOCK_SIZE - 1 && bits && (--bits, !stream_read_bit(stream, bit_off, pos++)); n++)
                 ;
     }
-
-    
 }
 
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, uniform uint *stream, int bit_off, int pos)
