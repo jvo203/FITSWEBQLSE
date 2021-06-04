@@ -560,9 +560,7 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
         float fblock[BLOCK_SIZE];
 
         bitmask = 0u;
-
-        print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
-
+        
         // reset the stream position
         pos = 0;
 
@@ -575,6 +573,8 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
             bitmask = stream_read_bits(bitstream, bit_off, pos, 16);
             pos += 16;
         }
+
+        print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
 
         int emax = (int)stream_read_bits(bitstream, bit_off, pos, EBITS) - EBIAS;
         int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
