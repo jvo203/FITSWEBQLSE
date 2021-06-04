@@ -801,7 +801,7 @@ int main()
     encode_array(data, compressed, minbits, maxbits, minexp, width, height);
 
     // print out the compressed bitstreams
-    for (int j = 0; j < cm; j++)
+    /*for (int j = 0; j < cm; j++)
         for (i = 0; i < cn; i++)
         {
             int bit_idx = j * cn + i;
@@ -818,7 +818,7 @@ int main()
                     printBits(sizeof(uint), &compressed[bit_off + k]);
                 }
             }
-        }
+        }*/
 
     // the decoder part (partial block decoding, not the whole array)
     int x1 = 14;

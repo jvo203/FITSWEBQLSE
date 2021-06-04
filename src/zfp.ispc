@@ -476,7 +476,7 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
                 bitmask = (bitmask << 1) | bit;
 
                 fblock[dst_offset++] = nan ? 0.0 : tmp;
-            }    
+            }            
 
         /*for(int k=0; k<BLOCK_SIZE; k++)
         {
@@ -502,6 +502,8 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
             stream_write_bit(bitstream, bit_off, pos++, 0u);
         else
         {
+            //print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
+
             stream_write_bit(bitstream, bit_off, pos++, 1u);
 
             // write the 16-bit mask too
@@ -512,8 +514,8 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
         encode_float_block(fblock, minbits, maxbits, minexp, bitstream, bit_off, pos);
 
         //print("bitmask: %\n", bitmask);        
-        /*print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
-        print("\t%\n", bitstream[bit_off + 0]);
+        //print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
+        /*print("\t%\n", bitstream[bit_off + 0]);
         print("\t%\n", bitstream[bit_off + 1]);
         print("\t%\n", bitstream[bit_off + 2]);
         print("\t%\n", bitstream[bit_off + 3]);*/
@@ -574,7 +576,7 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
             pos += 16;
         }
 
-        print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
+        //print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
 
         int emax = (int)stream_read_bits(bitstream, bit_off, pos, EBITS) - EBIAS;
         int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
