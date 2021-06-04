@@ -370,7 +370,7 @@ void decode_many_ints(varying uint data[BLOCK_SIZE], uniform uint *stream, int b
     /* decode one bit plane at a time from MSB to LSB */
     for (k = intprec, n = 0; bits && k-- > kmin;)
     {
-        print("k:%, n:%, bits:%\t", k, n, bits);
+        // print("k:%, n:%, bits:%\t", k, n, bits);
 
         /* decode first n bits of bit plane #k */
         m = MIN(n, bits);
@@ -449,7 +449,7 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
     uint e = maxprec ? emax + EBIAS : 0;
 
-    // print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
+    print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
 
     int iblock[BLOCK_SIZE];
 
@@ -462,7 +462,8 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     print("\n"); */
 
     // emit the 8-bit exponent
-    stream_write_bits(stream, bit_off, pos, 2 * e + 1, EBITS);
+    //stream_write_bits(stream, bit_off, pos, 2 * e + 1, EBITS);
+    stream_write_bits(stream, bit_off, pos, emax + EBIAS, EBITS);
     pos += EBITS;
 
     encode_integer_block(iblock, minbits, maxbits, maxprec, stream, bit_off, pos);
