@@ -221,11 +221,10 @@ inline void fwd_order(varying uint ublock[BLOCK_SIZE], const varying int iblock[
 }
 
 /* reorder unsigned coefficients and convert to signed integer */
-inline void inv_order(const uint *ublock, int *iblock, const uchar *perm, uint n)
+inline void inv_order(const varying uint ublock[BLOCK_SIZE], varying int iblock[BLOCK_SIZE], const uniform uchar perm[BLOCK_SIZE])
 {
-    do
-        iblock[*perm++] = uint2int(*ublock++);
-    while (--n);
+    for(uniform int i=0; i<BLOCK_SIZE; i++)
+        iblock[perm[i]] = uint2int(ublock[i]);
 }
 
 /* forward decorrelating 2D transform */
@@ -384,6 +383,11 @@ void decode_many_ints(varying uint data[BLOCK_SIZE], uniform uint *stream, int b
             for (; n < BLOCK_SIZE - 1 && bits && (--bits, !stream_read_bit(stream, bit_off, pos++)); n++)
                 ;
     }
+
+    print("data:\n");
+    for (k = 0; k < BLOCK_SIZE; k++)
+        print("%\t", data[k]);
+    print("\n");
 }
 
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, uniform uint *stream, int bit_off, int pos)
@@ -424,6 +428,16 @@ void decode_integer_block(varying int iblock[BLOCK_SIZE], uniform uint *stream, 
 
     decode_many_ints(ublock, stream, bit_off, pos, maxbits - pos, maxprec);
 
+    /*print("ublock:\n");
+    for (int k = 0; k < BLOCK_SIZE; k++)
+        print("%\t", ublock[k]);
+    print("\n");*/
+
+    /* reorder unsigned coefficients and convert to signed integer */
+    inv_order(ublock, iblock, PERM);
+
+    /* perform decorrelating transform */
+    inv_xform(iblock);
 }
 
 void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp, uniform uint *stream, int bit_off, int pos)
@@ -452,11 +466,14 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     encode_integer_block(iblock, minbits, maxbits, maxprec, stream, bit_off, pos);
 }
 
-void decode_float_block(varying float fblock[BLOCK_SIZE], uniform uint *stream, int bit_off, int pos, uniform int minbits, uniform int maxbits, varying int maxprec)
+void decode_float_block(varying float fblock[BLOCK_SIZE], uniform uint *stream, int bit_off, int pos, uniform int minbits, uniform int maxbits, varying int maxprec, varying int emax)
 {
     int iblock[BLOCK_SIZE];
 
     decode_integer_block(iblock, stream, bit_off, pos, minbits, maxbits, maxprec);
+    
+    /* perform inverse block-floating-point transform */
+    inv_cast(iblock, fblock, emax);
 }
 
 export void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
@@ -629,7 +646,12 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
 
         print("emax: %, maxprec: %, pos: %\n", emax, maxprec, pos);
        
-        decode_float_block(fblock, bitstream, bit_off, pos, minbits, maxbits, maxprec);
+        decode_float_block(fblock, bitstream, bit_off, pos, minbits, maxbits, maxprec, emax);
+
+        /*print("fblock:\n");
+        for (int k = 0; k < BLOCK_SIZE; k++)
+            print("%\t", fblock[k]);
+        print("\n");*/
     }
 
     uniform float sum = 0.0;
