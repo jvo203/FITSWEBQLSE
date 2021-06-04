@@ -356,6 +356,39 @@ int encode_many_ints(uniform uint *stream, int bit_off, int pos, uint maxbits, u
     return pos;
 }
 
+
+/* decompress sequence of size > 64 unsigned integers */
+void encode_many_ints(varying uint data[BLOCK_SIZE], uniform uint *stream, int bit_off, int pos, uint maxbits, uint maxprec)
+{
+    uint intprec = CHAR_BIT * (uint)sizeof(uint);
+    uint kmin = intprec > maxprec ? intprec - maxprec : 0;
+    uint bits = maxbits;
+    uint i, k, m, n;
+
+    /* initialize data array to all zeros */
+    for (i = 0; i < size; i++)
+        data[i] = 0;
+
+    /* decode one bit plane at a time from MSB to LSB */
+    for (k = intprec, n = 0; bits && k-- > kmin;)
+    {
+        /* decode first n bits of bit plane #k */
+        m = MIN(n, bits);
+        bits -= m;
+
+        for (i = 0; i < m; i++)
+            if (stream_read_bit(stream))
+                data[i] += (uint)1 << k;
+
+        /* unary run-length decode remainder of bit plane */
+        for (; n < size && bits && (--bits, stream_read_bit(stream)); data[n] += (uint)1 << k, n++)
+            for (; n < size - 1 && bits && (--bits, !stream_read_bit(stream)); n++)
+                ;
+    }
+
+    
+}
+
 void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, varying int maxprec, uniform uint *stream, int bit_off, int pos)
 {
     uint ublock[BLOCK_SIZE];
@@ -391,6 +424,8 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
 void decode_integer_block(varying int iblock[BLOCK_SIZE], uniform uint *stream, int bit_off, int pos, uniform int minbits, uniform int maxbits, varying int maxprec)
 {
     uint ublock[BLOCK_SIZE];
+
+    decode_many_ints(ublock, stream, bit_off, pos, maxbits - pos, maxprec);
 
 }
 
