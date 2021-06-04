@@ -449,7 +449,7 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
     uint e = maxprec ? emax + EBIAS : 0;
 
-    print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
+    // print("emax: %, maxprec: %, e: %\n", emax, maxprec, e);
 
     int iblock[BLOCK_SIZE];
 
@@ -647,7 +647,7 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
         int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
         pos += EBITS;
 
-        print("emax: %, maxprec: %, pos: %\n", emax, maxprec, pos);
+        // print("emax: %, maxprec: %, pos: %\n", emax, maxprec, pos);
        
         decode_float_block(fblock, bitstream, bit_off, pos, minbits, maxbits, maxprec, emax);
 
