@@ -388,6 +388,12 @@ void encode_integer_block(varying int iblock[BLOCK_SIZE], uniform int minbits, u
     }
 }
 
+void decode_integer_block(varying int iblock[BLOCK_SIZE], uniform uint *stream, int bit_off, int pos, uniform int minbits, uniform int maxbits, varying int maxprec)
+{
+    uint ublock[BLOCK_SIZE];
+
+}
+
 void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minbits, uniform int maxbits, uniform int minexp, uniform uint *stream, int bit_off, int pos)
 {
     /* compute maximum exponent */
@@ -412,6 +418,13 @@ void encode_float_block(const varying float fblock[BLOCK_SIZE], uniform int minb
     pos += EBITS;
 
     encode_integer_block(iblock, minbits, maxbits, maxprec, stream, bit_off, pos);
+}
+
+void decode_float_block(varying float fblock[BLOCK_SIZE], uniform uint *stream, int bit_off, int pos, uniform int minbits, uniform int maxbits, varying int maxprec)
+{
+    int iblock[BLOCK_SIZE];
+
+    decode_integer_block(iblock, stream, bit_off, pos, minbits, maxbits, maxprec);
 }
 
 export void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
@@ -583,6 +596,8 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
         pos += EBITS;
 
         print("emax: %, maxprec: %, pos: %\n", emax, maxprec, pos);
+       
+        decode_float_block(fblock, bitstream, bit_off, pos, minbits, maxbits, maxprec);
     }
 
     uniform float sum = 0.0;
