@@ -341,6 +341,10 @@ module fits
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
+            type(C_PTR), value, intent(in) :: src, bitstream
+            integer(c_int), value, intent(in) :: minbits, maxbits, minexp
+            integer(c_int), value, intent(in) :: width, height
+            real(c_float), value, intent(in) :: ignrval, datamin, datamax
         end subroutine encode_array
 
     end interface
