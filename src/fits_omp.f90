@@ -2140,6 +2140,19 @@ contains
                         ! call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame))
                     end if
 
+                    if (allocated(item%bitstream)) then
+                        block
+                            real(c_float) :: ispc_ignrval
+
+                            if (isnan(item%ignrval)) then
+                                ispc_ignrval = -1.0E30
+                            else
+                                ispc_ignrval = item%ignrval
+                            end if
+
+                        end block
+                    end if
+
                     item%frame_min(frame) = frame_min
                     item%frame_max(frame) = frame_max
 
