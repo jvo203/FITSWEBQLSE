@@ -332,6 +332,17 @@ module fits
             type(C_PTR), value, intent(in) :: pSrc, pDest
         end subroutine resizeNearest
 
+        ! ISPC SPMD C
+        ! void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits,&
+        ! uniform int minexp, uniform int width, uniform int height, uniform float ignrval, uniform float datamin,&
+        ! uniform float datamax)
+        subroutine encode_array(src, bitstream, minbits, maxbits, minexp, width, height, ignrval, datamin, datamax)&
+            & BIND(C, name="encode_array")
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+        end subroutine encode_array
+
     end interface
 contains
     subroutine close_fits_file(item)
