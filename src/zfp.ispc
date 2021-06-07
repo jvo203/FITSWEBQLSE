@@ -644,7 +644,7 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
             pos += 16;
         }
 
-        print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
+        // print("cn: %, cm: %, bit_idx: %, bit_off: %, bitmask: %\n", i, j, bit_idx, bit_off, bitmask);
 
         int emax = (int)stream_read_bits(bitstream, bit_off, pos, EBITS) - EBIAS;
         int maxprec = precision(emax, ZFP_MAX_PREC, minexp, DIMS);
@@ -680,7 +680,7 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
                 bitmask >>= 1;
 
                 // check if a pixel lies within the viewport window
-                bool valid = !bit;
+                bool valid = !bit && (pixel_x >= x1) && (pixel_x <= x2) && (pixel_y >= y1) && (pixel_y <= y2);
 
                 // not-a-NaN
                 cif(valid)
