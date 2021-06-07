@@ -2173,14 +2173,16 @@ contains
 
                     if (allocated(item%bitstream)) then
                         block
-                            real(c_float) :: ispc_ignrval
+                            real(c_float) :: ignrval, datamin, datamax
+                            integer(c_int) :: minbits, maxbits, minexp, width, height
 
                             if (isnan(item%ignrval)) then
-                                ispc_ignrval = -1.0E30
+                                ignrval = -1.0E30
                             else
-                                ispc_ignrval = item%ignrval
+                                ignrval = item%ignrval
                             end if
 
+                            !encode_array(src, bitstream, minbits, maxbits, minexp, width, height, ignrval, datamin, datamax)
                         end block
                     end if
 
