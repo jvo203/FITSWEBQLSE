@@ -347,6 +347,22 @@ module fits
             real(c_float), value, intent(in) :: ignrval, datamin, datamax
         end subroutine encode_array
 
+        ! float viewport_spectrum_rect(uniform uint bitstream[], uniform int minbits, uniform int maxbits,&
+        ! uniform int minexp, uniform int width, uniform int height, uniform int x1, uniform int x2,&
+        !  uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+        real(c_float) function viewport_spectrum_rect(bitstream, minbits, maxbits, minexp, width, height,&
+        &x1, x2, y1, y2, average, cdelt3) BIND(C, name="viewport_spectrum_rect")
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(C_PTR), value, intent(in) :: bitstream
+            integer(c_int), value, intent(in) :: minbits, maxbits, minexp
+            integer(c_int), value, intent(in) :: width, height
+            integer(c_int), value, intent(in) :: x1, x2, y1, y2, average
+            real(c_float), value, intent(in) :: cdelt3
+
+        end function viewport_spectrum_rect
+
     end interface
 contains
     subroutine close_fits_file(item)
