@@ -671,7 +671,7 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
         for(uniform int iy=3;iy>=0;iy--)
             for(uniform int ix=3;ix>=0;ix--)
             {                
-                float tmp;
+                float tmp = fblock[--offset];
 
                 int pixel_x = src_x + ix;
                 int pixel_y = src_y + iy;
@@ -685,8 +685,6 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
                 // not-a-NaN
                 cif(valid)
                 {
-                    tmp = fblock[--offset];
-
                     partial_sum += tmp ;
 	                partial_count += 1 ;
                 }
