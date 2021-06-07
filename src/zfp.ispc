@@ -610,7 +610,7 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
     cm_start = y1 / 4;
     cm_end = y2 / 4;
 
-    print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
+    // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
 
     varying float partial_sum = 0.0f ;
     varying unsigned int64 partial_count = 0 ;
