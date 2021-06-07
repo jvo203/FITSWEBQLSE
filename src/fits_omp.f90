@@ -2192,8 +2192,8 @@ contains
                             width = item%naxes(1)
                             height = item%naxes(2)
 
-                            call encode_array(c_loc(thread_buffer(:, tid)), c_loc(item%bitstream(:,frame)), minbits,&
-                            & maxbits, minexp, width, height, ignrval, datamin, datamax)
+                            call encode_array(c_loc(thread_buffer(:, tid)), c_loc(item%bitstream(:, frame)), &
+                            &minbits, maxbits, minexp, width, height, ignrval, datamin, datamax)
                         end block
                     end if
 
