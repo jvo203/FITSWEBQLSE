@@ -11,7 +11,7 @@
 
 #include <string.h>
 
-#include "../src/zfp.h"
+#include "../src/webql.h"
 
 typedef unsigned char uchar;
 typedef unsigned int uint;
