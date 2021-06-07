@@ -682,7 +682,6 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
                 // check if a pixel lies within the viewport window
                 bool valid = !bit && (pixel_x >= x1) && (pixel_x <= x2) && (pixel_y >= y1) && (pixel_y <= y2);
 
-                // not-a-NaN
                 cif(valid)
                 {
                     partial_sum += tmp ;
