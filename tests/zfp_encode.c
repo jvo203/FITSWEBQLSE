@@ -838,7 +838,7 @@ int main()
     for (int k = 0; k < view_size; k++)
         viewport[k] = 0.0f;
 
-    float spectrum = viewport_spectrum_rect(compressed, viewport, minbits, maxbits, minexp, width, height, x1, x2, y1, y2, 1, 1.0f);
+    float spectrum = viewport_spectrum_rect(compressed, minbits, maxbits, minexp, width, height, x1, x2, y1, y2, 1, 1.0f);
 
     printf("rect. spectrum = %f\n", spectrum);
 }
