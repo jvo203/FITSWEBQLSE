@@ -11,7 +11,7 @@
 
 #include <string.h>
 
-#include "../src/webql.h"
+#include "webql.h"
 
 typedef unsigned char uchar;
 typedef unsigned int uint;
