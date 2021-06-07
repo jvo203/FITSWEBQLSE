@@ -1506,7 +1506,7 @@ contains
         real, allocatable :: thread_mean_spec(:), thread_int_spec(:)
 
         ! thread-local variables
-        real(kind=4), allocatable :: thread_buffer(:, :)
+        real(kind=4), allocatable, target :: thread_buffer(:, :)
         real(kind=4), allocatable :: thread_pixels(:, :)
         logical(kind=1), allocatable :: thread_mask(:, :)
         real(kind=4), allocatable :: thread_x(:, :, :)
@@ -2176,13 +2176,24 @@ contains
                             real(c_float) :: ignrval, datamin, datamax
                             integer(c_int) :: minbits, maxbits, minexp, width, height
 
+                            minbits = 128
+                            maxbits = 128
+                            minexp = -1074
+
                             if (isnan(item%ignrval)) then
                                 ignrval = -1.0E30
                             else
                                 ignrval = item%ignrval
                             end if
 
-                            !encode_array(src, bitstream, minbits, maxbits, minexp, width, height, ignrval, datamin, datamax)
+                            datamin = item%datamin
+                            datamax = item%datamax
+
+                            width = item%naxes(1)
+                            height = item%naxes(2)
+
+                            call encode_array(c_loc(thread_buffer(:, tid)), c_loc(item%bitstream(:,frame)), minbits,&
+                            & maxbits, minexp, width, height, ignrval, datamin, datamax)
                         end block
                     end if
 
