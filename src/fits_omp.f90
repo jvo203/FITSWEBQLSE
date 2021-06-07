@@ -92,6 +92,7 @@ module fits
 
         ! type(fixed_block), dimension(:, :, :), allocatable :: compressed
         type(zfp_block), dimension(:, :, :), allocatable :: compressed
+        integer(kind=4), dimension(:, :, :, :), allocatable :: bitstream
 
         logical :: is_optical = .true.
         logical :: is_xray = .false.
