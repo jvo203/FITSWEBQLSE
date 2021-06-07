@@ -479,7 +479,7 @@ void decode_float_block(varying float fblock[BLOCK_SIZE], uniform uint *stream, 
     inv_cast(iblock, fblock, emax);
 }
 
-export void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height)
+export void encode_array(uniform float src[], uniform uint bitstream[], uniform int minbits, uniform int maxbits, uniform int minexp, uniform int width, uniform int height, uniform float ignrval, uniform float datamin, uniform float datamax)
 {
     uniform int cn, cm;
 
@@ -535,7 +535,7 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
                 else
                     tmp = 0.0; // non-existent edge values are filled with 0.0
             
-                bool nan = isnan(tmp) || isinf(tmp);
+                bool nan = isnan(tmp) || isinf(tmp) || (tmp <= ignrval) || (tmp < datamin) || (tmp > datamax) ;
 
                 bit = nan ? 1u : 0u;
                 bitmask = (bitmask << 1) | bit;
