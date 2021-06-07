@@ -14,6 +14,7 @@ module fits
     integer(c_int), parameter :: ZFP_HIGH_PRECISION = 16
     integer(c_int), parameter :: ZFP_MEDIUM_PRECISION = 11
     integer(c_int), parameter :: ZFP_LOW_PRECISION = 8
+    integer(c_int), parameter :: ZFP_MIN_EXP = -1074
 
     type, bind(c) :: gmutex
         integer(kind=c_intptr_t) :: i = 0
@@ -2178,7 +2179,7 @@ contains
 
                             minbits = 128
                             maxbits = 128
-                            minexp = -1074
+                            minexp = ZFP_MIN_EXP
 
                             if (isnan(item%ignrval)) then
                                 ignrval = -1.0E30
