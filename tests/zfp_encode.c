@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include <limits.h>
+#include <float.h>
 #include <math.h>
 
 #include <stdint.h>
@@ -765,7 +766,7 @@ int main()
 
     uint bitstream[4]; // 8 bits per value, a total of 128 bits
 
-    encode_array(fblock, bitstream, minbits, maxbits, minexp, 4, 4);
+    encode_array(fblock, bitstream, minbits, maxbits, minexp, 4, 4, -FLT_MAX, -FLT_MAX, FLT_MAX);
 
     // visualise all the bits
     for (i = 0; i < 4; i++)
@@ -798,7 +799,7 @@ int main()
 
     printf("width: %d, height: %d\tcn: %d, cm: %d\n", width, height, cn, cm);
 
-    encode_array(data, compressed, minbits, maxbits, minexp, width, height);
+    encode_array(data, compressed, minbits, maxbits, minexp, width, height, -FLT_MAX, -1.0, 1.0);
 
     // print out the compressed bitstreams
     /*for (int j = 0; j < cm; j++)
