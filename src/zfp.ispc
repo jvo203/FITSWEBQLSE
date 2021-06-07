@@ -679,8 +679,11 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
                 bit = bitmask & 1u;
                 bitmask >>= 1;
 
+                // check if a pixel lies within the viewport window
+                bool valid = !bit;
+
                 // not-a-NaN
-                cif(!bit)
+                cif(valid)
                 {
                     tmp = fblock[--offset];
 
