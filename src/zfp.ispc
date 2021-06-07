@@ -512,7 +512,7 @@ export void encode_array(uniform float src[], uniform uint bitstream[], uniform 
         bitmask = 0u;
 
         // 4x4 destination offset      
-        int dst_offset = 0;
+        uniform int dst_offset = 0;
 
         int src_x = i * 4;
         int src_y = j * 4;
@@ -612,6 +612,9 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
 
     print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
 
+    varying float partial_sum = 0.0f ;
+    varying unsigned int64 partial_count = 0 ;
+
     // process each block in parallel
     foreach(j=cm_start ... cm_end + 1, i=cn_start ... cn_end + 1)
     {
@@ -651,14 +654,45 @@ export uniform float viewport_spectrum_rect(uniform uint bitstream[], uniform fl
        
         decode_float_block(fblock, bitstream, bit_off, pos, minbits, maxbits, maxprec, emax);
 
-        print("fblock:\n");
+        /*print("fblock:\n");
         for (int k = 0; k < BLOCK_SIZE; k++)
             print("%\t", fblock[k]);
-        print("\n");
+        print("\n");*/
+
+        // 4x4 destination offset      
+        uniform int offset = BLOCK_SIZE;
+
+        int src_x = i * 4;
+        int src_y = j * 4;
+
+        // print("src_x: %, src_y: %\n", src_x, src_y);
+
+        // go throught the 4x4 block
+        for(uniform int iy=3;iy>=0;iy--)
+            for(uniform int ix=3;ix>=0;ix--)
+            {                
+                float tmp;
+
+                int pixel_x = src_x + ix;
+                int pixel_y = src_y + iy;
+
+                bit = bitmask & 1u;
+                bitmask >>= 1;
+
+                // not-a-NaN
+                cif(!bit)
+                {
+                    tmp = fblock[--offset];
+
+                    partial_sum += tmp ;
+	                partial_count += 1 ;
+                }
+            }
+
     }
 
-    uniform float sum = 0.0;
-    uniform int64 count = 0.0;
+    uniform float sum = reduce_add(partial_sum) ;
+    uniform int64 count = reduce_add(partial_count) ;
 
     if(count > 0)
     {
