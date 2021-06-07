@@ -1065,7 +1065,7 @@ contains
                 test_ignrval = .true.
             end if
 
-            if (.not. allocated(item%compressed)) then ! .or. req%image) then
+            if (.not. allocated(item%compressed) .and. .not. allocated(item%bitstream)) then ! .or. req%image) then
                 !$omp PARALLEL SHARED(item)&
                 !$omp& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
                 !$omp& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
@@ -1146,7 +1146,9 @@ contains
                 end do
                 !OMP END DO
                 !$omp END PARALLEL
-            else
+            end if
+
+            if (allocated(item%compressed)) then
                 ! real-time data decompression
                 start_x = 1 + (x1 - 1)/4
                 start_y = 1 + (y1 - 1)/4
