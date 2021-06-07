@@ -92,6 +92,8 @@ module fits
 
         ! type(fixed_block), dimension(:, :, :), allocatable :: compressed
         type(zfp_block), dimension(:, :, :), allocatable :: compressed
+
+        ! ZFP-compressed 128 bits per 4x4 floating-point blocks
         integer(kind=4), dimension(:, :, :, :), allocatable :: bitstream
 
         logical :: is_optical = .true.
