@@ -94,7 +94,7 @@ module fits
         type(zfp_block), dimension(:, :, :), allocatable :: compressed
 
         ! ZFP-compressed 128 bits per 4x4 floating-point blocks
-        integer(kind=4), dimension(:, :, :, :), allocatable :: bitstream
+        integer(kind=4), dimension(:, :), allocatable :: bitstream
 
         logical :: is_optical = .true.
         logical :: is_xray = .false.
@@ -2004,8 +2004,11 @@ contains
                 allocate (mask(npixels) [*])
 
                 ! compressed pixels
-                if (allocated(item%compressed)) deallocate (item%compressed)
-                allocate (item%compressed(cn, cm, start:end))
+                ! if (allocated(item%compressed)) deallocate (item%compressed)
+                ! allocate (item%compressed(cn, cm, start:end))
+
+                if (allocated(item%bitstream)) deallocate (item%bitstream)
+                allocate (item%bitstream(4*cn*cm, start:end))
 
                 ! spectra
                 allocate (mean_spec(naxes(3)) [*])
