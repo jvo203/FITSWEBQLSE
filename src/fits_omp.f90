@@ -1256,6 +1256,37 @@ contains
                 !$omp END PARALLEL
             end if
 
+            if (allocated(item%bitstream)) then
+                ! real-time data decompression
+                block
+                    integer(c_int) :: minbits, maxbits, minexp, width, height, average
+
+                    minbits = 128
+                    maxbits = 128
+                    minexp = ZFP_MIN_EXP
+
+                    width = item%naxes(1)
+                    height = item%naxes(2)
+
+                    if (req%intensity .eq. mean) then
+                        average = 1
+                    else
+                        average = 0
+                    end if
+
+                    !$omp PARALLEL SHARED(item)&
+                    !$omp& NUM_THREADS(max_threads)
+                    !$omp DO
+                    do frame = start, end
+                        shared_spectrum(frame) = viewport_spectrum_rect(c_loc(item%bitstream(:, frame)),&
+                        & minbits, maxbits, minexp, width, height, x1, x2, y1, y2, average, cdelt3)
+                    end do
+                    !OMP END DO
+                    !$omp END PARALLEL
+
+                end block
+            end if
+
             ! first reduce the pixels/mask locally
             if (req%image) then
                 do j = 1, max_threads
