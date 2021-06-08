@@ -1065,7 +1065,10 @@ contains
                 test_ignrval = .true.
             end if
 
-            if (.not. allocated(item%compressed) .and. .not. allocated(item%bitstream)) then ! .or. req%image) then
+            if (.not. allocated(item%compressed) .or. .not. allocated(item%bitstream)) then ! .or. req%image) then
+                thread_pixels = 0.0
+                thread_mask = .false.
+
                 !$omp PARALLEL SHARED(item)&
                 !$omp& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
                 !$omp& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
@@ -1146,6 +1149,10 @@ contains
                 end do
                 !OMP END DO
                 !$omp END PARALLEL
+
+                if (req%image) then
+                    print *, 'REAL:', thread_pixels(:, 1)
+                end if
             end if
 
             if (allocated(item%compressed)) then
@@ -1157,6 +1164,9 @@ contains
                 end_y = 1 + (y2 - 1)/4
 
                 print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y
+
+                thread_pixels = 0.0
+                thread_mask = .false.
 
                 !$omp PARALLEL SHARED(item)&
                 !$omp& PRIVATE(tmp, pixel_sum, pixel_count)&
@@ -1252,6 +1262,10 @@ contains
                 end do
                 !OMP END DO
                 !$omp END PARALLEL
+
+                if (req%image) then
+                    print *, 'COMP:', thread_pixels(:, 1)
+                end if
             end if
 
             if (allocated(item%bitstream)) then
