@@ -2206,7 +2206,7 @@ contains
                     ! compress the pixels
                     if (allocated(item%compressed) .and. allocated(thread_x)) then
                         block
-                            real(c_float) :: ignrval, datamin, datamax
+                            real :: ignrval, datamin, datamax
 
                             if (isnan(item%ignrval)) then
                                 ignrval = -1.0E30
