@@ -89,9 +89,6 @@ contains
 
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
-                ! x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
-                ! & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2)))
-
                 call to_fixed_block(input, compressed(i, j))
             end block
         end do
@@ -235,7 +232,6 @@ contains
         real :: dequantize
         integer i
 
-        ! i = (max_exp + 1) - bits
         i = max_exp - bits
         dequantize = scale(real(int(x)), i)
     end function dequantize
