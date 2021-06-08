@@ -1279,7 +1279,7 @@ contains
                     !$omp DO
                     do frame = start, end
                         shared_spectrum(frame) = viewport_spectrum_rect(c_loc(item%bitstream(:, frame)),&
-                        & minbits, maxbits, minexp, width, height, x1, x2, y1, y2, average, cdelt3)
+                        & minbits, maxbits, minexp, width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
                     end do
                     !OMP END DO
                     !$omp END PARALLEL
