@@ -59,7 +59,7 @@ program Wavelets
     ! reset the source
     do i = 1, N
         do j = 1, N
-            x(i, j) = i*j/100.0
+            x(i, j) = (i - 2)*(j - 2)/10.0
         end do
     end do
 
@@ -100,7 +100,7 @@ program Wavelets
     ! reset the source
     do i = 1, N
         do j = 1, N
-            x(i, j) = i*j/100.0
+            x(i, j) = (i - 2)*(j - 2)/10.0
         end do
     end do
 
@@ -118,7 +118,7 @@ program Wavelets
     ! where (.not. mask) x = 0.0
 
     ! ZFP-like compression
-    call to_fixed(x, compressed)
+    call to_fixed(x, compressed, -1000.0, -100.0, 100.0)
 
     ! testing irregular blocks
     x1 = 1
