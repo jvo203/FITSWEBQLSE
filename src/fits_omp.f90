@@ -2074,11 +2074,11 @@ contains
                 allocate (mask(npixels) [*])
 
                 ! compressed pixels
-                ! if (allocated(item%compressed)) deallocate (item%compressed)
-                ! allocate (item%compressed(cn, cm, start:end))
+                if (allocated(item%compressed)) deallocate (item%compressed)
+                allocate (item%compressed(cn, cm, start:end))
 
-                if (allocated(item%bitstream)) deallocate (item%bitstream)
-                allocate (item%bitstream(4*cn*cm, start:end))
+                ! if (allocated(item%bitstream)) deallocate (item%bitstream)
+                ! allocate (item%bitstream(4*cn*cm, start:end))
 
                 ! spectra
                 allocate (mean_spec(naxes(3)) [*])
@@ -2205,9 +2205,22 @@ contains
 
                     ! compress the pixels
                     if (allocated(item%compressed) .and. allocated(thread_x)) then
-                        thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
-                        ! call zfp_compress_array(thread_x(:, :, tid), item%compressed(:, :, frame))
-                        call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame))
+                        block
+                            real(c_float) :: ignrval, datamin, datamax
+
+                            if (isnan(item%ignrval)) then
+                                ignrval = -1.0E30
+                            else
+                                ignrval = item%ignrval
+                            end if
+
+                            datamin = item%datamin
+                            datamax = item%datamax
+
+                            thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                            ! call zfp_compress_array(thread_x(:, :, tid), item%compressed(:, :, frame))
+                            call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), ignrval, datamin, datamax)
+                        end block
                     end if
 
                     if (allocated(item%bitstream)) then
