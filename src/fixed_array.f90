@@ -27,13 +27,13 @@ contains
 
     !end function isnan
 
-    subroutine to_fixed(x, compressed, ignrval, datamin, datamax) ! , pmin, pmax) !, mask)
+    subroutine to_fixed(x, compressed, ignrval, datamin, datamax, pmin, pmax) !, mask)
         ! use wavelet
         use, intrinsic :: ieee_arithmetic
         implicit none
 
         integer(kind=4) :: n, m ! input dimensions
-        ! real, intent(in) :: pmin, pmax
+        real, intent(in) :: pmin, pmax
         real(kind=4), dimension(:, :), intent(in) :: x
         real, intent(in) :: ignrval, datamin, datamax
 
@@ -90,6 +90,9 @@ contains
                 y2 = min(m, shiftl(j, 2))
 
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
+
+                ! pre-condition the input array
+                input = log(0.5 + (input - pmin)/(pmax - pmin))
 
                 call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
             end block
