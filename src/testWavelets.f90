@@ -134,8 +134,8 @@ program Wavelets
         print *, x_in(i, :)
     end do
 
-    call to_fixed_block(x_in, compressed_block)
-    call from_fixed_block(compressed_block, x)
+    ! call to_fixed_block(x_in, compressed_block)
+    ! call from_fixed_block(compressed_block, x)
 
     print *, 'sizeof(x):', sizeof(x), ', compressed size:', sizeof(compressed)
     print *, 'compression ratio:', real(sizeof(x))/real(sizeof(compressed))
@@ -152,7 +152,7 @@ program Wavelets
     ! call decompress_fixed_array(array_buffer, compressed)
 
     ! ZFP-like decompression
-    ! call from_fixed(N, compressed, x)
+    call from_fixed(N, compressed, x)
 
     ! insert back NaN values
     ! where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)
