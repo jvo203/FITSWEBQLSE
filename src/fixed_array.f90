@@ -27,7 +27,7 @@ contains
 
     !end function isnan
 
-    subroutine to_fixed(x, compressed) ! , pmin, pmax) !, mask)
+    subroutine to_fixed(x, compressed, ignrval, datamin, datamax) ! , pmin, pmax) !, mask)
         ! use wavelet
         use, intrinsic :: ieee_arithmetic
         implicit none
@@ -35,6 +35,8 @@ contains
         integer(kind=4) :: n, m ! input dimensions
         ! real, intent(in) :: pmin, pmax
         real(kind=4), dimension(:, :), intent(in) :: x
+        real, intent(in) :: ignrval, datamin, datamax
+
         ! logical(kind=1), dimension(n, n), optional, intent(inout) :: mask
         integer(kind=4) :: i, j
 
@@ -89,17 +91,19 @@ contains
 
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
-                call to_fixed_block(input, compressed(i, j))
+                call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
             end block
         end do
 
     end subroutine to_fixed
 
-    pure subroutine to_fixed_block(x, compressed)
+    pure subroutine to_fixed_block(x, compressed, ignrval, datamin, datamax)
         ! use wavelet
         implicit none
 
         real(kind=4), dimension(4, 4), intent(inout) :: x
+        real, intent(in) :: ignrval, datamin, datamax
+
         integer, dimension(4, 4) :: e
 
         ! the maximum exponent
@@ -117,7 +121,7 @@ contains
         work = 0
 
         !  pick out all the NaN
-        where (isnan(x))
+        where (isnan(x) .or. (x .le. ignrval) .or. (x .lt. datamin) .or. (x .gt. datamax))
             mask = .true.
         elsewhere
             mask = .false.
