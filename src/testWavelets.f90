@@ -9,7 +9,7 @@ program Wavelets
     integer(kind=4), parameter :: N = 4
     integer i, j
 
-    real(kind=4), dimension(N, N) :: x
+    real(kind=4), dimension(N, N) :: x, x_in
     real(kind=4), dimension(N, N) :: y
     logical(kind=1), dimension(N, N) :: mask
     character(kind=c_char), allocatable :: mask_buffer(:)
@@ -122,11 +122,19 @@ program Wavelets
 
     ! testing irregular blocks
     x1 = 1
-    x2 = 4
+    x2 = 3
     y1 = 1
-    y2 = 4
+    y2 = 3
 
-    call to_fixed_block(x(x1:x2, y1:y2), compressed_block)
+    x_in = ieee_value(0.0, ieee_quiet_nan)
+    x_in(x1:x2, y1:y2) = x(x1:x2, y1:y2)
+
+    print *, 'x_in'
+    do i = 1, N
+        print *, x_in(i, :)
+    end do
+
+    call to_fixed_block(x_in, compressed_block)
     call from_fixed_block(compressed_block, x)
 
     print *, 'sizeof(x):', sizeof(x), ', compressed size:', sizeof(compressed)
