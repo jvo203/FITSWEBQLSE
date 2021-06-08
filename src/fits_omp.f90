@@ -1211,13 +1211,6 @@ contains
                                             ! we have a non-NaN pixel
                                             tmp = x(i, j)
 
-                                            if (test_ignrval) then
-                                                if (tmp .eq. item%ignrval) then
-                                                    ! skip the IGNRVAL pixels
-                                                    cycle
-                                                end if
-                                            end if
-
                                             ! calculate the original pixel coordinates
                                             src_x = i + shiftl(ix - 1, 2)
                                             src_y = j + shiftl(iy - 1, 2)
