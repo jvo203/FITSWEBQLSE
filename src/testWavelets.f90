@@ -16,6 +16,8 @@ program Wavelets
     character(kind=c_char), allocatable :: array_buffer(:)
 
     type(fixed_block), dimension(N/4, N/4) :: compressed
+    type(fixed_block) :: compressed_block
+    integer :: x1, x2, y1, y2
 
     ! FORTRAN-native ZFP
     type(zfp_block) :: compressed2
@@ -57,7 +59,7 @@ program Wavelets
     ! reset the source
     do i = 1, N
         do j = 1, N
-            x(i, j) = i*j
+            x(i, j) = i*j/100.0
         end do
     end do
 
@@ -98,7 +100,7 @@ program Wavelets
     ! reset the source
     do i = 1, N
         do j = 1, N
-            x(i, j) = i*j
+            x(i, j) = i*j/100.0
         end do
     end do
 
@@ -118,22 +120,31 @@ program Wavelets
     ! ZFP-like compression
     call to_fixed(x, compressed)
 
+    ! testing irregular blocks
+    x1 = 1
+    x2 = 4
+    y1 = 1
+    y2 = 4
+
+    call to_fixed_block(x(x1:x2, y1:y2), compressed_block)
+    call from_fixed_block(compressed_block, x)
+
     print *, 'sizeof(x):', sizeof(x), ', compressed size:', sizeof(compressed)
     print *, 'compression ratio:', real(sizeof(x))/real(sizeof(compressed))
 
     ! call LZ4-HC to compress the mask
-    call compress_mask(mask, mask_buffer)
+    ! call compress_mask(mask, mask_buffer)
 
     ! compress the fixed array
-    call compress_fixed_array(compressed, array_buffer)
+    ! call compress_fixed_array(compressed, array_buffer)
 
     ! decompress mask
-    call decompress_mask(mask_buffer, mask)
+    ! call decompress_mask(mask_buffer, mask)
 
-    call decompress_fixed_array(array_buffer, compressed)
+    ! call decompress_fixed_array(array_buffer, compressed)
 
     ! ZFP-like decompression
-    call from_fixed(N, compressed, x)
+    ! call from_fixed(N, compressed, x)
 
     ! insert back NaN values
     ! where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)

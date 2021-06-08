@@ -8,7 +8,6 @@ module fixed_array
     ! 1 sign bit + 7 bits for the magnitude
     integer(kind=4), parameter :: significant_bits = 7 ! was 7
     ! integer(kind=4), parameter :: significant_bits = 5
-    integer(kind=4), parameter :: EBIAS = 127
 
     type fixed_block
         ! a NaN mask: 4 x 4 bits = 16 bits (2 bytes)
@@ -134,8 +133,8 @@ contains
         e = exponent(x)
         max_exp = maxval(e)
 
-        ! compressed%common_exp = int(max_exp - 1, kind=1)
-        compressed%common_exp = int(max_exp + EBIAS, kind=1)
+        compressed%common_exp = int(max_exp - 1, kind=1)
+
         ! 8-bit quantization (7 bits + sign)
         compressed%mantissa = quantize(x, e, max_exp, significant_bits)
 
@@ -176,7 +175,12 @@ contains
         integer :: i, j, pos
         integer(kind=2) :: bitmask
 
-        x = dequantize(compressed%mantissa, int(compressed%common_exp) - EBIAS, significant_bits)
+        ! the maximum exponent
+        integer :: max_exp
+
+        max_exp = int(compressed%common_exp) + 1
+
+        x = dequantize(compressed%mantissa, max_exp, significant_bits)
 
         ! add NaNs where needed
         bitmask = compressed%mask
@@ -215,6 +219,6 @@ contains
 
         ! i = (max_exp + 1) - bits
         i = max_exp - bits
-        dequantize = scale(real(x), i)
+        dequantize = scale(real(int(x)), i)
     end function dequantize
 end module fixed_array
