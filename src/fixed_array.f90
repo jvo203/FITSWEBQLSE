@@ -29,11 +29,12 @@ contains
 
     subroutine to_fixed(x, compressed) ! , pmin, pmax) !, mask)
         ! use wavelet
+        use, intrinsic :: ieee_arithmetic
         implicit none
 
         integer(kind=4) :: n, m ! input dimensions
         ! real, intent(in) :: pmin, pmax
-        real(kind=4), dimension(:, :), intent(inout) :: x
+        real(kind=4), dimension(:, :), intent(in) :: x
         ! logical(kind=1), dimension(n, n), optional, intent(inout) :: mask
         integer(kind=4) :: i, j
 
@@ -68,14 +69,31 @@ contains
         ! x = log(0.5 + (x - pmin)/(pmax - pmin))
 
         do concurrent(j=1:m/4, i=1:n/4)
-            !if (present(mask)) then
-            !    call to_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
-            !    &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), .true.)
-            !end if
+            block
+                real(kind=4), dimension(4, 4) :: input
+                integer :: x1, x2, y1, y2
 
-            ! IMPORTANT: checking the bounds
-            call to_fixed_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
-            & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))), compressed(i, j))
+                !if (present(mask)) then
+                !    call to_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
+                !    &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), .true.)
+                !end if
+
+                ! by default there are no valid values
+                input = ieee_value(0.0, ieee_quiet_nan)
+
+                x1 = 1 + shiftl(i - 1, 2)
+                x2 = min(n, shiftl(i, 2))
+
+                y1 = 1 + shiftl(j - 1, 2)
+                y2 = min(m, shiftl(j, 2))
+
+                input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
+
+                ! x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
+                ! & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2)))
+
+                call to_fixed_block(input, compressed(i, j))
+            end block
         end do
 
     end subroutine to_fixed
