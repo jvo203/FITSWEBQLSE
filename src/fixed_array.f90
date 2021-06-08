@@ -93,6 +93,7 @@ contains
 
                 ! pre-condition the input array
                 input = log(0.5 + (input - pmin)/(pmax - pmin))
+                ! input = input/2.0
 
                 call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
             end block

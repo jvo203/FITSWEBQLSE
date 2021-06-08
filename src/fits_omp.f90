@@ -1207,7 +1207,7 @@ contains
                         real(kind=4), dimension(4, 4) :: x
                         integer(kind=2) :: bitmask
 
-                        ! real :: frame_min, frame_max, tmp
+                        real :: frame_min, frame_max, tmp
 
                         integer :: i, j, pos, ix, iy, src_x, src_y
                         integer :: offset_x, offset_y, offset
@@ -1215,8 +1215,8 @@ contains
                         ! the maximum exponent
                         integer :: max_exp
 
-                        ! frame_min = item%frame_min(frame)
-                        ! frame_max = item%frame_max(frame)
+                        frame_min = item%frame_min(frame)
+                        frame_max = item%frame_max(frame)
 
                         ! process the data
                         pixel_sum = 0.0
@@ -1235,7 +1235,8 @@ contains
                                 max_exp = int(compressed%common_exp) + 1
                                 x = dequantize(compressed%mantissa, max_exp, significant_bits)
                                 ! recover the original range
-                                ! x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min) ! not in use anymore
+                                x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min) ! not in use anymore
+                                ! x = x*2.0
 
                                 pos = 0
                                 do j = 1, 4
@@ -2252,7 +2253,8 @@ contains
 
                             thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
                             ! call zfp_compress_array(thread_x(:, :, tid), item%compressed(:, :, frame))
-                            call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), ignrval, datamin, datamax)
+                            call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), &
+                            &ignrval, datamin, datamax, frame_min, frame_max)
                         end block
                     end if
 
