@@ -107,6 +107,9 @@ contains
         real(kind=4), dimension(4, 4), intent(inout) :: x
         real, intent(in) :: ignrval, datamin, datamax
 
+        real(kind=4), dimension(:), allocatable :: tmp
+        integer, dimension(:), allocatable :: tmp_e
+
         integer, dimension(4, 4) :: e
 
         ! the maximum exponent
@@ -152,8 +155,20 @@ contains
         ! a wavelet transform
         ! call to_daub4_block(x)
 
-        e = exponent(x)
-        max_exp = maxval(e)
+        ! pick all non-zero values
+        where (x .ne. 0.0)
+            mask = .true.
+        elsewhere
+            mask = .false.
+        end where
+
+        ! pack the vector
+        tmp = pack(x, mask)
+        tmp_e = exponent(tmp)
+        max_exp = maxval(tmp_e)
+
+        ! e = exponent(x)
+        ! max_exp = maxval(e)
 
         compressed%common_exp = int(max_exp - 1, kind=1)
 

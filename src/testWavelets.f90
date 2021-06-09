@@ -122,9 +122,6 @@ program Wavelets
     call to_fixed(x, compressed, -1000.0, -100.0, 100.0, minval(x), maxval(x))
 
     call print_fixed_block(compressed(1, 1))
-    max_exp = compressed(1, 1)%common_exp + 1
-    print *, 'max_exp:', max_exp
-    print *, real(compressed(1, 1)%mantissa)*(2**max_exp)/(2**7)
 
     ! testing irregular blocks
     x1 = 1
