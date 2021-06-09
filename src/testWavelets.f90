@@ -101,7 +101,7 @@ program Wavelets
     ! reset the source
     do i = 1, N
         do j = 1, N
-            x(i, j) = (i - 2)*(j - 2)/10.0
+            x(i, j) = (i - 2)*(j - 2)/100.0
         end do
     end do
 
