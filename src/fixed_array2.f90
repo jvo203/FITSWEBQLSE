@@ -2,7 +2,8 @@ module fixed_array2
     implicit none
 
     ! a 16 x 16 block of floating-point values
-    integer, parameter :: DIM = 16
+    integer, parameter :: BASE = 4
+    integer, parameter :: DIM = 2**BASE ! 16
 
     ! significant_bits = works with 1 byte
     ! 1 sign bit + 7 bits for the magnitude
@@ -72,11 +73,11 @@ contains
                 ! by default there are no valid values
                 input = ieee_value(0.0, ieee_quiet_nan)
 
-                x1 = 1 + shiftl(i - 1, 4)
-                x2 = min(n, shiftl(i, 4))
+                x1 = 1 + shiftl(i - 1, BASE)
+                x2 = min(n, shiftl(i, BASE))
 
-                y1 = 1 + shiftl(j - 1, 4)
-                y2 = min(m, shiftl(j, 4))
+                y1 = 1 + shiftl(j - 1, BASE)
+                y2 = min(m, shiftl(j, BASE))
 
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 

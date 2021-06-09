@@ -1216,8 +1216,8 @@ contains
                                             tmp = x(i, j)
 
                                             ! calculate the original pixel coordinates
-                                            src_x = i + shiftl(ix - 1, 4) ! was 2
-                                            src_y = j + shiftl(iy - 1, 4) ! was 2
+                                            src_x = i + shiftl(ix - 1, BASE)
+                                            src_y = j + shiftl(iy - 1, BASE)
 
                                             ! check if a pixel resides within the bounding box (or a circle)
                                             if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
