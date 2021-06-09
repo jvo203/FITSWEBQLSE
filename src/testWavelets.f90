@@ -18,6 +18,7 @@ program Wavelets
     type(fixed_block), dimension(N/4, N/4) :: compressed
     type(fixed_block) :: compressed_block
     integer :: x1, x2, y1, y2
+    integer :: max_exp
 
     ! FORTRAN-native ZFP
     type(zfp_block) :: compressed2
@@ -118,13 +119,18 @@ program Wavelets
     ! where (.not. mask) x = 0.0
 
     ! ZFP-like compression
-    call to_fixed(x, compressed, -1000.0, -100.0, 100.0)
+    call to_fixed(x, compressed, -1000.0, -100.0, 100.0, minval(x), maxval(x))
+
+    call print_fixed_block(compressed(1, 1))
+    max_exp = compressed(1, 1)%common_exp + 1
+    print *, 'max_exp:', max_exp
+    print *, real(compressed(1, 1)%mantissa)*(2**max_exp)/(2**7)
 
     ! testing irregular blocks
     x1 = 1
-    x2 = 3
+    x2 = 4
     y1 = 1
-    y2 = 3
+    y2 = 4
 
     x_in = ieee_value(0.0, ieee_quiet_nan)
     x_in(x1:x2, y1:y2) = x(x1:x2, y1:y2)
@@ -152,7 +158,7 @@ program Wavelets
     ! call decompress_fixed_array(array_buffer, compressed)
 
     ! ZFP-like decompression
-    call from_fixed(N, compressed, x)
+    call from_fixed(N, compressed, x, minval(x), maxval(x))
 
     ! insert back NaN values
     ! where (.not. mask) x = ieee_value(0.0, ieee_quiet_nan)

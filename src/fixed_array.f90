@@ -92,8 +92,7 @@ contains
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
                 ! pre-condition the input array
-                input = log(0.5 + (input - pmin)/(pmax - pmin))
-                ! input = input/2.0
+                ! input = log(0.5 + (input - pmin)/(pmax - pmin))
 
                 call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
             end block
@@ -163,12 +162,13 @@ contains
 
     end subroutine to_fixed_block
 
-    subroutine from_fixed(n, compressed, x) !, mask)
+    subroutine from_fixed(n, compressed, x, pmin, pmax) !, mask)
         !use wavelet
         implicit none
 
         integer(kind=4) :: n
         type(fixed_block), dimension(n/4, n/4), intent(in) :: compressed
+        real, intent(in) :: pmin, pmax
         ! logical(kind=1), dimension(n, n), optional, intent(in) :: mask
 
         ! the result
@@ -178,7 +178,9 @@ contains
         if (mod(n, 4) .ne. 0) return
 
         do concurrent(j=1:n/4, i=1:n/4)
-            call from_fixed_block(compressed(i, j), x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
+            call from_fixed_block(compressed(i, j),&
+            & x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
+            &pmin, pmax)
 
             !if (present(mask)) then
             !    call from_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
@@ -188,12 +190,13 @@ contains
 
     end subroutine from_fixed
 
-    pure subroutine from_fixed_block(compressed, x)
+    pure subroutine from_fixed_block(compressed, x, pmin, pmax)
         use, intrinsic :: ieee_arithmetic
         implicit none
 
         type(fixed_block), intent(in) :: compressed
         real(kind=4), dimension(4, 4), intent(out) :: x
+        real, intent(in) :: pmin, pmax
 
         integer :: i, j, pos
         integer(kind=2) :: bitmask
@@ -221,7 +224,23 @@ contains
                 pos = pos + 1
             end do
         end do
+
+        ! recover the original range
+        ! x = pmin + (exp(x) - 0.5)*(pmax - pmin)
+
     end subroutine from_fixed_block
+
+    subroutine print_fixed_block(compressed)
+        use, intrinsic :: ieee_arithmetic
+        implicit none
+
+        type(fixed_block), intent(in) :: compressed
+
+        print *, 'mask', compressed%mask
+        print *, 'max exp.', int(compressed%common_exp) + 1
+        print *, 'mantissa', compressed%mantissa
+
+    end subroutine print_fixed_block
 
     elemental function quantize(x, e, max_exp, bits)
         real, intent(in) :: x
@@ -231,6 +250,8 @@ contains
 
         i = e - max_exp + bits
         quantize = nint(set_exponent(x, i), kind=1)
+
+        ! quantize = nint(x*(2**bits)/(2**max_exp), kind=1)
     end function quantize
 
     elemental function dequantize(x, max_exp, bits)
@@ -241,6 +262,8 @@ contains
         integer i
 
         i = max_exp - bits
-        dequantize = scale(real(int(x)), i)
+        dequantize = scale(real(x), i)
+
+        ! dequantize = real(x)*(2**max_exp)/(2**bits)
     end function dequantize
 end module fixed_array
