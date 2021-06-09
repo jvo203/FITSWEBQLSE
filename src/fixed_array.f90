@@ -1,6 +1,10 @@
 module fixed_array
     implicit none
 
+    ! a 4 x 4 block of floating-point values
+    integer, parameter :: BASE = 2
+    integer, parameter :: DIM = 2**BASE ! 4
+
     ! the minimum X-Y dimension below which the wavelet routines should terminate
     ! the operation (i.e. 8 -> 4x4 coarse coefficients, ideal for ZFP)
     ! since ZFP operates on 4x4 blocks
