@@ -92,7 +92,7 @@ contains
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
                 ! pre-condition the input array
-                input = log(0.5 + (input - pmin)/(pmax - pmin))
+                ! input = log(0.5 + (input - pmin)/(pmax - pmin))
 
                 call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
             end block
@@ -120,9 +120,6 @@ contains
         integer(kind=2) :: work
         integer :: i, j, pos
 
-        e = exponent(x)
-        ! max_exp = maxval(e)
-
         ! by default there are no NaNs
         work = 0
 
@@ -133,6 +130,7 @@ contains
             mask = .false.
         end where
 
+        e = exponent(x)
         max_exp = minexponent(0.0)
 
         ! go through the mask element by element
@@ -149,7 +147,7 @@ contains
 
                 else
                     ! ignore zero values when looking for the maximum exponent
-                    if (abs(x(i, j)) .ne. 0.0) then
+                    if (abs(x(i, j)) .gt. 0.0) then
                         if (e(i, j) .gt. max_exp) then
                             max_exp = e(i, j)
                         end if
@@ -236,7 +234,7 @@ contains
         end do
 
         ! recover the original range
-        x = pmin + (exp(x) - 0.5)*(pmax - pmin)
+        ! x = pmin + (exp(x) - 0.5)*(pmax - pmin)
 
     end subroutine from_fixed_block
 

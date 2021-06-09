@@ -20,6 +20,8 @@ program Wavelets
     integer :: x1, x2, y1, y2
     integer :: max_exp
 
+    integer, dimension(4, 4) :: e
+
     ! FORTRAN-native ZFP
     type(zfp_block) :: compressed2
     integer(kind=2) :: bitmask
@@ -101,7 +103,7 @@ program Wavelets
     ! reset the source
     do i = 1, N
         do j = 1, N
-            x(i, j) = (i - 2)*(j - 2)/100.0
+            x(i, j) = (i - 2)*(j - 2)/1000.0
         end do
     end do
 
@@ -117,6 +119,9 @@ program Wavelets
 
     ! replace NaNs with 0.0
     ! where (.not. mask) x = 0.0
+
+    print *, 'minexponent', minexponent(0.0)
+    print *, 'e', exponent(x)
 
     ! ZFP-like compression
     call to_fixed(x, compressed, -1000.0, -100.0, 100.0, minval(x), maxval(x))
@@ -136,6 +141,25 @@ program Wavelets
     do i = 1, N
         print *, x_in(i, :)
     end do
+
+    e = exponent(x)
+    max_exp = minexponent(0.0)
+
+    do j = 1, 4
+        do i = 1, 4
+            if (.not. isnan(x(i, j))) then
+                ! ignore zero values when looking for the maximum exponent
+                if (abs(x(i, j)) .gt. 0.0) then
+                    if (e(i, j) .gt. max_exp) then
+                        max_exp = e(i, j)
+                        print *, 'x', x(i, j), 'e', e(i, j), 'max_exp', max_exp
+                    end if
+                end if
+            end if
+        end do
+    end do
+
+    print *, 'block max_exp', max_exp
 
     ! call to_fixed_block(x_in, compressed_block)
     ! call from_fixed_block(compressed_block, x)
