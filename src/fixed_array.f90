@@ -107,9 +107,6 @@ contains
         real(kind=4), dimension(4, 4), intent(inout) :: x
         real, intent(in) :: ignrval, datamin, datamax
 
-        real(kind=4), dimension(:), allocatable :: tmp
-        integer, dimension(:), allocatable :: tmp_e
-
         integer, dimension(4, 4) :: e
 
         ! the maximum exponent
@@ -133,6 +130,8 @@ contains
             mask = .false.
         end where
 
+        max_exp = -126
+
         ! go through the mask element by element
         ! checking for any NaNs
         pos = 0
@@ -144,6 +143,13 @@ contains
 
                     ! set the bit to .true. where there is a NaN
                     work = ibset(work, pos)
+
+                else
+                    if (abs(x(i, j)) .gt. 1e-6) then
+                        if (exponent(x(i, j)) .gt. max_exp) then
+                            max_exp = exponent(x(i, j))
+                        end if
+                    end if
                 end if
 
                 pos = pos + 1
@@ -155,20 +161,8 @@ contains
         ! a wavelet transform
         ! call to_daub4_block(x)
 
-        ! pick all non-zero values
-        where (x .ne. 0.0)
-            mask = .true.
-        elsewhere
-            mask = .false.
-        end where
-
-        ! pack the vector
-        ! tmp = pack(x, mask)
-        ! tmp_e = exponent(tmp)
-        ! max_exp = maxval(tmp_e)
-
         e = exponent(x)
-        max_exp = maxval(e)
+        ! max_exp = maxval(e)
 
         compressed%common_exp = int(max_exp - 1, kind=1)
 
