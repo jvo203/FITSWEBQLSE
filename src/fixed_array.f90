@@ -120,6 +120,9 @@ contains
         integer(kind=2) :: work
         integer :: i, j, pos
 
+        e = exponent(x)
+        ! max_exp = maxval(e)
+
         ! by default there are no NaNs
         work = 0
 
@@ -130,7 +133,7 @@ contains
             mask = .false.
         end where
 
-        max_exp = -126
+        max_exp = minexponent(0.0)
 
         ! go through the mask element by element
         ! checking for any NaNs
@@ -147,8 +150,8 @@ contains
                 else
                     ! ignore zero values when looking for the maximum exponent
                     if (abs(x(i, j)) .ne. 0.0) then
-                        if (exponent(x(i, j)) .gt. max_exp) then
-                            max_exp = exponent(x(i, j))
+                        if (e(i, j) .gt. max_exp) then
+                            max_exp = e(i, j)
                         end if
                     end if
                 end if
@@ -161,9 +164,6 @@ contains
 
         ! a wavelet transform
         ! call to_daub4_block(x)
-
-        e = exponent(x)
-        ! max_exp = maxval(e)
 
         compressed%common_exp = int(max_exp - 1, kind=1)
 
