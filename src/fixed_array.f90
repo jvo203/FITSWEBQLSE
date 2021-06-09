@@ -92,7 +92,7 @@ contains
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
                 ! pre-condition the input array
-                ! input = log(0.5 + (input - pmin)/(pmax - pmin))
+                input = log(0.5 + (input - pmin)/(pmax - pmin))
 
                 call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
             end block
@@ -241,7 +241,7 @@ contains
         end do
 
         ! recover the original range
-        ! x = pmin + (exp(x) - 0.5)*(pmax - pmin)
+        x = pmin + (exp(x) - 0.5)*(pmax - pmin)
 
     end subroutine from_fixed_block
 
@@ -263,10 +263,12 @@ contains
         integer(kind=1) :: quantize
         integer i
 
+        ! what it does
+        ! quantize = nint(x*(2**bits)/(2**max_exp), kind=1)
+
         i = e - max_exp + bits
         quantize = nint(set_exponent(x, i), kind=1)
 
-        ! quantize = nint(x*(2**bits)/(2**max_exp), kind=1)
     end function quantize
 
     elemental function dequantize(x, max_exp, bits)
@@ -276,9 +278,11 @@ contains
         real :: dequantize
         integer i
 
+        ! what it does
+        ! dequantize = real(x)*(2**max_exp)/(2**bits)
+
         i = max_exp - bits
         dequantize = scale(real(x), i)
 
-        ! dequantize = real(x)*(2**max_exp)/(2**bits)
     end function dequantize
 end module fixed_array
