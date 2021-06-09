@@ -1,5 +1,7 @@
-module fixed_array
+module fixed_array2
     implicit none
+
+    integer, parameter :: DIM = 4
 
     ! the minimum X-Y dimension below which the wavelet routines should terminate
     ! the operation (i.e. 8 -> 4x4 coarse coefficients, ideal for ZFP)
@@ -275,4 +277,4 @@ contains
         dequantize = scale(real(x), i)
 
     end function dequantize
-end module fixed_array
+end module fixed_array2
