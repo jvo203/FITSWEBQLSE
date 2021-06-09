@@ -72,11 +72,11 @@ contains
                 ! by default there are no valid values
                 input = ieee_value(0.0, ieee_quiet_nan)
 
-                x1 = 1 + shiftl(i - 1, 2)
-                x2 = min(n, shiftl(i, 2))
+                x1 = 1 + shiftl(i - 1, 4)
+                x2 = min(n, shiftl(i, 4))
 
-                y1 = 1 + shiftl(j - 1, 2)
-                y2 = min(m, shiftl(j, 2))
+                y1 = 1 + shiftl(j - 1, 4)
+                y2 = min(m, shiftl(j, 4))
 
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
