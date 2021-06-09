@@ -817,7 +817,7 @@ contains
         logical(kind=1), allocatable, target :: mask(:) [:]
         real, allocatable, target :: spectrum(:) [:]
 
-        real(kind=4), allocatable, target :: comp_pixels(:)
+        ! real(kind=4), allocatable, target :: comp_pixels(:)
 
         ! use img%pixels, img%mask to form a viewport {tmp_pixels, tmp_mask} defined by (x1,y1) ~ (x2,y2)
         real(kind=c_float), dimension(:, :), allocatable, target :: tmp_pixels
@@ -1035,9 +1035,6 @@ contains
             allocate (pixels(npixels) [*])
             allocate (mask(npixels) [*])
 
-            ! testing
-            allocate (comp_pixels(npixels))
-
             ! initiate pixels to blank
             pixels = 0.0
             ! and reset the NaN mask
@@ -1070,15 +1067,7 @@ contains
                 test_ignrval = .true.
             end if
 
-            if (.not. allocated(item%compressed) .or. .not. allocated(item%bitstream)) then ! .or. req%image) then
-                ! initiate pixels to blank
-                pixels = 0.0
-                ! and reset the NaN mask
-                mask = .false.
-
-                thread_pixels = 0.0
-                thread_mask = .false.
-
+            if (.not. allocated(item%compressed) .and. .not. allocated(item%bitstream)) then ! .or. req%image) then
                 !$omp PARALLEL SHARED(item)&
                 !$omp& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, pixel_sum, pixel_count)&
                 !$omp& REDUCTION(.or.:thread_bSuccess) NUM_THREADS(max_threads)
@@ -1159,19 +1148,6 @@ contains
                 end do
                 !OMP END DO
                 !$omp END PARALLEL
-
-                ! first reduce the pixels/mask locally
-                if (req%image) then
-                    do j = 1, max_threads
-                        pixels(:) = pixels(:) + thread_pixels(:, j)
-                        mask(:) = mask(:) .or. thread_mask(:, j)
-                    end do
-                end if
-
-                if (req%image) then
-                    ! print *, 'REAL:', pixels
-                    comp_pixels = pixels
-                end if
             end if
 
             if (allocated(item%compressed)) then
@@ -1183,14 +1159,6 @@ contains
                 end_y = 1 + (y2 - 1)/4
 
                 print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y
-
-                ! initiate pixels to blank
-                pixels = 0.0
-                ! and reset the NaN mask
-                mask = .false.
-
-                thread_pixels = 0.0
-                thread_mask = .false.
 
                 !$omp PARALLEL SHARED(item)&
                 !$omp& PRIVATE(tmp, pixel_sum, pixel_count)&
@@ -1327,10 +1295,6 @@ contains
                 end do
             end if
 
-            if (req%image) then
-                print *, 'DIFF:', comp_pixels - pixels
-            end if
-
             spectrum = shared_spectrum
 
             ! upload the partial spectrum onto the root image
@@ -1341,8 +1305,6 @@ contains
 
         ! it is faster to reduce the spectrum on the root image in one call
         ! call co_sum(spectrum, result_image=1)
-
-        ! pixels = comp_pixels - pixels
 
         ! reduce the viewport pixels/mask on the root image
         if (req%image) then
