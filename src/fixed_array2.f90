@@ -106,9 +106,6 @@ contains
         integer(kind=2) :: work
         integer :: i, j, pos
 
-        ! by default there are no NaNs
-        work = 0
-
         !  pick out all the NaN
         where (isnan(x) .or. (x .le. ignrval) .or. (x .lt. datamin) .or. (x .gt. datamax))
             mask = .true.
@@ -121,9 +118,13 @@ contains
 
         ! go through the mask element by element
         ! checking for any NaNs
-        pos = 0
-        do j = 1, 4
-            do i = 1, 4
+
+        do j = 1, DIM
+            ! by default there are no NaNs in a column
+            work = 0
+            pos = 0
+
+            do i = 1, DIM
                 if (mask(i, j)) then
                     ! replace NaN with 0.0
                     x(i, j) = 0.0
@@ -142,12 +143,10 @@ contains
 
                 pos = pos + 1
             end do
+
+            compressed%mask(j) = work
+
         end do
-
-        compressed%mask = work
-
-        ! a wavelet transform
-        ! call to_daub4_block(x)
 
         compressed%common_exp = int(max_exp - 1, kind=1)
 
