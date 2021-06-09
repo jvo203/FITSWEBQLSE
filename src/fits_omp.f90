@@ -2253,7 +2253,7 @@ contains
                             thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
                             ! call zfp_compress_array(thread_x(:, :, tid), item%compressed(:, :, frame))
                             call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), &
-                            &ignrval, datamin, datamax, frame_min, frame_max)
+                            &ignrval, datamin, datamax) ! , frame_min, frame_max)
                         end block
                     end if
 
