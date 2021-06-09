@@ -27,13 +27,13 @@ contains
 
     !end function isnan
 
-    subroutine to_fixed(x, compressed, ignrval, datamin, datamax, pmin, pmax) !, mask)
+    subroutine to_fixed(x, compressed, ignrval, datamin, datamax) ! , pmin, pmax) !, mask)
         ! use wavelet
         use, intrinsic :: ieee_arithmetic
         implicit none
 
         integer(kind=4) :: n, m ! input dimensions
-        real, intent(in) :: pmin, pmax
+        ! real, intent(in) :: pmin, pmax
         real(kind=4), dimension(:, :), intent(in) :: x
         real, intent(in) :: ignrval, datamin, datamax
 
@@ -66,9 +66,6 @@ contains
             print *, 'compressed array dimension(2) mismatch:', size(compressed, 2), '.ne.', cm
             return
         end if
-
-        ! first pre-condition the input array
-        ! x = log(0.5 + (x - pmin)/(pmax - pmin))
 
         do concurrent(j=1:m/4, i=1:n/4)
             block
@@ -170,13 +167,13 @@ contains
 
     end subroutine to_fixed_block
 
-    subroutine from_fixed(n, compressed, x, pmin, pmax) !, mask)
+    subroutine from_fixed(n, compressed, x) ! , pmin, pmax) !, mask)
         !use wavelet
         implicit none
 
         integer(kind=4) :: n
         type(fixed_block), dimension(n/4, n/4), intent(in) :: compressed
-        real, intent(in) :: pmin, pmax
+        ! real, intent(in) :: pmin, pmax
         ! logical(kind=1), dimension(n, n), optional, intent(in) :: mask
 
         ! the result
@@ -187,8 +184,8 @@ contains
 
         do concurrent(j=1:n/4, i=1:n/4)
             call from_fixed_block(compressed(i, j),&
-            & x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
-            &pmin, pmax)
+            & x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
+            ! &pmin, pmax)
 
             !if (present(mask)) then
             !    call from_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
@@ -198,13 +195,13 @@ contains
 
     end subroutine from_fixed
 
-    pure subroutine from_fixed_block(compressed, x, pmin, pmax)
+    pure subroutine from_fixed_block(compressed, x) ! , pmin, pmax)
         use, intrinsic :: ieee_arithmetic
         implicit none
 
         type(fixed_block), intent(in) :: compressed
         real(kind=4), dimension(4, 4), intent(out) :: x
-        real, intent(in) :: pmin, pmax
+        ! real, intent(in) :: pmin, pmax
 
         integer :: i, j, pos
         integer(kind=2) :: bitmask
