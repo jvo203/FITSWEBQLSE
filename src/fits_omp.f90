@@ -2,7 +2,7 @@ module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
     ! use zfp_array
-    use fixed_array
+    use fixed_array2
     implicit none
 
     integer(kind=4), parameter :: NBINS = 1024
@@ -1152,11 +1152,11 @@ contains
 
             if (allocated(item%compressed)) then
                 ! real-time data decompression
-                start_x = 1 + (x1 - 1)/4
-                start_y = 1 + (y1 - 1)/4
+                start_x = 1 + (x1 - 1)/DIM
+                start_y = 1 + (y1 - 1)/DIM
 
-                end_x = 1 + (x2 - 1)/4
-                end_y = 1 + (y2 - 1)/4
+                end_x = 1 + (x2 - 1)/DIM
+                end_y = 1 + (y2 - 1)/DIM
 
                 print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y
 
@@ -1172,7 +1172,7 @@ contains
                         ! type(zfp_block) :: compressed
                         type(fixed_block) :: compressed
 
-                        real(kind=4), dimension(4, 4) :: x
+                        real(kind=4), dimension(DIM, DIM) :: x
                         integer(kind=2) :: bitmask
 
                         real :: frame_min, frame_max, tmp
@@ -1190,7 +1190,7 @@ contains
                         pixel_sum = 0.0
                         pixel_count = 0
 
-                        ! decompress each 4x4 block
+                        ! decompress each DIMxDIM block
                         do iy = start_y, end_y
                             do ix = start_x, end_x
                                 compressed = item%compressed(ix, iy, frame)
@@ -1198,24 +1198,26 @@ contains
                                 !call zfp_decompress_block(compressed, x, bitmask)
 
                                 ! a NaN mask
-                                bitmask = compressed%mask
+                                ! bitmask = compressed%mask
 
                                 max_exp = int(compressed%common_exp) + 1
                                 x = dequantize(compressed%mantissa, max_exp, significant_bits)
                                 ! recover the original range
                                 ! x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min)
 
-                                pos = 0
-                                do j = 1, 4
-                                    do i = 1, 4
+                                do j = 1, DIM
+                                    pos = 0
+                                    bitmask = compressed%mask(j)
+
+                                    do i = 1, DIM
                                         ! test a NaN mask
                                         if (.not. btest(bitmask, pos)) then
                                             ! we have a non-NaN pixel
                                             tmp = x(i, j)
 
                                             ! calculate the original pixel coordinates
-                                            src_x = i + shiftl(ix - 1, 2)
-                                            src_y = j + shiftl(iy - 1, 2)
+                                            src_x = i + shiftl(ix - 1, 4) ! was 2
+                                            src_y = j + shiftl(iy - 1, 4) ! was 2
 
                                             ! check if a pixel resides within the bounding box (or a circle)
                                             if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
@@ -1908,13 +1910,13 @@ contains
         ! allocate the buffer
         npixels = naxes(1)*naxes(2)
 
-        ! by default compressed is dimension(naxes(1)/4, naxes(2)/4)
-        cn = naxes(1)/4
-        cm = naxes(2)/4
+        ! by default compressed is dimension(naxes(1)/DIM, naxes(2)/DIM)
+        cn = naxes(1)/DIM
+        cm = naxes(2)/DIM
 
         ! but the input dimensions might not be divisible by 4
-        if (mod(naxes(1), 4) .ne. 0) cn = cn + 1
-        if (mod(naxes(2), 4) .ne. 0) cm = cm + 1
+        if (mod(naxes(1), DIM) .ne. 0) cn = cn + 1
+        if (mod(naxes(2), DIM) .ne. 0) cm = cm + 1
 
         ! now read the 3D FITS data cube (successive 2D planes)
         if (npixels .eq. 0) then
