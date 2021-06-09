@@ -145,7 +145,8 @@ contains
                     work = ibset(work, pos)
 
                 else
-                    if (abs(x(i, j)) .gt. 1e-6) then
+                    ! ignore zero values when looking for the maximum exponent
+                    if (abs(x(i, j)) .ne. 0.0) then
                         if (exponent(x(i, j)) .gt. max_exp) then
                             max_exp = exponent(x(i, j))
                         end if
