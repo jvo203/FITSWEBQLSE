@@ -155,41 +155,12 @@ contains
 
     end subroutine to_fixed_block
 
-    subroutine from_fixed(n, compressed, x) ! , pmin, pmax) !, mask)
-        !use wavelet
-        implicit none
-
-        integer(kind=4) :: n
-        type(fixed_block), dimension(n/4, n/4), intent(in) :: compressed
-        ! real, intent(in) :: pmin, pmax
-        ! logical(kind=1), dimension(n, n), optional, intent(in) :: mask
-
-        ! the result
-        real(kind=4), dimension(n, n), intent(out) :: x
-        integer(kind=4) :: i, j
-
-        if (mod(n, 4) .ne. 0) return
-
-        do concurrent(j=1:n/4, i=1:n/4)
-            call from_fixed_block(compressed(i, j),&
-            & x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
-            ! &pmin, pmax)
-
-            !if (present(mask)) then
-            !    call from_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
-            !    &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)))
-            !end if
-        end do
-
-    end subroutine from_fixed
-
-    pure subroutine from_fixed_block(compressed, x) ! , pmin, pmax)
+    pure subroutine from_fixed_block(compressed, x)
         use, intrinsic :: ieee_arithmetic
         implicit none
 
         type(fixed_block), intent(in) :: compressed
-        real(kind=4), dimension(4, 4), intent(out) :: x
-        ! real, intent(in) :: pmin, pmax
+        real(kind=4), dimension(DIM, DIM), intent(out) :: x
 
         integer :: i, j, pos
         integer(kind=2) :: bitmask
@@ -202,13 +173,14 @@ contains
         x = dequantize(compressed%mantissa, max_exp, significant_bits)
 
         ! add NaNs where needed
-        bitmask = compressed%mask
 
         ! go through the mask element by element
         ! checking for any NaNs
-        pos = 0
-        do j = 1, 4
-            do i = 1, 4
+        do j = 1, DIM
+            bitmask = compressed%mask(j)
+            pos = 0
+
+            do i = 1, DIM
                 if (btest(bitmask, pos)) then
                     ! insert back a NaN value
                     x(i, j) = ieee_value(0.0, ieee_quiet_nan)
@@ -217,9 +189,6 @@ contains
                 pos = pos + 1
             end do
         end do
-
-        ! recover the original range
-        ! x = pmin + (exp(x) - 0.5)*(pmax - pmin)
 
     end subroutine from_fixed_block
 
