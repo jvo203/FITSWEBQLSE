@@ -1,4 +1,8 @@
 module zfp_array
+    ! a 4 x 4 block of floating-point values
+    integer, parameter :: BASE = 2
+    integer, parameter :: DIM = 2**BASE ! 4
+
     integer(kind=4), parameter :: max_bits = 128
     integer(kind=4), parameter :: fraction_bits = 30
     integer(kind=4), parameter :: EBIAS = 127
