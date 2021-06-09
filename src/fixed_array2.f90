@@ -1,21 +1,18 @@
 module fixed_array2
     implicit none
 
-    integer, parameter :: DIM = 4
+    ! a 16 x 16 block of floating-point values
+    integer, parameter :: DIM = 16
 
-    ! the minimum X-Y dimension below which the wavelet routines should terminate
-    ! the operation (i.e. 8 -> 4x4 coarse coefficients, ideal for ZFP)
-    ! since ZFP operates on 4x4 blocks
     ! significant_bits = works with 1 byte
     ! 1 sign bit + 7 bits for the magnitude
-    integer(kind=4), parameter :: significant_bits = 7 ! was 7
-    ! integer(kind=4), parameter :: significant_bits = 5
+    integer(kind=4), parameter :: significant_bits = 7
 
     type fixed_block
-        ! a NaN mask: 4 x 4 bits = 16 bits (2 bytes)
-        integer(kind=2) :: mask
+        ! a NaN mask: 16 x 16 bits = 64 bits (2 bytes per column)
+        integer(kind=2) :: mask(DIM)
         integer(kind=1) :: common_exp
-        integer(kind=1), dimension(4, 4) :: mantissa ! was 1 byte
+        integer(kind=1), dimension(DIM, DIM) :: mantissa
     end type fixed_block
 contains
     !elemental logical function isnan(x)
@@ -29,17 +26,15 @@ contains
 
     !end function isnan
 
-    subroutine to_fixed(x, compressed, ignrval, datamin, datamax) ! , pmin, pmax) !, mask)
+    subroutine to_fixed(x, compressed, ignrval, datamin, datamax)
         ! use wavelet
         use, intrinsic :: ieee_arithmetic
         implicit none
 
         integer(kind=4) :: n, m ! input dimensions
-        ! real, intent(in) :: pmin, pmax
         real(kind=4), dimension(:, :), intent(in) :: x
         real, intent(in) :: ignrval, datamin, datamax
 
-        ! logical(kind=1), dimension(n, n), optional, intent(inout) :: mask
         integer(kind=4) :: i, j
 
         ! compressed output dimensions
@@ -51,13 +46,13 @@ contains
         n = size(x, 1)
         m = size(x, 2)
 
-        ! by default compressed is dimension(n/4, m/4)
-        cn = n/4
-        cm = m/4
+        ! by default compressed is dimension(n/DIM, m/DIM)
+        cn = n/DIM
+        cm = m/DIM
 
-        ! but the input dimensions might not be divisible by 4
-        if (mod(n, 4) .ne. 0) cn = cn + 1
-        if (mod(m, 4) .ne. 0) cm = cm + 1
+        ! but the input dimensions might not be divisible by <DIM>
+        if (mod(n, DIM) .ne. 0) cn = cn + 1
+        if (mod(m, DIM) .ne. 0) cm = cm + 1
 
         if (size(compressed, 1) .lt. cn) then
             print *, 'compressed array dimension(1) mismatch:', size(compressed, 1), '.ne.', cn
@@ -69,15 +64,10 @@ contains
             return
         end if
 
-        do concurrent(j=1:m/4, i=1:n/4)
+        do concurrent(j=1:m/DIM, i=1:n/DIM)
             block
-                real(kind=4), dimension(4, 4) :: input
+                real(kind=4), dimension(DIM, DIM) :: input
                 integer :: x1, x2, y1, y2
-
-                !if (present(mask)) then
-                !    call to_daub4_block(x(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)),&
-                !    &mask(1 + shiftl(i - 1, 2):shiftl(i, 2), 1 + shiftl(j - 1, 2):shiftl(j, 2)), .true.)
-                !end if
 
                 ! by default there are no valid values
                 input = ieee_value(0.0, ieee_quiet_nan)
@@ -90,9 +80,6 @@ contains
 
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
-                ! pre-condition the input array
-                ! input = log(0.5 + (input - pmin)/(pmax - pmin))
-
                 call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
             end block
         end do
@@ -103,10 +90,10 @@ contains
         ! use wavelet
         implicit none
 
-        real(kind=4), dimension(4, 4), intent(inout) :: x
+        real(kind=4), dimension(DIM, DIM), intent(inout) :: x
         real, intent(in) :: ignrval, datamin, datamax
 
-        integer, dimension(4, 4) :: e
+        integer, dimension(DIM, DIM) :: e
 
         ! the maximum exponent
         integer :: max_exp
@@ -115,7 +102,7 @@ contains
         type(fixed_block), intent(out) :: compressed
 
         ! an internal NaN mask
-        logical(kind=1), dimension(4, 4) :: mask
+        logical(kind=1), dimension(DIM, DIM) :: mask
         integer(kind=2) :: work
         integer :: i, j, pos
 
