@@ -1236,7 +1236,6 @@ contains
                                 x = dequantize(compressed%mantissa, max_exp, significant_bits)
                                 ! recover the original range
                                 x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min) ! not in use anymore
-                                ! x = x*2.0
 
                                 pos = 0
                                 do j = 1, 4
