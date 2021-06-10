@@ -1837,6 +1837,12 @@ contains
                     item%is_optical = .false.
                     item%is_xray = .true.
                 end if
+
+                pos = index(value, 'kiso')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'ratio'
+                end if
             end block
 
         end if
