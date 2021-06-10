@@ -403,6 +403,9 @@ contains
         if (item_ptr%ok_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%ok_mtx))
         if (item_ptr%progress_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%progress_mtx))
 
+        ! TO-DO:
+        ! write the dataset to a cache file so to speed up subsequent loading
+
         deallocate (item_ptr)
     end subroutine delete_dataset
 
