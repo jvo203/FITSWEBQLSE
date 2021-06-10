@@ -26,11 +26,14 @@ module zfp_array
     end type zfp_block
 
 contains
-    subroutine zfp_compress_array(x, compressed)
+    subroutine zfp_compress_array(x, compressed, ignrval, datamin, datamax)
+        use, intrinsic :: ieee_arithmetic
         implicit none
 
         integer(kind=4) :: n, m ! input dimensions
-        real(kind=4), dimension(:, :), intent(inout) :: x
+        real(kind=4), dimension(:, :), intent(in) :: x
+        real, intent(in) :: ignrval, datamin, datamax
+
         integer(kind=4) :: i, j
 
         ! compressed output dimensions
@@ -47,8 +50,8 @@ contains
         cm = m/4
 
         ! but the input dimensions might not be divisible by 4
-        if (mod(n, 4) .ne. 0) cn = cn + 1
-        if (mod(m, 4) .ne. 0) cm = cm + 1
+        if (mod(n, DIM) .ne. 0) cn = cn + 1
+        if (mod(m, DIM) .ne. 0) cm = cm + 1
 
         if (size(compressed, 1) .lt. cn) then
             print *, 'compressed array dimension(1) mismatch:', size(compressed, 1), '.ne.', cn
@@ -63,19 +66,34 @@ contains
         do concurrent(j=1:m/4, i=1:n/4)
             ! do j = 1, m/4
             ! do i = 1, n/4
-            ! IMPORTANT: checking the bounds
-            call zfp_compress_block(x(1 + shiftl(i - 1, 2):min(n, shiftl(i, 2)),&
-            & 1 + shiftl(j - 1, 2):min(m, shiftl(j, 2))), compressed(i, j))
+            block
+                real(kind=4), dimension(4, 4) :: input
+                integer :: x1, x2, y1, y2
+
+                ! by default there are no valid values
+                input = ieee_value(0.0, ieee_quiet_nan)
+
+                x1 = 1 + shiftl(i - 1, 2)
+                x2 = min(n, shiftl(i, 2))
+
+                y1 = 1 + shiftl(j - 1, 2)
+                y2 = min(m, shiftl(j, 2))
+
+                input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
+
+                call zfp_compress_block(input, compressed(i, j), ignrval, datamin, datamax)
+            end block
             ! end do
         end do
 
     end subroutine zfp_compress_array
 
-    pure subroutine zfp_compress_block(x, compressed)
+    pure subroutine zfp_compress_block(x, compressed, ignrval, datamin, datamax)
         implicit none
 
         ! the input 4x4 block to be compressed with ZFP
         real(kind=4), dimension(4, 4), intent(inout) :: x
+        real, intent(in) :: ignrval, datamin, datamax
 
         integer, dimension(4, 4) :: e
         integer, dimension(4, 4) :: qint
@@ -93,18 +111,18 @@ contains
         integer(kind=2) :: bitmask
         integer :: i, j, tmp
 
-        integer :: nvalid
-        real(kind=4) :: average
-
         ! by default there are no NaNs
         bitmask = 0
 
         !  pick out all the NaN
-        where (isnan(x))
+        where (isnan(x) .or. (x .le. ignrval) .or. (x .lt. datamin) .or. (x .gt. datamax))
             mask = .false.
         elsewhere
             mask = .true.
         end where
+
+        e = exponent(x)
+        max_exp = minexponent(0.0)
 
         ! go through the mask element by element checking for any NaNs
         pos = 0
@@ -116,26 +134,18 @@ contains
 
                     ! set the bit to .true. where there is a NaN
                     bitmask = ibset(bitmask, pos)
+                else
+                    ! ignore zero values when looking for the maximum exponent
+                    if (abs(x(i, j)) .gt. 0.0) then
+                        if (e(i, j) .gt. max_exp) then
+                            max_exp = e(i, j)
+                        end if
+                    end if
                 end if
 
                 pos = pos + 1
             end do
         end do
-
-        if (any(mask)) then
-            ! calculate the mean of the input array
-            nvalid = count(mask)
-
-            ! all values might be NaN in which case set the array to 0.0
-            if (nvalid .gt. 0) then
-                average = sum(x, mask=mask)/nvalid
-            else
-                average = 0.0
-            end if
-
-            ! replace NaNs with the average value
-            ! where (.not. mask) x = average
-        end if
 
         compressed%bitstream = 0
         pos = 0
@@ -155,8 +165,6 @@ contains
             call stream_write_bits(compressed%bitstream, tmp, 16, pos)
         end if
 
-        e = exponent(x)
-        max_exp = maxval(e)
         bits = max_exp + EBIAS
 
         ! write the exponent
