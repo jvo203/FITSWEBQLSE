@@ -27,7 +27,7 @@ program main
     ! bitstream
     ! the first bit (pos .eq. 0) : '0' - all values are either non-NaN or NaN
     ! the second bit (pos .eq. 1) : if the first bit is '0' then '0' : non-NaN, '1' : NaN
-    integer(kind=16) :: bitstream
+    integer(kind=4), dimension(4) :: bitstream
     integer :: pos
     integer :: bits
 
@@ -326,7 +326,7 @@ contains
         implicit none
 
         integer, dimension(16), intent(in) :: data
-        integer(kind=16), intent(inout) :: stream
+        integer(kind=4), dimension(4), intent(inout) :: stream
         integer, intent(inout) :: pos
 
         integer :: i, k, bit, c, n
@@ -400,7 +400,7 @@ contains
         implicit none
 
         integer, dimension(16), intent(out) :: data
-        integer(kind=16), intent(in) :: stream
+        integer(kind=4), dimension(4), intent(in) :: stream
         integer, intent(inout) :: pos
 
         integer :: i, k, bit, c, n
@@ -467,7 +467,7 @@ contains
         implicit none
 
         integer, dimension(16), intent(in) :: data
-        integer(kind=16), intent(inout) :: stream
+        integer(kind=4), dimension(4), intent(inout) :: stream
         integer, intent(inout) :: pos
 
         integer(kind=2) :: val, i, k, bit
@@ -520,7 +520,7 @@ contains
         implicit none
 
         integer, dimension(16), intent(out) :: data
-        integer(kind=16), intent(in) :: stream
+        integer(kind=4), dimension(4), intent(in) :: stream
         integer, intent(inout) :: pos
 
         integer :: i, k
@@ -563,7 +563,7 @@ contains
     integer function Golomb_encode(stream, pos, N)
         implicit none
 
-        integer(kind=16), intent(inout) :: stream
+        integer(kind=4), dimension(4), intent(inout) :: stream
         integer, intent(inout) :: pos
         integer, intent(in) :: N
 
@@ -627,7 +627,7 @@ contains
     integer function Golomb_decode(stream, pos)
         implicit none
 
-        integer(kind=16), intent(in) :: stream
+        integer(kind=4), dimension(4), intent(in) :: stream
         integer, intent(inout) :: pos
 
         integer :: s, x, bit, t
@@ -673,7 +673,7 @@ contains
     subroutine Rice_encode(stream, pos, N)
         implicit none
 
-        integer(kind=16), intent(inout) :: stream
+        integer(kind=4), dimension(4), intent(inout) :: stream
         integer, intent(inout) :: pos
         integer, intent(in) :: N
 
@@ -712,7 +712,7 @@ contains
     integer function Rice_decode(stream, pos)
         implicit none
 
-        integer(kind=16), intent(in) :: stream
+        integer(kind=4), dimension(4), intent(in) :: stream
         integer, intent(inout) :: pos
 
         integer :: s, x, bit
@@ -742,19 +742,23 @@ contains
 
     end function Rice_decode
 
-    subroutine stream_write_bit(stream, bit, pos)
+    pure subroutine stream_write_bit(stream, bit, pos)
         implicit none
 
-        integer(kind=16), intent(inout) :: stream
+        integer(kind=4), dimension(4), intent(inout) :: stream
         integer, intent(in) :: bit
         integer, intent(inout) :: pos
 
+        integer :: idx
+
+        idx = 1 + shiftr(pos, 5) ! divide by 32 to get an int index
+
         ! make place for the new bit
-        stream = shiftl(stream, 1)
+        stream(idx) = shiftl(stream(idx), 1)
 
         ! set the LSB bit
         if (bit .eq. 1) then
-            stream = ibset(stream, 0)
+            stream(idx) = ibset(stream(idx), 0)
         end if
 
         pos = pos + 1
@@ -763,32 +767,36 @@ contains
 
     end subroutine stream_write_bit
 
-    subroutine stream_write_bits(stream, bits, n, pos)
+    pure subroutine stream_write_bits(stream, bits, n, pos)
         implicit none
 
-        integer(kind=16), intent(inout) :: stream
+        integer(kind=4), dimension(4), intent(inout) :: stream
         integer, intent(inout) :: bits
         integer, intent(in) :: n
         integer, intent(inout) :: pos
 
-        integer :: i
+        integer :: i, bit
 
         if (n .lt. 1) return
 
-        stream = shiftl(stream, n)
+        do i = n - 1, 0
+            if (btest(bits, i)) then
+                bit = 1
+            else
+                bit = 0
+            end if
 
-        call mvbits(int(bits, kind=16), 0, n, stream, 0)
-
-        pos = pos + n
+            call stream_write_bit(stream, bit, pos)
+        end do
 
         return
 
     end subroutine stream_write_bits
 
-    subroutine pad_stream(stream, n, pos)
+    pure subroutine pad_stream(stream, n, pos)
         implicit none
 
-        integer(kind=16), intent(inout) :: stream
+        integer(kind=4), dimension(4), intent(inout) :: stream
         integer, intent(in) :: n
         integer, intent(inout) :: pos
 
@@ -796,10 +804,9 @@ contains
 
         if (n .lt. 1) return
 
-        print *, 'padding the stream with', n, '0 bits'
-
-        stream = shiftl(stream, n)
-        pos = pos + n
+        do i = 1, n
+            call stream_write_bit(stream, 0, pos)
+        end do
 
         return
     end subroutine pad_stream
@@ -807,15 +814,20 @@ contains
     integer function stream_read_bit(stream, pos)
         implicit none
 
-        integer(kind=16), intent(in) :: stream
+        integer(kind=4), dimension(4), intent(in) :: stream
         integer, intent(inout) :: pos
+
+        integer :: idx, shift
 
         if (pos .lt. 0) then
             stream_read_bit = -1
             return
         end if
 
-        if (btest(stream, pos)) then
+        idx = 1 + shiftr(pos, 5) ! divide by 32 to get an int index
+        shift = 31 - mod(pos, 32)
+
+        if (btest(stream(idx), shift)) then
             stream_read_bit = 1
         else
             stream_read_bit = 0
@@ -830,11 +842,11 @@ contains
     integer function stream_read_bits(stream, pos, n)
         implicit none
 
-        integer(kind=16), intent(in) :: stream
+        integer(kind=4), dimension(4), intent(in) :: stream
         integer, intent(inout) :: pos
         integer, intent(in) :: n
 
-        integer :: i
+        integer :: i, bit
 
         stream_read_bits = -1
 
@@ -842,9 +854,18 @@ contains
 
         if (pos - n + 1 .lt. 0) return
 
-        stream_read_bits = int(ibits(stream, pos - n + 1, n))
+        stream_read_bits = 0
 
-        pos = pos - n
+        do i = n - 1, 0
+            ! read the next bit
+            bit = stream_read_bit(stream, pos)
+
+            if (bit .lt. 0) return
+
+            if (bit .eq. 1) then
+                stream_read_bits = ibset(stream_read_bits, i)
+            end if
+        end do
 
         return
 
