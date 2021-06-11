@@ -103,7 +103,8 @@ program main
     print *, 'pos', pos
 
     ! reverse the process
-    pos = max_bits - 1
+    ! pos = max_bits - 1
+    pos = 0
 
     ! read the NaN mask bit
     print *, 'NaN mask', stream_read_bit(bitstream, pos)
@@ -828,7 +829,7 @@ contains
 
         integer :: idx, shift
 
-        if (pos .lt. 0) then
+        if (pos .gt. max_bits - 1) then
             stream_read_bit = -1
             return
         end if
@@ -842,7 +843,7 @@ contains
             stream_read_bit = 0
         end if
 
-        pos = pos - 1
+        pos = pos + 1
 
         return
 
@@ -861,7 +862,7 @@ contains
 
         if (n .lt. 1) return
 
-        if (pos - n + 1 .lt. 0) return
+        if (pos - n + 1 .gt. max_bits - 1) return
 
         stream_read_bits = 0
 
