@@ -22,7 +22,8 @@ module zfp_array
 
     type zfp_block
         ! a 128-bit bitstream holding a compressed 4x4 real array
-        integer(kind=16) :: bitstream
+        ! integer(kind=16) :: bitstream
+        integer(kind=4), dimension(4) :: bitstream
     end type zfp_block
 
 contains
@@ -610,7 +611,7 @@ contains
         implicit none
 
         integer, dimension(16), intent(in) :: data
-        integer(kind=16), intent(inout) :: stream
+        integer(kind=4), dimension(4), intent(inout) :: stream
         integer, intent(inout) :: pos
 
         integer :: i, k, bit, c, n
@@ -680,7 +681,7 @@ contains
         implicit none
 
         integer, dimension(16), intent(out) :: data
-        integer(kind=16), intent(in) :: stream
+        integer(kind=4), dimension(4), intent(in) :: stream
         integer, intent(inout) :: pos
 
         integer :: i, k, bit, c, n
@@ -761,13 +762,13 @@ contains
             do i = 1, q
                 ! check if there is space to write
                 if (pos .eq. max_bits) return
-                call stream_write_bit(stream, 1, pos)
+                call stream_write_bit_128(stream, 1, pos)
             end do
         end if
 
         if (pos .eq. max_bits) return
 
-        call stream_write_bit(stream, 0, pos)
+        call stream_write_bit_128(stream, 0, pos)
 
         ! Remainder Code
         t = 2**G_b - G_M
@@ -778,7 +779,7 @@ contains
 
             ! check if there is space to write
             if (pos + nbits .gt. max_bits) return
-            call stream_write_bits(stream, r, nbits, pos)
+            call stream_write_bits_128(stream, r, nbits, pos)
 
         else
 
@@ -787,7 +788,7 @@ contains
 
             ! check if there is space to write
             if (pos + nbits .gt. max_bits) return
-            call stream_write_bits(stream, r, nbits, pos)
+            call stream_write_bits_128(stream, r, nbits, pos)
 
         end if
 
@@ -809,7 +810,7 @@ contains
         ! count the number of consecutive '1', stop at '0'
 
         do
-            bit = stream_read_bit(stream, pos)
+            bit = stream_read_bit_128(stream, pos)
 
             if (bit .lt. 0) return
 
@@ -819,7 +820,7 @@ contains
         end do
 
         x = 0
-        x = stream_read_bits(stream, pos, G_b - 1)
+        x = stream_read_bits_128(stream, pos, G_b - 1)
 
         if (x .lt. 0) return
 
@@ -831,7 +832,7 @@ contains
         end if
 
         bit = 0
-        bit = stream_read_bit(stream, pos)
+        bit = stream_read_bit_128(stream, pos)
 
         if (bit .lt. 0) return
 
@@ -867,19 +868,19 @@ contains
                 ! check if there is space to write
                 if (pos .eq. max_bits) return
 
-                call stream_write_bit(stream, 1, pos)
+                call stream_write_bit_128(stream, 1, pos)
             end do
         end if
 
         if (pos .eq. max_bits) return
 
-        call stream_write_bit(stream, 0, pos)
+        call stream_write_bit_128(stream, 0, pos)
 
         ! Remainder Code
         ! check if there is space to write
         if (pos + R_k .gt. max_bits) return
 
-        call stream_write_bits(stream, r, R_k, pos)
+        call stream_write_bits_128(stream, r, R_k, pos)
 
         status = 0
 
@@ -901,7 +902,7 @@ contains
         ! count the number of consecutive '1', stop at '0'
 
         do
-            bit = stream_read_bit(stream, pos)
+            bit = stream_read_bit_128(stream, pos)
 
             if (bit .lt. 0) return
 
@@ -911,7 +912,7 @@ contains
         end do
 
         x = 0
-        x = stream_read_bits(stream, pos, R_k)
+        x = stream_read_bits_128(stream, pos, R_k)
 
         if (x .lt. 0) return
 
@@ -921,7 +922,7 @@ contains
 
     end function Rice_decode
 
-    pure subroutine stream_write_bit(stream, bit, pos)
+    pure subroutine stream_write_bit_128(stream, bit, pos)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -940,9 +941,9 @@ contains
 
         return
 
-    end subroutine stream_write_bit
+    end subroutine stream_write_bit_128
 
-    pure subroutine stream_write_bits(stream, bits, n, pos)
+    pure subroutine stream_write_bits_128(stream, bits, n, pos)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -962,9 +963,9 @@ contains
 
         return
 
-    end subroutine stream_write_bits
+    end subroutine stream_write_bits_128
 
-    pure subroutine pad_stream(stream, n, pos)
+    pure subroutine pad_stream_128(stream, n, pos)
         implicit none
 
         integer(kind=16), intent(inout) :: stream
@@ -979,20 +980,140 @@ contains
         pos = pos + n
 
         return
-    end subroutine pad_stream
+    end subroutine pad_stream_128
 
-    integer function stream_read_bit(stream, pos)
+    integer function stream_read_bit_128(stream, pos)
         implicit none
 
         integer(kind=16), intent(in) :: stream
         integer, intent(inout) :: pos
 
         if (pos .lt. 0) then
-            stream_read_bit = -1
+            stream_read_bit_128 = -1
             return
         end if
 
         if (btest(stream, pos)) then
+            stream_read_bit_128 = 1
+        else
+            stream_read_bit_128 = 0
+        end if
+
+        pos = pos - 1
+
+        return
+
+    end function stream_read_bit_128
+
+    integer function stream_read_bits_128(stream, pos, n)
+        implicit none
+
+        integer(kind=16), intent(in) :: stream
+        integer, intent(inout) :: pos
+        integer, intent(in) :: n
+
+        integer :: i
+
+        stream_read_bits_128 = -1
+
+        if (n .lt. 1) return
+
+        if (pos - n + 1 .lt. 0) return
+
+        stream_read_bits_128 = int(ibits(stream, pos - n + 1, n))
+
+        pos = pos - n
+
+        return
+
+    end function stream_read_bits_128
+
+    pure subroutine stream_write_bit(stream, bit, pos)
+        implicit none
+
+        integer(kind=4), dimension(4), intent(inout) :: stream
+        integer, intent(in) :: bit
+        integer, intent(inout) :: pos
+
+        integer :: idx
+
+        idx = 1 + shiftr(pos, 5) ! divide by 32 to get an int index
+
+        ! make place for the new bit
+        stream(idx) = shiftl(stream(idx), 1)
+
+        ! set the LSB bit
+        if (bit .eq. 1) then
+            stream(idx) = ibset(stream(idx), 0)
+        end if
+
+        pos = pos + 1
+
+        return
+
+    end subroutine stream_write_bit
+
+    pure subroutine stream_write_bits(stream, bits, n, pos)
+        implicit none
+
+        integer(kind=4), dimension(4), intent(inout) :: stream
+        integer, intent(inout) :: bits
+        integer, intent(in) :: n
+        integer, intent(inout) :: pos
+
+        integer :: i, bit
+
+        if (n .lt. 1) return
+
+        do i = n - 1, 0
+            if (btest(bits, i)) then
+                bit = 1
+            else
+                bit = 0
+            end if
+
+            call stream_write_bit(stream, bit, pos)
+        end do
+
+        return
+
+    end subroutine stream_write_bits
+
+    pure subroutine pad_stream(stream, n, pos)
+        implicit none
+
+        integer(kind=4), dimension(4), intent(inout) :: stream
+        integer, intent(in) :: n
+        integer, intent(inout) :: pos
+
+        integer :: i
+
+        if (n .lt. 1) return
+
+        do i = 1, n
+            call stream_write_bit(stream, 0, pos)
+        end do
+
+        return
+    end subroutine pad_stream
+
+    integer function stream_read_bit(stream, pos)
+        implicit none
+
+        integer(kind=4), dimension(4), intent(in) :: stream
+        integer, intent(inout) :: pos
+
+        integer :: idx, shift
+
+        if (pos .lt. 0) then
+            stream_read_bit = -1
+            return
+        end if
+
+        idx = 1 + shiftr(pos, 5) ! divide by 32 to get an int index
+        shift = 31 - mod(pos, 32)
+
+        if (btest(stream(idx), shift)) then
             stream_read_bit = 1
         else
             stream_read_bit = 0
@@ -1007,11 +1128,11 @@ contains
     integer function stream_read_bits(stream, pos, n)
         implicit none
 
-        integer(kind=16), intent(in) :: stream
+        integer(kind=4), dimension(4), intent(in) :: stream
         integer, intent(inout) :: pos
         integer, intent(in) :: n
 
-        integer :: i
+        integer :: i, bit
 
         stream_read_bits = -1
 
@@ -1019,11 +1140,21 @@ contains
 
         if (pos - n + 1 .lt. 0) return
 
-        stream_read_bits = int(ibits(stream, pos - n + 1, n))
+        stream_read_bits = 0
 
-        pos = pos - n
+        do i = n - 1, 0
+            ! read the next bit
+            bit = stream_read_bit(stream, pos)
+
+            if (bit .lt. 0) return
+
+            if (bit .eq. 1) then
+                stream_read_bits = ibset(stream_read_bits, i)
+            end if
+        end do
 
         return
 
     end function stream_read_bits
+
 end module zfp_array
