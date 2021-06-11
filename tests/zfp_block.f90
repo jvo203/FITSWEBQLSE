@@ -92,7 +92,11 @@ program main
         call pad_stream(bitstream, max_bits - pos, pos)
     end if
 
-    write (*, '(a,b128.128)') 'bitstream ', bitstream
+    print *, 'bitstream'
+    write (*, '(b32.32)') bitstream(1)
+    write (*, '(b32.32)') bitstream(2)
+    write (*, '(b32.32)') bitstream(3)
+    write (*, '(b32.32)') bitstream(4)
     print *, 'pos', pos
 
     ! reverse the process
