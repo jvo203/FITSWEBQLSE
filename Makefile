@@ -172,6 +172,9 @@ compress::
 block:
 	$(FORT) $(FLAGS) src/wavelet.f90 tests/zfp_block.f90 -o zfp_block $(LIBS)
 
+block128:
+	$(FORT) $(FLAGS) src/wavelet.f90 tests/zfp_block_128.f90 -o zfp_block_128 $(LIBS)
+
 encode:
 	ispc -g -O3 --pic --opt=fast-math --addressing=32 src/webql.ispc -o src/zfp.o -h tests/webql.h
 	$(CC) $(CFLAGS) tests/zfp_encode.c src/zfp.o -o zfp_encode -lm
