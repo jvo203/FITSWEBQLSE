@@ -207,8 +207,8 @@ contains
         ! the maximum exponent
         integer :: max_exp
 
-        ! pos = max_bits - 1
-        pos = 0
+        ! pos = max_bits - 1 ! decreasing read order used by the 128-bit integer
+        pos = 0 ! increasing read order used by an array of 32-bit integers
 
         ! by default there are no NaNs
         bitmask = 0
