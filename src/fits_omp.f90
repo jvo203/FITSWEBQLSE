@@ -1188,6 +1188,7 @@ contains
 
                         integer :: i, j, pos, ix, iy, src_x, src_y, dist2
                         integer :: offset_x, offset_y, offset
+                        logical :: valid_pixel
 
                         ! the maximum exponent
                         integer :: max_exp
@@ -1234,20 +1235,22 @@ contains
                                             src_y = j + shiftl(iy - 1, BASE)
 
                                             ! check if a pixel resides within the bounding square
-                                            if (req%beam .eq. square) then
-                                                if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
-                                                if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
-                                            end if
+                                            if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
+                                            if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
+
+                                            valid_pixel = .true.
 
                                             ! check if a pixel resides within the bounding circle
                                             if (req%beam .eq. circle) then
                                                 dist2 = (cx - src_x)*(cx - src_x) + (cy - src_y)*(cy - src_y)
-                                                if (dist2 > r2) cycle
+                                                if (dist2 > r2) valid_pixel = .false.
                                             end if
 
                                             ! we have a valid pixel
-                                            pixel_sum = pixel_sum + tmp
-                                            pixel_count = pixel_count + 1
+                                            if (valid_pixel) then
+                                                pixel_sum = pixel_sum + tmp
+                                                pixel_count = pixel_count + 1
+                                            end if
 
                                             ! do we need the viewport too?
                                             if (req%image) then
