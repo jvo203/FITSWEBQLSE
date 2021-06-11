@@ -69,6 +69,9 @@ program main
 
     call stream_write_bits(bitstream, bits, 8, pos)
 
+    print *, 'bitstream(1)'
+    write (*, '(b32.32)') bitstream(1)
+
     ! quantize
     i = e - max_exp + fraction_bits
     qint = nint(set_exponent(x, i))
@@ -746,7 +749,7 @@ contains
 
     end function Rice_decode
 
-    pure subroutine stream_write_bit(stream, bit, pos)
+    subroutine stream_write_bit(stream, bit, pos)
         implicit none
 
         integer(kind=4), dimension(4), intent(inout) :: stream
@@ -765,13 +768,15 @@ contains
             stream(idx) = ibset(stream(idx), 0)
         end if
 
+        print *, 'stream_write_bit@pos', pos, 'idx', idx, 'bit', bit
+
         pos = pos + 1
 
         return
 
     end subroutine stream_write_bit
 
-    pure subroutine stream_write_bits(stream, bits, n, pos)
+    subroutine stream_write_bits(stream, bits, n, pos)
         implicit none
 
         integer(kind=4), dimension(4), intent(inout) :: stream
@@ -783,7 +788,7 @@ contains
 
         if (n .lt. 1) return
 
-        do i = n - 1, 0
+        do i = n - 1, 0, -1
             if (btest(bits, i)) then
                 bit = 1
             else
@@ -797,7 +802,7 @@ contains
 
     end subroutine stream_write_bits
 
-    pure subroutine pad_stream(stream, n, pos)
+    subroutine pad_stream(stream, n, pos)
         implicit none
 
         integer(kind=4), dimension(4), intent(inout) :: stream
@@ -860,7 +865,7 @@ contains
 
         stream_read_bits = 0
 
-        do i = n - 1, 0
+        do i = n - 1, 0, -1
             ! read the next bit
             bit = stream_read_bit(stream, pos)
 
