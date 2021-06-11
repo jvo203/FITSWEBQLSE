@@ -1065,7 +1065,7 @@ contains
 
         if (n .lt. 1) return
 
-        do i = n - 1, 0
+        do i = n - 1, 0, -1
             if (btest(bits, i)) then
                 bit = 1
             else
@@ -1142,7 +1142,7 @@ contains
 
         stream_read_bits = 0
 
-        do i = n - 1, 0
+        do i = n - 1, 0, -1
             ! read the next bit
             bit = stream_read_bit(stream, pos)
 
