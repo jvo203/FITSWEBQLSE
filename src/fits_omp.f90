@@ -1,8 +1,8 @@
 module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
-    ! use zfp_array
-    use fixed_array2
+    use zfp_array
+    ! use fixed_array2
     implicit none
 
     integer(kind=4), parameter :: NBINS = 1024
@@ -91,8 +91,8 @@ module fits
         real(kind=c_float), allocatable :: pixels(:, :)
         logical(kind=c_bool), allocatable :: mask(:, :)
 
-        type(fixed_block), dimension(:, :, :), allocatable :: compressed
-        ! type(zfp_block), dimension(:, :, :), allocatable :: compressed
+        ! type(fixed_block), dimension(:, :, :), allocatable :: compressed
+        type(zfp_block), dimension(:, :, :), allocatable :: compressed
 
         ! ZFP-compressed 128 bits per 4x4 floating-point blocks
         integer(kind=4), dimension(:, :), allocatable :: bitstream
@@ -1172,8 +1172,8 @@ contains
                     tid = 1 + OMP_GET_THREAD_NUM()
 
                     block
-                        ! type(zfp_block) :: compressed
-                        type(fixed_block) :: compressed
+                        type(zfp_block) :: compressed
+                        ! type(fixed_block) :: compressed
 
                         real(kind=4), dimension(DIM, DIM) :: x
                         integer(kind=2) :: bitmask
@@ -1198,19 +1198,24 @@ contains
                             do ix = start_x, end_x
                                 compressed = item%compressed(ix, iy, frame)
 
-                                !call zfp_decompress_block(compressed, x, bitmask)
+                                call zfp_decompress_block(compressed, x, bitmask)
 
                                 ! a NaN mask
+                                ! for 4x4 blocks
                                 ! bitmask = compressed%mask
+                                pos = 0
 
-                                max_exp = int(compressed%common_exp) + 1
-                                x = dequantize(compressed%mantissa, max_exp, significant_bits)
+                                ! max_exp = int(compressed%common_exp) + 1
+                                ! x = dequantize(compressed%mantissa, max_exp, significant_bits)
+
                                 ! recover the original range
                                 ! x = frame_min + (exp(x) - 0.5)*(frame_max - frame_min)
 
                                 do j = 1, DIM
-                                    pos = 0
-                                    bitmask = compressed%mask(j)
+
+                                    ! for 16x16 blocks
+                                    ! pos = 0
+                                    ! bitmask = compressed%mask(j)
 
                                     do i = 1, DIM
                                         ! test a NaN mask
@@ -2224,9 +2229,10 @@ contains
                             datamax = item%datamax
 
                             thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
-                            ! call zfp_compress_array(thread_x(:, :, tid), item%compressed(:, :, frame))
-                            call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), &
-                            &ignrval, datamin, datamax) ! , frame_min, frame_max)
+                            call zfp_compress_array(thread_x(:, :, tid), item%compressed(:, :, frame),&
+                            &ignrval, datamin, datamax)
+                            ! call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), &
+                            ! &ignrval, datamin, datamax) ! , frame_min, frame_max)
                         end block
                     end if
 
