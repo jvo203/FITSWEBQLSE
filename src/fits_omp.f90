@@ -1022,6 +1022,12 @@ contains
             x2 = min(item%naxes(1), req%x2)
             y2 = min(item%naxes(2), req%y2)
 
+            ! calculate the centre and squared radius
+            cx = abs(x1 + x2)/2
+            cy = abs(y1 + y2)/2
+            r = min(abs(x2 - x1)/2, abs(y2 - y1)/2)
+            r2 = r*r
+
             if (req%intensity .eq. mean) then
                 average = .true.
             else
@@ -1180,7 +1186,7 @@ contains
 
                         real :: frame_min, frame_max, tmp
 
-                        integer :: i, j, pos, ix, iy, src_x, src_y
+                        integer :: i, j, pos, ix, iy, src_x, src_y, dist2
                         integer :: offset_x, offset_y, offset
 
                         ! the maximum exponent
@@ -1227,9 +1233,17 @@ contains
                                             src_x = i + shiftl(ix - 1, BASE)
                                             src_y = j + shiftl(iy - 1, BASE)
 
-                                            ! check if a pixel resides within the bounding box (or a circle)
-                                            if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
-                                            if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
+                                            ! check if a pixel resides within the bounding square
+                                            if (req%beam .eq. square) then
+                                                if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
+                                                if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
+                                            end if
+
+                                            ! check if a pixel resides within the bounding circle
+                                            if (req%beam .eq. circle) then
+                                                dist2 = (cx - src_x)*(cx - src_x) + (cy - src_y)*(cy - src_y)
+                                                if (dist2 > r2) cycle
+                                            end if
 
                                             ! we have a valid pixel
                                             pixel_sum = pixel_sum + tmp
