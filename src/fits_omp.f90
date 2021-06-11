@@ -1234,7 +1234,7 @@ contains
                                             src_x = i + shiftl(ix - 1, BASE)
                                             src_y = j + shiftl(iy - 1, BASE)
 
-                                            ! check if a pixel resides within the bounding square
+                                            ! check if a pixel resides within the bounding box
                                             if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
                                             if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
 
