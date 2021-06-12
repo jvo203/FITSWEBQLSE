@@ -23,4 +23,4 @@ const FITSWEBQL_ROUTER = HTTP.Router()
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
 
 # Sockets.localhost or Sockets.IPv4(0)
-HTTP.serve(FITSWEBQL_ROUTER, Sockets.IPv4(0), 8080)
+HTTP.serve(FITSWEBQL_ROUTER, Sockets.IPv4(0), UInt16(8080))
