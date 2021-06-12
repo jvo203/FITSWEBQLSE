@@ -29,6 +29,8 @@ function serveDirectory(request::HTTP.Request)
     dir = params["dir"]
     println("Scanning $dir ...")
 
+    # {location : dir, contents : [
+
     foreach(readdir(dir)) do f
         println("\nObject: ", f)
 
@@ -38,12 +40,16 @@ function serveDirectory(request::HTTP.Request)
 
         if isdir(path)
             println("mtime:", info.mtime)
+            # {type : dir, name : f, last_modified: info.mtime.to_String()},
         end
 
         if isfile(path)
             println("file size:", info.size, "\tmtime:", info.mtime)
+            # {type : file, name : f, size : info.size, last_modified: info.mtime.to_String()},
         end
     end
+
+    # ]}
 
     try
         return HTTP.Response(200, "WELCOME TO FITSWEBQL SE")
