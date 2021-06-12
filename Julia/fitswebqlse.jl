@@ -17,7 +17,7 @@ function serveFile(path)
     headers = ["Cache-Control" => "public, max-age=86400"]
 
     try
-        return isfile(path) ? HTTP.Response(200, headers; body=read(path)) :
+        return isfile(path) ? HTTP.Response(200, headers; body = read(path)) :
                HTTP.Response(404, "$path Not Found.")
     catch e
         return HTTP.Response(404, "Error: $e")
@@ -54,7 +54,12 @@ function serveDirectory(request::HTTP.Request)
 
         if isfile(path)
             # println("file size:", info.size, "\tmtime:", info.mtime)
-            dict = Dict("type" => "file", "size" => info.size, "name" => f, "last_modified" => info.mtime)
+            dict = Dict(
+                "type" => "file",
+                "size" => info.size,
+                "name" => f,
+                "last_modified" => info.mtime,
+            )
             append!(elements, dict)
             println(JSON.json(dict))
             # {type : file, name : f, size : info.size, last_modified: info.mtime.to_String()},
@@ -62,7 +67,7 @@ function serveDirectory(request::HTTP.Request)
     end
 
     # println(JSON3.write(elements))
-    # println(elements)
+    println(elements)
 
     # ]}
 
