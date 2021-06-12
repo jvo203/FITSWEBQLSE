@@ -1,5 +1,6 @@
 using Distributed;
 using HTTP;
+using JSON;
 using Sockets;
 
 const HT_DOCS = "../htdocs"
@@ -23,6 +24,10 @@ end
 
 function serveDirectory(request::HTTP.Request)
     @show request.target
+
+    params = HTTP.queryparams(HTTP.URI(request.target))
+    dir = params["dir"]
+    println("Scanning $dir ...")
 
     try
         return HTTP.Response(200, "WELCOME TO FITSWEBQL SE")
