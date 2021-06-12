@@ -14,8 +14,10 @@ function serveFile(path)
     # TO-DO:
     # add mime types
 
+    headers = ["Cache-Control" => "public, max-age=86400"]
+
     try
-        return isfile(path) ? HTTP.Response(200, read(path)) :
+        return isfile(path) ? HTTP.Response(200, headers; body=read(path)) :
                HTTP.Response(404, "$path Not Found.")
     catch e
         return HTTP.Response(404, "Error: $e")
@@ -24,6 +26,8 @@ end
 
 function serveDirectory(request::HTTP.Request)
     @show request.target
+
+    headers = ["Content-Type" => "application/json"]
 
     params = HTTP.queryparams(HTTP.URI(request.target))
     dir = params["dir"]
