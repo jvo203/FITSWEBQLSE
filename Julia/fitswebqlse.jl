@@ -47,6 +47,7 @@ function serveDirectory(request::HTTP.Request)
         if isdir(path)
             # println("mtime:", info.mtime)
             dict = Dict("type" => "dir", "name" => f, "last_modified" => info.mtime)
+            append!(elements, dict)
             println(JSON.json(dict))
             # {type : dir, name : f, last_modified: info.mtime.to_String()},
         end
@@ -54,10 +55,14 @@ function serveDirectory(request::HTTP.Request)
         if isfile(path)
             # println("file size:", info.size, "\tmtime:", info.mtime)
             dict = Dict("type" => "file", "size" => info.size, "name" => f, "last_modified" => info.mtime)
+            append!(elements, dict)
             println(JSON.json(dict))
             # {type : file, name : f, size : info.size, last_modified: info.mtime.to_String()},
         end
     end
+
+    # println(JSON3.write(elements))
+    # println(elements)
 
     # ]}
 
