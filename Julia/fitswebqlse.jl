@@ -31,6 +31,8 @@ function serveDirectory(request::HTTP.Request)
 
     # {location : dir, contents : [
 
+    elements = []
+
     foreach(readdir(dir)) do f
         println("\nObject: ", f)
 
@@ -39,12 +41,16 @@ function serveDirectory(request::HTTP.Request)
         info = stat(path)
 
         if isdir(path)
-            println("mtime:", info.mtime)
+            # println("mtime:", info.mtime)
+            dict = Dict("type" => "dir", "name" => f, "last_modified" => info.mtime)
+            println(JSON.json(dict))
             # {type : dir, name : f, last_modified: info.mtime.to_String()},
         end
 
         if isfile(path)
-            println("file size:", info.size, "\tmtime:", info.mtime)
+            # println("file size:", info.size, "\tmtime:", info.mtime)
+            dict = Dict("type" => "file", "size" => info.size, "name" => f, "last_modified" => info.mtime)
+            println(JSON.json(dict))
             # {type : file, name : f, size : info.size, last_modified: info.mtime.to_String()},
         end
     end
