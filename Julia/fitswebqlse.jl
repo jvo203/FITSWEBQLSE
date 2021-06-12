@@ -15,7 +15,6 @@ function serveFile(path)
     # add mime types
 
     try
-        # return HTTP.Response(404, "serving $path")
         return isfile(path) ? HTTP.Response(200, read(path)) : HTTP.Response(404, "$path Not Found.")
     catch e
 return HTTP.Response(404, "Error: $e")
