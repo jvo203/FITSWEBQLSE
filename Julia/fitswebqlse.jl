@@ -1,6 +1,6 @@
 using Distributed;
 using HTTP;
-using JSON;
+using JSON3;
 using Sockets;
 
 const HT_DOCS = "../htdocs"
@@ -46,9 +46,13 @@ function serveDirectory(request::HTTP.Request)
 
         if isdir(path)
             # println("mtime:", info.mtime)
-            dict = Dict("type" => "dir", "name" => f, "last_modified" => info.mtime)
+            dict = Dict(
+                "type" => "dir",
+                "name" => f,
+                "last_modified" => Libc.strftime(info.mtime),
+            )
             append!(elements, dict)
-            println(JSON.json(dict))
+            println(JSON3.write(dict))
             # {type : dir, name : f, last_modified: info.mtime.to_String()},
         end
 
@@ -58,16 +62,16 @@ function serveDirectory(request::HTTP.Request)
                 "type" => "file",
                 "size" => info.size,
                 "name" => f,
-                "last_modified" => info.mtime,
+                "last_modified" => Libc.strftime(info.mtime),
             )
             append!(elements, dict)
-            println(JSON.json(dict))
+            println(JSON3.write(dict))
             # {type : file, name : f, size : info.size, last_modified: info.mtime.to_String()},
         end
     end
 
     # println(JSON3.write(elements))
-    println(elements)
+    # println(elements)
 
     # ]}
 
