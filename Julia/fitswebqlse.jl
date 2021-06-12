@@ -4,7 +4,7 @@ using Sockets;
 
 println(default_worker_pool())
 
-function getROOT(request::HTTP.Request)
+function serveROOT(request::HTTP.Request)
     # @show request
     # @show request.method
     # @show HTTP.header(request, "Content-Type")
@@ -20,7 +20,7 @@ end
 
 const FITSWEBQL_ROUTER = HTTP.Router()
 
-HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", getROOT)
+HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
 
 # Sockets.localhost
 #IPv4(0)
