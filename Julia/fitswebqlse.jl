@@ -15,9 +15,10 @@ function serveFile(path)
     # add mime types
 
     try
-        return isfile(path) ? HTTP.Response(200, read(path)) : HTTP.Response(404, "$path Not Found.")
+        return isfile(path) ? HTTP.Response(200, read(path)) :
+               HTTP.Response(404, "$path Not Found.")
     catch e
-return HTTP.Response(404, "Error: $e")
+        return HTTP.Response(404, "Error: $e")
     end
 end
 
@@ -31,7 +32,7 @@ function serveDirectory(request::HTTP.Request)
     try
         return HTTP.Response(200, "WELCOME TO FITSWEBQL SE")
     catch e
-return HTTP.Response(404, "Error: $e")
+        return HTTP.Response(404, "Error: $e")
     end
 end
 
@@ -45,7 +46,7 @@ function serveROOT(request::HTTP.Request)
     path = HT_DOCS * HTTP.unescapeuri(request.target)
 
     if request.target == "/"
-        path *= "local.html"
+        path *= "local_j.html"
     end
 
     return serveFile(path)
@@ -53,7 +54,7 @@ function serveROOT(request::HTTP.Request)
     try
         return HTTP.Response("WELCOME TO FITSWEBQL SE")
     catch e
-return HTTP.Response(404, "Error: $e")
+        return HTTP.Response(404, "Error: $e")
     end
 end
 
