@@ -9,10 +9,25 @@ const WS_PORT = HTTP_PORT + 1
 println(default_worker_pool())
 
 function serveFile(path)
+
+    # TO-DO:
+    # add mime types
+
     try
-        return HTTP.Response(404, "serving $path")
+        # return HTTP.Response(404, "serving $path")
+        return isfile(path) ? HTTP.Response(200, read(path)) : HTTP.Response(404, "$path Not Found.")
     catch e
-        return HTTP.Response(404, "Error: $e")
+return HTTP.Response(404, "Error: $e")
+    end
+end
+
+function serveDirectory(request::HTTP.Request)
+    @show request.target
+
+    try
+        return HTTP.Response(200, "WELCOME TO FITSWEBQL SE")
+    catch e
+return HTTP.Response(404, "Error: $e")
     end
 end
 
@@ -23,7 +38,7 @@ function serveROOT(request::HTTP.Request)
     # @show HTTP.payload(request)
     @show request.target
 
-    path = HT_DOCS * request.target
+    path = HT_DOCS * HTTP.unescapeuri(request.target)
 
     if request.target == "/"
         path *= "local.html"
@@ -34,13 +49,14 @@ function serveROOT(request::HTTP.Request)
     try
         return HTTP.Response("WELCOME TO FITSWEBQL SE")
     catch e
-        return HTTP.Response(404, "Error: $e")
+return HTTP.Response(404, "Error: $e")
     end
 end
 
 const FITSWEBQL_ROUTER = HTTP.Router()
 
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
+HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
 
 println("FITSWEBQL SE (Supercomputer Edition)")
 println("Press CTRL+C to exit.")
