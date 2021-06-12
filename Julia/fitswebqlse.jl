@@ -29,6 +29,22 @@ function serveDirectory(request::HTTP.Request)
     dir = params["dir"]
     println("Scanning $dir ...")
 
+    foreach(readdir(dir)) do f
+        println("\nObject: ", f)
+
+        path = dir * "/" * f
+
+        info = stat(path)
+
+        if isdir(path)
+            println("mtime:", info.mtime)
+        end
+
+        if isfile(path)
+            println("file size:", info.size, "\tmtime:", info.mtime)
+        end
+    end
+
     try
         return HTTP.Response(200, "WELCOME TO FITSWEBQL SE")
     catch e
@@ -43,6 +59,11 @@ function serveROOT(request::HTTP.Request)
     # @show HTTP.payload(request)
     @show request.target
 
+    # prevent a simple directory traversal
+    if occursin("../", request.target)
+        return HTTP.Response(404, "Not Found")
+    end
+
     path = HT_DOCS * HTTP.unescapeuri(request.target)
 
     if request.target == "/"
@@ -50,12 +71,6 @@ function serveROOT(request::HTTP.Request)
     end
 
     return serveFile(path)
-
-    try
-        return HTTP.Response("WELCOME TO FITSWEBQL SE")
-    catch e
-        return HTTP.Response(404, "Error: $e")
-    end
 end
 
 const FITSWEBQL_ROUTER = HTTP.Router()
