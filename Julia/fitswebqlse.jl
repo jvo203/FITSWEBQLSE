@@ -53,7 +53,6 @@ function serveDirectory(request::HTTP.Request)
             )
             append!(elements, dict)
             println(JSON3.write(dict))
-            # {type : dir, name : f, last_modified: info.mtime.to_String()},
         end
 
         if isfile(path)
@@ -66,7 +65,6 @@ function serveDirectory(request::HTTP.Request)
             )
             append!(elements, dict)
             println(JSON3.write(dict))
-            # {type : file, name : f, size : info.size, last_modified: info.mtime.to_String()},
         end
     end
 
