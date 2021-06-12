@@ -2,10 +2,19 @@ using Distributed;
 using HTTP;
 using Sockets;
 
+const HT_DOCS = "../htdocs"
 const HTTP_PORT = 8080
 const WS_PORT = HTTP_PORT + 1
 
 println(default_worker_pool())
+
+function serveFile(path)
+    try
+        return HTTP.Response(404, "serving $path")
+    catch e
+        return HTTP.Response(404, "Error: $e")
+    end
+end
 
 function serveROOT(request::HTTP.Request)
     # @show request
@@ -13,6 +22,14 @@ function serveROOT(request::HTTP.Request)
     # @show HTTP.header(request, "Content-Type")
     # @show HTTP.payload(request)
     @show request.target
+
+    path = HT_DOCS * request.target
+
+    if request.target == "/"
+        path *= "local.html"
+    end
+
+    return serveFile(path)
 
     try
         return HTTP.Response("WELCOME TO FITSWEBQL SE")
