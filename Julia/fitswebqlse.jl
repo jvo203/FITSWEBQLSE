@@ -2,6 +2,9 @@ using Distributed;
 using HTTP;
 using Sockets;
 
+const HTTP_PORT = 8080
+const WS_PORT = HTTP_PORT + 1
+
 println(default_worker_pool())
 
 function serveROOT(request::HTTP.Request)
@@ -22,5 +25,8 @@ const FITSWEBQL_ROUTER = HTTP.Router()
 
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
 
+println("FITSWEBQL SE (Supercomputer Edition)")
+println("Press CTRL+C to exit.")
+
 # Sockets.localhost or Sockets.IPv4(0)
-HTTP.serve(FITSWEBQL_ROUTER, Sockets.IPv4(0), UInt16(8080))
+HTTP.serve(FITSWEBQL_ROUTER, Sockets.IPv4(0), UInt16(HTTP_PORT))
