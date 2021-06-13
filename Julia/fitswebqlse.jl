@@ -10,7 +10,6 @@ const WS_PORT = HTTP_PORT + 1
 println(default_worker_pool())
 
 function serveFile(path::String)
-
     # TO-DO:
     # add mime types
 
@@ -25,7 +24,6 @@ function serveFile(path::String)
 end
 
 function serveDirectory(request::HTTP.Request)
-
     headers = ["Content-Type" => "application/json"]
 
     params = HTTP.queryparams(HTTP.URI(request.target))
@@ -120,8 +118,6 @@ function serveROOT(request::HTTP.Request)
 end
 
 function serveFITS(request::HTTP.Request)
-    @show request.target
-
     root_path = HTTP.URIs.splitpath(request.target)[1]
 
     params = HTTP.queryparams(HTTP.URI(request.target))
