@@ -16,7 +16,7 @@ function serveFile(path::String)
     headers = ["Cache-Control" => "public, max-age=86400"]
 
     try
-        return isfile(path) ? HTTP.Response(200, headers; body = read(path)) :
+        return isfile(path) ? HTTP.Response(200, headers; body=read(path)) :
                HTTP.Response(404, "$path Not Found.")
     catch e
         return HTTP.Response(404, "Error: $e")
@@ -25,7 +25,7 @@ end
 
 function serveDirectory(request::HTTP.Request)
     headers = ["Content-Type" => "application/json"]
-
+    
     params = HTTP.queryparams(HTTP.URI(request.target))
 
     dir = ""
@@ -39,8 +39,8 @@ function serveDirectory(request::HTTP.Request)
 
     println("Scanning $dir ...")
 
-    resp = chop(JSON.json(Dict("location" => dir)), tail = 1) * ", \"contents\":["
-
+    resp = chop(JSON.json(Dict("location" => dir)), tail=1) * ", \"contents\":["
+        
     elements = false
 
     foreach(readdir(dir)) do f
@@ -50,7 +50,7 @@ function serveDirectory(request::HTTP.Request)
 
             path = dir * "/" * f
 
-            info = stat(path)
+                info = stat(path)
 
             if isdir(path)
                 dict = Dict(
@@ -82,15 +82,15 @@ function serveDirectory(request::HTTP.Request)
 
         end
     end
-
+    
     if elements
-        resp = chop(resp, tail = 1) * "]}"
+        resp = chop(resp, tail=1) * "]}"
     else
         resp *= "]}"
     end
 
     try
-        return HTTP.Response(200, headers; body = resp)
+        return HTTP.Response(200, headers; body=resp)
     catch e
         return HTTP.Response(404, "Error: $e")
     end
@@ -117,14 +117,46 @@ function serveROOT(request::HTTP.Request)
     return serveFile(path)
 end
 
+function get_filename(params, filename, idx::Integer)
+    try
+        push!(filename, params["filename" * string(idx)])
+        get_filename(params, filename, idx + 1)
+    catch e
+        return
+    end
+end
+
 function serveFITS(request::HTTP.Request)
     root_path = HTTP.URIs.splitpath(request.target)[1]
-
+    
     params = HTTP.queryparams(HTTP.URI(request.target))
 
     println("root path: \"$root_path\"")
     println(params)
+        
+    dir = ""
+    filename = []
+    ext = ""
+    
+    try
+        dir = params["dir"]
+    catch e
+    end
+    
+    try
+        ext = params["ext"]
+    catch e
+    end
 
+    try
+        push!(filename, params["filename"])
+    catch e
+        # try multiple filenames
+        get_filename(params, filename, 1)
+    end
+    
+    println(filename)
+    
     try
         return HTTP.Response(200, "FITSWEBQLSE")
     catch e
