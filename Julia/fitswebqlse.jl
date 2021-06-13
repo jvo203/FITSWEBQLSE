@@ -144,6 +144,7 @@ HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/FITSWebQL.html", serveFITS)
 
 println("FITSWEBQL SE (Supercomputer Edition)")
+println("Point your browser to http://localhost:$HTTP_PORT")
 println("Press CTRL+C to exit.")
 
 # Sockets.localhost or Sockets.IPv4(0)
