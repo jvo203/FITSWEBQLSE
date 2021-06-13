@@ -47,31 +47,42 @@ function serveDirectory(request::HTTP.Request)
     elements = false
 
     foreach(readdir(dir)) do f
-        path = dir * "/" * f
+        filename = lowercase(f)
 
-        info = stat(path)
+        if !startswith(filename, ".")
 
-        if isdir(path)
-            dict = Dict(
-                "type" => "dir",
-                "name" => f,
-                "last_modified" => Libc.strftime(info.mtime),
-            )
+            path = dir * "/" * f
 
-            resp *= JSON.json(dict) * ","
-            elements = true
-        end
+            info = stat(path)
 
-        if isfile(path)
-            dict = Dict(
-                "type" => "file",
-                "size" => info.size,
-                "name" => f,
-                "last_modified" => Libc.strftime(info.mtime),
-            )
+            if isdir(path)
+                dict = Dict(
+                    "type" => "dir",
+                    "name" => f,
+                    "last_modified" => Libc.strftime(info.mtime),
+                )
 
-            resp *= JSON.json(dict) * ","
-            elements = true
+                resp *= JSON.json(dict) * ","
+                elements = true
+            end
+
+            if isfile(path)
+
+                # filter the filenames
+                if endswith(filename, ".fits") || endswith(filename, ".fits.gz")
+
+                    dict = Dict(
+                        "type" => "file",
+                        "size" => info.size,
+                        "name" => f,
+                        "last_modified" => Libc.strftime(info.mtime),
+                    )
+
+                    resp *= JSON.json(dict) * ","
+                    elements = true
+                end
+            end
+
         end
     end
 
