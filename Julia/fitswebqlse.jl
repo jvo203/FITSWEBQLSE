@@ -9,7 +9,7 @@ const WS_PORT = HTTP_PORT + 1
 
 println(default_worker_pool())
 
-function serveFile(path)
+function serveFile(path::String)
 
     # TO-DO:
     # add mime types
@@ -123,8 +123,11 @@ end
 function serveFITS(request::HTTP.Request)
     @show request.target
 
+    root_path = HTTP.URIs.splitpath(request.target)[1]
+
     params = HTTP.queryparams(HTTP.URI(request.target))
 
+    println("root path: \"$root_path\"")
     println(params)
 
     try
