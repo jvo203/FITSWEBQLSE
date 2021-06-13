@@ -33,48 +33,49 @@ function serveDirectory(request::HTTP.Request)
     dir = params["dir"]
     println("Scanning $dir ...")
 
-    # {location : dir, contents : [
+    resp = chop(JSON3.write(Dict("location" => dir)), tail = 1) * ", contents : ["
 
-    elements = []
+    elements = false
 
     foreach(readdir(dir)) do f
-        println("\nObject: ", f)
-
         path = dir * "/" * f
 
         info = stat(path)
 
         if isdir(path)
-            # println("mtime:", info.mtime)
+            elements = true
+
             dict = Dict(
                 "type" => "dir",
                 "name" => f,
                 "last_modified" => Libc.strftime(info.mtime),
             )
-            append!(elements, dict)
-            println(JSON3.write(dict))
+
+            resp *= JSON3.write(dict) * ","
         end
 
         if isfile(path)
-            # println("file size:", info.size, "\tmtime:", info.mtime)
+            elements = true
+
             dict = Dict(
                 "type" => "file",
                 "size" => info.size,
                 "name" => f,
                 "last_modified" => Libc.strftime(info.mtime),
             )
-            append!(elements, dict)
-            println(JSON3.write(dict))
+
+            resp *= JSON3.write(dict) * ","
         end
     end
 
-    # println(JSON3.write(elements))
-    # println(elements)
-
-    # ]}
+    if elements
+        resp = chop(resp, tail = 1) * "]}"
+    else
+        resp *= "]}"
+    end
 
     try
-        return HTTP.Response(200, "WELCOME TO FITSWEBQL SE")
+        return HTTP.Response(200, headers; body = resp)
     catch e
         return HTTP.Response(404, "Error: $e")
     end
