@@ -25,7 +25,6 @@ function serveFile(path::String)
 end
 
 function serveDirectory(request::HTTP.Request)
-    @show request.target
 
     headers = ["Content-Type" => "application/json"]
 
