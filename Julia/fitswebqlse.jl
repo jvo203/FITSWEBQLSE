@@ -120,10 +120,25 @@ function serveROOT(request::HTTP.Request)
     return serveFile(path)
 end
 
+function serveFITS(request::HTTP.Request)
+    @show request.target
+
+    params = HTTP.queryparams(HTTP.URI(request.target))
+
+    println(params)
+
+    try
+        return HTTP.Response(200, "FITSWEBQLSE")
+    catch e
+        return HTTP.Response(404, "Error: $e")
+    end
+end
+
 const FITSWEBQL_ROUTER = HTTP.Router()
 
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
+HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/FITSWebQL.html", serveFITS)
 
 println("FITSWEBQL SE (Supercomputer Edition)")
 println("Press CTRL+C to exit.")
