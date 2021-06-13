@@ -117,6 +117,7 @@ function serveROOT(request::HTTP.Request)
     return serveFile(path)
 end
 
+# a recursive function (very elegant)
 function get_filename(params, filename, idx::Integer)
     try
         push!(filename, params["filename" * string(idx)])
@@ -124,6 +125,10 @@ function get_filename(params, filename, idx::Integer)
     catch e
         return
     end
+end
+
+function loadFITS(filepath::String)
+    println("loading $filepath")
 end
 
 function serveFITS(request::HTTP.Request)
@@ -151,11 +156,14 @@ function serveFITS(request::HTTP.Request)
     try
         push!(filename, params["filename"])
     catch e
-        # try multiple filenames
+        # try multiple filenames (recursion)
         get_filename(params, filename, 1)
     end
     
-    println(filename)
+    foreach(filename) do f
+        filepath = dir * "/" * f * "." * ext
+        @async loadFITS(filepath)
+    end
     
     try
         return HTTP.Response(200, "FITSWEBQLSE")
