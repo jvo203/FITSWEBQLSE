@@ -3,6 +3,8 @@ using HTTP;
 using JSON;
 using Sockets;
 
+@everywhere include("fits.jl")
+
 const HT_DOCS = "htdocs"
 const HTTP_PORT = 8080
 const WS_PORT = HTTP_PORT + 1
@@ -126,10 +128,6 @@ function get_dataset(prefix::String, params, datasets, idx::Integer)
         # no more datasets, stop recursion
         return
     end
-end
-
-function loadFITS(filepath::String)
-    println("loading $filepath")
 end
 
 function serveFITS(request::HTTP.Request)
