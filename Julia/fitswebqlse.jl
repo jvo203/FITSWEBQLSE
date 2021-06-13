@@ -118,11 +118,12 @@ function serveROOT(request::HTTP.Request)
 end
 
 # a recursive function (very elegant)
-function get_filename(params, filename, idx::Integer)
+function get_dataset(prefix::String, params, datasets, idx::Integer)
     try
-        push!(filename, params["filename" * string(idx)])
-        get_filename(params, filename, idx + 1)
+        push!(datasets, params[prefix * string(idx)])
+        get_dataset(prefix, params, datasets, idx + 1)
     catch e
+        # no more datasets, stop recursion
         return
     end
 end
@@ -140,27 +141,27 @@ function serveFITS(request::HTTP.Request)
     println(params)
         
     dir = ""
-    filename = []
+    datasets = []
     ext = ""
-    
-    try
-        dir = params["dir"]
-    catch e
-    end
     
     try
         ext = params["ext"]
     catch e
     end
+    
+    try
+        dir = params["dir"]
+    catch e
+    end
 
     try
-        push!(filename, params["filename"])
+        push!(datasets, params["filename"])
     catch e
         # try multiple filenames (recursion)
-        get_filename(params, filename, 1)
+    get_dataset("filename", params, datasets, 1)
     end
     
-    foreach(filename) do f
+    foreach(datasets) do f
         filepath = dir * "/" * f * "." * ext
         @async loadFITS(filepath)
     end
