@@ -2,7 +2,6 @@ using Distributed;
 using HTTP;
 using JSON;
 using Sockets;
-using StringEncodings;
 
 const HT_DOCS = "htdocs"
 const HTTP_PORT = 8080
@@ -31,7 +30,16 @@ function serveDirectory(request::HTTP.Request)
     headers = ["Content-Type" => "application/json"]
 
     params = HTTP.queryparams(HTTP.URI(request.target))
-    dir = params["dir"]
+
+    dir = ""
+
+    try
+        dir = params["dir"]
+    catch e
+        # if they keyword is not found fall back on a home directory
+        dir = ENV["HOME"]
+    end
+
     println("Scanning $dir ...")
 
     resp = chop(JSON.json(Dict("location" => dir)), tail = 1) * ", \"contents\":["
