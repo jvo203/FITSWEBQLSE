@@ -1,9 +1,10 @@
 using Distributed;
 using HTTP;
-using JSON3;
+using JSON;
 using Sockets;
+using StringEncodings;
 
-const HT_DOCS = "../htdocs"
+const HT_DOCS = "htdocs"
 const HTTP_PORT = 8080
 const WS_PORT = HTTP_PORT + 1
 
@@ -33,7 +34,7 @@ function serveDirectory(request::HTTP.Request)
     dir = params["dir"]
     println("Scanning $dir ...")
 
-    resp = chop(JSON3.write(Dict("location" => dir)), tail = 1) * ", contents : ["
+    resp = chop(JSON.json(Dict("location" => dir)), tail = 1) * ", \"contents\":["
 
     elements = false
 
@@ -43,20 +44,17 @@ function serveDirectory(request::HTTP.Request)
         info = stat(path)
 
         if isdir(path)
-            elements = true
-
             dict = Dict(
                 "type" => "dir",
                 "name" => f,
                 "last_modified" => Libc.strftime(info.mtime),
             )
 
-            resp *= JSON3.write(dict) * ","
+            resp *= JSON.json(dict) * ","
+            elements = true
         end
 
         if isfile(path)
-            elements = true
-
             dict = Dict(
                 "type" => "file",
                 "size" => info.size,
@@ -64,7 +62,8 @@ function serveDirectory(request::HTTP.Request)
                 "last_modified" => Libc.strftime(info.mtime),
             )
 
-            resp *= JSON3.write(dict) * ","
+            resp *= JSON.json(dict) * ","
+            elements = true
         end
     end
 
