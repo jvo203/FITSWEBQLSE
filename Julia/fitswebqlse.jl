@@ -472,6 +472,7 @@ println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
 println("Press CTRL+C to exit.")
 
+# Sockets.localhost or Sockets.IPv4(0)
 host = Sockets.IPv4(0)
 
 function ws_coroutine(ws, datasetid)
@@ -524,5 +525,4 @@ const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
     WebSockets.serve(ws_server, host, WS_PORT)
 end
 
-# Sockets.localhost or Sockets.IPv4(0)
 HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT))
