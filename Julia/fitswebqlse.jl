@@ -139,6 +139,7 @@ function serveFITS(request::HTTP.Request)
     println(params)
 
     has_fits = false
+    is_composite = false
         
     dir = ""
     datasets = []
@@ -153,6 +154,13 @@ function serveFITS(request::HTTP.Request)
         dir = params["dir"]
     catch e
     end
+            
+    try
+        if params["view"] == "composite"
+            is_composite = true
+        end
+    catch e
+    end
 
     try
         push!(datasets, params["filename"])
@@ -165,6 +173,8 @@ function serveFITS(request::HTTP.Request)
         filepath = dir * "/" * f * "." * ext
         @async loadFITS(filepath)
     end
+    
+    resp = IOBuffer();
     
     try
         return HTTP.Response(200, "FITSWEBQLSE")
