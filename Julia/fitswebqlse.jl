@@ -471,5 +471,15 @@ println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
 println("Press CTRL+C to exit.")
 
+host = Sockets.IPv4(0)
+
+    @async HTTP.WebSockets.listen(host, UInt16(WS_PORT)) do ws
+    while !eof(ws)
+        data = readavailable(ws)
+        # println("[ws] $data")
+        write(ws, data)
+    end
+end
+
 # Sockets.localhost or Sockets.IPv4(0)
-HTTP.serve(FITSWEBQL_ROUTER, Sockets.IPv4(0), UInt16(HTTP_PORT))
+HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT))
