@@ -2,6 +2,7 @@ using Distributed;
 using HTTP;
 using JSON;
 using Sockets;
+using WebSockets;
 
 const LOCAL_VERSION = true
 const PRODUCTION = false
@@ -251,7 +252,7 @@ function serveFITS(request::HTTP.Request)
     write(resp, "<link href=\"https://fonts.googleapis.com/css?family=Inconsolata\" rel=\"stylesheet\"/>\n")
     write(resp, "<link href=\"https://fonts.googleapis.com/css?family=Material+Icons\" rel=\"stylesheet\"/>\n")
     write(resp, "<script src=\"https://d3js.org/d3.v5.min.js\"></script>\n")
-    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/reconnecting-websocket.min.js\"></script>\n")
+    # write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/reconnecting-websocket.min.js\"></script>\n")
     write(resp, "<script src=\"//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js\"></script>\n")
     write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/ra_dec_conversion.min.js\"></script>\n")
     write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/sylvester.min.js\"></script>\n")
@@ -471,15 +472,40 @@ println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
 println("Press CTRL+C to exit.")
 
-host = Sockets.IPv4(0)
+host = Sockets.localhost 
+# Sockets.IPv4(0)
 
-    @async HTTP.WebSockets.listen(host, UInt16(WS_PORT)) do ws
-    while !eof(ws)
-        data = readavailable(ws)
-        # println("[ws] $data")
-        write(ws, data)
+    # @async HTTP.WebSockets.listen(host, UInt16(WS_PORT)) do ws
+    # while !eof(ws)
+    #    data = readavailable(ws)
+    #    # println("[ws] $data")
+    #    write(ws, data)
+    # end
+    # end
+
+function gatekeeper(req, ws)
+    orig = WebSockets.origin(req)
+    @info "\nOrigin: $orig   Target: $(req.target)   subprotocol: $(subprotocol(req))"
+    if occursin(LOCALIP, orig)
+        coroutine(ws)
+    elseif orig == ""
+        @info "Non-browser clients don't send Origin. We liberally accept the update request in this case:" ws
+        coroutine(ws)
+    else
+        @warn "Inacceptable request"
     end
+end
+
+handle(req) = replace(BAREHTML, "<body></body>" => BODY) |> WebSockets.Response
+
+const ws_server = WebSockets.ServerWS(handle, gatekeeper)
+
+@info "In browser > $host:$WS_PORT , F12> console > ws = new WebSocket(\"ws://$host:$WS_PORT\") "
+@async WebSockets.with_logger(WebSocketLogger()) do
+    WebSockets.serve(ws_server, host, WS_PORT)
 end
 
 # Sockets.localhost or Sockets.IPv4(0)
 HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT))
+
+put!(serverWS.in, "close!")
