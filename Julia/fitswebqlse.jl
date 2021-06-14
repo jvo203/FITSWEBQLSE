@@ -259,6 +259,42 @@ function serveFITS(request::HTTP.Request)
     write(resp, read(HT_DOCS * "/fitswebql/vertex-shader.vert"))
     write(resp, "</script>\n")
 
+    write(resp, "<script id=\"legend-vertex-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/legend-vertex-shader.vert"))
+    write(resp, "</script>\n")
+
+    # GLSL fragment shaders
+    write(resp, "<script id=\"common-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/common-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"legend-common-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/legend-common-shader.frag"))
+    write(resp, "</script>\n")
+
+    # tone mappings
+    write(resp, "<script id=\"ratio-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/ratio-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"logistic-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/logistic-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"square-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/square-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"legacy-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/legacy-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"linear-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/linear-shader.frag"))
+        write(resp, "</script>\n")
+
+    # colourmaps
+
     try
         return HTTP.Response(200, take!(resp))
     catch e
