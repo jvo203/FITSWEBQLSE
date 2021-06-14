@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-06-15.0";
+	return "JS2021-06-15.1";
 }
 
 const wasm_supported = (() => {
@@ -5457,7 +5457,7 @@ function change_ui_theme() {
 	else
 		colourmap = "amber";
 
-	localStorage.setItem("fortran_colourmap", colourmap);
+	localStorage.setItem("v5_colourmap", colourmap);
 
 	location.reload(); // was reload(false)
 	//resizeMe() ;
@@ -5465,7 +5465,7 @@ function change_ui_theme() {
 
 function change_colourmap(index, recursive) {
 	colourmap = document.getElementById('colourmap' + index).value;
-	localStorage.setItem("fortran_colourmap", colourmap);
+	localStorage.setItem("v5_colourmap", colourmap);
 
 	if (imageContainer[index - 1] != null) {
 		clear_webgl_image_buffers(index);
@@ -12135,7 +12135,7 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html("<h4>Server: C (networking) & Co-array FORTRAN (computation)</h4>");
+		.html("<h4>Server: Julia (networking & distributed computing)</h4>");
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
@@ -13801,7 +13801,7 @@ async*/ function mainRenderer() {
 		}*/
 
 		localStorage.setItem("ui_theme", theme);
-		localStorage.setItem("fortran_colourmap", colourmap);
+		localStorage.setItem("v5_colourmap", colourmap);
 	}
 	else {
 		theme = localStorage.getItem("ui_theme");
@@ -13835,16 +13835,16 @@ async*/ function mainRenderer() {
 	else
 		intensity_mode = localStorage.getItem("intensity_mode");
 
-	if (localStorage.getItem("fortran_colourmap") === null) {
+	if (localStorage.getItem("v5_colourmap") === null) {
 		if (theme == 'bright')
 			colourmap = "haxby";
 		else
 			colourmap = "amber";
 
-		localStorage.setItem("fortran_colourmap", colourmap);
+		localStorage.setItem("v5_colourmap", colourmap);
 	}
 	else
-		colourmap = localStorage.getItem("fortran_colourmap");
+		colourmap = localStorage.getItem("v5_colourmap");
 
 	if (colourmap === null)
 		colourmap = "amber";
