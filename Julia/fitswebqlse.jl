@@ -223,9 +223,11 @@ function serveFITS(request::HTTP.Request)
         get_dataset("filename", params, datasets, 1)
     end
 
-    foreach(datasets) do f
-        filepath = dir * "/" * f * "." * ext
-        @async loadFITS(filepath)
+    if !has_fits
+        foreach(datasets) do f
+            filepath = dir * "/" * f * "." * ext
+            @async loadFITS(filepath)
+        end
     end
     
     resp = IOBuffer();
@@ -291,9 +293,72 @@ function serveFITS(request::HTTP.Request)
 
     write(resp, "<script id=\"linear-shader\" type=\"x-shader/x-vertex\">\n")
     write(resp, read(HT_DOCS * "/fitswebql/linear-shader.frag"))
-        write(resp, "</script>\n")
+    write(resp, "</script>\n")
 
     # colourmaps
+    write(resp, "<script id=\"greyscale-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/greyscale-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"negative-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/negative-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"amber-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/amber-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"red-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/red-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"green-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/green-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"blue-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/blue-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"hot-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/hot-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"rainbow-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/rainbow-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"parula-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/parula-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"inferno-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/inferno-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"magma-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/magma-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"plasma-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/plasma-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"viridis-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/viridis-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"cubehelix-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/cubehelix-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"jet-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/jet-shader.frag"))
+    write(resp, "</script>\n")
+
+    write(resp, "<script id=\"haxby-shader\" type=\"x-shader/x-vertex\">\n")
+    write(resp, read(HT_DOCS * "/fitswebql/haxby-shader.frag"))
+    write(resp, "</script>\n")
 
     try
         return HTTP.Response(200, take!(resp))
