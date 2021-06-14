@@ -3,6 +3,11 @@ using HTTP;
 using JSON;
 using Sockets;
 
+const VERSION_MAJOR = 5
+const VERSION_MINOR = 0
+const VERSION_SUB = 0
+const SERVER_STRING = "FITSWEBQLSE v" * string(VERSION_MAJOR) * "." * string(VERSION_MINOR) * "." * string(VERSION_SUB)
+
 const WASM_VERSION = "21.04.XX.X"
 const VERSION_STRING = "SV2021-06-XX.X-ALPHA"
 
@@ -388,6 +393,8 @@ function serveFITS(request::HTTP.Request)
         end
     end
 
+    write(resp, "data-root-path='/' ")
+
     try
         return HTTP.Response(200, take!(resp))
     catch e
@@ -401,7 +408,7 @@ HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/FITSWebQL.html", serveFITS)
 
-println("FITSWEBQL SE (Supercomputer Edition)")
+println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
 println("Press CTRL+C to exit.")
 
