@@ -472,30 +472,27 @@ println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
 println("Press CTRL+C to exit.")
 
-host = Sockets.localhost 
-# Sockets.IPv4(0)
+host = Sockets.IPv4(0)
 
-# @async HTTP.WebSockets.listen(host, UInt16(WS_PORT)) do ws
-   # while !eof(ws)
-   #     data = readavailable(ws)
-#     println("[ws] $data")
-   #     write(ws, data)
-   #  end
-   #  end
+function ws_coroutine(ws, datasetid)
+        @info "Started websocket coroutine for $datasetid" ws
 
-function coroutine(ws)
-    @info "Started coroutine for " ws
     while isopen(ws)
         data, = readguarded(ws)
         s = String(data)
+
         if s == ""
             writeguarded(ws, "Goodbye!")
             break
         end
         @info "Received: $s"
-    writeguarded(ws, "Hello! Send empty message to exit, or just leave.")
+        
+        # ping back messages
+        writeguarded(ws, s)
     end
-    @info "Will now close " ws
+
+    @info "$datasetid will now close " ws
+
 end
 
 function gatekeeper(req, ws)
@@ -504,33 +501,27 @@ function gatekeeper(req, ws)
     @info "\nOrigin: $orig   Target: $(req.target)   subprotocol: $(subprotocol(req))"
 
     # check if there is a <datasetid> present in <req.target>
+    pos = findlast("/", req.target)
+        
+    if !isnothing(pos)
+        datasetid = SubString(req.target, pos[1] + 1)
 
-    coroutine(ws)
+    @info "\n[ws] datasetid $datasetid"
 
-    if occursin(String(host), orig)
-        println("got here A")
-        coroutine(ws)
-    elseif orig == ""
-        println("got here B")
-        @info "Non-browser clients don't send Origin. We liberally accept the update request in this case:" ws
-        coroutine(ws)
+        ws_coroutine(ws, datasetid)
     else
-        println("got here C")
-        @warn "Inacceptable request"
+        @info "[ws] Missing datasetid"
     end
-    println("got here D")
+
 end
 
 handle(req) = replace(BAREHTML, "<body></body>" => BODY) |> WebSockets.Response
 
 const ws_server = WebSockets.ServerWS(handle, gatekeeper)
 
-@info "In browser > $host:$WS_PORT , F12> console > ws = new WebSocket(\"ws://$host:$WS_PORT\") "
 @async WebSockets.with_logger(WebSocketLogger()) do
     WebSockets.serve(ws_server, host, WS_PORT)
 end
 
 # Sockets.localhost or Sockets.IPv4(0)
 HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT))
-
-put!(serverWS.in, "close!")
