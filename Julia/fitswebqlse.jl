@@ -176,8 +176,14 @@ function serveFITS(request::HTTP.Request)
     
     resp = IOBuffer();
     
+    write(resp, "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n")
+    write(resp, "<link href=\"https://fonts.googleapis.com/css?family=Inconsolata\" rel=\"stylesheet\"/>\n")
+    write(resp, "<link href=\"https://fonts.googleapis.com/css?family=Material+Icons\" rel=\"stylesheet\"/>\n")
+    write(resp, "<script src=\"https://d3js.org/d3.v5.min.js\"></script>\n")
+    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/reconnecting-websocket.min.js\"></script>\n")
+    
     try
-        return HTTP.Response(200, "FITSWEBQLSE")
+        return HTTP.Response(200, take!(resp))
     catch e
         return HTTP.Response(404, "Error: $e")
     end
