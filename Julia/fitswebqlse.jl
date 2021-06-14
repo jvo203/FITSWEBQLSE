@@ -372,6 +372,21 @@ function serveFITS(request::HTTP.Request)
     write(resp, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?", VERSION_STRING, "\"/>\n")
 
     # HTML content
+    va_count = length(datasets)
+    write(resp, "<title>FITSWEBQLSE</title></head><body>\n")
+    write(resp, "<div id='votable' style='width: 0; height: 0;' data-va_count='$va_count' ")
+
+    if va_count == 1
+        write(resp, "data-datasetId='$datasets[1]' ")
+    else
+        for i in 1:va_count
+            write(resp, "data-datasetId$i='$datasets[i]' ")
+        end
+
+        if is_composite && va_count <= 3
+            write(resp, "data-composite='1' ")
+        end
+    end
 
     try
         return HTTP.Response(200, take!(resp))
