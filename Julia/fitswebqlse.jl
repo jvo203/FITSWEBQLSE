@@ -516,7 +516,7 @@ function ws_gatekeeper(req, ws)
 
 end
 
-ws_handle(req) = "" |> WebSockets.Response
+ws_handle(req) = SERVER_STRING |> WebSockets.Response
 
 const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 
