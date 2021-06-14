@@ -3,6 +3,9 @@ using HTTP;
 using JSON;
 using Sockets;
 
+const LOCAL_VERSION = true
+const PRODUCTION = false
+
 const VERSION_MAJOR = 5
 const VERSION_MINOR = 0
 const VERSION_SUB = 0
@@ -393,14 +396,29 @@ function serveFITS(request::HTTP.Request)
         end
     end
 
-    write(resp, "data-root-path='/' ")
+    if !LOCAL_VERSION
+        write(resp, "data-root-path='$root_path/' ")
+    else
+        write(resp, "data-root-path='/' ")
+    end
+
     write(resp, " data-server-version='", VERSION_STRING, "' data-server-string='", SERVER_STRING)
-    write(resp, "' data-server-mode='LOCAL")
+
+    if LOCAL_VERSION
+        write(resp, "' data-server-mode='LOCAL")
+    else
+        write(resp, "' data-server-mode='SERVER")
+    end
 
     has_fits_str = has_fits ? "1" : "0"
     write(resp, "' data-has-fits='$has_fits_str'></div>\n")
-    
-    write(resp, "<script>var WS_SOCKET = 'ws://';</script>\n")
+
+    if PRODUCTION
+        write(resp, "<script>var WS_SOCKET = 'wss://';</script>\n")
+    else
+        write(resp, "<script>var WS_SOCKET = 'ws://';</script>\n")
+    end
+
     write(resp, "<script>var WS_PORT = $WS_PORT;</script>\n")
 
     # the page entry point
