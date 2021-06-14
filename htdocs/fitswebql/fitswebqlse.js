@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-04-23.0";
+	return "JS2021-06-14.0";
 }
 
 const wasm_supported = (() => {
@@ -2507,7 +2507,10 @@ function open_websocket_connection(datasetId, index) {
 				.attr("fill", "orange")
 				.attr("opacity", 0.8);
 
-			var ALMAWS = new ReconnectingWebSocket(ws_uri, "fitswebqlse", { binaryType: 'arraybuffer' });
+			//var ALMAWS = new ReconnectingWebSocket(ws_uri, "fitswebqlse", { binaryType: 'arraybuffer' });
+			// var ALMAWS = new WebSocket(ws_uri, "fitswebqlse", { binaryType: 'arraybuffer' });
+			//var ALMAWS = new ReconnectingWebSocket(ws_uri); //, "fitswebqlse") , { binaryType: 'arraybuffer' });
+			var ALMAWS = new ReconnectingWebSocket(ws_uri, "", { binaryType: 'arraybuffer' });
 			ALMAWS.binaryType = 'arraybuffer';
 
 			ALMAWS.addEventListener("open", function (evt) {
