@@ -394,6 +394,11 @@ function serveFITS(request::HTTP.Request)
     end
 
     write(resp, "data-root-path='/' ")
+    write(resp, " data-server-version='", VERSION_STRING, "' data-server-string='", SERVER_STRING)
+    write(resp, "' data-server-mode='LOCAL")
+
+    has_fits_str = has_fits ? "1" : "0"
+    write(resp, "' data-has-fits='$has_fits_str'></div>\n")
 
     try
         return HTTP.Response(200, take!(resp))
