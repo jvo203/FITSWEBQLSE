@@ -154,7 +154,7 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
         VERSION_SUB)
 
 #define WASM_VERSION "21.04.XX.X"
-#define VERSION_STRING "SV2021-05-XX.X-ALPHA"
+#define VERSION_STRING "SV2021-06-XX.X-ALPHA"
 
 #define HTTP_PORT 8080
 #define WS_PORT (HTTP_PORT + 1)
@@ -1515,7 +1515,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "</script>\n");
 
     // FITSWebQL main JavaScript + CSS
-    g_string_append(html, "<script src=\"fitswebqlse.js?" VERSION_STRING "\"></script>\n");
+    g_string_append(html, "<script src=\"fitswebqlse_for.js?" VERSION_STRING "\"></script>\n");
     g_string_append(html, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING
                           "\"/>\n");
 
