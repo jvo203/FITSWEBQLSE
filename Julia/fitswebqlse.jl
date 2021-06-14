@@ -482,9 +482,10 @@ function ws_coroutine(ws, datasetid)
         s = String(data)
 
         if s == ""
-            writeguarded(ws, "Goodbye!")
+            writeguarded(ws, "Exiting")
             break
         end
+
         @info "Received: $s"
         
         # ping back messages
@@ -495,7 +496,7 @@ function ws_coroutine(ws, datasetid)
 
 end
 
-function gatekeeper(req, ws)
+function ws_gatekeeper(req, ws)
     orig = WebSockets.origin(req)
     
     @info "\nOrigin: $orig   Target: $(req.target)   subprotocol: $(subprotocol(req))"
@@ -515,9 +516,9 @@ function gatekeeper(req, ws)
 
 end
 
-handle(req) = replace(BAREHTML, "<body></body>" => BODY) |> WebSockets.Response
+ws_handle(req) = "" |> WebSockets.Response
 
-const ws_server = WebSockets.ServerWS(handle, gatekeeper)
+const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 
 @async WebSockets.with_logger(WebSocketLogger()) do
     WebSockets.serve(ws_server, host, WS_PORT)
