@@ -233,7 +233,7 @@ function serveFITS(request::HTTP.Request)
     if !has_fits
         foreach(datasets) do f
             filepath = dir * "/" * f * "." * ext
-            @async loadFITS($filepath) # pass the filepath by value
+            @async loadFITS(filepath)
         end
     end
     
