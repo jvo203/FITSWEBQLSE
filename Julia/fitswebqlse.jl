@@ -399,6 +399,11 @@ function serveFITS(request::HTTP.Request)
 
     has_fits_str = has_fits ? "1" : "0"
     write(resp, "' data-has-fits='$has_fits_str'></div>\n")
+    
+    write(resp, "<script>var WS_SOCKET = 'ws://';</script>\n")
+    write(resp, "<script>var WS_PORT = $WS_PORT;</script>\n")
+
+    # the page entry point
 
     try
         return HTTP.Response(200, take!(resp))
