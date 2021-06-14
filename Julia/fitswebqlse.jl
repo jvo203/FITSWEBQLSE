@@ -15,6 +15,13 @@ const WS_PORT = HTTP_PORT + 1
 println(default_worker_pool())
 
 function serveFile(path::String)
+    # strip out a question mark (if there is any)
+    pos = findlast("?", path)
+
+    if !isnothing(pos)
+        path = SubString(path, 1:(pos[1] - 1))
+    end
+
     # cache a response
     headers = ["Cache-Control" => "public, max-age=86400"]
 
