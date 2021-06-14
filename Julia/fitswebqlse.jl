@@ -360,6 +360,12 @@ function serveFITS(request::HTTP.Request)
     write(resp, read(HT_DOCS * "/fitswebql/haxby-shader.frag"))
     write(resp, "</script>\n")
 
+    # FITSWebQL main JavaScript + CSS
+    write(resp, "<script src=\"fitswebqlse.js?", VERSION_STRING, "\"></script>\n")
+    write(resp, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?", VERSION_STRING, "\"/>\n")
+
+    # HTML content
+
     try
         return HTTP.Response(200, take!(resp))
     catch e
