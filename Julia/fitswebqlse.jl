@@ -475,25 +475,50 @@ println("Press CTRL+C to exit.")
 host = Sockets.localhost 
 # Sockets.IPv4(0)
 
-    # @async HTTP.WebSockets.listen(host, UInt16(WS_PORT)) do ws
-    # while !eof(ws)
-    #    data = readavailable(ws)
-    #    # println("[ws] $data")
-    #    write(ws, data)
-    # end
-    # end
+# @async HTTP.WebSockets.listen(host, UInt16(WS_PORT)) do ws
+   # while !eof(ws)
+   #     data = readavailable(ws)
+#     println("[ws] $data")
+   #     write(ws, data)
+   #  end
+   #  end
+
+function coroutine(ws)
+    @info "Started coroutine for " ws
+    while isopen(ws)
+        data, = readguarded(ws)
+        s = String(data)
+        if s == ""
+            writeguarded(ws, "Goodbye!")
+            break
+        end
+        @info "Received: $s"
+    writeguarded(ws, "Hello! Send empty message to exit, or just leave.")
+    end
+    @info "Will now close " ws
+end
 
 function gatekeeper(req, ws)
     orig = WebSockets.origin(req)
+    
     @info "\nOrigin: $orig   Target: $(req.target)   subprotocol: $(subprotocol(req))"
-    if occursin(LOCALIP, orig)
+
+    # check if there is a <datasetid> present in <req.target>
+
+    coroutine(ws)
+
+    if occursin(String(host), orig)
+        println("got here A")
         coroutine(ws)
     elseif orig == ""
+        println("got here B")
         @info "Non-browser clients don't send Origin. We liberally accept the update request in this case:" ws
         coroutine(ws)
     else
+        println("got here C")
         @warn "Inacceptable request"
     end
+    println("got here D")
 end
 
 handle(req) = replace(BAREHTML, "<body></body>" => BODY) |> WebSockets.Response
