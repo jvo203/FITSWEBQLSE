@@ -383,12 +383,14 @@ function serveFITS(request::HTTP.Request)
     va_count = length(datasets)
     write(resp, "<title>FITSWEBQLSE</title></head><body>\n")
     write(resp, "<div id='votable' style='width: 0; height: 0;' data-va_count='$va_count' ")
-
+        
     if va_count == 1
-        write(resp, "data-datasetId='$datasets[1]' ")
+        datasetid = datasets[1]
+        write(resp, "data-datasetId='$datasetid' ")
     else
         for i in 1:va_count
-            write(resp, "data-datasetId$i='$datasets[i]' ")
+            datasetid = datasets[i]
+            write(resp, "data-datasetId$i='$datasetid' ")
         end
 
         if is_composite && va_count <= 3
@@ -422,6 +424,35 @@ function serveFITS(request::HTTP.Request)
     write(resp, "<script>var WS_PORT = $WS_PORT;</script>\n")
 
     # the page entry point
+    write(resp,
+    "<script>",
+              "const golden_ratio = 1.6180339887;",
+              "var ALMAWS = null ;",
+              "var wsVideo = null ;",
+              "var wsConn = null;",
+              "var firstTime = true;",
+              "var has_image = false;",
+              "var PROGRESS_VARIABLE = 0.0;",
+              "var PROGRESS_INFO = '' ;",
+              "var RESTFRQ = 0.0;",
+              "var USER_SELFRQ = 0.0;",
+              "var USER_DELTAV = 0.0;",
+              "var ROOT_PATH = '/fitswebql/';",
+              "var idleResize = -1;",
+              "window.onresize = resizeMe;",
+              "window.onbeforeunload = function() {",
+              "    if (wsConn != null)",
+              "    {",
+              "        for (let i = 0; i < va_count; i++)",
+              "            wsConn[i].close();",
+              "    }",
+              "",
+              "          if (wsVideo != null)",
+              "             wsVideo.close();",
+              "    };",
+              "mainRenderer(); </script>\n")
+
+    write(resp, "</body></html>")
 
     try
         return HTTP.Response(200, take!(resp))
