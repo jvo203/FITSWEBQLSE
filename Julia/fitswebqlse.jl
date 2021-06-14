@@ -3,19 +3,73 @@ using HTTP;
 using JSON;
 using Sockets;
 
-@everywhere include("fits.jl")
+const WASM_VERSION = "21.04.XX.X"
+const VERSION_STRING = "SV2021-06-XX.X-ALPHA"
 
 const HT_DOCS = "htdocs"
 const HTTP_PORT = 8080
 const WS_PORT = HTTP_PORT + 1
 
+@everywhere include("fits.jl")
+
 println(default_worker_pool())
 
 function serveFile(path::String)
-    # TO-DO:
-    # add mime types
-
+    # cache a response
     headers = ["Cache-Control" => "public, max-age=86400"]
+
+    # add mime types
+    if endswith(path, ".htm") || endswith(path, ".html")
+        push!(headers, "Content-Type" => "text/html")
+    end
+
+    if endswith(path, ".txt")
+        push!(headers, "Content-Type" => "text/plain")
+    end
+
+    if endswith(path, ".css")
+        push!(headers, "Content-Type" => "text/css")
+    end
+
+    if endswith(path, ".js")
+        push!(headers, "Content-Type" => "application/javascript")
+    end
+
+    if endswith(path, ".wasm")
+        push!(headers, "Content-Type" => "application/wasm")
+    end
+
+    if endswith(path, ".pdf")
+        push!(headers, "Content-Type" => "application/pdf")
+    end
+
+    if endswith(path, ".ico")
+        push!(headers, "Content-Type" => "image/x-icon")
+    end
+
+    if endswith(path, ".png")
+        push!(headers, "Content-Type" => "image/png")
+    end
+
+    if endswith(path, ".gif")
+        push!(headers, "Content-Type" => "image/gif")
+    end
+
+    if endswith(path, ".webp")
+        push!(headers, "Content-Type" => "image/webp")
+    end
+
+    if endswith(path, ".svg")
+        push!(headers, "Content-Type" => "image/svg+xml")
+    end
+
+    if endswith(path, ".jpeg") || endswith(path, ".jpg")
+        push!(headers, "Content-Type" => "image/jpeg")
+    end
+
+    if endswith(path, ".mp4")
+        push!(headers, "Content-Type" => "video/mp4")
+    end
 
     try
         return isfile(path) ? HTTP.Response(200, headers; body=read(path)) :
@@ -181,7 +235,18 @@ function serveFITS(request::HTTP.Request)
     write(resp, "<link href=\"https://fonts.googleapis.com/css?family=Material+Icons\" rel=\"stylesheet\"/>\n")
     write(resp, "<script src=\"https://d3js.org/d3.v5.min.js\"></script>\n")
     write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/reconnecting-websocket.min.js\"></script>\n")
-    
+    write(resp, "<script src=\"//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js\"></script>\n")
+    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/ra_dec_conversion.min.js\"></script>\n")
+    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/sylvester.min.js\"></script>\n")
+    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/shortcut.min.js\"></script>\n")
+    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/colourmaps.min.js\"></script>\n")
+    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/lz4.min.js\"></script>\n")
+    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/marchingsquares-isocontours.min.js\"></script>\n")
+    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/marchingsquares-isobands.min.js\"></script>\n")
+
+    write(resp, "<script src=\"client.", WASM_VERSION, ".js\"></script>\n")
+    write(resp, "<script>\n", "Module.ready\n", "\t.then(status => console.log(status))\n", "\t.catch(e => console.error(e));\n", "</script>\n")
+
     try
         return HTTP.Response(200, take!(resp))
     catch e
