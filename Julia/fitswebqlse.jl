@@ -550,7 +550,7 @@ println("Press CTRL+C to exit.")
 # Sockets.localhost or Sockets.IPv4(0)
 host = Sockets.IPv4(0)
 
-function ws_coroutine(ws, datasetid::String)
+function ws_coroutine(ws, datasetid)
     @info "Started websocket coroutine for $datasetid" ws
 
     while isopen(ws)
@@ -562,10 +562,14 @@ function ws_coroutine(ws, datasetid::String)
             break
         end
 
-        @info "Received: $s"
+        # ping back heartbeat messages
+        if occursin("[heartbeat]", s)
+            @info "[ws] heartbeat"
+            writeguarded(ws, s)
+            continue
+        end
 
-        # ping back messages
-        writeguarded(ws, s)
+        @info "Received: $s"
     end
 
     @info "$datasetid will now close " ws
