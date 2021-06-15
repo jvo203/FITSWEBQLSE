@@ -1,4 +1,21 @@
+using Dates;
 using FITSIO;
+
+mutable struct FITSDataSet
+    datasetid::Any
+    header::Any
+    has_header::Bool
+    has_data::Bool
+    last_accessed::Float64
+
+    function FITSDataSet()
+        new("", Nothing, false, false, datetime2unix(now()))
+    end
+
+    function FITSDataSet(datasetid)
+        new(datasetid, Nothing, false, false, 0, datetime2unix(now()))
+    end
+end
 
 function loadFITS(filepath::String)
     println("loading $filepath")
