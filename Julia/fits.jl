@@ -10,13 +10,24 @@ mutable struct FITSDataSet
     has_header::Bool
     has_data::Bool
     last_accessed::Float64
+    mutex::Any
 
     function FITSDataSet()
-        new("", Nothing, 0, 0, 0, false, false, datetime2unix(now()))
+        new("", Nothing, 0, 0, 0, false, false, datetime2unix(now()), ReentrantLock())
     end
 
     function FITSDataSet(datasetid)
-        new(datasetid, Nothing, 0, 0, 0, false, false, datetime2unix(now()))
+        new(
+            datasetid,
+            Nothing,
+            0,
+            0,
+            0,
+            false,
+            false,
+            datetime2unix(now()),
+            ReentrantLock(),
+        )
     end
 end
 
