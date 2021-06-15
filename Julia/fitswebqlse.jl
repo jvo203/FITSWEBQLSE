@@ -224,6 +224,30 @@ function serveHeartBeat(request::HTTP.Request)
     end
 end
 
+function serveImageSpectrum(request::HTTP.Request)
+    params = HTTP.queryparams(HTTP.URI(request.target))
+    println(params)
+
+    datasetid = ""
+
+    try
+        datasetid = params["datasetId"]
+    catch e
+    end
+
+    fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+    if fits_object.datasetid == ""
+        return HTTP.Response(404, "Not Found")
+    end
+
+    try
+        return HTTP.Response(404, "Not Found")
+    catch e
+        return HTTP.Response(404, "Error: $e")
+    end
+end
+
 function serveFITS(request::HTTP.Request)
     root_path = HTTP.URIs.splitpath(request.target)[1]
 
@@ -569,6 +593,7 @@ HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/FITSWebQL.html", serveFITS)
 HTTP.@register(FITSWEBQL_ROUTER, "POST", "/*/heartbeat/*", serveHeartBeat)
+HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/image_spectrum/", serveImageSpectrum)
 
 println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
