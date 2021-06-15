@@ -2,7 +2,7 @@ using Dates;
 using FITSIO;
 
 mutable struct FITSDataSet
-    datasetid::Any
+    datasetid::String
     header::Any
     width::Integer
     height::Integer
@@ -69,7 +69,7 @@ function loadFITS(filepath::String)
 
         # read the header & data; break the <for> loop
         header = read_header(hdu)
-        println(header)
+        # println(header)
 
         break
     end
