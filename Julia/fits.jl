@@ -47,8 +47,8 @@ function insert_dataset(dataset::FITSDataSet, fits_objects, fits_lock)
     end
 end
 
-function get_dataset(datasetid::String, fits_objects, fits_lock)::FITSDataSet
-    dataset::FITSDataSet = Nothing
+function get_dataset(datasetid::String, fits_objects, fits_lock)::Any
+    dataset::Any = Nothing
 
     lock(fits_lock)
 
