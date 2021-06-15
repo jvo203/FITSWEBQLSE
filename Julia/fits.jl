@@ -16,7 +16,7 @@ mutable struct FITSDataSet
     end
 
     function FITSDataSet(datasetid)
-        new(datasetid, Nothing, 0, 0, 0, false, false, 0, datetime2unix(now()))
+        new(datasetid, Nothing, 0, 0, 0, false, false, datetime2unix(now()))
     end
 end
 
