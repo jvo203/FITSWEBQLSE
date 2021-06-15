@@ -242,7 +242,7 @@ function serveImageSpectrum(request::HTTP.Request)
     end
 
     try
-        return HTTP.Response(404, "Not Found")
+        return HTTP.Response(501, "Not Implemented")
     catch e
         return HTTP.Response(404, "Error: $e")
     end
