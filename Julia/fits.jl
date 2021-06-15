@@ -194,6 +194,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             fits.height = height
             fits.depth = depth
             fits.header = read_header(hdu)
+
             fits.has_header = true
         catch e
         finally
