@@ -214,6 +214,16 @@ function get_dataset(prefix::String, params, datasets, idx::Integer)
     end
 end
 
+function serveHeartBeat(request::HTTP.Request)
+    timestamp = HTTP.URIs.splitpath(request.target)[3]
+
+    try
+        return HTTP.Response(200, timestamp)
+    catch e
+        return HTTP.Response(404, "Error: $e")
+    end
+end
+
 function serveFITS(request::HTTP.Request)
     root_path = HTTP.URIs.splitpath(request.target)[1]
 
@@ -558,6 +568,7 @@ const FITSWEBQL_ROUTER = HTTP.Router()
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/FITSWebQL.html", serveFITS)
+HTTP.@register(FITSWEBQL_ROUTER, "POST", "/*/heartbeat/*", serveHeartBeat)
 
 println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
