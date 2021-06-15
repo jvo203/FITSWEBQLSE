@@ -34,6 +34,17 @@ function dataset_exists(datasetid::String, fits_objects, fits_lock)::Bool
     return key_exists
 end
 
+function insert_dataset(dataset::FITSDataSet, fits_objects, fits_lock)
+    lock(fits_lock)
+
+    try
+        datasetid = dataset.datasetid
+        fits_objects[datasetid] = dataset
+    finally
+        unlock(fits_lock)
+    end
+end
+
 function loadFITS(filepath::String)
     println("loading $filepath")
 
