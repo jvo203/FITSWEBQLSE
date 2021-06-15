@@ -19,11 +19,12 @@ function loadFITS(filepath::String)
         naxes = ndims(hdu)
 
         if naxes < 2
+            # continue searching for the "right" HDU
             continue
         end
 
         # we have at least two dimensions
-        # read the data and break the for loop
+        # read the header & data; break the <for> loop
         break
     end
 end
