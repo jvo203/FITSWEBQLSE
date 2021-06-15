@@ -20,6 +20,20 @@ mutable struct FITSDataSet
     end
 end
 
+function dataset_exists(datasetid::String, fits_objects, fits_lock)::Bool
+    key_exists = false
+
+    lock(fits_lock)
+
+    try
+        key_exists = haskey(fits_objects, datasetid)
+    finally
+        unlock(fits_lock)
+    end
+
+    return key_exists
+end
+
 function loadFITS(filepath::String)
     println("loading $filepath")
 
