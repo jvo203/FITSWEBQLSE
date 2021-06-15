@@ -4,23 +4,26 @@ using FITSIO;
 mutable struct FITSDataSet
     datasetid::Any
     header::Any
+    width::Integer
+    height::Integer
+    depth::Integer
     has_header::Bool
     has_data::Bool
     last_accessed::Float64
 
     function FITSDataSet()
-        new("", Nothing, false, false, datetime2unix(now()))
+        new("", Nothing, 0, 0, 0, false, false, datetime2unix(now()))
     end
 
     function FITSDataSet(datasetid)
-        new(datasetid, Nothing, false, false, 0, datetime2unix(now()))
+        new(datasetid, Nothing, 0, 0, 0, false, false, 0, datetime2unix(now()))
     end
 end
 
 function loadFITS(filepath::String)
     println("loading $filepath")
 
-    local f , width , height , depth
+    local f , width::Integer , height::Integer , depth::Integer
     local header
 
     try
