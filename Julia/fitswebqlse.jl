@@ -259,8 +259,12 @@ function serveFITS(request::HTTP.Request)
 
     if !has_fits
         foreach(datasets) do f
-            filepath = dir * "/" * f * "." * ext
-            @async loadFITS(filepath)
+            if !dataset_exists(f, FITS_OBJECTS, FITS_LOCK)
+
+                filepath = dir * "/" * f * "." * ext
+                @async loadFITS(filepath)
+
+            end
         end
     end
 
