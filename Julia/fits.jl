@@ -31,6 +31,17 @@ mutable struct FITSDataSet
     end
 end
 
+function update_timestamp(fits::FITSDataSet)
+
+    lock(fits.mutex)
+
+    fits.last_accessed = datetime2unix(now())
+
+    unlock(fits.mutex)
+
+end
+
+
 function dataset_exists(datasetid::String, fits_objects, fits_lock)::Bool
     key_exists = false
 
@@ -133,4 +144,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
         break
     end
+
+    update_timestamp(fits)
 end
