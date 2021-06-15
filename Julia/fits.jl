@@ -15,5 +15,15 @@ function loadFITS(filepath::String)
 
     for hdu in f
         println(typeof(hdu))
+
+        naxes = ndims(hdu)
+
+        if naxes < 2
+            continue
+        end
+
+        # we have at least two dimensions
+        # read the data and break the for loop
+        break
     end
 end
