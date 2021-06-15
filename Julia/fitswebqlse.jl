@@ -263,6 +263,8 @@ function serveFITS(request::HTTP.Request)
 
                 fits_object = FITSDataSet(f)
 
+                insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
+
                 filepath = dir * "/" * f * "." * ext
                 @async loadFITS(filepath)
 
