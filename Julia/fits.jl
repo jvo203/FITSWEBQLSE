@@ -40,6 +40,8 @@ function insert_dataset(dataset::FITSDataSet, fits_objects, fits_lock)
     try
         datasetid = dataset.datasetid
         fits_objects[datasetid] = dataset
+    catch e
+        println("Failed to insert a dataset: $e")
     finally
         unlock(fits_lock)
     end
