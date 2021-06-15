@@ -28,6 +28,7 @@ function loadFITS(filepath::String)
             continue
         end
 
+        # we have at least two dimensions
         try
             width = size(hdu, 1)
             height = size(hdu, 2)
@@ -46,7 +47,6 @@ function loadFITS(filepath::String)
             depth,
         )
 
-        # we have at least two dimensions
         # read the header & data; break the <for> loop
         header = read_header(hdu)
         println(header)
