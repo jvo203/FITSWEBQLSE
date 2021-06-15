@@ -4,6 +4,7 @@ function loadFITS(filepath::String)
     println("loading $filepath")
 
     local f , width , height , depth
+    local header
 
     try
         f = FITS(filepath)
@@ -47,6 +48,9 @@ function loadFITS(filepath::String)
 
         # we have at least two dimensions
         # read the header & data; break the <for> loop
+        header = read_header(hdu)
+        println(header)
+
         break
     end
 end
