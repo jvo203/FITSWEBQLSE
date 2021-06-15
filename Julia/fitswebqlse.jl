@@ -241,6 +241,14 @@ function serveImageSpectrum(request::HTTP.Request)
         return HTTP.Response(404, "Not Found")
     end
 
+    if has_error(fits_object)
+        return HTTP.Response(500, "Internal Server Error")
+    end
+
+    if !has_data(fits_object)
+        return HTTP.Response(202, "Accepted")
+    end
+
     try
         return HTTP.Response(501, "Not Implemented")
     catch e
