@@ -222,7 +222,7 @@ function serveFITS(request::HTTP.Request)
     println("root path: \"$root_path\"")
     println(params)
 
-    has_fits = false
+    has_fits = true
     is_composite = false
 
     dir = ""
@@ -251,6 +251,10 @@ function serveFITS(request::HTTP.Request)
     catch e
         # try multiple filenames (recursion)
         get_dataset("filename", params, datasets, 1)
+    end
+
+    foreach(datasets) do f
+        has_fits = has_fits && dataset_exists(f, FITS_OBJECTS, FITS_LOCK)
     end
 
     if !has_fits
