@@ -253,6 +253,8 @@ function serveFITS(request::HTTP.Request)
         get_dataset("filename", params, datasets, 1)
     end
 
+    println(get_dataset("test", FITS_OBJECTS, FITS_LOCK))
+
     foreach(datasets) do f
         has_fits = has_fits && dataset_exists(f, FITS_OBJECTS, FITS_LOCK)
     end
