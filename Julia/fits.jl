@@ -64,7 +64,7 @@ function get_dataset(datasetid::String, fits_objects, fits_lock)::FITSDataSet
     return dataset
 end
 
-function loadFITS(filepath::String)
+function loadFITS(filepath::String, fits_object::FITSDataSet)
     println("loading $filepath")
 
     local f , width::Integer , height::Integer , depth::Integer
