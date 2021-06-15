@@ -201,12 +201,13 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             unlock(fits.mutex)
         end
 
+        if has_header(fits)
+            println(fits.header)
+        end
+
         break
     end
 
     update_timestamp(fits)
 
-    if has_header(fits)
-        println(fits.header)
-    end
 end
