@@ -29,6 +29,9 @@ const WS_PORT = HTTP_PORT + 1
 
 println(default_worker_pool())
 
+# a global list of FITS objects
+FITS_OBJECTS = Dict{String,FITSDataSet}()
+
 function serveFile(path::String)
     # strip out a question mark (if there is any)
     pos = findlast("?", path)
