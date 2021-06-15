@@ -76,6 +76,11 @@ function get_dataset(datasetid::String, fits_objects, fits_lock)::FITSDataSet
 end
 
 function loadFITS(filepath::String, fits::FITSDataSet)
+
+    if fits.datasetid == ""
+        return
+    end
+
     println("loading $filepath::$(fits.datasetid)")
 
     local f , width::Integer , height::Integer , depth::Integer
