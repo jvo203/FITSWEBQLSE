@@ -550,7 +550,7 @@ println("Press CTRL+C to exit.")
 # Sockets.localhost or Sockets.IPv4(0)
 host = Sockets.IPv4(0)
 
-function ws_coroutine(ws, datasetid)
+function ws_coroutine(ws, datasetid, ids)
     @info "Started websocket coroutine for $datasetid" ws
 
     while isopen(ws)
@@ -578,18 +578,21 @@ end
 
 function ws_gatekeeper(req, ws)
     orig = WebSockets.origin(req)
+    target = HTTP.unescapeuri(req.target)
 
-    @info "\nOrigin: $orig   Target: $(req.target)   subprotocol: $(subprotocol(req))"
+    @info "\nOrigin: $orig   Target: $target   subprotocol: $(subprotocol(req))"
 
-    # check if there is a <datasetid> present in <req.target>
-    pos = findlast("/", req.target)
+    # check if there is a <datasetid> present in <target>
+    pos = findlast("/", target)
 
     if !isnothing(pos)
-        datasetid = SubString(req.target, pos[1] + 1)
+        targets = SubString(target, pos[1] + 1)
+        ids = split(targets, ";")
+        datasetid = ids[1]
 
         @info "\n[ws] datasetid $datasetid"
 
-        ws_coroutine(ws, datasetid)
+        ws_coroutine(ws, datasetid, ids)
     else
         @info "[ws] Missing datasetid"
     end
