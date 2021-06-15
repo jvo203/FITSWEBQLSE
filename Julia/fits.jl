@@ -9,11 +9,23 @@ mutable struct FITSDataSet
     depth::Integer
     has_header::Bool
     has_data::Bool
+    has_error::Bool
     last_accessed::Float64
     mutex::Any
 
     function FITSDataSet()
-        new("", Nothing, 0, 0, 0, false, false, datetime2unix(now()), ReentrantLock())
+        new(
+            "",
+            Nothing,
+            0,
+            0,
+            0,
+            false,
+            false,
+            false,
+            datetime2unix(now()),
+            ReentrantLock(),
+        )
     end
 
     function FITSDataSet(datasetid)
@@ -23,6 +35,7 @@ mutable struct FITSDataSet
             0,
             0,
             0,
+            false,
             false,
             false,
             datetime2unix(now()),
@@ -41,6 +54,41 @@ function update_timestamp(fits::FITSDataSet)
 
 end
 
+function has_header(fits::FITSDataSet)::Bool
+    has_header = false
+
+    lock(fits.mutex)
+
+    has_header = fits.has_header
+
+    unlock(fits.mutex)
+
+    return has_header
+end
+
+function has_data(fits::FITSDataSet)::Bool
+    has_data = false
+
+    lock(fits.mutex)
+
+    has_data = fits.has_data
+
+    unlock(fits.mutex)
+
+    return has_data
+end
+
+function has_error(fits::FITSDataSet)::Bool
+    has_error = false
+
+    lock(fits.mutex)
+
+    has_error = fits.has_error
+
+    unlock(fits.mutex)
+
+    return has_error
+end
 
 function dataset_exists(datasetid::String, fits_objects, fits_lock)::Bool
     key_exists = false
