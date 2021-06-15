@@ -187,11 +187,25 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         )
 
         # read the header & data; break the <for> loop
-        header = read_header(hdu)
-        # println(header)
+        try
+            lock(fits.mutex)
+
+            fits.width = width
+            fits.height = height
+            fits.depth = depth
+            fits.header = read_header(hdu)
+            fits.has_header = true
+        catch e
+        finally
+            unlock(fits.mutex)
+        end
 
         break
     end
 
     update_timestamp(fits)
+
+    if has_header(fits)
+        println(fits.header)
+    end
 end
