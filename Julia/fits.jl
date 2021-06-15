@@ -47,6 +47,22 @@ function insert_dataset(dataset::FITSDataSet, fits_objects, fits_lock)
     end
 end
 
+function get_dataset(datasetid::String, fits_objects, fits_lock)::FITSDataSet
+    dataset::FITSDataSet = Nothing
+
+    lock(fits_lock)
+
+    try
+        dataset = fits_objects[datasetid]
+    catch e
+        println("Failed to retrieve a dataset: $e")
+    finally
+        unlock(fits_lock)
+    end
+
+    return dataset
+end
+
 function loadFITS(filepath::String)
     println("loading $filepath")
 
