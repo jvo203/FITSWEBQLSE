@@ -287,7 +287,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 @sync @distributed for i = 1:depth
                     try
                         fits_file = FITS(filepath)
-                        spectrum[i] = myid()
+                        pixels =
+                            reshape(read(fits_file[hdu_id], :, :, i, 1), (width, height))
+                        spectrum[i] = sum(pixels)
+                        close(fits_file)
                     catch e
                         println("i:$i::error: $e")
                         spectrum[i] = 0.0
