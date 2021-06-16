@@ -262,7 +262,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             end
 
         else
-            println("reading a $width X $height X $depth 3D data cube")
+            println(
+                "reading a $width X $height X $depth 3D data cube using $(nprocs()) parallel worker(s)",
+            )
+
             println("reading depth($depth) > 1 not implemented yet.")
         end
 
