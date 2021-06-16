@@ -11,6 +11,9 @@ mutable struct FITSDataSet
     has_data::Bool
     has_error::Bool
     last_accessed::Threads.Atomic{Float64}
+    progress::Threads.Atomic{Int}
+    total::Threads.Atomic{Int}
+    elapsed::Threads.Atomic{Float64}
     mutex::Any
 
     function FITSDataSet()
@@ -23,6 +26,9 @@ mutable struct FITSDataSet
             false,
             false,
             false,
+            Threads.Atomic{Float64}(0.0),
+            Threads.Atomic{Int}(0),
+            Threads.Atomic{Int}(0),
             Threads.Atomic{Float64}(0.0),
             ReentrantLock(),
         )
@@ -39,6 +45,9 @@ mutable struct FITSDataSet
             false,
             false,
             Threads.Atomic{Float64}(datetime2unix(now())),
+            Threads.Atomic{Int}(0),
+            Threads.Atomic{Int}(0),
+            Threads.Atomic{Float64}(0.0),
             ReentrantLock(),
         )
     end
@@ -47,6 +56,14 @@ end
 function update_timestamp(fits::FITSDataSet)
 
     fits.last_accessed[] = datetime2unix(now())
+
+end
+
+function update_progress(fits::FITSDataSet, progress::Integer, total::Integer)
+
+    fits.elapsed[] = datetime2unix(now()) - fits.last_accessed[]
+    fits.total[] = total
+    Threads.atomic_add!(fits.progress, 1)
 
 end
 
@@ -197,9 +214,17 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             unlock(fits.mutex)
         end
 
-        if has_header(fits)
-            println(fits.header)
+        if !has_header(fits)
+
+            lock(fits.mutex)
+            fits.has_error = true
+            unlock(fits.mutex)
+
+            break
         end
+
+        # println(fits.header)
+        # process_header(fits)
 
         break
     end
