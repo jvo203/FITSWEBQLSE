@@ -2,11 +2,17 @@ using Dates;
 using FITSIO;
 
 mutable struct FITSDataSet
+    # metadata
     datasetid::String
     header::Any
     width::Integer
     height::Integer
     depth::Integer
+
+    # pixels, spectrum
+    img_pixels::Any
+
+    # house-keeping
     has_header::Bool
     has_data::Bool
     has_error::Bool
@@ -23,6 +29,7 @@ mutable struct FITSDataSet
             0,
             0,
             0,
+            Nothing,
             false,
             false,
             false,
@@ -41,6 +48,7 @@ mutable struct FITSDataSet
             0,
             0,
             0,
+            Nothing,
             false,
             false,
             false,
