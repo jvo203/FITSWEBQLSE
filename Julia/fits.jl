@@ -54,17 +54,23 @@ mutable struct FITSDataSet
 end
 
 function update_timestamp(fits::FITSDataSet)
-
     fits.last_accessed[] = datetime2unix(now())
-
 end
 
 function update_progress(fits::FITSDataSet, progress::Integer, total::Integer)
-
     fits.elapsed[] = datetime2unix(now()) - fits.last_accessed[]
     fits.total[] = total
     Threads.atomic_add!(fits.progress, 1)
+end
 
+function get_progress(fits::FITSDataSet)::(Float64, Float64)
+    progress = 0.0
+
+    if fits.total[] > 0
+        progress = 100.0 * Float64(fits.progress[]) / Float64(fits.total[])
+    end
+
+    return (progress, fits.elapsed[])
 end
 
 function has_header(fits::FITSDataSet)::Bool
