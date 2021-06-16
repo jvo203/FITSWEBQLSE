@@ -284,12 +284,19 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
             try
                 spectrum = SharedArray{Float64}(depth)
-                @sync @distributed for i = 1:depth
+
+                # TO-DO: reducing pixels, using cdelt3
+                # TO-DO: integrated_spectrum, mean_spectrum
+
+                @time @sync @distributed for i = 1:depth
+
                     try
                         fits_file = FITS(filepath)
+
                         pixels =
                             reshape(read(fits_file[hdu_id], :, :, i, 1), (width, height))
                         spectrum[i] = sum(pixels)
+
                         close(fits_file)
                     catch e
                         println("i:$i::error: $e")
@@ -298,7 +305,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 end
 
-                println("spectrum:", spectrum)
+                # println("spectrum:", spectrum)
             catch e
                 println("SharedArray error: $e")
             end
