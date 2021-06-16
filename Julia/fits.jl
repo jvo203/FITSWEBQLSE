@@ -240,6 +240,13 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         # println(fits.header)
         # process_header(fits)
 
+        # read a 2D image
+        if depth == 1
+            println("reading a 2D image $width x $height")
+        else
+            println("reading depth($depth) > 1 not implemented yet.")
+        end
+
         break
     end
 
