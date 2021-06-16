@@ -1,6 +1,7 @@
 using Dates;
 using DistributedArrays;
 using FITSIO;
+using SharedArrays;
 
 mutable struct FITSDataSet
     # metadata
@@ -272,7 +273,26 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 "reading a $width X $height X $depth 3D data cube using $(nprocs()) parallel worker(s)",
             )
 
-            println("reading depth($depth) > 1 not implemented yet.")
+            try
+                fits_files = SharedArray{Float64}(nprocs())
+                @sync @distributed for i = 1:nprocs()
+                    fits_files[i] = i
+                end
+
+                println("fits_files:", fits_files)
+            catch e
+                println("SharedArray error: $e")
+            end
+
+            #try
+            #    fits_files = DArray([@spawnat w myid() for w in workers()])
+            #    println("fits_handles:", fits_files)
+            #    #println([@fetchfrom w localindices(fits_files) for w in workers()])
+            #catch e
+            #    println("DArray error: $e")
+            #end
+
+            println("reading depth($depth) > 1 is not fully implemented yet.")
         end
 
         break
