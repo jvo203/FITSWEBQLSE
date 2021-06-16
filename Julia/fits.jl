@@ -3,6 +3,15 @@ using DistributedArrays;
 using FITSIO;
 using SharedArrays;
 
+mutable struct testD
+    x::Float64
+    y::Int32
+
+    function testD()
+        new(1.0, 7)
+    end
+end
+
 mutable struct FITSDataSet
     # metadata
     datasetid::String
@@ -274,23 +283,32 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             )
 
             try
-                fits_files = SharedArray{Float64}(nprocs())
-                @sync @distributed for i = 1:nprocs()
-                    fits_files[i] = i
+                spectrum = SharedArray{Float64}(depth)
+                @sync @distributed for i = 1:depth
+                    spectrum[i] = myid()
                 end
 
-                println("fits_files:", fits_files)
+                println("spectrum:", spectrum)
             catch e
                 println("SharedArray error: $e")
             end
 
-            #try
-            #    fits_files = DArray([@spawnat w myid() for w in workers()])
-            #    println("fits_handles:", fits_files)
-            #    #println([@fetchfrom w localindices(fits_files) for w in workers()])
-            #catch e
-            #    println("DArray error: $e")
-            #end
+            try
+                #ras = [@spawnat w 10 for w in workers()]
+                #fits_files = DArray(ras)
+                #println("fits_handles:", fits_files)
+                #println([@fetchfrom w localindices(fits_files) for w in workers()])        
+
+                #ras = [@spawnat w rand(2, 2) for w in workers()[1:4]]
+                #ras = reshape(ras, (2, 2))
+                #D = DArray(ras)
+                #println([@fetchfrom p DistributedArrays.localindices(D) for p in workers()])
+
+                #println("DArray:", D)
+
+            catch e
+                println("DArray error: $e")
+            end
 
             println("reading depth($depth) > 1 is not fully implemented yet.")
         end
