@@ -187,7 +187,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     height = 0
     depth = 1
 
+    hdu_id = 0
+
     for hdu in f
+
+        hdu_id = hdu_id + 1
+
         println(typeof(hdu))
 
         naxes = ndims(hdu)
