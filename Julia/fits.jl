@@ -23,7 +23,7 @@ mutable struct FITSDataSet
             false,
             false,
             false,
-            Threads.Atomic{Float64}(datetime2unix(now())),
+            Threads.Atomic{Float64}(0.0),
             ReentrantLock(),
         )
     end
