@@ -242,13 +242,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
         # read a 2D image
         if depth == 1
-            println("reading a 2D $width x $height image")
+            println("reading a 2D $width X $height image")
 
             try
 
                 fits.img_pixels = reshape(read(hdu), (width, height))
-
-                println("Image dimensions: ", size(fits.img_pixels))
+                println("FITS image dimensions: ", size(fits.img_pixels))
 
                 lock(fits.mutex)
                 fits.has_data = true
@@ -258,6 +257,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             end
 
         else
+            println("reading a 3D $width X $height X depth cube")
             println("reading depth($depth) > 1 not implemented yet.")
         end
 
