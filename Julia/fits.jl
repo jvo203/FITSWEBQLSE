@@ -10,7 +10,7 @@ mutable struct FITSDataSet
     has_header::Bool
     has_data::Bool
     has_error::Bool
-    last_accessed::Float64
+    last_accessed::Threads.Atomic{Float64}
     mutex::Any
 
     function FITSDataSet()
@@ -23,7 +23,7 @@ mutable struct FITSDataSet
             false,
             false,
             false,
-            datetime2unix(now()),
+            Threads.Atomic{Float64}(datetime2unix(now())),
             ReentrantLock(),
         )
     end
@@ -38,7 +38,7 @@ mutable struct FITSDataSet
             false,
             false,
             false,
-            datetime2unix(now()),
+            Threads.Atomic{Float64}(datetime2unix(now())),
             ReentrantLock(),
         )
     end
@@ -46,11 +46,7 @@ end
 
 function update_timestamp(fits::FITSDataSet)
 
-    lock(fits.mutex)
-
-    fits.last_accessed = datetime2unix(now())
-
-    unlock(fits.mutex)
+    fits.last_accessed = Threads.Atomic{Float64}(datetime2unix(now()))
 
 end
 
