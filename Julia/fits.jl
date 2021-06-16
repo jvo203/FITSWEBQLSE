@@ -255,6 +255,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 lock(fits.mutex)
                 fits.has_data = true
                 unlock(fits.mutex)
+
+                update_progress(fits, 1, 1)
             catch e
                 println("Error reading pixels: $e")
             end
