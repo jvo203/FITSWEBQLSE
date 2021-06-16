@@ -10,7 +10,8 @@ mutable struct FITSDataSet
     depth::Integer
 
     # pixels, spectrum
-    img_pixels::Any
+    image::Any
+    spectrum::Any
 
     # house-keeping
     has_header::Bool
@@ -30,6 +31,7 @@ mutable struct FITSDataSet
             0,
             0,
             Nothing,
+            Nothing,
             false,
             false,
             false,
@@ -48,6 +50,7 @@ mutable struct FITSDataSet
             0,
             0,
             0,
+            Nothing,
             Nothing,
             false,
             false,
@@ -242,12 +245,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
         # read a 2D image
         if depth == 1
-            println("reading a 2D $width X $height image")
+            println("reading a $width X $height 2D image")
 
             try
 
-                fits.img_pixels = reshape(read(hdu), (width, height))
-                println("FITS image dimensions: ", size(fits.img_pixels))
+                fits.image = reshape(read(hdu), (width, height))
+                println("FITS image dimensions: ", size(fits.image))
 
                 lock(fits.mutex)
                 fits.has_data = true
@@ -257,7 +260,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             end
 
         else
-            println("reading a 3D $width X $height X depth cube")
+            println("reading a $width X $height X $depth 3D data cube")
             println("reading depth($depth) > 1 not implemented yet.")
         end
 
