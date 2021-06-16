@@ -242,7 +242,21 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
         # read a 2D image
         if depth == 1
-            println("reading a 2D image $width x $height")
+            println("reading a 2D $width x $height image")
+
+            try
+
+                fits.img_pixels = reshape(read(hdu), (width, height))
+
+                println("Image dimensions: ", size(fits.img_pixels))
+
+                lock(fits.mutex)
+                fits.has_data = true
+                unlock(fits.mutex)
+            catch e
+                println("Error reading pixels: $e")
+            end
+
         else
             println("reading depth($depth) > 1 not implemented yet.")
         end
