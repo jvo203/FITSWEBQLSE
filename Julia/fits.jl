@@ -46,7 +46,7 @@ end
 
 function update_timestamp(fits::FITSDataSet)
 
-    fits.last_accessed = datetime2unix(now())
+    Threads.atomic_xchg!(fits.last_accessed, datetime2unix(now()))
 
 end
 
