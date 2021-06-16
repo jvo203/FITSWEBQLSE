@@ -285,7 +285,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             try
                 spectrum = SharedArray{Float64}(depth)
                 @sync @distributed for i = 1:depth
-                    spectrum[i] = myid()
+                    try
+                        fits_file = FITS(filepath)
+                        spectrum[i] = myid()
+                    catch e
+                        println("i:$i::error: $e")
+                        spectrum[i] = 0.0
+                    end
+
                 end
 
                 println("spectrum:", spectrum)
