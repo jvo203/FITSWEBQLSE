@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-06-15.1";
+	return "JS2021-06-16.0";
 }
 
 const wasm_supported = (() => {
@@ -12135,7 +12135,7 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html("<h4>Server: Julia (networking & distributed computing)</h4>");
+		.html("<h4>Server: Julia (distributed computing & networking)</h4>");
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
