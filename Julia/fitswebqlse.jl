@@ -1,6 +1,7 @@
 using Distributed;
 using HTTP;
 using JSON;
+using Printf;
 using Sockets;
 using WebSockets;
 
@@ -246,10 +247,13 @@ function serveProgress(request::HTTP.Request)
     progress, elapsed = get_progress(fits_object)
 
     # form a JSON response
-    println("progress: $progress, elapsed: $elapsed")
+    resp = IOBuffer()
+    write(resp, "{\"progress\" : $progress, \"elapsed\" : $elapsed}")
+
+    headers = ["Content-Type" => "application/json"]
 
     try
-        return HTTP.Response(501, "Not Implemented")
+        return HTTP.Response(200, headers; body = take!(resp))
     catch e
         return HTTP.Response(404, "Error: $e")
     end
