@@ -215,10 +215,41 @@ function get_dataset(prefix::String, params, datasets, idx::Integer)
 end
 
 function serveHeartBeat(request::HTTP.Request)
-    timestamp = HTTP.URIs.splitpath(request.target)[3]
+    timestamp = HTTP.URIs.splitpath(HTTP.unescapeuri(request.target))[3]
 
     try
         return HTTP.Response(200, timestamp)
+    catch e
+        return HTTP.Response(404, "Error: $e")
+    end
+end
+
+function serveProgress(request::HTTP.Request)
+    datasetid = ""
+
+    try
+        datasetid = HTTP.URIs.splitpath(request.target)[3]
+    catch e
+    end
+
+    fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+    if fits_object.datasetid == ""
+        return HTTP.Response(404, "Not Found")
+    end
+
+    if has_error(fits_object)
+        return HTTP.Response(500, "Internal Server Error")
+    end
+
+    # get the progress tuple
+    progress, elapsed = get_progress(fits_object)
+
+    # form a JSON response
+    println("progress: $progress, elapsed: $elapsed")
+
+    try
+        return HTTP.Response(501, "Not Implemented")
     catch e
         return HTTP.Response(404, "Error: $e")
     end
@@ -601,6 +632,7 @@ HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/FITSWebQL.html", serveFITS)
 HTTP.@register(FITSWEBQL_ROUTER, "POST", "/*/heartbeat/*", serveHeartBeat)
+HTTP.@register(FITSWEBQL_ROUTER, "POST", "/*/progress/*", serveProgress)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/image_spectrum/", serveImageSpectrum)
 
 println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")

@@ -63,14 +63,14 @@ function update_progress(fits::FITSDataSet, progress::Integer, total::Integer)
     Threads.atomic_add!(fits.progress, 1)
 end
 
-function get_progress(fits::FITSDataSet)::(Float64, Float64)
+function get_progress(fits::FITSDataSet)
     progress = 0.0
 
     if fits.total[] > 0
         progress = 100.0 * Float64(fits.progress[]) / Float64(fits.total[])
     end
 
-    return (progress, fits.elapsed[])
+    return progress, fits.elapsed[]
 end
 
 function has_header(fits::FITSDataSet)::Bool
