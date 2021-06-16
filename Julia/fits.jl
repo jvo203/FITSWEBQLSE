@@ -1,4 +1,5 @@
 using Dates;
+using DistributedArrays;
 using FITSIO;
 
 mutable struct FITSDataSet
