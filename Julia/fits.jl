@@ -46,7 +46,7 @@ end
 
 function update_timestamp(fits::FITSDataSet)
 
-    fits.last_accessed = Threads.Atomic{Float64}(datetime2unix(now()))
+    fits.last_accessed = datetime2unix(now())
 
 end
 
