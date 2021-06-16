@@ -79,10 +79,10 @@ function update_timestamp(fits::FITSDataSet)
     fits.last_accessed[] = datetime2unix(now())
 end
 
-function update_progress(fits::FITSDataSet, progress::Integer, total::Integer)
+function update_progress(fits::FITSDataSet, total::Integer)
     fits.elapsed[] = datetime2unix(now()) - fits.last_accessed[]
-    fits.total[] = total
     Threads.atomic_add!(fits.progress, 1)
+    fits.total[] = total
 end
 
 function get_progress(fits::FITSDataSet)
@@ -265,14 +265,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
             try
 
-                fits.image = reshape(read(hdu), (width, height))
+                @time fits.image = reshape(read(hdu), (width, height))
                 println("FITS image dimensions: ", size(fits.image))
 
                 lock(fits.mutex)
                 fits.has_data = true
                 unlock(fits.mutex)
 
-                update_progress(fits, 1, 1)
+                update_progress(fits, 1)
             catch e
                 println("Error reading pixels: $e")
             end
@@ -288,7 +288,9 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 # TO-DO: reducing pixels, using cdelt3
                 # TO-DO: integrated_spectrum, mean_spectrum
 
-                @time @sync @distributed for i = 1:depth
+                progress = RemoteChannel(() -> Channel{Int}(32));
+
+                @distributed for i = 1:depth
 
                     try
                         fits_file = FITS(filepath)
@@ -303,6 +305,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         spectrum[i] = 0.0
                     end
 
+                    put!(progress, i)
+
+                end
+
+                @time while fits.progress[] < depth
+                    frame = take!(progress)
+                    update_progress(fits, depth)
+                    # println("reading frame #$frame done")
                 end
 
                 # println("spectrum:", spectrum)
@@ -311,17 +321,17 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             end
 
             try
-                #ras = [@spawnat w 10 for w in workers()]
-                #fits_files = DArray(ras)
-                #println("fits_handles:", fits_files)
-                #println([@fetchfrom w localindices(fits_files) for w in workers()])        
+                # ras = [@spawnat w 10 for w in workers()]
+                # fits_files = DArray(ras)
+                # println("fits_handles:", fits_files)
+                # println([@fetchfrom w localindices(fits_files) for w in workers()])        
 
-                #ras = [@spawnat w rand(2, 2) for w in workers()[1:4]]
-                #ras = reshape(ras, (2, 2))
-                #D = DArray(ras)
-                #println([@fetchfrom p DistributedArrays.localindices(D) for p in workers()])
+                # ras = [@spawnat w rand(2, 2) for w in workers()[1:4]]
+                # ras = reshape(ras, (2, 2))
+                # D = DArray(ras)
+                # println([@fetchfrom p DistributedArrays.localindices(D) for p in workers()])
 
-                #println("DArray:", D)
+                # println("DArray:", D)
 
             catch e
                 println("DArray error: $e")
