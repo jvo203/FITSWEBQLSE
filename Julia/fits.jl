@@ -325,9 +325,9 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     hdu_id,
                 )
 
-                    local frame
+                    local frame , frame_pixels
 
-                    proc_pixels = zeros(Float32, width, height)
+                    pixels = zeros(Float32, width, height)
 
                     try
 
@@ -336,14 +336,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         while true
                             frame = take!(jobs)
 
-                            pixels = reshape(
+                            frame_pixels = reshape(
                                 read(fits_file[hdu_id], :, :, frame, 1),
                                 (width, height),
                             )
 
-                            proc_pixels += pixels
+                            pixels += frame_pixels
 
-                            val = sum(pixels)
+                            val = sum(frame_pixels)
 
                             put!(progress, (frame, val))
 
