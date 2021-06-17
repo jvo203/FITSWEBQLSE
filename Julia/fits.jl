@@ -291,6 +291,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 progress = RemoteChannel(() -> Channel{Tuple}(32))
 
+                # process the incoming results in the background
                 @async @time while fits.progress[] < depth
                     frame, val = take!(progress)
                     spectrum[frame] = Float32(val)
@@ -298,11 +299,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     #println("reading frame #$frame::$val done")
                 end
 
-                ndone = @distributed (+) for i = 1:depth
+                # reduce (integrate) the image
+                pixels = @distributed (+) for i = 1:depth
 
                     local val , pixels
-
-                    #idx[i] = myid()
 
                     try
                         fits_file = FITS(filepath)
@@ -317,25 +317,26 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     catch e
                         println("i:$i::error: $e")
                         val = 0.0
+
+                        # the type should be decided based on <bitpix>
                         pixels = zeros(Float32, width, height)
                     end
 
                     put!(progress, (i, val))
 
-                    1
+                    pixels
 
                 end
 
-                println("ndone = $ndone")
-
+                fits.image = pixels
                 fits.spectrum = spectrum
+
+                println("pixels:", size(pixels))
                 # println("spectrum:", fits.spectrum)
 
-                # println("pixels:", pixels)
-
-                #nheads = @distributed (+) for i = 1:depth
-                #    Int(rand(Bool))
-                #end
+                lock(fits.mutex)
+                fits.has_data = true
+                unlock(fits.mutex)
 
             catch e
                 println("distributed computing error: $e")
