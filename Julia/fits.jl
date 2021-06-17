@@ -296,22 +296,38 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 # fill-in the jobs queue
                 @async for i = 1:depth
                     put!(jobs, i)
+
+                    # close the channel after the last value has been sent
                     if i == depth
                         close(jobs)
                     end
                 end
 
                 # process the incoming results in the background
-                @async @time while fits.progress[] < depth
-                    frame, val = take!(progress)
-                    spectrum[frame] = Float32(val)
-                    update_progress(fits, depth)
-                    #println("reading frame #$frame::$val done")
+                @async @time while true
+                    try
+                        frame, val = take!(progress)
+                        spectrum[frame] = Float32(val)
+                        update_progress(fits, depth)
+                        println("reading frame #$frame::$val; done")
+                    catch e
+                        println("progress task completed")
+                        break
+                    end
                 end
 
-                @everywhere function load_fits_frame(jobs, path)
+                @everywhere function load_fits_frame(
+                    jobs,
+                    progress,
+                    path,
+                    width,
+                    height,
+                    hdu_id,
+                )
 
                     local frame
+
+                    proc_pixels = zeros(Float32, width, height)
 
                     try
                         fits_file = FITS(path)
@@ -319,21 +335,42 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         while true
                             frame = take!(jobs)
 
-                            println("processing frame #$frame")
+                            pixels = reshape(
+                                read(fits_file[hdu_id], :, :, frame, 1),
+                                (width, height),
+                            )
+
+                            val = sum(pixels)
+
+                            put!(progress, (frame, val))
+
+                            # println("processing frame #$frame")
                         end
 
                         close(fits_file)
                     catch e
                         println("task $(myid)/$frame::error: $e")
+                    finally
+                        # send the (pixels, mask) to the results queue
+
+                        println("task finished")
                     end
 
-                    println("task finished")
                 end
 
                 #spawn remote jobs
                 @sync for w in workers()
-                    @spawnat w load_fits_frame(jobs, filepath)
+                    @spawnat w load_fits_frame(
+                        jobs,
+                        progress,
+                        filepath,
+                        width,
+                        height,
+                        hdu_id,
+                    )
                 end
+
+                close(progress)
 
                 fits.image = pixels
                 fits.spectrum = spectrum
