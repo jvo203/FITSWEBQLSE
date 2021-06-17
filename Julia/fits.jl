@@ -291,7 +291,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 progress = RemoteChannel(() -> Channel{Tuple}(32))
 
-                @distributed for i = 1:depth
+                @async @time while fits.progress[] < depth
+                    frame, val = take!(progress)
+                    spectrum[frame] = Float32(val)
+                    update_progress(fits, depth)
+                    #println("reading frame #$frame::$val done")
+                end
+
+                ndone = @distributed (+) for i = 1:depth
 
                     local val , pixels
 
@@ -300,8 +307,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     try
                         fits_file = FITS(filepath)
 
-                        pixels =
-                            reshape(read(fits_file[hdu_id], :, :, i, 1), (width, height))
+                        pixels = reshape(
+                            read(fits_file[hdu_id], :, :, i, 1),
+                            (width, height),
+                        )
                         val = sum(pixels)
 
                         close(fits_file)
@@ -313,27 +322,20 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                     put!(progress, (i, val))
 
+                    1
+
                 end
 
-                @time while fits.progress[] < depth
-                    frame, val = take!(progress)
-                    spectrum[frame] = Float32(val)
-                    update_progress(fits, depth)
-                    #println("reading frame #$frame::$val done")
-                end
-
-                #println("ndone = $ndone")
+                println("ndone = $ndone")
 
                 fits.spectrum = spectrum
                 # println("spectrum:", fits.spectrum)
 
                 # println("pixels:", pixels)
 
-                nheads = @distributed (+) for i = 1:depth
-                    Int(rand(Bool))
-                end
-
-                println("nheads = $nheads")
+                #nheads = @distributed (+) for i = 1:depth
+                #    Int(rand(Bool))
+                #end
 
             catch e
                 println("distributed computing error: $e")
