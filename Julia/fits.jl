@@ -304,12 +304,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 end
 
                 # process the incoming results in the background
-                @async @time while true
+                @async while true
                     try
                         frame, val = take!(progress)
                         spectrum[frame] = Float32(val)
                         update_progress(fits, depth)
-                        println("reading frame #$frame::$val; done")
+                        # println("reading frame #$frame::$val; done")
                     catch e
                         println("progress task completed")
                         break
@@ -330,6 +330,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     proc_pixels = zeros(Float32, width, height)
 
                     try
+
                         fits_file = FITS(path)
 
                         while true
@@ -340,6 +341,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 (width, height),
                             )
 
+                            proc_pixels += pixels
+
                             val = sum(pixels)
 
                             put!(progress, (frame, val))
@@ -347,19 +350,18 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             # println("processing frame #$frame")
                         end
 
-                        close(fits_file)
                     catch e
-                        println("task $(myid)/$frame::error: $e")
+                    # println("task $(myid)/$frame::error: $e")
                     finally
                         # send the (pixels, mask) to the results queue
 
-                        println("task finished")
+                        println("loading FITS cube finished")
                     end
 
                 end
 
                 #spawn remote jobs
-                @sync for w in workers()
+                @time @sync for w in workers()
                     @spawnat w load_fits_frame(
                         jobs,
                         progress,
