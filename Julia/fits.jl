@@ -293,6 +293,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 jobs = RemoteChannel(() -> Channel{Int}(32))
                 progress = RemoteChannel(() -> Channel{Tuple}(32))
 
+                # fill-in the jobs queue
                 @async for i = 1:depth
                     put!(jobs, i)
                 end
@@ -305,7 +306,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     #println("reading frame #$frame::$val done")
                 end
 
+                @everywhere function load_fits_frame(path)
+                    println("test from $(myid())")
+                end
 
+                #spawn remote jobs
+                @sync for w in workers()
+                    @spawnat w load_fits_frame(filepath)
+                end
 
                 fits.image = pixels
                 fits.spectrum = spectrum
