@@ -284,12 +284,18 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
             try
                 # idx = SharedArray{Int}(depth)
+                pixels = zeros(Float32, width, height)
                 spectrum = zeros(Float32, depth)
 
                 # TO-DO: reducing pixels, using cdelt3
                 # TO-DO: integrated_spectrum, mean_spectrum
 
+                jobs = RemoteChannel(() -> Channel{Int}(32))
                 progress = RemoteChannel(() -> Channel{Tuple}(32))
+
+                @async for i = 1:depth
+                    put!(jobs, i)
+                end
 
                 # process the incoming results in the background
                 @async @time while fits.progress[] < depth
@@ -299,34 +305,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     #println("reading frame #$frame::$val done")
                 end
 
-                # reduce (integrate) the image
-                pixels = @distributed (+) for i = 1:depth
 
-                    local val , pixels
-
-                    try
-                        fits_file = FITS(filepath)
-
-                        pixels = reshape(
-                            read(fits_file[hdu_id], :, :, i, 1),
-                            (width, height),
-                        )
-                        val = sum(pixels)
-
-                        close(fits_file)
-                    catch e
-                        println("i:$i::error: $e")
-                        val = 0.0
-
-                        # the type should be decided based on <bitpix>
-                        pixels = zeros(Float32, width, height)
-                    end
-
-                    put!(progress, (i, val))
-
-                    pixels
-
-                end
 
                 fits.image = pixels
                 fits.spectrum = spectrum
