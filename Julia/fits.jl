@@ -279,45 +279,54 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
         else
             println(
-                "reading a $width X $height X $depth 3D data cube using $(nprocs()) parallel worker(s)",
+                "reading a $width X $height X $depth 3D data cube using $(length(workers())) parallel worker(s)",
             )
 
             try
-                spectrum = SharedArray{Float64}(depth)
+                # idx = SharedArray{Int}(depth)
+                spectrum = zeros(Float32, depth)
 
                 # TO-DO: reducing pixels, using cdelt3
                 # TO-DO: integrated_spectrum, mean_spectrum
 
-                progress = RemoteChannel(() -> Channel{Int}(32));
+                progress = RemoteChannel(() -> Channel{Tuple}(32))
 
                 @distributed for i = 1:depth
+
+                    local val , pixels
+
+                    #idx[i] = myid()
 
                     try
                         fits_file = FITS(filepath)
 
                         pixels =
                             reshape(read(fits_file[hdu_id], :, :, i, 1), (width, height))
-                        spectrum[i] = sum(pixels)
+                        val = sum(pixels)
 
                         close(fits_file)
                     catch e
                         println("i:$i::error: $e")
-                        spectrum[i] = 0.0
+                        val = 0.0
+                        pixels = zeros(Float32, width, height)
                     end
 
-                    put!(progress, i)
+                    put!(progress, (i, val))
 
                 end
 
                 @time while fits.progress[] < depth
-                    frame = take!(progress)
+                    frame, val = take!(progress)
+                    spectrum[frame] = Float32(val)
                     update_progress(fits, depth)
-                    # println("reading frame #$frame done")
+                    #println("reading frame #$frame::$val done")
                 end
 
-                # println("spectrum:", spectrum)
+                fits.spectrum = spectrum
+                println("spectrum:", fits.spectrum)
+
             catch e
-                println("SharedArray error: $e")
+                println("distributed computing error: $e")
             end
 
             try
