@@ -329,6 +329,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 # println("pixels:", pixels)
 
+                nheads = @distributed (+) for i = 1:depth
+                    Int(rand(Bool))
+                end
+
+                println("nheads = $nheads")
+
             catch e
                 println("distributed computing error: $e")
             end
