@@ -325,9 +325,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     hdu_id,
                 )
 
-                    local frame , frame_pixels
+                    local frame , frame_pixels , frame_mask
 
                     pixels = zeros(Float32, width, height)
+                    mask = map(!isnan, pixels)
 
                     try
 
@@ -341,7 +342,13 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 (width, height),
                             )
 
+                            frame_mask = map(isnan, frame_pixels)
+
+                            # replace NaNs with 0.0
+                            frame_pixels[frame_mask] .= 0.0
+
                             pixels += frame_pixels
+                            # mask = mask || frame_mask
 
                             val = sum(frame_pixels)
 
