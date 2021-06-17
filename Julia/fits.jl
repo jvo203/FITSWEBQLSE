@@ -328,7 +328,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     local frame , frame_pixels , frame_mask
 
                     pixels = zeros(Float32, width, height)
-                    mask = map(!isnan, pixels)
+                    mask = map(isnan, pixels)
 
                     try
 
@@ -348,7 +348,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             frame_pixels[frame_mask] .= 0.0
 
                             pixels .+= frame_pixels
-                            # mask .= mask || (!frame_mask)
+                            # mask .= mask && (!frame_mask)
 
                             val = sum(frame_pixels)
 
