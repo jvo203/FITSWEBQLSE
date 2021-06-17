@@ -296,6 +296,9 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 # fill-in the jobs queue
                 @async for i = 1:depth
                     put!(jobs, i)
+                    if i == depth
+                        close(jobs)
+                    end
                 end
 
                 # process the incoming results in the background
@@ -306,13 +309,30 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     #println("reading frame #$frame::$val done")
                 end
 
-                @everywhere function load_fits_frame(path)
-                    println("test from $(myid())")
+                @everywhere function load_fits_frame(jobs, path)
+
+                    local frame
+
+                    try
+                        fits_file = FITS(path)
+
+                        while true
+                            frame = take!(jobs)
+
+                            println("processing frame #$frame")
+                        end
+
+                        close(fits_file)
+                    catch e
+                        println("task $(myid)/$frame::error: $e")
+                    end
+
+                    println("task finished")
                 end
 
                 #spawn remote jobs
                 @sync for w in workers()
-                    @spawnat w load_fits_frame(filepath)
+                    @spawnat w load_fits_frame(jobs, filepath)
                 end
 
                 fits.image = pixels
