@@ -348,7 +348,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             frame_pixels[frame_mask] .= 0.0
 
                             pixels .+= frame_pixels
-                            # mask .= mask && (!frame_mask)
+                            # mask .= mask && frame_mask
 
                             val = sum(frame_pixels)
 
@@ -367,7 +367,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 end
 
-                #spawn remote jobs
+                # spawn remote jobs
                 @time @sync for w in workers()
                     @spawnat w load_fits_frame(
                         jobs,
