@@ -322,8 +322,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     #println("reading frame #$frame::$val done")
                 end
 
+                #println("ndone = $ndone")
+
                 fits.spectrum = spectrum
-                println("spectrum:", fits.spectrum)
+                # println("spectrum:", fits.spectrum)
+
+                # println("pixels:", pixels)
 
             catch e
                 println("distributed computing error: $e")
