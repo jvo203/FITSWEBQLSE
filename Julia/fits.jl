@@ -304,7 +304,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 end
 
                 # process the incoming results in the background
-                @async while true
+                progress_task = @async while true
                     try
                         frame, val = take!(progress)
                         spectrum[frame] = Float32(val)
@@ -373,6 +373,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 end
 
                 close(progress)
+
+                wait(progress_task)
 
                 fits.image = pixels
                 fits.spectrum = spectrum
