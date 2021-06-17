@@ -347,8 +347,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             # replace NaNs with 0.0
                             frame_pixels[frame_mask] .= 0.0
 
-                            pixels += frame_pixels
-                            # mask = mask || frame_mask
+                            pixels .+= frame_pixels
+                            # mask .= mask || (!frame_mask)
 
                             val = sum(frame_pixels)
 
@@ -387,7 +387,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 fits.spectrum = spectrum
 
                 println("pixels:", size(pixels))
-                # println("spectrum:", fits.spectrum)
+                println("spectrum:", fits.spectrum)
 
                 lock(fits.mutex)
                 fits.has_data = true
