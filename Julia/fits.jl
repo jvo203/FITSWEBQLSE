@@ -358,22 +358,20 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                         fits_file = FITS(path)
 
-                        naxes = ndims(fits_file[hdu_id])
+                        hdu = fits_file[hdu_id]
+
+                        naxes = ndims(hdu)
 
                         while true
                             frame = take!(jobs)
 
                             # check #naxes, only read (:, :, frame) if and when necessary
                             if naxes >= 4
-                                frame_pixels = reshape(
-                                    read(fits_file[hdu_id], :, :, frame, 1),
-                                    (width, height),
-                                )
+                                frame_pixels =
+                                    reshape(read(hdu, :, :, frame, 1), (width, height))
                             else
-                                frame_pixels = reshape(
-                                    read(fits_file[hdu_id], :, :, frame),
-                                    (width, height),
-                                )
+                                frame_pixels =
+                                    reshape(read(hdu, :, :, frame), (width, height))
                             end
 
                             frame_mask = map(isnan, frame_pixels)
