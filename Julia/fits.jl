@@ -306,13 +306,15 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 @async for i = 1:depth
                     put!(jobs, i)
 
-                    # close the channel after the last value has been sent
+                    # close the channel after the last value had been sent
                     if i == depth
                         close(jobs)
                     end
                 end
 
+                # in the following two tasks:
                 # process the incoming results in the background
+
                 progress_task = @async while true
                     try
                         frame, val = take!(progress)
