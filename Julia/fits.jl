@@ -339,7 +339,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         while true
                             frame = take!(jobs)
 
-                            # TO-DO: check #naxes, only read (:, :, frame) if and when necessary
+                            # check #naxes, only read (:, :, frame) if and when necessary
                             if naxes >= 4
                                 frame_pixels = reshape(
                                     read(fits_file[hdu_id], :, :, frame, 1),
