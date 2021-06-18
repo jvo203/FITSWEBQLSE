@@ -21,7 +21,8 @@ mutable struct FITSDataSet
     depth::Integer
 
     # pixels, spectrum
-    image::Any
+    pixels::Any
+    mask::Any
     spectrum::Any
 
     # house-keeping
@@ -43,6 +44,7 @@ mutable struct FITSDataSet
             0,
             Nothing,
             Nothing,
+            Nothing,
             false,
             false,
             false,
@@ -61,6 +63,7 @@ mutable struct FITSDataSet
             0,
             0,
             0,
+            Nothing,
             Nothing,
             Nothing,
             false,
@@ -265,14 +268,19 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
             try
 
-                @time fits.image = reshape(read(hdu), (width, height))
-                println("FITS image dimensions: ", size(fits.image))
+                @time begin
+                    fits.pixels = reshape(read(hdu), (width, height))
+                    fits.mask = map(isnan, fits.pixels)
+                end
+
+                println("FITS image dimensions: ", size(fits.pixels))
 
                 lock(fits.mutex)
                 fits.has_data = true
                 unlock(fits.mutex)
 
                 update_progress(fits, 1)
+
             catch e
                 println("Error reading pixels: $e")
             end
@@ -283,8 +291,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             )
 
             try
-                # idx = SharedArray{Int}(depth)
                 pixels = zeros(Float32, width, height)
+                mask = map(isnan, pixels)
                 spectrum = zeros(Float32, depth)
 
                 # TO-DO: reducing pixels, using cdelt3
@@ -292,6 +300,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 jobs = RemoteChannel(() -> Channel{Int}(32))
                 progress = RemoteChannel(() -> Channel{Tuple}(32))
+                image = RemoteChannel(() -> Channel{Tuple}(32))
 
                 # fill-in the jobs queue
                 @async for i = 1:depth
@@ -316,9 +325,22 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     end
                 end
 
+                image_task = @async while true
+                    try
+                        thread_pixels, thread_mask = take!(image)
+                        pixels .+= thread_pixels
+                        mask .&= thread_mask
+                        println("received (pixels,mask)")
+                    catch e
+                        println("image task completed")
+                        break
+                    end
+                end
+
                 @everywhere function load_fits_frame(
                     jobs,
                     progress,
+                    results,
                     path,
                     width,
                     height,
@@ -362,6 +384,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                             val = sum(frame_pixels)
 
+                            # send back the spectra
                             put!(progress, (frame, val))
 
                             # println("processing frame #$frame")
@@ -370,7 +393,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     catch e
                     # println("task $(myid)/$frame::error: $e")
                     finally
-                        # send the (pixels, mask) to the results queue
+                        # send back the result to the root
+                        put!(results, (pixels, mask))
 
                         println("loading FITS cube finished")
                     end
@@ -382,6 +406,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     @spawnat w load_fits_frame(
                         jobs,
                         progress,
+                        image,
                         filepath,
                         width,
                         height,
@@ -390,14 +415,18 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 end
 
                 close(progress)
+                close(image)
 
                 wait(progress_task)
+                wait(image_task)
 
-                fits.image = pixels
+                fits.pixels = pixels
+                fits.mask = mask
                 fits.spectrum = spectrum
 
                 println("pixels:", size(pixels))
                 println("spectrum:", fits.spectrum)
+                # println("mask:", fits.mask)
 
                 lock(fits.mutex)
                 fits.has_data = true
