@@ -25,6 +25,7 @@ mutable struct FITSDataSet
     has_frequency::Bool
     has_velocity::Bool
     frame_multiplier::Float32
+    flux::String
 
     # pixels, spectrum
     pixels::Any
@@ -53,6 +54,7 @@ mutable struct FITSDataSet
             false,
             false,
             0.0,
+            "",
             Nothing,
             Nothing,
             Nothing,
@@ -79,6 +81,7 @@ mutable struct FITSDataSet
             false,
             false,
             1.0,
+            "",
             Nothing,
             Nothing,
             Nothing,
