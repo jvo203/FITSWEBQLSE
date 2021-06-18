@@ -447,6 +447,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             println("error processing FITS header: $e")
         end
 
+        println(
+            "datamin: $(fits.datamin), datamax: $(fits.datamax), ignrval: $(fits.ignrval), _cdelt3: $(fits._cdelt3)",
+        )
+
         # read a 2D image
         if depth == 1
             println("reading a $width X $height 2D image")
