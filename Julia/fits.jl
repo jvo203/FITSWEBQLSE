@@ -20,6 +20,12 @@ mutable struct FITSDataSet
     height::Integer
     depth::Integer
 
+    is_optical::Bool
+    is_xray::Bool
+    has_frequency::Bool
+    has_velocity::Bool
+    frame_multiplier::Float32
+
     # pixels, spectrum
     pixels::Any
     mask::Any
@@ -42,6 +48,11 @@ mutable struct FITSDataSet
             0,
             0,
             0,
+            false,
+            false,
+            false,
+            false,
+            0.0,
             Nothing,
             Nothing,
             Nothing,
@@ -63,6 +74,11 @@ mutable struct FITSDataSet
             0,
             0,
             0,
+            true,
+            false,
+            false,
+            false,
+            1.0,
             Nothing,
             Nothing,
             Nothing,
@@ -178,6 +194,10 @@ function get_dataset(datasetid::String, fits_objects, fits_lock)::FITSDataSet
     return dataset
 end
 
+function process_header(fits::FITSDataSet)
+    # println(fits.header)
+end
+
 function loadFITS(filepath::String, fits::FITSDataSet)
 
     if fits.datasetid == ""
@@ -259,8 +279,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             break
         end
 
-        # println(fits.header)
-        # process_header(fits)
+        process_header(fits)
 
         # read a 2D image
         if depth == 1
