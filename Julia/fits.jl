@@ -485,7 +485,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             try
                 pixels = zeros(Float32, width, height)
                 mask = map(isnan, pixels)
-                spectrum = zeros(Float32, depth)
+                mean_spectrum = zeros(Float32, depth)
+                integrated_spectrum = zeros(Float32, depth)
 
                 # TO-DO: reducing pixels, using cdelt3
                 # TO-DO: integrated_spectrum, mean_spectrum
@@ -509,8 +510,11 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 progress_task = @async while true
                     try
-                        frame, val = take!(progress)
-                        spectrum[frame] = Float32(val)
+                        frame, mean_val, integrated_val = take!(progress)
+
+                        mean_spectrum[frame] = Float32(mean_val)
+                        integrated_spectrum[frame] = Float32(integrated_val)
+
                         update_progress(fits, depth)
                         # println("reading frame #$frame::$val; done")
                     catch e
@@ -546,6 +550,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 )
 
                     local frame , frame_pixels , frame_mask
+                    local valid_pixels , valid_mask
+                    local mean_spectrum , integrated_spectrum
 
                     pixels = zeros(Float32, width, height)
                     mask = map(isnan, pixels)
@@ -578,10 +584,23 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             pixels .+= frame_pixels
                             mask .&= frame_mask
 
-                            val = sum(frame_pixels) * cdelt3
+                            # pick out the valid values only
+                            valid_mask = .!frame_mask
+                            valid_pixels = frame_pixels[valid_mask]
+
+                            pixel_sum = sum(valid_pixels)
+                            pixel_count = length(valid_pixels)
+
+                            if pixel_count > 0
+                                mean_spectrum = pixel_sum / pixel_count
+                                integrated_spectrum = pixel_sum * cdelt3
+                            else
+                                mean_spectrum = 0.0
+                                integrated_spectrum = 0.0
+                            end
 
                             # send back the spectra
-                            put!(progress, (frame, val))
+                            put!(progress, (frame, mean_spectrum, integrated_spectrum))
 
                             # println("processing frame #$frame")
                         end
@@ -622,9 +641,11 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 fits.pixels = pixels
                 fits.mask = mask
-                fits.integrated_spectrum = spectrum
+                fits.mean_spectrum = mean_spectrum
+                fits.integrated_spectrum = integrated_spectrum
 
                 println("pixels:", size(pixels))
+                println("mean spectrum:", fits.mean_spectrum)
                 println("integrated spectrum:", fits.integrated_spectrum)
                 # println("mask:", fits.mask)
 
