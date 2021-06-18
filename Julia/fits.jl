@@ -26,6 +26,7 @@ mutable struct FITSDataSet
     has_velocity::Bool
     frame_multiplier::Float32
     flux::String
+    ignrval::Float32
 
     # pixels, spectrum
     pixels::Any
@@ -55,6 +56,7 @@ mutable struct FITSDataSet
             false,
             0.0,
             "",
+            0.0,
             Nothing,
             Nothing,
             Nothing,
@@ -82,6 +84,7 @@ mutable struct FITSDataSet
             false,
             1.0,
             "",
+            -prevfloat(typemax(Float32)),
             Nothing,
             Nothing,
             Nothing,
@@ -203,9 +206,45 @@ function process_header(fits::FITSDataSet)
     for i = 1:length(fits.header)
         record = fits.header[i]
 
+        # comments evaluate to 'nothing'
         if !isnothing(record)
-            println(record)
+
+            if typeof(record) != String
+                continue
+            end
+
+            if occursin("ASTRO-F", record)
+                fits.is_optical = true
+                fits.flux = "logistic"
+            end
+
+            if occursin("HSCPIPE", record)
+                fits.is_optical = true
+                fits.flux = "ratio"
+            end
+
+            record = lowercase(record)
+
+            if occursin("suzaku", record) ||
+               occursin("hitomi", record) ||
+               occursin("x-ray", record)
+                fits.is_optical = false
+                fits.is_xray = true
+                fits.flux = "legacy"
+                fits.ignrval = -1.0
+            end
         end
+    end
+
+    # further examine the header
+    try
+        record = fits.header["FRAMEID"]
+
+        if occursin("SUPM", record) || occursin("MCSM", record)
+            fits.is_optical = true
+            fits.flux = "ratio"
+        end
+    catch e
     end
 end
 
@@ -290,7 +329,11 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             break
         end
 
-        process_header(fits)
+        try
+            process_header(fits)
+        catch e
+            println("error processing FITS header: $e")
+        end
 
         # read a 2D image
         if depth == 1
