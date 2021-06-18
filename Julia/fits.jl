@@ -26,6 +26,8 @@ mutable struct FITSDataSet
     has_velocity::Bool
     frame_multiplier::Float32
     _cdelt3::Float32
+    datamin::Float32
+    datamax::Float32
     flux::String
     ignrval::Float32
 
@@ -57,6 +59,8 @@ mutable struct FITSDataSet
             false,
             0.0,
             0.0,
+            0.0,
+            0.0,
             "",
             0.0,
             Nothing,
@@ -86,6 +90,8 @@ mutable struct FITSDataSet
             false,
             1.0,
             1.0,
+            -prevfloat(typemax(Float32)),
+            prevfloat(typemax(Float32)),
             "",
             -prevfloat(typemax(Float32)),
             Nothing,
