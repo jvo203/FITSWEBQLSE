@@ -34,7 +34,8 @@ mutable struct FITSDataSet
     # pixels, spectrum
     pixels::Any
     mask::Any
-    spectrum::Any
+    mean_spectrum::Any
+    integrated_spectrum::Any
 
     # house-keeping
     has_header::Bool
@@ -66,6 +67,7 @@ mutable struct FITSDataSet
             Nothing,
             Nothing,
             Nothing,
+            Nothing,
             false,
             false,
             false,
@@ -94,6 +96,7 @@ mutable struct FITSDataSet
             prevfloat(typemax(Float32)),
             "",
             -prevfloat(typemax(Float32)),
+            Nothing,
             Nothing,
             Nothing,
             Nothing,
@@ -575,7 +578,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             pixels .+= frame_pixels
                             mask .&= frame_mask
 
-                            val = sum(frame_pixels)
+                            val = sum(frame_pixels) * cdelt3
 
                             # send back the spectra
                             put!(progress, (frame, val))
@@ -619,10 +622,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 fits.pixels = pixels
                 fits.mask = mask
-                fits.spectrum = spectrum
+                fits.integrated_spectrum = spectrum
 
                 println("pixels:", size(pixels))
-                println("spectrum:", fits.spectrum)
+                println("integrated spectrum:", fits.integrated_spectrum)
                 # println("mask:", fits.mask)
 
                 lock(fits.mutex)
