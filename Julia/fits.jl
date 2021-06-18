@@ -25,6 +25,7 @@ mutable struct FITSDataSet
     has_frequency::Bool
     has_velocity::Bool
     frame_multiplier::Float32
+    _cdelt3::Float32
     flux::String
     ignrval::Float32
 
@@ -55,6 +56,7 @@ mutable struct FITSDataSet
             false,
             false,
             0.0,
+            0.0,
             "",
             0.0,
             Nothing,
@@ -82,6 +84,7 @@ mutable struct FITSDataSet
             false,
             false,
             false,
+            1.0,
             1.0,
             "",
             -prevfloat(typemax(Float32)),
@@ -272,6 +275,70 @@ function process_header(fits::FITSDataSet)
         if occursin("kiso", record)
             fits.is_optical = true
             fits.flux = "ratio"
+        end
+    catch e
+    end
+
+    try
+        ctype3 = lowercase(fits.header["CTYPE3"])
+
+        if occursin("f", ctype3)
+            fits.has_frequency = true
+        end
+
+        if occursin("v", ctype3)
+            fits.has_velocity = true
+        end
+    catch e
+    end
+
+    try
+        cunit3 = lowercase(fits.header["CUNIT3"])
+
+        if occursin("hz", cunit3)
+            fits.has_frequency = true
+            fits.frame_multiplier = 1.0E0
+        end
+
+        if occursin("khz", cunit3)
+            fits.has_frequency = true
+            fits.frame_multiplier = 1.0E3
+        end
+
+        if occursin("mhz", cunit3)
+            fits.has_frequency = true
+            fits.frame_multiplier = 1.0E6
+        end
+
+        if occursin("ghz", cunit3)
+            fits.has_frequency = true
+            fits.frame_multiplier = 1.0E9
+        end
+
+        if occursin("thz", cunit3)
+            fits.has_frequency = true
+            fits.frame_multiplier = 1.0E12
+        end
+
+        if occursin("m/s", cunit3)
+            fits.has_velocity = true
+            fits.frame_multiplier = 1.0E0
+        end
+
+        if occursin("km/s", cunit3)
+            fits.has_velocity = true
+            fits.frame_multiplier = 1.0E3
+        end
+    catch e
+    end
+
+    try
+        cdelt3 = Float32(fits.header["CDELT3"])
+
+        if fits.has_velocity
+            fits._cdelt3 = cdelt3 * fits.frame_multiplier / 1000.0
+        else
+            fits._cdelt3 = 1.0
         end
     catch e
     end
