@@ -34,6 +34,9 @@ mutable struct FITSDataSet
     # pixels, spectrum
     pixels::Any
     mask::Any
+
+    frame_min::Any
+    frame_max::Any
     mean_spectrum::Any
     integrated_spectrum::Any
 
@@ -68,6 +71,8 @@ mutable struct FITSDataSet
             Nothing,
             Nothing,
             Nothing,
+            Nothing,
+            Nothing,
             false,
             false,
             false,
@@ -96,6 +101,8 @@ mutable struct FITSDataSet
             prevfloat(typemax(Float32)),
             "",
             -prevfloat(typemax(Float32)),
+            Nothing,
+            Nothing,
             Nothing,
             Nothing,
             Nothing,
@@ -485,6 +492,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             try
                 pixels = zeros(Float32, width, height)
                 mask = map(isnan, pixels)
+                frame_min = zeros(Float32, depth)
+                frame_max = zeros(Float32, depth)
                 mean_spectrum = zeros(Float32, depth)
                 integrated_spectrum = zeros(Float32, depth)
 
@@ -510,13 +519,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 progress_task = @async while true
                     try
-                        frame, mean_val, integrated_val = take!(progress)
+                        frame, min_val, max_val, mean_val, integrated_val = take!(progress)
 
+                        frame_min[frame] = Float32(min_val)
+                        frame_max[frame] = Float32(max_val)
                         mean_spectrum[frame] = Float32(mean_val)
                         integrated_spectrum[frame] = Float32(integrated_val)
 
                         update_progress(fits, depth)
-                        # println("reading frame #$frame::$val; done")
                     catch e
                         println("progress task completed")
                         break
@@ -551,6 +561,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                     local frame , frame_pixels , frame_mask
                     local valid_pixels , valid_mask
+                    local frame_min , frame_max
                     local mean_spectrum , integrated_spectrum
 
                     pixels = zeros(Float32, width, height)
@@ -592,15 +603,31 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             pixel_count = length(valid_pixels)
 
                             if pixel_count > 0
+                                frame_min, frame_max = extrema(valid_pixels)
                                 mean_spectrum = pixel_sum / pixel_count
                                 integrated_spectrum = pixel_sum * cdelt3
                             else
+                                # no mistake here, reverse the min/max values
+                                # so that global dmin/dmax can get correct values
+                                # in the face of all-NaN frames
+                                frame_min = prevfloat(typemax(Float32))
+                                frame_max = -prevfloat(typemax(Float32))
+
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
 
-                            # send back the spectra
-                            put!(progress, (frame, mean_spectrum, integrated_spectrum))
+                            # send back the reduced values
+                            put!(
+                                progress,
+                                (
+                                    frame,
+                                    frame_min,
+                                    frame_max,
+                                    mean_spectrum,
+                                    integrated_spectrum,
+                                ),
+                            )
 
                             # println("processing frame #$frame")
                         end
@@ -641,13 +668,18 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 fits.pixels = pixels
                 fits.mask = mask
+
+                fits.frame_min = frame_min
+                fits.frame_max = frame_max
                 fits.mean_spectrum = mean_spectrum
                 fits.integrated_spectrum = integrated_spectrum
 
                 println("pixels:", size(pixels))
+                # println("mask:", fits.mask)
+                println("frame_min:", fits.frame_min)
+                println("frame_max:", fits.frame_max)
                 println("mean spectrum:", fits.mean_spectrum)
                 println("integrated spectrum:", fits.integrated_spectrum)
-                # println("mask:", fits.mask)
 
                 lock(fits.mutex)
                 fits.has_data = true
