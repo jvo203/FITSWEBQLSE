@@ -535,6 +535,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     path,
                     width,
                     height,
+                    datamin,
+                    datamax,
+                    ignrval,
+                    cdelt3,
                     hdu_id,
                 )
 
@@ -599,6 +603,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         filepath,
                         width,
                         height,
+                        fits.datamin,
+                        fits.datamax,
+                        fits.ignrval,
+                        fits._cdelt3,
                         hdu_id,
                     )
                 end
