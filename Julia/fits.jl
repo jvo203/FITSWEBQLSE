@@ -674,12 +674,16 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 fits.mean_spectrum = mean_spectrum
                 fits.integrated_spectrum = integrated_spectrum
 
+                dmin = minimum(frame_min)
+                dmax = maximum(frame_max)
+                println("dmin: $dmin, dmax: $dmax")
+
                 println("pixels:", size(pixels))
                 # println("mask:", fits.mask)
-                println("frame_min:", fits.frame_min)
-                println("frame_max:", fits.frame_max)
-                println("mean spectrum:", fits.mean_spectrum)
-                println("integrated spectrum:", fits.integrated_spectrum)
+                # println("frame_min:", fits.frame_min)
+                # println("frame_max:", fits.frame_max)
+                # println("mean spectrum:", fits.mean_spectrum)
+                # println("integrated spectrum:", fits.integrated_spectrum)
 
                 lock(fits.mutex)
                 fits.has_data = true
