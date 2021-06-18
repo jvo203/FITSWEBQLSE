@@ -262,6 +262,16 @@ function process_header(fits::FITSDataSet)
     end
 
     try
+        fits.datamin = Float32(fits.header["DATAMIN"])
+    catch e
+    end
+
+    try
+        fits.datamax = Float32(fits.header["DATAMAX"])
+    catch e
+    end
+
+    try
         record = lowercase(fits.header["TELESCOP"])
 
         if occursin("alma", record) || occursin("vla", record) || occursin("ska", record)
