@@ -198,7 +198,15 @@ function get_dataset(datasetid::String, fits_objects, fits_lock)::FITSDataSet
 end
 
 function process_header(fits::FITSDataSet)
-    # println(fits.header)
+    println("FITS header #records: $(length(fits.header))")
+
+    for i = 1:length(fits.header)
+        record = fits.header[i]
+
+        if !isnothing(record)
+            println(record)
+        end
+    end
 end
 
 function loadFITS(filepath::String, fits::FITSDataSet)
