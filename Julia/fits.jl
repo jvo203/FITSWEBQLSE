@@ -246,6 +246,35 @@ function process_header(fits::FITSDataSet)
         end
     catch e
     end
+
+    try
+        fits.ignrval = Float32(fits.header["IGNRVAL"])
+    catch e
+    end
+
+    try
+        record = lowercase(fits.header["TELESCOP"])
+
+        if occursin("alma", record) || occursin("vla", record) || occursin("ska", record)
+            fits.is_optical = false
+        end
+
+        if occursin("nro45", record)
+            fits.is_optical = false
+            fits.flux = "ratio"
+        end
+
+        if occursin("chandra", record)
+            fits.is_optical = false
+            fits.is_xray = true
+        end
+
+        if occursin("kiso", record)
+            fits.is_optical = true
+            fits.flux = "ratio"
+        end
+    catch e
+    end
 end
 
 function loadFITS(filepath::String, fits::FITSDataSet)
