@@ -593,7 +593,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                     reshape(read(hdu, :, :, frame), (width, height))
                             end
 
-                            frame_mask = map(isnan, frame_pixels)
+                            frame_mask = map(
+                                x -> invalidate(x, datamin, datamax, ignrval),
+                                frame_pixels,
+                            )
 
                             # replace NaNs with 0.0
                             frame_pixels[frame_mask] .= 0.0
