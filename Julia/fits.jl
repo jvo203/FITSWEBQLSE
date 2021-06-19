@@ -373,9 +373,7 @@ end
 @everywhere function invalidate(x, datamin::Float32, datamax::Float32, ignrval::Float32)
     val = Float32(x)
 
-    return isnan(val)
-
-    # return !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
+    return !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
 end
 
 function loadFITS(filepath::String, fits::FITSDataSet)
