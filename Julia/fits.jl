@@ -461,7 +461,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             "datamin: $(fits.datamin), datamax: $(fits.datamax), ignrval: $(fits.ignrval), _cdelt3: $(fits._cdelt3)",
         )
 
-        @everywhere function invalidate(x, datamin, datamax, ignrval)::Bool
+        function invalidate(x, datamin, datamax, ignrval)::Bool
             val = Float32(x)
 
             !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
@@ -472,10 +472,26 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             println("reading a $width X $height 2D image")
 
             try
+                pixels = zeros(Float32, width, height)
+                mask = map(isnan, pixels)
 
                 @time begin
-                    fits.pixels = reshape(read(hdu), (width, height))
-                    fits.mask = map(isnan, fits.pixels)
+
+                    pixels = reshape(read(hdu), (width, height))
+
+                    mask = invalidate.(pixels, fits.datamin, fits.datamax, fits.ignrval)
+
+                    # replace NaNs with 0.0
+                    pixels[mask] .= 0.0
+
+                    valid_mask = .!mask
+                    valid_pixels = pixels[valid_mask]
+
+                    dmin, dmax = extrema(valid_pixels)
+                    println("dmin: $dmin, dmax: $dmax")
+
+                    fits.pixels = pixels
+                    fits.mask = mask
                 end
 
                 println("FITS image dimensions: ", size(fits.pixels))
