@@ -370,12 +370,6 @@ function process_header(fits::FITSDataSet)
     end
 end
 
-@everywhere function invalidate(x, datamin::Float32, datamax::Float32, ignrval::Float32)
-    val = Float32(x)
-
-    return !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
-end
-
 function loadFITS(filepath::String, fits::FITSDataSet)
 
     if fits.datasetid == ""
@@ -466,6 +460,17 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         println(
             "datamin: $(fits.datamin), datamax: $(fits.datamax), ignrval: $(fits.ignrval), _cdelt3: $(fits._cdelt3)",
         )
+
+        @everywhere function invalidate(
+            x,
+            datamin::Float32,
+            datamax::Float32,
+            ignrval::Float32,
+        )
+            val = Float32(x)
+
+            return !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
+        end
 
         # read a 2D image
         if depth == 1
