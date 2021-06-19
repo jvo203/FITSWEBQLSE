@@ -461,12 +461,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             "datamin: $(fits.datamin), datamax: $(fits.datamax), ignrval: $(fits.ignrval), _cdelt3: $(fits._cdelt3)",
         )
 
+        # callable in the main thread (invisible to workers...)
         function invalidate(x, datamin, datamax, ignrval)::Bool
             val = Float32(x)
 
             !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
         end
 
+        # only visible to workers...
         @everywhere function worker_invalidate(x, datamin, datamax, ignrval)::Bool
             val = Float32(x)
 
