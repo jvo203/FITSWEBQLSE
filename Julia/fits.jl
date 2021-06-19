@@ -467,6 +467,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
         end
 
+        @everywhere function worker_invalidate(x, datamin, datamax, ignrval)::Bool
+            val = Float32(x)
+
+            !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
+        end
+
         # read a 2D image
         if depth == 1
             println("reading a $width X $height 2D image")
@@ -610,7 +616,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             end
 
                             frame_mask = map(
-                                x -> invalidate(x, datamin, datamax, ignrval),
+                                x -> worker_invalidate(x, datamin, datamax, ignrval),
                                 frame_pixels,
                             )
 
