@@ -370,6 +370,14 @@ function process_header(fits::FITSDataSet)
     end
 end
 
+@everywhere function invalidate(x, datamin::Float32, datamax::Float32, ignrval::Float32)
+    val = Float32(x)
+
+    return isnan(val)
+
+    # return !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
+end
+
 function loadFITS(filepath::String, fits::FITSDataSet)
 
     if fits.datasetid == ""
@@ -587,7 +595,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                     reshape(read(hdu, :, :, frame), (width, height))
                             end
 
-                            frame_mask = map(x -> isnan(x), frame_pixels)
+                            frame_mask = map(isnan, frame_pixels)
 
                             # replace NaNs with 0.0
                             frame_pixels[frame_mask] .= 0.0
