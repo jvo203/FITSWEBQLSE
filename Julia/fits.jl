@@ -461,15 +461,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             "datamin: $(fits.datamin), datamax: $(fits.datamax), ignrval: $(fits.ignrval), _cdelt3: $(fits._cdelt3)",
         )
 
-        @everywhere function invalidate(
-            x,
-            datamin::Float32,
-            datamax::Float32,
-            ignrval::Float32,
-        )
+        @everywhere function invalidate(x, datamin, datamax, ignrval)::Bool
             val = Float32(x)
 
-            return !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
+            !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
         end
 
         # read a 2D image
