@@ -618,7 +618,11 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             end
 
                             frame_mask = map(
-                                x -> worker_invalidate(x, datamin, datamax, ignrval),
+                                x ->
+                                    !isfinite(x) ||
+                                        (x < datamin) ||
+                                        (x > datamax) ||
+                                        (x <= ignrval),
                                 frame_pixels,
                             )
 
@@ -649,6 +653,9 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
+
+                            # insert back NaNs ahead of conversion to half-float (Float16)
+                            frame_pixels[frame_mask] .= NaN32
 
                             # send back the reduced values
                             put!(
