@@ -617,14 +617,17 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                     reshape(read(hdu, :, :, frame), (width, height))
                             end
 
-                            frame_mask = map(
-                                x ->
-                                    !isfinite(x) ||
-                                        (x < datamin) ||
-                                        (x > datamax) ||
-                                        (x <= ignrval),
-                                frame_pixels,
-                            )
+                            #frame_mask = map(
+                            #    x ->
+                            #        !isfinite(x) ||
+                            #            (x < datamin) ||
+                            #            (x > datamax) ||
+                            #            (x <= ignrval),
+                            #    frame_pixels,
+                            #)
+
+                            frame_mask =
+                                worker_invalidate.(frame_pixels, datamin, datamax, ignrval)
 
                             # replace NaNs with 0.0
                             frame_pixels[frame_mask] .= 0.0
