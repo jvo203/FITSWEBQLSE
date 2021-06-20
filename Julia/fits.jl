@@ -469,7 +469,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         end
 
         # only visible to workers...
-        @everywhere function worker_invalidate(x, datamin, datamax, ignrval)::Bool
+        @everywhere function invalidate_pixel(x, datamin, datamax, ignrval)::Bool
             val = Float32(x)
 
             !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
@@ -627,7 +627,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             #)
 
                             frame_mask =
-                                worker_invalidate.(frame_pixels, datamin, datamax, ignrval)
+                                invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
 
                             # replace NaNs with 0.0
                             frame_pixels[frame_mask] .= 0.0
