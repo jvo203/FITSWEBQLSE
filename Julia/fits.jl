@@ -1,7 +1,6 @@
 using Dates;
 using DistributedArrays;
 using FITSIO;
-using SharedArrays;
 
 mutable struct testD
     x::Float64
@@ -515,15 +514,21 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             end
 
         else
-            println(
-                "reading a $width X $height X $depth 3D data cube using $(length(workers())) parallel worker(s)",
+            n = length(workers())
+
+                println(
+                "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
             try
                 # pixels = zeros(Float32, width, height)
                 # mask = map(isnan, pixels)
+                pixels = dzeros(Float32, (width, height, n), workers())
+                mask = dfill(false, (width, height, n), workers())
+
                 frame_min = zeros(Float32, depth)
                 frame_max = zeros(Float32, depth)
+                
                 mean_spectrum = zeros(Float32, depth)
                 integrated_spectrum = zeros(Float32, depth)
 
