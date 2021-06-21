@@ -578,8 +578,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     ignrval,
                     cdelt3,
                     hdu_id,
-                    global_pixels::DArray,
-                    global_mask::DArray
+                    dpixels::DArray,
+                    dmask::DArray
                 )
 
                     local frame , frame_pixels , frame_mask
@@ -669,8 +669,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         end
 
                     catch e
-                        # println("task $(myid)/$frame::error: $e")
+                        # println("task $(myid())/$frame::error: $e")
                     finally
+
+                        # copy (pixels,mask) into the distributed arrays (dpixels,dmask)
+                        pid = myid()
+
                         println("loading FITS cube finished")
                     end
 
