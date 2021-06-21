@@ -553,6 +553,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 # process the incoming results in the background
                 progress_task = @async while true
                     try
+                        local queue::BitArray{1}
+                        
                         frame, min_val, max_val, mean_val, integrated_val, tid = take!(progress)
 
                         frame_min[frame] = Float32(min_val)
@@ -561,8 +563,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         integrated_spectrum[frame] = Float32(integrated_val)
 
                         update_progress(fits, depth)
-
-                        local queue
 
                         try
                             queue = indices[tid]
