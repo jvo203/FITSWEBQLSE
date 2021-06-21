@@ -525,8 +525,9 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 # mask = map(isnan, pixels)
 
                 # distributed arrays
-                pixels = dzeros(Float32, (width, height, n), workers())
-                mask = dfill(false, (width, height, n), workers())
+                chunks = (1, 1, n)
+                pixels = DArray(I -> zeros(Float32, map(length, I)), (width, height, n), workers(), chunks)
+                mask = DArray(I -> fill(false, map(length, I)), (width, height, n), workers(), chunks)
 
                 frame_min = zeros(Float32, depth)
                 frame_max = zeros(Float32, depth)
@@ -580,8 +581,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     ignrval,
                     cdelt3,
                     hdu_id,
-                    dpixels::DArray,
-                    dmask::DArray
+                    global_pixels::DArray,
+                    global_mask::DArray
                 )
 
                     local frame , frame_pixels , frame_mask
@@ -676,8 +677,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                         # copy (pixels,mask) into the distributed arrays (dpixels,dmask)
                         try
-                            dpixels = pixels
-                            dmask = mask
+                            # dpixels = pixels
+                            # dmask = mask
+                            local_pixels = localpart(global_pixels)
+                            local_mask = localpart(global_mask)
                         catch e
                             println("DArray::$e")
                         end
