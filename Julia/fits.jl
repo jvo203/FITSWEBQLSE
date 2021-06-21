@@ -673,11 +673,16 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     finally
 
                         # copy (pixels,mask) into the distributed arrays (dpixels,dmask)
-                        pid = myid()
+                        try
+                            dpixels = pixels
+                            dmask = mask
+                        catch e
+                            println("DArray::$e")
+                        end
 
                         println("loading FITS cube finished")
                     end
-
+                        
                 end
 
                 # spawn remote jobs
