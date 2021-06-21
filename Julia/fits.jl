@@ -735,7 +735,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 close(progress)
                 wait(progress_task)
 
-                # println("indices:", indices)
                 for (key, value) in indices
                     idx = findall(value)
                     println("tid $key::", idx, "($(length(idx)))")
