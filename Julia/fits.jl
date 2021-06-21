@@ -523,6 +523,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             try
                 # pixels = zeros(Float32, width, height)
                 # mask = map(isnan, pixels)
+                
+                # distributed arrays
                 pixels = dzeros(Float32, (width, height, n), workers())
                 mask = dfill(false, (width, height, n), workers())
 
@@ -706,6 +708,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 close(progress)
                 wait(progress_task)
 
+                # distributed pixels & mask
+                fits.pixels = pixels
+                fits.mask = mask
+
                 fits.frame_min = frame_min
                 fits.frame_max = frame_max
                 fits.mean_spectrum = mean_spectrum
@@ -747,7 +753,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 println("DArray error: $e")
             end
 
-            println("reading depth($depth) > 1 is not fully implemented yet.")
+            # println("reading depth($depth) > 1 is not fully implemented yet.")
         end
 
         break
