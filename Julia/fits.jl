@@ -565,7 +565,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 @everywhere function load_fits_frame(
                     jobs,
                     progress,
-                    results,
                     path,
                     width,
                     height,
@@ -672,7 +671,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     @spawnat w load_fits_frame(
                         jobs,
                         progress,
-                        image,
                         filepath,
                         width,
                         height,
