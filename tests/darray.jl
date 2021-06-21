@@ -9,6 +9,17 @@ println("#workers: $n")
 pixels = dzeros(Float32, (3, 3, n), workers())
 mask = dfill(false, (3, 3, n), workers())
 
+@everywhere function fill_array(d::DArray)
+    pid = myid()
+
+    # d[1,1,pid] = Float32(pid)
+    println(d)
+end
+
+@sync for w in workers()
+    @spawnat w fill_array(pixels)
+end
+
 println(pixels)
 println(mask)
 
