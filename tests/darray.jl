@@ -13,7 +13,10 @@ mask = dfill(false, (3, 3, n), workers())
     pid = myid()
 
     # d[1,1,pid] = Float32(pid)
-    println(d)
+    println(localpart(d))
+
+    la = localpart(d)
+    la .= Float32(pid)
 end
 
 @sync for w in workers()
