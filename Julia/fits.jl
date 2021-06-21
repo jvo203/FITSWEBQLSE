@@ -528,7 +528,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 frame_min = zeros(Float32, depth)
                 frame_max = zeros(Float32, depth)
-                
+
                 mean_spectrum = zeros(Float32, depth)
                 integrated_spectrum = zeros(Float32, depth)
 
@@ -578,6 +578,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     ignrval,
                     cdelt3,
                     hdu_id,
+                    global_pixels::DArray,
+                    global_mask::DArray
                 )
 
                     local frame , frame_pixels , frame_mask
@@ -687,6 +689,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         fits.ignrval,
                         fits._cdelt3,
                         hdu_id,
+                        pixels,
+                        mask
                     )
                 end
 
