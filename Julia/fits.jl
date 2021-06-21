@@ -516,17 +516,27 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         else
             n = length(workers())
 
-                println(
+            println(
                 "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
             try
-                indices =  Dict{Int32,BitArray{1}}()
+                indices = Dict{Int32,BitArray{1}}()
 
                 # distributed arrays
                 chunks = (1, 1, n)
-                pixels = DArray(I -> zeros(Float32, map(length, I)), (width, height, n), workers(), chunks)
-                mask = DArray(I -> fill(false, map(length, I)), (width, height, n), workers(), chunks)
+                pixels = DArray(
+                    I -> zeros(Float32, map(length, I)),
+                    (width, height, n),
+                    workers(),
+                    chunks,
+                )
+                mask = DArray(
+                    I -> fill(false, map(length, I)),
+                    (width, height, n),
+                    workers(),
+                    chunks,
+                )
 
                 frame_min = zeros(Float32, depth)
                 frame_max = zeros(Float32, depth)
@@ -554,8 +564,9 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 progress_task = @async while true
                     try
                         local queue::BitArray{1}
-                        
-                        frame, min_val, max_val, mean_val, integrated_val, tid = take!(progress)
+
+                        frame, min_val, max_val, mean_val, integrated_val, tid =
+                            take!(progress)
 
                         frame_min[frame] = Float32(min_val)
                         frame_max[frame] = Float32(max_val)
@@ -567,7 +578,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         try
                             queue = indices[tid]
                         catch e
-                        println("adding a new BitArray@$tid")
+                            println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
                         finally
@@ -579,7 +590,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         break
                     end
                 end
-                        
+
                 @everywhere function load_fits_frame(
                     jobs,
                     progress,
@@ -592,7 +603,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     cdelt3,
                     hdu_id,
                     global_pixels::DArray,
-                    global_mask::DArray
+                    global_mask::DArray,
                 )
 
                     local frame , frame_pixels , frame_mask
@@ -658,7 +669,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-                                
+
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -675,7 +686,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                     frame_max,
                                     mean_spectrum,
                                     integrated_spectrum,
-                                    myid()
+                                    myid(),
                                 ),
                             )
 
@@ -683,7 +694,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         end
 
                     catch e
-                        # println("task $(myid())/$frame::error: $e")
+                    # println("task $(myid())/$frame::error: $e")
                     finally
 
                         # copy (pixels,mask) into the distributed arrays (global_pixels,global_mask)
@@ -692,15 +703,15 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             local_pixels = localpart(global_pixels)
                             local_mask = localpart(global_mask)
 
-                            local_pixels[:,:] = pixels
-                            local_mask[:,:] = mask
+                            local_pixels[:, :] = pixels
+                            local_mask[:, :] = mask
                         catch e
                             println("DArray::$e")
                         end
 
                         println("loading FITS cube finished")
                     end
-                        
+
                 end
 
                 # spawn remote jobs
@@ -717,14 +728,18 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         fits._cdelt3,
                         hdu_id,
                         pixels,
-                        mask
+                        mask,
                     )
                 end
 
                 close(progress)
                 wait(progress_task)
 
-                println("indices:", indices)
+                # println("indices:", indices)
+                for (key, value) in indices
+                    idx = findall(value)
+                    println("tid $key::", idx, "($(length(idx)))")
+                end
 
                 # distributed pixels & mask
                 fits.pixels = pixels
