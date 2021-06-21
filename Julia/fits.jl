@@ -520,8 +520,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             )
 
             try
-                pixels = zeros(Float32, width, height)
-                mask = map(isnan, pixels)
+                # pixels = zeros(Float32, width, height)
+                # mask = map(isnan, pixels)
                 frame_min = zeros(Float32, depth)
                 frame_max = zeros(Float32, depth)
                 mean_spectrum = zeros(Float32, depth)
@@ -579,6 +579,9 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     local valid_pixels , valid_mask
                     local frame_min , frame_max
                     local mean_spectrum , integrated_spectrum
+
+                    pixels = zeros(Float32, width, height)
+                    mask = map(isnan, pixels)
 
                     try
 
@@ -659,7 +662,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         end
 
                     catch e
-                    # println("task $(myid)/$frame::error: $e")
+                        # println("task $(myid)/$frame::error: $e")
                     finally
                         println("loading FITS cube finished")
                     end
