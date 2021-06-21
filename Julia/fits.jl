@@ -675,12 +675,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         # println("task $(myid())/$frame::error: $e")
                     finally
 
-                        # copy (pixels,mask) into the distributed arrays (dpixels,dmask)
+                        # copy (pixels,mask) into the distributed arrays (global_pixels,global_mask)
                         try
-                            # dpixels = pixels
-                            # dmask = mask
+                            # obtain worker-local references
                             local_pixels = localpart(global_pixels)
                             local_mask = localpart(global_mask)
+
+                            local_pixels = pixels
+                            local_mask = mask
                         catch e
                             println("DArray::$e")
                         end
