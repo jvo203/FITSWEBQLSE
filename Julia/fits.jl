@@ -523,7 +523,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             try
                 # pixels = zeros(Float32, width, height)
                 # mask = map(isnan, pixels)
-                
+
                 # distributed arrays
                 pixels = dzeros(Float32, (width, height, n), workers())
                 mask = dfill(false, (width, height, n), workers())
