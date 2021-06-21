@@ -521,10 +521,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             )
 
             try
-                indices =  Dict{Int32,BitArray{depth}}()
-
-                # pixels = zeros(Float32, width, height)
-                # mask = map(isnan, pixels)
+                indices =  Dict{Int32,BitArray{1}}()
 
                 # distributed arrays
                 chunks = (1, 1, n)
@@ -553,9 +550,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     end
                 end
 
-                # in the following two tasks:
                 # process the incoming results in the background
-
                 progress_task = @async while true
                     try
                         frame, min_val, max_val, mean_val, integrated_val, tid = take!(progress)
@@ -567,17 +562,24 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                         update_progress(fits, depth)
 
-                        # append to the workers index
-                        # println("frame: $frame, tid: $tid")
-                        # queue = indices[tid]
-                        # append!(queue, frame)
-                        # push!(indices[tid], frame)
+                        local queue
+
+                        try
+                            queue = indices[tid]
+                        catch e
+                        println("adding a new BitArray@$tid")
+                            queue = falses(depth)
+                            indices[tid] = queue
+                        finally
+                            queue[frame] = true
+                        end
+
                     catch e
                         println("progress task completed")
                         break
                     end
                 end
-
+                        
                 @everywhere function load_fits_frame(
                     jobs,
                     progress,
