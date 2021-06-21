@@ -681,8 +681,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             local_pixels = localpart(global_pixels)
                             local_mask = localpart(global_mask)
 
-                            local_pixels = pixels
-                            local_mask = mask
+                            local_pixels[:,:] = pixels
+                            local_mask[:,:] = mask
                         catch e
                             println("DArray::$e")
                         end
@@ -726,7 +726,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 dmax = maximum(frame_max)
                 println("dmin: $dmin, dmax: $dmax")
 
-                # println("pixels:", size(pixels))
+                println("fits.pixels:", size(fits.pixels))
+                # println("fits.pixels:", fits.pixels[1:5,1:5,:])
                 # println("mask:", fits.mask)
                 # println("frame_min:", fits.frame_min)
                 # println("frame_max:", fits.frame_max)
