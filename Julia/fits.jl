@@ -532,7 +532,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 jobs = RemoteChannel(() -> Channel{Int}(32))
                 progress = RemoteChannel(() -> Channel{Tuple}(32))
-                image = RemoteChannel(() -> Channel{Tuple}(32))
 
                 # fill-in the jobs queue
                 @async for i = 1:depth
@@ -563,18 +562,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     end
                 end
 
-                image_task = @async while true
-                    try
-                        thread_pixels, thread_mask = take!(image)
-                        pixels .+= thread_pixels
-                        mask .&= thread_mask
-                        println("received (pixels,mask)")
-                    catch e
-                        println("image task completed")
-                        break
-                    end
-                end
-
                 @everywhere function load_fits_frame(
                     jobs,
                     progress,
@@ -593,9 +580,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     local valid_pixels , valid_mask
                     local frame_min , frame_max
                     local mean_spectrum , integrated_spectrum
-
-                    pixels = zeros(Float32, width, height)
-                    mask = map(isnan, pixels)
 
                     try
 
@@ -617,14 +601,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                     reshape(read(hdu, :, :, frame), (width, height))
                             end
 
-                            #frame_mask = map(
+                            # frame_mask = map(
                             #    x ->
                             #        !isfinite(x) ||
                             #            (x < datamin) ||
                             #            (x > datamax) ||
                             #            (x <= ignrval),
                             #    frame_pixels,
-                            #)
+                            # )
 
                             frame_mask =
                                 invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
@@ -652,7 +636,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-
+                                
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -678,9 +662,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     catch e
                     # println("task $(myid)/$frame::error: $e")
                     finally
-                        # send back the result to the root
-                        put!(results, (pixels, mask))
-
                         println("loading FITS cube finished")
                     end
 
@@ -704,13 +685,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 end
 
                 close(progress)
-                close(image)
-
                 wait(progress_task)
-                wait(image_task)
-
-                fits.pixels = pixels
-                fits.mask = mask
 
                 fits.frame_min = frame_min
                 fits.frame_max = frame_max
@@ -721,7 +696,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 dmax = maximum(frame_max)
                 println("dmin: $dmin, dmax: $dmax")
 
-                println("pixels:", size(pixels))
+                # println("pixels:", size(pixels))
                 # println("mask:", fits.mask)
                 # println("frame_min:", fits.frame_min)
                 # println("frame_max:", fits.frame_max)
