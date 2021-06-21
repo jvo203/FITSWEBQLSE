@@ -521,6 +521,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             )
 
             try
+                indices =  Dict{Int32,BitArray{depth}}()
+
                 # pixels = zeros(Float32, width, height)
                 # mask = map(isnan, pixels)
 
@@ -556,7 +558,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 progress_task = @async while true
                     try
-                        frame, min_val, max_val, mean_val, integrated_val = take!(progress)
+                        frame, min_val, max_val, mean_val, integrated_val, tid = take!(progress)
 
                         frame_min[frame] = Float32(min_val)
                         frame_max[frame] = Float32(max_val)
@@ -564,6 +566,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         integrated_spectrum[frame] = Float32(integrated_val)
 
                         update_progress(fits, depth)
+
+                        # append to the workers index
+                        # println("frame: $frame, tid: $tid")
+                        # queue = indices[tid]
+                        # append!(queue, frame)
+                        # push!(indices[tid], frame)
                     catch e
                         println("progress task completed")
                         break
@@ -665,6 +673,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                     frame_max,
                                     mean_spectrum,
                                     integrated_spectrum,
+                                    myid()
                                 ),
                             )
 
@@ -712,6 +721,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 close(progress)
                 wait(progress_task)
+
+                println("indices:", indices)
 
                 # distributed pixels & mask
                 fits.pixels = pixels
