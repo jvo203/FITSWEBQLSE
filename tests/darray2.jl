@@ -21,3 +21,9 @@ pixels = DArray(ras)
 println("pixels:", pixels)
 
 println("indices:", [@fetchfrom p localindices(pixels) for p in workers()])
+
+r1 = DistributedArrays.remotecall(() -> rand(10, 10), workers()[1])
+r2 = DistributedArrays.remotecall(() -> rand(10, 10), workers()[2])
+r3 = DistributedArrays.remotecall(() -> rand(10, 10), workers()[3])
+r4 = DistributedArrays.remotecall(() -> rand(10, 10), workers()[4])
+D = DArray(reshape([r1 r2 r3 r4], (2, 2)))
