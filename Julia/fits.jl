@@ -1,6 +1,7 @@
 using Dates;
 using DistributedArrays;
 using FITSIO;
+using Mmap;
 
 mutable struct testD
     x::Float64
@@ -592,6 +593,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 end
 
                 @everywhere function load_fits_frame(
+                    datasetid,
                     jobs,
                     progress,
                     path,
@@ -610,11 +612,11 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     local valid_pixels , valid_mask
                     local frame_min , frame_max
                     local mean_spectrum , integrated_spectrum
-                    local compressed_pixels
 
                     pixels = zeros(Float32, width, height)
                     mask = map(!isnan, pixels)
-                    compressed_pixels = zeros(Float16, width, height)
+
+                    #compressed_pixels = zeros(Float16, width, height)
 
                     try
 
@@ -671,7 +673,13 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             frame_pixels[frame_mask] .= NaN32
 
                             # convert to half-float
+                            filename = ".cache/" * datasetid * "." * string(frame) * ".bin"
+                            io = open(filename, "w+")
+                            compressed_pixels =
+                                Mmap.mmap(io, Matrix{Float16}, (width, height))
                             compressed_pixels = map(x -> Float16(x), frame_pixels)
+                            Mmap.sync!(compressed_pixels)
+                            close(io)
 
                             # send back the reduced values
                             put!(
@@ -713,6 +721,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 # spawn remote jobs
                 @time @sync for w in workers()
                     @spawnat w load_fits_frame(
+                        fits.datasetid,
                         jobs,
                         progress,
                         filepath,
