@@ -2,6 +2,7 @@ using Dates;
 using DistributedArrays;
 using FITSIO;
 using Mmap;
+using Serialization;
 
 mutable struct testD
     x::Float64
@@ -129,6 +130,43 @@ function update_progress(fits::FITSDataSet, total::Integer)
     fits.elapsed[] = datetime2unix(now()) - fits.last_accessed[]
     Threads.atomic_add!(fits.progress, 1)
     fits.total[] = total
+end
+
+function serialize_to_file(fits::FITSDataSet)
+    try
+        filename = ".cache/" * fits.datasetid * ".jls"
+        open(f -> serialize(f, fits), filename, "w")
+    catch e
+        println("error serialising the FITS object::$e")
+    end
+end
+
+# The target struct
+struct Foo
+    x::Int
+    y::Float32
+end
+
+function serialize_to_memory(fits::FITSDataSet)
+
+    foo1 = Foo(1, 2.5)
+
+    try
+        # Serialization
+        write_iob = IOBuffer()
+        serialize(write_iob, foo1)
+        seekstart(write_iob)
+        content = read(write_iob)
+
+        # Deserialization
+        read_iob = IOBuffer(content)
+        foo2 = deserialize(read_iob)
+
+        @show foo1
+        @show foo2
+    catch e
+        println("serialisation error::$e")
+    end
 end
 
 function get_progress(fits::FITSDataSet)
@@ -801,5 +839,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     end
 
     update_timestamp(fits)
+
+    serialize_to_memory(fits)
 
 end
