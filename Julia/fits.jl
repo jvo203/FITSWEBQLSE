@@ -34,7 +34,7 @@ mutable struct FITSDataSet
     # pixels, spectrum
     pixels::Any
     mask::Any
-
+    indices::Any
     frame_min::Any
     frame_max::Any
     mean_spectrum::Any
@@ -73,6 +73,7 @@ mutable struct FITSDataSet
             Nothing,
             Nothing,
             Nothing,
+            Nothing,
             false,
             false,
             false,
@@ -101,6 +102,7 @@ mutable struct FITSDataSet
             prevfloat(typemax(Float32)),
             "",
             -prevfloat(typemax(Float32)),
+            Nothing,
             Nothing,
             Nothing,
             Nothing,
@@ -745,9 +747,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     println("tid $key::", idx, "($(length(idx)))")
                 end
 
-                # distributed pixels & mask
+                # distributed pixels & mask + distribution indices
                 fits.pixels = pixels
                 fits.mask = mask
+                fits.indices = indices
 
                 fits.frame_min = frame_min
                 fits.frame_max = frame_max
