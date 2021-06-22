@@ -345,7 +345,7 @@ function serveFITS(request::HTTP.Request)
 
                     if fits_object.depth > 1
                         println("preloading $f")
-                        # @async preloadFITS(fits_object)
+                        @async preloadFITS(fits_object)
                     end
                 catch e
                     println("cannot restore $f from cache")
