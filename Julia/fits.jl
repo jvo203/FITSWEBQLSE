@@ -834,10 +834,5 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
     # serialize_to_bson(fits)
     serialize_to_file(fits)
-
-    # fits2 = FITSDataSet(fits.datasetid)
-    fits2 = deserialize_from_file(fits.datasetid)
-
-    println("copy: $(fits2.datasetid)::$(fits2.header)")
-
+    #fits2 = deserialize_from_file(fits.datasetid)
 end
