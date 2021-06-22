@@ -610,9 +610,11 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     local valid_pixels , valid_mask
                     local frame_min , frame_max
                     local mean_spectrum , integrated_spectrum
+                    local compressed_pixels
 
                     pixels = zeros(Float32, width, height)
                     mask = map(!isnan, pixels)
+                    compressed_pixels = zeros(Float16, width, height)
 
                     try
 
@@ -645,7 +647,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                             # pick out the valid values only
                             valid_mask = .!frame_mask
-                            valid_pixels = frame_pixels[valid_mask]
+                            valid_pixels = @view frame_pixels[valid_mask]
 
                             pixel_sum = sum(valid_pixels)
                             pixel_count = length(valid_pixels)
@@ -667,6 +669,9 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                             # insert back NaNs ahead of conversion to half-float (Float16)
                             frame_pixels[frame_mask] .= NaN32
+
+                            # convert to half-float
+                            compressed_pixels = map(x -> Float16(x), frame_pixels)
 
                             # send back the reduced values
                             put!(
