@@ -634,48 +634,48 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                     reshape(read(hdu, :, :, frame), (width, height))
                             end
 
-                            # frame_mask = map(
-                            #    x ->
-                            #        !isfinite(x) ||
-                            #            (x < datamin) ||
-                            #            (x > datamax) ||
-                            #            (x <= ignrval),
-                            #    frame_pixels,
-                            # )
+                            pixel_count = 0
+                            pixel_sum = 0.0
 
-                            frame_mask =
-                                invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
+                            frame_min = prevfloat(typemax(Float32))
+                            frame_max = -prevfloat(typemax(Float32))
 
-                            # replace NaNs with 0.0
-                            frame_pixels[frame_mask] .= 0.0
+                            # a single pass through the data
+                            for idx in eachindex(frame_pixels)
+                                x = frame_pixels[idx]
 
-                            pixels .+= frame_pixels
-                            mask .&= frame_mask
+                                is_nan =
+                                    !isfinite(x) ||
+                                    (x < datamin) ||
+                                    (x > datamax) ||
+                                    (x <= ignrval)
 
-                            # pick out the valid values only
-                            valid_mask = .!frame_mask
-                            valid_pixels = frame_pixels[valid_mask]
+                                if is_nan
+                                    x = NaN32
+                                else
+                                    pixel_count += 1
+                                    pixel_sum += x
 
-                            pixel_sum = sum(valid_pixels)
-                            pixel_count = length(valid_pixels)
+                                    pixels[idx] += x
+                                    mask[idx] |= true
+
+                                    if x < frame_min
+                                        frame_min = x
+                                    end
+
+                                    if x > frame_max
+                                        frame_max = x
+                                    end
+                                end
+                            end
 
                             if pixel_count > 0
-                                frame_min, frame_max = extrema(valid_pixels)
                                 mean_spectrum = pixel_sum / pixel_count
                                 integrated_spectrum = pixel_sum * cdelt3
                             else
-                                # no mistake here, reverse the min/max values
-                                # so that global dmin/dmax can get correct values
-                                # in the face of all-NaN frames
-                                frame_min = prevfloat(typemax(Float32))
-                                frame_max = -prevfloat(typemax(Float32))
-
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
-
-                            # insert back NaNs ahead of conversion to half-float (Float16)
-                            frame_pixels[frame_mask] .= NaN32
 
                             # send back the reduced values
                             put!(

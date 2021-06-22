@@ -87,3 +87,48 @@ frame_pixels[frame_mask] .= NaN32
 
 
 ######################################
+very slow:
+pixel_count = 0
+                            pixel_sum = 0.0
+
+                            frame_min = prevfloat(typemax(Float32))
+                            frame_max = -prevfloat(typemax(Float32))
+
+                            # a single pass through the data
+                            for idx in eachindex(frame_pixels)
+                                x = frame_pixels[idx]
+
+                                is_nan =
+                                    !isfinite(x) ||
+                                    (x < datamin) ||
+                                    (x > datamax) ||
+                                    (x <= ignrval)
+
+                                if is_nan
+                                    x = NaN32
+                                else
+                                    pixel_count += 1
+                                    pixel_sum += x
+
+                                    pixels[idx] += x
+                                    mask[idx] |= true
+
+                                    if x < frame_min
+                                        frame_min = x
+                                    end
+
+                                    if x > frame_max
+                                        frame_max = x
+                                    end
+                                end
+                            end
+
+                            if pixel_count > 0
+                                mean_spectrum = pixel_sum / pixel_count
+                                integrated_spectrum = pixel_sum * cdelt3
+                            else
+                                mean_spectrum = 0.0
+                                integrated_spectrum = 0.0
+                            end
+
+######################################
