@@ -338,13 +338,24 @@ function serveFITS(request::HTTP.Request)
         foreach(datasets) do f
             if !dataset_exists(f, FITS_OBJECTS, FITS_LOCK)
 
-                fits_object = FITSDataSet(f)
+                # try to restore data from cache
+                try
+                    fits_object = deserialize_from_file(f)
+                    insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
-                insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
+                    if fits_object.depth > 1
+                        println("preloading $f")
+                        # @async preloadFITS(fits_object)
+                    end
+                catch e
+                    println("cannot restore $f from cache")
 
-                filepath = dir * "/" * f * "." * ext
-                @async loadFITS(filepath, fits_object)
+                    fits_object = FITSDataSet(f)
+                    insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
+                    filepath = dir * "/" * f * "." * ext
+                    @async loadFITS(filepath, fits_object)
+                end
             end
         end
     end
