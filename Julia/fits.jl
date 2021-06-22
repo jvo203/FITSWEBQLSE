@@ -1,3 +1,4 @@
+using BSON;
 using Dates;
 using DistributedArrays;
 using FITSIO;
@@ -132,41 +133,32 @@ function update_progress(fits::FITSDataSet, total::Integer)
     fits.total[] = total
 end
 
-function serialize_to_file(fits::FITSDataSet)
+function serialize_to_bson(fits::FITSDataSet)
     try
-        filename = ".cache/" * fits.datasetid * ".jls"
-        open(f -> serialize(f, fits), filename, "w")
+        filename = ".cache/" * fits.datasetid * ".bson"
+        bson(filename, fits)
     catch e
         println("error serialising the FITS object::$e")
     end
 end
 
-# The target struct
-struct Foo
-    x::Int
-    y::Float32
+function deserialize_from_bson(datasetid)::FITSDataSet
+    filename = ".cache/" * datasetid * ".bson"
+    return BSON.load(filename)
 end
 
-function serialize_to_memory(fits::FITSDataSet)
-
-    foo1 = Foo(1, 2.5)
-
+function serialize_to_file(fits::FITSDataSet)
     try
-        # Serialization
-        write_iob = IOBuffer()
-        serialize(write_iob, foo1)
-        seekstart(write_iob)
-        content = read(write_iob)
-
-        # Deserialization
-        read_iob = IOBuffer(content)
-        foo2 = deserialize(read_iob)
-
-        @show foo1
-        @show foo2
+        filename = ".cache/" * fits.datasetid * ".jls"
+        serialize(filename, fits)
     catch e
-        println("serialisation error::$e")
+        println("error serialising the FITS object::$e")
     end
+end
+
+function deserialize_from_file(datasetid)
+    filename = ".cache/" * datasetid * ".jls"
+    return deserialize(filename)
 end
 
 function get_progress(fits::FITSDataSet)
@@ -840,6 +832,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
     update_timestamp(fits)
 
-    serialize_to_memory(fits)
+    # serialize_to_bson(fits)
+    serialize_to_file(fits)
+
+    # fits2 = FITSDataSet(fits.datasetid)
+    fits2 = deserialize_from_file(fits.datasetid)
+
+    println("copy: $(fits2.datasetid)::$(fits2.header)")
 
 end
