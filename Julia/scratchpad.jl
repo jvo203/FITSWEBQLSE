@@ -6,10 +6,7 @@ pixels = @distributed (+) for i = 1:depth
     try
         fits_file = FITS(filepath)
 
-        pixels = reshape(
-                            read(fits_file[hdu_id], :, :, i, 1),
-                            (width, height),
-                        )
+        pixels = reshape(read(fits_file[hdu_id], :, :, i, 1), (width, height))
         val = sum(pixels)
 
         close(fits_file)
@@ -17,7 +14,7 @@ pixels = @distributed (+) for i = 1:depth
         println("i:$i::error: $e")
         val = 0.0
 
-                        # the type should be decided based on <bitpix>
+        # the type should be decided based on <bitpix>
         pixels = zeros(Float32, width, height)
     end
 
@@ -45,7 +42,7 @@ image_task = @async while true
     end
 end
 
-                # send back the result to the root
+# send back the result to the root
 put!(results, (pixels, mask))
 
 close(image)
@@ -54,3 +51,35 @@ wait(image_task)
 fits.pixels = pixels
 fits.mask = mask
 ################################
+
+frame_mask = invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
+
+# replace NaNs with 0.0
+frame_pixels[frame_mask] .= 0.0
+
+pixels .+= frame_pixels
+mask .&= frame_mask
+
+# pick out the valid values only
+valid_mask = .!frame_mask
+valid_pixels = frame_pixels[valid_mask]
+
+pixel_sum = sum(valid_pixels)
+pixel_count = length(valid_pixels)
+
+if pixel_count > 0
+    frame_min, frame_max = extrema(valid_pixels)
+    mean_spectrum = pixel_sum / pixel_count
+    integrated_spectrum = pixel_sum * cdelt3
+else
+    # no mistake here, reverse the min/max values
+    # so that global dmin/dmax can get correct values
+    # in the face of all-NaN frames
+    frame_min = prevfloat(typemax(Float32))
+    frame_max = -prevfloat(typemax(Float32))
+
+    mean_spectrum = 0.0
+    integrated_spectrum = 0.0
+end
+
+######################################
