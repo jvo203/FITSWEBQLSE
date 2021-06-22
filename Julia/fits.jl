@@ -807,24 +807,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 println("distributed computing error: $e")
             end
 
-            try
-                # ras = [@spawnat w 10 for w in workers()]
-                # fits_files = DArray(ras)
-                # println("fits_handles:", fits_files)
-                # println([@fetchfrom w localindices(fits_files) for w in workers()])        
-
-                # ras = [@spawnat w rand(2, 2) for w in workers()[1:4]]
-                # ras = reshape(ras, (2, 2))
-                # D = DArray(ras)
-                # println([@fetchfrom p DistributedArrays.localindices(D) for p in workers()])
-
-                # println("DArray:", D)
-
-            catch e
-                println("DArray error: $e")
-            end
-
-            # println("reading depth($depth) > 1 is not fully implemented yet.")
         end
 
         break
