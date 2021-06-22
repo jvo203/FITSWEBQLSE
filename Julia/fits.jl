@@ -828,5 +828,7 @@ function preloadFITS(fits::FITSDataSet)
     for (key, value) in fits.indices
         idx = findall(value)
         println("tid $key::", idx, "($(length(idx)))")
+
+        # @spawn @ key, pass <idx> 
     end
 end
