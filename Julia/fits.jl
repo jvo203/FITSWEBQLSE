@@ -841,4 +841,9 @@ function preloadFITS(fits::FITSDataSet)
     if (fits.datasetid == "") || (fits.depth <= 1)
         return
     end
+
+    for (key, value) in fits.indices
+        idx = findall(value)
+        println("tid $key::", idx, "($(length(idx)))")
+    end
 end
