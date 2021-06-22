@@ -82,4 +82,8 @@ else
     integrated_spectrum = 0.0
 end
 
+# insert back NaNs ahead of conversion to half-float (Float16)
+frame_pixels[frame_mask] .= NaN32
+
+
 ######################################
