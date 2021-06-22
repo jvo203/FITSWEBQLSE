@@ -809,6 +809,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
         end
 
+        # stop reading FITS HDUs
         break
     end
 
@@ -816,7 +817,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
     # serialize_to_bson(fits)
     serialize_to_file(fits)
-    #fits2 = deserialize_from_file(fits.datasetid)
+
 end
 
 function preloadFITS(fits::FITSDataSet)
