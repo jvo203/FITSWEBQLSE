@@ -187,7 +187,6 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.last_accessed)
         serialize(io, fits.progress)
         serialize(io, fits.total)
-
         # skipping fits.elapsed
         # skipping fits.mutex 
 
@@ -887,7 +886,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     update_timestamp(fits)
 
     # serialize_to_bson(fits)
-    serialize_to_file(fits)
+    serialize_fits(fits)
 
 end
 
