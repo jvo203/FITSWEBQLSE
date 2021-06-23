@@ -340,7 +340,7 @@ function serveFITS(request::HTTP.Request)
 
                 # try to restore data from cache
                 try
-                    fits_object = deserialize_from_file(f)
+                    fits_object = deserialize_fits(f)
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
                     if fits_object.depth > 1
