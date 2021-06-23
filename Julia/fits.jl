@@ -847,7 +847,8 @@ function preloadFITS(fits::FITSDataSet)
                 close(io)
 
                 # touch the data
-                println("preloaded frame #$frame", compressed_pixels[1:5, 1:5])
+                pixel_sum = sum(compressed_pixels)
+                println("preloaded frame #$frame")
 
             catch e
                 println(e)
@@ -855,12 +856,10 @@ function preloadFITS(fits::FITSDataSet)
         end
     end
 
-    for (key, value) in fits.indices
+    for (w, value) in fits.indices
         idx = findall(value)
-        println("tid $key::", idx, "($(length(idx)))")
+        println("worker $w::", idx, "($(length(idx)))")
 
-        for w in workers()
-            @spawnat w preload_fits(fits.datasetid, fits.width, fits.height, idx)
-        end
+        @spawnat w preload_fits(fits.datasetid, fits.width, fits.height, idx)
     end
 end
