@@ -758,10 +758,11 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         println("loading FITS cube finished")
                     end
 
+                    return ("workerid", myid())
                 end
 
-                # spawn remote jobs
-                @time @sync for w in workers()
+                # spawn remote jobs, collecting the Futures along the way
+                ras = [
                     @spawnat w load_fits_frame(
                         fits.datasetid,
                         jobs,
@@ -776,8 +777,13 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         hdu_id,
                         pixels,
                         mask,
-                    )
-                end
+                    ) for w in workers()
+                ]
+
+                println("ras: ", ras)
+
+                @time wait.(ras)
+                # println("results: ", fetch.(ras))
 
                 close(progress)
                 wait(progress_task)
@@ -826,7 +832,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     update_timestamp(fits)
 
     # serialize_to_bson(fits)
-    serialize_to_file(fits)
+    #serialize_to_file(fits)
 
 end
 
