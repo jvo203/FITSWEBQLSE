@@ -837,10 +837,32 @@ function preloadFITS(fits::FITSDataSet)
         return
     end
 
+    @everywhere function preload_fits(datasetid, width, height, idx)
+
+        for frame in idx
+            try
+                cache_dir = ".cache/" * datasetid
+                filename = cache_dir * "/" * string(frame) * ".bin"
+
+                io = open(filename) # default is read-only
+                compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
+
+                # touch the data
+                println("preloaded frame #$frame", compressed_pixels[1:5, 1:5])
+
+                close(io)
+            catch e
+                println(e)
+            end
+        end
+    end
+
     for (key, value) in fits.indices
         idx = findall(value)
         println("tid $key::", idx, "($(length(idx)))")
 
-        # @spawn @ key, pass <idx> 
+        for w in workers()
+            @spawnat w preload_fits(fits.datasetid, fits.width, fits.height, idx)
+        end
     end
 end
