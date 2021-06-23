@@ -150,6 +150,53 @@ function deserialize_from_bson(datasetid)::FITSDataSet
     return BSON.load(filename)
 end
 
+function serialize_fits(fits::FITSDataSet)
+    try
+        filename = ".cache/" * fits.datasetid * "/state.jls"
+        io = open(filename, "w+")
+
+        serialize(io, fits.datasetid)
+        serialize(io, fits.header)
+        serialize(io, fits.width)
+        serialize(io, fits.height)
+        serialize(io, fits.depth)
+
+        serialize(io, fits.is_optical)
+        serialize(io, fits.is_xray)
+        serialize(io, fits.has_frequency)
+        serialize(io, fits.has_velocity)
+        serialize(io, fits.frame_multiplier)
+        serialize(io, fits._cdelt3)
+        serialize(io, fits.datamin)
+        serialize(io, fits.datamax)
+        serialize(io, fits.flux)
+        serialize(io, fits.ignrval)
+
+        serialize(io, fits.pixels)
+        serialize(io, fits.mask)
+        # skipping fits.compressed_pixels (Futures do not serialize)
+        serialize(io, fits.indices)
+        serialize(io, fits.frame_min)
+        serialize(io, fits.frame_max)
+        serialize(io, fits.mean_spectrum)
+        serialize(io, fits.integrated_spectrum)
+
+        serialize(io, fits.has_header)
+        serialize(io, fits.has_data)
+        serialize(io, fits.has_error)
+        serialize(io, fits.last_accessed)
+        serialize(io, fits.progress)
+        serialize(io, fits.total)
+
+        # skipping fits.elapsed
+        # skipping fits.mutex 
+
+        close(io)
+    catch e
+        println("error serialising the FITS object::$e")
+    end
+end
+
 function serialize_to_file(fits::FITSDataSet)
     try
         filename = ".cache/" * fits.datasetid * "/state.jls"
