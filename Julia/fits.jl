@@ -36,6 +36,7 @@ mutable struct FITSDataSet
     # pixels, spectrum
     pixels::Any
     mask::Any
+    compressed_pixels::Any
     indices::Any
     frame_min::Any
     frame_max::Any
@@ -76,6 +77,7 @@ mutable struct FITSDataSet
             Nothing,
             Nothing,
             Nothing,
+            Nothing,
             false,
             false,
             false,
@@ -104,6 +106,7 @@ mutable struct FITSDataSet
             prevfloat(typemax(Float32)),
             "",
             -prevfloat(typemax(Float32)),
+            Nothing,
             Nothing,
             Nothing,
             Nothing,
@@ -796,6 +799,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 # distributed pixels & mask + distribution indices
                 fits.pixels = pixels
                 fits.mask = mask
+                fits.compressed_pixels = ras
                 fits.indices = indices
 
                 fits.frame_min = frame_min
@@ -832,7 +836,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     update_timestamp(fits)
 
     # serialize_to_bson(fits)
-    #serialize_to_file(fits)
+    serialize_to_file(fits)
 
 end
 
@@ -840,6 +844,8 @@ function preloadFITS(fits::FITSDataSet)
     if (fits.datasetid == "") || (fits.depth <= 1)
         return
     end
+
+    println("results: ", fits.compressed_pixels)
 
     @everywhere function preload_fits(datasetid, width, height, idx)
 
