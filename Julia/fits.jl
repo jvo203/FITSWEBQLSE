@@ -845,8 +845,6 @@ function preloadFITS(fits::FITSDataSet)
         return
     end
 
-    println("results: ", fits.compressed_pixels)
-
     @everywhere function preload_fits(datasetid, width, height, idx)
 
         for frame in idx
