@@ -719,10 +719,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             cache_dir = ".cache/" * datasetid
                             filename = cache_dir * "/" * string(frame) * ".bin"
                             io = open(filename, "w+")
-                            compressed_pixels =
-                                Mmap.mmap(io, Matrix{Float16}, (width, height))
                             compressed_pixels = map(x -> Float16(x), frame_pixels)
-                            Mmap.sync!(compressed_pixels)
+                            write(io, compressed_pixels)
                             close(io)
 
                             # send back the reduced values
