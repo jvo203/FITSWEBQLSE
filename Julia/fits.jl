@@ -428,7 +428,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             mkdir(cache_dir)
         end
     catch e
-        println("error creating a cache directory::$e")
+        println(e)
+        return
     end
 
     width = 0
