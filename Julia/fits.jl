@@ -184,7 +184,7 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.has_header)
         serialize(io, fits.has_data)
         serialize(io, fits.has_error)
-        serialize(io, fits.last_accessed)
+        # skipping fits.last_accessed
         serialize(io, fits.progress)
         serialize(io, fits.total)
         # skipping fits.elapsed
@@ -194,6 +194,56 @@ function serialize_fits(fits::FITSDataSet)
     catch e
         println("error serialising the FITS object::$e")
     end
+end
+
+function deserialize_fits(datasetid)
+    fits = FITSDataSet(datasetid)
+
+    try
+        filename = ".cache/" * fits.datasetid * "/state.jls"
+        io = open(filename)
+
+        fits.datasetid = deserialize(io)
+        fits.header = deserialize(io)
+        fits.width = deserialize(io)
+        fits.height = deserialize(io)
+        fits.depth = deserialize(io)
+
+        fits.is_optical = deserialize(io)
+        fits.is_xray = deserialize(io)
+        fits.has_frequency = deserialize(io)
+        fits.has_velocity = deserialize(io)
+        fits.frame_multiplier = deserialize(io)
+        fits._cdelt3 = deserialize(io)
+        fits.datamin = deserialize(io)
+        fits.datamax = deserialize(io)
+        fits.flux = deserialize(io)
+        fits.ignrval = deserialize(io)
+
+        fits.pixels = deserialize(io)
+        fits.mask = deserialize(io)
+        # skipping fits.compressed_pixels
+        fits.indices = deserialize(io)
+        fits.frame_min = deserialize(io)
+        fits.frame_max = deserialize(io)
+        fits.mean_spectrum = deserialize(io)
+        fits.integrated_spectrum = deserialize(io)
+
+        fits.has_header = deserialize(io)
+        fits.has_data = deserialize(io)
+        fits.has_error = deserialize(io)
+        # skipping fits.last_accessed
+        fits.progress = deserialize(io)
+        fits.total = deserialize(io)
+        # skipping fits.elapsed
+        # skipping fits.mutex
+
+        close(io)
+    catch e
+        println("error serialising the FITS object::$e")
+    end
+
+    return fits
 end
 
 function serialize_to_file(fits::FITSDataSet)
