@@ -938,8 +938,8 @@ function preloadFITS(fits::FITSDataSet)
                 close(io)
 
                 # touch the data
-                pixel_sum = sum(compressed_pixels)
-                println("preloaded frame #$frame")
+                # pixel_sum = sum(compressed_pixels)
+                println("restored frame #$frame")
 
             catch e
                 println(e)
