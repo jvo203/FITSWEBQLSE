@@ -162,3 +162,19 @@ function preloadFITS(fits::FITSDataSet)
     end
 end
 ########################################
+using BSON
+
+function serialize_to_bson(fits::FITSDataSet)
+    try
+        filename = ".cache/" * fits.datasetid * "/state.bson"
+        bson(filename, fits)
+    catch e
+        println("error serialising the FITS object::$e")
+    end
+end
+
+function deserialize_from_bson(datasetid)::FITSDataSet
+    filename = ".cache/" * datasetid * "/state.bson"
+    return BSON.load(filename)
+end
+###############################################
