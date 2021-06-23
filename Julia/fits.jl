@@ -662,6 +662,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     pixels = zeros(Float32, width, height)
                     mask = map(!isnan, pixels)
 
+                    compressed_frames = Dict{Int32,Matrix{Float16}}()
                     #compressed_pixels = zeros(Float16, width, height)
 
                     try
@@ -718,11 +719,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             # insert back NaNs ahead of conversion to half-float (Float16)
                             frame_pixels[frame_mask] .= NaN32
 
+                            compressed_pixels = map(x -> Float16(x), frame_pixels)
+                            compressed_frames[frame] = compressed_pixels
+
                             # convert to half-float
                             cache_dir = ".cache/" * datasetid
                             filename = cache_dir * "/" * string(frame) * ".bin"
+
                             io = open(filename, "w+")
-                            compressed_pixels = map(x -> Float16(x), frame_pixels)
                             write(io, compressed_pixels)
                             close(io)
 
@@ -761,7 +765,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         println("loading FITS cube finished")
                     end
 
-                    return ("workerid", myid())
+                    return compressed_frames
                 end
 
                 # spawn remote jobs, collecting the Futures along the way
@@ -845,7 +849,7 @@ function preloadFITS(fits::FITSDataSet)
         return
     end
 
-    @everywhere function preload_fits(datasetid, width, height, idx)
+    @everywhere function preload_frames(datasetid, width, height, idx)
 
         for frame in idx
             try
@@ -870,6 +874,6 @@ function preloadFITS(fits::FITSDataSet)
         idx = findall(value)
         println("worker $w::", idx, "($(length(idx)))")
 
-        @spawnat w preload_fits(fits.datasetid, fits.width, fits.height, idx)
+        @spawnat w preload_frames(fits.datasetid, fits.width, fits.height, idx)
     end
 end
