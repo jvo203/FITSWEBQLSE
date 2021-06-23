@@ -844,11 +844,11 @@ function preloadFITS(fits::FITSDataSet)
 
                 io = open(filename) # default is read-only
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
+                close(io)
 
                 # touch the data
                 println("preloaded frame #$frame", compressed_pixels[1:5, 1:5])
 
-                close(io)
             catch e
                 println(e)
             end
