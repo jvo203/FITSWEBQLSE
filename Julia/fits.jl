@@ -1,4 +1,3 @@
-using BSON;
 using Dates;
 using DistributedArrays;
 using FITSIO;
@@ -134,20 +133,6 @@ function update_progress(fits::FITSDataSet, total::Integer)
     fits.elapsed[] = datetime2unix(now()) - fits.last_accessed[]
     Threads.atomic_add!(fits.progress, 1)
     fits.total[] = total
-end
-
-function serialize_to_bson(fits::FITSDataSet)
-    try
-        filename = ".cache/" * fits.datasetid * "/state.bson"
-        bson(filename, fits)
-    catch e
-        println("error serialising the FITS object::$e")
-    end
-end
-
-function deserialize_from_bson(datasetid)::FITSDataSet
-    filename = ".cache/" * datasetid * "/state.bson"
-    return BSON.load(filename)
 end
 
 function serialize_fits(fits::FITSDataSet)
