@@ -135,7 +135,7 @@ end
 
 function serialize_to_bson(fits::FITSDataSet)
     try
-        filename = ".cache/" * fits.datasetid * ".bson"
+        filename = ".cache/" * fits.datasetid * "/state.bson"
         bson(filename, fits)
     catch e
         println("error serialising the FITS object::$e")
@@ -143,13 +143,13 @@ function serialize_to_bson(fits::FITSDataSet)
 end
 
 function deserialize_from_bson(datasetid)::FITSDataSet
-    filename = ".cache/" * datasetid * ".bson"
+    filename = ".cache/" * datasetid * "/state.bson"
     return BSON.load(filename)
 end
 
 function serialize_to_file(fits::FITSDataSet)
     try
-        filename = ".cache/" * fits.datasetid * ".jls"
+        filename = ".cache/" * fits.datasetid * "/state.jls"
         serialize(filename, fits)
     catch e
         println("error serialising the FITS object::$e")
@@ -157,7 +157,7 @@ function serialize_to_file(fits::FITSDataSet)
 end
 
 function deserialize_from_file(datasetid)
-    filename = ".cache/" * datasetid * ".jls"
+    filename = ".cache/" * datasetid * "/state.jls"
     return deserialize(filename)
 end
 
@@ -419,6 +419,16 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     catch e
         println(e)
         return
+    end
+
+    try
+        cache_dir = ".cache/" * fits.datasetid
+
+        if !isdir(cache_dir)
+            mkdir(cache_dir)
+        end
+    catch e
+        println("error creating a cache directory::$e")
     end
 
     width = 0
@@ -705,7 +715,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             frame_pixels[frame_mask] .= NaN32
 
                             # convert to half-float
-                            filename = ".cache/" * datasetid * "." * string(frame) * ".bin"
+                            filename = ".cache/" * datasetid * "/" * string(frame) * ".bin"
                             io = open(filename, "w+")
                             compressed_pixels =
                                 Mmap.mmap(io, Matrix{Float16}, (width, height))
