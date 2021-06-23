@@ -716,7 +716,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             frame_pixels[frame_mask] .= NaN32
 
                             # convert to half-float
-                            filename = ".cache/" * datasetid * "/" * string(frame) * ".bin"
+                            cache_dir = ".cache/" * datasetid
+                            filename = cache_dir * "/" * string(frame) * ".bin"
                             io = open(filename, "w+")
                             compressed_pixels =
                                 Mmap.mmap(io, Matrix{Float16}, (width, height))
