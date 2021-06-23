@@ -26,8 +26,9 @@ end
 function read_mmap(width, height)
     io = open("/tmp/mmap.bin")
     compressed_pixels = Mmap.mmap(io, Matrix{Float32}, (width, height))
-    println("read_mmap: ", compressed_pixels)
     close(io)
+
+    println("read_mmap: ", compressed_pixels)
 end
 
 write_mmap2(width, height)
