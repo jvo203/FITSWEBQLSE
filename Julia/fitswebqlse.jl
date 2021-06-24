@@ -39,7 +39,7 @@ function serveFile(path::String)
     pos = findlast("?", path)
 
     if !isnothing(pos)
-        path = SubString(path, 1:(pos[1] - 1))
+        path = SubString(path, 1:(pos[1]-1))
     end
 
     # cache a response
@@ -99,7 +99,7 @@ function serveFile(path::String)
     end
 
     try
-        return isfile(path) ? HTTP.Response(200, headers; body=read(path)) :
+        return isfile(path) ? HTTP.Response(200, headers; body = read(path)) :
                HTTP.Response(404, "$path Not Found.")
     catch e
         return HTTP.Response(404, "Error: $e")
@@ -108,7 +108,7 @@ end
 
 function serveDirectory(request::HTTP.Request)
     headers = ["Content-Type" => "application/json"]
-    
+
     params = HTTP.queryparams(HTTP.URI(request.target))
 
     dir = ""
@@ -122,8 +122,8 @@ function serveDirectory(request::HTTP.Request)
 
     println("Scanning $dir ...")
 
-    resp = chop(JSON.json(Dict("location" => dir)), tail=1) * ", \"contents\":["
-        
+    resp = chop(JSON.json(Dict("location" => dir)), tail = 1) * ", \"contents\":["
+
     elements = false
 
     foreach(readdir(dir)) do f
@@ -133,7 +133,7 @@ function serveDirectory(request::HTTP.Request)
 
             path = dir * "/" * f
 
-                info = stat(path)
+            info = stat(path)
 
             if isdir(path)
                 dict = Dict(
@@ -165,15 +165,15 @@ function serveDirectory(request::HTTP.Request)
 
         end
     end
-    
+
     if elements
-        resp = chop(resp, tail=1) * "]}"
+        resp = chop(resp, tail = 1) * "]}"
     else
         resp *= "]}"
     end
 
     try
-        return HTTP.Response(200, headers; body=resp)
+        return HTTP.Response(200, headers; body = resp)
     catch e
         return HTTP.Response(404, "Error: $e")
     end
@@ -193,10 +193,10 @@ function serveROOT(request::HTTP.Request)
 
     path = HT_DOCS * HTTP.unescapeuri(request.target)
 
-            if request.target == "/"
+    if request.target == "/"
         if LOCAL_VERSION
             path *= "local_j.html"
-    else
+        else
             path *= "test.html"
         end
     end
@@ -207,7 +207,7 @@ end
 # a recursive function (very elegant)
 function get_dataset(prefix::String, params, datasets, idx::Integer)
     try
-        push!(datasets, params[prefix * string(idx)])
+        push!(datasets, params[prefix*string(idx)])
         get_dataset(prefix, params, datasets, idx + 1)
     catch e
         # no more datasets, stop recursion
@@ -253,7 +253,7 @@ function serveProgress(request::HTTP.Request)
     headers = ["Content-Type" => "application/json"]
 
     try
-        return HTTP.Response(200, headers; body=take!(resp))
+        return HTTP.Response(200, headers; body = take!(resp))
     catch e
         return HTTP.Response(404, "Error: $e")
     end
@@ -261,18 +261,38 @@ end
 
 function serveImageSpectrum(request::HTTP.Request)
     params = HTTP.queryparams(HTTP.URI(request.target))
-    println(params)
+    # println(params)
 
     datasetid = ""
+    quality = "medium"
+    width = 0
+    height = 0
+    fetch_data = false
 
     try
         datasetid = params["datasetId"]
+        width = round(Int32, parse(Float64, params["width"]))
+        height = round(Int32, parse(Float64, params["height"]))
+    catch e
+        println(e)
+        return HTTP.Response(404, "Not Found")
+    end
+
+    try
+        quality = params["quality"]
     catch e
     end
 
+    try
+        fetch_data = parse(Bool, params["fetch_data"])
+    catch e
+    end
+
+    println("serveImageSpectrum::($datasetid)/($width)/($height)/($quality)/($fetch_data)")
+
     fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
-    if fits_object.datasetid == ""
+    if fits_object.datasetid == "" || width <= 0 || height <= 0
         return HTTP.Response(404, "Not Found")
     end
 
@@ -293,7 +313,7 @@ end
 
 function serveFITS(request::HTTP.Request)
     root_path = HTTP.URIs.splitpath(request.target)[1]
-    
+
     params = HTTP.queryparams(HTTP.URI(request.target))
 
     println("root path: \"$root_path\"")
@@ -301,21 +321,21 @@ function serveFITS(request::HTTP.Request)
 
     has_fits = true
     is_composite = false
-        
+
     dir = ""
     datasets = []
     ext = ""
-    
+
     try
         ext = params["ext"]
     catch e
     end
-    
+
     try
         dir = params["dir"]
     catch e
     end
-            
+
     try
         if params["view"] == "composite"
             is_composite = true
@@ -555,7 +575,7 @@ function serveFITS(request::HTTP.Request)
     va_count = length(datasets)
     write(resp, "<title>FITSWEBQLSE</title></head><body>\n")
     write(resp, "<div id='votable' style='width: 0; height: 0;' data-va_count='$va_count' ")
-        
+
     if va_count == 1
         datasetid = datasets[1]
         write(resp, "data-datasetId='$datasetid' ")
