@@ -968,10 +968,11 @@ function preloadFITS(fits::FITSDataSet)
         return compressed_frames
     end
 
-    for (w, value) in fits.indices
-        idx = findall(value)
-        println("worker $w::", idx, "($(length(idx)))")
+    ras = [
+        @spawnat w preload_frames(fits.datasetid, fits.width, fits.height, findall(value)) for (w, value) in fits.indices
+    ]
 
-        @spawnat w preload_frames(fits.datasetid, fits.width, fits.height, idx)
-    end
+    println("ras: ", ras)
+
+    fits.compressed_pixels = ras
 end

@@ -178,3 +178,10 @@ function deserialize_from_bson(datasetid)::FITSDataSet
     return BSON.load(filename)
 end
 ###############################################
+for (w, value) in fits.indices
+    idx = findall(value)
+    println("worker $w::", idx, "($(length(idx)))")
+
+    @spawnat w preload_frames(fits.datasetid, fits.width, fits.height, idx)
+end
+##############################################    
