@@ -944,7 +944,7 @@ function preloadFITS(fits::FITSDataSet)
 
                 compressed_frames[frame] = compressed_pixels
 
-                println("restored frame #$frame")
+                # println("restored frame #$frame")
 
             catch e
                 println(e)
