@@ -861,6 +861,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 end
 
                 # spawn remote jobs, collecting the Futures along the way
+                # Remote Access Service
                 ras = [
                     @spawnat w load_fits_frame(
                         fits.datasetid,
@@ -953,9 +954,6 @@ function preloadFITS(fits::FITSDataSet)
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
                 close(io)
 
-                # touch the data
-                # pixel_sum = sum(compressed_pixels)
-
                 compressed_frames[frame] = compressed_pixels
 
                 println("restored frame #$frame")
@@ -968,6 +966,7 @@ function preloadFITS(fits::FITSDataSet)
         return compressed_frames
     end
 
+    # Remote Access Service
     ras = [
         @spawnat w preload_frames(fits.datasetid, fits.width, fits.height, findall(value)) for (w, value) in fits.indices
     ]
