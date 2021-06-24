@@ -136,10 +136,13 @@ function update_progress(fits::FITSDataSet, total::Integer)
 end
 
 function serialize_fits(fits::FITSDataSet)
+    n = length(workers())
+
     try
         filename = ".cache/" * fits.datasetid * "/state.jls"
         io = open(filename, "w+")
 
+        serialize(io, n)
         serialize(io, fits.datasetid)
         serialize(io, fits.header)
         serialize(io, fits.width)
@@ -186,6 +189,18 @@ function deserialize_fits(datasetid)
 
     filename = ".cache/" * fits.datasetid * "/state.jls"
     io = open(filename)
+
+    n = length(workers())
+
+    if deserialize(io) != n
+        println("The number of parallel processes does not match. Invalidating the cache.")
+        close(io)
+
+        dirname = ".cache/" * fits.datasetid
+        rm(dirname, recursive = true)
+
+        error("The number of parallel processes does not match. Invalidating the cache.")
+    end
 
     fits.datasetid = deserialize(io)
     fits.header = deserialize(io)
