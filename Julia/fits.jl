@@ -942,6 +942,7 @@ function preloadFITS(fits::FITSDataSet)
     end
 
     @everywhere function preload_frames(datasetid, width, height, idx)
+        compressed_frames = Dict{Int32,Matrix{Float16}}()
 
         for frame in idx
             try
@@ -954,12 +955,17 @@ function preloadFITS(fits::FITSDataSet)
 
                 # touch the data
                 # pixel_sum = sum(compressed_pixels)
+
+                compressed_frames[frame] = compressed_pixels
+
                 println("restored frame #$frame")
 
             catch e
                 println(e)
             end
         end
+
+        return compressed_frames
     end
 
     for (w, value) in fits.indices
