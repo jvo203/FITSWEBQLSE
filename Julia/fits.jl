@@ -1046,6 +1046,69 @@ function restoreData(fits::FITSDataSet)
     fits.compressed_pixels = ras
 end
 
+function get_screen_scale(x::Int32)
+
+    return floor(0.9 * Float32(x))
+
+end
+
+function get_image_scale_square(
+    width::Int32,
+    height::Int32,
+    img_width::Int32,
+    img_height::Int32,
+)
+
+    screen_dimension = get_screen_scale(min(width, height))
+    image_dimension = Float32(max(img_width, img_height))
+
+    return screen_dimension / image_dimension
+
+end
+
+function get_image_scale(width::Int32, height::Int32, img_width::Int32, img_height::Int32)
+
+    scale = Float32(1.0)
+
+    if img_width == img_height
+        return get_image_scale_square(width, height, img_width, img_height)
+    end
+
+    if img_height < img_width
+        screen_dimension = 0.9 * Float32(height)
+        image_dimension = Float32(img_height)
+        scale = screen_dimension / image_dimension
+        new_image_width = scale * img_width
+
+        if new_image_width > 0.8 * Float32(width)
+            screen_dimension = 0.8 * Float32(width)
+            image_dimension = Float32(img_width)
+            scale = screen_dimension / image_dimension
+        end
+
+        return scale
+    end
+
+    if img_width < img_height
+
+        screen_dimension = 0.8 * Float32(width)
+        image_dimension = Float32(img_width)
+        scale = screen_dimension / image_dimension
+        new_image_height = scale * img_height
+
+        if new_image_height > 0.9 * Float32(height)
+            screen_dimension = 0.9 * Float32(height)
+            image_dimension = img_height
+            scale = screen_dimension / image_dimension
+        end
+
+        return scale
+    end
+
+    # default scale
+    return scale
+end
+
 function getImage(
     fits::FITSDataSet,
     width::Int32,
@@ -1053,12 +1116,36 @@ function getImage(
     quality::Quality,
     fetch_data::Bool,
 )
+    local scale::Float32
+    local image_width::Int32 , image_height::Int32
+    local inner_width::Int32 , inner_height::Int32
+
     println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
 
     # calculate scale, downsize when applicable
 
-    image_width = width
-    image_height = height
+    # for now assume FITS dimensions
+    # TODO: go through the collated mask
+    # fetch inner dims from all workers, get the maximum common bounding box
+    inner_width = Int32(fits.width)
+    inner_height = Int32(fits.height)
+
+    try
+        scale = get_image_scale(width, height, inner_width, inner_height)
+    catch e
+        println(e)
+        scale = 1.0
+    end
+
+    if scale < 1.0
+        image_width = round(Int32, scale * fits.width)
+        image_height = round(Int32, scale * fits.height)
+    else
+        image_width = Int32(fits.width)
+        image_height = Int32(fits.height)
+    end
+
+    println("scale = $scale, image: $image_width x $image_height")
 
     pixels = zeros(Float32, image_width, image_height)
     mask = map(isnan, pixels)
@@ -1079,7 +1166,7 @@ function getImage(
     end
 
     @everywhere function collate_images(
-        queue,
+        results,
         global_pixels::DArray,
         global_mask::DArray,
         width::Int32,
@@ -1097,7 +1184,7 @@ function getImage(
         println("FITS dimensions: $fits_width x $fits_height; ", size(local_pixels))
 
         # send back the (optionally downsized) image
-        # put!(queue, (pixels, mask))
+        # put!(results, (pixels, mask))
 
     end
 
