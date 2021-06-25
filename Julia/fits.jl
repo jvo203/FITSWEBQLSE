@@ -151,8 +151,8 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.flux)
         serialize(io, fits.ignrval)
 
-        serialize(io, fits.pixels)
-        serialize(io, fits.mask)
+        # skipping fits.pixels (DArray does not serialize well)
+        # skipping fits.mask (DArray does not serialize well)
         # skipping fits.compressed_pixels (Futures do not serialize)
         serialize(io, fits.indices)
         serialize(io, fits.frame_min)
@@ -188,7 +188,7 @@ function deserialize_fits(datasetid)
         close(io)
 
         dirname = ".cache/" * fits.datasetid
-        rm(dirname, recursive=true)
+        rm(dirname, recursive = true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
     end
@@ -210,8 +210,8 @@ function deserialize_fits(datasetid)
     fits.flux = deserialize(io)
     fits.ignrval = deserialize(io)
 
-    fits.pixels = deserialize(io)
-    fits.mask = deserialize(io)
+    # skipping fits.pixels (DArray does not serialize well)
+    # skipping fits.mask (DArray does not serialize well)
     # skipping fits.compressed_pixels
     fits.indices = deserialize(io)
     fits.frame_min = deserialize(io)
@@ -646,7 +646,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         else
             n = length(workers())
 
-                println(
+            println(
                 "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
@@ -672,7 +672,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 frame_max = zeros(Float32, depth)
 
                 mean_spectrum = zeros(Float32, depth)
-                integrated_spectrum = zeros(Float32, depth)                
+                integrated_spectrum = zeros(Float32, depth)
 
                 jobs = RemoteChannel(() -> Channel{Int}(32))
                 progress = RemoteChannel(() -> Channel{Tuple}(32))
@@ -705,7 +705,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         try
                             queue = indices[tid]
                         catch e
-                        println("adding a new BitArray@$tid")
+                            println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
                         finally
@@ -791,7 +791,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-                                
+
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -964,6 +964,14 @@ function preloadFITS(fits::FITSDataSet)
     fits.compressed_pixels = ras
 end
 
-function getImageSpectrum(fits::FITSDataSet, width::Int32, height::Int32, quality::String, fetch_data::Bool)
-    println("getImageSpectrum::($fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
+function getImageSpectrum(
+    fits::FITSDataSet,
+    width::Int32,
+    height::Int32,
+    quality::String,
+    fetch_data::Bool,
+)
+    println(
+        "getImageSpectrum::($fits.datasetid)/($width)/($height)/($quality)/($fetch_data)",
+    )
 end
