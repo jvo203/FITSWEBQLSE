@@ -979,10 +979,11 @@ function getImageSpectrum(
     fits::FITSDataSet,
     width::Int32,
     height::Int32,
-    quality::String,
+    quality::Quality,
     fetch_data::Bool,
 )
     println(
         "getImageSpectrum::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)",
     )
+
 end

@@ -264,7 +264,7 @@ function serveImageSpectrum(request::HTTP.Request)
     # println(params)
 
     datasetid = ""
-    quality::String = "medium"
+    quality::Quality = medium
     width::Int32 = 0
     height::Int32 = 0
     fetch_data::Bool = false
@@ -279,7 +279,7 @@ function serveImageSpectrum(request::HTTP.Request)
     end
 
     try
-        quality = params["quality"]
+        quality = eval(Meta.parse(params["quality"]))
     catch e
     end
 
