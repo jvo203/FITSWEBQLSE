@@ -970,6 +970,10 @@ function restoreImage(fits::FITSDataSet)
     end
 
     # wait for the pixels/mask to be restored, then set has_data to true
+
+    fits.pixels = pixels
+    fits.mask = mask
+
     lock(fits.mutex)
     fits.has_data = true
     unlock(fits.mutex)
