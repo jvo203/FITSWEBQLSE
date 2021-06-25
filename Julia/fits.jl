@@ -644,7 +644,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     println("dmin: $dmin, dmax: $dmax")
 
                     fits.pixels = pixels
-                    fits.mask = mask
+                    fits.mask = .!mask # negate the mask so that <true> indicates valid pixels
                 end
 
                 println("FITS image dimensions: ", size(fits.pixels))
@@ -853,7 +853,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             local_mask = localpart(global_mask)
 
                             local_pixels[:, :] = pixels
-                            local_mask[:, :] = mask
+                            local_mask[:, :] = .!mask # negate the mask so that <true> indicates valid pixels
 
                             cache_dir = ".cache/" * datasetid
 
@@ -1055,15 +1055,47 @@ function getImage(
 )
     println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
 
-    # pixels = 
-    # mask = 
+    pixels = zeros(Float32, width, height)
+    mask = map(isnan, pixels)
 
     # create a remote channel for receiving the results
+    image_res = RemoteChannel(() -> Channel{Tuple}(32))
 
-    # reduce_task = 
+    image_task = @async while true
+        try
+            thread_pixels, thread_mask = take!(image_res)
+            pixels .+= thread_pixels
+            mask .|= thread_mask
+            println("received (pixels,mask)")
+        catch e
+            println("image task completed")
+            break
+        end
+    end
 
-    @everywhere function collate_images(width::Int32, height::Int32)
+    @everywhere function collate_images(
+        queue,
+        global_pixels::DArray,
+        global_mask::DArray,
+        width::Int32,
+        height::Int32,
+    )
+
+        # obtain worker-local references
+        local_pixels = localpart(global_pixels)
+        local_mask = localpart(global_mask)
+
+        # send back the (optionally downsized) image
+        # put!(queue, (pixels, mask))
 
     end
 
+    @time @sync for w in workers()
+        @spawnat w collate_images(image_res, fits.pixels, fits.mask, width, height)
+    end
+
+    close(image_res)
+    wait(image_task)
+
+    println("getImage done")
 end
