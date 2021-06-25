@@ -261,13 +261,13 @@ end
 
 function serveImageSpectrum(request::HTTP.Request)
     params = HTTP.queryparams(HTTP.URI(request.target))
-    # println(params)
+    println(params)
 
     datasetid = ""
-    quality = "medium"
-    width = 0
-    height = 0
-    fetch_data = false
+    quality::String = "medium"
+    width::Int32 = 0
+    height::Int32 = 0
+    fetch_data::Bool = false
 
     try
         datasetid = params["datasetId"]
@@ -288,8 +288,6 @@ function serveImageSpectrum(request::HTTP.Request)
     catch e
     end
 
-    println("serveImageSpectrum::($datasetid)/($width)/($height)/($quality)/($fetch_data)")
-
     fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
     if fits_object.datasetid == "" || width <= 0 || height <= 0
@@ -305,8 +303,12 @@ function serveImageSpectrum(request::HTTP.Request)
     end
 
     try
+        println("serveSpectrum::($datasetid)/($width)/($height)/($quality)/($fetch_data)")
+
+        getImageSpectrum(fits_object, width, height, quality, fetch_data)
         return HTTP.Response(501, "Not Implemented")
     catch e
+        println(e)
         return HTTP.Response(404, "Error: $e")
     end
 end
@@ -317,7 +319,7 @@ function serveFITS(request::HTTP.Request)
     params = HTTP.queryparams(HTTP.URI(request.target))
 
     println("root path: \"$root_path\"")
-    println(params)
+    # println(params)
 
     has_fits = true
     is_composite = false

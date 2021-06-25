@@ -963,3 +963,7 @@ function preloadFITS(fits::FITSDataSet)
 
     fits.compressed_pixels = ras
 end
+
+function getImageSpectrum(fits::FITSDataSet, width::Int32, height::Int32, quality::String, fetch_data::Bool)
+    println("getImageSpectrum::($fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
+end
