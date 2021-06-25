@@ -4,6 +4,8 @@ using FITSIO;
 using Mmap;
 using Serialization;
 
+@enum Quality low medium high
+
 mutable struct FITSDataSet
     # metadata
     datasetid::String
