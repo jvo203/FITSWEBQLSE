@@ -261,7 +261,7 @@ end
 
 function serveImageSpectrum(request::HTTP.Request)
     params = HTTP.queryparams(HTTP.URI(request.target))
-    println(params)
+    # println(params)
 
     datasetid = ""
     quality::String = "medium"

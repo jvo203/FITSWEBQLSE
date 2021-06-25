@@ -804,7 +804,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                             # convert to half-float
                             cache_dir = ".cache/" * datasetid
-                            filename = cache_dir * "/" * string(frame) * ".bin"
+                            filename = cache_dir * "/" * string(frame) * ".f16"
 
                             io = open(filename, "w+")
                             write(io, compressed_pixels)
@@ -838,6 +838,15 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                             local_pixels[:, :] = pixels
                             local_mask[:, :] = mask
+
+                            cache_dir = ".cache/" * datasetid
+
+                            filename = cache_dir * "/" * string(myid()) * ".pixels"
+                            serialize(filename, pixels)
+
+                            filename = cache_dir * "/" * string(myid()) * ".mask"
+                            serialize(filename, mask)
+
                         catch e
                             println("DArray::$e")
                         end
@@ -936,7 +945,7 @@ function preloadFITS(fits::FITSDataSet)
         for frame in idx
             try
                 cache_dir = ".cache/" * datasetid
-                filename = cache_dir * "/" * string(frame) * ".bin"
+                filename = cache_dir * "/" * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
