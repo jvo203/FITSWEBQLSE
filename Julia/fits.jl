@@ -994,12 +994,11 @@ function restoreImage(fits::FITSDataSet)
     # Remote Access Service
     ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
 
-    # wait for the pixels/mask to be restored
+    # wait for the pixels & mask to be restored
     bSuccess = all(fetch.(ras))
 
     fits.pixels = pixels
     fits.mask = mask
-
 
     # adjust has_data and has_error
     lock(fits.mutex)
