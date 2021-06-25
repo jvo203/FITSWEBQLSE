@@ -1046,15 +1046,24 @@ function restoreData(fits::FITSDataSet)
     fits.compressed_pixels = ras
 end
 
-function getImageSpectrum(
+function getImage(
     fits::FITSDataSet,
     width::Int32,
     height::Int32,
     quality::Quality,
     fetch_data::Bool,
 )
-    println(
-        "getImageSpectrum::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)",
-    )
+    println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
+
+    # pixels = 
+    # mask = 
+
+    # create a remote channel for receiving the results
+
+    # reduce_task = 
+
+    @everywhere function collate_images(width::Int32, height::Int32)
+
+    end
 
 end

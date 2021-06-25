@@ -303,7 +303,11 @@ function serveImageSpectrum(request::HTTP.Request)
     end
 
     try
-        getImageSpectrum(fits_object, width, height, quality, fetch_data)
+        image_task = @async getImage(fits_object, width, height, quality, fetch_data)
+
+        wait(image_task)
+        # image = fetch(image_task)
+
         return HTTP.Response(501, "Not Implemented")
     catch e
         println(e)
