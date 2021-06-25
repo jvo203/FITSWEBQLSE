@@ -303,10 +303,15 @@ function serveImageSpectrum(request::HTTP.Request)
     end
 
     try
-        image_task = @async getImage(fits_object, width, height, quality, fetch_data)
+        if fits_object.depth > 1
+            # handle a distributed 3D cube
+            image_task = @async getImage(fits_object, width, height, quality, fetch_data)
 
-        wait(image_task)
-        # image = fetch(image_task)
+            wait(image_task)
+            # image = fetch(image_task)
+        else
+            # downsize a 2D image
+        end
 
         return HTTP.Response(501, "Not Implemented")
     catch e
