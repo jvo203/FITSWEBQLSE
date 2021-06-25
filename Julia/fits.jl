@@ -965,7 +965,29 @@ function restoreImage(fits::FITSDataSet)
     mask = DArray(I -> fill(false, map(length, I)), (width, height, n), workers(), chunks)
 
     # restore DArrays
-    @everywhere function preload_image(datasetid, pixels, mask)
+    @everywhere function preload_image(datasetid, global_pixels, global_mask)
+
+        cache_dir = ".cache/" * datasetid
+
+        try
+            filename = cache_dir * "/" * string(myid()) * ".pixels"
+            pixels = deserialize(filename)
+
+            filename = cache_dir * "/" * string(myid()) * ".mask"
+            mask = deserialize(filename)
+
+            # obtain worker-local references
+            local_pixels = localpart(global_pixels)
+            local_mask = localpart(global_mask)
+
+            local_pixels[:, :] = pixels
+            local_mask[:, :] = mask
+
+        catch e
+            println("DArray::$e")
+            return false
+        end
+
         return true
     end
 
