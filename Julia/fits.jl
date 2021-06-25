@@ -153,9 +153,16 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.flux)
         serialize(io, fits.ignrval)
 
+        if fits.depth == 1
+            serialize(io, fits.pixels)
+            serialize(io, fits.mask)
+        end
+
+        # depth > 1
         # skipping fits.pixels (DArray does not serialize well)
         # skipping fits.mask (DArray does not serialize well)
         # skipping fits.compressed_pixels (Futures do not serialize)
+
         serialize(io, fits.indices)
         serialize(io, fits.frame_min)
         serialize(io, fits.frame_max)
@@ -212,9 +219,16 @@ function deserialize_fits(datasetid)
     fits.flux = deserialize(io)
     fits.ignrval = deserialize(io)
 
+    if fits.depth == 1
+        fits.pixels = deserialize(io)
+        fits.mask = deserialize(io)
+    end
+
+    # depth > 1
     # skipping fits.pixels (DArray does not serialize well)
     # skipping fits.mask (DArray does not serialize well)
     # skipping fits.compressed_pixels
+
     fits.indices = deserialize(io)
     fits.frame_min = deserialize(io)
     fits.frame_max = deserialize(io)
@@ -936,7 +950,13 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
 end
 
-function preloadFITS(fits::FITSDataSet)
+function restoreImage(fits::FITSDataSet)
+    if (fits.datasetid == "") || (fits.depth <= 1)
+        return
+    end
+end
+
+function restoreData(fits::FITSDataSet)
     if (fits.datasetid == "") || (fits.depth <= 1)
         return
     end
