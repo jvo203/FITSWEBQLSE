@@ -303,8 +303,6 @@ function serveImageSpectrum(request::HTTP.Request)
     end
 
     try
-        println("serveSpectrum::($datasetid)/($width)/($height)/($quality)/($fetch_data)")
-
         getImageSpectrum(fits_object, width, height, quality, fetch_data)
         return HTTP.Response(501, "Not Implemented")
     catch e
