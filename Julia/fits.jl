@@ -1055,7 +1055,12 @@ function getImage(
 )
     println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
 
-    pixels = zeros(Float32, width, height)
+    # calculate scale, downsize when applicable
+
+    image_width = width
+    image_height = height
+
+    pixels = zeros(Float32, image_width, image_height)
     mask = map(isnan, pixels)
 
     # create a remote channel for receiving the results
@@ -1085,13 +1090,21 @@ function getImage(
         local_pixels = localpart(global_pixels)
         local_mask = localpart(global_mask)
 
+        println("original dimensions: ", size(local_pixels))
+
         # send back the (optionally downsized) image
         # put!(queue, (pixels, mask))
 
     end
 
     @time @sync for w in workers()
-        @spawnat w collate_images(image_res, fits.pixels, fits.mask, width, height)
+        @spawnat w collate_images(
+            image_res,
+            fits.pixels,
+            fits.mask,
+            image_width,
+            image_height,
+        )
     end
 
     close(image_res)
