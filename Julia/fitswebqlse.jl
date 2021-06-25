@@ -360,21 +360,23 @@ function serveFITS(request::HTTP.Request)
 
                 # try to restore data from cache
                 try
+                    println("restoring $f")
+
                     fits_object = deserialize_fits(f)
-                    insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
                     if fits_object.depth > 1
-                        println("preloading $f")
-
-                        lock(fits.mutex)
-                        fits.has_data = false
-                        unlock(fits.mutex)
+                        lock(fits_object.mutex)
+                        fits_object.has_data = false
+                        unlock(fits_object.mutex)
 
                         @async restoreImage(fits_object)
+
                         @async restoreData(fits_object)
                     end
+
+                    insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
                 catch e
-                    println("cannot restore $f from cache")
+                    println("cannot restore $f from cache::$e")
 
                     fits_object = FITSDataSet(f)
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)

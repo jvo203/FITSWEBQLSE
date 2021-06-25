@@ -966,9 +966,13 @@ function restoreImage(fits::FITSDataSet)
 
     # restore DArrays
     @everywhere function preload_image(datasetid, pixels, mask)
-
+        return true
     end
 
+    # Remote Access Service
+    ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
+
+    println(fetch.(ras))
     # wait for the pixels/mask to be restored, then set has_data to true
 
     fits.pixels = pixels
