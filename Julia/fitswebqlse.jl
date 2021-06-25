@@ -365,6 +365,11 @@ function serveFITS(request::HTTP.Request)
 
                     if fits_object.depth > 1
                         println("preloading $f")
+
+                        lock(fits.mutex)
+                        fits.has_data = false
+                        unlock(fits.mutex)
+
                         @async restoreImage(fits_object)
                         @async restoreData(fits_object)
                     end

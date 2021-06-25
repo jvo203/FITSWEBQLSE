@@ -954,6 +954,25 @@ function restoreImage(fits::FITSDataSet)
     if (fits.datasetid == "") || (fits.depth <= 1)
         return
     end
+
+    n = length(workers())
+    width = fits.width
+    height = fits.height
+
+    chunks = (1, 1, n)
+    pixels =
+        DArray(I -> zeros(Float32, map(length, I)), (width, height, n), workers(), chunks)
+    mask = DArray(I -> fill(false, map(length, I)), (width, height, n), workers(), chunks)
+
+    # restore DArrays
+    @everywhere function preload_image(datasetid, pixels, mask)
+
+    end
+
+    # wait for the pixels/mask to be restored, then set has_data to true
+    lock(fits.mutex)
+    fits.has_data = true
+    unlock(fits.mutex)
 end
 
 function restoreData(fits::FITSDataSet)
