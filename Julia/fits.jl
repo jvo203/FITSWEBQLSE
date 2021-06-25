@@ -1086,11 +1086,15 @@ function getImage(
         height::Int32,
     )
 
-        # obtain worker-local references
-        local_pixels = localpart(global_pixels)
-        local_mask = localpart(global_mask)
+        fits_dims = size(global_pixels)
+        fits_width = fits_dims[1]
+        fits_height = fits_dims[2]
 
-        println("original dimensions: ", size(local_pixels))
+        # obtain worker-local references
+        local_pixels = reshape(localpart(global_pixels), fits_dims[1:2])
+        local_mask = reshape(localpart(global_mask), fits_dims[1:2])
+
+        println("FITS dimensions: $fits_width x $fits_height; ", size(local_pixels))
 
         # send back the (optionally downsized) image
         # put!(queue, (pixels, mask))
