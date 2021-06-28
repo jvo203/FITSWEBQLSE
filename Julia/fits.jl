@@ -1109,11 +1109,11 @@ function get_image_scale(width::Int32, height::Int32, img_width::Int32, img_heig
     return scale
 end
 
-function inherent_image_dimensions(mask::Matrix{Bool})
+@views function inherent_image_dimensions(mask)
 
     width = size(mask)[1]
     height = size(mask)[2]
-
+    
     x1 = 1
     x2 = width
     y1 = 1
