@@ -873,6 +873,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         println("loading FITS cube finished")
                     end
 
+                    # do not wait, trigger garbage collection *NOW*
                     GC.gc()
 
                     return compressed_frames
@@ -1163,12 +1164,12 @@ end
             end
         end
 
-        println("original dimensions: $width x $height")
+        # println("original dimensions: $width x $height")
 
         width = x2 - x1 + 1
         height = y2 - y1 + 1
 
-    println("inherent dimensions: $width x $height")
+    # println("inherent dimensions: $width x $height")
 
     return (width, height)
 
@@ -1183,10 +1184,13 @@ end
 )
     local scale::Float32
     local image_width::Int32 , image_height::Int32
-    local inner_width::Int32 , inner_height::Int32
+
+    inner_width = Int32(0)
+    inner_height = Int32(0)
+
 
     println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
-
+    
     # calculate scale, downsize when applicable
 
     # for now assume FITS dimensions
@@ -1208,14 +1212,20 @@ end
         # Remote Access Service
     ras = [@spawnat w get_inner_dimensions(fits.mask) for w in workers()]
 
-    # fetch the results
-    println(fetch.(ras))
+    # fetch results
+        res = fetch.(ras)
+
+        # reduce the results
+
+    println(res)
+
     catch e
         println(e)
-    end
-
+        
+        # on error revert to the original FITS dimensions
     inner_width = Int32(fits.width)
     inner_height = Int32(fits.height)
+    end
 
     try
     scale = get_image_scale(width, height, inner_width, inner_height)
