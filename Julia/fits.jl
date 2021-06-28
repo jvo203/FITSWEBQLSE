@@ -1184,9 +1184,10 @@ end
 )
     local scale::Float32
     local image_width::Int32 , image_height::Int32
+    local inner_width::Int32, inner_height::Int32
 
-    inner_width = Int32(0)
-    inner_height = Int32(0)
+    inner_width = 0
+    inner_height = 0
 
 
     println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
@@ -1216,6 +1217,12 @@ end
         res = fetch.(ras)
 
         # reduce the results
+        for dims in res
+            dimx, dimy = dims
+
+         inner_width = max(inner_width, dimx)
+         inner_height = max(inner_height, dimy)
+        end
 
     println(res)
 
