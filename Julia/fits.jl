@@ -858,10 +858,16 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             cache_dir = ".cache/" * datasetid
 
                             filename = cache_dir * "/" * string(myid()) * ".pixels"
-                            serialize(filename, pixels)
+                            # serialize(filename, pixels)
+                            io = open(filename, "w+")
+                            write(io, pixels)
+                            close(io)
 
                             filename = cache_dir * "/" * string(myid()) * ".mask"
-                            serialize(filename, mask)
+                            # serialize(filename, mask)
+                            io = open(filename, "w+")
+                            write(io, mask)
+                            close(io)
 
                         catch e
                             println("DArray::$e")
@@ -967,16 +973,25 @@ function restoreImage(fits::FITSDataSet)
     mask = DArray(I -> fill(false, map(length, I)), (width, height, n), workers(), chunks)
 
     # restore DArrays
-    @everywhere function preload_image(datasetid, global_pixels, global_mask)
+    @everywhere function preload_image(datasetid, global_pixels, global_mask, width, height)
 
         cache_dir = ".cache/" * datasetid
 
         try
             filename = cache_dir * "/" * string(myid()) * ".pixels"
-            pixels = deserialize(filename)
+            # pixels = deserialize(filename)
+            io = open(filename)
+            # pixels = read(io, Matrix{Float32})
+            pixels = Mmap.mmap(io, Matrix{Float32}, (width, height))
+            close(io)
 
             filename = cache_dir * "/" * string(myid()) * ".mask"
-            mask = deserialize(filename)
+            # mask = deserialize(filename)
+            io = open(filename)
+            # mask = read(filename, Matrix{Bool})
+            mask = Mmap.mmap(io, Matrix{Bool}, (width, height))
+            close(io)
+
 
             # obtain worker-local references
             local_pixels = localpart(global_pixels)
@@ -994,7 +1009,7 @@ function restoreImage(fits::FITSDataSet)
     end
 
         # Remote Access Service
-    ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
+    ras = [@spawnat w preload_image(fits.datasetid, pixels, mask, width, height) for w in workers()]
 
     # wait for the pixels & mask to be restored
     bSuccess = all(fetch.(ras))
