@@ -1109,11 +1109,11 @@ function get_image_scale(width::Int32, height::Int32, img_width::Int32, img_heig
     return scale
 end
 
-function inherent_image_dimensions(mask)
+function inherent_image_dimensions(mask::Matrix{Bool})
 
-    width = size(mask)(1)
-    height = size(mask)(2)
-    
+    width = size(mask)[1]
+    height = size(mask)[2]
+
     x1 = 1
     x2 = width
     y1 = 1
@@ -1126,7 +1126,7 @@ function inherent_image_dimensions(mask)
     for k in 1:width
             x1 = k
 
-            if any(mask(k, :))
+            if any(mask[k, :])
                 break
             end
     end
@@ -1135,7 +1135,7 @@ function inherent_image_dimensions(mask)
         for k in width:-1:1
             x2 = k
 
-            if any(mask(k, :))
+            if any(mask[k, :])
         break
             end
         end
@@ -1144,7 +1144,7 @@ function inherent_image_dimensions(mask)
         for k in 1:height
         y1 = k
 
-            if any(mask(:, k))
+            if any(mask[:, k])
                 break
             end
         end
@@ -1153,7 +1153,7 @@ function inherent_image_dimensions(mask)
         for k in height:-1:1
             y2 = k
 
-            if any(mask(:, k))
+            if any(mask[:, k])
                 break
             end
         end
@@ -1187,14 +1187,36 @@ end
     # for now assume FITS dimensions
     # TODO: go through the collated mask
     # fetch inner dims from all workers, get the maximum common bounding box
+    @everywhere function get_inner_dimensions(global_mask::DArray)
+    fits_dims = size(global_mask)
+    fits_width = fits_dims[1]
+    fits_height = fits_dims[2]
+
+    # obtain a worker-local mask
+    local_mask = reshape(localpart(global_mask), fits_dims[1:2])
+
+        return inherent_image_dimensions(local_mask)
+
+    end
+
+    try
+        # Remote Access Service
+    ras = [@spawnat w get_inner_dimensions(fits.mask) for w in workers()]
+
+    # fetch the results
+    println(fetch.(ras))
+    catch e
+        println(e)
+    end
+
     inner_width = Int32(fits.width)
     inner_height = Int32(fits.height)
 
     try
-        scale = get_image_scale(width, height, inner_width, inner_height)
+    scale = get_image_scale(width, height, inner_width, inner_height)
     catch e
         println(e)
-        scale = 1.0
+    scale = 1.0
     end
 
     if scale < 1.0
