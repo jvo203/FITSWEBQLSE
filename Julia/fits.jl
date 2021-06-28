@@ -870,6 +870,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         println("loading FITS cube finished")
                     end
 
+                    GC.gc()
+
                     return compressed_frames
                 end
 
