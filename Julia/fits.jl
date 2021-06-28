@@ -1188,6 +1188,7 @@ end
 
     inner_width = 0
     inner_height = 0
+    bDownsize = false 
 
 
     println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
@@ -1244,6 +1245,7 @@ end
     if scale < 1.0
         image_width = round(Int32, scale * fits.width)
         image_height = round(Int32, scale * fits.height)
+        bDownsize = true
     else
         image_width = Int32(fits.width)
         image_height = Int32(fits.height)
@@ -1275,6 +1277,7 @@ end
         global_mask::DArray,
         width::Int32,
         height::Int32,
+        downsize::Bool,
     )
 
         fits_dims = size(global_pixels)
@@ -1299,6 +1302,7 @@ end
             fits.mask,
             image_width,
             image_height,
+            bDownsize,
         )
     end
 
