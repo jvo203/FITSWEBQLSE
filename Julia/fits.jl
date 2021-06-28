@@ -197,7 +197,7 @@ function deserialize_fits(datasetid)
         close(io)
 
         dirname = ".cache/" * fits.datasetid
-        rm(dirname, recursive = true)
+        rm(dirname, recursive=true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
     end
@@ -662,7 +662,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         else
             n = length(workers())
 
-            println(
+                println(
                 "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
@@ -721,7 +721,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         try
                             queue = indices[tid]
                         catch e
-                            println("adding a new BitArray@$tid")
+                        println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
                         finally
@@ -807,7 +807,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-
+                                
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -982,7 +982,7 @@ function restoreImage(fits::FITSDataSet)
 
             local_pixels[:, :] = pixels
             local_mask[:, :] = mask
-
+            
         catch e
             println("DArray::$e")
             return false
@@ -991,7 +991,7 @@ function restoreImage(fits::FITSDataSet)
         return true
     end
 
-    # Remote Access Service
+        # Remote Access Service
     ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
 
     # wait for the pixels & mask to be restored
@@ -1086,7 +1086,7 @@ function get_image_scale(width::Int32, height::Int32, img_width::Int32, img_heig
             scale = screen_dimension / image_dimension
         end
 
-        return scale
+            return scale
     end
 
     if img_width < img_height
@@ -1109,7 +1109,67 @@ function get_image_scale(width::Int32, height::Int32, img_width::Int32, img_heig
     return scale
 end
 
-function getImage(
+function inherent_image_dimensions(mask)
+
+    width = size(mask)(1)
+    height = size(mask)(2)
+    
+    x1 = 1
+    x2 = width
+    y1 = 1
+    y2 = height
+
+    # go through the 2D image mask
+    # truncating the NaN values along the X & Y axes
+
+    # x1
+    for k in 1:width
+            x1 = k
+
+            if any(mask(k, :))
+                break
+            end
+    end
+
+    # x2
+        for k in width:-1:1
+            x2 = k
+
+            if any(mask(k, :))
+        break
+            end
+        end
+    
+    # y1
+        for k in 1:height
+        y1 = k
+
+            if any(mask(:, k))
+                break
+            end
+        end
+
+    # y2
+        for k in height:-1:1
+            y2 = k
+
+            if any(mask(:, k))
+                break
+            end
+        end
+
+        println("original dimensions: $width x $height")
+
+        width = x2 - x1 + 1
+        height = y2 - y1 + 1
+
+    println("inherent dimensions: $width x $height")
+
+    return (width, height)
+
+end
+
+    function getImage(
     fits::FITSDataSet,
     width::Int32,
     height::Int32,
@@ -1156,7 +1216,7 @@ function getImage(
     image_task = @async while true
         try
             thread_pixels, thread_mask = take!(image_res)
-            pixels .+= thread_pixels
+    pixels .+= thread_pixels
             mask .|= thread_mask
             println("received (pixels,mask)")
         catch e
