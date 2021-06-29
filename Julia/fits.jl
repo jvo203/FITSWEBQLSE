@@ -5,6 +5,8 @@ using Mmap;
 using Serialization;
 using Images, ImageTransformations, Interpolations;
 
+const NBINS = 1024
+
 @enum Quality low medium high
 
 mutable struct FITSDataSet
@@ -1344,6 +1346,9 @@ function getImage(
     valid_pixels = pixels[mask]
 
     println("#valid_pixels: ", length(valid_pixels))
+
+    @time hist = imhist(valid_pixels, NBINS)
+    println(hist)
 
     println("getImage done")
 end
