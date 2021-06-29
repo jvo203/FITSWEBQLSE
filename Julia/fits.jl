@@ -1341,6 +1341,9 @@ function getImage(
     wait(image_task)
 
     # next make a histogram
+    valid_pixels = pixels[mask]
+
+    println("#valid_pixels: ", length(valid_pixels))
 
     println("getImage done")
 end
