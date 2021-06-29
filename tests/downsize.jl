@@ -1,9 +1,12 @@
 using Images, ImageTransformations, Interpolations;
 
-pixels = randn(Float32, 10, 10)
+dim = 11000
+view = 512
 
-println(pixels, "; dims: ", size(pixels))
+pixels = 100.0 * randn(Float32, dim, dim)
 
-res = imresize(pixels, (3, 3))
+println("; dims: ", size(pixels))
 
-println(res, "; dims: ", size(res))
+@time res = imresize(pixels, (view, view))
+
+println(res[1:100], "; dims: ", size(res))
