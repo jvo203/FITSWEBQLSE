@@ -1297,7 +1297,9 @@ function getImage(
         else
             # downsize the pixels & mask            
             try
-                pixels = imresize(local_pixels, (width, height))
+                img_view = colorview(Gray{Float32}, local_pixels)
+                pixels = imresize(img_view, (width, height))
+                println("pixels: ", size(pixels))
                 #mask = imresize(local_mask, (width, height)) # use Nearest-Neighbours for the mask
                 #put!(results, (pixels, mask))
             catch e
