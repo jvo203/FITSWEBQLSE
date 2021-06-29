@@ -1301,7 +1301,7 @@ function getImage(
             put!(results, (local_pixels, local_mask))
         else
             # downsize the pixels & mask            
-            try               
+            try
                 pixels = imresize(local_pixels, (width, height))
                 mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
 
