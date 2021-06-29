@@ -1344,12 +1344,12 @@ function getImage(
     wait(image_task)
 
     # next make a histogram
-    valid_pixels = pixels[mask]
+    valid_pixels = @view pixels[mask]
 
     println("#valid_pixels: ", length(valid_pixels))
 
-    classifier_hist = imhist(valid_pixels, NBINS)
-    println(classifier_hist)
+    # classifier_hist = imhist(valid_pixels, NBINS)
+    # println(classifier_hist)
 
     @time edges, bins = imhist(valid_pixels)
     @time med = median(valid_pixels)
