@@ -1308,7 +1308,7 @@ function getImage(
         local_pixels = reshape(localpart(global_pixels), fits_dims[1:2])
         local_mask = reshape(localpart(global_mask), fits_dims[1:2])
 
-        println("FITS dimensions: $fits_width x $fits_height; ", size(local_pixels))
+        # println("FITS dimensions: $fits_width x $fits_height; ", size(local_pixels))
 
         # send back the (optionally downsized) image
         if !downsize
