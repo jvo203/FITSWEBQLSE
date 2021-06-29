@@ -1268,8 +1268,22 @@ function getImage(
     image_task = @async while true
         try
             thread_pixels, thread_mask = take!(image_res)
-            pixels .+= thread_pixels
-            mask .|= thread_mask
+
+            if (typeof(pixels) != typeof(thread_pixels)) ||
+               (typeof(mask) != typeof(thread_mask))
+                # println("pixels/mask type mismatch")
+                # println(typeof(pixels), typeof(thread_pixels))
+                # println(typeof(mask), typeof(thread_mask))                
+            end
+
+            if (size(pixels) != size(thread_pixels)) || (size(mask) != size(thread_mask))
+                println("pixels/mask dimension mismatch")
+                # error("pixels/mask dimension mismatch")
+            else
+                pixels .+= thread_pixels
+                mask .|= thread_mask
+            end
+
             println("received (pixels,mask)")
         catch e
             println("image task completed")
