@@ -1340,5 +1340,7 @@ function getImage(
     close(image_res)
     wait(image_task)
 
+    # next make a histogram
+
     println("getImage done")
 end
