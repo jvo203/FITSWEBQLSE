@@ -3,6 +3,7 @@ using DistributedArrays;
 using FITSIO;
 using Mmap;
 using Serialization;
+using Images, ImageTransformations, Interpolations;
 
 @enum Quality low medium high
 
@@ -197,7 +198,7 @@ function deserialize_fits(datasetid)
         close(io)
 
         dirname = ".cache/" * fits.datasetid
-        rm(dirname, recursive=true)
+        rm(dirname, recursive = true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
     end
@@ -662,7 +663,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         else
             n = length(workers())
 
-                println(
+            println(
                 "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
@@ -721,7 +722,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         try
                             queue = indices[tid]
                         catch e
-                        println("adding a new BitArray@$tid")
+                            println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
                         finally
@@ -807,7 +808,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-                                
+
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -856,7 +857,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             mask = .!mask
 
                             local_pixels[:, :] = pixels
-                            local_mask[:, :] = mask 
+                            local_mask[:, :] = mask
 
                             cache_dir = ".cache/" * datasetid
 
@@ -988,7 +989,7 @@ function restoreImage(fits::FITSDataSet)
 
             local_pixels[:, :] = pixels
             local_mask[:, :] = mask
-            
+
         catch e
             println("DArray::$e")
             return false
@@ -997,7 +998,7 @@ function restoreImage(fits::FITSDataSet)
         return true
     end
 
-        # Remote Access Service
+    # Remote Access Service
     ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
 
     # wait for the pixels & mask to be restored
@@ -1092,7 +1093,7 @@ function get_image_scale(width::Int32, height::Int32, img_width::Int32, img_heig
             scale = screen_dimension / image_dimension
         end
 
-            return scale
+        return scale
     end
 
     if img_width < img_height
@@ -1119,7 +1120,7 @@ end
 
     width = size(mask)[1]
     height = size(mask)[2]
-    
+
     x1 = 1
     x2 = width
     y1 = 1
@@ -1129,45 +1130,45 @@ end
     # truncating the NaN values along the X & Y axes
 
     # x1
-    for k in 1:width
-            x1 = k
+    for k = 1:width
+        x1 = k
 
-            if any(mask[k, :])
-                break
-            end
+        if any(mask[k, :])
+            break
+        end
     end
 
     # x2
-        for k in width:-1:1
-            x2 = k
+    for k = width:-1:1
+        x2 = k
 
-            if any(mask[k, :])
-        break
-            end
+        if any(mask[k, :])
+            break
         end
-    
+    end
+
     # y1
-        for k in 1:height
+    for k = 1:height
         y1 = k
 
-            if any(mask[:, k])
-                break
-            end
+        if any(mask[:, k])
+            break
         end
+    end
 
     # y2
-        for k in height:-1:1
-            y2 = k
+    for k = height:-1:1
+        y2 = k
 
-            if any(mask[:, k])
-                break
-            end
+        if any(mask[:, k])
+            break
         end
+    end
 
-        # println("original dimensions: $width x $height")
+    # println("original dimensions: $width x $height")
 
-        width = x2 - x1 + 1
-        height = y2 - y1 + 1
+    width = x2 - x1 + 1
+    height = y2 - y1 + 1
 
     # println("inherent dimensions: $width x $height")
 
@@ -1175,7 +1176,7 @@ end
 
 end
 
-    function getImage(
+function getImage(
     fits::FITSDataSet,
     width::Int32,
     height::Int32,
@@ -1184,27 +1185,27 @@ end
 )
     local scale::Float32
     local image_width::Int32 , image_height::Int32
-    local inner_width::Int32, inner_height::Int32
+    local inner_width::Int32 , inner_height::Int32
 
     inner_width = 0
     inner_height = 0
-    bDownsize = false 
+    bDownsize = false
 
 
     println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
-    
+
     # calculate scale, downsize when applicable
 
     # for now assume FITS dimensions
     # TODO: go through the collated mask
     # fetch inner dims from all workers, get the maximum common bounding box
     @everywhere function get_inner_dimensions(global_mask::DArray)
-    fits_dims = size(global_mask)
-    fits_width = fits_dims[1]
-    fits_height = fits_dims[2]
+        fits_dims = size(global_mask)
+        fits_width = fits_dims[1]
+        fits_height = fits_dims[2]
 
-    # obtain a worker-local mask
-    local_mask = reshape(localpart(global_mask), fits_dims[1:2])
+        # obtain a worker-local mask
+        local_mask = reshape(localpart(global_mask), fits_dims[1:2])
 
         return inherent_image_dimensions(local_mask)
 
@@ -1212,34 +1213,34 @@ end
 
     try
         # Remote Access Service
-    ras = [@spawnat w get_inner_dimensions(fits.mask) for w in workers()]
+        ras = [@spawnat w get_inner_dimensions(fits.mask) for w in workers()]
 
-    # fetch results
+        # fetch results
         res = fetch.(ras)
 
         # reduce the results
         for dims in res
             dimx, dimy = dims
 
-         inner_width = max(inner_width, dimx)
-         inner_height = max(inner_height, dimy)
+            inner_width = max(inner_width, dimx)
+            inner_height = max(inner_height, dimy)
         end
 
-    println(res)
+        println(res)
 
     catch e
         println(e)
-        
+
         # on error revert to the original FITS dimensions
-    inner_width = Int32(fits.width)
-    inner_height = Int32(fits.height)
+        inner_width = Int32(fits.width)
+        inner_height = Int32(fits.height)
     end
 
     try
-    scale = get_image_scale(width, height, inner_width, inner_height)
+        scale = get_image_scale(width, height, inner_width, inner_height)
     catch e
         println(e)
-    scale = 1.0
+        scale = 1.0
     end
 
     if scale < 1.0
@@ -1262,7 +1263,7 @@ end
     image_task = @async while true
         try
             thread_pixels, thread_mask = take!(image_res)
-    pixels .+= thread_pixels
+            pixels .+= thread_pixels
             mask .|= thread_mask
             println("received (pixels,mask)")
         catch e
@@ -1291,7 +1292,18 @@ end
         println("FITS dimensions: $fits_width x $fits_height; ", size(local_pixels))
 
         # send back the (optionally downsized) image
-        # put!(results, (pixels, mask))
+        if !downsize
+            put!(results, (local_pixels, local_mask))
+        else
+            # downsize the pixels & mask            
+            try
+                pixels = imresize(local_pixels, (width, height))
+                #mask = imresize(local_mask, (width, height)) # use Nearest-Neighbours for the mask
+                #put!(results, (pixels, mask))
+            catch e
+                println(e)
+            end
+        end
 
     end
 
