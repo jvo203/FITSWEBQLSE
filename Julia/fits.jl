@@ -3,6 +3,7 @@ using DistributedArrays;
 using FITSIO;
 using Mmap;
 using Serialization;
+using Statistics;
 using Images, ImageTransformations, Interpolations;
 
 const NBINS = 1024
@@ -1347,8 +1348,19 @@ function getImage(
 
     println("#valid_pixels: ", length(valid_pixels))
 
-    @time hist = imhist(valid_pixels, NBINS)
-    println(hist)
+    classifier_hist = imhist(valid_pixels, NBINS)
+    println(classifier_hist)
+
+    @time edges, bins = imhist(valid_pixels)
+    @time med = median(valid_pixels)
+
+    println("pixel range: ", edges, ", median: ", med, "; bins: ", bins)
+
+    nbins = length(edges)
+    pmin = first(edges)
+    pmax = last(edges)
+
+    println("pmix = ", pmin, " pmax = ", pmax, "; nbins = ", nbins)
 
     println("getImage done")
 end
