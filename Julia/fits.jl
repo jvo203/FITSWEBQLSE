@@ -1301,13 +1301,11 @@ function getImage(
             put!(results, (local_pixels, local_mask))
         else
             # downsize the pixels & mask            
-            try
-                # img_view = colorview(Gray{Float32}, local_pixels)
-                @time pixels = imresize(local_pixels, (width, height))
+            try               
+                pixels = imresize(local_pixels, (width, height))
+                mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
 
-                #mask = imresize(local_mask, (width, height)) # use Nearest-Neighbours for the mask
-
-                #put!(results, (pixels, mask))
+                put!(results, (pixels, mask))
             catch e
                 println(e)
             end
