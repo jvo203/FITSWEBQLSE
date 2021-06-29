@@ -14,7 +14,8 @@ display(res)
 
 data = rand(dim, dim)
 mask = map(x -> (x > 0.5), data)
-println(mask)
+println(mask, typeof(mask))
 
 res = Bool.(imresize(mask, (view, view), method = Constant()))
+println(res, typeof(res))
 display(res)
