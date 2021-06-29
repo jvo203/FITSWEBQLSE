@@ -265,14 +265,14 @@ function serveImageSpectrum(request::HTTP.Request)
 
     datasetid = ""
     quality::Quality = medium
-    width::Int32 = 0
-    height::Int32 = 0
+    width::Integer = 0
+    height::Integer = 0
     fetch_data::Bool = false
 
     try
         datasetid = params["datasetId"]
-        width = round(Int32, parse(Float64, params["width"]))
-        height = round(Int32, parse(Float64, params["height"]))
+        width = round(Integer, parse(Float64, params["width"]))
+        height = round(Integer, parse(Float64, params["height"]))
     catch e
         println(e)
         return HTTP.Response(404, "Not Found")

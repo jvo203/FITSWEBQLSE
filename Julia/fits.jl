@@ -1053,17 +1053,17 @@ function restoreData(fits::FITSDataSet)
     fits.compressed_pixels = ras
 end
 
-function get_screen_scale(x::Int32)
+function get_screen_scale(x::Integer)
 
     return floor(0.9 * Float32(x))
 
 end
 
 function get_image_scale_square(
-    width::Int32,
-    height::Int32,
-    img_width::Int32,
-    img_height::Int32,
+    width::Integer,
+    height::Integer,
+    img_width::Integer,
+    img_height::Integer,
 )
 
     screen_dimension = get_screen_scale(min(width, height))
@@ -1073,7 +1073,12 @@ function get_image_scale_square(
 
 end
 
-function get_image_scale(width::Int32, height::Int32, img_width::Int32, img_height::Int32)
+function get_image_scale(
+    width::Integer,
+    height::Integer,
+    img_width::Integer,
+    img_height::Integer,
+)
 
     scale = Float32(1.0)
 
@@ -1178,14 +1183,14 @@ end
 
 function getImage(
     fits::FITSDataSet,
-    width::Int32,
-    height::Int32,
+    width::Integer,
+    height::Integer,
     quality::Quality,
     fetch_data::Bool,
 )
     local scale::Float32
-    local image_width::Int32 , image_height::Int32
-    local inner_width::Int32 , inner_height::Int32
+    local image_width::Integer , image_height::Integer
+    local inner_width::Integer , inner_height::Integer
 
     inner_width = 0
     inner_height = 0
@@ -1232,8 +1237,8 @@ function getImage(
         println(e)
 
         # on error revert to the original FITS dimensions
-        inner_width = Int32(fits.width)
-        inner_height = Int32(fits.height)
+        inner_width = fits.width
+        inner_height = fits.height
     end
 
     try
@@ -1244,12 +1249,12 @@ function getImage(
     end
 
     if scale < 1.0
-        image_width = round(Int32, scale * fits.width)
-        image_height = round(Int32, scale * fits.height)
+        image_width = round(Integer, scale * fits.width)
+        image_height = round(Integer, scale * fits.height)
         bDownsize = true
     else
-        image_width = Int32(fits.width)
-        image_height = Int32(fits.height)
+        image_width = fits.width
+        image_height = fits.height
     end
 
     println("scale = $scale, image: $image_width x $image_height")
@@ -1276,8 +1281,8 @@ function getImage(
         results,
         global_pixels::DArray,
         global_mask::DArray,
-        width::Int32,
-        height::Int32,
+        width::Integer,
+        height::Integer,
         downsize::Bool,
     )
 
@@ -1298,10 +1303,10 @@ function getImage(
             # downsize the pixels & mask            
             try
                 # img_view = colorview(Gray{Float32}, local_pixels)
-                # pixels = imresize(local_pixels, (Integer(width), Integer(height)))
-                @time pixels = imresize(local_pixels, (568, 568))
-                println("pixels: ", size(pixels))
+                @time pixels = imresize(local_pixels, (width, height))
+
                 #mask = imresize(local_mask, (width, height)) # use Nearest-Neighbours for the mask
+
                 #put!(results, (pixels, mask))
             catch e
                 println(e)
