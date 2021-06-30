@@ -123,13 +123,17 @@ mutable struct FITSDataSet
 end
 
 function path_separator()
+    separator = ""
+
     if Sys.isunix()
-        return "/"
+        separator = "/"
     elseif Sys.iswindows()
-        return "\"
+        separator = "\"
     else
         error("path primitives for this OS need to be defined")
     end
+
+    return separator
 end
 
 function update_timestamp(fits::FITSDataSet)
