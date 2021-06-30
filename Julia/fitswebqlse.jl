@@ -98,6 +98,11 @@ function serveFile(path::String)
         push!(headers, "Content-Type" => "video/mp4")
     end
 
+    # use backslash on Windows
+    #if Sys.iswindows()
+    #    path = replace(path, "/" => "\\")
+    #end
+
     try
         return isfile(path) ? HTTP.Response(200, headers; body = read(path)) :
                HTTP.Response(404, "$path Not Found.")
@@ -131,7 +136,7 @@ function serveDirectory(request::HTTP.Request)
 
         if !startswith(filename, ".")
 
-            path = dir * "/" * f
+            path = dir * Base.Filesystem.path_separator * f
 
             info = stat(path)
 
@@ -187,7 +192,7 @@ function serveROOT(request::HTTP.Request)
     @show request.target
 
     # prevent a simple directory traversal
-    if occursin("../", request.target)
+    if occursin("../", request.target) || occursin("..\\", request.target)
         return HTTP.Response(404, "Not Found")
     end
 
@@ -390,7 +395,7 @@ function serveFITS(request::HTTP.Request)
                     fits_object = FITSDataSet(f)
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
-                    filepath = dir * "/" * f * "." * ext
+                    filepath = dir * Base.Filesystem.path_separator * f * "." * ext
                     @async loadFITS(filepath, fits_object)
                 end
             end

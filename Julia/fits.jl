@@ -823,8 +823,13 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             compressed_frames[frame] = compressed_pixels
 
                             # convert to half-float
-                            cache_dir = ".cache" * "/" * datasetid
-                            filename = cache_dir * "/" * string(frame) * ".f16"
+                            cache_dir =
+                                ".cache" * Base.Filesystem.path_separator * datasetid
+                            filename =
+                                cache_dir *
+                                Base.Filesystem.path_separator *
+                                string(frame) *
+                                ".f16"
 
                             io = open(filename, "w+")
                             write(io, compressed_pixels)
@@ -862,12 +867,21 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             local_pixels[:, :] = pixels
                             local_mask[:, :] = mask
 
-                            cache_dir = ".cache" * "/" * datasetid
+                            cache_dir =
+                                ".cache" * Base.Filesystem.path_separator * datasetid
 
-                            filename = cache_dir * "/" * string(myid()) * ".pixels"
+                            filename =
+                                cache_dir *
+                                Base.Filesystem.path_separator *
+                                string(myid()) *
+                                ".pixels"
                             serialize(filename, pixels)
 
-                            filename = cache_dir * "/" * string(myid()) * ".mask"
+                            filename =
+                                cache_dir *
+                                Base.Filesystem.path_separator *
+                                string(myid()) *
+                                ".mask"
                             serialize(filename, mask)
 
                         catch e
@@ -977,13 +991,14 @@ function restoreImage(fits::FITSDataSet)
     # restore DArrays
     @everywhere function preload_image(datasetid, global_pixels, global_mask)
 
-        cache_dir = ".cache" * "/" * datasetid
+        cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
 
         try
-            filename = cache_dir * "/" * string(myid()) * ".pixels"
+            filename =
+                cache_dir * Base.Filesystem.path_separator * string(myid()) * ".pixels"
             pixels = deserialize(filename)
 
-            filename = cache_dir * "/" * string(myid()) * ".mask"
+            filename = cache_dir * Base.Filesystem.path_separator * string(myid()) * ".mask"
             mask = deserialize(filename)
 
             # obtain worker-local references
@@ -1027,8 +1042,9 @@ function restoreData(fits::FITSDataSet)
 
         for frame in idx
             try
-                cache_dir = ".cache" * "/" * datasetid
-                filename = cache_dir * "/" * string(frame) * ".f16"
+                cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+                filename =
+                    cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
@@ -1360,8 +1376,6 @@ function getImage(
     println("extrema: $pmin ~ $pmax")
 
     nbins = length(edges)
-    pmin = first(edges)
-    pmax = last(edges)
 
     println("pmix = ", pmin, " pmax = ", pmax, "; nbins = ", nbins)
 
