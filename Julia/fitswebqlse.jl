@@ -112,8 +112,6 @@ function serveFile(path::String)
 end
 
 function serveDirectory(request::HTTP.Request)
-    # println("serveDirectory($(HTTP.unescapeuri(request.target))")
-
     headers = ["Content-Type" => "application/json"]
 
     params = HTTP.queryparams(HTTP.URI(request.target))
@@ -122,6 +120,15 @@ function serveDirectory(request::HTTP.Request)
 
     try
         dir = params["dir"]
+
+        # on Windows remove the root slash
+        if Sys.iswindows() && length(dir) > 0
+            dir = lstrip(dir, '/')
+        end
+
+        if dir == ""
+            dir = homedir()
+        end
     catch e
         # if they keyword is not found fall back on a home directory
         dir = homedir()
@@ -133,34 +140,19 @@ function serveDirectory(request::HTTP.Request)
 
     elements = false
 
-    foreach(readdir(dir)) do f
-        filename = lowercase(f)
+    try
+        foreach(readdir(dir)) do f
+            filename = lowercase(f)
 
-        if !startswith(filename, ".")
+            if !startswith(filename, ".")
 
-            path = dir * Base.Filesystem.path_separator * f
+                path = dir * Base.Filesystem.path_separator * f
 
-            info = stat(path)
+                info = stat(path)
 
-            if isdir(path)
-                dict = Dict(
-                    "type" => "dir",
-                    "name" => f,
-                    "last_modified" => Libc.strftime(info.mtime),
-                )
-
-                resp *= JSON.json(dict) * ","
-                elements = true
-            end
-
-            if isfile(path)
-
-                # filter the filenames
-                if endswith(filename, ".fits") || endswith(filename, ".fits.gz")
-
+                if isdir(path)
                     dict = Dict(
-                        "type" => "file",
-                        "size" => info.size,
+                        "type" => "dir",
                         "name" => f,
                         "last_modified" => Libc.strftime(info.mtime),
                     )
@@ -168,9 +160,27 @@ function serveDirectory(request::HTTP.Request)
                     resp *= JSON.json(dict) * ","
                     elements = true
                 end
-            end
 
+                if isfile(path)
+
+                    # filter the filenames
+                    if endswith(filename, ".fits") || endswith(filename, ".fits.gz")
+
+                        dict = Dict(
+                            "type" => "file",
+                            "size" => info.size,
+                            "name" => f,
+                            "last_modified" => Libc.strftime(info.mtime),
+                        )
+
+                        resp *= JSON.json(dict) * ","
+                        elements = true
+                    end
+                end
+
+            end
         end
+    catch e
     end
 
     if elements
