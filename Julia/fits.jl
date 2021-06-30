@@ -1382,16 +1382,40 @@ function getImage(
     # println(classifier_hist)
 
     @time edges, bins = imhist(valid_pixels)
+    nbins = length(edges)
 
-    println("pixel range: ", edges, "; bins: ", bins)
+    println("pixel range: ", edges, "; bins: ", bins, "; nbins = ", nbins)
 
     @time pmin, pmax = extrema(valid_pixels)
     @time med = median(valid_pixels)
     println("extrema: $pmin ~ $pmax; median = $med")
 
-    nbins = length(edges)
+    pixelsN = filter(x -> x < med, valid_pixels)
+    pixelsP = filter(x -> x > med, valid_pixels)
 
-    println("pmix = ", pmin, " pmax = ", pmax, "; nbins = ", nbins)
+    countN = length(pixelsN)
+    countP = length(pixelsP)
+
+    sumN = sum(map(x -> abs(x - med), pixelsN))
+    sumP = sum(map(x -> abs(x - med), pixelsP))
+
+    # println("countN: $countN, countP: $countP, sumN: $sumN, sumP: $sumP")
+
+    mad = 0.0; madN = 0.0; madP = 0.0
+
+    if countN > 0
+        madN = sumN / countN
+    end
+
+    if countP > 0
+        madP = sumP / countP
+    end
+
+    if countN + countP > 0
+        mad = (sumN + sumP) / (countN + countP)
+    end
+
+    println("madN = $madN, madP = $madP, mad = $mad")
 
     println("getImage done")
 end
