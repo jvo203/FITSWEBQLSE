@@ -1438,7 +1438,6 @@ function getImage(
     acc_tot = sum(bins)
     println("accumulator length: $(length(acc)); total = $acc_tot")
     slots = Float32.(acc) ./ Float32(acc_tot)
-    println(slots)
     
     # upsample the slots array to <NBINS>
     cum = imresize(slots, (NBINS,), method=Linear())
