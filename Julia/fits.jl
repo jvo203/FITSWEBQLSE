@@ -28,7 +28,7 @@ mutable struct FITSDataSet
     _cdelt3::Float32
     datamin::Float32
     datamax::Float32
-    flux::String
+    flux::ToneMapping
     ignrval::Float32
 
     # pixels, spectrum
@@ -66,7 +66,7 @@ mutable struct FITSDataSet
             0.0,
             0.0,
             0.0,
-            "",
+            none,
             0.0,
             Nothing,
             Nothing,
@@ -102,7 +102,7 @@ mutable struct FITSDataSet
             1.0,
             -prevfloat(typemax(Float32)),
             prevfloat(typemax(Float32)),
-            "",
+            none,
             -prevfloat(typemax(Float32)),
             Nothing,
             Nothing,
@@ -213,7 +213,7 @@ function deserialize_fits(datasetid)
         close(io)
 
         dirname = ".cache" * Base.Filesystem.path_separator * fits.datasetid
-        rm(dirname, recursive=true)
+        rm(dirname, recursive = true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
     end
@@ -384,12 +384,12 @@ function process_header(fits::FITSDataSet)
 
             if occursin("ASTRO-F", record)
                 fits.is_optical = true
-                fits.flux = "logistic"
+                fits.flux = logistic
             end
 
             if occursin("HSCPIPE", record)
                 fits.is_optical = true
-                fits.flux = "ratio"
+                fits.flux = ratio
             end
 
             record = lowercase(record)
@@ -399,7 +399,7 @@ function process_header(fits::FITSDataSet)
                occursin("x-ray", record)
                 fits.is_optical = false
                 fits.is_xray = true
-                fits.flux = "legacy"
+                fits.flux = legacy
                 fits.ignrval = -1.0
             end
         end
@@ -411,7 +411,7 @@ function process_header(fits::FITSDataSet)
 
         if occursin("SUPM", record) || occursin("MCSM", record)
             fits.is_optical = true
-            fits.flux = "ratio"
+            fits.flux = ratio
         end
     catch e
     end
@@ -440,7 +440,7 @@ function process_header(fits::FITSDataSet)
 
         if occursin("nro45", record)
             fits.is_optical = false
-            fits.flux = "ratio"
+            fits.flux = ratio
         end
 
         if occursin("chandra", record)
@@ -450,7 +450,7 @@ function process_header(fits::FITSDataSet)
 
         if occursin("kiso", record)
             fits.is_optical = true
-            fits.flux = "ratio"
+            fits.flux = ratio
         end
     catch e
     end
@@ -682,7 +682,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         else
             n = length(workers())
 
-                println(
+            println(
                 "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
@@ -741,7 +741,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         try
                             queue = indices[tid]
                         catch e
-                        println("adding a new BitArray@$tid")
+                            println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
                         finally
@@ -827,7 +827,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-                                
+
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -1023,7 +1023,7 @@ function restoreImage(fits::FITSDataSet)
 
             local_pixels[:, :] = pixels
             local_mask[:, :] = mask
-            
+
         catch e
             println("DArray::$e")
             return false
@@ -1032,7 +1032,7 @@ function restoreImage(fits::FITSDataSet)
         return true
     end
 
-        # Remote Access Service
+    # Remote Access Service
     ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
 
     # wait for the pixels & mask to be restored
@@ -1060,7 +1060,7 @@ function restoreData(fits::FITSDataSet)
             try
                 cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
                 filename =
-                cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
+                    cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
@@ -1093,7 +1093,7 @@ function get_screen_scale(x::Integer)
     return floor(0.9 * Float32(x))
 
 end
-    
+
 function get_image_scale_square(
     width::Integer,
     height::Integer,
@@ -1133,7 +1133,7 @@ function get_image_scale(
             scale = screen_dimension / image_dimension
         end
 
-            return scale
+        return scale
     end
 
     if img_width < img_height
@@ -1206,7 +1206,7 @@ end
     end
 
     # println("original dimensions: $width x $height")
-        
+
     width = x2 - x1 + 1
     height = y2 - y1 + 1
 
@@ -1352,7 +1352,7 @@ function getImage(
             # downsize the pixels & mask            
             try
                 pixels = Float32.(imresize(local_pixels, (width, height)))
-                mask = Bool.(imresize(local_mask, (width, height), method=Constant())) # use Nearest-Neighbours for the mask
+                mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
                 put!(results, (pixels, mask))
             catch e
                 println(e)
@@ -1400,7 +1400,9 @@ function getImage(
 
     # println("countN: $countN, countP: $countP, sumN: $sumN, sumP: $sumP")
 
-    mad = 0.0; madN = 0.0; madP = 0.0
+    mad = 0.0
+    madN = 0.0
+    madP = 0.0
 
     if countN > 0
         madN = sumN / countN
@@ -1413,7 +1415,7 @@ function getImage(
     if countN + countP > 0
         mad = (sumN + sumP) / (countN + countP)
     end
-        
+
     println("madN = $madN, madP = $madP, mad = $mad")
 
     # ALMAWebQL v2 - style
@@ -1434,16 +1436,20 @@ function getImage(
         # TO-DO: auto-brightness
     end
 
-    println("black: $black, white: $white, sensitivity: $sensitivity, ratio_sensitivity: $ratio_sensitivity")
+    println(
+        "black: $black, white: $white, sensitivity: $sensitivity, ratio_sensitivity: $ratio_sensitivity",
+    )
 
-    acc = accumulate(+, bins)
-    acc_tot = sum(bins)
-    println("accumulator length: $(length(acc)); total = $acc_tot")
-    slots = Float32.(acc) ./ Float32(acc_tot)
-    
-    # upsample the slots array to <NBINS>
-    cum = imresize(slots, (NBINS,), method=Linear())
-    println("slots length: $(length(cum))")
+    if fits.flux == none
+        acc = accumulate(+, bins)
+        acc_tot = sum(bins)
+        println("accumulator length: $(length(acc)); total = $acc_tot")
+        slots = Float32.(acc) ./ Float32(acc_tot)
+
+        # upsample the slots array to <NBINS>
+        cum = imresize(slots, (NBINS,), method = Linear())
+        println("slots length: $(length(cum))")
+    end
 
     println("getImage done")
 end
