@@ -823,7 +823,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             compressed_frames[frame] = compressed_pixels
 
                             # convert to half-float
-                            cache_dir = ".cache/" * datasetid
+                            cache_dir = ".cache" * "/" * datasetid
                             filename = cache_dir * "/" * string(frame) * ".f16"
 
                             io = open(filename, "w+")
@@ -862,7 +862,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             local_pixels[:, :] = pixels
                             local_mask[:, :] = mask
 
-                            cache_dir = ".cache/" * datasetid
+                            cache_dir = ".cache" * "/" * datasetid
 
                             filename = cache_dir * "/" * string(myid()) * ".pixels"
                             serialize(filename, pixels)
@@ -977,7 +977,7 @@ function restoreImage(fits::FITSDataSet)
     # restore DArrays
     @everywhere function preload_image(datasetid, global_pixels, global_mask)
 
-        cache_dir = ".cache/" * datasetid
+        cache_dir = ".cache" * "/" * datasetid
 
         try
             filename = cache_dir * "/" * string(myid()) * ".pixels"
@@ -1027,7 +1027,7 @@ function restoreData(fits::FITSDataSet)
 
         for frame in idx
             try
-                cache_dir = ".cache/" * datasetid
+                cache_dir = ".cache" * "/" * datasetid
                 filename = cache_dir * "/" * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
