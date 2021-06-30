@@ -407,7 +407,8 @@ function serveFITS(request::HTTP.Request)
                     fits_object = FITSDataSet(f)
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
-                    filepath = dir * Base.Filesystem.path_separator * f * "." * ext
+                    # leave the slash as before, even in Windows
+                    filepath = dir * "/" * f * "." * ext
                     @async loadFITS(filepath, fits_object)
                 end
             end

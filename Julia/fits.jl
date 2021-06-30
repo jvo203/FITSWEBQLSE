@@ -136,7 +136,12 @@ function serialize_fits(fits::FITSDataSet)
     n = length(workers())
 
     try
-        filename = ".cache/" * fits.datasetid * "/state.jls"
+        filename =
+            ".cache" *
+            Base.Filesystem.path_separator *
+            fits.datasetid *
+            Base.Filesystem.path_separator *
+            "state.jls"
         io = open(filename, "w+")
 
         serialize(io, n)
@@ -191,7 +196,12 @@ end
 function deserialize_fits(datasetid)
     fits = FITSDataSet(datasetid)
 
-    filename = ".cache/" * fits.datasetid * "/state.jls"
+    filename =
+        ".cache" *
+        Base.Filesystem.path_separator *
+        fits.datasetid *
+        Base.Filesystem.path_separator *
+        "state.jls"
     io = open(filename)
 
     n = length(workers())
@@ -200,7 +210,7 @@ function deserialize_fits(datasetid)
         println("The number of parallel processes does not match. Invalidating the cache.")
         close(io)
 
-        dirname = ".cache/" * fits.datasetid
+        dirname = ".cache" * Base.Filesystem.path_separator * fits.datasetid
         rm(dirname, recursive = true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
@@ -255,7 +265,7 @@ end
 
 function serialize_to_file(fits::FITSDataSet)
     try
-        filename = ".cache/" * fits.datasetid * "/state.jls"
+        filename = ".cache" * Base.Filesystem.path_separator * fits.datasetid * "/state.jls"
         serialize(filename, fits)
     catch e
         println("error serialising the FITS object::$e")
@@ -263,7 +273,7 @@ function serialize_to_file(fits::FITSDataSet)
 end
 
 function deserialize_from_file(datasetid)
-    filename = ".cache/" * datasetid * "/state.jls"
+    filename = ".cache" * Base.Filesystem.path_separator * datasetid * "/state.jls"
     return deserialize(filename)
 end
 
@@ -514,6 +524,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         return
     end
 
+    if Sys.iswindows()
+        filepath = replace(filepath, "/" => "\\")
+    end
+
     println("loading $filepath::$(fits.datasetid)")
 
     local f , width::Integer , height::Integer , depth::Integer
@@ -528,7 +542,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     end
 
     try
-        cache_dir = ".cache/" * fits.datasetid
+        cache_dir = ".cache" * Base.Filesystem.path_separator * fits.datasetid
 
         if !isdir(cache_dir)
             mkdir(cache_dir)
