@@ -112,6 +112,8 @@ function serveFile(path::String)
 end
 
 function serveDirectory(request::HTTP.Request)
+    # println("serveDirectory($(HTTP.unescapeuri(request.target))")
+
     headers = ["Content-Type" => "application/json"]
 
     params = HTTP.queryparams(HTTP.URI(request.target))
