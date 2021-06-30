@@ -98,11 +98,6 @@ function serveFile(path::String)
         push!(headers, "Content-Type" => "video/mp4")
     end
 
-    # use backslash on Windows
-    #if Sys.iswindows()
-    #    path = replace(path, "/" => "\\")
-    #end
-
     try
         return isfile(path) ? HTTP.Response(200, headers; body = read(path)) :
                HTTP.Response(404, "$path Not Found.")
