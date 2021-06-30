@@ -1442,10 +1442,7 @@ function getImage(
     acc = accumulate(+, classifier_bins)
     acc_tot = sum(classifier_bins)
     println("accumulator length: $(length(acc)); total = $acc_tot")
-    # println(acc)
-
     slots = Float32.(acc) ./ Float32(acc_tot)
-    # println(slots)
-
+    
     println("getImage done")
 end
