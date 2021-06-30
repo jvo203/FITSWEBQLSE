@@ -16,11 +16,8 @@ function show_directory_contents(response) {
 	/*$("#fortran").prepend($("<div></div>")
 		.attr("id", "filesystem"));*/
 
-	let loc = response.location;
-
 	// replace any Windows backslashes
-	loc = loc.replaceAll('\\', '/');
-
+	let loc = response.location.replaceAll('\\', '/');
 	dirs = loc.split('/');
 
 	$("#filesystem").append($("<ul></ul>")
@@ -100,8 +97,6 @@ function show_directory_contents(response) {
 				cmd = "fetch_directory('" + loc + filelist[i].name.replace(/'/g, "\\'") + "')";
 			else
 				cmd = "fetch_directory('" + loc + '/' + filelist[i].name.replace(/'/g, "\\'") + "')";
-
-			console.log(cmd);
 
 			//class=\"text-right\"
 			$("#tbody").append($("<tr></tr>")
