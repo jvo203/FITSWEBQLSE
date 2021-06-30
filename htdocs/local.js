@@ -17,7 +17,17 @@ function show_directory_contents(response) {
 		.attr("id", "filesystem"));*/
 
 	let loc = response.location;
-	let dirs = loc.split('/');
+	let dirs = loc;
+
+	path_separator = '/';
+
+	if (loc.indexOf('/') >= 0) {
+		dirs = loc.split('/');
+	}
+	else {
+		dirs = loc.split('\\');
+		path_separator = '\\';
+	}
 
 	$("#filesystem").append($("<ul></ul>")
 		.attr("id", "breadcrumb")
@@ -35,7 +45,7 @@ function show_directory_contents(response) {
 	var dir = "";
 	for (let i = 0; i < dirs.length; i++) {
 		if (dirs[i] != "")
-			dir += "/" + dirs[i];
+			dir += path_separator + dirs[i];
 
 		var cmd = "fetch_directory(\"" + dir + "\")";
 
@@ -73,7 +83,7 @@ function show_directory_contents(response) {
 		dir = "";
 		for (let i = 0; i < dirs.length - 1; i++) {
 			if (dirs[i] != "")
-				dir += "/" + dirs[i];
+				dir += path_separator + dirs[i];
 		}
 
 		if (dir == "")
@@ -95,7 +105,9 @@ function show_directory_contents(response) {
 			if (loc == "/")
 				cmd = "fetch_directory('" + loc + filelist[i].name.replace(/'/g, "\\'") + "')";
 			else
-				cmd = "fetch_directory('" + loc + '/' + filelist[i].name.replace(/'/g, "\\'") + "')";
+				cmd = "fetch_directory('" + loc + path_separator + filelist[i].name.replace(/'/g, "\\'") + "')";
+
+			console.log(cmd);
 
 			//class=\"text-right\"
 			$("#tbody").append($("<tr></tr>")
