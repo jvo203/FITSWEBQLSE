@@ -117,7 +117,7 @@ function serveDirectory(request::HTTP.Request)
         dir = params["dir"]
     catch e
         # if they keyword is not found fall back on a home directory
-        dir = ENV["HOME"]
+        dir = homedir()
     end
 
     println("Scanning $dir ...")
