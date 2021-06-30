@@ -1434,16 +1434,15 @@ function getImage(
 
     println("black: $black, white: $white, sensitivity: $sensitivity, ratio_sensitivity: $ratio_sensitivity")
 
-    # call the histogram classifier
-    classifier_edges, classifier_bins = imhist(valid_pixels, NBINS)
-    println("bins length: $(length(classifier_bins))")
-    # println(classifier_bins)
-
     acc = accumulate(+, bins)
     acc_tot = sum(bins)
     println("accumulator length: $(length(acc)); total = $acc_tot")
     slots = Float32.(acc) ./ Float32(acc_tot)
     println(slots)
     
+    # upsample the slots array to <NBINS>
+    cum = imresize(slots, (NBINS, ), method = Linear())
+    # println(cum, "; length: $(length(cum))")
+
     println("getImage done")
 end
