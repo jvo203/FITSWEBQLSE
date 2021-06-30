@@ -1378,9 +1378,6 @@ function getImage(
 
     println("#valid_pixels: ", length(valid_pixels))
 
-    # classifier_hist = imhist(valid_pixels, NBINS)
-    # println(classifier_hist)
-
     @time edges, bins = imhist(valid_pixels)
     nbins = length(edges)
 
@@ -1416,6 +1413,30 @@ function getImage(
     end
 
     println("madN = $madN, madP = $madP, mad = $mad")
+
+    # ALMAWebQL v2 - style
+    u = 7.5
+    black = max(pmin, med - u*madN)
+    white = min(pmax, med + u*madP)
+    sensitivity = 1.0/(white - black)
+    ratio_sensitivity = sensitivity
+
+    if fits.is_optical
+        u = 0.5
+        v = 15.0
+        black = max(pmin, med - u*madN)
+        white = min(pmax, med + u*madP)
+        sensitivity = 1.0/(white - black)
+        ratio_sensitivity = sensitivity
+
+        # TO-DO: auto-brightness
+    end
+
+    println("black: $black, white: $white, sensitivity: $sensitivity, ratio_sensitivity: $ratio_sensitivity")
+
+    # call the histogram classifier
+    classifier_edges, classifier_bins = imhist(valid_pixels, NBINS)
+    println(classifier_bins)
 
     println("getImage done")
 end
