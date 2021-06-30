@@ -1,7 +1,7 @@
 @enum ToneMapping none legacy linear logistic ratio square
 
 function histogram_classifier(Slot::Vector{Float64})::ToneMapping
-    res::ToneMapping = legacy::ToneMapping
+    res::ToneMapping = none
 
     legacy = 443.6170837772559 - 
         0.008793892019758082 * Slot[1] - 0.05060583821958265 * Slot[2] - 0.07060929424871956 * Slot[3] - 
@@ -1374,12 +1374,10 @@ function histogram_classifier(Slot::Vector{Float64})::ToneMapping
 
     square = 0.0
 
-    return res
-
     println("legacy($legacy), linear($linear), logistic($logistic), ratio($ratio), square($square)")
 
     if (legacy > linear) && (legacy > logistic) && (legacy > ratio) && (legacy > square)
-        flux::ToneMapping = legacy
+        flux = legacy::ToneMapping
         return flux
     elseif (linear > legacy) && (linear > logistic) && (linear > ratio) && (linear > square) 
         res = linear
