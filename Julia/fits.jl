@@ -1382,12 +1382,12 @@ function getImage(
     # println(classifier_hist)
 
     @time edges, bins = imhist(valid_pixels)
+
+    println("pixel range: ", edges, "; bins: ", bins)
+
+    @time pmin, pmax = extrema(valid_pixels)
     @time med = median(valid_pixels)
-
-    println("pixel range: ", edges, ", median: ", med, "; bins: ", bins)
-
-    pmin, pmax = extrema(valid_pixels)
-    println("extrema: $pmin ~ $pmax")
+    println("extrema: $pmin ~ $pmax; median = $med")
 
     nbins = length(edges)
 

@@ -70,7 +70,7 @@ function show_directory_contents(response) {
 		.attr("id", "tbody"));
 
 	//add go up one step
-	if (loc != "/") {
+	if (loc != "/" && loc != "C:") {
 		dir = "";
 		for (let i = 0; i < dirs.length - 1; i++) {
 			if (dirs[i] != "")
