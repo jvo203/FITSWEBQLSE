@@ -1356,6 +1356,9 @@ function getImage(
 
     println("pixel range: ", edges, ", median: ", med, "; bins: ", bins)
 
+    pmin, pmax = extrema(valid_pixels)
+    println("extrema: $pmin ~ $pmax")
+
     nbins = length(edges)
     pmin = first(edges)
     pmax = last(edges)
