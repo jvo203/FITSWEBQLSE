@@ -211,7 +211,7 @@ function deserialize_fits(datasetid)
         close(io)
 
         dirname = ".cache" * Base.Filesystem.path_separator * fits.datasetid
-        rm(dirname, recursive = true)
+        rm(dirname, recursive=true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
     end
@@ -680,7 +680,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         else
             n = length(workers())
 
-            println(
+                println(
                 "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
@@ -739,7 +739,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         try
                             queue = indices[tid]
                         catch e
-                            println("adding a new BitArray@$tid")
+                        println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
                         finally
@@ -825,7 +825,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-
+                                
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -1021,7 +1021,7 @@ function restoreImage(fits::FITSDataSet)
 
             local_pixels[:, :] = pixels
             local_mask[:, :] = mask
-
+            
         catch e
             println("DArray::$e")
             return false
@@ -1030,7 +1030,7 @@ function restoreImage(fits::FITSDataSet)
         return true
     end
 
-    # Remote Access Service
+        # Remote Access Service
     ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
 
     # wait for the pixels & mask to be restored
@@ -1058,7 +1058,7 @@ function restoreData(fits::FITSDataSet)
             try
                 cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
                 filename =
-                    cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
+                cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
@@ -1091,7 +1091,7 @@ function get_screen_scale(x::Integer)
     return floor(0.9 * Float32(x))
 
 end
-
+    
 function get_image_scale_square(
     width::Integer,
     height::Integer,
@@ -1131,7 +1131,7 @@ function get_image_scale(
             scale = screen_dimension / image_dimension
         end
 
-        return scale
+            return scale
     end
 
     if img_width < img_height
@@ -1204,7 +1204,7 @@ end
     end
 
     # println("original dimensions: $width x $height")
-
+        
     width = x2 - x1 + 1
     height = y2 - y1 + 1
 
@@ -1350,7 +1350,7 @@ function getImage(
             # downsize the pixels & mask            
             try
                 pixels = Float32.(imresize(local_pixels, (width, height)))
-                mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
+                mask = Bool.(imresize(local_mask, (width, height), method=Constant())) # use Nearest-Neighbours for the mask
                 put!(results, (pixels, mask))
             catch e
                 println(e)
@@ -1411,22 +1411,22 @@ function getImage(
     if countN + countP > 0
         mad = (sumN + sumP) / (countN + countP)
     end
-
+        
     println("madN = $madN, madP = $madP, mad = $mad")
 
     # ALMAWebQL v2 - style
     u = 7.5
-    black = max(pmin, med - u*madN)
-    white = min(pmax, med + u*madP)
-    sensitivity = 1.0/(white - black)
+    black = max(pmin, med - u * madN)
+    white = min(pmax, med + u * madP)
+    sensitivity = 1.0 / (white - black)
     ratio_sensitivity = sensitivity
 
     if fits.is_optical
         u = 0.5
         v = 15.0
-        black = max(pmin, med - u*madN)
-        white = min(pmax, med + u*madP)
-        sensitivity = 1.0/(white - black)
+        black = max(pmin, med - u * madN)
+        white = min(pmax, med + u * madP)
+        sensitivity = 1.0 / (white - black)
         ratio_sensitivity = sensitivity
 
         # TO-DO: auto-brightness
@@ -1441,8 +1441,8 @@ function getImage(
     println(slots)
     
     # upsample the slots array to <NBINS>
-    cum = imresize(slots, (NBINS, ), method = Linear())
-    # println(cum, "; length: $(length(cum))")
+    cum = imresize(slots, (NBINS,), method=Linear())
+    println("slots length: $(length(cum))")
 
     println("getImage done")
 end
