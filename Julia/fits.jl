@@ -122,6 +122,16 @@ mutable struct FITSDataSet
     end
 end
 
+function path_separator()
+    if Sys.isunix()
+        return "/"
+    elseif Sys.iswindows()
+        return "\"
+    else
+        error("path primitives for this OS need to be defined")
+    end
+end
+
 function update_timestamp(fits::FITSDataSet)
     fits.last_accessed[] = datetime2unix(now())
 end
