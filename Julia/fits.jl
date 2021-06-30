@@ -6,6 +6,8 @@ using Serialization;
 using Statistics;
 using Images, ImageTransformations, Interpolations;
 
+include("classifier.jl")
+
 const NBINS = 1024
 
 @enum Quality low medium high
