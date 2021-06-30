@@ -1,4 +1,4 @@
-@enum ToneMapping legacy linear logistic ratio square
+@enum ToneMapping none legacy linear logistic ratio square
 
 function histogram_classifier(Slot::Array{Float32,1})
     legacy = 443.6170837772559 - 
