@@ -1436,7 +1436,16 @@ function getImage(
 
     # call the histogram classifier
     classifier_edges, classifier_bins = imhist(valid_pixels, NBINS)
-    println(classifier_bins)
+    println("bins length: $(length(classifier_bins))")
+    # println(classifier_bins)
+
+    acc = accumulate(+, classifier_bins)
+    acc_tot = sum(classifier_bins)
+    println("accumulator length: $(length(acc)); total = $acc_tot")
+    # println(acc)
+
+    slots = Float32.(acc) ./ Float32(acc_tot)
+    # println(slots)
 
     println("getImage done")
 end
