@@ -1444,11 +1444,18 @@ function getImage(
         acc = accumulate(+, bins)
         acc_tot = sum(bins)
         println("accumulator length: $(length(acc)); total = $acc_tot")
-        slots = Float32.(acc) ./ Float32(acc_tot)
+        slots = Float64.(acc) ./ Float64(acc_tot)
 
         # upsample the slots array to <NBINS>
         cum = imresize(slots, (NBINS,), method = Linear())
         println("slots length: $(length(cum))")
+
+        try
+            flux::ToneMapping = histogram_classifier(cum)
+            println("flux: ", flux)
+        catch e
+            println(e)
+        end
     end
 
     println("getImage done")

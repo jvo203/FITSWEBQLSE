@@ -1,6 +1,8 @@
 @enum ToneMapping none legacy linear logistic ratio square
 
-function histogram_classifier(Slot::Array{Float32,1})
+function histogram_classifier(Slot::Vector{Float64})::ToneMapping
+    res::ToneMapping = none
+
     legacy = 443.6170837772559 - 
         0.008793892019758082 * Slot[1] - 0.05060583821958265 * Slot[2] - 0.07060929424871956 * Slot[3] - 
         0.07458549722846479 * Slot[4] - 0.07872086383369215 * Slot[5] - 0.07838234461963924 * Slot[6] - 
@@ -342,7 +344,7 @@ function histogram_classifier(Slot::Array{Float32,1})
         16.36761709874582 * Slot[1012] - 4.308481040508021 * Slot[1013] - 12.410597106977546 * Slot[1014] - 
         10.835904600756184 * Slot[1015] - 14.899482768866228 * Slot[1016] - 14.023681021118861 * Slot[1017] - 
         16.338252289483385 * Slot[1018] - 25.270317452035627 * Slot[1019] - 27.70645291705413 * Slot[1020] - 
-        46.34742082070532 * Slot[1021] - 95.41336847906656 * Slot[1022] - 197.4918671655324 * Slot[1023] ;
+        46.34742082070532 * Slot[1021] - 95.41336847906656 * Slot[1022] - 197.4918671655324 * Slot[1023]
 
     linear = 276.75896124573 - 0.059031699424137704 * Slot[1] - 0.024409341568345844 * Slot[2] - 0.010180197610123743 * Slot[3] - 
         0.007608954119320594 * Slot[4] - 0.004975108876915551 * Slot[5] - 0.0025445737367902435 * Slot[6] - 
@@ -684,7 +686,7 @@ function histogram_classifier(Slot::Array{Float32,1})
         6.400827631534423 * Slot[1012] - 13.048109038552125 * Slot[1013] - 22.129522031362555 * Slot[1014] - 
         19.909936228944105 * Slot[1015] - 22.099001375125358 * Slot[1016] - 16.36642978467885 * Slot[1017] - 
         15.164579619967688 * Slot[1018] - 16.574413298885737 * Slot[1019] - 10.806712300721342 * Slot[1020] - 
-        15.296911823785557 * Slot[1021] - 35.21692264644518 * Slot[1022] - 4.305146893646584 * Slot[1023] ;
+        15.296911823785557 * Slot[1021] - 35.21692264644518 * Slot[1022] - 4.305146893646584 * Slot[1023]
 	
     logistic = -89.5787087847014 - 0.11490119217090321 * Slot[1] - 0.05333087496202682 * Slot[2] - 0.028473277934414464 * Slot[3] - 
         0.023943941936957813 * Slot[4] - 0.019550086224781712 * Slot[5] - 0.015512770077387565 * Slot[6] - 
@@ -1026,7 +1028,7 @@ function histogram_classifier(Slot::Array{Float32,1})
         14.929434079081867 * Slot[1012] - 18.849384441428914 * Slot[1013] - 24.89503011018147 * Slot[1014] - 
         21.315238016927836 * Slot[1015] - 26.48908117807192 * Slot[1016] - 24.32948068019222 * Slot[1017] - 
         23.163578148245396 * Slot[1018] - 32.59089511797474 * Slot[1019] - 12.478779338688108 * Slot[1020] - 
-        9.527446096473414 * Slot[1021] - 27.698843636748823 * Slot[1022] + 28.668144118076697 * Slot[1023] ;
+        9.527446096473414 * Slot[1021] - 27.698843636748823 * Slot[1022] + 28.668144118076697 * Slot[1023]
 	
     ratio = -528.6559213159951 - 0.3952187184615387 * Slot[1] - 0.15242912776421835 * Slot[2] - 0.0528974695085134 * Slot[3] - 
         0.03452412486594122 * Slot[4] - 0.017071419018406787 * Slot[5] - 0.0051057750456450545 * Slot[6] - 
@@ -1368,29 +1370,24 @@ function histogram_classifier(Slot::Array{Float32,1})
         10.248825349397027 * Slot[1012] + 8.953940965534835 * Slot[1013] + 2.1711528595245904 * Slot[1014] + 
         5.486803094799959 * Slot[1015] + 0.9726921583567536 * Slot[1016] + 0.09125056165895032 * Slot[1017] + 
         3.542181971110563 * Slot[1018] - 4.18161973699999 * Slot[1019] + 5.521860571096337 * Slot[1020] + 
-        3.3412421551243088 * Slot[1021] - 27.20917609989489 * Slot[1022] - 14.943357513738484 * Slot[1023] ;
+        3.3412421551243088 * Slot[1021] - 27.20917609989489 * Slot[1022] - 14.943357513738484 * Slot[1023]
 
     square = 0.0
 
+    println("legacy($legacy), linear($linear), logistic($logistic), ratio($ratio), square($square)")
+
     if (legacy > linear) && (legacy > logistic) && (legacy > ratio) && (legacy > square)
-        return legacy::ToneMapping
-    end
-
-    if (linear > legacy) && (linear > logistic) && (linear > ratio) && (linear > square) 
-        return linear::ToneMapping
-    end
-
-    if (logistic > linear) && (logistic > legacy) && (logistic > ratio) && (logistic > square) 
-        return logistic::ToneMapping
-    end
-
-    if (ratio > linear) && (ratio > legacy) && (ratio > logistic) && (ratio > square) 
-        return ratio::ToneMapping
-    end
-
-    if (square > linear) && (square > legacy) && (square > logistic) && (square > ratio)
-        return square::ToneMapping
+        flux::ToneMapping = legacy
+        return flux
+    elseif (linear > legacy) && (linear > logistic) && (linear > ratio) && (linear > square) 
+        res = linear
+    elseif (logistic > linear) && (logistic > legacy) && (logistic > ratio) && (logistic > square) 
+        res = logistic
+    elseif (ratio > linear) && (ratio > legacy) && (ratio > logistic) && (ratio > square) 
+        res = ratio
+    elseif (square > linear) && (square > legacy) && (square > logistic) && (square > ratio)
+        res = square
     end
  
-    return legacy::ToneMapping
+    return res
 end
