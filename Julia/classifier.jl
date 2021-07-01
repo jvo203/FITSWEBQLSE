@@ -1376,7 +1376,7 @@ function histogram_classifier(Slot::Vector{Float64})
     println("legacy($legacy), linear($linear), logistic($logistic), ratio($ratio), square($square)")
 
     if (legacy > linear) && (legacy > logistic) && (legacy > ratio) && (legacy > square)
-        return "flux"
+        return "legacy"
     elseif (linear > legacy) && (linear > logistic) && (linear > ratio) && (linear > square) 
         return "linear"
     elseif (logistic > linear) && (logistic > legacy) && (logistic > ratio) && (logistic > square) 

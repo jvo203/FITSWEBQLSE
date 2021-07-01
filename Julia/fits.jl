@@ -1451,8 +1451,8 @@ function getImage(
         println("slots length: $(length(cum))")
 
         try
-            flux = histogram_classifier(cum)
-            println("flux: $flux")
+            fits.flux = histogram_classifier(cum)
+            println("flux: ", fits.flux)
         catch e
             println(e)
         end
