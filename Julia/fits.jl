@@ -28,7 +28,7 @@ mutable struct FITSDataSet
     _cdelt3::Float32
     datamin::Float32
     datamax::Float32
-    flux::ToneMapping
+    flux::String
     ignrval::Float32
 
     # pixels, spectrum
@@ -66,7 +66,7 @@ mutable struct FITSDataSet
             0.0,
             0.0,
             0.0,
-            none,
+            "",
             0.0,
             Nothing,
             Nothing,
@@ -102,7 +102,7 @@ mutable struct FITSDataSet
             1.0,
             -prevfloat(typemax(Float32)),
             prevfloat(typemax(Float32)),
-            none,
+            "",
             -prevfloat(typemax(Float32)),
             Nothing,
             Nothing,
@@ -384,12 +384,12 @@ function process_header(fits::FITSDataSet)
 
             if occursin("ASTRO-F", record)
                 fits.is_optical = true
-                fits.flux = logistic
+                fits.flux = "logistic"
             end
 
             if occursin("HSCPIPE", record)
                 fits.is_optical = true
-                fits.flux = ratio
+                fits.flux = "ratio"
             end
 
             record = lowercase(record)
@@ -399,7 +399,7 @@ function process_header(fits::FITSDataSet)
                occursin("x-ray", record)
                 fits.is_optical = false
                 fits.is_xray = true
-                fits.flux = legacy
+                fits.flux = "legacy"
                 fits.ignrval = -1.0
             end
         end
@@ -411,7 +411,7 @@ function process_header(fits::FITSDataSet)
 
         if occursin("SUPM", record) || occursin("MCSM", record)
             fits.is_optical = true
-            fits.flux = ratio
+            fits.flux = "ratio"
         end
     catch e
     end
@@ -440,7 +440,7 @@ function process_header(fits::FITSDataSet)
 
         if occursin("nro45", record)
             fits.is_optical = false
-            fits.flux = ratio
+            fits.flux = "ratio"
         end
 
         if occursin("chandra", record)
@@ -450,7 +450,7 @@ function process_header(fits::FITSDataSet)
 
         if occursin("kiso", record)
             fits.is_optical = true
-            fits.flux = ratio
+            fits.flux = "ratio"
         end
     catch e
     end
@@ -1440,7 +1440,7 @@ function getImage(
         "black: $black, white: $white, sensitivity: $sensitivity, ratio_sensitivity: $ratio_sensitivity",
     )
 
-    if fits.flux == none
+    if fits.flux == ""
         acc = accumulate(+, bins)
         acc_tot = sum(bins)
         println("accumulator length: $(length(acc)); total = $acc_tot")
@@ -1451,8 +1451,8 @@ function getImage(
         println("slots length: $(length(cum))")
 
         try
-            flux::ToneMapping = histogram_classifier(cum)
-            println("flux: ", flux)
+            flux = histogram_classifier(cum)
+            println("flux: $flux")
         catch e
             println(e)
         end
