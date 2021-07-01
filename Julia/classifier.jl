@@ -1,6 +1,6 @@
 @enum ToneMapping none legacy linear logistic ratio square
 
-function histogram_classifier(Slot::Vector{Float64})
+function histogram_classifier(Slot::Vector{Float64})::String
 
     legacy = 443.6170837772559 - 
         0.008793892019758082 * Slot[1] - 0.05060583821958265 * Slot[2] - 0.07060929424871956 * Slot[3] - 
