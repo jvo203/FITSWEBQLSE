@@ -315,17 +315,23 @@ function serveImageSpectrum(request::HTTP.Request)
     end
 
     try
+        # get the JSON description
+        json_task = @async getJSON(fits_object)
+
         if fits_object.depth > 1
             # handle a distributed 3D cube
             image_task = @async getImage(fits_object, width, height, quality, fetch_data)
 
             wait(image_task)
             # image = fetch(image_task)
+
+            return HTTP.Response(501, "Not Implemented")
         else
             # downsize a 2D image
+
+            return HTTP.Response(501, "Not Implemented")
         end
 
-        return HTTP.Response(501, "Not Implemented")
     catch e
         println(e)
         return HTTP.Response(404, "Error: $e")
