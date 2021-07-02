@@ -1243,7 +1243,6 @@ function getImage(
     inner_height = 0
     bDownsize = false
 
-
     println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
 
     # calculate scale, downsize when applicable
@@ -1474,6 +1473,8 @@ function getImage(
     end
 
     println("getImage done")
+
+    return (bins, pixels, mask)
 end
 
 function getJSON(fits::FITSDataSet)
@@ -1742,7 +1743,7 @@ function getJSON(fits::FITSDataSet)
 
         write(buf, JSON.json(dict))
 
-        json = String(take!(buf))        
+        json = String(take!(buf))
 
         return json
     catch e
