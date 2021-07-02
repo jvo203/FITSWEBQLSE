@@ -154,6 +154,7 @@ function serialize_fits(fits::FITSDataSet)
 
         serialize(io, n)
         serialize(io, fits.datasetid)
+        serialize(io, fits.filesize)
         serialize(io, fits.header)
         serialize(io, fits.width)
         serialize(io, fits.height)
@@ -227,6 +228,7 @@ function deserialize_fits(datasetid)
     end
 
     fits.datasetid = deserialize(io)
+    fits.filesize = deserialize(io)
     fits.header = deserialize(io)
     fits.width = deserialize(io)
     fits.height = deserialize(io)
@@ -1475,7 +1477,12 @@ function getImage(
 end
 
 function getJSON(fits::FITSDataSet)
-    local CD1_1
+    local CD1_1 , CD1_2 , CD2_1 , CD2_2
+    local CRVAL1 , CDELT1 , CRPIX1 , CUNIT1 , CTYPE1
+    local CRVAL2 , CDELT2 , CRPIX2 , CUNIT2 , CTYPE2
+    local CRVAL3 , CDELT3 , CRPIX3 , CUNIT3 , CTYPE3
+    local BMAJ , BMIN , BPA
+    local BUNIT , BTYPE , SPECSYS
 
     try
         buf = IOBuffer()
@@ -1488,6 +1495,114 @@ function getJSON(fits::FITSDataSet)
             CD1_1 = NaN
         end
 
+        try
+            CD1_2 = header["CD1_2"]
+        catch e
+            CD1_2 = NaN
+        end
+
+        try
+            CD2_1 = header["CD2_1"]
+        catch e
+            CD2_1 = NaN
+        end
+
+        try
+            CD2_2 = header["CD2_2"]
+        catch e
+            CD2_2 = NaN
+        end
+
+        try
+            CRVAL1 = header["CRVAL1"]
+        catch e
+            CRVAL1 = NaN
+        end
+
+        try
+            CDELT1 = header["CDELT1"]
+        catch e
+            CDELT1 = NaN
+        end
+
+        try
+            CRPIX1 = header["CRPIX1"]
+        catch e
+            CRPIX1 = NaN
+        end
+
+        try
+            CUNIT1 = header["CUNIT1"]
+        catch e
+            CUNIT1 = ""
+        end
+
+        try
+            CTYPE1 = header["CTYPE1"]
+        catch e
+            CTYPE1 = ""
+        end
+
+        try
+            CRVAL2 = header["CRVAL2"]
+        catch e
+            CRVAL2 = NaN
+        end
+
+        try
+            CDELT2 = header["CDELT2"]
+        catch e
+            CDELT2 = NaN
+        end
+
+        try
+            CRPIX2 = header["CRPIX2"]
+        catch e
+            CRPIX2 = NaN
+        end
+
+        try
+            CUNIT2 = header["CUNIT2"]
+        catch e
+            CUNIT2 = ""
+        end
+
+        try
+            CTYPE2 = header["CTYPE2"]
+        catch e
+            CTYPE2 = ""
+        end
+
+        try
+            CRVAL3 = header["CRVAL3"]
+        catch e
+            CRVAL3 = NaN
+        end
+
+        try
+            CDELT3 = header["CDELT3"]
+        catch e
+            CDELT3 = NaN
+        end
+
+        try
+            CRPIX3 = header["CRPIX3"]
+        catch e
+            CRPIX3 = NaN
+        end
+
+        try
+            CUNIT3 = header["CUNIT3"]
+        catch e
+            CUNIT3 = ""
+        end
+
+        try
+            CTYPE3 = header["CTYPE3"]
+        catch e
+            CTYPE3 = ""
+        end
+
         dict = Dict(
             "width" => fits.width,
             "height" => fits.height,
@@ -1496,6 +1611,24 @@ function getJSON(fits::FITSDataSet)
             "filesize" => fits.filesize,
             "IGNRVAL" => fits.ignrval,
             "CD1_1" => CD1_1,
+            "CD1_2" => CD1_2,
+            "CD2_1" => CD2_1,
+            "CD2_2" => CD2_2,
+            "CRVAL1" => CRVAL1,
+            "CDELT1" => CDELT1,
+            "CRPIX1" => CRPIX1,
+            "CUNIT1" => CUNIT1,
+            "CTYPE1" => CTYPE1,
+            "CRVAL2" => CRVAL2,
+            "CDELT2" => CDELT2,
+            "CRPIX2" => CRPIX2,
+            "CUNIT2" => CUNIT2,
+            "CTYPE2" => CTYPE2,
+            "CRVAL3" => CRVAL3,
+            "CDELT3" => CDELT3,
+            "CRPIX3" => CRPIX3,
+            "CUNIT3" => CUNIT3,
+            "CTYPE3" => CTYPE3,
         )
 
         write(buf, JSON.json(dict))
