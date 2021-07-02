@@ -330,9 +330,9 @@ function serveImageSpectrum(request::HTTP.Request)
         end
 
         json = fetch(json_task)
+        bins, pixels, mask = fetch(image_task)
 
-        wait(image_task)
-        # image = fetch(image_task)
+        println("$json")
 
         return HTTP.Response(501, "Not Implemented")
 
