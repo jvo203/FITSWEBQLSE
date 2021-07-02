@@ -1474,20 +1474,22 @@ function getImage(
     println("getImage done")
 end
 
-function getJSON(fits::FITSDataSet)::String
-    println("getJSON calling")
+function getJSON(fits::FITSDataSet)
+    try       
+        buf = IOBuffer()
+       
+        # begin JSON
+        write(buf, "{")
 
-    buf = IOBuffer()
+        # end JSON
+        write(buf, "}")
 
-    # begin JSON
-    write(buf, "{")
+        json = String(take!(buf))        
 
-    # end JSON
-    write(buf, "}")
+        println("$json")
 
-    json = String(buf)
-
-    println("FITStoJSON: $json")
-
-    return json
+        return json
+    catch e
+        println(e)
+    end
 end
