@@ -368,15 +368,14 @@ function streamImageSpectrum(http::HTTP.Stream)
         write(http, json)
         closewrite(http)
         return
-    return
 
     catch e
     println(e)
-        return HTTP.Response(404, "Error: $e")
         HTTP.setstatus(http, 404)
         startwrite(http)
         write(http, e)
         closewrite(http)
+        return
     end
 
     return
