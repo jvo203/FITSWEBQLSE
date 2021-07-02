@@ -1475,16 +1475,21 @@ function getImage(
 end
 
 function getJSON(fits::FITSDataSet)
-    try       
+    try
         buf = IOBuffer()
-       
-        # begin JSON
-        write(buf, "{")
 
-        # end JSON
-        write(buf, "}")
+        dict = Dict(
+            "width" => fits.width,
+            "height" => fits.height,
+            "depth" => fits.depth,
+            "polarisation" => 1,
+            "filesize" => fits.filesize,
+            "IGNRVAL" => fits.ignrval,
+        )
 
-        json = String(take!(buf))        
+        write(buf, JSON.json(dict))
+
+        json = String(take!(buf))
 
         println("$json")
 
