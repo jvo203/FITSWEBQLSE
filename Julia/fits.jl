@@ -138,6 +138,8 @@ function serialize_fits(fits::FITSDataSet)
     n = length(workers())
 
     try
+        lock(fits.mutex)
+
         filename =
             ".cache" *
             Base.Filesystem.path_separator *
@@ -192,6 +194,8 @@ function serialize_fits(fits::FITSDataSet)
         close(io)
     catch e
         println("error serialising the FITS object::$e")
+    finally
+        unlock(fits.mutex)
     end
 end
 
@@ -1453,6 +1457,9 @@ function getImage(
         try
             fits.flux = histogram_classifier(cum)
             println("flux: ", fits.flux)
+
+            # save the updated flux
+            serialize_fits(fits)
         catch e
             println(e)
         end
