@@ -330,7 +330,7 @@ function serveImageSpectrum(request::HTTP.Request)
         end
 
         json = fetch(json_task)
-        bins, pixels, mask = fetch(image_task)
+        histogram, pixels, mask = fetch(image_task)
 
         println("$json")
 
