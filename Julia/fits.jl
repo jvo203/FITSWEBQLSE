@@ -1481,8 +1481,9 @@ function getJSON(fits::FITSDataSet)
     local CRVAL1 , CDELT1 , CRPIX1 , CUNIT1 , CTYPE1
     local CRVAL2 , CDELT2 , CRPIX2 , CUNIT2 , CTYPE2
     local CRVAL3 , CDELT3 , CRPIX3 , CUNIT3 , CTYPE3
-    local BMAJ , BMIN , BPA
-    local BUNIT , BTYPE , SPECSYS
+    local BMAJ , BMIN , BPA , BUNIT , BTYPE , SPECSYS
+    local RESTFRQ , OBSRA , OBSDEC
+    local OBJECT , DATEOBS , TIMESYS , LINE , FILTER
 
     try
         buf = IOBuffer()
@@ -1639,6 +1640,64 @@ function getJSON(fits::FITSDataSet)
             SPECSYS = ""
         end
 
+        RESTFRQ = 0.0 # default value
+        try
+            RESTFRQ = header["RESTFRQ"]
+        catch e
+        end
+
+        try
+            RESTFRQ = header["RESTFREQ"]
+        catch e
+        end
+
+        try
+            OBSRA = header["OBSRA"]
+        catch e
+            OBSRA = NaN
+        end
+
+        try
+            OBSDEC = header["OBSDEC"]
+        catch e
+            OBSDEC = NaN
+        end
+
+        try
+            OBJECT = header["OBJECT"]
+        catch e
+            OBJECT = ""
+        end
+
+        try
+            DATEOBS = header["DATE-OBS"]
+        catch e
+            DATEOBS = ""
+        end
+
+        try
+            TIMESYS = header["TIMESYS"]
+        catch e
+            TIMESYS = ""
+        end
+
+        LINE = "" # default value
+        try
+            LINE = header["LINE"]
+        catch e
+        end
+
+        try
+            LINE = header["J_LINE"]
+        catch e
+        end
+
+        try
+            FILTER = header["FILTER"]
+        catch e
+            FILTER = ""
+        end
+
         dict = Dict(
             "width" => fits.width,
             "height" => fits.height,
@@ -1671,16 +1730,23 @@ function getJSON(fits::FITSDataSet)
             "BUNIT" => BUNIT,
             "BTYPE" => BTYPE,
             "SPECSYS" => SPECSYS,
+            "RESTFRQ" => RESTFRQ,
+            "OBSRA" => OBSRA,
+            "OBSDEC" => OBSDEC,
+            "OBJECT" => OBJECT,
+            "DATEOBS" => DATEOBS,
+            "TIMESYS" => TIMESYS,
+            "LINE" => LINE,
+            "FILTER" => FILTER,
         )
 
         write(buf, JSON.json(dict))
 
-        json = String(take!(buf))
-
-        println("$json")
+        json = String(take!(buf))        
 
         return json
     catch e
         println(e)
+        return "{}"
     end
 end
