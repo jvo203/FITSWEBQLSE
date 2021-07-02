@@ -1,6 +1,7 @@
 using Dates;
 using DistributedArrays;
 using FITSIO;
+using JSON;
 using Mmap;
 using Serialization;
 using Statistics;
@@ -1473,8 +1474,18 @@ function getImage(
     println("getImage done")
 end
 
-function getJSON(fits::FITSDataSet)
-    resp = IOBuffer()
+function getJSON(fits::FITSDataSet)::String
+    buf = IOBuffer()
 
-    println("FITS filesize: $(fits.filesize) bytes.")
+    # begin JSON
+    write(buf, "{")
+
+    # end JSON
+    write(buf, "}")
+
+    json = String(buf)
+
+    println("FITStoJSON: $json")
+
+    return json
 end
