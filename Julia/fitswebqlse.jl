@@ -329,11 +329,11 @@ function serveImageSpectrum(request::HTTP.Request)
             return HTTP.Response(501, "Not Implemented")
         end
 
-        json = fetch(json_task)
+        json = chop(fetch(json_task)) * ","
         histogram, pixels, mask = fetch(image_task)
 
+        json = json * chop(JSON.json("histogram" => histogram), head = 1, tail = 0)
         println(json)
-        println(histogram)
 
         return HTTP.Response(501, "Not Implemented")
 
