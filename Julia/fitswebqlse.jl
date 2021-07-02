@@ -279,7 +279,14 @@ function streamImageSpectrum(http::HTTP.Stream)
     params = HTTP.queryparams(HTTP.URI(request.target))
     println(params)
 
+    HTTP.setheader(http, "Cache-Control" => "no-cache")
+    HTTP.setheader(http, "Cache-Control" => "no-store")
+    HTTP.setheader(http, "Pragma" => "no-cache")
+    HTTP.setheader(http, "Content-Type" => "application/octet-stream")
+
+    HTTP.setstatus(http, 202)
     startwrite(http)
+    write(http, "Accepted")
     closewrite(http)
 end
 
