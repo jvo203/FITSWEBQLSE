@@ -288,6 +288,8 @@ function streamImageSpectrum(http::HTTP.Stream)
     startwrite(http)
     write(http, "Accepted")
     closewrite(http)
+
+    return
 end
 
 function serveImageSpectrum(request::HTTP.Request)
