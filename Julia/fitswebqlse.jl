@@ -272,12 +272,15 @@ function serveProgress(request::HTTP.Request)
 end
 
 function streamImageSpectrum(http::HTTP.Stream)
-    request::Request = http.message
+    request::HTTP.Request = http.message
     request.body = read(http)
     closeread(http)
 
     params = HTTP.queryparams(HTTP.URI(request.target))
     println(params)
+
+    startwrite(http)
+    closewrite(http)
 end
 
 function serveImageSpectrum(request::HTTP.Request)
