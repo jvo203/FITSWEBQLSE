@@ -20,7 +20,7 @@ const SERVER_STRING =
     string(VERSION_SUB)
 
 const WASM_VERSION = "21.04.XX.X"
-const VERSION_STRING = "SV2021-06-XX.X-ALPHA"
+const VERSION_STRING = "SV2021-07-XX.X-ALPHA"
 
 const HT_DOCS = "htdocs"
 const HTTP_PORT = 8080
