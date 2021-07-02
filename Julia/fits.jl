@@ -1475,8 +1475,18 @@ function getImage(
 end
 
 function getJSON(fits::FITSDataSet)
+    local CD1_1
+
     try
         buf = IOBuffer()
+
+        header = fits.header
+
+        try
+            CD1_1 = header["CD1_1"]
+        catch e
+            CD1_1 = NaN
+        end
 
         dict = Dict(
             "width" => fits.width,
@@ -1485,6 +1495,7 @@ function getJSON(fits::FITSDataSet)
             "polarisation" => 1,
             "filesize" => fits.filesize,
             "IGNRVAL" => fits.ignrval,
+            "CD1_1" => CD1_1,
         )
 
         write(buf, JSON.json(dict))
