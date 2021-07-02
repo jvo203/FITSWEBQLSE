@@ -15,6 +15,7 @@ const NBINS = 1024
 mutable struct FITSDataSet
     # metadata
     datasetid::String
+    filesize::Integer
     header::Any
     width::Integer
     height::Integer
@@ -54,6 +55,7 @@ mutable struct FITSDataSet
     function FITSDataSet()
         new(
             "",
+            0,
             Nothing,
             0,
             0,
@@ -90,6 +92,7 @@ mutable struct FITSDataSet
     function FITSDataSet(datasetid)
         new(
             datasetid,
+            0,
             Nothing,
             0,
             0,
@@ -540,7 +543,9 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     local header
 
     try
+        fits.filesize = filesize(filepath)
         f = FITS(filepath)
+
         println(f)
     catch e
         println(e)
@@ -1470,4 +1475,6 @@ end
 
 function getJSON(fits::FITSDataSet)
     resp = IOBuffer()
+
+    println("FITS filesize: $(fits.filesize) bytes.")
 end
