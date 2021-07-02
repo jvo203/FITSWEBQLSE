@@ -1603,6 +1603,42 @@ function getJSON(fits::FITSDataSet)
             CTYPE3 = ""
         end
 
+        try
+            BMAJ = header["BMAJ"]
+        catch e
+            BMAJ = NaN
+        end
+
+        try
+            BMIN = header["BMIN"]
+        catch e
+            BMIN = Nan
+        end
+
+        try
+            BPA = header["BPA"]
+        catch e
+            BPA = NaN
+        end
+
+        try
+            BUNIT = header["BUNIT"]
+        catch e
+            BUNIT = ""
+        end
+
+        try
+            BTYPE = header["BTYPE"]
+        catch e
+            BTYPE = ""
+        end
+
+        try
+            SPECSYS = header["SPECSYS"]
+        catch e
+            SPECSYS = ""
+        end
+
         dict = Dict(
             "width" => fits.width,
             "height" => fits.height,
@@ -1629,6 +1665,12 @@ function getJSON(fits::FITSDataSet)
             "CRPIX3" => CRPIX3,
             "CUNIT3" => CUNIT3,
             "CTYPE3" => CTYPE3,
+            "BMAJ" => BMAJ,
+            "BMIN" => BMIN,
+            "BPA" => BPA,
+            "BUNIT" => BUNIT,
+            "BTYPE" => BTYPE,
+            "SPECSYS" => SPECSYS,
         )
 
         write(buf, JSON.json(dict))
