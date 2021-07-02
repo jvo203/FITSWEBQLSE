@@ -1467,3 +1467,7 @@ function getImage(
 
     println("getImage done")
 end
+
+function getJSON(fits::FITSDataSet)
+    resp = IOBuffer()
+end
