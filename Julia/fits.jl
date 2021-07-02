@@ -1475,6 +1475,8 @@ function getImage(
 end
 
 function getJSON(fits::FITSDataSet)::String
+    println("getJSON calling")
+
     buf = IOBuffer()
 
     # begin JSON
