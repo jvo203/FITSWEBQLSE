@@ -332,7 +332,8 @@ function serveImageSpectrum(request::HTTP.Request)
         json = fetch(json_task)
         histogram, pixels, mask = fetch(image_task)
 
-        println("$json")
+        println(json)
+        println(histogram)
 
         return HTTP.Response(501, "Not Implemented")
 
