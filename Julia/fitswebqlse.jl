@@ -720,7 +720,12 @@ HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/FITSWebQL.html", serveFITS)
 HTTP.@register(FITSWEBQL_ROUTER, "POST", "/*/heartbeat/*", serveHeartBeat)
 HTTP.@register(FITSWEBQL_ROUTER, "POST", "/*/progress/*", serveProgress)
-HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/image_spectrum/", streamImageSpectrum)
+HTTP.@register(
+    FITSWEBQL_ROUTER,
+    "GET",
+    "/*/image_spectrum/",
+    HTTP.StreamHandlerFunction(streamImageSpectrum)
+)
 
 println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
