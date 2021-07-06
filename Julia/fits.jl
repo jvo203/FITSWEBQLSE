@@ -13,6 +13,17 @@ const NBINS = 1024
 
 @enum Quality low medium high
 
+struct ToneMapping
+    flux::String
+    pmin::Float32
+    pmax::Float32
+    med::Float32
+    sensitivity::Float32
+    ratio_sensitivity::Float32
+    white::Float32
+    black::Float32
+end
+
 mutable struct FITSDataSet
     # metadata
     datasetid::String
@@ -1474,7 +1485,18 @@ function getImage(
 
     println("getImage done")
 
-    return (bins, pixels, mask)
+    tone_mapping = ToneMapping(
+        fits.flux,
+        pmin,
+        pmax,
+        med,
+        sensitivity,
+        ratio_sensitivity,
+        white,
+        black,
+    )
+
+    return (bins, tone_mapping, pixels, mask)
 end
 
 function getJSON(fits::FITSDataSet)
