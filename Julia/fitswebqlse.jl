@@ -1,7 +1,6 @@
 using Distributed;
 using HTTP;
 using JSON;
-using OpenEXR;
 using Printf;
 using Sockets;
 using WebSockets;
