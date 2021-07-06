@@ -388,6 +388,15 @@ function streamImageSpectrum(http::HTTP.Stream)
         write(http, Int32(width))
         write(http, Int32(height))
 
+        try
+            filename = "/tmp/" * fits_object.datasetid * ".exr"
+            image = Float16.(pixels)
+            channels = WRITE_Y
+            save_exr(filename, image, channels)
+        catch e
+            println(e)
+        end
+
         write(http, json)
         closewrite(http)
         return nothing
