@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-06-16.0";
+	return "JS2021-07-06.0";
 }
 
 const wasm_supported = (() => {
@@ -10235,6 +10235,8 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 						tone_mapping.black = dv.getFloat32(offset, endianness);
 						offset += 4;
+
+						console.log(tone_mapping);
 
 						var img_width = dv.getUint32(offset, endianness);
 						offset += 4;
