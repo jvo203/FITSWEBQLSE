@@ -369,9 +369,21 @@ function streamImageSpectrum(http::HTTP.Stream)
         HTTP.setstatus(http, 200)
         startwrite(http)
 
+        # first send the tone mapping
         len::Int32 = length(tone_mapping.flux)
         write(http, len)
         write(http, tone_mapping.flux)
+        write(http, tone_mapping.pmin)
+        write(http, tone_mapping.pmax)
+        write(http, tone_mapping.med)
+        write(http, tone_mapping.sensitivity)
+        write(http, tone_mapping.ratio_sensitivity)
+        write(http, tone_mapping.white)
+        write(http, tone_mapping.black)
+
+        # next the image
+        write(http, Int32(width))
+        write(http, Int32(height))
 
         write(http, json)
         closewrite(http)
