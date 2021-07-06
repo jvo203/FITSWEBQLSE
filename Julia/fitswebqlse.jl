@@ -358,7 +358,7 @@ function streamImageSpectrum(http::HTTP.Stream)
 
         # by default chop cuts the last character only; replace it with ','
         json = chop(fetch(json_task)) * ","
-        histogram, pixels, mask = fetch(image_task)
+        histogram, tone_mapping, pixels, mask = fetch(image_task)
 
         # chop the first '{' character only
         json = json * chop(JSON.json("histogram" => histogram), head=1, tail=0)
