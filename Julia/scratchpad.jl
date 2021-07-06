@@ -185,3 +185,14 @@ for (w, value) in fits.indices
     @spawnat w preload_frames(fits.datasetid, fits.width, fits.height, idx)
 end
 ##############################################    
+
+using OpenEXR
+
+try
+    filename = tempname() * ".exr"
+    image = Float16.(pixels)
+    channels = OpenEXR.WRITE_Y
+    OpenEXR.save_exr(filename, image, channels)
+catch e
+    println(e)
+end
