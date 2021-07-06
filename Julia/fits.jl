@@ -13,7 +13,7 @@ const NBINS = 1024
 
 @enum Quality low medium high
 
-struct ToneMapping
+struct ImageToneMapping
     flux::String
     pmin::Float32
     pmax::Float32
@@ -1485,7 +1485,7 @@ function getImage(
 
     println("getImage done")
 
-    tone_mapping = ToneMapping(
+    tone_mapping = ImageToneMapping(
         fits.flux,
         pmin,
         pmax,
