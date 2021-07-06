@@ -292,7 +292,11 @@ function streamImageSpectrum(http::HTTP.Stream)
         height = round(Integer, parse(Float64, params["height"]))
     catch e
         println(e)
-        return HTTP.Response(404, "Not Found")
+        HTTP.setstatus(http, 404)
+        startwrite(http)
+        write(http, "Not Found")
+        closewrite(http)
+        return nothing
     end
 
     try
@@ -317,7 +321,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         startwrite(http)
         write(http, "Not Found")
         closewrite(http)
-        return
+        return nothing
     end
 
     if has_error(fits_object)
@@ -325,7 +329,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         startwrite(http)
         write(http, "Internal Server Error")
         closewrite(http)
-        return
+        return nothing
     end
 
     if !has_data(fits_object)
@@ -333,7 +337,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         startwrite(http)
         write(http, "Accepted")
         closewrite(http)
-        return
+        return nothing
     end
 
     try
@@ -352,7 +356,7 @@ function streamImageSpectrum(http::HTTP.Stream)
             startwrite(http)
             write(http, "Not Implemented")
             closewrite(http)
-            return
+            return nothing
 
         end
 
@@ -386,7 +390,7 @@ function streamImageSpectrum(http::HTTP.Stream)
 
         write(http, json)
         closewrite(http)
-        return
+        return nothing
 
     catch e
         println(e)
@@ -394,10 +398,10 @@ function streamImageSpectrum(http::HTTP.Stream)
         startwrite(http)
         write(http, e)
         closewrite(http)
-        return
+        return nothing
     end
 
-    return
+    return nothing
 end
 
 function serveImageSpectrum(request::HTTP.Request)
