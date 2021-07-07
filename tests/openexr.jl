@@ -107,8 +107,9 @@ function save_exr(filename, image::AbstractArray{C.ImfRgba,2}, channels=WRITE_RG
         # addDwaCompressionLevel(header,quality);
         qualityKey = "dwaCompressionLevel"
         qualityValue = Ref{Cfloat}(10000.0)
+        val = Cfloat[10000.0]
         C.ImfHeaderSetCompression(hdr, DWAB_COMPRESSION)
-        C.ImfHeaderFloatAttribute(hdr, qualityKey, qualityValue)
+        C.ImfHeaderFloatAttribute(hdr, qualityKey, val)
         
         # open the output file
         outfile = C.ImfOpenOutputFile(filename, hdr, channels)
