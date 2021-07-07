@@ -1,3 +1,5 @@
+using Images
+
 module C
 using OpenEXR_jll
 using Colors
@@ -46,5 +48,10 @@ width = 100
 height = 67
 
 pixels = 100.0 * randn(Float16, width, height)
+mask = rand(Float16, width, height)
 
 println("OpenEXR MAGIC: $MAGIC")
+
+image = RGBA{Float16}.(pixels, pixels, pixels, mask)
+
+display(image)
