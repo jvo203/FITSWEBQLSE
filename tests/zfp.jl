@@ -1,4 +1,4 @@
-const zfplib = "libzfp.so"
+using ZfpCompression;
 
 width = 100
 height = 67
