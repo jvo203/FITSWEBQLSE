@@ -1,0 +1,1 @@
+const zfplib = "libzfp.so"
