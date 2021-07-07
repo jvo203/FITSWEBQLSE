@@ -1,7 +1,11 @@
 module C
 using OpenEXR_jll
+using Colors
+const ImfHalf = Float16
+const ImfRgba = RGBA{ImfHalf}
 include("OpenEXR_common.jl")
 include("OpenEXR_api.jl")
+const IMF_WRITE_RGBA = IMF_WRITE_RGB + IMF_WRITE_A
 end # module C
 
 const MAGIC = Cint(C.IMF_MAGIC)
