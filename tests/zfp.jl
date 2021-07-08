@@ -1,3 +1,6 @@
+import Base.Iterators: flatten
+
+using CodecLz4;
 using ZfpCompression;
 
 width = 100
@@ -5,7 +8,10 @@ height = 67
 precision = 8
 
 pixels = 100.0 * randn(Float32, width, height)
+mask = map(x -> x > -90, pixels)
 
-compressed_pixels = zfp_compress(pixels,precision=precision)
+compressed_pixels = zfp_compress(pixels, precision = precision)
+compressed_mask = transcode(LZ4HCCompressor, collect(flatten(UInt8.(mask))))
 
-println("compressed size:", length(compressed_pixels))
+println("compressed pixels size:", length(compressed_pixels))
+println("compressed mask size:", length(compressed_mask))
