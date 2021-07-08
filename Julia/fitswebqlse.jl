@@ -372,7 +372,6 @@ function streamImageSpectrum(http::HTTP.Stream)
 
         # chop the first '{' character only
         json = json * chop(JSON.json("histogram" => histogram), head = 1, tail = 0)
-        println(json)
 
         println(tone_mapping)
 
@@ -426,11 +425,21 @@ function streamImageSpectrum(http::HTTP.Stream)
             write(http, compressed_json)
 
             # FITS HEADER
+            local header::String
+
             if fits_object.has_header
-
+                header = fits_object.header
             else
-
+                header = "NULL"
             end
+
+            header_len = length(header)
+            compressed_header = lz4_hc_compress(Vector{UInt8}(header))
+            compressed_len = length(compressed_header)
+
+            write(http, Int32(header_len))
+            write(http, Int32(compressed_len))
+            write(http, compressed_header)
         end
 
         closewrite(http)
