@@ -415,7 +415,24 @@ function streamImageSpectrum(http::HTTP.Stream)
         write(http, Int32(length(compressed_mask)))
         write(http, compressed_mask)
 
-        write(http, json)
+        if fetch_data
+            # JSON
+            json_len = length(json)
+            compressed_json = lz4_hc_compress(Vector{UInt8}(json))
+            compressed_len = length(compressed_json)
+
+            write(http, Int32(json_len))
+            write(http, Int32(compressed_len))
+            write(http, compressed_json)
+
+            # FITS HEADER
+            if fits_object.has_header
+
+            else
+
+            end
+        end
+
         closewrite(http)
         return nothing
 
