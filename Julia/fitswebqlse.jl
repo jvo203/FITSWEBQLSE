@@ -409,7 +409,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         write(http, Int32(length(compressed_pixels)))
         write(http, compressed_pixels)
 
-        compressed_mask = transcode(LZ4HCCompressor, collect(flatten(UInt8.(mask))))
+        compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
         write(http, Int32(length(compressed_mask)))
         write(http, compressed_mask)
 
