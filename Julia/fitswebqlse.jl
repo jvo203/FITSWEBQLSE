@@ -405,6 +405,8 @@ function streamImageSpectrum(http::HTTP.Stream)
             prec = ZFP_LOW_PRECISION
         end
 
+        println("pixels type: ", typeof(pixels))
+
         compressed_pixels = zfp_compress(pixels, precision = prec)
         write(http, Int32(length(compressed_pixels)))
         write(http, compressed_pixels)
