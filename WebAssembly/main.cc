@@ -70,7 +70,7 @@ val decompressZFPval(int img_width, int img_height, std::string const &bytes)
   }
 
   // ZFP variables
-  zfp_type data_type = zfp_type_float;
+  zfp_type data_type = zfp_type_double; // was float
   zfp_field *field = NULL;
   zfp_stream *zfp = NULL;
   size_t bufsize = 0;
