@@ -1,3 +1,5 @@
+import Base.Iterators: flatten
+using CodecLz4;
 using Distributed;
 using HTTP;
 using JSON;
@@ -406,6 +408,10 @@ function streamImageSpectrum(http::HTTP.Stream)
         compressed_pixels = zfp_compress(pixels, precision = prec)
         write(http, Int32(length(compressed_pixels)))
         write(http, compressed_pixels)
+
+        compressed_mask = transcode(LZ4HCCompressor, collect(flatten(UInt8.(mask))))
+        write(http, Int32(length(compressed_mask)))
+        write(http, compressed_mask)
 
         write(http, json)
         closewrite(http)
