@@ -4,6 +4,7 @@ using JSON;
 using Printf;
 using Sockets;
 using WebSockets;
+using ZfpCompression;
 
 const LOCAL_VERSION = true
 const PRODUCTION = false
@@ -21,6 +22,10 @@ const SERVER_STRING =
 
 const WASM_VERSION = "21.04.XX.X"
 const VERSION_STRING = "SV2021-07-XX.X-ALPHA"
+
+const ZFP_HIGH_PRECISION = 16
+const ZFP_MEDIUM_PRECISION = 11
+const ZFP_LOW_PRECISION = 8
 
 const HT_DOCS = "htdocs"
 const HTTP_PORT = 8080
@@ -347,7 +352,7 @@ function streamImageSpectrum(http::HTTP.Stream)
 
         if fits_object.depth > 1
             # handle a distributed 3D cube
-            image_task = @async getImage(fits_object, width, height, quality, fetch_data)
+            image_task = @async getImage(fits_object, width, height, fetch_data)
         else
             # downsize a 2D image
 
@@ -386,6 +391,12 @@ function streamImageSpectrum(http::HTTP.Stream)
         # next the image
         write(http, Int32(width))
         write(http, Int32(height))
+
+        #compress pixels with ZFP
+        prec = 8
+        compressed_pixels = zfp_compress(pixels, precision = prec)
+        write(http, Int32(length(compressed_pixels)))
+        write(http, compressed_pixels)
 
         write(http, json)
         closewrite(http)

@@ -1243,7 +1243,6 @@ function getImage(
     fits::FITSDataSet,
     width::Integer,
     height::Integer,
-    quality::Quality,
     fetch_data::Bool,
 )
     local scale::Float32
@@ -1254,7 +1253,7 @@ function getImage(
     inner_height = 0
     bDownsize = false
 
-    println("getImage::$(fits.datasetid)/($width)/($height)/($quality)/($fetch_data)")
+    println("getImage::$(fits.datasetid)/($width)/($height)/($fetch_data)")
 
     # calculate scale, downsize when applicable
 
