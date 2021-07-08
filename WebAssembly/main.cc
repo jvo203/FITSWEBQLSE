@@ -70,7 +70,7 @@ val decompressZFPval(int img_width, int img_height, std::string const &bytes)
   }
 
   // ZFP variables
-  zfp_type data_type = zfp_type_double; // was float
+  zfp_type data_type = zfp_type_float;
   zfp_field *field = NULL;
   zfp_stream *zfp = NULL;
   size_t bufsize = 0;
@@ -93,7 +93,7 @@ val decompressZFPval(int img_width, int img_height, std::string const &bytes)
   {
     zfp_stream_set_bit_stream(zfp, stream);
 
-    zfp_read_header(zfp, field, ZFP_HEADER_MODE);
+    zfp_read_header(zfp, field, ZFP_HEADER_FULL);
 
     // decompress entire array
     zfpsize = zfp_decompress(zfp, field);
@@ -154,7 +154,7 @@ std::vector<float> decompressZFP(int img_width, int img_height, std::string cons
   {
     zfp_stream_set_bit_stream(zfp, stream);
 
-    zfp_read_header(zfp, field, ZFP_HEADER_MODE);
+    zfp_read_header(zfp, field, ZFP_HEADER_FULL);
 
     // decompress entire array
     zfpsize = zfp_decompress(zfp, field);
