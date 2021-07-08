@@ -15,3 +15,5 @@ compressed_mask = transcode(LZ4HCCompressor, collect(flatten(UInt8.(mask))))
 
 println("compressed pixels size:", length(compressed_pixels))
 println("compressed mask size:", length(compressed_mask))
+
+println(compressed_mask)
