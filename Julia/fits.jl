@@ -29,6 +29,7 @@ mutable struct FITSDataSet
     datasetid::String
     filesize::Integer
     header::Any
+    headerStr::String
     width::Integer
     height::Integer
     depth::Integer
@@ -69,6 +70,7 @@ mutable struct FITSDataSet
             "",
             0,
             Nothing,
+            "NULL",
             0,
             0,
             0,
@@ -106,6 +108,7 @@ mutable struct FITSDataSet
             datasetid,
             0,
             Nothing,
+            "NULL",
             0,
             0,
             0,
@@ -167,6 +170,7 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.datasetid)
         serialize(io, fits.filesize)
         serialize(io, fits.header)
+        serialize(io, fits.headerStr)
         serialize(io, fits.width)
         serialize(io, fits.height)
         serialize(io, fits.depth)
@@ -241,6 +245,7 @@ function deserialize_fits(datasetid)
     fits.datasetid = deserialize(io)
     fits.filesize = deserialize(io)
     fits.header = deserialize(io)
+    fits.headerStr = deserialize(io)
     fits.width = deserialize(io)
     fits.height = deserialize(io)
     fits.depth = deserialize(io)
@@ -623,6 +628,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             fits.height = height
             fits.depth = depth
             fits.header = read_header(hdu)
+            fits.headerStr = read_header(hdu, String)
 
             fits.has_header = true
         catch e
@@ -1239,12 +1245,7 @@ end
 
 end
 
-function getImage(
-    fits::FITSDataSet,
-    width::Integer,
-    height::Integer,
-    fetch_data::Bool,
-)
+function getImage(fits::FITSDataSet, width::Integer, height::Integer, fetch_data::Bool)
     local scale::Float32
     local image_width::Integer , image_height::Integer
     local inner_width::Integer , inner_height::Integer
