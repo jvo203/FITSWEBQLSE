@@ -29,6 +29,9 @@ const ZFP_HIGH_PRECISION = 16
 const ZFP_MEDIUM_PRECISION = 11
 const ZFP_LOW_PRECISION = 8
 
+const SPECTRUM_HIGH_PRECISION = 24
+const SPECTRUM_MEDIUM_PRECISION = 16
+
 const HT_DOCS = "htdocs"
 const HTTP_PORT = 8080
 const WS_PORT = HTTP_PORT + 1
@@ -435,11 +438,15 @@ function streamImageSpectrum(http::HTTP.Stream)
             write(http, compressed_header)
 
             if fits_object.mean_spectrum != Nothing
-
+                compressed_spectrum = zfp_compress(fits_object.mean_spectrum, precision=SPECTRUM_HIGH_PRECISION)
+                write(http, Int32(length(compressed_spectrum)))
+            write(http, compressed_spectrum)
             end
 
-            if fits_object.integrated_spectrum != Nothing
-
+                if fits_object.integrated_spectrum != Nothing
+                compressed_spectrum = zfp_compress(fits_object.integrated_spectrum, precision=SPECTRUM_HIGH_PRECISION)
+                write(http, Int32(length(compressed_spectrum)))
+                write(http, compressed_spectrum)
             end
         end
 
