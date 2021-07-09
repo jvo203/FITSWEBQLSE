@@ -437,14 +437,18 @@ function streamImageSpectrum(http::HTTP.Stream)
             write(http, Int32(compressed_len))
             write(http, compressed_header)
 
-            if fits_object.mean_spectrum != Nothing
+            if fits_object.mean_spectrum != Nothing                
                 compressed_spectrum = zfp_compress(fits_object.mean_spectrum, precision=SPECTRUM_HIGH_PRECISION)
+
+                write(http, Int32(length(fits_object.mean_spectrum)))
                 write(http, Int32(length(compressed_spectrum)))
             write(http, compressed_spectrum)
             end
 
                 if fits_object.integrated_spectrum != Nothing
                 compressed_spectrum = zfp_compress(fits_object.integrated_spectrum, precision=SPECTRUM_HIGH_PRECISION)
+            
+                write(http, Int32(length(fits_object.integrated_spectrum)))
                 write(http, Int32(length(compressed_spectrum)))
                 write(http, compressed_spectrum)
             end
