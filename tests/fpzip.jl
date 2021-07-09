@@ -59,7 +59,7 @@ function fpzip_compress(src::Array{Float32,1}, precision::Integer)
     println("got here#1")
 
     # write header
-    status = ccall((:fpzip_write_header, libfpzip), Cint, (Ptr{FPZ},), fpz)
+    status = ccall((:fpzip_write_header, libfpzip), Cint, (Ptr{Cvoid},), fpz)
     
     println("got here#2")
 
@@ -67,12 +67,12 @@ function fpzip_compress(src::Array{Float32,1}, precision::Integer)
         throw(error("Writing FPZIP header failed."))
     else
         # compress the data        
-        outbytes = ccall((:fpzip_write, libfpzip), Csize_t, (Ptr{FPZ}, Ptr{Cvoid}), fpz, src)
+        outbytes = ccall((:fpzip_write, libfpzip), Csize_t, (Ptr{Cvoid}, Ptr{Cvoid}), fpz, src)
         println("outbytes = $outbytes")
     end
 
     # release the metadata structure
-    ccall((:fpzip_write_close, libfpzip), Cvoid, (Ptr{FPZ},), fpz)
+    ccall((:fpzip_write_close, libfpzip), Cvoid, (Ptr{Cvoid},), fpz)
 
     if outbytes > 0
         return dest[1:outbytes]
