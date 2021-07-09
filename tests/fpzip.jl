@@ -38,6 +38,8 @@ function fpzip_compress(src::Array{Float32,1}, precision::Integer)
     # convert a pointer into Julia struct to access nx,ny,nz,nf etc.
     meta = FPZ(fpz)
 
+    println("an empty fpz: ", meta)
+
     # fill in the metadata
     meta.type = FPZIP_TYPE_FLOAT
     meta.prec = precision
@@ -46,20 +48,26 @@ function fpzip_compress(src::Array{Float32,1}, precision::Integer)
     meta.nz = 1
     meta.nf = 1
 
-    # sync the Julia structure back to C
-    n = sizeof(FPZ)
-    println(n, "¥t", Ref(meta), "¥t", fpz)
-    # call void * memcpy(void *restrict dst, const void *restrict src, size_t n);
-    # ccall(:memcpy, Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t), fpz, pointer_from_objref(meta), n)
+    println("after filling: ", meta)
+
+    # sync the Julia structure back to C    
+    unsafe_store!(Ptr{FPZ}(fpz), meta)
+
+    meta2 = FPZ(fpz)
+    println("meta copied to fpz; reconstructed from fpz: ", meta2)
+
+    println("got here#1")
 
     # write header
-    status = ccall((:fpzip_write_header, libfpzip), Cint, (Ptr{Cvoid},), pointer_from_objref(meta))
+    status = ccall((:fpzip_write_header, libfpzip), Cint, (Ptr{Cvoid},), fpz)
     
+    println("got here#2")
+
     if status == 0    
         throw(error("Writing FPZIP header failed."))
     else
         # compress the data        
-        outbytes = ccall((:fpzip_write, libfpzip), Csize_t, (Ptr{Cvoid}, Ptr{Cvoid}), pointer_from_objref(meta), src)
+        outbytes = ccall((:fpzip_write, libfpzip), Csize_t, (Ptr{Cvoid}, Ptr{Cvoid}), fpz, src)
         println("outbytes = $outbytes")
     end
 
