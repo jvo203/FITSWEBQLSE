@@ -1,5 +1,7 @@
 using fpzip_jll
 
+# lib = "/usr/local/lib/libfpzip.1.3.0.dylib"
+
 const FPZIP_TYPE_FLOAT = 0
 const FPZIP_TYPE_DOUBLE = 1
 
@@ -31,6 +33,7 @@ function fpzip_compress(src::Array{Float32,1}, precision::Integer)
 
     bufsize = 1024 + length(src) * sizeof(eltype(src))
     dest = Vector{UInt8}(undef, bufsize)
+    # dest = zeros(UInt8, bufsize)
 
     # compress to memory
     fpz = ccall((:fpzip_write_to_buffer, libfpzip), Ptr{FPZ}, (Ptr{Cvoid}, Csize_t), dest, bufsize)
