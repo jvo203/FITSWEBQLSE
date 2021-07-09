@@ -14,7 +14,7 @@ mutable struct FPZ
     nf::Cint    
 end
 
-FPZ(stream::Ptr) = unsafe_load(Ptr{FPZ}(stream))
+FPZ(meta::Ptr) = unsafe_load(Ptr{FPZ}(meta))
 
 const FPZIP_MEDIUM_PRECISION = 16
 const FPZIP_HIGH_PRECISION = 24
