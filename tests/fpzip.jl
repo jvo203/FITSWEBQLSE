@@ -7,10 +7,10 @@ const FPZIP_TYPE_DOUBLE = 1
 mutable struct FPZ
     type::Cint
     prec::Cint
-    nx::Cuint
-    ny::Cuint
-    nz::Cuint
-    nw::Cuint
+    nx::Cint
+    ny::Cint
+    nz::Cint
+    nw::Cint
     nf::Cint    
 end
 
@@ -22,24 +22,49 @@ const FPZIP_HIGH_PRECISION = 24
 depth = 768
 spectrum = Float32(100.0) * randn(Float32, depth)
 
-function fpzip_compress(A::Array{Float32,1}, precision::Integer)
+function fpzip_compress(src::Array{Float32,1}, precision::Integer)
 
-    bufsize = 1024 + length(A) * sizeof(eltype(A))
+    ndims = length(size(src))
+    ndims in [1] || throw(DimensionMismatch("FPZIP compression only for a 1D array (for the time being)."))
+
+    local status, outbytes
+
+    bufsize = 1024 + length(src) * sizeof(eltype(src))
     dest = Vector{UInt8}(undef, bufsize)
 
+    # compress to memory
     fpz = ccall((:fpzip_write_to_buffer, libfpzip), Ptr{Cvoid}, (Ptr{Cvoid}, Csize_t), dest, bufsize)
 
     # convert a pointer into Julia struct to access nx,ny,nz,nf etc.
-    JFPZ = FPZ(fpz)
+    meta = FPZ(fpz)
 
-    JFPZ.type = FPZIP_TYPE_FLOAT
-    JFPZ.prec = precision
-    JFPZ.nx = length(A)
-    JFPZ.ny = 1
-    JFPZ.nz = 1
-    JFPZ.nf = 1
+    # fill in the metadata
+    meta.type = FPZIP_TYPE_FLOAT
+    meta.prec = precision
+    meta.nx = length(src)
+    meta.ny = 1
+    meta.nz = 1
+    meta.nf = 1
 
-    display(JFPZ)
+    # write header
+    status = ccall((:fpzip_write_header, libfpzip), Cint, (Ptr{Cvoid},), fpz)
+    
+    if status == 0    
+        throw(error("Writing FPZIP header failed."))
+    else
+        # compress the data        
+        outbytes = ccall((:fpzip_write, libfpzip), Csize_t, (Ptr{Cvoid}, Ptr{Cvoid}), fpz, src)
+        println("outbytes = $outbytes")
+    end
+
+    # release the metadata structure
+    ccall((:fpzip_write_close, libfpzip), Cvoid, (Ptr{Cvoid},), fpz)
+
+    if outbytes > 0
+        return dest[1:outbytes]
+    else
+        return Nothing
+    end
 end
 
 fpzip_compress(spectrum, FPZIP_MEDIUM_PRECISION)
