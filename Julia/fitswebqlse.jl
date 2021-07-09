@@ -1,4 +1,4 @@
-import Base.Iterators: flatten
+import Base.Iterators:flatten
 using CodecLz4;
 using Distributed;
 using HTTP;
@@ -46,7 +46,7 @@ function serveFile(path::String)
     pos = findlast("?", path)
 
     if !isnothing(pos)
-        path = SubString(path, 1:(pos[1]-1))
+        path = SubString(path, 1:(pos[1] - 1))
     end
 
     # cache a response
@@ -106,7 +106,7 @@ function serveFile(path::String)
     end
 
     try
-        return isfile(path) ? HTTP.Response(200, headers; body = read(path)) :
+        return isfile(path) ? HTTP.Response(200, headers; body=read(path)) :
                HTTP.Response(404, "$path Not Found.")
     catch e
         return HTTP.Response(404, "Error: $e")
@@ -115,7 +115,7 @@ end
 
 function serveDirectory(request::HTTP.Request)
     headers = ["Content-Type" => "application/json"]
-
+    
     params = HTTP.queryparams(HTTP.URI(request.target))
 
     dir = ""
@@ -138,7 +138,7 @@ function serveDirectory(request::HTTP.Request)
 
     println("Scanning $dir ...")
 
-    resp = chop(JSON.json(Dict("location" => dir)), tail = 1) * ", \"contents\":["
+    resp = chop(JSON.json(Dict("location" => dir)), tail=1) * ", \"contents\":["
 
     elements = false
 
@@ -178,21 +178,21 @@ function serveDirectory(request::HTTP.Request)
                         resp *= JSON.json(dict) * ","
                         elements = true
                     end
-                end
+    end
 
             end
         end
     catch e
     end
-
+    
     if elements
-        resp = chop(resp, tail = 1) * "]}"
+        resp = chop(resp, tail=1) * "]}"
     else
         resp *= "]}"
     end
 
     try
-        return HTTP.Response(200, headers; body = resp)
+        return HTTP.Response(200, headers; body=resp)
     catch e
         return HTTP.Response(404, "Error: $e")
     end
@@ -212,10 +212,10 @@ function serveROOT(request::HTTP.Request)
 
     path = HT_DOCS * HTTP.unescapeuri(request.target)
 
-    if request.target == "/"
+            if request.target == "/"
         if LOCAL_VERSION
             path *= "local_j.html"
-        else
+    else
             path *= "test.html"
         end
     end
@@ -226,7 +226,7 @@ end
 # a recursive function (very elegant)
 function get_dataset(prefix::String, params, datasets, idx::Integer)
     try
-        push!(datasets, params[prefix*string(idx)])
+        push!(datasets, params[prefix * string(idx)])
         get_dataset(prefix, params, datasets, idx + 1)
     catch e
         # no more datasets, stop recursion
@@ -272,7 +272,7 @@ function serveProgress(request::HTTP.Request)
     headers = ["Content-Type" => "application/json"]
 
     try
-        return HTTP.Response(200, headers; body = take!(resp))
+        return HTTP.Response(200, headers; body=take!(resp))
     catch e
         return HTTP.Response(404, "Error: $e")
     end
@@ -295,7 +295,7 @@ function streamImageSpectrum(http::HTTP.Stream)
     try
         datasetid = params["datasetId"]
         width = round(Integer, parse(Float64, params["width"]))
-        height = round(Integer, parse(Float64, params["height"]))
+    height = round(Integer, parse(Float64, params["height"]))
     catch e
         println(e)
         HTTP.setstatus(http, 404)
@@ -306,7 +306,7 @@ function streamImageSpectrum(http::HTTP.Stream)
     end
 
     try
-        quality = eval(Meta.parse(params["quality"]))
+    quality = eval(Meta.parse(params["quality"]))
     catch e
     end
 
@@ -371,7 +371,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         histogram, tone_mapping, pixels, mask = fetch(image_task)
 
         # chop the first '{' character only
-        json = json * chop(JSON.json("histogram" => histogram), head = 1, tail = 0)
+        json = json * chop(JSON.json("histogram" => histogram), head=1, tail=0)
 
         println(tone_mapping)
 
@@ -393,7 +393,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         write(http, Int32(width))
         write(http, Int32(height))
 
-        #compress pixels with ZFP
+        # compress pixels with ZFP
         prec = ZFP_MEDIUM_PRECISION
 
         if quality == high
@@ -406,7 +406,7 @@ function streamImageSpectrum(http::HTTP.Stream)
 
         println("pixels type: ", typeof(pixels))
 
-        compressed_pixels = zfp_compress(pixels, precision = prec)
+        compressed_pixels = zfp_compress(pixels, precision=prec)
         write(http, Int32(length(compressed_pixels)))
         write(http, compressed_pixels)
 
@@ -433,6 +433,14 @@ function streamImageSpectrum(http::HTTP.Stream)
             write(http, Int32(header_len))
             write(http, Int32(compressed_len))
             write(http, compressed_header)
+
+            if fits_object.mean_spectrum != Nothing
+
+            end
+
+            if fits_object.integrated_spectrum != Nothing
+
+            end
         end
 
         closewrite(http)
@@ -463,14 +471,14 @@ function serveImageSpectrum(request::HTTP.Request)
     try
         datasetid = params["datasetId"]
         width = round(Integer, parse(Float64, params["width"]))
-        height = round(Integer, parse(Float64, params["height"]))
+    height = round(Integer, parse(Float64, params["height"]))
     catch e
-        println(e)
+    println(e)
         return HTTP.Response(404, "Not Found")
     end
 
     try
-        quality = eval(Meta.parse(params["quality"]))
+    quality = eval(Meta.parse(params["quality"]))
     catch e
     end
 
@@ -513,20 +521,20 @@ function serveImageSpectrum(request::HTTP.Request)
         histogram, pixels, mask = fetch(image_task)
 
         # chop the first '{' character only
-        json = json * chop(JSON.json("histogram" => histogram), head = 1, tail = 0)
+        json = json * chop(JSON.json("histogram" => histogram), head=1, tail=0)
         println(json)
 
         return HTTP.Response(501, "Not Implemented")
 
     catch e
-        println(e)
+    println(e)
         return HTTP.Response(404, "Error: $e")
     end
 end
 
 function serveFITS(request::HTTP.Request)
     root_path = HTTP.URIs.splitpath(request.target)[1]
-
+    
     params = HTTP.queryparams(HTTP.URI(request.target))
 
     println("root path: \"$root_path\"")
@@ -534,21 +542,21 @@ function serveFITS(request::HTTP.Request)
 
     has_fits = true
     is_composite = false
-
+        
     dir = ""
     datasets = []
     ext = ""
-
+    
     try
         ext = params["ext"]
     catch e
     end
-
+    
     try
         dir = params["dir"]
     catch e
     end
-
+            
     try
         if params["view"] == "composite"
             is_composite = true
@@ -797,7 +805,7 @@ function serveFITS(request::HTTP.Request)
     va_count = length(datasets)
     write(resp, "<title>FITSWEBQLSE</title></head><body>\n")
     write(resp, "<div id='votable' style='width: 0; height: 0;' data-va_count='$va_count' ")
-
+        
     if va_count == 1
         datasetid = datasets[1]
         write(resp, "data-datasetId='$datasetid' ")
