@@ -272,7 +272,7 @@ std::vector<unsigned char> decompressLZ4(int img_width, int img_height, std::str
   return mask;
 }
 
-val decompressLZ4val(int img_width, int img_height, std::string const &bytes)
+val decompressLZ4mask(int img_width, int img_height, std::string const &bytes)
 {
   std::cout << "[decompressLZ4val] " << bytes.size() << " bytes." << std::endl;
 
@@ -416,7 +416,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
   function("decompressZFPimage", &decompressZFPimage);
   function("decompressZFPspectrum", &decompressZFPspectrum);
   function("decompressLZ4", &decompressLZ4);
-  function("decompressLZ4val", &decompressLZ4val);
+  function("decompressLZ4mask", &decompressLZ4mask);
   function("FPunzip", &FPunzip);
   function("hevc_init_frame", &hevc_init_frame);
   function("hevc_destroy_frame", &hevc_destroy_frame);
