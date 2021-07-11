@@ -44,7 +44,7 @@ using namespace emscripten;
 typedef std::vector<float> Float;
 typedef std::vector<unsigned char> UChar;
 
-val decompressZFPval(int img_width, int img_height, std::string const &bytes)
+val decompressZFPimage(int img_width, int img_height, std::string const &bytes)
 {
   std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
 
@@ -413,7 +413,8 @@ EMSCRIPTEN_BINDINGS(Wrapper)
   register_vector<float>("Float");
   register_vector<unsigned char>("UChar");
   function("decompressZFP", &decompressZFP);
-  function("decompressZFPval", &decompressZFPval);
+  function("decompressZFPimage", &decompressZFPimage);
+  function("decompressZFPspectrum", &decompressZFPspectrum);
   function("decompressLZ4", &decompressLZ4);
   function("decompressLZ4val", &decompressLZ4val);
   function("FPunzip", &FPunzip);
