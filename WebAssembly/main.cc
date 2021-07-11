@@ -157,7 +157,7 @@ val decompressZFPspectrum(int length, std::string const &bytes)
   uint nx = length;
 
   // decompress spectrum with ZFP
-  field = zfp_field_1((void *)spectrumBuffer, data_type, nx);
+  field = zfp_field_1d((void *)spectrumBuffer, data_type, nx);
 
   // allocate metadata for a compressed stream
   zfp = zfp_stream_open(NULL);
