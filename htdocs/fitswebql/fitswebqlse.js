@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-07-12.0";
+	return "JS2021-07-12.1";
 }
 
 const wasm_supported = (() => {
@@ -10318,7 +10318,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							/*Module.ready
 								.then(_ => {*/
 							let start = performance.now();
-							mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer);
+							mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x);
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
@@ -10350,7 +10350,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							/*Module.ready
 								.then(_ => {*/
 							let start = performance.now();
-							integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer);
+							integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x);
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
