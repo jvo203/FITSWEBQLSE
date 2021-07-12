@@ -10318,23 +10318,10 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							/*Module.ready
 								.then(_ => {*/
 							let start = performance.now();
-							//var vec = Module.FPunzip(buffer);
 							mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer);
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
-
-							// copy the data to spectrum
-							/*let len = vec.size();
-
-							if (len > 0) {
-								mean_spectrum = new Float32Array(len);
-
-								for (let i = 0; i < len; i++)
-									mean_spectrum[i] = vec.get(i);
-							}
-
-							vec.delete();*/
 
 							// console.log(mean_spectrum);
 							/*})
@@ -10363,23 +10350,10 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							/*Module.ready
 								.then(_ => {*/
 							let start = performance.now();
-							//var vec = Module.FPunzip(buffer);
 							integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer);
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
-
-							// copy the data to spectrum
-							/*let len = vec.size();
-
-							if (len > 0) {
-								integrated_spectrum = new Float32Array(len);
-
-								for (let i = 0; i < len; i++)
-									integrated_spectrum[i] = vec.get(i);
-							}
-
-							vec.delete();*/
 
 							//console.log(integrated_spectrum);
 							/*})
