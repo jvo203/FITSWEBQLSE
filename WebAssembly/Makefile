@@ -10,11 +10,13 @@ LZ4_SRC := $(wildcard $(LZ4)/*.c)
 FPZIP = fpzip
 FPZIP_SRC := $(wildcard $(FPZIP)/src/*.cpp)
 
-SRC := $(ZFP_SRC) $(LZ4_SRC) $(FPZIP_SRC)
+SRC := $(ZFP_SRC) $(LZ4_SRC)
+# $(FPZIP_SRC)
 OBJ := $(SRC:.cpp=.o)
 OBJ := $(OBJ:.c=.o)
 
-INCLUDE = -I./ -I./$(ZFP)/include -I./$(ZFP)/src -I./$(LZ4) -I./$(FPZIP)/include -I./$(FPZIP)/src
+INCLUDE = -I./ -I./$(ZFP)/include -I./$(ZFP)/src -I./$(LZ4)
+# -I./$(FPZIP)/include -I./$(FPZIP)/src
 LIBRARY=
 CXXFLAGS=-std=c++11 -O3
 LDFLAGS=-lz --llvm-lto 1
@@ -33,9 +35,9 @@ EMFLAGS+=-s ERROR_ON_UNDEFINED_SYMBOLS=0
 #EMFLAGS+=-s MODULARIZE=1
 #EMFLAGS+=-s EXPORT_NAME="WASM"
 
-FPZIP_FP = FPZIP_FP_FAST
-FPZIP_BLOCK_SIZE = 0x1000
-DEFS += -DFPZIP_BLOCK_SIZE=$(FPZIP_BLOCK_SIZE) -DFPZIP_FP=$(FPZIP_FP) $(FPZIP_CONV)
+# FPZIP_FP = FPZIP_FP_FAST
+# FPZIP_BLOCK_SIZE = 0x1000
+# DEFS += -DFPZIP_BLOCK_SIZE=$(FPZIP_BLOCK_SIZE) -DFPZIP_FP=$(FPZIP_FP) $(FPZIP_CONV)
 DEFS += -DZFP_WITH_OPENMP=0
 
 FFMPEG_FLAGS = -Wno-implicit-function-declaration -DARCH_X86=0 -DHAVE_FAST_UNALIGNED=0 -DFF_MEMORY_POISON=0x2a -s ERROR_ON_UNDEFINED_SYMBOLS=0 -I./FFmpeg -I./FFmpeg/libavutil
