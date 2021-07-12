@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-07-09.0";
+	return "JS2021-07-12.0";
 }
 
 const wasm_supported = (() => {
@@ -10318,13 +10318,14 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							/*Module.ready
 								.then(_ => {*/
 							let start = performance.now();
-							var vec = Module.FPunzip(buffer);
+							//var vec = Module.FPunzip(buffer);
+							mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer);
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
 
 							// copy the data to spectrum
-							let len = vec.size();
+							/*let len = vec.size();
 
 							if (len > 0) {
 								mean_spectrum = new Float32Array(len);
@@ -10333,7 +10334,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 									mean_spectrum[i] = vec.get(i);
 							}
 
-							vec.delete();
+							vec.delete();*/
 
 							// console.log(mean_spectrum);
 							/*})
@@ -10362,13 +10363,14 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							/*Module.ready
 								.then(_ => {*/
 							let start = performance.now();
-							var vec = Module.FPunzip(buffer);
+							//var vec = Module.FPunzip(buffer);
+							integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer);
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
 
 							// copy the data to spectrum
-							let len = vec.size();
+							/*let len = vec.size();
 
 							if (len > 0) {
 								integrated_spectrum = new Float32Array(len);
@@ -10377,7 +10379,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 									integrated_spectrum[i] = vec.get(i);
 							}
 
-							vec.delete();
+							vec.delete();*/
 
 							//console.log(integrated_spectrum);
 							/*})
@@ -10558,9 +10560,9 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							console.log("processing an HDR image");
 							let start = performance.now();
 
-							var pixels = Module.decompressZFPval(img_width, img_height, frame_pixels);
+							var pixels = Module.decompressZFPimage(img_width, img_height, frame_pixels);
 
-							var alpha = Module.decompressLZ4val(img_width, img_height, frame_mask);
+							var alpha = Module.decompressLZ4mask(img_width, img_height, frame_mask);
 
 							let elapsed = Math.round(performance.now() - start);
 
