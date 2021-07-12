@@ -81,9 +81,6 @@ val decompressZFPimage(int img_width, int img_height, std::string const &bytes)
   // decompress pixels with ZFP
   field = zfp_field_2d((void *)pixelBuffer, data_type, nx, ny);
 
-  // disable striding
-  // zfp_field_set_stride_2d(field, 1, img_width);
-
   // allocate metadata for a compressed stream
   zfp = zfp_stream_open(NULL);
 
