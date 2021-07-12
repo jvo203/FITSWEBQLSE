@@ -187,11 +187,11 @@ val decompressZFPspectrum(int length, std::string const &bytes)
   zfp_field_free(field);
   zfp_stream_close(zfp);
 
-  for (size_t i = 0; i < spectrumLength; i++)
+  /*for (size_t i = 0; i < spectrumLength; i++)
     printf("%zu:%f|", i, spectrumBuffer[i]);
   printf("\n");
 
-  printf("spectrumLength: %zu, buffer:%p\n", spectrumLength, spectrumBuffer);
+  printf("spectrumLength: %zu, buffer:%p\n", spectrumLength, spectrumBuffer);*/
 
   return val(typed_memory_view(spectrumLength, spectrumBuffer));
 }
