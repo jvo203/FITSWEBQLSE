@@ -1,0 +1,10 @@
+cee96f8054964617d6ca870209483220222601bd is the first bad commit
+commit cee96f8054964617d6ca870209483220222601bd
+Author: Derek Schuff <dschuff@chromium.org>
+Date:   Fri Apr 23 18:35:03 2021 -0700
+
+    2.0.18 (#799)
+
+ bazel/revisions.bzl          |  6 +++++
+ emscripten-releases-tags.txt | 64 ++++++++++++++++++++++----------------------
+ 2 files changed, 38 insertions(+), 32 deletions(-)
