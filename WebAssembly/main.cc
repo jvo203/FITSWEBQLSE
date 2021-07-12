@@ -37,8 +37,6 @@ static size_t spectrumLength = 0;
 #include <string>
 #include <vector>
 
-#include <fpzip/include/fpzip.h>
-
 using namespace emscripten;
 
 typedef std::vector<float> Float;
@@ -82,6 +80,9 @@ val decompressZFPimage(int img_width, int img_height, std::string const &bytes)
 
   // decompress pixels with ZFP
   field = zfp_field_2d((void *)pixelBuffer, data_type, nx, ny);
+
+  // disable striding
+  // zfp_field_set_stride_2d(field, 1, img_width);
 
   // allocate metadata for a compressed stream
   zfp = zfp_stream_open(NULL);
@@ -307,48 +308,6 @@ val decompressLZ4mask(int img_width, int img_height, std::string const &bytes)
   return val(typed_memory_view(alphaLength, alphaBuffer));
 }
 
-std::vector<float> FPunzip(std::string const &bytes)
-{
-  std::cout << "[fpunzip] " << bytes.size() << " bytes." << std::endl;
-
-  FPZ *fpz = fpzip_read_from_buffer(bytes.data());
-
-  /* read header */
-  if (!fpzip_read_header(fpz))
-  {
-    fprintf(stderr, "cannot read header: %s\n", fpzip_errstr[fpzip_errno]);
-    return std::vector<float>();
-  }
-
-  // decompress into <spectrum.data()>
-  uint32_t spec_len = fpz->nx;
-
-  if (spec_len == 0)
-  {
-    fprintf(stderr, "zero-sized fpzip array\n");
-    return std::vector<float>();
-  }
-
-  std::vector<float> spectrum(spec_len, 0.0f);
-
-  if ((fpz->ny != 1) || (fpz->nz != 1) || (fpz->nf != 1))
-  {
-    fprintf(stderr, "array size does not match dimensions from header\n");
-    return std::vector<float>();
-  }
-
-  /* perform actual decompression */
-  if (!fpzip_read(fpz, spectrum.data()))
-  {
-    fprintf(stderr, "decompression failed: %s\n", fpzip_errstr[fpzip_errno]);
-    return std::vector<float>();
-  }
-
-  fpzip_read_close(fpz);
-
-  return spectrum;
-}
-
 void hevc_init_frame(int va_count, int width, int height)
 {
   size_t len = width * height * 4;
@@ -426,7 +385,6 @@ EMSCRIPTEN_BINDINGS(Wrapper)
   function("decompressZFPspectrum", &decompressZFPspectrum);
   function("decompressLZ4", &decompressLZ4);
   function("decompressLZ4mask", &decompressLZ4mask);
-  function("FPunzip", &FPunzip);
   function("hevc_init_frame", &hevc_init_frame);
   function("hevc_destroy_frame", &hevc_destroy_frame);
   function("hevc_decode_frame", &hevc_decode_frame);
