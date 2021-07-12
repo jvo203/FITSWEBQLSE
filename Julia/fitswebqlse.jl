@@ -393,8 +393,12 @@ function streamImageSpectrum(http::HTTP.Stream)
         write(http, tone_mapping.black)
 
         # next the image
-        write(http, Int32(width))
-        write(http, Int32(height))
+        dims = size(pixels)
+        img_width = dims[1]
+        img_height = dims[2]
+
+        write(http, Int32(img_width))
+        write(http, Int32(img_height))
 
         # compress pixels with ZFP
         prec = ZFP_MEDIUM_PRECISION
