@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-07-12.1";
+	return "JS2021-07-13.0";
 }
 
 const wasm_supported = (() => {
@@ -10367,11 +10367,9 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 						if (has_header) {
 							// decompress the FITS data etc.
-							var Buffer = require('buffer').Buffer;
 							var LZ4 = require('lz4');
 
-							var uncompressed = new Buffer(header_len);
-							// var uncompressed = Buffer.alloc(header_len);
+							var uncompressed = new Uint8Array(header_len);
 							uncompressedSize = LZ4.decodeBlock(header, uncompressed);
 							uncompressed = uncompressed.slice(0, uncompressedSize);
 
@@ -10389,11 +10387,9 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 
 						if (has_json) {
 							// decompress the FITS data etc.
-							var Buffer = require('buffer').Buffer;
 							var LZ4 = require('lz4');
 
-							var uncompressed = new Buffer(json_len);
-							// var uncompressed = Buffer.alloc(json_len);
+							var uncompressed = new Uint8Array(json_len);
 							uncompressedSize = LZ4.decodeBlock(json, uncompressed);
 							uncompressed = uncompressed.slice(0, uncompressedSize);
 
