@@ -5,6 +5,7 @@ using HTTP;
 using JSON;
 using Printf;
 using Sockets;
+using SQLite;
 using WebSockets;
 using ZfpCompression;
 
