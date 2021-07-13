@@ -1246,8 +1246,8 @@ end
 end
 
 function getImage(fits::FITSDataSet, width::Integer, height::Integer)
-    local scale::Float32
-    local image_width::Integer , image_height::Integer
+    local scale::Float32, pixels, mask
+local image_width::Integer , image_height::Integer
     local inner_width::Integer , inner_height::Integer
 
     inner_width = 0
@@ -1257,8 +1257,12 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     println("getImage::$(fits.datasetid)/($width)/($height)")
 
     # calculate scale, downsize when applicable
-    # go through the collated mask fetching inner dims from all workers, get the maximum common bounding box
-    @everywhere function get_inner_dimensions(global_mask::DArray)
+
+    # get the maximum common bounding box
+    if isa(fits.mask, DArray)
+
+        # go through the collated mask fetching inner dims from all workers
+        @everywhere function get_inner_dimensions(global_mask::DArray)
         fits_dims = size(global_mask)
         fits_width = fits_dims[1]
         fits_height = fits_dims[2]
@@ -1294,12 +1298,24 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
         inner_width = fits.width
         inner_height = fits.height
     end
+    else
+        # mask is a "normal" local Array
+        try
+            inner_width, inner_height = inherent_image_dimensions(fits.mask)
+        catch e
+            println(e)
+    
+            # on error revert to the original FITS dimensions
+            inner_width = fits.width
+            inner_height = fits.height
+        end
+    end
 
     try
         scale = get_image_scale(width, height, inner_width, inner_height)
     catch e
         println(e)
-        scale = 1.0
+    scale = 1.0
     end
 
     if scale < 1.0
@@ -1311,10 +1327,12 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
         image_height = fits.height
     end
 
-    println("scale = $scale, image: $image_width x $image_height")
+    println("scale = $scale, image: $image_width x $image_height, bDownsize: $bDownsize")
 
-    pixels = zeros(Float32, image_width, image_height)
-    mask = map(isnan, pixels)
+    if isa(fits.pixels, DArray) && isa(fits.mask, DArray)
+
+        pixels = zeros(Float32, image_width, image_height)
+        mask = map(isnan, pixels)
 
     # create a remote channel for receiving the results
     image_res = RemoteChannel(() -> Channel{Tuple}(32))
@@ -1394,8 +1412,24 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     close(image_res)
     wait(image_task)
 
+else
+    # copy and optionally downsize local pixels,mask
+    if !downsize
+        pixels = fits.pixels
+        mask = fits.mask
+    else
+        # downsize the pixels & mask            
+        try
+            pixels = Float32.(imresize(fits.pixels, (image_width, image_height)))
+            mask = Bool.(imresize(fits.mask, (image_width, image_height), method=Constant())) # use Nearest-Neighbours for the mask            
+        catch e
+            println(e)
+        end
+    end
+end
+
     # next make a histogram
-    valid_pixels = @view pixels[mask]
+        valid_pixels = @view pixels[mask]
 
     println("#valid_pixels: ", length(valid_pixels))
 
