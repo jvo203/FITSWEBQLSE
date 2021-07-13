@@ -360,11 +360,12 @@ function streamImageSpectrum(http::HTTP.Stream)
         # get the JSON description
         json_task = @async getJSON(fits_object)
 
-        if fits_object.depth > 1
-            # handle a distributed 3D cube
+        if fits_object.depth > 0
+
+            # downsize a 2D image and/or handle a distributed 3D cube
             image_task = @async getImage(fits_object, width, height)
+        
         else
-            # downsize a 2D image
 
             HTTP.setstatus(http, 501)
             startwrite(http)
