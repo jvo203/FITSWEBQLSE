@@ -1330,6 +1330,7 @@ local image_width::Integer , image_height::Integer
     println("scale = $scale, image: $image_width x $image_height, bDownsize: $bDownsize")
 
     if isa(fits.pixels, DArray) && isa(fits.mask, DArray)
+        println("distributed pixels,mask")
 
         pixels = zeros(Float32, image_width, image_height)
         mask = map(isnan, pixels)
@@ -1413,8 +1414,13 @@ local image_width::Integer , image_height::Integer
     wait(image_task)
 
 else
+    println("local pixels,mask")
+
+    println(fits.pixels[1:10])
+        println(fits.mask[1:10])
+
     # copy and optionally downsize local pixels,mask
-    if !downsize
+    if !bDownsize
         pixels = fits.pixels
         mask = fits.mask
     else
@@ -1438,7 +1444,9 @@ end
 
     println("pixel range: ", edges, "; bins: ", bins, "; nbins = ", nbins)
 
-    @time pmin, pmax = extrema(valid_pixels)
+    pmin = first(edges)
+    pmax = last(edges)
+    # @time pmin, pmax = extrema(valid_pixels)
     @time med = median(valid_pixels)
     println("extrema: $pmin ~ $pmax; median = $med")
 
