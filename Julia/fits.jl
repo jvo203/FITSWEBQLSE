@@ -237,7 +237,7 @@ function deserialize_fits(datasetid)
         close(io)
 
         dirname = ".cache" * Base.Filesystem.path_separator * fits.datasetid
-        rm(dirname, recursive=true)
+        rm(dirname, recursive = true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
     end
@@ -711,7 +711,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         else
             n = length(workers())
 
-                println(
+            println(
                 "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
@@ -770,7 +770,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         try
                             queue = indices[tid]
                         catch e
-                        println("adding a new BitArray@$tid")
+                            println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
                         finally
@@ -856,7 +856,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-                                
+
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -1052,7 +1052,7 @@ function restoreImage(fits::FITSDataSet)
 
             local_pixels[:, :] = pixels
             local_mask[:, :] = mask
-            
+
         catch e
             println("DArray::$e")
             return false
@@ -1061,7 +1061,7 @@ function restoreImage(fits::FITSDataSet)
         return true
     end
 
-        # Remote Access Service
+    # Remote Access Service
     ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
 
     # wait for the pixels & mask to be restored
@@ -1089,7 +1089,7 @@ function restoreData(fits::FITSDataSet)
             try
                 cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
                 filename =
-                cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
+                    cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
@@ -1122,7 +1122,7 @@ function get_screen_scale(x::Integer)
     return floor(0.9 * Float32(x))
 
 end
-    
+
 function get_image_scale_square(
     width::Integer,
     height::Integer,
@@ -1162,7 +1162,7 @@ function get_image_scale(
             scale = screen_dimension / image_dimension
         end
 
-            return scale
+        return scale
     end
 
     if img_width < img_height
@@ -1235,7 +1235,7 @@ end
     end
 
     # println("original dimensions: $width x $height")
-        
+
     width = x2 - x1 + 1
     height = y2 - y1 + 1
 
@@ -1246,8 +1246,8 @@ end
 end
 
 function getImage(fits::FITSDataSet, width::Integer, height::Integer)
-    local scale::Float32, pixels, mask
-local image_width::Integer , image_height::Integer
+    local scale::Float32 , pixels , mask
+    local image_width::Integer , image_height::Integer
     local inner_width::Integer , inner_height::Integer
 
     inner_width = 0
@@ -1263,48 +1263,48 @@ local image_width::Integer , image_height::Integer
 
         # go through the collated mask fetching inner dims from all workers
         @everywhere function get_inner_dimensions(global_mask::DArray)
-        fits_dims = size(global_mask)
-        fits_width = fits_dims[1]
-        fits_height = fits_dims[2]
+            fits_dims = size(global_mask)
+            fits_width = fits_dims[1]
+            fits_height = fits_dims[2]
 
-        # obtain a worker-local mask
-        local_mask = reshape(localpart(global_mask), fits_dims[1:2])
+            # obtain a worker-local mask
+            local_mask = reshape(localpart(global_mask), fits_dims[1:2])
 
-        return inherent_image_dimensions(local_mask)
+            return inherent_image_dimensions(local_mask)
 
-    end
-
-    try
-        # Remote Access Service
-        ras = [@spawnat w get_inner_dimensions(fits.mask) for w in workers()]
-
-        # fetch results
-        res = fetch.(ras)
-
-        # reduce the results
-        for dims in res
-            dimx, dimy = dims
-
-            inner_width = max(inner_width, dimx)
-            inner_height = max(inner_height, dimy)
         end
 
-        println(res)
+        try
+            # Remote Access Service
+            ras = [@spawnat w get_inner_dimensions(fits.mask) for w in workers()]
 
-    catch e
-        println(e)
+            # fetch results
+            res = fetch.(ras)
 
-        # on error revert to the original FITS dimensions
-        inner_width = fits.width
-        inner_height = fits.height
-    end
+            # reduce the results
+            for dims in res
+                dimx, dimy = dims
+
+                inner_width = max(inner_width, dimx)
+                inner_height = max(inner_height, dimy)
+            end
+
+            println(res)
+
+        catch e
+            println(e)
+
+            # on error revert to the original FITS dimensions
+            inner_width = fits.width
+            inner_height = fits.height
+        end
     else
         # mask is a "normal" local Array
         try
             inner_width, inner_height = inherent_image_dimensions(fits.mask)
         catch e
             println(e)
-    
+
             # on error revert to the original FITS dimensions
             inner_width = fits.width
             inner_height = fits.height
@@ -1315,7 +1315,7 @@ local image_width::Integer , image_height::Integer
         scale = get_image_scale(width, height, inner_width, inner_height)
     catch e
         println(e)
-    scale = 1.0
+        scale = 1.0
     end
 
     if scale < 1.0
@@ -1335,107 +1335,115 @@ local image_width::Integer , image_height::Integer
         pixels = zeros(Float32, image_width, image_height)
         mask = map(isnan, pixels)
 
-    # create a remote channel for receiving the results
-    image_res = RemoteChannel(() -> Channel{Tuple}(32))
+        # create a remote channel for receiving the results
+        image_res = RemoteChannel(() -> Channel{Tuple}(32))
 
-    image_task = @async while true
-        try
-            thread_pixels, thread_mask = take!(image_res)
+        image_task = @async while true
+            try
+                thread_pixels, thread_mask = take!(image_res)
 
-            if (typeof(pixels) != typeof(thread_pixels)) ||
-               (typeof(mask) != typeof(thread_mask))
-                # println("pixels/mask type mismatch")
-                # println(typeof(pixels), typeof(thread_pixels))
-                # println(typeof(mask), typeof(thread_mask))                
+                if (typeof(pixels) != typeof(thread_pixels)) ||
+                   (typeof(mask) != typeof(thread_mask))
+                    # println("pixels/mask type mismatch")
+                    # println(typeof(pixels), typeof(thread_pixels))
+                    # println(typeof(mask), typeof(thread_mask))                
+                end
+
+                if (size(pixels) != size(thread_pixels)) ||
+                   (size(mask) != size(thread_mask))
+                    println("pixels/mask dimension mismatch")
+                    # error("pixels/mask dimension mismatch")
+                else
+                    pixels .+= thread_pixels
+                    mask .|= thread_mask
+                end
+
+                println("received (pixels,mask)")
+            catch e
+                println("image task completed")
+                break
             end
-
-            if (size(pixels) != size(thread_pixels)) || (size(mask) != size(thread_mask))
-                println("pixels/mask dimension mismatch")
-                # error("pixels/mask dimension mismatch")
-            else
-                pixels .+= thread_pixels
-                mask .|= thread_mask
-            end
-
-            println("received (pixels,mask)")
-        catch e
-            println("image task completed")
-            break
         end
-    end
 
-    @everywhere function collate_images(
-        results,
-        global_pixels::DArray,
-        global_mask::DArray,
-        width::Integer,
-        height::Integer,
-        downsize::Bool,
-    )
+        @everywhere function collate_images(
+            results,
+            global_pixels::DArray,
+            global_mask::DArray,
+            width::Integer,
+            height::Integer,
+            downsize::Bool,
+        )
 
-        fits_dims = size(global_pixels)
-        fits_width = fits_dims[1]
-        fits_height = fits_dims[2]
+            fits_dims = size(global_pixels)
+            fits_width = fits_dims[1]
+            fits_height = fits_dims[2]
 
-        # obtain worker-local references
-        local_pixels = reshape(localpart(global_pixels), fits_dims[1:2])
-        local_mask = reshape(localpart(global_mask), fits_dims[1:2])
+            # obtain worker-local references
+            local_pixels = reshape(localpart(global_pixels), fits_dims[1:2])
+            local_mask = reshape(localpart(global_mask), fits_dims[1:2])
 
-        # println("FITS dimensions: $fits_width x $fits_height; ", size(local_pixels))
+            # println("FITS dimensions: $fits_width x $fits_height; ", size(local_pixels))
 
-        # send back the (optionally downsized) image
-        if !downsize
-            put!(results, (local_pixels, local_mask))
+            # send back the (optionally downsized) image
+            if !downsize
+                put!(results, (local_pixels, local_mask))
+            else
+                # downsize the pixels & mask            
+                try
+                    pixels = Float32.(imresize(local_pixels, (width, height)))
+                    mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
+                    put!(results, (pixels, mask))
+                catch e
+                    println(e)
+                end
+            end
+
+        end
+
+        @time @sync for w in workers()
+            @spawnat w collate_images(
+                image_res,
+                fits.pixels,
+                fits.mask,
+                image_width,
+                image_height,
+                bDownsize,
+            )
+        end
+
+        close(image_res)
+        wait(image_task)
+
+    else
+        println("local pixels,mask")
+
+        println(fits.pixels[1:10])
+        println(fits.mask[1:10])
+
+        # copy and optionally downsize local pixels,mask
+        if !bDownsize
+            pixels = fits.pixels
+            mask = fits.mask
         else
             # downsize the pixels & mask            
             try
-                pixels = Float32.(imresize(local_pixels, (width, height)))
-                mask = Bool.(imresize(local_mask, (width, height), method=Constant())) # use Nearest-Neighbours for the mask
-                put!(results, (pixels, mask))
+                pixels = Float32.(imresize(fits.pixels, (image_width, image_height)))
+                mask =
+                    Bool.(
+                        imresize(
+                            fits.mask,
+                            (image_width, image_height),
+                            method = Constant(),
+                        ),
+                    ) # use Nearest-Neighbours for the mask            
             catch e
                 println(e)
             end
         end
-
     end
-
-    @time @sync for w in workers()
-        @spawnat w collate_images(
-            image_res,
-            fits.pixels,
-            fits.mask,
-            image_width,
-            image_height,
-            bDownsize,
-        )
-    end
-
-    close(image_res)
-    wait(image_task)
-
-else
-    println("local pixels,mask")
-
-    println(fits.pixels[1:10])
-        println(fits.mask[1:10])
-
-    # copy and optionally downsize local pixels,mask
-    if !bDownsize
-        pixels = fits.pixels
-        mask = fits.mask
-    else
-        # downsize the pixels & mask            
-        try
-            pixels = Float32.(imresize(fits.pixels, (image_width, image_height)))
-            mask = Bool.(imresize(fits.mask, (image_width, image_height), method=Constant())) # use Nearest-Neighbours for the mask            
-        catch e
-            println(e)
-        end
-    end
-end
 
     # next make a histogram
-        valid_pixels = @view pixels[mask]
+    valid_pixels = @view pixels[mask]
 
     println("#valid_pixels: ", length(valid_pixels))
 
@@ -1476,7 +1484,7 @@ end
     if countN + countP > 0
         mad = (sumN + sumP) / (countN + countP)
     end
-        
+
     println("madN = $madN, madP = $madP, mad = $mad")
 
     # ALMAWebQL v2 - style
@@ -1508,7 +1516,7 @@ end
         slots = Float64.(acc) ./ Float64(acc_tot)
 
         # upsample the slots array to <NBINS>
-        cum = imresize(slots, (NBINS,), method=Linear())
+        cum = imresize(slots, (NBINS,), method = Linear())
         println("slots length: $(length(cum))")
 
         try
@@ -1527,7 +1535,7 @@ end
     tone_mapping = ImageToneMapping(
         fits.flux,
         pmin,
-    pmax,
+        pmax,
         med,
         sensitivity,
         ratio_sensitivity,
@@ -1551,7 +1559,7 @@ function getJSON(fits::FITSDataSet)
         buf = IOBuffer()
 
         header = fits.header
-    
+
         try
             CD1_1 = header["CD1_1"]
         catch e
@@ -1748,7 +1756,7 @@ function getJSON(fits::FITSDataSet)
             LINE = header["LINE"]
         catch e
         end
-        
+
         try
             LINE = header["J_LINE"]
         catch e
@@ -1762,7 +1770,7 @@ function getJSON(fits::FITSDataSet)
 
         dict = Dict(
             "width" => fits.width,
-        "height" => fits.height,
+            "height" => fits.height,
             "depth" => fits.depth,
             "polarisation" => 1,
             "filesize" => fits.filesize,
