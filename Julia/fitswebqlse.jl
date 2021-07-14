@@ -341,6 +341,18 @@ function streamMolecules(http::HTTP.Stream)
             closewrite(http)
             return nothing
         end
+
+        try
+            freq_start, freq_end = get_frequency_range(fits_object)
+        catch e
+            println(streamMolecules::$e)
+
+            HTTP.setstatus(http, 404)
+            startwrite(http)
+            write(http, "Not Found")
+            closewrite(http)
+            return nothing
+        end
     end
 
     println("get_molecules::$datasetid; [$freq_start, $freq_end] [GHz]")
