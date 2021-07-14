@@ -10119,44 +10119,49 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 			// molecules = response.molecules;
 
 			var received_msg = xmlhttp.response;
-			var dv = new DataView(received_msg);
-			offset = 0;
 
-			var json_len = dv.getUint32(offset, endianness);
-			offset += 4;
-			var buf = new Uint8Array(received_msg, offset);
+			if (received_msg instanceof ArrayBuffer) {
 
-			var LZ4 = require('lz4');
-			var uncompressed = new Uint8Array(json_len);
-			var uncompressedSize = LZ4.decodeBlock(buf, uncompressed);
-			uncompressed = uncompressed.slice(0, uncompressedSize);
+				var dv = new DataView(received_msg);
+				offset = 0;
 
-			var jsonData;
+				var json_len = dv.getUint32(offset, endianness);
+				offset += 4;
+				var buf = new Uint8Array(received_msg, offset);
 
-			try {
-				jsonData = String.fromCharCode.apply(null, uncompressed);
-			}
-			catch (err) {
-				jsonData = '';
-				for (var i = 0; i < uncompressed.length; i++)
-					jsonData += String.fromCharCode(uncompressed[i]);
+				var LZ4 = require('lz4');
+				var uncompressed = new Uint8Array(json_len);
+				var uncompressedSize = LZ4.decodeBlock(buf, uncompressed);
+				uncompressed = uncompressed.slice(0, uncompressedSize);
+
+				var jsonData;
+
+				try {
+					jsonData = String.fromCharCode.apply(null, uncompressed);
+				}
+				catch (err) {
+					jsonData = '';
+					for (var i = 0; i < uncompressed.length; i++)
+						jsonData += String.fromCharCode(uncompressed[i]);
+				};
+
+				var response = JSON.parse(jsonData);
+				molecules = response.molecules;
+
+				console.log("#SPLATALOGUE molecules: ", molecules.length);
+
+				let fitsData = fitsContainer[va_count - 1];
+
+				if (fitsData != null) {
+					if (fitsData.depth > 1)
+						display_molecules();
+				}
 			};
-
-			var response = JSON.parse(jsonData);
-			molecules = response.molecules;
-
-			console.log("#SPLATALOGUE molecules: ", molecules.length);
-
-			let fitsData = fitsContainer[va_count - 1];
-
-			if (fitsData != null) {
-				if (fitsData.depth > 1)
-					display_molecules();
-			}
 		}
 	}
 
 	xmlhttp.open("GET", url, true);
+	xmlhttp.responseType = 'arraybuffer';
 	xmlhttp.timeout = 0;
 	xmlhttp.send();
 };

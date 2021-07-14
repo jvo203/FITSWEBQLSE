@@ -400,6 +400,7 @@ function streamMolecules(http::HTTP.Stream)
 
     # LZ4-compress JSON
     compressed_json = lz4_hc_compress(Vector{UInt8}(json))
+    println("JSON length: $(length(json)); compressed: $(length(compressed_json))")    
     
     HTTP.setstatus(http, 200)
     startwrite(http)
