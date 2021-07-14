@@ -363,7 +363,7 @@ function streamMolecules(http::HTTP.Stream)
     strSQL = "SELECT * FROM lines WHERE frequency>=$freq_start AND frequency<=$freq_end;"
     
     try
-        for row in SQLite.Source(splat_db, strSQL)
+        for row in SQLite.DBInterface.execute(splat_db, strSQL)
             println(row)
         end
     catch e
