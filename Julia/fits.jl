@@ -237,7 +237,7 @@ function deserialize_fits(datasetid)
         close(io)
 
         dirname = ".cache" * Base.Filesystem.path_separator * fits.datasetid
-        rm(dirname, recursive = true)
+        rm(dirname, recursive=true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
     end
@@ -711,7 +711,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         else
             n = length(workers())
 
-            println(
+                println(
                 "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
@@ -770,7 +770,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         try
                             queue = indices[tid]
                         catch e
-                            println("adding a new BitArray@$tid")
+                        println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
                         finally
@@ -856,7 +856,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-
+                                
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -1052,7 +1052,7 @@ function restoreImage(fits::FITSDataSet)
 
             local_pixels[:, :] = pixels
             local_mask[:, :] = mask
-
+            
         catch e
             println("DArray::$e")
             return false
@@ -1061,7 +1061,7 @@ function restoreImage(fits::FITSDataSet)
         return true
     end
 
-    # Remote Access Service
+        # Remote Access Service
     ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
 
     # wait for the pixels & mask to be restored
@@ -1089,7 +1089,7 @@ function restoreData(fits::FITSDataSet)
             try
                 cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
                 filename =
-                    cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
+                cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
@@ -1122,7 +1122,7 @@ function get_screen_scale(x::Integer)
     return floor(0.9 * Float32(x))
 
 end
-
+    
 function get_image_scale_square(
     width::Integer,
     height::Integer,
@@ -1162,7 +1162,7 @@ function get_image_scale(
             scale = screen_dimension / image_dimension
         end
 
-        return scale
+            return scale
     end
 
     if img_width < img_height
@@ -1235,7 +1235,7 @@ end
     end
 
     # println("original dimensions: $width x $height")
-
+        
     width = x2 - x1 + 1
     height = y2 - y1 + 1
 
@@ -1367,7 +1367,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
 
         @everywhere function collate_images(
             results,
-            global_pixels::DArray,
+                global_pixels::DArray,
             global_mask::DArray,
             width::Integer,
             height::Integer,
@@ -1391,7 +1391,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
                 # downsize the pixels & mask            
                 try
                     pixels = Float32.(imresize(local_pixels, (width, height)))
-                    mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
+                    mask = Bool.(imresize(local_mask, (width, height), method=Constant())) # use Nearest-Neighbours for the mask
                     put!(results, (pixels, mask))
                 catch e
                     println(e)
@@ -1403,7 +1403,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
         @time @sync for w in workers()
             @spawnat w collate_images(
                 image_res,
-                fits.pixels,
+        fits.pixels,
                 fits.mask,
                 image_width,
                 image_height,
@@ -1429,11 +1429,11 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
             try
                 pixels = Float32.(imresize(fits.pixels, (image_width, image_height)))
                 mask =
-                    Bool.(
+                Bool.(
                         imresize(
                             fits.mask,
                             (image_width, image_height),
-                            method = Constant(),
+                            method=Constant(),
                         ),
                     ) # use Nearest-Neighbours for the mask            
             catch e
@@ -1484,7 +1484,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     if countN + countP > 0
         mad = (sumN + sumP) / (countN + countP)
     end
-
+        
     println("madN = $madN, madP = $madP, mad = $mad")
 
     # ALMAWebQL v2 - style
@@ -1516,7 +1516,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
         slots = Float64.(acc) ./ Float64(acc_tot)
 
         # upsample the slots array to <NBINS>
-        cum = imresize(slots, (NBINS,), method = Linear())
+        cum = imresize(slots, (NBINS,), method=Linear())
         println("slots length: $(length(cum))")
 
         try
@@ -1535,7 +1535,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     tone_mapping = ImageToneMapping(
         fits.flux,
         pmin,
-        pmax,
+    pmax,
         med,
         sensitivity,
         ratio_sensitivity,
@@ -1559,7 +1559,7 @@ function getJSON(fits::FITSDataSet)
         buf = IOBuffer()
 
         header = fits.header
-
+    
         try
             CD1_1 = header["CD1_1"]
         catch e
@@ -1756,7 +1756,7 @@ function getJSON(fits::FITSDataSet)
             LINE = header["LINE"]
         catch e
         end
-
+        
         try
             LINE = header["J_LINE"]
         catch e
@@ -1770,7 +1770,7 @@ function getJSON(fits::FITSDataSet)
 
         dict = Dict(
             "width" => fits.width,
-            "height" => fits.height,
+        "height" => fits.height,
             "depth" => fits.depth,
             "polarisation" => 1,
             "filesize" => fits.filesize,
@@ -1816,7 +1816,7 @@ function getJSON(fits::FITSDataSet)
 
         return json
     catch e
-        println(e)
+        println("getJSON::$e")
         return "{}"
     end
 end
