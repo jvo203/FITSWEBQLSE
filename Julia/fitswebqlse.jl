@@ -399,7 +399,7 @@ function streamMolecules(http::HTTP.Stream)
     HTTP.setheader(http, "Content-Type" => "application/octet-stream")
 
     # LZ4-compress JSON
-    compressed_json = lz4_hc_compress(json)
+    compressed_json = lz4_hc_compress(Vector{UInt8}(json))
     
     HTTP.setstatus(http, 200)
     startwrite(http)
