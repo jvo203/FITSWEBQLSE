@@ -187,7 +187,7 @@ function serveDirectory(request::HTTP.Request)
                         resp *= JSON.json(dict) * ","
                         elements = true
                     end
-                end
+    end
 
             end
         end
@@ -289,6 +289,8 @@ end
 
 
 function streamMolecules(http::HTTP.Stream)
+    global splat_db
+
     request::HTTP.Request = http.message
     request.body = read(http)
     closeread(http)
@@ -359,7 +361,20 @@ function streamMolecules(http::HTTP.Stream)
 
     # fetch the molecules from Splatalogue
     strSQL = "SELECT * FROM lines WHERE frequency>=$freq_start AND frequency<=$freq_end;"
-    println(strSQL)
+    
+    try
+        for row in SQLite.Source(splat_db, strSQL)
+            println(row)
+        end
+    catch e
+        println("streamMolecules::$e")
+
+        HTTP.setstatus(http, 404)
+        startwrite(http)
+        write(http, "Not Found")
+        closewrite(http)
+        return nothing
+    end
 
     HTTP.setheader(http, "Cache-Control" => "no-cache")
     HTTP.setheader(http, "Cache-Control" => "no-store")
