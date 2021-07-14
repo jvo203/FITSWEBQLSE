@@ -357,10 +357,13 @@ function streamMolecules(http::HTTP.Stream)
 
     println("get_molecules::$datasetid; [$freq_start, $freq_end] [GHz]")
 
+    # fetch the molecules from Splatalogue
+
+
     HTTP.setheader(http, "Cache-Control" => "no-cache")
     HTTP.setheader(http, "Cache-Control" => "no-store")
     HTTP.setheader(http, "Pragma" => "no-cache")
-    HTTP.setheader(http, "Content-Type" => "application/octet-stream")
+    HTTP.setheader(http, "Content-Type" => "application/json")
 
     # not implemented yet (under construction)
     HTTP.setstatus(http, 501)

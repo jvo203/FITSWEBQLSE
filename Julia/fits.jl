@@ -398,8 +398,7 @@ function get_dataset(datasetid::String, fits_objects, fits_lock)::FITSDataSet
 end
 
 function get_frequency_range(fits::FITSDataSet)
-    local f1 , f2
-    local crval3 , cdelt3 , crpix3 , restfrq
+    local crval3 , cdelt3 , crpix3
 
     header = fits.header
 
@@ -409,6 +408,8 @@ function get_frequency_range(fits::FITSDataSet)
     crpix3 = header["CRPIX3"]
 
     c = SpeedOfLightInVacuum
+    f1 = NaN
+    f2 = NaN
 
     if fits.has_velocity
 
@@ -426,7 +427,7 @@ function get_frequency_range(fits::FITSDataSet)
         end
 
         if restfrq == NaN
-            error("Could not obtain the rest frequency.")
+            error("Could not obtain the Rest Frequency.")
         end
 
         v1 =
@@ -448,6 +449,10 @@ function get_frequency_range(fits::FITSDataSet)
             crval3 * fits.frame_multiplier +
             cdelt3 * fits.frame_multiplier * (fits.depth - crpix3)
 
+    end
+
+    if f1 == NaN || f2 == NaN
+        error("Could not obtain {f1,f2}.")
     end
 
     freq_start = min(f1, f2) / 1.0E9 # [Hz -> GHz]
