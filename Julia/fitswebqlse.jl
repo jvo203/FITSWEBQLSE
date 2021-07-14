@@ -287,6 +287,77 @@ function serveProgress(request::HTTP.Request)
     end
 end
 
+
+function streamMolecules(http::HTTP.Stream)
+    request::HTTP.Request = http.message
+    request.body = read(http)
+    closeread(http)
+
+    params = HTTP.queryparams(HTTP.URI(request.target))
+    # println(params)
+
+    datasetid = ""
+    freq_start::Float64 = 0.0
+    freq_end::Float64 = 0.0
+
+    try
+        datasetid = params["datasetId"]
+        freq_start = parse(Float64, params["freq_start"])
+        freq_end = parse(Float64, params["freq_end"])
+    catch e
+        println(e)
+        HTTP.setstatus(http, 404)
+        startwrite(http)
+        write(http, "Not Found")
+        closewrite(http)
+        return nothing
+    end
+
+    if freq_start == 0.0 || freq_end == 0.0
+        # get the frequency range from the dataset
+
+        fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+        if fits_object.datasetid == ""
+            HTTP.setstatus(http, 404)
+            startwrite(http)
+            write(http, "Not Found")
+            closewrite(http)
+            return nothing
+        end
+
+        if has_error(fits_object)
+            HTTP.setstatus(http, 500)
+            startwrite(http)
+            write(http, "Internal Server Error")
+            closewrite(http)
+            return nothing
+        end
+
+        if !has_header(fits_object)
+            HTTP.setstatus(http, 202)
+            startwrite(http)
+            write(http, "Accepted")
+            closewrite(http)
+            return nothing
+        end
+    end
+
+    println("get_molecules::$datasetid; [$freq_start, $freq_end] [GHz]")
+
+    HTTP.setheader(http, "Cache-Control" => "no-cache")
+    HTTP.setheader(http, "Cache-Control" => "no-store")
+    HTTP.setheader(http, "Pragma" => "no-cache")
+    HTTP.setheader(http, "Content-Type" => "application/octet-stream")
+
+    # not implemented yet (under construction)
+    HTTP.setstatus(http, 501)
+    startwrite(http)
+    write(http, "Not Implemented")
+    closewrite(http)
+    return nothing
+end
+
 function streamImageSpectrum(http::HTTP.Stream)
     request::HTTP.Request = http.message
     request.body = read(http)
@@ -932,7 +1003,12 @@ HTTP.@register(
     "/*/image_spectrum/",
     HTTP.StreamHandlerFunction(streamImageSpectrum)
 )
-
+HTTP.@register(
+    FITSWEBQL_ROUTER,
+    "GET",
+    "/*/get_molecules/",
+    HTTP.StreamHandlerFunction(streamMolecules)
+)
 
 # open a Splatalogue database
 splat_db = SQLite.DB("splatalogue_v3.db")
