@@ -345,7 +345,7 @@ function streamMolecules(http::HTTP.Stream)
         try
             freq_start, freq_end = get_frequency_range(fits_object)
         catch e
-            println(streamMolecules::$e)
+            println("streamMolecules::$e")
 
             HTTP.setstatus(http, 404)
             startwrite(http)
