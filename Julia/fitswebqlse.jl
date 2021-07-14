@@ -396,12 +396,15 @@ function streamMolecules(http::HTTP.Stream)
     HTTP.setheader(http, "Cache-Control" => "no-cache")
     HTTP.setheader(http, "Cache-Control" => "no-store")
     HTTP.setheader(http, "Pragma" => "no-cache")
-    HTTP.setheader(http, "Content-Type" => "application/json")
+    HTTP.setheader(http, "Content-Type" => "application/octet-stream")
 
-    # send the raw JSON (uncompressed at the time)
+    # LZ4-compress JSON
+    compressed_json = lz4_hc_compress(json)
+    
     HTTP.setstatus(http, 200)
     startwrite(http)
-    write(http, json)
+    write(http, Int32(length(json)))
+    write(http, compressed_json)
     closewrite(http)
     return nothing
 end
