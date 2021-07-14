@@ -362,9 +362,17 @@ function streamMolecules(http::HTTP.Stream)
     # fetch the molecules from Splatalogue
     strSQL = "SELECT * FROM lines WHERE frequency>=$freq_start AND frequency<=$freq_end;"
     
+    has_molecules = false
+    resp = IOBuffer()
+    write(resp, "{\"molecules\" : [")
+
     try
         for row in SQLite.DBInterface.execute(splat_db, strSQL)
-            println(row)
+            has_molecules = true
+            json = JSON.json(row)
+
+            write(resp, json)
+            write(resp, ",")
         end
     catch e
         println("streamMolecules::$e")
@@ -376,15 +384,24 @@ function streamMolecules(http::HTTP.Stream)
         return nothing
     end
 
+    json = String(take!(resp))
+
+    if !has_molecules
+        json = "{\"molecules\" : []}"
+    else
+        # remove the last character (comma) from json, end an array
+        json = chop(json, tail=1) * "]}"
+    end
+
     HTTP.setheader(http, "Cache-Control" => "no-cache")
     HTTP.setheader(http, "Cache-Control" => "no-store")
     HTTP.setheader(http, "Pragma" => "no-cache")
     HTTP.setheader(http, "Content-Type" => "application/json")
 
-    # not implemented yet (under construction)
-    HTTP.setstatus(http, 501)
+    # send the raw JSON (uncompressed at the time)
+    HTTP.setstatus(http, 200)
     startwrite(http)
-    write(http, "Not Implemented")
+    write(http, json)
     closewrite(http)
     return nothing
 end
