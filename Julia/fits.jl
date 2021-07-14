@@ -426,7 +426,7 @@ function get_frequency_range(fits::FITSDataSet)
         catch e
         end
 
-        if restfrq == NaN
+        if !isfinite(restfrq)
             error("Could not obtain the Rest Frequency.")
         end
 
@@ -451,7 +451,7 @@ function get_frequency_range(fits::FITSDataSet)
 
     end
 
-    if f1 == NaN || f2 == NaN
+    if !isfinite(f1) || !isfinite(f2)
         error("Could not obtain {f1,f2}.")
     end
 
