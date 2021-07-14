@@ -408,8 +408,7 @@ function get_frequency_range(fits::FITSDataSet)
     crpix3 = header["CRPIX3"]
 
     c = SpeedOfLightInVacuum
-    f1 = NaN
-    f2 = NaN
+    f1 = f2 = NaN
 
     if fits.has_velocity
 
