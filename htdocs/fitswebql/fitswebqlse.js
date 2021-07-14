@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-07-13.0";
+	return "JS2021-07-14.0";
 }
 
 const wasm_supported = (() => {
@@ -9916,33 +9916,33 @@ function setup_image_selection() {
 }
 
 function screen_molecule(molecule) {
-	var intensity = parseFloat(molecule.cdms);
+	var intensity = parseFloat(molecule.cdms_intensity);
 
 	if (intensity < displayIntensity)
 		return false;
 
-	if (molecule.list == "CDMS")
+	if (molecule.linelist == "CDMS")
 		return displayCDMS;
 
-	if (molecule.list == "JPL")
+	if (molecule.linelist == "JPL")
 		return displayJPL;
 
-	if (molecule.list == "Recomb")
+	if (molecule.linelist == "Recomb")
 		return displayRecomb;
 
-	if (molecule.list == "SLAIM")
+	if (molecule.linelist == "SLAIM")
 		return displaySLAIM;
 
-	if (molecule.list == "TopModel")
+	if (molecule.linelist == "TopModel")
 		return displayTopModel;
 
-	if (molecule.list == "OSU")
+	if (molecule.linelist == "OSU")
 		return displayOSU;
 
-	if (molecule.list == "Lovas")
+	if (molecule.linelist == "Lovas")
 		return displayLovas;
 
-	if (molecule.list == "ToyaMA")
+	if (molecule.linelist == "ToyaMA")
 		return displayToyaMA;
 
 	return true;
@@ -10067,12 +10067,12 @@ function display_molecules() {
 		//console.log("spectral line @ x = ",x, (f/1e9).toPrecision(7), text.trim()) ;
 
 		var cdms = '';
-		var intensity = molecule.cdms;
+		var intensity = molecule.cdms_intensity;
 
 		if (intensity != 0.0)
 			cmds = ' CDMS/JPL Int. ' + intensity;
 
-		var htmlStr = molecule.name.trim() + ' ' + text.trim() + ' ' + molecule.quantum.trim() + ' <span style="font-size: 80%">(' + molecule.list + ')</span>';
+		var htmlStr = molecule.name.trim() + ' ' + text.trim() + ' ' + molecule.qn.trim() + ' <span style="font-size: 80%">(' + molecule.linelist + ')</span>';
 
 		if (htmlStr.indexOf("Unidentified") > -1)
 			htmlStr = molecule.name;
