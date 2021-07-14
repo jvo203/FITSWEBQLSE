@@ -393,12 +393,10 @@ function streamMolecules(http::HTTP.Stream)
         json = chop(json, tail=1) * "]}"
     end
 
-    # HTTP.setheader(http, "Cache-Control" => "no-cache")
-    # HTTP.setheader(http, "Cache-Control" => "no-store")
-    # HTTP.setheader(http, "Pragma" => "no-cache")
-
     # cache a response
     HTTP.setheader(http, "Cache-Control" => "public, max-age=86400")
+
+    # sending binary data
     HTTP.setheader(http, "Content-Type" => "application/octet-stream")
 
     # LZ4-compress JSON
