@@ -1683,7 +1683,7 @@ function getJSON(fits::FITSDataSet)
         try
             BMIN = header["BMIN"]
         catch e
-            BMIN = Nan
+            BMIN = NaN          
         end
 
         try
