@@ -1,3 +1,5 @@
+include("ispc_toolchain.jl")
+
 # A basic ISPC kernel:
 code = """
 export void simple(uniform float vin[], uniform float vout[],
