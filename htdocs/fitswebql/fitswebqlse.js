@@ -10122,7 +10122,7 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 
 			if (received_msg instanceof ArrayBuffer) {
 
-				// Bzip2 decoder 
+				// bzip2 decoder 
 				var bytes = new Uint8Array(received_msg);
 				jsonData = bzip2.simple(bzip2.array(bytes));
 
