@@ -821,6 +821,8 @@ function serveFITS(request::HTTP.Request)
         resp,
         "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/marchingsquares-isobands.min.js\"></script>\n",
     )
+    # Bzip2 decoder
+    write(resp, "<script src=\"bzip2.js\"></script>\n")
 
     # WebAssembly
     write(resp, "<script src=\"client.", WASM_VERSION, ".js\"></script>\n")
