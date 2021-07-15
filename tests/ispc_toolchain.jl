@@ -79,7 +79,7 @@ function load_ispc(code, options = ``)
 
         # Create a shared library:
         link(objfile, libfile)
-        return Libdl.dlopen(libfile)
+        return Libc.Libdl.dlopen(libfile)
     end
 
     if _keep_files
