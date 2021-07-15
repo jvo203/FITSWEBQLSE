@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-07-14.1";
+	return "JS2021-07-15.0";
 }
 
 const wasm_supported = (() => {
@@ -10122,7 +10122,11 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 
 			if (received_msg instanceof ArrayBuffer) {
 
-				var dv = new DataView(received_msg);
+				// Bzip2 decoder 
+				var buf = new Uint8Array(received_msg);
+				jsonData = bzip2.simple(buf);
+
+				/*var dv = new DataView(received_msg);
 				offset = 0;
 
 				var json_len = dv.getUint32(offset, endianness);
@@ -10143,7 +10147,7 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 					jsonData = '';
 					for (var i = 0; i < uncompressed.length; i++)
 						jsonData += String.fromCharCode(uncompressed[i]);
-				};
+				};*/
 
 				var response = JSON.parse(jsonData);
 				molecules = response.molecules;
