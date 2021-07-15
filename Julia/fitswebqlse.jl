@@ -398,24 +398,14 @@ function streamMolecules(http::HTTP.Stream)
     # sending binary data
     HTTP.setheader(http, "Content-Type" => "application/octet-stream")
 
-    # LZ4-compress JSON
-    compressed_json = lz4_hc_compress(Vector{UInt8}(json), 12)
-    println(
-        "SPECTRAL LINES JSON length: $(length(json)); compressed: $(length(compressed_json))",
-    )
-
-    # try Bzip2
+    # compress with Bzip2 (more efficient than LZ4HC)
     compressed = transcode(Bzip2Compressor, json)
-    println("Bzip2 compressed length: ", length(compressed))
-
-    # streaming Bzip2
-    # stream = Bzip2CompressorStream(IOBuffer(json))
-    # close(stream)
+    println(
+        "SPECTRAL LINES JSON length: $(length(json)); bzip2-compressed: $(length(compressed))",
+    )
 
     HTTP.setstatus(http, 200)
     startwrite(http)
-    # write(http, Int32(length(json)))
-    # write(http, compressed_json)
     write(http, compressed)
     closewrite(http)
 
