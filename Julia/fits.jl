@@ -1482,9 +1482,6 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     else
         println("local pixels,mask")
 
-        println(fits.pixels[1:10])
-        println(fits.mask[1:10])
-
         # copy and optionally downsize local pixels,mask
         if !bDownsize
             pixels = fits.pixels
