@@ -25,3 +25,5 @@ fptr = Libc.Libdl.dlsym(lib, "simple")
 vin = rand(Float32, 1000);
 vout = zeros(Float32, 1000);
 ccall(fptr, Cvoid, (Ref{Float32}, Ref{Float32}, UInt64), vin, vout, length(vout))
+
+println(vout[1:10])
