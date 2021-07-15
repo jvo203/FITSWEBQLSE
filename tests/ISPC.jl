@@ -17,3 +17,9 @@ println(code)
 
 # Compile the code and get a function pointer to our kernel:
 lib = load_ispc(code, `--target=avx1-i32x8`)
+fptr = Libdl.dlsym(lib, "simple")
+
+# Call the kernel:
+vin = rand(Float32, 1000);
+vout = zeros(Float32, 1000);
+ccall(fptr, Void, (Ref{Float32}, Ref{Float32}, UInt64), vin, vout, length(vout))
