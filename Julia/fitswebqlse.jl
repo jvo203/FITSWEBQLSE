@@ -392,17 +392,17 @@ function streamMolecules(http::HTTP.Stream)
         json = chop(json, tail = 1) * "]}"
     end
 
-    # cache a response
-    HTTP.setheader(http, "Cache-Control" => "public, max-age=86400")
-
-    # sending binary data
-    HTTP.setheader(http, "Content-Type" => "application/octet-stream")
-
     # compress with bzip2 (more efficient than LZ4HC)
     compressed = transcode(Bzip2Compressor, json)
     println(
         "SPECTRAL LINES JSON length: $(length(json)); bzip2-compressed: $(length(compressed))",
     )
+
+    # cache a response
+    HTTP.setheader(http, "Cache-Control" => "public, max-age=86400")
+
+    # sending binary data
+    HTTP.setheader(http, "Content-Type" => "application/octet-stream")
 
     HTTP.setstatus(http, 200)
     startwrite(http)
