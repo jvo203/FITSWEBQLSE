@@ -10123,31 +10123,8 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 			if (received_msg instanceof ArrayBuffer) {
 
 				// Bzip2 decoder 
-				var buf = new Uint8Array(received_msg);
-				jsonData = bzip2.simple(buf);
-
-				/*var dv = new DataView(received_msg);
-				offset = 0;
-
-				var json_len = dv.getUint32(offset, endianness);
-				offset += 4;
-				var buf = new Uint8Array(received_msg, offset);
-
-				var LZ4 = require('lz4');
-				var uncompressed = new Uint8Array(json_len);
-				var uncompressedSize = LZ4.decodeBlock(buf, uncompressed);
-				uncompressed = uncompressed.slice(0, uncompressedSize);
-
-				var jsonData;
-
-				try {
-					jsonData = String.fromCharCode.apply(null, uncompressed);
-				}
-				catch (err) {
-					jsonData = '';
-					for (var i = 0; i < uncompressed.length; i++)
-						jsonData += String.fromCharCode(uncompressed[i]);
-				};*/
+				var bytes = new Uint8Array(received_msg);
+				jsonData = bzip2.simple(bzip2.array(bytes));
 
 				var response = JSON.parse(jsonData);
 				molecules = response.molecules;
