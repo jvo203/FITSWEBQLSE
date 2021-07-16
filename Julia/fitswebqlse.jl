@@ -369,9 +369,7 @@ function streamMolecules(http::HTTP.Stream)
         for row in SQLite.DBInterface.execute(splat_db, strSQL)
             has_molecules = true
             json = JSON.json(row)
-
-            write(resp, json)
-            write(resp, ",")
+            write(resp, json, ",")
         end
     catch e
         println("streamMolecules::$e")
