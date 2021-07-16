@@ -1099,9 +1099,12 @@ function ws_coroutine(ws, datasetid, ids)
         try
             msg = JSON.parse(s)
             @info msg
+            println(msg["type"])
 
             if msg["type"] == "realtime_image_spectrum"
+                println("got here #1")
                 # fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+                println("got here #2")
 
                 # if !has_data(fits_object)
                 #    error("$datasetid: no data found.")
