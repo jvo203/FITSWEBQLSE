@@ -1074,7 +1074,8 @@ println("Press CTRL+C to exit.")
 # Sockets.localhost or Sockets.IPv4(0)
 host = Sockets.IPv4(0)
 
-function ws_coroutine(ws, datasetid, ids)
+function ws_coroutine(ws, ids)
+    datasetid = String(ids[1])
     @info "Started websocket coroutine for $datasetid" ws
 
     while isopen(ws)
@@ -1103,7 +1104,7 @@ function ws_coroutine(ws, datasetid, ids)
             if msg["type"] == "realtime_image_spectrum"
                 println("got here #1")
                 println("$datasetid::", typeof(datasetid))
-                # fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+                fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
                 #if fits_object.datasetid == ""
                 #    continue
@@ -1136,11 +1137,10 @@ function ws_gatekeeper(req, ws)
     if !isnothing(pos)
         targets = SubString(target, pos[1] + 1)
         ids = split(targets, ";")
-        datasetid = ids[1]
 
-        @info "\n[ws] datasetid $datasetid"
+        @info "\n[ws] datasetid $(ids[1])"
 
-        ws_coroutine(ws, datasetid, ids)
+        ws_coroutine(ws, ids)
     else
         @info "[ws] Missing datasetid"
     end
