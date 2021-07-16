@@ -1104,6 +1104,11 @@ function ws_coroutine(ws, datasetid, ids)
                 println("got here #1")
                 println("$datasetid::", typeof(datasetid))
                 # fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+                #if fits_object.datasetid == ""
+                #    continue
+                #end
+
                 println("got here #2")
 
                 # if !has_data(fits_object)
