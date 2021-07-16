@@ -1099,10 +1099,10 @@ function ws_coroutine(ws, datasetid, ids)
         try
             msg = JSON.parse(s)
             @info msg
-            println(msg["type"])
 
             if msg["type"] == "realtime_image_spectrum"
                 println("got here #1")
+                println("$datasetid::", typeof(datasetid))
                 # fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
                 println("got here #2")
 
@@ -1111,7 +1111,7 @@ function ws_coroutine(ws, datasetid, ids)
                 # end                
             end
         catch e
-            @info "ws_coroutine::$e"
+            println("ws_coroutine::$e")
         end
     end
 
