@@ -1114,6 +1114,8 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
+                @time getViewport(fits_object, msg)
+
             end
         catch e
             println("ws_coroutine::$e")

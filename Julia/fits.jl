@@ -1882,3 +1882,8 @@ function getJSON(fits::FITSDataSet)
         return "{}"
     end
 end
+
+function getViewport(fits::FITSDataSet, req::Dict{String, Any})
+    println("$(fits.datasetid)::$req")
+
+end
