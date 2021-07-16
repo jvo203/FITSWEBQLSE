@@ -1883,7 +1883,19 @@ function getJSON(fits::FITSDataSet)
     end
 end
 
-function getViewport(fits::FITSDataSet, req::Dict{String, Any})
-    println("$(fits.datasetid)::$req")
+function getViewport(fits::FITSDataSet, req::Dict{String,Any})
+    # println("$(fits.datasetid)::$req")
 
+    x1 = req["x1"]
+    x2 = req["x2"]
+    y1 = req["y1"]
+    y2 = req["y2"]
+
+    frame_start = req["frame_start"]
+    frame_end = req["frame_end"]
+    ref_freq = req["ref_freq"]
+
+    # first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
+    # frame_length = last_frame - first_frame + 1
+    # println(first_frame, last_frame, frame_length, fits.depth)
 end
