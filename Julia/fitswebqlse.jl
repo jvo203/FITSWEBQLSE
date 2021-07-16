@@ -1076,6 +1076,7 @@ host = Sockets.IPv4(0)
 
 function ws_coroutine(ws, ids)
     datasetid = String(ids[1])
+
     @info "Started websocket coroutine for $datasetid" ws
 
     while isopen(ws)
@@ -1102,7 +1103,6 @@ function ws_coroutine(ws, ids)
             @info msg
 
             if msg["type"] == "realtime_image_spectrum"
-                println("got here #1")
 
                 fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
@@ -1110,13 +1110,10 @@ function ws_coroutine(ws, ids)
                     continue
                 end
 
-                println("got here #2")
-
                 if !has_data(fits_object)
                     error("$datasetid: no data found.")
                 end
 
-                println("got here #3")
             end
         catch e
             println("ws_coroutine::$e")
