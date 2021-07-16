@@ -1088,12 +1088,20 @@ function ws_coroutine(ws, datasetid, ids)
 
         # ping back heartbeat messages
         if occursin("[heartbeat]", s)
-            @info "[ws] heartbeat"
+            # @info "[ws] heartbeat"
             writeguarded(ws, s)
             continue
         end
 
         @info "Received: $s"
+
+        # convert the message into JSON
+        try
+            msg = JSON.parse(s)
+            println(msg)
+        catch e
+            println("ws_coroutine::$e")
+        end
     end
 
     @info "$datasetid will now close " ws
