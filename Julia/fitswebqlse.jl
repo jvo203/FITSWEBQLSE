@@ -1174,5 +1174,7 @@ catch err
     warn(err)
     typeof(err) == InterruptException && rethrow(err)
 finally
+    close(ws_server)
+
     @info "FITSWEBQLSE shutdown."
 end
