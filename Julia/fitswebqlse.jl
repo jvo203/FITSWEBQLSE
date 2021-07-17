@@ -1162,7 +1162,9 @@ ws_handle(req) = SERVER_STRING |> WebSockets.Response
 
 const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 
-Base.exit_on_sigint(false)
+if Base.isinteractive()
+    Base.exit_on_sigint(false)
+end
 
 @async WebSockets.with_logger(WebSocketLogger()) do
     WebSockets.serve(ws_server, host, WS_PORT)
