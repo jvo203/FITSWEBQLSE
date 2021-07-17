@@ -1162,8 +1162,16 @@ ws_handle(req) = SERVER_STRING |> WebSockets.Response
 
 const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 
+function exitFunc()
+    close(ws_server)
+
+    @info "FITSWEBQLSE shutdown."
+end
+
 if Base.isinteractive()
     Base.exit_on_sigint(false)
+else
+    Base.atexit(exitFunc)
 end
 
 @async WebSockets.with_logger(WebSocketLogger()) do
@@ -1176,7 +1184,5 @@ catch err
     warn(err)
     typeof(err) == InterruptException && rethrow(err)
 finally
-    close(ws_server)
-
-    @info "FITSWEBQLSE shutdown."
+    exitFunc()
 end
