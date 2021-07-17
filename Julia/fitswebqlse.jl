@@ -1052,7 +1052,7 @@ function serveFITS(request::HTTP.Request)
     end
 end
 
-const FITSWEBQL_ROUTER = HTTP.Router()
+FITSWEBQL_ROUTER = HTTP.Router()
 
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
@@ -1073,7 +1073,7 @@ HTTP.@register(
 )
 
 # open a Splatalogue database
-const splat_db = SQLite.DB("splatalogue_v3.db")
+splat_db = SQLite.DB("splatalogue_v3.db")
 
 println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
@@ -1160,7 +1160,7 @@ end
 
 ws_handle(req) = SERVER_STRING |> WebSockets.Response
 
-const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
+ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 
 Base.exit_on_sigint(false)
 
