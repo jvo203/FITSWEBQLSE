@@ -1073,7 +1073,7 @@ HTTP.@register(
 )
 
 # open a Splatalogue database
-splat_db = SQLite.DB("splatalogue_v3.db")
+const splat_db = SQLite.DB("splatalogue_v3.db")
 
 println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
 println("Point your browser to http://localhost:$HTTP_PORT")
@@ -1162,8 +1162,17 @@ ws_handle(req) = SERVER_STRING |> WebSockets.Response
 
 const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 
+Base.exit_on_sigint(false)
+
 @async WebSockets.with_logger(WebSocketLogger()) do
     WebSockets.serve(ws_server, host, WS_PORT)
 end
 
-HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT))
+try
+    HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT))
+catch err
+    warn(err)
+    typeof(err) == InterruptException && rethrow(err)
+finally
+    @info "FITSWEBQLSE shutdown."
+end
