@@ -1978,6 +1978,12 @@ function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Flo
     cdelt3 = header["CDELT3"]
     crpix3 = header["CRPIX3"]
     
+    v1 = crval3 * fits.frame_multiplier + cdelt3 * fits.frame_multiplier * (1.0 - crpix3)
+    v2 = crval3 * fits.frame_multiplier + cdelt3 * fits.frame_multiplier * (Float64(fits.depth) - crpix3)
+
+    band_lo = min(v1, v2)
+    band_hi = max(v1, v2)
+
     local first_frame, last_frame
 
     if cdelt3 > 0.0
@@ -2036,5 +2042,5 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
 
     first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
     frame_length = last_frame - first_frame + 1
-    println(first_frame, last_frame, frame_length, fits.depth)
+    println("[getViewport] :: [$first_frame, $last_frame] <$frame_length> ($(fits.depth))")
 end
