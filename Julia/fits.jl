@@ -1885,11 +1885,8 @@ end
 
 
 function get_spectrum_range(fits::FITSDataSet, frame_start::Float64, frame_end::Float64, ref_freq::Float64)
-    first_frame = 1
-    last_frame = 1
-
     if fits.depth <= 1 
-        return (first_frame, last_frame)
+        return (fits.depth, fits.depth)
     end
 
     if fits.has_velocity && ref_freq > 0.0
@@ -1904,10 +1901,9 @@ function get_spectrum_range(fits::FITSDataSet, frame_start::Float64, frame_end::
         return get_velocity_bounds(fits, frame_start, frame_end)
     end
 
-    return (first_frame, last_frame)
-
+    error("$(fits.datasetid)::Cannot get a spectrum range")
 end
-
+        
 function getViewport(fits::FITSDataSet, req::Dict{String,Any})
     x1 = req["x1"]
     x2 = req["x2"]
