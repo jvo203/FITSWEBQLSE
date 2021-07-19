@@ -1884,42 +1884,39 @@ function getJSON(fits::FITSDataSet)
 end
 
 
-function get_spectrum_range(fits::FITSDataSet, frame_start, frame_end, ref_freq)
+function get_spectrum_range(fits::FITSDataSet, frame_start::Float64, frame_end::Float64, ref_freq::Float64)
+    first_frame = 1
+    last_frame = 1
 
-first_frame = 1
-last_frame = 1
+    if fits.depth <= 1 
+        return (first_frame, last_frame)
+    end
 
-if fits.depth <= 1 
-    return (first_frame, last_frame)
-end
+    if fits.has_velocity && ref_freq > 0.0
+        return get_freq2vel_bounds(fits, frame_start, frame_end, ref_freq)
+    end
 
-if fits.has_velocity && ref_freq > 0.0
-    return get_freq2vel_bounds(fits, frame_start, frame_end, ref_freq)
-end
+    if fits.has_frequency
+        return get_frequency_bounds(fits, frame_start, frame_end)
+    end
 
-if fits.has_frequency
-    return get_frequency_bounds(fits, frame_start, frame_end)
-end
-
- if fits.has_velocity
-    return get_velocity_bounds(fits, frame_start, frame_end)
-end
+    if fits.has_velocity
+        return get_velocity_bounds(fits, frame_start, frame_end)
+    end
 
     return (first_frame, last_frame)
 
 end
 
 function getViewport(fits::FITSDataSet, req::Dict{String,Any})
-    # println("$(fits.datasetid)::$req")
-
-x1 = req["x1"]
+    x1 = req["x1"]
     x2 = req["x2"]
     y1 = req["y1"]
     y2 = req["y2"]
 
-    frame_start = req["frame_start"]
-    frame_end = req["frame_end"]
-    ref_freq = req["ref_freq"]
+    frame_start = Float64(req["frame_start"])
+    frame_end = Float64(req["frame_end"])
+    ref_freq = Float64(req["ref_freq"])
 
     first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
     frame_length = last_frame - first_frame + 1
