@@ -426,7 +426,7 @@ function get_frequency_range(fits::FITSDataSet)
         end
 
         if !isfinite(restfrq)
-            error("Could not obtain the Rest Frequency.")
+            error("Could not obtain the rest frequency.")
         end
 
         v1 =
@@ -2038,7 +2038,12 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
 
     frame_start = Float64(req["frame_start"])
     frame_end = Float64(req["frame_end"])
-    ref_freq = Float64(req["ref_freq"])
+
+    ref_freq = 0.0 # by default ref_freq is missing
+    try
+        ref_freq = Float64(req["ref_freq"])
+    catch e
+    end
 
     first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
     frame_length = last_frame - first_frame + 1
