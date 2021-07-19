@@ -1883,10 +1883,36 @@ function getJSON(fits::FITSDataSet)
     end
 end
 
+
+function get_spectrum_range(fits::FITSDataSet, frame_start, frame_end, ref_freq)
+
+first_frame = 1
+last_frame = 1
+
+if fits.depth <= 1 
+    return (first_frame, last_frame)
+end
+
+if fits.has_velocity && ref_freq > 0.0
+    return get_freq2vel_bounds(fits, frame_start, frame_end, ref_freq)
+end
+
+if fits.has_frequency
+    return get_frequency_bounds(fits, frame_start, frame_end)
+end
+
+ if fits.has_velocity
+    return get_velocity_bounds(fits, frame_start, frame_end)
+end
+
+    return (first_frame, last_frame)
+
+end
+
 function getViewport(fits::FITSDataSet, req::Dict{String,Any})
     # println("$(fits.datasetid)::$req")
-    
-    x1 = req["x1"]
+
+x1 = req["x1"]
     x2 = req["x2"]
     y1 = req["y1"]
     y2 = req["y2"]
