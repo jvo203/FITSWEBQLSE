@@ -1980,15 +1980,15 @@ function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Flo
     
     local first_frame, last_frame
 
-        if (item%cdelt3 .gt. 0.0) then
-            first = 1 + nint((vel_start - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
-            last = 1 + nint((vel_end - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
-        else
-            first = 1 + nint((band_hi - vel_start)/(band_hi - band_lo)*(item%naxes(3) - 1))
-            last = 1 + nint((band_hi - vel_end)/(band_hi - band_lo)*(item%naxes(3) - 1))
-        end if
+    if cdelt3 > 0.0
+        first_frame = 1 + Integer(round((vel_start - band_lo) / (band_hi - band_lo) * (fits.depth - 1)))
+        last_frame = 1 + Integer(round((vel_end - band_lo) / (band_hi - band_lo) * (fits.depth - 1)))
+    else
+        first_frame = 1 + Integer(round((band_hi - vel_start) / (band_hi - band_lo) * (fits.depth - 1)))
+        last_frame = 1 + Integer(round((band_hi - vel_end) / (band_hi - band_lo) * (fits.depth - 1)))
+    end
 
-            # impose ordering
+    # impose ordering
     if last_frame < first_frame
         tmp = first_frame
         first_frame = last_frame
