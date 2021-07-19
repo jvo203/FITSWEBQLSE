@@ -1128,7 +1128,8 @@ function ws_coroutine(ws, ids)
 
             end
         catch e
-            println("ws_coroutine::$e")
+            # println("ws_coroutine::$e")
+            @error "ws_coroutine::" exception = (e, catch_backtrace())
         end
     end
 
