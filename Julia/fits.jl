@@ -2042,5 +2042,5 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
 
     first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
     frame_length = last_frame - first_frame + 1
-    println("[getViewport] :: [$first_frame, $last_frame] <$frame_length> ($(fits.depth))")
+    println("[get_spectrum_range] :: [$first_frame, $last_frame] <$frame_length> ($(fits.depth))")
 end
