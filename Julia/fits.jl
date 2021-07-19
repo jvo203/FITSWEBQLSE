@@ -1884,57 +1884,126 @@ function getJSON(fits::FITSDataSet)
 end
 
 function get_freq2vel_bounds(fits::FITSDataSet, frame_start::Float64, frame_end::Float64, ref_freq::Float64)
+
+    header = fits.header
+
+    # any errors will be propagated back and handled higher up
+    crval3 = header["CRVAL3"]
+    cdelt3 = header["CDELT3"]
+    crpix3 = header["CRPIX3"]
+
     c = SpeedOfLightInVacuum
 
-    if !fits.has_header
-        error("$(fits.datasetid)::header not found")
+    fRatio = frame_start / ref_freq
+    v1 = (1.0 - fRatio * fRatio) / (1.0 + fRatio * fRatio) * c
+
+    fRatio = frame_end / ref_freq
+    v2 = (1.0 - fRatio * fRatio) / (1.0 + fRatio * fRatio) * c
+
+    x1 = crpix3 + (v1 - crval3 * fits.frame_multiplier) / (cdelt3 * fits.frame_multiplier)
+    x2 = crpix3 + (v2 - crval3 * fits.frame_multiplier) / (cdelt3 * fits.frame_multiplier)
+
+    first_frame = Integer(round(x1))
+    last_frame = Integer(round(x2))
+
+    # reverse the direction
+    if cdelt3 < 0.0
+        first_frame = 1 + fits.depth - first_frame
+        last_frame = 1 + fits.depth - last_frame
     end
 
-    if ((item%restfrq .le. 0.0) .and. (ref_freq .le. 0.0)) then
-            first = 1
-            last = item%naxes(3)
-            return
-        end if
+    # impose ordering
+    if last_frame < first_frame
+        tmp = first_frame
+        first_frame = last_frame
+        last_frame = tmp
+    end
 
-        if (ref_freq .gt. 0.0) then
-            RESTFRQ = ref_freq
+    first_frame = max(1, first_frame)
+    last_frame = min(fits.depth, last_frame)    
+        
+    return (first_frame, last_frame)
+
+end
+
+function get_frequency_bounds(fits::FITSDataSet, freq_start::Float64, freq_end::Float64)
+        
+    if (freq_start <= 0.0) || (freq_end <= 0.0)
+        error("Frequency <= 0.0!!!")
+    end
+
+    header = fits.header
+
+    # any errors will be propagated back and handled higher up
+    crval3 = header["CRVAL3"]
+    cdelt3 = header["CDELT3"]
+    crpix3 = header["CRPIX3"]
+
+    f1 = crval3 * fits.frame_multiplier + cdelt3 * fits.frame_multiplier * (1.0 - crpix3)
+    f2 = crval3 * fits.frame_multiplier + cdelt3 * fits.frame_multiplier * (fits.depth - crpix3)
+
+    band_lo = min(f1, f2)
+    band_hi = max(f1, f2)
+
+    local first_frame, last_frame
+
+    if cdelt3 > 0.0
+        first_frame = 1 + Integer(round((freq_start - band_lo) / (band_hi - band_lo) * (fits.depth - 1)))
+        last_frame = 1 + Integer(round((freq_end - band_lo) / (band_hi - band_lo) * (fits.depth - 1)))
+    else
+        first_frame = 1 + Integer(round((band_hi - freq_start) / (band_hi - band_lo) * (fits.depth - 1)))
+        last_frame = 1 + Integer(round((band_hi - freq_end) / (band_hi - band_lo) * (fits.depth - 1)))
+    end
+
+    # impose ordering
+    if last_frame < first_frame
+        tmp = first_frame
+        first_frame = last_frame
+        last_frame = tmp
+    end
+
+    first_frame = max(1, first_frame)
+    last_frame = min(fits.depth, last_frame)    
+        
+    return (first_frame, last_frame)
+
+end
+
+function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Float64)
+    
+    header = fits.header
+
+    # any errors will be propagated back and handled higher up
+    crval3 = header["CRVAL3"]
+    cdelt3 = header["CDELT3"]
+    crpix3 = header["CRPIX3"]
+    
+    local first_frame, last_frame
+
+        if (item%cdelt3 .gt. 0.0) then
+            first = 1 + nint((vel_start - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            last = 1 + nint((vel_end - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
         else
-            RESTFRQ = item%restfrq
+            first = 1 + nint((band_hi - vel_start)/(band_hi - band_lo)*(item%naxes(3) - 1))
+            last = 1 + nint((band_hi - vel_end)/(band_hi - band_lo)*(item%naxes(3) - 1))
         end if
 
-        fRatio = frame_start/RESTFRQ
-        v1 = (1.0 - fRatio*fRatio)/(1.0 + fRatio*fRatio)*c
-
-        fRatio = frame_end/RESTFRQ
-        v2 = (1.0 - fRatio*fRatio)/(1.0 + fRatio*fRatio)*c
-
-        x1 = item%crpix3 + (v1 - item%crval3*item%frame_multiplier)/(item%cdelt3*item%frame_multiplier)
-        x2 = item%crpix3 + (v2 - item%crval3*item%frame_multiplier)/(item%cdelt3*item%frame_multiplier)
-
-        first = nint(x1)
-        last = nint(x2)
-
-        ! reverse the direction
-        if (item%cdelt3 .lt. 0.0) then
-            first = 1 + item%naxes(3) - first
-            last = 1 + item%naxes(3) - last
-        end if
-
-        ! impose ordering
-        if (last .lt. first) then
-            tmp = first
-            first = last
-            last = tmp
-        end if
-
-        if (first .lt. 1) first = 1
-        if (last .gt. item%naxes(3)) last = item%naxes(3)
-
-        return
-
+            # impose ordering
+    if last_frame < first_frame
+        tmp = first_frame
+        first_frame = last_frame
+        last_frame = tmp
     end
+
+    first_frame = max(1, first_frame)
+    last_frame = min(fits.depth, last_frame)    
+        
+    return (first_frame, last_frame)
+
+end 
 
 function get_spectrum_range(fits::FITSDataSet, frame_start::Float64, frame_end::Float64, ref_freq::Float64)
+    
     if fits.depth <= 1 
         return (fits.depth, fits.depth)
     end
@@ -1952,6 +2021,7 @@ function get_spectrum_range(fits::FITSDataSet, frame_start::Float64, frame_end::
     end
 
     error("$(fits.datasetid)::Cannot get a spectrum range")
+
 end
         
 function getViewport(fits::FITSDataSet, req::Dict{String,Any})
