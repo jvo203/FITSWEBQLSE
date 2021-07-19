@@ -1890,7 +1890,7 @@ function get_freq2vel_bounds(fits::FITSDataSet, frame_start::Float64, frame_end:
         error("$(fits.datasetid)::header not found")
     end
 
-        if ((item%restfrq .le. 0.0) .and. (ref_freq .le. 0.0)) then
+    if ((item%restfrq .le. 0.0) .and. (ref_freq .le. 0.0)) then
             first = 1
             last = item%naxes(3)
             return
