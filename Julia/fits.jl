@@ -1883,6 +1883,56 @@ function getJSON(fits::FITSDataSet)
     end
 end
 
+function get_freq2vel_bounds(fits::FITSDataSet, frame_start::Float64, frame_end::Float64, ref_freq::Float64)
+    c = SpeedOfLightInVacuum
+
+    if !fits.has_header
+        error("$(fits.datasetid)::header not found")
+    end
+
+        if ((item%restfrq .le. 0.0) .and. (ref_freq .le. 0.0)) then
+            first = 1
+            last = item%naxes(3)
+            return
+        end if
+
+        if (ref_freq .gt. 0.0) then
+            RESTFRQ = ref_freq
+        else
+            RESTFRQ = item%restfrq
+        end if
+
+        fRatio = frame_start/RESTFRQ
+        v1 = (1.0 - fRatio*fRatio)/(1.0 + fRatio*fRatio)*c
+
+        fRatio = frame_end/RESTFRQ
+        v2 = (1.0 - fRatio*fRatio)/(1.0 + fRatio*fRatio)*c
+
+        x1 = item%crpix3 + (v1 - item%crval3*item%frame_multiplier)/(item%cdelt3*item%frame_multiplier)
+        x2 = item%crpix3 + (v2 - item%crval3*item%frame_multiplier)/(item%cdelt3*item%frame_multiplier)
+
+        first = nint(x1)
+        last = nint(x2)
+
+        ! reverse the direction
+        if (item%cdelt3 .lt. 0.0) then
+            first = 1 + item%naxes(3) - first
+            last = 1 + item%naxes(3) - last
+        end if
+
+        ! impose ordering
+        if (last .lt. first) then
+            tmp = first
+            first = last
+            last = tmp
+        end if
+
+        if (first .lt. 1) first = 1
+        if (last .gt. item%naxes(3)) last = item%naxes(3)
+
+        return
+
+    end
 
 function get_spectrum_range(fits::FITSDataSet, frame_start::Float64, frame_end::Float64, ref_freq::Float64)
     if fits.depth <= 1 
