@@ -2639,6 +2639,12 @@ contains
 
         if (item%naxes(3) .le. 1) return
 
+        v1 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(1.0 - item%crpix3)
+        v2 = item%crval3*item%frame_multiplier + item%cdelt3*item%frame_multiplier*(item%naxes(3) - item%crpix3)
+
+        band_lo = min(v1, v2)
+        band_hi = max(v1, v2)
+
         if (item%cdelt3 .gt. 0.0) then
             first = 1 + nint((vel_start - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
             last = 1 + nint((vel_end - band_lo)/(band_hi - band_lo)*(item%naxes(3) - 1))
