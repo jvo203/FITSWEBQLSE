@@ -2074,5 +2074,8 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
     else
         # handle ras distributed Futures
         println("3D cube::viewport: $image")
+
+        # for each Future in ras find the corresponding worker
+        # launch jobs on each worker, pass the channel indices
     end
 end
