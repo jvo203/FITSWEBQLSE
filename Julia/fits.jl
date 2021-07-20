@@ -2066,14 +2066,14 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
     dimx = abs(x2 - x1 + 1)
     dimy = abs(y2 - y1 + 1)
 
-    spectrum = zeros(Float32, frame_length)
-
     if fits.compressed_pixels == Nothing && image
         # handle a 2D image
         println("2D image::viewport: $image")
     else
         # handle ras distributed Futures
         println("3D cube::viewport: $image")
+
+        spectrum = zeros(Float32, frame_length)
 
         # for each Future in ras find the corresponding worker
         # launch jobs on each worker, pass the channel indices
