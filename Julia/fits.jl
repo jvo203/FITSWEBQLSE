@@ -2048,4 +2048,16 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
     first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
     frame_length = last_frame - first_frame + 1
     println("[get_spectrum_range] :: [$first_frame, $last_frame] <$frame_length> ($(fits.depth))")
+
+    # sanity checks
+    x1 = max(1, x1)
+    y1 = max(1, y1)
+    x2 = min(fits.width, x2)
+    y2 = min(fits.height, y2)
+
+    # calculate the centre and squared radius
+    cx = abs(x1 + x2)/2
+    cy = abs(y1 + y2)/2
+    r = min(abs(x2 - x1)/2, abs(y2 - y1)/2)
+    r2 = r*r
 end
