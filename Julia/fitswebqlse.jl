@@ -1126,6 +1126,8 @@ function ws_coroutine(ws, ids)
 
                 @time getViewport(fits_object, msg)
 
+                update_timestamp(fits_object)
+
             end
         catch e
             println("ws_coroutine::$e")
