@@ -2060,4 +2060,11 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
     cy = abs(y1 + y2)/2
     r = min(abs(x2 - x1)/2, abs(y2 - y1)/2)
     r2 = r*r
+
+    # viewport dimensions
+    dimx = abs(x2 - x1 + 1)
+    dimy = abs(y2 - y1 + 1)
+
+    spectrum = zeros(Float32, frame_length)
+
 end
