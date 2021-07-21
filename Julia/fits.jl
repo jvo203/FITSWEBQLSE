@@ -2098,13 +2098,28 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
         # handle a 2D image
         println("2D image::viewport: $image")
 
-        pixels = fits.pixels[x1:x2, y1:y2]
-        mask = fits.mask[x1:x2, y1:y2]
+        pixels = @view fits.pixels[x1:x2, y1:y2]
+        mask = @view fits.mask[x1:x2, y1:y2]
 
         # display(pixels)
         # display(mask)
 
-        # optionally in-place downsize the image
+        native_size = dimx * dimy
+        viewport_size = width * height
+
+        if native_size > viewport_size
+            # in-place downsize the image
+            # downsize the pixels & mask      
+            scale = Float32(width) / Float32(dimx)
+            println("scaling the viewport by $scale")
+
+            try
+                pixels = Float32.(imresize(pixels, (width, height)))
+                mask = Bool.(imresize(mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask                
+            catch e
+                println(e)
+            end
+        end
     else
         # handle ras distributed Futures
         println("3D cube::viewport: $image")
