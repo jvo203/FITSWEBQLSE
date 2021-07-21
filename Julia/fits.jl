@@ -2110,14 +2110,11 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
         if native_size > viewport_size
             # downsize the pixels & mask      
             scale = Float32(width) / Float32(dimx)
-            println("scaling the viewport by $scale")
+            println("downscaling the viewport by $(1.0/scale)")
 
             try
                 pixels = Float32.(imresize(pixels, (width, height)))
-                mask = Bool.(imresize(mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask                
-
-                display(pixels[1:5, 1:5])
-                display(mask[1:5, 1:5])
+                mask = Bool.(imresize(mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
             catch e
                 println(e)
             end
