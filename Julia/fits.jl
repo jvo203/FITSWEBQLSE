@@ -2063,7 +2063,11 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
     x2 = req["x2"]
     y1 = req["y1"]
     y2 = req["y2"]
+
     image = req["image"]
+    width = req["width"]
+    height = req["height"]
+
 
     frame_start = Float64(req["frame_start"])
     frame_end = Float64(req["frame_end"])
