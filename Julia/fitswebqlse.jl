@@ -1094,7 +1094,7 @@ function ws_coroutine(ws, ids)
         s = String(data)
 
         if s == ""
-            continue
+            break
         end
 
         # ping back heartbeat messages
