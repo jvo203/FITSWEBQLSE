@@ -1094,15 +1094,17 @@ function ws_coroutine(ws, ids)
         s = String(data)
 
         if s == ""
-            writeguarded(ws, "Exiting")
-            break
+            continue
         end
 
         # ping back heartbeat messages
         if occursin("[heartbeat]", s)
             # @info "[ws] heartbeat"
-            writeguarded(ws, s)
-            continue
+            if writeguarded(ws, s)
+                continue
+            else
+                break
+            end
         end
 
         @info "Received: $s"
@@ -1127,7 +1129,13 @@ function ws_coroutine(ws, ids)
                 @time resp = getViewport(fits_object, msg)
 
                 if msg != Nothing
-                    # send a binary message
+                    # send a message
+                    println("[ws] $msg")
+                    # if writeguarded(ws, msg)
+                    #    continue
+                    # else
+                #    break
+                    # end
                 end
 
                 update_timestamp(fits_object)
