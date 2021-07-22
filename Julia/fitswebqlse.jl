@@ -1124,7 +1124,11 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                @time getViewport(fits_object, msg)
+                @time resp = getViewport(fits_object, msg)
+
+                if msg != Nothing
+                    # send a binary message
+                end
 
                 update_timestamp(fits_object)
 
