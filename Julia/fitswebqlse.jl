@@ -1131,7 +1131,7 @@ function ws_coroutine(ws, ids)
 
                 if viewport != Nothing
                     # send a viewport
-                    println("[ws] $viewport, elapsed: $elapsed [ms]")
+                    println("[getViewportSpectrum] elapsed: $elapsed [ms]")
                     # if writeguarded(ws, take!(resp))
                         # continue
                     # else
