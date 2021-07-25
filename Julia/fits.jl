@@ -2154,7 +2154,7 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
         write(resp, Int32(length(compressed_mask)))
         write(resp, compressed_mask)
 
-        return resp
+        return (Nothing, resp)
     else
         # handle ras distributed Futures
         println("3D cube::viewport: $image")
@@ -2171,4 +2171,5 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
         # launch jobs on each worker, pass the channel indices
     end
 
+    return (Nothing, Nothing)
 end
