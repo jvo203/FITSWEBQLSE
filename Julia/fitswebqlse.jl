@@ -1129,6 +1129,28 @@ function ws_coroutine(ws, ids)
                 elapsed = @elapsed viewport, spectrum = getViewportSpectrum(fits_object, msg)
                 elapsed *= 1000.0 # [ms]
 
+                if spectrum != Nothing
+                    # send a spectrum
+                    println("[getViewportSpectrum] elapsed: $elapsed [ms]")
+
+                    resp = IOBuffer()
+
+                    # the header
+                    write(resp, Float32(msg["timestamp"]))
+                    write(resp, Int32(msg["seq_id"]))
+                    write(resp, Int32(0)) # 0 - spectrum, 1 - viewport
+                    write(resp, Float32(elapsed))
+
+                    # the body
+                    write(resp, take!(spectrum))
+
+                    if writeguarded(ws, take!(resp))
+                        continue
+                    else
+                        break
+                    end
+                end
+
                 if viewport != Nothing
                     # send a viewport
                     println("[getViewportSpectrum] elapsed: $elapsed [ms]")
