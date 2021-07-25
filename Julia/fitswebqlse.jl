@@ -1126,16 +1126,16 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                @time resp = getViewport(fits_object, msg)
+                @time viewport, spectrum = getViewportSpectrum(fits_object, msg)
 
-                if resp != Nothing
+                if viewport != Nothing
                     # send a message
                     # println("[ws] $resp")
-                    if writeguarded(ws, take!(resp))
-                        continue
-                    else
-                        break
-                    end
+                    # if writeguarded(ws, take!(resp))
+                        # continue
+                    # else
+                        # break
+                    # end
                 end
 
                 update_timestamp(fits_object)

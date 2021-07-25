@@ -2059,7 +2059,8 @@ function get_spectrum_range(
 
 end
 
-function getViewport(fits::FITSDataSet, req::Dict{String,Any})
+function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
+
     x1 = req["x1"]
     x2 = req["x2"]
     y1 = req["y1"]
@@ -2154,7 +2155,7 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
         write(resp, Int32(length(compressed_mask)))
         write(resp, compressed_mask)
 
-        return (Nothing, resp)
+        return (resp, Nothing)
     else
         # handle ras distributed Futures
         println("3D cube::viewport: $image")
