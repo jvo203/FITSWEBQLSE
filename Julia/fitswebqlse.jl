@@ -1131,11 +1131,11 @@ function ws_coroutine(ws, ids)
                 if msg != Nothing
                     # send a message
                     println("[ws] $msg")
-                    # if writeguarded(ws, msg)
-                    #    continue
-                    # else
-                #    break
-                    # end
+                    if writeguarded(ws, take!(msg))
+                        continue
+                    else
+                        break
+                    end
                 end
 
                 update_timestamp(fits_object)
