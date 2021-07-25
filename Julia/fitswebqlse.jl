@@ -1130,7 +1130,7 @@ function ws_coroutine(ws, ids)
 
                     if resp != Nothing
                     # send a message
-                    println("[ws] $resp")
+                    # println("[ws] $resp")
                     if writeguarded(ws, take!(resp))
                         continue
                     else
