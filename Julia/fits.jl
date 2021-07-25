@@ -2170,7 +2170,8 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         # for each Future in ras find the corresponding worker
         # launch jobs on each worker, pass the channel indices
+
+        return (Nothing, Nothing)
     end
 
-    return (Nothing, Nothing)
 end
