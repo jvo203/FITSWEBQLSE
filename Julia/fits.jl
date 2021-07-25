@@ -2,11 +2,12 @@ using Dates;
 using DistributedArrays;
 using FITSIO;
 using JSON;
+using CodecLz4;
 using Mmap;
 using Serialization;
 using Statistics;
 using Images, ImageTransformations, Interpolations;
-
+using ZfpCompression;
 using PhysicalConstants.CODATA2018;
 
 include("classifier.jl")
@@ -2068,7 +2069,12 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
     width = req["width"]
     height = req["height"]
 
-    
+    quality::Quality = medium # by default use medium quality
+    try
+        quality = eval(Meta.parse(req["quality"]))
+    catch e
+    end
+
     frame_start = Float64(req["frame_start"])
     frame_end = Float64(req["frame_end"])
     
@@ -2119,6 +2125,36 @@ function getViewport(fits::FITSDataSet, req::Dict{String,Any})
                 println(e)
             end
         end
+
+        dims = size(pixels)
+        view_width = dims[1]
+        view_height = dims[2]
+
+            resp = IOBuffer()
+
+        write(resp, Int32(view_width))
+        write(resp, Int32(view_height))
+
+        # compress pixels with ZFP
+        prec = ZFP_MEDIUM_PRECISION
+
+        if quality == high
+            prec = ZFP_HIGH_PRECISION
+        elseif quality == medium
+            prec = ZFP_MEDIUM_PRECISION
+        elseif quality == low
+            prec = ZFP_LOW_PRECISION
+        end
+
+        compressed_pixels = zfp_compress(pixels, precision=prec)
+        write(resp, Int32(length(compressed_pixels)))
+        write(resp, compressed_pixels)
+
+        compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
+        write(resp, Int32(length(compressed_mask)))
+        write(resp, compressed_mask)
+
+        return resp
     else
         # handle ras distributed Futures
         println("3D cube::viewport: $image")
