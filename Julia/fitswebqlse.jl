@@ -1128,7 +1128,7 @@ function ws_coroutine(ws, ids)
 
                 @time resp = getViewport(fits_object, msg)
 
-                    if resp != Nothing
+                if resp != Nothing
                     # send a message
                     # println("[ws] $resp")
                     if writeguarded(ws, take!(resp))
