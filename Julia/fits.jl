@@ -2114,7 +2114,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         if native_size > viewport_size
             # downsize the pixels & mask      
             scale = Float32(width) / Float32(dimx)
-            println("downscaling the viewport by $(1.0 / scale)")
+            println("re-sizing the viewport down to $(round(100.0*scale))%")
 
             try
                 pixels = Float32.(imresize(pixels, (width, height)))
