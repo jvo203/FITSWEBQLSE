@@ -15,6 +15,8 @@ include("classifier.jl")
 const NBINS = 1024
 
 @enum Quality low medium high
+@enum Intensity mean integrated
+@enum Beam circle square
 
 struct ImageToneMapping
     flux::String
@@ -2156,6 +2158,9 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     else
         # handle ras distributed Futures
         println("3D cube::viewport: $image")
+
+        beam = eval(Meta.parse(req["beam"]))
+        intensity = eval(Meta.parse(req["intensity"]))
 
         # calculate the centre and squared radius
         cx = abs(x1 + x2) / 2
