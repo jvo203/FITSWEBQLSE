@@ -2159,8 +2159,8 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         # handle ras distributed Futures
         println("3D cube::viewport: $image")
 
-        beam = eval(Meta.parse(req["beam"]))
-        intensity = eval(Meta.parse(uppercase(req["intensity"])))
+        beam = eval(Meta.parse(uppercase(req["beam"])))
+        intensity = eval(Meta.parse(req["intensity"]))
 
         # calculate the centre and squared radius
         cx = abs(x1 + x2) / 2
