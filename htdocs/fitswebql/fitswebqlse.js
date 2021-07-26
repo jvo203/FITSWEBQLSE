@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-07-15.0";
+	return "JS2021-07-26.0";
 }
 
 const wasm_supported = (() => {
@@ -2627,9 +2627,9 @@ function open_websocket_connection(datasetId, index) {
 							console.log("processing an HDR viewport");
 							let start = performance.now();
 
-							var pixels = Module.decompressZFPval(view_width, view_height, frame_pixels);
+							var pixels = Module.decompressZFPimage(view_width, view_height, frame_pixels);
 
-							var alpha = Module.decompressLZ4val(view_width, view_height, frame_mask);
+							var alpha = Module.decompressLZ4mask(view_width, view_height, frame_mask);
 
 							let elapsed = Math.round(performance.now() - start);
 
