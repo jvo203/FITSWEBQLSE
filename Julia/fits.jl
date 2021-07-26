@@ -2167,6 +2167,9 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         # for each Future in ras find the corresponding worker
         # launch jobs on each worker, pass the channel indices
+        for job in fits.compressed_pixels
+            println(job, "\twhere:", job.where)
+        end
 
         return (Nothing, Nothing)
     end
