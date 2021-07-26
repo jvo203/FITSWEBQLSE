@@ -2105,8 +2105,8 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         # handle a 2D image
         println("2D image::viewport: $image")
 
-        pixels = @view fits.pixels[x1:x2, y1:y2]
-        mask = @view fits.mask[x1:x2, y1:y2]
+        pixels = fits.pixels[x1:x2, y1:y2]
+        mask = fits.mask[x1:x2, y1:y2]
 
         # display(pixels)
         # display(mask)
@@ -2131,7 +2131,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         view_width = dims[1]
         view_height = dims[2]
 
-            resp = IOBuffer()
+        resp = IOBuffer()
 
         write(resp, Int32(view_width))
         write(resp, Int32(view_height))
