@@ -16,7 +16,7 @@ const NBINS = 1024
 
 @enum Quality low medium high
 @enum Intensity mean integrated
-@enum Beam circle square
+@enum Beam CIRCLE SQUARE # "square" is a reserved Julia function
 
 struct ImageToneMapping
     flux::String
@@ -2160,7 +2160,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         println("3D cube::viewport: $image")
 
         beam = eval(Meta.parse(req["beam"]))
-        intensity = eval(Meta.parse(req["intensity"]))
+        intensity = eval(Meta.parse(uppercase(req["intensity"])))
 
         # calculate the centre and squared radius
         cx = abs(x1 + x2) / 2
