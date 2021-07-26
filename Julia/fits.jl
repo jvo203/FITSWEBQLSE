@@ -2108,9 +2108,6 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         pixels = fits.pixels[x1:x2, y1:y2]
         mask = fits.mask[x1:x2, y1:y2]
 
-        # display(pixels)
-        # display(mask)
-
         native_size = dimx * dimy
         viewport_size = width * height
 
