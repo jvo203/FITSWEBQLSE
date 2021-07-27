@@ -2205,6 +2205,8 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             idx,
             queue,
         )
+            println("#threads per worker: ", Threads.nthreads())
+
             put!(queue, (Nothing, Nothing, Nothing))
         end
 
