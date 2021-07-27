@@ -2204,6 +2204,8 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 Int32(x2),
                 Int32(y1),
                 Int32(y2),
+                beam,
+                intensity,
                 image,
                 findall(fits.indices[job.where]),
                 results,
@@ -2232,13 +2234,22 @@ end
     x2::Int32,
     y1::Int32,
     y2::Int32,
+    beam::Beam,
+    intensity::Intensity,
     bImage::Bool,
     idx::Vector{Int64},
     queue::RemoteChannel{Channel{Tuple}},
 )
     println("#threads per worker: ", Threads.nthreads())
 
+    spectrum = Array{Tuple{Int32,Float32},1}()
+    mutex = ReentrantLock()
+
     Threads.@threads for frame in idx
+        if frame < first_frame || frame > last_frame
+            continue
+        end
+
         println(Threads.threadid(), "::", frame)
     end
 
