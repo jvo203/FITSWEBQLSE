@@ -2255,7 +2255,9 @@ end
             viewport = @view pixels[x1:x2, y1:y2]
             mask = map(!isnan, viewport)
 
-            println(Threads.threadid(), "::", frame)
+            val = sum(viewport[mask])
+
+            println(Threads.threadid(), "::", frame, ", val = ", val)
         catch e
             println(e)
         end
