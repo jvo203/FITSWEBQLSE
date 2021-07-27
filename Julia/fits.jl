@@ -15,8 +15,8 @@ include("classifier.jl")
 const NBINS = 1024
 
 @enum Quality low medium high
-@enum Intensity mean integrated
-@enum Beam CIRCLE SQUARE # "square" is a reserved Julia function
+@everywhere @enum Intensity mean integrated
+@everywhere @enum Beam CIRCLE SQUARE # "square" is a reserved Julia function
 
 struct ImageToneMapping
     flux::String
