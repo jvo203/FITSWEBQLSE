@@ -2212,27 +2212,22 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         # for each Future in ras find the corresponding worker
         # launch jobs on each worker, pass the channel indices
-        ras = []
-        for job in fits.compressed_pixels
-            idx = findall(fits.indices[job.where])
-            println(job, "\twhere:", job.where, "::", idx)
-
-            append!(
-                ras,
-                @spawnat job.where calculateViewportSpectrum(
-                    fits.datasetid,
-                    first_frame,
-                    last_frame,
-                    x1,
-                    x2,
-                    y1,
-                    y2,
-                    image,
-                    idx,
-                    results,
-                )
+        ras = [
+            @spawnat job.where calculateViewportSpectrum(
+                fits.datasetid,
+                first_frame,
+                last_frame,
+                x1,
+                x2,
+                y1,
+                y2,
+                image,
+                findall(fits.indices[job.where]),
+                results,
             )
-        end
+
+            for job in fits.compressed_pixels
+        ]
 
         println("ras: ", ras)
 
