@@ -2071,6 +2071,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     image = req["image"]
     width = req["width"]
     height = req["height"]
+    dx = req["dx"]
 
     quality::Quality = medium # by default use medium quality
     try
@@ -2228,6 +2229,12 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         close(results)
         wait(results_task)
+
+        # optionally downsample the spectrum
+        if length(spectrum) > (dx >> 1)
+            println("downsampling spectrum from $(length(spectrum)) to $(dx >> 1)")
+            spectrum = imresize(spectrum, (dx >> 1,))
+        end
 
         println(spectrum)
 
