@@ -2238,5 +2238,9 @@ end
 )
     println("#threads per worker: ", Threads.nthreads())
 
+    Threads.@threads for frame in idx
+        println(Threads.threadid(), "::", frame)
+    end
+
     put!(queue, (Nothing, Nothing, Nothing))
 end
