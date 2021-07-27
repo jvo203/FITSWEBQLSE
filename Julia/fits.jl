@@ -2187,6 +2187,14 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                     pixels .+= thread_pixels
                     mask .&= thread_mask
                 end
+
+                if thread_spectrum != Nothing
+                    for x in thread_spectrum
+                        frame, val = x
+                        spectrum[frame] = val
+                    end
+                end
+
             catch e
                 println("results task completed")
                 break
@@ -2220,6 +2228,8 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         close(results)
         wait(results_task)
+
+        println(spectrum)
 
         return (Nothing, Nothing)
     end
@@ -2261,7 +2271,7 @@ end
             push!(spectrum, (frame, val))
             unlock(mutex)
 
-            println(Threads.threadid(), "::", frame, ", val = ", val)
+            # println(Threads.threadid(), "::", frame, ", val = ", val)
         catch e
             println(e)
         end
