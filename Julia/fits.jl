@@ -2193,34 +2193,17 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             end
         end
 
-        @everywhere function calculateViewportSpectrum(
-            datasetid,
-            first_frame,
-            last_frame,
-            x1,
-            x2,
-            y1,
-            y2,
-            bImage,
-            idx,
-            queue,
-        )
-            println("#threads per worker: ", Threads.nthreads())
-
-            put!(queue, (Nothing, Nothing, Nothing))
-        end
-
         # for each Future in ras find the corresponding worker
         # launch jobs on each worker, pass the channel indices
         ras = [
             @spawnat job.where calculateViewportSpectrum(
                 fits.datasetid,
-                first_frame,
-                last_frame,
-                x1,
-                x2,
-                y1,
-                y2,
+                Int32(first_frame),
+                Int32(last_frame),
+                Int32(x1),
+                Int32(x2),
+                Int32(y1),
+                Int32(y2),
                 image,
                 findall(fits.indices[job.where]),
                 results,
@@ -2239,4 +2222,21 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         return (Nothing, Nothing)
     end
 
+end
+
+@everywhere function calculateViewportSpectrum(
+    datasetid::String,
+    first_frame::Int32,
+    last_frame::Int32,
+    x1::Int32,
+    x2::Int32,
+    y1::Int32,
+    y2::Int32,
+    bImage::Bool,
+    idx::Vector{Int64},
+    queue::RemoteChannel{Channel{Tuple}},
+)
+    println("#threads per worker: ", Threads.nthreads())
+
+    put!(queue, (Nothing, Nothing, Nothing))
 end
