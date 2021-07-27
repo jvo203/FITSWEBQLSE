@@ -2255,7 +2255,11 @@ end
             viewport = @view pixels[x1:x2, y1:y2]
             mask = map(!isnan, viewport)
 
-            val = sum(viewport[mask])
+            val = sum(Float32.(viewport[mask]))
+
+            lock(mutex)
+            push!(spectrum, (frame, val))
+            unlock(mutex)
 
             println(Threads.threadid(), "::", frame, ", val = ", val)
         catch e
@@ -2263,5 +2267,5 @@ end
         end
     end
 
-    put!(queue, (Nothing, Nothing, Nothing))
+    put!(queue, (Nothing, Nothing, spectrum))
 end
