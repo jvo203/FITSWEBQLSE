@@ -2197,7 +2197,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         # launch jobs on each worker, pass the channel indices
         ras = [
             @spawnat job.where calculateViewportSpectrum(
-                fits.datasetid,
+                fetch(job),
                 Int32(first_frame),
                 Int32(last_frame),
                 Int32(x1),
@@ -2227,7 +2227,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 end
 
 @everywhere function calculateViewportSpectrum(
-    datasetid::String,
+    compressed_frames::Dict{Int32,Matrix{Float16}},
     first_frame::Int32,
     last_frame::Int32,
     x1::Int32,
@@ -2250,7 +2250,15 @@ end
             continue
         end
 
-        println(Threads.threadid(), "::", frame)
+        try
+            pixels = compressed_frames[frame]
+            viewport = @view pixels[x1:x2, y1:y2]
+            mask = map(!isnan, viewport)
+
+            println(Threads.threadid(), "::", frame)
+        catch e
+            println(e)
+        end
     end
 
     put!(queue, (Nothing, Nothing, Nothing))
