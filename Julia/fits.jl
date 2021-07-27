@@ -2195,8 +2195,8 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         @everywhere function calculateViewportSpectrum(
             datasetid,
-            first_channel,
-            last_channel,
+            first_frame,
+            last_frame,
             x1,
             x2,
             y1,
