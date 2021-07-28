@@ -10,6 +10,8 @@ using Images, ImageTransformations, Interpolations;
 using ZfpCompression;
 using PhysicalConstants.CODATA2018;
 
+const MADV_WILLNEED = 3
+
 include("classifier.jl")
 
 const NBINS = 1024
@@ -1160,8 +1162,7 @@ function restoreData(fits::FITSDataSet)
                 cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
-                compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
-                # compressed_pixels = read(io, Matrix{Float16}, (width, height))
+                compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))                
                 close(io)
 
                 # total = sum(compressed_pixels) # touch the data to force MMAP into RAM
