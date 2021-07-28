@@ -1161,9 +1161,11 @@ function restoreData(fits::FITSDataSet)
 
                 io = open(filename) # default is read-only
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
+                # compressed_pixels = read(io, Matrix{Float16}, (width, height))
                 close(io)
 
-                total = sum(compressed_pixels) # touch the data to force MMAP into RAM
+                # total = sum(compressed_pixels) # touch the data to force MMAP into RAM
+                Mmap.madvise!(compressed_pixels, MADV_WILLNEED)
                 compressed_frames[frame] = compressed_pixels
 
                 # println("restored frame #$frame")
