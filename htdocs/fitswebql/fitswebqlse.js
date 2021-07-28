@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-07-26.0";
+	return "JS2021-07-28.0";
 }
 
 const wasm_supported = (() => {
@@ -2558,34 +2558,28 @@ function open_websocket_connection(datasetId, index) {
 						hide_cursor();
 						computed = dv.getFloat32(12, endianness);
 
-						//var spectrum = new Float32Array(received_msg, 16);
-						var frame = new Uint8Array(received_msg, 16);
+						var offset = 16;
+						var spectrum_len = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						var frame = new Uint8Array(received_msg, offset);
 
 						// FPZIP decoder part				
 						Module.ready
 							.then(_ => {
 								let start = performance.now();
-								var vec = Module.FPunzip(frame);
+								var spectrum = Module.decompressZFPspectrum(spectrum_len, frame);
 								let elapsed = Math.round(performance.now() - start);
 
-								//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+								//console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
 
-								// copy the data to spectrum
-								let len = vec.size();
-
-								if (len > 0) {
-									var spectrum = new Float32Array(len);
-
-									for (let i = 0; i < len; i++)
-										spectrum[i] = vec.get(i);
-
+								if (spectrum.length > 0) {
 									if (!windowLeft) {
 										spectrum_stack[index - 1].push({ spectrum: spectrum, id: recv_seq_id });
 										console.log("index:", index, "spectrum_stack length:", spectrum_stack[index - 1].length);
 									};
 								}
 
-								vec.delete();
 							})
 							.catch(e => console.error(e));
 
