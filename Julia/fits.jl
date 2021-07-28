@@ -2247,8 +2247,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         compressed_spectrum = zfp_compress(spectrum, precision=prec)
             
-        write(spec_resp, Int32(length(spectrum)))
-        write(spec_resp, Int32(length(compressed_spectrum)))
+        write(spec_resp, Int32(length(spectrum)))        
         write(spec_resp, compressed_spectrum)
 
         return (Nothing, spec_resp)
