@@ -17,7 +17,7 @@ include("classifier.jl")
 const NBINS = 1024
 
 @enum Quality low medium high
-@everywhere @enum Intensity mean integrated
+@everywhere @enum Intensity MEAN INTEGRATED
 @everywhere @enum Beam CIRCLE SQUARE # "square" is a reserved Julia function
 
 struct ImageToneMapping
@@ -2168,7 +2168,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         println("3D cube::viewport: $image")
 
         beam = eval(Meta.parse(uppercase(req["beam"])))
-        intensity = eval(Meta.parse(req["intensity"]))
+        intensity = eval(Meta.parse(uppercase(req["intensity"])))
 
         # calculate the centre and squared radius
         cx = abs(x1 + x2) / 2
@@ -2293,7 +2293,7 @@ end
             viewport = @view pixels[x1:x2, y1:y2]
             mask = map(!isnan, viewport)
 
-            val = sum(Float32.(viewport[mask]))
+            val = sum(Float32.(viewport[mask])) * cdelt3
 
             lock(mutex)
             push!(spectrum, (frame, val))
