@@ -2287,6 +2287,16 @@ end
 )
     println("#threads per worker: ", Threads.nthreads())
 
+    # To-DO: replace the mutex with per-thread arrays
+    # then finally combine the arrays into the final spectrum
+    # or better still a single spectrum the length of fits.depth filled with zeros initially
+
+    average = true
+
+    if intensity == INTEGRATED
+        average = false
+    end
+
     spectrum = Array{Tuple{Int32,Float32},1}()
     mutex = ReentrantLock()
 
@@ -2301,13 +2311,18 @@ end
             mask = map(!isnan, viewport)
 
             val = sum(Float32.(viewport[mask])) * cdelt3
-            # val2 = ccall(radial_view_fptr, Cfloat, (Ref{Float32}, Ref{Float32}, UInt64), vin, vout, length(vout))
+
+            dim = size(pixels)
+            stride = strides(pixels)
+
+            # export uniform float calculate_square_spectrumF16(uniform int16 cubeData[], uniform unsigned int width, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+            val2 = ccall(square_view_fptr, Cfloat, (Ref{Float16}, UInt32, Int32, Int32, Int32, Int32, Bool, Float32), pixels, dim[1], x1 - 1, x2, y1 - 1, y2, average, cdelt3)
 
             lock(mutex)
-            push!(spectrum, (frame, val))
+            push!(spectrum, (frame, val2))
             unlock(mutex)
 
-            # println(Threads.threadid(), "::", frame, ", val = ", val)
+            # println(Threads.threadid(), "::", frame, ", val = ", val2)
         catch e
             println(e)
         end
