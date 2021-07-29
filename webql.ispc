@@ -1,11 +1,11 @@
-export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int width, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
+export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
 {  
   float partial_sum = 0.0f ;
   unsigned int64 partial_count = 0 ;
   
   foreach (y=y1 ... y2, x=x1 ... x2)
     {      
-      float tmp = half_to_float_fast(cubeData[y*width+x]) ;
+      float tmp = half_to_float_fast(cubeData[y*stride+x]) ;
       bool nan = isnan(tmp) ;
 
       float dist2 = (cx-x)*(cx-x) + (cy-y)*(cy-y) ;
@@ -29,14 +29,14 @@ export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], unif
     return 0.0f ;
 } ;
 
-export uniform float calculate_square_spectrumF16(uniform int16 cubeData[], uniform unsigned int width, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+export uniform float calculate_square_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
 {
   float partial_sum = 0.0f ;
   unsigned int64 partial_count = 0 ;
   
   foreach (y=y1 ... y2, x=x1 ... x2)
     {      
-      float tmp = half_to_float_fast(cubeData[y*width+x]) ;
+      float tmp = half_to_float_fast(cubeData[y*stride+x]) ;
       bool nan = isnan(tmp) ;
       
       partial_sum += nan ? 0.0f : tmp ;
