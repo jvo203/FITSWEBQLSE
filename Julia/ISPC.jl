@@ -1,7 +1,11 @@
 include("ispc_toolchain.jl")
 
+# read the code from a file
 code = open(f -> read(f, String), "webql.ispc")
 
-# Compile the code and get function pointers
+# compile the SPMD code
 lib = load_ispc(code, `--opt=fast-math --addressing=32`)
-# fptr = Libc.Libdl.dlsym(lib, "simple")
+
+# get function pointers
+const radial_view_fptr = Libc.Libdl.dlsym(lib, "calculate_radial_spectrumF16")
+const square_view_fptr = Libc.Libdl.dlsym(lib, "calculate_square_spectrumF16")
