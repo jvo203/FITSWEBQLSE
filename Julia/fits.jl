@@ -2307,19 +2307,23 @@ end
 
         try
             pixels = compressed_frames[frame]
+
             # viewport = @view pixels[x1:x2, y1:y2]
             # mask = map(!isnan, viewport)
-
             # val = sum(Float32.(viewport[mask])) * cdelt3
 
-            dim = size(pixels)
+            val = Float32(0.0)
+
             stride = strides(pixels)
 
-            # export uniform float calculate_square_spectrumF16(uniform int16 cubeData[], uniform unsigned int width, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
-            val2 = ccall(square_view_fptr, Cfloat, (Ref{Float16}, UInt32, Int32, Int32, Int32, Int32, Bool, Float32), pixels, dim[1], x1 - 1, x2, y1 - 1, y2, average, cdelt3)
+            if beam == CIRCLE
+                val = ccall(radial_view_fptr, Cfloat, (Ref{Float16}, UInt32, Int32, Int32, Int32, Int32, Int32, Int32, Int32, Bool, Float32), pixels, stride[2], x1 - 1, x2, y1 - 1, y2, cx, cy, r2, average, cdelt3)
+            elseif beam == SQUARE
+                val = ccall(square_view_fptr, Cfloat, (Ref{Float16}, UInt32, Int32, Int32, Int32, Int32, Bool, Float32), pixels, stride[2], x1 - 1, x2, y1 - 1, y2, average, cdelt3)
+            end
 
             lock(mutex)
-            push!(spectrum, (frame, val2))
+            push!(spectrum, (frame, val))
             unlock(mutex)
 
             # println(Threads.threadid(), "::", frame, ", val = ", val, ", val2 = ", val2)
