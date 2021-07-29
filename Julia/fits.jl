@@ -2307,10 +2307,10 @@ end
 
         try
             pixels = compressed_frames[frame]
-            viewport = @view pixels[x1:x2, y1:y2]
-            mask = map(!isnan, viewport)
+            # viewport = @view pixels[x1:x2, y1:y2]
+            # mask = map(!isnan, viewport)
 
-            val = sum(Float32.(viewport[mask])) * cdelt3
+            # val = sum(Float32.(viewport[mask])) * cdelt3
 
             dim = size(pixels)
             stride = strides(pixels)
@@ -2322,7 +2322,7 @@ end
             push!(spectrum, (frame, val2))
             unlock(mutex)
 
-            # println(Threads.threadid(), "::", frame, ", val = ", val2)
+            # println(Threads.threadid(), "::", frame, ", val = ", val, ", val2 = ", val2)
         catch e
             println(e)
         end
