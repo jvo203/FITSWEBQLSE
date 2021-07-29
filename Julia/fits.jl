@@ -2223,6 +2223,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 beam,
                 intensity,
                 image,
+                fits._cdelt3,
                 findall(fits.indices[job.where]),
                 results,
             )
@@ -2273,6 +2274,7 @@ end
     beam::Beam,
     intensity::Intensity,
     bImage::Bool,
+    cdelt3::Float32,
     idx::Vector{Int64},
     queue::RemoteChannel{Channel{Tuple}},
 )
