@@ -2172,9 +2172,9 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         intensity = eval(Meta.parse(uppercase(req["intensity"])))
 
         # calculate the centre and squared radius
-        cx = abs(x1 + x2) / 2
-        cy = abs(y1 + y2) / 2
-        r = min(abs(x2 - x1) / 2, abs(y2 - y1) / 2)
+        cx = abs(x1 + x2) >> 1
+        cy = abs(y1 + y2) >> 1
+        r = min(abs(x2 - x1) >> 1, abs(y2 - y1) >> 1)
         r2 = r * r
 
         local pixels , mask
@@ -2221,6 +2221,9 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 Int32(x2),
                 Int32(y1),
                 Int32(y2),
+                Int32(cx),
+                Int32(cy),
+                Int32(r2),
                 beam,
                 intensity,
                 image,
@@ -2272,6 +2275,9 @@ end
     x2::Int32,
     y1::Int32,
     y2::Int32,
+    cx::Int32,
+    cy::Int32,
+    r2::Int32,
     beam::Beam,
     intensity::Intensity,
     bImage::Bool,
@@ -2295,6 +2301,7 @@ end
             mask = map(!isnan, viewport)
 
             val = sum(Float32.(viewport[mask])) * cdelt3
+            # val2 = ccall(radial_view_fptr, Cfloat, (Ref{Float32}, Ref{Float32}, UInt64), vin, vout, length(vout))
 
             lock(mutex)
             push!(spectrum, (frame, val))
