@@ -2302,6 +2302,12 @@ end
 
     # thread_spectrum = [Array{Tuple{Int32,Float32},1}() for tid = 1:Threads.nthreads()]
 
+    # set the initial capacity to avoid reallocations
+    depth = last_frame - first_frame + 1
+    sizehint!(spectrum, depth)
+
+    spectrum2 = Vector{Float32}(missing, depth)
+
     Threads.@threads for frame in idx
         if frame < first_frame || frame > last_frame
             continue
@@ -2366,9 +2372,10 @@ end
             # spec = thread_spectrum[Threads.threadid()]
             # push!(spec, (frame, val))
 
-            Threads.lock(spinlock)
-            push!(spectrum, (frame, val))
-            Threads.unlock(spinlock)
+            # Threads.lock(spinlock)
+            # push!(spectrum, (frame, val))
+            # Threads.unlock(spinlock)
+            spectrum2[frame] = val
 
             # println(Threads.threadid(), "::", frame, ", val = ", val, ", val2 = ", val2)
         catch e
