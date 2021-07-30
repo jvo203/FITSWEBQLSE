@@ -2306,7 +2306,7 @@ end
     depth = last_frame - first_frame + 1
     sizehint!(spectrum, depth)
 
-    spectrum2 = Vector{Float32}(missing, depth)
+    # spectrum2 = Vector{Float32}(undef, depth)
 
     Threads.@threads for frame in idx
         if frame < first_frame || frame > last_frame
@@ -2372,10 +2372,10 @@ end
             # spec = thread_spectrum[Threads.threadid()]
             # push!(spec, (frame, val))
 
-            # Threads.lock(spinlock)
-            # push!(spectrum, (frame, val))
-            # Threads.unlock(spinlock)
-            spectrum2[frame] = val
+            Threads.lock(spinlock)
+            push!(spectrum, (frame, val))
+            Threads.unlock(spinlock)
+            # spectrum2[frame] = val
 
             # println(Threads.threadid(), "::", frame, ", val = ", val, ", val2 = ", val2)
         catch e
