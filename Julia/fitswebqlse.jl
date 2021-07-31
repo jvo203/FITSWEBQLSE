@@ -750,9 +750,9 @@ function serveFITS(request::HTTP.Request)
                         fits_object.has_data = false
                         unlock(fits_object.mutex)
 
-                        @spawn restoreImage(fits_object) # @async
+                        @async restoreImage(fits_object) # @async or @spawn
 
-                        @spawn restoreData(fits_object) # @async
+                        @async restoreData(fits_object) # @async or @spawn
                     end
 
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
@@ -764,7 +764,7 @@ function serveFITS(request::HTTP.Request)
 
                     # leave the slash as before, even in Windows
                     filepath = dir * "/" * f * "." * ext
-                    @spawn loadFITS(filepath, fits_object) # @async
+                    @async loadFITS(filepath, fits_object) # @async or @spawn
                 end
             end
         end
