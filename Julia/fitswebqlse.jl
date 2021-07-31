@@ -1,4 +1,5 @@
 import Base.Iterators:flatten
+import Base.Threads.@spawn
 using CodecBzip2;
 using CodecLz4;
 using Distributed;
@@ -749,9 +750,9 @@ function serveFITS(request::HTTP.Request)
                         fits_object.has_data = false
                         unlock(fits_object.mutex)
 
-                        @async restoreImage(fits_object)
+                        @spawn restoreImage(fits_object) # @async
 
-                        @async restoreData(fits_object)
+                        @spawn restoreData(fits_object) # @async
                     end
 
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
@@ -763,7 +764,7 @@ function serveFITS(request::HTTP.Request)
 
                     # leave the slash as before, even in Windows
                     filepath = dir * "/" * f * "." * ext
-                    @async loadFITS(filepath, fits_object)
+                    @spawn loadFITS(filepath, fits_object) # @async
                 end
             end
         end
