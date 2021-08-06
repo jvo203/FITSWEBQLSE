@@ -2272,6 +2272,34 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             spectrum = imresize(spectrum, (dx >> 1,))
         end
 
+        image_resp = Nothing
+
+        if image
+            image_resp = IOBuffer()
+
+            write(image_resp, Int32(view_width))
+            write(image_resp, Int32(view_height))
+
+            # compress pixels with ZFP
+            prec = ZFP_MEDIUM_PRECISION
+
+            if quality == high
+                prec = ZFP_HIGH_PRECISION
+            elseif quality == medium
+                prec = ZFP_MEDIUM_PRECISION
+            elseif quality == low
+                prec = ZFP_LOW_PRECISION
+            end
+
+            compressed_pixels = zfp_compress(pixels, precision=prec)
+            write(image_resp, Int32(length(compressed_pixels)))
+            write(image_resp, compressed_pixels)
+
+            compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
+            write(image_resp, Int32(length(compressed_mask)))
+            write(Image_resp, compressed_mask)
+        end
+
         spec_resp = IOBuffer()
 
         # compress spectrum with ZFP
@@ -2286,7 +2314,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         write(spec_resp, Int32(length(spectrum)))
         write(spec_resp, compressed_spectrum)
 
-        return (Nothing, spec_resp)
+        return (image_resp, spec_resp)
     end
 
 end
