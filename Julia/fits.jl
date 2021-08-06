@@ -2142,7 +2142,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         view_width = dims[1]
         view_height = dims[2]
 
-        resp = IOBuffer()
+            resp = IOBuffer()
 
         write(resp, Int32(view_width))
         write(resp, Int32(view_height))
@@ -2189,7 +2189,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         if image
             native_size = dimx * dimy
-            viewport_size = width * height
+        viewport_size = width * height
 
             if native_size > viewport_size
                 scale = Float32(width) / Float32(dimx)
@@ -2272,7 +2272,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             spectrum = imresize(spectrum, (dx >> 1,))
         end
 
-        image_resp = Nothing
+        local image_resp, spec_resp
 
         if image
             image_resp = IOBuffer()
@@ -2298,6 +2298,11 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
             write(image_resp, Int32(length(compressed_mask)))
             write(image_resp, compressed_mask)
+
+            display(@view pixels[1:5,1:5])
+            display(@view mask[1:5,1:5])
+        else
+            image_resp = Nothing
         end
 
         spec_resp = IOBuffer()
@@ -2428,9 +2433,13 @@ end
                     r2,
                     average,
                     cdelt3,
-                )
+                    )
+                    th_pixels = thread_pixels[tid]
+                    th_mask = thread_mask[tid]
+                    display(@view th_pixels[1:5,1:5])
+                    display(@view th_mask[1:5,1:5])
                 else
-                val = ccall(
+                    val = ccall(
                     radial_spec_fptr,
                     Cfloat,
                     (
@@ -2495,7 +2504,7 @@ end
     if bImage
         # combine the pixels/mask from each thread
         pixels = zeros(Float32, dimx, dimy)
-        mask = map(isnan, pixels)
+    mask = map(isnan, pixels)
 
         for th_pixels in thread_pixels
             pixels .+= th_pixels
