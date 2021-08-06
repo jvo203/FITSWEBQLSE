@@ -2297,7 +2297,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
             compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
             write(image_resp, Int32(length(compressed_mask)))
-            write(Image_resp, compressed_mask)
+            write(image_resp, compressed_mask)
         end
 
         spec_resp = IOBuffer()
