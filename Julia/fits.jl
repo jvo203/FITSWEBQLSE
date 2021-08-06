@@ -2180,24 +2180,27 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         r = min(abs(x2 - x1) >> 1, abs(y2 - y1) >> 1)
         r2 = r * r
 
-        local pixels, mask, bDownsize, view_width, view_height
+        local pixels, mask
+
+        # by default no downsizing is needed
+        bDownsize = false
+        view_width = dimx
+        view_height = dimy
 
         if image
             native_size = dimx * dimy
             viewport_size = width * height
 
             if native_size > viewport_size
+                scale = Float32(width) / Float32(dimx)
+                println("re-sizing the viewport down to $(Int32(round(100.0 * scale)))%")
+
                 # downsize the pixels & mask   
                 bDownsize = true
                 view_width = width
                 view_height = height 
-            else
-                # stick to the original dimensions
-                bDownsize = false
-                view_width = dimx
-                view_height = dimy
             end
-
+              
             pixels = zeros(Float32, view_width, view_height)
             mask = map(isnan, pixels)
         end
