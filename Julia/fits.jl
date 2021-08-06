@@ -2440,5 +2440,21 @@ end
     #     append!(spectrum, spec)
     # end
 
-    put!(queue, (Nothing, Nothing, spectrum))
+    if bImage
+        # combine the pixels/mask from each thread
+        pixels = zeros(Float32, dimx, dimy)
+        mask = map(isnan, pixels)
+
+        for th_pixels in thread_pixels
+            pixels .+= th_pixels
+        end
+
+        for th_mask in thread_mask
+            mask .|= th_mask
+        end
+
+        put!(queue, (pixels, mask, spectrum))
+    else
+        put!(queue, (Nothing, Nothing, spectrum))
+    end
 end
