@@ -189,4 +189,4 @@ ulimit -s unlimited
 11. Julia in a cluster
 
 	
-	julia -O3 --machine-file machines.txt Julia/fitswebqlse.jl
+	julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
