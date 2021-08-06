@@ -2475,7 +2475,7 @@ end
 
         if bDownsize
             try
-                pixels = Float32.(imresize(pixels, (view_width, view_height)))
+                pixels = Float32.(imresize(pixels, (view_width, view_height))) # check the function arguments (Int32 --> Integer ???)
                 mask = Bool.(imresize(mask, (view_width, view_height), method=Constant())) # use Nearest-Neighbours for the mask
             catch e
                 println(e)
