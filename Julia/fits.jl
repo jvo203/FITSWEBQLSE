@@ -2327,7 +2327,7 @@ end
 
             if beam == CIRCLE
                 val = ccall(
-                    radial_view_fptr,
+                    radial_spec_fptr,
                     Cfloat,
                     (
                         Ref{Float16},
@@ -2356,7 +2356,7 @@ end
                 )
             elseif beam == SQUARE
                 val = ccall(
-                    square_view_fptr,
+                    square_spec_fptr,
                     Cfloat,
                     (Ref{Float16}, UInt32, Int32, Int32, Int32, Int32, Bool, Float32),
                     pixels,
