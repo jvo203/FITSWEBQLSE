@@ -2184,7 +2184,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         if image
             pixels = zeros(Float32, dimx, dimy)
-            mask = map(!isnan, pixels)
+            mask = map(isnan, pixels)
         end
 
         spectrum = zeros(Float32, frame_length)
@@ -2197,7 +2197,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
                 if thread_pixels != Nothing && thread_mask != Nothing
                     pixels .+= thread_pixels
-                    mask .&= thread_mask
+                    mask .|= thread_mask
                 end
 
                 if thread_spectrum != Nothing
@@ -2290,9 +2290,16 @@ end
 )
     println("#threads per worker: ", Threads.nthreads())
 
-    # To-DO: replace the mutex with per-thread arrays
+    local thread_pixels, thread_mask
+
+    # viewport dimensions
+    dimx = abs(x2 - x1 + 1)
+    dimy = abs(y2 - y1 + 1)
+
+    # TO-DO: replace the mutex with per-thread arrays
     # then finally combine the arrays into the final spectrum
     # or better still a single spectrum the length of fits.depth filled with zeros initially
+    # Tried it all: finally settled on a spin lock instead
 
     average = true
 
@@ -2302,6 +2309,11 @@ end
 
     spectrum = Array{Tuple{Int32,Float32},1}()
     spinlock = Threads.SpinLock()
+
+    if bImage
+        thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
+        thread_mask = [map(isnan, t_p) for t_p in thread_pixels]
+    end
 
     # thread_spectrum = [Array{Tuple{Int32,Float32},1}() for tid = 1:Threads.nthreads()]
 
