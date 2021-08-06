@@ -2142,7 +2142,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         view_width = dims[1]
         view_height = dims[2]
 
-            resp = IOBuffer()
+        resp = IOBuffer()
 
         write(resp, Int32(view_width))
         write(resp, Int32(view_height))
@@ -2180,10 +2180,25 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         r = min(abs(x2 - x1) >> 1, abs(y2 - y1) >> 1)
         r2 = r * r
 
-        local pixels , mask
+        local pixels, mask, bDownsize, view_width, view_height
 
         if image
-            pixels = zeros(Float32, dimx, dimy)
+            native_size = dimx * dimy
+            viewport_size = width * height
+
+            if native_size > viewport_size
+                # downsize the pixels & mask   
+                bDownsize = true
+                view_width = width
+                view_height = height 
+            else
+                # stick to the original dimensions
+                bDownsize = false
+                view_width = dimx
+                view_height = dimy
+            end
+
+            pixels = zeros(Float32, view_width, view_height)
             mask = map(isnan, pixels)
         end
 
@@ -2230,6 +2245,9 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 beam,
                 intensity,
                 image,
+                bDownsize,
+                Int32(view_width),
+                Int32(view_height),
                 fits._cdelt3,
                 findall(fits.indices[job.where]),
                 results,
@@ -2284,6 +2302,9 @@ end
     beam::Beam,
     intensity::Intensity,
     bImage::Bool,
+    bDownsize::Bool,
+    view_width::Int32,
+    view_height::Int32,
     cdelt3::Float32,
     idx::Vector{Int64},
     queue::RemoteChannel{Channel{Tuple}},
@@ -2451,6 +2472,15 @@ end
 
         for th_mask in thread_mask
             mask .|= th_mask
+        end
+
+        if bDownsize
+            try
+                pixels = Float32.(imresize(pixels, (view_width, view_height)))
+                mask = Bool.(imresize(mask, (view_width, view_height), method=Constant())) # use Nearest-Neighbours for the mask
+            catch e
+                println(e)
+            end
         end
 
         put!(queue, (pixels, mask, spectrum))
