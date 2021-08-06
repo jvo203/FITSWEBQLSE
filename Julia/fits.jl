@@ -2363,6 +2363,7 @@ end
 
     spectrum = Array{Tuple{Int32,Float32},1}()
     spinlock = Threads.SpinLock()
+    # rlock = ReentrantLock()
 
     if bImage
         thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
@@ -2448,7 +2449,9 @@ end
             end
 
             Threads.lock(spinlock)
+            # lock(rlock)
             push!(spectrum, (frame, val))
+            # unlock(rlock)
             Threads.unlock(spinlock)
 
             # println(Threads.threadid(), "::", frame, ", val = ", val, ", val2 = ", val2)
