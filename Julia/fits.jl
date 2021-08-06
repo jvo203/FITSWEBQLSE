@@ -2298,9 +2298,6 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
             write(image_resp, Int32(length(compressed_mask)))
             write(image_resp, compressed_mask)
-
-            display(@view pixels[1:5,1:5])
-            display(@view mask[1:5,1:5])
         else
             image_resp = Nothing
         end
@@ -2311,7 +2308,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         prec = SPECTRUM_MEDIUM_PRECISION
 
         if image
-            prec = SPECTRUM_HIGH_PRECISION
+            prec = SPECTRUM_MEDIUM_PRECISION # SPECTRUM_HIGH_PRECISION
         end
 
         compressed_spectrum = zfp_compress(spectrum, precision=prec)
