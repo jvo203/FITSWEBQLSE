@@ -2312,7 +2312,7 @@ end
 
     if bImage
         thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
-        thread_mask = [map(isnan, t_p) for t_p in thread_pixels]
+        thread_mask = [map(isnan, th_pix) for th_pix in thread_pixels]
     end
 
     # thread_spectrum = [Array{Tuple{Int32,Float32},1}() for tid = 1:Threads.nthreads()]
@@ -2326,6 +2326,8 @@ end
             continue
         end
 
+        tid = Threads.threadid()
+
         try
             pixels = compressed_frames[frame]
 
@@ -2338,6 +2340,9 @@ end
             stride = strides(pixels)
 
             if beam == CIRCLE
+                if bImage
+                    view_stride = strides(thread_pixels[tid])
+                else
                 val = ccall(
                     radial_spec_fptr,
                     Cfloat,
@@ -2366,6 +2371,7 @@ end
                     average,
                     cdelt3,
                 )
+                end
             elseif beam == SQUARE
                 val = ccall(
                     square_spec_fptr,
