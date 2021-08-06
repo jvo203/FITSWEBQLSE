@@ -2308,7 +2308,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         prec = SPECTRUM_MEDIUM_PRECISION
 
         if image
-            prec = SPECTRUM_MEDIUM_PRECISION # SPECTRUM_HIGH_PRECISION
+            prec = SPECTRUM_HIGH_PRECISION
         end
 
         compressed_spectrum = zfp_compress(spectrum, precision=prec)
