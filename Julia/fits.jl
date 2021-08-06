@@ -2457,10 +2457,6 @@ end
         end
     end
 
-    # for spec in thread_spectrum
-    #     append!(spectrum, spec)
-    # end
-
     if bImage
         # combine the pixels/mask from each thread
         pixels = zeros(Float32, dimx, dimy)
