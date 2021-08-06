@@ -2447,9 +2447,6 @@ end
                 )
             end
 
-            # spec = thread_spectrum[Threads.threadid()]
-            # push!(spec, (frame, val))
-
             Threads.lock(spinlock)
             push!(spectrum, (frame, val))
             Threads.unlock(spinlock)
