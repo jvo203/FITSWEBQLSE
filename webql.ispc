@@ -74,7 +74,7 @@ export uniform float calculate_radial_viewport_spectrumF16(uniform int16 cubeDat
       partial_count += (nan || exclude) ? 0 : 1 ;
 
       // the still viewport
-      int idx = (y-y1)*stride+(x-x1) ;
+      varying int idx = (y-y1)*stride+(x-x1) ;
       pixels[idx] += (nan || exclude) ? 0.0f : tmp ;
       mask[idx] |= (nan || exclude) ? false : true ;
     } ;
