@@ -2372,8 +2372,6 @@ end
         thread_mask = [map(isnan, th_pix) for th_pix in thread_pixels]
     end
 
-    # thread_spectrum = [Array{Tuple{Int32,Float32},1}() for tid = 1:Threads.nthreads()]
-
     # set the initial capacity to avoid reallocations
     depth = last_frame - first_frame + 1
     sizehint!(spectrum, depth)
@@ -2392,54 +2390,23 @@ end
             # mask = map(!isnan, viewport)
             # val = sum(Float32.(viewport[mask])) * cdelt3
 
+            if bImage
+                viewport = pixels[x1:x2, y1:y2]
+                mask = map(isnan, viewport)
+
+                # replace NaNs with 0.0
+                viewport[mask] .= 0.0
+
+                thread_pixels[tid] .+= viewport
+                thread_mask[tid] .|= .!mask
+            end
+
             val = Float32(0.0)
 
             stride = strides(pixels)
 
             if beam == CIRCLE
-                if bImage
-                    view_stride = strides(thread_pixels[tid])
-
-                    val = ccall(
-                    radial_view_fptr,
-                    Cfloat,
-                    (
-                        Ref{Float16},
-                        UInt32,
-                        Ref{Float32},
-                        Ref{Bool},
-                        UInt32,
-                        Int32,
-                        Int32,
-                        Int32,
-                        Int32,
-                        Int32,
-                        Int32,
-                        Int32,
-                        Bool,
-                        Float32,
-                    ),
-                    pixels,
-                    stride[2],
-                    thread_pixels[tid],
-                    thread_mask[tid],
-                    view_stride[2],
-                    x1 - 1,
-                    x2,
-                    y1 - 1,
-                    y2,
-                    cx,
-                    cy,
-                    r2,
-                    average,
-                    cdelt3,
-                    )
-                    th_pixels = thread_pixels[tid]
-                    th_mask = thread_mask[tid]
-                    display(@view th_pixels[1:5,1:5])
-                    display(@view th_mask[1:5,1:5])
-                else
-                    val = ccall(
+                val = ccall(
                     radial_spec_fptr,
                     Cfloat,
                     (
@@ -2467,7 +2434,6 @@ end
                     average,
                     cdelt3,
                 )
-                end
             elseif beam == SQUARE
                 val = ccall(
                     square_spec_fptr,
