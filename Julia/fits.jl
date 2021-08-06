@@ -2342,6 +2342,41 @@ end
             if beam == CIRCLE
                 if bImage
                     view_stride = strides(thread_pixels[tid])
+
+                    val = ccall(
+                    radial_view_fptr,
+                    Cfloat,
+                    (
+                        Ref{Float16},
+                        UInt32,
+                        Ref{Float32},
+                        Ref{Bool},
+                        UInt32,
+                        Int32,
+                        Int32,
+                        Int32,
+                        Int32,
+                        Int32,
+                        Int32,
+                        Int32,
+                        Bool,
+                        Float32,
+                    ),
+                    pixels,
+                    stride[2],
+                    thread_pixels[tid],
+                    thread_mask[tid],
+                    view_stride[2],
+                    x1 - 1,
+                    x2,
+                    y1 - 1,
+                    y2,
+                    cx,
+                    cy,
+                    r2,
+                    average,
+                    cdelt3,
+                )
                 else
                 val = ccall(
                     radial_spec_fptr,
