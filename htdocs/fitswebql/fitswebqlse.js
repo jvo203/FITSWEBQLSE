@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-07-28.0";
+	return "JS2021-08-06.0";
 }
 
 const wasm_supported = (() => {
@@ -2568,7 +2568,7 @@ function open_websocket_connection(datasetId, index) {
 						Module.ready
 							.then(_ => {
 								let start = performance.now();
-								var spectrum = Module.decompressZFPspectrum(spectrum_len, frame);
+								var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
 								let elapsed = Math.round(performance.now() - start);
 
 								//console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
