@@ -2420,7 +2420,7 @@ end
                     radial_spec_fptr,
                     Cfloat,
                     (
-                        Ref{Float16},
+                        Ptr{Float16},
                         UInt32,
                         Int32,
                         Int32,
@@ -2448,7 +2448,7 @@ end
                 val = ccall(
                     square_spec_fptr,
                     Cfloat,
-                    (Ref{Float16}, UInt32, Int32, Int32, Int32, Int32, Bool, Float32),
+                    (Ptr{Float16}, UInt32, Int32, Int32, Int32, Int32, Bool, Float32),
                     pixels,
                     stride[2],
                     x1 - 1,
