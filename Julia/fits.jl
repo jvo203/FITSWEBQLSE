@@ -948,7 +948,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 ".f16"
 
                             io = open(filename, "w+")
-                            write(io, compressed_pixels)
+                            # write(io, compressed_pixels)
+                            serialize(io, compressed_pixels)
                             close(io)
 
                             # send back the reduced values
@@ -1165,8 +1166,9 @@ function restoreData(fits::FITSDataSet)
                     cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
-                compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
-                Mmap.madvise!(compressed_pixels, MADV_WILLNEED)
+                # compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
+                # Mmap.madvise!(compressed_pixels, MADV_WILLNEED)
+                compressed_pixels = deserialize(io)
                 close(io)
 
                 # touch the data by copying
