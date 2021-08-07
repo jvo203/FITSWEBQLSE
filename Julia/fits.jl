@@ -2346,6 +2346,7 @@ end
     println("#threads per worker: ", Threads.nthreads())
 
     local thread_pixels, thread_mask
+    local view_pixels, view_mask
 
     # viewport dimensions
     dimx = abs(x2 - x1 + 1)
@@ -2366,8 +2367,11 @@ end
     spinlock = Threads.SpinLock()
     
     if bImage
-    thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
-        thread_mask = [map(isnan, th_pix) for th_pix in thread_pixels]
+    # thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
+        # thread_mask = [map(isnan, th_pix) for th_pix in thread_pixels]
+
+        view_pixels = zeros(Float32, dimx, dimy)
+        view_mask = map(isnan, view_pixels)
     end
 
     # set the initial capacity to avoid reallocations
@@ -2380,7 +2384,7 @@ end
             continue
         end
 
-        tid = Threads.threadid()
+        # tid = Threads.threadid()
 
         try
             # Threads.lock(spinlock)
@@ -2398,8 +2402,11 @@ end
                 # replace NaNs with 0.0
                 viewport[mask] .= 0.0
 
-                thread_pixels[tid] .+= viewport
-                thread_mask[tid] .|= .!mask
+                # thread_pixels[tid] .+= viewport
+                # thread_mask[tid] .|= .!mask
+
+                view_pixels .+= viewport
+                view_mask .|= .!mask
             end
 
             val = Float32(0.0)
@@ -2463,8 +2470,9 @@ end
 
     if bImage
         # combine the pixels/mask from each thread
+        #= 
         pixels = zeros(Float32, dimx, dimy)
-    mask = map(isnan, pixels)
+        mask = map(isnan, pixels)
 
         for th_pixels in thread_pixels
             pixels .+= th_pixels
@@ -2472,19 +2480,19 @@ end
 
         for th_mask in thread_mask
             mask .|= th_mask
-        end
+        end =#
 
         if bDownsize
             try
-                pixels = Float32.(imresize(pixels, (view_width, view_height))) # check the function arguments (Int32 --> Integer ???)
-                mask = Bool.(imresize(mask, (view_width, view_height), method=Constant())) # use Nearest-Neighbours for the mask
+                view_pixels = Float32.(imresize(view_pixels, (view_width, view_height))) # check the function arguments (Int32 --> Integer ???)
+                view_mask = Bool.(imresize(view_mask, (view_width, view_height), method=Constant())) # use Nearest-Neighbours for the mask
             catch e
                 println(e)
             end
         end
 
-        put!(queue, (pixels, mask, spectrum))
+        put!(queue, (view_pixels, view_mask, spectrum))
     else
-        put!(queue, (Nothing, Nothing, spectrum))
+                put!(queue, (Nothing, Nothing, spectrum))
     end
 end
