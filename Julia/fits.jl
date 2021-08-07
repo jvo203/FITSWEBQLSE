@@ -2366,7 +2366,7 @@ end
     end
 
     spectrum = Array{Tuple{Int32,Float32},1}()
-    # spinlock = Threads.SpinLock()
+    spinlock = Threads.SpinLock()
 
     if bImage
         # thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
@@ -2380,8 +2380,7 @@ end
     depth = last_frame - first_frame + 1
     sizehint!(spectrum, depth)
 
-    # Threads.@threads 
-    for frame in idx
+    Threads.@threads for frame in idx
         if frame < first_frame || frame > last_frame
             continue
         end
@@ -2389,9 +2388,9 @@ end
         # tid = Threads.threadid()
 
         try
-            # Threads.lock(spinlock)
+            Threads.lock(spinlock)
             pixels = compressed_frames[frame]
-            # Threads.unlock(spinlock)
+            Threads.unlock(spinlock)
 
             # viewport = @view pixels[x1:x2, y1:y2]
             # mask = map(!isnan, viewport)
@@ -2407,8 +2406,10 @@ end
                 # thread_pixels[tid] .+= viewport
                 # thread_mask[tid] .|= .!mask
 
+                Threads.lock(spinlock)
                 view_pixels .+= viewport
                 view_mask .|= .!mask
+                Threads.unlock(spinlock)
             end
 
             val = Float32(0.0)
@@ -2460,13 +2461,14 @@ end
                 )
             end
 
-            # Threads.lock(spinlock)
+            Threads.lock(spinlock)
             push!(spectrum, (frame, val))
-            # Threads.unlock(spinlock)
+            Threads.unlock(spinlock)
 
             # println(Threads.threadid(), "::", frame, ", val = ", val, ", val2 = ", val2)
         catch e
-            println(e)
+            # println(e)
+            @error "calculateViewportSpectrum" exception = (e, catch_backtrace())
         end
     end
 
@@ -2486,7 +2488,10 @@ end
 
         if bDownsize
             try
-                view_pixels = Float32.(imresize(view_pixels, (view_width, view_height))) # check the function arguments (Int32 --> Integer ???)
+                view_pixels =
+                    Float32.(
+                        imresize(view_pixels, (Integer(view_width), Integer(view_height))),
+                    ) # check the function arguments (Int32 --> Integer ???)
                 view_mask =
                     Bool.(
                         imresize(view_mask, (view_width, view_height), method = Constant()),
