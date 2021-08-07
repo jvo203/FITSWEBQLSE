@@ -1155,9 +1155,10 @@ function restoreData(fits::FITSDataSet)
 
     @everywhere function preload_frames(datasetid, width, height, idx)
         compressed_frames = Dict{Int32,Matrix{Float16}}()
-        spinlock = Threads.SpinLock()
+        # spinlock = Threads.SpinLock()
 
-        Threads.@threads for frame in idx
+        # Threads.@threads 
+        for frame in idx
             try
                 cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
                 filename =
@@ -1172,9 +1173,9 @@ function restoreData(fits::FITSDataSet)
                 # ram_pixels = Array{Float16}(undef, width, height)
                 # ram_pixels .= compressed_pixels
 
-                Threads.lock(spinlock)
+                # Threads.lock(spinlock)
                 compressed_frames[frame] = compressed_pixels
-                Threads.unlock(spinlock)
+                # Threads.unlock(spinlock)
 
                 # println("restored frame #$frame")
 
@@ -2363,10 +2364,9 @@ end
 
     spectrum = Array{Tuple{Int32,Float32},1}()
     spinlock = Threads.SpinLock()
-    # rlock = ReentrantLock()
-
+    
     if bImage
-        thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
+    thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
         thread_mask = [map(isnan, th_pix) for th_pix in thread_pixels]
     end
 
@@ -2374,7 +2374,8 @@ end
     depth = last_frame - first_frame + 1
     sizehint!(spectrum, depth)
 
-    Threads.@threads for frame in idx
+    # Threads.@threads 
+    for frame in idx
         if frame < first_frame || frame > last_frame
             continue
         end
@@ -2382,7 +2383,9 @@ end
         tid = Threads.threadid()
 
         try
+            # Threads.lock(spinlock)
             pixels = compressed_frames[frame]
+            # Threads.unlock(spinlock)
 
             # viewport = @view pixels[x1:x2, y1:y2]
             # mask = map(!isnan, viewport)
@@ -2448,11 +2451,9 @@ end
                 )
             end
 
-            Threads.lock(spinlock)
-            # lock(rlock)
+            # Threads.lock(spinlock)
             push!(spectrum, (frame, val))
-            # unlock(rlock)
-            Threads.unlock(spinlock)
+            # Threads.unlock(spinlock)
 
             # println(Threads.threadid(), "::", frame, ", val = ", val, ", val2 = ", val2)
         catch e
