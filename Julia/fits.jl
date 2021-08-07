@@ -245,7 +245,7 @@ function deserialize_fits(datasetid)
         close(io)
 
         dirname = ".cache" * Base.Filesystem.path_separator * fits.datasetid
-        rm(dirname, recursive=true)
+        rm(dirname, recursive = true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
     end
@@ -404,7 +404,7 @@ function get_dataset(datasetid::String, fits_objects, fits_lock)::FITSDataSet
 end
 
 function get_frequency_range(fits::FITSDataSet)
-    local crval3 , cdelt3 , crpix3
+    local crval3, cdelt3, crpix3
 
     header = fits.header
 
@@ -629,7 +629,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
     println("loading $filepath::$(fits.datasetid)")
 
-    local f , width::Integer , height::Integer , depth::Integer
+    local f, width::Integer, height::Integer, depth::Integer
     local header
 
     try
@@ -782,7 +782,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         else
             n = length(workers())
 
-                println(
+            println(
                 "reading a $width X $height X $depth 3D data cube using $n parallel worker(s)",
             )
 
@@ -841,7 +841,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         try
                             queue = indices[tid]
                         catch e
-                        println("adding a new BitArray@$tid")
+                            println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
                         finally
@@ -870,10 +870,10 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     global_mask::DArray,
                 )
 
-                    local frame , frame_pixels , frame_mask
-                    local valid_pixels , valid_mask
-                    local frame_min , frame_max
-                    local mean_spectrum , integrated_spectrum
+                    local frame, frame_pixels, frame_mask
+                    local valid_pixels, valid_mask
+                    local frame_min, frame_max
+                    local mean_spectrum, integrated_spectrum
 
                     pixels = zeros(Float32, width, height)
                     mask = map(!isnan, pixels)
@@ -927,7 +927,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
-                                
+
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
@@ -1123,7 +1123,7 @@ function restoreImage(fits::FITSDataSet)
 
             local_pixels[:, :] = pixels
             local_mask[:, :] = mask
-            
+
         catch e
             println("DArray::$e")
             return false
@@ -1132,7 +1132,7 @@ function restoreImage(fits::FITSDataSet)
         return true
     end
 
-        # Remote Access Service
+    # Remote Access Service
     ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
 
     # wait for the pixels & mask to be restored
@@ -1162,7 +1162,7 @@ function restoreData(fits::FITSDataSet)
             try
                 cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
                 filename =
-                cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
+                    cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
 
                 io = open(filename) # default is read-only
                 compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
@@ -1202,7 +1202,7 @@ function get_screen_scale(x::Integer)
     return floor(0.9 * Float32(x))
 
 end
-    
+
 function get_image_scale_square(
     width::Integer,
     height::Integer,
@@ -1242,7 +1242,7 @@ function get_image_scale(
             scale = screen_dimension / image_dimension
         end
 
-            return scale
+        return scale
     end
 
     if img_width < img_height
@@ -1315,7 +1315,7 @@ end
     end
 
     # println("original dimensions: $width x $height")
-        
+
     width = x2 - x1 + 1
     height = y2 - y1 + 1
 
@@ -1326,9 +1326,9 @@ end
 end
 
 function getImage(fits::FITSDataSet, width::Integer, height::Integer)
-    local scale::Float32 , pixels , mask
-    local image_width::Integer , image_height::Integer
-    local inner_width::Integer , inner_height::Integer
+    local scale::Float32, pixels, mask
+    local image_width::Integer, image_height::Integer
+    local inner_width::Integer, inner_height::Integer
 
     inner_width = 0
     inner_height = 0
@@ -1447,7 +1447,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
 
         @everywhere function collate_images(
             results,
-                global_pixels::DArray,
+            global_pixels::DArray,
             global_mask::DArray,
             width::Integer,
             height::Integer,
@@ -1471,7 +1471,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
                 # downsize the pixels & mask            
                 try
                     pixels = Float32.(imresize(local_pixels, (width, height)))
-                    mask = Bool.(imresize(local_mask, (width, height), method=Constant())) # use Nearest-Neighbours for the mask
+                    mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
                     put!(results, (pixels, mask))
                 catch e
                     println(e)
@@ -1483,7 +1483,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
         @time @sync for w in workers()
             @spawnat w collate_images(
                 image_res,
-        fits.pixels,
+                fits.pixels,
                 fits.mask,
                 image_width,
                 image_height,
@@ -1506,11 +1506,11 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
             try
                 pixels = Float32.(imresize(fits.pixels, (image_width, image_height)))
                 mask =
-                Bool.(
+                    Bool.(
                         imresize(
                             fits.mask,
                             (image_width, image_height),
-                            method=Constant(),
+                            method = Constant(),
                         ),
                     ) # use Nearest-Neighbours for the mask            
             catch e
@@ -1561,7 +1561,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     if countN + countP > 0
         mad = (sumN + sumP) / (countN + countP)
     end
-        
+
     println("madN = $madN, madP = $madP, mad = $mad")
 
     # ALMAWebQL v2 - style
@@ -1593,7 +1593,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
         slots = Float64.(acc) ./ Float64(acc_tot)
 
         # upsample the slots array to <NBINS>
-        cum = imresize(slots, (NBINS,), method=Linear())
+        cum = imresize(slots, (NBINS,), method = Linear())
         println("slots length: $(length(cum))")
 
         try
@@ -1612,7 +1612,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     tone_mapping = ImageToneMapping(
         fits.flux,
         pmin,
-    pmax,
+        pmax,
         med,
         sensitivity,
         ratio_sensitivity,
@@ -1624,19 +1624,19 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
 end
 
 function getJSON(fits::FITSDataSet)
-    local CD1_1 , CD1_2 , CD2_1 , CD2_2
-    local CRVAL1 , CDELT1 , CRPIX1 , CUNIT1 , CTYPE1
-    local CRVAL2 , CDELT2 , CRPIX2 , CUNIT2 , CTYPE2
-    local CRVAL3 , CDELT3 , CRPIX3 , CUNIT3 , CTYPE3
-    local BMAJ , BMIN , BPA , BUNIT , BTYPE , SPECSYS
-    local RESTFRQ , OBSRA , OBSDEC
-    local OBJECT , DATEOBS , TIMESYS , LINE , FILTER
+    local CD1_1, CD1_2, CD2_1, CD2_2
+    local CRVAL1, CDELT1, CRPIX1, CUNIT1, CTYPE1
+    local CRVAL2, CDELT2, CRPIX2, CUNIT2, CTYPE2
+    local CRVAL3, CDELT3, CRPIX3, CUNIT3, CTYPE3
+    local BMAJ, BMIN, BPA, BUNIT, BTYPE, SPECSYS
+    local RESTFRQ, OBSRA, OBSDEC
+    local OBJECT, DATEOBS, TIMESYS, LINE, FILTER
 
     try
         buf = IOBuffer()
 
         header = fits.header
-    
+
         try
             CD1_1 = header["CD1_1"]
         catch e
@@ -1833,7 +1833,7 @@ function getJSON(fits::FITSDataSet)
             LINE = header["LINE"]
         catch e
         end
-        
+
         try
             LINE = header["J_LINE"]
         catch e
@@ -1847,7 +1847,7 @@ function getJSON(fits::FITSDataSet)
 
         dict = Dict(
             "width" => fits.width,
-        "height" => fits.height,
+            "height" => fits.height,
             "depth" => fits.depth,
             "polarisation" => 1,
             "filesize" => fits.filesize,
@@ -1900,7 +1900,7 @@ end
 
 function get_freq2vel_bounds(
     fits::FITSDataSet,
-        frame_start::Float64,
+    frame_start::Float64,
     frame_end::Float64,
     ref_freq::Float64,
 )
@@ -1967,11 +1967,11 @@ function get_frequency_bounds(fits::FITSDataSet, freq_start::Float64, freq_end::
     band_lo = min(f1, f2)
     band_hi = max(f1, f2)
 
-    local first_frame , last_frame
+    local first_frame, last_frame
 
     if cdelt3 > 0.0
-    first_frame =
-    1 +
+        first_frame =
+            1 +
             Integer(round((freq_start - band_lo) / (band_hi - band_lo) * (fits.depth - 1)))
         last_frame =
             1 +
@@ -2016,11 +2016,11 @@ function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Flo
     band_lo = min(v1, v2)
     band_hi = max(v1, v2)
 
-    local first_frame , last_frame
+    local first_frame, last_frame
 
     if cdelt3 > 0.0
-    first_frame =
-    1 +
+        first_frame =
+            1 +
             Integer(round((vel_start - band_lo) / (band_hi - band_lo) * (fits.depth - 1)))
         last_frame =
             1 + Integer(round((vel_end - band_lo) / (band_hi - band_lo) * (fits.depth - 1)))
@@ -2133,7 +2133,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
             try
                 pixels = Float32.(imresize(pixels, (width, height)))
-                mask = Bool.(imresize(mask, (width, height), method=Constant())) # use Nearest-Neighbours for the mask
+                mask = Bool.(imresize(mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
             catch e
                 println(e)
             end
@@ -2143,7 +2143,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         view_width = dims[1]
         view_height = dims[2]
 
-            resp = IOBuffer()
+        resp = IOBuffer()
 
         write(resp, Int32(view_width))
         write(resp, Int32(view_height))
@@ -2159,7 +2159,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             prec = ZFP_LOW_PRECISION
         end
 
-        compressed_pixels = zfp_compress(pixels, precision=prec)
+        compressed_pixels = zfp_compress(pixels, precision = prec)
         write(resp, Int32(length(compressed_pixels)))
         write(resp, compressed_pixels)
 
@@ -2190,7 +2190,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
         if image
             native_size = dimx * dimy
-        viewport_size = width * height
+            viewport_size = width * height
 
             if native_size > viewport_size
                 scale = Float32(width) / Float32(dimx)
@@ -2199,9 +2199,9 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 # downsize the pixels & mask   
                 bDownsize = true
                 view_width = width
-                view_height = height 
+                view_height = height
             end
-              
+
             pixels = zeros(Float32, view_width, view_height)
             mask = map(isnan, pixels)
         end
@@ -2292,7 +2292,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 prec = ZFP_LOW_PRECISION
             end
 
-            compressed_pixels = zfp_compress(pixels, precision=prec)
+            compressed_pixels = zfp_compress(pixels, precision = prec)
             write(image_resp, Int32(length(compressed_pixels)))
             write(image_resp, compressed_pixels)
 
@@ -2312,8 +2312,8 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             prec = SPECTRUM_HIGH_PRECISION
         end
 
-        compressed_spectrum = zfp_compress(spectrum, precision=prec)
-            
+        compressed_spectrum = zfp_compress(spectrum, precision = prec)
+
         write(spec_resp, Int32(length(spectrum)))
         write(spec_resp, compressed_spectrum)
 
@@ -2364,10 +2364,10 @@ end
     end
 
     spectrum = Array{Tuple{Int32,Float32},1}()
-    spinlock = Threads.SpinLock()
-    
+    # spinlock = Threads.SpinLock()
+
     if bImage
-    # thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
+        # thread_pixels = [zeros(Float32, dimx, dimy) for tid = 1:Threads.nthreads()]
         # thread_mask = [map(isnan, th_pix) for th_pix in thread_pixels]
 
         view_pixels = zeros(Float32, dimx, dimy)
@@ -2485,7 +2485,10 @@ end
         if bDownsize
             try
                 view_pixels = Float32.(imresize(view_pixels, (view_width, view_height))) # check the function arguments (Int32 --> Integer ???)
-                view_mask = Bool.(imresize(view_mask, (view_width, view_height), method=Constant())) # use Nearest-Neighbours for the mask
+                view_mask =
+                    Bool.(
+                        imresize(view_mask, (view_width, view_height), method = Constant()),
+                    ) # use Nearest-Neighbours for the mask
             catch e
                 println(e)
             end
@@ -2493,6 +2496,6 @@ end
 
         put!(queue, (view_pixels, view_mask, spectrum))
     else
-                put!(queue, (Nothing, Nothing, spectrum))
+        put!(queue, (Nothing, Nothing, spectrum))
     end
 end
