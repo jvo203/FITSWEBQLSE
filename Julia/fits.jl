@@ -2510,16 +2510,23 @@ end
                     "imresize error: ",
                     size(view_pixels),
                     "-->($view_width,$view_height); ",
-                    typeof(view_pixels), ";", typeof(view_mask)
+                    typeof(view_pixels),
+                    ";",
+                    typeof(view_mask),
                 )
+
+                serialize("/tmp/view_pixels.bin", view_pixels)
+                serialize("/tmp/view_mask.bin", view_mask)
             end
         else
             println(
                 "bDownsize: $bDownsize",
                 size(view_pixels),
                 "-->($view_width,$view_height); ",
-                typeof(view_pixels), ";", typeof(view_mask)
-                )
+                typeof(view_pixels),
+                ";",
+                typeof(view_mask),
+            )
         end
 
 
