@@ -2510,7 +2510,7 @@ end
                     "imresize error: ",
                     size(view_pixels),
                     "-->($view_width,$view_height); ",
-                    typeof(view_pixels), typeof(view_mask)
+                    typeof(view_pixels), ";", typeof(view_mask)
                 )
             end
         else
@@ -2518,7 +2518,7 @@ end
                 "bDownsize: $bDownsize",
                 size(view_pixels),
                 "-->($view_width,$view_height); ",
-                typeof(view_pixels), typeof(view_mask)
+                typeof(view_pixels), ";", typeof(view_mask)
                 )
         end
 
