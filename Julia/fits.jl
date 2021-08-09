@@ -2493,7 +2493,7 @@ end
                         imresize(
                             view_pixels,
                             (Integer(view_width), Integer(view_height)),
-                            method = Lanczos(),
+                            method = Lanczos{16}(),
                         ),
                     )
                 view_mask =
