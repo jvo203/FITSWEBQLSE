@@ -2488,17 +2488,10 @@ end
 
         if bDownsize
             try
-                view_pixels =
-                    Float32.(
-                        imresize(view_pixels, (Integer(view_width), Integer(view_height))),
-                    )
+                view_pixels = Float32.(imresize(view_pixels, (view_width, view_height)),)
                 view_mask =
                     Bool.(
-                        imresize(
-                            view_mask,
-                            (Integer(view_width), Integer(view_height)),
-                            method = Constant(),
-                        ),
+                        imresize(view_mask, (view_width, view_height), method = Constant()),
                     ) # use Nearest-Neighbours for the mask
             catch e
                 # println(e)
