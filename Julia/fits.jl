@@ -2490,11 +2490,7 @@ end
             try
                 view_pixels =
                     Float32.(
-                        imresize(
-                            view_pixels,
-                            (Integer(view_width), Integer(view_height)),
-                            method = Lanczos{16}(),
-                        ),
+                        imresize(view_pixels, (Integer(view_width), Integer(view_height))),
                     )
                 view_mask =
                     Bool.(
