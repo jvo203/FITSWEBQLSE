@@ -2490,14 +2490,27 @@ end
             try
                 view_pixels =
                     Float32.(
-                        imresize(view_pixels, (Integer(view_width), Integer(view_height))),
-                    ) # check the function arguments (Int32 --> Integer ???)
+                        imresize(
+                            view_pixels,
+                            (Integer(view_width), Integer(view_height)),
+                            method = Lanczos(),
+                        ),
+                    )
                 view_mask =
                     Bool.(
-                        imresize(view_mask, (view_width, view_height), method = Constant()),
+                        imresize(
+                            view_mask,
+                            (Integer(view_width), Integer(view_height)),
+                            method = Constant(),
+                        ),
                     ) # use Nearest-Neighbours for the mask
             catch e
-                println(e)
+                # println(e)
+                println(
+                    "imresize error: ",
+                    size(view_pixels),
+                    "-->($view_width,$view_height)",
+                )
             end
         end
 
