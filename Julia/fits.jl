@@ -2509,10 +2509,17 @@ end
                 println(
                     "imresize error: ",
                     size(view_pixels),
-                    "-->($view_width,$view_height)",
+                    "-->($view_width,$view_height); ",
+                    typeof(view_pixels), typeof(view_mask)
                 )
             end
         end
+
+        println(
+                    size(view_pixels),
+                    "-->($view_width,$view_height); ",
+                    typeof(view_pixels), typeof(view_mask)
+                )
 
         put!(queue, (view_pixels, view_mask, spectrum))
     else
