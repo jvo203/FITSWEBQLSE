@@ -20,6 +20,35 @@ function check_channel_state(c::Channel)
     end
 end
 
+function replace!(c::Channel{T}, v) where {T}
+    check_channel_state(c)
+    v = convert(T, v)
+    return isbuffered(c) ? replace_one(c, v) : put!(c, v)
+end
+
+function replace_one(c::Channel, v)
+    lock(c)
+    try
+        while length(c.data) == c.sz_max
+            check_channel_state(c)
+            wait(c.cond_put)
+        end
+
+        if isempty(c.data)
+            push!(c.data, v)
+        else
+            # replace the first element
+            c.data[1] = v
+        end
+
+        # notify all, since some of the waiters may be on a "fetch" call.
+        notify(c.cond_take, nothing, true, false)
+    finally
+        unlock(c)
+    end
+    return v
+end
+
 pop!(c::Channel) = isbuffered(c) ? pop_buffered(c) : take!(c)
 function pop_buffered(c::Channel)
     lock(c)
@@ -1160,7 +1189,7 @@ function ws_coroutine(ws, ids)
         local req_count
 
         try
-            # req = take!(requests)
+            req = take!(requests)
 
             # take out all requests
             #=req_count = 0
@@ -1175,7 +1204,7 @@ function ws_coroutine(ws, ids)
             #    continue
             #end
 
-            req = pop_last_element(requests)
+            # req = pop_last_element(requests)
 
             println(datasetid, "::", req) # , "; #($req_count)")
         catch e
@@ -1218,7 +1247,8 @@ function ws_coroutine(ws, ids)
             if msg["type"] == "realtime_image_spectrum"
 
                 # clear!(requests)
-                put!(requests, msg)
+                # put!(requests, msg)
+                replace!(requests, msg)
 
                 fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
