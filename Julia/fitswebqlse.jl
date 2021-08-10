@@ -1178,35 +1178,13 @@ function ws_coroutine(ws, ids)
 
     @info "Started websocket coroutine for $datasetid" ws
 
-    # requests = RemoteChannel(() -> Channel{Dict{String,Any}}(128))
-    requests = Channel{Dict{String,Any}}(128)
-    # stack = Stack{Dict{String,Any}}()
-
-    println("got here#1")
-
+    requests = Channel{Dict{String,Any}}(32)
+    
     realtime = @async while true
-        local req::Dict{String,Any}
-        local req_count
-
         try
             req = take!(requests)
 
-            # take out all requests
-            #=req_count = 0
-            for x in requests
-                req = x
-                req_count += 1
-                println(datasetid, "::", req, "; #($req_count)")
-            end=#
-
-            # only process the last (most up-to-date) request
-            #if (isempty(stack))
-            #    continue
-            #end
-
-            # req = pop_last_element(requests)
-
-            println(datasetid, "::", req) # , "; #($req_count)")
+            println(datasetid, "::", req)
         catch e
             if isa(e, InvalidStateException) && e.state == :closed
                 println("real-time task completed")
@@ -1216,8 +1194,6 @@ function ws_coroutine(ws, ids)
             end
         end
     end
-
-    println("got here#2")
 
     while isopen(ws)
         data, = readguarded(ws)
@@ -1246,8 +1222,6 @@ function ws_coroutine(ws, ids)
 
             if msg["type"] == "realtime_image_spectrum"
 
-                # clear!(requests)
-                # put!(requests, msg)
                 replace!(requests, msg)
 
                 fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
@@ -1313,12 +1287,8 @@ function ws_coroutine(ws, ids)
         end
     end
 
-    println("got here#3")
-
     close(requests)
-    println("got here#4")
     wait(realtime)
-    println("got here#5")
 
     @info "$datasetid will now close " ws
 
