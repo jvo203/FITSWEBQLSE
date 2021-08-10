@@ -1089,9 +1089,10 @@ function ws_coroutine(ws, ids)
 
     @info "Started websocket coroutine for $datasetid" ws
 
-    requests = RemoteChannel(() -> Channel{Tuple}(128))
+    # requests = RemoteChannel(() -> Channel{Tuple}(1024))
+    requests = Channel{Tuple}(1024)
 
-    #=realtime = Threads.@spawn while true
+    realtime = @async while true
         local id, msg
 
         try
@@ -1105,8 +1106,9 @@ function ws_coroutine(ws, ids)
             # only process the last (most up-to-date) request
             println(id, "::", msg)
         catch e
+            break
         end
-    end=#
+    end
 
     while isopen(ws)
         data, = readguarded(ws)
@@ -1135,7 +1137,7 @@ function ws_coroutine(ws, ids)
 
             if msg["type"] == "realtime_image_spectrum"
 
-                # put!(requests, (datasetid, msg))
+                put!(requests, (datasetid, msg))
 
                 fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
@@ -1201,7 +1203,7 @@ function ws_coroutine(ws, ids)
     end
 
     close(requests)
-    # wait(realtime)
+    wait(realtime)
 
     @info "$datasetid will now close " ws
 
