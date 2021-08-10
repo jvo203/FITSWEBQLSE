@@ -1,7 +1,6 @@
 import Base.Iterators: flatten
 using CodecBzip2;
 using CodecLz4;
-using DataStructures;
 using Distributed;
 using HTTP;
 using JSON;
@@ -10,6 +9,66 @@ using Sockets;
 using SQLite;
 using WebSockets;
 using ZfpCompression;
+
+isbuffered(c::Channel) = c.sz_max == 0 ? false : true
+
+function check_channel_state(c::Channel)
+    if !isopen(c)
+        excp = c.excp
+        excp !== nothing && throw(excp)
+        throw(closed_exception())
+    end
+end
+
+pop!(c::Channel) = isbuffered(c) ? pop_buffered(c) : take!(c)
+function pop_buffered(c::Channel)
+    lock(c)
+    try
+        while isempty(c.data)
+            check_channel_state(c)
+            wait(c.cond_take)
+        end
+
+        # obtain the last element
+        v = pop!(c.data)
+
+        # remove any remaining (older) elements
+        while !isempty(c.data)
+            pop!(c.data)
+        end
+
+        notify(c.cond_put, nothing, false, false) # notify only one, since only one slot has become available for a put!.
+        return v
+    finally
+        unlock(c)
+    end
+end
+
+function pop_last_element(c::Channel)
+    lock(c)
+
+    try
+        while isempty(c.data)
+            check_channel_state(c)
+            wait(c.cond_take)
+        end
+
+        # obtain the last element
+        # pop! does not work !?
+        v = last(c.data)
+        popfirst!(c.data)
+
+        # remove any remaining (older) elements
+        #while !isempty(c.data)
+        #    pop!(c.data)
+        #end
+
+        notify(c.cond_put, nothing, false, false) # notify only one, since only one slot has become available for a put!.
+        return v
+    finally
+        unlock(c)
+    end
+end
 
 const LOCAL_VERSION = true
 const PRODUCTION = false
@@ -1090,9 +1149,9 @@ function ws_coroutine(ws, ids)
 
     @info "Started websocket coroutine for $datasetid" ws
 
-    requests = RemoteChannel(() -> Channel{Dict{String,Any}}(128))
-    # requests = Channel{Dict{String,Any}}(128)
-    stack = Stack{Dict{String,Any}}()
+    # requests = RemoteChannel(() -> Channel{Dict{String,Any}}(128))
+    requests = Channel{Dict{String,Any}}(128)
+    # stack = Stack{Dict{String,Any}}()
 
     println("got here#1")
 
@@ -1101,7 +1160,7 @@ function ws_coroutine(ws, ids)
         local req_count
 
         try
-            req = take!(requests)
+            # req = take!(requests)
 
             # take out all requests
             #=req_count = 0
@@ -1116,7 +1175,7 @@ function ws_coroutine(ws, ids)
             #    continue
             #end
 
-            #req = pop!(stack)
+            req = pop_last_element(requests)
 
             println(datasetid, "::", req) # , "; #($req_count)")
         catch e
@@ -1158,7 +1217,7 @@ function ws_coroutine(ws, ids)
 
             if msg["type"] == "realtime_image_spectrum"
 
-                # empty!(stack)
+                # clear!(requests)
                 put!(requests, msg)
 
                 fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
