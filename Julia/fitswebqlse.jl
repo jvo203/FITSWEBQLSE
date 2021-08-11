@@ -1240,6 +1240,9 @@ function ws_coroutine(ws, ids)
             end
 
             update_timestamp(fits_object)
+
+            # trigger garbage collection
+            GC.gc()
         catch e
             if isa(e, InvalidStateException) && e.state == :closed
                 println("real-time task completed")
