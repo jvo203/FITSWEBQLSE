@@ -2507,17 +2507,7 @@ end
                 serialize("/tmp/view_pixels.bin", view_pixels)
                 serialize("/tmp/view_mask.bin", view_mask)
             end
-        else
-            println(
-                "bDownsize: $bDownsize",
-                size(view_pixels),
-                "-->($view_width,$view_height); ",
-                typeof(view_pixels),
-                ";",
-                typeof(view_mask),
-            )
         end
-
 
         put!(queue, (view_pixels, view_mask, spectrum))
     else
