@@ -1276,65 +1276,7 @@ function ws_coroutine(ws, ids)
             @info msg
 
             if msg["type"] == "realtime_image_spectrum"
-
                 replace!(requests, msg)
-
-                #=fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
-
-                if fits_object.datasetid == ""
-                    continue
-                end
-
-                if !has_data(fits_object)
-                    error("$datasetid: no data found.")
-                end
-
-                elapsed =
-                    @elapsed viewport, spectrum = getViewportSpectrum(fits_object, msg)
-                elapsed *= 1000.0 # [ms]
-
-                if viewport != Nothing
-                    # send a viewport
-                    println("[getViewportSpectrum] elapsed: $elapsed [ms]")
-
-                    resp = IOBuffer()
-
-                    # the header
-                    write(resp, Float32(msg["timestamp"]))
-                    write(resp, Int32(msg["seq_id"]))
-                    write(resp, Int32(1)) # 0 - spectrum, 1 - viewport
-                    write(resp, Float32(elapsed))
-
-                    # the body
-                    write(resp, take!(viewport))
-
-                    if !writeguarded(ws, take!(resp))
-                        break
-                    end
-                end
-
-                if spectrum != Nothing
-                    # send a spectrum
-                    println("[getViewportSpectrum] elapsed: $elapsed [ms]")
-
-                    resp = IOBuffer()
-
-                    # the header
-                    write(resp, Float32(msg["timestamp"]))
-                    write(resp, Int32(msg["seq_id"]))
-                    write(resp, Int32(0)) # 0 - spectrum, 1 - viewport
-                    write(resp, Float32(elapsed))
-
-                    # the body
-                    write(resp, take!(spectrum))
-
-                    if !writeguarded(ws, take!(resp))
-                        break
-                    end
-                end
-
-                update_timestamp(fits_object)
-                =#
             end
         catch e
             println("ws_coroutine::$e")
