@@ -49,56 +49,6 @@ function replace_one(c::Channel, v)
     return v
 end
 
-pop!(c::Channel) = isbuffered(c) ? pop_buffered(c) : take!(c)
-function pop_buffered(c::Channel)
-    lock(c)
-    try
-        while isempty(c.data)
-            check_channel_state(c)
-            wait(c.cond_take)
-        end
-
-        # obtain the last element
-        v = pop!(c.data)
-
-        # remove any remaining (older) elements
-        while !isempty(c.data)
-            pop!(c.data)
-        end
-
-        notify(c.cond_put, nothing, false, false) # notify only one, since only one slot has become available for a put!.
-        return v
-    finally
-        unlock(c)
-    end
-end
-
-function pop_last_element(c::Channel)
-    lock(c)
-
-    try
-        while isempty(c.data)
-            check_channel_state(c)
-            wait(c.cond_take)
-        end
-
-        # obtain the last element
-        # pop! does not work !?
-        v = last(c.data)
-        popfirst!(c.data)
-
-        # remove any remaining (older) elements
-        #while !isempty(c.data)
-        #    pop!(c.data)
-        #end
-
-        notify(c.cond_put, nothing, false, false) # notify only one, since only one slot has become available for a put!.
-        return v
-    finally
-        unlock(c)
-    end
-end
-
 const LOCAL_VERSION = true
 const PRODUCTION = false
 
