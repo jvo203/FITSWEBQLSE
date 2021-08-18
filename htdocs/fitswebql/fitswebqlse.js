@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-08-06.0";
+	return "JS2021-08-18.0";
 }
 
 const wasm_supported = (() => {
@@ -7638,10 +7638,42 @@ function x_axis_mouseenter(offset) {
 		let ui = '&width=' + width + '&height=' + height;
 
 		if (composite_view) {
-			wsConn[0].send('[init_video] frame=' + freq + '&view=composite' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate) + ui + '&flux=' + document.getElementById('flux' + 1).value + '&timestamp=' + performance.now());
+			var request = {
+				type: "init_video",
+				frame: freq,
+				view: "composite",
+				ref_freq: RESTFRQ,
+				fps: vidFPS,
+				seq_id: sent_vid_id,
+				bitrate: Math.round(target_bitrate),
+				width: width,
+				height: height,
+				flux: document.getElementById('flux' + 1).value,
+				timestamp: performance.now()
+			};
+
+			if (wsConn[0].readyState == 1)
+				wsConn[0].send(JSON.stringify(request));
+			// wsConn[0].send('[init_video] frame=' + freq + '&view=composite' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate) + ui + '&flux=' + document.getElementById('flux' + 1).value + '&timestamp=' + performance.now());
 			video_stack[0] = [];
 		} else for (let index = 0; index < va_count; index++) {
-			wsConn[index].send('[init_video] frame=' + freq + '&view=tile' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate) + ui + '&flux=' + document.getElementById('flux' + (index + 1)).value + '&timestamp=' + performance.now());
+			var request = {
+				type: "init_video",
+				frame: freq,
+				view: "tile",
+				ref_freq: RESTFRQ,
+				fps: vidFPS,
+				seq_id: sent_vid_id,
+				bitrate: Math.round(target_bitrate),
+				width: width,
+				height: height,
+				flux: document.getElementById('flux' + (index + 1)).value,
+				timestamp: performance.now()
+			};
+
+			if (wsConn[index].readyState == 1)
+				wsConn[index].send(JSON.stringify(request));
+			//wsConn[index].send('[init_video] frame=' + freq + '&view=tile' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate) + ui + '&flux=' + document.getElementById('flux' + (index + 1)).value + '&timestamp=' + performance.now());
 			video_stack[index] = [];
 		};
 	}
@@ -7748,18 +7780,26 @@ function x_axis_mouseleave() {
 	d3.select("#fps").text("");
 
 	//send an end_video command via WebSockets
+	var request = {
+		type: "end_video"
+	};
+
 	if (videoFrame[0] != null) {
 		if (composite_view) {
 			videoFrame[0].img = null;
 			videoFrame[0] = null;
 
-			wsConn[0].send('[end_video]');
+			if (wsConn[0].readyState == 1)
+				wsConn[0].send(JSON.stringify(request));
+			//wsConn[0].send('[end_video]');
 			video_stack[0] = [];
 		} else for (let index = 0; index < va_count; index++) {
 			videoFrame[index].img = null;
 			videoFrame[index] = null;
 
-			wsConn[index].send('[end_video]');
+			if (wsConn[index].readyState == 1)
+				wsConn[index].send(JSON.stringify(request));
+			//wsConn[index].send('[end_video]');
 			video_stack[index] = [];
 
 			if (va_count > 1)
