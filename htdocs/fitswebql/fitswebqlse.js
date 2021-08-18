@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-08-18.0";
+	return "JS2021-08-18.2";
 }
 
 const wasm_supported = (() => {
@@ -7654,7 +7654,6 @@ function x_axis_mouseenter(offset) {
 
 			if (wsConn[0].readyState == 1)
 				wsConn[0].send(JSON.stringify(request));
-			// wsConn[0].send('[init_video] frame=' + freq + '&view=composite' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate) + ui + '&flux=' + document.getElementById('flux' + 1).value + '&timestamp=' + performance.now());
 			video_stack[0] = [];
 		} else for (let index = 0; index < va_count; index++) {
 			var request = {
@@ -7673,7 +7672,6 @@ function x_axis_mouseenter(offset) {
 
 			if (wsConn[index].readyState == 1)
 				wsConn[index].send(JSON.stringify(request));
-			//wsConn[index].send('[init_video] frame=' + freq + '&view=tile' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate) + ui + '&flux=' + document.getElementById('flux' + (index + 1)).value + '&timestamp=' + performance.now());
 			video_stack[index] = [];
 		};
 	}
@@ -7791,7 +7789,7 @@ function x_axis_mouseleave() {
 
 			if (wsConn[0].readyState == 1)
 				wsConn[0].send(JSON.stringify(request));
-			//wsConn[0].send('[end_video]');
+
 			video_stack[0] = [];
 		} else for (let index = 0; index < va_count; index++) {
 			videoFrame[index].img = null;
@@ -7799,7 +7797,7 @@ function x_axis_mouseleave() {
 
 			if (wsConn[index].readyState == 1)
 				wsConn[index].send(JSON.stringify(request));
-			//wsConn[index].send('[end_video]');
+
 			video_stack[index] = [];
 
 			if (va_count > 1)
@@ -8026,11 +8024,35 @@ function x_axis_move(offset) {
 
 			if (realtime_video) {
 				if (composite_view) {
-					let strRequest = 'frame=' + freq + '&key=false' + '&view=composite' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate);
-					wsConn[0].send('[video] ' + strRequest + '&timestamp=' + performance.now());
+					var request = {
+						type: "video",
+						frame: freq,
+						key: false,
+						view: "composite",
+						ref_freq: RESTFRQ,
+						fps: vidFPS,
+						seq_id: sent_vid_id,
+						bitrate: Math.round(target_bitrate),
+						timestamp: performance.now()
+					};
+
+					if (wsConn[0].readyState == 1)
+						wsConn[0].send(JSON.stringify(request));
 				} else for (let index = 0; index < va_count; index++) {
-					let strRequest = 'frame=' + freq + '&key=false' + '&view=tile' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate);
-					wsConn[index].send('[video] ' + strRequest + '&timestamp=' + performance.now());
+					var request = {
+						type: "video",
+						frame: freq,
+						key: false,
+						view: "tile",
+						ref_freq: RESTFRQ,
+						fps: vidFPS,
+						seq_id: sent_vid_id,
+						bitrate: Math.round(target_bitrate),
+						timestamp: performance.now()
+					};
+
+					if (wsConn[index].readyState == 1)
+						wsConn[index].send(JSON.stringify(request));
 				}
 			};
 		};
@@ -10863,11 +10885,35 @@ function videoTimeout(freq) {
 	video_count = 0;
 
 	if (composite_view) {
-		let strRequest = 'frame=' + freq + '&key=true' + '&view=composite' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate);
-		wsConn[0].send('[video] ' + strRequest + '&timestamp=' + performance.now());
+		var request = {
+			type: "video",
+			frame: freq,
+			key: true,
+			view: "composite",
+			ref_freq: RESTFRQ,
+			fps: vidFPS,
+			seq_id: sent_vid_id,
+			bitrate: Math.round(target_bitrate),
+			timestamp: performance.now()
+		};
+
+		if (wsConn[0].readyState == 1)
+			wsConn[0].send(JSON.stringify(request));
 	} else for (let index = 0; index < va_count; index++) {
-		let strRequest = 'frame=' + freq + '&key=true' + '&view=tile' + '&ref_freq=' + RESTFRQ + '&fps=' + vidFPS + '&seq_id=' + sent_vid_id + '&bitrate=' + Math.round(target_bitrate);
-		wsConn[index].send('[video] ' + strRequest + '&timestamp=' + performance.now());
+		var request = {
+			type: "video",
+			frame: freq,
+			key: true,
+			view: "tile",
+			ref_freq: RESTFRQ,
+			fps: vidFPS,
+			seq_id: sent_vid_id,
+			bitrate: Math.round(target_bitrate),
+			timestamp: performance.now()
+		};
+
+		if (wsConn[index].readyState == 1)
+			wsConn[index].send(JSON.stringify(request));
 	}
 }
 
