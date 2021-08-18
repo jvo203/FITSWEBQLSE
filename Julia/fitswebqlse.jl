@@ -1128,11 +1128,11 @@ function ws_coroutine(ws, ids)
 
     @info "Started websocket coroutine for $datasetid" ws
 
-    requests = Channel{Dict{String,Any}}(32)
+    viewport_requests = Channel{Dict{String,Any}}(32)
 
     realtime = @async while true
         try
-            req = take!(requests)
+            req = take!(viewport_requests)
             # println(datasetid, "::", req)
 
             fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
@@ -1229,7 +1229,7 @@ function ws_coroutine(ws, ids)
             @info msg
 
             if msg["type"] == "realtime_image_spectrum"
-                replace!(requests, msg)
+                replace!(viewport_requests, msg)
             end
         catch e
             println("ws_coroutine::$e")
@@ -1237,7 +1237,7 @@ function ws_coroutine(ws, ids)
         end
     end
 
-    close(requests)
+    close(viewport_requests)
     wait(realtime)
 
     @info "$datasetid will now close " ws
