@@ -1195,7 +1195,40 @@ function ws_coroutine(ws, ids)
             GC.gc()
         catch e
             if isa(e, InvalidStateException) && e.state == :closed
-                println("real-time task completed")
+                println("real-time viewport task completed")
+                break
+            else
+                println(e)
+            end
+        end
+    end
+
+    video_requests = Channel{Dict{String,Any}}(32)
+
+    video = @async while true
+        try
+            req = take!(video_requests)
+            # println(datasetid, "::", req)
+
+            fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+            if fits_object.datasetid == ""
+                continue
+            end
+
+            if !has_data(fits_object)
+                error("$datasetid: no data found.")
+            end
+
+            # process a video frame
+
+            update_timestamp(fits_object)
+
+            # trigger garbage collection
+            GC.gc()
+        catch e
+            if isa(e, InvalidStateException) && e.state == :closed
+                println("real-time video task completed")
                 break
             else
                 println(e)
@@ -1231,6 +1264,10 @@ function ws_coroutine(ws, ids)
             if msg["type"] == "realtime_image_spectrum"
                 replace!(viewport_requests, msg)
             end
+
+            if msg["type"] == "video"
+                replace!(video_requests, msg)
+            end
         catch e
             println("ws_coroutine::$e")
             # @error "ws_coroutine::" exception = (e, catch_backtrace())
@@ -1238,7 +1275,10 @@ function ws_coroutine(ws, ids)
     end
 
     close(viewport_requests)
+    close(video_requests)
+
     wait(realtime)
+    wait(video)
 
     @info "$datasetid will now close " ws
 
