@@ -8,6 +8,7 @@ using Printf;
 using Sockets;
 using SQLite;
 using WebSockets;
+using x265_jll;
 using ZfpCompression;
 
 isbuffered(c::Channel) = c.sz_max == 0 ? false : true
@@ -1264,6 +1265,10 @@ function ws_coroutine(ws, ids)
             if msg["type"] == "realtime_image_spectrum"
                 replace!(viewport_requests, msg)
             end
+
+            # init_video
+
+            # end_video
 
             if msg["type"] == "video"
                 replace!(video_requests, msg)
