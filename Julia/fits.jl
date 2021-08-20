@@ -1087,6 +1087,19 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 unlock(fits.mutex)
 
                 # finally estimate data_mad, data_madN, data_madP based on the all-data median
+                local data_mad::Float32, data_count::Int64
+                local data_madP::Float32, data_countP::Int64
+                local data_madN::Float32, data_countN::Int64
+
+                data_mad = 0.0
+                data_count = 0
+
+                data_madP = 0.0
+                data_countP = 0
+
+                data_madN = 0.0
+                data_countN = 0
+
                 results = RemoteChannel(() -> Channel{Tuple}(32))
 
                 results_task = @async while true
