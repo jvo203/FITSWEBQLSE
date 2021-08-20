@@ -1088,17 +1088,17 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 # finally estimate data_mad, data_madN, data_madP based on the all-data median
                 local data_mad::Float32, data_count::Int64
-                local data_madP::Float32, data_countP::Int64
-                local data_madN::Float32, data_countN::Int64
+                local data_mad₊::Float32, data_count₊::Int64
+                local data_mad₋::Float32, data_count₋::Int64
 
                 data_mad = 0.0
                 data_count = 0
 
-                data_madP = 0.0
-                data_countP = 0
+                data_mad₊ = 0.0
+                data_count₊ = 0
 
-                data_madN = 0.0
-                data_countN = 0
+                data_mad₋ = 0.0
+                data_count₋ = 0
 
                 results = RemoteChannel(() -> Channel{Tuple}(32))
 
@@ -1106,10 +1106,19 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     try
                         thread_mad,
                         thread_count,
-                        thread_madP,
-                        thread_countP,
-                        thread_madN,
-                        thread_countN = take!(results)
+                        thread_mad₊,
+                        thread_count₊,
+                        thread_mad₋,
+                        thread_count₋ = take!(results)
+
+                        data_mad += thread_mad
+                        data_count += thread_count
+
+                        data_mad₊ += thread_mad₊
+                        data_count₊ += thread_count₊
+
+                        data_mad₋ += thread_mad₋
+                        data_count₋ += thread_count₋
 
                     catch e
                         println("results task completed")
@@ -1132,6 +1141,20 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 close(results)
                 wait(results_task)
+
+                if data_count > 0
+                    data_mad /= Float32(data_count)
+                end
+
+                if data_count₊ > 0
+                    data_mad₊ /= Float32(data_count₊)
+                end
+
+                if data_count₋ > 0
+                    data_mad₋ /= Float32(data_count₋)
+                end
+
+                println("data_mad: $data_mad, data_mad₊: $data_mad₊, data_mad₋: $data_mad₋")
 
             catch e
                 println("distributed computing error: $e")
@@ -2533,7 +2556,7 @@ end
 
     if bImage
         # combine the pixels/mask from each thread
-        #= 
+        #=
         pixels = zeros(Float32, dimx, dimy)
         mask = map(isnan, pixels)
 
@@ -2582,17 +2605,17 @@ end
     spinlock = Threads.SpinLock()
 
     local loc_mad::Float32, loc_count::Int64
-    local loc_madP::Float32, loc_countP::Int64
-    local loc_madN::Float32, loc_countN::Int64
+    local loc_mad₊::Float32, loc_count₊::Int64
+    local loc_mad₋::Float32, loc_count₋::Int64
 
     loc_mad = 0.0
     loc_count = 0
 
-    loc_madP = 0.0
-    loc_countP = 0
+    loc_mad₊ = 0.0
+    loc_count₊ = 0
 
-    loc_madN = 0.0
-    loc_countN = 0
+    loc_mad₋ = 0.0
+    loc_count₋ = 0
 
     Threads.@threads for frame in idx
         try
@@ -2605,5 +2628,5 @@ end
         end
     end
 
-    put!(queue, (loc_mad, loc_count, loc_madP, loc_countP, loc_madN, loc_countN))
+    put!(queue, (loc_mad, loc_count, loc_mad₊, loc_count₊, loc_mad₋, loc_count₋))
 end
