@@ -1065,7 +1065,15 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 dmin = minimum(frame_min)
                 dmax = maximum(frame_max)
-                println("dmin: $dmin, dmax: $dmax")
+
+                # median of medians
+                med_mask = map(!isnan, medians)
+                valid_medians = medians[med_mask]
+
+                # global median (approx.)
+                data_median = median(valid_medians)
+
+                println("dmin: $dmin, dmax: $dmax, approx. all-data median: $data_median")
 
                 println("fits.pixels:", size(fits.pixels))
                 # println("fits.pixels:", fits.pixels[1:5,1:5,:])
