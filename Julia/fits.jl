@@ -1087,6 +1087,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 fits.has_data = true
                 unlock(fits.mutex)
 
+                # finally estimate data_mad, data_madN, data_madP based on the all-data median
+
             catch e
                 println("distributed computing error: $e")
             end
