@@ -1121,7 +1121,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         data_count₋ += thread_count₋
 
                     catch e
-                        println("results task completed")
+                        println("global statistics task completed")
                         break
                     end
                 end
