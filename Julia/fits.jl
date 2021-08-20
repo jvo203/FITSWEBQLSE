@@ -217,7 +217,7 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.progress)
         serialize(io, fits.total)
         # skipping fits.elapsed
-        # skipping fits.mutex 
+        # skipping fits.mutex
 
         close(io)
     catch e
@@ -806,6 +806,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 frame_min = zeros(Float32, depth)
                 frame_max = zeros(Float32, depth)
+                medians = zeros(Float32, depth)
 
                 mean_spectrum = zeros(Float32, depth)
                 integrated_spectrum = zeros(Float32, depth)
@@ -828,11 +829,12 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     try
                         local queue::BitArray{1}
 
-                        frame, min_val, max_val, mean_val, integrated_val, tid =
+                        frame, min_val, max_val, med_val, mean_val, integrated_val, tid =
                             take!(progress)
 
                         frame_min[frame] = Float32(min_val)
                         frame_max[frame] = Float32(max_val)
+                        medians[frame] = Float32(med_val)
                         mean_spectrum[frame] = Float32(mean_val)
                         integrated_spectrum[frame] = Float32(integrated_val)
 
@@ -872,7 +874,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                     local frame, frame_pixels, frame_mask
                     local valid_pixels, valid_mask
-                    local frame_min, frame_max
+                    local frame_min, frame_max, frame_median
                     local mean_spectrum, integrated_spectrum
 
                     pixels = zeros(Float32, width, height)
@@ -919,6 +921,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                             if pixel_count > 0
                                 frame_min, frame_max = extrema(valid_pixels)
+                                frame_median = median(valid_pixels)
                                 mean_spectrum = pixel_sum / pixel_count
                                 integrated_spectrum = pixel_sum * cdelt3
                             else
@@ -927,6 +930,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 # in the face of all-NaN frames
                                 frame_min = prevfloat(typemax(Float32))
                                 frame_max = -prevfloat(typemax(Float32))
+                                frame_median = NaN32
 
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
@@ -959,6 +963,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                     frame,
                                     frame_min,
                                     frame_max,
+                                    frame_median,
                                     mean_spectrum,
                                     integrated_spectrum,
                                     myid(),
@@ -1158,7 +1163,7 @@ function restoreData(fits::FITSDataSet)
         compressed_frames = Dict{Int32,Matrix{Float16}}()
         # spinlock = Threads.SpinLock()
 
-        # Threads.@threads 
+        # Threads.@threads
         for frame in idx
             try
                 cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
@@ -1428,7 +1433,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
                    (typeof(mask) != typeof(thread_mask))
                     # println("pixels/mask type mismatch")
                     # println(typeof(pixels), typeof(thread_pixels))
-                    # println(typeof(mask), typeof(thread_mask))                
+                    # println(typeof(mask), typeof(thread_mask))
                 end
 
                 if (size(pixels) != size(thread_pixels)) ||
@@ -1470,7 +1475,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
             if !downsize
                 put!(results, (local_pixels, local_mask))
             else
-                # downsize the pixels & mask            
+                # downsize the pixels & mask
                 try
                     pixels = Float32.(imresize(local_pixels, (width, height)))
                     mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
@@ -1504,7 +1509,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
             pixels = fits.pixels
             mask = fits.mask
         else
-            # downsize the pixels & mask            
+            # downsize the pixels & mask
             try
                 pixels = Float32.(imresize(fits.pixels, (image_width, image_height)))
                 mask =
@@ -1514,7 +1519,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
                             (image_width, image_height),
                             method = Constant(),
                         ),
-                    ) # use Nearest-Neighbours for the mask            
+                    ) # use Nearest-Neighbours for the mask
             catch e
                 println(e)
             end
@@ -2129,7 +2134,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         viewport_size = width * height
 
         if native_size > viewport_size
-            # downsize the pixels & mask      
+            # downsize the pixels & mask
             scale = Float32(width) / Float32(dimx)
             println("re-sizing the viewport down to $(Int32(round(100.0 * scale)))%")
 
@@ -2198,7 +2203,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 scale = Float32(width) / Float32(dimx)
                 println("re-sizing the viewport down to $(Int32(round(100.0 * scale)))%")
 
-                # downsize the pixels & mask   
+                # downsize the pixels & mask
                 bDownsize = true
                 view_width = width
                 view_height = height
@@ -2474,7 +2479,7 @@ end
 
     if bImage
         # combine the pixels/mask from each thread
-        #= 
+        #=
         pixels = zeros(Float32, dimx, dimy)
         mask = map(isnan, pixels)
 
