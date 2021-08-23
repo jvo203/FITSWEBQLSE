@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-08-23.0";
+	return "JS2021-08-23.1";
 }
 
 const wasm_supported = (() => {
@@ -3027,7 +3027,7 @@ function open_websocket_connection(datasetId, index) {
 							}
 
 							try {
-								//init the HEVC encoder		
+								//init the HEVC decoder		
 								Module.hevc_init_frame(va_count, width, height);
 							} catch (e) {
 								console.log(e);
