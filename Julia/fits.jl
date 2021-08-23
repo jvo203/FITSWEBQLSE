@@ -308,6 +308,12 @@ function deserialize_fits(datasetid)
     fits.mean_spectrum = deserialize(io)
     fits.integrated_spectrum = deserialize(io)
 
+    fits.data_median = deserialize(io)
+    fits.data_mad = deserialize(io)
+    fits.data_mad₊ = deserialize(io)
+    fits.data_mad₋ = deserialize(io)
+    fits.video_ready = deserialize(io)
+
     fits.has_header = deserialize(io)
     fits.has_data = deserialize(io)
     fits.has_error = deserialize(io)
