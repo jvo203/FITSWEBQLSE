@@ -1267,9 +1267,16 @@ function ws_coroutine(ws, ids)
             end
 
             # init_video
+            if msg["type"] == "init_video"
+
+            end
 
             # end_video
+            if msg["type"] == "end_video"
 
+            end
+
+            # realtime streaming video frame requests
             if msg["type"] == "video"
                 replace!(video_requests, msg)
             end
