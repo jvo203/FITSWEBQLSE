@@ -63,6 +63,13 @@ mutable struct FITSDataSet
     mean_spectrum::Any
     integrated_spectrum::Any
 
+    # all-data statistics (needed by video streams)
+    data_median::Float32
+    data_mad::Float32
+    data_mad₊::Float32
+    data_mad₋::Float32
+    video_ready::Bool
+
     # house-keeping
     has_header::Bool
     has_data::Bool
@@ -100,6 +107,11 @@ mutable struct FITSDataSet
             Nothing,
             Nothing,
             Nothing,
+            NaN32,
+            NaN32,
+            NaN32,
+            NaN32,
+            false,
             false,
             false,
             false,
@@ -138,6 +150,11 @@ mutable struct FITSDataSet
             Nothing,
             Nothing,
             Nothing,
+            NaN32,
+            NaN32,
+            NaN32,
+            NaN32,
+            false,
             false,
             false,
             false,
@@ -1104,10 +1121,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 results_task = @async while true
                     try
-                        thread_sum₊,
-                        thread_count₊,
-                        thread_sum₋,
-                        thread_count₋ = take!(results)
+                        thread_sum₊, thread_count₊, thread_sum₋, thread_count₋ =
+                            take!(results)
 
                         data_mad₊ += thread_sum₊
                         data_count₊ += thread_count₊
@@ -1138,7 +1153,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 wait(results_task)
 
                 if data_count₊ + data_count₋ > 0
-                    data_mad = Float32(data_mad₊ + data_mad₋) / Float32(data_count₊ + data_count₋)
+                    data_mad =
+                        Float32(data_mad₊ + data_mad₋) / Float32(data_count₊ + data_count₋)
                 end
 
                 if data_count₊ > 0
