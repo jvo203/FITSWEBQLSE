@@ -1104,20 +1104,15 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 results_task = @async while true
                     try
-                        thread_mad,
-                        thread_count,
-                        thread_mad₊,
+                        thread_sum₊,
                         thread_count₊,
-                        thread_mad₋,
+                        thread_sum₋,
                         thread_count₋ = take!(results)
 
-                        data_mad += thread_mad
-                        data_count += thread_count
-
-                        data_mad₊ += thread_mad₊
+                        data_mad₊ += thread_sum₊
                         data_count₊ += thread_count₊
 
-                        data_mad₋ += thread_mad₋
+                        data_mad₋ += thread_sum₋
                         data_count₋ += thread_count₋
 
                     catch e
@@ -1142,8 +1137,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 close(results)
                 wait(results_task)
 
-                if data_count > 0
-                    data_mad /= Float32(data_count)
+                if data_count₊ + data_count₋ > 0
+                    data_mad = Float32(data_mad₊ + data_mad₋) / Float32(data_count₊ + data_count₋)
                 end
 
                 if data_count₊ > 0
@@ -2604,18 +2599,14 @@ end
 
     spinlock = Threads.SpinLock()
 
-    local loc_mad::Float32, loc_count::Int64
-    local loc_mad₊::Float32, loc_count₊::Int64
-    local loc_mad₋::Float32, loc_count₋::Int64
+    local sum₊::Float32, count₊::Int64
+    local sum₋::Float32, count₋::Int64
 
-    loc_mad = 0.0
-    loc_count = 0
+    sum₊ = 0.0
+    count₊ = 0
 
-    loc_mad₊ = 0.0
-    loc_count₊ = 0
-
-    loc_mad₋ = 0.0
-    loc_count₋ = 0
+    sum₋ = 0.0
+    count₋ = 0
 
     Threads.@threads for frame in idx
         try
@@ -2628,5 +2619,5 @@ end
         end
     end
 
-    put!(queue, (loc_mad, loc_count, loc_mad₊, loc_count₊, loc_mad₋, loc_count₋))
+    put!(queue, (sum₊, count₊, sum₋, count₋))
 end
