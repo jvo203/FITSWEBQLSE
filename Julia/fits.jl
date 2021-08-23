@@ -1151,6 +1151,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 println("data_mad: $data_mad, data_mad₊: $data_mad₊, data_mad₋: $data_mad₋")
 
+                fits.data_median = data_median
+                fits.data_mad = data_mad
+                fits.data_mad₊ = data_mad₊
+                fits.data_mad₋ = data_mad₋
+
+                lock(fits.mutex)
+                fits.video_ready = true
+                unlock(fits.mutex)
             catch e
                 println("distributed computing error: $e")
             end
