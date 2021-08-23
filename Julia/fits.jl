@@ -227,6 +227,12 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.mean_spectrum)
         serialize(io, fits.integrated_spectrum)
 
+        serialize(io, fits.data_median)
+        serialize(io, fits.data_mad)
+        serialize(io, fits.data_mad₊)
+        serialize(io, fits.data_mad₋)
+        serialize(io, fits.video_ready)
+
         serialize(io, fits.has_header)
         serialize(io, fits.has_data)
         serialize(io, fits.has_error)
