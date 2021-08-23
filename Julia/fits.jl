@@ -2613,6 +2613,29 @@ end
             Threads.lock(spinlock)
             pixels = compressed_frames[frame]
             Threads.unlock(spinlock)
+
+            mask = map(!isnan, pixels)
+            valid_pixels = @view pixels[mask]
+
+            pixelsN = filter(x -> x < data_median, valid_pixels)
+            pixelsP = filter(x -> x > data_median, valid_pixels)
+
+            countN = length(pixelsN)
+            countP = length(pixelsP)
+
+            sumN = sum(map(x -> abs(x - data_median), pixelsN))
+            sumP = sum(map(x -> abs(x - data_median), pixelsP))
+
+            Threads.lock(spinlock)
+            begin
+                sum₊ += sumP
+                count₊ += countP
+
+                sum₋ += sumN
+                count₋ += countN
+            end
+            Threads.unlock(spinlock)
+
         catch e
             # println(e)
             @error "calculateGlobalStatistics" exception = (e, catch_backtrace())
