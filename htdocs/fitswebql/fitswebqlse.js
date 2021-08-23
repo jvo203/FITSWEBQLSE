@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-08-18.2";
+	return "JS2021-08-23.0";
 }
 
 const wasm_supported = (() => {
@@ -3015,7 +3015,7 @@ function open_websocket_connection(datasetId, index) {
 										width: width,
 										height: height,
 										padded_width: data.padded_width,
-										padded_height: data.padded_width,
+										padded_height: data.padded_height,
 										img: null,
 										scaleX: imageFrame.width / width,
 										scaleY: imageFrame.height / height,
