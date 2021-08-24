@@ -1271,8 +1271,8 @@ function ws_coroutine(ws, ids)
 
             # init_video
             if msg["type"] == "init_video"
-                width = msg["width"]
-                height = msg["height"]
+                width = round(Integer, msg["width"])
+                height = round(Integer, msg["height"])
 
                 fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
