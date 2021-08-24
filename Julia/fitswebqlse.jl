@@ -1307,6 +1307,22 @@ function ws_coroutine(ws, ids)
                 println(
                     "scale = $scale, image: $image_width x $image_height, bDownsize: $bDownsize",
                 )
+
+                dict = Dict(
+                    "type" => "init_video",
+                    "width" => image_width,
+                    "height" => image_height,
+                    "padded_width" => image_width,
+                    "padded_height" => image_height,
+                )
+
+                resp = JSON.json(dict)
+
+                if writeguarded(ws, resp)
+                    continue
+                else
+                    break
+                end
             end
 
             # end_video
