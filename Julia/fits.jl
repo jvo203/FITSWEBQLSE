@@ -1440,18 +1440,11 @@ end
 
 end
 
-function getImage(fits::FITSDataSet, width::Integer, height::Integer)
-    local scale::Float32, pixels, mask
-    local image_width::Integer, image_height::Integer
+function get_inner_dimensions(fits::FITSDataSet)
     local inner_width::Integer, inner_height::Integer
 
     inner_width = 0
     inner_height = 0
-    bDownsize = false
-
-    println("getImage::$(fits.datasetid)/($width)/($height)")
-
-    # calculate scale, downsize when applicable
 
     # get the maximum common bounding box
     if isa(fits.mask, DArray)
@@ -1505,6 +1498,23 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
             inner_height = fits.height
         end
     end
+
+    return (inner_width, inner_height)
+end
+
+function getImage(fits::FITSDataSet, width::Integer, height::Integer)
+    local scale::Float32, pixels, mask
+    local image_width::Integer, image_height::Integer
+    local inner_width::Integer, inner_height::Integer
+
+    inner_width = 0
+    inner_height = 0
+    bDownsize = false
+
+    println("getImage::$(fits.datasetid)/($width)/($height)")
+
+    # calculate scale, downsize when applicable    
+    inner_width, inner_height = get_inner_dimensions(fits)
 
     try
         scale = get_image_scale(width, height, inner_width, inner_height)
