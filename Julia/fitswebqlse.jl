@@ -1268,7 +1268,8 @@ function ws_coroutine(ws, ids)
 
             # init_video
             if msg["type"] == "init_video"
-
+                width = msg["width"]
+                height = msg["height"]
             end
 
             # end_video
