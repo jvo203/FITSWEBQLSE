@@ -1285,7 +1285,7 @@ function ws_coroutine(ws, ids)
                 end
 
                 # calculate scale, downsize when applicable    
-                inner_width, inner_height = get_inner_dimensions(fits)
+                inner_width, inner_height = get_inner_dimensions(fits_object)
 
                 try
                     scale = get_image_scale(width, height, inner_width, inner_height)
@@ -1295,12 +1295,12 @@ function ws_coroutine(ws, ids)
                 end
 
                 if scale < 1.0
-                    image_width = round(Integer, scale * fits.width)
-                    image_height = round(Integer, scale * fits.height)
+                    image_width = round(Integer, scale * fits_object.width)
+                    image_height = round(Integer, scale * fits_object.height)
                     bDownsize = true
                 else
-                    image_width = fits.width
-                    image_height = fits.height
+                    image_width = fits_object.width
+                    image_height = fits_object.height
                 end
 
                 println(
