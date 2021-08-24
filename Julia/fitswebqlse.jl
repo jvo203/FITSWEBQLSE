@@ -1125,7 +1125,7 @@ host = Sockets.IPv4(0)
 function ws_coroutine(ws, ids)
     global FITS_OBJECTS, FITS_LOCK
 
-    local scale::Float32
+    local scale::Float32, flux::String
     local image_width::Integer, image_height::Integer, bDownsize::Bool
 
     datasetid = String(ids[1])
@@ -1273,6 +1273,7 @@ function ws_coroutine(ws, ids)
             if msg["type"] == "init_video"
                 width = round(Integer, msg["width"])
                 height = round(Integer, msg["height"])
+                flux = msg["flux"]
 
                 fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
