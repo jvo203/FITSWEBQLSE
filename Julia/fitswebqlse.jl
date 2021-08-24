@@ -1125,6 +1125,9 @@ host = Sockets.IPv4(0)
 function ws_coroutine(ws, ids)
     global FITS_OBJECTS, FITS_LOCK
 
+    local scale::Float32
+    local image_width::Integer, image_height::Integer, bDownsize::Bool
+
     datasetid = String(ids[1])
 
     @info "Started websocket coroutine for $datasetid" ws
@@ -1270,6 +1273,39 @@ function ws_coroutine(ws, ids)
             if msg["type"] == "init_video"
                 width = msg["width"]
                 height = msg["height"]
+
+                fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+                if fits_object.datasetid == ""
+                    continue
+                end
+
+                if !has_data(fits_object)
+                    error("$datasetid: no data found.")
+                end
+
+                # calculate scale, downsize when applicable    
+                inner_width, inner_height = get_inner_dimensions(fits)
+
+                try
+                    scale = get_image_scale(width, height, inner_width, inner_height)
+                catch e
+                    println(e)
+                    scale = 1.0
+                end
+
+                if scale < 1.0
+                    image_width = round(Integer, scale * fits.width)
+                    image_height = round(Integer, scale * fits.height)
+                    bDownsize = true
+                else
+                    image_width = fits.width
+                    image_height = fits.height
+                end
+
+                println(
+                    "scale = $scale, image: $image_width x $image_height, bDownsize: $bDownsize",
+                )
             end
 
             # end_video
