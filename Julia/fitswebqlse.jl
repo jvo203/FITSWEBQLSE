@@ -1302,6 +1302,7 @@ function ws_coroutine(ws, ids)
                 else
                     image_width = fits_object.width
                     image_height = fits_object.height
+                    bDownsize = false
                 end
 
                 println(
