@@ -1126,7 +1126,7 @@ function ws_coroutine(ws, ids)
     global FITS_OBJECTS, FITS_LOCK
 
     local scale::Float32, flux::String, fps::Integer, bitrate::integrated_spectrum
-    local last_video_seq::Integer, last_frame_idx::Integer, fps::Integer
+    local last_video_seq::Integer, last_frame_idx::Integer
     local image_width::Integer, image_height::Integer, bDownsize::Bool
 
     datasetid = String(ids[1])
