@@ -1334,6 +1334,12 @@ function ws_coroutine(ws, ids)
                     param = ccall((:x265_param_alloc, libx265), Ptr{Cvoid}, ())
                     println("typeof(param): ", typeof(param), "; value: $param")
 
+                    if param == C_NULL
+                        continue
+                    end
+
+                    ccall((:x265_param_default_preset, libx265), Cvoid, (Ptr{Cvoid}, Cstring, Cstring), param, "superfast", "zerolatency")
+
                     continue
                 else
                     break
@@ -1348,7 +1354,7 @@ function ws_coroutine(ws, ids)
                     ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
                     param = Nothing
 
-                    @info "cleaned up x265"
+                    @info "cleaned up x265 parameters"
                 end
 
                 continue
@@ -1375,7 +1381,7 @@ function ws_coroutine(ws, ids)
         # release the x265 parameters structure
         ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
 
-        @info "cleaned up x265"
+        @info "cleaned up x265 parameters"
     end
 
     @info "$datasetid will now close " ws
