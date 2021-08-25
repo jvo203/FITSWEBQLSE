@@ -38,6 +38,11 @@ res = string(image_width) * "x" * string(image_height)
 stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "input-res", res)
 println("x265_param_parse::$stat")
 
+# rc.bitrate = bitrate
+bitrate = Integer(1000)
+stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "bitrate", string(bitrate))
+println("x265_param_parse::$stat")
+
 # release memory
 ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
 param = C_NULL
