@@ -39,9 +39,15 @@ stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring),
 println("x265_param_parse::$stat")
 
 # rc.bitrate = bitrate
-bitrate = Integer(1000)
-stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "bitrate", string(bitrate))
+# bitrate = Integer(1000)
+# stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "bitrate", string(bitrate))
+# println("x265_param_parse::$stat")
+
+# set constant quality rate
+crf = Integer(28)
+stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "crf", string(crf))
 println("x265_param_parse::$stat")
+
 
 # release memory
 ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
