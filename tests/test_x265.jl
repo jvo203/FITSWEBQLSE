@@ -1,6 +1,7 @@
 using x265_jll;
 
-param = Nothing
+param = C_NULL
+encoder = C_NULL
 
 param = ccall((:x265_param_alloc, libx265), Ptr{Cvoid}, ())
 println("typeof(param): ", typeof(param), "; value: $param")
@@ -39,4 +40,7 @@ println("x265_param_parse::$stat")
 
 # release memory
 ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
-param = Nothing
+param = C_NULL
+
+ccall((:x265_encoder_close, libx265), Cvoid, (Ptr{Cvoid},), encoder)
+encoder = C_NULL
