@@ -1332,7 +1332,6 @@ function ws_coroutine(ws, ids)
                 if writeguarded(ws, resp)
                     # upon success init the HEVC encoder
                     param = ccall((:x265_param_alloc, libx265), Ptr{Cvoid}, ())
-                    println("typeof(param): ", typeof(param), "; value: $param")
 
                     if param == C_NULL
                         continue
