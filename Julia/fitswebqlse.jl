@@ -1125,7 +1125,8 @@ host = Sockets.IPv4(0)
 function ws_coroutine(ws, ids)
     global FITS_OBJECTS, FITS_LOCK
 
-    local scale::Float32, flux::String
+    local scale::Float32, flux::String, fps::Integer, bitrate::integrated_spectrum
+    local last_video_seq::Integer, last_frame_idx::Integer, fps::Integer
     local image_width::Integer, image_height::Integer, bDownsize::Bool
 
     datasetid = String(ids[1])
@@ -1274,6 +1275,10 @@ function ws_coroutine(ws, ids)
                 width = round(Integer, msg["width"])
                 height = round(Integer, msg["height"])
                 flux = msg["flux"]
+                last_video_seq = msg["seq"]
+                last_frame_idx = -1
+                bitrate = round(Integer, msg["bitrate"])
+                fps = msg["fps"]
 
                 fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
@@ -1285,7 +1290,7 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                # calculate scale, downsize when applicable    
+                # calculate scale, downsize when applicable
                 inner_width, inner_height = get_inner_dimensions(fits_object)
 
                 try
