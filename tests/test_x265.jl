@@ -12,3 +12,4 @@ end
 ccall((:x265_param_default_preset, libx265), Cvoid, (Ptr{Cvoid}, Cstring, Cstring), param, "superfast", "zerolatency")
 
 ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
+param = Nothing
