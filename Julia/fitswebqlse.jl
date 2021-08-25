@@ -1130,9 +1130,9 @@ function ws_coroutine(ws, ids)
     local image_width::Integer, image_height::Integer, bDownsize::Bool
 
     # HEVC
-    local param::Any
+    local param
 
-    param = Nothing
+    param = C_NULL
 
     datasetid = String(ids[1])
 
@@ -1348,7 +1348,7 @@ function ws_coroutine(ws, ids)
             # end_video
             if msg["type"] == "end_video"
                 # clean up x265
-                if param ≠ Nothing
+                if param ≠ C_NULL
                     # release the x265 parameters structure
                     ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
                     param = Nothing
@@ -1376,7 +1376,7 @@ function ws_coroutine(ws, ids)
     wait(video)
 
     # clean up x265
-    if param ≠ Nothing
+    if param ≠ C_NULL
         # release the x265 parameters structure
         ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
 
