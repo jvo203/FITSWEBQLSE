@@ -1129,6 +1129,11 @@ function ws_coroutine(ws, ids)
     local last_video_seq::Integer, last_frame_idx::Integer
     local image_width::Integer, image_height::Integer, bDownsize::Bool
 
+    # HEVC
+    local param::Any
+
+    param = Nothing
+
     datasetid = String(ids[1])
 
     @info "Started websocket coroutine for $datasetid" ws
@@ -1337,7 +1342,14 @@ function ws_coroutine(ws, ids)
 
             # end_video
             if msg["type"] == "end_video"
+                # clean up x265
+                if param ≠ Nothing
+                    # release the x265 parameters structure
+                    ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
+                    param = Nothing
+                end
 
+                continue
             end
 
             # realtime streaming video frame requests
@@ -1355,6 +1367,12 @@ function ws_coroutine(ws, ids)
 
     wait(realtime)
     wait(video)
+
+    # clean up x265
+    if param ≠ Nothing
+        # release the x265 parameters structure
+        ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
+    end
 
     @info "$datasetid will now close " ws
 
