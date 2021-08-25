@@ -3,6 +3,7 @@ using x265_jll;
 param = C_NULL
 encoder = C_NULL
 
+# x265 parameters
 param = ccall((:x265_param_alloc, libx265), Ptr{Cvoid}, ())
 println("typeof(param): ", typeof(param), "; value: $param")
 
@@ -48,6 +49,13 @@ crf = Integer(28)
 stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "crf", string(crf))
 println("x265_param_parse::$stat")
 
+# x265 encoder
+encoder = ccall((:x265_encoder_open, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
+println("typeof(encoder): ", typeof(encoder), "; value: $encoder")
+
+if encoder == C_NULL
+    error("NULL x265_encoder")
+end
 
 # release memory
 ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
