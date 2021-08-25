@@ -1347,6 +1347,8 @@ function ws_coroutine(ws, ids)
                     # release the x265 parameters structure
                     ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
                     param = Nothing
+
+                    @info "cleaned up x265"
                 end
 
                 continue
@@ -1372,6 +1374,8 @@ function ws_coroutine(ws, ids)
     if param ≠ Nothing
         # release the x265 parameters structure
         ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
+
+        @info "cleaned up x265"
     end
 
     @info "$datasetid will now close " ws
