@@ -1125,7 +1125,7 @@ host = Sockets.IPv4(0)
 function ws_coroutine(ws, ids)
     global FITS_OBJECTS, FITS_LOCK
 
-    local scale::Float32, flux::String, fps::Integer, bitrate::integrated_spectrum
+    local scale::Float32, flux::String, fps::Integer, bitrate::Integer
     local last_video_seq::Integer, last_frame_idx::Integer
     local image_width::Integer, image_height::Integer, bDownsize::Bool
 
