@@ -3,12 +3,12 @@ using x265_jll;
 function x265_apiver()
     @static if Sys.isapple()
         parts = split(x265_jll.get_libx265_path(), ".")
-        println(parts)
         return parts[length(parts)-1]
     end
 
     @static if Sys.islinux()
-
+        parts = split(readlink(x265_jll.get_libx265_path()), ".")
+        return last(parts)
     end
 
     @static if Sys.iswindows()
