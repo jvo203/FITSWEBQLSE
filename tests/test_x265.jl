@@ -1,5 +1,5 @@
 #using x265_jll;
-libx265 = "/usr/lib64/libx265.so"
+libx265 = "/usr/lib64/libx265.so.199"
 
 param = C_NULL
 encoder = C_NULL
