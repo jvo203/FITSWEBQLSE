@@ -12,20 +12,48 @@ if param == C_NULL
 end
 
 # default parameters
-ccall((:x265_param_default_preset, libx265), Cvoid, (Ptr{Cvoid}, Cstring, Cstring), param, "superfast", "zerolatency")
+ccall(
+    (:x265_param_default_preset, libx265),
+    Cvoid,
+    (Ptr{Cvoid}, Cstring, Cstring),
+    param,
+    "superfast",
+    "zerolatency",
+)
 
 # set extra parameters manually
 fps = Integer(5)
-stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "fps", string(fps))
+stat = ccall(
+    (:x265_param_parse, libx265),
+    Cint,
+    (Ptr{Cvoid}, Cstring, Cstring),
+    param,
+    "fps",
+    string(fps),
+)
 println("x265_param_parse::$stat")
 
 # bRepeatHeaders = 1
-stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Ptr{Cvoid}), param, "repeat-headers", C_NULL)
+stat = ccall(
+    (:x265_param_parse, libx265),
+    Cint,
+    (Ptr{Cvoid}, Cstring, Ptr{Cvoid}),
+    param,
+    "repeat-headers",
+    C_NULL,
+)
 #stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "repeat-headers", "1")
 println("x265_param_parse::$stat")
 
 # internalCsp = X265_CSP_I444
-stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "input-csp", "i444")
+stat = ccall(
+    (:x265_param_parse, libx265),
+    Cint,
+    (Ptr{Cvoid}, Cstring, Cstring),
+    param,
+    "input-csp",
+    "i444",
+)
 println("x265_param_parse::$stat")
 
 # internalBitDepth = 8
@@ -36,7 +64,14 @@ println("x265_param_parse::$stat")
 image_width = Integer(200)
 image_height = Integer(175)
 res = string(image_width) * "x" * string(image_height)
-stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "input-res", res)
+stat = ccall(
+    (:x265_param_parse, libx265),
+    Cint,
+    (Ptr{Cvoid}, Cstring, Cstring),
+    param,
+    "input-res",
+    res,
+)
 println("x265_param_parse::$stat")
 
 # rc.bitrate = bitrate
@@ -46,7 +81,14 @@ println("x265_param_parse::$stat")
 
 # set constant quality rate
 crf = Integer(28)
-stat = ccall((:x265_param_parse, libx265), Cint, (Ptr{Cvoid}, Cstring, Cstring), param, "crf", string(crf))
+stat = ccall(
+    (:x265_param_parse, libx265),
+    Cint,
+    (Ptr{Cvoid}, Cstring, Cstring),
+    param,
+    "crf",
+    string(crf),
+)
 println("x265_param_parse::$stat")
 
 # x265 encoder
