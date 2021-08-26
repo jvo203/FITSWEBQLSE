@@ -1,5 +1,20 @@
 using x265_jll;
-#libx265 = "/usr/lib64/libx265.so"
+
+function x265_apiver()
+    @static if Sys.isapple()
+        parts = split(x265_jll.get_libx265_path(), ".")
+        println(parts)
+        return parts[length(parts)-1]
+    end
+
+    @static if Sys.islinux()
+
+    end
+
+    @static if Sys.iswindows()
+        error("Not implemented: don't know how to access a shared lib on Windows")
+    end
+end
 
 param = C_NULL
 encoder = C_NULL
@@ -93,7 +108,8 @@ stat = ccall(
 println("x265_param_parse::$stat")
 
 # x265 encoder
-encoder = ccall((:x265_encoder_open_199, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
+const encoder_open = "x265_encoder_open_" * x265_apiver()
+encoder = ccall((encoder_open, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
 println("typeof(encoder): ", typeof(encoder), "; value: $encoder")
 
 if encoder == C_NULL
