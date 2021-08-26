@@ -93,7 +93,7 @@ stat = ccall(
 println("x265_param_parse::$stat")
 
 # x265 encoder
-encoder = ccall((:x265_encoder_open, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
+encoder = ccall((:x265_encoder_open_199, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
 println("typeof(encoder): ", typeof(encoder), "; value: $encoder")
 
 if encoder == C_NULL
