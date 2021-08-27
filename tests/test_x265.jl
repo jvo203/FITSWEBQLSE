@@ -117,6 +117,14 @@ if encoder == C_NULL
     error("NULL x265_encoder")
 end
 
+# x265 picture
+picture = ccall((:x265_picture_alloc, libx265), Ptr{Cvoid}, ())
+println("typeof(picture): ", typeof(picture), "; value: $picture")
+
+if picture == C_NULL
+    error("NULL x265_picture")
+end
+
 # release memory
 ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
 param = C_NULL
@@ -124,6 +132,6 @@ param = C_NULL
 ccall((:x265_encoder_close, libx265), Cvoid, (Ptr{Cvoid},), encoder)
 encoder = C_NULL
 
-
 ccall((:x265_picture_free, libx265), Cvoid, (Ptr{Cvoid},), picture)
 picture = C_NULL
+;
