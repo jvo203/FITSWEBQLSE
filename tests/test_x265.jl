@@ -125,6 +125,8 @@ if picture == C_NULL
     error("NULL x265_picture")
 end
 
+ccall((:x265_picture_init, libx265), Cvoid, (Ptr{Cvoid}, Ptr{Cvoid}), param, picture)
+
 # release memory
 ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
 param = C_NULL
