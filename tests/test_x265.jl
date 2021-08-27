@@ -144,8 +144,21 @@ ccall((:x265_picture_init, libx265), Cvoid, (Ptr{Cvoid}, Ptr{Cvoid}), param, pic
 
 j_picture = x265_picture(picture)
 display(j_picture)
+
+# a sample 2D plane
+width = 200
+height = 175
+
+j_picture.strideR = 0
+j_picture.strideG = 0
+j_picture.strideB = width
+
 # sync the Julia structure back to C
-# unsafe_store!(Ptr{x265_picture}(picture), j_picture)
+unsafe_store!(Ptr{x265_picture}(picture), j_picture)
+
+# check if the structure is getting written to
+j_picture2 = x265_picture(picture)
+display(j_picture2)
 
 # release memory
 ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
