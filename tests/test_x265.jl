@@ -18,6 +18,7 @@ end
 
 param = C_NULL
 encoder = C_NULL
+picture = C_NULL
 
 # x265 parameters
 param = ccall((:x265_param_alloc, libx265), Ptr{Cvoid}, ())
@@ -122,3 +123,7 @@ param = C_NULL
 
 ccall((:x265_encoder_close, libx265), Cvoid, (Ptr{Cvoid},), encoder)
 encoder = C_NULL
+
+
+ccall((:x265_picture_free, libx265), Cvoid, (Ptr{Cvoid},), picture)
+picture = C_NULL
