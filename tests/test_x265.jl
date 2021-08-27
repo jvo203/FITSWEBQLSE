@@ -1,5 +1,20 @@
 using x265_jll;
 
+mutable struct x265_picture
+    pts::Clong
+    dts::Clong
+    userData::Ptr{Cvoid}
+    planeR::Ptr{Cvoid}
+    planeG::Ptr{Cvoid}
+    planeB::Ptr{Cvoid}
+    strideR::Cint
+    strideG::Cint
+    strideB::Cint
+    bitDepth::Cint
+end
+
+x265_picture(picture::Ptr) = unsafe_load(Ptr{x265_picture}(picture))
+
 function x265_apiver()
     @static if Sys.isapple()
         parts = split(x265_jll.get_libx265_path(), ".")
@@ -126,6 +141,11 @@ if picture == C_NULL
 end
 
 ccall((:x265_picture_init, libx265), Cvoid, (Ptr{Cvoid}, Ptr{Cvoid}), param, picture)
+
+j_picture = x265_picture(picture)
+display(j_picture)
+# sync the Julia structure back to C
+# unsafe_store!(Ptr{x265_picture}(picture), j_picture)
 
 # release memory
 ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
