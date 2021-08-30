@@ -42,6 +42,9 @@ function x265_apiver()
         error("Not implemented: don't know how to access a shared lib on Windows")
     end
 end
+
+# the encoder_open function call uses the x265 API version
+const encoder_open = "x265_encoder_open_" * x265_apiver()
 # end of x265
 
 isbuffered(c::Channel) = c.sz_max == 0 ? false : true
@@ -1369,10 +1372,82 @@ function ws_coroutine(ws, ids)
                     param = ccall((:x265_param_alloc, libx265), Ptr{Cvoid}, ())
 
                     if param == C_NULL
+                        @error "NULL x265_param"
                         continue
                     end
 
+                    # set default parameters
                     ccall((:x265_param_default_preset, libx265), Cvoid, (Ptr{Cvoid}, Cstring, Cstring), param, "superfast", "zerolatency")
+
+                    # set extra parameters
+
+                    # FPS
+                    stat = ccall(
+                        (:x265_param_parse, libx265),
+                        Cint,
+                        (Ptr{Cvoid}, Cstring, Cstring),
+                        param,
+                        "fps",
+                        string(fps),
+                    )
+                    println("x265_param_parse::$stat")
+
+
+                    # bRepeatHeaders = 1
+                    stat = ccall(
+                        (:x265_param_parse, libx265),
+                        Cint,
+                        (Ptr{Cvoid}, Cstring, Ptr{Cvoid}),
+                        param,
+                        "repeat-headers",
+                        C_NULL,
+                    )
+                    println("x265_param_parse::$stat")
+
+
+                    # internalCsp = X265_CSP_I444
+                    stat = ccall(
+                        (:x265_param_parse, libx265),
+                        Cint,
+                        (Ptr{Cvoid}, Cstring, Cstring),
+                        param,
+                        "input-csp",
+                        "i444",
+                    )
+                    println("x265_param_parse::$stat")
+
+                    # set video resolution
+                    res = string(image_width) * "x" * string(image_height)
+                    stat = ccall(
+                        (:x265_param_parse, libx265),
+                        Cint,
+                        (Ptr{Cvoid}, Cstring, Cstring),
+                        param,
+                        "input-res",
+                        res,
+                    )
+                    println("x265_param_parse::$stat")
+
+                    # set constant quality rate
+                    crf = Integer(28)
+                    stat = ccall(
+                        (:x265_param_parse, libx265),
+                        Cint,
+                        (Ptr{Cvoid}, Cstring, Cstring),
+                        param,
+                        "crf",
+                        string(crf),
+                    )
+                    println("x265_param_parse::$stat")
+
+                    # x265 encoder
+                    encoder = ccall((encoder_open, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
+                    println("typeof(encoder): ", typeof(encoder), "; value: $encoder")
+
+                    if encoder == C_NULL
+                        @error "NULL x265_encoder"
+                        continue
+                    end
 
                     continue
                 else
