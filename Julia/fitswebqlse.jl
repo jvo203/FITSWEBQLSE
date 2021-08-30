@@ -1163,9 +1163,11 @@ function ws_coroutine(ws, ids)
     local image_width::Integer, image_height::Integer, bDownsize::Bool
 
     # HEVC
-    local param
+    local param, encoder, picture, planeB
 
     param = C_NULL
+    encoder = C_NULL
+    picture = C_NULL
 
     datasetid = String(ids[1])
 
@@ -1384,9 +1386,25 @@ function ws_coroutine(ws, ids)
                 if param ≠ C_NULL
                     # release the x265 parameters structure
                     ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
-                    param = Nothing
+                    param = C_NULL
 
                     @info "cleaned up x265 parameters"
+                end
+
+                if encoder ≠ C_NULL
+                    # release the x265 encoder
+                    ccall((:x265_encoder_close, libx265), Cvoid, (Ptr{Cvoid},), encoder)
+                    encoder = C_NULL
+
+                    @info "cleaned up the x265 encoder"
+                end
+
+                if picture ≠ C_NULL
+                    # release the x265 picture structure
+                    ccall((:x265_picture_free, libx265), Cvoid, (Ptr{Cvoid},), picture)
+                    picture = C_NULL
+
+                    @info "cleaned up the x265 picture"
                 end
 
                 continue
@@ -1414,6 +1432,20 @@ function ws_coroutine(ws, ids)
         ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
 
         @info "cleaned up x265 parameters"
+    end
+
+    if encoder ≠ C_NULL
+        # release the x265 encoder
+        ccall((:x265_encoder_close, libx265), Cvoid, (Ptr{Cvoid},), encoder)
+
+        @info "cleaned up the x265 encoder"
+    end
+
+    if picture ≠ C_NULL
+        # release the x265 picture structure
+        ccall((:x265_picture_free, libx265), Cvoid, (Ptr{Cvoid},), picture)
+
+        @info "cleaned up the x265 picture"
     end
 
     @info "$datasetid will now close " ws
