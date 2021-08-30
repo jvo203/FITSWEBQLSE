@@ -152,6 +152,7 @@ height = 175
 planeB = ones(UInt8, (width, height))
 println("strides:", strides(planeB))
 
+# j_picture.planeB = Base.unsafe_convert(Base.cconvert((planeB)))
 j_picture.planeB = pointer(planeB)
 j_picture.strideR = 0
 j_picture.strideG = 0
