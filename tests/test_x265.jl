@@ -149,9 +149,13 @@ display(j_picture)
 width = 200
 height = 175
 
+planeB = ones(UInt8, (width, height))
+println("strides:", strides(planeB))
+
 j_picture.strideR = 0
 j_picture.strideG = 0
-j_picture.strideB = width
+j_picture.strideB = strides(planeB)[2]
+j_picture.bitDepth = 8
 
 # sync the Julia structure back to C
 unsafe_store!(Ptr{x265_picture}(picture), j_picture)
