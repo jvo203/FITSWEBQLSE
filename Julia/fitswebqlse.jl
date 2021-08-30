@@ -11,6 +11,39 @@ using WebSockets;
 using x265_jll;
 using ZfpCompression;
 
+# needed by the x265 encoder
+mutable struct x265_picture
+    pts::Clong
+    dts::Clong
+    userData::Ptr{Cvoid}
+    planeR::Ptr{Cuchar}
+    planeG::Ptr{Cuchar}
+    planeB::Ptr{Cuchar}
+    strideR::Cint
+    strideG::Cint
+    strideB::Cint
+    bitDepth::Cint
+end
+
+x265_picture(picture::Ptr) = unsafe_load(Ptr{x265_picture}(picture))
+
+function x265_apiver()
+    @static if Sys.isapple()
+        parts = split(x265_jll.get_libx265_path(), ".")
+        return parts[length(parts)-1]
+    end
+
+    @static if Sys.islinux()
+        parts = split(readlink(x265_jll.get_libx265_path()), ".")
+        return last(parts)
+    end
+
+    @static if Sys.iswindows()
+        error("Not implemented: don't know how to access a shared lib on Windows")
+    end
+end
+# end of x265
+
 isbuffered(c::Channel) = c.sz_max == 0 ? false : true
 
 function check_channel_state(c::Channel)
