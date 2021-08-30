@@ -4,9 +4,9 @@ mutable struct x265_picture
     pts::Clong
     dts::Clong
     userData::Ptr{Cvoid}
-    planeR::Ptr{Cvoid}
-    planeG::Ptr{Cvoid}
-    planeB::Ptr{Cvoid}
+    planeR::Ptr{Cuchar}
+    planeG::Ptr{Cuchar}
+    planeB::Ptr{Cuchar}
     strideR::Cint
     strideG::Cint
     strideB::Cint
@@ -152,6 +152,7 @@ height = 175
 planeB = ones(UInt8, (width, height))
 println("strides:", strides(planeB))
 
+j_picture.planeB = pointer(planeB)
 j_picture.strideR = 0
 j_picture.strideG = 0
 j_picture.strideB = strides(planeB)[2]
