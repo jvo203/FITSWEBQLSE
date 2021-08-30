@@ -149,10 +149,19 @@ display(j_picture)
 width = 200
 height = 175
 
-planeB = ones(UInt8, (width, height))
+planeB = Array{UInt8}(undef, (width, height))
+planeB .= 128
 println("strides:", strides(planeB))
 
-# j_picture.planeB = Base.unsafe_convert(Base.cconvert((planeB)))
+vectorB = Vector{UInt8}(undef, width*height)
+vectorB .= 128
+
+# pointer(planeB) gives the same answer as Base.unsafe_convert(Ptr{Cuchar}, Base.cconvert(Ptr{UInt8},Ref(planeB, 1)))
+
+j_picture.planeR = pointer(vectorB)
+j_picture.planeG = Base.unsafe_convert(Ptr{Cuchar}, Base.cconvert(Ptr{UInt8},Ref(planeB, 1)))
+# j_picture.planeB = Base.unsafe_convert(Ptr{Cuchar}, Base.cconvert(Ptr{UInt8},Ref(vectorB, 1)))
+# j_picture.planeB = Base.unsafe_convert(Base.cconvert((vectorB)))
 j_picture.planeB = pointer(planeB)
 j_picture.strideR = 0
 j_picture.strideG = 0
