@@ -1379,7 +1379,7 @@ function ws_coroutine(ws, ids)
                     # set default parameters
                     ccall((:x265_param_default_preset, libx265), Cvoid, (Ptr{Cvoid}, Cstring, Cstring), param, "superfast", "zerolatency")
 
-                    # set extra parameters
+                    # extra parameters
 
                     # FPS
                     stat = ccall(
@@ -1390,8 +1390,10 @@ function ws_coroutine(ws, ids)
                         "fps",
                         string(fps),
                     )
-                    println("x265_param_parse::$stat")
 
+                    if stat != 0
+                        @error "Cannot set FPS"
+                    end
 
                     # bRepeatHeaders = 1
                     stat = ccall(
@@ -1402,8 +1404,10 @@ function ws_coroutine(ws, ids)
                         "repeat-headers",
                         C_NULL,
                     )
-                    println("x265_param_parse::$stat")
 
+                    if stat != 0
+                        @error "Cannot set repeat-headers"
+                    end
 
                     # internalCsp = X265_CSP_I444
                     stat = ccall(
@@ -1414,7 +1418,10 @@ function ws_coroutine(ws, ids)
                         "input-csp",
                         "i444",
                     )
-                    println("x265_param_parse::$stat")
+
+                    if stat != 0
+                        @error "Cannot set input-csp"
+                    end
 
                     # set video resolution
                     res = string(image_width) * "x" * string(image_height)
@@ -1426,7 +1433,10 @@ function ws_coroutine(ws, ids)
                         "input-res",
                         res,
                     )
-                    println("x265_param_parse::$stat")
+
+                    if stat != 0
+                        @error "Cannot set input-res"
+                    end
 
                     # set constant quality rate
                     crf = Integer(28)
@@ -1438,7 +1448,10 @@ function ws_coroutine(ws, ids)
                         "crf",
                         string(crf),
                     )
-                    println("x265_param_parse::$stat")
+
+                    if stat != 0
+                        @error "Cannot set CRF"
+                    end
 
                     # x265 encoder
                     encoder = ccall((encoder_open, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
