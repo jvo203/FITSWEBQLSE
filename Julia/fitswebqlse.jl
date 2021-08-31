@@ -1470,6 +1470,25 @@ function ws_coroutine(ws, ids)
                         continue
                     end
 
+                    # x265 picture
+                    picture = ccall((:x265_picture_alloc, libx265), Ptr{Cvoid}, ())
+                    println("typeof(picture): ", typeof(picture), "; value: $picture")
+
+                    if picture == C_NULL
+                        @error "NULL x265_picture"
+                        continue
+                    end
+
+                    ccall(
+                        (:x265_picture_init, libx265),
+                        Cvoid,
+                        (Ptr{Cvoid}, Ptr{Cvoid}),
+                        param,
+                        picture,
+                    )
+
+                    picture_jll = x265_picture(picture)
+
                     continue
                 else
                     break
