@@ -1487,6 +1487,8 @@ function ws_coroutine(ws, ids)
                         picture,
                     )
 
+                    planeB = fill(UInt8(128), image_width, image_height)
+
                     picture_jll = x265_picture(picture)
 
                     continue
