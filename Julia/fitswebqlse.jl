@@ -1490,7 +1490,6 @@ function ws_coroutine(ws, ids)
                     planeB = fill(UInt8(128), image_width, image_height)
 
                     picture_jl = x265_picture(picture)
-
                     picture_jl.planeB = pointer(planeB)
                     picture_jl.strideR = 0
                     picture_jl.strideG = 0
