@@ -1268,7 +1268,21 @@ function ws_coroutine(ws, ids)
                 error("$datasetid: no data found.")
             end
 
-            # process a video frame
+            keyframe = req["key"]
+
+            # obtain a cube channel
+            frame = Float64(req["frame"])
+
+            ref_freq = 0.0 # by default ref_freq is missing
+            try
+                ref_freq = Float64(req["ref_freq"])
+            catch e
+            end
+
+            frame_idx, = get_spectrum_range(fits_object, frame, frame, ref_freq)
+            println("video frame: $frame_idx; keyframe: $keyframe")
+
+            # get a video frame
 
             update_timestamp(fits_object)
 
