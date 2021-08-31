@@ -1290,6 +1290,7 @@ function ws_coroutine(ws, ids)
                     flux,
                     image_width,
                     image_height,
+                    bDownsize,
                 )
 
                 # HEVC-encode the pixels/mask
