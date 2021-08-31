@@ -1377,7 +1377,14 @@ function ws_coroutine(ws, ids)
                     end
 
                     # set default parameters
-                    ccall((:x265_param_default_preset, libx265), Cvoid, (Ptr{Cvoid}, Cstring, Cstring), param, "superfast", "zerolatency")
+                    ccall(
+                        (:x265_param_default_preset, libx265),
+                        Cvoid,
+                        (Ptr{Cvoid}, Cstring, Cstring),
+                        param,
+                        "superfast",
+                        "zerolatency",
+                    )
 
                     # extra parameters
 
@@ -1454,7 +1461,8 @@ function ws_coroutine(ws, ids)
                     end
 
                     # x265 encoder
-                    encoder = ccall((encoder_open, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
+                    encoder =
+                        ccall((encoder_open, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
                     println("typeof(encoder): ", typeof(encoder), "; value: $encoder")
 
                     if encoder == C_NULL
@@ -1471,13 +1479,6 @@ function ws_coroutine(ws, ids)
             # end_video
             if msg["type"] == "end_video"
                 # clean up x265
-                if param ≠ C_NULL
-                    # release the x265 parameters structure
-                    ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
-                    param = C_NULL
-
-                    @info "cleaned up x265 parameters"
-                end
 
                 if encoder ≠ C_NULL
                     # release the x265 encoder
@@ -1493,6 +1494,14 @@ function ws_coroutine(ws, ids)
                     picture = C_NULL
 
                     @info "cleaned up the x265 picture"
+                end
+
+                if param ≠ C_NULL
+                    # release the x265 parameters structure
+                    ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
+                    param = C_NULL
+
+                    @info "cleaned up x265 parameters"
                 end
 
                 continue
