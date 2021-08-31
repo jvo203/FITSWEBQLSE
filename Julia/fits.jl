@@ -2494,6 +2494,24 @@ function getVideoFrame(
     wait(results_task)
 end
 
+@everywhere function fetchVideoFrame(
+    compressed_frames::Dict{Int32,Matrix{Float16}},
+    frame::Integer,
+    image_width::Integer,
+    image_height::Integer,
+    bDownsize::Bool,
+    idx::Vector{Int64},
+    queue::RemoteChannel{Channel{Tuple}},
+)
+
+    if frame in idx
+        println("processing video frame $frame")
+    else
+        return
+    end
+
+end
+
 @everywhere function calculateViewportSpectrum(
     compressed_frames::Dict{Int32,Matrix{Float16}},
     first_frame::Int32,
