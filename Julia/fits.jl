@@ -2447,6 +2447,16 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
 end
 
+function getVideoFrame(
+    fits::FITSDataSet,
+    frame_idx::Integer,
+    flux::String,
+    image_width::Integer,
+    image_height::Integer,
+)
+
+end
+
 @everywhere function calculateViewportSpectrum(
     compressed_frames::Dict{Int32,Matrix{Float16}},
     first_frame::Int32,
