@@ -1489,7 +1489,16 @@ function ws_coroutine(ws, ids)
 
                     planeB = fill(UInt8(128), image_width, image_height)
 
-                    picture_jll = x265_picture(picture)
+                    picture_jl = x265_picture(picture)
+
+                    picture_jl.planeB = pointer(planeB)
+                    picture_jl.strideR = 0
+                    picture_jl.strideG = 0
+                    picture_jl.strideB = strides(planeB)[2]
+                    picture_jl.bitDepth = 8
+
+                    # sync the Julia structure back to C
+                    unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
 
                     continue
                 else
