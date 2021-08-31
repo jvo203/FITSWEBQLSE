@@ -2455,7 +2455,43 @@ function getVideoFrame(
     image_height::Integer,
     bDownsize::Bool,
 )
+    local pixels, mask
 
+    if fits.compressed_pixels == Nothing
+        error("Uninitialised compressed pixels.")
+    end
+
+    results = RemoteChannel(() -> Channel{Tuple}(32))
+
+    results_task = @async while true
+        try
+            pixels, mask = take!(results)
+        catch e
+            println("video frame task completed")
+            break
+        end
+    end
+
+    # for each Future in ras find the corresponding worker
+    # launch jobs on each worker, pass the channel indices
+    ras = [
+        @spawnat job.where fetchVideoFrame(
+            fetch(job),
+            frame_idx,
+            image_width,
+            image_height,
+            bDownsize,
+            findall(fits.indices[job.where]),
+            results,
+        )
+
+        for job in fits.compressed_pixels
+    ]
+
+    @time wait.(ras)
+
+    close(results)
+    wait(results_task)
 end
 
 @everywhere function calculateViewportSpectrum(
