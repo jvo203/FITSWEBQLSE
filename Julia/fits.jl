@@ -2453,6 +2453,7 @@ function getVideoFrame(
     flux::String,
     image_width::Integer,
     image_height::Integer,
+    bDownsize::Bool,
 )
 
 end
