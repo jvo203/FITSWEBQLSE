@@ -1279,11 +1279,23 @@ function ws_coroutine(ws, ids)
             catch e
             end
 
-            frame_idx, = get_spectrum_range(fits_object, frame, frame, ref_freq)
-            println("video frame: $frame_idx; keyframe: $keyframe")
+            try
+                frame_idx, = get_spectrum_range(fits_object, frame, frame, ref_freq)
+                println("video frame: $frame_idx; keyframe: $keyframe")
 
-            # get a video frame
-            getVideoFrame(fits_object, frame_idx, flux, image_width, image_height)
+                # get a video frame
+                pixels, mask = getVideoFrame(
+                    fits_object,
+                    frame_idx,
+                    flux,
+                    image_width,
+                    image_height,
+                )
+
+                # HEVC-encode the pixels/mask
+            catch e
+            end
+
 
             update_timestamp(fits_object)
 
