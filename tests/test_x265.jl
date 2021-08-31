@@ -149,8 +149,7 @@ display(j_picture)
 width = 200
 height = 175
 
-planeB = Array{UInt8}(undef, (width, height))
-planeB .= 128
+planeB = fill(UInt8(128), width, height)
 println("strides:", strides(planeB))
 
 vectorB = Vector{UInt8}(undef, width*height)
