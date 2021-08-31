@@ -1283,6 +1283,7 @@ function ws_coroutine(ws, ids)
             println("video frame: $frame_idx; keyframe: $keyframe")
 
             # get a video frame
+            getVideoFrame(fits_object, frame_idx, flux)
 
             update_timestamp(fits_object)
 
