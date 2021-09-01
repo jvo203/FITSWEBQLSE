@@ -2512,10 +2512,15 @@ end
 
     mask = map(isnan, pixels)
 
-    # replace NaNs with 0.0
-    pixels[mask] .= 0.0
-    # invert the mask
-    mask = .!mask
+    try
+        # replace NaNs with 0.0
+        pixels[mask] .= 0.0
+        # invert the mask
+        mask = .!mask
+    catch e
+        println(e)
+        return
+    end
 
     if bDownsize
         try
