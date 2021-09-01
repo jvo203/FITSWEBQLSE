@@ -1292,6 +1292,8 @@ function ws_coroutine(ws, ids)
                     image_height,
                     bDownsize,
                 )
+            
+                println(typeof(pixels), ";", typeof(mask), ";", size(pixels), ";", size(mask), "; bDownsize:", bDownsize)
 
                 # HEVC-encode the pixels/mask
             catch e
