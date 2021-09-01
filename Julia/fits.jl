@@ -2557,7 +2557,7 @@ end
         end
     end
 
-    println(typeof(pixels), ";", typeof(mask))
+    println(typeof(pixels), ";", typeof(mask), ";", size(pixels), ";", size(mask), "; bDownsize:", bDownsize)
 end
 
 @everywhere function calculateViewportSpectrum(
