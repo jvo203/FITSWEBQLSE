@@ -2559,7 +2559,7 @@ end
         end
     end
 
-    println(typeof(pixels), ";", typeof(mask), ";", size(pixels), ";", size(mask), "; bDownsize:", bDownsize)
+    # println(typeof(pixels), ";", typeof(mask), ";", size(pixels), ";", size(mask), "; bDownsize:", bDownsize)
 
     put!(queue, (pixels, mask))
 end
