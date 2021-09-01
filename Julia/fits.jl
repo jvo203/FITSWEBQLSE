@@ -2512,7 +2512,7 @@ end
 
     try
         # make an element-by-element write-enabled copy
-        pixels .= frame_pixels
+        pixels = deepcopy(frame_pixels)
     catch e
         println("frame_pixels: ", e)
         return
