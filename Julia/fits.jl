@@ -2510,6 +2510,35 @@ end
         return
     end
 
+    mask = map(isnan, pixels)
+
+    # replace NaNs with 0.0
+    pixels[mask] .= 0.0
+    # invert the mask
+    mask = .!mask
+
+    if bDownsize
+        try
+            pixels = Float16.(imresize(pixels, (image_width, image_height)),)
+            mask =
+                Bool.(
+                    imresize(mask, (image_width, image_height), method = Constant()),
+                ) # use Nearest-Neighbours for the mask
+        catch e
+            # println(e)
+            println(
+                "imresize error: ",
+                size(pixels),
+                "-->($image_width,$image_height); ",
+                typeof(pixels),
+                ";",
+                typeof(mask),
+            )
+            return
+        end
+    end
+
+    println(typeof(pixels), ";", typeof(mask))
 end
 
 @everywhere function calculateViewportSpectrum(
