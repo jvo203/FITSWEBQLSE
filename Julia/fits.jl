@@ -2501,12 +2501,20 @@ end
     bDownsize::Bool,
     queue::RemoteChannel{Channel{Tuple}},
 )
-    local pixels, mask
+    local frame_pixels, pixels, mask
 
     try
-        pixels = compressed_frames[frame]
+        frame_pixels = compressed_frames[frame]
         println("processing video frame $frame")
     catch e
+        return
+    end
+
+    try
+        # make an element-by-element write-enabled copy
+        pixels .= frame_pixels
+    catch e
+        println("frame_pixels: ", e)
         return
     end
 
@@ -2515,10 +2523,16 @@ end
     try
         # replace NaNs with 0.0
         pixels[mask] .= 0.0
+    catch e
+        println("pixels: ", e)
+        return
+    end
+
+    try
         # invert the mask
         mask = .!mask
     catch e
-        println(e)
+        println("mask: ", e)
         return
     end
 
