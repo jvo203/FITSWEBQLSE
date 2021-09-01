@@ -2491,6 +2491,8 @@ function getVideoFrame(
 
     close(results)
     wait(results_task)
+
+    return (pixels, mask)
 end
 
 @everywhere function fetchVideoFrame(
