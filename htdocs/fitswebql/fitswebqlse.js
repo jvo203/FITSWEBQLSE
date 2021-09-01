@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-08-23.1";
+	return "JS2021-09-01.0";
 }
 
 const wasm_supported = (() => {
@@ -528,8 +528,22 @@ function plot_spectrum(dataArray) {
 		dmax = data_max;
 	}
 
-	if (dmin == dmax)
-		return;
+	if (dmin == dmax) {
+		if (dmin == 0.0 && dmax == 0.0) {
+			dmin = -1.0;
+			dmax = 1.0;
+		} else {
+			if (dmin > 0.0) {
+				dmin *= 0.99;
+				dmax *= 1.01;
+			};
+
+			if (dmax < 0.0) {
+				dmax *= 0.99;
+				dmin *= 1.01;
+			}
+		}
+	}
 
 	var range = get_axes_range(width, height);
 
@@ -656,8 +670,22 @@ function replot_y_axis() {
 		dmax = data_max;
 	}
 
-	if (dmin == dmax)
-		return;
+	if (dmin == dmax) {
+		if (dmin == 0.0 && dmax == 0.0) {
+			dmin = -1.0;
+			dmax = 1.0;
+		} else {
+			if (dmin > 0.0) {
+				dmin *= 0.99;
+				dmax *= 1.01;
+			};
+
+			if (dmax < 0.0) {
+				dmax *= 0.99;
+				dmin *= 1.01;
+			}
+		}
+	}
 
 	var interval = dmax - dmin;
 
@@ -7229,6 +7257,24 @@ function setup_axes() {
 
 	var dmin = data_min;//d3.min(spectrum) ;
 	var dmax = data_max;//d3.max(spectrum) ;
+
+	if (dmin == dmax) {
+		if (dmin == 0.0 && dmax == 0.0) {
+			dmin = -1.0;
+			dmax = 1.0;
+		} else {
+			if (dmin > 0.0) {
+				dmin *= 0.99;
+				dmax *= 1.01;
+			};
+
+			if (dmax < 0.0) {
+				dmax *= 0.99;
+				dmin *= 1.01;
+			}
+		}
+	}
+
 	var interval = dmax - dmin;
 
 	var range = get_axes_range(width, height);
