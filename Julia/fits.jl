@@ -2481,7 +2481,6 @@ function getVideoFrame(
             image_width,
             image_height,
             bDownsize,
-            findall(fits.indices[job.where]),
             results,
         )
 
@@ -2500,13 +2499,14 @@ end
     image_width::Integer,
     image_height::Integer,
     bDownsize::Bool,
-    idx::Vector{Int64},
     queue::RemoteChannel{Channel{Tuple}},
 )
+    local pixels, mask
 
-    if frame in idx
+    try
+        pixels = compressed_frames[frame]
         println("processing video frame $frame")
-    else
+    catch e
         return
     end
 
