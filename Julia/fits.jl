@@ -2558,6 +2558,8 @@ end
     end
 
     println(typeof(pixels), ";", typeof(mask), ";", size(pixels), ";", size(mask), "; bDownsize:", bDownsize)
+
+    put!(queue, (pixels, mask))
 end
 
 @everywhere function calculateViewportSpectrum(
