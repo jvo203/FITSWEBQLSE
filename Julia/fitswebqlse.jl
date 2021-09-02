@@ -1268,6 +1268,10 @@ function ws_coroutine(ws, ids)
                 error("$datasetid: no data found.")
             end
 
+            if !has_video(fits_object)
+                continue
+            end
+
             keyframe = req["key"]
 
             # obtain a cube channel
