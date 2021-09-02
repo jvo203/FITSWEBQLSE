@@ -1513,7 +1513,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
 
     println("getImage::$(fits.datasetid)/($width)/($height)")
 
-    # calculate scale, downsize when applicable    
+    # calculate scale, downsize when applicable
     inner_width, inner_height = get_inner_dimensions(fits)
 
     try
@@ -2491,6 +2491,18 @@ function getVideoFrame(
 
     close(results)
     wait(results_task)
+
+    # calculate white, black, sensitivity from the all-data histogram
+    u = 7.5f0
+    _median = fits.data_median
+    _black = max(fits.datamin, (fits.data_median - u * fits.data_mad₋))
+    _white = min(fits.datamax, (fits.data_median + u * fits.data_mad₊))
+    _sensitivity = 1.0f0 / (_white - _black)
+    _slope = 1.0f0 / (_white - _black)
+    lmin = log(0.5f0)
+    lmax = log(1.5f0)
+
+    # convert Float16 pixels to UInt8 (apply tone mapping)
 
     return (pixels, mask)
 end
