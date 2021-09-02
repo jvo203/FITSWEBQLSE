@@ -388,6 +388,18 @@ function has_error(fits::FITSDataSet)::Bool
     return has_error
 end
 
+function has_video(fits::FITSDataSet)::Bool
+    has_video = false
+
+    lock(fits.mutex)
+
+    has_video = fits.video_ready
+
+    unlock(fits.mutex)
+
+    return has_video
+end
+
 function dataset_exists(datasetid::String, fits_objects, fits_lock)::Bool
     key_exists = false
 
