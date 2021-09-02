@@ -2516,11 +2516,16 @@ function getVideoFrame(
 
     # convert Float16 pixels to UInt8 (apply tone mapping)
     luma = Matrix{UInt8}(undef, size(pixels))
-    mask = UInt8.(mask) # BitMatrix -> Array{Bool} -> Array{UInt8}
+    alpha = Matrix{UInt8}(undef, size(mask))
+    # try to transmute mask into alpha (in-place)
 
-    # Intel SPMD C: {pixels,mask} -> luma, mask255
+    mask = collect(mask) # BitMatrix -> Array{Bool} -> Array{UInt8}
 
-    return (luma, mask)
+    display(mask[1:5,1:5])
+
+    # Intel SPMD C: {pixels,mask} -> {luma, alpha}
+
+    return (luma, alpha)
 end
 
 @everywhere function fetchVideoFrame(
