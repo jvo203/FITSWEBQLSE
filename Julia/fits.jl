@@ -2518,7 +2518,7 @@ function getVideoFrame(
     luma = Matrix{UInt8}(undef, size(pixels))
     mask = UInt8.(mask) # BitMatrix -> Array{Bool} -> Array{UInt8}
 
-    # Intel SPMD C: {pixels,mask} -> luma
+    # Intel SPMD C: {pixels,mask} -> luma, mask255
 
     return (luma, mask)
 end
