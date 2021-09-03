@@ -2483,6 +2483,18 @@ function logistic_tone_mapping(x::Float16, median::Float32, sensitivity::Float32
     return round(UInt8, clamp(pixel, 0.0f0, 255.0f0))
 end
 
+function ratio_tone_mapping(x::Float16, black::Float32, sensitivity::Float32)::UInt8
+    local pixel::Float32
+
+    pixel = 5.0f0 * (Float32(x) - black) * sensitivity
+    
+    if pixel > 0.0f0
+        return round(UInt8, clamp(255.0f0 * pixel / (1.0f0 + pixel), 0.0f0, 255.0f0))
+    else
+        return UInt8(0)
+    end
+end
+
 function getVideoFrame(
     fits::FITSDataSet,
     frame_idx::Integer,
@@ -2543,7 +2555,8 @@ function getVideoFrame(
     # luma = Matrix{UInt8}(undef, size(pixels))
 
     # luma = linear_tone_mapping.(pixels, _black, _slope)
-    luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
+    # luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
+    luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
 
     # BitMatrix -> Array{Bool} -> Array{UInt8}
     alpha = alphaMask.(mask)
