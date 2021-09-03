@@ -2459,6 +2459,14 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
 end
 
+function alphaMask(x::Bool)::UInt8
+    if x
+        return UInt8(255)
+    else
+        return UInt8(0)
+    end
+end
+
 function getVideoFrame(
     fits::FITSDataSet,
     frame_idx::Integer,
@@ -2468,6 +2476,7 @@ function getVideoFrame(
     bDownsize::Bool,
 )
     local pixels, mask
+    local luma, alpha
 
     if fits.compressed_pixels == Nothing
         error("Uninitialised compressed pixels.")
@@ -2516,14 +2525,14 @@ function getVideoFrame(
 
     # convert Float16 pixels to UInt8 (apply tone mapping)
     luma = Matrix{UInt8}(undef, size(pixels))
-    alpha = Matrix{UInt8}(undef, size(mask))
-    # try to transmute mask into alpha (in-place)
 
-    mask = collect(mask) # BitMatrix -> Array{Bool} -> Array{UInt8}
+    # BitMatrix -> Array{Bool} -> Array{UInt8}
+    alpha = alphaMask.(mask)
 
-    display(mask[1:5,1:5])
+    display(luma[1:5,1:5])
+    display(alpha[1:5,1:5])
 
-    # Intel SPMD C: {pixels,mask} -> {luma, alpha}
+    # use Intel SPMD C: {pixels,mask} -> {luma, alpha} ?
 
     return (luma, alpha)
 end
