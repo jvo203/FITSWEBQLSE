@@ -64,6 +64,8 @@ mutable struct FITSDataSet
     integrated_spectrum::Any
 
     # all-data statistics (needed by video streams)
+    dmin::Float32
+    dmax::Float32
     data_median::Float32
     data_mad::Float32
     data_mad₊::Float32
@@ -107,6 +109,8 @@ mutable struct FITSDataSet
             Nothing,
             Nothing,
             Nothing,
+            -prevfloat(typemax(Float32)),
+            prevfloat(typemax(Float32)),
             NaN32,
             NaN32,
             NaN32,
@@ -150,6 +154,8 @@ mutable struct FITSDataSet
             Nothing,
             Nothing,
             Nothing,
+            -prevfloat(typemax(Float32)),
+            prevfloat(typemax(Float32)),
             NaN32,
             NaN32,
             NaN32,
@@ -227,6 +233,8 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.mean_spectrum)
         serialize(io, fits.integrated_spectrum)
 
+        serialize(io, fits.dmin)
+        serialize(io, fits.dmax)
         serialize(io, fits.data_median)
         serialize(io, fits.data_mad)
         serialize(io, fits.data_mad₊)
@@ -308,6 +316,8 @@ function deserialize_fits(datasetid)
     fits.mean_spectrum = deserialize(io)
     fits.integrated_spectrum = deserialize(io)
 
+    fits.dmin = deserialize(io)
+    fits.dmax = deserialize(io)
     fits.data_median = deserialize(io)
     fits.data_mad = deserialize(io)
     fits.data_mad₊ = deserialize(io)
@@ -804,6 +814,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     dmin, dmax = extrema(valid_pixels)
                     println("dmin: $dmin, dmax: $dmax")
 
+                    fits.dmin = dmin
+                    fits.dmax = dmax
                     fits.pixels = pixels
                     fits.mask = .!mask # negate the mask so that <true> indicates valid pixels
                 end
@@ -1191,6 +1203,8 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 println("data_mad: $data_mad, data_mad₊: $data_mad₊, data_mad₋: $data_mad₋")
 
+                fits.dmin = dmin
+                fits.dmax = dmax
                 fits.data_median = data_median
                 fits.data_mad = data_mad
                 fits.data_mad₊ = data_mad₊
@@ -2572,25 +2586,25 @@ function getVideoFrame(
     # calculate white, black, sensitivity from the all-data histogram
     u = 7.5f0
     _median = fits.data_median
-    _black = max(fits.datamin, (fits.data_median - u * fits.data_mad₋))
-    _white = min(fits.datamax, (fits.data_median + u * fits.data_mad₊))
+    _black = max(fits.dmin, (fits.data_median - u * fits.data_mad₋))
+    _white = min(fits.dmax, (fits.data_median + u * fits.data_mad₊))
     _sensitivity = 1.0f0 / (_white - _black)
     _slope = 1.0f0 / (_white - _black)
-    dmin = fits.datamin
-    dmax = fits.datamax
+    _dmin = fits.dmin
+    _dmax = fits.dmax
     lmin = log(0.5f0)
     lmax = log(1.5f0)
 
     # convert Float16 pixels to UInt8 (apply tone mapping)
     # luma = Matrix{UInt8}(undef, size(pixels))
 
-    println("dmin: $dmin, dmax: $dmax, lmin: $lmin, lmax: $lmax")
+    println("dmin: $_dmin, dmax: $_dmax, lmin: $lmin, lmax: $lmax")
 
     # luma = linear_tone_mapping.(pixels, _black, _slope)
     # luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
     # luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
     # luma = square_tone_mapping.(pixels, _black, _sensitivity)
-    luma = legacy_tone_mapping.(pixels, dmin, dmax, lmin, lmax)
+    luma = legacy_tone_mapping.(pixels, _dmin, _dmax, lmin, lmax)
     # luma = null_tone_mapping.(pixels)
 
     # BitMatrix -> Array{Bool} -> Array{UInt8}
