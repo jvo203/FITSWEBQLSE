@@ -2495,6 +2495,18 @@ function ratio_tone_mapping(x::Float16, black::Float32, sensitivity::Float32)::U
     end
 end
 
+function square_tone_mapping(x::Float16, black::Float32, sensitivity::Float32)::UInt8
+    local pixel::Float32
+
+    pixel = (Float32(x) - black) * sensitivity
+    
+    if pixel > 0.0f0
+        return round(UInt8, clamp(255.0f0 * pixel * pixel, 0.0f0, 255.0f0))
+    else
+        return UInt8(0)
+    end
+end
+
 function getVideoFrame(
     fits::FITSDataSet,
     frame_idx::Integer,
@@ -2548,6 +2560,8 @@ function getVideoFrame(
     _white = min(fits.datamax, (fits.data_median + u * fits.data_mad₊))
     _sensitivity = 1.0f0 / (_white - _black)
     _slope = 1.0f0 / (_white - _black)
+    dmin = fits.datamin
+    dmax = fits.datamax
     lmin = log(0.5f0)
     lmax = log(1.5f0)
 
@@ -2556,7 +2570,8 @@ function getVideoFrame(
 
     # luma = linear_tone_mapping.(pixels, _black, _slope)
     # luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
-    luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
+    # luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
+    luma = square_tone_mapping.(pixels, _black, _sensitivity)
 
     # BitMatrix -> Array{Bool} -> Array{UInt8}
     alpha = alphaMask.(mask)
@@ -2564,7 +2579,9 @@ function getVideoFrame(
     display(luma[1:5,1:5])
     display(alpha[1:5,1:5])
 
-    # use Intel SPMD C: {pixels,mask} -> {luma, alpha} ?
+    # use Intel SPMD C: {pixels,alpha} -> {luma, alpha} ...
+    # in some cases, where pixels <= 0.0 alpha needs to be set to 0
+    # even if a pixel is not NaN
 
     return (luma, alpha)
 end
