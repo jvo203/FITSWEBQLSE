@@ -2598,8 +2598,6 @@ function getVideoFrame(
     # convert Float16 pixels to UInt8 (apply tone mapping)
     # luma = Matrix{UInt8}(undef, size(pixels))
 
-    println("dmin: $_dmin, dmax: $_dmax, lmin: $lmin, lmax: $lmax")
-
     # luma = linear_tone_mapping.(pixels, _black, _slope)
     # luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
     # luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
@@ -2610,11 +2608,7 @@ function getVideoFrame(
     # BitMatrix -> Array{Bool} -> Array{UInt8}
     alpha = alphaMask.(mask)
 
-    display(pixels[1:5,1:5])
-    display(luma[1:5,1:5])
-    display(alpha[1:5,1:5])
-
-    # use Intel SPMD C: {pixels,alpha} -> {luma, alpha} ...
+    # use Intel SPMD C: {pixels,alpha} -> {luma, alpha} ... ???
     # in some cases, where pixels <= 0.0 alpha needs to be set to 0
     # even if a pixel is not NaN
 
