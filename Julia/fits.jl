@@ -2584,16 +2584,19 @@ function getVideoFrame(
     # convert Float16 pixels to UInt8 (apply tone mapping)
     # luma = Matrix{UInt8}(undef, size(pixels))
 
+    println("dmin: $dmin, dmax: $dmax, lmin: $lmin, lmax: $lmax")
+
     # luma = linear_tone_mapping.(pixels, _black, _slope)
     # luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
     # luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
     # luma = square_tone_mapping.(pixels, _black, _sensitivity)
-    # luma = legacy_tone_mapping.(pixels, dmin, dmax, lmin, lmax)
-    luma = null_tone_mapping.(pixels)
+    luma = legacy_tone_mapping.(pixels, dmin, dmax, lmin, lmax)
+    # luma = null_tone_mapping.(pixels)
 
     # BitMatrix -> Array{Bool} -> Array{UInt8}
     alpha = alphaMask.(mask)
 
+    display(pixels[1:5,1:5])
     display(luma[1:5,1:5])
     display(alpha[1:5,1:5])
 
