@@ -2507,6 +2507,22 @@ function square_tone_mapping(x::Float16, black::Float32, sensitivity::Float32)::
     end
 end
 
+function legacy_tone_mapping(x::Float16, dmin::Float32, dmax::Float32, lmin::Float32, lmax::Float32)::UInt8
+    local pixel::Float32
+
+    pixel = 0.5f0 + (Float32(x) - dmin) / (dmax - dmin)
+    
+    if pixel > 0.0f0
+        return round(UInt8, clamp(255.0f0 * (log(pixel) - lmin) / (lmax - lmin), 0.0f0, 255.0f0))
+    else
+        return UInt8(0)
+    end
+end
+
+function null_tone_mapping(x::Float16)::UInt8
+    return UInt8(0)
+end
+
 function getVideoFrame(
     fits::FITSDataSet,
     frame_idx::Integer,
@@ -2571,7 +2587,9 @@ function getVideoFrame(
     # luma = linear_tone_mapping.(pixels, _black, _slope)
     # luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
     # luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
-    luma = square_tone_mapping.(pixels, _black, _sensitivity)
+    # luma = square_tone_mapping.(pixels, _black, _sensitivity)
+    # luma = legacy_tone_mapping.(pixels, dmin, dmax, lmin, lmax)
+    luma = null_tone_mapping.(pixels)
 
     # BitMatrix -> Array{Bool} -> Array{UInt8}
     alpha = alphaMask.(mask)
