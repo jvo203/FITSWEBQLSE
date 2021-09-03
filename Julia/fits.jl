@@ -2467,6 +2467,14 @@ function alphaMask(x::Bool)::UInt8
     end
 end
 
+function linear_tone_mapping(x::Float16, black::Float32, slope::Float32)::UInt8
+    local pixel::Float32
+
+    pixel = 255.0f0 / ( 1.0f0 + exp(-6.0f0 * (Float32(x) - black) * slope) )
+
+    return round(UInt8, clamp(pixel, 0.0f0, 255.0f0))
+end
+
 function getVideoFrame(
     fits::FITSDataSet,
     frame_idx::Integer,
@@ -2524,7 +2532,8 @@ function getVideoFrame(
     lmax = log(1.5f0)
 
     # convert Float16 pixels to UInt8 (apply tone mapping)
-    luma = Matrix{UInt8}(undef, size(pixels))
+    # luma = Matrix{UInt8}(undef, size(pixels))
+    luma = linear_tone_mapping.(pixels, _black, _slope)
 
     # BitMatrix -> Array{Bool} -> Array{UInt8}
     alpha = alphaMask.(mask)
