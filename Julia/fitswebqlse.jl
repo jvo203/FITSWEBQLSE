@@ -1330,7 +1330,16 @@ function ws_coroutine(ws, ids)
                         println("calling x265_encoder_encode")
 
                         # HEVC-encode the luminance and alpha channels
-                        local iNal::Int32 = 0
+                        iNal = Ref{Cint}(0)
+                        pNals = Ref{Ptr{Cvoid}}(C_NULL)
+
+                        # iNal_jll value: iNal[] 
+
+                        # an array of pointers
+                        # local pNals_jll::Ptr{Ptr{Cvoid}} = pNals[]
+
+                        # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
+                        # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
 
                         # stat = ccall(
                         #        (:x265_encoder_encode, libx265),
