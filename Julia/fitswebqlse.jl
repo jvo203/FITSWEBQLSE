@@ -1288,7 +1288,7 @@ function ws_coroutine(ws, ids)
                 println("video frame: $frame_idx; keyframe: $keyframe")
 
                 # get a video frame
-                pixels, mask = getVideoFrame(
+                luma, alpha = getVideoFrame(
                     fits_object,
                     frame_idx,
                     flux,
@@ -1298,18 +1298,28 @@ function ws_coroutine(ws, ids)
                 )
 
                 println(
-                    typeof(pixels),
+                    typeof(luma),
                     ";",
-                    typeof(mask),
+                    typeof(alpha),
                     ";",
-                    size(pixels),
+                    size(luma),
                     ";",
-                    size(mask),
+                    size(alpha),
                     "; bDownsize:",
                     bDownsize,
                 )
 
                 # HEVC-encode the pixels/mask
+                picture_jl = x265_picture(picture)
+
+                picture_jl.strideR = pointer(luma)
+                picture_jl.strideR = strides(luma)[2]
+
+                picture_jl.strideG = pointer(alpha)
+                picture_jl.strideG = strides(alpha)[2]
+
+                # sync the Julia structure back to C
+                unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
             catch e
                 println(e)
             end
@@ -1534,9 +1544,9 @@ function ws_coroutine(ws, ids)
                     planeB = fill(UInt8(128), image_width, image_height)
 
                     picture_jl = x265_picture(picture)
-                    picture_jl.planeB = pointer(planeB)
                     picture_jl.strideR = 0
                     picture_jl.strideG = 0
+                    picture_jl.planeB = pointer(planeB)
                     picture_jl.strideB = strides(planeB)[2]
                     picture_jl.bitDepth = 8
 
