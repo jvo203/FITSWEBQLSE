@@ -1309,29 +1309,40 @@ function ws_coroutine(ws, ids)
                     bDownsize,
                 )
 
+                println("strides: ", strides(luma), ";", strides(alpha))
+
                 # update the x265_picture structure
                 picture_jl = x265_picture(picture)
 
+                println("got here#1")
+
                 picture_jl.strideR = pointer(luma)
-                picture_jl.strideR = strides(luma)[2]
+                picture_jl.strideR = Int32(strides(luma)[2])
+
+                println("got here#2")
 
                 picture_jl.strideG = pointer(alpha)
-                picture_jl.strideG = strides(alpha)[2]
+                picture_jl.strideG = Int32(strides(alpha)[2])
+
+                println("got here#3")
 
                 # sync the Julia structure back to C
                 unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
 
+                println("calling x265_encoder_encode")
+
                 # HEVC-encode the luminance and alpha channels
-                #=
-                stat = ccall(
-                        (:x265_encoder_encode, libx265),
-                        Cint,
-                        (Ptr{Cvoid}, Cstring, Cstring),
-                        param,
-                        "fps",
-                        string(fps),
-                    )
-                    =#
+                #local iNal::Int32
+
+                # stat = ccall(
+                #        (:x265_encoder_encode, libx265),
+                #        Cint,
+                #        (Ptr{Cvoid}, Cstring, Cstring),
+                #        param,
+                #        "fps",
+                #        string(fps),
+                #    )
+
             catch e
                 println(e)
             end
@@ -1559,7 +1570,7 @@ function ws_coroutine(ws, ids)
                     picture_jl.strideR = 0
                     picture_jl.strideG = 0
                     picture_jl.planeB = pointer(planeB)
-                    picture_jl.strideB = strides(planeB)[2]
+                    picture_jl.strideB = Int32(strides(planeB)[2])
                     picture_jl.bitDepth = 8
 
                     # sync the Julia structure back to C
