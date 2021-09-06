@@ -9,7 +9,6 @@ using Statistics;
 using Images, ImageTransformations, Interpolations;
 using ZfpCompression;
 using PhysicalConstants.CODATA2018;
-using Switch;
 
 const MADV_WILLNEED = 3
 
@@ -2605,40 +2604,31 @@ function getVideoFrame(
     lmin = log(0.5f0)
     lmax = log(1.5f0)
 
+    # BitMatrix -> Array{Bool} -> Array{UInt8}
+    alpha_task = Threads.@spawn alpha = alphaMask.(mask)
+
     # convert Float16 pixels to UInt8 (apply tone mapping)
     # luma = Matrix{UInt8}(undef, size(pixels))
 
-    @switch flux begin
-        @case "linear"
-            luma = linear_tone_mapping.(pixels, _black, _slope)
-            break
-
-        @case "logistic"
-            luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
-            break
-
-        @case "ratio"
-            luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
-            break
-
-        @case "square"
-            luma = square_tone_mapping.(pixels, _black, _sensitivity)
-            break
-
-        @case "legacy"
-            luma = legacy_tone_mapping.(pixels, _dmin, _dmax, lmin, lmax)
-            break
-
-        @default
-            luma = null_tone_mapping.(pixels)
+    if flux == "linear"
+        luma = linear_tone_mapping.(pixels, _black, _slope)
+    elseif flux == "logistic"
+        luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
+    elseif flux == "ratio"
+        luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
+    elseif flux == "square"
+        luma = square_tone_mapping.(pixels, _black, _sensitivity)
+    elseif flux == "legacy"
+        luma = legacy_tone_mapping.(pixels, _dmin, _dmax, lmin, lmax)
+    else
+        luma = null_tone_mapping.(pixels)
     end
-
-    # BitMatrix -> Array{Bool} -> Array{UInt8}
-    alpha = alphaMask.(mask)
 
     # use Intel SPMD C: {pixels,alpha} -> {luma, alpha} ... ???
     # in some cases, where pixels <= 0.0 alpha needs to be set to 0
     # even if a pixel is not NaN
+
+    wait(alpha_task)
 
     return (luma, alpha)
 end
