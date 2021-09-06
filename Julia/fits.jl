@@ -2484,7 +2484,7 @@ end
 function linear_tone_mapping(x::Float16, black::Float32, slope::Float32)::UInt8
     local pixel::Float32
 
-    pixel = 255.0f0 / ( 1.0f0 + exp(-6.0f0 * (Float32(x) - black) * slope) )
+    pixel = 255.0f0 / (1.0f0 + exp(-6.0f0 * (Float32(x) - black) * slope))
 
     return round(UInt8, clamp(pixel, 0.0f0, 255.0f0))
 end
@@ -2492,8 +2492,8 @@ end
 function logistic_tone_mapping(x::Float16, median::Float32, sensitivity::Float32)::UInt8
     local pixel::Float32
 
-    pixel = 255.0f0 / ( 1.0f0 + exp(-6.0f0 * (Float32(x) - median) * sensitivity) )               
-    
+    pixel = 255.0f0 / (1.0f0 + exp(-6.0f0 * (Float32(x) - median) * sensitivity))
+
     return round(UInt8, clamp(pixel, 0.0f0, 255.0f0))
 end
 
@@ -2501,7 +2501,7 @@ function ratio_tone_mapping(x::Float16, black::Float32, sensitivity::Float32)::U
     local pixel::Float32
 
     pixel = 5.0f0 * (Float32(x) - black) * sensitivity
-    
+
     if pixel > 0.0f0
         return round(UInt8, clamp(255.0f0 * pixel / (1.0f0 + pixel), 0.0f0, 255.0f0))
     else
@@ -2513,7 +2513,7 @@ function square_tone_mapping(x::Float16, black::Float32, sensitivity::Float32)::
     local pixel::Float32
 
     pixel = (Float32(x) - black) * sensitivity
-    
+
     if pixel > 0.0f0
         return round(UInt8, clamp(255.0f0 * pixel * pixel, 0.0f0, 255.0f0))
     else
@@ -2521,13 +2521,22 @@ function square_tone_mapping(x::Float16, black::Float32, sensitivity::Float32)::
     end
 end
 
-function legacy_tone_mapping(x::Float16, dmin::Float32, dmax::Float32, lmin::Float32, lmax::Float32)::UInt8
+function legacy_tone_mapping(
+    x::Float16,
+    dmin::Float32,
+    dmax::Float32,
+    lmin::Float32,
+    lmax::Float32,
+)::UInt8
     local pixel::Float32
 
     pixel = 0.5f0 + (Float32(x) - dmin) / (dmax - dmin)
-    
+
     if pixel > 0.0f0
-        return round(UInt8, clamp(255.0f0 * (log(pixel) - lmin) / (lmax - lmin), 0.0f0, 255.0f0))
+        return round(
+            UInt8,
+            clamp(255.0f0 * (log(pixel) - lmin) / (lmax - lmin), 0.0f0, 255.0f0),
+        )
     else
         return UInt8(0)
     end
@@ -2661,10 +2670,7 @@ end
     if bDownsize
         try
             pixels = Float16.(imresize(pixels, (image_width, image_height)),)
-            mask =
-                Bool.(
-                    imresize(mask, (image_width, image_height), method = Constant()),
-                ) # use Nearest-Neighbours for the mask
+            mask = Bool.(imresize(mask, (image_width, image_height), method = Constant()),) # use Nearest-Neighbours for the mask
         catch e
             # println(e)
             println(
