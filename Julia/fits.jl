@@ -2678,8 +2678,11 @@ end
 
     if bDownsize
         try
+            mask_task = Threads.@spawn mask = Bool.(imresize(mask, (image_width, image_height), method = Constant()),) # use Nearest-Neighbours for the mask    
+
             pixels = Float16.(imresize(pixels, (image_width, image_height)),)
-            mask = Bool.(imresize(mask, (image_width, image_height), method = Constant()),) # use Nearest-Neighbours for the mask
+
+            wait(mask_task)
         catch e
             # println(e)
             println(
