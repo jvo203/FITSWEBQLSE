@@ -1321,7 +1321,17 @@ function ws_coroutine(ws, ids)
                 # sync the Julia structure back to C
                 unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
 
-                # HEVC-encode the pixels/mask
+                # HEVC-encode the luminance and alpha channels
+                #=
+                stat = ccall(
+                        (:x265_encoder_encode, libx265),
+                        Cint,
+                        (Ptr{Cvoid}, Cstring, Cstring),
+                        param,
+                        "fps",
+                        string(fps),
+                    )
+                    =#
             catch e
                 println(e)
             end
