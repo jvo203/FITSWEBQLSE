@@ -1309,7 +1309,7 @@ function ws_coroutine(ws, ids)
                     bDownsize,
                 )
 
-                # HEVC-encode the pixels/mask
+                # update the x265_picture structure
                 picture_jl = x265_picture(picture)
 
                 picture_jl.strideR = pointer(luma)
@@ -1320,6 +1320,8 @@ function ws_coroutine(ws, ids)
 
                 # sync the Julia structure back to C
                 unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
+
+                # HEVC-encode the pixels/mask
             catch e
                 println(e)
             end
