@@ -9,6 +9,7 @@ using Statistics;
 using Images, ImageTransformations, Interpolations;
 using ZfpCompression;
 using PhysicalConstants.CODATA2018;
+using Switch;
 
 const MADV_WILLNEED = 3
 
@@ -2607,12 +2608,30 @@ function getVideoFrame(
     # convert Float16 pixels to UInt8 (apply tone mapping)
     # luma = Matrix{UInt8}(undef, size(pixels))
 
-    # luma = linear_tone_mapping.(pixels, _black, _slope)
-    # luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
-    # luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
-    # luma = square_tone_mapping.(pixels, _black, _sensitivity)
-    luma = legacy_tone_mapping.(pixels, _dmin, _dmax, lmin, lmax)
-    # luma = null_tone_mapping.(pixels)
+    @switch flux begin
+        @case "linear"
+            luma = linear_tone_mapping.(pixels, _black, _slope)
+            break
+
+        @case "logistic"
+            luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
+            break
+
+        @case "ratio"
+            luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
+            break
+
+        @case "square"
+            luma = square_tone_mapping.(pixels, _black, _sensitivity)
+            break
+
+        @case "legacy"
+            luma = legacy_tone_mapping.(pixels, _dmin, _dmax, lmin, lmax)
+            break
+
+        @default
+            luma = null_tone_mapping.(pixels)
+    end
 
     # BitMatrix -> Array{Bool} -> Array{UInt8}
     alpha = alphaMask.(mask)
