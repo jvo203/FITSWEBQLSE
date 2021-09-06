@@ -1166,7 +1166,9 @@ function ws_coroutine(ws, ids)
     local image_width::Integer, image_height::Integer, bDownsize::Bool
 
     # HEVC
-    local param, encoder, picture, planeB
+    local param, encoder, picture, planeB, luma, alpha
+
+    local video_mtx = ReentrantLock()
 
     param = C_NULL
     encoder = C_NULL
@@ -1284,6 +1286,8 @@ function ws_coroutine(ws, ids)
             end
 
             try
+                lock(video_mtx)
+
                 frame_idx, = get_spectrum_range(fits_object, frame, frame, ref_freq)
                 println("video frame: $frame_idx; keyframe: $keyframe")
 
@@ -1309,34 +1313,39 @@ function ws_coroutine(ws, ids)
                     bDownsize,
                 )
 
-                # update the x265_picture structure
-                picture_jl = x265_picture(picture)
+                if picture != C_NULL
+                    # update the x265_picture structure                
+                    picture_jl = x265_picture(picture)
 
-                picture_jl.planeR = pointer(luma)
-                picture_jl.strideR = strides(luma)[2]
+                    picture_jl.planeR = pointer(luma)
+                    picture_jl.strideR = strides(luma)[2]
 
-                picture_jl.planeG = pointer(alpha)
-                picture_jl.strideG = strides(alpha)[2]
+                    picture_jl.planeG = pointer(alpha)
+                    picture_jl.strideG = strides(alpha)[2]
 
-                # sync the Julia structure back to C
-                unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
+                    # sync the Julia structure back to C
+                    unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
 
-                println("calling x265_encoder_encode")
+                    if encoder != C_NULL
+                        println("calling x265_encoder_encode")
 
-                # HEVC-encode the luminance and alpha channels
-                local iNal::Int32 = 0
+                        # HEVC-encode the luminance and alpha channels
+                        local iNal::Int32 = 0
 
-                # stat = ccall(
-                #        (:x265_encoder_encode, libx265),
-                #        Cint,
-                #        (Ptr{Cvoid}, Cstring, Cstring),
-                #        param,
-                #        "fps",
-                #        string(fps),
-                #    )
-
+                        # stat = ccall(
+                        #        (:x265_encoder_encode, libx265),
+                        #        Cint,
+                        #        (Ptr{Cvoid}, Cstring, Cstring),
+                        #        param,
+                        #        "fps",
+                        #        string(fps),
+                        #    )
+                    end
+                end
             catch e
                 println(e)
+            finally
+                unlock(video_mtx)
             end
 
             update_timestamp(fits_object)
@@ -1577,29 +1586,36 @@ function ws_coroutine(ws, ids)
             # end_video
             if msg["type"] == "end_video"
                 # clean up x265
+                try
+                    lock(video_mtx)
 
-                if encoder ≠ C_NULL
-                    # release the x265 encoder
-                    ccall((:x265_encoder_close, libx265), Cvoid, (Ptr{Cvoid},), encoder)
-                    encoder = C_NULL
+                    if encoder ≠ C_NULL
+                        # release the x265 encoder
+                        ccall((:x265_encoder_close, libx265), Cvoid, (Ptr{Cvoid},), encoder)
+                        encoder = C_NULL
 
-                    @info "cleaned up the x265 encoder"
-                end
+                        @info "cleaned up the x265 encoder"
+                    end
 
-                if picture ≠ C_NULL
-                    # release the x265 picture structure
-                    ccall((:x265_picture_free, libx265), Cvoid, (Ptr{Cvoid},), picture)
-                    picture = C_NULL
+                    if picture ≠ C_NULL
+                        # release the x265 picture structure
+                        ccall((:x265_picture_free, libx265), Cvoid, (Ptr{Cvoid},), picture)
+                        picture = C_NULL
 
-                    @info "cleaned up the x265 picture"
-                end
+                        @info "cleaned up the x265 picture"
+                    end
 
-                if param ≠ C_NULL
-                    # release the x265 parameters structure
-                    ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
-                    param = C_NULL
+                    if param ≠ C_NULL
+                        # release the x265 parameters structure
+                        ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
+                        param = C_NULL
 
-                    @info "cleaned up x265 parameters"
+                        @info "cleaned up x265 parameters"
+                    end
+                catch e
+                    println(e)
+                finally
+                    unlock(video_mtx)
                 end
 
                 continue
