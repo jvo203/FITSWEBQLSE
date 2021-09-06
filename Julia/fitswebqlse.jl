@@ -1327,8 +1327,6 @@ function ws_coroutine(ws, ids)
                     unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
 
                     if encoder != C_NULL
-                        println("calling x265_encoder_encode")
-
                         # HEVC-encode the luminance and alpha channels
                         iNal = Ref{Cint}(0)
                         pNals = Ref{Ptr{Cvoid}}(C_NULL)
@@ -1341,14 +1339,24 @@ function ws_coroutine(ws, ids)
                         # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
                         # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
 
-                        # stat = ccall(
-                        #        (:x265_encoder_encode, libx265),
-                        #        Cint,
-                        #        (Ptr{Cvoid}, Cstring, Cstring),
-                        #        param,
-                        #        "fps",
-                        #        string(fps),
-                        #    )
+                        stat = ccall(
+                            (:x265_encoder_encode, libx265),
+                            Cint,
+                            (
+                                Ptr{Cvoid},
+                                Ref{Ptr{Cvoid}},
+                                Ref{Cint},
+                                Ptr{Cvoid},
+                                Ptr{Cvoid},
+                            ),
+                            encoder,
+                            pNals,
+                            iNal,
+                            picture,
+                            C_NULL,
+                        )
+
+                        println("x265_encoder_encode::stat = $stat, iNal = ", iNal[])
                     end
                 end
             catch e
