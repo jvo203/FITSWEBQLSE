@@ -1309,22 +1309,14 @@ function ws_coroutine(ws, ids)
                     bDownsize,
                 )
 
-                println("strides: ", strides(luma), ";", strides(alpha))
-
                 # update the x265_picture structure
                 picture_jl = x265_picture(picture)
 
-                println("got here#1")
+                picture_jl.planeR = pointer(luma)
+                picture_jl.strideR = strides(luma)[2]
 
-                picture_jl.strideR = pointer(luma)
-                picture_jl.strideR = Int32(strides(luma)[2])
-
-                println("got here#2")
-
-                picture_jl.strideG = pointer(alpha)
-                picture_jl.strideG = Int32(strides(alpha)[2])
-
-                println("got here#3")
+                picture_jl.planeG = pointer(alpha)
+                picture_jl.strideG = strides(alpha)[2]
 
                 # sync the Julia structure back to C
                 unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
@@ -1332,7 +1324,7 @@ function ws_coroutine(ws, ids)
                 println("calling x265_encoder_encode")
 
                 # HEVC-encode the luminance and alpha channels
-                #local iNal::Int32
+                local iNal::Int32 = 0
 
                 # stat = ccall(
                 #        (:x265_encoder_encode, libx265),
@@ -1570,7 +1562,7 @@ function ws_coroutine(ws, ids)
                     picture_jl.strideR = 0
                     picture_jl.strideG = 0
                     picture_jl.planeB = pointer(planeB)
-                    picture_jl.strideB = Int32(strides(planeB)[2])
+                    picture_jl.strideB = strides(planeB)[2]
                     picture_jl.bitDepth = 8
 
                     # sync the Julia structure back to C
