@@ -1359,7 +1359,8 @@ function ws_coroutine(ws, ids)
                         println(
                             "x265_encoder_encode::stat = $stat, iNal = ",
                             iNal[],
-                            ", pNals: $pNals",
+                            ", pNals($pNals): ",
+                            pNals[],
                         )
                     end
                 end
