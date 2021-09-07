@@ -1356,7 +1356,11 @@ function ws_coroutine(ws, ids)
                             C_NULL,
                         )
 
-                        println("x265_encoder_encode::stat = $stat, iNal = ", iNal[])
+                        println(
+                            "x265_encoder_encode::stat = $stat, iNal = ",
+                            iNal[],
+                            ", pNals: $pNals",
+                        )
                     end
                 end
             catch e
@@ -1463,136 +1467,144 @@ function ws_coroutine(ws, ids)
                 resp = JSON.json(dict)
 
                 if writeguarded(ws, resp)
-                    # upon success init the HEVC encoder
-                    param = ccall((:x265_param_alloc, libx265), Ptr{Cvoid}, ())
+                    try
+                        lock(video_mtx)
 
-                    if param == C_NULL
-                        @error "NULL x265_param"
-                        continue
+                        # upon success init the HEVC encoder
+                        param = ccall((:x265_param_alloc, libx265), Ptr{Cvoid}, ())
+
+                        if param == C_NULL
+                            @error "NULL x265_param"
+                            continue
+                        end
+
+                        # set default parameters
+                        ccall(
+                            (:x265_param_default_preset, libx265),
+                            Cvoid,
+                            (Ptr{Cvoid}, Cstring, Cstring),
+                            param,
+                            "superfast",
+                            "zerolatency",
+                        )
+
+                        # extra parameters
+
+                        # FPS
+                        stat = ccall(
+                            (:x265_param_parse, libx265),
+                            Cint,
+                            (Ptr{Cvoid}, Cstring, Cstring),
+                            param,
+                            "fps",
+                            string(fps),
+                        )
+
+                        if stat != 0
+                            @error "Cannot set FPS"
+                        end
+
+                        # bRepeatHeaders = 1
+                        stat = ccall(
+                            (:x265_param_parse, libx265),
+                            Cint,
+                            (Ptr{Cvoid}, Cstring, Ptr{Cvoid}),
+                            param,
+                            "repeat-headers",
+                            C_NULL,
+                        )
+
+                        if stat != 0
+                            @error "Cannot set repeat-headers"
+                        end
+
+                        # internalCsp = X265_CSP_I444
+                        stat = ccall(
+                            (:x265_param_parse, libx265),
+                            Cint,
+                            (Ptr{Cvoid}, Cstring, Cstring),
+                            param,
+                            "input-csp",
+                            "i444",
+                        )
+
+                        if stat != 0
+                            @error "Cannot set input-csp"
+                        end
+
+                        # set video resolution
+                        res = string(image_width) * "x" * string(image_height)
+                        stat = ccall(
+                            (:x265_param_parse, libx265),
+                            Cint,
+                            (Ptr{Cvoid}, Cstring, Cstring),
+                            param,
+                            "input-res",
+                            res,
+                        )
+
+                        if stat != 0
+                            @error "Cannot set input-res"
+                        end
+
+                        # set constant quality rate
+                        crf = Integer(28)
+                        stat = ccall(
+                            (:x265_param_parse, libx265),
+                            Cint,
+                            (Ptr{Cvoid}, Cstring, Cstring),
+                            param,
+                            "crf",
+                            string(crf),
+                        )
+
+                        if stat != 0
+                            @error "Cannot set CRF"
+                        end
+
+                        # x265 encoder
+                        encoder =
+                            ccall((encoder_open, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
+                        println("typeof(encoder): ", typeof(encoder), "; value: $encoder")
+
+                        if encoder == C_NULL
+                            @error "NULL x265_encoder"
+                            continue
+                        end
+
+                        # x265 picture
+                        picture = ccall((:x265_picture_alloc, libx265), Ptr{Cvoid}, ())
+                        println("typeof(picture): ", typeof(picture), "; value: $picture")
+
+                        if picture == C_NULL
+                            @error "NULL x265_picture"
+                            continue
+                        end
+
+                        ccall(
+                            (:x265_picture_init, libx265),
+                            Cvoid,
+                            (Ptr{Cvoid}, Ptr{Cvoid}),
+                            param,
+                            picture,
+                        )
+
+                        planeB = fill(UInt8(128), image_width, image_height)
+
+                        picture_jl = x265_picture(picture)
+                        picture_jl.strideR = 0
+                        picture_jl.strideG = 0
+                        picture_jl.planeB = pointer(planeB)
+                        picture_jl.strideB = strides(planeB)[2]
+                        picture_jl.bitDepth = 8
+
+                        # sync the Julia structure back to C
+                        unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
+                    catch e
+                        println(e)
+                    finally
+                        unlock(video_mtx)
                     end
-
-                    # set default parameters
-                    ccall(
-                        (:x265_param_default_preset, libx265),
-                        Cvoid,
-                        (Ptr{Cvoid}, Cstring, Cstring),
-                        param,
-                        "superfast",
-                        "zerolatency",
-                    )
-
-                    # extra parameters
-
-                    # FPS
-                    stat = ccall(
-                        (:x265_param_parse, libx265),
-                        Cint,
-                        (Ptr{Cvoid}, Cstring, Cstring),
-                        param,
-                        "fps",
-                        string(fps),
-                    )
-
-                    if stat != 0
-                        @error "Cannot set FPS"
-                    end
-
-                    # bRepeatHeaders = 1
-                    stat = ccall(
-                        (:x265_param_parse, libx265),
-                        Cint,
-                        (Ptr{Cvoid}, Cstring, Ptr{Cvoid}),
-                        param,
-                        "repeat-headers",
-                        C_NULL,
-                    )
-
-                    if stat != 0
-                        @error "Cannot set repeat-headers"
-                    end
-
-                    # internalCsp = X265_CSP_I444
-                    stat = ccall(
-                        (:x265_param_parse, libx265),
-                        Cint,
-                        (Ptr{Cvoid}, Cstring, Cstring),
-                        param,
-                        "input-csp",
-                        "i444",
-                    )
-
-                    if stat != 0
-                        @error "Cannot set input-csp"
-                    end
-
-                    # set video resolution
-                    res = string(image_width) * "x" * string(image_height)
-                    stat = ccall(
-                        (:x265_param_parse, libx265),
-                        Cint,
-                        (Ptr{Cvoid}, Cstring, Cstring),
-                        param,
-                        "input-res",
-                        res,
-                    )
-
-                    if stat != 0
-                        @error "Cannot set input-res"
-                    end
-
-                    # set constant quality rate
-                    crf = Integer(28)
-                    stat = ccall(
-                        (:x265_param_parse, libx265),
-                        Cint,
-                        (Ptr{Cvoid}, Cstring, Cstring),
-                        param,
-                        "crf",
-                        string(crf),
-                    )
-
-                    if stat != 0
-                        @error "Cannot set CRF"
-                    end
-
-                    # x265 encoder
-                    encoder =
-                        ccall((encoder_open, libx265), Ptr{Cvoid}, (Ptr{Cvoid},), param)
-                    println("typeof(encoder): ", typeof(encoder), "; value: $encoder")
-
-                    if encoder == C_NULL
-                        @error "NULL x265_encoder"
-                        continue
-                    end
-
-                    # x265 picture
-                    picture = ccall((:x265_picture_alloc, libx265), Ptr{Cvoid}, ())
-                    println("typeof(picture): ", typeof(picture), "; value: $picture")
-
-                    if picture == C_NULL
-                        @error "NULL x265_picture"
-                        continue
-                    end
-
-                    ccall(
-                        (:x265_picture_init, libx265),
-                        Cvoid,
-                        (Ptr{Cvoid}, Ptr{Cvoid}),
-                        param,
-                        picture,
-                    )
-
-                    planeB = fill(UInt8(128), image_width, image_height)
-
-                    picture_jl = x265_picture(picture)
-                    picture_jl.strideR = 0
-                    picture_jl.strideG = 0
-                    picture_jl.planeB = pointer(planeB)
-                    picture_jl.strideB = strides(planeB)[2]
-                    picture_jl.bitDepth = 8
-
-                    # sync the Julia structure back to C
-                    unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
 
                     continue
                 else
