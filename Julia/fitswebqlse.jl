@@ -1364,7 +1364,9 @@ function ws_coroutine(ws, ids)
                         )
 
                         # create an array of undef <iNal[]> pointers
-                        # load it from <pNals[]> 
+                        # load it from <pNals[]>
+                        local frames::NTuple{iNal[],Ptr{Cvoid}}
+
                     end
                 end
             catch e
