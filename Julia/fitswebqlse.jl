@@ -25,6 +25,13 @@ mutable struct x265_picture
     bitDepth::Cint
 end
 
+mutable struct x265_nal
+    type::Cint
+    sizeBytes::Cint
+    payload::Ptr{Cuchar}
+end
+
+x265_nal(nal::Ptr) = unsafe_load(Ptr{x265_nal}(nal))
 x265_picture(picture::Ptr) = unsafe_load(Ptr{x265_picture}(picture))
 
 function x265_apiver()
