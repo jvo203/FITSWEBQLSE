@@ -1334,7 +1334,7 @@ function ws_coroutine(ws, ids)
                         # iNal_jll value: iNal[] 
 
                         # an array of pointers
-                        # local pNals_jll::Ptr{Ptr{Cvoid}} = pNals[]
+                        # local pNals_jll::Ptr{Ptr{Cvoid}} = pNals[]                        
 
                         # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
                         # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
@@ -1362,6 +1362,9 @@ function ws_coroutine(ws, ids)
                             ", pNals($pNals): ",
                             pNals[],
                         )
+
+                        # create an array of undef <iNal[]> pointers
+                        # load it from <pNals[]> 
                     end
                 end
             catch e
