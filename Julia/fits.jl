@@ -2605,7 +2605,8 @@ function getVideoFrame(
     lmax = log(1.5f0)
 
     # BitMatrix -> Array{Bool} -> Array{UInt8}
-    alpha_task = Threads.@spawn alpha = alphaMask.(mask)
+    # alpha_task = Threads.@spawn alpha = alphaMask.(mask)
+    alpha = alphaMask.(mask)
 
     # convert Float16 pixels to UInt8 (apply tone mapping)
     # luma = Matrix{UInt8}(undef, size(pixels))
@@ -2628,7 +2629,7 @@ function getVideoFrame(
     # in some cases, where pixels <= 0.0 alpha needs to be set to 0
     # even if a pixel is not NaN
 
-    wait(alpha_task)
+    # wait(alpha_task)
 
     return (luma, alpha)
 end
