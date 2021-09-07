@@ -1370,7 +1370,14 @@ function ws_coroutine(ws, ids)
                             pNals[],
                         )
 
+                        nal = x265_nal(pNals[])
+                        println("NAL: $nal")
+
                         nelems = iNal[]
+
+                        parr = Vector{Ptr{Cvoid}}(undef, nelems)
+                        unsafe_copyto!(pointer(parr), pNals, nelems)
+                        println(parr)
 
                         for idx = 1:nelems
                             # create an array of undef <iNal[]> pointers
@@ -1381,11 +1388,11 @@ function ws_coroutine(ws, ids)
                             #frames = unsafe_load(pNals[])
                             # frames = unsafe_load(NTuple{iNal[],Ptr{Cvoid}}(pNals[]))
 
-                            ptrNal = unsafe_load(Ptr{Ptr{Cvoid}}(pNals[]), idx)
-                            println("frame: $idx, ptrNal: $ptrNal")
+                            #ptrNal = unsafe_load(Ptr{Ptr{Cvoid}}(pNals[]), idx)
+                            #println("frame: $idx, ptrNal: $ptrNal")
 
-                            nal = x265_nal(ptrNal)
-                            println("NAL: $nal")
+                            #nal = x265_nal(ptrNal)
+                            #println("NAL: $nal")
                         end
                     end
                 end
