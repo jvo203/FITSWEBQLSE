@@ -1381,8 +1381,11 @@ function ws_coroutine(ws, ids)
                             #frames = unsafe_load(pNals[])
                             # frames = unsafe_load(NTuple{iNal[],Ptr{Cvoid}}(pNals[]))
 
-                            parr = unsafe_load(Ptr{Ptr{Cvoid}}(pNals[]), idx)
-                            println("frame: $idx, parr: $parr")
+                            ptrNal = unsafe_load(Ptr{Ptr{Cvoid}}(pNals[]), idx)
+                            println("frame: $idx, ptrNal: $ptrNal")
+
+                            nal = x265_nal(ptrNal)
+                            println("NAL: $nal")
                         end
                     end
                 end
