@@ -1363,10 +1363,20 @@ function ws_coroutine(ws, ids)
                             pNals[],
                         )
 
-                        # create an array of undef <iNal[]> pointers
-                        # load it from <pNals[]>
-                        local frames::NTuple{iNal[],Ptr{Cvoid}}
+                        nelems = iNal[]
 
+                        for idx = 1:nelems
+                            # create an array of undef <iNal[]> pointers
+                            # load it from <pNals[]>                            
+                            # local frames::NTuple{nelems,Ptr{Cvoid}}
+
+                            # load a C array of pointers
+                            #frames = unsafe_load(pNals[])
+                            # frames = unsafe_load(NTuple{iNal[],Ptr{Cvoid}}(pNals[]))
+
+                            parr = unsafe_load(Ptr{Ptr{Cvoid}}(pNals[]), idx)
+                            println("frame: $idx, parr: $parr")
+                        end
                     end
                 end
             catch e
