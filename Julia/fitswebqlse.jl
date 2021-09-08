@@ -28,7 +28,8 @@ end
 mutable struct x265_nal
     type::Cint
     sizeBytes::Cint
-    payload::Ptr{Cuchar}
+    # payload::Ptr{Cuchar}
+    payload::Ptr{UInt8}
 end
 
 x265_nal(nal::Ptr, idx::Integer) = unsafe_load(Ptr{x265_nal}(nal), idx)
