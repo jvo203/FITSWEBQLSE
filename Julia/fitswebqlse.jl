@@ -1296,7 +1296,14 @@ function ws_coroutine(ws, ids)
                 lock(video_mtx)
 
                 frame_idx, = get_spectrum_range(fits_object, frame, frame, ref_freq)
-                println("video frame: $frame_idx; keyframe: $keyframe")
+
+                if last_frame_idx == frame_idx
+                    println("skipping a repeat video frame")
+                    continue
+                else
+                    last_frame_idx = frame_idx
+                    println("video frame: $frame_idx; keyframe: $keyframe")
+                end
 
                 # get a video frame
                 luma, alpha = getVideoFrame(
