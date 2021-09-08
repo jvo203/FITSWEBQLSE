@@ -2567,7 +2567,7 @@ function getVideoFrame(
         try
             pixels, mask = take!(results)
         catch e
-            println("video frame task completed")
+            # println("video frame task completed")
             break
         end
     end
@@ -2681,8 +2681,15 @@ end
         try
             # tried using Threads.@spawn for the mask
             # imresize does not seem to be thread-safe
-            mask = Bool.(imresize(mask, (image_width, image_height), method = Constant()),) # use Nearest-Neighbours for the mask
-            pixels = Float16.(imresize(pixels, (image_width, image_height)),)
+
+            mask_task = @spawnat :any Bool.(
+                imresize(mask, (image_width, image_height), method = Constant()),
+            ) # use Nearest-Neighbours for the mask
+            pixels_task =
+                @spawnat :any Float16.(imresize(pixels, (image_width, image_height)),)
+
+            mask = fetch(mask_task)
+            pixels = fetch(pixels_task)
         catch e
             # println(e)
             println(
