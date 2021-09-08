@@ -1383,7 +1383,7 @@ function ws_coroutine(ws, ids)
 
                         for idx = 1:iNal[]
                             nal = x265_nal(pNals[], idx)
-                            println("NAL #$idx: $nal")
+                            # println("NAL #$idx: $nal")
 
                             resp = IOBuffer()
 
