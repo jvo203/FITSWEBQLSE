@@ -31,7 +31,7 @@ mutable struct x265_nal
     payload::Ptr{Cuchar}
 end
 
-x265_nal(nal::Ptr) = unsafe_load(Ptr{x265_nal}(nal))
+x265_nal(nal::Ptr, idx::Integer) = unsafe_load(Ptr{x265_nal}(nal), idx)
 x265_picture(picture::Ptr) = unsafe_load(Ptr{x265_picture}(picture))
 
 function x265_apiver()
@@ -1377,29 +1377,14 @@ function ws_coroutine(ws, ids)
                             pNals[],
                         )
 
-                        nal = x265_nal(pNals[])
-                        println("NAL: $nal")
+                        # nelems = iNal[]
+                        # parr = Vector{Ptr{Cvoid}}(undef, nelems)
+                        # unsafe_copyto!(pointer(parr), pNals, nelems)
+                        # println(parr)
 
-                        nelems = iNal[]
-
-                        parr = Vector{Ptr{Cvoid}}(undef, nelems)
-                        unsafe_copyto!(pointer(parr), pNals, nelems)
-                        println(parr)
-
-                        for idx = 1:nelems
-                            # create an array of undef <iNal[]> pointers
-                            # load it from <pNals[]>                            
-                            # local frames::NTuple{nelems,Ptr{Cvoid}}
-
-                            # load a C array of pointers
-                            #frames = unsafe_load(pNals[])
-                            # frames = unsafe_load(NTuple{iNal[],Ptr{Cvoid}}(pNals[]))
-
-                            #ptrNal = unsafe_load(Ptr{Ptr{Cvoid}}(pNals[]), idx)
-                            #println("frame: $idx, ptrNal: $ptrNal")
-
-                            #nal = x265_nal(ptrNal)
-                            #println("NAL: $nal")
+                        for idx = 1:iNal[]
+                            nal = x265_nal(pNals[], idx)
+                            println("NAL #$idx: $nal")
                         end
                     end
                 end
