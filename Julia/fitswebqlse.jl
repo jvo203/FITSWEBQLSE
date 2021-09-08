@@ -1462,7 +1462,7 @@ function ws_coroutine(ws, ids)
                 last_video_seq = msg["seq_id"]
                 last_frame_idx = -1
                 bitrate = msg["bitrate"]
-                fps = msg["fps"]
+                fps = round(Integer, msg["fps"])
 
                 fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
