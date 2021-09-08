@@ -1306,7 +1306,7 @@ function ws_coroutine(ws, ids)
                 end
 
                 # get a video frame
-                luma, alpha = getVideoFrame(
+                elapsed = @elapsed luma, alpha = getVideoFrame(
                     fits_object,
                     frame_idx,
                     flux,
@@ -1314,6 +1314,7 @@ function ws_coroutine(ws, ids)
                     image_height,
                     bDownsize,
                 )
+                elapsed *= 1000.0 # [ms]
 
                 println(
                     typeof(luma),
@@ -1325,6 +1326,7 @@ function ws_coroutine(ws, ids)
                     size(alpha),
                     "; bDownsize:",
                     bDownsize,
+                    "; elapsed: $elapsed [ms]",
                 )
 
                 if picture != C_NULL
@@ -1353,7 +1355,7 @@ function ws_coroutine(ws, ids)
                         # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
                         # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
 
-                        stat = ccall(
+                        encoding = @elapsed stat = ccall(
                             (:x265_encoder_encode, libx265),
                             Cint,
                             (
@@ -1369,12 +1371,14 @@ function ws_coroutine(ws, ids)
                             picture,
                             C_NULL,
                         )
+                        encoding *= 1000.0 # [ms]
 
                         println(
                             "x265_encoder_encode::stat = $stat, iNal = ",
                             iNal[],
                             ", pNals($pNals): ",
                             pNals[],
+                            "; elapsed: $encoding [ms]",
                         )
 
                         # nelems = iNal[]
@@ -1387,6 +1391,22 @@ function ws_coroutine(ws, ids)
                             println("NAL #$idx: $nal")
 
                             resp = IOBuffer()
+
+                            # the header
+                            write(resp, Float32(req["timestamp"]))
+                            write(resp, Int32(req["seq_id"]))
+                            write(resp, Int32(5)) # 5 - video frame
+                            write(resp, Float32(elapsed + encoding))
+
+                            # the body
+                            payload = Vector{UInt8}(undef, nal.sizeBytes)
+                            unsafe_copyto!(pointer(payload), nal.payload, nal.sizeBytes)
+                            write(resp, payload)
+
+                            if !writeguarded(ws, take!(resp))
+                                break
+                            end
+
                         end
                     end
                 end
