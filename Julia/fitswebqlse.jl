@@ -1297,7 +1297,7 @@ function ws_coroutine(ws, ids)
 
                 frame_idx, = get_spectrum_range(fits_object, frame, frame, ref_freq)
 
-                if last_frame_idx == frame_idx
+                if (last_frame_idx == frame_idx) && !keyframe
                     println("skipping a repeat video frame")
                     continue
                 else
@@ -1385,6 +1385,8 @@ function ws_coroutine(ws, ids)
                         for idx = 1:iNal[]
                             nal = x265_nal(pNals[], idx)
                             println("NAL #$idx: $nal")
+
+                            resp = IOBuffer()
                         end
                     end
                 end
