@@ -1266,7 +1266,6 @@ function ws_coroutine(ws, ids)
     video = @async while true
         try
             req = take!(video_requests)
-            # println(datasetid, "::", req)
 
             fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
@@ -1298,7 +1297,7 @@ function ws_coroutine(ws, ids)
 
                 frame_idx, = get_spectrum_range(fits_object, frame, frame, ref_freq)
 
-                if (last_frame_idx == frame_idx) && !keyframe
+                if !keyframe && (last_frame_idx == frame_idx)
                     println("skipping a repeat video frame")
                     continue
                 else
@@ -1382,11 +1381,6 @@ function ws_coroutine(ws, ids)
                             "; elapsed: $encoding [ms]",
                         )
 
-                        # nelems = iNal[]
-                        # parr = Vector{Ptr{Cvoid}}(undef, nelems)
-                        # unsafe_copyto!(pointer(parr), pNals, nelems)
-                        # println(parr)
-
                         for idx = 1:iNal[]
                             nal = x265_nal(pNals[], idx)
                             println("NAL #$idx: $nal")
@@ -1449,7 +1443,7 @@ function ws_coroutine(ws, ids)
             end
         end
 
-        @info "Received: $s"
+        # @info "Received: $s"
 
         # convert the message into JSON
         try
@@ -1715,13 +1709,6 @@ function ws_coroutine(ws, ids)
     wait(video)
 
     # clean up x265
-    if param ≠ C_NULL
-        # release the x265 parameters structure
-        ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
-
-        @info "cleaned up x265 parameters"
-    end
-
     if encoder ≠ C_NULL
         # release the x265 encoder
         ccall((:x265_encoder_close, libx265), Cvoid, (Ptr{Cvoid},), encoder)
@@ -1734,6 +1721,13 @@ function ws_coroutine(ws, ids)
         ccall((:x265_picture_free, libx265), Cvoid, (Ptr{Cvoid},), picture)
 
         @info "cleaned up the x265 picture"
+    end
+
+    if param ≠ C_NULL
+        # release the x265 parameters structure
+        ccall((:x265_param_free, libx265), Cvoid, (Ptr{Cvoid},), param)
+
+        @info "cleaned up x265 parameters"
     end
 
     @info "$datasetid will now close " ws
