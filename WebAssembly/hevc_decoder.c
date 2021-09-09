@@ -219,8 +219,12 @@ double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_le
                     apply_colourmap(canvas, w, h, luma, stride_luma, alpha, stride_alpha, false, viridis_r, viridis_g, viridis_b, fill);
                 }
                 else if (strcmp(colourmap, "negative") == 0)
-                {                    
+                {
                     apply_greyscale(canvas, w, h, luma, stride_luma, alpha, stride_alpha, true, fill);
+                }
+                else if (strcmp(colourmap, "amber") == 0)
+                {
+                    apply_amber(canvas, w, h, luma, stride_luma, alpha, stride_alpha, fill);
                 }
                 else
                 {

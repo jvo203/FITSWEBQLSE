@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-void apply_colourmap(unsigned char* canvas, int w, int h, const unsigned char* luma, int stride_luma, const unsigned char* alpha, int stride_alpha, bool invert, const float* r, const float* g, const float* b, unsigned char fill)
+void apply_colourmap(unsigned char *canvas, int w, int h, const unsigned char *luma, int stride_luma, const unsigned char *alpha, int stride_alpha, bool invert, const float *r, const float *g, const float *b, unsigned char fill)
 {
 	if (canvas == NULL || luma == NULL || alpha == NULL)
 		return;
@@ -16,7 +16,7 @@ void apply_colourmap(unsigned char* canvas, int w, int h, const unsigned char* l
 	float interp_factor = no_colours / 256.0f;
 
 	for (int j = 0; j < h; j++)
-	{		
+	{
 		// Y-mirror-flip the image
 		size_t luma_offset = (h - 1 - j) * stride_luma;
 		size_t alpha_offset = (h - 1 - j) * stride_alpha;
@@ -25,7 +25,7 @@ void apply_colourmap(unsigned char* canvas, int w, int h, const unsigned char* l
 		{
 			unsigned char pixel = luma[luma_offset++];
 			pixel = invert ? (255 - pixel) : pixel;
-			unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;			
+			unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;
 
 			float pos = pixel * interp_factor;
 			float frac = pos - floorf(pos);
@@ -42,6 +42,36 @@ void apply_colourmap(unsigned char* canvas, int w, int h, const unsigned char* l
 			canvas[dst_offset++] = r_pixel;
 			canvas[dst_offset++] = g_pixel;
 			canvas[dst_offset++] = b_pixel;
+			canvas[dst_offset++] = 255; //the alpha channel
+		}
+	}
+}
+
+void apply_amber(unsigned char *canvas, int w, int h, const unsigned char *luma, int stride_luma, const unsigned char *alpha, int stride_alpha, unsigned char fill)
+{
+	if (canvas == NULL || luma == NULL || alpha == NULL)
+		return;
+
+	size_t luma_offset = 0;
+	size_t alpha_offset = 0;
+	size_t dst_offset = 0;
+
+	for (int j = 0; j < h; j++)
+	{
+
+		// Y-mirror-flip the image
+		size_t luma_offset = (h - 1 - j) * stride_luma;
+		size_t alpha_offset = (h - 1 - j) * stride_alpha;
+
+		for (int i = 0; i < w; i++)
+		{
+			unsigned char pixel = luma[luma_offset++];
+			unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;
+			pixel = (mask == 0) ? fill : pixel;
+
+			canvas[dst_offset++] = pixel;
+			canvas[dst_offset++] = pixel;
+			canvas[dst_offset++] = pixel;
 			canvas[dst_offset++] = 255; //the alpha channel
 		}
 	}
@@ -66,7 +96,7 @@ void apply_greyscale(unsigned char *canvas, int w, int h, const unsigned char *l
 		for (int i = 0; i < w; i++)
 		{
 			unsigned char pixel = invert ? (255 - luma[luma_offset++]) : luma[luma_offset++];
-			unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;		
+			unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;
 			pixel = (mask == 0) ? fill : pixel;
 
 			canvas[dst_offset++] = pixel;
