@@ -47,6 +47,17 @@ void apply_colourmap(unsigned char *canvas, int w, int h, const unsigned char *l
 	}
 }
 
+float clamp(float x, float min, float max)
+{
+	if (x < min)
+		return min;
+
+	if (x > max)
+		return max;
+
+	return x;
+}
+
 void apply_amber(unsigned char *canvas, int w, int h, const unsigned char *luma, int stride_luma, const unsigned char *alpha, int stride_alpha, unsigned char fill)
 {
 	if (canvas == NULL || luma == NULL || alpha == NULL)
@@ -69,9 +80,11 @@ void apply_amber(unsigned char *canvas, int w, int h, const unsigned char *luma,
 			unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;
 			pixel = (mask == 0) ? fill : pixel;
 
+			unsigned char r_pixel = clamp(roundf(pixel * 204.0f / 255.0f), 0.0f, 255.0f);
+
 			canvas[dst_offset++] = pixel;
-			canvas[dst_offset++] = pixel;
-			canvas[dst_offset++] = pixel;
+			canvas[dst_offset++] = r_pixel;
+			canvas[dst_offset++] = 0;
 			canvas[dst_offset++] = 255; //the alpha channel
 		}
 	}
@@ -105,17 +118,6 @@ void apply_greyscale(unsigned char *canvas, int w, int h, const unsigned char *l
 			canvas[dst_offset++] = 255; //the alpha channel
 		}
 	}
-}
-
-float clamp(float x, float min, float max)
-{
-	if (x < min)
-		return min;
-
-	if (x > max)
-		return max;
-
-	return x;
 }
 
 void apply_yuv(unsigned char *canvas, const unsigned char *_y, const unsigned char *_u, const unsigned char *_v, int w, int h, int stride, const unsigned char *alpha)
