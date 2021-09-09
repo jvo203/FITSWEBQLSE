@@ -364,19 +364,19 @@ val hevc_decode_frame(unsigned int _w, unsigned int _h, std::string const &bytes
   return val(typed_memory_view(canvasLength, canvasBuffer));
 }
 
-int main()
+/*int main()
 {
   // does nothing, it is a dummy function to get around
   // broken emscripten >= 2.0.18
   printf("WASM MAIN\n");
   return 0;
-}
+}*/
 
 EMSCRIPTEN_BINDINGS(Wrapper)
 {
   register_vector<float>("Float");
   register_vector<unsigned char>("UChar");
-  function("main", &main);
+  //function("main", &main);
   function("decompressZFP", &decompressZFP);
   function("decompressZFPimage", &decompressZFPimage);
   function("decompressZFPspectrum", &decompressZFPspectrum);
