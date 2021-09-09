@@ -1451,7 +1451,8 @@ function ws_coroutine(ws, ids)
             @info msg
 
             if msg["type"] == "realtime_image_spectrum"
-                replace!(viewport_requests, msg)
+                # replace!(viewport_requests, msg)
+                push!(viewport_requests, msg)
             end
 
             # init_video
@@ -1694,8 +1695,8 @@ function ws_coroutine(ws, ids)
 
             # realtime streaming video frame requests
             if msg["type"] == "video"
-                replace!(video_requests, msg)
-                # push!(video_requests, msg)
+                # replace!(video_requests, msg)
+                push!(video_requests, msg)
             end
         catch e
             println("ws_coroutine::$e")
