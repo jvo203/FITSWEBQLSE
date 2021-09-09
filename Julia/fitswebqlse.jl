@@ -1540,7 +1540,8 @@ function ws_coroutine(ws, ids)
                             (Ptr{Cvoid}, Cstring, Cstring),
                             param,
                             "fps",
-                            string(fps),
+                            #string(fps),
+                            "30",
                         )
 
                         if stat != 0
