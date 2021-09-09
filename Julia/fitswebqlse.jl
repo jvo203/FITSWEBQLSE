@@ -1695,6 +1695,7 @@ function ws_coroutine(ws, ids)
             # realtime streaming video frame requests
             if msg["type"] == "video"
                 replace!(video_requests, msg)
+                # push!(video_requests, msg)
             end
         catch e
             println("ws_coroutine::$e")
