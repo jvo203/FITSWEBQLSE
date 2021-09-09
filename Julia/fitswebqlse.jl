@@ -1451,8 +1451,8 @@ function ws_coroutine(ws, ids)
             @info msg
 
             if msg["type"] == "realtime_image_spectrum"
-                # replace!(viewport_requests, msg)
-                push!(viewport_requests, msg)
+                replace!(viewport_requests, msg)
+                # push!(viewport_requests, msg) # there is too much lag
             end
 
             # init_video
