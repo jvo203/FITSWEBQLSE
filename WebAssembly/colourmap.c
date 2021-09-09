@@ -80,10 +80,8 @@ void apply_amber(unsigned char *canvas, int w, int h, const unsigned char *luma,
 			unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;
 			pixel = (mask == 0) ? fill : pixel;
 
-			unsigned char r_pixel = clamp(roundf(pixel * 204.0f / 255.0f), 0.0f, 255.0f);
-
 			canvas[dst_offset++] = pixel;
-			canvas[dst_offset++] = r_pixel;
+			canvas[dst_offset++] = clamp(roundf(pixel * 204.0f / 255.0f), 0.0f, 255.0f);
 			canvas[dst_offset++] = 0;
 			canvas[dst_offset++] = 255; //the alpha channel
 		}
