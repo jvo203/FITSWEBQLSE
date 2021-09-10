@@ -123,6 +123,7 @@ const HTTP_PORT = 8080
 const WS_PORT = HTTP_PORT + 1
 
 @everywhere include("fits.jl")
+include("kalman.jl")
 
 # a global list of FITS objects
 FITS_OBJECTS = Dict{String,FITSDataSet}()
