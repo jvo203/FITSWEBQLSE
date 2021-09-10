@@ -1302,9 +1302,14 @@ function ws_coroutine(ws, ids)
 
                 # Kalman Filter tracking/prediction
                 update(filter, frame, deltat)
-                frame = predict(filter, frame, deltat)
+                frame2 = predict(filter, frame, deltat)
 
                 frame_idx, = get_spectrum_range(fits_object, frame, frame, ref_freq)
+                frame_idx2, = get_spectrum_range(fits_object, frame2, frame2, ref_freq)
+
+                println(
+                    "deltat: %deltat [ms]; frame_idx: $frame_idx, predicted: $frame_idx2",
+                )
 
                 if !keyframe && (last_frame_idx == frame_idx)
                     println("skipping a repeat video frame")
@@ -1484,10 +1489,8 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                # obtain an initial cube channel and initialize the Kalman Filter
-                frame = Float64(req["frame"])
-                filter = KalmanFilter(frame, true)
-                ts = now()
+                # obtain an initial cube channel
+                frame = Float64(msg["frame"])
 
                 # calculate scale, downsize when applicable
                 inner_width, inner_height = get_inner_dimensions(fits_object)
@@ -1526,6 +1529,10 @@ function ws_coroutine(ws, ids)
                 if writeguarded(ws, resp)
                     try
                         lock(video_mtx)
+
+                        # initialize the Kalman Filter
+                        filter = KalmanFilter(frame, true)
+                        ts = now()
 
                         # upon success init the HEVC encoder
                         param = ccall((:x265_param_alloc, libx265), Ptr{Cvoid}, ())
