@@ -1252,7 +1252,7 @@ function ws_coroutine(ws, ids)
             update_timestamp(fits_object)
 
             # trigger garbage collection
-            # GC.gc()
+            GC.gc()
         catch e
             if isa(e, InvalidStateException) && e.state == :closed
                 println("real-time viewport task completed")
@@ -1333,6 +1333,7 @@ function ws_coroutine(ws, ids)
                     image_width,
                     image_height,
                     bDownsize,
+                    keyframe,
                 )
                 elapsed *= 1000.0 # [ms]
 
@@ -1434,7 +1435,7 @@ function ws_coroutine(ws, ids)
             update_timestamp(fits_object)
 
             # trigger garbage collection
-            # GC.gc()
+            GC.gc()
         catch e
             if isa(e, InvalidStateException) && e.state == :closed
                 println("real-time video task completed")

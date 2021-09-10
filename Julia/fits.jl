@@ -2553,6 +2553,7 @@ function getVideoFrame(
     image_width::Integer,
     image_height::Integer,
     bDownsize::Bool,
+    keyframe::Bool,
 )
     local pixels, mask
     local luma, alpha
@@ -2581,6 +2582,7 @@ function getVideoFrame(
             image_width,
             image_height,
             bDownsize,
+            keyframe,
             results,
         )
 
@@ -2640,6 +2642,7 @@ end
     image_width::Integer,
     image_height::Integer,
     bDownsize::Bool,
+    keyframe::Bool,
     queue::RemoteChannel{Channel{Tuple}},
 )
     local frame_pixels, pixels, mask
@@ -2685,8 +2688,18 @@ end
             mask_task = @spawnat :any Bool.(
                 imresize(mask, (image_width, image_height), method = Constant()),
             ) # use Nearest-Neighbours for the mask
-            pixels_task =
-                @spawnat :any Float16.(imresize(pixels, (image_width, image_height)),)
+
+            local pixels_task
+
+            if keyframe
+                pixels_task =
+                    @spawnat :any Float16.(imresize(pixels, (image_width, image_height)),)
+            else
+                pixels_task = @spawnat :any Float16.(
+                    imresize(pixels, (image_width, image_height)),
+                    method = Constant(),
+                )
+            end
 
             mask = fetch(mask_task)
             pixels = fetch(pixels_task)
