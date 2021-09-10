@@ -1295,6 +1295,7 @@ function ws_coroutine(ws, ids)
             end
 
             try
+                lock(video_mtx)
                 deltat = Float64(Dates.value(now() - ts)) # [ms]
                 ts = now()
 
@@ -1311,7 +1312,7 @@ function ws_coroutine(ws, ids)
                     last_frame_idx = frame_idx
                     println("video frame: $frame_idx; keyframe: $keyframe")
                 end
-
+                unlock(video_mtx)
 
                 # get a video frame
                 elapsed = @elapsed luma, alpha = getVideoFrame(
