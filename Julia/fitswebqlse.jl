@@ -1176,6 +1176,7 @@ function ws_coroutine(ws, ids)
 
     # HEVC
     local param, encoder, picture, planeB, luma, alpha
+    local filter::KalmanFilter, ts
 
     local video_mtx = ReentrantLock()
 
@@ -1294,7 +1295,11 @@ function ws_coroutine(ws, ids)
             end
 
             try
-                lock(video_mtx)
+                deltat = Float64(Dates.value(now() - ts)) # [ms]
+                ts = now()
+
+                update(filter, frame, deltat)
+                frame = predict(filter, frame, deltat)
 
                 frame_idx, = get_spectrum_range(fits_object, frame, frame, ref_freq)
 
@@ -1305,6 +1310,7 @@ function ws_coroutine(ws, ids)
                     last_frame_idx = frame_idx
                     println("video frame: $frame_idx; keyframe: $keyframe")
                 end
+
 
                 # get a video frame
                 elapsed = @elapsed luma, alpha = getVideoFrame(
@@ -1329,6 +1335,8 @@ function ws_coroutine(ws, ids)
                     bDownsize,
                     "; elapsed: $elapsed [ms]",
                 )
+
+                lock(video_mtx)
 
                 if picture != C_NULL
                     # update the x265_picture structure                
@@ -1475,6 +1483,11 @@ function ws_coroutine(ws, ids)
                 if !has_data(fits_object)
                     error("$datasetid: no data found.")
                 end
+
+                # obtain an initial cube channel and initialize the Kalman Filter
+                frame = Float64(req["frame"])
+                filter = KalmanFilter(frame, true)
+                ts = now()
 
                 # calculate scale, downsize when applicable
                 inner_width, inner_height = get_inner_dimensions(fits_object)
