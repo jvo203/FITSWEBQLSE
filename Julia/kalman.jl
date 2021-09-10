@@ -59,3 +59,41 @@ function reset(filter::KalmanFilter, position::Float64)
     filter.estimate_velocity = 0.0
     filter.has_velocity = false
 end
+
+function update(filter::KalmanFilter, position::Float64, deltat::Float64)
+    if deltat <= 0.0
+        return
+    end
+
+    if !filter.has_velocity
+        filter.estimate_velocity = (position - filter.estimate_position) / deltat
+        filter.estimate_position = position
+        filter.has_velocity = true
+    else
+        # Temporal update (predictive)
+        filter.estimate_position += filter.estimate_velocity * deltat
+
+        # Update covariance
+        filter.p_xx += deltat * (2.0 * filter.p_xv + deltat * filter.p_vv)
+        filter.p_xv += deltat * filter.p_vv
+
+        filter.p_xx += deltat * filter.position_variance
+        filter.p_vv += deltat * filter.velocity_variance
+
+        # Observational update (reactive)
+        vi = 1.0 / (filter.p_xx + filter.r)
+        kx = filter.p_xx * vi
+        kv = filter.p_xv * vi
+
+        filter.estimate_position += (position - filter.estimate_position) * kx
+        filter.estimate_velocity += (position - filter.estimate_position) * kv
+
+        filter.p_xx *= 1.0 - kx
+        filter.p_xv *= 1.0 - kx
+        filter.p_vv -= kv * filter.p_xv
+    end
+end
+
+function predict(filter::KalmanFilter, position::Float64, deltat::Float64)::Float64
+    return position + filter.estimate_velocity * deltat
+end
