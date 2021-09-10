@@ -1252,7 +1252,7 @@ function ws_coroutine(ws, ids)
             update_timestamp(fits_object)
 
             # trigger garbage collection
-            GC.gc()
+            # GC.gc()
         catch e
             if isa(e, InvalidStateException) && e.state == :closed
                 println("real-time viewport task completed")
@@ -1308,8 +1308,14 @@ function ws_coroutine(ws, ids)
                 frame_idx2, = get_spectrum_range(fits_object, frame2, frame2, ref_freq)
 
                 println(
-                    "deltat: %deltat [ms]; frame_idx: $frame_idx, predicted: $frame_idx2",
+                    "deltat: $deltat [ms]; frame_idx: $frame_idx, predicted: $frame_idx2",
                 )
+
+                # use a predicted frame for non-keyframes
+                if !keyframe
+                    # disable Kalman Filter for now, deltat needs to be reduced
+                    # frame_idx = frame_idx2
+                end
 
                 if !keyframe && (last_frame_idx == frame_idx)
                     println("skipping a repeat video frame")
@@ -1428,7 +1434,7 @@ function ws_coroutine(ws, ids)
             update_timestamp(fits_object)
 
             # trigger garbage collection
-            GC.gc()
+            # GC.gc()
         catch e
             if isa(e, InvalidStateException) && e.state == :closed
                 println("real-time video task completed")
