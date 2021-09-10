@@ -1298,6 +1298,7 @@ function ws_coroutine(ws, ids)
                 deltat = Float64(Dates.value(now() - ts)) # [ms]
                 ts = now()
 
+                # Kalman Filter tracking/prediction
                 update(filter, frame, deltat)
                 frame = predict(filter, frame, deltat)
 
