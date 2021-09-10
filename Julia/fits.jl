@@ -2696,8 +2696,7 @@ end
                     @spawnat :any Float16.(imresize(pixels, (image_width, image_height)),)
             else
                 pixels_task = @spawnat :any Float16.(
-                    imresize(pixels, (image_width, image_height)),
-                    method = Constant(),
+                    imresize(pixels, (image_width, image_height), method = Constant()),
                 )
             end
 
