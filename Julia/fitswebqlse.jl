@@ -1324,104 +1324,107 @@ function ws_coroutine(ws, ids)
                     println("video frame: $frame_idx; keyframe: $keyframe")
                 end
 
-                # get a video frame
-                elapsed = @elapsed luma, alpha = getVideoFrame(
-                    fits_object,
-                    frame_idx,
-                    flux,
-                    image_width,
-                    image_height,
-                    bDownsize,
-                    keyframe,
-                )
-                elapsed *= 1000.0 # [ms]
+                @async begin
+                    # get a video frame
+                    elapsed = @elapsed luma, alpha = getVideoFrame(
+                        fits_object,
+                        frame_idx,
+                        flux,
+                        image_width,
+                        image_height,
+                        bDownsize,
+                        keyframe,
+                    )
+                    elapsed *= 1000.0 # [ms]
 
-                println(
-                    typeof(luma),
-                    ";",
-                    typeof(alpha),
-                    ";",
-                    size(luma),
-                    ";",
-                    size(alpha),
-                    "; bDownsize:",
-                    bDownsize,
-                    "; elapsed: $elapsed [ms]",
-                )
+                    println(
+                        typeof(luma),
+                        ";",
+                        typeof(alpha),
+                        ";",
+                        size(luma),
+                        ";",
+                        size(alpha),
+                        "; bDownsize:",
+                        bDownsize,
+                        "; elapsed: $elapsed [ms]",
+                    )
 
-                if picture != C_NULL
-                    # update the x265_picture structure                
-                    picture_jl = x265_picture(picture)
+                    if picture != C_NULL
+                        # update the x265_picture structure                
+                        picture_jl = x265_picture(picture)
 
-                    picture_jl.planeR = pointer(luma)
-                    picture_jl.strideR = strides(luma)[2]
+                        picture_jl.planeR = pointer(luma)
+                        picture_jl.strideR = strides(luma)[2]
 
-                    picture_jl.planeG = pointer(alpha)
-                    picture_jl.strideG = strides(alpha)[2]
+                        picture_jl.planeG = pointer(alpha)
+                        picture_jl.strideG = strides(alpha)[2]
 
-                    # sync the Julia structure back to C
-                    unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
+                        # sync the Julia structure back to C
+                        unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
 
-                    if encoder != C_NULL
-                        # HEVC-encode the luminance and alpha channels
-                        iNal = Ref{Cint}(0)
-                        pNals = Ref{Ptr{Cvoid}}(C_NULL)
+                        if encoder != C_NULL
+                            # HEVC-encode the luminance and alpha channels
+                            iNal = Ref{Cint}(0)
+                            pNals = Ref{Ptr{Cvoid}}(C_NULL)
 
-                        # iNal_jll value: iNal[] 
+                            # iNal_jll value: iNal[] 
 
-                        # an array of pointers
-                        # local pNals_jll::Ptr{Ptr{Cvoid}} = pNals[]                        
+                            # an array of pointers
+                            # local pNals_jll::Ptr{Ptr{Cvoid}} = pNals[]                        
 
-                        # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
-                        # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
+                            # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
+                            # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
 
-                        encoding = @elapsed stat = ccall(
-                            (:x265_encoder_encode, libx265),
-                            Cint,
-                            (
-                                Ptr{Cvoid},
-                                Ref{Ptr{Cvoid}},
-                                Ref{Cint},
-                                Ptr{Cvoid},
-                                Ptr{Cvoid},
-                            ),
-                            encoder,
-                            pNals,
-                            iNal,
-                            picture,
-                            C_NULL,
-                        )
-                        encoding *= 1000.0 # [ms]
+                            encoding = @elapsed stat = ccall(
+                                (:x265_encoder_encode, libx265),
+                                Cint,
+                                (
+                                    Ptr{Cvoid},
+                                    Ref{Ptr{Cvoid}},
+                                    Ref{Cint},
+                                    Ptr{Cvoid},
+                                    Ptr{Cvoid},
+                                ),
+                                encoder,
+                                pNals,
+                                iNal,
+                                picture,
+                                C_NULL,
+                            )
+                            encoding *= 1000.0 # [ms]
 
-                        println(
-                            "x265_encoder_encode::stat = $stat, iNal = ",
-                            iNal[],
-                            ", pNals($pNals): ",
-                            pNals[],
-                            "; elapsed: $encoding [ms]",
-                        )
+                            println(
+                                "x265_encoder_encode::stat = $stat, iNal = ",
+                                iNal[],
+                                ", pNals($pNals): ",
+                                pNals[],
+                                "; elapsed: $encoding [ms]",
+                            )
 
-                        for idx = 1:iNal[]
-                            nal = x265_nal(pNals[], idx)
-                            # println("NAL #$idx: $nal")
+                            for idx = 1:iNal[]
+                                nal = x265_nal(pNals[], idx)
+                                # println("NAL #$idx: $nal")
 
-                            resp = IOBuffer()
+                                resp = IOBuffer()
 
-                            # the header
-                            write(resp, Float32(req["timestamp"]))
-                            write(resp, Int32(req["seq_id"]))
-                            write(resp, Int32(5)) # 5 - video frame
-                            write(resp, Float32(elapsed + encoding))
+                                # the header
+                                write(resp, Float32(req["timestamp"]))
+                                write(resp, Int32(req["seq_id"]))
+                                write(resp, Int32(5)) # 5 - video frame
+                                write(resp, Float32(elapsed + encoding))
 
-                            # the body
-                            payload = Vector{UInt8}(undef, nal.sizeBytes)
-                            unsafe_copyto!(pointer(payload), nal.payload, nal.sizeBytes)
-                            write(resp, payload)
+                                # the body
+                                payload = Vector{UInt8}(undef, nal.sizeBytes)
+                                unsafe_copyto!(pointer(payload), nal.payload, nal.sizeBytes)
+                                write(resp, payload)
 
-                            if !writeguarded(ws, take!(resp))
-                                break
+                                if !writeguarded(ws, take!(resp))
+                                    # break
+                                    error("could not send a WebSocket message")
+                                end
+
                             end
-
                         end
                     end
                 end
