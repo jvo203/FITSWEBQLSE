@@ -1296,10 +1296,6 @@ function restoreData(fits::FITSDataSet)
         return
     end
 
-    lock(fits.mutex)
-    fits.progress = Threads.Atomic{Int}(0)
-    unlock(fits.mutex)
-
     @everywhere function load_frames(datasetid, width, height, idx)
         compressed_frames = Dict{Int32,Matrix{Float16}}()
         # spinlock = Threads.SpinLock()
@@ -1377,6 +1373,10 @@ function restoreData(fits::FITSDataSet)
             break
         end
     end
+
+    lock(fits.mutex)
+    fits.progress = Threads.Atomic{Int}(0)
+    unlock(fits.mutex)
 
     ras = [
         @spawnat job.where cache_frames(fetch(job), progress) for
