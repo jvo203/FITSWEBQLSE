@@ -1293,7 +1293,7 @@ function restoreData(fits::FITSDataSet)
         return
     end
 
-    @everywhere function preload_frames(datasetid, width, height, idx)
+    @everywhere function load_frames(datasetid, width, height, idx)
         compressed_frames = Dict{Int32,Matrix{Float16}}()
         # spinlock = Threads.SpinLock()
 
@@ -1330,12 +1330,39 @@ function restoreData(fits::FITSDataSet)
 
     # Remote Access Service
     ras = [
-        @spawnat w preload_frames(fits.datasetid, fits.width, fits.height, findall(value)) for (w, value) in fits.indices
+        @spawnat w load_frames(fits.datasetid, fits.width, fits.height, findall(value))
+        for (w, value) in fits.indices
     ]
 
     println("ras: ", ras)
 
     fits.compressed_pixels = ras
+
+    @time wait.(ras)
+
+    # finally preload frames by touching the mmapped data
+    progress = RemoteChannel(() -> Channel{Tuple}(32))
+
+    @async while true
+        try
+            idx = take!(progress)
+            println("cached frame #$idx")
+        catch e
+            println("caching data completed")
+            break
+        end
+    end
+
+    ras = [
+        @spawnat job.where cache_frames(fetch(job), progress)
+
+        for
+        job in fits.compressed_pixels
+    ]
+
+    @time wait.(ras)
+    close(progress)
+
 end
 
 function get_screen_scale(x::Integer)
