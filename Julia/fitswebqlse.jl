@@ -1294,7 +1294,7 @@ function ws_coroutine(ws, ids)
             end
 
             try
-                lock(video_mtx)
+                # lock(video_mtx)
 
                 deltat = Float64(Dates.value(now() - ts)) # [ms]
                 ts = now()
@@ -1324,7 +1324,7 @@ function ws_coroutine(ws, ids)
                     println("video frame: $frame_idx; keyframe: $keyframe")
                 end
 
-                @async begin
+                @async try
                     # get a video frame
                     elapsed = @elapsed luma, alpha = getVideoFrame(
                         fits_object,
@@ -1349,6 +1349,8 @@ function ws_coroutine(ws, ids)
                         bDownsize,
                         "; elapsed: $elapsed [ms]",
                     )
+
+                    lock(video_mtx)
 
                     if picture != C_NULL
                         # update the x265_picture structure                
@@ -1427,11 +1429,15 @@ function ws_coroutine(ws, ids)
                             end
                         end
                     end
+                catch e
+                    println(e)
+                finally
+                    unlock(video_mtx)
                 end
             catch e
                 println(e)
             finally
-                unlock(video_mtx)
+                # unlock(video_mtx)
             end
 
             update_timestamp(fits_object)
