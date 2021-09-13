@@ -1296,6 +1296,10 @@ function restoreData(fits::FITSDataSet)
         return
     end
 
+    lock(fits.mutex)
+    fits.progress = Threads.Atomic{Int}(0)
+    unlock(fits.mutex)
+
     @everywhere function load_frames(datasetid, width, height, idx)
         compressed_frames = Dict{Int32,Matrix{Float16}}()
         # spinlock = Threads.SpinLock()
@@ -1366,6 +1370,8 @@ function restoreData(fits::FITSDataSet)
         try
             idx, = take!(progress)
             println("cached frame #$idx")
+
+            update_progress(fits, fits.depth)
         catch e
             println("caching data completed")
             break
