@@ -1286,6 +1286,9 @@ function restoreImage(fits::FITSDataSet)
     fits.has_data = bSuccess
     fits.has_error = !bSuccess
     unlock(fits.mutex)
+
+    # restore the cube channels
+    restoreData(fits)
 end
 
 function restoreData(fits::FITSDataSet)
