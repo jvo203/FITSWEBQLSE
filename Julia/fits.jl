@@ -1345,7 +1345,7 @@ function restoreData(fits::FITSDataSet)
 
     @async while true
         try
-            idx = take!(progress)
+            idx, = take!(progress)
             println("cached frame #$idx")
         catch e
             println("caching data completed")
@@ -1354,9 +1354,7 @@ function restoreData(fits::FITSDataSet)
     end
 
     ras = [
-        @spawnat job.where cache_frames(fetch(job), progress)
-
-        for
+        @spawnat job.where cache_frames(fetch(job), progress) for
         job in fits.compressed_pixels
     ]
 
