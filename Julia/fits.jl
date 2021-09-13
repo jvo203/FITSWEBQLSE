@@ -1340,6 +1340,26 @@ function restoreData(fits::FITSDataSet)
 
     @time wait.(ras)
 
+    @everywhere function cache_frames(
+        compressed_frames::Dict{Int32,Matrix{Float16}},
+        queue::RemoteChannel{Channel{Tuple}},
+    )
+        local frame_pixels
+
+        for (idx, frame) in compressed_frames
+
+            try
+                frame_pixels = compressed_frames[frame]
+                val = sum(frame_pixels)
+                put!(queue, (idx, val))
+            catch e
+                println("cache_frames: $e")
+            end
+
+        end
+
+    end
+
     # finally preload frames by touching the mmapped data
     progress = RemoteChannel(() -> Channel{Tuple}(32))
 
