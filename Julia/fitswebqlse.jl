@@ -834,9 +834,9 @@ function serveFITS(request::HTTP.Request)
                         fits_object.has_data = false
                         unlock(fits_object.mutex)
 
-                        @async restoreImage(fits_object) # @async or @spawn
+                        @async restoreImage(fits_object)
 
-                        @async restoreData(fits_object) # @async or @spawn
+                        @async restoreData(fits_object)
                     end
 
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
