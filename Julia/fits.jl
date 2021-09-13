@@ -1344,18 +1344,14 @@ function restoreData(fits::FITSDataSet)
         compressed_frames::Dict{Int32,Matrix{Float16}},
         queue::RemoteChannel{Channel{Tuple}},
     )
-        local frame_pixels
 
-        for (idx, frame) in compressed_frames
-
+        for (idx, pixels) in compressed_frames
             try
-                frame_pixels = compressed_frames[frame]
-                val = sum(frame_pixels)
+                val = sum(pixels)
                 put!(queue, (idx, val))
             catch e
                 println("cache_frames: $e")
             end
-
         end
 
     end
