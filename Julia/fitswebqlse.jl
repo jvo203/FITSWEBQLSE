@@ -1188,10 +1188,14 @@ function ws_coroutine(ws, ids)
     @info "Started websocket coroutine for $datasetid" ws
 
     # an outgoing queue for messages to be sent
-    outgoing = RemoteChannel{Any}(32)
+    outgoing = RemoteChannel(() -> Channel{Any}(32))
     sent_task = @async while true
         try
             msg = take!(outgoing)
+
+            if typeof(msg) == IOBuffer
+                msg = take!(msg)
+            end
 
             if !writeguarded(ws, msg)
                 break
@@ -1242,9 +1246,10 @@ function ws_coroutine(ws, ids)
                 # the body
                 write(resp, take!(viewport))
 
-                if !writeguarded(ws, take!(resp))
-                    break
-                end
+                put!(outgoing, resp)
+                #if !writeguarded(ws, take!(resp))
+                #    break
+                #end
             end
 
             if spectrum != Nothing
@@ -1262,9 +1267,10 @@ function ws_coroutine(ws, ids)
                 # the body
                 write(resp, take!(spectrum))
 
-                if !writeguarded(ws, take!(resp))
-                    break
-                end
+                put!(outgoing, resp)
+                #if !writeguarded(ws, take!(resp))
+                #    break
+                #end
             end
 
             update_timestamp(fits_object)
@@ -1440,10 +1446,11 @@ function ws_coroutine(ws, ids)
                                 unsafe_copyto!(pointer(payload), nal.payload, nal.sizeBytes)
                                 write(resp, payload)
 
-                                if !writeguarded(ws, take!(resp))
-                                    # break
-                                    error("could not send a WebSocket message")
-                                end
+                                put!(outgoing, resp)
+                                #if !writeguarded(ws, take!(resp))
+                                #    # break
+                                #    error("could not send a WebSocket message")
+                                #end
 
                             end
                         end
@@ -1485,8 +1492,13 @@ function ws_coroutine(ws, ids)
         if occursin("[heartbeat]", s)
             # @info "[ws] heartbeat"
 
-            push!(outgoing, s)
-            continue
+            try
+                put!(outgoing, s)
+            catch e
+                println(e)
+            finally
+                continue
+            end
 
             #=
             if writeguarded(ws, s)
@@ -1566,7 +1578,10 @@ function ws_coroutine(ws, ids)
 
                 resp = JSON.json(dict)
 
-                if writeguarded(ws, resp)
+                put!(outgoing, resp)
+
+                if true
+                    #if writeguarded(ws, resp)
                     try
                         lock(video_mtx)
 
