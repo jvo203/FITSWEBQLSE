@@ -1231,52 +1231,51 @@ function ws_coroutine(ws, ids)
                 @elapsed viewport, spectrum = getViewportSpectrum(fits_object, req)
             elapsed *= 1000.0 # [ms]
 
-            if viewport != Nothing
-                # send a viewport
-                println("[getViewportSpectrum] elapsed: $elapsed [ms]")
+            Threads.@spawn begin
+                if viewport != Nothing
+                    # send a viewport
+                    println("[getViewportSpectrum] elapsed: $elapsed [ms]")
 
-                resp = IOBuffer()
+                    resp = IOBuffer()
 
-                # the header
-                write(resp, Float32(req["timestamp"]))
-                write(resp, Int32(req["seq_id"]))
-                write(resp, Int32(1)) # 0 - spectrum, 1 - viewport
-                write(resp, Float32(elapsed))
+                    # the header
+                    write(resp, Float32(req["timestamp"]))
+                    write(resp, Int32(req["seq_id"]))
+                    write(resp, Int32(1)) # 0 - spectrum, 1 - viewport
+                    write(resp, Float32(elapsed))
 
-                # the body
-                write(resp, take!(viewport))
+                    # the body
+                    write(resp, take!(viewport))
 
-                put!(outgoing, resp)
-                #if !writeguarded(ws, take!(resp))
-                #    break
-                #end
-            end
+                    put!(outgoing, resp)
+                    #if !writeguarded(ws, take!(resp))
+                    #    break
+                    #end
+                end
 
-            if spectrum != Nothing
-                # send a spectrum
-                println("[getViewportSpectrum] elapsed: $elapsed [ms]")
+                if spectrum != Nothing
+                    # send a spectrum
+                    println("[getViewportSpectrum] elapsed: $elapsed [ms]")
 
-                resp = IOBuffer()
+                    resp = IOBuffer()
 
-                # the header
-                write(resp, Float32(req["timestamp"]))
-                write(resp, Int32(req["seq_id"]))
-                write(resp, Int32(0)) # 0 - spectrum, 1 - viewport
-                write(resp, Float32(elapsed))
+                    # the header
+                    write(resp, Float32(req["timestamp"]))
+                    write(resp, Int32(req["seq_id"]))
+                    write(resp, Int32(0)) # 0 - spectrum, 1 - viewport
+                    write(resp, Float32(elapsed))
 
-                # the body
-                write(resp, take!(spectrum))
+                    # the body
+                    write(resp, take!(spectrum))
 
-                put!(outgoing, resp)
-                #if !writeguarded(ws, take!(resp))
-                #    break
-                #end
+                    put!(outgoing, resp)
+                    #if !writeguarded(ws, take!(resp))
+                    #    break
+                    #end
+                end
             end
 
             update_timestamp(fits_object)
-
-            # trigger garbage collection
-            GC.gc()
         catch e
             if isa(e, InvalidStateException) && e.state == :closed
                 println("real-time viewport task completed")
@@ -1349,116 +1348,122 @@ function ws_coroutine(ws, ids)
                     println("video frame: $frame_idx; keyframe: $keyframe")
                 end
 
-                @async try
-                    # get a video frame
-                    elapsed = @elapsed luma, alpha = getVideoFrame(
-                        fits_object,
-                        frame_idx,
-                        flux,
-                        image_width,
-                        image_height,
-                        bDownsize,
-                        keyframe,
-                    )
-                    elapsed *= 1000.0 # [ms]
+                Threads.@spawn begin
+                    try
+                        # get a video frame
+                        elapsed = @elapsed luma, alpha = getVideoFrame(
+                            fits_object,
+                            frame_idx,
+                            flux,
+                            image_width,
+                            image_height,
+                            bDownsize,
+                            keyframe,
+                        )
+                        elapsed *= 1000.0 # [ms]
 
-                    println(
-                        typeof(luma),
-                        ";",
-                        typeof(alpha),
-                        ";",
-                        size(luma),
-                        ";",
-                        size(alpha),
-                        "; bDownsize:",
-                        bDownsize,
-                        "; elapsed: $elapsed [ms]",
-                    )
+                        println(
+                            typeof(luma),
+                            ";",
+                            typeof(alpha),
+                            ";",
+                            size(luma),
+                            ";",
+                            size(alpha),
+                            "; bDownsize:",
+                            bDownsize,
+                            "; elapsed: $elapsed [ms]",
+                        )
 
-                    lock(video_mtx)
+                        lock(video_mtx)
 
-                    if picture != C_NULL
-                        # update the x265_picture structure                
-                        picture_jl = x265_picture(picture)
+                        if picture != C_NULL
+                            # update the x265_picture structure                
+                            picture_jl = x265_picture(picture)
 
-                        picture_jl.planeR = pointer(luma)
-                        picture_jl.strideR = strides(luma)[2]
+                            picture_jl.planeR = pointer(luma)
+                            picture_jl.strideR = strides(luma)[2]
 
-                        picture_jl.planeG = pointer(alpha)
-                        picture_jl.strideG = strides(alpha)[2]
+                            picture_jl.planeG = pointer(alpha)
+                            picture_jl.strideG = strides(alpha)[2]
 
-                        # sync the Julia structure back to C
-                        unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
+                            # sync the Julia structure back to C
+                            unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
 
-                        if encoder != C_NULL
-                            # HEVC-encode the luminance and alpha channels
-                            iNal = Ref{Cint}(0)
-                            pNals = Ref{Ptr{Cvoid}}(C_NULL)
+                            if encoder != C_NULL
+                                # HEVC-encode the luminance and alpha channels
+                                iNal = Ref{Cint}(0)
+                                pNals = Ref{Ptr{Cvoid}}(C_NULL)
 
-                            # iNal_jll value: iNal[] 
+                                # iNal_jll value: iNal[] 
 
-                            # an array of pointers
-                            # local pNals_jll::Ptr{Ptr{Cvoid}} = pNals[]                        
+                                # an array of pointers
+                                # local pNals_jll::Ptr{Ptr{Cvoid}} = pNals[]                        
 
-                            # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
-                            # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
+                                # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
+                                # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
 
-                            encoding = @elapsed stat = ccall(
-                                (:x265_encoder_encode, libx265),
-                                Cint,
-                                (
-                                    Ptr{Cvoid},
-                                    Ref{Ptr{Cvoid}},
-                                    Ref{Cint},
-                                    Ptr{Cvoid},
-                                    Ptr{Cvoid},
-                                ),
-                                encoder,
-                                pNals,
-                                iNal,
-                                picture,
-                                C_NULL,
-                            )
-                            encoding *= 1000.0 # [ms]
+                                encoding = @elapsed stat = ccall(
+                                    (:x265_encoder_encode, libx265),
+                                    Cint,
+                                    (
+                                        Ptr{Cvoid},
+                                        Ref{Ptr{Cvoid}},
+                                        Ref{Cint},
+                                        Ptr{Cvoid},
+                                        Ptr{Cvoid},
+                                    ),
+                                    encoder,
+                                    pNals,
+                                    iNal,
+                                    picture,
+                                    C_NULL,
+                                )
+                                encoding *= 1000.0 # [ms]
 
-                            println(
-                                "x265_encoder_encode::stat = $stat, iNal = ",
-                                iNal[],
-                                ", pNals($pNals): ",
-                                pNals[],
-                                "; elapsed: $encoding [ms]",
-                            )
+                                println(
+                                    "x265_encoder_encode::stat = $stat, iNal = ",
+                                    iNal[],
+                                    ", pNals($pNals): ",
+                                    pNals[],
+                                    "; elapsed: $encoding [ms]",
+                                )
 
-                            for idx = 1:iNal[]
-                                nal = x265_nal(pNals[], idx)
-                                # println("NAL #$idx: $nal")
+                                for idx = 1:iNal[]
+                                    nal = x265_nal(pNals[], idx)
+                                    # println("NAL #$idx: $nal")
 
-                                resp = IOBuffer()
+                                    resp = IOBuffer()
 
-                                # the header
-                                write(resp, Float32(req["timestamp"]))
-                                write(resp, Int32(req["seq_id"]))
-                                write(resp, Int32(5)) # 5 - video frame
-                                write(resp, Float32(elapsed + encoding))
+                                    # the header
+                                    write(resp, Float32(req["timestamp"]))
+                                    write(resp, Int32(req["seq_id"]))
+                                    write(resp, Int32(5)) # 5 - video frame
+                                    write(resp, Float32(elapsed + encoding))
 
-                                # the body
-                                payload = Vector{UInt8}(undef, nal.sizeBytes)
-                                unsafe_copyto!(pointer(payload), nal.payload, nal.sizeBytes)
-                                write(resp, payload)
+                                    # the body
+                                    payload = Vector{UInt8}(undef, nal.sizeBytes)
+                                    unsafe_copyto!(
+                                        pointer(payload),
+                                        nal.payload,
+                                        nal.sizeBytes,
+                                    )
+                                    write(resp, payload)
 
-                                put!(outgoing, resp)
-                                #if !writeguarded(ws, take!(resp))
-                                #    # break
-                                #    error("could not send a WebSocket message")
-                                #end
+                                    put!(outgoing, resp)
+                                    #if !writeguarded(ws, take!(resp))
+                                    #    # break
+                                    #    error("could not send a WebSocket message")
+                                    #end
 
+                                end
                             end
                         end
+                    catch e
+                        println(e)
+                    finally
+                        unlock(video_mtx)
                     end
-                catch e
-                    println(e)
-                finally
-                    unlock(video_mtx)
                 end
             catch e
                 println(e)
@@ -1467,9 +1472,6 @@ function ws_coroutine(ws, ids)
             end
 
             update_timestamp(fits_object)
-
-            # trigger garbage collection
-            GC.gc()
         catch e
             if isa(e, InvalidStateException) && e.state == :closed
                 println("real-time video task completed")
@@ -1517,8 +1519,8 @@ function ws_coroutine(ws, ids)
             @info msg
 
             if msg["type"] == "realtime_image_spectrum"
-                replace!(viewport_requests, msg)
-                # push!(viewport_requests, msg) # there is too much lag
+                # replace!(viewport_requests, msg)
+                push!(viewport_requests, msg) # there is too much lag
             end
 
             # init_video
