@@ -1187,6 +1187,25 @@ function ws_coroutine(ws, ids)
 
     @info "Started websocket coroutine for $datasetid" ws
 
+    # an outgoing queue for messages to be sent
+    outgoing = RemoteChannel{Any}(32)
+    sent_task = @async while true
+        try
+            msg = take!(outgoing)
+
+            if !writeguarded(ws, msg)
+                break
+            end
+        catch e
+            if isa(e, InvalidStateException) && e.state == :closed
+                println("sent task completed")
+                break
+            else
+                println(e)
+            end
+        end
+    end
+
     viewport_requests = Channel{Dict{String,Any}}(32)
 
     realtime = @async while true
@@ -1465,11 +1484,16 @@ function ws_coroutine(ws, ids)
         # ping back heartbeat messages
         if occursin("[heartbeat]", s)
             # @info "[ws] heartbeat"
+
+            push!(outgoing, s)
+
+            #=
             if writeguarded(ws, s)
                 continue
             else
                 break
             end
+            =#
         end
 
         # @info "Received: $s"
@@ -1740,6 +1764,9 @@ function ws_coroutine(ws, ids)
             # @error "ws_coroutine::" exception = (e, catch_backtrace())
         end
     end
+
+    close(outgoing)
+    wait(sent_task)
 
     close(viewport_requests)
     close(video_requests)
