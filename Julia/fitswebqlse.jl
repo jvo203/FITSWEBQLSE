@@ -1486,6 +1486,7 @@ function ws_coroutine(ws, ids)
             # @info "[ws] heartbeat"
 
             push!(outgoing, s)
+            continue
 
             #=
             if writeguarded(ws, s)
