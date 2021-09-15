@@ -959,7 +959,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
 
                             # replace NaNs with 0.0
-                            frame_pixels[frame_mask] .= 0.0
+                            frame_pixels[frame_mask] .= 0
+
+                            zfp_compress_pixels(
+                                datasetid,
+                                frame,
+                                Float32.(frame_pixels),
+                                frame_mask,
+                            )
 
                             pixels .+= frame_pixels
                             mask .&= frame_mask
@@ -3013,4 +3020,15 @@ end
     end
 
     put!(queue, (sum₊, count₊, sum₋, count₋))
+end
+
+function zfp_compress_pixels(datasetid, frame, pixels, mask)
+    cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+    filename = cache_dir * Base.Filesystem.path_separator * string(frame)
+
+    compressed_pixels = zfp_compress(pixels, precision = 14)
+    compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
+
+    serialize(filename * ".zfp", compressed_pixels)
+    serialize(filename * ".lz4", compressed_mask)
 end
