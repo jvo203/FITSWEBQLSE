@@ -1295,6 +1295,9 @@ function restoreImage(fits::FITSDataSet)
     fits.pixels = pixels
     fits.mask = mask
 
+    # decompress the cube channels
+    decompressData(fits)
+
     # adjust has_data and has_error
     lock(fits.mutex)
     fits.has_data = bSuccess
@@ -1302,7 +1305,7 @@ function restoreImage(fits::FITSDataSet)
     unlock(fits.mutex)
 
     # restore the cube channels
-    restoreData(fits)
+    # restoreData(fits)
 end
 
 function restoreData(fits::FITSDataSet)
@@ -3038,4 +3041,89 @@ function zfp_compress_pixels(datasetid, frame, pixels, mask)
 
     serialize(filename * ".zfp", compressed_pixels)
     serialize(filename * ".lz4", compressed_mask)
+end
+
+function decompressData(fits::FITSDataSet)
+    if (fits.datasetid == "") || (fits.depth <= 1)
+        return
+    end
+
+    progress = RemoteChannel(() -> Channel{Integer}(32))
+
+    @async while true
+        try
+            idx = take!(progress)
+            println("decompressed frame #$idx")
+
+            update_progress(fits, fits.depth)
+        catch e
+            println("decompressing data completed")
+            break
+        end
+    end
+
+    @everywhere function load_frames(
+        datasetid,
+        width,
+        height,
+        idx,
+        queue::RemoteChannel{Channel{Integer}},
+    )
+        compressed_frames = Dict{Int32,Matrix{Float16}}()
+        spinlock = Threads.SpinLock()
+
+        Threads.@threads for frame in idx
+            try
+                cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+                filename = cache_dir * Base.Filesystem.path_separator * string(frame)
+
+                compressed_pixels = deserialize(filename * ".zfp")
+                compressed_mask = deserialize(filename * ".lz4")
+
+                # decompress the data and convert into the right format                
+                frame_mask = reshape(
+                    Bool.(lz4_decompress(compressed_mask, width * height)),
+                    (width, height),
+                )
+                frame_pixels = Float16.(zfp_decompress(compressed_pixels))
+
+                # insert back NaNs
+                frame_pixels[frame_mask] .= NaN16
+
+                Threads.lock(spinlock)
+                compressed_frames[frame] = frame_pixels
+                Threads.unlock(spinlock)
+
+                # println("restored frame #$frame")
+
+                put!(queue, idx)
+            catch e
+                println(e)
+            end
+        end
+
+        return compressed_frames
+    end
+
+    lock(fits.mutex)
+    fits.progress = Threads.Atomic{Int}(0)
+    unlock(fits.mutex)
+
+    # Remote Access Service
+    ras = [
+        @spawnat w load_frames(
+            fits.datasetid,
+            fits.width,
+            fits.height,
+            findall(value),
+            progress,
+        ) for (w, value) in fits.indices
+    ]
+
+    println("ras: ", ras)
+
+    fits.compressed_pixels = ras
+
+    @time wait.(ras)
+    close(progress)
 end
