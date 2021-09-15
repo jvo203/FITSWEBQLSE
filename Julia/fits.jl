@@ -994,11 +994,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
-
-                            # insert back NaNs ahead of conversion to half-float (Float16)
-                            frame_pixels[frame_mask] .= NaN32
-
+                            
+                            # convert to half-float (Float16)
                             compressed_pixels = map(x -> Float16(x), frame_pixels)
+
+                            # insert back NaNs
+                            compressed_pixels[frame_mask] .= NaN16
+
+                            # store the data
                             compressed_frames[frame] = compressed_pixels
 
                             # convert to half-float
