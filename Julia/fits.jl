@@ -3048,12 +3048,16 @@ function decompressData(fits::FITSDataSet)
         return
     end
 
-    progress = RemoteChannel(() -> Channel{Integer}(32))
+    lock(fits.mutex)
+    fits.progress = Threads.Atomic{Int}(0)
+    unlock(fits.mutex)
+
+    progress = RemoteChannel(() -> Channel{Int32}(32))
 
     @async while true
         try
             idx = take!(progress)
-            println("decompressed frame #$idx")
+            # println("decompressed frame #$idx")
 
             update_progress(fits, fits.depth)
         catch e
@@ -3067,7 +3071,7 @@ function decompressData(fits::FITSDataSet)
         width,
         height,
         idx,
-        queue::RemoteChannel{Channel{Integer}},
+        queue::RemoteChannel{Channel{Int32}},
     )
         compressed_frames = Dict{Int32,Matrix{Float16}}()
         spinlock = Threads.SpinLock()
@@ -3094,9 +3098,9 @@ function decompressData(fits::FITSDataSet)
                 compressed_frames[frame] = frame_pixels
                 Threads.unlock(spinlock)
 
-                # println("restored frame #$frame")
+                # println("decompressed frame #$frame")
 
-                put!(queue, idx)
+                put!(queue, frame)
             catch e
                 println(e)
             end
@@ -3104,10 +3108,6 @@ function decompressData(fits::FITSDataSet)
 
         return compressed_frames
     end
-
-    lock(fits.mutex)
-    fits.progress = Threads.Atomic{Int}(0)
-    unlock(fits.mutex)
 
     # Remote Access Service
     ras = [
