@@ -961,12 +961,16 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                             # replace NaNs with 0.0
                             frame_pixels[frame_mask] .= 0
 
-                            zfp_compress_pixels(
-                                datasetid,
-                                frame,
-                                Float32.(frame_pixels),
-                                frame_mask,
-                            )
+                            try
+                                zfp_compress_pixels(
+                                    datasetid,
+                                    frame,
+                                    Float32.(frame_pixels),
+                                    frame_mask,
+                                )
+                            catch e
+                                println(e)
+                            end
 
                             pixels .+= frame_pixels
                             mask .&= frame_mask
@@ -994,7 +998,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                                 mean_spectrum = 0.0
                                 integrated_spectrum = 0.0
                             end
-                            
+
                             # convert to half-float (Float16)
                             compressed_pixels = map(x -> Float16(x), frame_pixels)
 
