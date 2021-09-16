@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-09-01.0";
+	return "JS2021-09-16.0";
 }
 
 const wasm_supported = (() => {
@@ -3011,13 +3011,6 @@ function open_websocket_connection(datasetId, index) {
 						if (data.type == "progress")
 							process_progress_event(data, index);
 
-						/*if (data.type == "image") {
-							if (data.message.indexOf("unavailable") >= 0) {
-								console.log("Server not ready, long-polling the image again after 100 ms.");
-								setTimeout(function () { ALMAWS.send("[image]"); }, 100);
-							}
-						}*/
-
 						if (data.type == "caching") {
 							console.log(data);
 							show_cursor();
@@ -5276,8 +5269,22 @@ function cube_refresh(index) {
 	var strRequest = image + freq;
 	console.log(strRequest);
 
+	var request = {
+		type: "image",
+		width: width,
+		height: height,
+		quality: image_quality,
+		frame_start: data_band_lo,
+		frame_end: data_band_hi,
+		ref_freq: RESTFRQ,
+		timestamp: performance.now()
+	};
+
 	//send an [image] request to the server    
-	wsConn[index - 1].send('[image] ' + strRequest + '&timestamp=' + performance.now());
+	//wsConn[index - 1].send('[image] ' + strRequest + '&timestamp=' + performance.now());
+
+	if (wsConn[index - 1].readyState == 1)
+		wsConn[index - 1].send(JSON.stringify(request));
 }
 
 function display_scale_range_ui(called_from_menu = false) {
