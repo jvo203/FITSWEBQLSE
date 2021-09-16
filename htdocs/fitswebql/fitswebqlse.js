@@ -5263,12 +5263,6 @@ function cube_refresh(index) {
 	var width = rect.width - 20;
 	var height = rect.height - 20;
 
-	var image = 'width=' + width + '&height=' + height + '&quality=' + image_quality;
-	var freq = '&frame_start=' + data_band_lo + '&frame_end=' + data_band_hi + '&ref_freq=' + RESTFRQ;
-
-	var strRequest = image + freq;
-	console.log(strRequest);
-
 	var request = {
 		type: "image",
 		width: width,
@@ -5281,8 +5275,6 @@ function cube_refresh(index) {
 	};
 
 	//send an [image] request to the server    
-	//wsConn[index - 1].send('[image] ' + strRequest + '&timestamp=' + performance.now());
-
 	if (wsConn[index - 1].readyState == 1)
 		wsConn[index - 1].send(JSON.stringify(request));
 }
