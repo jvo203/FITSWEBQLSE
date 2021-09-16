@@ -2858,7 +2858,7 @@ end
         try
             Threads.lock(spinlock)
             pixels = compressed_frames[frame]
-            #Threads.unlock(spinlock)
+            Threads.unlock(spinlock)
 
             # viewport = @view pixels[x1:x2, y1:y2]
             # mask = map(!isnan, viewport)
