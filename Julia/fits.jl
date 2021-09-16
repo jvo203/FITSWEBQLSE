@@ -2812,7 +2812,7 @@ end
     idx::Vector{Int64},
     queue::RemoteChannel{Channel{Tuple}},
 )
-    println("#threads per worker: ", Threads.nthreads())
+    # println("#threads per worker: ", Threads.nthreads())
 
     local thread_pixels, thread_mask
     local view_pixels, view_mask
