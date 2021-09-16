@@ -3107,7 +3107,13 @@ function decompressData(fits::FITSDataSet)
             catch e
                 println(e)
             end
+
+            # allow garbage collection to run
+            GC.safepoint()
         end
+
+        # do not wait, trigger garbage collection *NOW*
+        GC.gc()
 
         return compressed_frames
     end
