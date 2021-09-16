@@ -2848,11 +2848,12 @@ end
     sizehint!(spectrum, depth)
 
     Threads.@threads for frame in idx
+        # Threads.@threads for (frame, pixels) in compressed_frames
+        # @threads macro does not cope with a Dictionary object iterator ...
+
         if frame < first_frame || frame > last_frame
             continue
         end
-
-        # tid = Threads.threadid()
 
         try
             Threads.lock(spinlock)
@@ -2937,6 +2938,8 @@ end
             # println(e)
             @error "calculateViewportSpectrum" exception = (e, catch_backtrace())
         end
+
+        GC.safepoint()
     end
 
     if bImage
