@@ -2848,8 +2848,8 @@ end
     sizehint!(spectrum, depth)
 
     Threads.@threads for frame in idx
-        # Threads.@threads for (frame, pixels) in compressed_frames
-        # @threads macro does not cope with a Dictionary object iterator ...
+        # @threads macro does not cope with a Dict nor SparseVector object iterator ...
+        # not even with "findnz(SparseVector)"
 
         if frame < first_frame || frame > last_frame
             continue
@@ -2858,7 +2858,7 @@ end
         try
             Threads.lock(spinlock)
             pixels = compressed_frames[frame]
-            Threads.unlock(spinlock)
+            #Threads.unlock(spinlock)
 
             # viewport = @view pixels[x1:x2, y1:y2]
             # mask = map(!isnan, viewport)
