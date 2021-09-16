@@ -329,8 +329,11 @@ function deserialize_fits(datasetid)
     fits.has_data = deserialize(io)
     fits.has_error = deserialize(io)
     # skipping fits.last_accessed
-    fits.progress = deserialize(io)
+
+    # skipping progress
+    # fits.progress = deserialize(io)
     fits.total = deserialize(io)
+
     # skipping fits.elapsed
     # skipping fits.mutex
 
