@@ -246,8 +246,13 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.has_data)
         serialize(io, fits.has_error)
         # skipping fits.last_accessed
-        serialize(io, fits.progress)
+
+        if fits.depth == 1
+            serialize(io, fits.progress)
+        end
+
         serialize(io, fits.total)
+
         # skipping fits.elapsed
         # skipping fits.mutex
 
@@ -330,8 +335,10 @@ function deserialize_fits(datasetid)
     fits.has_error = deserialize(io)
     # skipping fits.last_accessed
 
-    # skipping progress
-    # fits.progress = deserialize(io)
+    if fits.depth == 1
+        fits.progress = deserialize(io)
+    end
+
     fits.total = deserialize(io)
 
     # skipping fits.elapsed
