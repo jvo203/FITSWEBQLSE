@@ -3073,7 +3073,7 @@ function decompressData(fits::FITSDataSet)
     @async while true
         try
             idx = take!(progress)
-            # println("decompressed frame #$idx")
+            println("decompressed frame #$idx")
 
             update_progress(fits, fits.depth)
         catch e
@@ -3124,9 +3124,6 @@ function decompressData(fits::FITSDataSet)
             # allow garbage collection to run
             GC.safepoint()
         end
-
-        # do not wait, trigger garbage collection *NOW*
-        GC.gc()
 
         return compressed_frames
     end
