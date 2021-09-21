@@ -14,8 +14,9 @@ end
     println("Linker: $gcc")
     ipplib = ENV["IPPROOT"] * "/lib/intel64"
 
-    link(objfile, libfile, linkfiles) =
-        run(`$gcc -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`)
+    link(objfile, libfile, linkfiles) = run(
+        `$gcc "-L$ipplib $linkfiles" -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`,
+    )
 end
 
 @static if Sys.iswindows()
