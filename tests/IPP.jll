@@ -1,5 +1,4 @@
 include("ipp_toolchain.jl")
 
-code = read("../src/ipp.c)
-
-println(code)
+code = read("../src/ipp.c", String)
+# println(code)
