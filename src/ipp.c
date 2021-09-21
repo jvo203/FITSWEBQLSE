@@ -336,7 +336,9 @@ extern void resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest
 
     IppStatus stat = resizeCubic32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
     printf("[C] resizeCubic: %d, %s\n", stat, ippGetStatusString(stat));
+#endif
 }
 
 extern void resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
@@ -353,7 +355,9 @@ extern void resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDe
 
     IppStatus stat = resizeLanczos32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
     printf("[C] resizeLanczos%d: %d, %s\n", numLobes, stat, ippGetStatusString(stat));
+#endif
 }
 
 extern void resizeSuper(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
@@ -370,7 +374,9 @@ extern void resizeSuper(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest
 
     IppStatus stat = resizeSuper32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
     printf("[C] resizeSuper: %d, %s\n", stat, ippGetStatusString(stat));
+#endif
 }
 
 extern void resizeNearest(Ipp8u *pSrc, int srcWidth, int srcHeight, Ipp8u *pDest, int dstWidth, int dstHeight)
@@ -387,5 +393,7 @@ extern void resizeNearest(Ipp8u *pSrc, int srcWidth, int srcHeight, Ipp8u *pDest
 
     IppStatus stat = resizeNearest8u_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
     printf("[C] resizeNearest: %d, %s\n", stat, ippGetStatusString(stat));
+#endif
 }
