@@ -5,7 +5,7 @@
     ipplib = ENV["IPPROOT"] * "/lib"
 
     link(objfile, libfile, linkfiles) =
-        run(`$libtool -L$ipplib $linkfiles -dynamic -o "$libfile" "$objfile"`)
+        run(`$libtool "-L$ipplib $linkfiles" -dynamic -o "$libfile" "$objfile"`)
 end
 
 @static if Sys.islinux()
@@ -14,9 +14,8 @@ end
     println("Linker: $gcc")
     ipplib = ENV["IPPROOT"] * "/lib/intel64"
 
-    link(objfile, libfile, linkfiles) = run(
-        `$gcc -L$ipplib $linkfiles -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`,
-    )
+    link(objfile, libfile, linkfiles) =
+        run(`$gcc -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`)
 end
 
 @static if Sys.iswindows()
@@ -32,16 +31,12 @@ function load_ipp(code, options = ``)
     function load(tmpdir)
         objfile = "$tmpdir/ipp.o"
         libfile = "$tmpdir/ipp.so"
-
         linkfiles = "-lippi -lippdc -lipps -lippcore"
 
         # Pipe the input program to gcc:
-        gcc_cmd = `gcc $code -o "$objfile" -fPIC $options`
+        gcc_cmd = `gcc -c $code -o "$objfile" -fPIC $options`
         println(gcc_cmd)
         run(gcc_cmd)
-        #open(gcc_cmd, "w", stderr) do stdin
-        #    write(stdin, code)
-        #end
 
         # Create a shared library:
         link(objfile, libfile, linkfiles)
