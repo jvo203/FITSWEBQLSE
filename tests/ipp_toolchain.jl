@@ -48,4 +48,9 @@ function load_ipp(code, options = ``)
 end
 
 # macOS tests
+
+# compiler
 # gcc -c ../src/ipp.c -o test.o -fPIC -O3
+
+# linker
+# /usr/bin/libtool -dynamic -o test.so test.o -L/opt/intel/oneapi/ipp/2021.1.1/lib -lippi -lippdc -lipps -lippcore
