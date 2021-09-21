@@ -2,15 +2,21 @@
 @static if Sys.isapple()
     libtool = "/usr/bin/libtool"
     println("Linker: $libtool")
-    link(objfile, libfile) = run(`$libtool -dynamic -o "$libfile" "$objfile"`)
+    ipplib = ENV["IPPROOT"] * "/lib"
+
+    link(objfile, libfile, linkfiles) =
+        run(`$libtool -L$ipplib $linkfiles -dynamic -o "$libfile" "$objfile"`)
 end
 
 @static if Sys.islinux()
     gcc = strip(read(`which gcc`, String))
     gcc == "" && error("libtool or gcc is required")
     println("Linker: $gcc")
-    link(objfile, libfile) =
-        run(`$gcc -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`)
+    ipplib = ENV["IPPROOT"] * "/lib/intel64"
+
+    link(objfile, libfile, linkfiles) = run(
+        `$gcc -L$ipplib $linkfiles -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`,
+    )
 end
 
 @static if Sys.iswindows()
@@ -24,18 +30,21 @@ handle `lib` for use with `Libdl.dlsym(lib, symbol)`.
 function load_ipp(code, options = ``)
 
     function load(tmpdir)
-        objfile = "$tmpdir/program.o"
-        libfile = "$tmpdir/program.so"
+        objfile = "$tmpdir/ipp.o"
+        libfile = "$tmpdir/ipp.so"
+
+        linkfiles = "-lippi -lippdc -lipps -lippcore"
 
         # Pipe the input program to gcc:
-        gcc_cmd = `gcc -o "$objfile" --fPIC $options -`
+        gcc_cmd = `gcc $code -o "$objfile" -fPIC $options`
         println(gcc_cmd)
-        open(gcc_cmd, "w", stderr) do stdin
-            write(stdin, code)
-        end
+        run(gcc_cmd)
+        #open(gcc_cmd, "w", stderr) do stdin
+        #    write(stdin, code)
+        #end
 
         # Create a shared library:
-        link(objfile, libfile)
+        link(objfile, libfile, linkfiles)
         return Libc.Libdl.dlopen(libfile)
     end
 

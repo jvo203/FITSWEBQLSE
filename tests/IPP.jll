@@ -1,8 +1,4 @@
 include("ipp_toolchain.jl")
 
-# Read the code
-code = read("../src/ipp.c", String)
-# println(code)
-
 # Compile the code
-ipp = load_ipp(code, `-O3`)
+ipp = load_ipp("../src/ipp.c", `-O3`)
