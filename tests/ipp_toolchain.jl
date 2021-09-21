@@ -46,3 +46,6 @@ function load_ipp(code, options = ``)
 
     load(mktempdir())
 end
+
+# macOS tests
+# gcc -c ../src/ipp.c -o test.o -fPIC -O3
