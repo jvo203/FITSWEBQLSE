@@ -13,11 +13,16 @@ dim = 10
 view = 3
 
 pixels = 100.0f0 * randn(Float32, dim, dim)
-pixels2 = Matrix{Float32}(undef, view,view)
+pixels2 = Matrix{Float32}(undef, view, view)
 
 display(pixels)
 
 # Call the kernel:
-ccall(resizeCubic32F, Cvoid, (Ref{Float32}, Cint, Cint, Ref{Float32}, Cint, Cint), pointer(pixels), dim, dim, pointer(pixels2), view, view)
+# ccall(resizeCubic32F, Cvoid, (Ref{Float32}, Cint, Cint, Ref{Float32}, Cint, Cint), pointer(pixels), dim, dim, pointer(pixels2), view, view)
 
 display(pixels2)
+
+mutable struct IppiSize
+    width::Cint
+    height::Cint
+end
