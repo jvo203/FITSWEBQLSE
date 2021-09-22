@@ -2,3 +2,15 @@ include("ipp_toolchain.jl")
 
 # Compile the code
 ipp = load_ipp("../src/ipp.c", `-O3`)
+
+# function pointers
+resizeCubic32F = Libc.Libdl.dlsym(ipp, "resizeCubic")
+resizeLanczos32F = Libc.Libdl.dlsym(ipp, "resizeLanczos")
+resizeSuper32F = Libc.Libdl.dlsym(ipp, "resizeSuper")
+resizeNearest8U = Libc.Libdl.dlsym(ipp, "resizeNearest")
+
+# Call the kernel:
+# vin = rand(Float32, 1000);
+# vout = zeros(Float32, 1000);
+# ccall(fptr, Cvoid, (Ref{Float32}, Ref{Float32}, UInt64), vin, vout, length(vout))
+# println(vout[1:10])
