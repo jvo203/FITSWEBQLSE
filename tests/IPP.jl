@@ -1,10 +1,10 @@
 include("ipp_toolchain.jl")
 
 # Compile the code
-# ipp = load_ipp("../src/ipp.c", `-O3`)
+ipp = load_ipp("../src/ipp.c", `-O3`)
 
 # function pointers
-# resizeCubic32F = Libc.Libdl.dlsym(ipp, "resizeCubic")
+resizeCubic32F = Libc.Libdl.dlsym(ipp, "resizeCubic")
 # resizeLanczos32F = Libc.Libdl.dlsym(ipp, "resizeLanczos")
 # resizeSuper32F = Libc.Libdl.dlsym(ipp, "resizeSuper")
 # resizeNearest8U = Libc.Libdl.dlsym(ipp, "resizeNearest")
@@ -18,7 +18,17 @@ pixels2 = Matrix{Float32}(undef, view, view)
 #display(pixels)
 
 # Call the kernel:
-# ccall(resizeCubic32F, Cvoid, (Ref{Float32}, Cint, Cint, Ref{Float32}, Cint, Cint), pointer(pixels), dim, dim, pointer(pixels2), view, view)
+ccall(
+    resizeCubic32F,
+    Cvoid,
+    (Ref{Float32}, Cint, Cint, Ref{Float32}, Cint, Cint),
+    pointer(pixels),
+    dim,
+    dim,
+    pointer(pixels2),
+    view,
+    view,
+)
 
 display(pixels2)
 
@@ -42,6 +52,11 @@ end
 const ippC1 = 1
 const ippBorderRepl = 1
 
+const ippNearest = 1
+const ippCubic = 6
+const ippSuper = 8
+const ippLanczos = 16
+
 function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer)
     dims = size(src)
     srcSize = IppiSize(dims[1], dims[2])
@@ -49,6 +64,14 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
 
     # a destination buffer
     dst = Matrix{Float32}(undef, width, height)
+
+    status::Cint
+    specSize = Ref{Cint}(0)
+    initSize = Ref{Cint}(0)
+
+    # Spec and init buffer sizes
+    # status = ippiResizeGetSize_32f(srcSize, dstSize, ippCubic, 0, &specSize, &initSize);
+    # status = ccall((:ippiResizeGetSize_32f, ipplib), )
 
     return dst
 end
