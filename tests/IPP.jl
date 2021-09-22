@@ -83,7 +83,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         initSize,
     )
 
-    println("specSize: $(specSize[]), initSize: $(initSize[])")
+    println("status: $status; specSize: $(specSize[]), initSize: $(initSize[])")
 
     return dst
 end
