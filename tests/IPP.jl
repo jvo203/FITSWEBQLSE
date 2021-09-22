@@ -13,9 +13,9 @@ dim = 10
 view = 3
 
 pixels = 100.0f0 * randn(Float32, dim, dim)
-pixels2 = Matrix{Float32}(undef, view, view)
-
 #display(pixels)
+
+pixels2 = Matrix{Float32}(undef, view, view)
 
 # Call the kernel:
 ccall(
@@ -71,7 +71,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
 
     # Spec and init buffer sizes
     # status = ippiResizeGetSize_32f(srcSize, dstSize, ippCubic, 0, &specSize, &initSize);
-    # status = ccall((:ippiResizeGetSize_32f, ipplib), )
+    # status = ccall((:ippiResizeGetSize_32f, ipplib * "/libippi.so"), Cint, (IppiSize, IppiSize))
 
     return dst
 end
