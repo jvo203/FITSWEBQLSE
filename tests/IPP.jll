@@ -9,8 +9,15 @@ resizeLanczos32F = Libc.Libdl.dlsym(ipp, "resizeLanczos")
 resizeSuper32F = Libc.Libdl.dlsym(ipp, "resizeSuper")
 resizeNearest8U = Libc.Libdl.dlsym(ipp, "resizeNearest")
 
+dim = 10
+view = 3
+
+pixels = 100.0f0 * randn(Float32, dim, dim)
+pixels2 = Matrix{Float32}(undef, view,view)
+
+display(pixels)
+
 # Call the kernel:
-# vin = rand(Float32, 1000);
-# vout = zeros(Float32, 1000);
-# ccall(fptr, Cvoid, (Ref{Float32}, Ref{Float32}, UInt64), vin, vout, length(vout))
-# println(vout[1:10])
+ccall(resizeCubic32F, Cvoid, (Ref{Float32}, Cint, Cint, Ref{Float32}, Cint, Cint), pointer(pixels), dim, dim, pointer(pixels2), view, view)
+
+display(pixels2)
