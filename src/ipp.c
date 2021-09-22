@@ -93,7 +93,7 @@ IppStatus resizeCubic32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     IppStatus pStatus;
 
     /* Spec and init buffer sizes */
-    status = ippiResizeGetSize_32f(srcSize, dstSize, ippLanczos, 0, &specSize, &initSize);
+    status = ippiResizeGetSize_32f(srcSize, dstSize, ippCubic, 0, &specSize, &initSize);
 
     if (status != ippStsNoErr)
         return status;
