@@ -14,6 +14,9 @@ end
     println("Linker: $gcc")
     ipplib = ENV["IPPROOT"] * "/lib/intel64"
 
+    # push!(Libdl.DL_LOAD_PATH,"path_to_libmean.so")
+
+
     link(objfile, libfile, linkfiles) = run(
         `$gcc "-L$ipplib $linkfiles" -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`,
     )

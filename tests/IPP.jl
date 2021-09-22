@@ -15,6 +15,7 @@ view = 3
 pixels = 100.0f0 * randn(Float32, dim, dim)
 #display(pixels)
 
+#=
 pixels2 = Matrix{Float32}(undef, view, view)
 
 # Call the kernel:
@@ -31,6 +32,7 @@ ccall(
 )
 
 display(pixels2)
+=#
 
 mutable struct IppiSize
     width::Cint
@@ -65,13 +67,23 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
     # a destination buffer
     dst = Matrix{Float32}(undef, width, height)
 
-    status::Cint
     specSize = Ref{Cint}(0)
     initSize = Ref{Cint}(0)
 
     # Spec and init buffer sizes
-    # status = ippiResizeGetSize_32f(srcSize, dstSize, ippCubic, 0, &specSize, &initSize);
-    # status = ccall((:ippiResizeGetSize_32f, ipplib * "/libippi.so"), Cint, (IppiSize, IppiSize))
+    status = ccall(
+        (:ippiResizeGetSize_32f, ipplib * "/libippi.so"),
+        Cint,
+        (IppiSize, IppiSize, Cint, Cint, Ref{Cint}, Ref{Cint}),
+        srcSize,
+        dstSize,
+        ippCubic,
+        0,
+        specSize,
+        initSize,
+    )
+
+    println("specSize: $(specSize[]), initSize: $(initSize[])")
 
     return dst
 end
