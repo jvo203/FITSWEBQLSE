@@ -124,6 +124,15 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         error("ippiResizeCubicInit_32f::$status")
     end
 
+    borderSize = IppiBorderSize(0, 0, 0, 0)
+
+    # status = ippiResizeGetBorderSize_32f(pSpec, &borderSize);
+
+    if status != 0
+        ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
+        error("ippiResizeGetBorderSize_32f::$status")
+    end
+
     # a destination buffer
     dst = Matrix{Float32}(undef, width, height)
 
