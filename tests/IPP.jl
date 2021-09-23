@@ -125,7 +125,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
 
     borderSize = Ref{IppiBorderSize}(IppiBorderSize(0, 0, 0, 0))
 
-    ccall(
+    status = ccall(
         (:ippiResizeGetBorderSize_32f, ipplib * "/libippi.so"),
         Cint,
         (Ptr{Cvoid}, Ref{IppiBorderSize}),
@@ -138,6 +138,26 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
         error("ippiResizeGetBorderSize_32f::$status")
     end
+
+    bufSize = Ref{Cint}(0)
+
+    # General transform function
+    status = ccall(
+        (:ippiResizeGetBufferSize_32f, ipplib * "/libippi.so"),
+        Cint,
+        (Ptr{Cvoid}, IppiSize, Cint, Ref{Cint}),
+        pSpec,
+        dstSize,
+        ippC1,
+        bufSize,
+    )
+    println("ippiResizeGetBufferSize_32f::$status, bufSize:", bufSize[])
+
+    if status != 0
+        ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
+        error("ippiResizeGetBufferSize_32f::$status")
+    end
+
 
     # a destination buffer
     dst = Matrix{Float32}(undef, width, height)
