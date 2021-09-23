@@ -116,7 +116,6 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         pInitBuf,
     )
     ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pInitBuf)
-
     println("ippiResizeCubicInit_32f::$status")
 
     if status != 0
@@ -124,9 +123,17 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         error("ippiResizeCubicInit_32f::$status")
     end
 
-    borderSize = IppiBorderSize(0, 0, 0, 0)
+    borderSize = Ref{IppiBorderSize}(IppiBorderSize(0, 0, 0, 0))
 
     # status = ippiResizeGetBorderSize_32f(pSpec, &borderSize);
+    ccall(
+        (:ippiResizeGetBorderSize_32f, ipplib * "/libippi.so"),
+        Cint,
+        (Ptr{Cvoid}, Ref{IppiBorderSize}),
+        pSpec,
+        borderSize[],
+    )
+    println("ippiResizeGetBorderSize_32f::$status, borderSize:", borderSize[])
 
     if status != 0
         ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
