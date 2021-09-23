@@ -87,15 +87,25 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
     end
 
     # Memory allocation
-    # pInitBuf = ippsMalloc_8u(initSize);
     pInitBuf =
         ccall((:ippsMalloc_8u, ipplib * "/libipps.so"), Ptr{Cvoid}, (Cint,), initSize[])
     println("pInitBuf:", pInitBuf)
 
-    # pSpec = (IppiResizeSpec_32f *)ippsMalloc_8u(specSize);
+    pSpec = ccall((:ippsMalloc_8u, ipplib * "/libipps.so"), Ptr{Cvoid}, (Cint,), specSize[])
+    println("pSpec:", pSpec)
+
+    if pInitBuf == C_NULL || pSpec == C_NULL
+        ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pInitBuf)
+        ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
+        error("NULL pInitBuf or pSpec")
+    end
 
     # a destination buffer
     dst = Matrix{Float32}(undef, width, height)
+
+    # Release memory
+    ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pInitBuf)
+    ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
 
     return dst
 end
