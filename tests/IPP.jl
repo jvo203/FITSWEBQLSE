@@ -130,7 +130,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         Cint,
         (Ptr{Cvoid}, Ref{IppiBorderSize}),
         pSpec,
-        borderSize[],
+        borderSize,
     )
     println("ippiResizeGetBorderSize_32f::$status, borderSize:", borderSize[])
 
