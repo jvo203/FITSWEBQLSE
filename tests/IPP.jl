@@ -100,11 +100,34 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         error("NULL pInitBuf or pSpec")
     end
 
+    valueB = 0.0f0
+    valueC = 0.0f0
+
+    # Filter initialization
+    status = ccall(
+        (:ippiResizeCubicInit_32f, ipplib * "/libippi.so"),
+        Cint,
+        (IppiSize, IppiSize, Cfloat, Cfloat, Ptr{Cvoid}, Ptr{Cvoid}),
+        srcSize,
+        dstSize,
+        valueB,
+        valueC,
+        pSpec,
+        pInitBuf,
+    )
+    ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pInitBuf)
+
+    println("ippiResizeCubicInit_32f::$status")
+
+    if status != 0
+        ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
+        error("ippiResizeCubicInit_32f::$status")
+    end
+
     # a destination buffer
     dst = Matrix{Float32}(undef, width, height)
 
     # Release memory
-    ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pInitBuf)
     ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
 
     return dst
