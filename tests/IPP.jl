@@ -60,6 +60,9 @@ const ippSuper = 8
 const ippLanczos = 16
 
 function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer)
+    # a destination buffer
+    dst = Matrix{Float32}(undef, width, height)
+
     dims = size(src)
     srcSize = IppiSize(dims[1], dims[2])
     dstSize = IppiSize(width, height)
@@ -158,9 +161,16 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         error("ippiResizeGetBufferSize_32f::$status")
     end
 
+    # pBuffer = ippsMalloc_8u(bufSize);
+    pBuffer =
+        ccall((:ippsMalloc_8u, ipplib * "/libipps.so"), Ptr{Cvoid}, (Cint,), bufSize[])
+    println("pBuffer:", pBuffer)
 
-    # a destination buffer
-    dst = Matrix{Float32}(undef, width, height)
+    if pBuffer != C_NULL
+
+
+        ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pBuffer)
+    end
 
     # Release memory
     ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
