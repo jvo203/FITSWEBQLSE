@@ -183,19 +183,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         println("ippiResizeGetSrcRoi_32f::$status")
 
         if status == 0
-            # finally resize the image
-            #=pStatus = ippiResizeCubic_32f_C1R(
-                pSrc,
-                srcStep * sizeof(Ipp32f),
-                pDst,
-                dstStep * sizeof(Ipp32f),
-                dstOffset,
-                dstSize,
-                border,
-                0,
-                pSpec,
-                pBuffer,
-            )=#
+            # finally resize the image            
             srcStep = strides(src)[2] * sizeof(Float32)
             dstStep = strides(dst)[2] * sizeof(Float32)
 
