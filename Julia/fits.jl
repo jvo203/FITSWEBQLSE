@@ -2772,6 +2772,7 @@ end
 
             local pixels_task
 
+            #=
             if keyframe
                 pixels_task =
                     @spawnat :any Float16.(imresize(pixels, (image_width, image_height)),)
@@ -2780,9 +2781,12 @@ end
                     imresize(pixels, (image_width, image_height), method = Constant()),
                 )
             end
+            =#
+
+            pixels = resizeCubic32fC1R(pixels, image_width, image_height)
 
             mask = fetch(mask_task)
-            pixels = fetch(pixels_task)
+            # pixels = fetch(pixels_task)
         catch e
             # println(e)
             println(
