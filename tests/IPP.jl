@@ -167,7 +167,37 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
     println("pBuffer:", pBuffer)
 
     if pBuffer != C_NULL
+        srcOffset = IppiPoint(0, 0)
+        dstOffset = IppiPoint(0, 0)
 
+        status = ccall(
+            (:ippiResizeGetSrcRoi_32f, ipplib * "/libippi.so"),
+            Cint,
+            (Ptr{Cvoid}, IppiPoint, IppiSize, Ref{IppiPoint}, Ref{IppiSize}),
+            pSpec,
+            dstOffset,
+            dstSize,
+            srcOffset,
+            srcSize,
+        )
+        println("ippiResizeGetSrcRoi_32f::$status")
+
+        if status == 0
+            # finally resize the image
+            pStatus = ippiResizeCubic_32f_C1R(
+                pSrc,
+                srcStep * sizeof(Ipp32f),
+                pDst,
+                dstStep * sizeof(Ipp32f),
+                dstOffset,
+                dstSize,
+                border,
+                0,
+                pSpec,
+                pBuffer,
+            )
+
+        end
 
         ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pBuffer)
     end
