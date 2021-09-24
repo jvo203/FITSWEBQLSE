@@ -1,38 +1,23 @@
-include("ipp_toolchain.jl")
+# Set the IPP library path
+@static if Sys.isapple()
+    ipplib = ENV["IPPROOT"] * "/lib"
+end
 
-# Compile the code
-ipp = load_ipp("../src/ipp.c", `-O3`)
+@static if Sys.islinux()
+    ipplib = ENV["IPPROOT"] * "/lib/intel64"
+end
 
-# function pointers
-resizeCubic32F = Libc.Libdl.dlsym(ipp, "resizeCubic")
-# resizeLanczos32F = Libc.Libdl.dlsym(ipp, "resizeLanczos")
-# resizeSuper32F = Libc.Libdl.dlsym(ipp, "resizeSuper")
-# resizeNearest8U = Libc.Libdl.dlsym(ipp, "resizeNearest")
+@static if Sys.iswindows()
+    error("Unsupported OS: Windows")
+end
 
-dim = 10
-view = 3
+const ippC1 = 1
+const ippBorderRepl = 1
 
-pixels = 100.0f0 * randn(Float32, dim, dim)
-#display(pixels)
-
-#=
-pixels2 = Matrix{Float32}(undef, view, view)
-
-# Call the kernel:
-ccall(
-    resizeCubic32F,
-    Cvoid,
-    (Ref{Float32}, Cint, Cint, Ref{Float32}, Cint, Cint),
-    pointer(pixels),
-    dim,
-    dim,
-    pointer(pixels2),
-    view,
-    view,
-)
-
-display(pixels2)
-=#
+const ippNearest = 1
+const ippCubic = 6
+const ippSuper = 8
+const ippLanczos = 16
 
 mutable struct IppiSize
     width::Cint
@@ -50,14 +35,6 @@ mutable struct IppiBorderSize
     borderRight::Cint
     borderBottom::Cint
 end
-
-const ippC1 = 1
-const ippBorderRepl = 1
-
-const ippNearest = 1
-const ippCubic = 6
-const ippSuper = 8
-const ippLanczos = 16
 
 function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer)
     # a destination buffer
@@ -225,6 +202,3 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
 
     return dst
 end
-
-res = resizeCubic32fC1R(pixels, view, view)
-display(res)
