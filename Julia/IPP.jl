@@ -60,7 +60,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         initSize,
     )
 
-    println("status: $status; specSize: $(specSize[]), initSize: $(initSize[])")
+    # println("status: $status; specSize: $(specSize[]), initSize: $(initSize[])")
 
     if status != 0
         error("ippiResizeGetSize_32f::$status")
@@ -69,10 +69,10 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
     # Memory allocation
     pInitBuf =
         ccall((:ippsMalloc_8u, ipplib * "/libipps.so"), Ptr{Cvoid}, (Cint,), initSize[])
-    println("pInitBuf:", pInitBuf)
+    # println("pInitBuf:", pInitBuf)
 
     pSpec = ccall((:ippsMalloc_8u, ipplib * "/libipps.so"), Ptr{Cvoid}, (Cint,), specSize[])
-    println("pSpec:", pSpec)
+    # println("pSpec:", pSpec)
 
     if pInitBuf == C_NULL || pSpec == C_NULL
         ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pInitBuf)
@@ -96,7 +96,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         pInitBuf,
     )
     ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pInitBuf)
-    println("ippiResizeCubicInit_32f::$status")
+    # println("ippiResizeCubicInit_32f::$status")
 
     if status != 0
         ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
@@ -112,7 +112,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         pSpec,
         borderSize,
     )
-    println("ippiResizeGetBorderSize_32f::$status, borderSize:", borderSize[])
+    # println("ippiResizeGetBorderSize_32f::$status, borderSize:", borderSize[])
 
     if status != 0
         ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
@@ -131,7 +131,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
         ippC1,
         bufSize,
     )
-    println("ippiResizeGetBufferSize_32f::$status, bufSize:", bufSize[])
+    # println("ippiResizeGetBufferSize_32f::$status, bufSize:", bufSize[])
 
     if status != 0
         ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
@@ -141,7 +141,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
     # pBuffer = ippsMalloc_8u(bufSize);
     pBuffer =
         ccall((:ippsMalloc_8u, ipplib * "/libipps.so"), Ptr{Cvoid}, (Cint,), bufSize[])
-    println("pBuffer:", pBuffer)
+    # println("pBuffer:", pBuffer)
 
     if pBuffer != C_NULL
         srcOffset = IppiPoint(0, 0)
@@ -157,7 +157,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
             srcOffset,
             srcSize,
         )
-        println("ippiResizeGetSrcRoi_32f::$status")
+        # println("ippiResizeGetSrcRoi_32f::$status")
 
         if status == 0
             # finally resize the image            
@@ -190,7 +190,7 @@ function resizeCubic32fC1R(src::Matrix{Float32}, width::Integer, height::Integer
                 pSpec,
                 pBuffer,
             )
-            println("ippiResizeCubic_32f_C1R::$status")
+            # println("ippiResizeCubic_32f_C1R::$status")
 
         end
 

@@ -2763,15 +2763,18 @@ end
 
     if bDownsize
         try
-            # tried using Threads.@spawn for the mask
-            # imresize does not seem to be thread-safe
-
-            mask_task = @spawnat :any Bool.(
-                imresize(mask, (image_width, image_height), method = Constant()),
-            ) # use Nearest-Neighbours for the mask
-
+            # tried using Threads.@spawn: imresize does not seem to be thread-safe
             local pixels_task
 
+            pixels_task = Threads.@spawn pixels =
+                Float16.(resizeCubic32fC1R(Float32.(pixels), image_width, image_height))
+
+            #mask_task = @spawnat :any Bool.(
+            #    imresize(mask, (image_width, image_height), method = Constant()),
+            #) # use Nearest-Neighbours for the mask            
+            mask = Bool.(imresize(mask, (image_width, image_height), method = Constant()),) # use Nearest-Neighbours for the mask  
+
+            #=
             if keyframe
                 pixels_task = @spawnat :any imresize(pixels, (image_width, image_height))
             else
@@ -2781,14 +2784,13 @@ end
                     method = Constant(),
                 )
             end
+            =#
 
-            # pixels =
-            #    Float16.(resizeCubic32fC1R(Float32.(pixels), image_width, image_height))
-
-            mask = fetch(mask_task)
-            pixels = fetch(pixels_task)
+            # mask = fetch(mask_task)
+            # pixels = fetch(pixels_task)
+            wait(pixels_task)
         catch e
-            # println(e)
+            println(e)
             println(
                 "imresize error: ",
                 size(pixels),
@@ -3097,7 +3099,8 @@ function decompressData(fits::FITSDataSet)
         compressed_frames = Dict{Int32,Matrix{Float16}}()
         spinlock = Threads.SpinLock()
 
-        Threads.@threads for frame in idx
+        # Threads.@threads for frame in idx # threads causing problems???
+        for frame in idx
             try
                 cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
                 filename = cache_dir * Base.Filesystem.path_separator * string(frame)
@@ -3115,9 +3118,9 @@ function decompressData(fits::FITSDataSet)
                 # insert back NaNs
                 frame_pixels[frame_mask] .= NaN16
 
-                Threads.lock(spinlock)
+                #Threads.lock(spinlock)
                 compressed_frames[frame] = frame_pixels
-                Threads.unlock(spinlock)
+                #Threads.unlock(spinlock)
 
                 # println("decompressed frame #$frame")
 
