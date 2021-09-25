@@ -34,6 +34,17 @@ struct ImageToneMapping
     black::Float32
 end
 
+struct VideoToneMapping
+    flux::String
+    dmin::Float32
+    dmax::Float32
+    med::Float32
+    sensitivity::Float32
+    slope::Float32
+    white::Float32
+    black::Float32
+end
+
 mutable struct FITSDataSet
     # metadata
     datasetid::String
@@ -2654,6 +2665,21 @@ function getVideoFrame(
         end
     end
 
+    # calculate white, black, sensitivity from the all-data histogram
+    u = 7.5f0
+    _median = fits.data_median
+    _black = max(fits.dmin, (fits.data_median - u * fits.data_mad₋))
+    _white = min(fits.dmax, (fits.data_median + u * fits.data_mad₊))
+    _sensitivity = 1.0f0 / (_white - _black)
+    _slope = 1.0f0 / (_white - _black)
+    _dmin = fits.dmin
+    _dmax = fits.dmax
+    lmin = log(0.5f0)
+    lmax = log(1.5f0)
+
+    # video tone mapping
+    tone = VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
+
     # for each Future in ras find the corresponding worker
     # launch jobs on each worker, pass the channel indices
     ras = [
@@ -2674,18 +2700,6 @@ function getVideoFrame(
 
     close(results)
     wait(results_task)
-
-    # calculate white, black, sensitivity from the all-data histogram
-    u = 7.5f0
-    _median = fits.data_median
-    _black = max(fits.dmin, (fits.data_median - u * fits.data_mad₋))
-    _white = min(fits.dmax, (fits.data_median + u * fits.data_mad₊))
-    _sensitivity = 1.0f0 / (_white - _black)
-    _slope = 1.0f0 / (_white - _black)
-    _dmin = fits.dmin
-    _dmax = fits.dmax
-    lmin = log(0.5f0)
-    lmax = log(1.5f0)
 
     # BitMatrix -> Array{Bool} -> Array{UInt8}
     # alpha_task = Threads.@spawn alpha = alphaMask.(mask)
