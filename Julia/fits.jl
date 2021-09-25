@@ -2678,7 +2678,8 @@ function getVideoFrame(
     lmax = log(1.5f0)
 
     # video tone mapping
-    tone = VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
+    tone =
+        VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
 
     # for each Future in ras find the corresponding worker
     # launch jobs on each worker, pass the channel indices
@@ -2686,6 +2687,7 @@ function getVideoFrame(
         @spawnat job.where fetchVideoFrame(
             fetch(job),
             frame_idx,
+            tone,
             image_width,
             image_height,
             bDownsize,
@@ -2734,6 +2736,7 @@ end
 @everywhere function fetchVideoFrame(
     compressed_frames::Dict{Int32,Matrix{Float16}},
     frame::Integer,
+    tone::VideoToneMapping,
     image_width::Integer,
     image_height::Integer,
     bDownsize::Bool,
