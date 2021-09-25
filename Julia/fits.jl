@@ -2766,15 +2766,14 @@ end
             # tried using Threads.@spawn: imresize does not seem to be thread-safe
             local pixels_task
 
-            pixels_task = Threads.@spawn pixels =
-                Float16.(resizeCubic32fC1R(Float32.(pixels), image_width, image_height))
+            # pixels_task = Threads.@spawn pixels =
+            #    Float16.(resizeCubic32fC1R(Float32.(pixels), image_width, image_height))
 
-            #mask_task = @spawnat :any Bool.(
-            #    imresize(mask, (image_width, image_height), method = Constant()),
-            #) # use Nearest-Neighbours for the mask            
-            mask = Bool.(imresize(mask, (image_width, image_height), method = Constant()),) # use Nearest-Neighbours for the mask  
+            mask_task = @spawnat :any Bool.(
+                imresize(mask, (image_width, image_height), method = Constant()),
+            ) # use Nearest-Neighbours for the mask            
+            # mask = Bool.(imresize(mask, (image_width, image_height), method = Constant()),) # use Nearest-Neighbours for the mask  
 
-            #=
             if keyframe
                 pixels_task = @spawnat :any imresize(pixels, (image_width, image_height))
             else
@@ -2784,11 +2783,10 @@ end
                     method = Constant(),
                 )
             end
-            =#
 
-            # mask = fetch(mask_task)
-            # pixels = fetch(pixels_task)
-            wait(pixels_task)
+            mask = fetch(mask_task)
+            pixels = fetch(pixels_task)
+            # wait(pixels_task)
         catch e
             println(e)
             println(
