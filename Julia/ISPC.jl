@@ -17,4 +17,4 @@ const make_linear_video_frame_fptr = Libc.Libdl.dlsym(lib, "make_video_frameF16_
 const make_logistic_video_frame_fptr = Libc.Libdl.dlsym(lib, "make_video_frameF16_logistic")
 const make_ratio_video_frame_fptr = Libc.Libdl.dlsym(lib, "make_video_frameF16_ratio")
 const make_square_video_frame_fptr = Libc.Libdl.dlsym(lib, "make_video_frameF16_square")
-const make_kegacy_video_frame_fptr = Libc.Libdl.dlsym(lib, "make_video_frameF16_legacy")
+const make_legacy_video_frame_fptr = Libc.Libdl.dlsym(lib, "make_video_frameF16_legacy")
