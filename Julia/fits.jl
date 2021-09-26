@@ -14,7 +14,7 @@ using PhysicalConstants.CODATA2018;
 const MADV_WILLNEED = 3
 
 include("classifier.jl")
-include("IPP.jl")
+# include("IPP.jl")
 include("ISPC.jl")
 
 const NBINS = 1024
@@ -2752,6 +2752,10 @@ end
         return
     end
 
+    pixels = Matrix{UInt8}(undef, size(frame_pixels))
+    mask = Matrix{UInt8}(undef, size(frame_pixels))
+
+    #=
     try
         # make an element-by-element write-enabled copy
         pixels = deepcopy(frame_pixels)
@@ -2777,6 +2781,7 @@ end
         println("mask: ", e)
         return
     end
+    =#
 
     if bDownsize
         try
