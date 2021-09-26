@@ -38,7 +38,7 @@ end
     flux::String
     dmin::Float32
     dmax::Float32
-    med::Float32
+    median::Float32
     sensitivity::Float32
     slope::Float32
     white::Float32
@@ -2654,17 +2654,6 @@ function getVideoFrame(
         error("Uninitialised compressed pixels.")
     end
 
-    results = RemoteChannel(() -> Channel{Tuple}(32))
-
-    results_task = @async while true
-        try
-            pixels, mask = take!(results)
-        catch e
-            # println("video frame task completed")
-            break
-        end
-    end
-
     # calculate white, black, sensitivity from the all-data histogram
     u = 7.5f0
     _median = fits.data_median
@@ -2681,6 +2670,38 @@ function getVideoFrame(
     tone =
         VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
 
+    # target the specific worker instead of a "scatter-gun" approach
+    for job in fits.compressed_pixels
+        idx = fits.indices[job.where]
+
+        if idx[frame_idx]
+            println("found $frame_idx @ $(job.where)")
+
+            res = @spawnat job.where fetchVideoFrame(
+                fetch(job),
+                frame_idx,
+                tone,
+                image_width,
+                image_height,
+                bDownsize,
+                keyframe,
+            )
+
+            return fetch(res)
+        end
+    end
+
+    results = RemoteChannel(() -> Channel{Tuple}(32))
+
+    results_task = @async while true
+        try
+            pixels, mask = take!(results)
+        catch e
+            # println("video frame task completed")
+            break
+        end
+    end
+
     # for each Future in ras find the corresponding worker
     # launch jobs on each worker, pass the channel indices
     ras = [
@@ -2692,7 +2713,7 @@ function getVideoFrame(
             image_height,
             bDownsize,
             keyframe,
-            results,
+            # results,
         )
 
         for job in fits.compressed_pixels
@@ -2744,7 +2765,7 @@ end
     image_height::Integer,
     bDownsize::Bool,
     keyframe::Bool,
-    queue::RemoteChannel{Channel{Tuple}},
+    # queue::RemoteChannel{Channel{Tuple}},
 )
     local frame_pixels, pixels, mask
 
@@ -2943,7 +2964,8 @@ end
 
     # println(typeof(pixels), ";", typeof(mask), ";", size(pixels), ";", size(mask), "; bDownsize:", bDownsize)
 
-    put!(queue, (pixels, mask))
+    return (pixels, mask)
+    # put!(queue, (pixels, mask))
 end
 
 @everywhere function calculateViewportSpectrum(
