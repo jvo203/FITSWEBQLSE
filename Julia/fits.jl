@@ -2758,18 +2758,105 @@ end
     pixels = Matrix{UInt8}(undef, size(frame_pixels))
     mask = Matrix{UInt8}(undef, size(frame_pixels))
 
+    dims = size(frame_pixels)
+    width = dims[1]
+    height = dims[2]
+
+    src_stride = strides(frame_pixels)
+    dst_stride = strides(pixels)
+
     if tone.flux == "linear"
-        #luma = linear_tone_mapping.(pixels, _black, _slope)
+        ccall(
+            make_linear_video_frame_fptr,
+            Cvoid,
+            (Ptr{Float16}, Cint, Cint, Cint, Ptr{UInt8}, Ptr{UInt8}, Cint, Cfloat, Cfloat),
+            pointer(frame_pixels),
+            width,
+            height,
+            src_stride[2],
+            pointer(pixels),
+            pointer(mask),
+            dst_stride[2],
+            tone.black,
+            tone.slope,
+        )
     elseif tone.flux == "logistic"
-        #luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
+        ccall(
+            make_logistic_video_frame_fptr,
+            Cvoid,
+            (Ptr{Float16}, Cint, Cint, Cint, Ptr{UInt8}, Ptr{UInt8}, Cint, Cfloat, Cfloat),
+            pointer(frame_pixels),
+            width,
+            height,
+            src_stride[2],
+            pointer(pixels),
+            pointer(mask),
+            dst_stride[2],
+            tone.median,
+            tone.sensitivity,
+        )
     elseif tone.flux == "ratio"
-        #luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
+        ccall(
+            make_ratio_video_frame_fptr,
+            Cvoid,
+            (Ptr{Float16}, Cint, Cint, Cint, Ptr{UInt8}, Ptr{UInt8}, Cint, Cfloat, Cfloat),
+            pointer(frame_pixels),
+            width,
+            height,
+            src_stride[2],
+            pointer(pixels),
+            pointer(mask),
+            dst_stride[2],
+            tone.black,
+            tone.sensitivity,
+        )
     elseif tone.flux == "square"
-        #luma = square_tone_mapping.(pixels, _black, _sensitivity)
+        ccall(
+            make_square_video_frame_fptr,
+            Cvoid,
+            (Ptr{Float16}, Cint, Cint, Cint, Ptr{UInt8}, Ptr{UInt8}, Cint, Cfloat, Cfloat),
+            pointer(frame_pixels),
+            width,
+            height,
+            src_stride[2],
+            pointer(pixels),
+            pointer(mask),
+            dst_stride[2],
+            tone.black,
+            tone.sensitivity,
+        )
     elseif tone.flux == "legacy"
         lmin = log(0.5f0)
         lmax = log(1.5f0)
-        #luma = legacy_tone_mapping.(pixels, _dmin, _dmax, lmin, lmax)
+
+        ccall(
+            make_legacy_video_frame_fptr,
+            Cvoid,
+            (
+                Ptr{Float16},
+                Cint,
+                Cint,
+                Cint,
+                Ptr{UInt8},
+                Ptr{UInt8},
+                Cint,
+                Cfloat,
+                Cfloat,
+                Cfloat,
+                Cfloat,
+            ),
+            pointer(frame_pixels),
+            width,
+            height,
+            src_stride[2],
+            pointer(pixels),
+            pointer(mask),
+            dst_stride[2],
+            tone.dmin,
+            tone.dmax,
+            lmin,
+            lmax,
+        )
     else
         pixels .= 0
         mask .= 0
