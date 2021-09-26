@@ -2675,7 +2675,7 @@ function getVideoFrame(
         idx = fits.indices[job.where]
 
         if idx[frame_idx]
-            println("found $frame_idx @ $(job.where)")
+            println("located $frame_idx @ $(job.where)")
 
             res = @spawnat job.where fetchVideoFrame(
                 fetch(job),
