@@ -2703,6 +2703,7 @@ function getVideoFrame(
     close(results)
     wait(results_task)
 
+    #=
     # BitMatrix -> Array{Bool} -> Array{UInt8}
     # alpha_task = Threads.@spawn alpha = alphaMask.(mask)
     alpha = alphaMask.(mask)
@@ -2723,6 +2724,7 @@ function getVideoFrame(
     else
         luma = null_tone_mapping.(pixels)
     end
+    =#
 
     # use Intel SPMD C: {pixels,alpha} -> {luma, alpha} ... ???
     # in some cases, where pixels <= 0.0 alpha needs to be set to 0
@@ -2730,7 +2732,8 @@ function getVideoFrame(
 
     # wait(alpha_task)
 
-    return (luma, alpha)
+    # return (luma, alpha)
+    return (pixels, mask)
 end
 
 @everywhere function fetchVideoFrame(
