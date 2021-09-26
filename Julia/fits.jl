@@ -34,7 +34,7 @@ struct ImageToneMapping
     black::Float32
 end
 
-struct VideoToneMapping
+@everywhere struct VideoToneMapping
     flux::String
     dmin::Float32
     dmax::Float32
@@ -2757,6 +2757,23 @@ end
 
     pixels = Matrix{UInt8}(undef, size(frame_pixels))
     mask = Matrix{UInt8}(undef, size(frame_pixels))
+
+    if tone.flux == "linear"
+        #luma = linear_tone_mapping.(pixels, _black, _slope)
+    elseif tone.flux == "logistic"
+        #luma = logistic_tone_mapping.(pixels, _median, _sensitivity)
+    elseif tone.flux == "ratio"
+        #luma = ratio_tone_mapping.(pixels, _black, _sensitivity)
+    elseif tone.flux == "square"
+        #luma = square_tone_mapping.(pixels, _black, _sensitivity)
+    elseif tone.flux == "legacy"
+        lmin = log(0.5f0)
+        lmax = log(1.5f0)
+        #luma = legacy_tone_mapping.(pixels, _dmin, _dmax, lmin, lmax)
+    else
+        pixels .= 0
+        mask .= 0
+    end
 
     #=
     try
