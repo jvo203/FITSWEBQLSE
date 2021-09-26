@@ -2675,8 +2675,6 @@ function getVideoFrame(
         idx = fits.indices[job.where]
 
         if idx[frame_idx]
-            println("located $frame_idx @ $(job.where)")
-
             res = @spawnat job.where fetchVideoFrame(
                 fetch(job),
                 frame_idx,
@@ -2691,38 +2689,7 @@ function getVideoFrame(
         end
     end
 
-    results = RemoteChannel(() -> Channel{Tuple}(32))
-
-    results_task = @async while true
-        try
-            pixels, mask = take!(results)
-        catch e
-            # println("video frame task completed")
-            break
-        end
-    end
-
-    # for each Future in ras find the corresponding worker
-    # launch jobs on each worker, pass the channel indices
-    ras = [
-        @spawnat job.where fetchVideoFrame(
-            fetch(job),
-            frame_idx,
-            tone,
-            image_width,
-            image_height,
-            bDownsize,
-            keyframe,
-            # results,
-        )
-
-        for job in fits.compressed_pixels
-    ]
-
-    @time wait.(ras)
-
-    close(results)
-    wait(results_task)
+    return (nothing, nothing)
 
     #=
     # BitMatrix -> Array{Bool} -> Array{UInt8}
@@ -2754,7 +2721,6 @@ function getVideoFrame(
     # wait(alpha_task)
 
     # return (luma, alpha)
-    return (pixels, mask)
 end
 
 @everywhere function fetchVideoFrame(
@@ -2765,7 +2731,6 @@ end
     image_height::Integer,
     bDownsize::Bool,
     keyframe::Bool,
-    # queue::RemoteChannel{Channel{Tuple}},
 )
     local frame_pixels, pixels, mask
 
@@ -2965,7 +2930,6 @@ end
     # println(typeof(pixels), ";", typeof(mask), ";", size(pixels), ";", size(mask), "; bDownsize:", bDownsize)
 
     return (pixels, mask)
-    # put!(queue, (pixels, mask))
 end
 
 @everywhere function calculateViewportSpectrum(
