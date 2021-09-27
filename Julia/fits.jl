@@ -2855,6 +2855,8 @@ end
         mask .= 0
     end
 
+    # LZ4-compress {pixels,mask} for a faster transmission from the remote worker
+    # to the root process (network bandwidth savings)
     dims = size(pixels)
     pixels = lz4_compress(collect(flatten(pixels)))
     mask = lz4_compress(collect(flatten(mask)))
