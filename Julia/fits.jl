@@ -2648,7 +2648,7 @@ function getVideoFrame(
     keyframe::Bool,
 )
     local pixels, mask
-    local luma, alpha
+    # local luma, alpha
 
     if fits.compressed_pixels == Nothing
         error("Uninitialised compressed pixels.")
@@ -2685,7 +2685,14 @@ function getVideoFrame(
                 keyframe,
             )
 
-            return fetch(res)
+            pixels, mask, dims = fetch(res)
+            len = dims[1] * dims[2]
+
+            # decompress and reconstruct (reshape) the pixels/mask arrays
+            pixels = reshape(lz4_decompress(pixels, len), dims)
+            mask = reshape(lz4_decompress(mask, len), dims)
+
+            return (pixels, mask)
         end
     end
 
@@ -2848,6 +2855,10 @@ end
         mask .= 0
     end
 
+    dims = size(pixels)
+    pixels = lz4_compress(collect(flatten(pixels)))
+    mask = lz4_compress(collect(flatten(mask)))
+
     #=
     try
         # make an element-by-element write-enabled copy
@@ -2939,7 +2950,7 @@ end
 
     # println(typeof(pixels), ";", typeof(mask), ";", size(pixels), ";", size(mask), "; bDownsize:", bDownsize)
 
-    return (pixels, mask)
+    return (pixels, mask, dims)
 end
 
 @everywhere function calculateViewportSpectrum(
