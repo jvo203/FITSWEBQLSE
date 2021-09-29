@@ -1,7 +1,7 @@
 # reduce (integrate) the image
 pixels = @distributed (+) for i = 1:depth
 
-    local val , pixels
+    local val, pixels
 
     try
         fits_file = FITS(filepath)
@@ -196,3 +196,33 @@ try
 catch e
     println(e)
 end
+
+# fetchVideoFrame
+#=
+    try
+        # make an element-by-element write-enabled copy
+        pixels = deepcopy(frame_pixels)
+    catch e
+        println("frame_pixels: ", e)
+        return
+    end
+
+    mask = map(isnan, pixels)
+
+    try
+        # replace NaNs with 0.0
+        pixels[mask] .= 0.0
+    catch e
+        println("pixels: ", e)
+        return
+    end
+
+    try
+        # invert the mask
+        mask = .!mask
+    catch e
+        println("mask: ", e)
+        return
+    end
+    =#
+#

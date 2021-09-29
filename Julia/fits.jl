@@ -2855,40 +2855,6 @@ end
         mask .= 0
     end
 
-    # LZ4-compress {pixels,mask} for a faster transmission from the remote worker
-    # to the root process (network bandwidth savings)
-    dims = size(pixels)
-    pixels = lz4_compress(collect(flatten(pixels)))
-    mask = lz4_compress(collect(flatten(mask)))
-
-    #=
-    try
-        # make an element-by-element write-enabled copy
-        pixels = deepcopy(frame_pixels)
-    catch e
-        println("frame_pixels: ", e)
-        return
-    end
-
-    mask = map(isnan, pixels)
-
-    try
-        # replace NaNs with 0.0
-        pixels[mask] .= 0.0
-    catch e
-        println("pixels: ", e)
-        return
-    end
-
-    try
-        # invert the mask
-        mask = .!mask
-    catch e
-        println("mask: ", e)
-        return
-    end
-    =#
-
     if bDownsize
         try
             # tried using Threads.@spawn: imresize does not seem to be thread-safe
@@ -2944,6 +2910,8 @@ end
                 "-->($image_width,$image_height); ",
                 typeof(pixels),
                 ";",
+                size(mask),
+                "-->($image_width,$image_height); ",
                 typeof(mask),
             )
             return
@@ -2951,6 +2919,12 @@ end
     end
 
     # println(typeof(pixels), ";", typeof(mask), ";", size(pixels), ";", size(mask), "; bDownsize:", bDownsize)
+
+    # LZ4-compress {pixels,mask} for a faster transmission from the remote worker
+    # to the root process (network bandwidth savings)
+    dims = size(pixels)
+    pixels = lz4_compress(collect(flatten(pixels)))
+    mask = lz4_compress(collect(flatten(mask)))
 
     return (pixels, mask, dims)
 end
