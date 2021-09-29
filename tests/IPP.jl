@@ -13,6 +13,7 @@ dim = 10
 view = 3
 
 pixels = 100.0f0 * randn(Float32, dim, dim)
+mask = round.(UInt8, pixels)
 #display(pixels)
 
 #=
