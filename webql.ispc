@@ -180,6 +180,7 @@ export void make_video_frameF16_ratio(uniform unsigned int16 src[], uniform int 
       // source
       varying int sx = round(scale_x * (float)x) ;
       varying int sy = round(scale_y * (float)y) ;
+      
       unsigned int src_x = clamp(sx, (varying int32)0, (varying int32)width-1);
       unsigned int src_y = clamp(sy, (varying int32)0, (varying int32)height-1);
       
