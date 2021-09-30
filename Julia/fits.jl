@@ -2906,7 +2906,9 @@ end
 
             # mask = fetch(mask_task)
             # pixels = fetch(pixels_task)
-            # wait(mask_task)
+
+            # wait(pixels_task)
+            # wait(mask_task)            
         catch e
             println(e)
             println(
