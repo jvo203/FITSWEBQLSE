@@ -287,8 +287,8 @@ function resizeNearest8uC1R(src::Matrix{UInt8}, width::Integer, height::Integer)
 
         if status == 0
             # finally resize the image            
-            srcStep = strides(src)[2] * sizeof(Float32)
-            dstStep = strides(dst)[2] * sizeof(Float32)
+            srcStep = strides(src)[2] * sizeof(UInt8)
+            dstStep = strides(dst)[2] * sizeof(UInt8)
 
             status = ccall(
                 (:ippiResizeNearest_8u_C1R, ipplib * "/libippi.so"),
