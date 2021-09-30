@@ -14,7 +14,7 @@ using PhysicalConstants.CODATA2018;
 const MADV_WILLNEED = 3
 
 include("classifier.jl")
-# include("IPP.jl")
+include("IPP.jl")
 include("ISPC.jl")
 
 const NBINS = 1024
