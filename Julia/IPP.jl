@@ -216,12 +216,15 @@ function resizeNearest8uC1R(src::Matrix{UInt8}, width::Integer, height::Integer)
         initSize,
     )
 
+    println("status: $status; specSize: $(specSize[]), initSize: $(initSize[])")
+
     if status != 0
         error("ippiResizeGetSize_8u::$status")
     end
 
     # Memory allocation
     pSpec = ccall((:ippsMalloc_8u, ipplib * "/libipps.so"), Ptr{Cvoid}, (Cint,), specSize[])
+    println("pSpec:", pSpec)
 
     if pSpec == C_NULL
         error("NULL pSpec")
@@ -236,6 +239,7 @@ function resizeNearest8uC1R(src::Matrix{UInt8}, width::Integer, height::Integer)
         dstSize,
         pSpec,
     )
+    println("ippiResizeNearestInit_8u::$status")
 
     if status != 0
         ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
@@ -254,6 +258,7 @@ function resizeNearest8uC1R(src::Matrix{UInt8}, width::Integer, height::Integer)
         ippC1,
         bufSize,
     )
+    println("ippiResizeGetBufferSize_8u::$status, bufSize:", bufSize[])
 
     if status != 0
         ccall((:ippsFree, ipplib * "/libipps.so"), Cvoid, (Ptr{Cvoid},), pSpec)
@@ -262,6 +267,7 @@ function resizeNearest8uC1R(src::Matrix{UInt8}, width::Integer, height::Integer)
 
     pBuffer =
         ccall((:ippsMalloc_8u, ipplib * "/libipps.so"), Ptr{Cvoid}, (Cint,), bufSize[])
+    println("pBuffer:", pBuffer)
 
     if pBuffer != C_NULL
         srcOffset = IppiPoint(0, 0)
@@ -277,6 +283,7 @@ function resizeNearest8uC1R(src::Matrix{UInt8}, width::Integer, height::Integer)
             srcOffset,
             srcSize,
         )
+        println("ippiResizeGetSrcRoi_8u::$status")
 
         if status == 0
             # finally resize the image            
@@ -296,6 +303,7 @@ function resizeNearest8uC1R(src::Matrix{UInt8}, width::Integer, height::Integer)
                 pSpec,
                 pBuffer,
             )
+            println("ippiResizeNearest_8u_C1R::$status")
 
         end
 
