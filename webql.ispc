@@ -170,11 +170,12 @@ export void make_video_frameF16_logistic(uniform unsigned int16 src[], uniform i
     } ;  
 } ;
 
-export void make_video_frameF16_ratio(uniform unsigned int16 src[], uniform int width, uniform int height, uniform int src_stride, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int dst_stride, uniform float black, uniform float sensitivity)
+export void make_video_frameF16_ratio(uniform unsigned int16 src[], uniform int width, uniform int height, uniform int src_stride, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int dst_width, uniform int dst_height, uniform int dst_stride, uniform float black, uniform float sensitivity)
 {
-  foreach (y=0 ... height, x=0 ... width)
+  foreach (y=0 ... dst_height, x=0 ... dst_width)
     {
-      float tmp = half_to_float_fast(src[y*src_stride+x]) ;
+      unsigned int src_idx = y*src_stride+x ;
+      float tmp = half_to_float_fast(src[src_idx]) ;
       unsigned int idx = y * dst_stride + x ;
 
       //alternative coherent if
