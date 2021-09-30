@@ -2863,6 +2863,7 @@ end
             # pixels_task = Threads.@spawn pixels =
             #    Float16.(resizeCubic32fC1R(Float32.(pixels), image_width, image_height))
 
+            #=
             # mask_task = @spawnat :any 
             mask =
                 round.(
@@ -2874,6 +2875,10 @@ end
                     ),
                 ) # use Nearest-Neighbours for the mask
             # mask = Bool.(imresize(mask, (image_width, image_height), method = Constant()),) # use Nearest-Neighbours for the mask  
+            =#
+
+            mask_task =
+                Threads.@spawn mask = resizeNearest8uC1R(mask, image_width, image_height)
 
             if keyframe
                 # pixels_task = @spawnat :any 
@@ -2901,7 +2906,7 @@ end
 
             # mask = fetch(mask_task)
             # pixels = fetch(pixels_task)
-            # wait(pixels_task)
+            wait(mask_task)
         catch e
             println(e)
             println(
