@@ -2740,6 +2740,7 @@ end
     keyframe::Bool,
 )
     local frame_pixels, pixels, mask
+    local dstWidth, dstHeight
 
     try
         frame_pixels = compressed_frames[frame]
@@ -2748,12 +2749,20 @@ end
         return
     end
 
-    pixels = Matrix{UInt8}(undef, size(frame_pixels))
-    mask = Matrix{UInt8}(undef, size(frame_pixels))
-
     dims = size(frame_pixels)
     width = dims[1]
     height = dims[2]
+
+    if bDownsize
+        dstWidth = image_width
+        dstHeight = image_height
+    else
+        dstWidth = width
+        dstHeight = height
+    end
+
+    pixels = Matrix{UInt8}(undef, (dstWidth, dstHeight))
+    mask = Matrix{UInt8}(undef, (dstWidth, dstHeight))
 
     src_stride = strides(frame_pixels)
     dst_stride = strides(pixels)
@@ -2792,13 +2801,27 @@ end
         ccall(
             make_ratio_video_frame_fptr,
             Cvoid,
-            (Ptr{Float16}, Cint, Cint, Cint, Ptr{UInt8}, Ptr{UInt8}, Cint, Cfloat, Cfloat),
+            (
+                Ptr{Float16},
+                Cint,
+                Cint,
+                Cint,
+                Ptr{UInt8},
+                Ptr{UInt8},
+                Cint,
+                Cint,
+                Cint,
+                Cfloat,
+                Cfloat,
+            ),
             pointer(frame_pixels),
             width,
             height,
             src_stride[2],
             pointer(pixels),
             pointer(mask),
+            dstWidth,
+            dstHeight,
             dst_stride[2],
             tone.black,
             tone.sensitivity,
@@ -2855,6 +2878,13 @@ end
         mask .= 0
     end
 
+    dims = size(pixels)
+    pixels = lz4_compress(collect(flatten(pixels)))
+    mask = lz4_compress(collect(flatten(mask)))
+
+    return (pixels, mask, dims)
+
+    # the code below will not execute
     if bDownsize
         try
             # tried using Threads.@spawn: imresize does not seem to be thread-safe
