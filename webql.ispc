@@ -227,11 +227,24 @@ export void make_video_frameF16_square(uniform unsigned int16 src[], uniform int
     } ;  
 } ;
 
-export void make_video_frameF16_legacy(uniform unsigned int16 src[], uniform int width, uniform int height, uniform int src_stride, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int dst_stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax)
+export void make_video_frameF16_legacy(uniform unsigned int16 src[], uniform int width, uniform int height, uniform int src_stride, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int dst_width, uniform int dst_height, uniform int dst_stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax)
 {
-  foreach (y=0 ... height, x=0 ... width)
+  uniform float scale_x = (float)width / (float)dst_width ;
+  uniform float scale_y = (float)height / (float)dst_height ;
+
+  foreach (y=0 ... dst_height, x=0 ... dst_width)
     {
-      float tmp = half_to_float_fast(src[y*src_stride+x]) ;
+      // source
+      varying int sx = round(scale_x * (float)x) ;
+      varying int sy = round(scale_y * (float)y) ;
+      
+      unsigned int src_x = clamp(sx, (varying int32)0, (varying int32)width-1);
+      unsigned int src_y = clamp(sy, (varying int32)0, (varying int32)height-1);
+      
+      unsigned int src_idx = src_y*src_stride+src_x ;
+      float tmp = half_to_float_fast(src[src_idx]) ;
+
+      // destination
       unsigned int idx = y * dst_stride + x ;
 
       //alternative coherent if
