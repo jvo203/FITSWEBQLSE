@@ -14,7 +14,7 @@ using PhysicalConstants.CODATA2018;
 const MADV_WILLNEED = 3
 
 include("classifier.jl")
-include("IPP.jl")
+# include("IPP.jl")
 include("ISPC.jl")
 
 const NBINS = 1024
@@ -2889,6 +2889,7 @@ end
     return (pixels, mask, dims)
 
     # the code below will not execute
+    #=
     if bDownsize
         try
             # tried using Threads.@spawn: imresize does not seem to be thread-safe
@@ -2968,6 +2969,7 @@ end
     mask = lz4_compress(collect(flatten(mask)))
 
     return (pixels, mask, dims)
+    =#
 end
 
 @everywhere function calculateViewportSpectrum(
