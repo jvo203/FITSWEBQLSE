@@ -126,6 +126,11 @@ export uniform float calculate_square_viewport_spectrumF16(uniform int16 cubeDat
     return 0.0f ;
 } ;
 
+/* without any downsizing
+float tmp = half_to_float_fast(src[y*src_stride+x]) ;
+unsigned int idx = y * dst_stride + x ;
+*/
+
 export void make_video_frameF16_linear(uniform unsigned int16 src[], uniform int width, uniform int height, uniform int src_stride, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int dst_stride, uniform float black, uniform float slope)
 {
   foreach (y=0 ... height, x=0 ... width)
