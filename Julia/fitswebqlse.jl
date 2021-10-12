@@ -1468,7 +1468,7 @@ function ws_coroutine(ws, ids)
                             end
                         end
                     catch e
-                        println(e)
+                        println(e, stacktrace())
                     finally
                         unlock(video_mtx)
                     end

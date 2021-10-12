@@ -2663,8 +2663,6 @@ function getVideoFrame(
     _slope = 1.0f0 / (_white - _black)
     _dmin = fits.dmin
     _dmax = fits.dmax
-    lmin = log(0.5f0)
-    lmax = log(1.5f0)
 
     # video tone mapping
     tone =
