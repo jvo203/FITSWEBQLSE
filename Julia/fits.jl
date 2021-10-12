@@ -2673,7 +2673,7 @@ function getVideoFrame(
         idx = fits.indices[job.where]
 
         if idx[frame_idx]
-            res = @spawnat job.where fetchVideoFrame(
+            pixels, mask, dims = @fetchfrom job.where fetchVideoFrame(
                 fetch(job),
                 frame_idx,
                 tone,
@@ -2683,7 +2683,6 @@ function getVideoFrame(
                 keyframe,
             )
 
-            pixels, mask, dims = fetch(res)
             len = dims[1] * dims[2]
 
             # decompress and reconstruct (reshape) the pixels/mask arrays
