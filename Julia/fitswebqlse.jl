@@ -1464,7 +1464,7 @@ function ws_coroutine(ws, ids)
                         end
 
                     catch e
-                        println("thread error:", e)
+                        println("Inner error:", e)
                     finally
                         if islocked(video_mtx)
                             unlock(video_mtx)
