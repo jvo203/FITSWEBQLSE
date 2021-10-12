@@ -1349,20 +1349,28 @@ function ws_coroutine(ws, ids)
                 end
 
                 Threads.@spawn begin
+                    # interpolate variable values into a thread
+                    t_frame_idx = $frame_idx
+                    t_flux = $flux
+                    t_image_width = $image_width
+                    t_image_height = $image_height
+                    t_bDownsize = $bDownsize
+                    t_keyframe = $keyframe
+
                     try
                         # get a video frame
                         elapsed = @elapsed luma, alpha = getVideoFrame(
                             fits_object,
-                            frame_idx,
-                            flux,
-                            image_width,
-                            image_height,
-                            bDownsize,
-                            keyframe,
+                            t_frame_idx,
+                            t_flux,
+                            t_image_width,
+                            t_image_height,
+                            t_bDownsize,
+                            t_keyframe,
                         )
                         elapsed *= 1000.0 # [ms]
 
-                        println(
+                        #=println(
                             typeof(luma),
                             ";",
                             typeof(alpha),
@@ -1373,7 +1381,7 @@ function ws_coroutine(ws, ids)
                             "; bDownsize:",
                             bDownsize,
                             "; elapsed: $elapsed [ms]",
-                        )
+                        )=#
 
                         lock(video_mtx)
 
