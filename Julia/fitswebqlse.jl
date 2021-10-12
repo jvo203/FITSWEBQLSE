@@ -1349,6 +1349,8 @@ function ws_coroutine(ws, ids)
                 end
 
                 Threads.@spawn begin
+                    println("#got here#1")
+
                     # interpolate variable values into a thread
                     t_frame_idx = $frame_idx
                     t_flux = $flux
@@ -1357,126 +1359,136 @@ function ws_coroutine(ws, ids)
                     t_bDownsize = $bDownsize
                     t_keyframe = $keyframe
 
-                    try
-                        # get a video frame
-                        elapsed = @elapsed luma, alpha = getVideoFrame(
-                            fits_object,
-                            t_frame_idx,
-                            t_flux,
-                            t_image_width,
-                            t_image_height,
-                            t_bDownsize,
-                            t_keyframe,
-                        )
-                        elapsed *= 1000.0 # [ms]
+                    println("#got here#2")
 
-                        #=println(
-                            typeof(luma),
-                            ";",
-                            typeof(alpha),
-                            ";",
-                            size(luma),
-                            ";",
-                            size(alpha),
-                            "; bDownsize:",
-                            bDownsize,
-                            "; elapsed: $elapsed [ms]",
-                        )=#
+                    # try
+                    # get a video frame
+                    elapsed = @elapsed luma, alpha = getVideoFrame(
+                        fits_object,
+                        t_frame_idx,
+                        t_flux,
+                        t_image_width,
+                        t_image_height,
+                        t_bDownsize,
+                        t_keyframe,
+                    )
+                    elapsed *= 1000.0 # [ms]
 
-                        lock(video_mtx)
+                    println("#got here#3")
 
-                        if picture != C_NULL
-                            # update the x265_picture structure                
-                            picture_jl = x265_picture(picture)
+                    #=println(
+                        typeof(luma),
+                        ";",
+                        typeof(alpha),
+                        ";",
+                        size(luma),
+                        ";",
+                        size(alpha),
+                        "; bDownsize:",
+                        bDownsize,
+                        "; elapsed: $elapsed [ms]",
+                    )=#
 
-                            picture_jl.planeR = pointer(luma)
-                            picture_jl.strideR = strides(luma)[2]
+                    lock(video_mtx)
 
-                            picture_jl.planeG = pointer(alpha)
-                            picture_jl.strideG = strides(alpha)[2]
+                    println("#got here#4")
 
-                            # sync the Julia structure back to C
-                            unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
+                    if picture != C_NULL
+                        # update the x265_picture structure                
+                        picture_jl = x265_picture(picture)
 
-                            if encoder != C_NULL
-                                # HEVC-encode the luminance and alpha channels
-                                iNal = Ref{Cint}(0)
-                                pNals = Ref{Ptr{Cvoid}}(C_NULL)
+                        picture_jl.planeR = pointer(luma)
+                        picture_jl.strideR = strides(luma)[2]
 
-                                # iNal_jll value: iNal[] 
+                        picture_jl.planeG = pointer(alpha)
+                        picture_jl.strideG = strides(alpha)[2]
 
-                                # an array of pointers
-                                # local pNals_jll::Ptr{Ptr{Cvoid}} = pNals[]                        
+                        # sync the Julia structure back to C
+                        unsafe_store!(Ptr{x265_picture}(picture), picture_jl)
 
-                                # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
-                                # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
+                        if encoder != C_NULL
+                            # HEVC-encode the luminance and alpha channels
+                            iNal = Ref{Cint}(0)
+                            pNals = Ref{Ptr{Cvoid}}(C_NULL)
 
-                                encoding = @elapsed stat = ccall(
-                                    (:x265_encoder_encode, libx265),
-                                    Cint,
-                                    (
-                                        Ptr{Cvoid},
-                                        Ref{Ptr{Cvoid}},
-                                        Ref{Cint},
-                                        Ptr{Cvoid},
-                                        Ptr{Cvoid},
-                                    ),
-                                    encoder,
-                                    pNals,
-                                    iNal,
-                                    picture,
-                                    C_NULL,
-                                )
-                                encoding *= 1000.0 # [ms]
+                            # iNal_jll value: iNal[] 
 
-                                println(
-                                    "x265_encoder_encode::stat = $stat, iNal = ",
-                                    iNal[],
-                                    ", pNals($pNals): ",
-                                    pNals[],
-                                    "; elapsed: $encoding [ms]",
-                                )
+                            # an array of pointers
+                            # local pNals_jll::Ptr{Ptr{Cvoid}} = pNals[]                        
 
-                                for idx = 1:iNal[]
-                                    nal = x265_nal(pNals[], idx)
-                                    # println("NAL #$idx: $nal")
+                            # int x265_encoder_encode(x265_encoder *encoder, x265_nal **pp_nal, uint32_t *pi_nal, x265_picture *pic_in, x265_picture *pic_out);
+                            # int ret = x265_encoder_encode(encoder, &pNals, &iNal, picture, NULL);
 
-                                    resp = IOBuffer()
+                            encoding = @elapsed stat = ccall(
+                                (:x265_encoder_encode, libx265),
+                                Cint,
+                                (
+                                    Ptr{Cvoid},
+                                    Ref{Ptr{Cvoid}},
+                                    Ref{Cint},
+                                    Ptr{Cvoid},
+                                    Ptr{Cvoid},
+                                ),
+                                encoder,
+                                pNals,
+                                iNal,
+                                picture,
+                                C_NULL,
+                            )
+                            encoding *= 1000.0 # [ms]
 
-                                    # the header
-                                    write(resp, Float32(req["timestamp"]))
-                                    write(resp, Int32(req["seq_id"]))
-                                    write(resp, Int32(5)) # 5 - video frame
-                                    write(resp, Float32(elapsed + encoding))
+                            println(
+                                "x265_encoder_encode::stat = $stat, iNal = ",
+                                iNal[],
+                                ", pNals($pNals): ",
+                                pNals[],
+                                "; elapsed: $encoding [ms]",
+                            )
 
-                                    # the body
-                                    payload = Vector{UInt8}(undef, nal.sizeBytes)
-                                    unsafe_copyto!(
-                                        pointer(payload),
-                                        nal.payload,
-                                        nal.sizeBytes,
-                                    )
-                                    write(resp, payload)
+                            for idx = 1:iNal[]
+                                nal = x265_nal(pNals[], idx)
+                                # println("NAL #$idx: $nal")
 
-                                    put!(outgoing, resp)
-                                    #if !writeguarded(ws, take!(resp))
-                                    #    # break
-                                    #    error("could not send a WebSocket message")
-                                    #end
+                                resp = IOBuffer()
 
-                                end
+                                # the header
+                                write(resp, Float32(req["timestamp"]))
+                                write(resp, Int32(req["seq_id"]))
+                                write(resp, Int32(5)) # 5 - video frame
+                                write(resp, Float32(elapsed + encoding))
+
+                                # the body
+                                payload = Vector{UInt8}(undef, nal.sizeBytes)
+                                unsafe_copyto!(pointer(payload), nal.payload, nal.sizeBytes)
+                                write(resp, payload)
+
+                                put!(outgoing, resp)
+                                #if !writeguarded(ws, take!(resp))
+                                #    # break
+                                #    error("could not send a WebSocket message")
+                                #end
+
                             end
                         end
-                    catch e
-                        println(e)
-                    finally
-                        unlock(video_mtx)
                     end
+
+                    println("#got here#5")
+
+                    unlock(video_mtx)
+
+                    println("#got here#6")
+                    # catch e
+                    #    println("Inner error:", e)
+                    #end
+
+                    # do not use a finalizer in a Base.thread ...
+                    #if islocked(video_mtx)
+                    #    println("unlocking a locked video_mtx")
+                    #    unlock(video_mtx)
+                    #end
                 end
             catch e
-                println(e)
-            finally
-                # unlock(video_mtx)
+                println("Outer error: ", e)
             end
 
             update_timestamp(fits_object)
