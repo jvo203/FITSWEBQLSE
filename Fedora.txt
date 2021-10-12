@@ -188,5 +188,6 @@ ulimit -s unlimited
 
 11. Julia in a cluster
 
+	julia --startup-file=no -e 'using DaemonMode; serve()'&
 	
 	julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
