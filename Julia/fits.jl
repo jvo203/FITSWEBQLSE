@@ -2742,7 +2742,7 @@ end
 
     try
         frame_pixels = compressed_frames[frame]
-        println("processing video frame $frame")
+        # println("processing video frame $frame")
     catch e
         return
     end
