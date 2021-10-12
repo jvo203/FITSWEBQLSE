@@ -2668,7 +2668,7 @@ function getVideoFrame(
     tone =
         VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
 
-    # target the specific worker instead of a "scatter-gun" approach
+    # target a specific worker instead of a "scatter-gun" approach
     for job in fits.compressed_pixels
         idx = fits.indices[job.where]
 
