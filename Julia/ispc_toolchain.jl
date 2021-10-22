@@ -23,6 +23,7 @@ end
 @static if Sys.isapple()
     libtool = "/usr/bin/libtool"
     # println("Linker: $libtool")
+    # -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib -lSystem
     link(objfile, libfile) = run(`$libtool -dynamic -o "$libfile" "$objfile"`)
 end
 
