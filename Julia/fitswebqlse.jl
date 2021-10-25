@@ -119,7 +119,7 @@ const SPECTRUM_HIGH_PRECISION = 24
 const SPECTRUM_MEDIUM_PRECISION = 16
 
 const HT_DOCS = "htdocs"
-const HTTP_PORT = 8080
+const HTTP_PORT = 9000 #8080
 const WS_PORT = HTTP_PORT + 1
 
 @everywhere include("fits.jl")
