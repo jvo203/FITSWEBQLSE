@@ -21,21 +21,16 @@ end
 
 # Detect how to link a shared library:
 @static if Sys.isapple()
-    #libtool = "/usr/bin/libtool"
-    # println("Linker: $libtool")
-    #link(objfile, libfile) = run(`$libtool -dynamic -o "$libfile" "$objfile"`)
-
-    gpp = strip(read(`which g++`, String))
-    gpp == "" && error("libtool or g++ is required")
-    link(objfile, libfile) = run(`$gpp -dynamiclib -o "$libfile" "$objfile"`)
+    gcc = strip(read(`which gcc`, String))
+    gcc == "" && error("gcc is required")
+    link(objfile, libfile) = run(`$gcc -dynamiclib -o "$libfile" "$objfile"`)
 end
 
 @static if Sys.islinux()
-    gpp = strip(read(`which g++`, String))
-    gpp == "" && error("libtool or g++ is required")
-    # println("Linker: $gpp")
+    gcc = strip(read(`which gcc`, String))
+    gcc == "" && error("gcc is required")
     link(objfile, libfile) =
-        run(`$gpp -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`)
+        run(`$gcc -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`)
 end
 
 @static if Sys.iswindows()
