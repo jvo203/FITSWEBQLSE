@@ -3269,6 +3269,66 @@ function zfp_compress_pixels(datasetid, frame, pixels, mask)
     serialize(filename * ".lz4", compressed_mask)
 end
 
+@everywhere function load_frames(
+    datasetid,
+    width,
+    height,
+    idx,
+    queue::RemoteChannel{Channel{Int32}},
+)
+    compressed_frames = Dict{Int32,Matrix{Float16}}()
+    frames = Channel{Tuple}(32)
+
+    frames_task = @async while true
+        try
+            frame, frame_pixels = take!(frames)
+            compressed_frames[frame] = frame_pixels
+        catch e
+            if isa(e, InvalidStateException) && e.state == :closed
+                break
+            else
+                println(e)
+            end
+        end
+    end
+
+    Threads.@threads for frame in idx
+        try
+            cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+            filename = cache_dir * Base.Filesystem.path_separator * string(frame)
+
+            compressed_pixels = deserialize(filename * ".zfp")
+            compressed_mask = deserialize(filename * ".lz4")
+
+            # decompress the data and convert into the right format                
+            frame_mask = reshape(
+                Bool.(lz4_decompress(compressed_mask, width * height)),
+                (width, height),
+            )
+            frame_pixels = Float16.(zfp_decompress(compressed_pixels))
+
+            # insert back NaNs
+            frame_pixels[frame_mask] .= NaN16
+
+            put!(frames, (frame, frame_pixels))
+
+            # println("decompressed frame #$frame")
+
+            put!(queue, frame)
+        catch e
+            println(e)
+        end
+
+        # allow garbage collection to run
+        # GC.safepoint()
+    end
+
+    close(frames)
+    wait(frames_task)
+
+    return compressed_frames
+end
+
 function decompressData(fits::FITSDataSet)
     if (fits.datasetid == "") || (fits.depth <= 1)
         return
@@ -3290,66 +3350,6 @@ function decompressData(fits::FITSDataSet)
             println("decompressing data completed")
             break
         end
-    end
-
-    @everywhere function load_frames(
-        datasetid,
-        width,
-        height,
-        idx,
-        queue::RemoteChannel{Channel{Int32}},
-    )
-        compressed_frames = Dict{Int32,Matrix{Float16}}()
-        frames = Channel{Tuple}(32)
-
-        frames_task = @async while true
-            try
-                frame, frame_pixels = take!(frames)
-                compressed_frames[frame] = frame_pixels
-            catch e
-                if isa(e, InvalidStateException) && e.state == :closed
-                    break
-                else
-                    println(e)
-                end
-            end
-        end
-
-        Threads.@threads for frame in idx
-            try
-                cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
-                filename = cache_dir * Base.Filesystem.path_separator * string(frame)
-
-                compressed_pixels = deserialize(filename * ".zfp")
-                compressed_mask = deserialize(filename * ".lz4")
-
-                # decompress the data and convert into the right format                
-                frame_mask = reshape(
-                    Bool.(lz4_decompress(compressed_mask, width * height)),
-                    (width, height),
-                )
-                frame_pixels = Float16.(zfp_decompress(compressed_pixels))
-
-                # insert back NaNs
-                frame_pixels[frame_mask] .= NaN16
-
-                put!(frames, (frame, frame_pixels))
-
-                # println("decompressed frame #$frame")
-
-                put!(queue, frame)
-            catch e
-                println(e)
-            end
-
-            # allow garbage collection to run
-            GC.safepoint()
-        end
-
-        close(frames)
-        wait(frames_task)
-
-        return compressed_frames
     end
 
     # Remote Access Service
