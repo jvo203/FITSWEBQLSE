@@ -20,15 +20,14 @@ function ispc_llvm(code, options=``, llvm_dis="/usr/local/opt/llvm/bin/llvm-dis"
 end
 
 # Detect how to link a shared library:
+gcc = strip(read(`which gcc`, String))
+gcc == "" && error("gcc is required")
+
 @static if Sys.isapple()
-    gcc = strip(read(`which gcc`, String))
-    gcc == "" && error("gcc is required")
     link(objfile, libfile) = run(`$gcc -dynamiclib -o "$libfile" "$objfile"`)
 end
 
 @static if Sys.islinux()
-    gcc = strip(read(`which gcc`, String))
-    gcc == "" && error("gcc is required")
     link(objfile, libfile) =
         run(`$gcc -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`)
 end
