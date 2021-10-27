@@ -28,8 +28,7 @@ gcc == "" && error("gcc is required")
 end
 
 @static if Sys.islinux()
-    link(objfile, libfile) =
-        run(`$gcc -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`)
+    link(objfile, libfile) = run(`$gcc -shared -Wl,-export-dynamic "$objfile" -o "$libfile"`)
 end
 
 @static if Sys.iswindows()
