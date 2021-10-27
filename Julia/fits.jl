@@ -3300,10 +3300,22 @@ function decompressData(fits::FITSDataSet)
         queue::RemoteChannel{Channel{Int32}},
     )
         compressed_frames = Dict{Int32,Matrix{Float16}}()
-        spinlock = Threads.SpinLock()
+        frames = Channel{Tuple}(32)
 
-        # Threads.@threads for frame in idx # threads causing problems???
-        for frame in idx
+        frames_task = @async while true
+            try
+                frame, frame_pixels = take!(frames)
+                compressed_frames[frame] = frame_pixels
+            catch e
+                if isa(e, InvalidStateException) && e.state == :closed
+                    break
+                else
+                    println(e)
+                end
+            end
+        end
+
+        Threads.@threads for frame in idx
             try
                 cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
                 filename = cache_dir * Base.Filesystem.path_separator * string(frame)
@@ -3321,9 +3333,7 @@ function decompressData(fits::FITSDataSet)
                 # insert back NaNs
                 frame_pixels[frame_mask] .= NaN16
 
-                #Threads.lock(spinlock)
-                compressed_frames[frame] = frame_pixels
-                #Threads.unlock(spinlock)
+                put!(frames, (frame, frame_pixels))
 
                 # println("decompressed frame #$frame")
 
@@ -3335,6 +3345,9 @@ function decompressData(fits::FITSDataSet)
             # allow garbage collection to run
             GC.safepoint()
         end
+
+        close(frames)
+        wait(frames_task)
 
         return compressed_frames
     end
