@@ -3320,7 +3320,7 @@ end
         end
 
         # allow garbage collection to run
-        # GC.safepoint()
+        GC.safepoint()
     end
 
     close(frames)
