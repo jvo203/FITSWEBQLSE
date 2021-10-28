@@ -1452,6 +1452,11 @@ function ws_coroutine(ws, ids)
             msg = JSON.parse(s)
             @info msg
 
+            if msg["type"] == "image"
+                # sub-region selection
+                # re-use the <msg> Dictionary, append the necessary fields
+            end
+
             if msg["type"] == "realtime_image_spectrum"
                 # replace!(viewport_requests, msg)
                 push!(viewport_requests, msg) # there is too much lag
