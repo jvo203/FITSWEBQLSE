@@ -1612,8 +1612,6 @@ end
 )
 
     fits_dims = size(global_pixels)
-    fits_width = fits_dims[1]
-    fits_height = fits_dims[2]
 
     # obtain worker-local references
     local_pixels = reshape(localpart(global_pixels), fits_dims[1:2])
@@ -1637,13 +1635,7 @@ end
 
 end
 
-function getImage(
-    fits::FITSDataSet,
-    width::Integer,
-    height::Integer,
-    frame_start::Integer,
-    frame_end::Integer,
-)
+function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     local scale::Float32, pixels, mask
     local image_width::Integer, image_height::Integer
     local inner_width::Integer, inner_height::Integer

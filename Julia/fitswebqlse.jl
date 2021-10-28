@@ -576,7 +576,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         if fits_object.depth > 0
 
             # downsize a 2D image and/or handle a distributed 3D cube
-            image_task = @async getImage(fits_object, width, height, 1, fits_object.depth)
+            image_task = @async getImage(fits_object, width, height)
 
         else
 
