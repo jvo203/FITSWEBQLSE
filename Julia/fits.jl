@@ -1637,7 +1637,13 @@ end
 
 end
 
-function getImage(fits::FITSDataSet, width::Integer, height::Integer)
+function getImage(
+    fits::FITSDataSet,
+    width::Integer,
+    height::Integer,
+    frame_start::Integer,
+    frame_end::Integer,
+)
     local scale::Float32, pixels, mask
     local image_width::Integer, image_height::Integer
     local inner_width::Integer, inner_height::Integer
