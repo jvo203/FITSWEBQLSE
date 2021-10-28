@@ -576,7 +576,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         if fits_object.depth > 0
 
             # downsize a 2D image and/or handle a distributed 3D cube
-            image_task = @async getImage(fits_object, width, height)
+            image_task = @async getImage(fits_object, width, height, 1, fits_object.depth)
 
         else
 
@@ -696,82 +696,6 @@ function streamImageSpectrum(http::HTTP.Stream)
     end
 
     return nothing
-end
-
-function serveImageSpectrum(request::HTTP.Request)
-    global FITS_OBJECTS, FITS_LOCK
-
-    params = HTTP.queryparams(HTTP.URI(request.target))
-    # println(params)
-
-    datasetid = ""
-    quality::Quality = medium
-    width::Integer = 0
-    height::Integer = 0
-    fetch_data::Bool = false
-
-    try
-        datasetid = params["datasetId"]
-        width = round(Integer, parse(Float64, params["width"]))
-        height = round(Integer, parse(Float64, params["height"]))
-    catch e
-        println(e)
-        return HTTP.Response(404, "Not Found")
-    end
-
-    try
-        quality = eval(Meta.parse(params["quality"]))
-    catch e
-    end
-
-    try
-        fetch_data = parse(Bool, params["fetch_data"])
-    catch e
-    end
-
-    fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
-
-    if fits_object.datasetid == "" || width <= 0 || height <= 0
-        return HTTP.Response(404, "Not Found")
-    end
-
-    if has_error(fits_object)
-        return HTTP.Response(500, "Internal Server Error")
-    end
-
-    if !has_data(fits_object)
-        return HTTP.Response(202, "Accepted")
-    end
-
-    try
-        local image_task
-
-        # get the JSON description
-        json_task = @async getJSON(fits_object)
-
-        if fits_object.depth > 1
-            # handle a distributed 3D cube
-            image_task = @async getImage(fits_object, width, height, quality, fetch_data)
-        else
-            # downsize a 2D image
-
-            return HTTP.Response(501, "Not Implemented")
-        end
-
-        # by default chop cuts the last character only; replace it with ','
-        json = chop(fetch(json_task)) * ","
-        histogram, pixels, mask = fetch(image_task)
-
-        # chop the first '{' character only
-        json = json * chop(JSON.json("histogram" => histogram), head = 1, tail = 0)
-        println(json)
-
-        return HTTP.Response(501, "Not Implemented")
-
-    catch e
-        println(e)
-        return HTTP.Response(404, "Error: $e")
-    end
 end
 
 function serveFITS(request::HTTP.Request)
