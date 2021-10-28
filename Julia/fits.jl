@@ -10,6 +10,7 @@ using Statistics;
 using Images, ImageTransformations, Interpolations;
 using ZfpCompression;
 using PhysicalConstants.CODATA2018;
+using ThreadsX;
 
 const MADV_WILLNEED = 3
 
@@ -691,6 +692,183 @@ function process_header(fits::FITSDataSet)
     end
 end
 
+# callable in the main thread (invisible to workers...)
+function invalidate(x, datamin, datamax, ignrval)::Bool
+    val = Float32(x)
+
+    !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
+end
+
+# only visible to workers...
+@everywhere function invalidate_pixel(x, datamin, datamax, ignrval)::Bool
+    val = Float32(x)
+
+    !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
+end
+
+@everywhere function load_fits_frame(
+    datasetid,
+    jobs,
+    progress,
+    path,
+    width,
+    height,
+    datamin,
+    datamax,
+    ignrval,
+    cdelt3,
+    hdu_id,
+    global_pixels::DArray,
+    global_mask::DArray,
+)
+
+    local frame, frame_pixels, frame_mask
+    local valid_pixels, valid_mask
+    local frame_min, frame_max, frame_median
+    local mean_spectrum, integrated_spectrum
+
+    pixels = zeros(Float32, width, height)
+    mask = map(!isnan, pixels)
+
+    compressed_frames = Dict{Int32,Matrix{Float16}}()
+    # compressed_pixels = zeros(Float16, width, height)
+
+    try
+
+        fits_file = FITS(path)
+
+        hdu = fits_file[hdu_id]
+
+        naxes = ndims(hdu)
+
+        while true
+            frame = take!(jobs)
+
+            # check #naxes, only read (:, :, frame) if and when necessary
+            if naxes >= 4
+                frame_pixels = reshape(read(hdu, :, :, frame, 1), (width, height))
+            else
+                frame_pixels = reshape(read(hdu, :, :, frame), (width, height))
+            end
+
+            frame_mask = invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
+
+            # replace NaNs with 0.0
+            frame_pixels[frame_mask] .= 0
+
+            try
+                zfp_compress_pixels(datasetid, frame, Float32.(frame_pixels), frame_mask)
+            catch e
+                println(e)
+            end
+
+            pixels .+= frame_pixels
+            mask .&= frame_mask
+
+            # pick out the valid values only
+            valid_mask = .!frame_mask
+            valid_pixels = @view frame_pixels[valid_mask]
+
+            pixel_sum = sum(valid_pixels)
+            pixel_count = length(valid_pixels)
+
+            if pixel_count > 0
+                frame_min, frame_max = ThreadsX.extrema(valid_pixels)
+                frame_median = median(valid_pixels)
+                mean_spectrum = pixel_sum / pixel_count
+                integrated_spectrum = pixel_sum * cdelt3
+            else
+                # no mistake here, reverse the min/max values
+                # so that global dmin/dmax can get correct values
+                # in the face of all-NaN frames
+                frame_min = prevfloat(typemax(Float32))
+                frame_max = -prevfloat(typemax(Float32))
+                frame_median = NaN32
+
+                mean_spectrum = 0.0
+                integrated_spectrum = 0.0
+            end
+
+            # convert to half-float (Float16)
+            compressed_pixels = map(x -> Float16(x), frame_pixels)
+
+            # insert back NaNs
+            compressed_pixels[frame_mask] .= NaN16
+
+            # store the data
+            compressed_frames[frame] = compressed_pixels
+
+            #=
+            #  save the half-float (Float16) data
+            cache_dir =
+                ".cache" * Base.Filesystem.path_separator * datasetid
+            filename =
+                cache_dir *
+                Base.Filesystem.path_separator *
+                string(frame) *
+                ".f16"
+
+            io = open(filename, "w+")
+            write(io, compressed_pixels)
+            # serialize(io, compressed_pixels)
+            close(io)
+            =#
+
+            # send back the reduced values
+            put!(
+                progress,
+                (
+                    frame,
+                    frame_min,
+                    frame_max,
+                    frame_median,
+                    mean_spectrum,
+                    integrated_spectrum,
+                    myid(),
+                ),
+            )
+
+            # println("processing frame #$frame")
+        end
+
+    catch e
+    # println("task $(myid())/$frame::error: $e")
+    finally
+
+        # copy (pixels,mask) into the distributed arrays (global_pixels,global_mask)
+        try
+            # obtain worker-local references
+            local_pixels = localpart(global_pixels)
+            local_mask = localpart(global_mask)
+
+            # negate the mask so that <true> indicates valid pixels
+            mask = .!mask
+
+            local_pixels[:, :] = pixels
+            local_mask[:, :] = mask
+
+            cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+
+            filename =
+                cache_dir * Base.Filesystem.path_separator * string(myid()) * ".pixels"
+            serialize(filename, pixels)
+
+            filename = cache_dir * Base.Filesystem.path_separator * string(myid()) * ".mask"
+            serialize(filename, mask)
+
+        catch e
+            println("DArray::$e")
+        end
+
+        println("loading FITS cube finished")
+    end
+
+    # do not wait, trigger garbage collection *NOW*
+    GC.gc()
+
+    return compressed_frames
+end
+
 function loadFITS(filepath::String, fits::FITSDataSet)
 
     if fits.datasetid == ""
@@ -800,20 +978,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             "datamin: $(fits.datamin), datamax: $(fits.datamax), ignrval: $(fits.ignrval), _cdelt3: $(fits._cdelt3)",
         )
 
-        # callable in the main thread (invisible to workers...)
-        function invalidate(x, datamin, datamax, ignrval)::Bool
-            val = Float32(x)
-
-            !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
-        end
-
-        # only visible to workers...
-        @everywhere function invalidate_pixel(x, datamin, datamax, ignrval)::Bool
-            val = Float32(x)
-
-            !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
-        end
-
         # read a 2D image
         if depth == 1
             println("reading a $width X $height 2D image")
@@ -834,7 +998,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                     valid_mask = .!mask
                     valid_pixels = pixels[valid_mask]
 
-                    dmin, dmax = extrema(valid_pixels)
+                    dmin, dmax = ThreadsX.extrema(valid_pixels)
                     println("dmin: $dmin, dmax: $dmax")
 
                     fits.dmin = dmin
@@ -929,185 +1093,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                         println("progress task completed")
                         break
                     end
-                end
-
-                @everywhere function load_fits_frame(
-                    datasetid,
-                    jobs,
-                    progress,
-                    path,
-                    width,
-                    height,
-                    datamin,
-                    datamax,
-                    ignrval,
-                    cdelt3,
-                    hdu_id,
-                    global_pixels::DArray,
-                    global_mask::DArray,
-                )
-
-                    local frame, frame_pixels, frame_mask
-                    local valid_pixels, valid_mask
-                    local frame_min, frame_max, frame_median
-                    local mean_spectrum, integrated_spectrum
-
-                    pixels = zeros(Float32, width, height)
-                    mask = map(!isnan, pixels)
-
-                    compressed_frames = Dict{Int32,Matrix{Float16}}()
-                    # compressed_pixels = zeros(Float16, width, height)
-
-                    try
-
-                        fits_file = FITS(path)
-
-                        hdu = fits_file[hdu_id]
-
-                        naxes = ndims(hdu)
-
-                        while true
-                            frame = take!(jobs)
-
-                            # check #naxes, only read (:, :, frame) if and when necessary
-                            if naxes >= 4
-                                frame_pixels =
-                                    reshape(read(hdu, :, :, frame, 1), (width, height))
-                            else
-                                frame_pixels =
-                                    reshape(read(hdu, :, :, frame), (width, height))
-                            end
-
-                            frame_mask =
-                                invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
-
-                            # replace NaNs with 0.0
-                            frame_pixels[frame_mask] .= 0
-
-                            try
-                                zfp_compress_pixels(
-                                    datasetid,
-                                    frame,
-                                    Float32.(frame_pixels),
-                                    frame_mask,
-                                )
-                            catch e
-                                println(e)
-                            end
-
-                            pixels .+= frame_pixels
-                            mask .&= frame_mask
-
-                            # pick out the valid values only
-                            valid_mask = .!frame_mask
-                            valid_pixels = @view frame_pixels[valid_mask]
-
-                            pixel_sum = sum(valid_pixels)
-                            pixel_count = length(valid_pixels)
-
-                            if pixel_count > 0
-                                frame_min, frame_max = extrema(valid_pixels)
-                                frame_median = median(valid_pixels)
-                                mean_spectrum = pixel_sum / pixel_count
-                                integrated_spectrum = pixel_sum * cdelt3
-                            else
-                                # no mistake here, reverse the min/max values
-                                # so that global dmin/dmax can get correct values
-                                # in the face of all-NaN frames
-                                frame_min = prevfloat(typemax(Float32))
-                                frame_max = -prevfloat(typemax(Float32))
-                                frame_median = NaN32
-
-                                mean_spectrum = 0.0
-                                integrated_spectrum = 0.0
-                            end
-
-                            # convert to half-float (Float16)
-                            compressed_pixels = map(x -> Float16(x), frame_pixels)
-
-                            # insert back NaNs
-                            compressed_pixels[frame_mask] .= NaN16
-
-                            # store the data
-                            compressed_frames[frame] = compressed_pixels
-
-                            #=
-                            #  save the half-float (Float16) data
-                            cache_dir =
-                                ".cache" * Base.Filesystem.path_separator * datasetid
-                            filename =
-                                cache_dir *
-                                Base.Filesystem.path_separator *
-                                string(frame) *
-                                ".f16"
-
-                            io = open(filename, "w+")
-                            write(io, compressed_pixels)
-                            # serialize(io, compressed_pixels)
-                            close(io)
-                            =#
-
-                            # send back the reduced values
-                            put!(
-                                progress,
-                                (
-                                    frame,
-                                    frame_min,
-                                    frame_max,
-                                    frame_median,
-                                    mean_spectrum,
-                                    integrated_spectrum,
-                                    myid(),
-                                ),
-                            )
-
-                            # println("processing frame #$frame")
-                        end
-
-                    catch e
-                    # println("task $(myid())/$frame::error: $e")
-                    finally
-
-                        # copy (pixels,mask) into the distributed arrays (global_pixels,global_mask)
-                        try
-                            # obtain worker-local references
-                            local_pixels = localpart(global_pixels)
-                            local_mask = localpart(global_mask)
-
-                            # negate the mask so that <true> indicates valid pixels
-                            mask = .!mask
-
-                            local_pixels[:, :] = pixels
-                            local_mask[:, :] = mask
-
-                            cache_dir =
-                                ".cache" * Base.Filesystem.path_separator * datasetid
-
-                            filename =
-                                cache_dir *
-                                Base.Filesystem.path_separator *
-                                string(myid()) *
-                                ".pixels"
-                            serialize(filename, pixels)
-
-                            filename =
-                                cache_dir *
-                                Base.Filesystem.path_separator *
-                                string(myid()) *
-                                ".mask"
-                            serialize(filename, mask)
-
-                        catch e
-                            println("DArray::$e")
-                        end
-
-                        println("loading FITS cube finished")
-                    end
-
-                    # do not wait, trigger garbage collection *NOW*
-                    GC.gc()
-
-                    return compressed_frames
                 end
 
                 # spawn remote jobs, collecting the Futures along the way
@@ -1269,6 +1254,33 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
 end
 
+# restore DArrays
+@everywhere function preload_image(datasetid, global_pixels, global_mask)
+
+    cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+
+    try
+        filename = cache_dir * Base.Filesystem.path_separator * string(myid()) * ".pixels"
+        pixels = deserialize(filename)
+
+        filename = cache_dir * Base.Filesystem.path_separator * string(myid()) * ".mask"
+        mask = deserialize(filename)
+
+        # obtain worker-local references
+        local_pixels = localpart(global_pixels)
+        local_mask = localpart(global_mask)
+
+        local_pixels[:, :] = pixels
+        local_mask[:, :] = mask
+
+    catch e
+        println("DArray::$e")
+        return false
+    end
+
+    return true
+end
+
 function restoreImage(fits::FITSDataSet)
     if (fits.datasetid == "") || (fits.depth <= 1)
         return
@@ -1282,34 +1294,6 @@ function restoreImage(fits::FITSDataSet)
     pixels =
         DArray(I -> zeros(Float32, map(length, I)), (width, height, n), workers(), chunks)
     mask = DArray(I -> fill(false, map(length, I)), (width, height, n), workers(), chunks)
-
-    # restore DArrays
-    @everywhere function preload_image(datasetid, global_pixels, global_mask)
-
-        cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
-
-        try
-            filename =
-                cache_dir * Base.Filesystem.path_separator * string(myid()) * ".pixels"
-            pixels = deserialize(filename)
-
-            filename = cache_dir * Base.Filesystem.path_separator * string(myid()) * ".mask"
-            mask = deserialize(filename)
-
-            # obtain worker-local references
-            local_pixels = localpart(global_pixels)
-            local_mask = localpart(global_mask)
-
-            local_pixels[:, :] = pixels
-            local_mask[:, :] = mask
-
-        catch e
-            println("DArray::$e")
-            return false
-        end
-
-        return true
-    end
 
     # Remote Access Service
     ras = [@spawnat w preload_image(fits.datasetid, pixels, mask) for w in workers()]
@@ -1333,50 +1317,48 @@ function restoreImage(fits::FITSDataSet)
     # restoreData(fits)
 end
 
+@everywhere function load_f16_frames(datasetid, width, height, idx)
+    compressed_frames = Dict{Int32,Matrix{Float16}}()
+    # spinlock = Threads.SpinLock()
+
+    # Threads.@threads
+    for frame in idx
+        try
+            cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+            filename = cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
+
+            io = open(filename) # default is read-only
+            compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
+            Mmap.madvise!(compressed_pixels, MADV_WILLNEED)
+            # compressed_pixels = deserialize(io)
+            close(io)
+
+            # touch the data by copying
+            # ram_pixels = Array{Float16}(undef, width, height)
+            # ram_pixels .= compressed_pixels
+
+            # Threads.lock(spinlock)
+            compressed_frames[frame] = compressed_pixels
+            # Threads.unlock(spinlock)
+
+            # println("restored frame #$frame")
+
+        catch e
+            println(e)
+        end
+    end
+
+    return compressed_frames
+end
+
 function restoreData(fits::FITSDataSet)
     if (fits.datasetid == "") || (fits.depth <= 1)
         return
     end
 
-    @everywhere function load_frames(datasetid, width, height, idx)
-        compressed_frames = Dict{Int32,Matrix{Float16}}()
-        # spinlock = Threads.SpinLock()
-
-        # Threads.@threads
-        for frame in idx
-            try
-                cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
-                filename =
-                    cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
-
-                io = open(filename) # default is read-only
-                compressed_pixels = Mmap.mmap(io, Matrix{Float16}, (width, height))
-                Mmap.madvise!(compressed_pixels, MADV_WILLNEED)
-                # compressed_pixels = deserialize(io)
-                close(io)
-
-                # touch the data by copying
-                # ram_pixels = Array{Float16}(undef, width, height)
-                # ram_pixels .= compressed_pixels
-
-                # Threads.lock(spinlock)
-                compressed_frames[frame] = compressed_pixels
-                # Threads.unlock(spinlock)
-
-                # println("restored frame #$frame")
-
-            catch e
-                println(e)
-            end
-        end
-
-        return compressed_frames
-    end
-
     # Remote Access Service
     ras = [
-        @spawnat w load_frames(fits.datasetid, fits.width, fits.height, findall(value))
-        for (w, value) in fits.indices
+        @spawnat w load_f16_frames(fits.datasetid, fits.width, fits.height, findall(value)) for (w, value) in fits.indices
     ]
 
     println("ras: ", ras)
@@ -1620,6 +1602,41 @@ function get_inner_dimensions(fits::FITSDataSet)
     return (inner_width, inner_height)
 end
 
+@everywhere function collate_images(
+    results,
+    global_pixels::DArray,
+    global_mask::DArray,
+    width::Integer,
+    height::Integer,
+    downsize::Bool,
+)
+
+    fits_dims = size(global_pixels)
+    fits_width = fits_dims[1]
+    fits_height = fits_dims[2]
+
+    # obtain worker-local references
+    local_pixels = reshape(localpart(global_pixels), fits_dims[1:2])
+    local_mask = reshape(localpart(global_mask), fits_dims[1:2])
+
+    # println("FITS dimensions: $fits_width x $fits_height; ", size(local_pixels))
+
+    # send back the (optionally downsized) image
+    if !downsize
+        put!(results, (local_pixels, local_mask))
+    else
+        # downsize the pixels & mask
+        try
+            pixels = Float32.(imresize(local_pixels, (width, height)))
+            mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
+            put!(results, (pixels, mask))
+        catch e
+            println(e)
+        end
+    end
+
+end
+
 function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     local scale::Float32, pixels, mask
     local image_width::Integer, image_height::Integer
@@ -1686,41 +1703,6 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
                 println("image task completed")
                 break
             end
-        end
-
-        @everywhere function collate_images(
-            results,
-            global_pixels::DArray,
-            global_mask::DArray,
-            width::Integer,
-            height::Integer,
-            downsize::Bool,
-        )
-
-            fits_dims = size(global_pixels)
-            fits_width = fits_dims[1]
-            fits_height = fits_dims[2]
-
-            # obtain worker-local references
-            local_pixels = reshape(localpart(global_pixels), fits_dims[1:2])
-            local_mask = reshape(localpart(global_mask), fits_dims[1:2])
-
-            # println("FITS dimensions: $fits_width x $fits_height; ", size(local_pixels))
-
-            # send back the (optionally downsized) image
-            if !downsize
-                put!(results, (local_pixels, local_mask))
-            else
-                # downsize the pixels & mask
-                try
-                    pixels = Float32.(imresize(local_pixels, (width, height)))
-                    mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
-                    put!(results, (pixels, mask))
-                catch e
-                    println(e)
-                end
-            end
-
         end
 
         @time @sync for w in workers()
@@ -3269,7 +3251,7 @@ function zfp_compress_pixels(datasetid, frame, pixels, mask)
     serialize(filename * ".lz4", compressed_mask)
 end
 
-@everywhere function load_frames(
+@everywhere function load_zfp_frames(
     datasetid,
     width,
     height,
@@ -3354,7 +3336,7 @@ function decompressData(fits::FITSDataSet)
 
     # Remote Access Service
     ras = [
-        @spawnat w load_frames(
+        @spawnat w load_zfp_frames(
             fits.datasetid,
             fits.width,
             fits.height,
