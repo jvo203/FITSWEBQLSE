@@ -1465,21 +1465,7 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                # re-use the <msg> Dictionary, append the necessary fields
-                msg["image"] = true
-                msg["beam"] = "square"
-                msg["intensity"] = "integrated"
-
-                # select the entire FITS image plane
-                msg["x1"] = 1
-                msg["x2"] = fits_object.width
-                msg["y1"] = 1
-                msg["y2"] = fits_object.height
-
-                # disable spectrum downsampling
-                msg["dx"] = 2 * fits_object.depth
-
-                @time viewport_resp, spectrum_resp = getViewportSpectrum(fits_object, msg)
+                @time getImageSpectrum(fits_object, msg)
 
                 # exit the function during development / testing
                 return
