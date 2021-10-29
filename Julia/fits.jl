@@ -2545,6 +2545,193 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
 end
 
+function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
+    if fits.depth < 1
+        error("getImageSpectrum() only supports 3D cubes.")
+    end
+
+    # use the entire FITS plane
+    x1 = 1
+    x2 = fits.width
+    y1 = 1
+    y2 = fits.height
+
+    image = true
+    width = req["width"]
+    height = req["height"]
+
+    beam::Beam = SQUARE
+    intensity::Intensity = INTEGRATED
+
+    quality::Quality = medium # by default use medium quality
+    try
+        quality = eval(Meta.parse(req["quality"]))
+    catch e
+    end
+
+    frame_start = Float64(req["frame_start"])
+    frame_end = Float64(req["frame_end"])
+
+    ref_freq = 0.0 # by default ref_freq is missing
+    try
+        ref_freq = Float64(req["ref_freq"])
+    catch e
+    end
+
+    first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
+    frame_length = last_frame - first_frame + 1
+    println(
+        "[get_spectrum_range] :: [$first_frame, $last_frame] <$frame_length> ($(fits.depth))",
+    )
+
+    # viewport dimensions
+    dimx = fits.width
+    dimy = fits.height
+
+    begin
+        # handle ras distributed Futures        
+
+        # calculate the centre and squared radius
+        cx = abs(x1 + x2) >> 1
+        cy = abs(y1 + y2) >> 1
+        r = min(abs(x2 - x1) >> 1, abs(y2 - y1) >> 1)
+        r2 = r * r
+
+        local pixels, mask
+
+        # by default no downsizing is needed
+        bDownsize = false
+        view_width = dimx
+        view_height = dimy
+
+        if image
+            native_size = dimx * dimy
+            viewport_size = width * height
+
+            if native_size > viewport_size
+                scale = Float32(width) / Float32(dimx)
+                println("re-sizing the viewport down to $(Int32(round(100.0 * scale)))%")
+
+                # downsize the pixels & mask
+                bDownsize = true
+                view_width = width
+                view_height = height
+            end
+
+            pixels = zeros(Float32, view_width, view_height)
+            mask = map(isnan, pixels)
+        end
+
+        spectrum = zeros(Float32, frame_length)
+
+        results = RemoteChannel(() -> Channel{Tuple}(32))
+
+        results_task = @async while true
+            try
+                thread_pixels, thread_mask, thread_spectrum = take!(results)
+
+                if thread_pixels != Nothing && thread_mask != Nothing
+                    pixels .+= thread_pixels
+                    mask .|= thread_mask
+                end
+
+                if thread_spectrum != Nothing
+                    for x in thread_spectrum
+                        frame, val = x
+                        spectrum[frame] = val
+                    end
+                end
+
+            catch e
+                println("results task completed")
+                break
+            end
+        end
+
+        # for each Future in ras find the corresponding worker
+        # launch jobs on each worker, pass the channel indices
+        ras = [
+            @spawnat job.where calculateViewportSpectrum(
+                fetch(job),
+                Int32(first_frame),
+                Int32(last_frame),
+                Int32(x1),
+                Int32(x2),
+                Int32(y1),
+                Int32(y2),
+                Int32(cx),
+                Int32(cy),
+                Int32(r2),
+                beam,
+                intensity,
+                image,
+                bDownsize,
+                Int64(view_width),
+                Int64(view_height),
+                fits._cdelt3,
+                findall(fits.indices[job.where]),
+                results,
+            )
+
+            for job in fits.compressed_pixels
+        ]
+
+        println("ras: ", ras)
+
+        @time wait.(ras)
+
+        close(results)
+        wait(results_task)
+
+        local image_resp, spec_resp
+
+        if image
+            image_resp = IOBuffer()
+
+            write(image_resp, Int32(view_width))
+            write(image_resp, Int32(view_height))
+
+            # compress pixels with ZFP
+            prec = ZFP_MEDIUM_PRECISION
+
+            if quality == high
+                prec = ZFP_HIGH_PRECISION
+            elseif quality == medium
+                prec = ZFP_MEDIUM_PRECISION
+            elseif quality == low
+                prec = ZFP_LOW_PRECISION
+            end
+
+            compressed_pixels = zfp_compress(pixels, precision = prec)
+            write(image_resp, Int32(length(compressed_pixels)))
+            write(image_resp, compressed_pixels)
+
+            compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
+            write(image_resp, Int32(length(compressed_mask)))
+            write(image_resp, compressed_mask)
+        else
+            image_resp = Nothing
+        end
+
+        spec_resp = IOBuffer()
+
+        # compress spectrum with ZFP
+        prec = SPECTRUM_MEDIUM_PRECISION
+
+        if image
+            prec = SPECTRUM_HIGH_PRECISION
+        end
+
+        compressed_spectrum = zfp_compress(spectrum, precision = prec)
+
+        write(spec_resp, Int32(length(spectrum)))
+        write(spec_resp, compressed_spectrum)
+
+        return (image_resp, spec_resp)
+    end
+
+end
+
 function alphaMask(x::Bool)::UInt8
     if x
         return UInt8(255)
