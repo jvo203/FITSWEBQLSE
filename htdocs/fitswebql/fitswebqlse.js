@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-09-16.0";
+	return "JS2021-11-01.0";
 }
 
 const wasm_supported = (() => {
@@ -7451,6 +7451,38 @@ function setup_axes() {
 			//.style("stroke-width", emStrokeWidth)
 			.attr("transform", "translate(" + (0.75 * range.xMin - 1) + ",0)")
 			.call(yAxis);
+
+		// Add a CSV export link
+		var svg = d3.select("#FrontSVG");
+		var width = parseFloat(svg.attr("width"));
+		var height = parseFloat(svg.attr("height"));
+
+		strCSV = '<span id="exportCSV" class="glyphicon glyphicon-floppy-save"  style="display:inline-block; cursor: pointer"></span>';
+
+		svg.append("foreignObject")
+			.attr("x", (range.xMax + 0.75 * emFontSize))
+			.attr("y", (height - 2.0 * emFontSize))
+			.attr("width", 2 * emFontSize)
+			.attr("height", 2 * emFontSize)
+			.append("xhtml:div")
+			.attr("id", "csv")
+			.attr("class", "axis-label")
+			.attr("pointer-events", "auto")
+			.html(strCSV);
+
+		document.getElementById('exportCSV').onclick = function () {
+			console.log("export spectrum to CSV.");
+
+			var blob = new Blob(["channel, intensity"], { type: "data:text/csv;charset=utf-8" });
+
+			if (va_count == 1) {
+				saveAs(blob, datasetId + ".csv");
+			} else {
+				saveAs(blob, datasetId[0] + ".csv");
+			};
+		};
+
+		d3.select("#csv").moveToFront();
 	}
 
 	//if(fitsData.CTYPE3 == "FREQ")
