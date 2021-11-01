@@ -828,6 +828,9 @@ function serveFITS(request::HTTP.Request)
     # Bzip2 decoder
     write(resp, "<script src=\"bzip2.js\"></script>\n")
 
+    # HTML5 FileSaver
+    write(resp, "<script src=\"FileSaver.js\"></script>\n")
+
     # WebAssembly
     write(resp, "<script src=\"client.", WASM_VERSION, ".js\"></script>\n")
     write(
