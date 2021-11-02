@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-01.0";
+	return "JS2021-11-02.0";
 }
 
 const wasm_supported = (() => {
@@ -5268,6 +5268,7 @@ function cube_refresh(index) {
 		width: width,
 		height: height,
 		quality: image_quality,
+		intensity: intensity_mode,
 		frame_start: data_band_lo,
 		frame_end: data_band_hi,
 		ref_freq: RESTFRQ,
