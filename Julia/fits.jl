@@ -1635,6 +1635,109 @@ end
 
 end
 
+function getHistogram(fits::FITSDataSet, pixels, mask)
+    valid_pixels = @view pixels[mask]
+    println("#valid_pixels: ", length(valid_pixels))
+
+    @time edges, bins = imhist(valid_pixels)
+    nbins = length(edges)
+
+    println("pixel range: ", edges, "; bins: ", bins, "; nbins = ", nbins)
+
+    pmin = first(edges)
+    pmax = last(edges)
+    # @time pmin, pmax = extrema(valid_pixels)
+    @time med = median(valid_pixels)
+    println("extrema: $pmin ~ $pmax; median = $med")
+
+    pixelsN = filter(x -> x < med, valid_pixels)
+    pixelsP = filter(x -> x > med, valid_pixels)
+
+    countN = length(pixelsN)
+    countP = length(pixelsP)
+
+    sumN = sum(map(x -> abs(x - med), pixelsN))
+    sumP = sum(map(x -> abs(x - med), pixelsP))
+
+    # println("countN: $countN, countP: $countP, sumN: $sumN, sumP: $sumP")
+
+    mad = 0.0
+    madN = 0.0
+    madP = 0.0
+
+    if countN > 0
+        madN = sumN / countN
+    end
+
+    if countP > 0
+        madP = sumP / countP
+    end
+
+    if countN + countP > 0
+        mad = (sumN + sumP) / (countN + countP)
+    end
+
+    println("madN = $madN, madP = $madP, mad = $mad")
+
+    # ALMAWebQL v2 - style
+    u = 7.5
+    black = max(pmin, med - u * madN)
+    white = min(pmax, med + u * madP)
+    sensitivity = 1.0 / (white - black)
+    ratio_sensitivity = sensitivity
+
+    if fits.is_optical
+        u = 0.5
+        v = 15.0
+        black = max(pmin, med - u * madN)
+        white = min(pmax, med + u * madP)
+        sensitivity = 1.0 / (white - black)
+        ratio_sensitivity = sensitivity
+
+        # TO-DO: auto-brightness
+    end
+
+    println(
+        "black: $black, white: $white, sensitivity: $sensitivity, ratio_sensitivity: $ratio_sensitivity",
+    )
+
+    if fits.flux == ""
+        acc = accumulate(+, bins)
+        acc_tot = sum(bins)
+        println("accumulator length: $(length(acc)); total = $acc_tot")
+        slots = Float64.(acc) ./ Float64(acc_tot)
+
+        # upsample the slots array to <NBINS>
+        cum = imresize(slots, (NBINS,), method = Linear())
+        println("slots length: $(length(cum))")
+
+        try
+            fits.flux = histogram_classifier(cum)
+            println("flux: ", fits.flux)
+
+            # save the updated flux
+            serialize_fits(fits)
+        catch e
+            println(e)
+        end
+    end
+
+    println("getHistogram done")
+
+    tone_mapping = ImageToneMapping(
+        fits.flux,
+        pmin,
+        pmax,
+        med,
+        sensitivity,
+        ratio_sensitivity,
+        white,
+        black,
+    )
+
+    return (bins, tone_mapping)
+end
+
 function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     local scale::Float32, pixels, mask
     local image_width::Integer, image_height::Integer
@@ -1743,105 +1846,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
     end
 
     # next make a histogram
-    valid_pixels = @view pixels[mask]
-
-    println("#valid_pixels: ", length(valid_pixels))
-
-    @time edges, bins = imhist(valid_pixels)
-    nbins = length(edges)
-
-    println("pixel range: ", edges, "; bins: ", bins, "; nbins = ", nbins)
-
-    pmin = first(edges)
-    pmax = last(edges)
-    # @time pmin, pmax = extrema(valid_pixels)
-    @time med = median(valid_pixels)
-    println("extrema: $pmin ~ $pmax; median = $med")
-
-    pixelsN = filter(x -> x < med, valid_pixels)
-    pixelsP = filter(x -> x > med, valid_pixels)
-
-    countN = length(pixelsN)
-    countP = length(pixelsP)
-
-    sumN = sum(map(x -> abs(x - med), pixelsN))
-    sumP = sum(map(x -> abs(x - med), pixelsP))
-
-    # println("countN: $countN, countP: $countP, sumN: $sumN, sumP: $sumP")
-
-    mad = 0.0
-    madN = 0.0
-    madP = 0.0
-
-    if countN > 0
-        madN = sumN / countN
-    end
-
-    if countP > 0
-        madP = sumP / countP
-    end
-
-    if countN + countP > 0
-        mad = (sumN + sumP) / (countN + countP)
-    end
-
-    println("madN = $madN, madP = $madP, mad = $mad")
-
-    # ALMAWebQL v2 - style
-    u = 7.5
-    black = max(pmin, med - u * madN)
-    white = min(pmax, med + u * madP)
-    sensitivity = 1.0 / (white - black)
-    ratio_sensitivity = sensitivity
-
-    if fits.is_optical
-        u = 0.5
-        v = 15.0
-        black = max(pmin, med - u * madN)
-        white = min(pmax, med + u * madP)
-        sensitivity = 1.0 / (white - black)
-        ratio_sensitivity = sensitivity
-
-        # TO-DO: auto-brightness
-    end
-
-    println(
-        "black: $black, white: $white, sensitivity: $sensitivity, ratio_sensitivity: $ratio_sensitivity",
-    )
-
-    if fits.flux == ""
-        acc = accumulate(+, bins)
-        acc_tot = sum(bins)
-        println("accumulator length: $(length(acc)); total = $acc_tot")
-        slots = Float64.(acc) ./ Float64(acc_tot)
-
-        # upsample the slots array to <NBINS>
-        cum = imresize(slots, (NBINS,), method = Linear())
-        println("slots length: $(length(cum))")
-
-        try
-            fits.flux = histogram_classifier(cum)
-            println("flux: ", fits.flux)
-
-            # save the updated flux
-            serialize_fits(fits)
-        catch e
-            println(e)
-        end
-    end
-
-    println("getImage done")
-
-    tone_mapping = ImageToneMapping(
-        fits.flux,
-        pmin,
-        pmax,
-        med,
-        sensitivity,
-        ratio_sensitivity,
-        white,
-        black,
-    )
+    bins, tone_mapping = getHistogram(fits, pixels, mask)
 
     return (bins, tone_mapping, pixels, mask)
 end
@@ -2713,6 +2718,9 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     write(spec_resp, Int32(length(spectrum)))
     write(spec_resp, compressed_spectrum)
+
+    # next make a histogram
+    bins, tone_mapping = getHistogram(fits, pixels, mask)
 
     return (image_resp, spec_resp)
 
