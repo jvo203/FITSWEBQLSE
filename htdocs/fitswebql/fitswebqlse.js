@@ -7474,6 +7474,26 @@ function setup_axes() {
 		document.getElementById('exportCSV').onclick = function () {
 			console.log("export spectrum to CSV.");
 
+			for (let index = 0; index < va_count; index++) {
+				var dataId = datasetId;
+				if (va_count > 1)
+					dataId = datasetId[index];
+
+				// a CSV websocket request
+				var request = {
+					type: "spectrum",
+					beam: zoom_shape,
+					intensity: intensity_mode,
+					frame_start: data_band_lo,
+					frame_end: data_band_hi,
+					ref_freq: RESTFRQ,
+					seq_id: sent_seq_id,
+				};
+
+				if (wsConn[index].readyState == 1)
+					wsConn[index].send(JSON.stringify(request));
+			}
+
 			var blob = new Blob(["channel, intensity"], { type: "data:text/csv;charset=utf-8" });
 
 			if (va_count == 1) {
