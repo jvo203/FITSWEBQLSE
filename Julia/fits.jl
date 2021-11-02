@@ -2561,7 +2561,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     height = req["height"]
 
     beam::Beam = SQUARE
-    intensity::Intensity = INTEGRATED
+    intensity = eval(Meta.parse(uppercase(req["intensity"])))
 
     quality::Quality = medium # by default use medium quality
     try
