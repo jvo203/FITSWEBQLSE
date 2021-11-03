@@ -7459,7 +7459,11 @@ function setup_axes() {
 		var height = parseFloat(svg.attr("height"));
 
 		//strCSV = '<span id="exportCSV" class="glyphicon glyphicon-floppy-save" style="display:inline-block; cursor: pointer"></span>';
-		strCSV = '<i id="exportCSV" class="fas fa-file-csv" style="display:inline-block; cursor: pointer"></i>'
+		strCSV = '<span id="exportCSV" class="fas fa-file-csv" style="display:inline-block; cursor: pointer"></span>'
+
+		var colour_style = "csv-dark";
+		if (theme == 'bright')
+			colour_style = "csv-light";
 
 		svg.append("foreignObject")
 			.attr("x", (range.xMax + 0.75 * emFontSize))
@@ -7468,7 +7472,7 @@ function setup_axes() {
 			.attr("height", 2 * emFontSize)
 			.append("xhtml:div")
 			.attr("id", "csv")
-			.attr("class", "axis-label")
+			.attr("class", colour_style)
 			.attr("pointer-events", "auto")
 			.html(strCSV);
 

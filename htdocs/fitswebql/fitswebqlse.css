@@ -347,6 +347,18 @@ opacity: 0.75;
     opacity: 1 ;
 }
 
+.csv-light {
+    font: 2.0em Inconsolata;/*sans-serif;*/
+    color: darkgray;
+    opacity: 1 ;
+}
+
+.csv-dark {
+    font: 2.0em Inconsolata;/*sans-serif;*/
+    color: rgba(255,204,0,1.0);// Amber
+    opacity: 1 ;
+}
+
 .input {
     display:inline-block;
     color: inherit;
