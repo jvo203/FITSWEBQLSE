@@ -829,6 +829,10 @@ function serveFITS(request::HTTP.Request)
     write(resp, "<script src=\"bzip2.js\"></script>\n")
 
     # HTML5 FileSaver
+    write(
+        resp,
+        "<script src=\"https://kit.fontawesome.com/8433b7dde2.js\" crossorigin=\"anonymous\"></script>\n",
+    )
     write(resp, "<script src=\"FileSaver.js\"></script>\n")
 
     # WebAssembly
