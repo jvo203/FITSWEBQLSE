@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-02.0";
+	return "JS2021-11-03.0";
 }
 
 const wasm_supported = (() => {
@@ -7458,7 +7458,8 @@ function setup_axes() {
 		var width = parseFloat(svg.attr("width"));
 		var height = parseFloat(svg.attr("height"));
 
-		strCSV = '<span id="exportCSV" class="glyphicon glyphicon-floppy-save"  style="display:inline-block; cursor: pointer"></span>';
+		//strCSV = '<span id="exportCSV" class="glyphicon glyphicon-floppy-save" style="display:inline-block; cursor: pointer"></span>';
+		strCSV = '<i id="exportCSV" class="fas fa-file-csv" style="display:inline-block; cursor: pointer"></i>'
 
 		svg.append("foreignObject")
 			.attr("x", (range.xMax + 0.75 * emFontSize))
