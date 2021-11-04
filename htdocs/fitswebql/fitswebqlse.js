@@ -5264,12 +5264,13 @@ function cube_refresh(index) {
 
 	enable_autoscale();
 
+	var elem = document.getElementById("SpectrumCanvas");
+	var range = get_axes_range(elem.width, elem.height);
+	var dx = range.xMax - range.xMin;
+
 	var rect = document.getElementById('mainDiv').getBoundingClientRect();
 	var width = rect.width - 20;
 	var height = rect.height - 20;
-
-	var range = get_axes_range(width, height);
-	var dx = range.xMax - range.xMin;
 
 	var request = {
 		type: "image",
