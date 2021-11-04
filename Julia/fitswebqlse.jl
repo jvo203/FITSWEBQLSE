@@ -1472,10 +1472,38 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                @time getImageSpectrum(fits_object, msg)
+                elapsed = @elapsed image, spectrum = getImageSpectrum(fits_object, msg)
+                elapsed *= 1000.0 # [ms]
 
-                # exit the function during development / testing
-                return
+                if image != Nothing
+                    resp = IOBuffer()
+
+                    # the header
+                    write(resp, Float32(0.0))
+                    write(resp, Int32(0))
+                    write(resp, Int32(2)) # 2 - image + histogram
+                    write(resp, Float32(elapsed))
+
+                    # the body
+                    write(resp, take!(image))
+
+                    put!(outgoing, resp)
+                end
+
+                if spectrum != Nothing
+                    resp = IOBuffer()
+
+                    # the header
+                    write(resp, Float32(0.0))
+                    write(resp, Int32(0))
+                    write(resp, Int32(3)) # 3 - spectrum refresh
+                    write(resp, Float32(elapsed))
+
+                    # the body
+                    write(resp, take!(spectrum))
+
+                    put!(outgoing, resp)
+                end
             end
 
             if msg["type"] == "realtime_image_spectrum"
