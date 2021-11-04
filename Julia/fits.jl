@@ -2696,7 +2696,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     # pad flux with spaces so that the length is a multiple of 4
     # this is needed for an array alignment in JavaScript
-    len = 4*(length(flux) ÷ 4 + 1)
+    len = 4 * (length(flux) ÷ 4 + 1)
     flux = lpad(flux, len, " ")
 
     write(image_resp, UInt32(length(flux)))
@@ -2743,7 +2743,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     # compress spectrum with ZFP        
     compressed_spectrum = zfp_compress(spectrum, precision = SPECTRUM_HIGH_PRECISION)
 
-    write(spec_resp, Int32(length(spectrum)))
+    write(spec_resp, UInt32(length(spectrum)))
     write(spec_resp, compressed_spectrum)
 
     return (image_resp, spec_resp)
