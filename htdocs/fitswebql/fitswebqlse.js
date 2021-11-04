@@ -5268,8 +5268,12 @@ function cube_refresh(index) {
 	var width = rect.width - 20;
 	var height = rect.height - 20;
 
+	var range = get_axes_range(width, height);
+	var dx = range.xMax - range.xMin;
+
 	var request = {
 		type: "image",
+		dx: dx,
 		width: width,
 		height: height,
 		quality: image_quality,

@@ -2564,6 +2564,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     image = true
     width = req["width"]
     height = req["height"]
+    dx = req["dx"]
 
     beam::Beam = SQUARE
     intensity = eval(Meta.parse(uppercase(req["intensity"])))
@@ -2684,6 +2685,12 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     close(results)
     wait(results_task)
+
+    # optionally downsample the spectrum
+    if length(spectrum) > (dx >> 1)
+        println("downsampling spectrum from $(length(spectrum)) to $(dx >> 1)")
+        spectrum = imresize(spectrum, (dx >> 1,))
+    end
 
     # next make a histogram
     bins, tone_mapping = getHistogram(fits, pixels, mask)
