@@ -1485,7 +1485,7 @@ function ws_coroutine(ws, ids)
                     resp = IOBuffer()
 
                     # the header                    
-                    write(resp, Float32(req["timestamp"]))
+                    write(resp, Float32(msg["timestamp"]))
                     write(resp, Int32(0))
                     write(resp, Int32(2)) # 2 - image + histogram
 
