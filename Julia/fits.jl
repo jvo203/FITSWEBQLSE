@@ -2692,9 +2692,15 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     image_resp = IOBuffer()
 
     # first send the tone mapping
-    println("flux: ", tone_mapping.flux, "length(flux):", length(tone_mapping.flux))
-    write(image_resp, UInt32(length(tone_mapping.flux)))
-    write(image_resp, tone_mapping.flux)
+    flux = tone_mapping.flux
+
+    # pad flux with spaces so that the length is a multiple of 4
+    # this is needed for an array alignment in JavaScript
+    len = 4*(length(flux) ÷ 4 + 1)
+    flux = lpad(flux, len, " ")
+
+    write(image_resp, UInt32(length(flux)))
+    write(image_resp, flux)
     write(image_resp, tone_mapping.pmin)
     write(image_resp, tone_mapping.pmax)
     write(image_resp, tone_mapping.med)

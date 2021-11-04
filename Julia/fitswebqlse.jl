@@ -601,8 +601,15 @@ function streamImageSpectrum(http::HTTP.Stream)
         startwrite(http)
 
         # first send the tone mapping
-        write(http, UInt32(length(tone_mapping.flux)))
-        write(http, tone_mapping.flux)
+        flux = tone_mapping.flux
+
+        # pad flux with spaces so that the length is a multiple of 4
+        # this is needed for an array alignment in JavaScript
+        len = 4 * (length(flux) ÷ 4 + 1)
+        flux = lpad(flux, len, " ")
+
+        write(http, UInt32(length(flux)))
+        write(http, flux)
         write(http, tone_mapping.pmin)
         write(http, tone_mapping.pmax)
         write(http, tone_mapping.med)
@@ -1472,8 +1479,7 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                elapsed = @elapsed image, spectrum = getImageSpectrum(fits_object, msg)
-                elapsed *= 1000.0 # [ms]
+                @time image, spectrum = getImageSpectrum(fits_object, msg)
 
                 if image != Nothing
                     resp = IOBuffer()
@@ -1482,7 +1488,6 @@ function ws_coroutine(ws, ids)
                     write(resp, Float32(0.0))
                     write(resp, Int32(0))
                     write(resp, Int32(2)) # 2 - image + histogram
-                    write(resp, Float32(elapsed))
 
                     # the body
                     write(resp, take!(image))
@@ -1497,7 +1502,6 @@ function ws_coroutine(ws, ids)
                     write(resp, Float32(0.0))
                     write(resp, Int32(0))
                     write(resp, Int32(3)) # 3 - spectrum refresh
-                    write(resp, Float32(elapsed))
 
                     # the body
                     write(resp, take!(spectrum))

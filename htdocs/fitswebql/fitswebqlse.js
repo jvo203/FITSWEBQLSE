@@ -2672,12 +2672,12 @@ function open_websocket_connection(datasetId, index) {
 						tone_mapping.lmin = Math.log(p);
 						tone_mapping.lmax = Math.log(p + 1.0);
 
-						var offset = 16;
+						var offset = 12;
 						var str_length = dv.getUint32(offset, endianness);
 						offset += 4;
 
 						let flux = new Uint8Array(received_msg, offset, str_length);
-						tone_mapping.flux = new TextDecoder("utf-8").decode(flux);
+						tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
 						offset += str_length;
 
 						tone_mapping.min = dv.getFloat32(offset, endianness);
@@ -10389,7 +10389,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 						offset += 4;
 
 						let flux = new Uint8Array(received_msg, offset, str_length);
-						tone_mapping.flux = new TextDecoder("utf-8").decode(flux);
+						tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
 						offset += str_length;
 
 						tone_mapping.min = dv.getFloat32(offset, endianness);
