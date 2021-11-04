@@ -2778,6 +2778,31 @@ function open_websocket_connection(datasetId, index) {
 					//full spectrum refresh
 					if (type == 3) {
 						hide_cursor();
+
+						var offset = 12;
+						var spectrum_len = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						var frame = new Uint8Array(received_msg, offset);
+
+						// FPZIP decoder part				
+						Module.ready
+							.then(_ => {
+								var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
+
+								//console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
+
+								if (spectrum.length > 0) {
+									// attach the spectrum as either "mean" or "integrated"
+								}
+
+							})
+							.catch(e => console.error(e));
+
+						return;
+
+						// previous code
+
 						var length = dv.getUint32(12, endianness);
 						var offset = 16;
 						var mean_spectrum = new Float32Array(received_msg, offset, length);
