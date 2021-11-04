@@ -601,7 +601,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         startwrite(http)
 
         # first send the tone mapping
-        write(http, Int32(length(tone_mapping.flux)))
+        write(http, UInt32(length(tone_mapping.flux)))
         write(http, tone_mapping.flux)
         write(http, tone_mapping.pmin)
         write(http, tone_mapping.pmax)

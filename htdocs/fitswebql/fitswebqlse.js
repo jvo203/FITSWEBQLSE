@@ -2672,8 +2672,13 @@ function open_websocket_connection(datasetId, index) {
 						tone_mapping.lmin = Math.log(p);
 						tone_mapping.lmax = Math.log(p + 1.0);
 
-						var offset = 12;
-						tone_mapping.flux = document.getElementById('flux' + index).value;
+						var offset = 16;
+						var str_length = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						let flux = new Uint8Array(received_msg, offset, str_length);
+						tone_mapping.flux = new TextDecoder("utf-8").decode(flux);
+						offset += str_length;
 
 						tone_mapping.min = dv.getFloat32(offset, endianness);
 						offset += 4;
@@ -2684,16 +2689,16 @@ function open_websocket_connection(datasetId, index) {
 						tone_mapping.median = dv.getFloat32(offset, endianness);
 						offset += 4;
 
-						tone_mapping.white = dv.getFloat32(offset, endianness);
-						offset += 4;
-
-						tone_mapping.black = dv.getFloat32(offset, endianness);
-						offset += 4;
-
 						tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
 						offset += 4;
 
 						tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
+						offset += 4;
+
+						tone_mapping.white = dv.getFloat32(offset, endianness);
+						offset += 4;
+
+						tone_mapping.black = dv.getFloat32(offset, endianness);
 						offset += 4;
 
 						if (tone_mapping.flux == "legacy") {

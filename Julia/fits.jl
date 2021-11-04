@@ -2685,9 +2685,30 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     close(results)
     wait(results_task)
 
+    # next make a histogram
+    bins, tone_mapping = getHistogram(fits, pixels, mask)
+
     # image response
     image_resp = IOBuffer()
 
+    # first send the tone mapping
+    println("flux: ", tone_mapping.flux, "length(flux):", length(tone_mapping.flux))
+    write(image_resp, UInt32(length(tone_mapping.flux)))
+    write(image_resp, tone_mapping.flux)
+    write(image_resp, tone_mapping.pmin)
+    write(image_resp, tone_mapping.pmax)
+    write(image_resp, tone_mapping.med)
+    write(image_resp, tone_mapping.sensitivity)
+    write(image_resp, tone_mapping.ratio_sensitivity)
+    write(image_resp, tone_mapping.white)
+    write(image_resp, tone_mapping.black)
+
+    # the histogram
+    println("typeof(bins):", typeof(bins))
+    write(image_resp, UInt32(length(bins)))
+    write(image_resp, Int32.(bins))
+
+    # next the image
     write(image_resp, Int32(view_width))
     write(image_resp, Int32(view_height))
 
@@ -2718,9 +2739,6 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     write(spec_resp, Int32(length(spectrum)))
     write(spec_resp, compressed_spectrum)
-
-    # next make a histogram
-    bins, tone_mapping = getHistogram(fits, pixels, mask)
 
     return (image_resp, spec_resp)
 
