@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-05.0";
+	return "JS2021-11-05.1";
 }
 
 const wasm_supported = (() => {
@@ -2802,57 +2802,46 @@ function open_websocket_connection(datasetId, index) {
 							.then(_ => {
 								var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
 
-								//console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
+								// console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
 
 								if (spectrum.length > 0) {
 									// attach the spectrum as either "mean" or "integrated"
+									//insert a spectrum object to the spectrumContainer at <index-1>
+
+									fitsContainer[index - 1].depth = spectrum.length;
+
+									if (intensity_mode == "mean") {
+										fitsContainer[index - 1].mean_spectrum = spectrum;
+										mean_spectrumContainer[index - 1] = spectrum;
+									}
+
+									if (intensity_mode == "integrated") {
+										fitsContainer[index - 1].integrated_spectrum = spectrum;
+										integrated_spectrumContainer[index - 1] = spectrum;
+									}
+
+									spectrum_count++;
+
+									if (va_count == 1) {
+										setup_axes();
+
+										plot_spectrum([spectrum]);
+									}
+									else {
+										if (spectrum_count == va_count) {
+											setup_axes();
+
+											if (intensity_mode == "mean")
+												plot_spectrum(mean_spectrumContainer);
+
+											if (intensity_mode == "integrated")
+												plot_spectrum(integrated_spectrumContainer);
+										}
+									}
 								}
 
 							})
 							.catch(e => console.error(e));
-
-						return;
-
-						// previous code
-
-						var length = dv.getUint32(12, endianness);
-						var offset = 16;
-						var mean_spectrum = new Float32Array(received_msg, offset, length);
-						offset += 4 * length;
-						var integrated_spectrum = new Float32Array(received_msg, offset, length);
-
-						/*self.postMessage;console.log({type: 'refresh', latency: latency, recv_seq_id: recv_seq_id, length: length, mean_spectrum: mean_spectrum, integrated_spectrum: integrated_spectrum});*/
-
-						fitsContainer[index - 1].depth = length;
-						fitsContainer[index - 1].mean_spectrum = mean_spectrum;
-						fitsContainer[index - 1].integrated_spectrum = integrated_spectrum;
-
-						//insert a spectrum object to the spectrumContainer at <index-1>
-						mean_spectrumContainer[index - 1] = mean_spectrum;
-						integrated_spectrumContainer[index - 1] = integrated_spectrum;
-
-						spectrum_count++;
-
-						if (va_count == 1) {
-							setup_axes();
-
-							if (intensity_mode == "mean")
-								plot_spectrum([mean_spectrum]);
-
-							if (intensity_mode == "integrated")
-								plot_spectrum([integrated_spectrum]);
-						}
-						else {
-							if (spectrum_count == va_count) {
-								setup_axes();
-
-								if (intensity_mode == "mean")
-									plot_spectrum(mean_spectrumContainer);
-
-								if (intensity_mode == "integrated")
-									plot_spectrum(integrated_spectrumContainer);
-							}
-						}
 
 						return;
 					}
