@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-04.0";
+	return "JS2021-11-05.0";
 }
 
 const wasm_supported = (() => {
@@ -2734,33 +2734,45 @@ function open_websocket_connection(datasetId, index) {
 						redraw_histogram(index);
 
 						// and finally receive/process the 32-bit floating-point image frame
-						var frame = new Uint8Array(received_msg, offset);
+						var img_width = dv.getUint32(offset, endianness);
+						offset += 4;
 
-						if (frame.length > 0) {
-							// OpenEXR decoder part				
-							Module.ready
-								.then(_ => {
-									console.log("processing an OpenEXR HDR image");
-									let start = performance.now();
-									var image = Module.loadEXRStr(frame);
-									let elapsed = Math.round(performance.now() - start);
+						var img_height = dv.getUint32(offset, endianness);
+						offset += 4;
 
-									console.log("image width: ", image.width, "height: ", image.height, "channels: ", image.channels(), "elapsed: ", elapsed, "[ms]");
+						console.log('img_width:', img_width, 'img_height:', img_height);
 
-									var img_width = image.width;
-									var img_height = image.height;
-									var pixels = new Float32Array(image.plane("Y"));
-									var alpha = new Float32Array(image.plane("A"));
+						var pixels_length = dv.getUint32(offset, endianness);
+						offset += 4;
 
-									image.delete();
+						console.log('pixels length:', pixels_length);
 
-									process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+						var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
+						offset += pixels_length;
 
-									display_legend();
-								})
-								.catch(e => console.error(e));
-						} else {
-							hide_hourglass();
+						var mask_length = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						console.log('mask length:', mask_length);
+
+						var frame_mask = new Uint8Array(received_msg, offset, mask_length);
+						offset += mask_length;
+
+						{
+							console.log("processing an HDR image");
+							let start = performance.now();
+
+							var pixels = Module.decompressZFPimage(img_width, img_height, frame_pixels);
+
+							var alpha = Module.decompressLZ4mask(img_width, img_height, frame_mask);
+
+							let elapsed = Math.round(performance.now() - start);
+
+							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+
+							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+
+							display_legend();
 						}
 
 						return;

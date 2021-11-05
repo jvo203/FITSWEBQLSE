@@ -2722,8 +2722,8 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     write(image_resp, Int32.(bins))
 
     # next the image
-    write(image_resp, Int32(view_width))
-    write(image_resp, Int32(view_height))
+    write(image_resp, UInt32(view_width))
+    write(image_resp, UInt32(view_height))
 
     # compress pixels with ZFP
     prec = ZFP_MEDIUM_PRECISION
@@ -2737,11 +2737,11 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     end
 
     compressed_pixels = zfp_compress(pixels, precision = prec)
-    write(image_resp, Int32(length(compressed_pixels)))
+    write(image_resp, UInt32(length(compressed_pixels)))
     write(image_resp, compressed_pixels)
 
     compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
-    write(image_resp, Int32(length(compressed_mask)))
+    write(image_resp, UInt32(length(compressed_mask)))
     write(image_resp, compressed_mask)
 
     # spectrum response
