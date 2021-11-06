@@ -2450,7 +2450,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 if thread_spectrum != Nothing
                     for x in thread_spectrum
                         frame, val = x
-                        spectrum[frame] = val
+                        spectrum[1+frame-first_frame] = val
                     end
                 end
 
@@ -2641,7 +2641,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if thread_spectrum != Nothing
                 for x in thread_spectrum
                     frame, val = x
-                    spectrum[frame] = val
+                    spectrum[1+frame-first_frame] = val
                 end
             end
 
