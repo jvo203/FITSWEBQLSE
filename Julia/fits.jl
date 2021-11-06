@@ -2692,6 +2692,8 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         spectrum = imresize(spectrum, (dx >> 1,))
     end
 
+    println("spectrum:", spectrum)
+
     # next make a histogram
     bins, tone_mapping = getHistogram(fits, pixels, mask)
 
