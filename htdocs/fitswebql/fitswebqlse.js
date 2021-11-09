@@ -12350,7 +12350,7 @@ function show_welcome() {
 	}
 
 	bodyDiv.append("p")
-		.html('For optimum performance we recommend <a href="https://www.google.com/chrome/index.html" style="color:' + textColour + '"><b>Google Chrome</b></a>. Microsoft Edge (Chromium-based), Firefox as well as Safari on macOS are supported too. We do NOT recommend MS IE.');
+		.html('For optimum performance we recommend <a href="https://www.google.com/chrome/index.html" style="color:' + textColour + '"><b>Google Chrome</b></a>. Microsoft Edge (Chromium-based), Firefox as well as Safari on macOS are supported too. We do NOT support MS IE.');
 
 	//bodyDiv.append("hr");    
 
