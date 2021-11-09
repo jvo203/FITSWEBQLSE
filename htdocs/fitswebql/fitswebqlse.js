@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-05.1";
+	return "JS2021-11-09.0";
 }
 
 const wasm_supported = (() => {
@@ -2790,6 +2790,7 @@ function open_websocket_connection(datasetId, index) {
 					//full spectrum refresh
 					if (type == 3) {
 						hide_cursor();
+						hide_hourglass();
 
 						var offset = 12;
 						var spectrum_len = dv.getUint32(offset, endianness);
@@ -2941,7 +2942,7 @@ function open_websocket_connection(datasetId, index) {
 									//HEVC
 									Module.hevc_decode_frame(0, 0, frame, index - 1, 'greyscale', fill);
 								} catch (e) {
-									console.log(e);
+									// console.log(e);
 								};
 							}
 
@@ -7262,6 +7263,7 @@ function setup_axes() {
 
 	try {
 		d3.select("#axes").remove();
+		d3.select("#foreignCSV").remove();
 	}
 	catch (e) {
 	}
@@ -7490,9 +7492,9 @@ function setup_axes() {
 			.call(yAxis);
 
 		// Add a CSV export link
-		var svg = d3.select("#FrontSVG");
-		var width = parseFloat(svg.attr("width"));
-		var height = parseFloat(svg.attr("height"));
+		var front_svg = d3.select("#FrontSVG");
+		var width = parseFloat(front_svg.attr("width"));
+		var height = parseFloat(front_svg.attr("height"));
 
 		//strCSV = '<span id="exportCSV" class="glyphicon glyphicon-floppy-save" style="display:inline-block; cursor: pointer"></span>';
 		strCSV = '<span id="exportCSV" class="fas fa-file-csv" style="display:inline-block; cursor: pointer"></span>'
@@ -7501,7 +7503,8 @@ function setup_axes() {
 		if (theme == 'bright')
 			colour_style = "csv-light";
 
-		svg.append("foreignObject")
+		front_svg.append("foreignObject")
+			.attr("id", "foreignCSV")
 			.attr("x", (range.xMax + 0.75 * emFontSize))
 			.attr("y", (height - 2.0 * emFontSize))
 			.attr("width", 2 * emFontSize)
