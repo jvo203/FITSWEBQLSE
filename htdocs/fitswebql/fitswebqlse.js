@@ -2640,6 +2640,7 @@ function open_websocket_connection(datasetId, index) {
 
 					//image
 					if (type == 2) {
+						hide_hourglass();
 						var tone_mapping = new Object();
 						let p = 0.5;
 						tone_mapping.lmin = Math.log(p);
