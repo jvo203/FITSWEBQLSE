@@ -12316,7 +12316,7 @@ function show_welcome() {
 		.attr("class", "modal modal-center")
 		.attr("role", "dialog")
 		.append("div")
-		.attr("class", "modal-dialog");
+		.attr("class", "modal-dialog modal-dialog-centered");
 
 	var contentDiv = div.append("div")
 		.attr("class", "modal-content");
@@ -12384,7 +12384,7 @@ function show_welcome() {
 	//bodyDiv.append("hr");    
 
 	var footer = contentDiv.append("div")
-		.attr("class", "modal-footer");
+		.attr("class", "modal-footer d-flex justify-content-around");
 
 	/*footer.append("button")	
 	.attr("type", "button")
@@ -12398,7 +12398,7 @@ function show_welcome() {
 	footer.append("p")
 		//.style("color", "#a94442")
 		.attr("align", "left")
-		.html('<label style="cursor: pointer"><input type="checkbox" value="" class="control-label" style="cursor: pointer" id="donotshowcheckbox" onchange="javascript:donotshow();">&nbsp;don\'t show this dialogue again</label>' + '&nbsp;&nbsp;&nbsp;<a style="color:red" href="' + href + '">page loading problems?</a>' + '<button type="submit" class="btn btn-danger btn-default pull-right" data-dismiss="modal"><span class="fas fa-times"></span> Close</button>');
+		.html('<label style="cursor: pointer"><input type="checkbox" value="" class="control-label" style="cursor: pointer" id="donotshowcheckbox" onchange="javascript:donotshow();">&nbsp;don\'t show this dialogue again</label>' + '&nbsp;&nbsp;&nbsp;<a style="color:red" href="' + href + '">page loading problems? </a>' + '<button type="submit" class="btn btn-danger btn-default pull-right" data-dismiss="modal"><span class="fas fa-times"></span> Close</button>');
 
 	$('#welcomeScreen').modal('show');
 }
