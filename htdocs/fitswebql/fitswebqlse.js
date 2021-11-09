@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-09.2";
+	return "JS2021-11-09.3";
 }
 
 const wasm_supported = (() => {
@@ -14193,6 +14193,12 @@ async*/ function mainRenderer() {
 		d3.select("body").append("div")
 			.attr("id", "mainDiv")
 			.attr("class", "main");
+
+		var rect = document.getElementById('mainDiv').getBoundingClientRect();
+		var width = Math.round(rect.width);
+		var height = Math.round(rect.height);
+		document.getElementById('mainDiv').setAttribute("style", "width:" + width.toString() + "px");
+		document.getElementById('mainDiv').setAttribute("style", "height:" + height.toString() + "px");
 
 		if (theme == 'bright') {
 			d3.select("body")
