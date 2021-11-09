@@ -860,7 +860,7 @@ function serveFITS(request::HTTP.Request)
     )
 
     # Bootstrap v4.1.3
-    #=write(
+    write(
         resp,
         "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\" integrity=\"sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO\" crossorigin=\"anonymous\">",
     )
@@ -875,10 +875,10 @@ function serveFITS(request::HTTP.Request)
     write(
         resp,
         "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js\" integrity=\"sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy\" crossorigin=\"anonymous\"></script>",
-    )=#
+    )
 
     # Bootstrap v3.4.1
-    write(
+    #=write(
         resp,
         "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\" integrity=\"sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu\" crossorigin=\"anonymous\">",
     )
@@ -889,7 +889,7 @@ function serveFITS(request::HTTP.Request)
     write(
         resp,
         "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js\" integrity=\"sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd\" crossorigin=\"anonymous\"></script>",
-    )
+    )=#
 
     # GLSL vertex shader
     write(resp, "<script id=\"vertex-shader\" type=\"x-shader/x-vertex\">\n")
