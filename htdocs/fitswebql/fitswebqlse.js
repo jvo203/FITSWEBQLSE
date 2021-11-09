@@ -11698,7 +11698,7 @@ function display_menu() {
 		.attr("class", "menu");
 	//.on("mouseleave", hide_navigation_bar);
 
-	var nav = div.append("nav").attr("class", "navbar navbar-inverse navbar-fixed-top fixed-top navbar-expand-sm navbar-light");
+	var nav = div.append("nav").attr("class", "navbar navbar-inverse navbar-fixed-top fixed-top navbar-expand-sm navbar-dark");
 
 	var main = nav.append("div")
 		.attr("class", "container-fluid");
