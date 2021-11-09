@@ -2562,8 +2562,8 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     y2 = fits.height
 
     image = true
-    width = req["width"]
-    height = req["height"]
+    width = round(Integer,req["width"])
+    height = round(Integer,req["height"])
     dx = req["dx"]
 
     beam::Beam = SQUARE
