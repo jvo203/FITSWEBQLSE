@@ -2803,7 +2803,14 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     dimx = abs(x2 - x1 + 1)
     dimy = abs(y2 - y1 + 1)
 
-    beam = eval(Meta.parse(uppercase(req["beam"])))
+    local beam::Beam
+
+    try
+        beam = eval(Meta.parse(uppercase(req["beam"])))
+    catch _
+        beam = SQUARE
+    end
+
     intensity = eval(Meta.parse(uppercase(req["intensity"])))
 
     # calculate the centre and squared radius
