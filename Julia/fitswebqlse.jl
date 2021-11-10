@@ -1543,7 +1543,7 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                @time getSpectrum(fits_object, msg)
+                @time csv = getSpectrum(fits_object, msg)
 
             end
 

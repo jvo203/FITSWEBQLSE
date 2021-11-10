@@ -2875,7 +2875,17 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     close(results)
     wait(results_task)
 
-    println("spectrum:", spectrum)
+    csv = IOBuffer()
+
+    display(spectrum)
+
+    for (idx, val) in spectrum
+        frame = first_frame + (idx - 1)
+
+        println("$idx, $frame, $val")
+    end
+
+    return csv
 end
 
 function alphaMask(x::Bool)::UInt8
