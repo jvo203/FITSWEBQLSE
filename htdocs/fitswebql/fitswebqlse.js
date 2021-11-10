@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-09.3";
+	return "JS2021-11-10.0";
 }
 
 const wasm_supported = (() => {
@@ -2640,7 +2640,6 @@ function open_websocket_connection(datasetId, index) {
 
 					//image
 					if (type == 2) {
-						hide_hourglass();
 						var tone_mapping = new Object();
 						let p = 0.5;
 						tone_mapping.lmin = Math.log(p);
@@ -6357,9 +6356,12 @@ function display_preferences(index) {
 		.attr("opacity", 0.75)
 		.text("");
 
+	var range = get_axes_range(svgWidth, svgHeight);
+
+
 	group.append("text")
 		.attr("id", "fps")
-		.attr("x", svgWidth)
+		.attr("x", range.xMax - 0.25 * emFontSize)
 		//.attr("y", offset)
 		.attr("y", (svgHeight - offset / 4))
 		.attr("font-family", "Inconsolata")
