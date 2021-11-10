@@ -2764,6 +2764,113 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
 end
 
+function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
+    if fits.depth < 1
+        error("getSpectrum() only supports 3D cubes.")
+    end
+
+    # use the entire FITS plane
+    x1 = 1
+    x2 = fits.width
+    y1 = 1
+    y2 = fits.height
+
+    # disable viewport
+    image = false
+
+    frame_start = Float64(req["frame_start"])
+    frame_end = Float64(req["frame_end"])
+
+    ref_freq = 0.0 # by default ref_freq is missing
+    try
+        ref_freq = Float64(req["ref_freq"])
+    catch e
+    end
+
+    first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
+    frame_length = last_frame - first_frame + 1
+    println(
+        "[get_spectrum_range] :: [$first_frame, $last_frame] <$frame_length> ($(fits.depth))",
+    )
+
+    # sanity checks
+    x1 = max(1, x1)
+    y1 = max(1, y1)
+    x2 = min(fits.width, x2)
+    y2 = min(fits.height, y2)
+
+    # viewport dimensions
+    dimx = abs(x2 - x1 + 1)
+    dimy = abs(y2 - y1 + 1)
+
+    beam = eval(Meta.parse(uppercase(req["beam"])))
+    intensity = eval(Meta.parse(uppercase(req["intensity"])))
+
+    # calculate the centre and squared radius
+    cx = abs(x1 + x2) >> 1
+    cy = abs(y1 + y2) >> 1
+    r = min(abs(x2 - x1) >> 1, abs(y2 - y1) >> 1)
+    r2 = r * r
+
+    spectrum = zeros(Float32, frame_length)
+
+    results = RemoteChannel(() -> Channel{Tuple}(32))
+
+    results_task = @async while true
+        try
+            _, _, thread_spectrum = take!(results)
+
+            if thread_spectrum != Nothing
+                for x in thread_spectrum
+                    frame, val = x
+                    spectrum[1+frame-first_frame] = val
+                end
+            end
+
+        catch e
+            println("results task completed")
+            break
+        end
+    end
+
+    # for each Future in ras find the corresponding worker
+    # launch jobs on each worker, pass the channel indices
+    ras = [
+        @spawnat job.where calculateViewportSpectrum(
+            fetch(job),
+            Int32(first_frame),
+            Int32(last_frame),
+            Int32(x1),
+            Int32(x2),
+            Int32(y1),
+            Int32(y2),
+            Int32(cx),
+            Int32(cy),
+            Int32(r2),
+            beam,
+            intensity,
+            false,
+            false,
+            Int64(dimx),
+            Int64(dimy),
+            fits._cdelt3,
+            findall(fits.indices[job.where]),
+            results,
+        )
+
+        for job in fits.compressed_pixels
+    ]
+
+    println("ras: ", ras)
+
+    @time wait.(ras)
+
+    close(results)
+    wait(results_task)
+
+    println("spectrum:", spectrum)
+end
+
 function alphaMask(x::Bool)::UInt8
     if x
         return UInt8(255)
