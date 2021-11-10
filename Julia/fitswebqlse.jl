@@ -1530,6 +1530,23 @@ function ws_coroutine(ws, ids)
                 end
             end
 
+            if msg["type"] == "spectrum"
+                # CSV spectrum export
+
+                fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+                if fits_object.datasetid == ""
+                    continue
+                end
+
+                if !has_data(fits_object)
+                    error("$datasetid: no data found.")
+                end
+
+                @time getSpectrum(fits_object, msg)
+
+            end
+
             if msg["type"] == "realtime_image_spectrum"
                 # replace!(viewport_requests, msg)
                 push!(viewport_requests, msg) # there is too much lag
