@@ -2834,7 +2834,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 end
             end
 
-        catch e
+        catch _
             println("results task completed")
             break
         end
@@ -2877,12 +2877,11 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     csv = IOBuffer()
 
-    display(spectrum)
+    # display(spectrum)
 
     for (idx, val) in spectrum
         frame = first_frame + (idx - 1)
-
-        println("$idx, $frame, $val")
+        println("$key, $frame, $val")
     end
 
     return csv
