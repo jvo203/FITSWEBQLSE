@@ -1552,8 +1552,6 @@ function get_inner_dimensions(fits::FITSDataSet)
         # go through the collated mask fetching inner dims from all workers
         @everywhere function get_inner_dimensions(global_mask::DArray)
             fits_dims = size(global_mask)
-            fits_width = fits_dims[1]
-            fits_height = fits_dims[2]
 
             # obtain a worker-local mask
             local_mask = reshape(localpart(global_mask), fits_dims[1:2])
@@ -2555,6 +2553,9 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         error("getImageSpectrum() only supports 3D cubes.")
     end
 
+    local scale::Float32
+    local inner_width::Integer, inner_height::Integer
+
     # use the entire FITS plane
     x1 = 1
     x2 = fits.width
@@ -2562,8 +2563,8 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     y2 = fits.height
 
     image = true
-    width = round(Integer,req["width"])
-    height = round(Integer,req["height"])
+    width = round(Integer, req["width"])
+    height = round(Integer, req["height"])
     dx = req["dx"]
 
     beam::Beam = SQUARE
@@ -2609,18 +2610,24 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     view_width = dimx
     view_height = dimy
 
-    native_size = dimx * dimy
-    viewport_size = width * height
+    # calculate scale, downsize when applicable
+    inner_width, inner_height = get_inner_dimensions(fits)
 
-    if native_size > viewport_size
-        scale = Float32(width) / Float32(dimx)
-        println("re-sizing the viewport down to $(Int32(round(100.0 * scale)))%")
-
-        # downsize the pixels & mask
-        bDownsize = true
-        view_width = width
-        view_height = height
+    try
+        scale = get_image_scale(width, height, inner_width, inner_height)
+    catch e
+        println(e)
+        scale = 1.0
     end
+
+    if scale < 1.0
+        println("re-sizing the image down to $(Int32(round(100.0 * scale)))%")
+        view_width = round(Integer, scale * fits.width)
+        view_height = round(Integer, scale * fits.height)
+        bDownsize = true
+    end
+
+    println("scale = $scale, image: $view_width x $view_height, bDownsize: $bDownsize")
 
     pixels = zeros(Float32, view_width, view_height)
     mask = map(isnan, pixels)
