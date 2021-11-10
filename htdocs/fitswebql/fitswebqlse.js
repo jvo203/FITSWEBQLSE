@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-10.0";
+	return "JS2021-11-10.1";
 }
 
 const wasm_supported = (() => {
@@ -7501,7 +7501,7 @@ function setup_axes() {
 				// a CSV websocket request
 				var request = {
 					type: "spectrum",
-					beam: zoom_shape,
+					/*beam: zoom_shape,*/
 					intensity: intensity_mode,
 					frame_start: data_band_lo,
 					frame_end: data_band_hi,
