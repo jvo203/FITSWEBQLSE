@@ -2272,21 +2272,19 @@ function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Flo
 
 end
 
-function Einstein_velocity_addition(v1::Float64, v2::Float64)
+function Einstein_velocity_addition(v1, v2)
     c = SpeedOfLightInVacuum # [m/s]
 
     return (v1 + v2) / (1.0 + v1 * v2 / c^2)
 end
 
-function Einstein_relative_velocity(f::Float64, f0::Float64, deltaV::Float64)
+function Einstein_relative_velocity(f, f0, deltaV)
     println("f: $f, f0: $f0")
 
     c = SpeedOfLightInVacuum # [m/s]
 
     fRatio = f / f0
     v = (1.0 - fRatio^2) / (1.0 + fRatio^2) * c
-
-    println("v: $v, deltaV: $deltaV")
 
     return Einstein_velocity_addition(v, deltaV)
 end
