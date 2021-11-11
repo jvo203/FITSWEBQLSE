@@ -2879,9 +2879,9 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     # display(spectrum)
 
-    for (idx, val) in spectrum
+    for (idx, val) in enumerate(spectrum)
         frame = first_frame + (idx - 1)
-        println("$key, $frame, $val")
+        println("$idx\t$frame\t$val")
     end
 
     return csv
