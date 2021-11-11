@@ -2272,6 +2272,41 @@ function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Flo
 
 end
 
+function get_frame2freq_vel(fits::FITSDataSet, frame::Integer, ref_freq::Float64)
+    header = fits.header
+
+    # any errors will be propagated back and handled higher up
+    crval3 = header["CRVAL3"]
+    cdelt3 = header["CDELT3"]
+    crpix3 = header["CRPIX3"]
+
+    c = SpeedOfLightInVacuum / 1000.0 # [km/s]
+
+    if fits.has_velocity && fits.has_frequency
+        v =
+            crval3 * fits.frame_multiplier +
+            cdelt3 * fits.frame_multiplier * (frame - crpix3) # [m/s]
+        v /= 1000.0 # [km/s]
+
+        f = ref_freq * sqrt((1.0 - v / c) / (1 + v / c)) # [Hz]
+        f /= 1.0e9 # [GHz]
+
+        return (f, v)
+    end
+
+    val = crval3 * fits.frame_multiplier + cdelt3 * fits.frame_multiplier * (frame - crpix3)
+
+    if fits.has_frequency
+        return (val / 1.0e9, Nothing) # [GHz]
+    end
+
+    if fits.has_velocity
+        return (Nothing, val / 1000.0) # [km/s]
+    end
+
+    return (Nothing, Nothing)
+end
+
 function get_spectrum_range(
     fits::FITSDataSet,
     frame_start::Float64,
@@ -2881,6 +2916,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         frame = first_frame + (idx - 1)
 
         # convert frame to frequency and/or velocity
+        frequency, velocity = get_frame2freq_vel(fits, frame, ref_freq)
 
         println("$idx\t$frame\t$val")
     end
