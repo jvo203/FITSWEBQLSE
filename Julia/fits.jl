@@ -2275,14 +2275,18 @@ end
 function Einstein_velocity_addition(v1::Float64, v2::Float64)
     c = SpeedOfLightInVacuum # [m/s]
 
-    return (v1 + v2) / (1.0 + v1 * v2 / (c * c))
+    return (v1 + v2) / (1.0 + v1 * v2 / c^2)
 end
 
 function Einstein_relative_velocity(f::Float64, f0::Float64, deltaV::Float64)
+    println("f: $f, f0: $f0")
+
     c = SpeedOfLightInVacuum # [m/s]
 
     fRatio = f / f0
-    v = (1.0 - fRatio * fRatio) / (1.0 + fRatio * fRatio) * c
+    v = (1.0 - fRatio^2) / (1.0 + fRatio^2) * c
+
+    println("v: $v, deltaV: $deltaV")
 
     return Einstein_velocity_addition(v, deltaV)
 end
@@ -2849,6 +2853,8 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     deltaV = Float64(req["deltaV"])
     rest = req["rest"]
+
+    println("deltaV: $deltaV, rest: $rest")
 
     ref_freq = 0.0 # by default ref_freq is missing
     try
