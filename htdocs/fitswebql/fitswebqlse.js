@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-10.1";
+	return "JS2021-11-11.0";
 }
 
 const wasm_supported = (() => {
@@ -7468,61 +7468,63 @@ function setup_axes() {
 			.call(yAxis);
 
 		// Add a CSV export link
-		var front_svg = d3.select("#FrontSVG");
-		var width = parseFloat(front_svg.attr("width"));
-		var height = parseFloat(front_svg.attr("height"));
+		if (has_velocity_info || has_frequency_info) {
+			var front_svg = d3.select("#FrontSVG");
+			var width = parseFloat(front_svg.attr("width"));
+			var height = parseFloat(front_svg.attr("height"));
 
-		strCSV = '<span id="exportCSV" class="fas fa-file-csv" style="display:inline-block; cursor: pointer"></span>'
+			strCSV = '<span id="exportCSV" class="fas fa-file-csv" style="display:inline-block; cursor: pointer"></span>'
 
-		var colour_style = "csv-dark";
-		if (theme == 'bright')
-			colour_style = "csv-light";
+			var colour_style = "csv-dark";
+			if (theme == 'bright')
+				colour_style = "csv-light";
 
-		front_svg.append("foreignObject")
-			.attr("id", "foreignCSV")
-			.attr("x", (range.xMax + 0.75 * emFontSize))
-			.attr("y", (height - 2.0 * emFontSize))
-			.attr("width", 2 * emFontSize)
-			.attr("height", 2 * emFontSize)
-			.append("xhtml:div")
-			.attr("id", "csv")
-			.attr("class", colour_style)
-			.attr("pointer-events", "auto")
-			.html(strCSV);
+			front_svg.append("foreignObject")
+				.attr("id", "foreignCSV")
+				.attr("x", (range.xMax + 0.75 * emFontSize))
+				.attr("y", (height - 2.0 * emFontSize))
+				.attr("width", 2 * emFontSize)
+				.attr("height", 2 * emFontSize)
+				.append("xhtml:div")
+				.attr("id", "csv")
+				.attr("class", colour_style)
+				.attr("pointer-events", "auto")
+				.html(strCSV);
 
-		document.getElementById('exportCSV').onclick = function () {
-			console.log("export spectrum to CSV.");
+			document.getElementById('exportCSV').onclick = function () {
+				console.log("export spectrum to CSV.");
 
-			for (let index = 0; index < va_count; index++) {
-				var dataId = datasetId;
-				if (va_count > 1)
-					dataId = datasetId[index];
+				for (let index = 0; index < va_count; index++) {
+					var dataId = datasetId;
+					if (va_count > 1)
+						dataId = datasetId[index];
 
-				// a CSV websocket request
-				var request = {
-					type: "spectrum",
-					/*beam: zoom_shape,*/
-					intensity: intensity_mode,
-					frame_start: data_band_lo,
-					frame_end: data_band_hi,
-					ref_freq: RESTFRQ,
-					seq_id: sent_seq_id,
+					// a CSV websocket request
+					var request = {
+						type: "spectrum",
+						/*beam: zoom_shape,*/
+						intensity: intensity_mode,
+						frame_start: data_band_lo,
+						frame_end: data_band_hi,
+						ref_freq: RESTFRQ,
+						seq_id: sent_seq_id,
+					};
+
+					if (wsConn[index].readyState == 1)
+						wsConn[index].send(JSON.stringify(request));
+				}
+
+				var blob = new Blob(["channel, intensity"], { type: "data:text/csv;charset=utf-8" });
+
+				if (va_count == 1) {
+					saveAs(blob, datasetId + ".csv");
+				} else {
+					saveAs(blob, datasetId[0] + ".csv");
 				};
-
-				if (wsConn[index].readyState == 1)
-					wsConn[index].send(JSON.stringify(request));
-			}
-
-			var blob = new Blob(["channel, intensity"], { type: "data:text/csv;charset=utf-8" });
-
-			if (va_count == 1) {
-				saveAs(blob, datasetId + ".csv");
-			} else {
-				saveAs(blob, datasetId[0] + ".csv");
 			};
-		};
 
-		d3.select("#csv").moveToFront();
+			d3.select("#csv").moveToFront();
+		};
 	}
 
 	//if(fitsData.CTYPE3 == "FREQ")
