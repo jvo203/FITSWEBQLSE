@@ -2282,7 +2282,14 @@ function get_frame2freq_vel(fits::FITSDataSet, frame::Integer, ref_freq::Float64
 
     c = SpeedOfLightInVacuum / 1000.0 # [km/s]
 
-    if fits.has_velocity && fits.has_frequency
+    has_velocity = fits.has_velocity
+    has_frequency = fits.has_frequency
+
+    if ref_freq > 0.0
+        has_frequency = true
+    end
+
+    if has_velocity && has_frequency
         v =
             crval3 * fits.frame_multiplier +
             cdelt3 * fits.frame_multiplier * (frame - crpix3) # [m/s]
@@ -2296,11 +2303,14 @@ function get_frame2freq_vel(fits::FITSDataSet, frame::Integer, ref_freq::Float64
 
     val = crval3 * fits.frame_multiplier + cdelt3 * fits.frame_multiplier * (frame - crpix3)
 
-    if fits.has_frequency
+    if has_frequency
+        # convert frequency to velocity
+
         return (val / 1.0e9, Nothing) # [GHz]
     end
 
-    if fits.has_velocity
+    if has_velocity
+        # no frequency info, only velocity
         return (Nothing, val / 1000.0) # [km/s]
     end
 
