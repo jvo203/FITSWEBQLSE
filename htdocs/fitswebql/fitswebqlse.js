@@ -7492,11 +7492,30 @@ function setup_axes() {
 			document.getElementById('exportCSV').onclick = function () {
 				console.log("export spectrum to CSV.");
 
-				for (let index = 0; index < va_count; index++) {
-					var dataId = datasetId;
-					if (va_count > 1)
-						dataId = datasetId[index];
+				var c = 299792.458;//speed of light [km/s]
 
+				var deltaV = 0.0;
+
+				try {
+					deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
+				}
+				catch (e) {
+					console.log(e);
+					console.log("USER_DELTAV = ", USER_DELTAV);
+				}
+
+				//convert redshift z to V
+				var value = sessionStorage.getItem("redshift");
+
+				if (value == "z") {
+					var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
+
+					deltaV = tmp * c;
+				};
+
+				var checkbox = document.getElementById('restcheckbox');
+
+				for (let index = 0; index < va_count; index++) {
 					// a CSV websocket request
 					var request = {
 						type: "spectrum",
@@ -7505,6 +7524,8 @@ function setup_axes() {
 						frame_start: data_band_lo,
 						frame_end: data_band_hi,
 						ref_freq: RESTFRQ,
+						deltaV: 1000.0 * deltaV, // [m/s]
+						rest: checkbox.checked,
 						seq_id: sent_seq_id,
 					};
 

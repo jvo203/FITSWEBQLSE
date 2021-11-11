@@ -2305,8 +2305,9 @@ function get_frame2freq_vel(fits::FITSDataSet, frame::Integer, ref_freq::Float64
 
     if has_frequency
         # find the corresponding velocity
+        v = Einstein_relative_velocity(val, ref_freq)
 
-        return (val / 1.0e9, Nothing) # [GHz]
+        return (val / 1.0e9, v / 1000.0) # [GHz], [km/s]
     end
 
     if has_velocity
