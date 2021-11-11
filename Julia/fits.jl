@@ -488,7 +488,7 @@ function get_frequency_range(fits::FITSDataSet)
     cdelt3 = header["CDELT3"]
     crpix3 = header["CRPIX3"]
 
-    c = SpeedOfLightInVacuum
+    c = Float64(SpeedOfLightInVacuum) # [m/s]
     f1 = f2 = NaN
 
     if fits.has_velocity
@@ -2138,13 +2138,13 @@ function get_freq2vel_bounds(
     cdelt3 = header["CDELT3"]
     crpix3 = header["CRPIX3"]
 
-    c = SpeedOfLightInVacuum
+    c = Float64(SpeedOfLightInVacuum) # [m/s]
 
     fRatio = frame_start / ref_freq
-    v1 = (1.0 - fRatio * fRatio) / (1.0 + fRatio * fRatio) * c
+    v1 = (1.0 - fRatio^2) / (1.0 + fRatio^2) * c
 
     fRatio = frame_end / ref_freq
-    v2 = (1.0 - fRatio * fRatio) / (1.0 + fRatio * fRatio) * c
+    v2 = (1.0 - fRatio^2) / (1.0 + fRatio^2) * c
 
     x1 = crpix3 + (v1 - crval3 * fits.frame_multiplier) / (cdelt3 * fits.frame_multiplier)
     x2 = crpix3 + (v2 - crval3 * fits.frame_multiplier) / (cdelt3 * fits.frame_multiplier)
@@ -2272,16 +2272,14 @@ function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Flo
 
 end
 
-function Einstein_velocity_addition(v1, v2)
-    c = SpeedOfLightInVacuum # [m/s]
+function Einstein_velocity_addition(v1::Float64, v2::Float64)
+    c = Float64(SpeedOfLightInVacuum) # [m/s]
 
     return (v1 + v2) / (1.0 + v1 * v2 / c^2)
 end
 
-function Einstein_relative_velocity(f, f0, deltaV)
-    println("f: $f, f0: $f0")
-
-    c = SpeedOfLightInVacuum # [m/s]
+function Einstein_relative_velocity(f::Float64, f0::Float64, deltaV::Float64)
+    c = Float64(SpeedOfLightInVacuum) # [m/s]
 
     fRatio = f / f0
     v = (1.0 - fRatio^2) / (1.0 + fRatio^2) * c
@@ -2302,7 +2300,7 @@ function get_frame2freq_vel(
     cdelt3 = header["CDELT3"]
     crpix3 = header["CRPIX3"]
 
-    c = SpeedOfLightInVacuum / 1000.0 # [km/s]
+    c = Float64(SpeedOfLightInVacuum) / 1000.0 # [km/s]
 
     has_velocity = fits.has_velocity
     has_frequency = fits.has_frequency
