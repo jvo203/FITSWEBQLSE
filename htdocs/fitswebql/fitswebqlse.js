@@ -7198,12 +7198,10 @@ function getMinMaxVel(fitsData) {
 			vMax = data_band_hi / 1000;//[km/s]
 		}
 		else {
-			var c = 299792.458;//speed of light [km/s]
-
-			var vMin = fitsData.CRVAL3 + fitsData.CDELT3 * (1 - fitsData.CRPIX3);
+			vMin = fitsData.CRVAL3 + fitsData.CDELT3 * (1 - fitsData.CRPIX3);
 			vMin /= 1000;//[km/s]
 
-			var vMax = fitsData.CRVAL3 + fitsData.CDELT3 * (fitsData.depth - fitsData.CRPIX3);
+			vMax = fitsData.CRVAL3 + fitsData.CDELT3 * (fitsData.depth - fitsData.CRPIX3);
 			vMax /= 1000;//[km/s]
 		}
 	}
