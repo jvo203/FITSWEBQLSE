@@ -2298,13 +2298,13 @@ function get_frame2freq_vel(fits::FITSDataSet, frame::Integer, ref_freq::Float64
         f = ref_freq * sqrt((1.0 - v / c) / (1 + v / c)) # [Hz]
         f /= 1.0e9 # [GHz]
 
-        return (f, v)
+        return (f, v) # [GHz], [km/s]
     end
 
     val = crval3 * fits.frame_multiplier + cdelt3 * fits.frame_multiplier * (frame - crpix3)
 
     if has_frequency
-        # convert frequency to velocity
+        # find the corresponding velocity
 
         return (val / 1.0e9, Nothing) # [GHz]
     end
