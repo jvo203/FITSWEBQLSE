@@ -2877,10 +2877,11 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     csv = IOBuffer()
 
-    # display(spectrum)
-
     for (idx, val) in enumerate(spectrum)
         frame = first_frame + (idx - 1)
+
+        # convert frame to frequency and/or velocity
+
         println("$idx\t$frame\t$val")
     end
 
