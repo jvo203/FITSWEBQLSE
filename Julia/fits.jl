@@ -2272,7 +2272,27 @@ function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Flo
 
 end
 
-function get_frame2freq_vel(fits::FITSDataSet, frame::Integer, ref_freq::Float64)
+function Einstein_velocity_addition(v1::Float64, v2::Float64)
+    c = SpeedOfLightInVacuum # [m/s]
+
+    return (v1 + v2) / (1.0 + v1 * v2 / (c * c))
+end
+
+function Einstein_relative_velocity(f::Float64, f0::Float64, deltaV::Float64)
+    c = SpeedOfLightInVacuum # [m/s]
+
+    fRatio = f / f0
+    v = (1.0 - fRatio * fRatio) / (1.0 + fRatio * fRatio) * c
+
+    return Einstein_velocity_addition(v, deltaV)
+end
+
+function get_frame2freq_vel(
+    fits::FITSDataSet,
+    frame::Integer,
+    ref_freq::Float64,
+    deltaV::Float64,
+)
     header = fits.header
 
     # any errors will be propagated back and handled higher up
@@ -2305,7 +2325,7 @@ function get_frame2freq_vel(fits::FITSDataSet, frame::Integer, ref_freq::Float64
 
     if has_frequency
         # find the corresponding velocity
-        v = Einstein_relative_velocity(val, ref_freq)
+        v = Einstein_relative_velocity(val, ref_freq, deltaV)
 
         return (val / 1.0e9, v / 1000.0) # [GHz], [km/s]
     end
@@ -2827,6 +2847,9 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     frame_start = Float64(req["frame_start"])
     frame_end = Float64(req["frame_end"])
 
+    deltaV = Float64(req["deltaV"])
+    rest = req["rest"]
+
     ref_freq = 0.0 # by default ref_freq is missing
     try
         ref_freq = Float64(req["ref_freq"])
@@ -2927,7 +2950,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         frame = first_frame + (idx - 1)
 
         # convert frame to frequency and/or velocity
-        f, v = get_frame2freq_vel(fits, frame, ref_freq)
+        f, v = get_frame2freq_vel(fits, frame, ref_freq, deltaV)
 
         println(
             "$idx\tframe: $frame\tfrequency: $f GHz\tvelocity: $v km/s\tintensity: $val",
