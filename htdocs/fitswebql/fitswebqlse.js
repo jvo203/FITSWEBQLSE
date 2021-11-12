@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-11.1";
+	return "JS2021-11-12.0";
 }
 
 const wasm_supported = (() => {
@@ -7514,6 +7514,13 @@ function setup_axes() {
 				};
 
 				var checkbox = document.getElementById('restcheckbox');
+				var rest = false;
+
+				try {
+					rest = checkbox.checked;
+				} catch (e) {
+					console.log(e);
+				}
 
 				for (let index = 0; index < va_count; index++) {
 					// a CSV websocket request
@@ -7525,7 +7532,7 @@ function setup_axes() {
 						frame_end: data_band_hi,
 						ref_freq: RESTFRQ,
 						deltaV: 1000.0 * deltaV, // [m/s]
-						rest: checkbox.checked,
+						rest: rest,
 						seq_id: sent_seq_id,
 					};
 
