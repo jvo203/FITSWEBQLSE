@@ -2955,7 +2955,28 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         # convert frame to frequency and/or velocity
         f, v = get_frame2freq_vel(fits, frame, ref_freq, deltaV)
 
-        println("$idx\tframe: $frame\tf: $f GHz\tv: $v km/s\tint.: $val")
+        println("$idx\tchannel: $frame\tf: $f GHz\tv: $v km/s\tint.: $val\n")
+
+        if f != Nothing && v != Nothing
+            if !has_header
+                write(csv, "\"channel\",\"frequency [GHz]\",\"velocity [km/s]\",\"intensity\"")
+                has_header = true
+            end
+
+            write(csv, "$frame,$f,$v\n")
+
+            continue
+        end
+
+        if v != Nothing
+
+            continue
+        end
+
+        if f != Nothing
+
+            continue
+        end
     end
 
     return csv

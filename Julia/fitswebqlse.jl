@@ -1545,6 +1545,8 @@ function ws_coroutine(ws, ids)
 
                 @time csv = getSpectrum(fits_object, msg)
 
+                println(take!(csv))
+
             end
 
             if msg["type"] == "realtime_image_spectrum"
