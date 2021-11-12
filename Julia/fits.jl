@@ -2999,17 +2999,29 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 has_header = true
             end
 
-            write(csv, "$frame,$f,$v\n")
+            write(csv, "$frame,$f,$v,$val\n")
 
             continue
         end
 
         if v != Nothing
+            if !has_header
+                write(csv, "\"channel\",\"velocity [km/s]\",\"$intensity_column\"\n")
+                has_header = true
+            end
+
+            write(csv, "$frame,$v,$val\n")
 
             continue
         end
 
         if f != Nothing
+            if !has_header
+                write(csv, "\"channel\",\"$frequency_column\",\"$intensity_column\"\n")
+                has_header = true
+            end
+
+            write(csv, "$frame,$f,$val\n")
 
             continue
         end
