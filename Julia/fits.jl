@@ -2947,6 +2947,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     wait(results_task)
 
     csv = IOBuffer()
+    has_header = false
 
     for (idx, val) in enumerate(spectrum)
         frame = first_frame + (idx - 1)
@@ -2954,9 +2955,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         # convert frame to frequency and/or velocity
         f, v = get_frame2freq_vel(fits, frame, ref_freq, deltaV)
 
-        println(
-            "$idx\tframe: $frame\tfrequency: $f GHz\tvelocity: $v km/s\tintensity: $val",
-        )
+        println("$idx\tframe: $frame\tf: $f GHz\tv: $v km/s\tint.: $val")
     end
 
     return csv
