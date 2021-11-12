@@ -9,7 +9,7 @@ using Serialization;
 using Statistics;
 using Images, ImageTransformations, Interpolations;
 using ZfpCompression;
-using PhysicalConstants.CODATA2018;
+using PhysicalConstants.CODATA2018: c_0;
 using ThreadsX;
 
 const MADV_WILLNEED = 3
@@ -488,7 +488,7 @@ function get_frequency_range(fits::FITSDataSet)
     cdelt3 = header["CDELT3"]
     crpix3 = header["CRPIX3"]
 
-    c = Float64(SpeedOfLightInVacuum) # [m/s]
+    c = c_0.val # [m/s]
     f1 = f2 = NaN
 
     if fits.has_velocity
@@ -2138,7 +2138,7 @@ function get_freq2vel_bounds(
     cdelt3 = header["CDELT3"]
     crpix3 = header["CRPIX3"]
 
-    c = Float64(SpeedOfLightInVacuum) # [m/s]
+    c = c_0.val # [m/s]
 
     fRatio = frame_start / ref_freq
     v1 = (1.0 - fRatio^2) / (1.0 + fRatio^2) * c
@@ -2273,13 +2273,13 @@ function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Flo
 end
 
 function Einstein_velocity_addition(v1::Float64, v2::Float64)
-    c = Float64(SpeedOfLightInVacuum) # [m/s]
+    c = c_0.val # [m/s]
 
     return (v1 + v2) / (1.0 + v1 * v2 / c^2)
 end
 
 function Einstein_relative_velocity(f::Float64, f0::Float64, deltaV::Float64)
-    c = Float64(SpeedOfLightInVacuum) # [m/s]
+    c = c_0.val # [m/s]
 
     fRatio = f / f0
     v = (1.0 - fRatio^2) / (1.0 + fRatio^2) * c
@@ -2300,7 +2300,7 @@ function get_frame2freq_vel(
     cdelt3 = header["CDELT3"]
     crpix3 = header["CRPIX3"]
 
-    c = Float64(SpeedOfLightInVacuum) / 1000.0 # [km/s]
+    c = c_0.val / 1000.0 # [km/s]
 
     has_velocity = fits.has_velocity
     has_frequency = fits.has_frequency
