@@ -1545,7 +1545,7 @@ function ws_coroutine(ws, ids)
 
                 @time csv = getSpectrum(fits_object, msg)
 
-                println(take!(csv))
+                println(String(take!(csv)))
 
             end
 
