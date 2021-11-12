@@ -2835,6 +2835,16 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         error("getSpectrum() only supports 3D cubes.")
     end
 
+    header = fits.header
+
+    local bunit
+
+    try
+        bunit = strip(header["BUNIT"])
+    catch e
+        bunit = ""
+    end
+
     # use the entire FITS plane
     x1 = 1
     x2 = fits.width
@@ -2947,7 +2957,24 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     wait(results_task)
 
     csv = IOBuffer()
+
     has_header = false
+
+    intensity_column = "intensity [" * bunit
+
+    if intensity == MEAN
+        intensity_column = "mean " * intensity_column
+    end
+
+    if intensity == INTEGRATED
+        intensity_column = "integrated " * intensity_column
+
+        if fits.has_velocity
+            intensity_column = intensity_column * "•km/s"
+        end
+    end
+
+    intensity_column = intensity_column * "]"
 
     for (idx, val) in enumerate(spectrum)
         frame = first_frame + (idx - 1)
@@ -2961,7 +2988,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"frequency [GHz]\",\"velocity [km/s]\",\"intensity\"\n",
+                    "\"channel\",\"frequency [GHz]\",\"velocity [km/s]\",\"$intensity_column\"\n",
                 )
                 has_header = true
             end
