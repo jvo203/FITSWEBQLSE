@@ -2976,6 +2976,12 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     intensity_column = intensity_column * "]"
 
+    frequency_column = "frequency [GHz]"
+
+    if rest
+        frequency_column = "rest " * frequency_column
+    end
+
     for (idx, val) in enumerate(spectrum)
         frame = first_frame + (idx - 1)
 
@@ -2988,7 +2994,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"frequency [GHz]\",\"velocity [km/s]\",\"$intensity_column\"\n",
+                    "\"channel\",\"$frequency_column\",\"velocity [km/s]\",\"$intensity_column\"\n",
                 )
                 has_header = true
             end
