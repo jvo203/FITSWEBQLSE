@@ -2278,20 +2278,31 @@ function Einstein_velocity_addition(v1::Float64, v2::Float64)
     return (v1 + v2) / (1.0 + v1 * v2 / c^2)
 end
 
-function Einstein_relative_velocity(f::Float64, f0::Float64, deltaV::Float64)
+function Einstein_relative_velocity(f::Float64, f0::Float64, Δv::Float64)
     c = c_0.val # [m/s]
 
     fRatio = f / f0
     v = (1.0 - fRatio^2) / (1.0 + fRatio^2) * c
 
-    return Einstein_velocity_addition(v, deltaV)
+    return Einstein_velocity_addition(v, Δv)
+end
+
+function relativistic_rest_frequency(f::Float64, Δv::Float64)
+    c = c_0.val # [m/s]
+
+    β = Δv / c
+
+    tmp = sqrt((1.0 + β) / (1.0 - β))
+
+    return f * tmp
 end
 
 function get_frame2freq_vel(
     fits::FITSDataSet,
     frame::Integer,
     ref_freq::Float64,
-    deltaV::Float64,
+    Δv::Float64,
+    rest::Bool,
 )
     header = fits.header
 
@@ -2318,6 +2329,10 @@ function get_frame2freq_vel(
         f = ref_freq * sqrt((1.0 - v / c) / (1 + v / c)) # [Hz]
         f /= 1.0e9 # [GHz]
 
+        if rest
+            f = relativistic_rest_frequency(f, Δv)
+        end
+
         return (f, v) # [GHz], [km/s]
     end
 
@@ -2325,7 +2340,11 @@ function get_frame2freq_vel(
 
     if has_frequency
         # find the corresponding velocity
-        v = Einstein_relative_velocity(val, ref_freq, deltaV)
+        v = Einstein_relative_velocity(val, ref_freq, Δv)
+
+        if rest
+            val = relativistic_rest_frequency(val, Δv)
+        end
 
         return (val / 1.0e9, v / 1000.0) # [GHz], [km/s]
     end
@@ -2857,10 +2876,10 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     frame_start = Float64(req["frame_start"])
     frame_end = Float64(req["frame_end"])
 
-    deltaV = Float64(req["deltaV"])
+    Δv = Float64(req["deltaV"])
     rest = req["rest"]
 
-    println("deltaV: $deltaV, rest: $rest")
+    println("Δv: $Δv, rest: $rest")
 
     ref_freq = 0.0 # by default ref_freq is missing
     try
@@ -2986,7 +3005,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         frame = first_frame + (idx - 1)
 
         # convert frame to frequency and/or velocity
-        f, v = get_frame2freq_vel(fits, frame, ref_freq, deltaV)
+        f, v = get_frame2freq_vel(fits, frame, ref_freq, Δv, rest)
 
         println("$idx\tchannel: $frame\tf: $f GHz\tv: $v km/s\tint.: $val")
 
