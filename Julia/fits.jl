@@ -2324,7 +2324,9 @@ function get_frame2freq_vel(
         v =
             crval3 * fits.frame_multiplier +
             cdelt3 * fits.frame_multiplier * (frame - crpix3) # [m/s]
-        v /= 1000.0 # [km/s]
+        v /= 1000.0 # [km/s]        
+
+        # what about Δv ???
 
         f = ref_freq * sqrt((1.0 - v / c) / (1 + v / c)) # [Hz]
         f /= 1.0e9 # [GHz]
@@ -2355,6 +2357,9 @@ function get_frame2freq_vel(
 
     if has_velocity
         # no frequency info, only velocity
+
+        # what about Δv ???
+
         return (Nothing, val / 1000.0) # [km/s]
     end
 
