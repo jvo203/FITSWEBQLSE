@@ -7477,9 +7477,12 @@ function setup_axes() {
 			if (theme == 'bright')
 				colour_style = "csv-light";
 
+			var x1 = range.xMax + 0.75 * emFontSize;
+			var x2 = (range.xMax + width) / 2.0 - 0.5 * emFontSize;
+
 			front_svg.append("foreignObject")
 				.attr("id", "foreignCSV")
-				.attr("x", ((range.xMax + width) / 2.0 - 0.5 * emFontSize))
+				.attr("x", Math.min(x1, x2))
 				.attr("y", (height - 2.0 * emFontSize))
 				.attr("width", 2 * emFontSize)
 				.attr("height", 2 * emFontSize)
