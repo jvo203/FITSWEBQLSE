@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-16.0";
+	return "JS2021-11-16.1";
 }
 
 const wasm_supported = (() => {
@@ -4725,7 +4725,7 @@ function display_dataset_info() {
 		var elem = document.getElementById('frequencyInput');
 		elem.onblur = submit_corrections;
 		elem.onmouseleave = submit_corrections;
-		elem.onkeypress = function (e) {
+		elem.onkeyup = function (e) {
 			var event = e || window.event;
 			var charCode = event.which || event.keyCode;
 
@@ -4805,7 +4805,7 @@ function display_dataset_info() {
 		var m = document.getElementById('velocityInput');
 		m.onblur = submit_delta_v;
 		m.onmouseleave = submit_delta_v;
-		m.onkeypress = function (e) {
+		m.onkeyup = function (e) {
 			var event = e || window.event;
 			var charCode = event.which || event.keyCode;
 
@@ -5090,7 +5090,7 @@ function submit_delta_v() {
 		var m = document.getElementById('velocityInput');
 		m.onblur = submit_delta_v;
 		m.onmouseleave = submit_delta_v;
-		m.onkeypress = function (e) {
+		m.onkeyup = function (e) {
 			var event = e || window.event;
 			var charCode = event.which || event.keyCode;
 
@@ -5141,7 +5141,7 @@ function submit_corrections() {
 		var elem = document.getElementById('frequencyInput');
 		elem.onblur = submit_corrections;
 		elem.onmouseleave = submit_corrections;
-		elem.onkeypress = function (e) {
+		elem.onkeyup = function (e) {
 			var event = e || window.event;
 			var charCode = event.which || event.keyCode;
 
@@ -6581,7 +6581,7 @@ function display_preferences(index) {
 	var elem = document.getElementById('contour_lines');
 	elem.onblur = validate_contour_lines;
 	elem.onmouseleave = validate_contour_lines;
-	elem.onkeypress = function (e) {
+	elem.onkeyup = function (e) {
 		var event = e || window.event;
 		var charCode = event.which || event.keyCode;
 
