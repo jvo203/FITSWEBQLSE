@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-12.0";
+	return "JS2021-11-16.0";
 }
 
 const wasm_supported = (() => {
@@ -7479,7 +7479,7 @@ function setup_axes() {
 
 			front_svg.append("foreignObject")
 				.attr("id", "foreignCSV")
-				.attr("x", (range.xMax + 0.75 * emFontSize))
+				.attr("x", ((range.xMax + width) / 2.0 - 0.5 * emFontSize))
 				.attr("y", (height - 2.0 * emFontSize))
 				.attr("width", 2 * emFontSize)
 				.attr("height", 2 * emFontSize)
