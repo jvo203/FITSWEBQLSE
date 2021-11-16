@@ -274,7 +274,7 @@ svg {
     z-index: 90; /* Sit on top = 90, below = 0 */
     width: 40%; /* 40%; Full width */
     height: 18em; /* 30%Full height */
-    /*min-height: 4.0em;*//*3.75em*/
+    /*min-height: 4.0em;*/ /*3.75em*/
     overflow: hidden; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
@@ -355,7 +355,7 @@ opacity: 0.75;
 
 .csv-dark {
     font: 2.0em Inconsolata;/*sans-serif;*/
-    color: rgba(255,204,0,1.0);// Amber
+    color: rgba(255,204,0,1.0);/* Amber */
     opacity: 1 ;
 }
 
