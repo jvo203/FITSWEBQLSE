@@ -2328,12 +2328,12 @@ function get_frame2freq_vel(
 
         f = ref_freq * sqrt((1.0 - v / c) / (1 + v / c)) # [Hz]        
 
-        # find the corresponding velocity
-        v = Einstein_relative_velocity(f, ref_freq, Δv)
-
         if rest
             f = relativistic_rest_frequency(f, Δv)
         end
+
+        # find the corresponding velocity
+        v = Einstein_relative_velocity(f, ref_freq, Δv)
 
         return (f / 1.0e9, v / 1000.0) # [GHz], [km/s]
     end
