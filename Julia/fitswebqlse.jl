@@ -1543,10 +1543,32 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                @time csv = getSpectrum(fits_object, msg)
+                @time csv = take!(getSpectrum(fits_object, msg))
 
-                println(String(take!(csv)))
+                # println(String(csv))
 
+                # LZ4-compress csv
+                compressed_csv = lz4_hc_compress(csv)
+                println(
+                    "csv length: ",
+                    length(csv),
+                    ", compressed csv length: ",
+                    length(compressed_csv),
+                )
+
+                # send a WebSockets response
+                resp = IOBuffer()
+
+                # the header                    
+                write(resp, Float32(msg["timestamp"]))
+                write(resp, Int32(0))
+                write(resp, Int32(6)) # 6 - spectrum csv
+
+                # the body
+                write(resp, Int32(length(csv))) # original length
+                write(resp, compressed_csv)
+
+                put!(outgoing, resp)
             end
 
             if msg["type"] == "realtime_image_spectrum"

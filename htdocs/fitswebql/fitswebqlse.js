@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-16.1";
+	return "JS2021-11-20.0";
 }
 
 const wasm_supported = (() => {
@@ -7537,6 +7537,7 @@ function setup_axes() {
 						deltaV: 1000.0 * deltaV, // [m/s]
 						rest: rest,
 						seq_id: sent_seq_id,
+						timestamp: performance.now(),
 					};
 
 					if (wsConn[index].readyState == 1)
