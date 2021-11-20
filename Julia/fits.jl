@@ -2311,8 +2311,6 @@ function get_frame2freq_vel(
     cdelt3 = header["CDELT3"]
     crpix3 = header["CRPIX3"]
 
-    c = c_0.val / 1000.0 # [km/s]
-
     has_velocity = fits.has_velocity
     has_frequency = fits.has_frequency
 
@@ -2321,6 +2319,8 @@ function get_frame2freq_vel(
     end
 
     if has_velocity && has_frequency
+        c = c_0.val # [m/s]
+
         # go from v to f then apply a Δv correction to v
         v =
             crval3 * fits.frame_multiplier +
