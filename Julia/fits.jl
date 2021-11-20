@@ -2321,15 +2321,17 @@ function get_frame2freq_vel(
     end
 
     if has_velocity && has_frequency
+        # go from v to f then apply a Δv correction to v
         v =
             crval3 * fits.frame_multiplier +
             cdelt3 * fits.frame_multiplier * (frame - crpix3) # [m/s]
         v /= 1000.0 # [km/s]        
 
-        # what about Δv ???
-
         f = ref_freq * sqrt((1.0 - v / c) / (1 + v / c)) # [Hz]
         f /= 1.0e9 # [GHz]
+
+        # find the corresponding velocity
+        v = Einstein_relative_velocity(f, ref_freq, Δv)
 
         if rest
             f = relativistic_rest_frequency(f, Δv)
