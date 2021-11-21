@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-20.0";
+	return "JS2021-11-21.3";
 }
 
 const wasm_supported = (() => {
@@ -2492,14 +2492,14 @@ function poll_progress(datasetId, index) {
 	xmlhttp.send();
 }
 
-function open_websocket_connection(datasetId, index) {
+function open_websocket_connection(_datasetId, index) {
 	if ("WebSocket" in window) {
 		//alert("WebSocket is supported by your Browser!");
 
 		// Let us open a web socket
 		var loc = window.location, ws_uri;
 
-		ws_uri = WS_SOCKET + loc.hostname + ':' + WS_PORT + ROOT_PATH + "websocket/" + encodeURIComponent(datasetId);
+		ws_uri = WS_SOCKET + loc.hostname + ':' + WS_PORT + ROOT_PATH + "websocket/" + encodeURIComponent(_datasetId);
 
 		//d3.select("#welcome").append("p").text("ws_uri: " + ws_uri) ;
 
@@ -2947,6 +2947,37 @@ function open_websocket_connection(datasetId, index) {
 						}
 
 						return;
+					}
+
+					//CSV spectrum
+					if (type == 6) {
+						hide_cursor();
+						hide_hourglass();
+
+						var csv_len = dv.getUint32(12, endianness);
+						var csv_frame = new Uint8Array(received_msg, 16);
+
+						// decompress CSV
+						var LZ4 = require('lz4');
+
+						var uncompressed = new Uint8Array(csv_len);
+						uncompressedSize = LZ4.decodeBlock(csv_frame, uncompressed);
+						uncompressed = uncompressed.slice(0, uncompressedSize);
+
+						try {
+							csv = String.fromCharCode.apply(null, uncompressed);
+
+							var blob = new Blob([csv], { type: "data:text/csv;charset=utf-8" });
+
+							if (va_count == 1) {
+								saveAs(blob, datasetId + ".csv");
+							} else {
+								saveAs(blob, datasetId[index - 1] + ".csv");
+							};
+						}
+						catch (err) {
+							console.error(err);
+						};
 					}
 				}
 
@@ -7525,6 +7556,8 @@ function setup_axes() {
 					console.log(e);
 				}
 
+				display_hourglass();
+
 				for (let index = 0; index < va_count; index++) {
 					// a CSV websocket request
 					var request = {
@@ -7543,14 +7576,6 @@ function setup_axes() {
 					if (wsConn[index].readyState == 1)
 						wsConn[index].send(JSON.stringify(request));
 				}
-
-				var blob = new Blob(["channel, intensity"], { type: "data:text/csv;charset=utf-8" });
-
-				if (va_count == 1) {
-					saveAs(blob, datasetId + ".csv");
-				} else {
-					saveAs(blob, datasetId[0] + ".csv");
-				};
 			};
 
 			d3.select("#csv").moveToFront();
@@ -12403,7 +12428,7 @@ function show_welcome() {
 	footer.append("p")
 		//.style("color", "#a94442")
 		.attr("align", "left")
-		.html('<label style="cursor: pointer"><input type="checkbox" value="" class="control-label" style="cursor: pointer" id="donotshowcheckbox" onchange="javascript:donotshow();">&nbsp;don\'t show this dialogue again</label>' + '&nbsp;&nbsp;&nbsp;<a style="color:red" href="' + href + '">page loading problems? </a>' + '<button type="submit" class="btn btn-danger btn-default pull-right" data-dismiss="modal"><span class="fas fa-times"></span> Close</button>');
+		.html('<label style="cursor: pointer"><input type="checkbox" value="" class="control-label" style="cursor: pointer" id="donotshowcheckbox" onchange="javascript:donotshow();">&nbsp;do not show this dialogue again</label>' + '&nbsp;&nbsp;&nbsp;<a style="color:red" href="' + href + '">page loading problems? </a>' + '<button type="submit" class="btn btn-danger btn-default pull-right" data-dismiss="modal"><span class="fas fa-times"></span> Close</button>');
 
 	$('#welcomeScreen').modal('show');
 }
