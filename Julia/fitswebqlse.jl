@@ -1565,7 +1565,7 @@ function ws_coroutine(ws, ids)
                 write(resp, Int32(6)) # 6 - spectrum csv
 
                 # the body
-                write(resp, Int32(length(csv))) # original length
+                write(resp, UInt32(length(csv))) # pass the original length
                 write(resp, compressed_csv)
 
                 put!(outgoing, resp)
