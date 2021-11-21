@@ -2978,6 +2978,8 @@ function open_websocket_connection(_datasetId, index) {
 						catch (err) {
 							console.error(err);
 						};
+
+						return;
 					}
 				}
 
