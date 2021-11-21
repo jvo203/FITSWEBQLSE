@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-21.4";
+	return "JS2021-11-21.5";
 }
 
 const wasm_supported = (() => {
@@ -7262,6 +7262,62 @@ function composite_data_min_max() {
 	}
 }
 
+function setup_csv_export() {
+	document.getElementById('exportCSV').onclick = function () {
+		console.log("export spectrum to CSV.");
+
+		var c = 299792.458;//speed of light [km/s]
+
+		var deltaV = 0.0;
+
+		try {
+			deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
+		}
+		catch (e) {
+			console.log(e);
+			console.log("USER_DELTAV = ", USER_DELTAV);
+		}
+
+		//convert redshift z to V
+		var value = sessionStorage.getItem("redshift");
+
+		if (value == "z") {
+			var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
+
+			deltaV = tmp * c;
+		};
+
+		var checkbox = document.getElementById('restcheckbox');
+		var rest = false;
+
+		try {
+			rest = checkbox.checked;
+		} catch (e) {
+			console.log(e);
+		}
+
+		display_hourglass();
+
+		for (let index = 0; index < va_count; index++) {
+			// a CSV websocket request
+			var request = {
+				type: "spectrum",
+				intensity: intensity_mode,
+				frame_start: data_band_lo,
+				frame_end: data_band_hi,
+				ref_freq: RESTFRQ,
+				deltaV: 1000.0 * deltaV, // [m/s]
+				rest: rest,
+				seq_id: sent_seq_id,
+				timestamp: performance.now(),
+			};
+
+			if (wsConn[index].readyState == 1)
+				wsConn[index].send(JSON.stringify(request));
+		}
+	};
+}
+
 function setup_axes() {
 	let fitsData = fitsContainer[va_count - 1];
 
@@ -7525,60 +7581,7 @@ function setup_axes() {
 				.attr("pointer-events", "auto")
 				.html(strCSV);
 
-			document.getElementById('exportCSV').onclick = function () {
-				console.log("export spectrum to CSV.");
-
-				var c = 299792.458;//speed of light [km/s]
-
-				var deltaV = 0.0;
-
-				try {
-					deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
-				}
-				catch (e) {
-					console.log(e);
-					console.log("USER_DELTAV = ", USER_DELTAV);
-				}
-
-				//convert redshift z to V
-				var value = sessionStorage.getItem("redshift");
-
-				if (value == "z") {
-					var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
-
-					deltaV = tmp * c;
-				};
-
-				var checkbox = document.getElementById('restcheckbox');
-				var rest = false;
-
-				try {
-					rest = checkbox.checked;
-				} catch (e) {
-					console.log(e);
-				}
-
-				display_hourglass();
-
-				for (let index = 0; index < va_count; index++) {
-					// a CSV websocket request
-					var request = {
-						type: "spectrum",
-						/*beam: zoom_shape,*/
-						intensity: intensity_mode,
-						frame_start: data_band_lo,
-						frame_end: data_band_hi,
-						ref_freq: RESTFRQ,
-						deltaV: 1000.0 * deltaV, // [m/s]
-						rest: rest,
-						seq_id: sent_seq_id,
-						timestamp: performance.now(),
-					};
-
-					if (wsConn[index].readyState == 1)
-						wsConn[index].send(JSON.stringify(request));
-				}
-			};
+			setup_csv_export();
 
 			d3.select("#csv").moveToFront();
 		};
