@@ -4634,9 +4634,9 @@ function display_dataset_info() {
 		.attr("font-size", "1.5em")
 		.attr("text-anchor", "end")
 		.attr("stroke", "none")
-		.text(raText)
-		.append("svg:title")
-		.text(fitsData.CTYPE1.trim());
+		.text(raText);
+	/*.append("svg:title")
+	.text(fitsData.CTYPE1.trim());*/
 
 	let decText = 'DEC N/A';
 
@@ -4658,9 +4658,9 @@ function display_dataset_info() {
 		.attr("font-size", "1.5em")
 		.attr("text-anchor", "end")
 		.attr("stroke", "none")
-		.text(decText)
-		.append("svg:title")
-		.text(fitsData.CTYPE2.trim());
+		.text(decText);
+	/*.append("svg:title")
+	.text(fitsData.CTYPE2.trim());*/
 
 	group.append("text")
 		.attr("id", "pixel")
@@ -9295,6 +9295,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 				if (fitsData.CTYPE2.indexOf("ELAT") > -1)
 					decText = 'β: ' + RadiansPrintDMS(xradec[1]);
 
+				console.log(raText, decText);
 				d3.select("#ra").text(raText);
 				d3.select("#dec").text(decText);
 			}
