@@ -2858,6 +2858,15 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
 end
 
+function split_wcs(coord)
+    radec = split(coord, ":")
+
+    key = radec[1]
+    value = replace(radec[2], "\\" => "")
+
+    return (strip(key), strip(value))
+end
+
 function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     if fits.depth < 1
         error("getSpectrum() only supports 3D cubes.")
@@ -2869,7 +2878,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     try
         bunit = strip(header["BUNIT"])
-    catch e
+    catch _
         bunit = ""
     end
 
@@ -2893,7 +2902,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     ref_freq = 0.0 # by default ref_freq is missing
     try
         ref_freq = Float64(req["ref_freq"])
-    catch e
+    catch _
     end
 
     first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
@@ -3041,34 +3050,40 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"$frequency_column\",\"velocity [km/s]\",\"$intensity_column\"\n",
+                    "\"channel\",\"$frequency_column\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\"\n",
                 )
                 has_header = true
             end
 
-            write(csv, "$frame,$f,$v,$val\n")
+            write(csv, "$frame,$f,$v,$val,$ra_value,$dec_value\n")
 
             continue
         end
 
         if v != Nothing
             if !has_header
-                write(csv, "\"channel\",\"velocity [km/s]\",\"$intensity_column\"\n")
+                write(
+                    csv,
+                    "\"channel\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\"\n",
+                )
                 has_header = true
             end
 
-            write(csv, "$frame,$v,$val\n")
+            write(csv, "$frame,$v,$val,$ra_value,$dec_value\n")
 
             continue
         end
 
         if f != Nothing
             if !has_header
-                write(csv, "\"channel\",\"$frequency_column\",\"$intensity_column\"\n")
+                write(
+                    csv,
+                    "\"channel\",\"$frequency_column\",\"$intensity_column\",\"$ra_column\",\"$dec_column\"\n",
+                )
                 has_header = true
             end
 
-            write(csv, "$frame,$f,$val\n")
+            write(csv, "$frame,$f,$val,$ra_value,$dec_value\n")
 
             continue
         end
