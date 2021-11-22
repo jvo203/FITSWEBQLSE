@@ -1544,8 +1544,7 @@ function ws_coroutine(ws, ids)
                 end
 
                 @time csv = take!(getSpectrum(fits_object, msg))
-
-                # println(String(csv))
+                println(String(csv))
 
                 # LZ4-compress csv
                 compressed_csv = lz4_hc_compress(csv)
