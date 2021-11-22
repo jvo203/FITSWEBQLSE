@@ -2965,7 +2965,7 @@ function open_websocket_connection(_datasetId, index) {
 						uncompressed = uncompressed.slice(0, uncompressedSize);
 
 						try {
-							csv = String.fromCharCode.apply(null, uncompressed);
+							var csv = new TextDecoder().decode(uncompressed);
 
 							console.log(csv);
 
@@ -10626,7 +10626,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							uncompressed = uncompressed.slice(0, uncompressedSize);
 
 							try {
-								fitsHeader = String.fromCharCode.apply(null, uncompressed);
+								fitsHeader = new TextDecoder().decode(uncompressed);
 							}
 							catch (err) {
 								fitsHeader = '';
@@ -10648,7 +10648,7 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 							var fitsData;
 
 							try {
-								fitsData = String.fromCharCode.apply(null, uncompressed);
+								fitsData = new TextDecoder().decode(uncompressed);
 							}
 							catch (err) {
 								fitsData = '';
