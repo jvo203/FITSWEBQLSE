@@ -3010,6 +3010,11 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         frequency_column = "rest " * frequency_column
     end
 
+    ra_column = "beam ra"
+    dec_column = "beam dec"
+    ra_value = "N/A"
+    dec_value = "N/A"
+
     for (idx, val) in enumerate(spectrum)
         frame = first_frame + (idx - 1)
 
