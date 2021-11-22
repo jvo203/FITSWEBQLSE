@@ -2967,9 +2967,8 @@ function open_websocket_connection(_datasetId, index) {
 						try {
 							var csv = new TextDecoder().decode(uncompressed);
 
-							console.log(csv);
-
-							var blob = new Blob([csv], { type: "data:text/csv;charset=utf-8" });
+							// prepend the UTF-8 Byte Order Mark (BOM) 0xEF,0xBB,0xBF
+							var blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: "data:text/csv;charset=utf-8" });
 
 							if (va_count == 1) {
 								saveAs(blob, datasetId + ".csv");
@@ -7315,10 +7314,6 @@ function setup_csv_export() {
 				seq_id: sent_seq_id,
 				timestamp: performance.now(),
 			};
-
-			console.log(d3.select("#ra").text());
-			console.log(d3.select("#dec").text());
-			console.log(request);
 
 			if (wsConn[index].readyState == 1)
 				wsConn[index].send(JSON.stringify(request));

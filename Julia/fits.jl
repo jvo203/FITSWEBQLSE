@@ -2995,11 +2995,6 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     csv = IOBuffer()
 
-    # add UTF-8 Byte Order Mark (BOM) 0xEF,0xBB,0xBF
-    # Microsoft tools like Excel require BOM
-    write(csv, 0xEF, 0xBB, 0xBF)
-    # write(csv, Char(239), Char(187), Char(191))
-
     has_header = false
 
     intensity_column = "intensity [" * bunit
