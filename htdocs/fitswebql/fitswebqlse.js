@@ -7316,6 +7316,10 @@ function setup_csv_export() {
 				timestamp: performance.now(),
 			};
 
+			console.log(d3.select("#ra").text());
+			console.log(d3.select("#dec").text());
+			console.log(request);
+
 			if (wsConn[index].readyState == 1)
 				wsConn[index].send(JSON.stringify(request));
 		}

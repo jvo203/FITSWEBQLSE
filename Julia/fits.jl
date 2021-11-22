@@ -2995,6 +2995,11 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     csv = IOBuffer()
 
+    # add UTF-8 Byte Order Mark (BOM) 0xEF,0xBB,0xBF
+    # Microsoft tools like Excel require BOM
+    write(csv, 0xEF, 0xBB, 0xBF)
+    # write(csv, Char(239), Char(187), Char(191))
+
     has_header = false
 
     intensity_column = "intensity [" * bunit
@@ -3023,6 +3028,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     local dec_column, dec_value
 
     try
+        println("RA:", req["ra"])
         ra_suffix, ra_value = split_wcs(req["ra"])
         ra_column = "beam ra (" * ra_suffix * ")"
     catch _
@@ -3031,6 +3037,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     end
 
     try
+        println("DEC:", req["dec"])
         dec_suffix, dec_value = split_wcs(req["dec"])
         dec_column = "beam dec (" * dec_suffix * ")"
     catch _
