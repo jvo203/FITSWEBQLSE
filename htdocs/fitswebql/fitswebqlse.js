@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-21.5";
+	return "JS2021-11-22.0";
 }
 
 const wasm_supported = (() => {
@@ -7302,6 +7302,8 @@ function setup_csv_export() {
 			// a CSV websocket request
 			var request = {
 				type: "spectrum",
+				ra: ds.select("#ra").node().value,
+				dec: ds.select("#dec").node().value,
 				intensity: intensity_mode,
 				frame_start: data_band_lo,
 				frame_end: data_band_hi,
@@ -11337,6 +11339,8 @@ function imageTimeout() {
 				// a CSV websocket request
 				var request = {
 					type: "spectrum",
+					ra: ds.select("#ra").node().value,
+					dec: ds.select("#dec").node().value,
 					x1: _x1 + 1,
 					y1: _y1 + 1,
 					x2: _x2 + 1,
