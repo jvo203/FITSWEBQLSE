@@ -2967,6 +2967,8 @@ function open_websocket_connection(_datasetId, index) {
 						try {
 							csv = String.fromCharCode.apply(null, uncompressed);
 
+							console.log(csv);
+
 							var blob = new Blob([csv], { type: "data:text/csv;charset=utf-8" });
 
 							if (va_count == 1) {
