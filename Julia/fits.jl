@@ -2873,7 +2873,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         error("getSpectrum() only supports 3D cubes.")
     end
 
-    local bunit, wcs
+    local bunit, naxis, wcs
 
     try
         wcs_array = WCS.from_header(fits.headerStr)
@@ -2889,6 +2889,12 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         bunit = strip(header["BUNIT"])
     catch _
         bunit = ""
+    end
+
+    try
+        naxis = header["NAXIS"]
+    catch _
+        naxis = 2
     end
 
     local x1, x2, y1, y2
@@ -3067,7 +3073,10 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         dec_value = "N/A"
     end
 
-    pixcoords = [cx - 1; cy - 1]
+    pixcoords = zeros(Float64, max(2, naxis))
+    pixcoords[1] = cx - 1
+    pixcoords[2] = cy - 1
+
     worldcoords = pix_to_world(wcs, pixcoords)
     println("$ra_column/$dec_column: $ra_value, $dec_value")
     println("WCS lng/lat [deg]: ", worldcoords)
