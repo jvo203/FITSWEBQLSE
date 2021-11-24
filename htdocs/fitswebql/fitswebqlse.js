@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-24.0";
+	return "JS2021-11-24.1";
 }
 
 const wasm_supported = (() => {
@@ -2417,7 +2417,7 @@ function poll_heartbeat() {
 				.attr("opacity", 1.0)
 				//.text('\ue143');// an empty heart
 				//.text('\ue005');// a full heart
-				.text('\uf21e');// heartbeat
+				.text('\uf004');// heart
 			//.text('📡');
 			//.text('📶');
 
@@ -2427,7 +2427,8 @@ function poll_heartbeat() {
 					.attr("opacity", 1.0)
 					//.text('\ue144');// link
 					//.text('\uf004');// handshake
-					.text('\uf00c');// check
+					// .text('\uf00c');// check
+					.text('\uf21e');// heartbeat
 
 				setTimeout(function () {
 					d3.select("#heartbeat")
@@ -7264,64 +7265,66 @@ function composite_data_min_max() {
 }
 
 function setup_csv_export() {
-	try {
-		document.getElementById('exportCSV').onclick = function () {
-			console.log("export spectrum to CSV.");
+	var elem = document.getElementById('exportCSV');
 
-			var c = 299792.458;//speed of light [km/s]
+	if (elem == null)
+		return;
 
-			var deltaV = 0.0;
+	elem.onclick = function () {
+		console.log("export spectrum to CSV.");
 
-			try {
-				deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
-			}
-			catch (e) {
-				console.log(e);
-				console.log("USER_DELTAV = ", USER_DELTAV);
-			}
+		var c = 299792.458;//speed of light [km/s]
 
-			//convert redshift z to V
-			var value = sessionStorage.getItem("redshift");
+		var deltaV = 0.0;
 
-			if (value == "z") {
-				var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
+		try {
+			deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
+		}
+		catch (e) {
+			console.log(e);
+			console.log("USER_DELTAV = ", USER_DELTAV);
+		}
 
-				deltaV = tmp * c;
+		//convert redshift z to V
+		var value = sessionStorage.getItem("redshift");
+
+		if (value == "z") {
+			var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
+
+			deltaV = tmp * c;
+		};
+
+		var checkbox = document.getElementById('restcheckbox');
+		var rest = false;
+
+		try {
+			rest = checkbox.checked;
+		} catch (e) {
+			console.log(e);
+		}
+
+		display_hourglass();
+
+		for (let index = 0; index < va_count; index++) {
+			// a CSV websocket request
+			var request = {
+				type: "spectrum",
+				ra: d3.select("#ra").text().toString(),
+				dec: d3.select("#dec").text().toString(),
+				intensity: intensity_mode,
+				frame_start: data_band_lo,
+				frame_end: data_band_hi,
+				ref_freq: RESTFRQ,
+				deltaV: 1000.0 * deltaV, // [m/s]
+				rest: rest,
+				seq_id: sent_seq_id,
+				timestamp: performance.now(),
 			};
 
-			var checkbox = document.getElementById('restcheckbox');
-			var rest = false;
-
-			try {
-				rest = checkbox.checked;
-			} catch (e) {
-				console.log(e);
-			}
-
-			display_hourglass();
-
-			for (let index = 0; index < va_count; index++) {
-				// a CSV websocket request
-				var request = {
-					type: "spectrum",
-					ra: d3.select("#ra").text().toString(),
-					dec: d3.select("#dec").text().toString(),
-					intensity: intensity_mode,
-					frame_start: data_band_lo,
-					frame_end: data_band_hi,
-					ref_freq: RESTFRQ,
-					deltaV: 1000.0 * deltaV, // [m/s]
-					rest: rest,
-					seq_id: sent_seq_id,
-					timestamp: performance.now(),
-				};
-
-				if (wsConn[index].readyState == 1)
-					wsConn[index].send(JSON.stringify(request));
-			}
-		};
-	}
-	catch (e) { }
+			if (wsConn[index].readyState == 1)
+				wsConn[index].send(JSON.stringify(request));
+		}
+	};
 }
 
 function setup_axes() {
@@ -11307,66 +11310,70 @@ function imageTimeout() {
 	if (has_velocity_info || has_frequency_info) {
 		_x1 = x1; _x2 = x2; _y1 = y1; _y2 = y2; // global variables
 
-		document.getElementById('exportCSV').onclick = function () {
-			console.log("export viewport to CSV.");
+		var elem = document.getElementById('exportCSV');
 
-			var c = 299792.458;//speed of light [km/s]
+		if (elem != null) {
+			elem.onclick = function () {
+				console.log("export viewport to CSV.");
 
-			var deltaV = 0.0;
+				var c = 299792.458;//speed of light [km/s]
 
-			try {
-				deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
-			}
-			catch (e) {
-				console.log(e);
-				console.log("USER_DELTAV = ", USER_DELTAV);
-			}
+				var deltaV = 0.0;
 
-			//convert redshift z to V
-			var value = sessionStorage.getItem("redshift");
+				try {
+					deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
+				}
+				catch (e) {
+					console.log(e);
+					console.log("USER_DELTAV = ", USER_DELTAV);
+				}
 
-			if (value == "z") {
-				var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
+				//convert redshift z to V
+				var value = sessionStorage.getItem("redshift");
 
-				deltaV = tmp * c;
-			};
+				if (value == "z") {
+					var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
 
-			var checkbox = document.getElementById('restcheckbox');
-			var rest = false;
-
-			try {
-				rest = checkbox.checked;
-			} catch (e) {
-				console.log(e);
-			}
-
-			display_hourglass();
-
-			for (let index = 0; index < va_count; index++) {
-				// a CSV websocket request
-				var request = {
-					type: "spectrum",
-					ra: d3.select("#ra").text().toString(),
-					dec: d3.select("#dec").text().toString(),
-					x1: _x1 + 1,
-					y1: _y1 + 1,
-					x2: _x2 + 1,
-					y2: _y2 + 1,
-					beam: zoom_shape,
-					intensity: intensity_mode,
-					frame_start: data_band_lo,
-					frame_end: data_band_hi,
-					ref_freq: RESTFRQ,
-					deltaV: 1000.0 * deltaV, // [m/s]
-					rest: rest,
-					seq_id: sent_seq_id,
-					timestamp: performance.now(),
+					deltaV = tmp * c;
 				};
 
-				if (wsConn[index].readyState == 1)
-					wsConn[index].send(JSON.stringify(request));
-			}
-		};
+				var checkbox = document.getElementById('restcheckbox');
+				var rest = false;
+
+				try {
+					rest = checkbox.checked;
+				} catch (e) {
+					console.log(e);
+				}
+
+				display_hourglass();
+
+				for (let index = 0; index < va_count; index++) {
+					// a CSV websocket request
+					var request = {
+						type: "spectrum",
+						ra: d3.select("#ra").text().toString(),
+						dec: d3.select("#dec").text().toString(),
+						x1: _x1 + 1,
+						y1: _y1 + 1,
+						x2: _x2 + 1,
+						y2: _y2 + 1,
+						beam: zoom_shape,
+						intensity: intensity_mode,
+						frame_start: data_band_lo,
+						frame_end: data_band_hi,
+						ref_freq: RESTFRQ,
+						deltaV: 1000.0 * deltaV, // [m/s]
+						rest: rest,
+						seq_id: sent_seq_id,
+						timestamp: performance.now(),
+					};
+
+					if (wsConn[index].readyState == 1)
+						wsConn[index].send(JSON.stringify(request));
+				}
+			};
+		}
 	}
 
 	for (let index = 0; index < va_count; index++) {
