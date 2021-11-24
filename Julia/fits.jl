@@ -2967,7 +2967,11 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     # calculate the centre and squared radius
     cx = abs(x1 + x2) >> 1
     cy = abs(y1 + y2) >> 1
-    r = min(abs(x2 - x1) >> 1, abs(y2 - y1) >> 1)
+
+    rx = abs(x2 - x1) >> 1
+    ry = abs(y2 - y1) >> 1
+
+    r = min(rx, ry)
     r2 = r^2
 
     spectrum = zeros(Float32, frame_length)
@@ -3080,8 +3084,11 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     pixcoordsR₋ = deepcopy(pixcoords)
     pixcoordsR₊ = deepcopy(pixcoords)
 
-    pixcoordsR₋[1] -= r
-    pixcoordsR₊[1] += r
+    pixcoordsR₋[1] -= rx
+    pixcoordsR₋[2] -= ry
+
+    pixcoordsR₊[1] += rx
+    pixcoordsR₊[2] += ry
 
     worldcoords = pix_to_world(wcs, pixcoords)
     worldcoordsR₋ = pix_to_world(wcs, pixcoordsR₋)
@@ -3096,10 +3103,12 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     lng_value = worldcoords[1] # [deg]
     lat_value = worldcoords[2] # [deg]
 
-    beam_size = abs(worldcoordsR₊[1] - worldcoordsR₋[1]) # [deg]
+    beam_width = abs(worldcoordsR₊[1] - worldcoordsR₋[1]) # [deg]
+    beam_height = abs(worldcoordsR₊[2] - worldcoordsR₋[2]) # [deg]
 
     println("$ra_column/$dec_column: $ra_value, $dec_value")
-    println("WCS lng/lat [deg]: $lng_value, $lat_value, beam diameter [deg]: $beam_size")
+    println("WCS lng/lat [deg]: $lng_value, $lat_value")
+    println("beam width [deg]: $beam_width, beam height [deg]: $beam_height")
 
     for (idx, val) in enumerate(spectrum)
         frame = first_frame + (idx - 1)
