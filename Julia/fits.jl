@@ -11,6 +11,7 @@ using Images, ImageTransformations, Interpolations;
 using ZfpCompression;
 using PhysicalConstants.CODATA2018: c_0;
 using ThreadsX;
+using WCS;
 
 const MADV_WILLNEED = 3
 
@@ -2872,9 +2873,17 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         error("getSpectrum() only supports 3D cubes.")
     end
 
-    header = fits.header
+    local bunit, wcs
 
-    local bunit
+    try
+        wcs_array = WCS.from_header(fits.headerStr)
+        wcs = wcs_array[1]
+    catch err
+        println(err)
+        error("WCS.from_header error")
+    end
+
+    header = fits.header
 
     try
         bunit = strip(header["BUNIT"])
@@ -2882,14 +2891,32 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         bunit = ""
     end
 
-    # use the entire FITS plane
-    x1 = 1
-    x2 = fits.width
-    y1 = 1
-    y2 = fits.height
+    local x1, x2, y1, y2
 
-    # disable viewport
-    image = false
+    # by default use the entire FITS plane
+    try
+        x1 = req["x1"]
+    catch _
+        x1 = 1
+    end
+
+    try
+        x2 = req["x2"]
+    catch _
+        x2 = fits.width
+    end
+
+    try
+        y1 = req["y1"]
+    catch _
+        y1 = 1
+    end
+
+    try
+        y2 = req["y2"]
+    catch _
+        y2 = fits.height
+    end
 
     frame_start = Float64(req["frame_start"])
     frame_end = Float64(req["frame_end"])
@@ -3039,6 +3066,11 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         dec_column = "beam dec"
         dec_value = "N/A"
     end
+
+    pixcoords = [cx - 1; cy - 1]
+    worldcoords = pix_to_world(wcs, pixcoords)
+    println("$ra_column/$dec_column: $ra_value, $dec_value")
+    println("WCS lng/lat [deg]: ", worldcoords)
 
     for (idx, val) in enumerate(spectrum)
         frame = first_frame + (idx - 1)
