@@ -3058,6 +3058,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     local ra_column, ra_value
     local dec_column, dec_value
+    local beam_type, beam_width, beam_height
 
     try
         println("RA:", req["ra"])
@@ -3098,10 +3099,18 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     println(pixcoordsR₋, worldcoordsR₋)
     println(pixcoordsR₊, worldcoordsR₊)
 
-    lng_column = "wcs.lng [deg]"
-    lat_column = "wcs.lat [deg]"
+    lng_column = "beam wcs.lng [deg]"
+    lat_column = "beam wcs.lat [deg]"
     lng_value = worldcoords[1] # [deg]
     lat_value = worldcoords[2] # [deg]
+
+    if beam == SQUARE
+        beam_type = "square/rect."
+    end
+
+    if beam == CIRCLE
+        beam_type = "circle"
+    end
 
     beam_width = abs(worldcoordsR₊[1] - worldcoordsR₋[1]) # [deg]
     beam_height = abs(worldcoordsR₊[2] - worldcoordsR₋[2]) # [deg]
@@ -3122,12 +3131,15 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"$frequency_column\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\"\n",
+                    "\"channel\",\"$frequency_column\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\",\"beam type\",\"beam width [deg]\",\"beam height [deg]\"\n",
                 )
                 has_header = true
             end
 
-            write(csv, "$frame,$f,$v,$val,$ra_value,$dec_value,$lng_value,$lat_value\n")
+            write(
+                csv,
+                "$frame,$f,$v,$val,$ra_value,$dec_value,$lng_value,$lat_value,$beam_type,$beam_width,$beam_height\n",
+            )
 
             continue
         end
@@ -3136,12 +3148,15 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\"\n",
+                    "\"channel\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\",\"beam type\",\"beam width [deg]\",\"beam height [deg]\"\n",
                 )
                 has_header = true
             end
 
-            write(csv, "$frame,$v,$val,$ra_value,$dec_value,$lng_value,$lat_value\n")
+            write(
+                csv,
+                "$frame,$v,$val,$ra_value,$dec_value,$lng_value,$lat_valuee,$beam_type,$beam_width,$beam_height\n",
+            )
 
             continue
         end
@@ -3150,12 +3165,15 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"$frequency_column\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\"\n",
+                    "\"channel\",\"$frequency_column\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\",\"beam type\",\"beam width [deg]\",\"beam height [deg]\"\n",
                 )
                 has_header = true
             end
 
-            write(csv, "$frame,$f,$val,$ra_value,$dec_value,$lng_value,$lat_value\n")
+            write(
+                csv,
+                "$frame,$f,$val,$ra_value,$dec_value,$lng_value,$lat_valuee,$beam_type,$beam_width,$beam_height\n",
+            )
 
             continue
         end
