@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-22.0";
+	return "JS2021-11-24.0";
 }
 
 const wasm_supported = (() => {
@@ -7264,61 +7264,64 @@ function composite_data_min_max() {
 }
 
 function setup_csv_export() {
-	document.getElementById('exportCSV').onclick = function () {
-		console.log("export spectrum to CSV.");
+	try {
+		document.getElementById('exportCSV').onclick = function () {
+			console.log("export spectrum to CSV.");
 
-		var c = 299792.458;//speed of light [km/s]
+			var c = 299792.458;//speed of light [km/s]
 
-		var deltaV = 0.0;
+			var deltaV = 0.0;
 
-		try {
-			deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
-		}
-		catch (e) {
-			console.log(e);
-			console.log("USER_DELTAV = ", USER_DELTAV);
-		}
+			try {
+				deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
+			}
+			catch (e) {
+				console.log(e);
+				console.log("USER_DELTAV = ", USER_DELTAV);
+			}
 
-		//convert redshift z to V
-		var value = sessionStorage.getItem("redshift");
+			//convert redshift z to V
+			var value = sessionStorage.getItem("redshift");
 
-		if (value == "z") {
-			var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
+			if (value == "z") {
+				var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
 
-			deltaV = tmp * c;
-		};
-
-		var checkbox = document.getElementById('restcheckbox');
-		var rest = false;
-
-		try {
-			rest = checkbox.checked;
-		} catch (e) {
-			console.log(e);
-		}
-
-		display_hourglass();
-
-		for (let index = 0; index < va_count; index++) {
-			// a CSV websocket request
-			var request = {
-				type: "spectrum",
-				ra: d3.select("#ra").text().toString(),
-				dec: d3.select("#dec").text().toString(),
-				intensity: intensity_mode,
-				frame_start: data_band_lo,
-				frame_end: data_band_hi,
-				ref_freq: RESTFRQ,
-				deltaV: 1000.0 * deltaV, // [m/s]
-				rest: rest,
-				seq_id: sent_seq_id,
-				timestamp: performance.now(),
+				deltaV = tmp * c;
 			};
 
-			if (wsConn[index].readyState == 1)
-				wsConn[index].send(JSON.stringify(request));
-		}
-	};
+			var checkbox = document.getElementById('restcheckbox');
+			var rest = false;
+
+			try {
+				rest = checkbox.checked;
+			} catch (e) {
+				console.log(e);
+			}
+
+			display_hourglass();
+
+			for (let index = 0; index < va_count; index++) {
+				// a CSV websocket request
+				var request = {
+					type: "spectrum",
+					ra: d3.select("#ra").text().toString(),
+					dec: d3.select("#dec").text().toString(),
+					intensity: intensity_mode,
+					frame_start: data_band_lo,
+					frame_end: data_band_hi,
+					ref_freq: RESTFRQ,
+					deltaV: 1000.0 * deltaV, // [m/s]
+					rest: rest,
+					seq_id: sent_seq_id,
+					timestamp: performance.now(),
+				};
+
+				if (wsConn[index].readyState == 1)
+					wsConn[index].send(JSON.stringify(request));
+			}
+		};
+	}
+	catch (e) { }
 }
 
 function setup_axes() {
@@ -9717,6 +9720,8 @@ function setup_image_selection() {
 			if (d3.event.shiftKey)
 				return;
 
+			setup_csv_export();
+
 			if (xradec != null) {
 				let fitsData = fitsContainer[va_count - 1];
 
@@ -11795,6 +11800,7 @@ function change_intensity_threshold(refresh) {
 function hide_navigation_bar() {
 	document.getElementById('menu').style.display = "none";
 	d3.select("#menu_activation_area").attr("opacity", 0.1);//was 0.7
+	setup_csv_export();
 }
 
 function display_menu() {
