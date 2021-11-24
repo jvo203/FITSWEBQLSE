@@ -3078,8 +3078,14 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     pixcoords[2] = cy - 1
 
     worldcoords = pix_to_world(wcs, pixcoords)
+
+    lng_column = "wcs.lng [deg]"
+    lat_column = "wcs.lat [deg]"
+    lng_value = worldcoords[1]
+    lat_value = worldcoords[2]
+
     println("$ra_column/$dec_column: $ra_value, $dec_value")
-    println("WCS lng/lat [deg]: ", worldcoords)
+    println("WCS lng/lat [deg]: $lng_value, $lat_value")
 
     for (idx, val) in enumerate(spectrum)
         frame = first_frame + (idx - 1)
@@ -3093,12 +3099,12 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"$frequency_column\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\"\n",
+                    "\"channel\",\"$frequency_column\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\"\n",
                 )
                 has_header = true
             end
 
-            write(csv, "$frame,$f,$v,$val,$ra_value,$dec_value\n")
+            write(csv, "$frame,$f,$v,$val,$ra_value,$dec_value,$lng_value,$lat_value\n")
 
             continue
         end
@@ -3107,12 +3113,12 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\"\n",
+                    "\"channel\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\"\n",
                 )
                 has_header = true
             end
 
-            write(csv, "$frame,$v,$val,$ra_value,$dec_value\n")
+            write(csv, "$frame,$v,$val,$ra_value,$dec_value,$lng_value,$lat_value\n")
 
             continue
         end
@@ -3121,12 +3127,12 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"$frequency_column\",\"$intensity_column\",\"$ra_column\",\"$dec_column\"\n",
+                    "\"channel\",\"$frequency_column\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\"\n",
                 )
                 has_header = true
             end
 
-            write(csv, "$frame,$f,$val,$ra_value,$dec_value\n")
+            write(csv, "$frame,$f,$val,$ra_value,$dec_value,$lng_value,$lat_value\n")
 
             continue
         end
