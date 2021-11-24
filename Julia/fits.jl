@@ -3131,15 +3131,28 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"$frequency_column\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\",\"beam type\",\"beam width [deg]\",\"beam height [deg]\",\"beam cx [px]\",\"beam cy [px]\",\"beam width [px]\",\"beam height [px]\"\n",
+                    "\"channel\",\"$frequency_column\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\",\"beam type\",\"beam width [deg]\",\"beam height [deg]\",\"beam cx [px]\",\"beam cy [px]\",\"beam width [px]\",\"beam height [px]\",\"source velocity [km/s]\"",
                 )
+
+                if ref_freq > 0.0
+                    write(csv, ",\"reference frequency [GHz]\"")
+                end
+
+                write(csv, "\n")
+
                 has_header = true
             end
 
             write(
                 csv,
-                "$frame,$f,$v,$val,$ra_value,$dec_value,$lng_value,$lat_value,$beam_type,$beam_width,$beam_height,$cx,$cy,$dimx,$dimy\n",
+                "$frame,$f,$v,$val,$ra_value,$dec_value,$lng_value,$lat_value,$beam_type,$beam_width,$beam_height,$cx,$cy,$dimx,$dimy,$(Δv/1000.0)",
             )
+
+            if ref_freq > 0.0
+                write(csv, ",$(ref_freq / 1.0e9)")
+            end
+
+            write(csv, "\n")
 
             continue
         end
@@ -3148,15 +3161,28 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\",\"beam type\",\"beam width [deg]\",\"beam height [deg]\",\"beam cx [px]\",\"beam cy [px]\",\"beam width [px]\",\"beam height [px]\"\n",
+                    "\"channel\",\"velocity [km/s]\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\",\"beam type\",\"beam width [deg]\",\"beam height [deg]\",\"beam cx [px]\",\"beam cy [px]\",\"beam width [px]\",\"beam height [px]\",\"source velocity [km/s]\"",
                 )
+
+                if ref_freq > 0.0
+                    write(csv, ",\"reference frequency [GHz]\"")
+                end
+
+                write(csv, "\n")
+
                 has_header = true
             end
 
             write(
                 csv,
-                "$frame,$v,$val,$ra_value,$dec_value,$lng_value,$lat_valuee,$beam_type,$beam_width,$beam_height,$cx,$cy,$dimx,$dimy\n",
+                "$frame,$v,$val,$ra_value,$dec_value,$lng_value,$lat_value,$beam_type,$beam_width,$beam_height,$cx,$cy,$dimx,$dimy,$(Δv/1000.0)",
             )
+
+            if ref_freq > 0.0
+                write(csv, ",$(ref_freq / 1.0e9)")
+            end
+
+            write(csv, "\n")
 
             continue
         end
@@ -3165,15 +3191,28 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             if !has_header
                 write(
                     csv,
-                    "\"channel\",\"$frequency_column\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\",\"beam type\",\"beam width [deg]\",\"beam height [deg]\",\"beam cx [px]\",\"beam cy [px]\",\"beam width [px]\",\"beam height [px]\"\n",
+                    "\"channel\",\"$frequency_column\",\"$intensity_column\",\"$ra_column\",\"$dec_column\",\"$lng_column\",\"$lat_column\",\"beam type\",\"beam width [deg]\",\"beam height [deg]\",\"beam cx [px]\",\"beam cy [px]\",\"beam width [px]\",\"beam height [px]\",\"source velocity [km/s]\"",
                 )
+
+                if ref_freq > 0.0
+                    write(csv, ",\"reference frequency [GHz]\"")
+                end
+
+                write(csv, "\n")
+
                 has_header = true
             end
 
             write(
                 csv,
-                "$frame,$f,$val,$ra_value,$dec_value,$lng_value,$lat_valuee,$beam_type,$beam_width,$beam_height,$cx,$cy,$dimx,$dimy\n",
+                "$frame,$f,$val,$ra_value,$dec_value,$lng_value,$lat_value,$beam_type,$beam_width,$beam_height,$cx,$cy,$dimx,$dimy,$(Δv/1000.0)",
             )
+
+            if ref_freq > 0.0
+                write(csv, ",$(ref_freq / 1.0e9)")
+            end
+
+            write(csv, "\n")
 
             continue
         end
