@@ -8,6 +8,9 @@
 /zfp_encode
 /*.dSYM
 
+# Config files
+*.ini
+
 # Prerequisites
 *.d
 
