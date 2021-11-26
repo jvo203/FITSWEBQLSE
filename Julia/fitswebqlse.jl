@@ -1148,6 +1148,9 @@ end
 try
     conf = ConfParse(CONFIG_FILE)
     parse_conf!(conf)
+
+    global HTTP_PORT = parse(Int64, retrieve(conf, "fitswebql", "port"))
+    global WS_PORT = HTTP_PORT + 1
 catch _
     println("Cannot parse the config file $CONFIG_FILE.")
 
