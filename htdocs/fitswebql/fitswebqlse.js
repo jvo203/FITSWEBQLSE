@@ -9659,8 +9659,11 @@ function setup_image_selection() {
 				// Clear the Viewport Canvas
 				console.log("clearing the Viewport Canvas");
 				var gl = viewport.gl;
-				gl.clearColor(0, 0, 0, 0);
-				gl.clear(gl.COLOR_BUFFER_BIT);
+
+				if (gl != undefined) {
+					gl.clearColor(0, 0, 0, 0);
+					gl.clear(gl.COLOR_BUFFER_BIT);
+				};
 
 				clear_webgl_zoom_buffers();
 			}
@@ -9764,9 +9767,6 @@ function setup_image_selection() {
 			init_webgl_image_buffers(va_count);
 		})
 		.on("mousemove", (event) => {
-			if (event == undefined)
-				return;
-
 			if (!autoscale && event.shiftKey) {
 				d3.select("#scaling")
 					.style('cursor', 'ns-resize')
@@ -9833,7 +9833,11 @@ function setup_image_selection() {
 			if (isNaN(offset[0]) || isNaN(offset[1]))
 				return;
 
-			mouse_position = { x: offset[0], y: offset[1] };
+			if ((offset[0] >= 0) && (offset[1] >= 0)) {
+				mouse_position = { x: offset[0], y: offset[1] };
+			};
+
+			console.log("mouse position:", mouse_position);
 
 			var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 			var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
@@ -10976,6 +10980,8 @@ function zoomed(event) {
 	console.log("scale: " + event.transform.k);
 	zoom_scale = event.transform.k;
 
+	console.log("windowLeft:", windowLeft);
+
 	if (!windowLeft) {
 		try {
 			zoom_beam();
@@ -10984,8 +10990,14 @@ function zoomed(event) {
 			console.log('NON-CRITICAL:', e);
 		}
 
-		var onMouseMoveFunc = d3.select(this).on("mousemove");
-		d3.select("#image_rectangle").each(onMouseMoveFunc);
+		/*var node = event.currentTarget;
+		var onMouseMoveFunc = node.on("mousemove");
+		d3.select("#image_rectangle").each(onMouseMoveFunc);*/
+		//d3.select("#image_rectangle").dispatch("mousemove");
+
+		var evt = new MouseEvent("mousemove");
+		d3.select('#image_rectangle').node().dispatchEvent(evt);
+
 		viewport.refresh = true;
 	}
 }
@@ -11211,7 +11223,7 @@ function imageTimeout() {
 
 	//d3.select("#image_rectangle").style('cursor','crosshair');
 
-	console.log("mouse position: ", mouse_position);
+	console.log("idle mouse position: ", mouse_position);
 
 	var svg = d3.select("#FrontSVG");
 	var width = parseFloat(svg.attr("width"));
@@ -11420,30 +11432,7 @@ function imageTimeout() {
 
 	//ctx.clearRect(px, py, zoomed_size, zoomed_size);
 
-	var imageCanvas;
-
-	/*if (composite_view)
-		imageCanvas = compositeCanvas;
-	else
-		imageCanvas = imageContainer[va_count - 1].imageCanvas;//if composite_view use compositeCanvas
-
-	if (zoom_shape == "square") {
-		//ctx.fillStyle = "rgba(0,0,0,0.3)";
-		//ctx.fillRect(px, py, zoomed_size, zoomed_size);	
-		ctx.drawImage(imageCanvas, x - clipSize, y - clipSize, 2 * clipSize + 1, 2 * clipSize + 1, px, py, zoomed_size, zoomed_size);
-	}
-
-	if (zoom_shape == "circle") {
-		ctx.save();
-		ctx.beginPath();
-		ctx.arc(px + zoomed_size / 2, py + zoomed_size / 2, zoomed_size / 2, 0, 2 * Math.PI, true);
-		//ctx.fillStyle = "rgba(0,0,0,0.3)";
-		//ctx.fill() ;
-		ctx.closePath();
-		ctx.clip();
-		ctx.drawImage(imageCanvas, x - clipSize, y - clipSize, 2 * clipSize + 1, 2 * clipSize + 1, px, py, zoomed_size, zoomed_size);
-		ctx.restore();
-	}*/
+	console.log("imageTimeout::END");
 }
 
 function resetKalman() {
