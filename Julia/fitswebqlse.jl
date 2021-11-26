@@ -1,6 +1,8 @@
 import Base.Iterators: flatten
+using ArgParse;
 using CodecBzip2;
 using CodecLz4;
+using ConfParser;
 using Distributed;
 using HTTP;
 using JSON;
@@ -118,9 +120,12 @@ const ZFP_LOW_PRECISION = 8
 const SPECTRUM_HIGH_PRECISION = 24
 const SPECTRUM_MEDIUM_PRECISION = 16
 
+# default config file
+CONFIG_FILE = "config.ini"
+
 const HT_DOCS = "htdocs"
-const HTTP_PORT = 9000 #8080
-const WS_PORT = HTTP_PORT + 1
+HTTP_PORT = 8080
+WS_PORT = HTTP_PORT + 1
 
 @everywhere include("fits.jl")
 include("kalman.jl")
@@ -1094,6 +1099,22 @@ function serveFITS(request::HTTP.Request)
     end
 end
 
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table s begin
+        "--config"
+        help = "a configuration file."
+        default = "config.ini"
+        "--port"
+        help = "an HTTP listening port, defaults to 8080. WebSockets will use the next port (i.e. 8081). The port can also be specified in the .ini config file. Any config file will override this command-line argument."
+        arg_type = Int
+        default = 8080
+    end
+
+    return parse_args(s)
+end
+
 const FITSWEBQL_ROUTER = HTTP.Router()
 
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
@@ -1113,6 +1134,31 @@ HTTP.@register(
     "/*/get_molecules/",
     HTTP.StreamHandlerFunction(streamMolecules)
 )
+
+# parse command-line arguments (a config file, port numbers etc.)
+parsed_args = parse_commandline()
+
+try
+    global CONFIG_FILE = parsed_args["config"]
+catch _
+    println("A config file not supplied. Will try a default config.ini .")
+end
+
+# read the config file (if available)
+try
+    conf = ConfParse(CONFIG_FILE)
+    parse_conf!(conf)
+catch _
+    println("Cannot parse the config file $CONFIG_FILE.")
+
+    # override any config file settings
+    try
+        global HTTP_PORT = parsed_args["port"]
+        global WS_PORT = HTTP_PORT + 1
+    catch _
+    end
+end
+
 
 # open a Splatalogue database
 const splat_db = SQLite.DB("splatalogue_v3.db")
