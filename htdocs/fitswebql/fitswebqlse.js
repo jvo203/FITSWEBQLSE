@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-26.0";
+	return "JS2021-11-26.1";
 }
 
 const wasm_supported = (() => {
@@ -6933,9 +6933,9 @@ function setup_3d_view() {
 		position = (width + rect_width) / 2 + 2 * emFontSize;
 }
 
-function dragstart() {
+function dragstart(event) {
 	freqdrag = true;
-	d3.event.preventDefault = true;
+	event.preventDefault = true;
 
 	var offset = d3.mouse(this);
 	freq_mouse_start = offset[0];
@@ -7037,8 +7037,8 @@ function dragend() {
 	mol_pos = -1;
 }
 
-function dragmove() {
-	var offset = d3.mouse(this);
+function dragmove(event) {
+	var offset = d3.pointer(event);
 	var frequency = get_mouse_frequency(offset);
 
 	var freq = d3.select("#frequency");
@@ -9576,7 +9576,7 @@ function setup_image_selection() {
 			.on("end", fits_subregion_end)
 		)
 		.call(zoom)
-		.on("mouseenter", function () {
+		.on("mouseenter", (event) => {
 			hide_navigation_bar();
 
 			// cancel the image animation loop
@@ -9613,7 +9613,7 @@ function setup_image_selection() {
 			var offset;
 
 			try {
-				offset = d3.mouse(this);
+				offset = d3.pointer(event);
 			}
 			catch (e) {
 				console.log(e);
@@ -9640,7 +9640,7 @@ function setup_image_selection() {
 					wsConn[index].send(JSON.stringify(msg));
 			}
 		})
-		.on("mouseleave", function () {
+		.on("mouseleave", (event) => {
 			clearTimeout(idleMouse);
 
 			// send a "Kalman Filter reset" WebSocket message in order to reset the server-side Kalman Filter
@@ -9668,7 +9668,7 @@ function setup_image_selection() {
 			// Clear the ZOOMCanvas
 			clear_webgl_viewport();
 
-			if (!d3.event.shiftKey)
+			if (!event.shiftKey)
 				windowLeft = true;
 
 			spectrum_stack = new Array(va_count);
@@ -9677,7 +9677,7 @@ function setup_image_selection() {
 
 			image_stack = [];
 
-			if (!d3.event.shiftKey) {
+			if (!event.shiftKey) {
 				viewport_zoom_settings = null;
 				zoom_element.attr("opacity", 0.0);
 			};
@@ -9692,7 +9692,7 @@ function setup_image_selection() {
 			shortcut.remove("Meta+C");
 			shortcut.remove("s");
 
-			if (d3.event.shiftKey)
+			if (event.shiftKey)
 				return;
 
 			setup_csv_export();
@@ -9763,8 +9763,11 @@ function setup_image_selection() {
 
 			init_webgl_image_buffers(va_count);
 		})
-		.on("mousemove", function () {
-			if (!autoscale && d3.event.shiftKey) {
+		.on("mousemove", (event) => {
+			if (event == undefined)
+				return;
+
+			if (!autoscale && event.shiftKey) {
 				d3.select("#scaling")
 					.style('cursor', 'ns-resize')
 					.attr("opacity", 0.5);
@@ -9788,7 +9791,7 @@ function setup_image_selection() {
 					.style("stroke", axisColour);
 			}
 
-			if (freqdrag || d3.event.shiftKey) {
+			if (freqdrag || event.shiftKey) {
 				d3.select(this).style('cursor', 'pointer');
 				return;
 			}
@@ -9796,7 +9799,7 @@ function setup_image_selection() {
 			// commented out so that the caching 'wait' cursor remains visible
 			//d3.select(this).style('cursor', 'none');
 
-			d3.event.preventDefault = true;
+			event.preventDefault = true;
 			if (!has_image) return;
 
 			let fitsData = fitsContainer[va_count - 1];
@@ -9820,7 +9823,7 @@ function setup_image_selection() {
 			var offset;
 
 			try {
-				offset = d3.mouse(this);
+				offset = d3.pointer(event);
 			}
 			catch (e) {
 				console.log(e);
@@ -9842,11 +9845,13 @@ function setup_image_selection() {
 			/*var x = image_bounding_dims.x1 + (mouse_position.x - d3.select(this).attr("x")) / (d3.select(this).attr("width") - 1) * (image_bounding_dims.width - 1);
 			var y = image_bounding_dims.y2 + (mouse_position.y - d3.select(this).attr("y")) / (d3.select(this).attr("height") - 1) * (image_bounding_dims.height - 1);*/
 
-			var ax = (image_bounding_dims.width - 1) / (d3.select(this).attr("width") - 1);
-			var x = image_bounding_dims.x1 + ax * (mouse_position.x - d3.select(this).attr("x"));
+			let rect = event.currentTarget;
 
-			var ay = (image_bounding_dims.height - 1) / (d3.select(this).attr("height") - 1);
-			var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - d3.select(this).attr("y"));
+			var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 1);
+			var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect.getAttribute("x"));
+
+			var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 1);
+			var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect.getAttribute("y"));
 
 			x = Math.round(x);
 			y = Math.round(y);
@@ -10058,11 +10063,13 @@ function setup_image_selection() {
 				/*var pred_x = image_bounding_dims.x1 + (pred_mouse_x - d3.select(this).attr("x")) / (d3.select(this).attr("width") - 1) * (image_bounding_dims.width - 1);
 				var pred_y = image_bounding_dims.y2 + (pred_mouse_y - d3.select(this).attr("y")) / (d3.select(this).attr("height") - 1) * (image_bounding_dims.height - 1);*/
 
-				var ax = (image_bounding_dims.width - 1) / (d3.select(this).attr("width") - 1);
-				var pred_x = image_bounding_dims.x1 + ax * (pred_mouse_x - d3.select(this).attr("x"));
+				let rect = event.currentTarget;
 
-				var ay = (image_bounding_dims.height - 1) / (d3.select(this).attr("height") - 1);
-				var pred_y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (pred_mouse_y - d3.select(this).attr("y"));
+				var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 1);
+				var pred_x = image_bounding_dims.x1 + ax * (pred_mouse_x - rect.getAttribute("x"));
+
+				var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 1);
+				var pred_y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (pred_mouse_y - rect.getAttribute("y"));
 
 				prex_d = Math.round(pred_x);
 				pred_y = Math.round(pred_y);
@@ -10965,9 +10972,9 @@ function tiles_zoom() {
 	tmp.each(onMouseMoveFunc);
 }
 
-function zoomed() {
-	console.log("scale: " + d3.event.transform.k);
-	zoom_scale = d3.event.transform.k;
+function zoomed(event) {
+	console.log("scale: " + event.transform.k);
+	zoom_scale = event.transform.k;
 
 	if (!windowLeft) {
 		try {
