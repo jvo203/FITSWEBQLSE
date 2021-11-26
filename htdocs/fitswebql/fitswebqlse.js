@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-24.1";
+	return "JS2021-11-26.0";
 }
 
 const wasm_supported = (() => {
@@ -5450,42 +5450,14 @@ function change_intensity_mode() {
 
 	console.log("new intensity mode:", intensity_mode);
 
-	let fitsData = fitsContainer[va_count - 1];
+	display_hourglass();
 
-	if (fitsData != null) {
-		if (fitsData.depth > 1) {
-			if (va_count == 1) {
-				if (intensity_mode == "mean") {
-					data_min = d3.min(fitsData.mean_spectrum);
-					data_max = d3.max(fitsData.mean_spectrum);
+	image_count = 0;
+	viewport_count = 0;
+	spectrum_count = 0;
 
-					plot_spectrum([fitsData.mean_spectrum]);
-					replot_y_axis();
-				}
-
-				if (intensity_mode == "integrated") {
-					data_min = d3.min(fitsData.integrated_spectrum);
-					data_max = d3.max(fitsData.integrated_spectrum);
-
-					plot_spectrum([fitsData.integrated_spectrum]);
-					replot_y_axis();
-				}
-			}
-			else {
-				composite_data_min_max();
-
-				if (intensity_mode == "mean") {
-					plot_spectrum(mean_spectrumContainer);
-					replot_y_axis();
-				}
-
-				if (intensity_mode == "integrated") {
-					plot_spectrum(integrated_spectrumContainer);
-					replot_y_axis();
-				}
-			}
-		}
-	}
+	for (let index = 1; index <= va_count; index++)
+		cube_refresh(index);
 }
 
 function change_coords_fmt() {
