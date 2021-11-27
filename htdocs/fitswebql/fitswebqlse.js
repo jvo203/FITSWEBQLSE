@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-26.1";
+	return "JS2021-11-27.0";
 }
 
 const wasm_supported = (() => {
@@ -6937,7 +6937,7 @@ function dragstart(event) {
 	freqdrag = true;
 	event.preventDefault = true;
 
-	var offset = d3.mouse(this);
+	var offset = d3.pointer(event);
 	freq_mouse_start = offset[0];
 
 	var frequency = get_mouse_frequency(offset);
@@ -7678,17 +7678,20 @@ function setup_axes() {
 			//.style("stroke-dasharray", ("1, 5"))
 			.attr("opacity", 0.0)
 			.style('cursor', 'pointer')
-			.on("mouseleave", function () {
+			.on("mouseleave", (event) => {
 				x_axis_mouseleave();
 			})
-			.on("mouseenter", function () {
-				var offset = d3.mouse(this);
+			.on("mouseenter", (event) => {
+				var offset = d3.pointer(event);
 				x_axis_mouseenter(offset);
 
 			})
-			.on("mousemove", function () {
-				var offset = d3.mouse(this);
-				x_axis_mousemove(offset);
+			.on("mousemove", (event) => {
+				var offset = d3.pointer(event);
+
+				if (offset[0] >= 0) {
+					x_axis_mousemove(offset);
+				};
 			})
 			.call(d3.drag()
 				.on("start", dragstart)
@@ -7710,7 +7713,7 @@ function setup_axes() {
 		.attr("opacity", 0.0)
 		.call(d3.drag().on("drag", shifted))
 		.call(d3.zoom().scaleExtent([0.1, 10]).on("zoom", scaled))
-		.on("mouseleave", function () {
+		.on("mouseleave", function (event) {
 			d3.select(this)
 				.style('cursor', '')
 				.attr("opacity", 0.0);
@@ -7719,7 +7722,7 @@ function setup_axes() {
 			.style("fill", axisColour)
 			.style("stroke", axisColour);*/
 		})
-		.on("mouseenter", function () {
+		.on("mouseenter", function (event) {
 			if (autoscale)
 				return;
 
@@ -8504,7 +8507,7 @@ function swap_viewports() {
 	}
 }
 
-function fits_subregion_start() {
+function fits_subregion_start(event) {
 	if (freqdrag) return;
 	if (optical_view) return;
 
@@ -8540,14 +8543,14 @@ function fits_subregion_start() {
 		ctx.clearRect(0, 0, width, height);
 	}
 
-	var offset = d3.mouse(this);
+	var offset = d3.pointer(event);
 	begin_x = offset[0];
 	begin_y = offset[1];
 	mousedown = true;
 	d3.select("#zoom").attr("opacity", 0.0);
 }
 
-function fits_subregion_drag() {
+function fits_subregion_drag(event) {
 	if (freqdrag) return;
 	if (optical_view) return;
 
@@ -8583,7 +8586,7 @@ function fits_subregion_drag() {
 		x1 = begin_x;
 		y1 = begin_y;
 
-		var offset = d3.mouse(this);
+		var offset = d3.pointer(event);
 
 		x2 = offset[0]; y2 = offset[1];
 
@@ -8596,13 +8599,13 @@ function fits_subregion_drag() {
 	}
 }
 
-function fits_subregion_end() {
+function fits_subregion_end(event) {
 	if (freqdrag) return;
 	if (optical_view) return;
 
 	console.log("fits_subregion_end");
 
-	var offset = d3.mouse(this);
+	var offset = d3.pointer(event);
 	end_x = offset[0];
 	end_y = offset[1];
 
@@ -9187,7 +9190,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 				}
 			}
 		})
-		.on("mouseenter", function () {
+		.on("mouseenter", function (event) {
 			hide_navigation_bar();
 			console.log("switching active view to", d3.select(this).attr("id"));
 
@@ -9233,7 +9236,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 				};
 			}
 		})
-		.on("mouseleave", function () {
+		.on("mouseleave", function (event) {
 			windowLeft = true;
 
 			spectrum_stack = new Array(va_count);
@@ -9273,7 +9276,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 				d3.select("#dec").text(decText);
 			}
 		})
-		.on("mousemove", function () {
+		.on("mousemove", function (event) {
 			//moving = true;
 			windowLeft = false;
 
@@ -9283,7 +9286,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 			var offset;
 
 			try {
-				offset = d3.mouse(this);
+				offset = d3.pointer(event);
 			}
 			catch (e) {
 				console.log(e);
@@ -10990,11 +10993,6 @@ function zoomed(event) {
 			console.log('NON-CRITICAL:', e);
 		}
 
-		/*var node = event.currentTarget;
-		var onMouseMoveFunc = node.on("mousemove");
-		d3.select("#image_rectangle").each(onMouseMoveFunc);*/
-		//d3.select("#image_rectangle").dispatch("mousemove");
-
 		var evt = new MouseEvent("mousemove");
 		d3.select('#image_rectangle').node().dispatchEvent(evt);
 
@@ -11002,18 +11000,18 @@ function zoomed(event) {
 	}
 }
 
-function shifted() {
+function shifted(event) {
 	if (autoscale)
 		return;
 
 	if (last_spectrum == null)
 		return;
 
-	console.log("y-axis shift:", d3.event.dy);
+	console.log("y-axis shift:", event.dy);
 
 	var height = parseFloat(d3.select("#scaling").attr("height"));
 	var interval = user_data_max - user_data_min;
-	var shift = d3.event.dy * interval / height;
+	var shift = event.dy * interval / height;
 
 	user_data_max += shift;
 	user_data_min += shift;
@@ -11022,24 +11020,24 @@ function shifted() {
 	replot_y_axis();
 }
 
-function scaled() {
+function scaled(event) {
 	if (autoscale)
 		return;
 
 	if (last_spectrum == null)
 		return;
 
-	console.log("y-axis scale:", d3.event.transform.k, "previous:", prev_scale);
+	console.log("y-axis scale:", event.transform.k, "previous:", prev_scale);
 
-	var factor = d3.event.transform.k;
+	var factor = event.transform.k;
 
-	if (d3.event.transform.k > prev_scale)
+	if (event.transform.k > prev_scale)
 		factor = 1.2;
 
-	if (d3.event.transform.k < prev_scale)
+	if (event.transform.k < prev_scale)
 		factor = 0.8;
 
-	prev_scale = d3.event.transform.k;
+	prev_scale = event.transform.k;
 
 	/*var interval = factor * (tmp_data_max - tmp_data_min) ;
 	var middle = (tmp_data_max + tmp_data_min) / 2 ;*/
