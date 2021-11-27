@@ -9795,7 +9795,8 @@ function setup_image_selection() {
 			}
 
 			if (freqdrag || event.shiftKey) {
-				d3.select(this).style('cursor', 'pointer');
+				var node = event.currentTarget;
+				node.style.cursor = 'pointer';
 				return;
 			}
 
