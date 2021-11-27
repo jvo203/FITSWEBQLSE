@@ -96,8 +96,8 @@ function replace_one(c::Channel, v)
     return v
 end
 
-const LOCAL_VERSION = true
-const PRODUCTION = false
+LOCAL_VERSION = true
+PRODUCTION = false
 
 const VERSION_MAJOR = 5
 const VERSION_MINOR = 0
