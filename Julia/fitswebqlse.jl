@@ -165,7 +165,7 @@ function get_jvo_path(
 
     sql = "SELECT path FROM " * table * " WHERE data_id = '" * dataid * "';"
 
-    println(url, dataid, sql)
+    println(url, "\t", dataid, "\t", sql)
 
     error("cannot access PostgreSQL")
 end
