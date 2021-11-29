@@ -159,8 +159,8 @@ function get_jvo_path(
 
     try
         conn = LibPQ.Connection(url)
-    catch _        
-        error("cannot access PostgreSQL")
+    catch _
+        error("cannot connect to PostgreSQL")
     end
 
     # dataid: if db is alma append _00_00_00
@@ -171,10 +171,25 @@ function get_jvo_path(
     end
 
     sql = "SELECT path FROM " * table * " WHERE data_id = '" * dataid * "';"
-
     println(sql)
 
+    filepath = ""
+
+    try
+        result = execute(conn, sql)
+        data = columntable(result)
+
+        println(result)
+        println(data)
+    catch err
+        println(err)
+        close(conn)
+        error("cannot read from PostgreSQL")
+    end
+
     close(conn)
+
+    return filepath
 end
 
 function serveFile(path::String)
