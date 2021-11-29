@@ -139,7 +139,7 @@ include("kalman.jl")
 FITS_OBJECTS = Dict{String,FITSDataSet}()
 FITS_LOCK = ReentrantLock()
 
-function get_jvo_path(dataid, db, table)
+function get_jvo_path(dataid, host::String, user::String, password::String, db::String, table::String)
     error("cannot access PostgreSQL")
 end
 
@@ -829,7 +829,7 @@ function serveFITS(request::HTTP.Request)
                     else
                         # get the FITS path from PostgreSQL
                         try
-                            filepath = get_jvo_path(f, db, table)
+                            filepath = get_jvo_path(f, DB_HOST, DB_USER, DB_PASSWORD, db, table)
                         catch _
                             filepath = ".cache" * "/" * f * ".fits"
                         end
