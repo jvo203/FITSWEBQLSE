@@ -1149,17 +1149,29 @@ try
     conf = ConfParse(CONFIG_FILE)
     parse_conf!(conf)
 
-    global HTTP_PORT = parse(Int64, retrieve(conf, "fitswebql", "port"))
-    global WS_PORT = HTTP_PORT + 1
-catch _
-    println("Cannot parse the config file $CONFIG_FILE.")
-
-    # override any config file settings
     try
-        global HTTP_PORT = parsed_args["port"]
+        global HTTP_PORT = parse(Int64, retrieve(conf, "fitswebql", "port"))
         global WS_PORT = HTTP_PORT + 1
     catch _
+        # cannot find the port, try the command-line arguments
+        try
+            global HTTP_PORT = parsed_args["port"]
+            global WS_PORT = HTTP_PORT + 1
+        catch _
+        end
     end
+
+    try
+        global LOCAL_VERSION = parse(Bool, retrieve(conf, "fitswebql", "local"))
+    catch _
+    end
+
+    try
+        global PRODUCTION = parse(Bool, retrieve(conf, "fitswebql", "production"))
+    catch _
+    end
+catch _
+    println("Cannot parse the config file $CONFIG_FILE.")
 end
 
 # open a Splatalogue database
