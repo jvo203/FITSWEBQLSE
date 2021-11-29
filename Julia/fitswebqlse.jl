@@ -159,8 +159,7 @@ function get_jvo_path(
 
     try
         conn = LibPQ.Connection(url)
-    catch err
-        println(url, "::", err)
+    catch _        
         error("cannot access PostgreSQL")
     end
 
