@@ -180,7 +180,7 @@ function get_jvo_path(
         data = columntable(result)
         println(data)
 
-        filepath = data[:path]
+        filepath = data[:path][1]
         println("filepath:", filepath)
     catch err
         println(err)
