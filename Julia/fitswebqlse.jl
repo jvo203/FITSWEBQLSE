@@ -6,7 +6,7 @@ using ConfParser;
 using Distributed;
 using HTTP;
 using JSON;
-using LibPQ;
+using LibPQ, Tables;
 using Printf;
 using Sockets;
 using SQLite;
@@ -177,9 +177,9 @@ function get_jvo_path(
 
     try
         result = execute(conn, sql)
-        data = columntable(result)
-
         println(result)
+
+        data = columntable(result)
         println(data)
     catch err
         println(err)
