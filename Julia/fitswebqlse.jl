@@ -177,10 +177,10 @@ function get_jvo_path(
 
     try
         result = execute(conn, sql)
-        data = dictcolumntable(result)
+        data = columntable(result)
         println(data)
 
-        filepath = data["path"]
+        filepath = data[:path]
         println("filepath:", filepath)
     catch err
         println(err)
