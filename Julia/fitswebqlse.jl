@@ -178,9 +178,12 @@ function get_jvo_path(
     try
         result = execute(conn, sql)
         data = columntable(result)
-        println(data)
+        path = data[:path][1]
 
-        filepath = data[:path][1]
+        pos = findfirst(table, ".")
+        println("pos:", pos)
+        println(SubString(table, 1:(pos[1]-1)))
+
         println("filepath:", filepath)
     catch err
         println(err)
