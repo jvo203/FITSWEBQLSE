@@ -202,6 +202,10 @@ function get_jvo_path(
 
     close(conn)
 
+    # TO-DO: check if the filepath exists
+
+    # otherwise throw an error
+
     return filepath
 end
 
