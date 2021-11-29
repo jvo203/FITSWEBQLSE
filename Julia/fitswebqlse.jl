@@ -182,9 +182,8 @@ function get_jvo_path(
 
         pos = findfirst(".", table)
 
-        if !isnothing(pos)
-            println("pos:", pos)
-            println(SubString(table, 1:(pos[1]-1)))
+        if !isnothing(pos)                        
+            filepath = FITS_HOME * "/" * db * "/" * SubString(table, 1:(pos[1]-1)) * "/" * path
         end
 
         println("filepath:", filepath)
