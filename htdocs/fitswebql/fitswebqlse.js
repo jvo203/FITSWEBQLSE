@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-27.0";
+	return "JS2021-11-29.0";
 }
 
 const wasm_supported = (() => {
@@ -5625,13 +5625,13 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
 	var flux_elem = d3.select("#flux_path" + index);
 	flux_elem.attr(info, pos);
 
-	function dropGroup(d) {
+	function dropGroup(event, d) {
 	}
 
-	function dragGroup(d) {
-		d3.event.preventDefault = true;
+	function dragGroup(event, d) {
+		event.preventDefault = true;
 
-		d.x += d3.event.dx;
+		d.x += event.dx;
 		d.x = Math.max(-x, d.x);
 		d.x = Math.min(width - x - 1, d.x);
 
