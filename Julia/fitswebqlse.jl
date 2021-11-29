@@ -726,6 +726,21 @@ function serveFITS(request::HTTP.Request)
     dir = ""
     datasets = []
     ext = ""
+    pattern = ""
+
+    # ALMA defaults
+    db = "alma"
+    table = "cube"
+
+    try
+        db = params["db"]
+    catch e
+    end
+
+    try
+        table = params["table"]
+    catch e
+    end
 
     try
         ext = params["ext"]
@@ -744,11 +759,17 @@ function serveFITS(request::HTTP.Request)
     catch e
     end
 
+    if LOCAL_VERSION
+        pattern = "filename"
+    else
+        pattern = "datasetId"
+    end
+
     try
-        push!(datasets, params["filename"])
+        push!(datasets, params[pattern])
     catch e
-        # try multiple filenames (recursion)
-        get_dataset("filename", params, datasets, 1)
+        # try multiple datasets (use recursion)
+        get_dataset(pattern, params, datasets, 1)
     end
 
     foreach(datasets) do f
@@ -779,10 +800,27 @@ function serveFITS(request::HTTP.Request)
                     println("cannot restore $f from cache::$e")
 
                     fits_object = FITSDataSet(f)
+
+                    # sane defaults
+                    if occursin("hsc", db)
+                        fits_object.flux = "ratio"
+                    end
+
+                    if occursin("fugin", table)
+                        fits_object.flux = "logistic"
+                    end
+
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
-                    # leave the slash as before, even in Windows
-                    filepath = dir * "/" * f * "." * ext
+                    filepath = ""
+
+                    if LOCAL_VERSION
+                        # leave the slash as before, even in Windows
+                        filepath = dir * "/" * f * "." * ext
+                    else
+                        # get the FITS path from PostgreSQL
+                    end
+
                     @async loadFITS(filepath, fits_object) # @async or @spawn
                 end
             end
