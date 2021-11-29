@@ -139,6 +139,10 @@ include("kalman.jl")
 FITS_OBJECTS = Dict{String,FITSDataSet}()
 FITS_LOCK = ReentrantLock()
 
+function get_jvo_path(dataid, db, table)
+    error("cannot access PostgreSQL")
+end
+
 function serveFile(path::String)
     # strip out a question mark (if there is any)
     pos = findlast("?", path)
@@ -824,6 +828,11 @@ function serveFITS(request::HTTP.Request)
                         filepath = dir * "/" * f * "." * ext
                     else
                         # get the FITS path from PostgreSQL
+                        try
+                            filepath = get_jvo_path(f, db, table)
+                        catch _
+                            filepath = ".cache" * "/" * f * ".fits"
+                        end
                     end
 
                     @async loadFITS(filepath, fits_object) # @async or @spawn
@@ -1215,22 +1224,22 @@ try
     end
 
     try
-        DB_HOST = retrieve(conf, "postgresql", "host")
+        global DB_HOST = retrieve(conf, "postgresql", "host")
     catch _
     end
 
     try
-        DB_USER = retrieve(conf, "postgresql", "user")
+        global DB_USER = retrieve(conf, "postgresql", "user")
     catch _
     end
 
     try
-        DB_PASSWORD = retrieve(conf, "postgresql", "password")
+        global DB_PASSWORD = retrieve(conf, "postgresql", "password")
     catch _
     end
 
     try
-        FITS_HOME = retrieve(conf, "postgresql", "fitshome")
+        global FITS_HOME = retrieve(conf, "postgresql", "fitshome")
     catch _
     end
 catch _
