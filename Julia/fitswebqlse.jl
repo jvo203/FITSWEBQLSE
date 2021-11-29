@@ -99,6 +99,11 @@ end
 LOCAL_VERSION = true
 PRODUCTION = false
 
+DB_HOST = ""
+DB_USER = ""
+DB_PASSWORD = ""
+FITS_HOME = "/home"
+
 const VERSION_MAJOR = 5
 const VERSION_MINOR = 0
 const VERSION_SUB = 0
@@ -1206,6 +1211,26 @@ try
 
     try
         global PRODUCTION = parse(Bool, retrieve(conf, "fitswebql", "production"))
+    catch _
+    end
+
+    try
+        DB_HOST = retrieve(conf, "postgresql", "host")
+    catch _
+    end
+
+    try
+        DB_USER = retrieve(conf, "postgresql", "user")
+    catch _
+    end
+
+    try
+        DB_PASSWORD = retrieve(conf, "postgresql", "password")
+    catch _
+    end
+
+    try
+        FITS_HOME = retrieve(conf, "postgresql", "fitshome")
     catch _
     end
 catch _
