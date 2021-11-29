@@ -6,6 +6,7 @@ using ConfParser;
 using Distributed;
 using HTTP;
 using JSON;
+using LibPQ;
 using Printf;
 using Sockets;
 using SQLite;
@@ -139,7 +140,33 @@ include("kalman.jl")
 FITS_OBJECTS = Dict{String,FITSDataSet}()
 FITS_LOCK = ReentrantLock()
 
-function get_jvo_path(dataid, host::String, user::String, password::String, db::String, table::String)
+function get_jvo_path(
+    datasetid,
+    host::String,
+    user::String,
+    password::String,
+    db::String,
+    table::String,
+)
+    local url::String, dataid::String, sql::String
+
+    if password == ""
+        url = "postgresql://" * user * "@" * host * "/" * db
+    else
+        url = "postgresql://" * user * ":" * password * "@" * host * "/" * db
+    end
+
+    # dataid: if db is alma append _00_00_00
+    if db == "alma"
+        dataid = datasetid * "_00_00_00"
+    else
+        dataid = datasetid
+    end
+
+    sql = "SELECT path FROM " * table * " WHERE data_id = '" * dataid * "';"
+
+    println(url, dataid, sql)
+
     error("cannot access PostgreSQL")
 end
 
@@ -829,7 +856,8 @@ function serveFITS(request::HTTP.Request)
                     else
                         # get the FITS path from PostgreSQL
                         try
-                            filepath = get_jvo_path(f, DB_HOST, DB_USER, DB_PASSWORD, db, table)
+                            filepath =
+                                get_jvo_path(f, DB_HOST, DB_USER, DB_PASSWORD, db, table)
                         catch _
                             filepath = ".cache" * "/" * f * ".fits"
                         end
