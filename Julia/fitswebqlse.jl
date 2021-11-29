@@ -180,9 +180,12 @@ function get_jvo_path(
         data = columntable(result)
         path = data[:path][1]
 
-        pos = findfirst(table, ".")
-        println("pos:", pos)
-        println(SubString(table, 1:(pos[1]-1)))
+        pos = findfirst(".", table)
+
+        if !isnothing(pos)
+            println("pos:", pos)
+            println(SubString(table, 1:(pos[1]-1)))
+        end
 
         println("filepath:", filepath)
     catch err
