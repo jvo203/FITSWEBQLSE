@@ -149,11 +149,19 @@ function get_jvo_path(
     table::String,
 )
     local url::String, dataid::String, sql::String
+    local conn
 
     if password == ""
         url = "postgresql://" * user * "@" * host * "/" * db
     else
         url = "postgresql://" * user * ":" * password * "@" * host * "/" * db
+    end
+
+    try
+        conn = LibPQ.Connection(url)
+    catch err
+        println(url, "::", err)
+        error("cannot access PostgreSQL")
     end
 
     # dataid: if db is alma append _00_00_00
@@ -165,9 +173,9 @@ function get_jvo_path(
 
     sql = "SELECT path FROM " * table * " WHERE data_id = '" * dataid * "';"
 
-    println(url, "\t", dataid, "\t", sql)
+    println(sql)
 
-    error("cannot access PostgreSQL")
+    close(conn)
 end
 
 function serveFile(path::String)
