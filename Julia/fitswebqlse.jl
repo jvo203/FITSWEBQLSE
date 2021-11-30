@@ -1148,7 +1148,7 @@ function serveFITS(request::HTTP.Request)
     end
 
     if !LOCAL_VERSION
-        write(resp, "data-root-path='$root_path/' ")
+        write(resp, "data-root-path='/$root_path/' ")
     else
         write(resp, "data-root-path='/' ")
     end
