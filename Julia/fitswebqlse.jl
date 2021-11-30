@@ -208,11 +208,13 @@ function get_jvo_path(
 
     close(conn)
 
-    # TO-DO: check if the filepath exists
-
-    # otherwise throw an error
-
-    return filepath
+    # check if the file exists
+    if isfile(filepath)
+        return filepath
+    else
+        # otherwise throw an error    
+        error("'$filepath' does not exist.")
+    end
 end
 
 function serveFile(path::String)
