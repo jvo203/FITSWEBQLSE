@@ -19,6 +19,7 @@ julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
 port=9000
 local=false
 production=false
+timeout=15 ; [s]
 
 [postgresql]
 user=jvo
