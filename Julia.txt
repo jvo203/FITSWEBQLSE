@@ -11,6 +11,10 @@ DaemonMode ArgParse CodecBzip2 CodecLz4 ConfParser HTTP JSON LibPQ Tables SQLite
 
 julia -O3 -t 16 Julia/fitswebqlse.jl
 
+# testing Julia
+
+julia -p 2 -t 4 -O3 Julia/fitswebqlse.jl
+
 # running Julia in a cluster
 
 julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
