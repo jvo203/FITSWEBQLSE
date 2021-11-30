@@ -5,8 +5,23 @@ julia --startup-file=no -e 'using DaemonMode; serve()'&
 # Julia dependencies (start julia, press ']' to get into a package manager,
 then use 'add' to install all the packages)
 
+# running Julia on jvof or py1
 
+julia -O3 -t 16 Julia/fitswebqlse.jl
 
-# Julia in a cluster
+# running Julia in a cluster
 
 julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
+
+# an example config.ini
+
+[fitswebql]
+port=9000
+local=false
+production=false
+
+[postgresql]
+user=jvo
+password=jvo!
+host=jvox.vo.nao.ac.jp
+fitshome=/home
