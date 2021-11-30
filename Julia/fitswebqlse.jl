@@ -184,7 +184,13 @@ function get_jvo_path(
 
         if !isnothing(pos)
             filepath =
-                FITS_HOME * "/" * db * "/" * SubString(table, 1:(pos[1]-1)) * "/" * path
+                FITS_HOME *
+                "/" *
+                db *
+                "/" *
+                uppercase(SubString(table, 1:(pos[1]-1))) *
+                "/" *
+                path
         else
             if (db == "spcam") || (db == "moircs")
                 filepath = FITS_HOME * "/subaru/" * db * "/mosaic/" * path
