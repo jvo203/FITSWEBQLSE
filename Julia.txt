@@ -1,0 +1,12 @@
+# speed up start-up (just a little bit)
+
+julia --startup-file=no -e 'using DaemonMode; serve()'&
+
+# Julia dependencies (start julia, press ']' to get into a package manager,
+then use 'add' to install all the packages)
+
+
+
+# Julia in a cluster
+
+julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
