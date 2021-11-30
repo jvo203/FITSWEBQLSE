@@ -5,7 +5,7 @@ julia --startup-file=no -e 'using DaemonMode; serve()'&
 # Julia dependencies (start julia, press ']' to get into a package manager,
 then use 'add' to install all the packages):
 
-DaemonMode ArgParse CodecBzip2 CodecLz4 ConfParser HTTP JSON LibPQ Tables SQLite WebSockets
+DaemonMode ArgParse CodecBzip2 CodecLz4 ConfParser HTTP JSON LibPQ Tables SQLite WebSockets x265_jll ZfpCompression DistributedArrays FITSIO Images ImageTransformations Interpolations PhysicalConstants ThreadsX
 
 # running Julia on jvof or py1
 
