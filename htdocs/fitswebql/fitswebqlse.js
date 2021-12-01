@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-11-29.0";
+	return "JS2021-11-29.1";
 }
 
 const wasm_supported = (() => {
@@ -12289,7 +12289,7 @@ function show_help() {
 function donotshow() {
 	var checkbox = document.getElementById('donotshowcheckbox');
 
-	localStorage_write_boolean("welcome_v5", !checkbox.checked);
+	localStorage_write_boolean("welcome_v5_alpha", !checkbox.checked);
 };
 
 function show_timeout() {
@@ -12437,8 +12437,11 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html('<h4>Client: HDR image rendering with WebGL</h4>');
+		.html('<h4>CSV spectrum export (CSV icon in the bottom right corner)</h4>');
 
+	ul.append("li")
+		.attr("class", "list-group-item list-group-item-success")
+		.html('<h4>HDR image rendering with WebGL</h4>');
 
 	/*ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
@@ -14288,7 +14291,7 @@ async*/ function mainRenderer() {
 		realtime_video = localStorage_read_boolean("realtime_video", true);
 		experimental = localStorage_read_boolean("experimental", false);
 		displayDownloadConfirmation = localStorage_read_boolean("displayDownloadConfirmation", true);
-		welcome = localStorage_read_boolean("welcome_v5", true);
+		welcome = localStorage_read_boolean("welcome_v5_alpha", true);
 
 		autoscale = true;
 		displayScalingHelp = localStorage_read_boolean("displayScalingHelp", true);
@@ -14596,7 +14599,7 @@ async*/ function mainRenderer() {
 
 		if (va_count == 1) {
 			poll_progress(datasetId, 1);
-			open_websocket_connection(datasetId, 1);
+			// open_websocket_connection(datasetId, 1);
 
 			fetch_image_spectrum(datasetId, 1, true, false);
 
