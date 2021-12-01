@@ -91,6 +91,7 @@ mutable struct FITSDataSet
     has_header::Threads.Atomic{Bool}
     has_data::Threads.Atomic{Bool}
     has_error::Threads.Atomic{Bool}
+    created::Threads.Atomic{Float64}
     last_accessed::Threads.Atomic{Float64}
     progress::Threads.Atomic{Int}
     total::Threads.Atomic{Int}
@@ -134,6 +135,7 @@ mutable struct FITSDataSet
             Threads.Atomic{Bool}(false),
             Threads.Atomic{Bool}(false),
             Threads.Atomic{Bool}(false),
+            Threads.Atomic{Float64}(0.0),
             Threads.Atomic{Float64}(0.0),
             Threads.Atomic{Int}(0),
             Threads.Atomic{Int}(0),
@@ -180,6 +182,7 @@ mutable struct FITSDataSet
             Threads.Atomic{Bool}(false),
             Threads.Atomic{Bool}(false),
             Threads.Atomic{Float64}(datetime2unix(now())),
+            Threads.Atomic{Float64}(datetime2unix(now())),
             Threads.Atomic{Int}(0),
             Threads.Atomic{Int}(0),
             Threads.Atomic{Float64}(0.0),
@@ -193,9 +196,11 @@ function update_timestamp(fits::FITSDataSet)
 end
 
 function update_progress(fits::FITSDataSet, total::Integer)
-    fits.elapsed[] = datetime2unix(now()) - fits.last_accessed[]
+    fits.elapsed[] = datetime2unix(now()) - fits.created[]
     Threads.atomic_add!(fits.progress, 1)
     fits.total[] = total
+
+    update_timestamp(fits)
 end
 
 function serialize_fits(fits::FITSDataSet)
@@ -259,6 +264,7 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.has_header)
         serialize(io, fits.has_data)
         serialize(io, fits.has_error)
+        # skipping fits.created
         # skipping fits.last_accessed
 
         if fits.depth == 1
@@ -347,6 +353,7 @@ function deserialize_fits(datasetid)
     fits.has_header = deserialize(io)
     fits.has_data = deserialize(io)
     fits.has_error = deserialize(io)
+    # skipping fits.created
     # skipping fits.last_accessed
 
     if fits.depth == 1
@@ -1206,7 +1213,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 fits.data_mad = data_mad
                 fits.data_mad₊ = data_mad₊
                 fits.data_mad₋ = data_mad₋
-
                 fits.video_ready[] = true
             catch e
                 println("distributed computing error: $e")
