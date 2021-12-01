@@ -1418,12 +1418,6 @@ function ws_coroutine(ws, ids)
             req = take!(viewport_requests)
             # println(datasetid, "::", req)
 
-            fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
-
-            if fits_object.datasetid == ""
-                continue
-            end
-
             if !has_data(fits_object)
                 error("$datasetid: no data found.")
             end
@@ -1492,12 +1486,6 @@ function ws_coroutine(ws, ids)
     video = @async while true
         try
             req = take!(video_requests)
-
-            fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
-
-            if fits_object.datasetid == ""
-                continue
-            end
 
             if !has_data(fits_object)
                 error("$datasetid: no data found.")
@@ -1705,14 +1693,6 @@ function ws_coroutine(ws, ids)
         if occursin("[heartbeat]", s)
             # @info "[ws] heartbeat"
 
-            fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
-
-            if fits_object.datasetid == ""
-                break
-            end
-
-            update_timestamp(fits_object)
-
             try
                 put!(outgoing, s)
             catch e
@@ -1739,12 +1719,6 @@ function ws_coroutine(ws, ids)
 
             if msg["type"] == "image"
                 # sub-region selection
-
-                fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
-
-                if fits_object.datasetid == ""
-                    continue
-                end
 
                 if !has_data(fits_object)
                     error("$datasetid: no data found.")
@@ -1783,12 +1757,6 @@ function ws_coroutine(ws, ids)
 
             if msg["type"] == "spectrum"
                 # CSV spectrum export
-
-                fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
-
-                if fits_object.datasetid == ""
-                    continue
-                end
 
                 if !has_data(fits_object)
                     error("$datasetid: no data found.")
@@ -1834,12 +1802,6 @@ function ws_coroutine(ws, ids)
                 last_frame_idx = -1
                 bitrate = msg["bitrate"]
                 fps = round(Integer, msg["fps"])
-
-                fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
-
-                if fits_object.datasetid == ""
-                    continue
-                end
 
                 if !has_data(fits_object)
                     error("$datasetid: no data found.")
