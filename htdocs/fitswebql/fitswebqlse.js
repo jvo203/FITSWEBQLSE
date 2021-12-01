@@ -10381,14 +10381,14 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 	xmlhttp.send();
 };
 
-function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
+function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 	var rect = document.getElementById('mainDiv').getBoundingClientRect();
 	var width = rect.width - 20;
 	var height = rect.height - 20;
 
 	var xmlhttp = new XMLHttpRequest();
 
-	var url = 'image_spectrum?datasetId=' + encodeURIComponent(datasetId) + '&width=' + width + '&height=' + height + '&quality=' + image_quality;
+	var url = 'image_spectrum?datasetId=' + encodeURIComponent(_datasetId) + '&width=' + width + '&height=' + height + '&quality=' + image_quality;
 
 	if (fetch_data)
 		url += '&fetch_data=true';
@@ -10417,18 +10417,25 @@ function fetch_image_spectrum(datasetId, index, fetch_data, add_timestamp) {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 502) {
 			console.log("Connection error, re-fetching image after 1 second.");
 			setTimeout(function () {
-				fetch_image_spectrum(datasetId, index, fetch_data, true);
+				fetch_image_spectrum(_datasetId, index, fetch_data, true);
 			}, 1000);
 		}
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 202) {
 			console.log("Server not ready, long-polling image again after 500ms.");
 			setTimeout(function () {
-				fetch_image_spectrum(datasetId, index, fetch_data, false);
+				fetch_image_spectrum(_datasetId, index, fetch_data, false);
 			}, 500);
 		}
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+
+			if (va_count == 1) {
+				open_websocket_connection(datasetId, 1);
+			} else {
+				open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
+			}
+
 			// wait for WebAssembly to get compiled
 			Module.ready
 				.then(_ => {
@@ -14610,7 +14617,7 @@ async*/ function mainRenderer() {
 				console.log(index, datasetId.rotate(index - 1));
 
 				poll_progress(datasetId.rotate(index - 1)[0], index);
-				open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
+				// open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
 
 				fetch_image_spectrum(datasetId[index - 1], index, true, false);
 			}
