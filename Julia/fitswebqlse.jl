@@ -1698,6 +1698,14 @@ function ws_coroutine(ws, ids)
         if occursin("[heartbeat]", s)
             # @info "[ws] heartbeat"
 
+            fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+            if fits_object.datasetid == ""
+                continue
+            end
+
+            update_timestamp(fits_object)
+
             try
                 put!(outgoing, s)
             catch e
@@ -2149,6 +2157,33 @@ end
 
 @async WebSockets.with_logger(WebSocketLogger()) do
     WebSockets.serve(ws_server, host, WS_PORT)
+end
+
+# a garbage collection loop (dataset timeout)
+@async while true
+    sleep(10)
+
+    # purge datasets
+    for (datasetid, fits) in FITS_OBJECTS
+        elapsed = datetime2unix(now()) - fits.last_accessed[]
+
+        if elapsed > TIMEOUT
+            # check if there are any WebSocket connections
+            # open for <datasetid>
+
+            println("purging a dataset: $datasetid")
+
+            lock(FITS_LOCK)
+
+            try
+                delete!(FITS_OBJECTS, datasetid)
+            catch e
+                println("Failed to remove a dataset: $e")
+            finally
+                unlock(FITS_LOCK)
+            end
+        end
+    end
 end
 
 try
