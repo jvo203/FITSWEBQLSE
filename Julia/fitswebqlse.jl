@@ -99,7 +99,7 @@ end
 
 LOCAL_VERSION = true
 PRODUCTION = false
-TIMEOUT = 15
+TIMEOUT = 60 # [s]
 
 DB_HOST = ""
 DB_PORT = -1
