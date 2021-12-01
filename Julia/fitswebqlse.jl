@@ -880,10 +880,8 @@ function serveFITS(request::HTTP.Request)
 
                     fits_object = deserialize_fits(f)
 
-                    if fits_object.depth > 1
-                        lock(fits_object.mutex)
-                        fits_object.has_data = false
-                        unlock(fits_object.mutex)
+                    if fits_object.depth > 1                        
+                        fits_object.has_data[] = false                    
 
                         @async restoreImage(fits_object)
                         # @async restoreData(fits_object)
