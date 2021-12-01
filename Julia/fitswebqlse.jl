@@ -99,8 +99,10 @@ end
 
 LOCAL_VERSION = true
 PRODUCTION = false
+TIMEOUT = 15
 
 DB_HOST = ""
+DB_PORT = -1
 DB_USER = ""
 DB_PASSWORD = ""
 FITS_HOME = "/home"
@@ -143,6 +145,7 @@ FITS_LOCK = ReentrantLock()
 function get_jvo_path(
     datasetid,
     host::String,
+    port::Int64,
     user::String,
     password::String,
     db::String,
@@ -151,11 +154,19 @@ function get_jvo_path(
     local url::String, dataid::String, sql::String
     local conn
 
-    if password == ""
-        url = "postgresql://" * user * "@" * host * "/" * db
-    else
-        url = "postgresql://" * user * ":" * password * "@" * host * "/" * db
+    url = "postgresql://" * user
+
+    if password != ""
+        url *= ":" * password
     end
+
+    url *= "@" * host
+
+    if port > 0
+        url *= ":" * string(port)
+    end
+
+    url *= "/" * db
 
     try
         conn = LibPQ.Connection(url)
@@ -903,8 +914,15 @@ function serveFITS(request::HTTP.Request)
                     else
                         # get the FITS path from PostgreSQL
                         try
-                            filepath =
-                                get_jvo_path(f, DB_HOST, DB_USER, DB_PASSWORD, db, table)
+                            filepath = get_jvo_path(
+                                f,
+                                DB_HOST,
+                                DB_PORT,
+                                DB_USER,
+                                DB_PASSWORD,
+                                db,
+                                table,
+                            )
                         catch _
                             filepath = ".cache" * "/" * f * ".fits"
                         end
@@ -1299,7 +1317,17 @@ try
     end
 
     try
+        global TIMEOUT = parse(Int64, retrieve(conf, "fitswebql", "timeout"))
+    catch _
+    end
+
+    try
         global DB_HOST = retrieve(conf, "postgresql", "host")
+    catch _
+    end
+
+    try
+        global DB_PORT = parse(Int64, retrieve(conf, "postgresql", "port"))
     catch _
     end
 
@@ -1325,6 +1353,7 @@ end
 const splat_db = SQLite.DB("splatalogue_v3.db")
 
 println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
+println("DATASET TIMEOUT: $timeout [s]")
 println("Point your browser to http://localhost:$HTTP_PORT")
 println("Press CTRL+C to exit.")
 
