@@ -85,12 +85,12 @@ mutable struct FITSDataSet
     data_mad::Float32
     data_mad₊::Float32
     data_mad₋::Float32
-    video_ready::Bool
+    video_ready::Threads.Atomic{Bool}
 
     # house-keeping
-    has_header::Bool
-    has_data::Bool
-    has_error::Bool
+    has_header::Threads.Atomic{Bool}
+    has_data::Threads.Atomic{Bool}
+    has_error::Threads.Atomic{Bool}
     last_accessed::Threads.Atomic{Float64}
     progress::Threads.Atomic{Int}
     total::Threads.Atomic{Int}
@@ -130,10 +130,10 @@ mutable struct FITSDataSet
             NaN32,
             NaN32,
             NaN32,
-            false,
-            false,
-            false,
-            false,
+            Threads.Atomic{Bool}(false),
+            Threads.Atomic{Bool}(false),
+            Threads.Atomic{Bool}(false),
+            Threads.Atomic{Bool}(false),
             Threads.Atomic{Float64}(0.0),
             Threads.Atomic{Int}(0),
             Threads.Atomic{Int}(0),
@@ -175,10 +175,10 @@ mutable struct FITSDataSet
             NaN32,
             NaN32,
             NaN32,
-            false,
-            false,
-            false,
-            false,
+            Threads.Atomic{Bool}(false),
+            Threads.Atomic{Bool}(false),
+            Threads.Atomic{Bool}(false),
+            Threads.Atomic{Bool}(false),
             Threads.Atomic{Float64}(datetime2unix(now())),
             Threads.Atomic{Int}(0),
             Threads.Atomic{Int}(0),
@@ -388,6 +388,9 @@ function get_progress(fits::FITSDataSet)
 end
 
 function has_header(fits::FITSDataSet)::Bool
+    return fits.has_header[]
+
+    #=
     has_header = false
 
     lock(fits.mutex)
@@ -397,42 +400,19 @@ function has_header(fits::FITSDataSet)::Bool
     unlock(fits.mutex)
 
     return has_header
+    =#
 end
 
 function has_data(fits::FITSDataSet)::Bool
-    has_data = false
-
-    lock(fits.mutex)
-
-    has_data = fits.has_data
-
-    unlock(fits.mutex)
-
-    return has_data
+    return fits.has_data[]
 end
 
 function has_error(fits::FITSDataSet)::Bool
-    has_error = false
-
-    lock(fits.mutex)
-
-    has_error = fits.has_error
-
-    unlock(fits.mutex)
-
-    return has_error
+    return fits.has_error[]
 end
 
 function has_video(fits::FITSDataSet)::Bool
-    has_video = false
-
-    lock(fits.mutex)
-
-    has_video = fits.video_ready
-
-    unlock(fits.mutex)
-
-    return has_video
+    return fits.video_ready[]
 end
 
 function dataset_exists(datasetid::String, fits_objects, fits_lock)::Bool
@@ -954,18 +934,14 @@ function loadFITS(filepath::String, fits::FITSDataSet)
             fits.header = read_header(hdu)
             fits.headerStr = read_header(hdu, String)
 
-            fits.has_header = true
+            fits.has_header[] = true
         catch e
         finally
             unlock(fits.mutex)
         end
 
         if !has_header(fits)
-
-            lock(fits.mutex)
-            fits.has_error = true
-            unlock(fits.mutex)
-
+            fits.has_error[] = true
             break
         end
 
@@ -1010,9 +986,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
                 println("FITS image dimensions: ", size(fits.pixels))
 
-                lock(fits.mutex)
-                fits.has_data = true
-                unlock(fits.mutex)
+                fits.has_data[] = true
 
                 update_progress(fits, 1)
 
@@ -1160,9 +1134,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 # println("mean spectrum:", fits.mean_spectrum)
                 # println("integrated spectrum:", fits.integrated_spectrum)
 
-                lock(fits.mutex)
-                fits.has_data = true
-                unlock(fits.mutex)
+                fits.has_data[] = true
 
                 # finally estimate data_mad, data_madN, data_madP based on the all-data median
                 local data_mad::Float32, data_count::Int64
@@ -1235,9 +1207,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
                 fits.data_mad₊ = data_mad₊
                 fits.data_mad₋ = data_mad₋
 
-                lock(fits.mutex)
-                fits.video_ready = true
-                unlock(fits.mutex)
+                fits.video_ready[] = true
             catch e
                 println("distributed computing error: $e")
             end
@@ -1309,10 +1279,8 @@ function restoreImage(fits::FITSDataSet)
     decompressData(fits)
 
     # adjust has_data and has_error
-    lock(fits.mutex)
-    fits.has_data = bSuccess
-    fits.has_error = !bSuccess
-    unlock(fits.mutex)
+    fits.has_data[] = bSuccess
+    fits.has_error[] = !bSuccess
 
     # restore the cube channels
     # restoreData(fits)
