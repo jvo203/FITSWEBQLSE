@@ -1379,7 +1379,14 @@ function ws_coroutine(ws, ids)
 
     datasetid = String(ids[1])
 
-    @info "Started websocket coroutine for $datasetid" ws
+    fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+    if fits_object.datasetid == ""
+        @error "$datasetid not found, closing a websocket coroutine."
+        return
+    end
+
+    @info "Started a websocket coroutine for $datasetid" ws
 
     # an outgoing queue for messages to be sent
     outgoing = RemoteChannel(() -> Channel{Any}(32))
@@ -1701,7 +1708,7 @@ function ws_coroutine(ws, ids)
             fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
             if fits_object.datasetid == ""
-                continue
+                break
             end
 
             update_timestamp(fits_object)
@@ -2168,10 +2175,7 @@ end
         elapsed = datetime2unix(now()) - fits.last_accessed[]
 
         if elapsed > TIMEOUT
-            # check if there are any WebSocket connections
-            # open for <datasetid>
-
-            println("purging a dataset: $datasetid")
+            println("purging a dataset '$datasetid'")
 
             lock(FITS_LOCK)
 
