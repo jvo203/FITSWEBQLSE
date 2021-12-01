@@ -1352,8 +1352,8 @@ end
 # open a Splatalogue database
 const splat_db = SQLite.DB("splatalogue_v3.db")
 
-println("WELCOME TO $SERVER_STRING (Supercomputer Edition)")
-println("DATASET TIMEOUT: $timeout [s]")
+println("$SERVER_STRING (Supercomputer Edition)")
+println("DATASET TIMEOUT: $(TIMEOUT)s")
 println("Point your browser to http://localhost:$HTTP_PORT")
 println("Press CTRL+C to exit.")
 
