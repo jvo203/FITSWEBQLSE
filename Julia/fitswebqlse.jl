@@ -946,7 +946,7 @@ function serveFITS(request::HTTP.Request)
                                     ":8060/skynode/getDataForALMA.do?db=" *
                                     JVO_FITS_DB *
                                     "&table=cube&data_id=" *
-                                    datasetid *
+                                    f *
                                     "_00_00_00"
                             end
                         end
