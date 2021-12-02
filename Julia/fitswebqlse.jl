@@ -4,6 +4,7 @@ using CodecBzip2;
 using CodecLz4;
 using ConfParser;
 using Distributed;
+using Downloads;
 using HTTP;
 using JSON;
 using LibPQ, Tables;
@@ -816,6 +817,10 @@ function streamImageSpectrum(http::HTTP.Stream)
     return nothing
 end
 
+function download_progress(dl_total, dl_now)
+    println("$dl_now / $dl_total bytes")
+end
+
 function serveFITS(request::HTTP.Request)
     global FITS_OBJECTS, FITS_LOCK
 
@@ -940,7 +945,7 @@ function serveFITS(request::HTTP.Request)
 
                             # the last throw of dice ...
                             if !isfile(filepath)
-                                uri =
+                                url =
                                     "http://" *
                                     JVO_FITS_SERVER *
                                     ":8060/skynode/getDataForALMA.do?db=" *
@@ -950,6 +955,12 @@ function serveFITS(request::HTTP.Request)
                                     "_00_00_00"
 
                                 # download a FITS file from <uri>, save it under <filepath>
+                                download(
+                                    url,
+                                    output = filepath,
+                                    progress = download_progress,
+                                    verbose = true,
+                                )
                             end
                         end
                     end
