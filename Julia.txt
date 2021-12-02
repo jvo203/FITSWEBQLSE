@@ -22,13 +22,16 @@ julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
 # an example config.ini
 
 [fitswebql]
-port=9000
-local=false
-production=false
+port=9000 ; optional
+local=false ; optional
+production=false ; optional
 timeout=15 ; [s]
+home=.cache ; optional
+cache=.cahe ; optional
 
 [postgresql]
 user=jvo
-password=???
-host=jvox.vo.nao.ac.jp
+password=??? ; optional
+host=p10.vo.nao.ac.jp
+port=5433 ; optional
 fitshome=/home
