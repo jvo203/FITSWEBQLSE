@@ -2175,30 +2175,32 @@ end
     WebSockets.serve(ws_server, host, WS_PORT)
 end
 
-# a garbage collection loop (dataset timeout)
-@async while true
-    sleep(10)
+if TIMEOUT > 0
+    # a garbage collection loop (dataset timeout)
+    @async while true
+        sleep(10)
 
-    # purge datasets
-    for (datasetid, fits) in FITS_OBJECTS
-        elapsed = datetime2unix(now()) - fits.last_accessed[]
+        # purge datasets
+        for (datasetid, fits) in FITS_OBJECTS
+            elapsed = datetime2unix(now()) - fits.last_accessed[]
 
-        if elapsed > TIMEOUT
-            println("purging a dataset '$datasetid'")
+            if elapsed > TIMEOUT
+                println("purging a dataset '$datasetid'")
 
-            lock(FITS_LOCK)
+                lock(FITS_LOCK)
 
-            try
-                delete!(FITS_OBJECTS, datasetid)
-            catch e
-                println("Failed to remove a dataset: $e")
-            finally
-                unlock(FITS_LOCK)
+                try
+                    delete!(FITS_OBJECTS, datasetid)
+                catch e
+                    println("Failed to remove a dataset: $e")
+                finally
+                    unlock(FITS_LOCK)
+                end
+
+                # do not wait, trigger garbage collection *NOW*
+                # GC.gc()
+
             end
-
-            # do not wait, trigger garbage collection *NOW*
-            # GC.gc()
-
         end
     end
 end
