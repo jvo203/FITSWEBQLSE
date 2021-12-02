@@ -2121,11 +2121,10 @@ const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 
 function exitFunc()
     global ws_server
-    global FITSWEBQL_ROUTER
 
     try
         close(ws_server)
-        close(FITSWEBQL_ROUTER)
+        throw(InterruptException())
     catch e
         println(e)
     end
