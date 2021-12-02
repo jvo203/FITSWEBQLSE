@@ -119,7 +119,7 @@ const SERVER_STRING =
     string(VERSION_SUB)
 
 const WASM_VERSION = "21.09.XX.X"
-const VERSION_STRING = "SV2021-11-XX.X-ALPHA"
+const VERSION_STRING = "SV2021-12-XX.X-ALPHA"
 
 const ZFP_HIGH_PRECISION = 16
 const ZFP_MEDIUM_PRECISION = 11
@@ -872,6 +872,8 @@ function serveFITS(request::HTTP.Request)
         has_fits = has_fits && dataset_exists(f, FITS_OBJECTS, FITS_LOCK)
     end
 
+    finale(x) = @async println("Finalizing $(x.datasetid).")
+
     if !has_fits
         foreach(datasets) do f
             if !dataset_exists(f, FITS_OBJECTS, FITS_LOCK)
@@ -881,6 +883,7 @@ function serveFITS(request::HTTP.Request)
                     println("restoring $f")
 
                     fits_object = deserialize_fits(f)
+                    # finalizer(finale, fits_object)
 
                     if fits_object.depth > 1
                         fits_object.has_data[] = false
@@ -894,6 +897,7 @@ function serveFITS(request::HTTP.Request)
                     println("cannot restore $f from cache::$e")
 
                     fits_object = FITSDataSet(f)
+                    # finalizer(finale, fits_object)
 
                     # sane defaults
                     if occursin("hsc", db)
