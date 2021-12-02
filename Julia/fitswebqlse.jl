@@ -918,15 +918,15 @@ function serveFITS(request::HTTP.Request)
 
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
-                    uri = ""
+                    filepath = ""
 
                     if LOCAL_VERSION
                         # leave the slash as before, even in Windows
-                        uri = dir * "/" * f * "." * ext
+                        filepath = dir * "/" * f * "." * ext
                     else
                         # get the FITS path from PostgreSQL
                         try
-                            uri = get_jvo_path(
+                            filepath = get_jvo_path(
                                 f,
                                 DB_HOST,
                                 DB_PORT,
@@ -936,10 +936,10 @@ function serveFITS(request::HTTP.Request)
                                 table,
                             )
                         catch _
-                            uri = ".cache" * "/" * f * ".fits"
+                            filepath = ".cache" * "/" * f * ".fits"
 
                             # the last throw of dice ...
-                            if !isfile(uri)
+                            if !isfile(filepath)
                                 uri =
                                     "http://" *
                                     JVO_FITS_SERVER *
@@ -948,11 +948,13 @@ function serveFITS(request::HTTP.Request)
                                     "&table=cube&data_id=" *
                                     f *
                                     "_00_00_00"
+
+                                # download a FITS file from <uri>, save it under <filepath>
                             end
                         end
                     end
 
-                    @async loadFITS(uri, fits_object) # @async or @spawn
+                    @async loadFITS(filepath, fits_object) # @async or @spawn
                 end
             end
         end
