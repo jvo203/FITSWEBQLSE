@@ -870,9 +870,7 @@ function serveFITS(request::HTTP.Request)
 
     foreach(datasets) do f
         has_fits = has_fits && dataset_exists(f, FITS_OBJECTS, FITS_LOCK)
-    end
-
-    finale(x) = @async println("Finalizing $(x.datasetid).")
+    end    
 
     if !has_fits
         foreach(datasets) do f
@@ -883,7 +881,7 @@ function serveFITS(request::HTTP.Request)
                     println("restoring $f")
 
                     fits_object = deserialize_fits(f)
-                    # finalizer(finale, fits_object)
+                    finalizer(finale, fits_object)
 
                     if fits_object.depth > 1
                         fits_object.has_data[] = false
@@ -897,7 +895,7 @@ function serveFITS(request::HTTP.Request)
                     println("cannot restore $f from cache::$e")
 
                     fits_object = FITSDataSet(f)
-                    # finalizer(finale, fits_object)
+                    finalizer(finale, fits_object)
 
                     # sane defaults
                     if occursin("hsc", db)
