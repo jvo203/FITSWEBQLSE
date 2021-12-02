@@ -2154,6 +2154,10 @@ end
             finally
                 unlock(FITS_LOCK)
             end
+
+            # do not wait, trigger garbage collection *NOW*
+            GC.gc()
+
         end
     end
 end
