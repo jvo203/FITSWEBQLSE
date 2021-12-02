@@ -390,6 +390,12 @@ function serveDirectory(request::HTTP.Request)
     end
 end
 
+function gracefullyShutdown(request::HTTP.Request)
+    exitFunc()
+
+    return HTTP.Response(200, "Shutting down $(SERVER_STRING).")
+end
+
 function serveROOT(request::HTTP.Request)
     # @show request
     # @show request.method
@@ -870,7 +876,7 @@ function serveFITS(request::HTTP.Request)
 
     foreach(datasets) do f
         has_fits = has_fits && dataset_exists(f, FITS_OBJECTS, FITS_LOCK)
-    end    
+    end
 
     if !has_fits
         foreach(datasets) do f
@@ -1265,6 +1271,7 @@ end
 const FITSWEBQL_ROUTER = HTTP.Router()
 
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
+HTTP.@register(FITSWEBQL_ROUTER, "GET", "/exit", gracefullyShutdown)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/get_directory", serveDirectory)
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/*/FITSWebQL.html", serveFITS)
 HTTP.@register(FITSWEBQL_ROUTER, "POST", "/*/heartbeat/*", serveHeartBeat)
@@ -2113,13 +2120,19 @@ ws_handle(req) = SERVER_STRING |> WebSockets.Response
 const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 
 function exitFunc()
+    global ws_server
+    global FITSWEBQL_ROUTER
+
     try
         close(ws_server)
+        close(FITSWEBQL_ROUTER)
     catch e
         println(e)
     end
 
     @info "FITSWEBQLSE shutdown."
+
+    exit()
 end
 
 if Base.isinteractive()
@@ -2154,7 +2167,7 @@ end
             end
 
             # do not wait, trigger garbage collection *NOW*
-            GC.gc()
+            # GC.gc()
 
         end
     end
