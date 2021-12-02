@@ -923,7 +923,7 @@ function serveFITS(request::HTTP.Request)
 
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
-                    filepath = ""
+                    local filepath
 
                     if LOCAL_VERSION
                         # leave the slash as before, even in Windows
