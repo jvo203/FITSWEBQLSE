@@ -933,6 +933,11 @@ function serveFITS(request::HTTP.Request)
                             )
                         catch _
                             filepath = ".cache" * "/" * f * ".fits"
+
+                            # the last throw of dice ...
+                            if !isfile(filepath)
+                                # let url = format!("http://{}:8060/skynode/getDataForALMA.do?db={}&table=cube&data_id={}_00_00_00", JVO_FITS_SERVER, JVO_FITS_DB, id) ;
+                            end
                         end
                     end
 

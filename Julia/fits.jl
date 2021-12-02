@@ -863,6 +863,7 @@ end
 function loadFITS(filepath::String, fits::FITSDataSet)
 
     if fits.datasetid == ""
+        fits.has_error[] = true
         return
     end
 
@@ -873,7 +874,6 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     println("loading $filepath::$(fits.datasetid)")
 
     local f, width::Integer, height::Integer, depth::Integer
-    local header
 
     try
         fits.filesize = filesize(filepath)
@@ -882,6 +882,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         println(f)
     catch e
         println(e)
+        fits.has_error[] = true
         return
     end
 
@@ -893,6 +894,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
         end
     catch e
         println(e)
+        fits.has_error[] = true
         return
     end
 
