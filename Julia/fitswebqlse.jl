@@ -818,7 +818,7 @@ function streamImageSpectrum(http::HTTP.Stream)
 end
 
 function download_progress(dl_total, dl_now)
-    println("$dl_now / $dl_total bytes")
+    print("$dl_now / $dl_total bytes\r")
 end
 
 function serveFITS(request::HTTP.Request)
@@ -955,9 +955,9 @@ function serveFITS(request::HTTP.Request)
                                     "_00_00_00"
 
                                 # download a FITS file from <uri>, save it under <filepath>
-                                download(
+                                Downloads.download(
                                     url,
-                                    output = filepath,
+                                    filepath,
                                     progress = download_progress,
                                     verbose = true,
                                 )
