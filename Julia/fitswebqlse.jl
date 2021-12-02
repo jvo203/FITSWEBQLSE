@@ -818,7 +818,7 @@ function streamImageSpectrum(http::HTTP.Stream)
 end
 
 function download_progress(dl_total, dl_now)
-    print("$dl_now / $dl_total bytes\r")
+    print("  $dl_now / $dl_total bytes\r")
 end
 
 function serveFITS(request::HTTP.Request)
