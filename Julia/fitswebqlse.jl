@@ -391,9 +391,9 @@ function serveDirectory(request::HTTP.Request)
 end
 
 function gracefullyShutdown(request::HTTP.Request)
-    exitFunc()
+    @async exitFunc()
 
-    return HTTP.Response(200, "Shutting down $(SERVER_STRING).")
+    return HTTP.Response(200, "Shutting down $(SERVER_STRING)")
 end
 
 function serveROOT(request::HTTP.Request)
