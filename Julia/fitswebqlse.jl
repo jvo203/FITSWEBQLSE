@@ -107,6 +107,10 @@ DB_USER = ""
 DB_PASSWORD = ""
 FITS_HOME = "/home"
 
+# backup FITS download
+const JVO_FITS_SERVER = "jvox.vo.nao.ac.jp"
+const JVO_FITS_DB = "alma"
+
 const VERSION_MAJOR = 5
 const VERSION_MINOR = 0
 const VERSION_SUB = 0
@@ -914,15 +918,15 @@ function serveFITS(request::HTTP.Request)
 
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
-                    filepath = ""
+                    uri = ""
 
                     if LOCAL_VERSION
                         # leave the slash as before, even in Windows
-                        filepath = dir * "/" * f * "." * ext
+                        uri = dir * "/" * f * "." * ext
                     else
                         # get the FITS path from PostgreSQL
                         try
-                            filepath = get_jvo_path(
+                            uri = get_jvo_path(
                                 f,
                                 DB_HOST,
                                 DB_PORT,
@@ -932,16 +936,23 @@ function serveFITS(request::HTTP.Request)
                                 table,
                             )
                         catch _
-                            filepath = ".cache" * "/" * f * ".fits"
+                            uri = ".cache" * "/" * f * ".fits"
 
                             # the last throw of dice ...
-                            if !isfile(filepath)
-                                # let url = format!("http://{}:8060/skynode/getDataForALMA.do?db={}&table=cube&data_id={}_00_00_00", JVO_FITS_SERVER, JVO_FITS_DB, id) ;
+                            if !isfile(uri)
+                                uri =
+                                    "http://" *
+                                    JVO_FITS_SERVER *
+                                    ":8060/skynode/getDataForALMA.do?db=" *
+                                    JVO_FITS_DB *
+                                    "&table=cube&data_id=" *
+                                    datasetid *
+                                    "_00_00_00"
                             end
                         end
                     end
 
-                    @async loadFITS(filepath, fits_object) # @async or @spawn
+                    @async loadFITS(uri, fits_object) # @async or @spawn
                 end
             end
         end
