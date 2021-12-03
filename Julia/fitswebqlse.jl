@@ -106,7 +106,10 @@ DB_HOST = ""
 DB_PORT = -1
 DB_USER = ""
 DB_PASSWORD = ""
-FITS_HOME = "/home"
+DB_HOME = "/home"
+
+FITS_HOME = ".cache"
+FITS_CACHE = ".cache"
 
 # backup FITS download
 const JVO_FITS_SERVER = "jvox.vo.nao.ac.jp"
@@ -200,7 +203,7 @@ function get_jvo_path(
 
         if !isnothing(pos)
             filepath =
-                FITS_HOME *
+                DB_HOME *
                 "/" *
                 db *
                 "/" *
@@ -209,9 +212,9 @@ function get_jvo_path(
                 path
         else
             if (db == "spcam") || (db == "moircs")
-                filepath = FITS_HOME * "/subaru/" * db * "/mosaic/" * path
+                filepath = DB_HOME * "/subaru/" * db * "/mosaic/" * path
             else
-                filepath = FITS_HOME * "/" * db * "/" * path
+                filepath = DB_HOME * "/" * db * "/" * path
             end
         end
 
@@ -941,7 +944,7 @@ function serveFITS(request::HTTP.Request)
                                 table,
                             )
                         catch _
-                            filepath = ".cache" * "/" * f * ".fits"
+                            filepath = FITS_HOME * "/" * f * ".fits"
 
                             # the last throw of dice ...
                             if !isfile(filepath)
@@ -1380,7 +1383,7 @@ try
     end
 
     try
-        global FITS_HOME = retrieve(conf, "postgresql", "fitshome")
+        global DB_HOME = retrieve(conf, "postgresql", "home")
     catch _
     end
 catch _
