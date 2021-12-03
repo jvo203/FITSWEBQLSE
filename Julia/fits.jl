@@ -1,6 +1,7 @@
 import Base.Iterators: flatten
 using Dates;
 using DistributedArrays;
+using Downloads;
 using FITSIO;
 using JSON;
 using CodecLz4;
@@ -870,7 +871,11 @@ end
     return compressed_frames
 end
 
-function loadFITS(filepath::String, fits::FITSDataSet)
+function download_progress(dl_total, dl_now)
+    print("  $dl_now / $dl_total bytes\r")
+end
+
+function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String} = missing)
     global FITS_CACHE
 
     if fits.datasetid == ""
@@ -880,6 +885,17 @@ function loadFITS(filepath::String, fits::FITSDataSet)
 
     if Sys.iswindows()
         filepath = replace(filepath, "/" => "\\")
+    end
+
+    if !ismissing(url)
+        try
+            # download a FITS file from <uri>, save it under <filepath>
+            Downloads.download(url, filepath, progress = download_progress, verbose = true)
+        catch err
+            println(err)
+            fits.has_error[] = true
+            return
+        end
     end
 
     println("loading $filepath::$(fits.datasetid)")

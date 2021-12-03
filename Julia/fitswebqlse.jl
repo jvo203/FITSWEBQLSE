@@ -4,7 +4,6 @@ using CodecBzip2;
 using CodecLz4;
 using ConfParser;
 using Distributed;
-using Downloads;
 using HTTP;
 using JSON;
 using LibPQ, Tables;
@@ -820,10 +819,6 @@ function streamImageSpectrum(http::HTTP.Stream)
     return nothing
 end
 
-function download_progress(dl_total, dl_now)
-    print("  $dl_now / $dl_total bytes\r")
-end
-
 function serveFITS(request::HTTP.Request)
     global FITS_OBJECTS, FITS_LOCK
 
@@ -926,7 +921,8 @@ function serveFITS(request::HTTP.Request)
 
                     insert_dataset(fits_object, FITS_OBJECTS, FITS_LOCK)
 
-                    local filepath
+                    local filepath = ""
+                    local url = missing
 
                     if LOCAL_VERSION
                         # leave the slash as before, even in Windows
@@ -956,19 +952,11 @@ function serveFITS(request::HTTP.Request)
                                     "&table=cube&data_id=" *
                                     f *
                                     "_00_00_00"
-
-                                # download a FITS file from <uri>, save it under <filepath>
-                                Downloads.download(
-                                    url,
-                                    filepath,
-                                    progress = download_progress,
-                                    verbose = true,
-                                )
                             end
                         end
                     end
 
-                    @async loadFITS(filepath, fits_object) # @async or @spawn
+                    @async loadFITS(fits_object, filepath, url) # @async or @spawn
                 end
             end
         end
