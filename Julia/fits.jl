@@ -206,13 +206,15 @@ function update_progress(fits::FITSDataSet, total::Integer)
 end
 
 function serialize_fits(fits::FITSDataSet)
+    global FITS_CACHE
+
     n = length(workers())
 
     try
         lock(fits.mutex)
 
         filename =
-            ".cache" *
+            FITS_CACHE *
             Base.Filesystem.path_separator *
             fits.datasetid *
             Base.Filesystem.path_separator *
@@ -287,10 +289,12 @@ function serialize_fits(fits::FITSDataSet)
 end
 
 function deserialize_fits(datasetid)
+    global FITS_CACHE
+
     fits = FITSDataSet(datasetid)
 
     filename =
-        ".cache" *
+        FITS_CACHE *
         Base.Filesystem.path_separator *
         fits.datasetid *
         Base.Filesystem.path_separator *
@@ -303,7 +307,7 @@ function deserialize_fits(datasetid)
         println("The number of parallel processes does not match. Invalidating the cache.")
         close(io)
 
-        dirname = ".cache" * Base.Filesystem.path_separator * fits.datasetid
+        dirname = FITS_CACHE * Base.Filesystem.path_separator * fits.datasetid
         rm(dirname, recursive = true)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
@@ -374,8 +378,11 @@ function deserialize_fits(datasetid)
 end
 
 function serialize_to_file(fits::FITSDataSet)
+    global FITS_CACHE
+
     try
-        filename = ".cache" * Base.Filesystem.path_separator * fits.datasetid * "/state.jls"
+        filename =
+            FITS_CACHE * Base.Filesystem.path_separator * fits.datasetid * "/state.jls"
         serialize(filename, fits)
     catch e
         println("error serialising the FITS object::$e")
@@ -383,7 +390,9 @@ function serialize_to_file(fits::FITSDataSet)
 end
 
 function deserialize_from_file(datasetid)
-    filename = ".cache" * Base.Filesystem.path_separator * datasetid * "/state.jls"
+    global FITS_CACHE
+
+    filename = FITS_CACHE * Base.Filesystem.path_separator * datasetid * "/state.jls"
     return deserialize(filename)
 end
 
@@ -712,6 +721,7 @@ end
     global_pixels::DArray,
     global_mask::DArray,
 )
+    global FITS_CACHE
 
     local frame, frame_pixels, frame_mask
     local valid_pixels, valid_mask
@@ -792,7 +802,7 @@ end
             #=
             #  save the half-float (Float16) data
             cache_dir =
-                ".cache" * Base.Filesystem.path_separator * datasetid
+                FITS_CACHE * Base.Filesystem.path_separator * datasetid
             filename =
                 cache_dir *
                 Base.Filesystem.path_separator *
@@ -838,7 +848,7 @@ end
             local_pixels[:, :] = pixels
             local_mask[:, :] = mask
 
-            cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+            cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
 
             filename =
                 cache_dir * Base.Filesystem.path_separator * string(myid()) * ".pixels"
@@ -861,6 +871,7 @@ end
 end
 
 function loadFITS(filepath::String, fits::FITSDataSet)
+    global FITS_CACHE
 
     if fits.datasetid == ""
         fits.has_error[] = true
@@ -887,7 +898,7 @@ function loadFITS(filepath::String, fits::FITSDataSet)
     end
 
     try
-        cache_dir = ".cache" * Base.Filesystem.path_separator * fits.datasetid
+        cache_dir = FITS_CACHE * Base.Filesystem.path_separator * fits.datasetid
 
         if !isdir(cache_dir)
             mkdir(cache_dir)
@@ -1238,8 +1249,9 @@ end
 
 # restore DArrays
 @everywhere function preload_image(datasetid, global_pixels, global_mask)
+    global FITS_CACHE
 
-    cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+    cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
 
     try
         filename = cache_dir * Base.Filesystem.path_separator * string(myid()) * ".pixels"
@@ -1298,13 +1310,15 @@ function restoreImage(fits::FITSDataSet)
 end
 
 @everywhere function load_f16_frames(datasetid, width, height, idx)
+    global FITS_CACHE
+
     compressed_frames = Dict{Int32,Matrix{Float16}}()
     # spinlock = Threads.SpinLock()
 
     # Threads.@threads
     for frame in idx
         try
-            cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+            cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
             filename = cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
 
             io = open(filename) # default is read-only
@@ -3894,7 +3908,9 @@ end
 end
 
 function zfp_compress_pixels(datasetid, frame, pixels, mask)
-    cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+    global FITS_CACHE
+
+    cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
     filename = cache_dir * Base.Filesystem.path_separator * string(frame)
 
     compressed_pixels = zfp_compress(pixels, precision = 14)
@@ -3911,6 +3927,8 @@ end
     idx,
     queue::RemoteChannel{Channel{Int32}},
 )
+    global FITS_CACHE
+
     compressed_frames = Dict{Int32,Matrix{Float16}}()
     frames = Channel{Tuple}(32)
 
@@ -3929,7 +3947,7 @@ end
 
     Threads.@threads for frame in idx
         try
-            cache_dir = ".cache" * Base.Filesystem.path_separator * datasetid
+            cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
             filename = cache_dir * Base.Filesystem.path_separator * string(frame)
 
             compressed_pixels = deserialize(filename * ".zfp")
