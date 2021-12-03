@@ -34,4 +34,4 @@ user=jvo
 password=??? ; optional
 host=p10.vo.nao.ac.jp
 port=5433 ; optional
-fitshome=/home
+home=/home
