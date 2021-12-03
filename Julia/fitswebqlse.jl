@@ -1347,6 +1347,8 @@ try
         end
     end
 
+    # [fitswebql]
+
     try
         global LOCAL_VERSION = parse(Bool, retrieve(conf, "fitswebql", "local"))
     catch _
@@ -1361,6 +1363,18 @@ try
         global TIMEOUT = parse(Int64, retrieve(conf, "fitswebql", "timeout"))
     catch _
     end
+
+    try
+        global FITS_HOME = retrieve(conf, "fitswebql", "home")
+    catch _
+    end
+
+    try
+        global FITS_CACHE = retrieve(conf, "fitswebql", "cache")
+    catch _
+    end
+
+    # [postgresql]
 
     try
         global DB_HOST = retrieve(conf, "postgresql", "host")
