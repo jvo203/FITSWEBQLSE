@@ -7,9 +7,9 @@ println(workers())
     println(id)
 
     try
-        io = open("/data/cache/$(id).txt", "w")
-        println(io, "myid() = $id")
-        close(io)
+        open("/data/cache/$(id).txt", "w") do io
+            println(io, "myid() = $id")
+        end
     catch err
         println(err)
     end
