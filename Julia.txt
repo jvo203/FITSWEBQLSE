@@ -27,7 +27,7 @@ local=false ; optional
 production=false ; optional
 timeout=15 ; [s]
 home=.cache ; optional
-cache=.cahe ; optional
+cache=.cache ; optional
 
 [postgresql]
 user=jvo
