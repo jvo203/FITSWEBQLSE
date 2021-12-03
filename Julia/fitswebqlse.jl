@@ -2171,6 +2171,7 @@ function exitFunc()
     global ws_server
 
     try
+        println("WebSocket Server .out channel: ", string(take!(ws_server.out)))
         close(ws_server)
         throw(InterruptException())
     catch e
