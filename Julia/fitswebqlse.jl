@@ -109,7 +109,7 @@ DB_PASSWORD = ""
 DB_HOME = "/home"
 
 FITS_HOME = ".cache"
-FITS_CACHE = ".cache"
+@everywhere FITS_CACHE = ".cache"
 
 # backup FITS download
 const JVO_FITS_SERVER = "jvox.vo.nao.ac.jp"
