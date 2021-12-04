@@ -1352,6 +1352,10 @@ HTTP.@register(
     HTTP.StreamHandlerFunction(streamMolecules)
 )
 
+@everywhere function set_fits_cache(cache::String)
+    global FITS_CACHE = cache
+end
+
 try
     global CONFIG_FILE = parsed_args["config"]
 catch _
@@ -1398,8 +1402,15 @@ try
     end
 
     try
-        cache = retrieve(conf, "fitswebql", "cache")
-        @everywhere global FITS_CACHE = cache
+        global FITS_CACHE = retrieve(conf, "fitswebql", "cache")
+
+        # synchronise <FITS_CACHE> across the workers
+        ras = [@spawnat w set_fits_cache(FITS_CACHE) for w in workers()]
+
+        println("ras: ", ras)
+
+        @time wait.(ras)
+
     catch err
         println(err)
     end
