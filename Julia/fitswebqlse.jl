@@ -1426,7 +1426,7 @@ function ws_coroutine(ws, ids)
 
     fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
-    if fits_object.datasetid == ""
+    if fits_object.datasetid == "" || has_error(fits_object)
         @error "$datasetid not found, closing a websocket coroutine."
         return
     end
@@ -1737,6 +1737,11 @@ function ws_coroutine(ws, ids)
         # ping back heartbeat messages
         if occursin("[heartbeat]", s)
             # @info "[ws] heartbeat"
+
+            if has_error(fits_object)
+                @error "$datasetid: an error detected, closing a websocket coroutine."
+                break
+            end
 
             update_timestamp(fits_object)
 
