@@ -1,30 +1,19 @@
 using Distributed;
 
-println("nprocs: ", nprocs())
-println(workers())
-
+# add two local workers
 addprocs(1)
-println(workers())
-
 addprocs(1)
-println(workers())
 
+# add TCP/IP workers (2 per node)
 addprocs(["grid61"])
-println(workers())
-
 addprocs(["grid61"])
-println(workers())
 
 addprocs(["grid62"])
-println(workers())
-
 addprocs(["grid62"])
-println(workers())
 
 addprocs(["grid63"])
-println(workers())
-
 addprocs(["grid63"])
+
 println(workers())
 
 println("distributed workers initialised, starting tests")
