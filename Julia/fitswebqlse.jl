@@ -153,8 +153,7 @@ parsed_args = parse_commandline()
 # try adding distributed workers
 try
     add_machines(parsed_args["machines"])
-catch err
-    println(err)
+catch _
 end
 
 LOCAL_VERSION = true
