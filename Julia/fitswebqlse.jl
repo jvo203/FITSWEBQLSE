@@ -1407,10 +1407,7 @@ try
         # synchronise <FITS_CACHE> across the workers
         ras = [@spawnat w set_fits_cache(FITS_CACHE) for w in workers()]
 
-        println("ras: ", ras)
-
         @time wait.(ras)
-
     catch _
     end
 
