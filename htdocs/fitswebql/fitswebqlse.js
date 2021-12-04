@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-12-03.0";
+	return "JS2021-12-04.0";
 }
 
 const wasm_supported = (() => {
@@ -10430,11 +10430,11 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 
-			if (va_count == 1) {
+			/*if (va_count == 1) {
 				open_websocket_connection(datasetId, 1);
 			} else {
 				open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
-			}
+			}*/
 
 			// wait for WebAssembly to get compiled
 			Module.ready
@@ -14606,7 +14606,7 @@ async*/ function mainRenderer() {
 
 		if (va_count == 1) {
 			poll_progress(datasetId, 1);
-			// open_websocket_connection(datasetId, 1);
+			open_websocket_connection(datasetId, 1);
 
 			fetch_image_spectrum(datasetId, 1, true, false);
 
@@ -14617,7 +14617,7 @@ async*/ function mainRenderer() {
 				console.log(index, datasetId.rotate(index - 1));
 
 				poll_progress(datasetId.rotate(index - 1)[0], index);
-				// open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
+				open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
 
 				fetch_image_spectrum(datasetId[index - 1], index, true, false);
 			}
