@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-12-04.0";
+	return "JS2021-12-04.1";
 }
 
 const wasm_supported = (() => {
@@ -12444,7 +12444,7 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html('<h4>CSV spectrum export (PLAIN TEXT or FITS formats under consideration)</h4>');
+		.html('<h4>CSV spectrum export (other formats like JSON, PLAIN TEXT or FITS under consideration)</h4>');
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
