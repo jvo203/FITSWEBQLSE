@@ -97,6 +97,66 @@ function replace_one(c::Channel, v)
     return v
 end
 
+function add_machines(file)
+
+    machines = readlines(file)
+
+    for entry in machines
+        local count, host
+
+        v = split(entry, ",")
+
+        host = v[1]
+
+        if length(v) > 1
+            count = parse(Int, v[2])
+        else
+            count = 1
+        end
+
+        println("host: $host, count: $count")
+
+        if host == "localhost"
+            println("adding $count local worker(s)")
+            addprocs(count)
+        else
+            println("adding $count remote worker(s) on $host")
+            addprocs([(host, count)])
+        end
+    end
+
+    println("distributed workers: ", workers())
+end
+
+function parse_commandline()
+    s = ArgParseSettings()
+
+    @add_arg_table s begin
+        "--config"
+        help = "a configuration file."
+        default = "config.ini"
+        "--machines"
+        help = "a CSV machines file for setting up distributed workers in the right (persistent) order"
+        default = ""
+        "--port"
+        help = "an HTTP listening port, defaults to 8080. WebSockets will use the next port (i.e. 8081). The port can also be specified in the .ini config file. Any config file will override this command-line argument."
+        arg_type = Int
+        default = 8080
+    end
+
+    return parse_args(s)
+end
+
+# parse command-line arguments (a config file, port numbers etc.)
+parsed_args = parse_commandline()
+
+# try adding distributed workers
+try
+    add_machines(parsed_args["machines"])
+catch err
+    println(err)
+end
+
 LOCAL_VERSION = true
 PRODUCTION = false
 TIMEOUT = 60 # [s]
@@ -1272,22 +1332,6 @@ function serveFITS(request::HTTP.Request)
     end
 end
 
-function parse_commandline()
-    s = ArgParseSettings()
-
-    @add_arg_table s begin
-        "--config"
-        help = "a configuration file."
-        default = "config.ini"
-        "--port"
-        help = "an HTTP listening port, defaults to 8080. WebSockets will use the next port (i.e. 8081). The port can also be specified in the .ini config file. Any config file will override this command-line argument."
-        arg_type = Int
-        default = 8080
-    end
-
-    return parse_args(s)
-end
-
 const FITSWEBQL_ROUTER = HTTP.Router()
 
 HTTP.@register(FITSWEBQL_ROUTER, "GET", "/", serveROOT)
@@ -1308,9 +1352,6 @@ HTTP.@register(
     "/*/get_molecules/",
     HTTP.StreamHandlerFunction(streamMolecules)
 )
-
-# parse command-line arguments (a config file, port numbers etc.)
-parsed_args = parse_commandline()
 
 try
     global CONFIG_FILE = parsed_args["config"]
@@ -1358,7 +1399,8 @@ try
     end
 
     try
-        global FITS_CACHE = retrieve(conf, "fitswebql", "cache")
+        cache = retrieve(conf, "fitswebql", "cache")
+        @everywhere global FITS_CACHE = cache
     catch _
     end
 
