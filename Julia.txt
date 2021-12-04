@@ -21,7 +21,7 @@ julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
 
 # a JVO cluster with a persistent worker id order
 
-julia -O3 -t 4 Julia/fitswebqlse.jl --machines machines.csv
+julia -O3 -t 4 Julia/fitswebqlse.jl --machines machines.dat
 
 # an example config.ini
 
