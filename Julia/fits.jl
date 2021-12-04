@@ -875,6 +875,19 @@ function download_progress(dl_total, dl_now)
     print("  $dl_now / $dl_total bytes\r")
 end
 
+@everywhere function make_fits_cache(cache_dir::String)::Bool
+    try
+        if !isdir(cache_dir)
+            mkdir(cache_dir)
+        end
+    catch e
+        println(e)
+        return true
+    end
+
+    return false
+end
+
 function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String} = missing)
     global FITS_CACHE
 
@@ -913,14 +926,18 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
         return
     end
 
-    try
-        cache_dir = FITS_CACHE * Base.Filesystem.path_separator * fits.datasetid
+    cache_dir = FITS_CACHE * Base.Filesystem.path_separator * fits.datasetid
 
-        if !isdir(cache_dir)
-            mkdir(cache_dir)
+    try
+        ras = [@spawnat w make_fits_cache(cache_dir) for w in workers()]
+        bError = any(fetch.(ras))
+
+        if bError
+            fits.has_error[] = true
+            return
         end
-    catch e
-        println(e)
+    catch err
+        println(err)
         fits.has_error[] = true
         return
     end

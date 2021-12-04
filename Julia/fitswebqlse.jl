@@ -1411,8 +1411,7 @@ try
 
         @time wait.(ras)
 
-    catch err
-        println(err)
+    catch _
     end
 
     # [postgresql]
