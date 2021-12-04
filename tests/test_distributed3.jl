@@ -1,20 +1,20 @@
 using Distributed;
 
-file = "../machines.txt"
+file = "../machines.csv"
 
 machines = readlines(file)
 
 for entry in machines
     local count, host
 
-    v = split(entry, "*")
+    v = split(entry, ",")
+
+    host = v[1]
 
     if length(v) > 1
-        count = parse(Int, v[1])
-        host = v[2]
+        count = parse(Int, v[2])
     else
         count = 1
-        host = v[1]
     end
 
     println("host: $host, count: $count")
