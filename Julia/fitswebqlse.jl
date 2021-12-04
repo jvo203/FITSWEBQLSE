@@ -136,7 +136,7 @@ function parse_commandline()
         help = "a configuration file."
         default = "config.ini"
         "--machines"
-        help = "a machines file for setting up distributed workers in the right (persistent) order. Entries: host[:count]. host == 'localhost' implies a local topology (WARNING: 'localhost' results in Julia errors at present, to be fixed)."
+        help = "a machines file for setting up distributed workers in the reproducible (persistent) order. Entries: host[:count]. host == 'localhost' implies a local topology (WARNING: 'localhost' results in Julia errors at present, to be fixed)."
         default = ""
         "--port"
         help = "an HTTP listening port, defaults to 8080. WebSockets will use the next port (i.e. 8081). The port can also be specified in the .ini config file. Any config file will override this command-line argument."
