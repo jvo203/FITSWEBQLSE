@@ -1400,7 +1400,8 @@ try
     try
         cache = retrieve(conf, "fitswebql", "cache")
         @everywhere global FITS_CACHE = cache
-    catch _
+    catch err
+        println(err)
     end
 
     # [postgresql]
