@@ -19,6 +19,10 @@ julia -p 2 -t 4 -O3 Julia/fitswebqlse.jl
 
 julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
 
+# a JVO cluster with a persistent worker id order
+
+julia -O3 -t 4 --machines machines.csv Julia/fitswebqlse.jl
+
 # an example config.ini
 
 [fitswebql]
