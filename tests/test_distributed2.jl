@@ -1,18 +1,12 @@
 using Distributed;
 
 # add two local workers
-addprocs(1)
-addprocs(1)
+addprocs(2)
 
-# add TCP/IP workers (2 per node)
-addprocs(["grid61"])
-addprocs(["grid61"])
-
-addprocs(["grid62"])
-addprocs(["grid62"])
-
-addprocs(["grid63"])
-addprocs(["grid63"])
+# add TCP/IP workers (two per node)
+addprocs([("grid61", 2)])
+addprocs([("grid62", 2)])
+addprocs([("grid63", 2)])
 
 println(workers())
 
