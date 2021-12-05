@@ -1477,6 +1477,7 @@ function ws_coroutine(ws, ids)
 
     if fits_object.datasetid == "" || has_error(fits_object)
         @error "$datasetid not found, closing a websocket coroutine."
+        writeguarded(ws, "[close]")
         return
     end
 
@@ -1789,6 +1790,7 @@ function ws_coroutine(ws, ids)
 
             if has_error(fits_object)
                 @error "$datasetid: an error detected, closing a websocket coroutine."
+                writeguarded(ws, "[close]")
                 break
             end
 
