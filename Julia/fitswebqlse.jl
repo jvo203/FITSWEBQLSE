@@ -1790,7 +1790,8 @@ function ws_coroutine(ws, ids)
 
             if has_error(fits_object)
                 @error "$datasetid: an error detected, closing a websocket coroutine."
-                s = "[close]"
+                writeguarded(ws, "[close]")
+                break
             end
 
             update_timestamp(fits_object)
