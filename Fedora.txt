@@ -186,8 +186,3 @@ ulimit -s unlimited
 
 	mpiexec -silent-abort -machinefile /home/chris/mpi_machines -rr -n 4 ./fitswebqlse
 
-11. Julia in a cluster
-
-	julia --startup-file=no -e 'using DaemonMode; serve()'&
-	
-	julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
