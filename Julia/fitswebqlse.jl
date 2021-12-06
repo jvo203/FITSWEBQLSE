@@ -2261,6 +2261,11 @@ function exitFunc(exception = false)
         println(e)
     end
 
+    @info "FITSWEBQLSE shutdown."
+    exit()
+
+    # unreachable code
+
     if exception
         throw(InterruptException())
     end
@@ -2274,9 +2279,6 @@ function exitFunc(exception = false)
         end
     end
 
-    @info "FITSWEBQLSE shutdown."
-
-    exit()
 end
 
 if Base.isinteractive()
