@@ -1466,8 +1466,7 @@ println("$SERVER_STRING (Supercomputer Edition)")
 println("DATASET TIMEOUT: $(TIMEOUT)s")
 println("Point your browser to http://localhost:$HTTP_PORT")
 println(
-    "Press CTRL+C or send SIGINT to exit.",
-    # " Alternatively point your browser to http://localhost:$HTTP_PORT/exit",
+    "Press CTRL+C or send SIGINT to exit. Alternatively point your browser to http://localhost:$HTTP_PORT/exit",
 )
 
 # Sockets.localhost or Sockets.IPv4(0)
