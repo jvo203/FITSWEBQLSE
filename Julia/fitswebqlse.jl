@@ -457,11 +457,7 @@ function serveDirectory(request::HTTP.Request)
 end
 
 function gracefullyShutdown(request::HTTP.Request)
-    @async begin
-        println("About to throw an InterruptException in 1s.")
-        sleep(1)
-        throw(InterruptException())
-    end
+    @async exitFunc(true)
 
     return HTTP.Response(200, "Shutting down $(SERVER_STRING)")
 end
@@ -2252,7 +2248,7 @@ function remove_symlinks()
     end
 end
 
-function exitFunc()
+function exitFunc(exception = false)
     global ws_server
 
     remove_symlinks()
@@ -2274,6 +2270,10 @@ function exitFunc()
     end
 
     @info "FITSWEBQLSE shutdown."
+
+    if exception
+        throw(InterruptException())
+    end
 
     exit()
 end
