@@ -32,6 +32,7 @@ production=false ; optional
 timeout=15 ; [s]
 home=.cache ; optional
 cache=.cache ; optional
+logs=LOGS
 
 [postgresql]
 user=jvo

@@ -159,6 +159,7 @@ end
 LOCAL_VERSION = true
 PRODUCTION = false
 TIMEOUT = 60 # [s]
+LOGS = "LOGS"
 
 DB_HOST = ""
 DB_PORT = -1
@@ -1420,6 +1421,11 @@ try
     end
 
     try
+        global LOGS = retrieve(conf, "fitswebql", "logs")
+    catch _
+    end
+
+    try
         global FITS_CACHE = retrieve(conf, "fitswebql", "cache")
 
         # synchronise <FITS_CACHE> across the workers
@@ -2293,6 +2299,8 @@ end
 #    Base.atexit(exitFunc)
 #    Base.exit_on_sigint(true)
 #end
+
+
 
 @async WebSockets.with_logger(WebSocketLogger()) do
     WebSockets.serve(ws_server, host, WS_PORT)
