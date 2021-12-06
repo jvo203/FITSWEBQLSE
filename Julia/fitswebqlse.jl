@@ -457,7 +457,11 @@ function serveDirectory(request::HTTP.Request)
 end
 
 function gracefullyShutdown(request::HTTP.Request)
-    @async exitFunc()
+    @async begin
+        println("About to throw an InterruptException in 1s.")
+        sleep(1)
+        throw(InterruptException())
+    end
 
     return HTTP.Response(200, "Shutting down $(SERVER_STRING)")
 end
@@ -2256,9 +2260,17 @@ function exitFunc()
     try
         println("WebSocket Server .out channel: ", string(take!(ws_server.out)))
         close(ws_server)
-        throw(InterruptException())
     catch e
         println(e)
+    end
+
+    for w in workers()
+        try
+            println("removing $w")
+            rmprocs(w, waitfor = 10)
+        catch e
+            println(e)
+        end
     end
 
     @info "FITSWEBQLSE shutdown."
