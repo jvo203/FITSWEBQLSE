@@ -2232,7 +2232,7 @@ const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 function remove_symlinks()
     # scan HT_DOCS for any symlinks and remove them
 
-    foreach(readdir(HT_DOCS), join = true) do f
+    foreach(readdir(HT_DOCS, join = true)) do f
         println(f)
         # is it a symbolic link ?
         if islink(f)
