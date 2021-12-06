@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-12-04.1";
+	return "JS2021-12-06.0";
 }
 
 const wasm_supported = (() => {
@@ -7541,7 +7541,7 @@ function setup_axes() {
 			var width = parseFloat(front_svg.attr("width"));
 			var height = parseFloat(front_svg.attr("height"));
 
-			strCSV = '<span id="exportCSV" class="fas fa-file-download" style="display:inline-block; cursor: pointer"></span>'
+			strCSV = '<span id="exportCSV" class="fas fa-file-download" style="display:inline-block; cursor: pointer" title="click to export spectrum to a local file"></span>'
 
 			var colour_style = "csv-dark";
 			if (theme == 'bright')
@@ -12426,7 +12426,7 @@ function show_welcome() {
 
 	headerDiv.append("h2")
 		.attr("align", "center")
-		.html('WELCOME TO FITSWEBQL SE 改善版');
+		.html('WELCOME TO FITSWEBQLSE ALPHA RELEASE');
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
@@ -12440,7 +12440,7 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html("<h4>Server: Julia (distributed computing & networking)</h4>");
+		.html("<h4>Server coded in Julia (distributed computing)</h4>");
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
