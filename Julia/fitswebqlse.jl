@@ -1466,7 +1466,8 @@ println("$SERVER_STRING (Supercomputer Edition)")
 println("DATASET TIMEOUT: $(TIMEOUT)s")
 println("Point your browser to http://localhost:$HTTP_PORT")
 println(
-    "Press CTRL+C to exit. Alternatively point your browser to http://localhost:$HTTP_PORT/exit",
+    "Press CTRL+C or send SIGINT to exit.",
+    # " Alternatively point your browser to http://localhost:$HTTP_PORT/exit",
 )
 
 # Sockets.localhost or Sockets.IPv4(0)
@@ -2260,6 +2261,10 @@ function exitFunc(exception = false)
         println(e)
     end
 
+    if exception
+        throw(InterruptException())
+    end
+
     for w in workers()
         try
             println("removing a distributed worker #$w")
@@ -2271,10 +2276,6 @@ function exitFunc(exception = false)
 
     @info "FITSWEBQLSE shutdown."
 
-    if exception
-        throw(InterruptException())
-    end
-
     exit()
 end
 
@@ -2285,6 +2286,11 @@ else
     Base.atexit(exitFunc)
 end
 =#
+
+if !Base.isinteractive()
+    Base.atexit(exitFunc)
+    Base.exit_on_sigint(true)
+end
 
 @async WebSockets.with_logger(WebSocketLogger()) do
     WebSockets.serve(ws_server, host, WS_PORT)
