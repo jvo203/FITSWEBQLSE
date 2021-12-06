@@ -7,6 +7,7 @@ using Distributed;
 using HTTP;
 using JSON;
 using LibPQ, Tables;
+using LogRoller;
 using Printf;
 using Sockets;
 using SQLite;
@@ -2300,9 +2301,10 @@ end
 #    Base.exit_on_sigint(true)
 #end
 
+ws_log_file =
+    RollingFileWriter(LOGS * Base.Filesystem.path_separator * "ws.log", 256 * 1024, 10)
 
-
-@async WebSockets.with_logger(WebSocketLogger()) do
+@async WebSockets.with_logger(WebSocketLogger(ws_log_file)) do
     WebSockets.serve(ws_server, host, WS_PORT)
 end
 
