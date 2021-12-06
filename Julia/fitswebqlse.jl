@@ -2233,7 +2233,7 @@ function remove_symlinks()
     # scan HT_DOCS for any symlinks and remove them
 
     foreach(readdir(HT_DOCS, join = true)) do f
-        println(f)
+
         # is it a symbolic link ?
         if islink(f)
             # if so remove it
@@ -2244,6 +2244,7 @@ function remove_symlinks()
                 println(err)
             end
         end
+
     end
 end
 
