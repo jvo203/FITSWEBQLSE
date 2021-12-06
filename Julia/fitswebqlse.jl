@@ -2261,11 +2261,14 @@ function exitFunc(exception = false)
         println(e)
     end
 
+    # interrupt all distributed workers
+    interrupt()
+
     @info "FITSWEBQLSE shutdown."
     exit()
 
     # unreachable code
-
+    # throwing an exception here seems to hang Julia
     if exception
         throw(InterruptException())
     end
