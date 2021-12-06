@@ -2237,6 +2237,7 @@ function remove_symlinks()
         if islink(f)
             # if so remove it
             try
+                println("removing a symbolic link $f")
                 rm(f)
             catch err
                 println(err)
