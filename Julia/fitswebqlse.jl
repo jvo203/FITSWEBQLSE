@@ -2279,13 +2279,11 @@ function exitFunc(exception = false)
     exit()
 end
 
-#=
 if Base.isinteractive()
     Base.exit_on_sigint(false)
 else
     Base.atexit(exitFunc)
 end
-=#
 
 # if !Base.isinteractive()
 #    Base.atexit(exitFunc)
@@ -2326,9 +2324,8 @@ if TIMEOUT > 0
     end
 end
 
-HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT), on_shutdown = exitFunc)
+# HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT), on_shutdown = exitFunc)
 
-#=
 try
     HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT))
 catch err
@@ -2337,4 +2334,3 @@ catch err
 finally
     exitFunc()
 end
-=#
