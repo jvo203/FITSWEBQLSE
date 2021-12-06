@@ -2229,8 +2229,26 @@ ws_handle(req) = SERVER_STRING |> WebSockets.Response
 
 const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 
+function remove_symlinks()
+    # scan HT_DOCS for any symlinks and remove them
+
+    foreach(readdir(HT_DOCS)) do f
+        # is it a symbolic link ?
+        if islink(f)
+            # if so remove it
+            try
+                rm(f)
+            catch err
+                println(err)
+            end
+        end
+    end
+end
+
 function exitFunc()
     global ws_server
+
+    remove_symlinks()
 
     try
         println("WebSocket Server .out channel: ", string(take!(ws_server.out)))
