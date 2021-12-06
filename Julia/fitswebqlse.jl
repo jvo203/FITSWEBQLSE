@@ -2287,10 +2287,10 @@ else
 end
 =#
 
-if !Base.isinteractive()
-    Base.atexit(exitFunc)
-    Base.exit_on_sigint(true)
-end
+# if !Base.isinteractive()
+#    Base.atexit(exitFunc)
+#    Base.exit_on_sigint(true)
+#end
 
 @async WebSockets.with_logger(WebSocketLogger()) do
     WebSockets.serve(ws_server, host, WS_PORT)
