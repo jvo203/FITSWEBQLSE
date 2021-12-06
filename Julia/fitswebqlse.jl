@@ -2262,7 +2262,11 @@ function exitFunc(exception = false)
     end
 
     # interrupt all distributed workers
-    interrupt()
+    try
+        interrupt()
+    catch e
+        println(e)
+    end
 
     @info "FITSWEBQLSE shutdown."
     exit()
