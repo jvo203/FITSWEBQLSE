@@ -2266,7 +2266,7 @@ function exitFunc()
 
     for w in workers()
         try
-            println("removing $w")
+            println("removing a distributed worker #$w")
             rmprocs(w, waitfor = 10)
         catch e
             println(e)
