@@ -878,6 +878,22 @@ function streamImageSpectrum(http::HTTP.Stream)
     return nothing
 end
 
+function create_root_path(root_path)
+    link = HT_DOCS * Base.Filesystem.path_separator * root_path
+
+    if !isdir(link)
+        target = "fitswebql"
+        println("making a symbolic link $link --> $target")
+
+        try
+            symlink(target, link)
+        catch err
+            println(err)
+        end
+
+    end
+end
+
 function serveFITS(request::HTTP.Request)
     global FITS_OBJECTS, FITS_LOCK
 
@@ -887,6 +903,8 @@ function serveFITS(request::HTTP.Request)
 
     println("root path: \"$root_path\"")
     # println(params)
+
+    create_root_path(root_path)
 
     has_fits = true
     is_composite = false
