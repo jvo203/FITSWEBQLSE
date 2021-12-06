@@ -2233,6 +2233,7 @@ function remove_symlinks()
     # scan HT_DOCS for any symlinks and remove them
 
     foreach(readdir(HT_DOCS), join = true) do f
+        println(f)
         # is it a symbolic link ?
         if islink(f)
             # if so remove it
@@ -2264,11 +2265,13 @@ function exitFunc()
     exit()
 end
 
+#=
 if Base.isinteractive()
     Base.exit_on_sigint(false)
 else
     Base.atexit(exitFunc)
 end
+=#
 
 @async WebSockets.with_logger(WebSocketLogger()) do
     WebSockets.serve(ws_server, host, WS_PORT)
@@ -2304,6 +2307,9 @@ if TIMEOUT > 0
     end
 end
 
+HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT), on_shutdown = exitFunc)
+
+#=
 try
     HTTP.serve(FITSWEBQL_ROUTER, host, UInt16(HTTP_PORT))
 catch err
@@ -2312,3 +2318,4 @@ catch err
 finally
     exitFunc()
 end
+=#
