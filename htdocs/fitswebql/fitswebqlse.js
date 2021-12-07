@@ -12562,19 +12562,24 @@ function setup_help() {
 
 	bodyDiv.append("h3")
 		.attr("id", "h3")
-		.text("OpenEXR Image Quality");
+		.text("Spectrum Export");
 
 	bodyDiv.append("p")
-		.html("The image quality can be adjusted via <i>Preferences/image quality</i>");
+		.html("The current image/viewport spectrum can be exported to a <b>CSV</b> file");
 
 	bodyDiv.append("p")
-		.html("<b>high</b>: image sizes 300KB〜500KB, <em>DWAB COMPRESSION = 45</em>");
+		.html("Other formats like <em>JSON</em>, <em>PLAIN TEXT</em> or <em>FITS</em> are under consideration");
 
-	bodyDiv.append("p")
-		.html("<b>medium</b>: image sizes around 200KB, <em>DWAB COMPRESSION = 1000</em>");
+	var csv = bodyDiv.append("video")
+		.attr("width", "100%")
+		.attr("controls", "")
+		.attr("preload", "metadata");
 
-	bodyDiv.append("p")
-		.html("<b>low</b>: around 25KB-large images with visible artifacts, <em>DWAB COMPRESSION = 10000</em>");
+	csv.append("source")
+		.attr("src", "https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/spectrum_export.mp4");
+
+	csv.append("p")
+		.html("Your browser does not support the video tag.");
 
 	bodyDiv.append("hr");
 
