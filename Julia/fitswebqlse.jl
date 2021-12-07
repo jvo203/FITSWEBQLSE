@@ -2331,7 +2331,7 @@ if TIMEOUT > 0
                 end
 
                 # do not wait, trigger garbage collection *NOW*
-                # GC.gc()
+                GC.gc()
 
             end
         end
