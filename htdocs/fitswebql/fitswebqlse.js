@@ -12522,11 +12522,34 @@ function setup_help() {
 		.text("×");
 
 	var title = headerDiv.append("h2")
-		.text("FITSWebQL HOW-TO");
+		.text("FITSWEBQLSE HOW-TO");
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
 		.attr("class", "modal-body");
+
+	bodyDiv.append("h3")
+		.attr("id", "h3")
+		.text("Spectrum Export");
+
+	bodyDiv.append("p")
+		.html("The current image/viewport spectrum can be exported to a <b>CSV</b> file");
+
+	bodyDiv.append("p")
+		.html("Other formats like <em>JSON</em>, <em>PLAIN TEXT</em> or <em>FITS</em> are under consideration");
+
+	var csv = bodyDiv.append("video")
+		.attr("width", "100%")
+		.attr("controls", "")
+		.attr("preload", "metadata");
+
+	csv.append("source")
+		.attr("src", "https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/spectrum_export.mp4");
+
+	csv.append("p")
+		.html("Your browser does not support the video tag.");
+
+	bodyDiv.append("hr");
 
 	bodyDiv.append("h3")
 		.text("3D View");
@@ -12557,29 +12580,6 @@ function setup_help() {
 
 	bodyDiv.append("p")
 		.html("when disabled the spectrum refresh will be requested after a 250ms delay since the last movement of the mouse");
-
-	bodyDiv.append("hr");
-
-	bodyDiv.append("h3")
-		.attr("id", "h3")
-		.text("Spectrum Export");
-
-	bodyDiv.append("p")
-		.html("The current image/viewport spectrum can be exported to a <b>CSV</b> file");
-
-	bodyDiv.append("p")
-		.html("Other formats like <em>JSON</em>, <em>PLAIN TEXT</em> or <em>FITS</em> are under consideration");
-
-	var csv = bodyDiv.append("video")
-		.attr("width", "100%")
-		.attr("controls", "")
-		.attr("preload", "metadata");
-
-	csv.append("source")
-		.attr("src", "https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/spectrum_export.mp4");
-
-	csv.append("p")
-		.html("Your browser does not support the video tag.");
 
 	bodyDiv.append("hr");
 
