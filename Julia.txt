@@ -9,8 +9,10 @@ DaemonMode ArgParse CodecBzip2 CodecLz4 ConfParser Downloads HTTP JSON LibPQ Tab
 
 # running Julia on jvof or py1
 
+# no distributed workers, only threads (not recommended)
 julia -O3 -t 16 Julia/fitswebqlse.jl
 
+# threads with distributed workers for (better CPU load balancing)
 julia -O3 -p 4 -t 4 Julia/fitswebqlse.jl
 
 # testing Julia
