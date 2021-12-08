@@ -4583,7 +4583,11 @@ function display_dataset_info() {
 		.append("svg:title")
 		.text("object name");
 
-	document.title = fitsData.OBJECT.replace(/_/g, " ");
+	let titleStr = fitsData.OBJECT.replace(/_/g, " ").trim();
+
+	if titleStr != "" {
+		document.title = titleStr;
+	};
 
 	var dateobs = fitsData.DATEOBS;
 
