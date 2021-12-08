@@ -33,7 +33,7 @@ julia -O3 -t 4 Julia/fitswebqlse.jl --machines machines.dat
 port=9000 ; optional
 local=false ; optional
 production=false ; optional
-timeout=15 ; [s]
+timeout=15 ; [s] , optional (setting 0 disables a timeout)
 home=.cache ; optional
 cache=.cache ; optional
 logs=LOGS
