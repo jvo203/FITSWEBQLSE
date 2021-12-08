@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-12-08.2";
+	return "JS2021-12-08.3";
 }
 
 const wasm_supported = (() => {
@@ -2501,12 +2501,11 @@ function open_websocket_connection(_datasetId, index) {
 		var loc = window.location, ws_uri;
 
 		var pos = WS_SOCKET.indexOf("wss");
-		console.log(WS_SOCKET, pos);
 
 		if (pos >= 0) {
-			ws_uri = WS_SOCKET + loc.hostname + ':' + WS_PORT;
-		} else {
 			ws_uri = WS_SOCKET + loc.hostname;
+		} else {
+			ws_uri = WS_SOCKET + loc.hostname + ':' + WS_PORT;
 		}
 
 		ws_uri += ROOT_PATH + "websocket/" + encodeURIComponent(_datasetId);
