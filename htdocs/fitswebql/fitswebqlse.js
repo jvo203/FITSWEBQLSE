@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-12-07.0";
+	return "JS2021-12-08.0";
 }
 
 const wasm_supported = (() => {
@@ -4583,7 +4583,7 @@ function display_dataset_info() {
 		.append("svg:title")
 		.text("object name");
 
-	document.title = 'FITSWebQL: ' + fitsData.OBJECT.replace(/_/g, " ");
+	document.title = fitsData.OBJECT.replace(/_/g, " ");
 
 	var dateobs = fitsData.DATEOBS;
 
