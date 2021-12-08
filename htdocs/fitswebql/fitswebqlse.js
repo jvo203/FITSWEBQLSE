@@ -4585,7 +4585,7 @@ function display_dataset_info() {
 
 	let titleStr = fitsData.OBJECT.replace(/_/g, " ").trim();
 
-	if titleStr != "" {
+	if (titleStr != "") {
 		document.title = titleStr;
 	};
 
