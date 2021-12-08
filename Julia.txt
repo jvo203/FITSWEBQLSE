@@ -11,6 +11,8 @@ DaemonMode ArgParse CodecBzip2 CodecLz4 ConfParser Downloads HTTP JSON LibPQ Tab
 
 julia -O3 -t 16 Julia/fitswebqlse.jl
 
+julia -O3 -p 4 -t 4 Julia/fitswebqlse.jl
+
 # testing Julia
 
 julia -p 2 -t 4 -O3 Julia/fitswebqlse.jl
