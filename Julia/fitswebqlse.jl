@@ -1007,22 +1007,25 @@ function serveFITS(request::HTTP.Request)
                         # leave the slash as before, even in Windows
                         filepath = dir * "/" * f * "." * ext
                     else
-                        # get the FITS path from PostgreSQL
-                        try
-                            filepath = get_jvo_path(
-                                f,
-                                DB_HOST,
-                                DB_PORT,
-                                DB_USER,
-                                DB_PASSWORD,
-                                db,
-                                table,
-                            )
-                        catch _
-                            filepath = FITS_HOME * "/" * f * ".fits"
+                        # try the FITS home first                        
+                        filepath = FITS_HOME * "/" * f * ".fits"
 
-                            # the last throw of dice ...
-                            if !isfile(filepath)
+                        if !isfile(filepath)
+                            # get the FITS path from PostgreSQL
+                            try
+                                filepath = get_jvo_path(
+                                    f,
+                                    DB_HOST,
+                                    DB_PORT,
+                                    DB_USER,
+                                    DB_PASSWORD,
+                                    db,
+                                    table,
+                                )
+                            catch _
+                                filepath = FITS_HOME * "/" * f * ".fits"
+
+                                # the last throw of dice ...                            
                                 url =
                                     "http://" *
                                     JVO_FITS_SERVER *
