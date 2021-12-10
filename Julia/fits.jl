@@ -880,7 +880,7 @@ end
         if !isdir(cache_dir)
             mkdir(cache_dir)
         end
-    catch _        
+    catch _
     end
 end
 
@@ -925,8 +925,9 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
     cache_dir = FITS_CACHE * Base.Filesystem.path_separator * fits.datasetid
 
     try
-        ras = [@spawnat w make_fits_cache(cache_dir) for w in workers()]    
-        @time wait.(ras)
+        for w in workers()
+            @spawnat w make_fits_cache(cache_dir)
+        end
     catch err
         println(err)
         fits.has_error[] = true
