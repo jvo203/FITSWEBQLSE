@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-12-08.3";
+	return "JS2021-12-10.0";
 }
 
 const wasm_supported = (() => {
@@ -8630,10 +8630,15 @@ function fits_subregion_end(event) {
 		return cancel_download();
 	}
 
+	{
+		let fitsData = fitsContainer[va_count - 1];
+		console.log("BITPIX = ", fitsData.BITPIX);
+	}
+
 	if (displayDownloadConfirmation)
 		download_confirmation();
 	else
-		partial_fits_download(d3.select(this).attr("x"), d3.select(this).attr("y"), d3.select(this).attr("width"), d3.select(this).attr("height"));
+		partial_fits_download();
 
 	/*var onMouseMoveFunc = d3.select(this).on("mousemove");
 	d3.select("#image_rectangle").each( onMouseMoveFunc );*/
@@ -11644,9 +11649,12 @@ function change_noise_sensitivity(index) {
 	update_legend();
 }
 
-function partial_fits_download(offsetx, offsety, width, height) {
+function partial_fits_download() {
 	mousedown = false;
 	d3.select("#region").attr("opacity", 0.0);
+
+	var offsetx = d3.select("#image_rectangle").attr("x");
+	var offsety = d3.select("#image_rectangle").attr("y");
 
 	let fitsData = fitsContainer[va_count - 1];
 	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
@@ -11688,7 +11696,7 @@ function ok_download() {
 	$('#downloadConfirmation').modal('hide');
 	d3.select("#downloadConfirmation").remove();
 
-	partial_fits_download(d3.select("#image_rectangle").attr("x"), d3.select("#image_rectangle").attr("y"), d3.select("#image_rectangle").attr("width"), d3.select("#image_rectangle").attr("height"));
+	partial_fits_download();
 };
 
 function cancel_download() {
