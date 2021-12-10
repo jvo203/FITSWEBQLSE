@@ -1874,7 +1874,7 @@ function getJSON(fits::FITSDataSet)
     local CRVAL2, CDELT2, CRPIX2, CUNIT2, CTYPE2
     local CRVAL3, CDELT3, CRPIX3, CUNIT3, CTYPE3
     local BMAJ, BMIN, BPA, BUNIT, BTYPE, SPECSYS
-    local RESTFRQ, OBSRA, OBSDEC
+    local BITPIX, RESTFRQ, OBSRA, OBSDEC
     local OBJECT, DATEOBS, TIMESYS, LINE, FILTER
 
     try
@@ -1883,210 +1883,216 @@ function getJSON(fits::FITSDataSet)
         header = fits.header
 
         try
+            BITPIX = header["BITPIX"]
+        catch _
+            BITPIX = 0
+        end
+
+        try
             CD1_1 = header["CD1_1"]
-        catch e
+        catch _
             CD1_1 = NaN
         end
 
         try
             CD1_2 = header["CD1_2"]
-        catch e
+        catch _
             CD1_2 = NaN
         end
 
         try
             CD2_1 = header["CD2_1"]
-        catch e
+        catch _
             CD2_1 = NaN
         end
 
         try
             CD2_2 = header["CD2_2"]
-        catch e
+        catch _
             CD2_2 = NaN
         end
 
         try
             CRVAL1 = header["CRVAL1"]
-        catch e
+        catch _
             CRVAL1 = NaN
         end
 
         try
             CDELT1 = header["CDELT1"]
-        catch e
+        catch _
             CDELT1 = NaN
         end
 
         try
             CRPIX1 = header["CRPIX1"]
-        catch e
+        catch _
             CRPIX1 = NaN
         end
 
         try
             CUNIT1 = header["CUNIT1"]
-        catch e
+        catch _
             CUNIT1 = ""
         end
 
         try
             CTYPE1 = header["CTYPE1"]
-        catch e
+        catch _
             CTYPE1 = ""
         end
 
         try
             CRVAL2 = header["CRVAL2"]
-        catch e
+        catch _
             CRVAL2 = NaN
         end
 
         try
             CDELT2 = header["CDELT2"]
-        catch e
+        catch _
             CDELT2 = NaN
         end
 
         try
             CRPIX2 = header["CRPIX2"]
-        catch e
+        catch _
             CRPIX2 = NaN
         end
 
         try
             CUNIT2 = header["CUNIT2"]
-        catch e
+        catch _
             CUNIT2 = ""
         end
 
         try
             CTYPE2 = header["CTYPE2"]
-        catch e
+        catch _
             CTYPE2 = ""
         end
 
         try
             CRVAL3 = header["CRVAL3"]
-        catch e
+        catch _
             CRVAL3 = NaN
         end
 
         try
             CDELT3 = header["CDELT3"]
-        catch e
+        catch _
             CDELT3 = NaN
         end
 
         try
             CRPIX3 = header["CRPIX3"]
-        catch e
+        catch _
             CRPIX3 = NaN
         end
 
         try
             CUNIT3 = header["CUNIT3"]
-        catch e
+        catch _
             CUNIT3 = ""
         end
 
         try
             CTYPE3 = header["CTYPE3"]
-        catch e
+        catch _
             CTYPE3 = ""
         end
 
         try
             BMAJ = header["BMAJ"]
-        catch e
+        catch _
             BMAJ = NaN
         end
 
         try
             BMIN = header["BMIN"]
-        catch e
+        catch _
             BMIN = NaN
         end
 
         try
             BPA = header["BPA"]
-        catch e
+        catch _
             BPA = NaN
         end
 
         try
             BUNIT = header["BUNIT"]
-        catch e
+        catch _
             BUNIT = ""
         end
 
         try
             BTYPE = header["BTYPE"]
-        catch e
+        catch _
             BTYPE = ""
         end
 
         try
             SPECSYS = header["SPECSYS"]
-        catch e
+        catch _
             SPECSYS = ""
         end
 
         RESTFRQ = NaN # default value
         try
             RESTFRQ = header["RESTFRQ"]
-        catch e
+        catch _
         end
 
         try
             RESTFRQ = header["RESTFREQ"]
-        catch e
+        catch _
         end
 
         try
             OBSRA = header["OBSRA"]
-        catch e
+        catch _
             OBSRA = NaN
         end
 
         try
             OBSDEC = header["OBSDEC"]
-        catch e
+        catch _
             OBSDEC = NaN
         end
 
         try
             OBJECT = header["OBJECT"]
-        catch e
+        catch _
             OBJECT = ""
         end
 
         try
             DATEOBS = header["DATE-OBS"]
-        catch e
+        catch _
             DATEOBS = ""
         end
 
         try
             TIMESYS = header["TIMESYS"]
-        catch e
+        catch _
             TIMESYS = ""
         end
 
         LINE = "" # default value
         try
             LINE = header["LINE"]
-        catch e
+        catch _
         end
 
         try
             LINE = header["J_LINE"]
-        catch e
+        catch _
         end
 
         try
             FILTER = header["FILTER"]
-        catch e
+        catch _
             FILTER = ""
         end
 
@@ -2096,6 +2102,7 @@ function getJSON(fits::FITSDataSet)
             "depth" => fits.depth,
             "polarisation" => 1,
             "filesize" => fits.filesize,
+            "BITPIX" => BITPIX,
             "IGNRVAL" => fits.ignrval,
             "CD1_1" => CD1_1,
             "CD1_2" => CD1_2,
