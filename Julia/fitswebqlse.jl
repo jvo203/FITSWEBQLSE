@@ -2335,6 +2335,9 @@ if TIMEOUT > 0
 
                 # do not wait, trigger garbage collection *NOW*
                 GC.gc()
+
+                # yet another time to trigger finalizers ...
+                GC.gc()
             end
         end
     end
