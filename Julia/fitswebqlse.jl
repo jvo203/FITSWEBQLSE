@@ -1324,7 +1324,6 @@ function serveFITS(request::HTTP.Request)
         "var wsConn = null;",
         "var firstTime = true;",
         "var has_image = false;",
-        "var PartialFITSSize = 0;",
         "var PROGRESS_VARIABLE = 0.0;",
         "var PROGRESS_INFO = '' ;",
         "var RESTFRQ = 0.0;",
