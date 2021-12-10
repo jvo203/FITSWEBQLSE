@@ -2332,12 +2332,11 @@ if TIMEOUT > 0
                 finally
                     unlock(FITS_LOCK)
                 end
-
-                # do not wait, trigger garbage collection *NOW*
-                GC.gc()
-
             end
         end
+
+        # do not wait, trigger garbage collection *NOW*
+        GC.gc()
     end
 end
 
