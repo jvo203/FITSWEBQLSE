@@ -740,10 +740,37 @@ function streamFITS(http::HTTP.Stream)
         return nothing
     end
 
-    # TO-DO: sanity checks (X-Y-Z bounds)
-    # (...)
+    # sanity checks (X-Y-Z bounds)
+    local first_frame, last_frame
 
-    println("[streamFITS] passed sanity checks.")
+    try
+        first_frame, last_frame =
+            get_spectrum_range(fits_object, frame_start, frame_end, ref_freq)
+        frame_length = last_frame - first_frame + 1
+        println(
+            "[get_spectrum_range] :: [$first_frame, $last_frame] <$frame_length> ($(fits_object.depth))",
+        )
+    catch e
+        println(e)
+        HTTP.setstatus(http, 500)
+        startwrite(http)
+        write(http, "Internal Server Error")
+        closewrite(http)
+        return nothing
+    end
+
+    x1 = max(1, x1)
+    y1 = max(1, y1)
+    x2 = min(fits_object.width, x2)
+    y2 = min(fits_object.height, y2)
+
+    # cut-out dimensions
+    dimx = abs(x2 - x1 + 1)
+    dimy = abs(y2 - y1 + 1)
+
+    println(
+        "[streamFITS] x1=$x1, x2=$x2, y1=$y1, y2=$y2, first_frame=$first_frame, last_frame=$last_frame; dimx=$dimx, dimy=$dimy.",
+    )
 
     HTTP.setstatus(http, 200)
     startwrite(http)
