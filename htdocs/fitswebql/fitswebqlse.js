@@ -90,6 +90,22 @@ function round(value, precision, mode) {
 	return (isHalf ? value : Math.round(value)) / m
 }
 
+// https://stackoverflow.com/questions/3407012/rounding-up-to-the-nearest-multiple-of-a-number
+// works for positive numbers only
+function roundUp(numToRound, multiple) {
+	if (multiple == 0) {
+		return numToRound;
+	}
+
+	let remainder = numToRound % multiple;
+
+	if (remainder == 0) {
+		return numToRound;
+	}
+
+	return numToRound + multiple - remainder;
+}
+
 function getUint64(dataview, byteOffset, littleEndian) {
 	// 64ビット数を2つの32ビット (4バイト) の部分に分割する
 	const left = dataview.getUint32(byteOffset, littleEndian);
@@ -309,7 +325,7 @@ function get_velocity_bounds(vel_start, vel_end, fitsData) {
 	}
 	else {
 		_frame_start = Math.round((vel_hi - vel_start) / (vel_hi - vel_lo) * (fitsData.depth - 1));
-		_frame_end = roundf((vel_hi - vel_end) / (vel_hi - vel_lo) * (fitsData.depth - 1));
+		_frame_end = Math.round((vel_hi - vel_end) / (vel_hi - vel_lo) * (fitsData.depth - 1));
 	};
 
 	if (_frame_end < _frame_start) {
@@ -8681,8 +8697,8 @@ function fits_subregion_end(event) {
 	else
 		partial_fits_download();
 
-	/*var onMouseMoveFunc = d3.select(this).on("mousemove");
-	d3.select("#image_rectangle").each( onMouseMoveFunc );*/
+	/*var evt = new MouseEvent("mousemove");
+	d3.select('#image_rectangle').node().dispatchEvent(evt);*/
 }
 
 function get_diagonal_image_position(index, width, height) {
@@ -11688,13 +11704,42 @@ function change_noise_sensitivity(index) {
 }
 
 function partial_fits_size() {
+	let frame_bounds = get_frame_bounds(data_band_lo, data_band_hi, va_count - 1);
+	let len = frame_bounds.frame_end - frame_bounds.frame_start + 1;
+
+	console.log("frame_bounds:", frame_bounds, "#frames:", len);
+
+	var offsetx = d3.select("#image_rectangle").attr("x");
+	var offsety = d3.select("#image_rectangle").attr("y");
+
 	let fitsData = fitsContainer[va_count - 1];
+	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 	console.log("BITPIX = ", fitsData.BITPIX);
 
-	let frame_bounds = get_frame_bounds(data_band_lo, data_band_hi, va_count - 1);
-	console.log("frame_bounds:", frame_bounds);
+	var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 1);
+	var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 1);
 
-	return 0;
+	var x1 = image_bounding_dims.x1 + ax * (begin_x - offsetx);
+	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (begin_y - offsety);
+
+	var orig_x1 = x1 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
+	var orig_y1 = y1 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+
+	var x2 = image_bounding_dims.x1 + ax * (end_x - offsetx);
+	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (end_y - offsety);
+
+	var orig_x2 = x2 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
+	var orig_y2 = y2 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+
+	let dimx = Math.abs(orig_x2 - orig_x1 + 1);
+	let dimy = Math.abs(orig_y2 - orig_y1 + 1);
+
+	let fitsHeader = fitsData.HEADER;
+
+	let partial_size = fitsHeader.length + len * dimx * dimy * Math.round(Math.abs(fitsData.BITPIX) / 8);
+
+	// FITS header/data units come in multiples of 2880 bytes
+	return roundUp(partial_size, 2880);
 }
 
 function partial_fits_download() {
@@ -11714,15 +11759,15 @@ function partial_fits_download() {
 	//var y1 = image_bounding_dims.y1 + ay * (begin_y - offsety);
 	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (begin_y - offsety);
 
-	var orig_x1 = x1 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-	var orig_y1 = y1 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+	var orig_x1 = 1 + x1 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
+	var orig_y1 = 1 + y1 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
 
 	var x2 = image_bounding_dims.x1 + ax * (end_x - offsetx);
 	//var y2 = image_bounding_dims.y1 + ay * (end_y - offsety);
 	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (end_y - offsety);
 
-	var orig_x2 = x2 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-	var orig_y2 = y2 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+	var orig_x2 = 1 + x2 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
+	var orig_y2 = 1 + y2 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
 
 	var url = "get_fits?";
 
@@ -13033,7 +13078,7 @@ function download_confirmation(partialSize) {
 		.html("Estimated FITS cut-out size: " + strPartialSize + ". Proceed with the download?");
 
 	var p = bodyDiv.append("p")
-		.html("");
+		.html("</br>");
 
 	p.append("span")
 		.html("&nbsp;&nbsp;&nbsp;");
