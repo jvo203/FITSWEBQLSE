@@ -245,11 +245,10 @@ function get_freq2vel_bounds(freq_start, freq_end, fitsData) {
 	return { frame_start: _frame_start, frame_end: _frame_end };
 }
 
-
 function get_frequency_bounds(freq_start, freq_end, fitsData) {
 	console.log("get_frequency_bounds(" + freq_start + "," + freq_end + ")");
 
-	var f1, f2, band_lo, band_high;
+	var f1, f2, band_lo, band_hi;
 
 	f1 = fitsData.CRVAL3 + fitsData.CDELT3 * (1.0 - fitsData.CRPIX3);
 	f2 = fitsData.CRVAL3 + fitsData.CDELT3 * (fitsData.depth - fitsData.CRPIX3);
