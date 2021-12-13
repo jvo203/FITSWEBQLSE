@@ -759,6 +759,15 @@ function streamFITS(http::HTTP.Stream)
         return nothing
     end
 
+    # restore the "natural" order
+    if x2 < x1
+        x1, x2 = x2, x1
+    end
+
+    if y2 < y1
+        y1, y2 = y2, y1
+    end
+
     x1 = max(1, x1)
     y1 = max(1, y1)
     x2 = min(fits_object.width, x2)
@@ -769,7 +778,7 @@ function streamFITS(http::HTTP.Stream)
     dimy = abs(y2 - y1 + 1)
 
     println(
-        "[streamFITS] x1=$x1, x2=$x2, y1=$y1, y2=$y2, first_frame=$first_frame, last_frame=$last_frame; dimx=$dimx, dimy=$dimy.",
+        "[streamFITS] :: x1=$x1, x2=$x2, y1=$y1, y2=$y2, first_frame=$first_frame, last_frame=$last_frame; dimx=$dimx, dimy=$dimy.",
     )
 
     HTTP.setstatus(http, 200)

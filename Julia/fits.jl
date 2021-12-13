@@ -2186,9 +2186,7 @@ function get_freq2vel_bounds(
 
     # impose ordering
     if last_frame < first_frame
-        tmp = first_frame
-        first_frame = last_frame
-        last_frame = tmp
+        first_frame, last_frame = last_frame, first_frame
     end
 
     first_frame = max(1, first_frame)
@@ -2239,9 +2237,7 @@ function get_frequency_bounds(fits::FITSDataSet, freq_start::Float64, freq_end::
 
     # impose ordering
     if last_frame < first_frame
-        tmp = first_frame
-        first_frame = last_frame
-        last_frame = tmp
+        first_frame, last_frame = last_frame, first_frame
     end
 
     first_frame = max(1, first_frame)
@@ -2286,9 +2282,7 @@ function get_velocity_bounds(fits::FITSDataSet, vel_start::Float64, vel_end::Flo
 
     # impose ordering
     if last_frame < first_frame
-        tmp = first_frame
-        first_frame = last_frame
-        last_frame = tmp
+        first_frame, last_frame = last_frame, first_frame
     end
 
     first_frame = max(1, first_frame)
