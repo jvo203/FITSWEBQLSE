@@ -672,6 +672,85 @@ function streamMolecules(http::HTTP.Stream)
     return nothing
 end
 
+function streamFITS(http::HTTP.Stream)
+    global FITS_OBJECTS, FITS_LOCK
+
+    request::HTTP.Request = http.message
+    request.body = read(http)
+    closeread(http)
+
+    params = HTTP.queryparams(HTTP.URI(request.target))
+    println(params)
+
+    datasetid = ""
+    x1 = 0
+    x2 = 0
+    y1 = 0
+    y2 = 0
+    frame_start::Float64 = 0.0
+    frame_end::Float64 = 0.0
+    ref_freq::Float64 = 0.0
+
+    try
+        datasetid = params["datasetId"]
+        x1 = round(Integer, parse(Int32, params["x1"]))
+        x2 = round(Integer, parse(Int32, params["x2"]))
+        y1 = round(Integer, parse(Int32, params["y1"]))
+        y2 = round(Integer, parse(Int32, params["y2"]))
+        frame_start = parse(Float64, params["frame_start"])
+        frame_end = parse(Float64, params["frame_end"])
+        ref_freq = parse(Float64, params["ref_freq"])
+    catch e
+        println(e)
+        HTTP.setstatus(http, 404)
+        startwrite(http)
+        write(http, "Not Found")
+        closewrite(http)
+        return nothing
+    end
+
+    HTTP.setheader(http, "Cache-Control" => "no-cache")
+    HTTP.setheader(http, "Cache-Control" => "no-store")
+    HTTP.setheader(http, "Pragma" => "no-cache")
+    HTTP.setheader(http, "Content-Type" => "application/octet-stream")
+
+    fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+    if fits_object.datasetid == "" || x1 <= 0 || x2 <= 0 || y1 <= 0 || y2 <= 0
+        HTTP.setstatus(http, 404)
+        startwrite(http)
+        write(http, "Not Found")
+        closewrite(http)
+        return nothing
+    end
+
+    if has_error(fits_object)
+        HTTP.setstatus(http, 500)
+        startwrite(http)
+        write(http, "Internal Server Error")
+        closewrite(http)
+        return nothing
+    end
+
+    if !has_header(fits_object)
+        HTTP.setstatus(http, 404)
+        startwrite(http)
+        write(http, "Not Found")
+        closewrite(http)
+        return nothing
+    end
+
+    # TO-DO: sanity checks (X-Y-Z bounds)
+    # (...)
+
+    HTTP.setstatus(http, 200)
+    startwrite(http)
+    write(http, "Work-In-Progress")
+    closewrite(http)
+    return nothing
+
+end
+
 function streamImageSpectrum(http::HTTP.Stream)
     global FITS_OBJECTS, FITS_LOCK
 
@@ -1373,6 +1452,12 @@ HTTP.@register(
     "GET",
     "/*/get_molecules/",
     HTTP.StreamHandlerFunction(streamMolecules)
+)
+HTTP.@register(
+    FITSWEBQL_ROUTER,
+    "GET",
+    "/*/get_fits/",
+    HTTP.StreamHandlerFunction(streamFITS)
 )
 
 @everywhere function set_fits_cache(cache::String)
