@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-12-10.0";
+	return "JS2021-12-13.0";
 }
 
 const wasm_supported = (() => {
@@ -8630,13 +8630,11 @@ function fits_subregion_end(event) {
 		return cancel_download();
 	}
 
-	{
-		let fitsData = fitsContainer[va_count - 1];
-		console.log("BITPIX = ", fitsData.BITPIX);
-	}
+	if (displayDownloadConfirmation) {
+		var partialSize = partial_fits_size();
 
-	if (displayDownloadConfirmation)
-		download_confirmation();
+		download_confirmation(partialSize);
+	}
 	else
 		partial_fits_download();
 
@@ -11649,6 +11647,13 @@ function change_noise_sensitivity(index) {
 	update_legend();
 }
 
+function partial_fits_size() {
+	let fitsData = fitsContainer[va_count - 1];
+	console.log("BITPIX = ", fitsData.BITPIX);
+
+	return 0;
+}
+
 function partial_fits_download() {
 	mousedown = false;
 	d3.select("#region").attr("opacity", 0.0);
@@ -12946,7 +12951,7 @@ function display_range_validation() {
 		.html("Incorrect velocity/redshift input. Valid values are |V| < c and z > -1.");
 }
 
-function download_confirmation() {
+function download_confirmation(partialSize) {
 	var div = d3.select("body")
 		.append("div")
 		.attr("class", "container")
@@ -12973,17 +12978,19 @@ function download_confirmation() {
 	headerDiv.append("h3")
 		.style("color", "#a94442")
 		.attr("align", "center")
-		.text("CONFIRMATION");
+		.text("DOWNLOAD CONFIRMATION");
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
 		.attr("class", "modal-body");
 
+	let strPartialSize = numeral(partialSize).format('0.0b');
+
 	bodyDiv.append("p")
-		.html("Selecting a sub-region triggers a corresponding partial FITS file download.");
+		.html("Estimated FITS cut-out size: " + strPartialSize + ". Proceed with the download?");
 
 	var p = bodyDiv.append("p")
-		.html("Proceed with the download?");
+		.html("");
 
 	p.append("span")
 		.html("&nbsp;&nbsp;&nbsp;");
@@ -13011,7 +13018,7 @@ function download_confirmation() {
 
 	footer.append("p")
 		.style("color", "#a94442")
-		.html("you can disable showing this dialog via the <i>Preferences</i> menu, <i>download confirmation</i> checkbox");
+		.html("you can disable showing this dialog in the <i>Preferences</i> menu, <i>download confirmation</i> checkbox");
 
 	show_download_confirmation();
 	$('#downloadConfirmation').modal('show');
