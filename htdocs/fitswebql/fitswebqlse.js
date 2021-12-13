@@ -245,8 +245,52 @@ function get_freq2vel_bounds(freq_start, freq_end, fitsData) {
 	return { frame_start: _frame_start, frame_end: _frame_end };
 }
 
+
+function get_frequency_bounds(freq_start, freq_end, fitsData) {
+	console.log("get_frequency_bounds(" + freq_start + "," + freq_end + ")");
+
+	var f1, f2, band_lo, band_high;
+
+	f1 = fitsData.CRVAL3 + fitsData.CDELT3 * (1.0 - fitsData.CRPIX3);
+	f2 = fitsData.CRVAL3 + fitsData.CDELT3 * (fitsData.depth - fitsData.CRPIX3);
+
+	band_lo = Math.min(f1, f2);
+	band_hi = Math.max(f1, f2);
+
+	console.log("band_lo:", band_lo, "band_hi:", band_hi);
+
+	var _frame_start, _frame_end;
+
+	if (fitsData.CDELT3 > 0.0) {
+		_frame_start =
+			Math.round((freq_start - band_lo) / (band_hi - band_lo) * (fitsData.depth - 1));
+		_frame_end =
+			Math.round((freq_end - band_lo) / (band_hi - band_lo) * (fitsData.depth - 1));
+	}
+	else {
+		_frame_start =
+			Math.round((band_hi - freq_start) / (band_hi - band_lo) * (fitsData.depth - 1));
+		_frame_end =
+			Math.round((band_hi - freq_end) / (band_hi - band_lo) * (fitsData.depth - 1));
+	}
+
+	if (_frame_end < _frame_start) {
+		let tmp = _frame_start;
+		_frame_start = _frame_end;
+		_frame_end = tmp;
+	};
+
+	_frame_start = Math.max(_frame_start, 0);
+	_frame_start = Math.min(_frame_start, fitsData.depth - 1);
+
+	_frame_end = Math.max(_frame_end, 0);
+	_frame_end = Math.min(_frame_end, fitsData.depth - 1);
+
+	return { frame_start: _frame_start, frame_end: _frame_end };
+}
+
 function get_velocity_bounds(vel_start, vel_end, fitsData) {
-	console.log("get_velocity_bounds(" + data_band_lo + "," + data_band_hi + ")");
+	console.log("get_velocity_bounds(" + vel_start + "," + vel_end + ")");
 
 	var v1, v2, vel_lo, vel_hi;
 
@@ -10122,9 +10166,6 @@ function setup_image_selection() {
 						if (va_count > 1)
 							dataId = datasetId[index];
 
-						/*let frame_bounds = get_frame_bounds(data_band_lo, data_band_hi, index) ;
-						console.log("frame_bounds:", frame_bounds) ;*/
-
 						// a real-time websocket request
 						var range = get_axes_range(width, height);
 						var dx = range.xMax - range.xMin;
@@ -11650,6 +11691,9 @@ function change_noise_sensitivity(index) {
 function partial_fits_size() {
 	let fitsData = fitsContainer[va_count - 1];
 	console.log("BITPIX = ", fitsData.BITPIX);
+
+	let frame_bounds = get_frame_bounds(data_band_lo, data_band_hi, va_count - 1);
+	console.log("frame_bounds:", frame_bounds);
 
 	return 0;
 }
