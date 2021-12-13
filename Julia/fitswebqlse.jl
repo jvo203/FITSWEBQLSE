@@ -759,11 +759,12 @@ function streamFITS(http::HTTP.Stream)
         return nothing
     end
 
-    # restore the "natural" order
+    # impose ordering
     if x2 < x1
         x1, x2 = x2, x1
     end
 
+    # impose ordering
     if y2 < y1
         y1, y2 = y2, y1
     end
