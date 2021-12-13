@@ -743,6 +743,8 @@ function streamFITS(http::HTTP.Stream)
     # TO-DO: sanity checks (X-Y-Z bounds)
     # (...)
 
+    println("[streamFITS] passed sanity checks.")
+
     HTTP.setstatus(http, 200)
     startwrite(http)
     write(http, "Work-In-Progress")
