@@ -890,7 +890,9 @@ end
 
 @everywhere function remove_fits_cache(cache_dir::String)
     try
-        rm(cache_dir, recursive = true)
+        if isdir(cache_dir)
+            rm(cache_dir, recursive = true)
+        end
     catch _
     end
 end
