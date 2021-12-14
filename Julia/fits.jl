@@ -309,7 +309,11 @@ function deserialize_fits(datasetid)
         close(io)
 
         dirname = FITS_CACHE * Base.Filesystem.path_separator * fits.datasetid
-        rm(dirname, recursive = true)
+        # rm(dirname, recursive = true)
+
+        # use a distributed function to empty the cache directory
+        ras = [@spawnat w remove_fits_cache(dirname) for w in workers()]
+        wait.(ras)
 
         error("The number of parallel processes does not match. Invalidating the cache.")
     end
@@ -880,6 +884,13 @@ end
         if !isdir(cache_dir)
             mkdir(cache_dir)
         end
+    catch _
+    end
+end
+
+@everywhere function remove_fits_cache(cache_dir::String)
+    try
+        rm(cache_dir, recursive = true)
     catch _
     end
 end
@@ -3742,7 +3753,8 @@ end
     depth = last_frame - first_frame + 1
     sizehint!(spectrum, depth)
 
-    Threads.@threads for frame in idx
+    # Threads.@threads
+    for frame in idx
         # @threads macro does not cope with a Dict nor SparseVector object iterator ...
         # not even with "findnz(SparseVector)"
 
@@ -3896,7 +3908,8 @@ end
     sum₋ = 0.0
     count₋ = 0
 
-    Threads.@threads for frame in idx
+    # Threads.@threads
+    for frame in idx
         try
             Threads.lock(spinlock)
             pixels = compressed_frames[frame]
@@ -3971,7 +3984,8 @@ end
         end
     end
 
-    Threads.@threads for frame in idx
+    # Threads.@threads
+    for frame in idx
         try
             cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
             filename = cache_dir * Base.Filesystem.path_separator * string(frame)
