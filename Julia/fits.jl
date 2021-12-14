@@ -1353,8 +1353,7 @@ end
     compressed_frames = Dict{Int32,Matrix{Float16}}()
     # spinlock = Threads.SpinLock()
 
-    # Threads.@threads
-    for frame in idx
+    Threads.@threads for frame in idx
         try
             cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
             filename = cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
@@ -3755,8 +3754,7 @@ end
     depth = last_frame - first_frame + 1
     sizehint!(spectrum, depth)
 
-    # Threads.@threads
-    for frame in idx
+    Threads.@threads for frame in idx
         # @threads macro does not cope with a Dict nor SparseVector object iterator ...
         # not even with "findnz(SparseVector)"
 
@@ -3910,8 +3908,7 @@ end
     sum₋ = 0.0
     count₋ = 0
 
-    # Threads.@threads
-    for frame in idx
+    Threads.@threads for frame in idx
         try
             Threads.lock(spinlock)
             pixels = compressed_frames[frame]
@@ -3986,8 +3983,7 @@ end
         end
     end
 
-    # Threads.@threads
-    for frame in idx
+    Threads.@threads for frame in idx
         try
             cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
             filename = cache_dir * Base.Filesystem.path_separator * string(frame)
