@@ -762,7 +762,13 @@ end
             # replace NaNs with 0.0
             frame_pixels[frame_mask] .= 0
 
-            @async zfp_compress_pixels(datasetid, frame, Float32.(frame_pixels), frame_mask)
+            # @async or Threads.@spawn ..., or nothing
+            Threads.@spawn zfp_compress_pixels(
+                datasetid,
+                frame,
+                Float32.(frame_pixels),
+                frame_mask,
+            )
 
             pixels .+= frame_pixels
             mask .&= frame_mask
