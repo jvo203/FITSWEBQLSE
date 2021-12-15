@@ -762,11 +762,7 @@ end
             # replace NaNs with 0.0
             frame_pixels[frame_mask] .= 0
 
-            try
-                zfp_compress_pixels(datasetid, frame, Float32.(frame_pixels), frame_mask)
-            catch e
-                println(e)
-            end
+            @async zfp_compress_pixels(datasetid, frame, Float32.(frame_pixels), frame_mask)
 
             pixels .+= frame_pixels
             mask .&= frame_mask
@@ -835,6 +831,8 @@ end
             )
 
             # println("processing frame #$frame")
+
+            GC.safepoint()
         end
 
     catch e
@@ -3948,14 +3946,18 @@ end
 function zfp_compress_pixels(datasetid, frame, pixels, mask)
     global FITS_CACHE
 
-    cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
-    filename = cache_dir * Base.Filesystem.path_separator * string(frame)
+    try
+        cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
+        filename = cache_dir * Base.Filesystem.path_separator * string(frame)
 
-    compressed_pixels = zfp_compress(pixels, precision = 14)
-    compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
+        compressed_pixels = zfp_compress(pixels, precision = 14)
+        compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
 
-    serialize(filename * ".zfp", compressed_pixels)
-    serialize(filename * ".lz4", compressed_mask)
+        serialize(filename * ".zfp", compressed_pixels)
+        serialize(filename * ".lz4", compressed_mask)
+    catch e
+        println(e)
+    end
 end
 
 @everywhere function load_zfp_frames(
