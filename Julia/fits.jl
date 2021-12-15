@@ -1351,7 +1351,8 @@ end
     compressed_frames = Dict{Int32,Matrix{Float16}}()
     # spinlock = Threads.SpinLock()
 
-    Threads.@threads for frame in idx
+    # Threads.@threads
+    for frame in idx
         try
             cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
             filename = cache_dir * Base.Filesystem.path_separator * string(frame) * ".f16"
@@ -3970,7 +3971,7 @@ end
     global FITS_CACHE
 
     compressed_frames = Dict{Int32,Matrix{Float16}}()
-    frames = Channel{Tuple}(32)
+    #=frames = Channel{Tuple}(32)
 
     frames_task = @async while true
         try
@@ -3983,7 +3984,9 @@ end
                 println(e)
             end
         end
-    end
+    end=#
+
+    spinlock = Threads.SpinLock()
 
     Threads.@threads for frame in idx
         try
@@ -4003,7 +4006,10 @@ end
             # insert back NaNs
             frame_pixels[frame_mask] .= NaN16
 
-            put!(frames, (frame, frame_pixels))
+            Threads.lock(spinlock)
+            compressed_frames[frame] = frame_pixels
+            # put!(frames, (frame, frame_pixels))
+            Threads.unlock(spinlock)
 
             # println("decompressed frame #$frame")
 
@@ -4016,8 +4022,8 @@ end
         GC.safepoint()
     end
 
-    close(frames)
-    wait(frames_task)
+    # close(frames)
+    # wait(frames_task)
 
     return compressed_frames
 end
