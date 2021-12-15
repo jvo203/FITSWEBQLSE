@@ -43,7 +43,7 @@ production=false ; optional (true --> 'wss://', false --> 'ws://')
 timeout=15 ; [s] , optional (setting 0 disables a timeout)
 home=.cache ; optional
 cache=.cache ; optional
-logs=LOGS
+logs=LOGS ; optional
 
 [postgresql]
 user=jvo
