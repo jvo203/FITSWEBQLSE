@@ -9,27 +9,30 @@ DaemonMode ArgParse CodecBzip2 CodecLz4 ConfParser Downloads HTTP JSON LibPQ Tab
 
 # running Julia on jvof or py1
 
+set "JULIA_NUM_THREADS" in .bashrc so that all the distributed workers can use threads
+export JULIA_NUM_THREADS=8
+
 # no distributed workers, only threads (not recommended)
-julia -O3 -t 16 Julia/fitswebqlse.jl
+julia -O3 Julia/fitswebqlse.jl
 
 # threads with distributed workers for (better CPU load balancing)
-julia -O3 -p 4 -t 4 Julia/fitswebqlse.jl
+julia -O3 -p 4 Julia/fitswebqlse.jl
 
 # testing Julia
 
-julia -p 2 -t 4 -O3 Julia/fitswebqlse.jl
+julia -p 2 -O3 Julia/fitswebqlse.jl
 
 # running Julia in a cluster
 
-julia -O3 -t 4 --machine-file machines.txt Julia/fitswebqlse.jl
+julia -O3 --machine-file machines.txt Julia/fitswebqlse.jl
 
 # a JVO cluster with a persistent worker id order
 
 # AMD
-julia -O3 -t 4 Julia/fitswebqlse.jl --machines machines.dat
+julia -O3 Julia/fitswebqlse.jl --machines machines.dat
 
 # Intel (SSD)
-julia -O3 -t 4 Julia/fitswebqlse.jl --machines machines_intel.dat --config config_ssd.ini
+julia -O3 Julia/fitswebqlse.jl --machines machines_intel.dat --config config_ssd.ini
 
 # an example config.ini
 
