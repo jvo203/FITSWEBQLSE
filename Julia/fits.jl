@@ -4046,8 +4046,12 @@ function decompressData(fits::FITSDataSet)
 
             update_progress(fits, fits.depth)
         catch e
-            println("decompressing data completed")
-            break
+            if isa(e, InvalidStateException) && e.state == :closed
+                println("decompressing data completed")
+                break
+            else
+                println(e)
+            end
         end
     end
 
