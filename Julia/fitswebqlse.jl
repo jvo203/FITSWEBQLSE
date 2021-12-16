@@ -822,8 +822,10 @@ function streamFITS(
 
     HTTP.setstatus(http, 200)
     startwrite(http)
-    # write(http, "Work-In-Progress")
-    write(http, f)
+    write(http, "Work-In-Progress")
+
+    # write(http, f) # this does not worker, figure out a way to stream f
+
     closewrite(http)
 
     close(f)
