@@ -4006,7 +4006,8 @@ end
 
     spinlock = Threads.SpinLock()
 
-    Threads.@threads for frame in idx
+    # Threads.@threads for frame in idx
+    ThreadsX.foreach(idx) do frame
         try
             cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
             filename = cache_dir * Base.Filesystem.path_separator * string(frame)
