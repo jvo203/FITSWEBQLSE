@@ -813,11 +813,20 @@ function streamFITS(
     println(f)
 
     # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
+    disposition = "attachment; filename=" * replace(fits.datasetid, "/" => "_") * "-subregion.fits"
+
+    HTTP.setheader(http, "Content-Type" => "application/force-download")
+    HTTP.setheader(http, "Content-Disposition" => disposition)
+    HTTP.setheader(http, "Content-Transfer-Encoding" => "binary")
+    HTTP.setheader(http, "Accept-Ranges" => "bytes")
 
     HTTP.setstatus(http, 200)
     startwrite(http)
-    write(http, "Work-In-Progress")
+    # write(http, "Work-In-Progress")
+    write(http, f)
     closewrite(http)
+
+    close(f)
     return nothing
 end
 
