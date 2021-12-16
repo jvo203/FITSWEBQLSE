@@ -782,8 +782,17 @@ function streamFITS(http::HTTP.Stream)
         "[streamFITS] :: x1=$x1, x2=$x2, y1=$y1, y2=$y2, first_frame=$first_frame, last_frame=$last_frame; dimx=$dimx, dimy=$dimy.",
     )
 
-    return streamFITS(http, fits_object, x1, x2, y1, y2, first_frame, last_frame)
+    try
+        return streamFITS(http, fits_object, x1, x2, y1, y2, first_frame, last_frame)
+    catch err
+        println(err)
 
+        HTTP.setstatus(http, 404)
+        startwrite(http)
+        write(http, "$err")
+        closewrite(http)
+        return nothing
+    end
 end
 
 function streamFITS(
@@ -796,6 +805,10 @@ function streamFITS(
     first_frame,
     last_frame,
 )
+    # any errors will be caught/handled higher up
+
+    f = FITS(fits.filepath)
+    println(f)
 
     # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
 
