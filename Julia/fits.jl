@@ -3958,8 +3958,10 @@ function zfp_compress_pixels(datasetid, frame, pixels, mask)
         serialize(filename * ".zfp", compressed_pixels)
         serialize(filename * ".lz4", compressed_mask)
 
-        # trim memory
-        ccall(:malloc_trim, Cvoid, (Cint,), 0)
+        @static if Sys.islinux()
+            # trim memory
+            ccall(:malloc_trim, Cvoid, (Cint,), 0)
+        end
     catch e
         println(e)
     end
@@ -4007,8 +4009,10 @@ end
             )
             frame_pixels = Float16.(zfp_decompress(compressed_pixels))
 
-            # trim memory
-            ccall(:malloc_trim, Cvoid, (Cint,), 0)
+            @static if Sys.islinux()
+                # trim memory
+                ccall(:malloc_trim, Cvoid, (Cint,), 0)
+            end
 
             # insert back NaNs
             frame_pixels[frame_mask] .= NaN16
