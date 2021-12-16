@@ -824,7 +824,13 @@ function streamFITS(
     startwrite(http)
     write(http, "Work-In-Progress")
 
-    # write(http, f) # this does not worker, figure out a way to stream f
+    # write(http, f) # this does not work, figure out a way to stream f
+    hdu_id = 0
+    for hdu in f
+        hdu_id = hdu_id + 1
+        println(typeof(hdu))
+    end
+    println("HDU count: $hdu_id")
 
     closewrite(http)
 
