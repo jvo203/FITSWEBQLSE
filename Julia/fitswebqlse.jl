@@ -679,6 +679,11 @@ function streamFITS(http::HTTP.Stream)
     request.body = read(http)
     closeread(http)
 
+    HTTP.setheader(http, "Cache-Control" => "no-cache")
+    HTTP.setheader(http, "Cache-Control" => "no-store")
+    HTTP.setheader(http, "Pragma" => "no-cache")
+    # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
+
     params = HTTP.queryparams(HTTP.URI(request.target))
     println(params)
 
@@ -708,11 +713,6 @@ function streamFITS(http::HTTP.Stream)
         closewrite(http)
         return nothing
     end
-
-    HTTP.setheader(http, "Cache-Control" => "no-cache")
-    HTTP.setheader(http, "Cache-Control" => "no-store")
-    HTTP.setheader(http, "Pragma" => "no-cache")
-    HTTP.setheader(http, "Content-Type" => "application/octet-stream")
 
     fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
