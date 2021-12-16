@@ -4,6 +4,7 @@ using CodecBzip2;
 using CodecLz4;
 using ConfParser;
 using Distributed;
+using FITSIO;
 using HTTP;
 using JSON;
 using LibPQ, Tables;

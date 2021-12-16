@@ -325,6 +325,11 @@ function deserialize_fits(datasetid)
     fits.datasetid = deserialize(io)
     fits.filesize = deserialize(io)
     fits.filepath = deserialize(io)
+
+    if !isfile(fits.filepath)
+        error("$(fits.filepath) cannot be accessed. Invalidating the cache.")
+    end
+
     fits.header = deserialize(io)
     fits.headerStr = deserialize(io)
     fits.width = deserialize(io)
