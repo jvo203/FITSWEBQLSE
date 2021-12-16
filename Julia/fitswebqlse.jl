@@ -825,12 +825,15 @@ function streamFITS(
     write(http, "Work-In-Progress")
 
     # write(http, read(f)) # this does not work, figure out a way to stream f
-    hdu_id = 0
+    #=hdu_id = 0
     for hdu in f
         hdu_id = hdu_id + 1
         println(typeof(hdu))
     end
-    println("HDU count: $hdu_id")
+    println("HDU count: $hdu_id")=#
+
+    # select the first HDU
+    hdu = f[1]
 
     closewrite(http)
 
