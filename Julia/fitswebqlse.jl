@@ -682,7 +682,6 @@ function streamFITS(http::HTTP.Stream)
     HTTP.setheader(http, "Cache-Control" => "no-cache")
     HTTP.setheader(http, "Cache-Control" => "no-store")
     HTTP.setheader(http, "Pragma" => "no-cache")
-    # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
 
     params = HTTP.queryparams(HTTP.URI(request.target))
     println(params)
@@ -782,12 +781,28 @@ function streamFITS(http::HTTP.Stream)
         "[streamFITS] :: x1=$x1, x2=$x2, y1=$y1, y2=$y2, first_frame=$first_frame, last_frame=$last_frame; dimx=$dimx, dimy=$dimy.",
     )
 
+    return streamFITS(http, fits_object, x1, x2, y1, y2, first_frame, last_frame)
+
+end
+
+function streamFITS(
+    http::HTTP.Stream,
+    fits::FITSDataSet,
+    x1,
+    x2,
+    y1,
+    y2,
+    first_frame,
+    last_frame,
+)
+
+    # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
+
     HTTP.setstatus(http, 200)
     startwrite(http)
     write(http, "Work-In-Progress")
     closewrite(http)
     return nothing
-
 end
 
 function streamImageSpectrum(http::HTTP.Stream)
