@@ -807,7 +807,9 @@ function streamFITS(
 )
     # any errors will be caught/handled higher up
 
-    f = FITS(fits.filepath)
+    filter = "[" * string(x1) * ":" * string(x2) * "," * string(y1) * ":" * string(y2) * "," * string(first_frame) * ":" * string(last_frame) * "]"
+
+    f = FITS(fits.filepath * filter)
     println(f)
 
     # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
