@@ -54,6 +54,7 @@ mutable struct FITSDataSet
     # metadata
     datasetid::String
     filesize::Integer
+    filepath::String
     header::Any
     headerStr::String
     width::Integer
@@ -105,6 +106,7 @@ mutable struct FITSDataSet
         new(
             "",
             0,
+            "",
             Nothing,
             "NULL",
             0,
@@ -151,6 +153,7 @@ mutable struct FITSDataSet
         new(
             datasetid,
             0,
+            "",
             Nothing,
             "NULL",
             0,
@@ -225,6 +228,7 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, n)
         serialize(io, fits.datasetid)
         serialize(io, fits.filesize)
+        serialize(io, fits.filepath)
         serialize(io, fits.header)
         serialize(io, fits.headerStr)
         serialize(io, fits.width)
@@ -320,6 +324,7 @@ function deserialize_fits(datasetid)
 
     fits.datasetid = deserialize(io)
     fits.filesize = deserialize(io)
+    fits.filepath = deserialize(io)
     fits.header = deserialize(io)
     fits.headerStr = deserialize(io)
     fits.width = deserialize(io)
@@ -934,6 +939,9 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
         return
     end
 
+    # it is safe to set the filepath, the FITS file has been opened without an error
+    fits.filepath = filepath
+
     cache_dir = FITS_CACHE * Base.Filesystem.path_separator * fits.datasetid
 
     try
@@ -1279,7 +1287,6 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
 
     update_timestamp(fits)
 
-    # serialize_to_bson(fits)
     serialize_fits(fits)
 
 end
