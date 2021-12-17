@@ -197,6 +197,8 @@ const ZFP_LOW_PRECISION = 8
 const SPECTRUM_HIGH_PRECISION = 24
 const SPECTRUM_MEDIUM_PRECISION = 16
 
+const FITS_CHUNK = 2880
+
 # default config file
 CONFIG_FILE = "config.ini"
 
@@ -824,13 +826,14 @@ function streamFITS(
 
     # get the header string
     headerStr = read_header(hdu, String)
+    padding = FITS_CHUNK - length(headerStr) % FITS_CHUNK
 
     # and the number of 2D planes (depth)
     width = size(hdu, 1)
     height = size(hdu, 2)
     depth = size(hdu, 3)
 
-    println("FITS cut-out: $width x $height x $depth\theader length: ", length(headerStr))
+    println("FITS cut-out: $width x $height x $depth\theader length: ", length(headerStr), ", padding: $padding")
 
     # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
     disposition = "attachment; filename=" * replace(fits.datasetid, "/" => "_") * "-subregion.fits"
@@ -843,7 +846,14 @@ function streamFITS(
 
     try
         startwrite(http)
-        write(http, "Work-In-Progress")
+
+        # first the FITS header
+        write(http, headerStr)
+
+        if padding > 0
+            write(http, '\0'^padding)
+        end
+
     catch e
         println(e)
     finally
