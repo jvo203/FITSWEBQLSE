@@ -773,7 +773,7 @@ end
             frame_pixels[frame_mask] .= 0
 
             # @async or Threads.@spawn ..., or nothing
-            @async zfp_compress_pixels(datasetid, frame, Float32.(frame_pixels), frame_mask)
+            zfp_compress_pixels(datasetid, frame, Float32.(frame_pixels), frame_mask)
 
             pixels .+= frame_pixels
             mask .&= frame_mask
