@@ -854,6 +854,8 @@ function streamFITS(
 
     HTTP.setstatus(http, 200)
 
+    local frame_pixels
+
     try
         startwrite(http)
 
@@ -865,7 +867,14 @@ function streamFITS(
         end
 
         for frame = 1:depth
+            # check #naxes, only read (:, :, frame) if and when necessary
+            if naxes >= 4
+                frame_pixels = reshape(read(hdu, :, :, frame, 1), (width, height))
+            else
+                frame_pixels = reshape(read(hdu, :, :, frame), (width, height))
+            end
 
+            println("read FITS channel #$frame")
         end
 
     catch e
