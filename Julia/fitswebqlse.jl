@@ -888,6 +888,8 @@ function streamFITS(
             write(http, binary_pixels)
         end
 
+        # TO-DO: pad the output to a multiple of FITS_CHUNK
+
     catch e
         println(e)
     finally
