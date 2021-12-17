@@ -1008,7 +1008,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
             fits.headerStr = read_header(hdu, String)
 
             fits.has_header[] = true
-        catch e
+        catch _
         finally
             unlock(fits.mutex)
         end
