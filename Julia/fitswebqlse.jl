@@ -886,9 +886,18 @@ function streamFITS(
             println("binary pixels length: ", length(binary_pixels))
 
             write(http, binary_pixels)
+            total_length += length(binary_pixels)
         end
 
-        # TO-DO: pad the output to a multiple of FITS_CHUNK
+        # pad the output to a multiple of FITS_CHUNK
+        padding = FITS_CHUNK - total_length % FITS_CHUNK
+
+        if padding > 0
+            write(http, '\0'^padding)
+            total_length += padding
+        end
+
+        println("[streamFITS]::written $total_length bytes.")
 
     catch e
         println(e)
