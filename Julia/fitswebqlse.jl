@@ -879,7 +879,7 @@ function streamFITS(
                 frame_pixels = reshape(read(hdu, :, :, frame), width * height)
             end
 
-            println("read FITS channel #$frame, pixels length: ", length(frame_pixels))
+            println("read FITS channel #$frame, pixels length: ", length(frame_pixels), ", type: ", typeof(frame_pixels))
         end
 
     catch e
