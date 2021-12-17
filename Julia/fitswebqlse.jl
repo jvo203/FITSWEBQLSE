@@ -828,6 +828,12 @@ function streamFITS(
     headerStr = read_header(hdu, String)
     padding = FITS_CHUNK - length(headerStr) % FITS_CHUNK
 
+    naxes = ndims(hdu)
+
+    if naxes < 3
+        error("FITS data cube naxes should be >= 3.")
+    end
+
     # and the number of 2D planes (depth)
     width = size(hdu, 1)
     height = size(hdu, 2)
@@ -856,6 +862,10 @@ function streamFITS(
 
         if padding > 0
             write(http, '\0'^padding)
+        end
+
+        for frame = 1:depth
+
         end
 
     catch e
