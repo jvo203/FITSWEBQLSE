@@ -854,18 +854,19 @@ function streamFITS(
 
     HTTP.setstatus(http, 200)
 
-    local frame_pixels
-
     try
         startwrite(http)
 
-        # first the FITS header
+        # first send the FITS header
         write(http, headerStr)
 
         if padding > 0
             write(http, '\0'^padding)
         end
 
+        local frame_pixels
+
+        # then the data
         for frame = 1:depth
             # check #naxes, only read (:, :, frame) if and when necessary
             if naxes >= 4
