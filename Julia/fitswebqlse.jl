@@ -788,6 +788,13 @@ function streamFITS(http::HTTP.Stream)
         println(err)
 
         HTTP.setstatus(http, 404)
+
+        # undo any header changes done in 'streamFITS' below
+        HTTP.setheader(http, "Content-Type" => "text/plain")
+        HTTP.setheader(http, "Content-Transfer-Encoding" => "base64")
+        HTTP.setheader(http, "Content-Disposition" => "inline")
+        HTTP.setheader(http, "Accept-Ranges" => "none")
+
         startwrite(http)
         write(http, "$err")
         closewrite(http)
@@ -812,6 +819,19 @@ function streamFITS(
     f = FITS(fits.filepath * filter)
     println(f)
 
+    # select the first HDU
+    hdu = f[1]
+
+    # get the header string
+    headerStr = read_header(hdu, String)
+
+    # and the number of 2D planes (depth)
+    width = size(hdu, 1)
+    height = size(hdu, 2)
+    depth = size(hdu, 3)
+
+    println("width: $width, height: $height, depth: $depth\theader length: ", length(headerStr))
+
     # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
     disposition = "attachment; filename=" * replace(fits.datasetid, "/" => "_") * "-subregion.fits"
 
@@ -821,23 +841,17 @@ function streamFITS(
     HTTP.setheader(http, "Accept-Ranges" => "bytes")
 
     HTTP.setstatus(http, 200)
-    startwrite(http)
-    write(http, "Work-In-Progress")
 
-    # write(http, read(f)) # this does not work, figure out a way to stream f
-    #=hdu_id = 0
-    for hdu in f
-        hdu_id = hdu_id + 1
-        println(typeof(hdu))
+    try
+        startwrite(http)
+        write(http, "Work-In-Progress")
+    catch e
+        println(e)
+    finally
+        close(f)
+        closewrite(http)
     end
-    println("HDU count: $hdu_id")=#
 
-    # select the first HDU
-    hdu = f[1]
-
-    closewrite(http)
-
-    close(f)
     return nothing
 end
 
