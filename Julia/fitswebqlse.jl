@@ -830,7 +830,7 @@ function streamFITS(
     height = size(hdu, 2)
     depth = size(hdu, 3)
 
-    println("width: $width, height: $height, depth: $depth\theader length: ", length(headerStr))
+    println("FITS cut-out: $width x $height x $depth\theader length: ", length(headerStr))
 
     # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
     disposition = "attachment; filename=" * replace(fits.datasetid, "/" => "_") * "-subregion.fits"
