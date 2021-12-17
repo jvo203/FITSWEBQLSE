@@ -9,3 +9,5 @@ z2 = map(x -> reverse(reinterpret(UInt8, [x])), a)
 
 println(z1)
 println(z2)
+
+println(typeof(z2))
