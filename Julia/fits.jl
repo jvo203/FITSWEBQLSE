@@ -983,7 +983,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
             width = size(hdu, 1)
             height = size(hdu, 2)
             depth = size(hdu, 3)
-        catch e
+        catch _
         end
 
         println(
