@@ -879,7 +879,13 @@ function streamFITS(
                 frame_pixels = reshape(read(hdu, :, :, frame), width * height)
             end
 
+            # convert to BIG-ENDIAN UInt8
+            binary_pixels = collect(flatten(map(x -> reverse(reinterpret(UInt8, [x])), frame_pixels)))
+
             println("read FITS channel #$frame, pixels length: ", length(frame_pixels), ", type: ", typeof(frame_pixels))
+            println("binary pixels length: ", length(binary_pixels))
+
+            write(http, binary_pixels)
         end
 
     catch e
