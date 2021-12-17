@@ -854,14 +854,18 @@ function streamFITS(
 
     HTTP.setstatus(http, 200)
 
+    total_length = 0
+
     try
         startwrite(http)
 
         # first send the FITS header
         write(http, headerStr)
+        total_length += length(headerStr)
 
         if padding > 0
             write(http, '\0'^padding)
+            total_length += padding
         end
 
         local frame_pixels
@@ -870,12 +874,12 @@ function streamFITS(
         for frame = 1:depth
             # check #naxes, only read (:, :, frame) if and when necessary
             if naxes >= 4
-                frame_pixels = reshape(read(hdu, :, :, frame, 1), (width, height))
+                frame_pixels = reshape(read(hdu, :, :, frame, 1), width * height)
             else
-                frame_pixels = reshape(read(hdu, :, :, frame), (width, height))
+                frame_pixels = reshape(read(hdu, :, :, frame), width * height)
             end
 
-            println("read FITS channel #$frame")
+            println("read FITS channel #$frame, pixels length: ", length(frame_pixels))
         end
 
     catch e
