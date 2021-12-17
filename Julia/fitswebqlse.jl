@@ -835,6 +835,10 @@ function streamFITS(
 
     println("FITS cut-out: $width x $height x $depth\theader length: ", length(headerStr), ", padding: $padding")
 
+    if depth < 1
+        error("FITS data cube depth should be >= 1.")
+    end
+
     # HTTP.setheader(http, "Content-Type" => "application/octet-stream")
     disposition = "attachment; filename=" * replace(fits.datasetid, "/" => "_") * "-subregion.fits"
     HTTP.setheader(http, "Content-Type" => "application/force-download")
