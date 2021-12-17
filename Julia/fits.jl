@@ -1129,7 +1129,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
 
                         try
                             queue = indices[tid]
-                        catch e
+                        catch _
                             println("adding a new BitArray@$tid")
                             queue = falses(depth)
                             indices[tid] = queue
@@ -1137,7 +1137,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
                             queue[frame] = true
                         end
 
-                    catch e
+                    catch _
                         println("progress task completed")
                         break
                     end
