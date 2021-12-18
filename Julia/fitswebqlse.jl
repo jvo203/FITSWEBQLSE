@@ -863,8 +863,9 @@ function streamFITS(
         write(http, headerStr)
         total_length += length(headerStr)
 
+        # pad a header with blanks (spaces)
         if padding > 0
-            write(http, '\0'^padding)
+            write(http, ' '^padding)
             total_length += padding
         end
 
