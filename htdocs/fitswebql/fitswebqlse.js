@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-12-13.2";
+	return "JS2021-12-18.0";
 }
 
 const wasm_supported = (() => {
@@ -11736,7 +11736,7 @@ function partial_fits_size() {
 
 	let fitsHeader = fitsData.HEADER;
 
-	let partial_size = fitsHeader.length + len * dimx * dimy * Math.round(Math.abs(fitsData.BITPIX) / 8);
+	let partial_size = roundUp(fitsHeader.length, 2880) + len * dimx * dimy * Math.round(Math.abs(fitsData.BITPIX) / 8);
 
 	// FITS header/data units come in multiples of 2880 bytes
 	return roundUp(partial_size, 2880);
