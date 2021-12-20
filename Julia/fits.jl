@@ -2370,7 +2370,7 @@ function get_frame2freq_vel(
             crval3 * fits.frame_multiplier +
             cdelt3 * fits.frame_multiplier * (frame - crpix3) # [m/s]        
 
-        f = ref_freq * sqrt((1.0 - v / c) / (1 + v / c)) # [Hz]        
+        f = ref_freq * sqrt((1.0 - v / c) / (1.0 + v / c)) # [Hz]        
 
         if rest
             f = relativistic_rest_frequency(f, Δv)
