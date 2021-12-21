@@ -3038,11 +3038,15 @@ function open_websocket_connection(_datasetId, index) {
 							// prepend the UTF-8 Byte Order Mark (BOM) 0xEF,0xBB,0xBF
 							var blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: "data:text/csv;charset=utf-8" });
 
+							var filename = "";
+
 							if (va_count == 1) {
-								saveAs(blob, datasetId + ".csv");
+								filename = datasetId + ".csv";
 							} else {
-								saveAs(blob, datasetId[index - 1] + ".csv");
+								filename = datasetId[index - 1] + ".csv";
 							};
+
+							saveAs(blob, filename.replace('/', '_'));
 						}
 						catch (err) {
 							console.error(err);
