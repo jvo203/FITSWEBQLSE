@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2021-12-23.0";
+	return "JS2022-01-04.1";
 }
 
 const wasm_supported = (() => {
@@ -9206,6 +9206,10 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 		}
 	}
 
+	// a fix for Safari
+	d3.select(document.body)
+		.on('wheel.body', e => { });
+
 	var svg = d3.select("#FrontSVG");
 
 	//svg image rectangle for zooming-in
@@ -9637,6 +9641,10 @@ function setup_image_selection() {
 		if (!windowLeft)
 			requestAnimationFrame(update_spectrum);
 	}
+
+	// a fix for Safari
+	d3.select(document.body)
+		.on('wheel.body', e => { });
 
 	//svg image rectangle for zooming-in
 	var rect = svg.append("rect")
