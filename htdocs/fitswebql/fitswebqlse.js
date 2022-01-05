@@ -12568,7 +12568,7 @@ function show_welcome() {
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
-		.html('<h4>CSV spectrum export (other formats, i.e. JSON, PLAIN TEXT or FITS are under consideration)</h4>');
+		.html('<h4>CSV spectrum export (other formats, e.g., JSON, PLAIN TEXT or FITS are under consideration)</h4>');
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
@@ -12660,7 +12660,7 @@ function setup_help() {
 		.html("The current image/viewport spectrum can be exported to a <b>CSV</b> file");
 
 	bodyDiv.append("p")
-		.html("Other formats, i.e. <em>JSON</em>, <em>PLAIN TEXT</em> or <em>FITS</em> are under consideration");
+		.html("Other formats, e.g., <em>JSON</em>, <em>PLAIN TEXT</em> or <em>FITS</em> are under consideration");
 
 	var csv = bodyDiv.append("video")
 		.attr("width", "100%")
