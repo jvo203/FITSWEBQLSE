@@ -79,6 +79,7 @@ mutable struct FITSDataSet
     indices::Any
     frame_min::Any
     frame_max::Any
+    frame_median::Any
     mean_spectrum::Any
     integrated_spectrum::Any
 
@@ -130,6 +131,7 @@ mutable struct FITSDataSet
             Nothing,
             Nothing,
             Nothing,
+            Nothing,
             -prevfloat(typemax(Float32)),
             prevfloat(typemax(Float32)),
             NaN32,
@@ -169,6 +171,7 @@ mutable struct FITSDataSet
             prevfloat(typemax(Float32)),
             "",
             -prevfloat(typemax(Float32)),
+            Nothing,
             Nothing,
             Nothing,
             Nothing,
@@ -259,6 +262,7 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.indices)
         serialize(io, fits.frame_min)
         serialize(io, fits.frame_max)
+        serialize(io, fits.frame_median)
         serialize(io, fits.mean_spectrum)
         serialize(io, fits.integrated_spectrum)
 
@@ -360,6 +364,7 @@ function deserialize_fits(datasetid)
     fits.indices = deserialize(io)
     fits.frame_min = deserialize(io)
     fits.frame_max = deserialize(io)
+    fits.frame_median = deserialize(io)
     fits.mean_spectrum = deserialize(io)
     fits.integrated_spectrum = deserialize(io)
 
@@ -1184,6 +1189,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
 
                 fits.frame_min = frame_min
                 fits.frame_max = frame_max
+                fits.frame_median = medians
                 fits.mean_spectrum = mean_spectrum
                 fits.integrated_spectrum = integrated_spectrum
 
