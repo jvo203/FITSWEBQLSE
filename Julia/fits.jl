@@ -2838,13 +2838,13 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     end
 
     # next make a histogram
-    bins, tone_mapping = getHistogram(fits, pixels, mask)
+    bins, image_tone_mapping = getHistogram(fits, pixels, mask)
 
     # image response
     image_resp = IOBuffer()
 
     # first send the tone mapping
-    flux = tone_mapping.flux
+    flux = image_tone_mapping.flux
 
     # pad flux with spaces so that the length is a multiple of 4
     # this is needed for an array alignment in JavaScript
@@ -2853,13 +2853,13 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     write(image_resp, UInt32(length(flux)))
     write(image_resp, flux)
-    write(image_resp, tone_mapping.pmin)
-    write(image_resp, tone_mapping.pmax)
-    write(image_resp, tone_mapping.med)
-    write(image_resp, tone_mapping.sensitivity)
-    write(image_resp, tone_mapping.ratio_sensitivity)
-    write(image_resp, tone_mapping.white)
-    write(image_resp, tone_mapping.black)
+    write(image_resp, image_tone_mapping.pmin)
+    write(image_resp, image_tone_mapping.pmax)
+    write(image_resp, image_tone_mapping.med)
+    write(image_resp, image_tone_mapping.sensitivity)
+    write(image_resp, image_tone_mapping.ratio_sensitivity)
+    write(image_resp, image_tone_mapping.white)
+    write(image_resp, image_tone_mapping.black)
 
     # the histogram
     println("typeof(bins):", typeof(bins))
