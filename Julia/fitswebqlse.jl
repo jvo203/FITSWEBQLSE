@@ -188,7 +188,7 @@ const SERVER_STRING =
     string(VERSION_SUB)
 
 const WASM_VERSION = "21.09.XX.X"
-const VERSION_STRING = "SV2021-12-XX.X-ALPHA"
+const VERSION_STRING = "SV2022-01-XX.X-ALPHA"
 
 const ZFP_HIGH_PRECISION = 16
 const ZFP_MEDIUM_PRECISION = 11
@@ -1736,12 +1736,14 @@ function ws_coroutine(ws, ids)
     # HEVC
     local param, encoder, picture, planeB, luma, alpha
     local filter::KalmanFilter, ts
+    local tone::Union{Missing,VideoToneMapping}
 
     local video_mtx = ReentrantLock()
 
     param = C_NULL
     encoder = C_NULL
     picture = C_NULL
+    tone = missing
 
     datasetid = String(ids[1])
 
@@ -1902,6 +1904,12 @@ function ws_coroutine(ws, ids)
                 else
                     last_frame_idx = frame_idx
                     println("video frame: $frame_idx; keyframe: $keyframe")
+                end
+
+                if ismissing(tone)
+                    println("undefined video tone mapping")
+                else
+                    println("video tone mapping:", tone)
                 end
 
                 Threads.@spawn begin
