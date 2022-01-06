@@ -1253,6 +1253,8 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
                         data_median,
                         fetch(job),
                         findall(indices[job.where]),
+                        Int64(1),
+                        Int64(fits.depth),
                         results,
                     )
 
@@ -3912,6 +3914,8 @@ end
     data_median::Float32,
     compressed_frames::Dict{Int32,Matrix{Float16}},
     idx::Vector{Int64},
+    first_frame::Int64,
+    last_frame::Int64,
     queue::RemoteChannel{Channel{Tuple}},
 )
     println("#threads per worker: ", Threads.nthreads())
@@ -3928,6 +3932,10 @@ end
     count₋ = 0
 
     Threads.@threads for frame in idx
+        if frame < first_frame || frame > last_frame
+            continue
+        end
+
         try
             Threads.lock(spinlock)
             pixels = compressed_frames[frame]
