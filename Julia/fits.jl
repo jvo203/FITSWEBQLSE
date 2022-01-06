@@ -1242,7 +1242,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
                         data_mad₋ += thread_sum₋
                         data_count₋ += thread_count₋
 
-                    catch e
+                    catch _
                         println("global statistics task completed")
                         break
                     end
