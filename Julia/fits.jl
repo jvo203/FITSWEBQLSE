@@ -2797,7 +2797,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 end
             end
 
-        catch e
+        catch _
             println("results task completed")
             break
         end
