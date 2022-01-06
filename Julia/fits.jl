@@ -2898,7 +2898,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         @spawnat job.where calculateGlobalStatistics(
             data_median,
             fetch(job),
-            findall(indices[job.where]),
+            findall(fits.indices[job.where]),
             Int64(first_frame),
             Int64(last_frame),
             results,
