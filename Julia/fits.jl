@@ -2846,6 +2846,21 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     # next make a histogram
     bins, image_tone_mapping = getHistogram(fits, pixels, mask)
 
+    # re-create the video tone mapping
+    dmin = minimum(fits.frame_min[first_frame:last_frame])
+    dmax = maximum(fits.frame_max[first_frame:last_frame])
+
+    medians = fits.frame_median[first_frame:last_frame]
+
+    # median of medians
+    med_mask = map(!isnan, medians)
+    valid_medians = medians[med_mask]
+
+    # global median (approx.)
+    data_median = median(valid_medians)
+
+    println("dmin: $dmin, dmax: $dmax, approx. partial-data median: $data_median")
+
     # image response
     image_resp = IOBuffer()
 
