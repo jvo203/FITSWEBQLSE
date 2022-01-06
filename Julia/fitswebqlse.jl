@@ -1907,7 +1907,25 @@ function ws_coroutine(ws, ids)
                 end
 
                 if ismissing(tone)
-                    println("undefined video tone mapping")
+                    println("initialising video tone mapping")
+
+                    if has_video(fits_object)
+                        # calculate white, black, sensitivity from the all-data histogram
+                        u = 7.5f0
+                        _median = fits_object.data_median
+                        _black = max(fits_object.dmin, (fits_object.data_median - u * fits_object.data_mad₋))
+                        _white = min(fits_object.dmax, (fits_object.data_median + u * fits_object.data_mad₊))
+                        _sensitivity = 1.0f0 / (_white - _black)
+                        _slope = 1.0f0 / (_white - _black)
+                        _dmin = fits_object.dmin
+                        _dmax = fits_object.dmax
+
+                        # video tone mapping
+                        tone =
+                            VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
+                    else
+                        println("unavailable video statistics")
+                    end
                 else
                     println("video tone mapping:", tone)
                 end
