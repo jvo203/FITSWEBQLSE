@@ -1216,12 +1216,11 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
                 fits.has_data[] = true
 
                 # finally estimate data_mad, data_madN, data_madP based on the all-data median
-                local data_mad::Float32, data_count::Int64
+                local data_mad::Float32
                 local data_mad₊::Float32, data_count₊::Int64
                 local data_mad₋::Float32, data_count₋::Int64
 
                 data_mad = 0.0
-                data_count = 0
 
                 data_mad₊ = 0.0
                 data_count₊ = 0
@@ -2719,7 +2718,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     quality::Quality = medium # by default use medium quality
     try
         quality = eval(Meta.parse(req["quality"]))
-    catch e
+    catch _
     end
 
     frame_start = Float64(req["frame_start"])
@@ -2728,7 +2727,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     ref_freq = 0.0 # by default ref_freq is missing
     try
         ref_freq = Float64(req["ref_freq"])
-    catch e
+    catch _
     end
 
     first_frame, last_frame = get_spectrum_range(fits, frame_start, frame_end, ref_freq)
@@ -2863,6 +2862,85 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     println("dmin: $dmin, dmax: $dmax, approx. partial-data median: $data_median")
 
+    # finally estimate data_mad, data_madN, data_madP based on the partial-data median
+    local data_mad::Float32
+    local data_mad₊::Float32, data_count₊::Int64
+    local data_mad₋::Float32, data_count₋::Int64
+
+    data_mad = 0.0
+
+    data_mad₊ = 0.0
+    data_count₊ = 0
+
+    data_mad₋ = 0.0
+    data_count₋ = 0
+
+    results = RemoteChannel(() -> Channel{Tuple}(32))
+
+    results_task = @async while true
+        try
+            thread_sum₊, thread_count₊, thread_sum₋, thread_count₋ =
+                take!(results)
+
+            data_mad₊ += thread_sum₊
+            data_count₊ += thread_count₊
+
+            data_mad₋ += thread_sum₋
+            data_count₋ += thread_count₋
+
+        catch _
+            println("global statistics task completed")
+            break
+        end
+    end
+
+    data_ras = [
+        @spawnat job.where calculateGlobalStatistics(
+            data_median,
+            fetch(job),
+            findall(indices[job.where]),
+            Int64(first_frame),
+            Int64(last_frame),
+            results,
+        )
+
+        for job in fits.compressed_pixels
+    ]
+
+    @time wait.(data_ras)
+
+    close(results)
+    wait(results_task)
+
+    if data_count₊ + data_count₋ > 0
+        data_mad =
+            Float32(data_mad₊ + data_mad₋) / Float32(data_count₊ + data_count₋)
+    end
+
+    if data_count₊ > 0
+        data_mad₊ /= Float32(data_count₊)
+    end
+
+    if data_count₋ > 0
+        data_mad₋ /= Float32(data_count₋)
+    end
+
+    println("data_mad: $data_mad, data_mad₊: $data_mad₊, data_mad₋: $data_mad₋")
+
+    # take flux from <image_tone_mapping>
+    u = 7.5f0
+    _median = data_median
+    _black = max(dmin, (data_median - u * data_mad₋))
+    _white = min(dmax, (data_median + u * data_mad₊))
+    _sensitivity = 1.0f0 / (_white - _black)
+    _slope = 1.0f0 / (_white - _black)
+    _dmin = dmin
+    _dmax = dmax
+
+    # video tone mapping
+    video_tone_mapping =
+        VideoToneMapping(image_tone_mapping.flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
+
     # image response
     image_resp = IOBuffer()
 
@@ -2921,8 +2999,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     write(spec_resp, UInt32(length(spectrum)))
     write(spec_resp, compressed_spectrum)
 
-    return (image_resp, spec_resp)
-
+    return (image_resp, spec_resp, video_tone_mapping)
 end
 
 function split_wcs(coord)

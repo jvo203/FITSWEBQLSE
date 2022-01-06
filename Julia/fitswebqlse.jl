@@ -2127,7 +2127,11 @@ function ws_coroutine(ws, ids)
                     error("$datasetid: no data found.")
                 end
 
-                @time image, spectrum = getImageSpectrum(fits_object, msg)
+                @time image, spectrum, video_tone_mapping = getImageSpectrum(fits_object, msg)
+
+                if video_tone_mapping != Nothing
+                    tone = video_tone_mapping
+                end
 
                 if image != Nothing
                     resp = IOBuffer()
