@@ -3340,7 +3340,7 @@ end
 function getVideoFrame(
     fits::FITSDataSet,
     frame_idx::Integer,
-    flux::String,
+    tone::VideoToneMapping,
     image_width::Integer,
     image_height::Integer,
     bDownsize::Bool,
@@ -3352,20 +3352,6 @@ function getVideoFrame(
     if fits.compressed_pixels == Nothing
         error("Uninitialised compressed pixels.")
     end
-
-    # calculate white, black, sensitivity from the all-data histogram
-    u = 7.5f0
-    _median = fits.data_median
-    _black = max(fits.dmin, (fits.data_median - u * fits.data_mad₋))
-    _white = min(fits.dmax, (fits.data_median + u * fits.data_mad₊))
-    _sensitivity = 1.0f0 / (_white - _black)
-    _slope = 1.0f0 / (_white - _black)
-    _dmin = fits.dmin
-    _dmax = fits.dmax
-
-    # video tone mapping
-    tone =
-        VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
 
     # target a specific worker instead of a "scatter-gun" approach
     for job in fits.compressed_pixels

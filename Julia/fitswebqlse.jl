@@ -1924,16 +1924,18 @@ function ws_coroutine(ws, ids)
                         tone =
                             VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
                     else
-                        println("unavailable video statistics")
+                        error("video tone mapping has not been initialised.")
                     end
                 else
                     println("video tone mapping:", tone)
                 end
 
+                # by this point the VideoToneMapping variable is valid
+
                 Threads.@spawn begin
                     # interpolate variable values into a thread
                     t_frame_idx = $frame_idx
-                    t_flux = $flux
+                    t_tone = $tone
                     t_image_width = $image_width
                     t_image_height = $image_height
                     t_bDownsize = $bDownsize
@@ -1944,7 +1946,7 @@ function ws_coroutine(ws, ids)
                         elapsed = @elapsed luma, alpha = getVideoFrame(
                             fits_object,
                             t_frame_idx,
-                            t_flux,
+                            t_tone,
                             t_image_width,
                             t_image_height,
                             t_bDownsize,
