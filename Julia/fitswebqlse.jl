@@ -1710,7 +1710,7 @@ try
     catch _
     end
 catch _
-    println("Cannot parse the config file $CONFIG_FILE.")
+    println("Cannot parse the config file $CONFIG_FILE .")
 end
 
 # open a Splatalogue database
