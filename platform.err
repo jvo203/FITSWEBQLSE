@@ -1,0 +1,5 @@
+signal (11): Segmentation fault: 11
+in expression starting at /Volumes/Fusion/chris/projects/FITSWEBQLSE/Julia/fitswebqlse.jl:2624
+_platform_memmove$VARIANT$Haswell at /usr/lib/system/libsystem_platform.dylib (unknown line)
+Allocations: 128770318 (Pool: 128728393; Big: 41925); GC: 92
+
