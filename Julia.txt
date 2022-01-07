@@ -34,6 +34,9 @@ julia -O3 Julia/fitswebqlse.jl --machines machines.dat
 # Intel (SSD)
 julia -O3 Julia/fitswebqlse.jl --machines machines_intel.dat --config config_ssd.ini
 
+# Redirect of stdout/stderr to a log file:
+julia -O3 -p 4 Julia/fitswebqlse.jl > LOGS/out.log 2>&1
+
 # an example config.ini
 
 [fitswebql]
