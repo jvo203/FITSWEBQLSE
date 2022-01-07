@@ -1747,12 +1747,14 @@ function ws_coroutine(ws, ids)
 
     datasetid = String(ids[1])
 
-    fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+    begin
+        fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
 
-    if fits_object.datasetid == "" || has_error(fits_object)
-        @error "$datasetid not found, closing a websocket coroutine."
-        writeguarded(ws, "[close]")
-        return
+        if fits_object.datasetid == "" || has_error(fits_object)
+            @error "$datasetid not found, closing a websocket coroutine."
+            writeguarded(ws, "[close]")
+            return
+        end
     end
 
     @info "Started a websocket coroutine for $datasetid" ws
@@ -1786,6 +1788,12 @@ function ws_coroutine(ws, ids)
         try
             req = take!(viewport_requests)
             # println(datasetid, "::", req)
+
+            fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+            if fits_object.datasetid == "" || has_error(fits_object)
+                error("$datasetid not found.")
+            end
 
             if !has_data(fits_object)
                 error("$datasetid: no data found.")
@@ -1855,6 +1863,12 @@ function ws_coroutine(ws, ids)
     video = @async while true
         try
             req = take!(video_requests)
+
+            fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+            if fits_object.datasetid == "" || has_error(fits_object)
+                error("$datasetid not found.")
+            end
 
             if !has_data(fits_object)
                 error("$datasetid: no data found.")
@@ -2088,6 +2102,14 @@ function ws_coroutine(ws, ids)
         if occursin("[heartbeat]", s)
             # @info "[ws] heartbeat"
 
+            fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+            if fits_object.datasetid == "" || has_error(fits_object)
+                @error "$datasetid not found, closing a websocket coroutine."
+                writeguarded(ws, "[close]")
+                break
+            end
+
             if has_error(fits_object)
                 @error "$datasetid: an error detected, closing a websocket coroutine."
                 writeguarded(ws, "[close]")
@@ -2122,6 +2144,12 @@ function ws_coroutine(ws, ids)
 
             if msg["type"] == "image"
                 # sub-region selection
+
+                fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+                if fits_object.datasetid == "" || has_error(fits_object)
+                    error("$datasetid not found.")
+                end
 
                 if !has_data(fits_object)
                     error("$datasetid: no data found.")
@@ -2164,6 +2192,12 @@ function ws_coroutine(ws, ids)
 
             if msg["type"] == "spectrum"
                 # CSV spectrum export
+
+                fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+                if fits_object.datasetid == "" || has_error(fits_object)
+                    error("$datasetid not found.")
+                end
 
                 if !has_data(fits_object)
                     error("$datasetid: no data found.")
@@ -2209,6 +2243,12 @@ function ws_coroutine(ws, ids)
                 last_frame_idx = -1
                 bitrate = msg["bitrate"]
                 fps = round(Integer, msg["fps"])
+
+                fits_object = get_dataset(datasetid, FITS_OBJECTS, FITS_LOCK)
+
+                if fits_object.datasetid == "" || has_error(fits_object)
+                    error("$datasetid not found.")
+                end
 
                 if !has_data(fits_object)
                     error("$datasetid: no data found.")
@@ -2597,12 +2637,14 @@ if TIMEOUT > 0
             elapsed = datetime2unix(now()) - fits.last_accessed[]
 
             if elapsed > TIMEOUT
-                println("purging a dataset '$datasetid'")
+                println("Purging a dataset '$datasetid'")
 
                 lock(FITS_LOCK)
 
                 try
-                    delete!(FITS_OBJECTS, datasetid)
+                    # delete!(FITS_OBJECTS, datasetid)
+                    fits_object = pop!(FITS_OBJECTS, datasetid)
+                    println("Removed $(fits_object.datasetid).")
                 catch e
                     println("Failed to remove a dataset: $e")
                 finally
