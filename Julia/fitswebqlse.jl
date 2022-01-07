@@ -2637,14 +2637,14 @@ if TIMEOUT > 0
             elapsed = datetime2unix(now()) - fits.last_accessed[]
 
             if elapsed > TIMEOUT
-                println("Purging a dataset '$datasetid'")
+                println("Purging a dataset '$datasetid' ...")
 
                 lock(FITS_LOCK)
 
                 try
                     # delete!(FITS_OBJECTS, datasetid)
                     fits_object = pop!(FITS_OBJECTS, datasetid)
-                    println("Removed $(fits_object.datasetid).")
+                    println("Removed '$(fits_object.datasetid)' .")
                 catch e
                     println("Failed to remove a dataset: $e")
                 finally
