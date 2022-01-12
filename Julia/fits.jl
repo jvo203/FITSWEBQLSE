@@ -26,6 +26,8 @@ const NBINS = 1024
 @everywhere @enum Intensity MEAN INTEGRATED
 @everywhere @enum Beam CIRCLE SQUARE # "square" is a reserved Julia function
 
+const JOB_CHUNK = 16
+
 struct ImageToneMapping
     flux::String
     pmin::Float32
@@ -726,7 +728,7 @@ end
     !isfinite(val) || (val < datamin) || (val > datamax) || (val <= ignrval)
 end
 
-@everywhere function load_fits_frame(
+@everywhere function load_fits_frames(
     datasetid,
     jobs,
     progress,
@@ -763,92 +765,96 @@ end
         naxes = ndims(hdu)
 
         while true
-            frame = take!(jobs)
+            frame_start, frame_end = take!(jobs)
 
-            # check #naxes, only read (:, :, frame) if and when necessary
-            if naxes >= 4
-                frame_pixels = reshape(read(hdu, :, :, frame, 1), (width, height))
-            else
-                frame_pixels = reshape(read(hdu, :, :, frame), (width, height))
+            # process a chunk of frames
+            for frame = frame_start:frame_end
+
+                # check #naxes, only read (:, :, frame) if and when necessary
+                if naxes >= 4
+                    frame_pixels = reshape(read(hdu, :, :, frame, 1), (width, height))
+                else
+                    frame_pixels = reshape(read(hdu, :, :, frame), (width, height))
+                end
+
+                frame_mask = invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
+
+                # replace NaNs with 0.0
+                frame_pixels[frame_mask] .= 0
+
+                # @async or Threads.@spawn ..., or nothing
+                zfp_compress_pixels(datasetid, frame, Float32.(frame_pixels), frame_mask)
+
+                pixels .+= frame_pixels
+                mask .&= frame_mask
+
+                # pick out the valid values only
+                valid_mask = .!frame_mask
+                valid_pixels = @view frame_pixels[valid_mask]
+
+                pixel_sum = sum(valid_pixels)
+                pixel_count = length(valid_pixels)
+
+                if pixel_count > 0
+                    frame_min, frame_max = ThreadsX.extrema(valid_pixels)
+                    frame_median = median(valid_pixels)
+                    mean_spectrum = pixel_sum / pixel_count
+                    integrated_spectrum = pixel_sum * cdelt3
+                else
+                    # no mistake here, reverse the min/max values
+                    # so that global dmin/dmax can get correct values
+                    # in the face of all-NaN frames
+                    frame_min = prevfloat(typemax(Float32))
+                    frame_max = -prevfloat(typemax(Float32))
+                    frame_median = NaN32
+
+                    mean_spectrum = 0.0
+                    integrated_spectrum = 0.0
+                end
+
+                # convert to half-float (Float16)
+                compressed_pixels = map(x -> Float16(x), frame_pixels)
+
+                # insert back NaNs
+                compressed_pixels[frame_mask] .= NaN16
+
+                # store the data
+                compressed_frames[frame] = compressed_pixels
+
+                #=
+                #  save the half-float (Float16) data
+                cache_dir =
+                    FITS_CACHE * Base.Filesystem.path_separator * datasetid
+                filename =
+                    cache_dir *
+                    Base.Filesystem.path_separator *
+                    string(frame) *
+                    ".f16"
+
+                io = open(filename, "w+")
+                write(io, compressed_pixels)
+                # serialize(io, compressed_pixels)
+                close(io)
+                =#
+
+                # send back the reduced values
+                put!(
+                    progress,
+                    (
+                        frame,
+                        frame_min,
+                        frame_max,
+                        frame_median,
+                        mean_spectrum,
+                        integrated_spectrum,
+                        myid(),
+                    ),
+                )
+
+                # println("processing frame #$frame")
+
+                GC.safepoint()
             end
-
-            frame_mask = invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
-
-            # replace NaNs with 0.0
-            frame_pixels[frame_mask] .= 0
-
-            # @async or Threads.@spawn ..., or nothing
-            zfp_compress_pixels(datasetid, frame, Float32.(frame_pixels), frame_mask)
-
-            pixels .+= frame_pixels
-            mask .&= frame_mask
-
-            # pick out the valid values only
-            valid_mask = .!frame_mask
-            valid_pixels = @view frame_pixels[valid_mask]
-
-            pixel_sum = sum(valid_pixels)
-            pixel_count = length(valid_pixels)
-
-            if pixel_count > 0
-                frame_min, frame_max = ThreadsX.extrema(valid_pixels)
-                frame_median = median(valid_pixels)
-                mean_spectrum = pixel_sum / pixel_count
-                integrated_spectrum = pixel_sum * cdelt3
-            else
-                # no mistake here, reverse the min/max values
-                # so that global dmin/dmax can get correct values
-                # in the face of all-NaN frames
-                frame_min = prevfloat(typemax(Float32))
-                frame_max = -prevfloat(typemax(Float32))
-                frame_median = NaN32
-
-                mean_spectrum = 0.0
-                integrated_spectrum = 0.0
-            end
-
-            # convert to half-float (Float16)
-            compressed_pixels = map(x -> Float16(x), frame_pixels)
-
-            # insert back NaNs
-            compressed_pixels[frame_mask] .= NaN16
-
-            # store the data
-            compressed_frames[frame] = compressed_pixels
-
-            #=
-            #  save the half-float (Float16) data
-            cache_dir =
-                FITS_CACHE * Base.Filesystem.path_separator * datasetid
-            filename =
-                cache_dir *
-                Base.Filesystem.path_separator *
-                string(frame) *
-                ".f16"
-
-            io = open(filename, "w+")
-            write(io, compressed_pixels)
-            # serialize(io, compressed_pixels)
-            close(io)
-            =#
-
-            # send back the reduced values
-            put!(
-                progress,
-                (
-                    frame,
-                    frame_min,
-                    frame_max,
-                    frame_median,
-                    mean_spectrum,
-                    integrated_spectrum,
-                    myid(),
-                ),
-            )
-
-            # println("processing frame #$frame")
-
-            GC.safepoint()
         end
 
     catch e
@@ -1104,15 +1110,18 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
                 mean_spectrum = zeros(Float32, depth)
                 integrated_spectrum = zeros(Float32, depth)
 
-                jobs = RemoteChannel(() -> Channel{Int}(32))
+                jobs = RemoteChannel(() -> Channel{Tuple}(32)) # was Int
                 progress = RemoteChannel(() -> Channel{Tuple}(32))
 
                 # fill-in the jobs queue
-                @async for i = 1:depth
-                    put!(jobs, i)
+                @async for i = 1:JOB_CHUNK:depth
+                    job_start = i
+                    job_end = min(i + JOB_CHUNK - 1, depth)
+
+                    put!(jobs, (job_start, job_end))
 
                     # close the channel after the last value had been sent
-                    if i == depth
+                    if i >= depth
                         close(jobs)
                     end
                 end
@@ -1151,7 +1160,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
                 # spawn remote jobs, collecting the Futures along the way
                 # Remote Access Service
                 ras = [
-                    @spawnat w load_fits_frame(
+                    @spawnat w load_fits_frames(
                         fits.datasetid,
                         jobs,
                         progress,
