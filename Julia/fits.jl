@@ -1121,7 +1121,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
                     put!(jobs, (job_start, job_end))
 
                     # close the channel after the last value had been sent
-                    if i >= depth
+                    if job_end == depth
                         close(jobs)
                     end
                 end
