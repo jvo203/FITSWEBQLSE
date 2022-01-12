@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-01-07.0";
+	return "JS2022-01-12.0";
 }
 
 const wasm_supported = (() => {
@@ -1965,7 +1965,7 @@ function process_video(index) {
 	if (!streaming || videoFrame[index - 1] == null || videoFrame[index - 1].img == null)
 		return;
 
-	//let image_bounding_dims = imageContainer[index-1].image_bounding_dims;
+	//let image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
 	//{x1: 0, y1: 0, width: w, height: h};
 
 	let imageCanvas = document.createElement('canvas');
@@ -3133,6 +3133,8 @@ function open_websocket_connection(_datasetId, index) {
 						}
 
 						if (data.type == "init_video") {
+							console.log(data);
+
 							var width = data.width;
 							var height = data.height;
 
@@ -3140,8 +3142,8 @@ function open_websocket_connection(_datasetId, index) {
 								let imageFrame = imageContainer[va_count - 1];
 
 								if (imageFrame != null) {
-									let dims = imageFrame.image_bounding_dims;
-									dims.y1 = height - dims.y1 - dims.height;
+									let tmp = imageFrame.image_bounding_dims;
+									let dims = { x1: tmp.x1, y1: height - tmp.y1 - tmp.height, width: tmp.width, height: tmp.height };
 
 									videoFrame[index - 1] = {
 										width: width,
@@ -7894,6 +7896,8 @@ function x_axis_mouseenter(offset) {
 				wsConn[0].send(JSON.stringify(request));
 			video_stack[0] = [];
 		} else for (let index = 0; index < va_count; index++) {
+			var image_bounding_dims = imageContainer[index].image_bounding_dims;
+
 			var request = {
 				type: "init_video",
 				frame: freq,
