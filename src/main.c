@@ -18,6 +18,7 @@
 #include "http.h"
 
 #include "mongoose.h"
+#include "mjson.h"
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
