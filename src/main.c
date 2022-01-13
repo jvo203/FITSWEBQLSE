@@ -155,7 +155,7 @@ static int handler(void *user, const char *section, const char *name,
     }
     else
     {
-        printf("unknown section(%s)/name(%s)\n.", section, name);
+        printf("unknown option %s/%s\n", section, name);
         return 0; /* unknown section/name, error */
     }
     return 1;
