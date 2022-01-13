@@ -59,6 +59,9 @@ typedef struct
 
 void usage(char *progname, int opt);
 
+static int handler(void *user, const char *section, const char *name,
+                   const char *value);
+
 int main(int argc, char *argv[])
 {
     struct passwd *passwdEnt = getpwuid(getuid());
@@ -67,6 +70,10 @@ int main(int argc, char *argv[])
     db_options_t db_options = {"jvo", NULL, "p10.vo.nao.ac.jp", 5433, "/home"};
 
     // parse a config.ini config file
+    if (ini_parse("config.ini", handler, &options) < 0)
+        printf("Can't load 'config.ini', assuming default options.\n");
+    else
+        printf("Successfully parsed 'config.ini'.\n");
 
     // parse options command-line options (over-rides the .ini config file)
     int opt;
@@ -119,4 +126,37 @@ void usage(char *progname, int opt)
     fprintf(stderr, USAGE_FMT, progname ? progname : DEFAULT_PROGNAME);
     exit(EXIT_FAILURE);
     /* NOTREACHED */
+}
+
+static int handler(void *user, const char *section, const char *name,
+                   const char *value)
+{
+    main_options_t *options = (main_options_t *)user;
+
+#define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
+
+    if (MATCH("fitswebql", "local"))
+    {
+        if (MATCH(value, "true"))
+            options->local = true;
+
+        if (MATCH(value, "false"))
+            options->local = false;
+
+        // pconfig->version = atoi(value);
+    }
+    else if (MATCH("user", "name"))
+    {
+        // pconfig->name = strdup(value);
+    }
+    else if (MATCH("user", "email"))
+    {
+        // pconfig->email = strdup(value);
+    }
+    else
+    {
+        printf("unknown section(%s)/name(%s)\n.", section, name);
+        return 0; /* unknown section/name, error */
+    }
+    return 1;
 }
