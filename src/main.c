@@ -145,11 +145,12 @@ int main(int argc, char *argv[])
     mg_log_set("3");
     pipe = mg_mkpipe(&mgr, mg_pipe_event_handler, NULL);  // Create pipe
     mg_http_listen(&mgr, url, mg_request_callback, pipe); // Create listener
-    while (s_received_signal == 0)
-        mg_mgr_poll(&mgr, 1000); // Event loop
-    mg_mgr_free(&mgr);           // Cleanup
 
     // a mongoose event loop
+    while (s_received_signal == 0)
+        mg_mgr_poll(&mgr, 1000); // Event loop
+
+    mg_mgr_free(&mgr); // Cleanup
 
     stop_http();
 
