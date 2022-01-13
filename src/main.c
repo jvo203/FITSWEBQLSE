@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <getopt.h>
+#include <libgen.h>
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -27,8 +28,42 @@ typedef struct
     uint32_t ws_port;
 } options_t;
 
+#define OPTSTR "p:h"
+#define USAGE_FMT "%s [-p HTTP port] [-h]\n"
+#define DEFAULT_PROGNAME "fitswebql"
+
+void usage(char *progname, int opt);
+
 int main(int argc, char *argv[])
 {
+    // parse a .ini config file
+
+    // parse options command-line options (over-rides the .ini config file)
+    int opt;
+    options_t options = {8080, 8081}; // default values
+
+    while ((opt = getopt(argc, argv, OPTSTR)) != EOF)
+        switch (opt)
+        {
+        case 'p':
+            options.http_port = (uint32_t)strtoul(optarg, NULL, 16);
+            options.ws_port = options.http_port + 1;
+            break;
+
+        case 'h':
+        default:
+            usage(basename(argv[0]), opt);
+            /* NOTREACHED */
+            break;
+        }
+
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
     printf("*** To quit FITSWebQL press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
+}
+
+void usage(char *progname, int opt)
+{
+    fprintf(stderr, USAGE_FMT, progname ? progname : DEFAULT_PROGNAME);
+    exit(EXIT_FAILURE);
+    /* NOTREACHED */
 }
