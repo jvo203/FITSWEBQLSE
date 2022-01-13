@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 {
     struct passwd *passwdEnt = getpwuid(getuid());
 
-    options_t options = {8080, 8081, true, false, 15, ".cache", ".cache", "LOGS", passwdEnt->pw_dir, "jvo", NULL, "p10.vo.nao.ac.jp", 5433, "/home"}; // default values
+    options_t options = {8080, 8081, true, false, 15, strdup(".cache"), strdup(".cache"), strdup("LOGS"), strdup(passwdEnt->pw_dir), strdup("jvo"), NULL, strdup("p10.vo.nao.ac.jp"), 5433, strdup("/home")}; // default values
 
     // parse a config.ini config file
     if (ini_parse("config.ini", handler, &options) < 0)
@@ -88,6 +88,9 @@ int main(int argc, char *argv[])
             break;
 
         case 'd':
+            if (options.home_dir != NULL)
+                free(options.home_dir);
+
             options.home_dir = strdup(optarg);
             break;
 
@@ -112,12 +115,45 @@ int main(int argc, char *argv[])
     start_http();
 
     // a mongoose server
+    /*struct mg_mgr mgr;
+    struct mg_connection *pipe; // Used to wake up event manager
+    mg_mgr_init(&mgr);
+    mg_log_set("3");
+    pipe = mg_mkpipe(&mgr, pcb, NULL);                       // Create pipe
+    mg_http_listen(&mgr, "http://localhost:8000", fn, pipe); // Create listener
+    for (;;)
+        mg_mgr_poll(&mgr, 1000); // Event loop
+    mg_mgr_free(&mgr);           // Cleanup
+    */
 
     // a mongoose event loop
 
     stop_http();
 
-    // release any memory allocated in options (really not needed at this point) ...
+    // release any memory allocated in options (really not needed at this point but ...)
+    if (options.fits_home != NULL)
+        free(options.fits_home);
+
+    if (options.cache != NULL)
+        free(options.cache);
+
+    if (options.logs != NULL)
+        free(options.logs);
+
+    if (options.home_dir != NULL)
+        free(options.home_dir);
+
+    if (options.user != NULL)
+        free(options.user);
+
+    if (options.password != NULL)
+        free(options.password);
+
+    if (options.host != NULL)
+        free(options.host);
+
+    if (options.db_home != NULL)
+        free(options.db_home);
 
     return EXIT_SUCCESS;
 }
@@ -158,14 +194,23 @@ static int handler(void *user, const char *section, const char *name,
     }
     else if (MATCH("fitswebql", "home"))
     {
+        if (options->fits_home != NULL)
+            free(options->fits_home);
+
         options->fits_home = strdup(value);
     }
     else if (MATCH("fitswebql", "logs"))
     {
+        if (options->logs != NULL)
+            free(options->logs);
+
         options->logs = strdup(value);
     }
     else if (MATCH("fitswebql", "cache"))
     {
+        if (options->cache != NULL)
+            free(options->cache);
+
         options->cache = strdup(value);
     }
     else if (MATCH("fitswebql", "port"))
@@ -175,18 +220,30 @@ static int handler(void *user, const char *section, const char *name,
     }
     else if (MATCH("postgresql", "host"))
     {
+        if (options->host != NULL)
+            free(options->host);
+
         options->host = strdup(value);
     }
     else if (MATCH("postgresql", "user"))
     {
+        if (options->user != NULL)
+            free(options->user);
+
         options->user = strdup(value);
     }
     else if (MATCH("postgresql", "password"))
     {
+        if (options->password != NULL)
+            free(options->password);
+
         options->password = strdup(value);
     }
     else if (MATCH("postgresql", "home"))
     {
+        if (options->db_home != NULL)
+            free(options->db_home);
+
         options->db_home = strdup(value);
     }
     else if (MATCH("postgresql", "port"))
