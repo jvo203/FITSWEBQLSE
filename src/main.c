@@ -15,6 +15,7 @@
 #include <pwd.h>
 
 #include "ini.h"
+#include "http.h"
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -100,13 +101,13 @@ int main(int argc, char *argv[])
     // Ctrl-C signal handler
     // ignore SIGPIPE
 
-    // start_http();
+    start_http();
 
     // a mongoose server
 
     // a mongoose event loop
 
-    // stop_http();
+    stop_http();
 
     // release any memory allocated in options (really not needed at this point) ...
 
