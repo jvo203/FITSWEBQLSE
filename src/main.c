@@ -6,10 +6,13 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <unistd.h>
 #include <getopt.h>
 #include <libgen.h>
 #include <string.h>
 #include <stdbool.h>
+#include <dirent.h>
+#include <pwd.h>
 
 #include "ini.h"
 
@@ -37,6 +40,7 @@ typedef struct
     char *home;
     char *cache;
     char *logs;
+    char *home_dir;
 } main_options_t;
 
 typedef struct
@@ -49,18 +53,22 @@ typedef struct
 } db_options_t;
 
 #define OPTSTR "p:h"
-#define USAGE_FMT "%s [-p HTTP port] [-h]\n"
+#define USAGE_FMT "%s [-p HTTP port] [-d home directory] [-h]\n"
 #define DEFAULT_PROGNAME "fitswebql"
 
 void usage(char *progname, int opt);
 
 int main(int argc, char *argv[])
 {
+    struct passwd *passwdEnt = getpwuid(getuid());
+
+    main_options_t options = {8080, 8081, true, false, 15, ".cache", ".cache", "LOGS", passwdEnt->pw_dir}; // default values
+    db_options_t db_options = {"jvo", NULL, "p10.vo.nao.ac.jp", 5433, "/home"};
+
     // parse a .ini config file
 
     // parse options command-line options (over-rides the .ini config file)
     int opt;
-    main_options_t options = {8080, 8081, true, false, 15, ".cache", ".cache", "LOGS"}; // default values
 
     while ((opt = getopt(argc, argv, OPTSTR)) != EOF)
         switch (opt)
@@ -68,6 +76,10 @@ int main(int argc, char *argv[])
         case 'p':
             options.http_port = (uint32_t)strtoul(optarg, NULL, 10);
             options.ws_port = options.http_port + 1;
+            break;
+
+        case 'd':
+            options.home_dir = strdup(optarg);
             break;
 
         case 'h':
@@ -78,8 +90,24 @@ int main(int argc, char *argv[])
         }
 
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
+    printf("Home Directory: %s\n", options.home_dir);
     printf("Browser URL: http://localhost:%" PRIu32 "\n", options.http_port);
     printf("*** To quit FITSWEBQLSE press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
+
+    // Ctrl-C signal handler
+    // ignore SIGPIPE
+
+    // start_http();
+
+    // a mongoose server
+
+    // a mongoose event loop
+
+    // stop_http();
+
+    // release any memory allocated in options (really not needed at this point) ...
+
+    return EXIT_SUCCESS;
 }
 
 void usage(char *progname, int opt)
