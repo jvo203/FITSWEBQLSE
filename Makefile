@@ -24,7 +24,7 @@ ifeq ($(UNAME_S),Linux)
 		ifneq (,$(findstring AuthenticAMD,$(CPU_S)))
 			# GNU gcc / gfortran
 			CC := gcc
-			FORT := mpifort
+			FORT := gfortran
 		endif
 
 		# found an Intel CPU
@@ -32,15 +32,15 @@ ifeq ($(UNAME_S),Linux)
 			ifneq (,$(findstring Clear,$(OS_S)))
 				# GNU gcc / gfortran since there are problems with ifort on Intel Clear Linux
 				CC := gcc
-				FORT := mpifort
+				FORT := gfortran
 			else
 				# Intel oneAPI icc / ifort 
 				CC := icc
-				FORT := mpiifort
+				FORT := ifort
 
 				# not so fast, ifort is buggy!!!
 				# CC := gcc
-				# FORT := mpifort
+				# FORT := gfortran
 			endif
 		endif
 
@@ -109,7 +109,7 @@ ifeq ($(UNAME_S),Darwin)
 #MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc-11
-	FORT = mpifort
+	FORT = gfortran-11
 
 	FLAGS = -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
