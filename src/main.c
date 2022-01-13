@@ -9,6 +9,7 @@
 #include <getopt.h>
 #include <libgen.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "ini.h"
 
@@ -30,7 +31,22 @@ typedef struct
 {
     uint32_t http_port;
     uint32_t ws_port;
-} options_t;
+    bool local;
+    bool production;
+    uint32_t timeout;
+    char *home;
+    char *cache;
+    char *logs;
+} main_options_t;
+
+typedef struct
+{
+    char *user;
+    char *password;
+    char *host;
+    uint32_t port;
+    char *home;
+} db_options_t;
 
 #define OPTSTR "p:h"
 #define USAGE_FMT "%s [-p HTTP port] [-h]\n"
@@ -44,7 +60,7 @@ int main(int argc, char *argv[])
 
     // parse options command-line options (over-rides the .ini config file)
     int opt;
-    options_t options = {8080, 8081}; // default values
+    main_options_t options = {8080, 8081, true, false, 15, ".cache", ".cache", "LOGS"}; // default values
 
     while ((opt = getopt(argc, argv, OPTSTR)) != EOF)
         switch (opt)
