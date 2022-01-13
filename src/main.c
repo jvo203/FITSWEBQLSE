@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         switch (opt)
         {
         case 'p':
-            options.http_port = (uint32_t)strtoul(optarg, NULL, 16);
+            options.http_port = (uint32_t)strtoul(optarg, NULL, 10);
             options.ws_port = options.http_port + 1;
             break;
 
@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
         }
 
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
+    printf("Browser URL: http://localhost:%u\n", options.http_port);
     printf("*** To quit FITSWebQL press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
 }
 
