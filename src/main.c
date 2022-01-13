@@ -17,8 +17,21 @@
 #include "ini.h"
 #include "http.h"
 
+#include <pthread.h>
+#define closesocket(x) close(x)
+
 #include "mongoose.h"
 #include "mjson.h"
+
+static volatile sig_atomic_t s_received_signal = 0;
+
+static void signal_handler(int sig_num)
+{
+    printf("Interrupt signal [%d] received.\n", sig_num);
+
+    signal(sig_num, signal_handler);
+    s_received_signal = sig_num;
+}
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
@@ -63,6 +76,12 @@ void usage(char *progname, int opt);
 
 static int handler(void *user, const char *section, const char *name,
                    const char *value);
+
+// HTTP request callback
+static void mg_request_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data);
+
+// Pipe event handler
+static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data, void *fn_data);
 
 int main(int argc, char *argv[])
 {
@@ -111,24 +130,24 @@ int main(int argc, char *argv[])
 
     // Ctrl-C signal handler
     // ignore SIGPIPE
+    signal(SIGTERM, signal_handler);
+    signal(SIGINT, signal_handler);
 
     start_http();
 
     // a mongoose server
-    // a custom connection string
     char url[256] = "";
     sprintf(url, "0.0.0.0:%d", options.ws_port);
 
-    /*struct mg_mgr mgr;
+    struct mg_mgr mgr;
     struct mg_connection *pipe; // Used to wake up event manager
     mg_mgr_init(&mgr);
     mg_log_set("3");
-    pipe = mg_mkpipe(&mgr, pcb, NULL);                       // Create pipe
-    mg_http_listen(&mgr, "http://localhost:8000", fn, pipe); // Create listener
-    for (;;)
+    pipe = mg_mkpipe(&mgr, mg_pipe_event_handler, NULL);  // Create pipe
+    mg_http_listen(&mgr, url, mg_request_callback, pipe); // Create listener
+    while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 1000); // Event loop
     mg_mgr_free(&mgr);           // Cleanup
-    */
 
     // a mongoose event loop
 
@@ -260,4 +279,58 @@ static int handler(void *user, const char *section, const char *name,
         return 0; /* unknown section/name, error */
     }
     return 1;
+}
+
+static void start_thread(void (*f)(void *), void *p)
+{
+    pthread_t thread_id = (pthread_t)0;
+    pthread_attr_t attr;
+    (void)pthread_attr_init(&attr);
+    (void)pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_create(&thread_id, &attr, (void *(*)(void *))f, p);
+    pthread_attr_destroy(&attr);
+}
+
+static void thread_function(void *param)
+{
+    struct mg_connection *c = param; // Pipe connection
+    sleep(2);                        // Simulate long execution
+    mg_mgr_wakeup(c);                // Wakeup event manager
+}
+
+// HTTP request callback
+static void mg_request_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
+{
+    if (ev == MG_EV_HTTP_MSG)
+    {
+        struct mg_http_message *hm = (struct mg_http_message *)ev_data;
+        if (mg_http_match_uri(hm, "/fast"))
+        {
+            // Single-threaded code path, for performance comparison
+            // The /fast URI responds immediately
+            mg_http_reply(c, 200, "Host: foo.com\r\n", "hi\n");
+        }
+        else
+        {
+            // Multithreading code path
+            c->label[0] = 'W';                      // Mark us as waiting for data
+            start_thread(thread_function, fn_data); // Start handling thread
+        }
+    }
+}
+
+// Pipe event handler
+static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
+{
+    if (ev == MG_EV_READ)
+    {
+        struct mg_connection *t;
+        for (t = c->mgr->conns; t != NULL; t = t->next)
+        {
+            if (t->label[0] != 'W')
+                continue;                                       // Ignore un-marked connections
+            mg_http_reply(t, 200, "Host: foo.com\r\n", "hi\n"); // Respond!
+            t->label[0] = 0;                                    // Clear mark
+        }
+    }
 }
