@@ -33,6 +33,7 @@
 
 typedef struct
 {
+    // fitswebql
     uint32_t http_port;
     uint32_t ws_port;
     bool local;
@@ -42,16 +43,14 @@ typedef struct
     char *cache;
     char *logs;
     char *home_dir;
-} main_options_t;
 
-typedef struct
-{
+    //postgresql
     char *user;
     char *password;
     char *host;
     uint32_t port;
-    char *home;
-} db_options_t;
+    char *db_home;
+} options_t;
 
 #define OPTSTR "p:h"
 #define USAGE_FMT "%s [-p HTTP port] [-d home directory] [-h]\n"
@@ -66,8 +65,7 @@ int main(int argc, char *argv[])
 {
     struct passwd *passwdEnt = getpwuid(getuid());
 
-    main_options_t options = {8080, 8081, true, false, 15, ".cache", ".cache", "LOGS", passwdEnt->pw_dir}; // default values
-    db_options_t db_options = {"jvo", NULL, "p10.vo.nao.ac.jp", 5433, "/home"};
+    options_t options = {8080, 8081, true, false, 15, ".cache", ".cache", "LOGS", passwdEnt->pw_dir, "jvo", NULL, "p10.vo.nao.ac.jp", 5433, "/home"}; // default values
 
     // parse a config.ini config file
     if (ini_parse("config.ini", handler, &options) < 0)
@@ -131,7 +129,7 @@ void usage(char *progname, int opt)
 static int handler(void *user, const char *section, const char *name,
                    const char *value)
 {
-    main_options_t *options = (main_options_t *)user;
+    options_t *options = (options_t *)user;
 
 #define MATCH(s, n) strcmp(section, s) == 0 && strcmp(name, n) == 0
 
