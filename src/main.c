@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     main_options_t options = {8080, 8081, true, false, 15, ".cache", ".cache", "LOGS", passwdEnt->pw_dir}; // default values
     db_options_t db_options = {"jvo", NULL, "p10.vo.nao.ac.jp", 5433, "/home"};
 
-    // parse a .ini config file
+    // parse a config.ini config file
 
     // parse options command-line options (over-rides the .ini config file)
     int opt;
