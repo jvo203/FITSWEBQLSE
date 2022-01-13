@@ -1,5 +1,5 @@
 /* main.c */
-/* FITSWEBQLSE by Christopher Zapart @ Japanese Virtual Observatory (NAOJ) */
+/* FITSWEBQLSE by Christopher Zapart @ Japanese Virtual Observatory (JVO) in NAOJ */
 /* chris.zapart@nao.ac.jp */
 
 #include <stdio.h>
