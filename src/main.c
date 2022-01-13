@@ -8,6 +8,7 @@
 #include <inttypes.h>
 #include <getopt.h>
 #include <libgen.h>
+#include <string.h>
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
