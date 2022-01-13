@@ -39,7 +39,7 @@ typedef struct
     bool local;
     bool production;
     uint32_t timeout;
-    char *home;
+    char *fits_home;
     char *cache;
     char *logs;
     char *home_dir;
@@ -140,16 +140,35 @@ static int handler(void *user, const char *section, const char *name,
 
         if (MATCH(value, "false"))
             options->local = false;
+    }
+    else if (MATCH("fitswebql", "production"))
+    {
+        if (MATCH(value, "true"))
+            options->production = true;
 
-        // pconfig->version = atoi(value);
+        if (MATCH(value, "false"))
+            options->production = false;
     }
-    else if (MATCH("user", "name"))
+    else if (MATCH("fitswebql", "timeout"))
     {
-        // pconfig->name = strdup(value);
+        options->timeout = atoi(value);
     }
-    else if (MATCH("user", "email"))
+    else if (MATCH("fitswebql", "home"))
     {
-        // pconfig->email = strdup(value);
+        options->fits_home = strdup(value);
+    }
+    else if (MATCH("fitswebql", "logs"))
+    {
+        options->logs = strdup(value);
+    }
+    else if (MATCH("fitswebql", "cache"))
+    {
+        options->cache = strdup(value);
+    }
+    else if (MATCH("fitswebql", "port"))
+    {
+        options->http_port = atoi(value);
+        options->ws_port = options->http_port + 1;
     }
     else
     {
