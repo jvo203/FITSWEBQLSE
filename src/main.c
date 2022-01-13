@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <getopt.h>
 #include <libgen.h>
 
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
         }
 
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
-    printf("Browser URL: http://localhost:%u\n", options.http_port);
+    printf("Browser URL: http://localhost:%" PRIu32 "\n", options.http_port);
     printf("*** To quit FITSWebQL press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
 }
 
