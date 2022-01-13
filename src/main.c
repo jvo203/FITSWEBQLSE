@@ -115,6 +115,10 @@ int main(int argc, char *argv[])
     start_http();
 
     // a mongoose server
+    // a custom connection string
+    char url[256] = "";
+    sprintf(url, "0.0.0.0:%d", options.ws_port);
+
     /*struct mg_mgr mgr;
     struct mg_connection *pipe; // Used to wake up event manager
     mg_mgr_init(&mgr);
