@@ -10,6 +10,8 @@
 #include <libgen.h>
 #include <string.h>
 
+#include "ini.h"
+
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
 #define VERSION_SUB 0
