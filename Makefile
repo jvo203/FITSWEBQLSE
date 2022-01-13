@@ -22,7 +22,7 @@ ifeq ($(UNAME_S),Linux)
 
 		# found an AMD CPU
 		ifneq (,$(findstring AuthenticAMD,$(CPU_S)))
-			# GNU gcc / gfortran with OpenCoarrays
+			# GNU gcc / gfortran
 			CC := gcc
 			FORT := mpifort
 		endif
@@ -30,7 +30,7 @@ ifeq ($(UNAME_S),Linux)
 		# found an Intel CPU
 		ifneq (,$(findstring GenuineIntel,$(CPU_S)))
 			ifneq (,$(findstring Clear,$(OS_S)))
-				# GNU gcc / gfortran with OpenCoarrays since there are problems with ifort on Intel Clear Linux
+				# GNU gcc / gfortran since there are problems with ifort on Intel Clear Linux
 				CC := gcc
 				FORT := mpifort
 			else
@@ -39,8 +39,8 @@ ifeq ($(UNAME_S),Linux)
 				FORT := mpiifort
 
 				# not so fast, ifort is buggy!!!
-				CC := gcc
-				FORT := mpifort
+				# CC := gcc
+				# FORT := mpifort
 			endif
 		endif
 
@@ -70,7 +70,8 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 # src/zmq.f90
 # src/wavelet.f90
 # src/lz4.f90
-SRC = $(ZFP_SRC) src/webql.ispc src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/json_write.c src/m_mrgrnk.f90 src/mod_sort.f90 src/wavelet.f90 src/fixed_array.f90 src/fixed_array2.f90 src/zfp_array.f90 src/histogram.c src/classifier.f90 src/fits_omp.f90 src/net.f90 src/main.f90
+# src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/json_write.c src/m_mrgrnk.f90 src/mod_sort.f90 src/wavelet.f90 src/fixed_array.f90 src/fixed_array2.f90 src/zfp_array.f90 src/histogram.c src/classifier.f90 src/fits_omp.f90 src/net.f90 src/main.f90
+SRC = $(ZFP_SRC) src/webql.ispc src/main.c
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
@@ -85,7 +86,7 @@ ifeq ($(CC),icc)
 # -fast causes static linking problems
 
 	CFLAGS := $(FLAGS)
-	FLAGS += -heap-arrays 32 -align array64byte -coarray=distributed
+	FLAGS += -heap-arrays 32 -align array64byte
 #-mt_mpi
 endif
 
@@ -104,7 +105,7 @@ LIBS = -L/usr/local/lib -lmicrohttpd -lwebsockets `pkg-config --libs glib-2.0` `
 
 ifeq ($(UNAME_S),Darwin)
 	INC += -I/usr/local/include -I/usr/local/opt/openssl/include
-	LIBS += -L/usr/local/opt/openssl/lib -lcaf_mpi -L/usr/local/opt/lz4/lib -llz4
+	LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/lz4/lib -llz4
 #MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc-11
@@ -115,9 +116,9 @@ ifeq ($(UNAME_S),Darwin)
 
 	ifeq ($(FORT),nagfor)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
-		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp -colour $(MPI_LINK_FLAGS)
+		FLAGS := -target=core2 -O4 -f2018 -kind=byte -openmp -colour $(MPI_LINK_FLAGS)
 	else
-		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib -fmax-stack-var-size=32768
+		FLAGS += -cpp -fallow-invalid-boz -fmax-stack-var-size=32768
 	endif
 endif
 
@@ -125,13 +126,12 @@ endif
 ifeq ($(CC),gcc)
 	override CFLAGS += -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	FLAGS := $(CFLAGS)
-	LIBS += -L/usr/local/opencoarrays/2.9.2/lib64 -lcaf_mpi
 
 	ifeq ($(FORT),nagfor)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
-		FLAGS := -target=core2 -O4 -f2018 -kind=byte -coarray=single -openmp -colour $(MPI_LINK_FLAGS)
+		FLAGS := -target=core2 -O4 -f2018 -kind=byte -openmp -colour $(MPI_LINK_FLAGS)
 	else
-		FLAGS += -cpp -fallow-invalid-boz -fcoarray=lib -fmax-stack-var-size=32768
+		FLAGS += -cpp -fallow-invalid-boz -fmax-stack-var-size=32768
 	endif
 endif
 
