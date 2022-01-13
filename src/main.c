@@ -170,6 +170,26 @@ static int handler(void *user, const char *section, const char *name,
         options->http_port = atoi(value);
         options->ws_port = options->http_port + 1;
     }
+    else if (MATCH("postgresql", "host"))
+    {
+        options->host = strdup(value);
+    }
+    else if (MATCH("postgresql", "user"))
+    {
+        options->user = strdup(value);
+    }
+    else if (MATCH("postgresql", "password"))
+    {
+        options->password = strdup(value);
+    }
+    else if (MATCH("postgresql", "home"))
+    {
+        options->db_home = strdup(value);
+    }
+    else if (MATCH("postgresql", "port"))
+    {
+        options->port = atoi(value);
+    }
     else
     {
         printf("unknown option %s/%s\n", section, name);
