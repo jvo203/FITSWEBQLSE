@@ -90,7 +90,10 @@ int main(int argc, char *argv[])
         }
 
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
-    printf("Home Directory: %s\n", options.home_dir);
+
+    if (options.local)
+        printf("Home Directory: %s\n", options.home_dir);
+
     printf("Browser URL: http://localhost:%" PRIu32 "\n", options.http_port);
     printf("*** To quit FITSWEBQLSE press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
 
