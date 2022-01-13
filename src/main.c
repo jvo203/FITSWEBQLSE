@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
     printf("Browser URL: http://localhost:%" PRIu32 "\n", options.http_port);
-    printf("*** To quit FITSWebQL press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
+    printf("*** To quit FITSWEBQLSE press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
 }
 
 void usage(char *progname, int opt)
