@@ -85,6 +85,8 @@ static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data
 
 int main(int argc, char *argv[])
 {
+    printf("%s %s\n", SERVER_STRING, VERSION_STRING);
+
     struct passwd *passwdEnt = getpwuid(getuid());
 
     options_t options = {8080, 8081, true, false, 15, strdup(".cache"), strdup(".cache"), strdup("LOGS"), strdup(passwdEnt->pw_dir), strdup("jvo"), NULL, strdup("p10.vo.nao.ac.jp"), 5433, strdup("/home")}; // default values
@@ -119,8 +121,6 @@ int main(int argc, char *argv[])
             /* NOTREACHED */
             break;
         }
-
-    printf("%s %s\n", SERVER_STRING, VERSION_STRING);
 
     if (options.local)
         printf("Home Directory: %s\n", options.home_dir);
