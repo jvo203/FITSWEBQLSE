@@ -18,7 +18,6 @@
 #include "http.h"
 
 #include <pthread.h>
-#define closesocket(x) close(x)
 
 #include "mongoose.h"
 #include "mjson.h"
@@ -209,7 +208,7 @@ int main(int argc, char *argv[])
     {
         zstr_sendx(speaker, "SILENCE", NULL);
 
-        const char *message = "JVO:>FITSWEBQL::LEAVE";
+        const char *message = "FITSWEBQLSE::LEAVE";
         const int interval = 1000; //[ms]
         zsock_send(speaker, "sbi", "PUBLISH", message, strlen(message), interval);
 
@@ -396,7 +395,7 @@ static void *autodiscovery_daemon(void *)
 
     if (my_hostname != NULL)
     {
-        const char *message = "JVO:>FITSWEBQL::ENTER";
+        const char *message = "FITSWEBQLSE::ENTER";
         const int interval = 1000; //[ms]
         zsock_send(speaker, "sbi", "PUBLISH", message, strlen(message), interval);
     }
