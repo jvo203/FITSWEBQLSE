@@ -117,6 +117,7 @@ ifeq ($(UNAME_S),Darwin)
 	# FORT = ifort
 	# FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -shared-intel
 	# CFLAGS := $(FLAGS) -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+	# icc main.c -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 	# FLAGS += -heap-arrays 32 -align array64byte
 
 	ifeq ($(FORT),nagfor)
