@@ -47,6 +47,16 @@ static void signal_handler(int sig_num)
 #define WASM_VERSION "21.09.XX.X"
 #define VERSION_STRING "SV2022-01-XX.X-ALPHA"
 
+/* ZeroMQ node auto-discovery */
+#define BEACON_PORT 50000
+
+#include <czmq.h>
+
+zactor_t *speaker = NULL;
+zactor_t *listener = NULL;
+
+static void *autodiscovery_daemon(void *);
+
 typedef struct
 {
     // fitswebql
@@ -83,8 +93,22 @@ static void mg_request_callback(struct mg_connection *c, int ev, void *ev_data, 
 // Pipe event handler
 static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data, void *fn_data);
 
+// Thread utility function
+static void start_thread(void (*f)(void *), void *p);
+
 int main(int argc, char *argv[])
 {
+    // ZeroMQ node auto-discovery
+    setenv("ZSYS_SIGHANDLER", "false", 1);
+    pthread_t zmq_t;
+    int res = pthread_create(&zmq_t, NULL, autodiscovery_daemon, NULL);
+
+    if (res)
+    {
+        printf("error %d\n", res);
+        exit(EXIT_FAILURE);
+    }
+
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
 
     struct passwd *passwdEnt = getpwuid(getuid());
@@ -178,6 +202,29 @@ int main(int argc, char *argv[])
 
     if (options.db_home != NULL)
         free(options.db_home);
+
+    // clean-up ZeroMQ
+    if (speaker != NULL)
+    {
+        zstr_sendx(speaker, "SILENCE", NULL);
+
+        const char *message = "JVO:>FITSWEBQL::LEAVE";
+        const int interval = 1000; //[ms]
+        zsock_send(speaker, "sbi", "PUBLISH", message, strlen(message), interval);
+
+        zstr_sendx(speaker, "SILENCE", NULL);
+        zactor_destroy(&speaker);
+    }
+
+    if (listener != NULL)
+    {
+        zstr_sendx(listener, "UNSUBSCRIBE", NULL);
+
+        // wait for the ZeroMQ thread to exit
+        pthread_join(zmq_t, NULL);
+
+        zactor_destroy(&listener);
+    }
 
     return EXIT_SUCCESS;
 }
@@ -334,4 +381,88 @@ static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data
             t->label[0] = 0;                                    // Clear mark
         }
     }
+}
+
+static void *autodiscovery_daemon(void *)
+{
+    speaker = zactor_new(zbeacon, NULL);
+    if (speaker == NULL)
+        return NULL;
+
+    zstr_send(speaker, "VERBOSE");
+    zsock_send(speaker, "si", "CONFIGURE", BEACON_PORT);
+    char *my_hostname = zstr_recv(speaker);
+
+    if (my_hostname != NULL)
+    {
+        const char *message = "JVO:>FITSWEBQL::ENTER";
+        const int interval = 1000; //[ms]
+        zsock_send(speaker, "sbi", "PUBLISH", message, strlen(message), interval);
+    }
+
+    listener = zactor_new(zbeacon, NULL);
+    if (listener == NULL)
+        return NULL;
+
+    zstr_send(listener, "VERBOSE");
+    zsock_send(listener, "si", "CONFIGURE", BEACON_PORT);
+    char *hostname = zstr_recv(listener);
+    if (hostname != NULL)
+        free(hostname);
+    else
+        return NULL;
+
+    zsock_send(listener, "sb", "SUBSCRIBE", "", 0);
+    zsock_set_rcvtimeo(listener, 500);
+
+    while (s_received_signal == 0)
+    {
+        char *ipaddress = zstr_recv(listener);
+        if (ipaddress != NULL)
+        {
+            zframe_t *content = zframe_recv(listener);
+            /*std::string_view message = std::string_view(
+                (const char *)zframe_data(content), zframe_size(content));*/
+
+            // ENTER
+            /*if (message.find("ENTER") != std::string::npos)
+            {
+                if (strcmp(my_hostname, ipaddress) != 0)
+                {
+                    std::string node = std::string(ipaddress);
+
+                    if (!cluster_contains_node(node))
+                    {
+                        PrintThread{} << "found a new peer @ " << ipaddress << ": "
+                                      << message << std::endl;
+                        cluster_insert_node(node);
+                    }
+                }
+            }*/
+
+            // LEAVE
+            /*if (message.find("LEAVE") != std::string::npos)
+            {
+                if (strcmp(my_hostname, ipaddress) != 0)
+                {
+                    std::string node = std::string(ipaddress);
+
+                    if (cluster_contains_node(node))
+                    {
+                        PrintThread{} << ipaddress << " is leaving: " << message
+                                      << std::endl;
+                        cluster_erase_node(node);
+                    }
+                }
+            }*/
+
+            zframe_destroy(&content);
+            zstr_free(&ipaddress);
+        }
+    }
+
+    if (my_hostname != NULL)
+        free(my_hostname);
+
+    return NULL;
 }
