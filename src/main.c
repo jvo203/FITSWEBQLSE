@@ -423,12 +423,12 @@ static void *autodiscovery_daemon(void *)
             zframe_t *content = zframe_recv(listener);
 
             {
-                char *msg = strndup((const char *)zframe_data(content), zframe_size(content));
+                char *str_msg = strndup((const char *)zframe_data(content), zframe_size(content));
 
-                if (msg != NULL)
+                if (str_msg != NULL)
                 {
-                    printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
-                    free(msg);
+                    printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
+                    free(str_msg);
                 };
             }
 
