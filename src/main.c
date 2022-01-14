@@ -52,9 +52,9 @@ static void signal_handler(int sig_num)
 
 #include <czmq.h>
 
-zactor_t *speaker = NULL;
-zactor_t *listener = NULL;
-
+static zactor_t *speaker = NULL;
+static zactor_t *listener = NULL;
+static pthread_t zmq_t;
 static void *autodiscovery_daemon(void *);
 
 typedef struct
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 {
     // ZeroMQ node auto-discovery
     setenv("ZSYS_SIGHANDLER", "false", 1);
-    pthread_t zmq_t;
+
     int res = pthread_create(&zmq_t, NULL, autodiscovery_daemon, NULL);
 
     if (res)
