@@ -423,6 +423,7 @@ static void *autodiscovery_daemon(void *)
         if (ipaddress != NULL)
         {
             zframe_t *content = zframe_recv(listener);
+            char *str_msg = strndup((const char *)zframe_data(content), zframe_size(content));
 
             struct mg_str msg = {(const char *)zframe_data(content), zframe_size(content)};
             struct mg_str enter = mg_str("ENTER");
@@ -433,15 +434,8 @@ static void *autodiscovery_daemon(void *)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
-                    {
-                        char *str_msg = strndup((const char *)zframe_data(content), zframe_size(content));
-
-                        if (str_msg != NULL)
-                        {
-                            printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
-                            free(str_msg);
-                        };
-                    }
+                    if (str_msg != NULL)
+                        printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
 
                     /*std::string node = std::string(ipaddress);
 
@@ -459,15 +453,8 @@ static void *autodiscovery_daemon(void *)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
-                    {
-                        char *str_msg = strndup((const char *)zframe_data(content), zframe_size(content));
-
-                        if (str_msg != NULL)
-                        {
-                            printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
-                            free(str_msg);
-                        };
-                    }
+                    if (str_msg != NULL)
+                        printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
 
                     /*std::string node = std::string(ipaddress);
 
@@ -479,6 +466,9 @@ static void *autodiscovery_daemon(void *)
                     }*/
                 }
             }
+
+            if (str_msg != NULL)
+                free(str_msg);
 
             zframe_destroy(&content);
             zstr_free(&ipaddress);
