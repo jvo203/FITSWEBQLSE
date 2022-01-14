@@ -427,7 +427,7 @@ static void *autodiscovery_daemon(void *)
 
                 if (msg != NULL)
                 {
-                    printf("[ØMQ] received %s from %s\n", msg, ipaddress);
+                    printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
                     free(msg);
                 };
             }
