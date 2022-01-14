@@ -422,8 +422,13 @@ static void *autodiscovery_daemon(void *)
         if (ipaddress != NULL)
         {
             zframe_t *content = zframe_recv(listener);
-            /*std::string_view message = std::string_view(
-                (const char *)zframe_data(content), zframe_size(content));*/
+            char *msg = strndup((const char *)zframe_data(content), zframe_size(content));
+
+            if (msg != NULL)
+            {
+                printf("[ØMQ] received %s from %s\n", msg, ipaddress);
+                free(msg);
+            };
 
             // ENTER
             /*if (message.find("ENTER") != std::string::npos)
