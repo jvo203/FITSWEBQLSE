@@ -434,21 +434,24 @@ static void *autodiscovery_daemon(void *)
 
             struct mg_str msg = {(const char *)zframe_data(content), zframe_size(content)};
 
+            struct mg_str enter = mg_str("ENTER");
+            struct mg_str leave = mg_str("LEAVE");
+
             // ENTER
-            /*if (message.find("ENTER") != std::string::npos)
+            if (mg_strstr(msg, enter) != NULL)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
-                    std::string node = std::string(ipaddress);
+                    /*std::string node = std::string(ipaddress);
 
                     if (!cluster_contains_node(node))
                     {
                         PrintThread{} << "found a new peer @ " << ipaddress << ": "
                                       << message << std::endl;
                         cluster_insert_node(node);
-                    }
+                    }*/
                 }
-            }*/
+            }
 
             // LEAVE
             /*if (message.find("LEAVE") != std::string::npos)
