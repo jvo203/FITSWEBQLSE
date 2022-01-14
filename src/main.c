@@ -385,7 +385,7 @@ static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data
     }
 }
 
-void *autodiscovery_daemon(void *)
+static void *autodiscovery_daemon(void *ptr)
 {
     speaker = zactor_new(zbeacon, NULL);
     if (speaker == NULL)
