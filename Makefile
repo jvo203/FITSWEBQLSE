@@ -154,7 +154,7 @@ endif
 	$(FORT) $(FLAGS) $(MOD) -o $@ -c $<
 
 fitswebqlse: $(OBJ)
-	$(FORT) $(FLAGS) -o $(TARGET) $^ $(LIBS) $(IPP)
+	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBS) $(IPP)
 
 test:
 	$(FORT) $(FLAGS) src/wavelet.f90 src/fixed_array.f90 src/zfp_array.f90 src/lz4.f90 src/testWavelets.f90 -o testWavelets -llz4 $(LIBS)
