@@ -454,20 +454,20 @@ static void *autodiscovery_daemon(void *)
             }
 
             // LEAVE
-            /*if (message.find("LEAVE") != std::string::npos)
+            if (mg_strstr(msg, leave) != NULL)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
-                    std::string node = std::string(ipaddress);
+                    /*std::string node = std::string(ipaddress);
 
                     if (cluster_contains_node(node))
                     {
                         PrintThread{} << ipaddress << " is leaving: " << message
                                       << std::endl;
                         cluster_erase_node(node);
-                    }
+                    }*/
                 }
-            }*/
+            }
 
             zframe_destroy(&content);
             zstr_free(&ipaddress);
