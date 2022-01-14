@@ -4,10 +4,10 @@
 
 void start_http()
 {
-    printf("libmicrohttpd server has started.\n");
+    printf("libmicrohttpd server started.\n");
 };
 
 void stop_http()
 {
-    printf("libmicrohttpd server has stopped.\n");
+    printf("libmicrohttpd server stopped.\n");
 };
