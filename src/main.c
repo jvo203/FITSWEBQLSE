@@ -424,16 +424,6 @@ static void *autodiscovery_daemon(void *)
         {
             zframe_t *content = zframe_recv(listener);
 
-            {
-                char *str_msg = strndup((const char *)zframe_data(content), zframe_size(content));
-
-                if (str_msg != NULL)
-                {
-                    printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
-                    free(str_msg);
-                };
-            }
-
             struct mg_str msg = {(const char *)zframe_data(content), zframe_size(content)};
             struct mg_str enter = mg_str("ENTER");
             struct mg_str leave = mg_str("LEAVE");
@@ -443,6 +433,16 @@ static void *autodiscovery_daemon(void *)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
+                    {
+                        char *str_msg = strndup((const char *)zframe_data(content), zframe_size(content));
+
+                        if (str_msg != NULL)
+                        {
+                            printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
+                            free(str_msg);
+                        };
+                    }
+
                     /*std::string node = std::string(ipaddress);
 
                     if (!cluster_contains_node(node))
@@ -459,6 +459,16 @@ static void *autodiscovery_daemon(void *)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
+                    {
+                        char *str_msg = strndup((const char *)zframe_data(content), zframe_size(content));
+
+                        if (str_msg != NULL)
+                        {
+                            printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
+                            free(str_msg);
+                        };
+                    }
+
                     /*std::string node = std::string(ipaddress);
 
                     if (cluster_contains_node(node))
