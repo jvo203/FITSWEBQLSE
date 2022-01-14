@@ -433,7 +433,6 @@ static void *autodiscovery_daemon(void *)
             }
 
             struct mg_str msg = {(const char *)zframe_data(content), zframe_size(content)};
-
             struct mg_str enter = mg_str("ENTER");
             struct mg_str leave = mg_str("LEAVE");
 
