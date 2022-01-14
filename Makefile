@@ -109,9 +109,15 @@ ifeq ($(UNAME_S),Darwin)
 
 	CC = gcc-11
 	FORT = gfortran-11
-
 	FLAGS = -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
+
+	# try Intel compilers for a change! ... linking problems ...
+	# CC = icc
+	# FORT = ifort
+	# FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -shared-intel
+	# CFLAGS := $(FLAGS) -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+	# FLAGS += -heap-arrays 32 -align array64byte
 
 	ifeq ($(FORT),nagfor)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
