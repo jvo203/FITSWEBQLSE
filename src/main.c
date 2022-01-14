@@ -55,6 +55,7 @@ static void signal_handler(int sig_num)
 static zactor_t *speaker = NULL;
 static zactor_t *listener = NULL;
 static pthread_t zmq_t;
+
 static void *autodiscovery_daemon(void *);
 
 typedef struct
