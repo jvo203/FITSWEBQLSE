@@ -60,7 +60,7 @@ static pthread_t zmq_t;
 static void *autodiscovery_daemon(void *);
 
 static GSList *cluster = NULL;
-static GMutex mutex;
+static GMutex cluster_mtx;
 
 typedef struct
 {
@@ -230,6 +230,9 @@ int main(int argc, char *argv[])
 
         zactor_destroy(&listener);
     }
+
+    if (cluster != NULL)
+        g_slist_free(cluster);
 
     return EXIT_SUCCESS;
 }
@@ -426,39 +429,37 @@ static void *autodiscovery_daemon(void *ptr)
         if (ipaddress != NULL)
         {
             zframe_t *content = zframe_recv(listener);
-            char *str_msg = strndup((const char *)zframe_data(content), zframe_size(content));
-
-            struct mg_str msg = {(const char *)zframe_data(content), zframe_size(content)};
-            struct mg_str enter = mg_str("ENTER");
-            struct mg_str leave = mg_str("LEAVE");
+            char *msg = strndup((const char *)zframe_data(content), zframe_size(content));
 
             // ENTER
-            if (mg_strstr(msg, enter) != NULL)
+            if (strstr(msg, "ENTER") != NULL)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
-                    if (str_msg != NULL)
-                        printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
+                    printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
 
-                    /*std::string node = std::string(ipaddress);
+                    g_mutex_lock(&cluster_mtx);
+                    GSList *item = g_slist_find(cluster, ipaddress);
 
-                    if (!cluster_contains_node(node))
+                    // only insert if not present
+                    if (item == NULL)
                     {
-                        PrintThread{} << "found a new peer @ " << ipaddress << ": "
-                                      << message << std::endl;
-                        cluster_insert_node(node);
-                    }*/
+                        cluster = g_slist_append(cluster, ipaddress);
+                        printf("[ØMQ] added %s to the cluster.\n", ipaddress);
+                    }
+
+                    g_mutex_unlock(&cluster_mtx);
                 }
             }
 
             // LEAVE
-            if (mg_strstr(msg, leave) != NULL)
+            if (strstr(msg, "LEAVE") != NULL)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
-                    if (str_msg != NULL)
-                        printf("[ØMQ] received '%s' from %s\n", str_msg, ipaddress);
+                    printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
 
+                    g_mutex_lock(&cluster_mtx);
                     /*std::string node = std::string(ipaddress);
 
                     if (cluster_contains_node(node))
@@ -467,11 +468,12 @@ static void *autodiscovery_daemon(void *ptr)
                                       << std::endl;
                         cluster_erase_node(node);
                     }*/
+                    g_mutex_unlock(&cluster_mtx);
                 }
             }
 
-            if (str_msg != NULL)
-                free(str_msg);
+            if (msg != NULL)
+                free(msg);
 
             zframe_destroy(&content);
             zstr_free(&ipaddress);
