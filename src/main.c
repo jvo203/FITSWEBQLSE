@@ -78,6 +78,8 @@ static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data
 // Thread utility function
 static void start_thread(void (*f)(void *), void *p);
 
+options_t options; // the one and only one definition
+
 int main(int argc, char *argv[])
 {
     // ZeroMQ node auto-discovery

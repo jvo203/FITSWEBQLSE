@@ -24,7 +24,5 @@ typedef struct
     char *db_home;
 } options_t;
 
-static options_t options;
-
 void start_http();
 void stop_http();

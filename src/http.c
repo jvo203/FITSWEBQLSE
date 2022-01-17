@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <time.h>
+#include <inttypes.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -17,6 +18,8 @@
 
 #include "json.h"
 #include "http.h"
+
+extern options_t options; // <options> is defined in main.c
 
 // HTML
 #define PAGE "<html><head><title>FITSWEBQL SE</title>" \
@@ -429,7 +432,7 @@ void start_http()
     }
     else
     {
-        printf("[C] µHTTP daemon listening on port %u... Press CTRL-C to stop it.\n", options.http_port);
+        printf("[C] µHTTP daemon listening on port %" PRIu16 "... Press CTRL-C to stop it.\n", options.http_port);
     }
 
     printf("libmicrohttpd server started.\n");
