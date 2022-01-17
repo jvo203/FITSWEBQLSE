@@ -1,5 +1,8 @@
 # FITSWEBQL SE
 
+# status
+in active development
+
 ## PROJECT LAZARUS (a.k.a. FORTRAN RESURRECTED) (January 2022 ~)
 A resurrection of the previous Fortran code, this time without CoArrays but with manual custom distributed computing. Julia has been found to suffer from serious RAM fragmentation issues when ran "long-enough" in a 24h server environment.
 
@@ -10,6 +13,3 @@ FITSWEBQLSE (Supercomputer Edition) coded in Julia. Originally Julia was positio
 An experimental Fortran 2018 FITSWebQL built with Co-Array Fortran & MPI, using NASA's FITSIO to read FITS files. FITSWEBQL SE scales across multiple computers (cluster nodes).
 
 Co-Array Fortran has since been replaced by Julia since it (Fortran 2018) lacks concurrent (asynchronous) Co-Arrays. Out of all programming languages, Julia has the best distributed computing capabilities.
-
-# status
-in active development
