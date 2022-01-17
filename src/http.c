@@ -3,7 +3,10 @@
 #include <string.h>
 #include <signal.h>
 #include <stdbool.h>
+
+#define __USE_XOPEN
 #include <time.h>
+
 #include <inttypes.h>
 #include <unistd.h>
 #include <sys/stat.h>
