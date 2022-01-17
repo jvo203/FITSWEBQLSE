@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
         printf("Node: '%s'\n", iterator->data);
 
     if (cluster != NULL)
-        g_slist_free(cluster);
+        g_slist_free_full(cluster, free);
 
     return EXIT_SUCCESS;
 }
@@ -448,7 +448,7 @@ static void *autodiscovery_daemon(void *ptr)
                     // only insert if not present
                     if (item == NULL)
                     {
-                        cluster = g_slist_append(cluster, ipaddress);
+                        cluster = g_slist_append(cluster, strdup(ipaddress));
                         printf("[ØMQ] added %s to the cluster.\n", ipaddress);
                     }
 
