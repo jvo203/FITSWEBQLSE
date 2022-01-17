@@ -231,6 +231,10 @@ int main(int argc, char *argv[])
         zactor_destroy(&listener);
     }
 
+    GSList *iterator = NULL;
+    for (iterator = cluster; iterator; iterator = iterator->next)
+        printf("Node: '%s'\n", iterator->data);
+
     if (cluster != NULL)
         g_slist_free(cluster);
 
@@ -460,14 +464,15 @@ static void *autodiscovery_daemon(void *ptr)
                     printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
 
                     g_mutex_lock(&cluster_mtx);
-                    /*std::string node = std::string(ipaddress);
+                    GSList *item = g_slist_find(cluster, ipaddress);
 
-                    if (cluster_contains_node(node))
+                    // only remove if present
+                    if (item != NULL)
                     {
-                        PrintThread{} << ipaddress << " is leaving: " << message
-                                      << std::endl;
-                        cluster_erase_node(node);
-                    }*/
+                        cluster = g_slist_remove(cluster, ipaddress);
+                        printf("[ØMQ] removed %s from the cluster.\n", ipaddress);
+                    }
+
                     g_mutex_unlock(&cluster_mtx);
                 }
             }
