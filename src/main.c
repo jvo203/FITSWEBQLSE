@@ -10,8 +10,6 @@
 #include <getopt.h>
 #include <libgen.h>
 #include <string.h>
-#include <stdbool.h>
-#include <dirent.h>
 #include <pwd.h>
 
 #include "ini.h"
@@ -62,27 +60,6 @@ static void *autodiscovery_daemon(void *);
 static GSList *cluster = NULL;
 static GMutex cluster_mtx;
 
-typedef struct
-{
-    // fitswebql
-    uint32_t http_port;
-    uint32_t ws_port;
-    bool local;
-    bool production;
-    uint32_t timeout;
-    char *fits_home;
-    char *cache;
-    char *logs;
-    char *home_dir;
-
-    //postgresql
-    char *user;
-    char *password;
-    char *host;
-    uint32_t port;
-    char *db_home;
-} options_t;
-
 #define OPTSTR "p:h"
 #define USAGE_FMT "%s [-p HTTP port] [-d home directory] [-h]\n"
 #define DEFAULT_PROGNAME "fitswebql"
@@ -118,7 +95,22 @@ int main(int argc, char *argv[])
 
     struct passwd *passwdEnt = getpwuid(getuid());
 
-    options_t options = {8080, 8081, true, false, 15, strdup(".cache"), strdup(".cache"), strdup("LOGS"), strdup(passwdEnt->pw_dir), strdup("jvo"), NULL, strdup("p10.vo.nao.ac.jp"), 5433, strdup("/home")}; // default values
+    //options = {8080, 8081, true, false, 15, strdup(".cache"), strdup(".cache"), strdup("LOGS"), strdup(passwdEnt->pw_dir), strdup("jvo"), NULL, strdup("p10.vo.nao.ac.jp"), 5433, strdup("/home")}; // default values
+    options.http_port = 8080;
+    options.ws_port = options.http_port + 1;
+    options.local = true;
+    options.production = false;
+    options.timeout = 15;
+    options.fits_home = strdup(".cache");
+    options.cache = strdup(".cache");
+    options.logs = strdup("LOGS");
+    options.home_dir = strdup(passwdEnt->pw_dir);
+
+    options.user = strdup("jvo");
+    options.password = NULL;
+    options.host = strdup("p10.vo.nao.ac.jp");
+    options.port = 5433;
+    options.db_home = strdup("/home");
 
     // parse a config.ini config file
     if (ini_parse("config.ini", handler, &options) < 0)
@@ -133,7 +125,7 @@ int main(int argc, char *argv[])
         switch (opt)
         {
         case 'p':
-            options.http_port = (uint32_t)strtoul(optarg, NULL, 10);
+            options.http_port = (uint16_t)strtoul(optarg, NULL, 10);
             options.ws_port = options.http_port + 1;
             break;
 
@@ -154,7 +146,7 @@ int main(int argc, char *argv[])
     if (options.local)
         printf("Home Directory: %s\n", options.home_dir);
 
-    printf("Browser URL: http://localhost:%" PRIu32 "\n", options.http_port);
+    printf("Browser URL: http://localhost:%" PRIu16 "\n", options.http_port);
     printf("*** To quit FITSWEBQLSE press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
 
     // Ctrl-C signal handler
@@ -162,7 +154,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
 
-    start_http();
+    start_http(options.http_port);
 
     // a mongoose server
     char url[256] = "";
