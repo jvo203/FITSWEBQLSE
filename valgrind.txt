@@ -1,0 +1,2 @@
+ valgrind --leak-check=full --show-leak-kinds=all --suppressions=/usr/share/glib-2.0/valgrind/glib.supp ./fitswebqlse
+
