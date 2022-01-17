@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 
     GSList *iterator = NULL;
     for (iterator = cluster; iterator; iterator = iterator->next)
-        printf("Node: '%s'\n", iterator->data);
+        printf("cluster node @%s\n", iterator->data);
 
     if (cluster != NULL)
         g_slist_free_full(cluster, free);
