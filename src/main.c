@@ -59,6 +59,9 @@ static pthread_t zmq_t;
 
 static void *autodiscovery_daemon(void *);
 
+static GSList *cluster = NULL;
+static GMutex mutex;
+
 typedef struct
 {
     // fitswebql
