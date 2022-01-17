@@ -448,7 +448,8 @@ static void *autodiscovery_daemon(void *ptr)
                     // only insert if not present
                     if (item == NULL)
                     {
-                        cluster = g_slist_append(cluster, strdup(ipaddress));
+                        // use prepend to avoid traversing to the end of the list
+                        cluster = g_slist_prepend(cluster, strdup(ipaddress));
                         printf("[ØMQ] added %s to the cluster.\n", ipaddress);
                     }
 
