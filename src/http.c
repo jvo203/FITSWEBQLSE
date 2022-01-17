@@ -434,19 +434,15 @@ void start_http()
     {
         printf("[C] µHTTP daemon listening on port %" PRIu16 "... Press CTRL-C to stop it.\n", options.http_port);
     }
-
-    printf("libmicrohttpd server started.\n");
 };
 
 void stop_http()
 {
     if (http_server != NULL)
     {
-        printf("[C] shutting down the HTTP server... ");
+        printf("[C] shutting down the µHTTP daemon... ");
         MHD_stop_daemon(http_server);
         http_server = NULL;
         printf("done\n");
     }
-
-    printf("libmicrohttpd server stopped.\n");
 };
