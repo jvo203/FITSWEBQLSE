@@ -853,7 +853,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "<script>var WS_SOCKET = 'ws://';</script>\n");
 #endif
 
-    g_string_append_printf(html, "<script>var WS_PORT = %d;</script>\n", WS_PORT);
+    g_string_append_printf(html, "<script>var WS_PORT = %" PRIu16 ";</script>\n", options.ws_port);
 
     // the page entry point
     g_string_append(
