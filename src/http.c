@@ -21,6 +21,7 @@
 
 #include "json.h"
 #include "http.h"
+#include "hash_table.h"
 
 #include <sqlite3.h>
 static sqlite3 *splat_db = NULL;
