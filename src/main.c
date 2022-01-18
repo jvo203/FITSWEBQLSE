@@ -440,14 +440,14 @@ static void *autodiscovery_daemon(void *ptr)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
-                    printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
-
                     g_mutex_lock(&cluster_mtx);
                     GSList *item = g_slist_find_custom(cluster, ipaddress, gstrcmp);
 
                     // only insert if not present
                     if (item == NULL)
                     {
+                        printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
+
                         // use prepend to avoid traversing to the end of the list
                         cluster = g_slist_prepend(cluster, strdup(ipaddress));
                         printf("[ØMQ] added '%s' to the cluster.\n", ipaddress);
@@ -462,14 +462,14 @@ static void *autodiscovery_daemon(void *ptr)
             {
                 if (strcmp(my_hostname, ipaddress) != 0)
                 {
-                    printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
-
                     g_mutex_lock(&cluster_mtx);
                     GSList *item = g_slist_find_custom(cluster, ipaddress, gstrcmp);
 
                     // only remove if present
                     if (item != NULL)
                     {
+                        printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
+
                         cluster = g_slist_remove(cluster, ipaddress);
                         printf("[ØMQ] removed '%s' from the cluster.\n", ipaddress);
                     }
