@@ -33,6 +33,30 @@ extern options_t options; // <options> is defined in main.c
 
 struct MHD_Daemon *http_server = NULL;
 
+static enum MHD_Result http_ok(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *okstr =
+        "<html><body><div align='center'><p>200 OK Processing a request.</p></div><div align='center'><img src=\"/fortran.webp\" alt=\" Powered by Fortran 2018\" style = \"height:40px; margin-top:25px;\" ></div></ body></ html>";
+
+    response =
+        MHD_create_response_from_buffer(strlen(okstr),
+                                        (void *)okstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_OK,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
 static enum MHD_Result http_not_found(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
@@ -390,6 +414,163 @@ static enum MHD_Result on_http_connection(void *cls,
         else
             return get_home_directory(connection);
     };
+
+    // WebQL main entry page
+    if (strstr(url, "FITSWebQL.html") != NULL)
+    {
+        char *root = NULL;
+
+        if (!options.local)
+        {
+            //get the root path
+            char *proot = (char *)strstr(url, "FITSWebQL.html");
+
+            int len = proot - url;
+            char *root = strndup(url, len);
+
+            printf("[C] URL root path: %s\n", root);
+        }
+
+        //get datasetId
+        char **datasetId = NULL;
+        int va_count = 0;
+
+        if (options.local)
+        {
+            char *directory = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dir");
+            char *extension = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ext");
+            char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "filename");
+
+            //auto-detect multiple entries
+            if (tmp == NULL)
+            {
+                char str_key[255] = "";
+
+                sprintf(str_key, "filename%d", va_count + 1);
+
+                while ((tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, str_key)) != NULL)
+                {
+                    va_count++;
+                    printf("[C] argument %d:%s\n", va_count, tmp);
+                    sprintf(str_key, "filename%d", va_count + 1);
+
+                    datasetId = (char **)realloc(datasetId, va_count * sizeof(char *));
+                    datasetId[va_count - 1] = tmp;
+                }
+
+                printf("[C] number of arguments: %d\n", va_count);
+            }
+            else
+            {
+                va_count = 1;
+
+                //allocate datasetId
+                datasetId = (char **)malloc(sizeof(char *));
+                datasetId[0] = tmp;
+            }
+        }
+        else
+        {
+            char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+
+            //auto-detect multiple lines
+            if (tmp == NULL)
+            {
+                char str_key[255] = "";
+
+                sprintf(str_key, "datasetId%d", va_count + 1);
+
+                while ((tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, str_key)) != NULL)
+                {
+                    va_count++;
+                    printf("[C] argument %d:%s\n", va_count, tmp);
+                    sprintf(str_key, "datasetId%d", va_count + 1);
+
+                    datasetId = (char **)realloc(datasetId, va_count * sizeof(char *));
+                    datasetId[va_count - 1] = tmp;
+                }
+
+                printf("[C] number of arguments: %d\n", va_count);
+            }
+            else
+            {
+                va_count = 1;
+
+                //allocate datasetId
+                datasetId = (char **)malloc(sizeof(char *));
+                datasetId[0] = tmp;
+            }
+        }
+
+        char *view = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "view");
+        char *flux = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "flux");
+        char *db = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "db");
+        char *table = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "table");
+
+        int composite = 0;
+
+        if (view != NULL)
+            composite = (strcasecmp("composite", view) == 0) ? 1 : 0;
+
+        if (datasetId != NULL)
+        {
+            ret = execute_alma(connection, datasetId, va_count, composite);
+
+            // pass the filepath to FORTRAN
+            if (options.local)
+            {
+                // make a filepath from the dir/extension
+                int i;
+                char filepath[1024];
+                memset(filepath, '\0', sizeof(filepath));
+
+                for (i = 0; i < va_count; i++)
+                {
+                    pthread_t tid;
+
+                    // try to insert a NULL dataset
+
+                    if (insert_if_not_exists(datasetId[i], NULL))
+                        continue;
+
+                    if (directory != NULL)
+                    {
+                        if (extension == NULL)
+                            snprintf(filepath, sizeof(filepath), "%s/%s.fits", directory, datasetId[i]);
+                        else
+                            snprintf(filepath, sizeof(filepath), "%s/%s.%s", directory, datasetId[i], extension);
+                    }
+
+                    printf("[C] FITS filepath:\t%s\n", filepath);
+
+                    pthread_create(&tid, NULL, &handle_fitswebql_request, strndup(filepath, sizeof(filepath)));
+                    pthread_detach(tid);
+                }
+
+                // directory/extension should not be freed (libmicrohttpd does that)
+            }
+            else
+            {
+                ret = http_ok(connection);
+                // get the full path from the postgresql db
+
+                // if a file does not exist form a download URL (jvox...)
+
+                // then call FORTRAN with a filepath or URL
+            }
+        }
+        else
+            ret = http_not_found(connection);
+
+        // deallocate datasetId
+        if (datasetId != NULL)
+            free(datasetId);
+
+        if (root != NULL)
+            free(root);
+
+        return ret;
+    }
 
     // static resources
     if (url[strlen(url) - 1] != '/')
