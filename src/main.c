@@ -389,6 +389,12 @@ static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data
     }
 }
 
+int gstrcmp(const void *pa, const void *pb)
+{
+    /* compare strings */
+    return strcmp((const char *)pa, (const char *)pb);
+}
+
 static void *autodiscovery_daemon(void *ptr)
 {
     speaker = zactor_new(zbeacon, NULL);
@@ -437,14 +443,13 @@ static void *autodiscovery_daemon(void *ptr)
                     printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
 
                     g_mutex_lock(&cluster_mtx);
-                    GSList *item = g_slist_find(cluster, ipaddress);
+                    GSList *item = g_slist_find_custom(cluster, ipaddress, gstrcmp);
 
                     // only insert if not present
                     if (item == NULL)
                     {
                         // use prepend to avoid traversing to the end of the list
-                        // prepend --> append
-                        cluster = g_slist_append(cluster, strdup(ipaddress));
+                        cluster = g_slist_prepend(cluster, strdup(ipaddress));
                         printf("[ØMQ] added '%s' to the cluster.\n", ipaddress);
                     }
 
@@ -460,7 +465,7 @@ static void *autodiscovery_daemon(void *ptr)
                     printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
 
                     g_mutex_lock(&cluster_mtx);
-                    GSList *item = g_slist_find(cluster, ipaddress);
+                    GSList *item = g_slist_find_custom(cluster, ipaddress, gstrcmp);
 
                     // only remove if present
                     if (item != NULL)
