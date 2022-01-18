@@ -335,17 +335,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
 
 static enum MHD_Result get_home_directory(struct MHD_Connection *connection)
 {
-    struct passwd *passwdEnt = getpwuid(getuid());
-    char *home = passwdEnt->pw_dir;
-
-    if (home != NULL)
-    {
-        char *dir = strdup(home);
-
-        return get_directory(connection, dir);
-    }
-    else
-        return http_not_found(connection);
+    return get_directory(connection, strdup(options.home_dir));
 }
 
 static enum MHD_Result on_http_connection(void *cls,
