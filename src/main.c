@@ -460,7 +460,8 @@ static void *autodiscovery_daemon(void *ptr)
                         printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
 
                         // free the underlying data
-                        free(item->data);
+                        if (item->data != NULL)
+                            free(item->data);
 
                         // remove an item from the list
                         cluster = g_slist_delete_link(cluster, item);
