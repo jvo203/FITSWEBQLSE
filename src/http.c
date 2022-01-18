@@ -435,10 +435,13 @@ static enum MHD_Result on_http_connection(void *cls,
         char **datasetId = NULL;
         int va_count = 0;
 
+        char *directory = NULL; // only needed by <options.local>
+        char *extension = NULL; // only needed by <options.local>
+
         if (options.local)
         {
-            char *directory = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dir");
-            char *extension = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ext");
+            directory = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dir");
+            extension = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ext");
             char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "filename");
 
             //auto-detect multiple entries
