@@ -23,6 +23,8 @@
 #include "http.h"
 #include "hash_table.h"
 
+#include "version.h"
+
 #include <sqlite3.h>
 static sqlite3 *splat_db = NULL;
 extern options_t options; // <options> is defined in main.c
