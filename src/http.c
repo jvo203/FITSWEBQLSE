@@ -33,6 +33,8 @@ extern options_t options; // <options> is defined in main.c
 
 struct MHD_Daemon *http_server = NULL;
 
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite);
+
 static enum MHD_Result http_ok(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
@@ -590,6 +592,312 @@ static enum MHD_Result on_http_connection(void *cls,
     }
 
     return http_not_found(connection);
+}
+
+void include_file(GString *str, const char *filename)
+{
+    int fd = -1;
+    void *buffer = NULL;
+
+    struct stat st;
+    stat(filename, &st);
+    long size = st.st_size;
+
+    fd = open(filename, O_RDONLY);
+
+    if (fd != -1)
+    {
+        buffer = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+        if (buffer != MAP_FAILED)
+        {
+            g_string_append_len(str, (const char *)buffer, size);
+
+            if (munmap(buffer, size) == -1)
+                perror("un-mapping error");
+        }
+        else
+            perror("error mapping a file");
+
+        close(fd);
+    };
+}
+
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite)
+{
+    unsigned int i;
+    bool has_fits = true;
+
+    // go through the dataset list looking up entries in the hash table
+    for (i = 0; i < va_count; i++)
+        has_fits = has_fits && dataset_exists(va_list[i]);
+
+    // the string holding the dynamically generated HTML content
+    GString *html = g_string_new("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n");
+
+    g_string_append(html,
+                    "<link href=\"https://fonts.googleapis.com/css?family=Inconsolata\" "
+                    "rel=\"stylesheet\"/>\n");
+    g_string_append(html,
+                    "<link href=\"https://fonts.googleapis.com/css?family=Material+Icons\" "
+                    "rel=\"stylesheet\"/>\n");
+    g_string_append(html, "<script src=\"https://d3js.org/d3.v5.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/reconnecting-websocket.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/"
+                          "numeral.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/ra_dec_conversion.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/sylvester.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/shortcut.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/colourmaps.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/lz4.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/marchingsquares-isocontours.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/marchingsquares-isobands.min.js\"></script>\n");
+
+    // OpenEXR WASM decoder
+    g_string_append(html, "<script "
+                          "src=\"client." WASM_VERSION ".js\"></script>\n");
+    /*html.append("<script "
+              "src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWebQL@master/" +
+              docs_root +
+              "/"
+              "fitswebql/exr." WASM_VERSION ".min.js\"></script>\n");*/
+    g_string_append_printf(html, "<script>\n"
+                                 "Module.ready\n"
+                                 "\t.then(status => console.log(status))\n"
+                                 "\t.catch(e => console.error(e));\n"
+                                 "</script>\n");
+
+    // bootstrap
+    g_string_append(html,
+                    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, "
+                    "user-scalable=no, minimum-scale=1, maximum-scale=1\">\n");
+
+    // version 3.3.7
+    /*g_string_append(html, "<link rel=\"stylesheet\" "
+                          "href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/"
+                          "bootstrap.min.css\">\n");
+    g_string_append(html, "<script "
+                          "src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/"
+                          "jquery.min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/"
+                          "bootstrap.min.js\"></script>\n");*/
+
+    // version 3.4.1
+    g_string_append(html, "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\" integrity=\"sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu\" crossorigin=\"anonymous\">");
+    g_string_append(html, "<script src=\"https://code.jquery.com/jquery-1.12.4.min.js\" integrity=\"sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ\" crossorigin=\"anonymous\"></script>");
+    g_string_append(html, "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js\" integrity=\"sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd\" crossorigin=\"anonymous\"></script>");
+
+    // GLSL vertex shader
+    g_string_append(html, "<script id=\"vertex-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/vertex-shader.vert");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html,
+                    "<script id=\"legend-vertex-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/legend-vertex-shader.vert");
+    g_string_append(html, "</script>\n");
+
+    // GLSL fragment shaders
+    g_string_append(html, "<script id=\"common-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/common-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html,
+                    "<script id=\"legend-common-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/legend-common-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    // tone mappings
+    g_string_append(html, "<script id=\"ratio-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/ratio-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"logistic-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/logistic-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"square-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/square-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"legacy-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/legacy-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"linear-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/linear-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    // colourmaps
+    g_string_append(html, "<script id=\"greyscale-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/greyscale-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"negative-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/negative-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"amber-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/amber-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"red-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/red-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"green-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/green-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"blue-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/blue-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"hot-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/hot-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"rainbow-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/rainbow-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"parula-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/parula-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"inferno-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/inferno-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"magma-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/magma-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"plasma-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/plasma-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"viridis-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/viridis-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"cubehelix-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/cubehelix-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"jet-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/jet-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    g_string_append(html, "<script id=\"haxby-shader\" type=\"x-shader/x-vertex\">\n");
+    include_file(html, "htdocs/fitswebql/haxby-shader.frag");
+    g_string_append(html, "</script>\n");
+
+    // FITSWebQL main JavaScript + CSS
+    g_string_append(html, "<script src=\"fitswebqlse_for.js?" VERSION_STRING "\"></script>\n");
+    g_string_append(html, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING
+                          "\"/>\n");
+
+    // HTML content
+    g_string_append(html, "<title>FITSWEBQLSE</title></head><body>\n");
+    g_string_append_printf(html, "<div id='votable' style='width: 0; height: 0;' data-va_count='%d' ", va_count);
+
+    if (va_count == 1)
+        g_string_append_printf(html, "data-datasetId='%s' ", va_list[0]);
+    else
+    {
+        for (i = 0; i < va_count; i++)
+            g_string_append_printf(html, "data-datasetId%d='%s' ", (i + 1), va_list[i]);
+
+        if (composite && va_count <= 3)
+            g_string_append(html, "data-composite='1' ");
+    }
+
+#ifndef LOCAL
+    g_string_append_printf(html, "data-root-path='%s/' ", root);
+#else
+    g_string_append(html, "data-root-path='/' ");
+#endif
+
+    g_string_append(html, " data-server-version='" VERSION_STRING "' data-server-string='" SERVER_STRING);
+#ifdef LOCAL
+    g_string_append(html, "' data-server-mode='LOCAL");
+#else
+    g_string_append(html, "' data-server-mode='SERVER");
+#endif
+    g_string_append_printf(html, "' data-has-fits='%d'></div>\n", (has_fits ? 1 : 0));
+
+#ifdef PRODUCTION
+    g_string_append(html, "<script>var WS_SOCKET = 'wss://';</script>\n");
+#else
+    g_string_append(html, "<script>var WS_SOCKET = 'ws://';</script>\n");
+#endif
+
+    g_string_append_printf(html, "<script>var WS_PORT = %d;</script>\n", WS_PORT);
+
+    // the page entry point
+    g_string_append(
+        html, "<script>"
+              "const golden_ratio = 1.6180339887;"
+              "var ALMAWS = null ;"
+              "var wsVideo = null ;"
+              "var wsConn = null;"
+              "var firstTime = true;"
+              "var has_image = false;"
+              "var PROGRESS_VARIABLE = 0.0;"
+              "var PROGRESS_INFO = '' ;"
+              "var RESTFRQ = 0.0;"
+              "var USER_SELFRQ = 0.0;"
+              "var USER_DELTAV = 0.0;"
+              "var ROOT_PATH = '/fitswebql/';"
+              "var idleResize = -1;"
+              "window.onresize = resizeMe;"
+              "window.onbeforeunload = function() {"
+              "    if (wsConn != null)"
+              "    {"
+              "        for (let i = 0; i < va_count; i++)"
+              "            wsConn[i].close();"
+              "    }"
+              ""
+              "          if (wsVideo != null)"
+              "             wsVideo.close();"
+              "    };"
+              "mainRenderer(); </script>\n");
+
+    g_string_append(html, "</body></html>");
+
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html->len, (void *)html->str, g_free);
+    // deallocate the html content after libmicrohttpd has taken ownership of the string
+    g_string_free(html, FALSE);
+
+    MHD_add_response_header(response, "Cache-Control", "no-cache");
+    MHD_add_response_header(response, "Cache-Control", "no-store");
+    MHD_add_response_header(response, "Pragma", "no-cache");
+    MHD_add_response_header(response, "Content-Type", "text/html; charset=utf-8");
+
+    enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+    MHD_destroy_response(response);
+
+    return ret;
 }
 
 void start_http()
