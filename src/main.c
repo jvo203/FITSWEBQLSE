@@ -20,6 +20,8 @@
 #include "mongoose.h"
 #include "mjson.h"
 
+#include "version.h"
+
 #include <glib.h>
 
 static volatile sig_atomic_t s_received_signal = 0;
@@ -31,20 +33,6 @@ static void signal_handler(int sig_num)
     signal(sig_num, signal_handler);
     s_received_signal = sig_num;
 }
-
-#define VERSION_MAJOR 5
-#define VERSION_MINOR 0
-#define VERSION_SUB 0
-
-#define STR_HELPER(x) #x
-#define STR(x) STR_HELPER(x)
-
-#define SERVER_STRING                                                  \
-    "FITSWEBQLSE v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR( \
-        VERSION_SUB)
-
-#define WASM_VERSION "21.09.XX.X"
-#define VERSION_STRING "SV2022-01-XX.X-ALPHA"
 
 /* ZeroMQ node auto-discovery */
 #define BEACON_PORT 50000
