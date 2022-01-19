@@ -10436,7 +10436,7 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 		}
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-			var molecules = [];
+			molecules = []; // a global variable
 
 			try {
 				var response = JSON.parse(xmlhttp.responseText);
@@ -10457,13 +10457,11 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 
 			console.log("#SPLATALOGUE molecules: ", molecules.length);
 
-			if (molecules.length > 0) {
-				let fitsData = fitsContainer[va_count - 1];
+			let fitsData = fitsContainer[va_count - 1];
 
-				if (fitsData != null) {
-					if (fitsData.depth > 1)
-						display_molecules();
-				}
+			if (fitsData != null) {
+				if (fitsData.depth > 1)
+					display_molecules();
 			}
 		}
 	}
