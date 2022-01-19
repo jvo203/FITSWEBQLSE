@@ -246,10 +246,10 @@ const char *get_filename_ext(const char *filename)
 {
     const char *dot = strrchr(filename, '.');
 
-    if ((dot == NULL) || (dot == filename))
+    if (!dot || dot == filename)
         return "";
-    else
-        return dot + 1;
+
+    return dot + 1;
 }
 
 static enum MHD_Result get_directory(struct MHD_Connection *connection, char *dir)
