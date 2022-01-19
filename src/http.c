@@ -35,7 +35,7 @@ extern options_t options; // <options> is defined in main.c
 
 struct MHD_Daemon *http_server = NULL;
 
-static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite);
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
 
 static enum MHD_Result http_ok(struct MHD_Connection *connection)
 {
@@ -521,7 +521,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (datasetId != NULL)
         {
-            ret = execute_alma(connection, datasetId, va_count, composite);
+            ret = execute_alma(connection, datasetId, va_count, composite, root);
 
             // pass the filepath to FORTRAN
             if (options.local)
@@ -625,7 +625,7 @@ void include_file(GString *str, const char *filename)
     };
 }
 
-static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite)
+static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
 {
     unsigned int i;
     bool has_fits = true;
@@ -823,7 +823,12 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     }
 
     if (!options.local)
-        g_string_append_printf(html, "data-root-path='%s/' ", root);
+    {
+        if (root != NULL)
+            g_string_append_printf(html, "data-root-path='%s/' ", root);
+        else
+            g_string_append(html, "data-root-path='/' ");
+    }
     else
         g_string_append(html, "data-root-path='/' ");
 
