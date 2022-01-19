@@ -19,7 +19,7 @@
 
 #include "mongoose.h"
 #include "mjson.h"
-
+#include "hash_table.h"
 #include "version.h"
 
 #include <glib.h>
@@ -70,6 +70,9 @@ options_t options; // the one and only one definition
 
 int main(int argc, char *argv[])
 {
+    g_mutex_init(&cluster_mtx);
+    init_hash_table();
+
     // ZeroMQ node auto-discovery
     setenv("ZSYS_SIGHANDLER", "false", 1);
 
@@ -219,6 +222,9 @@ int main(int argc, char *argv[])
 
     if (cluster != NULL)
         g_slist_free_full(cluster, free);
+
+    g_mutex_clear(&cluster_mtx);
+    delete_hash_table();
 
     return EXIT_SUCCESS;
 }
