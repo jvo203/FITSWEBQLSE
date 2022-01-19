@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-01-12.0";
+	return "JS2022-01-19.0";
 }
 
 const wasm_supported = (() => {
@@ -10436,29 +10436,35 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 		}
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-			// var response = JSON.parse(xmlhttp.responseText);
-			// molecules = response.molecules;
+			var molecules = [];
 
-			var received_msg = xmlhttp.response;
-
-			if (received_msg instanceof ArrayBuffer) {
-
-				// bzip2 decoder 
-				var bytes = new Uint8Array(received_msg);
-				jsonData = bzip2.simple(bzip2.array(bytes));
-
-				var response = JSON.parse(jsonData);
+			try {
+				var response = JSON.parse(xmlhttp.responseText);
 				molecules = response.molecules;
+			} catch (err) {
+				var received_msg = xmlhttp.response;
 
-				console.log("#SPLATALOGUE molecules: ", molecules.length);
+				if (received_msg instanceof ArrayBuffer) {
 
+					// bzip2 decoder 
+					var bytes = new Uint8Array(received_msg);
+					jsonData = bzip2.simple(bzip2.array(bytes));
+
+					var response = JSON.parse(jsonData);
+					molecules = response.molecules;
+				};
+			};
+
+			console.log("#SPLATALOGUE molecules: ", molecules.length);
+
+			if (molecules.length > 0) {
 				let fitsData = fitsContainer[va_count - 1];
 
 				if (fitsData != null) {
 					if (fitsData.depth > 1)
 						display_molecules();
 				}
-			};
+			}
 		}
 	}
 
