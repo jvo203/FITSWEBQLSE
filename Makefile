@@ -79,7 +79,7 @@ OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
 ifeq ($(CC),icc)
-	FLAGS = -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=medium -shared-intel
+	FLAGS = -g -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=medium -shared-intel
 # -parallel
 #-mcmodel=medium
 #-ipo -parallel -fast
