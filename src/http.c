@@ -691,17 +691,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, "
                     "user-scalable=no, minimum-scale=1, maximum-scale=1\">\n");
 
-    // version 3.3.7
-    /*g_string_append(html, "<link rel=\"stylesheet\" "
-                          "href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/"
-                          "bootstrap.min.css\">\n");
-    g_string_append(html, "<script "
-                          "src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/"
-                          "jquery.min.js\"></script>\n");
-    g_string_append(html, "<script "
-                          "src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/"
-                          "bootstrap.min.js\"></script>\n");*/
-
     // version 3.4.1
     g_string_append(html, "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\" integrity=\"sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu\" crossorigin=\"anonymous\">");
     g_string_append(html, "<script src=\"https://code.jquery.com/jquery-1.12.4.min.js\" integrity=\"sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ\" crossorigin=\"anonymous\"></script>");
@@ -833,25 +822,24 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
             g_string_append(html, "data-composite='1' ");
     }
 
-#ifndef LOCAL
-    g_string_append_printf(html, "data-root-path='%s/' ", root);
-#else
-    g_string_append(html, "data-root-path='/' ");
-#endif
+    if (!options.local)
+        g_string_append_printf(html, "data-root-path='%s/' ", root);
+    else
+        g_string_append(html, "data-root-path='/' ");
 
     g_string_append(html, " data-server-version='" VERSION_STRING "' data-server-string='" SERVER_STRING);
-#ifdef LOCAL
-    g_string_append(html, "' data-server-mode='LOCAL");
-#else
-    g_string_append(html, "' data-server-mode='SERVER");
-#endif
+
+    if (options.local)
+        g_string_append(html, "' data-server-mode='LOCAL");
+    else
+        g_string_append(html, "' data-server-mode='SERVER");
+
     g_string_append_printf(html, "' data-has-fits='%d'></div>\n", (has_fits ? 1 : 0));
 
-#ifdef PRODUCTION
-    g_string_append(html, "<script>var WS_SOCKET = 'wss://';</script>\n");
-#else
-    g_string_append(html, "<script>var WS_SOCKET = 'ws://';</script>\n");
-#endif
+    if (options.production)
+        g_string_append(html, "<script>var WS_SOCKET = 'wss://';</script>\n");
+    else
+        g_string_append(html, "<script>var WS_SOCKET = 'ws://';</script>\n");
 
     g_string_append_printf(html, "<script>var WS_PORT = %" PRIu16 ";</script>\n", options.ws_port);
 
