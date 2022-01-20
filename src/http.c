@@ -408,6 +408,18 @@ static enum MHD_Result on_http_connection(void *cls,
     if (0 == strcmp(url, "/exit"))
     {
         // forward the exit events to all other nodes
+        char url[256];
+
+        g_mutex_lock(&cluster_mtx);
+
+        GSList *iterator = NULL;
+        for (iterator = cluster; iterator; iterator = iterator->next)
+        {
+            sprintf(url, "http://%s:%" PRIu16 "/exit", iterator->data, options.http_port);
+            printf("Exit URL: %s\n", url);
+        }
+
+        g_mutex_unlock(&cluster_mtx);
 
         // raise SIGINT
         int ret = raise(SIGINT);
