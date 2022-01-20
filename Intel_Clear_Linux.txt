@@ -55,14 +55,35 @@
 
     sudo make install
 
-# 10. CFITSIO
+# 10. libcURL
 
-# 14. Adjust the environment variables in the .bashrc
+    sudo swupd bundle-add devpkg-curl
 
-Add
+# 11. CFITSIO
+    wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.0.0.tar.gz
 
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
-export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
+    tar zxvf cfitsio-4.0.0.tar.gz
 
-to .bashrc and re-login
+    cd cfitsio-4.0.0
 
+    ./configure --prefix=/usr/local
+
+    make
+
+    sudo make install
+
+
+# 12. Adjust the environment variables in the .bashrc
+
+    Add
+
+    export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
+    export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
+
+    to .bashrc and re-login
+
+# 13. Intel oneAPI
+
+    intel-basekit
+
+    intel-hpckit
