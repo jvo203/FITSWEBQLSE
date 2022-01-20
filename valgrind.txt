@@ -5,3 +5,4 @@ valgrind --leak-check=full --show-leak-kinds=all --suppressions=/usr/share/glib-
 valgrind --leak-check=full --suppressions=/usr/share/glib-2.0/valgrind/glib.supp ./fitswebqlse
 
 valgrind --leak-check=full --track-origins=yes --suppressions=/usr/share/glib-2.0/valgrind/glib.supp ./fitswebqlse
+
