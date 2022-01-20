@@ -678,14 +678,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // HTML5 FileSaver
     g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/FileSaver.js\"></script>\n");
 
-    // OpenEXR WASM decoder
+    // WebAssembly
     g_string_append(html, "<script "
                           "src=\"client." WASM_VERSION ".js\"></script>\n");
-    /*html.append("<script "
-              "src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWebQL@master/" +
-              docs_root +
-              "/"
-              "fitswebql/exr." WASM_VERSION ".min.js\"></script>\n");*/
     g_string_append_printf(html, "<script>\n"
                                  "Module.ready\n"
                                  "\t.then(status => console.log(status))\n"
