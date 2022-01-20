@@ -373,7 +373,10 @@ static enum MHD_Result get_home_directory(struct MHD_Connection *connection)
 
 void forward_exit_event(void *item, void *)
 {
-    printf("node %s\n", (const char *)item);
+    char url[256];
+
+    sprintf(url, "http://%s:%" PRIu16 "/exit", (const char *)item, options.http_port);
+    printf("Exit URL: %s\n", url);
 
     return;
 }
