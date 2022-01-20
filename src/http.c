@@ -410,6 +410,10 @@ static enum MHD_Result on_http_connection(void *cls,
         // forward the exit events to all other nodes
 
         // raise SIGINT
+        int ret = raise(SIGINT);
+
+        if (ret != 0)
+            printf("[C] Error: unable to raise SIGINT signal.\n");
 
         return http_ok(connection);
     }
