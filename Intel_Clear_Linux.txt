@@ -1,0 +1,68 @@
+# 1. glib-devel
+    sudo swupd bundle-add devpkg-glib
+
+# 2. ZeroMQ
+    sudo swupd bundle-add devpkg-libzmq
+
+# 3. CZMQ
+    git clone git://github.com/zeromq/czmq.git
+
+    cd czmq
+
+    ./autogen.sh && ./configure && make check
+
+    sudo make install
+
+    sudo ldconfig
+
+# 4. libmicrohttpd
+    sudo swupd bundle-add devpkg-libmicrohttpd
+
+# 5. sqlite3-devel
+    sudo swupd bundle-add devpkg-sqlite-autoconf
+
+# 6. PostgreSQL
+    sudo swupd bundle-add devpkg-postgresql
+
+# 7. jemalloc
+    wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+
+    bunzip2 jemalloc-5.2.1.tar.bz2
+
+    tar xvf jemalloc-5.2.1.tar
+
+    cd jemalloc-5.2.1
+
+    ./configure
+
+    make
+
+    sudo make install
+
+# 8. lz4-devel
+    sudo swupd bundle-add devpkg-lz4
+
+# 9. libcpuid
+    wget https://github.com/anrieff/libcpuid/releases/download/v0.5.1/libcpuid-0.5.1.tar.gz
+    
+    tar zxvf libcpuid-0.5.1.tar.gz
+    
+    cd libcpuid-0.5.1
+
+    ./configure
+
+    make
+
+    sudo make install
+
+# 10. CFITSIO
+
+# 14. Adjust the environment variables in the .bashrc
+
+Add
+
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
+
+to .bashrc and re-login
+
