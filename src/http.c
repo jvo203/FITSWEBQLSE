@@ -413,9 +413,12 @@ static enum MHD_Result on_http_connection(void *cls,
         int ret = raise(SIGINT);
 
         if (ret != 0)
+        {
             printf("[C] Error: unable to raise SIGINT signal.\n");
-
-        return http_ok(connection);
+            return http_not_found(connection);
+        }
+        else
+            return http_ok(connection);
     }
 
     if (0 == strcmp(url, "/get_directory"))
