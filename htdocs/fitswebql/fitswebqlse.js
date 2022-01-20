@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-01-20.0";
+	return "JS2022-01-20.1";
 }
 
 const wasm_supported = (() => {
@@ -10446,12 +10446,16 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 
 				if (received_msg instanceof ArrayBuffer) {
 
-					// bzip2 decoder 
-					var bytes = new Uint8Array(received_msg);
-					jsonData = bzip2.simple(bzip2.array(bytes));
+					try {
+						// bzip2 decoder 
+						var bytes = new Uint8Array(received_msg);
+						jsonData = bzip2.simple(bzip2.array(bytes));
 
-					var response = JSON.parse(jsonData);
-					molecules = response.molecules;
+						var response = JSON.parse(jsonData);
+						molecules = response.molecules;
+					} catch (e) {
+						console.log(e);
+					};
 				};
 			};
 
