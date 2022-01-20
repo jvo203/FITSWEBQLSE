@@ -409,7 +409,7 @@ static enum MHD_Result on_http_connection(void *cls,
     {
         // forward the exit events to all other nodes
 
-        s_received_signal = 1; // trigger a shutdown
+        // raise SIGINT
 
         return http_ok(connection);
     }

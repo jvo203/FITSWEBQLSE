@@ -2,7 +2,6 @@
 #pragma once
 
 #include <stdbool.h>
-#include <signal.h>
 
 typedef struct
 {
@@ -27,5 +26,3 @@ typedef struct
 
 void start_http();
 void stop_http();
-
-static volatile sig_atomic_t s_received_signal = 0;
