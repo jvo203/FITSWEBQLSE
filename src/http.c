@@ -410,7 +410,7 @@ static enum MHD_Result on_http_connection(void *cls,
     if (0 == strcmp(url, "/exit"))
     {
         // forward the exit events to all other nodes
-        char url[256];
+        char url[256] = "";
 
         g_mutex_lock(&cluster_mtx);
 
