@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-01-19.0";
+	return "JS2022-01-20.0";
 }
 
 const wasm_supported = (() => {
@@ -12570,9 +12570,19 @@ function show_welcome() {
 	var ul = bodyDiv.append("ul")
 		.attr("class", "list-group");
 
-	ul.append("li")
-		.attr("class", "list-group-item list-group-item-success")
-		.html("<h4>Server coded in Julia (distributed computing)</h4>");
+	sv = votable.getAttribute('data-server-version');
+
+	if (sv.charAt(0) == 'F') {
+		ul.append("li")
+			.attr("class", "list-group-item list-group-item-success")
+			.html("<h4>Server coded in FORTRAN (computing) &amp; C (networking)</h4>");
+	};
+
+	if (sv.charAt(0) == 'J') {
+		ul.append("li")
+			.attr("class", "list-group-item list-group-item-success")
+			.html("<h4>Server coded in Julia (distributed computing &amp; networking)</h4>");
+	};
 
 	ul.append("li")
 		.attr("class", "list-group-item list-group-item-success")
