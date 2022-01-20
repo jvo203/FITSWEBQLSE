@@ -77,13 +77,27 @@
 
     Add
 
-    export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
-    export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
+        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
+        export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
 
     to .bashrc and re-login
 
 # 13. Intel oneAPI
 
-    intel-basekit
+    i) intel-basekit
 
-    intel-hpckit
+        wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18445/l_BaseKit_p_2022.1.1.119_offline.sh
+
+        sudo sh ./l_BaseKit_p_2022.1.1.119_offline.sh
+
+    ii) intel-hpckit
+
+        wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18438/l_HPCKit_p_2022.1.1.97_offline.sh
+
+        sudo sh ./l_HPCKit_p_2022.1.1.97_offline.sh
+
+    Add
+
+        source /opt/intel/oneapi/setvars.sh
+
+    to .bashrc and re-login
