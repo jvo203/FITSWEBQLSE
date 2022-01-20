@@ -1338,7 +1338,7 @@ function serveFITS(request::HTTP.Request)
         resp,
         "<script src=\"https://kit.fontawesome.com/8433b7dde2.js\" crossorigin=\"anonymous\"></script>\n",
     )
-    write(resp, "<script src=\"FileSaver.js\"></script>\n")
+    write(resp, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/FileSaver.js\"></script>\n")
 
     # WebAssembly
     write(resp, "<script src=\"client.", WASM_VERSION, ".js\"></script>\n")
