@@ -21,6 +21,8 @@
 
 #include "json.h"
 #include "http.h"
+
+#include "cluster.h"
 #include "hash_table.h"
 
 #include "version.h"

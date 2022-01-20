@@ -19,7 +19,10 @@
 
 #include "mongoose.h"
 #include "mjson.h"
+
+#include "cluster.h"
 #include "hash_table.h"
+
 #include "version.h"
 
 #include <glib.h>
@@ -44,9 +47,6 @@ static zactor_t *listener = NULL;
 static pthread_t zmq_t;
 
 static void *autodiscovery_daemon(void *);
-
-static GSList *cluster = NULL;
-static GMutex cluster_mtx;
 
 #define OPTSTR "p:h"
 #define USAGE_FMT "%s [-p HTTP port] [-d home directory] [-h]\n"
