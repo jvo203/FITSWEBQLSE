@@ -405,6 +405,15 @@ static enum MHD_Result on_http_connection(void *cls,
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
     //MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
 
+    if (0 == strcmp(url, "/exit"))
+    {
+        // forward the exit events to all other nodes
+
+        s_received_signal = 1; // trigger a shutdown
+
+        return http_ok(connection);
+    }
+
     if (0 == strcmp(url, "/get_directory"))
     {
         char *pointer = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dir");

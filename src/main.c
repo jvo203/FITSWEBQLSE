@@ -24,8 +24,6 @@
 
 #include <glib.h>
 
-static volatile sig_atomic_t s_received_signal = 0;
-
 static void signal_handler(int sig_num)
 {
     printf("Interrupt signal [%d] received.\n", sig_num);
