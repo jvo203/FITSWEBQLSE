@@ -371,6 +371,13 @@ static enum MHD_Result get_home_directory(struct MHD_Connection *connection)
     return get_directory(connection, strdup(options.home_dir));
 }
 
+void forward_exit_event(void *item, void *)
+{
+    printf("node %s\n", (const char *)item);
+
+    return;
+}
+
 static enum MHD_Result on_http_connection(void *cls,
                                           struct MHD_Connection *connection,
                                           const char *url,
@@ -415,6 +422,9 @@ static enum MHD_Result on_http_connection(void *cls,
         g_mutex_lock(&cluster_mtx);
 
         GSList *iterator = NULL;
+
+        g_slist_foreach(cluster, forward_exit_event, NULL);
+
         for (iterator = cluster; iterator; iterator = iterator->next)
         {
             sprintf(url, "http://%s:%" PRIu16 "/exit", iterator->data, options.http_port);
