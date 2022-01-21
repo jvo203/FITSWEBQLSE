@@ -16,7 +16,11 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
     case MG_EV_CLOSE:
     {
         if (c->is_websocket)
+        {
             printf("WEBSOCKET CONNECTION CLOSED.\n");
+            printf("closing a websocket connection for %s\n", (char *)c->fn_data);
+            printf("closing a websocket connection for %s\n", (char *)fn_data);
+        }
 
         break;
     }
