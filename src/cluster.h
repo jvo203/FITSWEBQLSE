@@ -4,3 +4,5 @@
 
 static GSList *cluster = NULL;
 static GMutex cluster_mtx;
+
+void distributed_exit();

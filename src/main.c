@@ -168,6 +168,9 @@ int main(int argc, char *argv[])
 
     stop_http();
 
+    // shutdown the cluster
+    distributed_exit();
+
     // release any memory allocated in options (really not needed at this point but ...)
     if (options.fits_home != NULL)
         free(options.fits_home);
