@@ -2,7 +2,6 @@
 
 #include <glib.h>
 
-static GSList *cluster = NULL;
-static GMutex cluster_mtx;
-
+void init_cluster();
+void delete_cluster();
 void distributed_exit();

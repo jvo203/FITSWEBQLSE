@@ -42,6 +42,9 @@ static void signal_handler(int sig_num)
 
 #include <czmq.h>
 
+extern GSList *cluster;
+extern GMutex cluster_mtx;
+
 static zactor_t *speaker = NULL;
 static zactor_t *listener = NULL;
 static pthread_t zmq_t;
@@ -70,7 +73,7 @@ options_t options; // the one and only one definition
 
 int main(int argc, char *argv[])
 {
-    g_mutex_init(&cluster_mtx);
+    init_cluster();
     init_hash_table();
 
     // ZeroMQ node auto-discovery
@@ -219,14 +222,7 @@ int main(int argc, char *argv[])
         zactor_destroy(&listener);
     }
 
-    GSList *iterator = NULL;
-    for (iterator = cluster; iterator; iterator = iterator->next)
-        printf("cluster node %s\n", (char *)iterator->data);
-
-    if (cluster != NULL)
-        g_slist_free_full(cluster, free);
-
-    g_mutex_clear(&cluster_mtx);
+    delete_cluster();
     delete_hash_table();
 
     return EXIT_SUCCESS;
