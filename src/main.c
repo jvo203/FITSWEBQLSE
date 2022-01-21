@@ -216,12 +216,20 @@ int main(int argc, char *argv[])
     // parse options command-line options (over-rides the .ini config file)
     int opt;
 
+    bool port_override = false;
+    uint16_t port_number = 8080;
+
     while ((opt = getopt(argc, argv, OPTSTR)) != EOF)
         switch (opt)
         {
         case 'p':
             options.http_port = (uint16_t)strtoul(optarg, NULL, 10);
             options.ws_port = options.http_port + 1;
+
+            // save the command-line port
+            port_override = true;
+            port_number = options.http_port;
+
             break;
 
         case 'd':
@@ -246,6 +254,13 @@ int main(int argc, char *argv[])
         printf("Can't load 'config.ini', assuming default options.\n");
     else
         printf("Successfully parsed 'config.ini'.\n");
+
+    // a manual port override
+    if (port_override)
+    {
+        options.http_port = port_number;
+        options.ws_port = options.http_port + 1;
+    }
 
     ipp_init();
     curl_global_init(CURL_GLOBAL_ALL);
