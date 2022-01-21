@@ -484,13 +484,16 @@ static void *autodiscovery_daemon(void *ptr)
             // SHUTDOWN
             if (strstr(msg, "SHUTDOWN") != NULL)
             {
-                printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
+                if (strcmp(my_hostname, ipaddress) != 0)
+                {
+                    printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
 
-                // raise SIGINT
-                int ret = raise(SIGINT);
+                    // raise SIGINT
+                    int ret = raise(SIGINT);
 
-                if (ret != 0)
-                    printf("[C] Error: unable to raise SIGINT signal.\n");
+                    if (ret != 0)
+                        printf("[C] Error: unable to raise SIGINT signal.\n");
+                }
             }
 
             if (msg != NULL)
