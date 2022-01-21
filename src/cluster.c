@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+#include "mongoose.h"
 #include "cluster.h"
 #include "http.h"
 
 GSList *cluster = NULL;
 GMutex cluster_mtx;
 
-extern options_t options; // <options> is defined in main.c
+extern options_t options; // definition in main.c
+extern struct mg_mgr mgr; // definition in main.c
 
 void init_cluster()
 {
