@@ -172,9 +172,6 @@ int main(int argc, char *argv[])
 
     stop_http();
 
-    // shutdown the cluster
-    //distributed_exit();
-
     // release any memory allocated in options (really not needed at this point but ...)
     if (options.fits_home != NULL)
         free(options.fits_home);
@@ -205,10 +202,12 @@ int main(int argc, char *argv[])
     {
         zstr_sendx(speaker, "SILENCE", NULL);
 
+        // leave the cluster
         const char *msg_leave = "LEAVE";
         const int interval = 1000; //[ms]
         zsock_send(speaker, "sbi", "PUBLISH", msg_leave, strlen(msg_leave), interval);
 
+        // shutdown the cluster
         const char *msg_exit = "SHUTDOWN";
         zsock_send(speaker, "sbi", "PUBLISH", msg_exit, strlen(msg_exit), interval);
 

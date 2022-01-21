@@ -409,8 +409,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (0 == strcmp(url, "/exit"))
     {
-        // forward the exit events to all other nodes
-        //distributed_exit();
+        // distributed exit
+        distributed_exit();
 
         // raise SIGINT
         int ret = raise(SIGINT);
