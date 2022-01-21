@@ -532,11 +532,18 @@ static enum MHD_Result on_http_connection(void *cls,
         char *flux = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "flux");
         char *db = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "db");
         char *table = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "table");
+        char *rankStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "rank");
 
         int composite = 0;
+        int rank = 0; // assume root rank 0
 
         if (view != NULL)
             composite = (strcasecmp("composite", view) == 0) ? 1 : 0;
+
+        if (rankStr != NULL)
+            rank = atoi(rankStr); // in case of problems default to 0
+
+        printf("[C] RANK: %d\n", rank);
 
         if (datasetId != NULL)
         {
