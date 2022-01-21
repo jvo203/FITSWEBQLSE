@@ -211,6 +211,7 @@ int main(int argc, char *argv[])
         const char *msg_exit = "SHUTDOWN";
         zsock_send(speaker, "sbi", "PUBLISH", msg_exit, strlen(msg_exit), interval);
 
+        // stop broadcasting the beacon
         zstr_sendx(speaker, "SILENCE", NULL);
         zactor_destroy(&speaker);
     }
