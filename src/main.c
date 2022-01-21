@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
     stop_http();
 
     // shutdown the cluster
-    distributed_exit();
+    //distributed_exit();
 
     // release any memory allocated in options (really not needed at this point but ...)
     if (options.fits_home != NULL)
@@ -205,9 +205,12 @@ int main(int argc, char *argv[])
     {
         zstr_sendx(speaker, "SILENCE", NULL);
 
-        const char *message = "FITSWEBQLSE::LEAVE";
+        const char *msg_leave = "FITSWEBQLSE::LEAVE";
         const int interval = 1000; //[ms]
-        zsock_send(speaker, "sbi", "PUBLISH", message, strlen(message), interval);
+        zsock_send(speaker, "sbi", "PUBLISH", msg_leave, strlen(msg_leave), interval);
+
+        const char *msg_exit = "FITSWEBQLSE::SHUTDOWN";
+        zsock_send(speaker, "sbi", "PUBLISH", msg_exit, strlen(msg_exit), interval);
 
         zstr_sendx(speaker, "SILENCE", NULL);
         zactor_destroy(&speaker);
@@ -477,6 +480,16 @@ static void *autodiscovery_daemon(void *ptr)
 
                     g_mutex_unlock(&cluster_mtx);
                 }
+            }
+
+            // SHUTDOWN
+            if (strstr(msg, "SHUTDOWN") != NULL)
+            {
+                // raise SIGINT
+                int ret = raise(SIGINT);
+
+                if (ret != 0)
+                    printf("[C] Error: unable to raise SIGINT signal.\n");
             }
 
             if (msg != NULL)
