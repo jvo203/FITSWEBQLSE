@@ -342,7 +342,7 @@ static void thread_function(void *param)
 {
     struct mg_connection *c = param; // Pipe connection
     sleep(2);                        // Simulate long execution
-    mg_mgr_wakeup(c);                // Wakeup event manager
+    mg_mgr_wakeup(c, "", 0);         // Wakeup event manager
 }
 
 // HTTP request callback
