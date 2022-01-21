@@ -55,7 +55,7 @@ static pthread_t zmq_t;
 
 static void *autodiscovery_daemon(void *);
 
-#define OPTSTR "p:h"
+#define OPTSTR "c:d:p:h"
 #define USAGE_FMT "%s  [-c config file] [-d home directory] [-p HTTP port] [-h]\n"
 #define DEFAULT_PROGNAME "fitswebql"
 
@@ -218,6 +218,7 @@ int main(int argc, char *argv[])
 
     bool port_override = false;
     uint16_t port_number = 8080;
+    char *config_file = strdup("config.ini");
 
     while ((opt = getopt(argc, argv, OPTSTR)) != EOF)
         switch (opt)
@@ -229,6 +230,14 @@ int main(int argc, char *argv[])
             // save the command-line port
             port_override = true;
             port_number = options.http_port;
+
+            break;
+
+        case 'c':
+            if (config_file != NULL)
+                free(config_file);
+
+            config_file = strdup(optarg);
 
             break;
 
@@ -250,8 +259,8 @@ int main(int argc, char *argv[])
         printf("Home Directory: %s\n", options.home_dir);
 
     // parse a config.ini config file
-    if (ini_parse("config.ini", handler, &options) < 0)
-        printf("Can't load 'config.ini', assuming default options.\n");
+    if (ini_parse(config_file, handler, &options) < 0)
+        printf("Can't load '%s', assuming default options.\n", config_file);
     else
         printf("Successfully parsed 'config.ini'.\n");
 
@@ -331,6 +340,9 @@ int main(int argc, char *argv[])
 
     if (options.db_home != NULL)
         free(options.db_home);
+
+    if (config_file != NULL)
+        free(config_file);
 
     // clean-up ZeroMQ
     if (speaker != NULL)
