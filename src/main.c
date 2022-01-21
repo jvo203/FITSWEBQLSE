@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
 
     stop_http();
 
-    // release any memory allocated in options (really not needed at this point but ...)
+    // release any memory allocated in options
     if (options.fits_home != NULL)
         free(options.fits_home);
 
