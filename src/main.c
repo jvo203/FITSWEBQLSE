@@ -297,7 +297,7 @@ int main(int argc, char *argv[])
 
     start_http(options.http_port);
 
-    // a mongoose server
+    // a blocking mongoose websocket server
     start_ws();
     /*
     char url[256] = "";
