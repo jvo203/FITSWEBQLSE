@@ -213,12 +213,6 @@ int main(int argc, char *argv[])
     options.port = 5433;
     options.db_home = strdup("/home");
 
-    // parse a config.ini config file
-    if (ini_parse("config.ini", handler, &options) < 0)
-        printf("Can't load 'config.ini', assuming default options.\n");
-    else
-        printf("Successfully parsed 'config.ini'.\n");
-
     // parse options command-line options (over-rides the .ini config file)
     int opt;
 
@@ -246,6 +240,12 @@ int main(int argc, char *argv[])
 
     if (options.local)
         printf("Home Directory: %s\n", options.home_dir);
+
+    // parse a config.ini config file
+    if (ini_parse("config.ini", handler, &options) < 0)
+        printf("Can't load 'config.ini', assuming default options.\n");
+    else
+        printf("Successfully parsed 'config.ini'.\n");
 
     ipp_init();
     curl_global_init(CURL_GLOBAL_ALL);
