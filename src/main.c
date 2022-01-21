@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
     if (options.local)
         printf("Home Directory: %s\n", options.home_dir);
 
-    // parse a config.ini config file
+    // parse a config file
     if (ini_parse(config_file, handler, &options) < 0)
         printf("Can't load '%s', assuming default options.\n", config_file);
     else
