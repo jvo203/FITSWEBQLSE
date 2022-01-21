@@ -39,8 +39,6 @@ static void signal_handler(int sig_num)
     s_received_signal = sig_num;
 }
 
-struct mg_mgr mgr; // make it a global variable
-
 /* ZeroMQ node auto-discovery */
 #define BEACON_PORT 50000
 
@@ -303,6 +301,7 @@ int main(int argc, char *argv[])
     sprintf(url, "0.0.0.0:%d", options.ws_port);
 
     struct mg_connection *pipe; // Used to wake up event manager
+    struct mg_mgr mgr;
     mg_mgr_init(&mgr);
     mg_log_set("3");
     pipe = mg_mkpipe(&mgr, mg_pipe_event_handler, NULL);  // Create pipe
