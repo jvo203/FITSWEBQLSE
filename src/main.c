@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
     if (ini_parse(config_file, handler, &options) < 0)
         printf("Can't load '%s', assuming default options.\n", config_file);
     else
-        printf("Successfully parsed 'config.ini'.\n");
+        printf("Successfully parsed '%s'.\n", config_file);
 
     // a manual port override
     if (port_override)
