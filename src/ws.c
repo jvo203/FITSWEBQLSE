@@ -62,6 +62,9 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
     {
         // Got websocket frame. Received data is wm->data. Echo it back!
         struct mg_ws_message *wm = (struct mg_ws_message *)ev_data;
+
+        printf("[WS] %.*s\n", (int)wm->data.len, wm->data.ptr);
+
         mg_ws_send(c, wm->data.ptr, wm->data.len, WEBSOCKET_OP_TEXT);
         break;
     }
