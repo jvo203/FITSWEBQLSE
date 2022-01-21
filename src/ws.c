@@ -6,15 +6,32 @@ extern sig_atomic_t s_received_signal;
 
 static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
-    if (ev == MG_EV_OPEN)
+    switch (ev)
+    {
+    case MG_EV_OPEN:
     {
         // c->is_hexdumping = 1;
+        break;
     }
-    else if (ev == MG_EV_HTTP_MSG)
+    case MG_EV_CLOSE:
+    {
+        if (c->is_websocket)
+            printf("WEBSOCKET CONNECTION CLOSED.\n");
+
+        break;
+    }
+    case MG_EV_HTTP_MSG:
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
-        if (mg_http_match_uri(hm, "/websocket"))
+
+        if (mg_strstr(hm->uri, mg_str("/websocket")) != NULL)
         {
+            printf("ACCEPTED WEBSOCKET URI:\t%.*s\n", (int)hm->uri.len, hm->uri.ptr);
+
+            // extract the datasetId
+
+            // set the <c> user data to datasetId
+
             // Upgrade to websocket. From now on, a connection is a full-duplex
             // Websocket connection, which will receive MG_EV_WS_MSG events.
             mg_ws_upgrade(c, hm, NULL);
@@ -23,16 +40,29 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
         {
             printf("rejecting the connection.\n");
 
-            // close the connection
+            // reject the connection
             mg_http_reply(c, 404, "", "Rejected");
         }
+
+        break;
     }
-    else if (ev == MG_EV_WS_MSG)
+    case MG_EV_WS_OPEN:
+    {
+        struct mg_http_message *hm = (struct mg_http_message *)ev_data;
+        printf("WEBSOCKET OPEN; URI:\t%.*s\n", (int)hm->uri.len, hm->uri.ptr);
+        break;
+    }
+    case MG_EV_WS_MSG:
     {
         // Got websocket frame. Received data is wm->data. Echo it back!
         struct mg_ws_message *wm = (struct mg_ws_message *)ev_data;
         mg_ws_send(c, wm->data.ptr, wm->data.len, WEBSOCKET_OP_TEXT);
+        break;
     }
+    default:
+        break;
+    }
+
     (void)fn_data;
 }
 
