@@ -56,7 +56,7 @@ static pthread_t zmq_t;
 static void *autodiscovery_daemon(void *);
 
 #define OPTSTR "p:h"
-#define USAGE_FMT "%s [-p HTTP port] [-d home directory] [-h]\n"
+#define USAGE_FMT "%s  [-c config file] [-d home directory] [-p HTTP port] [-h]\n"
 #define DEFAULT_PROGNAME "fitswebql"
 
 void usage(char *progname, int opt);
@@ -192,23 +192,6 @@ void ipp_init()
 
 int main(int argc, char *argv[])
 {
-    ipp_init();
-    curl_global_init(CURL_GLOBAL_ALL);
-
-    init_cluster();
-    init_hash_table();
-
-    // ZeroMQ node auto-discovery
-    setenv("ZSYS_SIGHANDLER", "false", 1);
-
-    int res = pthread_create(&zmq_t, NULL, autodiscovery_daemon, NULL);
-
-    if (res)
-    {
-        printf("error %d\n", res);
-        exit(EXIT_FAILURE);
-    }
-
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
 
     struct passwd *passwdEnt = getpwuid(getuid());
@@ -263,6 +246,23 @@ int main(int argc, char *argv[])
 
     if (options.local)
         printf("Home Directory: %s\n", options.home_dir);
+
+    ipp_init();
+    curl_global_init(CURL_GLOBAL_ALL);
+
+    init_cluster();
+    init_hash_table();
+
+    // ZeroMQ node auto-discovery
+    setenv("ZSYS_SIGHANDLER", "false", 1);
+
+    int res = pthread_create(&zmq_t, NULL, autodiscovery_daemon, NULL);
+
+    if (res)
+    {
+        printf("error %d\n", res);
+        exit(EXIT_FAILURE);
+    }
 
     printf("Browser URL: http://localhost:%" PRIu16 "\n", options.http_port);
     printf("*** To quit FITSWEBQLSE press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
