@@ -485,6 +485,8 @@ static void *autodiscovery_daemon(void *ptr)
             // SHUTDOWN
             if (strstr(msg, "SHUTDOWN") != NULL)
             {
+                printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
+
                 // raise SIGINT
                 int ret = raise(SIGINT);
 
