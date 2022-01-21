@@ -30,7 +30,7 @@
 #include <curl/curl.h>
 #include <glib.h>
 
-static volatile sig_atomic_t s_received_signal = 0;
+volatile sig_atomic_t s_received_signal = 0;
 
 static void signal_handler(int sig_num)
 {
