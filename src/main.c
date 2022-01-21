@@ -14,6 +14,7 @@
 
 #include "ini.h"
 #include "http.h"
+#include "ws.h"
 
 #include <pthread.h>
 
