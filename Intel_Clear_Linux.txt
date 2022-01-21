@@ -104,4 +104,4 @@
 
 # 14. MPI launcher (we do not use MPI internally!)
 
-    mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse -c config_ssd.ini
+    mpiexec -silent-abort -machinefile intel.txt -rr -n 3 ./fitswebqlse -c config_ssd.ini
