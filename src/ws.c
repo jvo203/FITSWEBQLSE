@@ -22,6 +22,8 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
             printf("closing a websocket connection for %s\n", (char *)fn_data);
         }
 
+        // free any user data <c->fn_data>
+
         break;
     }
     case MG_EV_HTTP_MSG:
@@ -34,7 +36,7 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
 
             // extract the datasetId
 
-            // set the <c> user data to datasetId
+            // set the <c->fn_data> to datasetId
 
             // Upgrade to websocket. From now on, a connection is a full-duplex
             // Websocket connection, which will receive MG_EV_WS_MSG events.
