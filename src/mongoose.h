@@ -18,7 +18,7 @@
 #ifndef MONGOOSE_H
 #define MONGOOSE_H
 
-#define MG_VERSION "7.5"
+#define MG_VERSION "7.6"
 
 #ifdef __cplusplus
 extern "C" {
@@ -353,6 +353,7 @@ struct timeval {
 #endif
 
 #include <ctype.h>
+#include <direct.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -408,6 +409,7 @@ typedef int socklen_t;
 
 #define realpath(a, b) _fullpath((b), (a), MG_PATH_MAX)
 #define sleep(x) Sleep(x)
+#define mkdir(a, b) _mkdir(a)
 
 #ifndef va_copy
 #ifdef __va_copy
