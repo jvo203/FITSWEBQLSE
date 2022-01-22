@@ -298,8 +298,8 @@ int main(int argc, char *argv[])
     start_http(options.http_port);
 
     // a blocking mongoose websocket server
-    start_ws();
-    /*
+    // start_ws();
+
     char url[256] = "";
     sprintf(url, "0.0.0.0:%d", options.ws_port);
 
@@ -315,7 +315,6 @@ int main(int argc, char *argv[])
         mg_mgr_poll(&mgr, 1000); // Event loop
 
     mg_mgr_free(&mgr); // Cleanup
-    */
 
     stop_http();
 
