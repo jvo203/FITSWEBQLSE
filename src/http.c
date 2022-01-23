@@ -547,7 +547,10 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (datasetId != NULL)
         {
-            ret = execute_alma(connection, datasetId, va_count, composite, root);
+            if (rank == 0)
+                ret = execute_alma(connection, datasetId, va_count, composite, root);
+            else
+                ret = http_ok(connection);
 
             // pass the filepath to FORTRAN
             if (options.local)
