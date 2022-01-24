@@ -468,6 +468,21 @@ static enum MHD_Result on_http_connection(void *cls,
             extension = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ext");
             char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "filename");
 
+            if (directory != NULL)
+            {
+                char tmp[256];
+                size_t len;
+
+                GString *value = g_string_new(directory);
+
+                len = html_encode(value->str, value->len, tmp, sizeof(tmp) - 1);
+                tmp[len] = '\0';
+
+                g_string_append_printf(uri, "dir=%s", tmp);
+
+                g_string_free(value, TRUE);
+            }
+
             //auto-detect multiple entries
             if (tmp == NULL)
             {
