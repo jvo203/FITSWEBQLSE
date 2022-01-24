@@ -1177,7 +1177,7 @@ void *forward_fitswebql_request(void *ptr)
         GString *url = g_string_new("http://");
 
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "%s&rank=%d", req->uri, options.http_port, ++rank);
+        g_string_append_printf(url, "%" PRIu16 "%s&rank=%d", options.http_port, req->uri, ++rank);
 
         printf("URL: '%s'\n", url->str);
 
