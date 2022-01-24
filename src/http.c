@@ -544,14 +544,14 @@ static enum MHD_Result on_http_connection(void *cls,
             composite = (strcasecmp("composite", view) == 0) ? 1 : 0;
 
         if (rankStr != NULL)
-            rank = atoi(rankStr); // in case of problems default to 0
+            rank = atoi(rankStr); // in case of problems defaults to 0
 
         if (worldStr != NULL)
             world = atoi(worldStr);
 
-        // if the world is 0
+        // if <world> is still 0
         if (world == 0)
-            world = get_cluster_size() + 1;
+            world = get_cluster_size() + 1; // rank 0 + other nodes
 
         printf("[C] RANK: %d, WORLD: %d\n", rank, world);
 
