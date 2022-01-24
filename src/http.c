@@ -513,6 +513,18 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     datasetId = (char **)realloc(datasetId, va_count * sizeof(char *));
                     datasetId[va_count - 1] = tmp;
+
+                    char enc[256];
+                    size_t len;
+
+                    GString *value = g_string_new(tmp);
+
+                    len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                    enc[len] = '\0';
+
+                    g_string_append_printf(uri, "filename%d=%s&", va_count, enc);
+
+                    g_string_free(value, TRUE);
                 }
 
                 printf("[C] number of arguments: %d\n", va_count);
@@ -524,6 +536,18 @@ static enum MHD_Result on_http_connection(void *cls,
                 //allocate datasetId
                 datasetId = (char **)malloc(sizeof(char *));
                 datasetId[0] = tmp;
+
+                char enc[256];
+                size_t len;
+
+                GString *value = g_string_new(tmp);
+
+                len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                enc[len] = '\0';
+
+                g_string_append_printf(uri, "filename=%s&", enc);
+
+                g_string_free(value, TRUE);
             }
         }
         else
