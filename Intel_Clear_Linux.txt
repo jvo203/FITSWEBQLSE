@@ -102,6 +102,20 @@
 
     to .bashrc and re-login
 
-# 14. MPI launcher (we do not use MPI internally!)
+# 14. libdill (C coroutines)
+
+    wget http://libdill.org/libdill-2.14.tar.gz
+
+    tar -xzf libdill-2.14.tar.gz
+
+    cd libdill-2.14
+
+    ./configure
+
+    make
+    
+    sudo make install
+
+# 15. MPI launcher (we do not use MPI internally!)
 
     mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse -c config_ssd.ini
