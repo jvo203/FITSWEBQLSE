@@ -18,6 +18,7 @@
 
 #include <glib.h>
 #include <microhttpd.h>
+#include <curl/curl.h>
 
 #include "json.h"
 #include "http.h"
