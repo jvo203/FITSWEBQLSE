@@ -612,6 +612,18 @@ static enum MHD_Result on_http_connection(void *cls,
         char *db = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "db");
         char *table = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "table");
 
+        if (view != NULL)
+            g_string_append_printf(uri, "view=%s&", view);
+
+        if (flux != NULL)
+            g_string_append_printf(uri, "flux=%s&", flux);
+
+        if (db != NULL)
+            g_string_append_printf(uri, "db=%s&", db);
+
+        if (table != NULL)
+            g_string_append_printf(uri, "table=%s&", table);
+
         char *rankStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "rank");
         char *worldStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "world");
 
