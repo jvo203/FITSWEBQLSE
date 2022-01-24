@@ -27,6 +27,19 @@ void delete_cluster()
     g_mutex_clear(&cluster_mtx);
 }
 
+int get_cluster_size()
+{
+    int world;
+
+    g_mutex_lock(&cluster_mtx);
+
+    world = g_slist_length(cluster);
+
+    g_mutex_unlock(&cluster_mtx);
+
+    return world;
+}
+
 void forward_exit_event(void *item, void *)
 {
     char url[256];
