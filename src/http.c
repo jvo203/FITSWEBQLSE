@@ -551,7 +551,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // if the world is 0
         if (world == 0)
-            world = get_cluster_size();
+            world = get_cluster_size() + 1;
 
         printf("[C] RANK: %d, WORLD: %d\n", rank, world);
 
