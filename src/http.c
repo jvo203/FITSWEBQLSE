@@ -38,6 +38,7 @@ extern options_t options; // <options> is defined in main.c
 struct MHD_Daemon *http_server = NULL;
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
+void *forward_fitswebql_request(void *req);
 
 static enum MHD_Result http_ok(struct MHD_Connection *connection)
 {
@@ -1004,3 +1005,19 @@ void stop_http()
         splat_db = NULL;
     }
 };
+
+void *forward_fitswebql_request(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    fits_req_t *req = (fits_req_t *)ptr;
+
+    printf("forwarding '%s' across the cluster.\n");
+
+    // release memory
+    free(req->uri);
+    free(req);
+
+    pthread_exit(NULL);
+}
