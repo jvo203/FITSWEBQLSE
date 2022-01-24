@@ -233,17 +233,13 @@ int main(int argc, char *argv[])
             break;
 
         case 'c':
-            if (config_file != NULL)
-                free(config_file);
-
+            free(config_file);
             config_file = strdup(optarg);
 
             break;
 
         case 'd':
-            if (options.home_dir != NULL)
-                free(options.home_dir);
-
+            free(options.home_dir);
             options.home_dir = strdup(optarg);
             break;
 
@@ -319,32 +315,15 @@ int main(int argc, char *argv[])
     stop_http();
 
     // release any memory allocated in options
-    if (options.fits_home != NULL)
-        free(options.fits_home);
-
-    if (options.cache != NULL)
-        free(options.cache);
-
-    if (options.logs != NULL)
-        free(options.logs);
-
-    if (options.home_dir != NULL)
-        free(options.home_dir);
-
-    if (options.user != NULL)
-        free(options.user);
-
-    if (options.password != NULL)
-        free(options.password);
-
-    if (options.host != NULL)
-        free(options.host);
-
-    if (options.db_home != NULL)
-        free(options.db_home);
-
-    if (config_file != NULL)
-        free(config_file);
+    free(options.fits_home);
+    free(options.cache);
+    free(options.logs);
+    free(options.home_dir);
+    free(options.user);
+    free(options.password);
+    free(options.host);
+    free(options.db_home);
+    free(config_file);
 
     // clean-up ZeroMQ
     if (speaker != NULL)
@@ -419,23 +398,17 @@ static int handler(void *user, const char *section, const char *name,
     }
     else if (MATCH("fitswebql", "home"))
     {
-        if (options->fits_home != NULL)
-            free(options->fits_home);
-
+        free(options->fits_home);
         options->fits_home = strdup(value);
     }
     else if (MATCH("fitswebql", "logs"))
     {
-        if (options->logs != NULL)
-            free(options->logs);
-
+        free(options->logs);
         options->logs = strdup(value);
     }
     else if (MATCH("fitswebql", "cache"))
     {
-        if (options->cache != NULL)
-            free(options->cache);
-
+        free(options->cache);
         options->cache = strdup(value);
     }
     else if (MATCH("fitswebql", "port"))
@@ -445,30 +418,22 @@ static int handler(void *user, const char *section, const char *name,
     }
     else if (MATCH("postgresql", "host"))
     {
-        if (options->host != NULL)
-            free(options->host);
-
+        free(options->host);
         options->host = strdup(value);
     }
     else if (MATCH("postgresql", "user"))
     {
-        if (options->user != NULL)
-            free(options->user);
-
+        free(options->user);
         options->user = strdup(value);
     }
     else if (MATCH("postgresql", "password"))
     {
-        if (options->password != NULL)
-            free(options->password);
-
+        free(options->password);
         options->password = strdup(value);
     }
     else if (MATCH("postgresql", "home"))
     {
-        if (options->db_home != NULL)
-            free(options->db_home);
-
+        free(options->db_home);
         options->db_home = strdup(value);
     }
     else if (MATCH("postgresql", "port"))
@@ -620,8 +585,7 @@ static void *autodiscovery_daemon(void *ptr)
                         printf("[ØMQ] received '%s' from %s\n", msg, ipaddress);
 
                         // free the underlying data
-                        if (item->data != NULL)
-                            free(item->data);
+                        free(item->data);
 
                         // remove an item from the list
                         cluster = g_slist_delete_link(cluster, item);
@@ -648,16 +612,14 @@ static void *autodiscovery_daemon(void *ptr)
                 }
             }
 
-            if (msg != NULL)
-                free(msg);
+            free(msg);
 
             zframe_destroy(&content);
             zstr_free(&ipaddress);
         }
     }
 
-    if (my_hostname != NULL)
-        free(my_hostname);
+    free(my_hostname);
 
     return NULL;
 }
