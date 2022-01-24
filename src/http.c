@@ -470,15 +470,30 @@ static enum MHD_Result on_http_connection(void *cls,
 
             if (directory != NULL)
             {
-                char tmp[256];
+                char enc[256];
                 size_t len;
 
                 GString *value = g_string_new(directory);
 
-                len = html_encode(value->str, value->len, tmp, sizeof(tmp) - 1);
-                tmp[len] = '\0';
+                len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                enc[len] = '\0';
 
-                g_string_append_printf(uri, "dir=%s", tmp);
+                g_string_append_printf(uri, "dir=%s&", enc);
+
+                g_string_free(value, TRUE);
+            }
+
+            if (extension != NULL)
+            {
+                char enc[256];
+                size_t len;
+
+                GString *value = g_string_new(extension);
+
+                len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                enc[len] = '\0';
+
+                g_string_append_printf(uri, "ext=%s&", enc);
 
                 g_string_free(value, TRUE);
             }
