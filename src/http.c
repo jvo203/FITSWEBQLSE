@@ -23,6 +23,10 @@
 #include "http.h"
 
 #include "cluster.h"
+
+extern GSList *cluster;
+extern GMutex cluster_mtx;
+
 #include "hash_table.h"
 
 #include "version.h"
@@ -1161,6 +1165,15 @@ void *forward_fitswebql_request(void *ptr)
     fits_req_t *req = (fits_req_t *)ptr;
 
     printf("forwarding '%s' across the cluster.\n", req->uri);
+
+    GSList *iterator = NULL;
+
+    g_mutex_lock(&cluster_mtx);
+
+    for (iterator = cluster; iterator; iterator = iterator->next)
+        printf("IP:%s\n", (char *)iterator->data);
+
+    g_mutex_unlock(&cluster_mtx);
 
     // release memory
     free(req->uri);
