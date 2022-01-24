@@ -562,7 +562,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
             if (req != NULL)
             {
-                req->uri = strdup(url);
+                req->uri = strdup(uri->str);
                 req->world = world;
 
                 // launch a pthread, release memory inside the thread
