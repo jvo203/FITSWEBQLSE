@@ -275,8 +275,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
 
     g_string_printf(json, "{\"location\" : %s, \"contents\" : [", encoded);
 
-    if (encoded != NULL)
-        free(encoded);
+    free(encoded);
 
     int has_contents = 0;
 
@@ -316,8 +315,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
                     g_string_append_printf(json, "{\"type\" : \"dir\", \"name\" : %s, \"last_modified\" : \"%s\"},", encoded, last_modified);
                     has_contents = 1;
 
-                    if (encoded != NULL)
-                        free(encoded);
+                    free(encoded);
                 }
 
                 if (S_ISREG(sbuf.st_mode))
@@ -328,8 +326,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
                         g_string_append_printf(json, "{\"type\" : \"file\", \"name\" : %s, \"size\" : %zu, \"last_modified\" : \"%s\"},", encoded, filesize, last_modified);
                         has_contents = 1;
 
-                        if (encoded != NULL)
-                            free(encoded);
+                        free(encoded);
                     };
             }
             else
@@ -345,11 +342,8 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
         g_string_append(json, "]}");
     };
 
-    if (namelist != NULL)
-        free(namelist);
-
-    if (dir != NULL)
-        free(dir);
+    free(namelist);
+    free(dir);
 
     struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
     g_string_free(json, FALSE);
@@ -555,6 +549,32 @@ static enum MHD_Result on_http_connection(void *cls,
 
         printf("[C] RANK: %d, WORLD: %d\n", rank, world);
 
+        // broadcast the FITS request across the cluster
+        if (rank == 0)
+        {
+            pthread_t tid;
+
+            fits_req_t *req = malloc(sizeof(fits_req_t));
+
+            if (req != NULL)
+            {
+                req->uri = strdup(url);
+                req->world = world;
+
+                // launch a pthread, release memory inside the thread
+                int stat = pthread_create(&tid, NULL, &forward_fitswebql_request, req);
+
+                if (stat != 0)
+                {
+                    // release memory
+                    free(req->uri);
+                    free(req);
+                }
+                else
+                    pthread_detach(tid);
+            }
+        };
+
         if (datasetId != NULL)
         {
             if (rank == 0)
@@ -610,11 +630,10 @@ static enum MHD_Result on_http_connection(void *cls,
             ret = http_not_found(connection);
 
         // deallocate datasetId
-        if (datasetId != NULL)
-            free(datasetId);
+        free(datasetId);
 
-        if (root != NULL)
-            free(root);
+        // deallocate the root path
+        free(root);
 
         return ret;
     }
