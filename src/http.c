@@ -1013,7 +1013,7 @@ void *forward_fitswebql_request(void *ptr)
 
     fits_req_t *req = (fits_req_t *)ptr;
 
-    printf("forwarding '%s' across the cluster.\n");
+    printf("forwarding '%s' across the cluster.\n", req->uri);
 
     // release memory
     free(req->uri);
