@@ -449,6 +449,9 @@ static enum MHD_Result on_http_connection(void *cls,
             printf("[C] URL root path: %s\n", root);
         }
 
+        // to be forwarded to cluster nodes
+        GString *uri = g_string_new(url);
+
         //get datasetId
         char **datasetId = NULL;
         int va_count = 0;
@@ -635,6 +638,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // deallocate the root path
         free(root);
+
+        g_string_free(uri, TRUE);
 
         return ret;
     }
