@@ -1165,11 +1165,6 @@ void *forward_fitswebql_request(void *ptr)
 
     fits_req_t *req = (fits_req_t *)ptr;
 
-    int handle_count = get_cluster_size();
-
-    CURL *handles[handle_count];
-    CURLM *multi_handle;
-
     printf("forwarding '%s' across the cluster.\n", req->uri);
 
     GSList *iterator = NULL;
@@ -1177,6 +1172,10 @@ void *forward_fitswebql_request(void *ptr)
     g_mutex_lock(&cluster_mtx);
 
     int rank = 0;
+    int handle_count = g_slist_length(cluster);
+
+    CURL *handles[handle_count];
+    CURLM *multi_handle;
 
     for (iterator = cluster; iterator; iterator = iterator->next)
     {
