@@ -1170,8 +1170,19 @@ void *forward_fitswebql_request(void *ptr)
 
     g_mutex_lock(&cluster_mtx);
 
+    int rank = 0;
+
     for (iterator = cluster; iterator; iterator = iterator->next)
-        printf("IP:%s\n", (char *)iterator->data);
+    {
+        GString *url = g_string_new("http://");
+
+        g_string_append_printf(url, "%s:", (char *)iterator->data);
+        g_string_append_printf(url, "%" PRIu16 "%s&rank=%d", req->uri, options.http_port, ++rank);
+
+        printf("URL: '%s'\n", url->str);
+
+        g_string_free(url, TRUE);
+    }
 
     g_mutex_unlock(&cluster_mtx);
 
