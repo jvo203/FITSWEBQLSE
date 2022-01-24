@@ -102,7 +102,16 @@
 
     to .bashrc and re-login
 
-# 14. libdill (C coroutines) (compilation errors in both Fedora 35 and Intel Clear Linux ...)
+# 14. libdill (C coroutines) 
+
+    (compilation errors in both Fedora 35 and Intel Clear Linux ...)
+    (a fix: make CC=clang)
+        git clone https://github.com/sustrik/libdill
+        cd libdill
+        mkdir build
+        cd build
+        CC=clang cmake ..
+        make
 
     wget http://libdill.org/libdill-2.14.tar.gz
 
