@@ -39,6 +39,7 @@ struct MHD_Daemon *http_server = NULL;
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
 void *forward_fitswebql_request(void *req);
+size_t html_encode(char *source, size_t len, char *dest, size_t max);
 
 static enum MHD_Result http_ok(struct MHD_Connection *connection)
 {
@@ -451,6 +452,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // to be forwarded to cluster nodes
         GString *uri = g_string_new(url);
+
+        g_string_append(uri, "?");
 
         //get datasetId
         char **datasetId = NULL;
@@ -1010,6 +1013,51 @@ void stop_http()
         splat_db = NULL;
     }
 };
+
+size_t html_encode(char *source, size_t len, char *dest, size_t max)
+{
+    char tmp[8] = "";
+    int pos = 0;
+
+    if (source == NULL)
+        return -1;
+
+    for (int i = 0; i < len; i++)
+    {
+        char c = source[i];
+        switch (c)
+        {
+        case '&':
+            strcat(dest, "&amp;");
+            pos += 5;
+            break;
+        case '\"':
+            strcat(dest, "&quot;");
+            pos += 6;
+            break;
+        case '\'':
+            strcat(dest, "&apos;");
+            pos += 6;
+            break;
+        case '<':
+            strcat(dest, "&lt;");
+            pos += 4;
+            break;
+        case '>':
+            strcat(dest, "&gt;");
+            pos += 4;
+            break;
+        default:
+            dest[pos++] = c;
+            break;
+        }
+
+        if (pos >= max)
+            break;
+    };
+
+    return pos;
+}
 
 void *forward_fitswebql_request(void *ptr)
 {
