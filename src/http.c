@@ -553,7 +553,7 @@ static enum MHD_Result on_http_connection(void *cls,
         if (world == 0)
             world = get_cluster_size();
 
-        printf("[C] RANK: %d\n", rank);
+        printf("[C] RANK: %d, WORLD: %d\n", rank, world);
 
         if (datasetId != NULL)
         {
