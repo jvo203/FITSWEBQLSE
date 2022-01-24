@@ -624,6 +624,8 @@ static enum MHD_Result on_http_connection(void *cls,
         if (table != NULL)
             g_string_append_printf(uri, "table=%s&", table);
 
+        // remove the last '&' from uri
+
         char *rankStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "rank");
         char *worldStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "world");
 
