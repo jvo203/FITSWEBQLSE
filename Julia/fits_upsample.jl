@@ -55,8 +55,8 @@ new_height = 2 * height
 header["NAXIS1"] = new_width
 header["NAXIS2"] = new_height
 
-# open a destination FITS file
-df = FITS(dest, "w")
+
+new_data = zeros(Float32, new_width, new_height, depth)
 
 for frame = 1:depth
     global N
@@ -71,14 +71,11 @@ for frame = 1:depth
 
     println("HDU $(frame): ", size(data))
 
-    new_data = Float32.(imresize(data, (new_width, new_height)))
-
-    println("upsampled size:", size(new_data))
-
-    if frame == 1
-        #write the header too
-        write(df, new_data, header = header)
-    else
-        write(df, new_data)
-    end
+    new_data[:, :, frame] = Float32.(imresize(data, (new_width, new_height)))
 end
+
+println("upsampled size:", size(new_data))
+
+# open a destination FITS file
+df = FITS(dest, "w")
+write(df, new_data, header = header)
