@@ -1206,6 +1206,9 @@ void *forward_fitswebql_request(void *ptr)
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
 
+        // ignore the response body
+        curl_easy_setopt(handles[i], CURLOPT_NOBODY, 1);
+
         // add the individual transfer
         curl_multi_add_handle(multi_handle, handles[i]);
 
@@ -1241,7 +1244,7 @@ void *forward_fitswebql_request(void *ptr)
             long response_code;
             curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
-            printf("HTTP transfer completed with status %d, HTTP response: %ld.\n", msg->data.result, response_code);
+            printf("HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
         }
     }
 
