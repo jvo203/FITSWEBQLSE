@@ -1,11 +1,11 @@
 using FITSIO
 using ImageTransformations
 
-# src = homedir() * "/Downloads/ALMA00000006.fits"
-# dest = homedir() * "/upsampled.fits"
+src = homedir() * "/Downloads/ALMA00000006.fits"
+dest = homedir() * "/upsampled.fits"
 
-src = "/Volumes/OWC/fits_web_ql/FITSCACHE/ALMA01567567.fits"
-dest = "/Volumes/OWC/I_AM_BIG.fits"
+# src = "/Volumes/OWC/fits_web_ql/FITSCACHE/ALMA01567567.fits"
+# dest = "/Volumes/OWC/I_AM_BIG.fits"
 
 f = FITS(src)
 hdu = f[1]
@@ -59,7 +59,7 @@ header["NAXIS1"] = new_width
 header["NAXIS2"] = new_height
 
 
-new_data = zeros(Float32, new_width, new_height, depth)
+new_data = Array{Float32}(undef, new_width, new_height, depth)
 
 for frame = 1:depth
     global N
