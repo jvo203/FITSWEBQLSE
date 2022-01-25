@@ -58,7 +58,6 @@ new_height = 2 * height
 header["NAXIS1"] = new_width
 header["NAXIS2"] = new_height
 
-
 new_data = Array{Float32}(undef, new_width, new_height, depth)
 
 for frame = 1:depth
