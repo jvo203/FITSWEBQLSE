@@ -1240,7 +1240,7 @@ void *forward_fitswebql_request(void *ptr)
             long response_code;
             curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
-            printf("HTTP transfer completed with status %d (%ld)\n", msg->data.result, response_code);
+            printf("HTTP transfer completed with status %d, HTTP resp. code %ld.\n", msg->data.result, response_code);
         }
     }
 
