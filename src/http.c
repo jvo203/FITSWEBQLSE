@@ -1166,8 +1166,6 @@ size_t html_encode(char *source, size_t len, char *dest, size_t max)
 
 void *forward_fitswebql_request(void *ptr)
 {
-#define HTTP_HANDLE 0 /* Index for the HTTP transfer */
-
     if (ptr == NULL)
         pthread_exit(NULL);
 
@@ -1238,26 +1236,7 @@ void *forward_fitswebql_request(void *ptr)
     while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
     {
         if (msg->msg == CURLMSG_DONE)
-        {
-            int idx;
-
-            /* Find out which handle this message is about */
-            for (idx = 0; idx < handle_count; idx++)
-            {
-                int found = (msg->easy_handle == handles[idx]);
-                if (found)
-                    break;
-            }
-
-            switch (idx)
-            {
-            case HTTP_HANDLE:
-                printf("HTTP transfer completed with status %d\n", msg->data.result);
-                break;
-            default:
-                break;
-            }
-        }
+            printf("HTTP transfer completed with status %d\n", msg->data.result);
     }
 
     /* remove the transfers and cleanup the handles */
