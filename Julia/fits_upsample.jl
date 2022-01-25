@@ -1,11 +1,11 @@
 using FITSIO
 using ImageTransformations
 
-src = homedir() * "/Downloads/ALMA00000006.fits"
-dest = homedir() * "/upsampled.fits"
+# src = homedir() * "/Downloads/ALMA00000006.fits"
+# dest = homedir() * "/upsampled.fits"
 
-# src = "/Volumes/OWC/fits_web_ql/FITSCACHE/ALMA01567567.fits"
-# dest = "/Volumes/OWC/I_AM_BIG.fits"
+src = "/Volumes/OWC/fits_web_ql/FITSCACHE/ALMA01567567.fits"
+dest = "/Volumes/OWC/I_AM_BIG.fits"
 
 f = FITS(src)
 hdu = f[1]
