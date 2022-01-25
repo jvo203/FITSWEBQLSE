@@ -23,6 +23,9 @@ typedef struct
     char *host;
     uint32_t port;
     char *db_home;
+
+    // cluster
+    char *root;
 } options_t;
 
 typedef struct

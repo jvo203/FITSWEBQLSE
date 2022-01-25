@@ -212,6 +212,8 @@ int main(int argc, char *argv[])
     options.port = 5433;
     options.db_home = strdup("/home");
 
+    options.root = NULL;
+
     // parse options command-line options (over-rides the .ini config file)
     int opt;
 
@@ -325,6 +327,7 @@ int main(int argc, char *argv[])
     free(options.password);
     free(options.host);
     free(options.db_home);
+    free(options.root);
     free(config_file);
 
     // clean-up ZeroMQ
@@ -525,6 +528,9 @@ static void *autodiscovery_daemon(void *ptr)
         const char *message = "ENTER";
         const int interval = 1000; //[ms]
         zsock_send(speaker, "sbi", "PUBLISH", message, strlen(message), interval);
+
+        options.root = strdup(my_hostname);
+        printf("<options.root>: %s\n", options.root);
     }
 
     listener = zactor_new(zbeacon, NULL);
