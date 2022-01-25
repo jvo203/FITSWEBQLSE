@@ -104,8 +104,8 @@ LIBS = -L/usr/local/lib -lmicrohttpd `pkg-config --libs glib-2.0` `pkg-config --
 # -L/home/chris/zfp/build/lib64
 
 ifeq ($(UNAME_S),Darwin)
-	INC += -I/usr/local/include -I/usr/local/opt/openssl/include
-	LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/lz4/lib -llz4
+	INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
+	LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/lz4/lib -llz4 -L/usr/local/opt/curl/lib -lcurl
 #MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc-11
