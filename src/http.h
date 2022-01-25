@@ -28,12 +28,5 @@ typedef struct
     char *root;
 } options_t;
 
-typedef struct
-{
-    char *uri;
-    int rank;
-    int world;
-} fits_req_t;
-
 void start_http();
 void stop_http();

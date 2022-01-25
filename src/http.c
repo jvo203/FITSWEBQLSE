@@ -660,25 +660,17 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             pthread_t tid;
 
-            fits_req_t *req = malloc(sizeof(fits_req_t));
+            // launch a pthread, release memory inside the thread
+            char *req = strdup(uri->str);
+            int stat = pthread_create(&tid, NULL, &forward_fitswebql_request, req);
 
-            if (req != NULL)
+            if (stat != 0)
             {
-                req->uri = strdup(uri->str);
-                req->world = world;
-
-                // launch a pthread, release memory inside the thread
-                int stat = pthread_create(&tid, NULL, &forward_fitswebql_request, req);
-
-                if (stat != 0)
-                {
-                    // release memory
-                    free(req->uri);
-                    free(req);
-                }
-                else
-                    pthread_detach(tid);
+                // release memory
+                free(req);
             }
+            else
+                pthread_detach(tid);
         };
 
         if (datasetId != NULL)
@@ -1163,10 +1155,11 @@ void *forward_fitswebql_request(void *ptr)
     if (ptr == NULL)
         pthread_exit(NULL);
 
-    fits_req_t *req = (fits_req_t *)ptr;
+    char *uri = (char *)ptr;
 
-    printf("forwarding '%s' across the cluster.\n", req->uri);
+    printf("forwarding '%s' across the cluster.\n", uri);
 
+    int i;
     GSList *iterator = NULL;
 
     g_mutex_lock(&cluster_mtx);
@@ -1176,14 +1169,12 @@ void *forward_fitswebql_request(void *ptr)
     CURL *handles[handle_count];
     CURLM *multi_handle;
 
-    int rank = 0;
-
     for (iterator = cluster; iterator; iterator = iterator->next)
     {
         GString *url = g_string_new("http://");
 
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "%s&root=%s&rank=%d&world=%d", options.http_port, req->uri, options.root, ++rank, req->world);
+        g_string_append_printf(url, "%" PRIu16 "%s&root=%s", options.http_port, uri, options.root);
 
         printf("URL: '%s'\n", url->str);
 
@@ -1193,8 +1184,7 @@ void *forward_fitswebql_request(void *ptr)
     g_mutex_unlock(&cluster_mtx);
 
     // release memory
-    free(req->uri);
-    free(req);
+    free(uri);
 
     pthread_exit(NULL);
 }
