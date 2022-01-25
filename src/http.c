@@ -646,7 +646,7 @@ static enum MHD_Result on_http_connection(void *cls,
             is_root_rank = false;
 
         // broadcast the FITS request across the cluster
-        if (is_root_rank == 0)
+        if (is_root_rank)
         {
             pthread_t tid;
 
@@ -665,7 +665,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (datasetId != NULL)
         {
-            if (is_root_rank == 0)
+            if (is_root_rank)
                 ret = execute_alma(connection, datasetId, va_count, composite, root);
             else
                 ret = http_ok(connection);
