@@ -633,30 +633,20 @@ static enum MHD_Result on_http_connection(void *cls,
         if (uri->str[uri->len - 1] == '&')
             g_string_truncate(uri, uri->len - 1);
 
-        char *rankStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "rank");
-        char *worldStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "world");
-
         int composite = 0;
-        int rank = 0; // assume root rank 0
-        int world = 0;
 
         if (view != NULL)
             composite = (strcasecmp("composite", view) == 0) ? 1 : 0;
 
-        if (rankStr != NULL)
-            rank = atoi(rankStr); // in case of problems defaults to 0
+        bool is_root_rank = true;
 
-        if (worldStr != NULL)
-            world = atoi(worldStr);
+        char *root_ip = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "root");
 
-        // if <world> is still 0
-        if (world == 0)
-            world = get_cluster_size() + 1; // rank 0 + other nodes
-
-        printf("[C] RANK: %d, WORLD: %d\n", rank, world);
+        if (root_ip != NULL)
+            is_root_rank = false;
 
         // broadcast the FITS request across the cluster
-        if (rank == 0)
+        if (is_root_rank == 0)
         {
             pthread_t tid;
 
@@ -675,7 +665,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (datasetId != NULL)
         {
-            if (rank == 0)
+            if (is_root_rank == 0)
                 ret = execute_alma(connection, datasetId, va_count, composite, root);
             else
                 ret = http_ok(connection);
