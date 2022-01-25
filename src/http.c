@@ -1236,7 +1236,12 @@ void *forward_fitswebql_request(void *ptr)
     while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
     {
         if (msg->msg == CURLMSG_DONE)
-            printf("HTTP transfer completed with status %d\n", msg->data.result);
+        {
+            long response_code;
+            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+            printf("HTTP transfer completed with status %d (%ld)\n", msg->data.result, response_code);
+        }
     }
 
     /* remove the transfers and cleanup the handles */
