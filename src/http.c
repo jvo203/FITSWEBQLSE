@@ -94,6 +94,30 @@ static enum MHD_Result http_not_found(struct MHD_Connection *connection)
         return MHD_NO;
 };
 
+static enum MHD_Result http_acknowledge(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *okstr =
+        "200 OK Request acknowledged.";
+
+    response =
+        MHD_create_response_from_buffer(strlen(okstr),
+                                        (void *)okstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_OK,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
 static enum MHD_Result serve_file(struct MHD_Connection *connection, const char *url)
 {
     int fd;
@@ -668,7 +692,7 @@ static enum MHD_Result on_http_connection(void *cls,
             if (is_root_rank)
                 ret = execute_alma(connection, datasetId, va_count, composite, root);
             else
-                ret = http_ok(connection);
+                ret = http_acknowledge(connection);
 
             // pass the filepath to FORTRAN
             if (options.local)
