@@ -99,7 +99,7 @@ static enum MHD_Result http_acknowledge(struct MHD_Connection *connection)
     struct MHD_Response *response;
     int ret;
     const char *okstr =
-        "200 OK Request acknowledged.";
+        "200 OK Request Acknowledged.\n";
 
     response =
         MHD_create_response_from_buffer(strlen(okstr),
