@@ -5,10 +5,14 @@ src = homedir() * "/Downloads/ALMA00000006.fits"
 dest = homedir() * "/upsampled.fits"
 
 f = FITS(src)
-N = ndims(f[1])
-println("ndims: ", N, ", size: ", size(f[1]))
+hdu = f[1]
 
-header = read_header(f[1])
+N = ndims(hdu)
+println("ndims: ", N, ", size: ", size(hdu))
+
+header = read_header(hdu)
+headerStr = read_header(hdu, String)
+println(header)
 
 width = 0
 height = 0
@@ -34,15 +38,25 @@ if depth < 1
     exit()
 end
 
-hdu = f[1]
+bitpix = header["BITPIX"]
 
-header = read_header(hdu)
-headerStr = read_header(hdu, String)
-println(header)
+if bitpix != -32
+    println("BITPIX:", bitpix)
+    println("bitpix must be == -32")
+    close(f)
+    exit()
+end
 
 # new dimensions
 new_width = 2 * width
 new_height = 2 * height
+
+# change the header
+header["NAXIS1"] = new_width
+header["NAXIS2"] = new_height
+
+# open a destination FITS file
+df = FITS(dest, "w")
 
 for frame = 1:depth
     global N
@@ -60,4 +74,11 @@ for frame = 1:depth
     new_data = Float32.(imresize(data, (new_width, new_height)))
 
     println("upsampled size:", size(new_data))
+
+    if frame == 1
+        #write the header too
+        write(df, new_data, header = header)
+    else
+        write(df, new_data)
+    end
 end
