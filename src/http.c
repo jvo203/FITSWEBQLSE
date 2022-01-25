@@ -1211,6 +1211,7 @@ void *forward_fitswebql_request(void *ptr)
 
         g_string_free(url, TRUE);
 
+        // move on to the next cluster node
         i++;
     }
 
@@ -1219,7 +1220,7 @@ void *forward_fitswebql_request(void *ptr)
     // release memory
     free(uri);
 
-    // wait for the transfers
+    /* Wait for the transfers */
     while (still_running)
     {
         CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
