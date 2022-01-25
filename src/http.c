@@ -1183,7 +1183,7 @@ void *forward_fitswebql_request(void *ptr)
         GString *url = g_string_new("http://");
 
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "%s&rank=%d&world=%d", options.http_port, req->uri, ++rank, req->world);
+        g_string_append_printf(url, "%" PRIu16 "%s&root=%s&rank=%d&world=%d", options.http_port, req->uri, options.root, ++rank, req->world);
 
         printf("URL: '%s'\n", url->str);
 
