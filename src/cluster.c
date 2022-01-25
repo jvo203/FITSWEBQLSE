@@ -40,7 +40,7 @@ int get_cluster_size()
     return world;
 }
 
-void forward_exit_event(void *item, void *)
+void forward_exit_event(void *item, void *user)
 {
     char url[256];
 
