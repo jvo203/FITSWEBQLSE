@@ -968,6 +968,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
         return
     end
 
+    naxes = 0
     width = 0
     height = 0
     depth = 1
@@ -980,7 +981,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
         println(hdu_id, ") hdu_type = ", hdu_type)
 
         try
-            naxes, = fits_read_keyword(f, "NAXIS1")
+            naxes, = fits_read_keyword(f, "NAXIS")
             naxes = parse(Int64, naxes)
         catch _
             continue
@@ -1020,9 +1021,10 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
             fits.height = height
             fits.depth = depth
 
-            fits.header = read_header(hdu)
+            fits.header = cfitsio_read_header(hdu) # TO-DO use CFITSIO with a custom Dict{String,String}()
 
             fits.headerStr = fits_hdr2str(f)
+            println(fits.headerStr)
 
             fits.has_header[] = true
         catch _
