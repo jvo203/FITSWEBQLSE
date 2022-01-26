@@ -946,9 +946,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
 
     try
         fits.filesize = filesize(filepath)
-        f = FITS(filepath)
-
-        println(f)
+        f = fits_open_diskfile(filepath)
     catch e
         println(e)
         fits.has_error[] = true
@@ -974,15 +972,19 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
     height = 0
     depth = 1
 
-    hdu_id = 0
+    num = fits_get_num_hdus(f)
+    println("Number of HDUs in the file: ", num)
 
-    for hdu in f
+    for hdu_id = 1:num
+        hdu_type = fits_movabs_hdu(f, hdu_id)
+        println(hdu_id, ") hdu_type = ", hdu_type)
 
-        hdu_id = hdu_id + 1
-
-        println(typeof(hdu))
-
-        naxes = ndims(hdu)
+        try
+            naxes, = fits_read_keyword(f, "NAXIS1")
+            naxes = parse(Int64, naxes)
+        catch _
+            continue
+        end
 
         if naxes < 2
             # continue searching for the "right" HDU
@@ -991,9 +993,11 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
 
         # we have at least two dimensions
         try
-            width = size(hdu, 1)
-            height = size(hdu, 2)
-            depth = size(hdu, 3)
+            dims = fits_get_img_size(f)
+
+            width = dims[1]
+            height = dims[2]
+            depth = dims[3]
         catch _
         end
 
@@ -1015,8 +1019,10 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
             fits.width = width
             fits.height = height
             fits.depth = depth
+
             fits.header = read_header(hdu)
-            fits.headerStr = read_header(hdu, String)
+
+            fits.headerStr = fits_hdr2str(f)
 
             fits.has_header[] = true
         catch _
