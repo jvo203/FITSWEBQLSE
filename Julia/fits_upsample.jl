@@ -77,7 +77,7 @@ new_data = Array{Float32}(undef, new_width, new_height)
 nelements = width * height
 
 for frame = 1:depth
-    global new_data
+    global data, new_data
 
     fpixel = [1, 1, frame, 1]
     fits_read_pix(f, fpixel, nelements, data)
