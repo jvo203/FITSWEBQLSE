@@ -3,11 +3,11 @@ using ImageTransformations
 
 println(libcfitsio_version())
 
-src = homedir() * "/Downloads/ALMA00000006.fits"
-dst = homedir() * "/upsampled.fits"
+# src = homedir() * "/Downloads/ALMA00000006.fits"
+# dst = homedir() * "/upsampled.fits"
 
-# src = "/Volumes/OWC/fits_web_ql/FITSCACHE/ALMA01567567.fits"
-# dest = "/Volumes/OWC/I_AM_BIG.fits"
+src = "/Volumes/OWC/fits_web_ql/FITSCACHE/ALMA01567567.fits"
+dst = "/Volumes/OWC/I_AM_BIG.fits"
 
 f = fits_open_diskfile(src)
 
