@@ -69,5 +69,27 @@ for i = 1:keysexist+1 # the extra one is the <END> keyword
     fits_write_record(out, rec)
 end
 
+println("FITS image dimensions: ", fits_get_img_size(f))
+
+data = Array{Float32}(undef, width, height)
+new_data = Array{Float32}(undef, new_width, new_height)
+
+nelements = width * height
+
+for frame = 1:depth
+    global new_data
+
+    fpixel = [1, 1, frame, 1]
+    fits_read_pix(f, fpixel, nelements, data)
+
+    println("HDU $(frame): ", size(data))
+
+    new_data = Float32.(imresize(data, (new_width, new_height)))
+
+    fits_write_pix(out, fpixel, new_width * new_height, new_data)
+end
+
+println("upsampled size:", size(new_data))
+
 fits_close_file(f)
 fits_close_file(out)
