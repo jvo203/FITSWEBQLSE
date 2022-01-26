@@ -2,7 +2,7 @@ import Base.Iterators: flatten
 using Dates;
 using DistributedArrays;
 using Downloads;
-using FITSIO;
+using CFITSIO;
 using JSON;
 using CodecLz4;
 using Mmap;
