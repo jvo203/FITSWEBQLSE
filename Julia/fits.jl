@@ -925,7 +925,23 @@ function read_header(f::FITSFile)
         catch _
         end
 
-        # OK, <value> is a String
+        # OK, it is a String
+        s = value
+        if length(s) < 2 || s[1] != '\'' || s[end] != '\''
+            value = s # override, use 'as is'
+        end
+
+        i = lastindex(s) - 1
+        while i > 2
+            if s[i] != ' '
+                value = s[2:i]
+                break
+            end
+            i -= 1
+        end
+
+        value = s[2:i]
+
         header[name] = value
     end
 
