@@ -4,7 +4,7 @@ using CodecBzip2;
 using CodecLz4;
 using ConfParser;
 using Distributed;
-using FITSIO;
+using CFITSIO;
 using HTTP;
 using JSON;
 using LibPQ, Tables;
@@ -844,7 +844,7 @@ function streamFITS(
             continue
         end
 
-        # we have at least two dimensions
+        # we have at least three dimensions
         try
             dims = fits_get_img_size(f)
 
@@ -896,16 +896,13 @@ function streamFITS(
             total_length += padding
         end
 
-        local frame_pixels
+        frame_pixels = Array{Float32}(undef, width, height)
+        nelements = width * height
 
         # then the data
         for frame = 1:depth
-            # check #naxes, only read (:, :, frame) if and when necessary
-            if naxes >= 4
-                frame_pixels = reshape(read(hdu, :, :, frame, 1), width * height)
-            else
-                frame_pixels = reshape(read(hdu, :, :, frame), width * height)
-            end
+            fpixel = [1, 1, frame, 1] # to cover all cases (NAXIS up to 4), use 4 values
+            fits_read_pix(f, fpixel, nelements, frame_pixels)
 
             # convert to BIG-ENDIAN UInt8
             binary_pixels = collect(flatten(map(x -> reverse(reinterpret(UInt8, [x])), frame_pixels)))
