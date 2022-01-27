@@ -58,6 +58,7 @@ mutable struct FITSDataSet
     filesize::Integer
     filepath::String
     header::Any
+    headerRec::Any
     headerStr::String
     width::Integer
     height::Integer
@@ -111,6 +112,7 @@ mutable struct FITSDataSet
             0,
             "",
             Nothing,
+            Nothing,
             "NULL",
             0,
             0,
@@ -158,6 +160,7 @@ mutable struct FITSDataSet
             datasetid,
             0,
             "",
+            Nothing,
             Nothing,
             "NULL",
             0,
@@ -235,6 +238,7 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.filesize)
         serialize(io, fits.filepath)
         serialize(io, fits.header)
+        serialize(io, fits.headerRec)
         serialize(io, fits.headerStr)
         serialize(io, fits.width)
         serialize(io, fits.height)
@@ -337,6 +341,7 @@ function deserialize_fits(datasetid)
     end
 
     fits.header = deserialize(io)
+    fits.headerRec = deserialize(io)
     fits.headerStr = deserialize(io)
     fits.width = deserialize(io)
     fits.height = deserialize(io)
@@ -430,18 +435,6 @@ end
 
 function has_header(fits::FITSDataSet)::Bool
     return fits.has_header[]
-
-    #=
-    has_header = false
-
-    lock(fits.mutex)
-
-    has_header = fits.has_header
-
-    unlock(fits.mutex)
-
-    return has_header
-    =#
 end
 
 function has_data(fits::FITSDataSet)::Bool
@@ -566,11 +559,8 @@ end
 function process_header(fits::FITSDataSet)
     println("FITS header #records: $(length(fits.header))")
 
-    for i = 1:length(fits.header)
-        record = fits.header[i]
-
-        # comments evaluate to 'nothing'
-        if !isnothing(record)
+    for record in fits.headerRec
+        if !ismissing(record)
 
             if typeof(record) != String
                 continue
@@ -607,22 +597,22 @@ function process_header(fits::FITSDataSet)
             fits.is_optical = true
             fits.flux = "ratio"
         end
-    catch e
+    catch _
     end
 
     try
         fits.ignrval = Float32(fits.header["IGNRVAL"])
-    catch e
+    catch _
     end
 
     try
         fits.datamin = Float32(fits.header["DATAMIN"])
-    catch e
+    catch _
     end
 
     try
         fits.datamax = Float32(fits.header["DATAMAX"])
-    catch e
+    catch _
     end
 
     try
@@ -646,7 +636,7 @@ function process_header(fits::FITSDataSet)
             fits.is_optical = true
             fits.flux = "ratio"
         end
-    catch e
+    catch _
     end
 
     try
@@ -917,6 +907,51 @@ end
     end
 end
 
+function read_header(f::FITSFile)
+    header = Dict{String,Any}()
+
+    keysexist, = fits_get_hdrspace(f)
+
+    headerRec = Vector{Union{Missing,String}}(missing, keysexist + 1)
+
+    for i = 1:keysexist+1
+        rec = fits_read_record(f, i)
+
+        if length(rec) == 0
+            continue
+        end
+
+        headerRec[i] = rec
+
+        name, value, = fits_read_keyn(f, i)
+
+        if length(name) == 0 || length(value) == 0
+            continue
+        end
+
+        # println(name, "|", value, "|", comment)
+
+        # first try an Integer
+        try
+            header[name] = parse(Int, value)
+            continue
+        catch _
+        end
+
+        # failing that, try Float64
+        try
+            header[name] = parse(Float64, value)
+            continue
+        catch _
+        end
+
+        # OK, <value> is a String
+        header[name] = value
+    end
+
+    return (header, headerRec)
+end
+
 function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String} = missing)
     global FITS_CACHE
 
@@ -1021,13 +1056,15 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
             fits.height = height
             fits.depth = depth
 
-            fits.header = cfitsio_read_header(hdu) # TO-DO use CFITSIO with a custom Dict{String,String}()
-
+            fits.header, fits.headerRec = read_header(f)
             fits.headerStr = fits_hdr2str(f)
-            println(fits.headerStr)
+
+            println(fits.headerRec)
+            println(fits.header)
 
             fits.has_header[] = true
-        catch _
+        catch e
+            println(e)
         finally
             unlock(fits.mutex)
         end
