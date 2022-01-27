@@ -59,6 +59,7 @@ mutable struct FITSDataSet
     filepath::String
     header::Any
     headerRec::Any
+    headerStr::String
     width::Integer
     height::Integer
     depth::Integer
@@ -111,6 +112,7 @@ mutable struct FITSDataSet
             0,
             "",
             Nothing,
+            Nothing,
             "NULL",
             0,
             0,
@@ -158,6 +160,7 @@ mutable struct FITSDataSet
             datasetid,
             0,
             "",
+            Nothing,
             Nothing,
             "NULL",
             0,
@@ -236,6 +239,7 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.filepath)
         serialize(io, fits.header)
         serialize(io, fits.headerRec)
+        serialize(io, fits.headerStr)
         serialize(io, fits.width)
         serialize(io, fits.height)
         serialize(io, fits.depth)
@@ -338,6 +342,7 @@ function deserialize_fits(datasetid)
 
     fits.header = deserialize(io)
     fits.headerRec = deserialize(io)
+    fits.headerStr = deserialize(io)
     fits.width = deserialize(io)
     fits.height = deserialize(io)
     fits.depth = deserialize(io)
@@ -552,7 +557,7 @@ function get_frequency_range(fits::FITSDataSet)
 end
 
 function process_header(fits::FITSDataSet)
-    println("FITS header #records: $(length(fits.header))")
+    println("FITS header #records: $(length(fits.headerRec))")
 
     for record in fits.headerRec
         if occursin("ASTRO-F", record)
@@ -637,7 +642,7 @@ function process_header(fits::FITSDataSet)
         if occursin("v", ctype3)
             fits.has_velocity = true
         end
-    catch e
+    catch _
     end
 
     try
@@ -677,7 +682,7 @@ function process_header(fits::FITSDataSet)
             fits.has_velocity = true
             fits.frame_multiplier = 1.0E3
         end
-    catch e
+    catch _
     end
 
     try
@@ -688,7 +693,7 @@ function process_header(fits::FITSDataSet)
         else
             fits._cdelt3 = 1.0
         end
-    catch e
+    catch _
     end
 end
 
@@ -895,24 +900,16 @@ function read_header(f::FITSFile)
 
     keysexist, = fits_get_hdrspace(f)
 
-    headerRec = Vector{String}("", keysexist + 1)
+    headerRec = Vector{String}(undef, keysexist + 1)
 
     for i = 1:keysexist+1
-        rec = fits_read_record(f, i)
-
-        if length(rec) == 0
-            continue
-        end
-
-        headerRec[i] = rec
+        headerRec[i] = fits_read_record(f, i)
 
         name, value, = fits_read_keyn(f, i)
 
         if length(name) == 0 || length(value) == 0
             continue
         end
-
-        # println(name, "|", value, "|", comment)
 
         # first try an Integer
         try
@@ -1040,6 +1037,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
             fits.depth = depth
 
             fits.header, fits.headerRec = read_header(f)
+            fits.headerStr = fits_hdr2str(f)
 
             fits.has_header[] = true
         catch _
@@ -3052,7 +3050,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     local bunit, naxis, wcs
 
     try
-        wcs_array = WCS.from_header(join(fits.headerRec))
+        wcs_array = WCS.from_header(fits.headerStr)
         wcs = wcs_array[1]
     catch err
         println(err)

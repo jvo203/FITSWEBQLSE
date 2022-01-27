@@ -965,12 +965,12 @@ function streamImageSpectrum(http::HTTP.Stream)
 
     try
         quality = eval(Meta.parse(params["quality"]))
-    catch e
+    catch _
     end
 
     try
         fetch_data = parse(Bool, params["fetch_data"])
-    catch e
+    catch _
     end
 
     HTTP.setheader(http, "Cache-Control" => "no-cache")
@@ -1095,7 +1095,7 @@ function streamImageSpectrum(http::HTTP.Stream)
             write(http, compressed_json)
 
             # FITS HEADER
-            header = join(fits_object.headerRec)
+            header = fits_object.headerStr
             header_len = length(header)
             compressed_header = lz4_hc_compress(Vector{UInt8}(header))
             compressed_len = length(compressed_header)
