@@ -561,11 +561,6 @@ function process_header(fits::FITSDataSet)
 
     for record in fits.headerRec
         if !ismissing(record)
-
-            if typeof(record) != String
-                continue
-            end
-
             if occursin("ASTRO-F", record)
                 fits.is_optical = true
                 fits.flux = "logistic"
@@ -1059,12 +1054,8 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
             fits.header, fits.headerRec = read_header(f)
             fits.headerStr = fits_hdr2str(f)
 
-            println(fits.headerRec)
-            println(fits.header)
-
             fits.has_header[] = true
-        catch e
-            println(e)
+        catch _
         finally
             unlock(fits.mutex)
         end
