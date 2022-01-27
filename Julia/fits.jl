@@ -742,15 +742,12 @@ end
     # compressed_pixels = zeros(Float16, width, height)
 
     try
-
-        fits_file = FITS(path)
-
-        hdu = fits_file[hdu_id]
-
-        naxes = ndims(hdu)
+        fits_file = fits_open_diskfile(path)
+        fits_movabs_hdu(fits_file, hdu_id)
 
         frame_pixels = Array{Float32}(undef, width, height)
         frame_mask = Array{Bool}(undef, width, height)
+        nelements = width * height
 
         while true
             frame_start, frame_end = take!(jobs)
@@ -758,13 +755,8 @@ end
             # process a chunk of frames
             for frame = frame_start:frame_end
 
-                # check #naxes, only read (:, :, frame) if and when necessary
-                if naxes >= 4
-                    frame_pixels = reshape(read(hdu, :, :, frame, 1), (width, height))
-                else
-                    frame_pixels = reshape(read(hdu, :, :, frame), (width, height))
-                end
-
+                fpixel = [1, 1, frame, 1] # to cover all cases (NAXIS up to 4), use 4 values
+                fits_read_pix(fits_file, fpixel, nelements, frame_pixels)
                 frame_mask = invalidate_pixel.(frame_pixels, datamin, datamax, ignrval)
 
                 # replace NaNs with 0.0
