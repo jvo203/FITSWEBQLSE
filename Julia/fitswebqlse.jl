@@ -818,26 +818,53 @@ function streamFITS(
 
     filter = "[" * string(x1) * ":" * string(x2) * "," * string(y1) * ":" * string(y2) * "," * string(first_frame) * ":" * string(last_frame) * "]"
 
-    f = FITS(fits.filepath * filter)
-    println(f)
+    f = fits_open_file(fits.filepath * filter)
 
-    # select the first HDU
-    hdu = f[1]
+    num = fits_get_num_hdus(f)
+    println("Number of HDUs in the file: ", num)
 
-    # get the header string
-    headerStr = read_header(hdu, String)
-    padding = FITS_CHUNK - length(headerStr) % FITS_CHUNK
+    naxes = 0
+    width = 0
+    height = 0
+    depth = 1
 
-    naxes = ndims(hdu)
+    for hdu_id = 1:num
+        hdu_type = fits_movabs_hdu(f, hdu_id)
+        println(hdu_id, ") hdu_type = ", hdu_type)
+
+        try
+            naxes, = fits_read_keyword(f, "NAXIS")
+            naxes = parse(Int, naxes)
+        catch _
+            continue
+        end
+
+        if naxes < 3
+            # continue searching for the "right" HDU
+            continue
+        end
+
+        # we have at least two dimensions
+        try
+            dims = fits_get_img_size(f)
+
+            width = dims[1]
+            height = dims[2]
+            depth = dims[3]
+        catch _
+        end
+
+        # stop the loop here
+        break
+    end
 
     if naxes < 3
         error("FITS data cube naxes should be >= 3.")
     end
 
-    # and the number of 2D planes (depth)
-    width = size(hdu, 1)
-    height = size(hdu, 2)
-    depth = size(hdu, 3)
+    # get the header string
+    headerStr = fits_hdr2str(f)
+    padding = FITS_CHUNK - length(headerStr) % FITS_CHUNK
 
     println("FITS cut-out: $width x $height x $depth\theader length: ", length(headerStr), ", padding: $padding")
 

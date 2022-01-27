@@ -1007,7 +1007,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
 
         try
             naxes, = fits_read_keyword(f, "NAXIS")
-            naxes = parse(Int64, naxes)
+            naxes = parse(Int, naxes)
         catch _
             continue
         end
