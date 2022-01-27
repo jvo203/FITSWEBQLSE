@@ -749,6 +749,9 @@ end
 
         naxes = ndims(hdu)
 
+        frame_pixels = Array{Float32}(undef, width, height)
+        frame_mask = Array{Bool}(undef, width, height)
+
         while true
             frame_start, frame_end = take!(jobs)
 
@@ -1080,13 +1083,14 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
             println("reading a $width X $height 2D image")
 
             try
-                pixels = zeros(Float32, width, height)
-                mask = map(isnan, pixels)
+                pixels = Array{Float32}(undef, width, height)
+                mask = Array{Bool}(undef, width, height)
 
                 @time begin
 
-                    pixels = reshape(read(hdu), (width, height))
-
+                    nelements = width * height
+                    fpixel = [1, 1, 1, 1] # to cover all cases (NAXIS up to 4), use 4 values
+                    fits_read_pix(f, fpixel, nelements, pixels)
                     mask = invalidate.(pixels, fits.datamin, fits.datamax, fits.ignrval)
 
                     # replace NaNs with 0.0
