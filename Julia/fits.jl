@@ -59,7 +59,6 @@ mutable struct FITSDataSet
     filepath::String
     header::Any
     headerRec::Any
-    headerStr::String
     width::Integer
     height::Integer
     depth::Integer
@@ -112,7 +111,6 @@ mutable struct FITSDataSet
             0,
             "",
             Nothing,
-            Nothing,
             "NULL",
             0,
             0,
@@ -160,7 +158,6 @@ mutable struct FITSDataSet
             datasetid,
             0,
             "",
-            Nothing,
             Nothing,
             "NULL",
             0,
@@ -239,7 +236,6 @@ function serialize_fits(fits::FITSDataSet)
         serialize(io, fits.filepath)
         serialize(io, fits.header)
         serialize(io, fits.headerRec)
-        serialize(io, fits.headerStr)
         serialize(io, fits.width)
         serialize(io, fits.height)
         serialize(io, fits.depth)
@@ -342,7 +338,6 @@ function deserialize_fits(datasetid)
 
     fits.header = deserialize(io)
     fits.headerRec = deserialize(io)
-    fits.headerStr = deserialize(io)
     fits.width = deserialize(io)
     fits.height = deserialize(io)
     fits.depth = deserialize(io)
@@ -560,27 +555,25 @@ function process_header(fits::FITSDataSet)
     println("FITS header #records: $(length(fits.header))")
 
     for record in fits.headerRec
-        if !ismissing(record)
-            if occursin("ASTRO-F", record)
-                fits.is_optical = true
-                fits.flux = "logistic"
-            end
+        if occursin("ASTRO-F", record)
+            fits.is_optical = true
+            fits.flux = "logistic"
+        end
 
-            if occursin("HSCPIPE", record)
-                fits.is_optical = true
-                fits.flux = "ratio"
-            end
+        if occursin("HSCPIPE", record)
+            fits.is_optical = true
+            fits.flux = "ratio"
+        end
 
-            record = lowercase(record)
+        record = lowercase(record)
 
-            if occursin("suzaku", record) ||
-               occursin("hitomi", record) ||
-               occursin("x-ray", record)
-                fits.is_optical = false
-                fits.is_xray = true
-                fits.flux = "legacy"
-                fits.ignrval = -1.0
-            end
+        if occursin("suzaku", record) ||
+           occursin("hitomi", record) ||
+           occursin("x-ray", record)
+            fits.is_optical = false
+            fits.is_xray = true
+            fits.flux = "legacy"
+            fits.ignrval = -1.0
         end
     end
 
@@ -902,7 +895,7 @@ function read_header(f::FITSFile)
 
     keysexist, = fits_get_hdrspace(f)
 
-    headerRec = Vector{Union{Missing,String}}(missing, keysexist + 1)
+    headerRec = Vector{String}("", keysexist + 1)
 
     for i = 1:keysexist+1
         rec = fits_read_record(f, i)
@@ -1047,7 +1040,6 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
             fits.depth = depth
 
             fits.header, fits.headerRec = read_header(f)
-            fits.headerStr = fits_hdr2str(f)
 
             fits.has_header[] = true
         catch _
@@ -3060,7 +3052,7 @@ function getSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     local bunit, naxis, wcs
 
     try
-        wcs_array = WCS.from_header(fits.headerStr)
+        wcs_array = WCS.from_header(join(fits.headerRec))
         wcs = wcs_array[1]
     catch err
         println(err)
