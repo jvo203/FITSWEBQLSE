@@ -43,7 +43,9 @@ extern options_t options; // <options> is defined in main.c
 struct MHD_Daemon *http_server = NULL;
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
-void *forward_fitswebql_request(void *req);
+void *forward_fitswebql_request(void *ptr);
+void *handle_fitswebql_request(void *ptr);
+
 size_t html_encode(char *source, size_t len, char *dest, size_t max);
 
 static enum MHD_Result http_ok(struct MHD_Connection *connection)
@@ -721,9 +723,9 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     printf("[C] FITS filepath:\t%s\n", filepath);
 
-                    // FORTRAN code, not implemented yet (TO-DO)
-                    /* pthread_create(&tid, NULL, &handle_fitswebql_request, strndup(filepath, sizeof(filepath)));
-                    pthread_detach(tid);*/
+                    // C -> FORTRAN code, not implemented yet (TO-DO)
+                    pthread_create(&tid, NULL, &handle_fitswebql_request, strndup(filepath, sizeof(filepath)));
+                    pthread_detach(tid);
                 }
 
                 // directory/extension should not be freed (libmicrohttpd does that)
@@ -1256,6 +1258,20 @@ void *forward_fitswebql_request(void *ptr)
     }
 
     curl_multi_cleanup(multi_handle);
+
+    pthread_exit(NULL);
+}
+
+void *handle_fitswebql_request(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    char *filepath = (char *)ptr;
+
+    printf("[C] loading '%s'\n", filepath);
+
+    free(filepath);
 
     pthread_exit(NULL);
 }
