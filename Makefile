@@ -103,6 +103,11 @@ LIBS = -L/usr/local/lib -lmicrohttpd `pkg-config --libs glib-2.0` `pkg-config --
 # -lmpifort not needed when using mpiifort
 # -L/home/chris/zfp/build/lib64
 
+ifeq ($(CC),icc)
+	# Intel FORTRAN runtime
+	LIBS += -lifcore -limf
+endif
+
 ifeq ($(UNAME_S),Darwin)
 	INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
 	LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/lz4/lib -llz4 -L/usr/local/opt/curl/lib -lcurl
