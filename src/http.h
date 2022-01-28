@@ -28,5 +28,12 @@ typedef struct
     char *root;
 } options_t;
 
+typedef struct
+{
+    char *datasetid;
+    char *filepath;
+    char *flux;
+} fits_req_t;
+
 void start_http();
 void stop_http();
