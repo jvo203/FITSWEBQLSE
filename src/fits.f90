@@ -73,7 +73,7 @@ module fits
         real(kind=c_float), allocatable :: pixels(:, :)
         logical(kind=c_bool), allocatable :: mask(:, :)
 
-        ! an array holding pointers to half-float 2D planes
+        ! an array holding pointers to half-float 2D channel images
         type(fp16), dimension(:), allocatable :: half_compressed
 
         logical :: is_optical = .true.
