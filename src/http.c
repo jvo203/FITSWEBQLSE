@@ -736,17 +736,19 @@ static enum MHD_Result on_http_connection(void *cls,
                         else
                             req->flux = NULL;
 
-                        if (strstr(db, "hsc") != NULL)
-                        {
-                            free(req->flux);
-                            req->flux = strdup("ratio");
-                        }
+                        if (db != NULL)
+                            if (strstr(db, "hsc") != NULL)
+                            {
+                                free(req->flux);
+                                req->flux = strdup("ratio");
+                            }
 
-                        if (strstr(table, "fugin") != NULL)
-                        {
-                            free(req->flux);
-                            req->flux = strdup("logistic");
-                        }
+                        if (table != NULL)
+                            if (strstr(table, "fugin") != NULL)
+                            {
+                                free(req->flux);
+                                req->flux = strdup("logistic");
+                            }
 
                         int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
 
@@ -1304,7 +1306,7 @@ void *handle_fitswebql_request(void *ptr)
 
     fits_req_t *req = (fits_req_t *)ptr;
 
-    printf("[C] datasetid: '%s', flux: '%s', filepath: '%s'; passing over to FORTRAN\n", req->datasetid, req->flux, req->filepath);
+    printf("[C] datasetid: '%s', flux: '%s', filepath: '%s'; over to FORTRAN\n", req->datasetid, req->flux, req->filepath);
 
     free(req->datasetid);
     free(req->filepath);
