@@ -103,9 +103,6 @@ LIBS = -L/usr/local/lib -lmicrohttpd `pkg-config --libs glib-2.0` `pkg-config --
 # -lmpifort not needed when using mpiifort
 # -L/home/chris/zfp/build/lib64
 
-# FORTRAN runtime
-LIBS += -L/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11 -lgfortran -lm
-
 ifeq ($(UNAME_S),Darwin)
 	INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
 	LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/lz4/lib -llz4 -L/usr/local/opt/curl/lib -lcurl
@@ -115,6 +112,9 @@ ifeq ($(UNAME_S),Darwin)
 	FORT = gfortran-11
 	FLAGS = -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
+
+	# GCC FORTRAN runtime
+	LIBS += -L/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11 -lgfortran -lm
 
 	# try Intel compilers for a change! ... linking problems ...
 	# CC = icc
