@@ -1290,11 +1290,14 @@ void *handle_fitswebql_request(void *ptr)
     if (ptr == NULL)
         pthread_exit(NULL);
 
-    char *filepath = (char *)ptr;
+    fits_req_t *req = (fits_req_t *)ptr;
 
-    printf("[C] loading '%s'\n", filepath);
+    printf("[C] loading '%s'\n", req->filepath);
 
-    free(filepath);
+    free(req->datasetid);
+    free(req->filepath);
+    free(req->flux);
+    free(req);
 
     pthread_exit(NULL);
 }
