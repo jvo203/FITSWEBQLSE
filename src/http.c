@@ -724,8 +724,31 @@ static enum MHD_Result on_http_connection(void *cls,
                     printf("[C] FITS filepath:\t%s\n", filepath);
 
                     // C -> FORTRAN code, not implemented yet (TO-DO)
-                    pthread_create(&tid, NULL, &handle_fitswebql_request, strndup(filepath, sizeof(filepath)));
-                    pthread_detach(tid);
+                    fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
+
+                    if (req != NULL)
+                    {
+                        req->datasetid = strdup(datasetId[i]);
+                        req->filepath = strndup(filepath, sizeof(filepath));
+
+                        if (flux != NULL)
+                            req->flux = strdup(flux);
+                        else
+                            req->flux = NULL;
+
+                        int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
+
+                        if (stat != 0)
+                        {
+                            // release memory
+                            free(req->datasetid);
+                            free(req->filepath);
+                            free(req->flux);
+                            free(req);
+                        }
+                        else
+                            pthread_detach(tid);
+                    }
                 }
 
                 // directory/extension should not be freed (libmicrohttpd does that)
