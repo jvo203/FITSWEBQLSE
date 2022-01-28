@@ -1308,6 +1308,8 @@ void *handle_fitswebql_request(void *ptr)
 
     printf("[C] datasetid: '%s', flux: '%s', filepath: '%s'; over to FORTRAN\n", req->datasetid, req->flux, req->filepath);
 
+    // call FORTRAN
+
     free(req->datasetid);
     free(req->filepath);
     free(req->flux);
