@@ -1292,7 +1292,7 @@ void *handle_fitswebql_request(void *ptr)
 
     fits_req_t *req = (fits_req_t *)ptr;
 
-    printf("[C] loading '%s'\n", req->filepath);
+    printf("[C] passing '%s' over to FORTRAN\n", req->filepath);
 
     free(req->datasetid);
     free(req->filepath);
