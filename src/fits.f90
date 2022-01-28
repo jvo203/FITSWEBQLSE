@@ -117,7 +117,7 @@ contains
         type(dataset) :: item
         integer status
 
-        ! nothing to do if the FITS file has never been opened
+        ! there is nothing to do if the FITS file has never been opened
         if (item%unit .eq. -1) return
 
         print *, item%datasetid, ': closing the FITS file unit'
