@@ -736,6 +736,18 @@ static enum MHD_Result on_http_connection(void *cls,
                         else
                             req->flux = NULL;
 
+                        if (strstr(db, "hsc") != NULL)
+                        {
+                            free(req->flux);
+                            req->flux = strdup("ratio");
+                        }
+
+                        if (strstr(table, "fugin") != NULL)
+                        {
+                            free(req->flux);
+                            req->flux = strdup("logistic");
+                        }
+
                         int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
 
                         if (stat != 0)
