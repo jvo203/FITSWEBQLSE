@@ -119,7 +119,7 @@ ifeq ($(UNAME_S),Darwin)
 	CFLAGS := $(FLAGS)
 
 	# GCC FORTRAN runtime
-	LIBS += -L/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11 -lgfortran -lm
+	LIBS += -L/usr/local/Cellar/gcc/11.2.0_3/lib/gcc/11
 
 	# try Intel compilers for a change! ... linking problems ...
 	# CC = icc
@@ -148,6 +148,9 @@ ifeq ($(CC),gcc)
 	else
 		FLAGS += -cpp -fallow-invalid-boz -fmax-stack-var-size=32768
 	endif
+
+	# GCC FORTRAN runtime
+	LIBS += -lgfortran -lm
 endif
 
 # include dependencies (all .d files)
