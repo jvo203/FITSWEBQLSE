@@ -1,6 +1,7 @@
 module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
+    use zfp_array
     implicit none
 
     integer(kind=4), parameter :: NBINS = 1024

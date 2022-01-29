@@ -12,14 +12,6 @@ module zfp_array
 
     integer(kind=4), parameter :: NBMASK = Z'aaaaaaaa'
 
-    ! Golomb encoding
-    integer, parameter :: G_M = 10
-    integer, parameter :: G_b = 4
-
-    ! Rice encoding
-    integer, parameter :: R_k = 3
-    integer, parameter :: R_M = 2**R_k
-
     type zfp_block
         ! a 128-bit bitstream holding a compressed 4x4 real array        
         integer(kind=4), dimension(4) :: bitstream
