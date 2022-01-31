@@ -736,7 +736,7 @@ static enum MHD_Result on_http_connection(void *cls,
                         if (flux != NULL)
                             req->flux = strdup(flux);
                         else
-                            req->flux = NULL;
+                            req->flux = strdup("NULL");
 
                         if (db != NULL)
                             if (strstr(db, "hsc") != NULL)
@@ -1311,7 +1311,7 @@ void *handle_fitswebql_request(void *ptr)
     printf("[C] datasetid: '%s', flux: '%s', filepath: '%s'; over to FORTRAN\n", req->datasetid, req->flux, req->filepath);
 
     // call FORTRAN
-    load_fits_file(req->datasetid, sizeof(req->datasetid), req->filepath, sizeof(req->filepath), req->flux, sizeof(req->flux));
+    load_fits_file(req->datasetid, strlen(req->datasetid), req->filepath, strlen(req->filepath), req->flux, strlen(req->flux));
 
     free(req->datasetid);
     free(req->filepath);
