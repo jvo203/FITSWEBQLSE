@@ -202,7 +202,7 @@ contains
         if (item%progress_mtx%i .ne. 0) call g_mutex_clear(c_loc(item%progress_mtx))
 
         ! TO-DO:
-        ! write the dataset to a cache file so to speed up subsequent loading
+        ! write the dataset to a cache file so as to speed up subsequent loading
 
         deallocate (item)
     end subroutine delete_dataset
