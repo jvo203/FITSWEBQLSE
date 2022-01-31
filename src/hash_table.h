@@ -13,5 +13,4 @@ bool dataset_exists(const char *datasetid);
 void *get_dataset(const char *datasetid);
 
 // a Fortran callback
-extern void delete_dataset(void *item);
-
+extern void delete_dataset(void *ptr);
