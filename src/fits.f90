@@ -353,7 +353,7 @@ contains
 
         num_threads = OMP_GET_MAX_THREADS()
 
-        print *, "OpenMP num_threads: ", num_threads
+        print *, "OpenMP max #threads: ", num_threads
 
         naxis = 0
         naxes = (/0, 0, 0, 0/)
@@ -396,6 +396,17 @@ contains
         end if
 
         item%unit = unit
+
+        ! open the FITS file, with read - only access.The returned BLOCKSIZE
+        ! parameter is obsolete and should be ignored.
+        readwrite = 0
+        call ftopen(unit, filename, readwrite, blocksize, status)
+
+        if (status .ne. 0) then
+            return
+        end if
+
+        print *, "[F]::GOT SO FAR"
 
     end subroutine read_fits_file
 end module fits
