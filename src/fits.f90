@@ -359,5 +359,31 @@ contains
         naxes = (/0, 0, 0, 0/)
         bSuccess = .false.
 
+        ! reset the strings
+        item%frameid = ''
+        item%object = ''
+        item%line = ''
+        item%filter = ''
+        item%date_obs = ''
+        item%btype = ''
+        item%bunit = ''
+        item%specsys = ''
+        item%timesys = ''
+
+        ! special handling for the flux
+        ! test the first character for 'N' ('NULL')
+        if (flux(1:1) .ne. 'N') allocate (item%flux, source=flux)
+
+        item%cunit1 = ''
+        item%cunit2 = ''
+        item%cunit3 = ''
+
+        item%ctype1 = ''
+        item%ctype2 = ''
+        item%ctype3 = ''
+
+        ! reset the FITS header
+        if (allocated(item%hdr)) deallocate (item%hdr)
+
     end subroutine read_fits_file
 end module fits
