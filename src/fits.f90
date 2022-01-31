@@ -72,7 +72,7 @@ module fits
         logical :: has_frequency = .false.
 
         ! derived values
-        character(len=16) :: flux
+        character(len=:), allocatable :: flux
         real(kind=c_float) dmin, dmax
         real(kind=4), allocatable :: frame_min(:), frame_max(:)
         real(kind=c_float), allocatable :: pixels(:, :)
@@ -271,8 +271,11 @@ contains
         character(kind=c_char), dimension(filepath_len), intent(in) :: filepath
         character(kind=c_char), dimension(flux_len), intent(in) :: flux
 
-        character(len=filepath_len) :: filename
+        character(len=filepath_len) :: strFilename
+        character(len=flux_len) :: strFlux
+
         integer :: i
+        logical :: bSuccess
 
         type(dataset), pointer :: item
 
@@ -280,6 +283,14 @@ contains
         real :: elapsed
 
         print *, "[load_fits_file] datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
+
+        do i = 1, filepath_len
+            strFilename(i:i) = filepath(i)
+        end do
+
+        do i = 1, flux_len
+            strFlux(i:i) = flux(i)
+        end do
 
         allocate (item)
 
@@ -292,41 +303,61 @@ contains
         item%datasetid = datasetid
         item%progress = 0
         item%elapsed = 0
-        ! allocate (item%uri, source=filename) ! is it needed ?
+        allocate (item%uri, source=strFilename) ! is it needed ?
         call set_ok_status(item, .false.)
         call set_error_status(item, .false.)
         call set_header_status(item, .false.)
 
         call insert_dataset(item%datasetid, c_loc(item))
 
-        do i = 1, filepath_len
-            filename(i:i) = filepath(i)
-        end do
-
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
-        call read_fits_file(item, filename)
+        call read_fits_file(item, strFilename, strFlux, bSuccess)
 
         ! end the timer
         call system_clock(finish)
         elapsed = real(finish - start)/real(crate)
 
-        print *, "finished loading ", item%datasetid, ", elapsed time: ", elapsed, " [s]"
+        print *, "finished loading ", item%datasetid, ", bSuccess: ", bSuccess, ", elapsed time: ", elapsed, " [s]"
 
         ! reset the timeout clock
         call reset_clock(item)
 
     end subroutine load_fits_file
 
-    subroutine read_fits_file(item, filename)
+    subroutine read_fits_file(item, filename, flux, bSuccess)
         use omp_lib
         implicit none
 
         type(dataset), pointer, intent(inout) :: item
-        character(len=*), intent(in) :: filename
+        character(len=*), intent(in) :: filename, flux
+        logical, intent(out) ::  bSuccess
 
-        print *, "[read_fits_file]::'", filename, "'"
+        integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i, j
+        integer naxis, bitpix
+        integer npixels, cn, cm
+        integer naxes(4)
+        integer(kind=8) firstpix, lastpix, npixels_per_image
+        integer max_threads, tid, start, end, num_per_image, frame
+        integer, dimension(4) :: fpixels, lpixels, incs
+        logical test_ignrval
+
+        real :: nullval, tmp
+        character :: record*80, key*10, value*70, comment*70
+        logical :: anynull
+
+        integer :: num_threads
+
+        print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
+
+        num_threads = OMP_GET_MAX_THREADS()
+
+        print *, "OpenMP num_threads: ", num_threads
+
+        naxis = 0
+        naxes = (/0, 0, 0, 0/)
+        bSuccess = .false.
 
     end subroutine read_fits_file
 end module fits
