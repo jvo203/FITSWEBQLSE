@@ -46,6 +46,8 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
 
+extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len);
+
 size_t html_encode(char *source, size_t len, char *dest, size_t max);
 
 static enum MHD_Result http_ok(struct MHD_Connection *connection)
@@ -1309,6 +1311,7 @@ void *handle_fitswebql_request(void *ptr)
     printf("[C] datasetid: '%s', flux: '%s', filepath: '%s'; over to FORTRAN\n", req->datasetid, req->flux, req->filepath);
 
     // call FORTRAN
+    load_fits_file(req->datasetid, sizeof(req->datasetid), req->filepath, sizeof(req->filepath), req->flux, sizeof(req->flux));
 
     free(req->datasetid);
     free(req->filepath);

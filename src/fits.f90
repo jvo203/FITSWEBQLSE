@@ -141,5 +141,7 @@ contains
         character(kind=c_char), dimension(filepath_len), intent(in) :: filepath
         character(kind=c_char), dimension(flux_len), intent(in) :: flux
 
+        print *, "[F] datasetid:", datasetid, "flux:", flux, "filepath:", filepath
+
     end subroutine load_fits_file
 end module fits
