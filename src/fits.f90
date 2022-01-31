@@ -177,5 +177,8 @@ contains
 
         print *, "finished loading ", item%datasetid, ", elapsed: ", elapsed, " [s]"
 
+        ! reset the timeout clock
+        call reset_clock(item)
+
     end subroutine load_fits_file
 end module fits
