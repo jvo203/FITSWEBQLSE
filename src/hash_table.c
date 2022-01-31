@@ -20,8 +20,8 @@ void delete_hash_table()
 void free_hash_data(gpointer item)
 {
     // call Fortran to delete the dataset
-    //if (item != NULL)
-    //    delete_dataset(item); // TO-DO: delete_dataset in FORTRAN
+    if (item != NULL)
+        delete_dataset(item);
 }
 
 void insert_dataset(const char *datasetid, void *item)
