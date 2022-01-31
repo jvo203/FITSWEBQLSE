@@ -34,7 +34,7 @@ volatile sig_atomic_t s_received_signal = 0;
 
 static void signal_handler(int sig_num)
 {
-    printf("Interrupt signal [%d] received.\n", sig_num);
+    printf("[C] Interrupt signal [%d] received.\n", sig_num);
 
     signal(sig_num, signal_handler);
     s_received_signal = sig_num;
@@ -86,12 +86,14 @@ void ipp_init()
     lib = ippGetLibVersion();
     printf("%s %s\n", lib->Name, lib->Version);
 
+    return;
+
     /* Get CPU features and features enabled with selected library level */
     status = ippGetCpuFeatures(&mask, 0);
     if (ippStsNoErr == status)
     {
         emask = ippGetEnabledCpuFeatures();
-        printf("Features supported by CPU\tby IPP\n");
+        printf("[C] Features supported by CPU\tby IPP\n");
         printf("-----------------------------------------\n");
         printf("  ippCPUID_MMX        = ");
         printf("%c\t%c\t", (mask & ippCPUID_MMX) ? 'Y' : 'N',
