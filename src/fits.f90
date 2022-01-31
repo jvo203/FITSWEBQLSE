@@ -188,6 +188,25 @@ contains
 
     end subroutine close_fits_file
 
+    subroutine delete_dataset(item) BIND(C, name='delete_dataset')
+        type(C_PTR), intent(in), value :: item
+        type(dataset), pointer :: item_ptr
+
+        call c_f_pointer(item, item_ptr)
+
+        print *, 'deleting ', item_ptr%datasetid
+
+        if (item_ptr%header_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%header_mtx))
+        if (item_ptr%error_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%error_mtx))
+        if (item_ptr%ok_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%ok_mtx))
+        if (item_ptr%progress_mtx%i .ne. 0) call g_mutex_clear(c_loc(item_ptr%progress_mtx))
+
+        ! TO-DO:
+        ! write the dataset to a cache file so to speed up subsequent loading
+
+        deallocate (item_ptr)
+    end subroutine delete_dataset
+
     subroutine set_error_status(item, error)
         type(dataset), pointer, intent(inout) :: item
         logical, intent(in) :: error
