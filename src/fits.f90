@@ -166,5 +166,16 @@ contains
 
         call insert_dataset(item%datasetid, c_loc(item))
 
+        ! start the timer
+        call system_clock(count=start, count_rate=crate, count_max=cmax)
+
+        ! call read_fits_file()
+
+        ! end the timer
+        call system_clock(finish)
+        elapsed = real(finish - start)/real(crate)
+
+        print *, "finished loading ", item%datasetid, ", elapsed: ", elapsed, " [s]"
+
     end subroutine load_fits_file
 end module fits
