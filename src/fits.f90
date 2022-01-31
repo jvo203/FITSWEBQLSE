@@ -271,12 +271,15 @@ contains
         character(kind=c_char), dimension(filepath_len), intent(in) :: filepath
         character(kind=c_char), dimension(flux_len), intent(in) :: flux
 
+        character(len=filepath_len) :: filename
+        integer :: i
+
         type(dataset), pointer :: item
 
         integer(8) :: start, finish, crate, cmax, id
         real :: elapsed
 
-        print *, "datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
+        print *, "[load_fits_file] datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
 
         allocate (item)
 
@@ -296,10 +299,14 @@ contains
 
         call insert_dataset(item%datasetid, c_loc(item))
 
+        do i = 1, filepath_len
+            filename(i:i) = filepath(i)
+        end do
+
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
-        ! call read_fits_file()
+        call read_fits_file(item, filename)
 
         ! end the timer
         call system_clock(finish)
@@ -311,4 +318,15 @@ contains
         call reset_clock(item)
 
     end subroutine load_fits_file
+
+    subroutine read_fits_file(item, filename)
+        use omp_lib
+        implicit none
+
+        type(dataset), pointer, intent(inout) :: item
+        character(len=*), intent(in) :: filename
+
+        print *, "[read_fits_file]::'", filename, "'"
+
+    end subroutine read_fits_file
 end module fits
