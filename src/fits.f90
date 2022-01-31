@@ -141,7 +141,30 @@ contains
         character(kind=c_char), dimension(filepath_len), intent(in) :: filepath
         character(kind=c_char), dimension(flux_len), intent(in) :: flux
 
+        type(dataset), pointer :: item
+
+        integer(8) :: start, finish, crate, cmax, id
+        real :: elapsed
+
         print *, "datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
+
+        allocate (item)
+
+        ! init mutexes
+        if (item%header_mtx%i .eq. 0) call g_mutex_init(c_loc(item%header_mtx))
+        if (item%error_mtx%i .eq. 0) call g_mutex_init(c_loc(item%error_mtx))
+        if (item%ok_mtx%i .eq. 0) call g_mutex_init(c_loc(item%ok_mtx))
+        if (item%progress_mtx%i .eq. 0) call g_mutex_init(c_loc(item%progress_mtx))
+
+        item%datasetid = datasetid
+        item%progress = 0
+        item%elapsed = 0
+        ! allocate (item%uri, source=filename) ! is it needed ?
+        call set_ok_status(item, .false.)
+        call set_error_status(item, .false.)
+        call set_header_status(item, .false.)
+
+        call insert_dataset(item%datasetid, c_loc(item))
 
     end subroutine load_fits_file
 end module fits
