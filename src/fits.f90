@@ -114,6 +114,62 @@ module fits
     end type dataset
 
     interface
+        ! int get_physical_cores()
+        integer(c_int) function get_physical_cores() BIND(C, name='get_physical_cores')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+        end function get_physical_cores
+
+        ! void g_mutex_init (GMutex *mutex);
+        subroutine g_mutex_init(mutex) BIND(C, name='g_mutex_init')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: mutex
+        end subroutine g_mutex_init
+
+        ! void g_mutex_clear (GMutex *mutex);
+        subroutine g_mutex_clear(mutex) BIND(C, name='g_mutex_clear')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: mutex
+        end subroutine g_mutex_clear
+
+        ! void g_mutex_lock (GMutex *mutex);
+        subroutine g_mutex_lock(mutex) BIND(C, name='g_mutex_lock')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: mutex
+        end subroutine g_mutex_lock
+
+        ! void g_mutex_unlock (GMutex *mutex);
+        subroutine g_mutex_unlock(mutex) BIND(C, name='g_mutex_unlock')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: mutex
+        end subroutine g_mutex_unlock
+
+        ! glib hash table
+        ! void insert_dataset(const char *datasetid, void *item);
+        subroutine insert_dataset(datasetid, item) BIND(C, name='insert_dataset')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            character(kind=c_char), intent(in) :: datasetid(*)
+            type(c_ptr), value :: item
+        end subroutine insert_dataset
+
+        ! void *get_dataset(const char *datasetid);
+        type(c_ptr) function get_dataset(datasetid) BIND(C, name='get_dataset')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            character(kind=c_char), intent(in) :: datasetid(*)
+        end function get_dataset
 
     end interface
 
@@ -131,6 +187,61 @@ contains
         call ftfiou(item%unit, status)
 
     end subroutine close_fits_file
+
+    subroutine set_error_status(item, error)
+        type(dataset), pointer, intent(inout) :: item
+        logical, intent(in) :: error
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%error_mtx))
+
+        item%error = error
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%error_mtx))
+
+    end subroutine set_error_status
+
+    subroutine set_ok_status(item, ok)
+        type(dataset), pointer, intent(inout) :: item
+        logical, intent(in) :: ok
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%ok_mtx))
+
+        item%ok = ok
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%ok_mtx))
+
+    end subroutine set_ok_status
+
+    subroutine set_header_status(item, header)
+        type(dataset), pointer, intent(inout) :: item
+        logical, intent(in) :: header
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%header_mtx))
+
+        item%header = header
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%header_mtx))
+
+    end subroutine set_header_status
+
+    subroutine reset_clock(item)
+        type(dataset), pointer, intent(inout) :: item
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%progress_mtx))
+
+        call system_clock(item%start_time)
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%progress_mtx))
+
+    end subroutine reset_clock
 
     subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len) bind(C)
         use, intrinsic :: iso_c_binding
