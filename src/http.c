@@ -323,8 +323,6 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     {
         for (i = 0; i < n; i++)
         {
-            //printf("%s\n", namelist[i]->d_name);
-
             char pathname[1024];
 
             snprintf(pathname, sizeof(pathname), "%s/%s", dir, namelist[i]->d_name);
@@ -1134,7 +1132,7 @@ void start_http()
 
         if (rc)
         {
-            fprintf(stderr, "Can't open local splatalogue database: %s\n", sqlite3_errmsg(splat_db));
+            fprintf(stderr, "[C] Can't open local splatalogue database: %s\n", sqlite3_errmsg(splat_db));
             sqlite3_close(splat_db);
             splat_db = NULL;
         }
@@ -1212,7 +1210,7 @@ void *forward_fitswebql_request(void *ptr)
 
     char *uri = (char *)ptr;
 
-    printf("forwarding '%s' across the cluster.\n", uri);
+    printf("[C] forwarding '%s' across the cluster.\n", uri);
 
     int i;
     GSList *iterator = NULL;
@@ -1242,7 +1240,7 @@ void *forward_fitswebql_request(void *ptr)
 
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "%s&root=%s", options.http_port, uri, options.root);
-        printf("URL: '%s'\n", url->str);
+        printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
@@ -1285,7 +1283,7 @@ void *forward_fitswebql_request(void *ptr)
             long response_code;
             curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
-            printf("HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+            printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
         }
     }
 
