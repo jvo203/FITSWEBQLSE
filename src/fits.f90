@@ -286,7 +286,7 @@ contains
         call system_clock(finish)
         elapsed = real(finish - start)/real(crate)
 
-        print *, "finished loading ", item%datasetid, ", elapsed: ", elapsed, " [s]"
+        print *, "finished loading ", item%datasetid, ", elapsed time: ", elapsed, " [s]"
 
         ! reset the timeout clock
         call reset_clock(item)
