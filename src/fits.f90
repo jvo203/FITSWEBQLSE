@@ -181,7 +181,7 @@ contains
         ! there is nothing to do if the FITS file has never been opened
         if (item%unit .eq. -1) return
 
-        print *, item%datasetid, ': closing the FITS file unit'
+        print *, item%datasetid, ': closing the FITS file unit:', item%unit
 
         call ftclos(item%unit, status)
         call ftfiou(item%unit, status)
@@ -384,6 +384,18 @@ contains
 
         ! reset the FITS header
         if (allocated(item%hdr)) deallocate (item%hdr)
+
+        ! The STATUS parameter must always be initialized.
+        status = 0
+
+        ! Get an unused Logical Unit Number to use to open the FITS file.
+        call ftgiou(unit, status)
+
+        if (status .ne. 0) then
+            return
+        end if
+
+        item%unit = unit
 
     end subroutine read_fits_file
 end module fits
