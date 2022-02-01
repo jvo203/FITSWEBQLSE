@@ -778,4 +778,68 @@ contains
         end do
     end subroutine lower_case
 
+    subroutine frame_reference_type(item)
+        type(dataset), pointer, intent(inout) :: item
+        integer pos
+
+        pos = index(item%ctype3, 'F')
+        if (pos .ne. 0) item%has_frequency = .true.
+
+        pos = index(item%ctype3, 'f')
+        if (pos .ne. 0) item%has_frequency = .true.
+
+        pos = index(item%ctype3, 'V')
+        if (pos .ne. 0) item%has_velocity = .true.
+
+        pos = index(item%ctype3, 'v')
+        if (pos .ne. 0) item%has_velocity = .true.
+
+    end subroutine frame_reference_type
+
+    subroutine frame_reference_unit(item)
+        type(dataset), pointer, intent(inout) :: item
+
+        if (trim(item%cunit3) .eq. 'Hz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E0
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'kHz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E3
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'MHz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E6
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'GHz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E9
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'THz') then
+            item%has_frequency = .true.
+            item%frame_multiplier = 1.0E12
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'm/s') then
+            item%has_velocity = .true.
+            item%frame_multiplier = 1.0E0
+            return
+        end if
+
+        if (trim(item%cunit3) .eq. 'km/s') then
+            item%has_velocity = .true.
+            item%frame_multiplier = 1.0E3
+            return
+        end if
+    end subroutine frame_reference_unit
+
 end module fits
