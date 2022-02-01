@@ -2,6 +2,8 @@ module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
     use zfp_array
+    use logger_mod, only: logger => master_logger
+
     implicit none
 
     integer(kind=4), parameter :: NBINS = 1024

@@ -53,6 +53,7 @@ static zactor_t *listener = NULL;
 static pthread_t zmq_t;
 
 static void *autodiscovery_daemon(void *);
+extern void init_fortran_logging();
 
 #define OPTSTR "c:d:p:h"
 #define USAGE_FMT "%s  [-c config file] [-d home directory] [-p HTTP port] [-h]\n"
@@ -193,6 +194,8 @@ void ipp_init()
 
 int main(int argc, char *argv[])
 {
+    init_fortran_logging();
+
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
 
     struct passwd *passwdEnt = getpwuid(getuid());
