@@ -53,7 +53,7 @@ static zactor_t *listener = NULL;
 static pthread_t zmq_t;
 
 static void *autodiscovery_daemon(void *);
-extern void init_fortran_logging();
+extern void init_fortran_logging(char *log_file, size_t len);
 
 #define OPTSTR "c:d:p:h"
 #define USAGE_FMT "%s  [-c config file] [-d home directory] [-p HTTP port] [-h]\n"
@@ -264,7 +264,16 @@ int main(int argc, char *argv[])
     else
         printf("Successfully parsed '%s'.\n", config_file);
 
-    init_fortran_logging();
+    // fortran logging
+    {
+        GString *log_file = g_string_new(options.logs);
+
+        g_string_append(log_file, "/fortran.log");
+
+        init_fortran_logging(log_file->str, log_file->len);
+
+        g_string_free(log_file, TRUE);
+    }
 
     // a manual port override
     if (port_override)
