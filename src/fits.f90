@@ -290,9 +290,9 @@ contains
         print *, "[load_fits_file] datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
 
         if (.not. c_associated(root)) then
-            print *, "[load_fits_file] :: ROOT MODE"
+            print *, "[load_fits_file] :: ROOT NODE"
         else
-            print *, "[load_fits_file] :: CLIENT MODE"
+            print *, "[load_fits_file] :: CLIENT NODE"
         end if
 
         do i = 1, filepath_len
