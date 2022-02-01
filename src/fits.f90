@@ -784,6 +784,57 @@ contains
         ! start the timer
         call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
+        ! calculate the range for each image
+        if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
+            ! read one 2D image only in parallel on each image
+            firstpix = 1
+            lastpix = npixels
+
+            ! local buffers
+            allocate (local_buffer(npixels))
+            allocate (local_mask(npixels))
+
+            ! shared buffers
+            allocate (pixels(npixels) [*])
+            allocate (mask(npixels) [*])
+
+            call ftgpve(unit, group, firstpix, npixels, nullval, local_buffer, anynull, status)
+
+            ! abort upon an error
+            if (status .ne. 0) go to 200
+
+            ! calculate the min/max values
+            do j = 1, npixels
+
+                tmp = local_buffer(j)
+
+                if (isnan(tmp) .neqv. .true.) then
+                    if (test_ignrval) then
+                        if (tmp .eq. item%ignrval) then
+                            ! skip the IGNRVAL pixels
+                            local_buffer(j) = 0.0
+                            local_mask(j) = .false.
+                            cycle
+                        end if
+                    end if
+
+                    dmin = min(dmin, tmp)
+                    dmax = max(dmax, tmp)
+                    local_mask(j) = .true.
+                else
+                    local_buffer(j) = 0.0
+                    local_mask(j) = .false.
+                end if
+
+            end do
+
+            ! measure progress only on the root image
+            call update_progress(item, 1, 1)
+
+            item%pixels = reshape(local_buffer, naxes(1:2))
+            item%mask = reshape(local_mask, naxes(1:2))
+        end if
+
         bSuccess = .true.
         return
 
