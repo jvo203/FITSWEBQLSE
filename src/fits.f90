@@ -194,7 +194,7 @@ contains
     subroutine init_fortran_logging() BIND(C, name='init_fortran_logging')
 
         ! Initialise the logger prior to use
-        call logger_init('LOGS/log.txt')
+        call logger_init('LOGS/fortran.log')
 
     end subroutine init_fortran_logging
 
