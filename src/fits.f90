@@ -286,6 +286,28 @@ contains
 
     end subroutine reset_clock
 
+    subroutine update_progress(item, progress, total)
+        type(dataset), pointer, intent(inout) :: item
+        integer, intent(in) :: progress, total
+        integer(8) finish
+        real elapsed
+
+        ! take a time measurement
+        call system_clock(finish)
+        elapsed = real(finish - item%start_time)/real(item%crate)
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%progress_mtx))
+
+        item%progress = item%progress + 1
+        item%total = total
+        item%elapsed = elapsed
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%progress_mtx))
+
+    end subroutine update_progress
+
     subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, root) bind(C)
         use, intrinsic :: iso_c_binding
         implicit none
@@ -383,6 +405,10 @@ contains
         real :: nullval, tmp
         character :: record*80, key*10, value*70, comment*70
         logical :: anynull
+
+        ! local buffers
+        real(kind=4), allocatable :: local_buffer(:)
+        logical(kind=1), allocatable :: local_mask(:)
 
         ! local statistics
         real(kind=4) :: dmin, dmax
@@ -793,10 +819,6 @@ contains
             ! local buffers
             allocate (local_buffer(npixels))
             allocate (local_mask(npixels))
-
-            ! shared buffers
-            allocate (pixels(npixels) [*])
-            allocate (mask(npixels) [*])
 
             call ftgpve(unit, group, firstpix, npixels, nullval, local_buffer, anynull, status)
 
