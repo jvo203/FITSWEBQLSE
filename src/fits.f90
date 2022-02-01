@@ -191,10 +191,24 @@ contains
 
     end subroutine close_fits_file
 
-    subroutine init_fortran_logging() BIND(C, name='init_fortran_logging')
+    subroutine init_fortran_logging(log_file, len) BIND(C, name='init_fortran_logging')
+        use, intrinsic :: iso_c_binding
+        implicit none
+
+        integer(kind=c_size_t), intent(in), value :: len
+        character(kind=c_char), dimension(len), intent(in) :: log_file
+
+        character(len=len) :: filename
+        integer :: i
+
+        do i = 1, len
+            filename(i:i) = log_file(i)
+        end do
+
+        print *, "LOG FILE: ", filename
 
         ! Initialise the logger prior to use
-        call logger_init('LOGS/fortran.log')
+        call logger_init(filename)
 
     end subroutine init_fortran_logging
 
