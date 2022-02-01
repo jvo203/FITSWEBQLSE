@@ -831,7 +831,7 @@ contains
             if (status .ne. 0) go to 200
 
             ! calculate the min/max values
-            do j = 1, npixels
+            do j = firstpix, lastpix
 
                 tmp = local_buffer(j)
 
