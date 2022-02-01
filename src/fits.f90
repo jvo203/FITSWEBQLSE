@@ -438,7 +438,8 @@ contains
             print *, 'item%hdr::allocated space for', (80*nkeys + 1), 'characters; size:', size(item%hdr)
 
             do i = 1, nkeys
-                call ftgrec(unit, i, record, status)
+                record = ''
+                status = 0; call ftgrec(unit, i, record, status)
 
                 ! split the record into a key and a value
                 !key = record(1:10)
