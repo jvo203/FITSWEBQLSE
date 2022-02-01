@@ -369,6 +369,8 @@ contains
 
         integer :: num_threads
 
+        call logger%info('read_fits_file', 'opening '//filename)
+
         print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
 
         num_threads = OMP_GET_MAX_THREADS()
