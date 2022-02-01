@@ -382,6 +382,8 @@ contains
         naxes = (/0, 0, 0, 0/)
         bSuccess = .false.
 
+        key = ''
+        value = ''
         record = ''
         comment = ''
 
