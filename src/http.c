@@ -46,7 +46,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
 
-extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len);
+extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root);
 
 size_t html_encode(char *source, size_t len, char *dest, size_t max);
 
@@ -750,6 +750,11 @@ static enum MHD_Result on_http_connection(void *cls,
                                 req->flux = strdup("logistic");
                             }
 
+                        if (root_ip != NULL)
+                            req->root = strdup(root_ip);
+                        else
+                            req->root = NULL;
+
                         int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
 
                         if (stat != 0)
@@ -758,6 +763,7 @@ static enum MHD_Result on_http_connection(void *cls,
                             free(req->datasetid);
                             free(req->filepath);
                             free(req->flux);
+                            free(req->root);
                             free(req);
                         }
                         else
@@ -1309,11 +1315,12 @@ void *handle_fitswebql_request(void *ptr)
     printf("[C] datasetid: '%s', flux: '%s', filepath: '%s'; over to FORTRAN\n", req->datasetid, req->flux, req->filepath);
 
     // call FORTRAN
-    load_fits_file(req->datasetid, strlen(req->datasetid), req->filepath, strlen(req->filepath), req->flux, strlen(req->flux));
+    load_fits_file(req->datasetid, strlen(req->datasetid), req->filepath, strlen(req->filepath), req->flux, strlen(req->flux), req->root);
 
     free(req->datasetid);
     free(req->filepath);
     free(req->flux);
+    free(req->root);
     free(req);
 
     pthread_exit(NULL);

@@ -33,6 +33,7 @@ typedef struct
     char *datasetid;
     char *filepath;
     char *flux;
+    char *root;
 } fits_req_t;
 
 void start_http();
