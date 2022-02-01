@@ -24,13 +24,17 @@ void free_hash_data(gpointer item)
         delete_dataset(item);
 }
 
-void insert_dataset(const char *datasetid, void *item)
+void insert_dataset(const char *datasetid, int len, void *item)
 {
+    char *id = strndup(datasetid, len);
+
     g_mutex_lock(&datasets_mtx);
-    g_hash_table_replace(datasets, (gpointer)strdup(datasetid), item);
+    g_hash_table_replace(datasets, (gpointer)strdup(id), item);
     g_mutex_unlock(&datasets_mtx);
 
-    printf("[C] inserted %s into the hash table\n", datasetid);
+    printf("[C] inserted %s into the hash table\n", id);
+
+    free(id);
 }
 
 bool insert_if_not_exists(const char *datasetid, void *item)

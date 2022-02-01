@@ -154,12 +154,13 @@ module fits
         end subroutine g_mutex_unlock
 
         ! glib hash table
-        ! void insert_dataset(const char *datasetid, void *item);
-        subroutine insert_dataset(datasetid, item) BIND(C, name='insert_dataset')
+        ! void insert_dataset(const char *datasetid, int len, void *item);
+        subroutine insert_dataset(datasetid, len, item) BIND(C, name='insert_dataset')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
             character(kind=c_char), intent(in) :: datasetid(*)
+            integer(c_int), value :: len
             type(c_ptr), value :: item
         end subroutine insert_dataset
 
@@ -318,7 +319,7 @@ contains
         call set_error_status(item, .false.)
         call set_header_status(item, .false.)
 
-        call insert_dataset(item%datasetid, c_loc(item))
+        call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
 
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
