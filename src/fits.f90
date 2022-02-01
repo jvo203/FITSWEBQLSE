@@ -205,7 +205,7 @@ contains
             filename(i:i) = log_file(i)
         end do
 
-        print *, "LOG FILE: ", filename
+        print *, "FORTRAN LOG FILE: ", filename
 
         ! Initialise the logger prior to use
         call logger_init(filename)
