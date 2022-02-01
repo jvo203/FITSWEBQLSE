@@ -369,7 +369,7 @@ contains
 
         integer :: num_threads
 
-        call logger%info('read_fits_file', 'opening '//filename)
+        call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
 
         print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
 
