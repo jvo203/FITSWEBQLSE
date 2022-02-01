@@ -2,7 +2,7 @@ module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
     use zfp_array
-    use logger_mod, only: logger => master_logger
+    use logger_mod, only: logger_init, logger => master_logger
 
     implicit none
 
@@ -190,6 +190,13 @@ contains
         call ftfiou(item%unit, status)
 
     end subroutine close_fits_file
+
+    subroutine init_fortran_logging() BIND(C, name='init_fortran_logging')
+
+        ! Initialise the logger prior to use
+        call logger_init('LOGS/log.txt')
+
+    end subroutine init_fortran_logging
 
     subroutine delete_dataset(ptr) BIND(C, name='delete_dataset')
         type(C_PTR), intent(in), value :: ptr
