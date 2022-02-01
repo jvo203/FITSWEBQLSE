@@ -812,7 +812,12 @@ contains
 
         ! calculate the range for each image
         if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
-            ! read one 2D image only in parallel on each image
+            ! client nodes can skip 2D images
+            if (c_associated(root)) then
+                return
+            end if
+
+            ! read a 2D image on the root node only
             firstpix = 1
             lastpix = npixels
 
