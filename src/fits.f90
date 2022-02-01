@@ -370,6 +370,9 @@ contains
         naxes = (/0, 0, 0, 0/)
         bSuccess = .false.
 
+        record = ''
+        comment = ''
+
         ! reset the strings
         item%frameid = ''
         item%object = ''
@@ -438,7 +441,6 @@ contains
             print *, 'item%hdr::allocated space for', (80*nkeys + 1), 'characters; size:', size(item%hdr)
 
             do i = 1, nkeys
-                record = ''
                 status = 0; call ftgrec(unit, i, record, status)
 
                 ! split the record into a key and a value
