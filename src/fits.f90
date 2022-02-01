@@ -262,7 +262,7 @@ contains
 
     end subroutine reset_clock
 
-    subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len) bind(C)
+    subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, root) bind(C)
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -270,6 +270,10 @@ contains
         character(kind=c_char), dimension(datasetid_len), intent(in) :: datasetid
         character(kind=c_char), dimension(filepath_len), intent(in) :: filepath
         character(kind=c_char), dimension(flux_len), intent(in) :: flux
+
+        ! the pointer will be passed back to C when requesting FITS file ranges
+        ! from the root node and submitting results to the cluster root
+        type(c_ptr), intent(in), value :: root
 
         character(len=filepath_len) :: strFilename
         character(len=flux_len) :: strFlux
