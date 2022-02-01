@@ -194,8 +194,6 @@ void ipp_init()
 
 int main(int argc, char *argv[])
 {
-    init_fortran_logging();
-
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
 
     struct passwd *passwdEnt = getpwuid(getuid());
@@ -265,6 +263,8 @@ int main(int argc, char *argv[])
         printf("Can't load '%s', assuming default options.\n", config_file);
     else
         printf("Successfully parsed '%s'.\n", config_file);
+
+    init_fortran_logging();
 
     // a manual port override
     if (port_override)
