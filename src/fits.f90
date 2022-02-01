@@ -855,6 +855,11 @@ contains
 
             item%pixels = reshape(local_buffer, naxes(1:2))
             item%mask = reshape(local_mask, naxes(1:2))
+
+            ! make an image histogram, decide on the flux etc.
+            ! call make_image_statistics(item)
+
+            call set_ok_status(item, .true.)
         end if
 
         bSuccess = .true.
