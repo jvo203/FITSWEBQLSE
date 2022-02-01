@@ -333,7 +333,7 @@ contains
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
-        call read_fits_file(item, strFilename, strFlux, bSuccess)
+        call read_fits_file(item, strFilename, strFlux, root, bSuccess)
 
         ! end the timer
         call system_clock(finish)
@@ -346,12 +346,15 @@ contains
 
     end subroutine load_fits_file
 
-    subroutine read_fits_file(item, filename, flux, bSuccess)
+    subroutine read_fits_file(item, filename, flux, root, bSuccess)
         use omp_lib
         implicit none
 
         type(dataset), pointer, intent(inout) :: item
         character(len=*), intent(in) :: filename, flux
+        ! the pointer will be passed back to C when requesting FITS file ranges
+        ! from the root node and submitting results to the cluster root
+        type(c_ptr), intent(in) :: root
         logical, intent(out) ::  bSuccess
 
         integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i, j
@@ -369,8 +372,10 @@ contains
 
         integer :: num_threads
 
-        ! TO-DO: needs to be protected with a mutex
-        call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
+        if (.not. c_associated(root)) then
+            ! TO-DO: needs to be protected with a mutex
+            call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
+        end if
 
         print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
 
