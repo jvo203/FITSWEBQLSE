@@ -417,7 +417,365 @@ contains
             return
         end if
 
-        print *, "[F]::GOT SO FAR"
+        j = 0
+100     continue
+        j = j + 1
+
+        ! print *, 'Header listing for HDU', j
+
+        ! The FTGHSP subroutine returns the number of existing keywords in the
+        ! current header data unit(CHDU), not counting the required END keyword,
+        call ftghsp(unit, nkeys, nspace, status)
+
+        ! Read each 80 - character keyword record, and print it out.
+        block
+            integer pos
+
+            ! allocate a header character array
+            ! one extra character to hold the C '\0'
+            if (.not. allocated(item%hdr)) allocate (item%hdr(80*nkeys + 1))
+            item%hdr = c_null_char
+            print *, 'item%hdr::allocated space for', (80*nkeys + 1), 'characters; size:', size(item%hdr)
+
+            do i = 1, nkeys
+                call ftgrec(unit, i, record, status)
+
+                ! split the record into a key and a value
+                !key = record(1:10)
+                !value = record(11:80)
+
+                ! print *, record
+                ! print *, key, '-->', value
+
+                ! copy the characters one by one
+                ! Fortran string operations are frustrating
+                do concurrent(pos=1:80)
+                    item%hdr(pos + (i - 1)*80) = record(pos:pos)
+                end do
+
+                ! print *, record, '<--->', item%hdr(1 + (i - 1)*80:i*80)
+
+                pos = index(record, 'ASTRO-F')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'logistic'
+                end if
+
+                pos = index(record, 'HSCPIPE')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'ratio'
+                end if
+
+                call lower_case(record)
+
+                pos = index(record, 'suzaku')
+                if (pos .ne. 0) go to 110
+
+                pos = index(record, 'hitomi')
+                if (pos .ne. 0) go to 110
+
+                pos = index(record, 'x-ray')
+                if (pos .ne. 0) go to 110
+
+                cycle
+
+                ! enable X-RAY settings
+110             block
+                    item%is_optical = .false.
+                    item%is_xray = .true.
+                    item%flux = 'legacy'
+                    item%ignrval = -1.0
+                end block
+
+            end do
+
+        end block
+
+        ! Print out an END record, and a blank line to mark the end of the header.
+        if (status .eq. 0) then
+            ! print *, 'END'
+            ! print *, ' '
+        end if
+
+        status = 0; call FTGKYS(unit, 'FRAMEID', item%frameid, comment, status)
+
+        ! further examine the datasetid for any hints
+        if (status .eq. 0) then
+            block
+                integer pos
+
+                pos = index(item%frameid, 'SUPM')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'ratio'
+                end if
+
+                pos = index(item%frameid, 'MCSM')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'ratio'
+                end if
+            end block
+        end if
+
+        status = 0; call FTGKYS(unit, 'BTYPE', item%btype, comment, status)
+
+        status = 0; call FTGKYS(unit, 'BUNIT', item%bunit, comment, status)
+
+        status = 0; call FTGKYE(unit, 'IGNRVAL', item%ignrval, comment, status)
+        if (status .ne. 0 .and. .not. item%is_xray) item%ignrval = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CRVAL1', item%crval1, comment, status)
+        if (status .ne. 0) item%crval1 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CDELT1', item%cdelt1, comment, status)
+        if (status .ne. 0) item%cdelt1 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CRPIX1', item%crpix1, comment, status)
+        if (status .ne. 0) item%crpix1 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CRVAL2', item%crval2, comment, status)
+        if (status .ne. 0) item%crval2 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CDELT2', item%cdelt2, comment, status)
+        if (status .ne. 0) item%cdelt2 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CRPIX2', item%crpix2, comment, status)
+        if (status .ne. 0) item%crpix2 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CRVAL3', item%crval3, comment, status)
+        if (status .ne. 0) item%crval3 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CDELT3', item%cdelt3, comment, status)
+        if (status .ne. 0) item%cdelt3 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CRPIX3', item%crpix3, comment, status)
+        if (status .ne. 0) item%crpix3 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'BMAJ', item%bmaj, comment, status)
+        if (status .ne. 0) item%bmaj = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'BMIN', item%bmin, comment, status)
+        if (status .ne. 0) item%bmin = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'BPA', item%bpa, comment, status)
+        if (status .ne. 0) item%bpa = ieee_value(0.0, ieee_quiet_nan)
+
+        ! either keyword is valid
+        status = 0; call FTGKYE(unit, 'RESTFRQ', item%restfrq, comment, status)
+        status = 0; call FTGKYE(unit, 'RESTFREQ', item%restfrq, comment, status)
+
+        status = 0; call FTGKYE(unit, 'OBSRA', item%obsra, comment, status)
+        if (status .ne. 0) item%obsra = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'OBSDEC', item%obsdec, comment, status)
+        if (status .ne. 0) item%obsdec = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'DATAMIN', item%datamin, comment, status)
+        if (status .ne. 0) item%datamin = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'DATAMAX', item%datamax, comment, status)
+        if (status .ne. 0) item%datamax = ieee_value(0.0, ieee_quiet_nan)
+
+        ! either keyword is valid
+        status = 0; call FTGKYS(unit, 'LINE', item%line, comment, status)
+        status = 0; call FTGKYS(unit, 'J_LINE', item%line, comment, status)
+
+        status = 0; call FTGKYS(unit, 'FILTER', item%filter, comment, status)
+
+        status = 0; call FTGKYS(unit, 'SPECSYS', item%specsys, comment, status)
+
+        status = 0; call FTGKYS(unit, 'TIMESYS', item%timesys, comment, status)
+
+        status = 0; call FTGKYS(unit, 'OBJECT', item%object, comment, status)
+
+        status = 0; call FTGKYS(unit, 'DATE-OBS', item%date_obs, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CUNIT1', item%cunit1, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CUNIT2', item%cunit2, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CUNIT3', item%cunit3, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CTYPE1', item%ctype1, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CTYPE2', item%ctype2, comment, status)
+
+        status = 0; call FTGKYS(unit, 'CTYPE3', item%ctype3, comment, status)
+
+        status = 0; call FTGKYE(unit, 'CD1_1', item%cd1_1, comment, status)
+        if (status .ne. 0) item%cd1_1 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CD1_2', item%cd1_2, comment, status)
+        if (status .ne. 0) item%cd1_2 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CD2_1', item%cd2_1, comment, status)
+        if (status .ne. 0) item%cd2_1 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYE(unit, 'CD2_2', item%cd2_2, comment, status)
+        if (status .ne. 0) item%cd2_2 = ieee_value(0.0, ieee_quiet_nan)
+
+        status = 0; call FTGKYS(unit, 'TELESCOP', value, comment, status)
+
+        ! handle the telescope
+        if (status .eq. 0) then
+            ! first convert the value to lower case
+            call lower_case(value)
+
+            block
+                integer pos
+
+                pos = index(value, 'alma')
+                if (pos .ne. 0) item%is_optical = .false.
+
+                pos = index(value, 'vla')
+                if (pos .ne. 0) item%is_optical = .false.
+
+                pos = index(value, 'ska')
+                if (pos .ne. 0) item%is_optical = .false.
+
+                pos = index(value, 'nro45')
+                if (pos .ne. 0) then
+                    item%is_optical = .false.
+                    item%flux = 'logistic'
+                end if
+
+                pos = index(value, 'chandra')
+                if (pos .ne. 0) then
+                    item%is_optical = .false.
+                    item%is_xray = .true.
+                end if
+
+                pos = index(value, 'kiso')
+                if (pos .ne. 0) then
+                    item%is_optical = .true.
+                    item%flux = 'ratio'
+                end if
+            end block
+
+        end if
+
+        ! Try moving to the next extension in the FITS file, if it exists.
+        ! The FTMRHD subroutine attempts to move to the next HDU, as specified by
+        ! the second parameter.This subroutine moves by a relative number of
+        ! HDUs from the current HDU.The related FTMAHD routine may be used to
+        ! move to an absolute HDU number in the FITS file.If the end - of - file is
+        ! encountered when trying to move to the specified extension, then a
+        ! status = 107 is returned.
+
+        ! reset the status
+        status = 0
+
+        !  Determine the size of the data cube
+        ! new subroutines (! LL for kind=8)
+        call FTGIPR(unit, 4, bitpix, naxis, naxes, status)
+
+        if (status .ne. 0) then
+            ! do this only if naxis is still 0
+            call ftmrhd(unit, 1, hdutype, status)
+
+            if (status .eq. 0) then
+                ! reset the header
+                if (allocated(item%hdr)) then
+                    print *, 'DEALLOCATING item%hdr'
+                    deallocate (item%hdr)
+                end if
+
+                ! success, so jump back and print out keywords in this extension
+                print *, "GO TO 100"
+                go to 100
+
+            else if (status .eq. 107) then
+                ! hit end of file, so quit
+                status = 0
+            end if
+        end if
+
+        !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
+        if (naxis .lt. 2) then
+            print *, 'READIMAGE failed to read the NAXISn keywords.'
+
+            go to 200
+        end if
+
+        ! detect the FITS header types and units (frequency, velocity)
+        call frame_reference_type(item)
+        call frame_reference_unit(item)
+
+        item%bitpix = bitpix
+        item%naxis = naxis
+        item%naxes = naxes
+
+        call set_header_status(item, .true.)
+
+        print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
+        print *, '#no. pixels:', naxes(1)*naxes(2)
+
+        bSuccess = .true.
+        return
+
+        ! The FITS file must always be closed before exiting the program.
+        ! Any unit numbers allocated with FTGIOU must be freed with FTFIOU.
+200     call ftclos(unit, status)
+        call ftfiou(unit, status)
+
+        call set_error_status(item, .true.)
+
+        ! Check for any error, and if so print out error messages.
+        ! The PRINTERROR subroutine is listed near the end of this file.
+        if (status .gt. 0) then
+            call printerror(status)
+            return
+        end if
 
     end subroutine read_fits_file
+
+    !*************************************************************************
+    subroutine printerror(status)
+
+        ! This subroutine prints out the descriptive text corresponding to the
+        ! error status value and prints out the contents of the internal
+        ! error message stack generated by FITSIO whenever an error occurs.
+
+        integer status
+        character errtext*30, errmessage*80
+
+        ! Check if status is OK(no error); if so, simply return
+        if (status .le. 0) return
+
+        ! The FTGERR subroutine returns a descriptive 30 - character text string that
+        ! corresponds to the integer error status number.A complete list of all
+        ! the error numbers can be found in the back of the FITSIO User's Guide.
+        call ftgerr(status, errtext)
+        print *, 'FITSIO Error Status =', status, ': ', errtext
+
+        ! FITSIO usually generates an internal stack of error messages whenever
+        ! an error occurs.These messages provide much more information on the
+        ! cause of the problem than can be provided by the single integer error
+        ! status value.The FTGMSG subroutine retrieves the oldest message from
+        ! the stack and shifts any remaining messages on the stack down one
+        ! position.FTGMSG is called repeatedly until a blank message is
+        ! returned, which indicates that the stack is empty.Each error message
+        ! may be up to 80 characters in length.Another subroutine, called
+        ! FTCMSG, is available to simply clear the whole error message stack in
+        ! cases where one is not interested in the contents.
+        call ftgmsg(errmessage)
+        do while (errmessage .ne. ' ')
+            print *, errmessage
+            call ftgmsg(errmessage)
+        end do
+    end subroutine printerror
+
+    elemental subroutine lower_case(word)
+        ! convert a word to lower case
+        character(len=*), intent(in out) :: word
+        integer                            :: i, ic, nlen
+        nlen = len(word)
+        do i = 1, nlen
+            ic = ichar(word(i:i))
+            if (ic >= 65 .and. ic < 90) word(i:i) = char(ic + 32)
+        end do
+    end subroutine lower_case
+
 end module fits
