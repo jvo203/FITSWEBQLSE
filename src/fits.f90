@@ -369,6 +369,7 @@ contains
 
         integer :: num_threads
 
+        ! TO-DO: needs to be protected with a mutex
         call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
 
         print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
