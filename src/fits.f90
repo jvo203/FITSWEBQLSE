@@ -382,9 +382,9 @@ contains
         naxes = (/0, 0, 0, 0/)
         bSuccess = .false.
 
+        record = ''
         key = ''
         value = ''
-        record = ''
         comment = ''
 
         ! reset the strings
