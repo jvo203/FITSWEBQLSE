@@ -384,6 +384,9 @@ contains
         character :: record*80, key*10, value*70, comment*70
         logical :: anynull
 
+        ! local statistics
+        real(kind=4) :: dmin, dmax
+
         integer :: num_threads
 
         if (.not. c_associated(root)) then
@@ -747,6 +750,39 @@ contains
 
         print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
         print *, '#no. pixels:', naxes(1)*naxes(2)
+
+        group = 1
+        nullval = 0
+
+        dmin = 1.0E30
+        dmax = -1.0E30
+
+        ! allocate the buffer
+        npixels = naxes(1)*naxes(2)
+
+        ! by default compressed is dimension(naxes(1)/DIM, naxes(2)/DIM)
+        cn = naxes(1)/DIM
+        cm = naxes(2)/DIM
+
+        ! but the input dimensions might not be divisible by 4
+        if (mod(naxes(1), DIM) .ne. 0) cn = cn + 1
+        if (mod(naxes(2), DIM) .ne. 0) cm = cm + 1
+
+        ! now read the 3D FITS data cube (successive 2D planes)
+        if (npixels .eq. 0) then
+            ! skip memory allocation / reading
+            go to 200
+        end if
+
+        ! should we be checking values against ignrval ?
+        if (isnan(item%ignrval)) then
+            test_ignrval = .false.
+        else
+            test_ignrval = .true.
+        end if
+
+        ! start the timer
+        call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
         bSuccess = .true.
         return
