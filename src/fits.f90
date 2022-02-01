@@ -231,6 +231,47 @@ contains
         deallocate (item)
     end subroutine delete_dataset
 
+    subroutine print_dataset(item)
+        type(dataset), pointer, intent(in) :: item
+
+        print *, 'datasetid:', item%datasetid, ', FRAMEID:', trim(item%frameid),&
+        & ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
+        print *, 'LINE: ', trim(item%line), ', FILTER: ', trim(item%filter),&
+        & ', SPECSYS: ', trim(item%specsys), ', TIMESYS: ', trim(item%timesys),&
+        & ', OBJECT: ', trim(item%object), ', DATE-OBS: ', trim(item%date_obs)
+        print *, 'RESTFRQ: ', item%restfrq, 'BMAJ: ', item%bmaj, ', BMIN: ', item%bmin, ', BPA: ', item%bpa
+        print *, 'OBSRA: ', item%obsra, 'OBSDEC: ', item%obsdec, ', DATAMIN: ', item%datamin, ', DATAMAX: ', item%datamax
+        print *, 'CRVAL1: ', item%crval1, ', CDELT1: ', item%cdelt1, ', CRPIX1: ', item%crpix1
+        print *, 'CRVAL2: ', item%crval2, ', CDELT2: ', item%cdelt2, ', CRPIX2: ', item%crpix2
+        print *, 'CRVAL3: ', item%crval3, ', CDELT3: ', item%cdelt3, ', CRPIX3: ', item%crpix3
+        print *, 'CUNIT1: ', trim(item%cunit1), ', CTYPE1: ', trim(item%ctype1)
+        print *, 'CUNIT2: ', trim(item%cunit2), ', CTYPE2: ', trim(item%ctype2)
+        print *, 'CUNIT3: ', trim(item%cunit3), ', CTYPE3: ', trim(item%ctype3)
+        print *, 'CD1_1: ', item%cd1_1, 'CD1_2: ', item%cd1_2
+        print *, 'CD2_1: ', item%cd2_1, 'CD2_2: ', item%cd2_2
+        print *, 'IS_OPTICAL: ', item%is_optical, ', IS_XRAY: ', item%is_xray, ', FLUX: ', trim(item%flux)
+        print *, 'has_frequency:', item%has_frequency,&
+        & ', has_velocity:', item%has_velocity,&
+        & ', frame_multiplier = ', item%frame_multiplier
+
+        print *, 'pmin:', item%pmin
+        print *, 'pmax:', item%pmax
+        print *, 'pmedian:', item%pmedian
+        print *, 'black:', item%black
+        print *, 'white:', item%white
+        print *, 'sensitivity:', item%sensitivity
+        print *, 'ratio_sensitivity:', item%ratio_sensitivity
+
+        if (item%naxes(3) .gt. 1) then
+            ! print *, 'frame_min:', item%frame_min
+            ! print *, 'frame_max:', item%frame_max
+
+            ! print *, 'mean spectrum:', item%mean_spectrum
+            ! print *, 'integrated spectrum:', item%integrated_spectrum
+        end if
+
+    end subroutine print_dataset
+
     subroutine set_error_status(item, error)
         type(dataset), pointer, intent(inout) :: item
         logical, intent(in) :: error
@@ -457,6 +498,14 @@ contains
         item%ctype1 = ''
         item%ctype2 = ''
         item%ctype3 = ''
+
+        item%pmin = 0.0
+        item%pmax = 0.0
+        item%pmedian = 0.0
+        item%black = 0.0
+        item%white = 0.0
+        item%sensitivity = 0.0
+        item%ratio_sensitivity = 0.0
 
         ! reset the FITS header
         if (allocated(item%hdr)) deallocate (item%hdr)
@@ -865,6 +914,8 @@ contains
             ! call make_image_statistics(item)
 
             call set_ok_status(item, .true.)
+
+            call print_dataset(item)
         end if
 
         bSuccess = .true.
