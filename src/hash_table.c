@@ -33,7 +33,6 @@ void insert_dataset(const char *datasetid, int len, void *item)
     g_mutex_unlock(&datasets_mtx);
 
     printf("[C] inserted %s into the hash table\n", id);
-
     free(id);
 }
 
