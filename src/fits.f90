@@ -928,6 +928,307 @@ contains
          call set_ok_status(item, .true.)
 
          call print_dataset(item)
+      else
+         ! read a range of 2D planes in parallel on each image
+         tid = this_image()
+
+         if (naxes(3) .ge. num_images()) then
+            num_per_image = naxes(3)/num_images()
+            start = 1 + (tid - 1)*num_per_image
+            end = min(tid*num_per_image, naxes(3))
+            num_per_image = end - start + 1
+         else
+            num_per_image = -1
+            start = tid
+
+            if (tid .le. naxes(3)) then
+               end = tid
+            else
+               end = 0
+            end if
+         end if
+
+         ! num_per_image = naxes(3)/num_images()
+         ! start = 1 + (tid - 1)*num_per_image
+         ! end = min(tid*num_per_image, naxes(3))
+         ! num_per_image = end - start + 1
+         !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
+
+         ! interleave computation with disk access
+         ! cap the number of threads to avoid system overload
+         max_threads = min(OMP_GET_MAX_THREADS(), 4)
+
+         ! get #physical cores (ignore HT)
+         ! max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
+         if (.not. allocated(item%thread_units)) then
+            allocate (item%thread_units(OMP_GET_MAX_THREADS()))
+            item%thread_units = -1
+
+            ! open the thread-local FITS file if necessary
+            do i = 1, OMP_GET_MAX_THREADS()
+               if (item%thread_units(i) .eq. -1) then
+                  block
+                     ! file operations
+                     integer unit, readwrite, blocksize, status
+
+                     ! The STATUS parameter must always be initialized.
+                     status = 0
+
+                     ! Get an unused Logical Unit Number to use to open the FITS file.
+                     call ftgiou(unit, status)
+
+                     if (status .ne. 0) then
+                        cycle
+                     end if
+
+                     ! open the FITS file, with read - only access.The returned BLOCKSIZE
+                     ! parameter is obsolete and should be ignored.
+                     readwrite = 0
+                     call ftopen(unit, item%uri, readwrite, blocksize, status)
+
+                     if (status .ne. 0) then
+                        cycle
+                     end if
+
+                     item%thread_units(i) = unit
+
+                  end block
+
+               end if
+            end do
+         end if
+
+         block
+            real cdelt3, mean_spec_val, int_spec_val
+            real frame_min, frame_max
+            real pixel_sum
+            integer pixel_count
+
+            ! npixels_per_image = npixels*num_per_image
+            allocate (local_buffer(npixels))
+            allocate (pixels(npixels) [*])
+            allocate (mask(npixels) [*])
+
+            ! compressed pixels
+            if (allocated(item%compressed)) deallocate (item%compressed)
+            allocate (item%compressed(cn, cm, start:end))
+
+            ! if (allocated(item%bitstream)) deallocate (item%bitstream)
+            ! allocate (item%bitstream(4*cn*cm, start:end))
+
+            ! spectra
+            allocate (mean_spec(naxes(3)) [*])
+            allocate (int_spec(naxes(3)) [*])
+
+            ! allocate partial frame_min / frame_max arrays
+            if (allocated(item%frame_min)) deallocate (item%frame_min)
+            allocate (item%frame_min(start:end))
+
+            if (allocated(item%frame_max)) deallocate (item%frame_max)
+            allocate (item%frame_max(start:end))
+
+            ! initiate pixels to blank
+            pixels = 0.0
+            ! and reset the NaN mask
+            mask = .false.
+
+            allocate (thread_buffer(npixels, max_threads))
+            allocate (thread_pixels(npixels, max_threads))
+            allocate (thread_mask(npixels, max_threads))
+            allocate (thread_x(item%naxes(1), item%naxes(2), max_threads))
+
+            allocate (thread_mean_spec(start:end))
+            allocate (thread_int_spec(start:end))
+            thread_mean_spec = 0.0
+            thread_int_spec = 0.0
+
+            thread_pixels = 0.0
+            thread_mask = .false.
+            thread_bSuccess = .true.
+
+            call get_cdelt3(item, cdelt3)
+
+            ! zero-out the spectra
+            mean_spec = 0.0
+            int_spec = 0.0
+
+            item%frame_min = 1.0E30
+            item%frame_max = -1.0E30
+
+            !$omp PARALLEL SHARED(item)&
+            !$omp& PRIVATE(tid, j, fpixels, lpixels, incs, status, tmp, frame_min, frame_max)&
+            !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
+            !$omp& REDUCTION(.or.:thread_bSuccess)&
+            !$omp& REDUCTION(max:dmax)&
+            !$omp& REDUCTION(min:dmin) NUM_THREADS(max_threads)
+            !$omp DO
+            do frame = start, end
+               ! get a current OpenMP thread (starting from 0 as in C)
+               tid = 1 + OMP_GET_THREAD_NUM()
+
+               ! starting bounds
+               fpixels = (/1, 1, frame, 1/)
+
+               ! ending bounds
+               lpixels = (/naxes(1), naxes(2), frame, 1/)
+
+               ! do not skip over any pixels
+               incs = 1
+
+               ! reset the status
+               status = 0
+
+               if (item%thread_units(tid) .ne. -1) then
+                  call ftgsve(item%thread_units(tid), group, naxis, naxes,&
+                  & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+               else
+                  thread_bSuccess = .false.
+                  cycle
+               end if
+
+               ! abort upon errors
+               if (status .ne. 0) then
+                  print *, this_image(), 'error reading frame', frame
+                  thread_bSuccess = .false.
+
+                  if (status .gt. 0) then
+                     call printerror(status)
+                  end if
+
+                  cycle
+               else
+                  thread_bSuccess = thread_bSuccess .and. .true.
+               end if
+
+               mean_spec_val = 0.0
+               int_spec_val = 0.0
+
+               pixel_sum = 0.0
+               pixel_count = 0
+
+               frame_min = 1.0E30
+               frame_max = -1.0E30
+
+               ! calculate the min/max values
+               do j = 1, npixels
+
+                  tmp = thread_buffer(j, tid)
+
+                  if (isnan(tmp) .neqv. .true.) then
+                     if (test_ignrval) then
+                        if (tmp .eq. item%ignrval) then
+                           ! skip the IGNRVAL pixels
+                           ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
+                           cycle
+                        end if
+                     end if
+
+                     frame_min = min(frame_min, tmp)
+                     frame_max = max(frame_max, tmp)
+
+                     ! integrate (sum up) pixels and a NaN mask
+                     thread_pixels(j, tid) = thread_pixels(j, tid) + tmp
+                     thread_mask(j, tid) = thread_mask(j, tid) .or. .true.
+
+                     ! needed by the mean and integrated spectra
+                     pixel_sum = pixel_sum + tmp
+                     pixel_count = pixel_count + 1
+                  else
+                     ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
+                  end if
+
+               end do
+
+               ! compress the pixels
+               if (allocated(item%compressed) .and. allocated(thread_x)) then
+                  block
+                     real :: ignrval, datamin, datamax
+
+                     if (isnan(item%ignrval)) then
+                        ignrval = -1.0E30
+                     else
+                        ignrval = item%ignrval
+                     end if
+
+                     datamin = item%datamin
+                     datamax = item%datamax
+
+                     thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                     call zfp_compress_array(thread_x(:, :, tid), item%compressed(:, :, frame),&
+                     &ignrval, datamin, datamax)
+                     ! call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), &
+                     ! &ignrval, datamin, datamax) ! , frame_min, frame_max)
+                  end block
+               end if
+
+               if (allocated(item%bitstream)) then
+                  block
+                     real(c_float) :: ignrval, datamin, datamax
+                     integer(c_int) :: minbits, maxbits, minexp, width, height
+
+                     minbits = 128
+                     maxbits = 128
+                     minexp = ZFP_MIN_EXP
+
+                     if (isnan(item%ignrval)) then
+                        ignrval = -1.0E30
+                     else
+                        ignrval = item%ignrval
+                     end if
+
+                     datamin = item%datamin
+                     datamax = item%datamax
+
+                     width = item%naxes(1)
+                     height = item%naxes(2)
+
+                     call encode_array(c_loc(thread_buffer(:, tid)), c_loc(item%bitstream(:, frame)), &
+                     &minbits, maxbits, minexp, width, height, ignrval, datamin, datamax)
+                  end block
+               end if
+
+               item%frame_min(frame) = frame_min
+               item%frame_max(frame) = frame_max
+
+               dmin = min(dmin, frame_min)
+               dmax = max(dmax, frame_max)
+
+               if (pixel_count .gt. 0) then
+                  mean_spec_val = pixel_sum/real(pixel_count)
+                  int_spec_val = pixel_sum*cdelt3
+               end if
+
+               thread_mean_spec(frame) = mean_spec_val
+               thread_int_spec(frame) = int_spec_val
+
+               ! measure progress only on the root image
+               call update_progress(item, frame - start + 1, num_per_image)
+            end do
+            !$OMP END DO
+            !$OMP END PARALLEL
+
+            ! abort upon an error
+            if (.not. thread_bSuccess) go to 200
+
+            if ((start .ge. 1) .and. (end .ge. 1)) then
+
+               mean_spec(start:end) = thread_mean_spec(start:end)
+               int_spec(start:end) = thread_int_spec(start:end)
+
+               ! direct partial uploads onto the root image
+               ! mean_spec(start:end) [1] = mean_spec(start:end)
+               ! int_spec(start:end) [1] = int_spec(start:end)
+
+               ! reduce the pixels/mask locally
+               do j = 1, max_threads
+                  pixels(:) = pixels(:) + thread_pixels(:, j)
+                  mask(:) = mask(:) .or. thread_mask(:, j)
+               end do
+
+            end if
+
+         end block
       end if
 
       bSuccess = .true.
