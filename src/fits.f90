@@ -1057,6 +1057,18 @@ contains
         end if
     end subroutine frame_reference_unit
 
+    subroutine get_cdelt3(item, cdelt3)
+        type(dataset), pointer, intent(in) :: item
+        real, intent(out) :: cdelt3
+
+        if (item%has_velocity) then
+            cdelt3 = item%cdelt3*item%frame_multiplier/1000.0
+        else
+            cdelt3 = 1.0
+        end if
+        
+    end subroutine get_cdelt3
+
     subroutine make_image_statistics(item)
         implicit NONE
 
