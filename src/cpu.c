@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include <libcpuid.h>
 
 int get_physical_cores()
