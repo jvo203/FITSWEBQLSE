@@ -1285,7 +1285,6 @@ contains
         IMPLICIT NONE
         INTEGER, INTENT(IN)                :: N
         REAL, DIMENSION(N), INTENT(INOUT), TARGET :: X
-        INTEGER                            :: i
 
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
