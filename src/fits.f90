@@ -1191,17 +1191,17 @@ contains
             tone_mapping = histogram_classifier(c_loc(Slot))
 
             select case (tone_mapping)
-             case (0)
+            case (0)
                item%flux = 'legacy'
-             case (1)
+            case (1)
                item%flux = 'linear'
-             case (2)
+            case (2)
                item%flux = 'logistic'
-             case (3)
+            case (3)
                item%flux = 'ratio'
-             case (4)
+            case (4)
                item%flux = 'square'
-             case default
+            case default
                item%flux = 'legacy'
             end select
          end block
