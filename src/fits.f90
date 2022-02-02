@@ -1048,4 +1048,177 @@ contains
         end if
     end subroutine frame_reference_unit
 
+    subroutine make_image_statistics(item)
+        implicit NONE
+
+        type(dataset), pointer, intent(inout) :: item
+        real, dimension(:), allocatable :: data
+        real cdelt3, pmin, pmax, pmedian
+        real mad, madP, madN
+        integer countP, countN
+        real pixel
+        integer i, j, n
+        real u, v
+        real black, white, sensitivity, ratio_sensitivity
+        integer stat
+
+        print *, this_image(), 'make_image_statistics::START'
+
+        call get_cdelt3(item, cdelt3)
+
+        print *, this_image(), 'make_image_statistics#1'
+
+        if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+            pmin = item%dmin
+            pmax = item%dmax
+        else
+            pmin = 1.0E30
+            pmax = -1.0E30
+
+            do j = 1, item%naxes(2)
+                do i = 1, item%naxes(1)
+                    if (item%mask(i, j)) then
+                        pixel = item%pixels(i, j)*cdelt3
+                        item%pixels(i, j) = pixel
+
+                        pmin = min(pmin, pixel)
+                        pmax = max(pmax, pixel)
+                    end if
+                end do
+            end do
+        end if
+
+        print *, this_image(), 'make_image_statistics#2', pmin, pmax, size(item%mask), count(item%mask)
+
+        ! pick non-NaN valid pixels only according to mask
+        data = pack(item%pixels, item%mask)
+
+        print *, this_image(), 'make_image_statistics#3'
+
+        ! make a histogram with a range given by [pmin, pmax]
+        call make_histogram(item, data, pmin, pmax)
+
+        print *, this_image(), 'make_image_statistics#4'
+
+        n = size(data)
+
+        print *, this_image(), 'make_image_statistics#5', n
+
+        if (n .eq. 0) return
+
+        print *, this_image(), 'make_image_statistics#6'
+
+        pmedian = median(data, n)
+        print *, 'median = ', pmedian
+
+        print *, this_image(), 'make_image_statistics#7'
+
+        ! now the deviations from the median
+        mad = 0.0; madP = 0.0; madN = 0.0
+        countP = 0; countN = 0
+
+        do i = 1, n
+            pixel = data(i)
+            mad = mad + abs(pixel - pmedian)
+
+            if (pixel > pmedian) then
+                madP = madP + (pixel - pmedian)
+                countP = countP + 1
+            end if
+
+            if (pixel < pmedian) then
+                madN = madN + (pmedian - pixel)
+                countN = countN + 1
+            end if
+        end do
+
+        print *, this_image(), 'make_image_statistics#8'
+
+        mad = mad/real(n)
+        if (countP > 0) madP = madP/real(countP)
+        if (countN > 0) madN = madN/real(countN)
+
+        print *, this_image(), 'make_image_statistics#9'
+
+        print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
+        print *, 'mad = ', mad, ', madP = ', madP, ', madN = ', madN
+
+        ! ALMAWebQL v2 - style
+        u = 7.5
+        black = max(pmin, pmedian - u*madN)
+        white = min(pmax, pmedian + u*madP)
+        sensitivity = 1.0/(white - black)
+        ratio_sensitivity = sensitivity
+
+        if (item%is_optical) then
+            u = 0.5
+            v = 15.0
+            black = max(pmin, pmedian - u*madN)
+            white = min(pmax, pmedian + u*madP)
+            sensitivity = 1.0/(white - black)
+            ratio_sensitivity = sensitivity
+
+            ! TO-DO: auto-brightness
+        end if
+
+        print *, this_image(), 'make_image_statistics#10'
+
+        ! histogram classifier
+        if (item%flux .eq. '') then
+            block
+                use classifier
+
+                integer(kind=8), dimension(NBINS) :: cdf
+                real(c_float), dimension(NBINS), target :: Slot
+                integer(c_int) tone_mapping
+
+                integer(kind=8) total
+
+                ! the first histogram item
+                total = item%hist(1)
+                cdf(1) = item%hist(1)
+
+                ! the remaining items
+                do i = 2, NBINS
+                    cdf(i) = cdf(i - 1) + item%hist(i)
+                    total = total + item%hist(i)
+                end do
+
+                Slot = cdf/real(total)
+
+                tone_mapping = histogram_classifier(c_loc(Slot))
+
+                select case (tone_mapping)
+                case (0)
+                    item%flux = 'legacy'
+                case (1)
+                    item%flux = 'linear'
+                case (2)
+                    item%flux = 'logistic'
+                case (3)
+                    item%flux = 'ratio'
+                case (4)
+                    item%flux = 'square'
+                case default
+                    item%flux = 'legacy'
+                end select
+            end block
+        end if
+
+        print *, this_image(), 'make_image_statistics#11'
+
+        print *, 'black = ', black, ', white = ', white, ', sensitivity = ', sensitivity
+
+        item%pmin = pmin
+        item%pmax = pmax
+        item%pmedian = pmedian
+        item%black = black
+        item%white = white
+        item%sensitivity = sensitivity
+        item%ratio_sensitivity = ratio_sensitivity
+
+        print *, this_image(), 'make_image_statistics::END'
+
+    end subroutine make_image_statistics
+
 end module fits
