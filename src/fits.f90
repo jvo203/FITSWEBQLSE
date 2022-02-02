@@ -173,6 +173,15 @@ module fits
 
             character(kind=c_char), intent(in) :: datasetid(*)
         end function get_dataset
+        
+        ! parallel sort void psrs_sort(float *a, int n);
+        subroutine psrs_sort(a, n) BIND(C, name='psrs_sort')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: a
+            integer(kind=c_int), value, intent(in) :: n
+        end subroutine psrs_sort
 
     end interface
 
