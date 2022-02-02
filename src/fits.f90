@@ -460,9 +460,27 @@ contains
       real(kind=4), allocatable :: local_buffer(:)
       logical(kind=1), allocatable :: local_mask(:)
 
+      ! shared variables
+      real(kind=4), allocatable :: pixels(:)
+      logical(kind=1), allocatable :: mask(:)
+      real, allocatable :: mean_spec(:)
+      real, allocatable :: int_spec(:)
+
+      ! thread-shared
+      real, allocatable :: thread_mean_spec(:), thread_int_spec(:)
+
+      ! thread-local variables
+      real(kind=4), allocatable, target :: thread_buffer(:, :)
+      real(kind=4), allocatable :: thread_pixels(:, :)
+      logical(kind=1), allocatable :: thread_mask(:, :)
+      real(kind=4), allocatable :: thread_x(:, :, :)
+      logical thread_bSuccess
+
       ! local statistics
       real(kind=4) :: dmin, dmax
 
+      ! OpenMP multi-threading
+      integer, dimension(:), allocatable :: thread_units
       integer :: num_threads
 
       if (.not. c_associated(root)) then
@@ -929,45 +947,22 @@ contains
 
          call print_dataset(item)
       else
-         ! read a range of 2D planes in parallel on each image
-         tid = this_image()
-
-         if (naxes(3) .ge. num_images()) then
-            num_per_image = naxes(3)/num_images()
-            start = 1 + (tid - 1)*num_per_image
-            end = min(tid*num_per_image, naxes(3))
-            num_per_image = end - start + 1
-         else
-            num_per_image = -1
-            start = tid
-
-            if (tid .le. naxes(3)) then
-               end = tid
-            else
-               end = 0
-            end if
-         end if
-
-         ! num_per_image = naxes(3)/num_images()
-         ! start = 1 + (tid - 1)*num_per_image
-         ! end = min(tid*num_per_image, naxes(3))
-         ! num_per_image = end - start + 1
-         !print *, 'tid:', tid, 'start:', start, 'end:', end, 'num_per_image:', num_per_image
+         ! read a range of 2D planes in parallel on each cluster node
 
          ! interleave computation with disk access
          ! cap the number of threads to avoid system overload
-         max_threads = min(OMP_GET_MAX_THREADS(), 4)
+         ! max_threads = min(OMP_GET_MAX_THREADS(), 4)
 
          ! get #physical cores (ignore HT)
-         ! max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+         max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
-         if (.not. allocated(item%thread_units)) then
-            allocate (item%thread_units(OMP_GET_MAX_THREADS()))
-            item%thread_units = -1
+         if (.not. allocated(thread_units)) then
+            allocate (thread_units(OMP_GET_MAX_THREADS()))
+            thread_units = -1
 
             ! open the thread-local FITS file if necessary
             do i = 1, OMP_GET_MAX_THREADS()
-               if (item%thread_units(i) .eq. -1) then
+               if (thread_units(i) .eq. -1) then
                   block
                      ! file operations
                      integer unit, readwrite, blocksize, status
@@ -985,19 +980,24 @@ contains
                      ! open the FITS file, with read - only access.The returned BLOCKSIZE
                      ! parameter is obsolete and should be ignored.
                      readwrite = 0
-                     call ftopen(unit, item%uri, readwrite, blocksize, status)
+                     call ftopen(unit, filename, readwrite, blocksize, status)
 
                      if (status .ne. 0) then
                         cycle
                      end if
 
-                     item%thread_units(i) = unit
+                     thread_units(i) = unit
 
                   end block
 
                end if
             end do
          end if
+
+         ! initially the whole range
+         start = 1
+         end = naxes(3)
+         num_per_image = end - start + 1
 
          block
             real cdelt3, mean_spec_val, int_spec_val
@@ -1007,19 +1007,16 @@ contains
 
             ! npixels_per_image = npixels*num_per_image
             allocate (local_buffer(npixels))
-            allocate (pixels(npixels) [*])
-            allocate (mask(npixels) [*])
+            allocate (pixels(npixels))
+            allocate (mask(npixels))
 
             ! compressed pixels
             if (allocated(item%compressed)) deallocate (item%compressed)
             allocate (item%compressed(cn, cm, start:end))
 
-            ! if (allocated(item%bitstream)) deallocate (item%bitstream)
-            ! allocate (item%bitstream(4*cn*cm, start:end))
-
             ! spectra
-            allocate (mean_spec(naxes(3)) [*])
-            allocate (int_spec(naxes(3)) [*])
+            allocate (mean_spec(naxes(3)))
+            allocate (int_spec(naxes(3)))
 
             ! allocate partial frame_min / frame_max arrays
             if (allocated(item%frame_min)) deallocate (item%frame_min)
@@ -1079,8 +1076,8 @@ contains
                ! reset the status
                status = 0
 
-               if (item%thread_units(tid) .ne. -1) then
-                  call ftgsve(item%thread_units(tid), group, naxis, naxes,&
+               if (thread_units(tid) .ne. -1) then
+                  call ftgsve(thread_units(tid), group, naxis, naxes,&
                   & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
                else
                   thread_bSuccess = .false.
@@ -1157,34 +1154,6 @@ contains
                      thread_x(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
                      call zfp_compress_array(thread_x(:, :, tid), item%compressed(:, :, frame),&
                      &ignrval, datamin, datamax)
-                     ! call to_fixed(thread_x(:, :, tid), item%compressed(:, :, frame), &
-                     ! &ignrval, datamin, datamax) ! , frame_min, frame_max)
-                  end block
-               end if
-
-               if (allocated(item%bitstream)) then
-                  block
-                     real(c_float) :: ignrval, datamin, datamax
-                     integer(c_int) :: minbits, maxbits, minexp, width, height
-
-                     minbits = 128
-                     maxbits = 128
-                     minexp = ZFP_MIN_EXP
-
-                     if (isnan(item%ignrval)) then
-                        ignrval = -1.0E30
-                     else
-                        ignrval = item%ignrval
-                     end if
-
-                     datamin = item%datamin
-                     datamax = item%datamax
-
-                     width = item%naxes(1)
-                     height = item%naxes(2)
-
-                     call encode_array(c_loc(thread_buffer(:, tid)), c_loc(item%bitstream(:, frame)), &
-                     &minbits, maxbits, minexp, width, height, ignrval, datamin, datamax)
                   end block
                end if
 
