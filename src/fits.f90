@@ -1086,7 +1086,10 @@ contains
 
                ! abort upon errors
                if (status .ne. 0) then
-                  print *, this_image(), 'error reading frame', frame
+                  print *, 'error reading frame', frame
+
+                  ! TO-DO: protect it with a mutex
+                  ! call logger%error('error reading frame')
                   thread_bSuccess = .false.
 
                   if (status .gt. 0) then
