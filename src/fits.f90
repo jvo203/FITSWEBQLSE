@@ -1066,7 +1066,7 @@ contains
         else
             cdelt3 = 1.0
         end if
-        
+
     end subroutine get_cdelt3
 
     subroutine make_image_statistics(item)
@@ -1241,6 +1241,35 @@ contains
         print *, 'make_image_statistics::END'
 
     end subroutine make_image_statistics
+
+    subroutine make_histogram(item, data, pmin, pmax)
+        type(dataset), pointer, intent(inout) :: item
+        real, dimension(:), intent(in) :: data
+        real, intent(in) :: pmin, pmax
+        integer i, index, n
+        real value
+
+        allocate (item%hist(NBINS))
+
+        ! reset the histogram
+        item%hist = 0
+
+        n = size(data)
+
+        do i = 1, n
+            ! bin the value to [0,1]
+            value = (data(i) - pmin)/(pmax - pmin)
+
+            ! get a histogram bin index
+            index = 1 + int(value*NBINS)
+
+            ! clamp the index to within [1,NBINS]
+            ! (rounding errors might cause an out-of-bounds index value)
+            index = max(min(index, NBINS), 1)
+            item%hist(index) = item%hist(index) + 1
+        end do
+
+    end subroutine make_histogram
 
      ! --------------------------------------------------------------------
     ! REAL FUNCTION  median() :
