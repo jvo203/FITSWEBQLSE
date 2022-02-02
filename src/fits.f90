@@ -889,7 +889,7 @@ contains
             if (status .ne. 0) go to 200
 
             ! calculate the min/max values
-            do j = firstpix, lastpix
+            do j = 1, npixels
 
                 tmp = local_buffer(j)
 
@@ -915,6 +915,9 @@ contains
 
             ! measure progress only on the root image
             call update_progress(item, 1, 1)
+
+            item%dmin = dmin
+            item%dmax = dmax
 
             item%pixels = reshape(local_buffer, naxes(1:2))
             item%mask = reshape(local_mask, naxes(1:2))
