@@ -983,6 +983,7 @@ contains
                      call ftopen(unit, filename, readwrite, blocksize, status)
 
                      if (status .ne. 0) then
+                        print *, 'thread ', i, ': error opening '//filename
                         cycle
                      end if
 
@@ -1000,17 +1001,28 @@ contains
          num_per_image = end - start + 1
 
          ! type(zfp_ptr), dimension(:), allocatable :: compressed
-         allocate (item%compressed(start:end))
+         ! allocate (item%compressed(start:end))
 
-         do i = start, end
-            nullify (item%compressed(i)%ptr)
-         end do
+         ! do i = start, end
+         ! nullify (item%compressed(i)%ptr)
+         ! end do
 
-         allocate (item%frame_min(start:end))
-         allocate (item%frame_max(start:end))
+         ! allocate (item%frame_min(start:end))
+         ! allocate (item%frame_max(start:end))
 
          ! dynamically get the range (in blocks)
 
+         ! close any remaining thread file units
+         if (allocated(thread_units)) then
+            do i = 1, size(thread_units)
+               if (thread_units(i) .eq. -1) cycle
+
+               call ftclos(thread_units(i), status)
+               call ftfiou(thread_units(i), status)
+            end do
+
+            deallocate (thread_units)
+         end if
       end if
 
       bSuccess = .true.
@@ -1020,16 +1032,6 @@ contains
       ! Any unit numbers allocated with FTGIOU must be freed with FTFIOU.
 200   call ftclos(unit, status)
       call ftfiou(unit, status)
-
-      ! close any remaining thread file units
-      if (allocated(thread_units)) then
-         do i = 1, size(thread_units)
-            if (thread_units(i) .eq. -1) cycle
-
-            call ftclos(thread_units(i), status)
-            call ftfiou(thread_units(i), status)
-         end do
-      end if
 
       call set_error_status(item, .true.)
 
