@@ -59,7 +59,7 @@ void psrs_sort(float *a, int n)
       }
       omp_set_num_threads(p);
 
-      printf("psrs_sort #threads: %d\n", p);
+      printf("[C] psrs_sort #threads: %d\n", p);
 
       size = (n + p - 1) / p;
       rsize = (size + p - 1) / p;
