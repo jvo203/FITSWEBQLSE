@@ -54,7 +54,6 @@ static pthread_t zmq_t;
 
 static void *autodiscovery_daemon(void *);
 extern void init_fortran_logging(char *log_file, size_t len);
-extern void end_fortran_logging(void);
 
 #define OPTSTR "c:d:p:h"
 #define USAGE_FMT "%s  [-c config file] [-d home directory] [-p HTTP port] [-h]\n"
@@ -378,8 +377,6 @@ int main(int argc, char *argv[])
     delete_hash_table();
 
     curl_global_cleanup();
-
-    end_fortran_logging();
 
     return EXIT_SUCCESS;
 }
