@@ -1010,7 +1010,7 @@ contains
          allocate (item%frame_min(start:end))
          allocate (item%frame_max(start:end))
 
-         ! dynamically get the range (in blocks)
+         ! dynamically get the range blocks
 
          ! close any remaining thread file units
          if (allocated(thread_units)) then
