@@ -223,6 +223,8 @@ contains
 
    subroutine end_fortran_logging() BIND(C, name='end_fortran_logging')
 
+      print *, "closing the FORTRAN log file."
+
       call logger%destroy()
 
    end subroutine end_fortran_logging
