@@ -1302,7 +1302,7 @@ contains
         call system_clock(finish_t)
         elapsed = real(finish_t - start_t)/real(crate)
 
-        print *, 'sort elapsed time:', 1000*elapsed
+        print *, 'sort elapsed time:', 1000*elapsed, ' [ms]'
 
         IF (MOD(N, 2) == 0) THEN           ! compute the median
             median = (X(N/2) + X(N/2 + 1))/2.0
