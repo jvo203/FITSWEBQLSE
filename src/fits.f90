@@ -221,6 +221,12 @@ contains
 
    end subroutine init_fortran_logging
 
+   subroutine end_fortran_logging() BIND(C, name='end_fortran_logging')
+
+      call logger%destroy()
+
+   end subroutine end_fortran_logging
+
    subroutine delete_dataset(ptr) BIND(C, name='delete_dataset')
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
