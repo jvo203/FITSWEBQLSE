@@ -911,7 +911,7 @@ contains
             item%mask = reshape(local_mask, naxes(1:2))
 
             ! make an image histogram, decide on the flux etc.
-            ! call make_image_statistics(item)
+            call make_image_statistics(item)
 
             call set_ok_status(item, .true.)
 
