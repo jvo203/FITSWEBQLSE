@@ -1221,4 +1221,42 @@ contains
 
     end subroutine make_image_statistics
 
+     ! --------------------------------------------------------------------
+    ! REAL FUNCTION  median() :
+    !    This function receives an array X of N entries, sorts it
+    !    and computes the median.
+    !    The returned value is of REAL type.
+    ! --------------------------------------------------------------------
+
+    REAL FUNCTION median(X, N)        
+        IMPLICIT NONE
+        INTEGER, INTENT(IN)                :: N
+        REAL, DIMENSION(N), INTENT(INOUT), TARGET :: X
+        INTEGER                            :: i
+
+        integer, dimension(N) :: order
+
+        ! timing
+        integer(8) :: start_t, finish_t, crate, cmax
+        real :: elapsed
+
+        ! start the timer
+        call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+        call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
+
+        ! end the timer
+        call system_clock(finish_t)
+        elapsed = real(finish_t - start_t)/real(crate)
+
+        print *, 'sort elapsed time:', 1000*elapsed
+
+        IF (MOD(N, 2) == 0) THEN           ! compute the median
+            median = (X(N/2) + X(N/2 + 1))/2.0
+        ELSE
+            median = X(N/2 + 1)
+        END IF
+
+    END FUNCTION median
+
 end module fits
