@@ -1006,6 +1006,9 @@ contains
             nullify (item%compressed(i)%ptr)
          end do
 
+         allocate (item%frame_min(start:end))
+         allocate (item%frame_max(start:end))
+
          ! dynamically get the range (in blocks)
 
       end if
