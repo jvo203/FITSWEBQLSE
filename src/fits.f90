@@ -1001,14 +1001,14 @@ contains
          num_per_image = end - start + 1
 
          ! type(zfp_ptr), dimension(:), allocatable :: compressed
-         ! allocate (item%compressed(start:end))
+         allocate (item%compressed(start:end))
 
-         ! do i = start, end
-         ! nullify (item%compressed(i)%ptr)
-         ! end do
+         do i = start, end
+            nullify (item%compressed(i)%ptr)
+         end do
 
-         ! allocate (item%frame_min(start:end))
-         ! allocate (item%frame_max(start:end))
+         allocate (item%frame_min(start:end))
+         allocate (item%frame_max(start:end))
 
          ! dynamically get the range (in blocks)
 
