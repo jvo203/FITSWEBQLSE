@@ -1287,8 +1287,6 @@ contains
         REAL, DIMENSION(N), INTENT(INOUT), TARGET :: X
         INTEGER                            :: i
 
-        integer, dimension(N) :: order
-
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
         real :: elapsed
