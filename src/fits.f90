@@ -999,6 +999,15 @@ contains
          end = naxes(3)
          num_per_image = end - start + 1
 
+         ! type(zfp_ptr), dimension(:), allocatable :: compressed
+         allocate (item%compressed(start:end))
+
+         do i = start, end
+            nullify (item%compressed(i)%ptr)
+         end do
+
+         ! dynamically get the range (in blocks)
+
       end if
 
       bSuccess = .true.
