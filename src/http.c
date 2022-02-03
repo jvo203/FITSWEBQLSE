@@ -22,6 +22,7 @@
 
 #include "json.h"
 #include "http.h"
+#include "mjson.h"
 
 #include "cluster.h"
 
@@ -1467,6 +1468,16 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
             printf("libcURL response: %s\n", chunk.memory);
 
             // parse the JSON response
+            double val;
+
+            if (mjson_get_number(chunk.memory, chunk.size, "$.startindex", &val))
+                *start = (int)val;
+
+            if (mjson_get_number(chunk.memory, chunk.size, "$.endindex", &val))
+                *end = (int)val;
+
+            if (mjson_get_number(chunk.memory, chunk.size, "$.status", &val))
+                *status = (int)val;
         }
 
         free(chunk.memory);
