@@ -1080,6 +1080,8 @@ contains
                     call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
                 end if
 
+                call sleep(1) ! 1 sec.
+
                 if (status .ne. 0) exit ! no more work to do
 
                 num_per_node = end - start + 1
