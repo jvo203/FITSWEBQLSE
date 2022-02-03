@@ -47,7 +47,14 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status);
+
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root);
+extern int get_error_status(void *item);
+extern int get_header_status(void *item);
+extern int get_ok_status(void *item);
+extern float get_progress(void *item);
+extern float get_elapsed(void *item);
+extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
 
 size_t html_encode(char *source, size_t len, char *dest, size_t max);
 
