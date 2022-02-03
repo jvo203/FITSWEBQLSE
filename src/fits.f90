@@ -1060,14 +1060,14 @@ contains
             status = 0
 
             do while (status .eq. 0)
-                if (.not. c_associated(root)) then
-                    ! a direct (local) request
-                    call get_channel_range(item, start, end, status)
-                else
-                    ! fetch the range from the root node via HTTP
-                    call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
-                    print *, 'fetch_channel_range', start, end, status
-                end if
+                !if (.not. c_associated(root)) then
+                ! a direct (local) request
+                ! call get_channel_range(item, start, end, status)
+                !else
+                ! fetch the range from the root node via HTTP
+                call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
+                print *, 'fetch_channel_range', start, end, status
+                !end if
 
                 if (status .ne. 0) exit ! no more work to do
 

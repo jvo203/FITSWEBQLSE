@@ -1332,11 +1332,30 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
     if (id == NULL)
     {
+        *start = 0;
+        *end = 0;
         *status = -1;
         return;
     }
 
     printf("ROOT: %s\n", root);
+
+    // form an HTTP request URL
+
+    // testing
+    void *item = get_dataset(id);
+
+    if (item == NULL)
+    {
+        *start = 0;
+        *end = 0;
+        *status = -1;
+
+        free(id);
+        return;
+    }
+
+    // get the channel range from FORTRAN
 
     *start = 0;
     *end = 0;
