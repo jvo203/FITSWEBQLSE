@@ -17,7 +17,7 @@ typedef struct
     char *logs;
     char *home_dir;
 
-    //postgresql
+    // postgresql
     char *user;
     char *password;
     char *host;
@@ -35,6 +35,13 @@ typedef struct
     char *flux;
     char *root;
 } fits_req_t;
+
+typedef struct
+{
+    int *start;
+    int *end;
+    int *status;
+} fits_range_t;
 
 void start_http();
 void stop_http();

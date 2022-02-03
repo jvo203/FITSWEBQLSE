@@ -1384,7 +1384,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
         /* Check for errors */
         if (res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            fprintf(stderr, "[C] curl_easy_perform() failed: %s\n",
                     curl_easy_strerror(res));
 
         /* always cleanup */
