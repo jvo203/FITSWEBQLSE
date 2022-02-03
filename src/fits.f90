@@ -375,7 +375,7 @@ contains
             endindex = -1
 
             ! an error status
-            status = -1
+            status = 1 ! end of AXIS3
         else
             startindex = item%cursor
             endindex = min(startindex + CHANNEL_BLOCK - 1, item%naxes(3))
@@ -1045,6 +1045,19 @@ contains
             allocate (item%frame_max(start:end))
 
             ! dynamically get the range blocks
+
+            status = 0
+
+            do while (status .eq. 0)
+                status = 0; call get_channel_range(item, start, end, status)
+                if (status .ne. 0) exit ! no more work to do
+
+                num_per_image = end - start + 1
+                print *, 'START:', start, 'END:', end, 'num_pre_image:', num_per_image
+
+                ! process the block
+
+            end do
 
             ! close any remaining thread file units
             if (allocated(thread_units)) then
