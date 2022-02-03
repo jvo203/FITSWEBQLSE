@@ -1358,17 +1358,38 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         return;
     }
 
+    // assume the worst case
+    *start = 0;
+    *end = 0;
+    *status = -1;
+
     // form an HTTP request URL
+    CURL *curl;
+    CURLcode res;
+
     GString *url = g_string_new("http://");
 
     g_string_append_printf(url, "%s:", root);
     g_string_append_printf(url, "%" PRIu16 "/range/%s", options.http_port, id);
     printf("[C] URL: '%s'\n", url->str);
 
-    // for now
-    *start = 0;
-    *end = 0;
-    *status = -1;
+    curl = curl_easy_init();
+
+    if (curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_URL, url->str);
+
+        /* Perform the request, res will get the return code */
+        res = curl_easy_perform(curl);
+
+        /* Check for errors */
+        if (res != CURLE_OK)
+            fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                    curl_easy_strerror(res));
+
+        /* always cleanup */
+        curl_easy_cleanup(curl);
+    };
 
     g_string_free(url, TRUE);
     free(id);
