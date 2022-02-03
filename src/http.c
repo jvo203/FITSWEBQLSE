@@ -1365,6 +1365,11 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     g_string_append_printf(url, "%" PRIu16 "/range/%s", options.http_port, id);
     printf("[C] URL: '%s'\n", url->str);
 
+    // for now
+    *start = 0;
+    *end = 0;
+    *status = -1;
+
     g_string_free(url, TRUE);
     free(id);
 }
