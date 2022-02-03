@@ -505,7 +505,7 @@ contains
         integer npixels, cn, cm
         integer naxes(4)
         integer(kind=8) firstpix, lastpix, npixels_per_image
-        integer max_threads, tid, start, end, num_per_image, frame
+        integer max_threads, tid, start, end, num_per_node, frame
         integer, dimension(4) :: fpixels, lpixels, incs
         logical test_ignrval
 
@@ -1055,7 +1055,7 @@ contains
             ! initially the whole range
             start = 1
             end = naxes(3)
-            num_per_image = end - start + 1
+            num_per_node = end - start + 1
 
             ! type(zfp_ptr), dimension(:), allocatable :: compressed
             allocate (item%compressed(start:end))
@@ -1072,19 +1072,18 @@ contains
             status = 0
 
             do while (status .eq. 0)
-                !if (.not. c_associated(root)) then
-                ! a direct (local) request
-                ! call get_channel_range(item, start, end, status)
-                !else
-                ! fetch the range from the root node via HTTP
-                call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
-                print *, 'fetch_channel_range', start, end, status
-                !end if
+                if (.not. c_associated(root)) then
+                    ! a direct (local) request
+                    call get_channel_range(item, start, end, status)
+                else
+                    ! fetch the range from the root node via HTTP
+                    call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
+                end if
 
                 if (status .ne. 0) exit ! no more work to do
 
-                num_per_image = end - start + 1
-                print *, 'START:', start, 'END:', end, 'num_per_image:', num_per_image
+                num_per_node = end - start + 1
+                print *, 'START:', start, 'END:', end, 'num_per_node:', num_per_node
 
                 ! process the block
 

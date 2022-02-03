@@ -1340,11 +1340,21 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
     if (root == NULL)
     {
-        free(id);
+        void *item = get_dataset(id);
 
-        *start = 0;
-        *end = 0;
-        *status = -1;
+        if (item == NULL)
+        {
+            *start = 0;
+            *end = 0;
+            *status = -1;
+        }
+        else
+        {
+            // get the channel range from FORTRAN
+            get_channel_range_from_C(item, start, end, status);
+        }
+
+        free(id);
         return;
     }
 
@@ -1356,26 +1366,5 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     printf("[C] URL: '%s'\n", url->str);
 
     g_string_free(url, TRUE);
-
-    // testing
-    void *item = get_dataset(id);
-
-    if (item == NULL)
-    {
-        *start = 0;
-        *end = 0;
-        *status = -1;
-
-        free(id);
-        return;
-    }
-
-    // get the channel range from FORTRAN
-    get_channel_range_from_C(item, start, end, status);
-
-    /**start = 0;
-     *end = 0;
-     *status = 1;*/
-
     free(id);
 }
