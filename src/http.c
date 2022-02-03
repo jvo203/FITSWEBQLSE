@@ -45,7 +45,7 @@ struct MHD_Daemon *http_server = NULL;
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
 void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
-
+void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status);
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root);
 
 size_t html_encode(char *source, size_t len, char *dest, size_t max);
@@ -170,7 +170,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
 
         bool unmodified = false;
 
-        //if(difftime(mktime(&lm), mktime(&tm)) <= 0)
+        // if(difftime(mktime(&lm), mktime(&tm)) <= 0)
         if (difftime(timegm(&lm), timegm(&tm)) <= 0)
             unmodified = true;
 
@@ -211,7 +211,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
             return MHD_NO;
         }
 
-        //detect mime-types
+        // detect mime-types
         char *pos = NULL;
 
         pos = (char *)strstr(url, ".htm");
@@ -270,7 +270,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
         if (pos != NULL)
             MHD_add_response_header(response, "Content-Type", "image/svg+xml");
 
-        MHD_add_response_header(response, "Cache-Control", "public, max-age=86400"); //86400
+        MHD_add_response_header(response, "Cache-Control", "public, max-age=86400"); // 86400
         MHD_add_response_header(response, MHD_HTTP_HEADER_ETAG, last_etag);
 
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
@@ -368,7 +368,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
             free(namelist[i]);
         };
 
-        //overwrite the the last ',' with a list closing character
+        // overwrite the the last ',' with a list closing character
         if (has_contents)
             g_string_truncate(json, json->len - 1);
 
@@ -413,7 +413,7 @@ static enum MHD_Result on_http_connection(void *cls,
     enum MHD_Result ret;
 
     // accept both "GET" and "PUT"
-    //if (0 != strcmp(method, "GET"))
+    // if (0 != strcmp(method, "GET"))
     //    return MHD_NO; /* unexpected method */
 
     if (&dummy != *ptr)
@@ -432,7 +432,7 @@ static enum MHD_Result on_http_connection(void *cls,
     const char *user_agent = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
     const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
-    //MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
+    // MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
 
     if (0 == strcmp(url, "/exit"))
     {
@@ -472,7 +472,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (!options.local)
         {
-            //get the root path
+            // get the root path
             char *proot = (char *)strstr(url, "FITSWebQL.html");
 
             int len = proot - url;
@@ -486,7 +486,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         g_string_append(uri, "?");
 
-        //get datasetId
+        // get datasetId
         char **datasetId = NULL;
         int va_count = 0;
 
@@ -529,7 +529,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 g_string_free(value, TRUE);
             }
 
-            //auto-detect multiple entries
+            // auto-detect multiple entries
             if (tmp == NULL)
             {
                 char str_key[255] = "";
@@ -564,7 +564,7 @@ static enum MHD_Result on_http_connection(void *cls,
             {
                 va_count = 1;
 
-                //allocate datasetId
+                // allocate datasetId
                 datasetId = (char **)malloc(sizeof(char *));
                 datasetId[0] = tmp;
 
@@ -585,7 +585,7 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
 
-            //auto-detect multiple lines
+            // auto-detect multiple lines
             if (tmp == NULL)
             {
                 char str_key[255] = "";
@@ -620,7 +620,7 @@ static enum MHD_Result on_http_connection(void *cls,
             {
                 va_count = 1;
 
-                //allocate datasetId
+                // allocate datasetId
                 datasetId = (char **)malloc(sizeof(char *));
                 datasetId[0] = tmp;
 
@@ -1115,10 +1115,10 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
 void start_http()
 {
-    signal(SIGPIPE, SIG_IGN); //ignore SIGPIPE
-    //signal(SIGINT, SIGINTHandler); //intercept CTRL+C to trigger a clean shutdown
+    signal(SIGPIPE, SIG_IGN); // ignore SIGPIPE
+    // signal(SIGINT, SIGINTHandler); //intercept CTRL+C to trigger a clean shutdown
 
-    //http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
+    // http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
     http_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
                                    options.http_port,
                                    NULL,
