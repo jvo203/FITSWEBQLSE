@@ -1338,6 +1338,16 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         return;
     }
 
+    if (root == NULL)
+    {
+        free(id);
+
+        *start = 0;
+        *end = 0;
+        *status = -1;
+        return;
+    }
+
     // form an HTTP request URL
     GString *url = g_string_new("http://");
 
