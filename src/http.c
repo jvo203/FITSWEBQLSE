@@ -1379,6 +1379,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     {
         curl_easy_setopt(curl, CURLOPT_URL, url->str);
 
+        // pass the FORTRAN pointers to the libcURL handler
         fits_range_t resp = {start, end, status};
 
         /* Perform the request, res will get the return code */
