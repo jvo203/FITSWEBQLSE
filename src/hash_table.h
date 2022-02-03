@@ -12,6 +12,6 @@ bool insert_if_not_exists(const char *datasetid, void *item);
 bool dataset_exists(const char *datasetid);
 void *get_dataset(const char *datasetid);
 
-// a Fortran callback
+// Fortran callbacks
 extern void delete_dataset(void *ptr);
 extern void get_channel_range_from_C(void *ptr, int *startindex, int *endindex, int *status);
