@@ -1053,7 +1053,7 @@ contains
                 if (status .ne. 0) exit ! no more work to do
 
                 num_per_image = end - start + 1
-                print *, 'START:', start, 'END:', end, 'num_pre_image:', num_per_image
+                print *, 'START:', start, 'END:', end, 'num_per_image:', num_per_image
 
                 ! process the block
 
