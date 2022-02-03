@@ -486,7 +486,7 @@ static enum MHD_Result on_http_connection(void *cls,
             // make JSON
             GString *json = g_string_sized_new(1024);
 
-            g_string_printf(json, "{\"start\":%d, \"end\":%d,\"status\":%d}", start, end, status);
+            g_string_printf(json, "{\"start\":%d,\"end\":%d,\"status\":%d}", start, end, status);
 
             struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
             g_string_free(json, FALSE);
