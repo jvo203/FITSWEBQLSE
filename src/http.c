@@ -1325,3 +1325,22 @@ void *handle_fitswebql_request(void *ptr)
 
     pthread_exit(NULL);
 }
+
+void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status)
+{
+    char *id = strndup(datasetid, len);
+
+    if (id == NULL)
+    {
+        *status = -1;
+        return;
+    }
+
+    printf("ROOT: %s\n", root);
+
+    *start = 0;
+    *end = 0;
+    *status = 1;
+
+    free(id);
+}
