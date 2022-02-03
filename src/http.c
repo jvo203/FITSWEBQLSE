@@ -1444,6 +1444,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
         chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
         chunk.size = 0;           /* no data at this point */
+        chunk.memory[0] = 0;
 
         curl_easy_setopt(curl, CURLOPT_URL, url->str);
 
