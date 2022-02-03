@@ -471,7 +471,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (datasetId != NULL)
         {
-            datasetId++;
+            datasetId++; // skip the slash character
 
             void *item = get_dataset(datasetId);
 
