@@ -1341,6 +1341,13 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     printf("ROOT: %s\n", root);
 
     // form an HTTP request URL
+    GString *url = g_string_new("http://");
+
+    g_string_append_printf(url, "%s:", root);
+    g_string_append_printf(url, "%" PRIu16 "/range/%s", options.http_port, id);
+    printf("[C] URL: '%s'\n", url->str);
+
+    g_string_free(url, TRUE);
 
     // testing
     void *item = get_dataset(id);
