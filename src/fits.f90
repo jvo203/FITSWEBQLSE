@@ -17,6 +17,8 @@ module fits
     integer(c_int), parameter :: ZFP_LOW_PRECISION = 8
     integer(c_int), parameter :: ZFP_MIN_EXP = -1074
 
+    integer, parameter :: CHANNEL_BLOCK = 128
+
     type, bind(c) :: gmutex
         integer(kind=c_intptr_t) :: i = 0
     end type gmutex
@@ -359,14 +361,32 @@ contains
 
     end subroutine update_progress
 
-    function get_fits_range(item, startindex, endindex) result(status)
+    subroutine get_channel_range(item, startindex, endindex, status)
         type(dataset), pointer, intent(inout) :: item
-        integer, intent(out) :: startindex, endindex
+        integer, intent(out) :: status, startindex, endindex
 
-        integer :: status
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%progress_mtx))
 
-        status = 0
-    end function get_fits_range
+        if (item%cursor .gt. item%naxes(3)) then
+            ! an error, no more channels to allocate
+            startindex = -1
+            endindex = -1
+
+            ! an error status
+            status = -1
+        else
+            startindex = item%cursor
+            endindex = min(startindex + CHANNEL_BLOCK - 1, item%naxes(3))
+
+            ! status OK
+            status = 0
+        end if
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%progress_mtx))
+
+    end subroutine get_channel_range
 
     subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, root) bind(C)
         use, intrinsic :: iso_c_binding
