@@ -465,6 +465,47 @@ static enum MHD_Result on_http_connection(void *cls,
             return get_home_directory(connection);
     };
 
+    if (strstr(url, "/range/") != NULL)
+    {
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+        {
+            datasetId++;
+
+            void *item = get_dataset(datasetId);
+
+            if (item == NULL)
+                return http_not_found(connection);
+
+            int start, end, status;
+
+            // get the channel range from FORTRAN
+            get_channel_range_from_C(item, &start, &end, &status);
+
+            // make JSON
+            GString *json = g_string_sized_new(1024);
+
+            g_string_printf(json, "{\"start\":%d, \"end\":%d,\"status\":%d}", start, end, status);
+
+            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
+            g_string_free(json, FALSE);
+
+            MHD_add_response_header(response, "Cache-Control", "no-cache");
+            MHD_add_response_header(response, "Cache-Control", "no-store");
+            MHD_add_response_header(response, "Pragma", "no-cache");
+            MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
+
+            enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+            MHD_destroy_response(response);
+
+            return ret;
+        }
+        else
+            return http_not_found(connection);
+    }
+
     // WebQL main entry page
     if (strstr(url, "FITSWebQL.html") != NULL)
     {
