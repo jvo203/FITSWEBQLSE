@@ -1367,6 +1367,28 @@ void *handle_fitswebql_request(void *ptr)
     pthread_exit(NULL);
 }
 
+static size_t
+WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+    size_t realsize = size * nmemb;
+    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+
+    char *ptr = realloc(mem->memory, mem->size + realsize + 1);
+    if (!ptr)
+    {
+        /* out of memory! */
+        printf("not enough memory (realloc returned NULL)\n");
+        return 0;
+    }
+
+    mem->memory = ptr;
+    memcpy(&(mem->memory[mem->size]), contents, realsize);
+    mem->size += realsize;
+    mem->memory[mem->size] = 0;
+
+    return realsize;
+}
+
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status)
 {
     char *id = strndup(datasetid, len);
@@ -1420,8 +1442,10 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     {
         curl_easy_setopt(curl, CURLOPT_URL, url->str);
 
-        // pass the FORTRAN pointers to the libcURL handler
-        fits_range_t resp = {start, end, status};
+        struct MemoryStruct chunk;
+
+        chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
+        chunk.size = 0;           /* no data at this point */
 
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);

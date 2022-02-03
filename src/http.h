@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <stdlib.h>
 #include <inttypes.h>
 #include <stdbool.h>
 
@@ -36,12 +37,11 @@ typedef struct
     char *root;
 } fits_req_t;
 
-typedef struct
+struct MemoryStruct
 {
-    int *start;
-    int *end;
-    int *status;
-} fits_range_t;
+    char *memory;
+    size_t size;
+};
 
 void start_http();
 void stop_http();
