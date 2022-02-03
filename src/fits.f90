@@ -375,7 +375,7 @@ contains
 
     subroutine get_channel_range_from_C(ptr, startindex, endindex, status) BIND(C, name='get_channel_range_from_C')
         type(C_PTR), intent(in), value :: ptr
-        integer, intent(out) :: status, startindex, endindex
+        integer(c_int), intent(out) :: status, startindex, endindex
 
         type(dataset), pointer :: item
 
