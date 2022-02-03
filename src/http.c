@@ -1356,10 +1356,11 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     }
 
     // get the channel range from FORTRAN
+    get_channel_range_from_C(item, start, end, status);
 
-    *start = 0;
-    *end = 0;
-    *status = 1;
+    /**start = 0;
+     *end = 0;
+     *status = 1;*/
 
     free(id);
 }
