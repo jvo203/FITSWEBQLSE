@@ -17,6 +17,7 @@ module fits
     integer(c_int), parameter :: ZFP_LOW_PRECISION = 8
     integer(c_int), parameter :: ZFP_MIN_EXP = -1074
 
+    ! FITS channels are allocated to cluster nodes in blocks
     integer, parameter :: CHANNEL_BLOCK = 128
 
     type, bind(c) :: gmutex
@@ -378,6 +379,9 @@ contains
         else
             startindex = item%cursor
             endindex = min(startindex + CHANNEL_BLOCK - 1, item%naxes(3))
+
+            ! move the cursor forward
+            item%cursor = item%cursor + CHANNEL_BLOCK
 
             ! status OK
             status = 0
