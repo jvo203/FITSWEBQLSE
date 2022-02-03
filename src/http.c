@@ -466,6 +466,30 @@ static enum MHD_Result on_http_connection(void *cls,
             return get_home_directory(connection);
     };
 
+    if (strstr(url, "/progress/") != NULL)
+    {
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+        {
+            datasetId++;
+
+            void *item = get_dataset(datasetId);
+
+            if (item == NULL)
+                return http_accepted(connection);
+
+            float progress = get_progress(item);
+            float elapsed = get_elapsed(item);
+
+            // printf("[C] [progress] datasetId(%s): %f%% in %f [s]\n", datasetId, progress, elapsed);
+
+            return send_progress(connection, progress, elapsed);
+        }
+        else
+            return http_not_found(connection);
+    }
+
     if (strstr(url, "/range/") != NULL)
     {
         char *datasetId = strrchr(url, '/');
