@@ -178,10 +178,11 @@ module fits
             character(kind=c_char), intent(in) :: datasetid(*)
         end function get_dataset
 
-        subroutine fetch_channel_range(datasetid, len, start, end, status) BIND(C, name='fetch_channel_range')
+        subroutine fetch_channel_range(root, datasetid, len, start, end, status) BIND(C, name='fetch_channel_range')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
+            type(c_ptr), value :: root
             character(kind=c_char), intent(in) :: datasetid(*)
             integer(c_int), value :: len
             integer(c_int) :: start, end, status
@@ -1064,7 +1065,7 @@ contains
                     call get_channel_range(item, start, end, status)
                 else
                     ! fetch the range from the root node via HTTP
-                    call fetch_channel_range(item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
+                    call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
                 end if
 
                 if (status .ne. 0) exit ! no more work to do
