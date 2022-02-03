@@ -1049,7 +1049,12 @@ contains
             status = 0
 
             do while (status .eq. 0)
-                status = 0; call get_channel_range(item, start, end, status)
+                if (.not. c_associated(root)) then
+                    call get_channel_range(item, start, end, status)
+                else
+                    ! fetch the range from the root node
+                end if
+
                 if (status .ne. 0) exit ! no more work to do
 
                 num_per_image = end - start + 1
