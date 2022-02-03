@@ -1377,7 +1377,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     if (!ptr)
     {
         /* out of memory! */
-        printf("not enough memory (realloc returned NULL)\n");
+        printf("[C] not enough memory (realloc returned NULL)\n");
         return 0;
     }
 
@@ -1440,12 +1440,18 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
     if (curl)
     {
-        curl_easy_setopt(curl, CURLOPT_URL, url->str);
-
         struct MemoryStruct chunk;
 
         chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
         chunk.size = 0;           /* no data at this point */
+
+        curl_easy_setopt(curl, CURLOPT_URL, url->str);
+
+        /* send all data to this function  */
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+        /* we pass our 'chunk' struct to the callback function */
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
@@ -1454,6 +1460,15 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         if (res != CURLE_OK)
             fprintf(stderr, "[C] curl_easy_perform() failed: %s\n",
                     curl_easy_strerror(res));
+        else
+        {
+            printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
+            printf("libcURL response: %s\n", chunk.memory);
+
+            // parse the JSON response
+        }
+
+        free(chunk.memory);
 
         /* always cleanup */
         curl_easy_cleanup(curl);
