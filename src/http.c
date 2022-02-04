@@ -795,6 +795,64 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_not_found(connection);
     }
 
+    if (strstr(url, "/image_spectrum") != NULL)
+    {
+        int fetch_data = 0;
+        int width, height;
+        int precision = ZFP_MEDIUM_PRECISION; // default ZFP precision
+
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
+        char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+        char *widthStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "width");
+        char *heightStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "height");
+        char *qualityStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "quality");
+        char *fetch_dataStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "fetch_data");
+
+        if (datasetId == NULL || widthStr == NULL || heightStr == NULL)
+            return http_not_found(connection);
+
+        if (fetch_dataStr != NULL)
+            if (0 == strcmp(fetch_dataStr, "true"))
+                fetch_data = 1;
+
+        width = atoi(widthStr);
+        height = atoi(heightStr);
+
+        if (qualityStr != NULL)
+        {
+            if (0 == strcmp(qualityStr, "high"))
+                precision = ZFP_HIGH_PRECISION;
+
+            if (0 == strcmp(qualityStr, "medium"))
+                precision = ZFP_MEDIUM_PRECISION;
+
+            if (0 == strcmp(qualityStr, "low"))
+                precision = ZFP_LOW_PRECISION;
+        }
+
+        // printf("[C] datasetId(%s), width(%d), height(%d), quality(%s), fetch_data: %s\n", datasetId, width, height, quality, (fetch_data ? "true" : "false"));
+
+        if (width <= 0 || height <= 0)
+            return http_not_implemented(connection);
+
+        void *item = get_dataset(datasetId);
+
+        if (item == NULL)
+            return http_accepted(connection);
+
+        if (get_error_status(item))
+            return http_internal_server_error(connection);
+
+        if (!get_ok_status(item))
+            return http_accepted(connection);
+
+        // for now return http_accepted
+        return http_accepted(connection);
+    }
+
     // WebQL main entry page
     if (strstr(url, "FITSWebQL.html") != NULL)
     {
