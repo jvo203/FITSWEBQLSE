@@ -489,22 +489,30 @@ contains
       ! lock the mutex
       call g_mutex_lock(c_loc(item%progress_mtx))
 
-      if (item%cursor .gt. item%naxes(3)) then
-         ! an error, no more channels to allocate
+      if (.not. item%header) then
          startindex = -1
          endindex = -1
 
-         ! an error status
-         status = 1 ! end of AXIS3
+         ! header not available yet
+         status = -1
       else
-         startindex = item%cursor
-         endindex = min(startindex + CHANNEL_BLOCK - 1, item%naxes(3))
+         if (item%cursor .gt. item%naxes(3)) then
+            ! an error, no more channels to allocate
+            startindex = -1
+            endindex = -1
 
-         ! move the cursor forward
-         item%cursor = item%cursor + CHANNEL_BLOCK
+            ! an end of channels
+            status = 1 ! end of AXIS3
+         else
+            startindex = item%cursor
+            endindex = min(startindex + CHANNEL_BLOCK - 1, item%naxes(3))
 
-         ! status OK
-         status = 0
+            ! move the cursor forward
+            item%cursor = item%cursor + CHANNEL_BLOCK
+
+            ! status OK
+            status = 0
+         end if
       end if
 
       ! unlock the mutex
@@ -1164,11 +1172,8 @@ contains
          allocate (item%frame_min(start:end))
          allocate (item%frame_max(start:end))
 
-         ! dynamically get the range blocks
-
-         status = 0
-
-         do while (status .eq. 0)
+         do
+            ! dynamically request / get the range blocks
             if (.not. c_associated(root)) then
                ! a direct (local) request
                call get_channel_range(item, start, end, status)
@@ -1180,7 +1185,7 @@ contains
             ! simulate doing work
             call sleep(1) ! 1 sec.
 
-            if (status .ne. 0) exit ! no more work to do
+            if (status .eq. 1) exit ! no more work to do
 
             num_per_node = end - start + 1
             print *, 'START:', start, 'END:', end, 'num_per_node:', num_per_node
