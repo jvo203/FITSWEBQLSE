@@ -470,7 +470,7 @@ contains
       call g_mutex_unlock(c_loc(item%progress_mtx))
    end function get_elapsed
 
-   subroutine get_channel_range_from_C(ptr, startindex, endindex, status) BIND(C, name='get_channel_range_from_C')
+   subroutine get_channel_range_C(ptr, startindex, endindex, status) BIND(C, name='get_channel_range_C')
       type(C_PTR), intent(in), value :: ptr
       integer(c_int), intent(out) :: status, startindex, endindex
 
@@ -480,7 +480,7 @@ contains
 
       call get_channel_range(item, startindex, endindex, status)
 
-   end subroutine get_channel_range_from_C
+   end subroutine get_channel_range_C
 
    subroutine get_channel_range(item, startindex, endindex, status)
       type(dataset), pointer, intent(inout) :: item
