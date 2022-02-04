@@ -87,7 +87,7 @@ static enum MHD_Result http_not_found(struct MHD_Connection *connection)
     struct MHD_Response *response;
     int ret;
     const char *errorstr =
-        "<html><body>404 Not Found</body></html>";
+        "404 Not Found";
 
     response =
         MHD_create_response_from_buffer(strlen(errorstr),
@@ -111,7 +111,7 @@ static enum MHD_Result http_accepted(struct MHD_Connection *connection)
     struct MHD_Response *response;
     int ret;
     const char *errorstr =
-        "<html><body>202 Accepted</body></html>";
+        "202 Accepted";
 
     response =
         MHD_create_response_from_buffer(strlen(errorstr),
@@ -135,7 +135,7 @@ static enum MHD_Result http_acknowledge(struct MHD_Connection *connection)
     struct MHD_Response *response;
     int ret;
     const char *okstr =
-        "200 OK Request Acknowledged.\n";
+        "200 OK Request Acknowledged\n";
 
     response =
         MHD_create_response_from_buffer(strlen(okstr),
@@ -159,7 +159,7 @@ static enum MHD_Result http_internal_server_error(struct MHD_Connection *connect
     struct MHD_Response *response;
     int ret;
     const char *errorstr =
-        "<html><body>500 Internal Server Error</body></html>";
+        "500 Internal Server Error";
 
     response =
         MHD_create_response_from_buffer(strlen(errorstr),
@@ -183,7 +183,7 @@ static enum MHD_Result http_not_implemented(struct MHD_Connection *connection)
     struct MHD_Response *response;
     int ret;
     const char *errorstr =
-        "<html><body>501 Not Implemented</body></html>";
+        "501 Not Implemented";
 
     response =
         MHD_create_response_from_buffer(strlen(errorstr),
