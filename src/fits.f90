@@ -1182,6 +1182,7 @@ contains
                call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
             end if
 
+            if (status .eq. -2) exit ! a catastrophic error
             if (status .eq. 1) exit ! no more work to do
 
             ! process the block
