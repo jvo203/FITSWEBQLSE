@@ -1182,9 +1182,6 @@ contains
                call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
             end if
 
-            ! simulate doing work
-            call sleep(1) ! 1 sec.
-
             if (status .eq. 1) exit ! no more work to do
 
             ! process the block
@@ -1192,8 +1189,9 @@ contains
                num_per_node = end - start + 1
                print *, 'START:', start, 'END:', end, 'num_per_node:', num_per_node
 
+               ! simulate doing work
+               call sleep(1) ! 1 sec.
             end if
-
          end do
 
          ! close any remaining thread file units
