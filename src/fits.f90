@@ -1187,10 +1187,12 @@ contains
 
             if (status .eq. 1) exit ! no more work to do
 
-            num_per_node = end - start + 1
-            print *, 'START:', start, 'END:', end, 'num_per_node:', num_per_node
-
             ! process the block
+            if ((start .gt. 0) .and. (end .gt. 0)) then
+               num_per_node = end - start + 1
+               print *, 'START:', start, 'END:', end, 'num_per_node:', num_per_node
+
+            end if
 
          end do
 
