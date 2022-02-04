@@ -1769,8 +1769,8 @@ contains
       ! start the timer
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
-      ! call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
-      call mergeSort(c_loc(X), 1, N) ! another parallel sorting with OpenMP
+      call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
+      ! call mergeSort(c_loc(X), 1, N) ! another parallel sorting with OpenMP
 
       ! end the timer
       call system_clock(finish_t)
