@@ -1187,7 +1187,7 @@ contains
             ! process the block
             if ((start .gt. 0) .and. (end .gt. 0)) then
                num_per_node = end - start + 1
-               print *, 'START:', start, 'END:', end, 'num_per_node:', num_per_node
+               print *, 'START', start, 'END', end, 'NUM_PER_NODE', num_per_node
 
                ! simulate doing work
                call sleep(1) ! 1 sec.
