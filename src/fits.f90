@@ -490,16 +490,16 @@ contains
       call g_mutex_lock(c_loc(item%progress_mtx))
 
       if (.not. item%header) then
-         startindex = -1
-         endindex = -1
+         startindex = 0
+         endindex = 0
 
          ! header not available yet
          status = -1
       else
          if (item%cursor .gt. item%naxes(3)) then
             ! an error, no more channels to allocate
-            startindex = -1
-            endindex = -1
+            startindex = 0
+            endindex = 0
 
             ! an end of channels
             status = 1 ! end of AXIS3
