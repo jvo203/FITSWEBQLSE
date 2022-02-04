@@ -33,6 +33,10 @@
         }                                                                         \
     }
 
+#define ZFP_HIGH_PRECISION 16
+#define ZFP_MEDIUM_PRECISION 11
+#define ZFP_LOW_PRECISION 8
+
 typedef struct
 {
     // fitswebql
