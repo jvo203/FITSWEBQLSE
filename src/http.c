@@ -1589,7 +1589,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         else
         {
             // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
-            printf("cURL response: %s\n", chunk.memory);
+            // printf("cURL response: %s\n", chunk.memory);
 
             // parse the JSON response
             double val;
