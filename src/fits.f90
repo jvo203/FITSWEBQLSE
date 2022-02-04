@@ -487,6 +487,25 @@ contains
       integer, intent(out) :: status, startindex, endindex
 
       ! lock the mutex
+      call g_mutex_lock(c_loc(item%error_mtx))
+
+      ! check the error
+      if (item%error) then
+         startindex = 0
+         endindex = 0
+         status = -2
+
+         ! unlock the mutex and exit subroutine
+         call g_mutex_unlock(c_loc(item%error_mtx))
+         return
+      else
+         ! unlock the mutex
+         call g_mutex_unlock(c_loc(item%error_mtx))
+      end if
+
+      ! there has been no error up until now, continue
+
+      ! lock the mutex
       call g_mutex_lock(c_loc(item%progress_mtx))
 
       if (.not. item%header) then
