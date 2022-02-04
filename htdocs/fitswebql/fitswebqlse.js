@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-01-20.1";
+	return "JS2022-02-04.0";
 }
 
 const wasm_supported = (() => {
@@ -10471,7 +10471,13 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 	}
 
 	xmlhttp.open("GET", url, true);
-	xmlhttp.responseType = 'arraybuffer';
+
+	sv = votable.getAttribute('data-server-version');
+
+	if (sv.charAt(0) == 'J') {
+		xmlhttp.responseType = 'arraybuffer';
+	}
+
 	xmlhttp.timeout = 0;
 	xmlhttp.send();
 };
@@ -12569,7 +12575,7 @@ function show_welcome() {
 		.attr("class", "modal-body");
 
 	bodyDiv.append("h3")
-		.text("What's New");
+		.text("FEATURES");
 
 	var ul = bodyDiv.append("ul")
 		.attr("class", "list-group");
