@@ -627,7 +627,7 @@ static enum MHD_Result on_http_connection(void *cls,
             int start, end, status;
 
             // get the channel range from FORTRAN
-            get_channel_range_from_C(item, &start, &end, &status);
+            get_channel_range_C(item, &start, &end, &status);
 
             // make JSON
             GString *json = g_string_sized_new(1024);
@@ -1554,22 +1554,26 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         {
             *start = 0;
             *end = 0;
-            *status = -1;
+
+            if (dataset_exists(id))
+                *status = 1; // accepted
+            else
+                *status = -2; // a catastrophic error
         }
         else
         {
             // get the channel range from FORTRAN
-            get_channel_range_from_C(item, start, end, status);
+            get_channel_range_C(item, start, end, status);
         }
 
         free(id);
         return;
     }
 
-    // assume the worst case
+    // assume a catastrophic error
     *start = 0;
     *end = 0;
-    *status = -1;
+    *status = -2;
 
     // form an HTTP request URL
     CURL *curl;
@@ -1609,7 +1613,10 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         else
         {
             // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
-            // printf("cURL response: %s\n", chunk.memory);
+            printf("cURL response: %s\n", chunk.memory);
+
+            // assume accepted (no header yet)
+            *status = 1;
 
             // parse the JSON response
             double val;
