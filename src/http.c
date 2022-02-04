@@ -679,6 +679,110 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_not_found(connection);
     }
 
+    if (strstr(url, "/get_molecules") != NULL)
+    {
+        char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+        char *freqStartStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "freq_start");
+        char *freqEndStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "freq_end");
+
+        bool compress = false;
+        double freq_start = 0.0;
+        double freq_end = 0.0;
+
+        double *freq_start_ptr = &freq_start;
+        double *freq_end_ptr = &freq_end;
+
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
+        if (freqStartStr != NULL)
+            freq_start = atof(freqStartStr);
+
+        if (freqEndStr != NULL)
+            freq_end = atof(freqEndStr);
+
+        printf("[C] Accept-Encoding: %s\n", encoding);
+
+        if (strstr(encoding, "gzip") != NULL)
+            compress = true;
+
+        if (splat_db == NULL)
+            return http_internal_server_error(connection);
+
+        if (datasetId == NULL)
+            return http_not_found(connection);
+
+        if (freq_start == 0.0 || freq_end == 0.0)
+        {
+            // get the frequency range from the FITS header
+            void *item = get_dataset(datasetId);
+
+            if (item == NULL)
+                return http_accepted(connection);
+
+            if (get_error_status(item))
+                return http_internal_server_error(connection);
+
+            if (!get_header_status(item))
+                return http_accepted(connection);
+
+            get_frequency_range(item, freq_start_ptr, freq_end_ptr);
+        }
+
+        printf("[C] get_molecules: datasetId(%s); freq_start: %gGHz, freq_end: %gGHz\n", datasetId, freq_start, freq_end);
+
+        if (freq_start > 0.0 && freq_end > 0.0)
+        {
+            // open a pipe
+            status = pipe(pipefd);
+
+            if (0 != status)
+                return http_internal_server_error(connection);
+
+            // create a response from the pipe by passing the read end of the pipe
+            struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+            // add headers
+            /*MHD_add_response_header(response, "Cache-Control", "no-cache");
+            MHD_add_response_header(response, "Cache-Control", "no-store");
+            MHD_add_response_header(response, "Pragma", "no-cache");*/
+
+            MHD_add_response_header(response, "Cache-Control", "public, max-age=86400");
+            MHD_add_response_header(response, "Content-Type", "application/json");
+
+            if (compress)
+                MHD_add_response_header(response, "Content-Encoding", "gzip");
+
+            // queue the response
+            enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+            MHD_destroy_response(response);
+
+            printf("[C] calling stream_molecules with the pipe file descriptor %d\n", pipefd[1]);
+
+            struct splat_req *args = malloc(sizeof(struct splat_req));
+
+            if (args != NULL)
+            {
+                args->compression = compress;
+                args->freq_start = freq_start;
+                args->freq_end = freq_end;
+                args->fd = pipefd[1];
+
+                // create and detach the thread
+                pthread_create(&tid, NULL, &stream_molecules, args);
+                pthread_detach(tid);
+            }
+            else
+                close(pipefd[1]);
+
+            return ret;
+        }
+        else
+            return http_not_found(connection);
+    }
+
     // WebQL main entry page
     if (strstr(url, "FITSWebQL.html") != NULL)
     {
