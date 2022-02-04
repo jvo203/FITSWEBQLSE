@@ -512,7 +512,7 @@ contains
          startindex = 0
          endindex = 0
 
-         ! header not available yet
+         ! header is not available yet
          status = 1
       else
          if (item%cursor .gt. item%naxes(3)) then
