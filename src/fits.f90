@@ -650,7 +650,7 @@ contains
          call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
       end if
 
-      print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
+      ! print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
 
       num_threads = OMP_GET_MAX_THREADS()
 
