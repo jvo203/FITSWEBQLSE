@@ -1412,7 +1412,7 @@ void *forward_fitswebql_request(void *ptr)
 
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "%s&root=%s", options.http_port, uri, options.root);
-        printf("[C] URL: '%s'\n", url->str);
+        // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
@@ -1559,7 +1559,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
     g_string_append_printf(url, "%s:", root);
     g_string_append_printf(url, "%" PRIu16 "/range/%s", options.http_port, id);
-    printf("[C] URL: '%s'\n", url->str);
+    // printf("[C] URL: '%s'\n", url->str);
 
     curl = curl_easy_init();
 
@@ -1589,7 +1589,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         else
         {
             // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
-            printf("libcURL response: %s\n", chunk.memory);
+            printf("cURL response: %s\n", chunk.memory);
 
             // parse the JSON response
             double val;
