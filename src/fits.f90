@@ -198,15 +198,6 @@ module fits
          integer(kind=c_int), value, intent(in) :: n
       end subroutine psrs_sort
 
-      ! void mergeSort(int *array, int start, int end)
-      subroutine mergeSort(array, start, end) BIND(C, name='mergeSort')
-         use, intrinsic :: ISO_C_BINDING
-         implicit none
-
-         type(c_ptr), value :: array
-         integer(kind=c_int), value, intent(in) :: start, end
-      end subroutine mergeSort
-
    end interface
 
 contains
@@ -1770,7 +1761,6 @@ contains
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
       call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
-      ! call mergeSort(c_loc(X), 1, N) ! another parallel sorting with OpenMP
 
       ! end the timer
       call system_clock(finish_t)
