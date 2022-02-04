@@ -601,7 +601,28 @@ static enum MHD_Result on_http_connection(void *cls,
             void *item = get_dataset(datasetId);
 
             if (item == NULL)
-                return http_not_found(connection);
+            {
+                if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
+                    return http_accepted(connection);
+                else
+                {
+                    // signal a catastrophic error
+                    GString *json = g_string_new("{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+
+                    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
+                    g_string_free(json, FALSE);
+
+                    MHD_add_response_header(response, "Cache-Control", "no-cache");
+                    MHD_add_response_header(response, "Cache-Control", "no-store");
+                    MHD_add_response_header(response, "Pragma", "no-cache");
+                    MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
+
+                    enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+                    MHD_destroy_response(response);
+
+                    return ret;
+                }
+            }
 
             int start, end, status;
 
@@ -622,7 +643,6 @@ static enum MHD_Result on_http_connection(void *cls,
             MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
 
             enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
             MHD_destroy_response(response);
 
             return ret;
