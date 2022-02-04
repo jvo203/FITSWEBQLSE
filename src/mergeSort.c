@@ -65,7 +65,7 @@ void mergeSort(int *array, int start, int end)
 {
     if (start < end)
     {
-        printf("Thread %d is sorting %d through %d\n", omp_get_thread_num(), start, end);
+        // printf("Thread %d is sorting %d through %d\n", omp_get_thread_num(), start, end);
         int middle = (start + end) / 2;
 
 /* sort both halves in parallel */
