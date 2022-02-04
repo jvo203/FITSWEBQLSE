@@ -37,6 +37,14 @@ extern GMutex cluster_mtx;
 static sqlite3 *splat_db = NULL;
 extern options_t options; // <options> is defined in main.c
 
+inline const char *denull(const char *str)
+{
+    if (str != NULL)
+        return str;
+    else
+        return "\"\"";
+};
+
 // HTML
 #define PAGE "<html><head><title>FITSWEBQL SE</title>" \
              "</head><body>FITSWEBQLSE (libmicrohttpd)</body></html>"
@@ -55,6 +63,10 @@ extern int get_ok_status(void *item);
 extern float get_progress(void *item);
 extern float get_elapsed(void *item);
 extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
+
+size_t chunked_write(int fd, const char *src, size_t n);
+void *stream_molecules(void *args);
+static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
 
 size_t html_encode(char *source, size_t len, char *dest, size_t max);
 
@@ -1771,4 +1783,207 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
     g_string_free(url, TRUE);
     free(id);
+}
+
+size_t chunked_write(int fd, const char *src, size_t n)
+{
+    size_t nchar, remaining, offset;
+    ssize_t written;
+
+    remaining = n;
+    offset = 0;
+
+    while (remaining > 0)
+    {
+        nchar = MIN(remaining, CHUNK);
+        written = write(fd, src + offset, nchar);
+
+        if (written > 0)
+        {
+            remaining -= written;
+            offset += written;
+        }
+
+        // the connection might have been closed, bail out
+        if (written < 0)
+        {
+            printf("[C] write returned %ld, aborting.\n", written);
+            return offset;
+        }
+
+        printf("[C] chars written: %zu out of %zu bytes.\n", offset, n);
+    }
+
+    return offset;
+}
+
+void *stream_molecules(void *args)
+{
+    if (args == NULL)
+        pthread_exit(NULL);
+
+    struct splat_req *req = (struct splat_req *)args;
+
+    char strSQL[256];
+    char chunk_data[256];
+    int rc;
+    char *zErrMsg = 0;
+
+    snprintf(strSQL, sizeof(strSQL), "SELECT * FROM lines WHERE frequency>=%f AND frequency<=%f;", req->freq_start, req->freq_end);
+    printf("%s\n", strSQL);
+
+    req->first = true;
+
+    if (req->compression)
+    {
+        req->z.zalloc = Z_NULL;
+        req->z.zfree = Z_NULL;
+        req->z.opaque = Z_NULL;
+        req->z.next_in = Z_NULL;
+        req->z.avail_in = 0;
+
+        CALL_ZLIB(deflateInit2(&(req->z), Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
+    }
+
+    rc = sqlite3_exec(splat_db, strSQL, sqlite_callback, req, &zErrMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+    }
+
+    if (req->first)
+        snprintf(chunk_data, sizeof(chunk_data), "{\"molecules\" : []}");
+    else
+        snprintf(chunk_data, sizeof(chunk_data), "]}");
+
+    if (req->compression)
+    {
+        req->z.avail_in = strlen(chunk_data);
+        req->z.next_in = (unsigned char *)chunk_data;
+
+        do
+        {
+            req->z.avail_out = CHUNK;   // size of output
+            req->z.next_out = req->out; // output char array
+            CALL_ZLIB(deflate(&(req->z), Z_FINISH));
+            size_t have = CHUNK - req->z.avail_out;
+
+            if (have > 0)
+            {
+                // printf("Z_FINISH avail_out: %zu\n", have);
+                chunked_write(req->fd, (const char *)req->out, have);
+            }
+        } while (req->z.avail_out == 0);
+
+        CALL_ZLIB(deflateEnd(&(req->z)));
+    }
+    else
+        chunked_write(req->fd, (const char *)chunk_data, strlen(chunk_data));
+
+    // close the write end of the pipe
+    close(req->fd);
+
+    free(req);
+
+    pthread_exit(NULL);
+}
+
+static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
+{
+    struct splat_req *req = (struct splat_req *)userp;
+
+    if (argc == 8)
+    {
+        /*printf("sqlite_callback::molecule:\t");
+        for (int i = 0; i < argc; i++)
+            printf("%s:%s\t", azColName[i], argv[i]);
+        printf("\n");*/
+
+        GString *json = g_string_sized_new(1024);
+
+        if (req->first)
+        {
+            req->first = false;
+
+            g_string_printf(json, "{\"molecules\" : [");
+        }
+        else
+            g_string_printf(json, ",");
+
+        // json-encode a spectral line
+        char *encoded;
+
+        // species
+        encoded = json_encode_string(denull(argv[0]));
+        g_string_append_printf(json, "{\"species\" : %s,", denull(encoded));
+        if (encoded != NULL)
+            free(encoded);
+
+        // name
+        encoded = json_encode_string(denull(argv[1]));
+        g_string_append_printf(json, "\"name\" : %s,", denull(encoded));
+        if (encoded != NULL)
+            free(encoded);
+
+        // frequency
+        g_string_append_printf(json, "\"frequency\" : %s,", denull(argv[2]));
+
+        // quantum numbers
+        encoded = json_encode_string(denull(argv[3]));
+        g_string_append_printf(json, "\"quantum\" : %s,", denull(encoded));
+        if (encoded != NULL)
+            free(encoded);
+
+        // cdms_intensity
+        encoded = json_encode_string(denull(argv[4]));
+        g_string_append_printf(json, "\"cdms\" : %s,", denull(encoded));
+        if (encoded != NULL)
+            free(encoded);
+
+        // lovas_intensity
+        encoded = json_encode_string(denull(argv[5]));
+        g_string_append_printf(json, "\"lovas\" : %s,", denull(encoded));
+        if (encoded != NULL)
+            free(encoded);
+
+        // E_L
+        encoded = json_encode_string(denull(argv[6]));
+        g_string_append_printf(json, "\"E_L\" : %s,", denull(encoded));
+        if (encoded != NULL)
+            free(encoded);
+
+        // linelist
+        encoded = json_encode_string(denull(argv[7]));
+        g_string_append_printf(json, "\"list\" : %s}", denull(encoded));
+        if (encoded != NULL)
+            free(encoded);
+
+        if (req->compression)
+        {
+            req->z.avail_in = json->len;                 // size of input
+            req->z.next_in = (unsigned char *)json->str; // input char array
+
+            do
+            {
+                req->z.avail_out = CHUNK;   // size of output
+                req->z.next_out = req->out; // output char array
+                CALL_ZLIB(deflate(&(req->z), Z_NO_FLUSH));
+                size_t have = CHUNK - req->z.avail_out;
+
+                if (have > 0)
+                {
+                    // printf("ZLIB avail_out: %zu\n", have);
+                    chunked_write(req->fd, (const char *)req->out, have);
+                }
+            } while (req->z.avail_out == 0);
+        }
+        else
+            chunked_write(req->fd, (const char *)json->str, json->len);
+
+        g_string_free(json, TRUE);
+    }
+
+    return 0;
 }
