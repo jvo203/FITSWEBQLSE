@@ -494,7 +494,7 @@ contains
          endindex = 0
 
          ! header not available yet
-         status = -1
+         status = 1
       else
          if (item%cursor .gt. item%naxes(3)) then
             ! an error, no more channels to allocate
@@ -502,7 +502,7 @@ contains
             endindex = 0
 
             ! an end of channels
-            status = 1 ! end of AXIS3
+            status = -1 ! end of AXIS3
          else
             startindex = item%cursor
             endindex = min(startindex + CHANNEL_BLOCK - 1, item%naxes(3))
@@ -1182,8 +1182,14 @@ contains
                call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
             end if
 
-            if (status .eq. -2) exit ! a catastrophic error
-            if (status .eq. 1) exit ! no more work to do
+            ! LOOP EXIT
+            ! -2 : a catastrophic error
+            ! -1 : end of FITS file (no more work to do)
+
+            ! LOOP CONTINUE
+            ! 0 : OK
+            ! 1 : accepted, header not ready yet
+            if (status .lt. 0) exit ! one comparison handles all cases, neat!
 
             ! process the block
             if ((start .gt. 0) .and. (end .gt. 0)) then
