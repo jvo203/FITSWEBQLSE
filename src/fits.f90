@@ -378,7 +378,7 @@ contains
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
 
-        print *, 'progress', item%progress, 'total', item%total
+        print *, 'progress:', item%progress, 'out of total:', item%total
 
         ! unlock the mutex
         call g_mutex_unlock(c_loc(item%progress_mtx))
@@ -1067,7 +1067,7 @@ contains
         if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
             call set_progress(item, 0, 1)
         else
-            call set_progress(item, num_per_node, naxes(3))
+            call set_progress(item, 0, naxes(3))
         end if
 
         call set_header_status(item, .true.)
@@ -1263,6 +1263,9 @@ contains
 
                     ! simulate doing work
                     call sleep(1) ! 1 sec.
+                else
+                    ! no work done at this step
+                    num_per_node = 0
                 end if
             end do
 
