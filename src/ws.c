@@ -30,7 +30,8 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
 
-        if (mg_strstr(hm->uri, mg_str("/websocket")) != NULL)
+        if (mg_http_match_uri(hm, "/websocket"))
+        //if (mg_strstr(hm->uri, mg_str("/websocket")) != NULL)
         {
             printf("ACCEPTED WEBSOCKET URI:\t%.*s\n", (int)hm->uri.len, hm->uri.ptr);
 
@@ -45,7 +46,8 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
         }
 
         // is it "/range" ?
-        if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
+        if (mg_http_match_uri(hm, "/range"))
+        // if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
 
             // signal a catastrophic error
