@@ -41,8 +41,19 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
             // Upgrade to websocket. From now on, a connection is a full-duplex
             // Websocket connection, which will receive MG_EV_WS_MSG events.
             mg_ws_upgrade(c, hm, NULL);
+            break;
         }
-        else
+
+        // is it "/range" ?
+        if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
+        {
+
+            // accept the request
+            mg_http_reply(c, 202, "", "Accepted");
+            break;
+        }
+
+        // else
         {
             printf("rejecting the connection.\n");
 
