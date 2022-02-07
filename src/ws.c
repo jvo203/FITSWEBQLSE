@@ -1,6 +1,8 @@
 #include "http.h"
 #include "ws.h"
 
+#include "hash_table.h"
+
 extern options_t options; // <options> is defined in main.c
 extern sig_atomic_t s_received_signal;
 
@@ -49,8 +51,34 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
         {
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
 
-            // signal a catastrophic error
-            mg_http_reply(c, 200, NULL, "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+            char *datasetId = strrchr(tmp, '/');
+
+            if (datasetId != NULL)
+            {
+                datasetId++; // skip the slash character
+
+                void *item = get_dataset(datasetId);
+
+                if (item == NULL)
+                {
+                    if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
+                    {
+                        mg_http_reply(c, 202, NULL, "Accepted");
+                        break;
+                    }
+                    else
+                    {
+                        // signal a catastrophic error
+                        mg_http_reply(c, 200, NULL, "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+                        break;
+                    }
+                }
+
+                // signal a catastrophic error
+                mg_http_reply(c, 200, NULL, "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+            }
+            else
+                mg_http_reply(c, 400, NULL, "Bad Request");
 
             // accept the request
             // mg_http_reply(c, 202, NULL, "Accepted");
