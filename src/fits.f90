@@ -178,13 +178,13 @@ module fits
             character(kind=c_char), intent(in) :: datasetid(*)
         end function get_dataset
 
-        subroutine fetch_channel_range(root, datasetid, len, start, end, status) BIND(C, name='fetch_channel_range')
+        subroutine fetch_channel_range(root, datasetid, len, progress, start, end, status) BIND(C, name='fetch_channel_range')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
             type(c_ptr), value :: root
             character(kind=c_char), intent(in) :: datasetid(*)
-            integer(c_int), value :: len
+            integer(c_int), value :: len, progress
             integer(c_int) :: start, end, status
 
         end subroutine fetch_channel_range
@@ -1216,7 +1216,7 @@ contains
             ! reset the initial counter
             num_per_node = 0
 
-            ! reset the progress counters
+            ! reset the progress
             call set_progress(item, num_per_node, naxes(3))
 
             do
@@ -1227,8 +1227,9 @@ contains
                     ! a direct (local) request
                     call get_channel_range(item, start, end, status)
                 else
+                    ! submit work completed in the previous step (<num_per_node>)
                     ! fetch the range from the root node via HTTP
-                    call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
+                    call fetch_channel_range(root, item%datasetid, size(item%datasetid), num_per_node, start, end, status) ! a C function defined in http.c
                 end if
 
                 ! LOOP EXIT
