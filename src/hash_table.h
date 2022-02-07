@@ -14,4 +14,4 @@ void *get_dataset(const char *datasetid);
 
 // Fortran callbacks
 extern void delete_dataset(void *ptr);
-extern void get_channel_range_C(void *ptr, int *startindex, int *endindex, int *status, int progress);
+extern void get_channel_range_C(void *ptr, int progress, int *startindex, int *endindex, int *status);

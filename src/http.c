@@ -667,7 +667,7 @@ static enum MHD_Result on_http_connection(void *cls,
             int start, end, status;
 
             // get the channel range from FORTRAN
-            get_channel_range_C(item, &start, &end, &status, 0);
+            get_channel_range_C(item, 0, &start, &end, &status);
 
             // make JSON
             GString *json = g_string_sized_new(1024);
@@ -1765,7 +1765,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
         else
         {
             // get the channel range from FORTRAN
-            get_channel_range_C(item, start, end, status, progress);
+            get_channel_range_C(item, progress, start, end, status);
         }
 
         free(id);
