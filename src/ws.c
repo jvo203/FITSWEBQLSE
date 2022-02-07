@@ -35,6 +35,9 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
 
+        LOG(LL_INFO, ("New request to: [%.*s], body size: %lu", (int)hm->uri.len,
+                      hm->uri.ptr, (unsigned long)hm->body.len));
+
         // open a WebSocket request
         if (mg_strstr(hm->uri, mg_str("/websocket")) != NULL)
         {
