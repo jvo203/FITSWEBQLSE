@@ -69,22 +69,18 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
                     else
                     {
                         // signal a catastrophic error
-                        mg_http_reply(c, 200, NULL, "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+                        mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
                         break;
                     }
                 }
 
                 // signal a catastrophic error
-                mg_http_reply(c, 200, NULL, "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+                mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
             }
             else
                 mg_http_reply(c, 400, NULL, "Bad Request");
 
-            // accept the request
-            // mg_http_reply(c, 202, NULL, "Accepted");
-
             free(tmp);
-
             break;
         }
 
