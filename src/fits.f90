@@ -351,7 +351,28 @@ contains
 
     end subroutine reset_clock
 
-    subroutine update_progress(item, progress, total)
+    subroutine update_progress(item, progress)
+        type(dataset), pointer, intent(inout) :: item
+        integer, intent(in) :: progress
+        integer(8) finish
+        real elapsed
+
+        ! take a time measurement
+        call system_clock(finish)
+        elapsed = real(finish - item%start_time)/real(item%crate)
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%progress_mtx))
+
+        item%progress = item%progress + progress
+        item%elapsed = elapsed
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%progress_mtx))
+
+    end subroutine update_progress
+
+    subroutine set_progress(item, progress, total)
         type(dataset), pointer, intent(inout) :: item
         integer, intent(in) :: progress, total
         integer(8) finish
@@ -364,14 +385,14 @@ contains
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
 
-        item%progress = item%progress + 1
+        item%progress = progress
         item%total = total
         item%elapsed = elapsed
 
         ! unlock the mutex
         call g_mutex_unlock(c_loc(item%progress_mtx))
 
-    end subroutine update_progress
+    end subroutine set_progress
 
     integer(c_int) function get_error_status(item_ptr) bind(c)
         type(C_PTR), intent(in), value :: item_ptr
@@ -1069,6 +1090,8 @@ contains
 
         ! calculate the range for each image
         if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
+            call set_progress(item, 0, 1)
+
             ! client nodes can skip 2D images
             if (c_associated(root)) then
                 return
@@ -1113,7 +1136,7 @@ contains
             end do
 
             ! measure progress only on the root image
-            call update_progress(item, 1, 1)
+            call update_progress(item, 1)
 
             item%dmin = dmin
             item%dmax = dmax
@@ -1179,7 +1202,6 @@ contains
             ! initially the whole range
             start = 1
             end = naxes(3)
-            num_per_node = end - start + 1
 
             ! type(zfp_ptr), dimension(:), allocatable :: compressed
             allocate (item%compressed(start:end))
@@ -1191,9 +1213,17 @@ contains
             allocate (item%frame_min(start:end))
             allocate (item%frame_max(start:end))
 
+            ! reset the initial counter
+            num_per_node = 0
+
+            ! reset the progress counters
+            call set_progress(item, num_per_node, naxes(3))
+
             do
                 ! dynamically request / get the range blocks
                 if (.not. c_associated(root)) then
+                    call update_progress(item, num_per_node)
+
                     ! a direct (local) request
                     call get_channel_range(item, start, end, status)
                 else
