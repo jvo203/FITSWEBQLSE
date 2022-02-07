@@ -1221,10 +1221,11 @@ contains
             num_per_node = 0
 
             do
+                ! update the progress with work done so far
+                call update_progress(item, num_per_node)
+
                 ! dynamically request / get the range blocks
                 if (.not. c_associated(root)) then
-                    call update_progress(item, num_per_node)
-
                     ! a direct (local) request
                     call get_channel_range(item, start, end, status)
                 else
