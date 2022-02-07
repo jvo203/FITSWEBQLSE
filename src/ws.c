@@ -53,6 +53,16 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
         // a FITS channel range combined PUT/GET request
         if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
+            struct mg_http_part part;
+            size_t ofs = 0;
+            while ((ofs = mg_http_next_multipart(hm->body, ofs, &part)) > 0)
+            {
+                LOG(LL_INFO,
+                    ("Chunk name: [%.*s] filename: [%.*s] length: %lu bytes",
+                     (int)part.name.len, part.name.ptr, (int)part.filename.len,
+                     part.filename.ptr, (unsigned long)part.body.len));
+            }
+
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
 
             char *datasetId = strrchr(tmp, '/');
