@@ -35,6 +35,7 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
 
+        // open a WebSocket request
         if (mg_strstr(hm->uri, mg_str("/websocket")) != NULL)
         {
             printf("ACCEPTED WEBSOCKET URI:\t%.*s\n", (int)hm->uri.len, hm->uri.ptr);
@@ -49,7 +50,7 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
             break;
         }
 
-        // is it "/range" ?
+        // a FITS channel range combined PUT/GET request
         if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
@@ -77,14 +78,15 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
                     }
                 }
 
+                char *json = NULL;
                 int start, end, status;
 
                 // get the channel range from FORTRAN
                 get_channel_range_C(item, &start, &end, &status);
 
-                char *json = NULL;
                 mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%d,%Q:%d,%Q:%d}", "startindex", start, "endindex", end, "status", status);
                 mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", json);
+
                 free(json);
             }
             else
