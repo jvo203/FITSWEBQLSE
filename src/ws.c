@@ -148,6 +148,7 @@ void start_ws()
 
     struct mg_mgr mgr; // Event manager
     mg_mgr_init(&mgr); // Initialise event manager
+    mg_log_set("3");
     printf("Starting WS listener on %s\n", url);
 
     mg_http_listen(&mgr, url, mg_ws_callback, NULL); // Create HTTP listener
