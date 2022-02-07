@@ -1140,7 +1140,6 @@ contains
 
             end do
 
-            ! measure progress only on the root image
             call update_progress(item, 1)
 
             item%dmin = dmin
