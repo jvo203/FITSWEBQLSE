@@ -56,11 +56,19 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
         // a FITS channel range combined PUT/GET request
         if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
-            printf("POST /range request: [%.*s]\n", (int)hm->body.len, hm->body.ptr);
+            printf("POST <range> request: [%.*s]\n", (int)hm->body.len, hm->body.ptr);
+
+            int progress = 0;
+            char buf[100] = "";
+
+            if (mg_http_get_var(&hm->body, "progress", buf, sizeof(buf)) > 0)
+                progress = atoi(buf);
 
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
 
             char *datasetId = strrchr(tmp, '/');
+
+            printf("POST <range> request for '%s': progress = %d\n", datasetId, progress);
 
             if (datasetId != NULL)
             {
