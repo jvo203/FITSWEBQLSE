@@ -7,7 +7,7 @@
 extern options_t options; // <options> is defined in main.c
 extern sig_atomic_t s_received_signal;
 
-static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
+static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     switch (ev)
     {
@@ -150,7 +150,7 @@ void start_ws()
     mg_log_set("3");
     printf("Starting WS listener on %s\n", url);
 
-    mg_http_listen(&mgr, url, mg_ws_callback, NULL); // Create HTTP listener
+    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL); // Create HTTP listener
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 1000); // Infinite event loop
