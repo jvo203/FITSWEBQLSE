@@ -96,7 +96,7 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
             break;
         }
 
-        // else
+        // all else
         {
             printf("rejecting the connection.\n");
 
