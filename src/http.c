@@ -634,8 +634,6 @@ static enum MHD_Result on_http_connection(void *cls,
     {
         char *datasetId = strrchr(url, '/');
 
-        printf("handling a '/range' request for '%s'\n", datasetId);
-
         if (datasetId != NULL)
         {
             datasetId++; // skip the slash character
