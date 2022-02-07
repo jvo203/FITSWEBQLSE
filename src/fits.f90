@@ -1050,6 +1050,13 @@ contains
         item%naxis = naxis
         item%naxes = naxes
 
+        ! reset the progress
+        if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
+            call set_progress(item, 0, 1)
+        else
+            call set_progress(item, num_per_node, naxes(3))
+        end if
+
         call set_header_status(item, .true.)
 
         print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
@@ -1090,8 +1097,6 @@ contains
 
         ! calculate the range for each image
         if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
-            call set_progress(item, 0, 1)
-
             ! client nodes can skip 2D images
             if (c_associated(root)) then
                 return
@@ -1215,9 +1220,6 @@ contains
 
             ! reset the initial counter
             num_per_node = 0
-
-            ! reset the progress
-            call set_progress(item, num_per_node, naxes(3))
 
             do
                 ! dynamically request / get the range blocks
