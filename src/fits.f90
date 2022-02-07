@@ -372,6 +372,19 @@ contains
 
     end subroutine update_progress
 
+    subroutine print_progress(item)
+        type(dataset), pointer, intent(inout) :: item
+
+        ! lock the mutex
+        call g_mutex_lock(c_loc(item%progress_mtx))
+
+        print *, 'progress', item%progress, 'total', item%total
+
+        ! unlock the mutex
+        call g_mutex_unlock(c_loc(item%progress_mtx))
+
+    end subroutine print_progress
+
     subroutine set_progress(item, progress, total)
         type(dataset), pointer, intent(inout) :: item
         integer, intent(in) :: progress, total
@@ -1265,6 +1278,8 @@ contains
                 deallocate (thread_units)
             end if
         end if
+
+        call print_progress(item)
 
         bSuccess = .true.
         return
