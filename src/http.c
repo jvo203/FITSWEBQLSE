@@ -1811,7 +1811,8 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
         /* we pass our 'chunk' struct to the callback function */
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post->str);
+        if (progress > 0)
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post->str);
 
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
