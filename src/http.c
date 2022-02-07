@@ -63,6 +63,7 @@ extern int get_ok_status(void *item);
 extern float get_progress(void *item);
 extern float get_elapsed(void *item);
 extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
+extern void get_channel_range_C(void *ptr, int *start, int *end, int *status);
 
 size_t chunked_write(int fd, const char *src, size_t n);
 void *stream_molecules(void *args);
