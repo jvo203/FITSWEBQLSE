@@ -1812,7 +1812,13 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
         if (progress > 0)
+        {
+            /* size of the POST data */
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post->len);
+
+            /* the actual POST data */
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post->str);
+        }
 
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
