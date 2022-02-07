@@ -1797,6 +1797,10 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
         chunk.size = 0;           /* no data at this point */
         chunk.memory[0] = 0;
 
+        /* POST data */
+        GString *post = g_string_new(NULL);
+        g_string_printf(post, "progress=%d", progress);
+
         curl_easy_setopt(curl, CURLOPT_URL, url->str);
 
         /* send all data to this function  */
@@ -1804,6 +1808,8 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
 
         /* we pass our 'chunk' struct to the callback function */
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post->str);
 
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
@@ -1837,6 +1843,8 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
 
         /* always cleanup */
         curl_easy_cleanup(curl);
+
+        g_string_free(post, TRUE);
     };
 
     g_string_free(url, TRUE);
