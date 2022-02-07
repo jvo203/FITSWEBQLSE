@@ -1786,7 +1786,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
     GString *url = g_string_new("http://");
 
     g_string_append_printf(url, "%s:", root);
-    g_string_append_printf(url, "%" PRIu16 "/range/%s/%d", options.http_port, id, progress);
+    g_string_append_printf(url, "%" PRIu16 "/range/%s", options.ws_port, id);
     // printf("[C] URL: '%s'\n", url->str);
 
     curl = curl_easy_init();
@@ -1799,6 +1799,10 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
         chunk.size = 0;           /* no data at this point */
         chunk.memory[0] = 0;
 
+        /* POST data */
+        GString *post = g_string_new(NULL);
+        g_string_printf(post, "progress=%d", progress);
+
         curl_easy_setopt(curl, CURLOPT_URL, url->str);
 
         /* send all data to this function  */
@@ -1806,6 +1810,12 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
 
         /* we pass our 'chunk' struct to the callback function */
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+
+        /* size of the POST data */
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post->len);
+
+        /* the actual POST data */
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post->str);
 
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
@@ -1839,6 +1849,8 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
 
         /* always cleanup */
         curl_easy_cleanup(curl);
+
+        g_string_free(post, TRUE);
     };
 
     g_string_free(url, TRUE);
