@@ -48,8 +48,11 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
         if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
 
+            // signal a catastrophic error
+            mg_http_reply(c, 200, "", "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+
             // accept the request
-            mg_http_reply(c, 202, "", "Accepted");
+            // mg_http_reply(c, 202, "", "Accepted");
             break;
         }
 
