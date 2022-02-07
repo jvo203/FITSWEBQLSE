@@ -1825,7 +1825,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
         else
         {
             // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
-            printf("cURL response: %s\n", chunk.memory);
+            // printf("cURL response: %s\n", chunk.memory);
 
             // assume accepted (no header yet)
             *status = 1;
