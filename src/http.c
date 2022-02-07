@@ -632,8 +632,9 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/range/") != NULL)
     {
-        printf("handling a '/range' request...\n");
         char *datasetId = strrchr(url, '/');
+
+        printf("handling a '/range' request for '%s'\n", datasetId);
 
         if (datasetId != NULL)
         {
