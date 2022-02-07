@@ -54,7 +54,7 @@ struct MHD_Daemon *http_server = NULL;
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
 void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
-void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status);
+void fetch_channel_range(char *root, char *datasetid, int len, int progress, int *start, int *end, int *status);
 
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root);
 extern int get_error_status(void *item);
@@ -1736,7 +1736,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     return realsize;
 }
 
-void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status)
+void fetch_channel_range(char *root, char *datasetid, int len, int progress, int *start, int *end, int *status)
 {
     char *id = strndup(datasetid, len);
 
