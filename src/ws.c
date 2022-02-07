@@ -7,8 +7,6 @@
 extern options_t options; // <options> is defined in main.c
 extern sig_atomic_t s_received_signal;
 
-extern void get_channel_range_C(void *ptr, int *start, int *end, int *status);
-
 static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     switch (ev)
@@ -56,8 +54,6 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
         // a FITS channel range combined PUT/GET request
         if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
-            printf("POST <range> request: [%.*s]\n", (int)hm->body.len, hm->body.ptr);
-
             int progress = 0;
             char buf[100] = "";
 
@@ -68,7 +64,7 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
 
             char *datasetId = strrchr(tmp, '/');
 
-            printf("POST <range> request for '%s': progress = %d\n", datasetId, progress);
+            printf("<range> POST request for '%s': progress = %d\n", datasetId, progress);
 
             if (datasetId != NULL)
             {
@@ -95,7 +91,7 @@ static void mg_ws_callback(struct mg_connection *c, int ev, void *ev_data, void 
                 int start, end, status;
 
                 // get the channel range from FORTRAN
-                get_channel_range_C(item, &start, &end, &status);
+                get_channel_range_C(item, &start, &end, &status, progress);
 
                 mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%d,%Q:%d,%Q:%d}", "startindex", start, "endindex", end, "status", status);
                 mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", json);
