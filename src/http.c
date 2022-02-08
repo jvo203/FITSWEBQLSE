@@ -20,6 +20,9 @@
 #include <microhttpd.h>
 #include <curl/curl.h>
 
+// LZ4 character streams compressor
+#include <lz4hc.h>
+
 #include "json.h"
 #include "http.h"
 #include "mjson.h"
