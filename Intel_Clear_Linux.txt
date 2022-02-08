@@ -72,8 +72,23 @@
 
     sudo make install
 
+# 12. FPZIP
 
-# 12. Adjust the environment variables in the .bashrc
+    git clone https://github.com/LLNL/fpzip.git
+
+    cd fpzip
+
+    mkdir -p build
+
+    cd build
+
+    cmake ..
+
+    make
+
+    sudo make install
+
+# 13. Adjust the environment variables in the .bashrc
 
     Add
 
@@ -82,7 +97,7 @@
 
     to .bashrc and re-login
 
-# 13. Intel oneAPI
+# 14. Intel oneAPI
 
     i) intel-basekit
 
@@ -102,7 +117,7 @@
 
     to .bashrc and re-login
 
-# 14. libdill (C coroutines) 
+# 15. libdill (C coroutines) 
 
     (compilation errors in both Fedora 35 and Intel Clear Linux ...)
     (a fix: make CC=clang)
@@ -125,6 +140,6 @@
 
     sudo make install
 
-# 15. MPI launcher (we do not use MPI internally!)
+# 16. MPI launcher (we do not use MPI internally!)
 
     mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse -c config_ssd.ini
