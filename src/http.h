@@ -75,6 +75,16 @@ struct MemoryStruct
     size_t size;
 };
 
+struct arg_struct
+{
+    void *item;
+    int width;
+    int height;
+    int precision;
+    int fetch_data;
+    int fd;
+};
+
 struct splat_req
 {
     bool first;
