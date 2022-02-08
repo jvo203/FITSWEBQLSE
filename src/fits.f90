@@ -288,6 +288,14 @@ module fits
             character(kind=c_char), intent(in) :: json_str(*)
         end subroutine write_header
 
+        subroutine write_spectrum(fd, spectrum, n, prec) BIND(C, name='write_spectrum')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: fd, n, prec
+            type(C_PTR), value, intent(in) :: spectrum
+        end subroutine write_spectrum
+
         ! glib functions
         !  GString *begin_json()
         type(C_PTR) function begin_json() BIND(C, name='begin_json')
