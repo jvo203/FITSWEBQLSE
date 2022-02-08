@@ -26,6 +26,9 @@
 // FPzip
 #include <fpzip.h>
 
+// ZFP floating-point compressor
+#include <zfp.h>
+
 #include "json.h"
 #include "http.h"
 #include "mjson.h"
@@ -76,6 +79,7 @@ size_t chunked_write(int fd, const char *src, size_t n);
 void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
+void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *pixels, const bool *mask);
 
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
@@ -2248,4 +2252,163 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
 
         free(compressed);
     }
+}
+
+void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *pixels, const bool *mask)
+{
+    uchar *compressed_pixels = NULL;
+    char *compressed_mask = NULL;
+
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = width;
+    uint ny = height;
+
+    int mask_size, worst_size;
+    int compressed_size = 0;
+
+    if (flux == NULL || pixels == NULL || mask == NULL)
+        return;
+
+    if (width <= 0 || height <= 0)
+        return;
+
+    printf("[C] fd: %d, flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f, width: %d, height: %d\n", fd, flux, pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity, width, height);
+
+    /*for (i = 0; i < width; i++)
+        printf("|%f,%d", pixels[i], mask[i]);
+    printf("\n\n\n");
+
+    for (i = width * height - width; i < width * height; i++)
+        printf("|%f,%d", pixels[i], mask[i]);
+    printf("\n");*/
+
+    // compress pixels with ZFP
+    field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    compressed_pixels = (uchar *)malloc(bufsize);
+
+    if (compressed_pixels != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)compressed_pixels, bufsize);
+
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+
+            zfp_write_header(zfp, field, ZFP_HEADER_MODE);
+
+            // compress entire array
+            zfpsize = zfp_compress(zfp, field);
+
+            if (zfpsize == 0)
+                printf("[C] ZFP compression failed!\n");
+            else
+                printf("[C] image pixels compressed size: %zu bytes\n", zfpsize);
+
+            bitstream_close(stream);
+
+            // the compressed part is available at compressed_pixels[0..zfpsize-1]
+        }
+
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+    }
+    else
+        printf("[C] a NULL compressed_pixels buffer!\n");
+
+    // compress mask with LZ4-HC
+    mask_size = width * height;
+
+    worst_size = LZ4_compressBound(mask_size);
+
+    compressed_mask = (char *)malloc(worst_size);
+
+    if (compressed_mask != NULL)
+    {
+        // compress the mask as much as possible
+        compressed_size = LZ4_compress_HC((const char *)mask, compressed_mask, mask_size, worst_size, LZ4HC_CLEVEL_MAX);
+
+        printf("[C] image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
+    }
+
+    // transmit the data
+    float tmp;
+    uint32_t flux_len = strlen(flux);
+
+    uint32_t img_width = width;
+    uint32_t img_height = height;
+    uint32_t pixels_len = zfpsize;
+    uint32_t mask_len = compressed_size;
+
+    // the flux length
+    chunked_write(fd, (const char *)&flux_len, sizeof(flux_len));
+
+    // flux
+    chunked_write(fd, flux, flux_len);
+
+    // pmin
+    tmp = pmin;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // pmax
+    tmp = pmax;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // pmedian
+    tmp = pmedian;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // sensitivity
+    tmp = sensitivity;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // ratio_sensitivity
+    tmp = ratio_sensitivity;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // white
+    tmp = white;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // black
+    tmp = black;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // the image + mask
+    chunked_write(fd, (const char *)&img_width, sizeof(img_width));
+    chunked_write(fd, (const char *)&img_height, sizeof(img_height));
+
+    // pixels (use a chunked version for larger tranfers)
+    chunked_write(fd, (const char *)&pixels_len, sizeof(pixels_len));
+    if (compressed_pixels != NULL)
+        chunked_write(fd, (char *)compressed_pixels, pixels_len);
+
+    // mask (use a chunked version for larger tranfers)
+    chunked_write(fd, (const char *)&mask_len, sizeof(mask_len));
+    if (compressed_mask != NULL)
+        chunked_write(fd, compressed_mask, mask_len);
+
+    // release the memory
+    if (compressed_pixels != NULL)
+        free(compressed_pixels);
+
+    if (compressed_mask != NULL)
+        free(compressed_mask);
 }
