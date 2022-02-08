@@ -198,6 +198,49 @@ module fits
             integer(kind=c_int), value, intent(in) :: n
         end subroutine psrs_sort
 
+        subroutine write_image_spectrum(fd, flux, &
+         pmin, pmax, pmedian, &
+         &black, white, sensitivity, ratio_sensitivity,&
+         &width, height, precision,&
+         &pixels, mask)&
+         &BIND(C, name='write_image_spectrum')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            character(kind=c_char), intent(in) :: flux(*)
+            integer(c_int), value, intent(in) :: fd, width, height, precision
+            real(kind=c_float), value, intent(in) :: pmin, pmax, pmedian
+            real(kind=c_float), value, intent(in) :: black, white
+            real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
+            type(C_PTR), value :: pixels, mask
+        end subroutine write_image_spectrum
+
+        subroutine write_json(fd, json) BIND(C, name='write_json')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: fd
+            type(C_PTR), value :: json
+        end subroutine write_json
+
+        ! void delete_json(GString *json)
+        subroutine delete_json(json) BIND(C, name='delete_json')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+        end subroutine delete_json
+
+        subroutine write_header(fd, json_str, str_len) BIND(C, name='write_header')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: fd, str_len
+            character(kind=c_char), intent(in) :: json_str(*)
+        end subroutine write_header
+
+        ! TO-DO: add write_spectrum
+
     end interface
 
 contains
