@@ -569,11 +569,11 @@ contains
 
     end subroutine set_progress
 
-    integer(c_int) function get_error_status(item_ptr) bind(c)
-        type(C_PTR), intent(in), value :: item_ptr
+    integer(c_int) function get_error_status(ptr) bind(c)
+        type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
 
-        call c_f_pointer(item_ptr, item)
+        call c_f_pointer(ptr, item)
 
         ! lock the mutex
         call g_mutex_lock(c_loc(item%error_mtx))
@@ -590,11 +590,11 @@ contains
         return
     end function get_error_status
 
-    integer(c_int) function get_ok_status(item_ptr) bind(c)
-        type(C_PTR), intent(in), value :: item_ptr
+    integer(c_int) function get_ok_status(ptr) bind(c)
+        type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
 
-        call c_f_pointer(item_ptr, item)
+        call c_f_pointer(ptr, item)
 
         ! lock the mutex
         call g_mutex_lock(c_loc(item%ok_mtx))
@@ -611,11 +611,11 @@ contains
         return
     end function get_ok_status
 
-    integer(c_int) function get_header_status(item_ptr) bind(c)
-        type(C_PTR), intent(in), value :: item_ptr
+    integer(c_int) function get_header_status(ptr) bind(c)
+        type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
 
-        call c_f_pointer(item_ptr, item)
+        call c_f_pointer(ptr, item)
 
         ! lock the mutex
         call g_mutex_lock(c_loc(item%header_mtx))
@@ -632,16 +632,16 @@ contains
         return
     end function get_header_status
 
-    real(c_float) function get_progress(item_ptr) bind(c)
-        type(C_PTR), intent(in), value :: item_ptr
+    real(c_float) function get_progress(ptr) bind(c)
+        type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
 
-        if (get_header_status(item_ptr) .ne. 1) then
+        if (get_header_status(ptr) .ne. 1) then
             get_progress = 0.0
             return
         end if
 
-        call c_f_pointer(item_ptr, item)
+        call c_f_pointer(ptr, item)
 
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
@@ -656,11 +656,11 @@ contains
         call g_mutex_unlock(c_loc(item%progress_mtx))
     end function get_progress
 
-    real(c_float) function get_elapsed(item_ptr) bind(c)
-        type(C_PTR), intent(in), value :: item_ptr
+    real(c_float) function get_elapsed(ptr) bind(c)
+        type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
 
-        call c_f_pointer(item_ptr, item)
+        call c_f_pointer(ptr, item)
 
         ! lock the mutex
         call g_mutex_lock(c_loc(item%progress_mtx))
@@ -1623,8 +1623,8 @@ contains
 
     end subroutine get_spectrum_range
 
-    subroutine get_frequency_range(item_ptr, freq_start, freq_end) bind(c)
-        type(C_PTR), intent(in), value :: item_ptr
+    subroutine get_frequency_range(ptr, freq_start, freq_end) bind(c)
+        type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
         real(kind=c_double) :: freq_start, freq_end
 
@@ -1632,7 +1632,7 @@ contains
         real(kind=8), parameter :: c = 299792458.0
         real(kind=8) :: f1, f2, v1, v2
 
-        call c_f_pointer(item_ptr, item)
+        call c_f_pointer(ptr, item)
 
         if (item%has_velocity) then
 
