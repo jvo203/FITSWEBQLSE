@@ -96,7 +96,7 @@ MOD =
 # -I/home/chris/zfp/include
 DEF = -DLOCAL
 
-LIBS = -L/usr/local/lib -lmicrohttpd `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` -llz4 -L/usr/local/lib64 -lcfitsio -lsqlite3 -lcurl -lz -pthread -lzmq -lczmq
+LIBS = -L/usr/local/lib -lmicrohttpd `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` -llz4 -L/usr/local/lib64 -lcfitsio -lsqlite3 -lcurl -lz -pthread -lzmq -lczmq -lfpzip
 # -lzfp before cfitsio
 #`pkg-config --libs json-fortran`
 
