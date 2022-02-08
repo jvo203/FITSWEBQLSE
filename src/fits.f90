@@ -636,6 +636,11 @@ contains
         type(C_PTR), intent(in), value :: item_ptr
         type(dataset), pointer :: item
 
+        if (get_header_status(item_ptr) .ne. 1) then
+            get_progress = 0.0
+            return
+        end if
+
         call c_f_pointer(item_ptr, item)
 
         ! lock the mutex
