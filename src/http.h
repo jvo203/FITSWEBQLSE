@@ -37,6 +37,9 @@
 #define ZFP_MEDIUM_PRECISION 11
 #define ZFP_LOW_PRECISION 8
 
+#define FPZIP_MEDIUM_PRECISION 16
+#define FPZIP_HIGH_PRECISION 24
+
 typedef struct
 {
     // fitswebql

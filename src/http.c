@@ -23,6 +23,9 @@
 // LZ4 character streams compressor
 #include <lz4hc.h>
 
+// FPzip
+#include <fpzip.h>
+
 #include "json.h"
 #include "http.h"
 #include "mjson.h"
