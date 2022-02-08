@@ -69,6 +69,7 @@ extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq
 size_t chunked_write(int fd, const char *src, size_t n);
 void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
+void write_spectrum(int fd, const float *spectrum, int n, int precision);
 
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
@@ -2183,4 +2184,62 @@ void write_header(int fd, const char *header_str, int str_len)
 
     if (compressed_header != NULL)
         free(compressed_header);
+}
+
+void write_spectrum(int fd, const float *spectrum, int n, int precision)
+{
+    bool success;
+    void *compressed;
+    size_t bufbytes, outbytes;
+    uint32_t length;
+    uint32_t transmitted_size;
+    FPZ *fpz;
+
+    length = n;
+    bufbytes = 1024 + length * sizeof(float);
+    outbytes = 0;
+
+    success = false;
+    compressed = malloc(bufbytes);
+
+    if (compressed != NULL)
+    {
+        // compress to memory
+        fpz = fpzip_write_to_buffer(compressed, bufbytes);
+        fpz->type = FPZIP_TYPE_FLOAT;
+        fpz->prec = precision;
+        fpz->nx = n;
+        fpz->ny = 1;
+        fpz->nz = 1;
+        fpz->nf = 1;
+
+        // write header
+        if (!fpzip_write_header(fpz))
+            fprintf(stderr, "[C] cannot write the FPzip header: %s\n", fpzip_errstr[fpzip_errno]);
+        else
+        {
+            outbytes = fpzip_write(fpz, spectrum);
+
+            if (!outbytes)
+                fprintf(stderr, "[C] FPzip compression failed: %s\n", fpzip_errstr[fpzip_errno]);
+            else
+                success = true;
+        }
+
+        fpzip_write_close(fpz);
+
+        if (success)
+        {
+            printf("[C] float array size: %zu, compressed: %zu bytes\n", length * sizeof(float), outbytes);
+
+            // transmit the data
+            uint32_t transmitted_size = outbytes;
+
+            chunked_write(fd, (const char *)&length, sizeof(length));                     // spectrum length after decompressing
+            chunked_write(fd, (const char *)&transmitted_size, sizeof(transmitted_size)); // compressed buffer size
+            chunked_write(fd, compressed, outbytes);
+        }
+
+        free(compressed);
+    }
 }
