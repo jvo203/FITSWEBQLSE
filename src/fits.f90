@@ -1855,6 +1855,132 @@ contains
 
     END FUNCTION median
 
+    subroutine inherent_image_dimensions(item, width, height)
+        type(dataset), pointer, intent(in) :: item
+        integer, intent(out) :: width, height
+        integer x1, x2, y1, y2, k
+
+        width = item%naxes(1)
+        height = item%naxes(2)
+
+        x1 = 1; x2 = width
+        y1 = 1; y2 = height
+
+        ! go through the 2D image mask item%mask
+        ! truncating the NaN values along the X & Y axes
+
+        ! x1
+        do k = 1, width
+            x1 = k
+
+            if (any(item%mask(k, :))) exit
+        end do
+
+        ! x2
+        do k = width, 1, -1
+            x2 = k
+
+            if (any(item%mask(k, :))) exit
+        end do
+
+        ! y1
+        do k = 1, height
+            y1 = k
+
+            if (any(item%mask(:, k))) exit
+        end do
+
+        ! y2
+        do k = height, 1, -1
+            y2 = k
+
+            if (any(item%mask(:, k))) exit
+        end do
+
+        print *, 'original dimensions:', width, height
+
+        width = x2 - x1 + 1
+        height = y2 - y1 + 1
+
+        print *, 'inherent dimensions:', width, height
+
+    end subroutine inherent_image_dimensions
+
+    function get_screen_scale(x) result(scale)
+        integer, intent(in) :: x
+        real scale
+
+        scale = floor(0.9*real(x))
+
+    end function get_screen_scale
+
+    function get_image_scale_square(width, height, img_width, img_height) result(scale)
+        integer, intent(in) :: width, height
+        integer, intent(in) :: img_width, img_height
+        real scale, screen_dimension, image_dimension
+
+        screen_dimension = get_screen_scale(min(width, height))
+        image_dimension = max(img_width, img_height)
+        scale = screen_dimension/image_dimension
+    end function get_image_scale_square
+
+    function get_image_scale(width, height, img_width, img_height) result(scale)
+        integer, intent(in) :: width, height
+        integer, intent(in) :: img_width, img_height
+        real scale
+
+        if (img_width .eq. img_height) then
+            scale = get_image_scale_square(width, height, img_width, img_height)
+            return
+        end if
+
+        if (img_height .lt. img_width) then
+            block
+                real screen_dimension, image_dimension
+                real new_image_width
+
+                screen_dimension = 0.9*real(height)
+                image_dimension = img_height
+                scale = screen_dimension/image_dimension
+                new_image_width = scale*img_width
+
+                if (new_image_width .gt. 0.8*real(width)) then
+                    screen_dimension = 0.8*real(width)
+                    image_dimension = img_width
+                    scale = screen_dimension/image_dimension
+                end if
+
+            end block
+
+            return
+        end if
+
+        if (img_width .lt. img_height) then
+            block
+                real screen_dimension, image_dimension
+                real new_image_height
+
+                screen_dimension = 0.8*real(width)
+                image_dimension = img_width
+                scale = screen_dimension/image_dimension
+                new_image_height = scale*img_height
+
+                if (new_image_height > 0.9*real(height)) then
+                    screen_dimension = 0.9*real(height)
+                    image_dimension = img_height
+                    scale = screen_dimension/image_dimension
+                end if
+
+            end block
+
+            return
+        end if
+
+        ! default scale
+        scale = 1.0
+        return
+    end function get_image_scale
+
     subroutine image_spectrum_request(ptr, width, height, precision, fetch_data, fd) bind(C)
         ! use json_module
         use, intrinsic :: iso_c_binding
