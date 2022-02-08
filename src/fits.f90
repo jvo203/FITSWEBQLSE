@@ -247,23 +247,6 @@ module fits
             type(C_PTR), value, intent(in) :: pSrc, pDest
         end subroutine resizeNearest
 
-        subroutine write_image_spectrum(fd, flux, &
-         pmin, pmax, pmedian, &
-         &black, white, sensitivity, ratio_sensitivity,&
-         &width, height, precision,&
-         &pixels, mask)&
-         &BIND(C, name='write_image_spectrum')
-            use, intrinsic :: ISO_C_BINDING
-            implicit none
-
-            character(kind=c_char), intent(in) :: flux(*)
-            integer(c_int), value, intent(in) :: fd, width, height, precision
-            real(kind=c_float), value, intent(in) :: pmin, pmax, pmedian
-            real(kind=c_float), value, intent(in) :: black, white
-            real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
-            type(C_PTR), value :: pixels, mask
-        end subroutine write_image_spectrum
-
         subroutine write_json(fd, json) BIND(C, name='write_json')
             use, intrinsic :: ISO_C_BINDING
             implicit none
@@ -287,6 +270,23 @@ module fits
             integer(c_int), value, intent(in) :: fd, str_len
             character(kind=c_char), intent(in) :: json_str(*)
         end subroutine write_header
+
+        subroutine write_image_spectrum(fd, flux, &
+         pmin, pmax, pmedian, &
+         &black, white, sensitivity, ratio_sensitivity,&
+         &width, height, precision,&
+         &pixels, mask)&
+         &BIND(C, name='write_image_spectrum')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            character(kind=c_char), intent(in) :: flux(*)
+            integer(c_int), value, intent(in) :: fd, width, height, precision
+            real(kind=c_float), value, intent(in) :: pmin, pmax, pmedian
+            real(kind=c_float), value, intent(in) :: black, white
+            real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
+            type(C_PTR), value :: pixels, mask
+        end subroutine write_image_spectrum
 
         subroutine write_spectrum(fd, spectrum, n, prec) BIND(C, name='write_spectrum')
             use, intrinsic :: ISO_C_BINDING
