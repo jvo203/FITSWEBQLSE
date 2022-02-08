@@ -58,6 +58,7 @@ void *handle_image_spectrum_request(void *args);
 void fetch_channel_range(char *root, char *datasetid, int len, int progress, int *start, int *end, int *status);
 
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root);
+extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
 extern int get_error_status(void *item);
 extern int get_header_status(void *item);
 extern int get_ok_status(void *item);
