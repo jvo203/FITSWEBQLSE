@@ -2024,6 +2024,75 @@ contains
         return
     end function get_image_scale
 
+    type(C_PTR) function get_json(item)
+        implicit none
+
+        type(dataset), pointer, intent(in) :: item
+        type(C_PTR) :: json
+        integer(kind=8) :: filesize
+
+        ! calculate the FITS file size
+        filesize = nint(real(size(item%hdr)) + real(item%naxes(1))*real(item%naxes(2))&
+                       &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
+
+        json = begin_json()
+
+        ! misc. values
+        call add_json_integer(json, 'width'//c_null_char, item%naxes(1))
+        call add_json_integer(json, 'height'//c_null_char, item%naxes(2))
+        call add_json_integer(json, 'depth'//c_null_char, item%naxes(3))
+        call add_json_integer(json, 'polarisation'//c_null_char, item%naxes(4))
+        call add_json_long(json, 'filesize'//c_null_char, filesize)
+        call add_json_real(json, 'IGNRVAL'//c_null_char, item%ignrval)
+
+        call add_json_real(json, 'CD1_1'//c_null_char, item%cd1_1)
+        call add_json_real(json, 'CD1_2'//c_null_char, item%cd1_2)
+        call add_json_real(json, 'CD2_1'//c_null_char, item%cd2_1)
+        call add_json_real(json, 'CD2_2'//c_null_char, item%cd2_2)
+
+        call add_json_real(json, 'CRVAL1'//c_null_char, item%crval1)
+        call add_json_real(json, 'CDELT1'//c_null_char, item%cdelt1)
+        call add_json_real(json, 'CRPIX1'//c_null_char, item%crpix1)
+        call add_json_string(json, 'CUNIT1'//c_null_char, trim(item%cunit1)//c_null_char)
+        call add_json_string(json, 'CTYPE1'//c_null_char, trim(item%ctype1)//c_null_char)
+
+        call add_json_real(json, 'CRVAL2'//c_null_char, item%crval2)
+        call add_json_real(json, 'CDELT2'//c_null_char, item%cdelt2)
+        call add_json_real(json, 'CRPIX2'//c_null_char, item%crpix2)
+        call add_json_string(json, 'CUNIT2'//c_null_char, trim(item%cunit2)//c_null_char)
+        call add_json_string(json, 'CTYPE2'//c_null_char, trim(item%ctype2)//c_null_char)
+
+        call add_json_real(json, 'CRVAL3'//c_null_char, item%crval3)
+        call add_json_real(json, 'CDELT3'//c_null_char, item%cdelt3)
+        call add_json_real(json, 'CRPIX3'//c_null_char, item%crpix3)
+        call add_json_string(json, 'CUNIT3'//c_null_char, trim(item%cunit3)//c_null_char)
+        call add_json_string(json, 'CTYPE3'//c_null_char, trim(item%ctype3)//c_null_char)
+
+        call add_json_real(json, 'BMAJ'//c_null_char, item%bmaj)
+        call add_json_real(json, 'BMIN'//c_null_char, item%bmin)
+        call add_json_real(json, 'BPA'//c_null_char, item%bpa)
+
+        call add_json_string(json, 'BUNIT'//c_null_char, trim(item%bunit)//c_null_char)
+        call add_json_string(json, 'BTYPE'//c_null_char, trim(item%btype)//c_null_char)
+        call add_json_string(json, 'SPECSYS'//c_null_char, trim(item%specsys)//c_null_char)
+
+        call add_json_real(json, 'RESTFRQ'//c_null_char, item%restfrq)
+        call add_json_real(json, 'OBSRA'//c_null_char, item%obsra)
+        call add_json_real(json, 'OBSDEC'//c_null_char, item%obsdec)
+
+        call add_json_string(json, 'OBJECT'//c_null_char, trim(item%object)//c_null_char)
+        call add_json_string(json, 'DATEOBS'//c_null_char, trim(item%date_obs)//c_null_char)
+        call add_json_string(json, 'TIMESYS'//c_null_char, trim(item%timesys)//c_null_char)
+        call add_json_string(json, 'LINE'//c_null_char, trim(item%line)//c_null_char)
+        call add_json_string(json, 'FILTER'//c_null_char, trim(item%filter)//c_null_char)
+
+        call add_json_integer_array(json, 'histogram'//c_null_char, c_loc(item%hist), size(item%hist))
+
+        call end_json(json)
+
+        get_json = json
+    end function get_json
+
     subroutine image_spectrum_request(ptr, width, height, precision, fetch_data, fd) bind(C)
         ! use json_module
         use, intrinsic :: iso_c_binding
