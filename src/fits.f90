@@ -241,6 +241,70 @@ module fits
 
         ! TO-DO: add write_spectrum
 
+        ! glib functions
+        !  GString *begin_json()
+        type(C_PTR) function begin_json() BIND(C, name='begin_json')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+        end function begin_json
+
+        ! void end_json(GString *json)
+        subroutine end_json(json) BIND(C, name='end_json')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+        end subroutine end_json
+
+        ! void add_json_integer(GString *json, char *key, int val)
+        subroutine add_json_integer(json, key, val) BIND(C, name='add_json_integer')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+            character(kind=c_char), intent(in) :: key(*)
+            integer(c_int), value, intent(in) :: val
+        end subroutine add_json_integer
+
+        ! void add_json_integer_array(GString *json, char *key, int *val, int n)
+        subroutine add_json_integer_array(json, key, val, n) BIND(C, name='add_json_integer_array')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json, val
+            character(kind=c_char), intent(in) :: key(*)
+            integer(c_int), value, intent(in) :: n
+        end subroutine add_json_integer_array
+
+        ! void add_json_string(GString *json, char *key, char *val)
+        subroutine add_json_string(json, key, val) BIND(C, name='add_json_string')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+            character(kind=c_char), intent(in) :: key(*), val(*)
+        end subroutine add_json_string
+
+        ! void add_json_long(GString *json, char *key, long val)
+        subroutine add_json_long(json, key, val) BIND(C, name='add_json_long')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+            character(kind=c_char), intent(in) :: key(*)
+            integer(c_long), value, intent(in) :: val
+        end subroutine add_json_long
+
+        ! void add_json_real(GString *json, char *key, float val)
+        subroutine add_json_real(json, key, val) BIND(C, name='add_json_real')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: json
+            character(kind=c_char), intent(in) :: key(*)
+            real(kind=c_float), value, intent(in) :: val
+        end subroutine add_json_real
+
     end interface
 
 contains
