@@ -227,8 +227,8 @@ void *start_ws(void *ignore)
     const char *p;
     int n = 0, logs = LLL_USER | LLL_ERR | LLL_WARN | LLL_NOTICE
         /* for LLL_ verbosity above NOTICE to be built into lws,
-			 * lws must have been configured and built with
-			 * -DCMAKE_BUILD_TYPE=DEBUG instead of =RELEASE */
+         * lws must have been configured and built with
+         * -DCMAKE_BUILD_TYPE=DEBUG instead of =RELEASE */
         /* | LLL_INFO */ /* | LLL_PARSER */ /* | LLL_HEADER */
         /* | LLL_EXT */ /* | LLL_CLIENT */  /* | LLL_LATENCY */
         /* | LLL_DEBUG */;
@@ -241,7 +241,7 @@ void *start_ws(void *ignore)
     info.mounts = &mount;
     info.protocols = protocols;
     info.pvo = &pvo; /* per-vhost options */
-    //info.vhost_name = "localhost";
+    // info.vhost_name = "localhost";
     info.options =
         LWS_SERVER_OPTION_HTTP_HEADERS_SECURITY_BEST_PRACTICES_ENFORCE;
 
@@ -446,7 +446,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
 
         bool unmodified = false;
 
-        //if(difftime(mktime(&lm), mktime(&tm)) <= 0)
+        // if(difftime(mktime(&lm), mktime(&tm)) <= 0)
         if (difftime(timegm(&lm), timegm(&tm)) <= 0)
             unmodified = true;
 
@@ -487,7 +487,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
             return MHD_NO;
         }
 
-        //detect mime-types
+        // detect mime-types
         char *pos = NULL;
 
         pos = (char *)strstr(url, ".htm");
@@ -546,7 +546,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
         if (pos != NULL)
             MHD_add_response_header(response, "Content-Type", "image/svg+xml");
 
-        MHD_add_response_header(response, "Cache-Control", "public, max-age=86400"); //86400
+        MHD_add_response_header(response, "Cache-Control", "public, max-age=86400"); // 86400
         MHD_add_response_header(response, MHD_HTTP_HEADER_ETAG, last_etag);
 
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
@@ -600,7 +600,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     {
         for (i = 0; i < n; i++)
         {
-            //printf("%s\n", namelist[i]->d_name);
+            // printf("%s\n", namelist[i]->d_name);
 
             char pathname[1024];
 
@@ -649,7 +649,7 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
             free(namelist[i]);
         };
 
-        //overwrite the the last ',' with a list closing character
+        // overwrite the the last ',' with a list closing character
         if (has_contents)
             g_string_truncate(json, json->len - 1);
 
@@ -728,7 +728,7 @@ static enum MHD_Result on_http_connection(void *cls,
     enum MHD_Result ret;
 
     // accept both "GET" and "PUT"
-    //if (0 != strcmp(method, "GET"))
+    // if (0 != strcmp(method, "GET"))
     //    return MHD_NO; /* unexpected method */
 
     if (&dummy != *ptr)
@@ -747,7 +747,7 @@ static enum MHD_Result on_http_connection(void *cls,
     const char *user_agent = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
     const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
-    //MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
+    // MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
 
 #ifdef LOCAL
     if (0 == strcmp(url, "/get_directory"))
@@ -1029,7 +1029,7 @@ static enum MHD_Result on_http_connection(void *cls,
     if (strstr(url, "FITSWebQL.html") != NULL)
     {
 #ifndef LOCAL
-        //get the root path
+        // get the root path
         char *proot = (char *)strstr(url, "FITSWebQL.html");
 
         int len = proot - url;
@@ -1038,7 +1038,7 @@ static enum MHD_Result on_http_connection(void *cls,
         printf("[C] URL root path: %s\n", root);
 #endif
 
-        //get datasetId
+        // get datasetId
         char **datasetId = NULL;
         int va_count = 0;
 
@@ -1047,7 +1047,7 @@ static enum MHD_Result on_http_connection(void *cls,
         char *extension = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ext");
         char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "filename");
 
-        //auto-detect multiple entries
+        // auto-detect multiple entries
         if (tmp == NULL)
         {
             char str_key[255] = "";
@@ -1070,14 +1070,14 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             va_count = 1;
 
-            //allocate datasetId
+            // allocate datasetId
             datasetId = (char **)malloc(sizeof(char *));
             datasetId[0] = tmp;
         }
 #else
         char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
 
-        //auto-detect multiple lines
+        // auto-detect multiple lines
         if (tmp == NULL)
         {
             char str_key[255] = "";
@@ -1100,7 +1100,7 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             va_count = 1;
 
-            //allocate datasetId
+            // allocate datasetId
             datasetId = (char **)malloc(sizeof(char *));
             datasetId[0] = tmp;
         }
@@ -1204,8 +1204,8 @@ void SIGINTHandler(int sigint)
         MHD_stop_daemon(http_server);
         http_server = NULL;
 
-        //stop accepting new connections
-        //MHD_quiesce_daemon(http_server);
+        // stop accepting new connections
+        // MHD_quiesce_daemon(http_server);
     };
 
     printf("[C] clean shutdown completed.\n");
@@ -1239,10 +1239,10 @@ extern int get_physical_cores()
 extern void start_http()
 {
 
-    signal(SIGPIPE, SIG_IGN); //ignore SIGPIPE
-    //signal(SIGINT, SIGINTHandler); //intercept CTRL+C to trigger a clean shutdown
+    signal(SIGPIPE, SIG_IGN); // ignore SIGPIPE
+    // signal(SIGINT, SIGINTHandler); //intercept CTRL+C to trigger a clean shutdown
 
-    //http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
+    // http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
     http_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
                                    HTTP_PORT,
                                    NULL,
@@ -1696,7 +1696,7 @@ extern void write_header(int fd, const char *header_str, int str_len)
 
         printf("[C] HEADER length: %d; compressed: %d bytes\n", str_len, compressed_size);
 
-        //send off the compressed data
+        // send off the compressed data
         if (compressed_size > 0)
         {
             uint32_t header_size = str_len;
@@ -1742,7 +1742,7 @@ extern void write_viewport(int fd, int width, int height, const float *pixels, c
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
 
-    //zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
     zfp_stream_set_precision(zfp, precision);
 
     // allocate buffer for compressed data
@@ -1863,7 +1863,7 @@ extern void write_image_spectrum(int fd, const char *flux, float pmin, float pma
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
 
-    //zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
     zfp_stream_set_precision(zfp, precision);
 
     // allocate buffer for compressed data

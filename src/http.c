@@ -67,6 +67,9 @@ extern float get_elapsed(void *item);
 extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
 
 size_t chunked_write(int fd, const char *src, size_t n);
+void write_json(int fd, GString *json);
+void write_header(int fd, const char *header_str, int str_len);
+
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
 
@@ -2129,4 +2132,55 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
     }
 
     return 0;
+}
+
+void write_json(int fd, GString *json)
+{
+    if (json == NULL)
+        return;
+
+    printf("[C] JSON(%s)\n", json->str);
+
+    write_header(fd, json->str, json->len);
+}
+
+void write_header(int fd, const char *header_str, int str_len)
+{
+    char *compressed_header = NULL;
+
+    if (header_str == NULL)
+        return;
+
+    int worst_size;
+    int compressed_size = 0;
+
+    if (str_len == 0)
+        return;
+
+    worst_size = LZ4_compressBound(str_len);
+
+    compressed_header = (char *)malloc(worst_size);
+
+    if (compressed_header != NULL)
+    {
+        // compress JSON as much as possible
+        // no, to speed up the process switched to the default compression level (.eq. 0)
+        compressed_size = LZ4_compress_HC((const char *)header_str, compressed_header, str_len, worst_size, 0 /*LZ4HC_CLEVEL_MAX*/);
+
+        printf("[C] HEADER length: %d; compressed: %d bytes\n", str_len, compressed_size);
+
+        // send off the compressed data
+        if (compressed_size > 0)
+        {
+            uint32_t header_size = str_len;
+            uint32_t transmitted_size = compressed_size;
+
+            chunked_write(fd, (const char *)&header_size, sizeof(header_size));           // header size after decompressing
+            chunked_write(fd, (const char *)&transmitted_size, sizeof(transmitted_size)); // compressed buffer size
+            chunked_write(fd, compressed_header, compressed_size);
+        }
+    }
+
+    if (compressed_header != NULL)
+        free(compressed_header);
 }
