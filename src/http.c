@@ -2259,6 +2259,13 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
     }
 }
 
+void rpad(char *dst, const char *src, const char pad, const size_t sz)
+{
+    memset(dst, pad, sz);
+    dst[sz] = 0x0;
+    memcpy(dst, src, strlen(src));
+}
+
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *pixels, const bool *mask)
 {
     uchar *compressed_pixels = NULL;
@@ -2353,9 +2360,18 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
         printf("[C] image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
     }
 
+    // pad the flux with spaces so that the length is a multiple of 4 (JavaScript needs it ...)
+    int padded_len = 4 * (strlen(flux) / 4 + 1);
+
+    // memory for a new padded flux
+    char padded_flux[padded_len + 1];
+
+    // right-pad the flux with spaces
+    rpad(padded_flux, flux, ' ', padded_len);
+
     // transmit the data
     float tmp;
-    uint32_t flux_len = strlen(flux);
+    uint32_t flux_len = strlen(padded_flux);
 
     uint32_t img_width = width;
     uint32_t img_height = height;
@@ -2366,7 +2382,7 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     chunked_write(fd, (const char *)&flux_len, sizeof(flux_len));
 
     // flux
-    chunked_write(fd, flux, flux_len);
+    chunked_write(fd, padded_flux, flux_len);
 
     // pmin
     tmp = pmin;
