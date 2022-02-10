@@ -22,6 +22,25 @@
     char* lz4_mask
 
 # JSON
+    
     int32 json_lenght
     int32 length(lz4_json)
     char* lz4_json
+
+# FITS HEADER
+
+    int32 length(header)
+    int32 length(lz4_header)
+    char* lz4_header
+
+# MEAN SPECTRUM
+
+    int32 length(mean_spectrum)
+    int32 length(zfp_mean_spectrum)
+    char* zfp_mean_spectrum
+
+# INTEGRATED SPECTRUM
+
+    int32 length(integrated_spectrum)
+    int32 length(zfp_integrated_spectrum)
+    char* zfp_integrated_spectrum
