@@ -2266,7 +2266,7 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
         free(compressed);
     }
     else
-        printf("[C] a NULL compressed_pixels buffer!\n");
+        printf("[C] a NULL compressed buffer!\n");
 
     // clean up
     zfp_field_free(field);
