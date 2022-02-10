@@ -2323,7 +2323,7 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
         {
             zfp_stream_set_bit_stream(zfp, stream);
 
-            zfp_write_header(zfp, field, ZFP_HEADER_MODE);
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
 
             // compress entire array
             zfpsize = zfp_compress(zfp, field);
