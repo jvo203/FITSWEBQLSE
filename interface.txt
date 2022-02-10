@@ -1,0 +1,2 @@
+/image_spectrum --> function streamImageSpectrum(http::HTTP.Stream)
+
