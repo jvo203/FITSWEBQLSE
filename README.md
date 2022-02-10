@@ -1,4 +1,4 @@
-![Alt text](IVOA.JPG?raw=true "JVO Breaking Through the 1TB Barrier")
+![Alt text](IVOA.jpg?raw=true "JVO Breaking Through the 1TB Barrier")
 
 # FITSWEBQL SE
 
