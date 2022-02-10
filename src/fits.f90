@@ -44,9 +44,9 @@ module fits
     !    integer(kind=2), dimension(:, :), pointer :: ptr
     !end type fp16
 
-    type zfp_ptr
+    type array_ptr
         type(fixed_block), dimension(:, :), pointer :: ptr
-    end type zfp_ptr
+    end type array_ptr
 
     type dataset
         character(kind=c_char), dimension(:), allocatable :: datasetid
@@ -84,7 +84,7 @@ module fits
         logical(kind=c_bool), allocatable :: mask(:, :)
 
         ! an array holding pointers to half-float 2D channel images
-        type(zfp_ptr), dimension(:), allocatable :: compressed
+        type(array_ptr), dimension(:), allocatable :: compressed
 
         logical :: is_optical = .true.
         logical :: is_xray = .false.
