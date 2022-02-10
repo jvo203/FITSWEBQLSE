@@ -2,7 +2,7 @@
 
 ![Alt text](IVOA.jpg?raw=true "JVO Breaking Through the 1TB Barrier")
 
-# FITSWEBQLSE Status
+# FITSWEBQLSE STATUS
 in active development
 
 ## PROJECT LAZARUS (a.k.a. FORTRAN RESURRECTED) (January 2022 ~)
