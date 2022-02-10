@@ -1,2 +1,27 @@
-/image_spectrum --> function streamImageSpectrum(http::HTTP.Stream)
+"/image_spectrum" --> function streamImageSpectrum(http::HTTP.Stream)
 
+# tone mapping
+
+    uint32  length(flux)
+    char* flux
+    float32 pmin
+    float32 pmax
+    float32 median
+    float32 sensitivity
+    float32 ratio_sensitivity
+    float32 white
+    float32 black
+
+# image
+
+    int32 width
+    int32 height
+    int32 length(zfp_pixels)
+    char* zfp_pixels
+    int32 length(lz4_mask)
+    char* lz4_mask
+
+# JSON
+    int32 json_lenght
+    int32 length(lz4_json)
+    char* lz4_json
