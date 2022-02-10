@@ -1,8 +1,6 @@
-# Breaking the 1TB Barrier
+# FITSWEBQLSE: Breaking the 1TB Barrier
 
 ![Alt text](IVOA.jpg?raw=true "JVO Breaking Through the 1TB Barrier")
-
-# FITSWEBQLSE
 
 # status
 in active development
