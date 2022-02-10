@@ -23,9 +23,6 @@
 // LZ4 character streams compressor
 #include <lz4hc.h>
 
-// FPzip
-#include <fpzip.h>
-
 // ZFP floating-point compressor
 #include <zfp.h>
 
@@ -2203,60 +2200,77 @@ void write_header(int fd, const char *header_str, int str_len)
 
 void write_spectrum(int fd, const float *spectrum, int n, int precision)
 {
-    bool success;
-    void *compressed;
-    size_t bufbytes, outbytes;
-    uint32_t length;
-    uint32_t transmitted_size;
-    FPZ *fpz;
+    uchar *compressed;
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = n;
 
-    length = n;
-    bufbytes = 1024 + length * sizeof(float);
-    outbytes = 0;
+    uint32_t length = n;
 
-    success = false;
-    compressed = malloc(bufbytes);
+    if (spectrum == NULL)
+        return;
+
+    if (n <= 0)
+        return;
+
+    // spectrum with ZFP
+    field = zfp_field_1d((void *)spectrum, data_type, nx);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    compressed = (uchar *)malloc(bufsize);
 
     if (compressed != NULL)
     {
-        // compress to memory
-        fpz = fpzip_write_to_buffer(compressed, bufbytes);
-        fpz->type = FPZIP_TYPE_FLOAT;
-        fpz->prec = precision;
-        fpz->nx = n;
-        fpz->ny = 1;
-        fpz->nz = 1;
-        fpz->nf = 1;
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)compressed, bufsize);
 
-        // write header
-        if (!fpzip_write_header(fpz))
-            fprintf(stderr, "[C] cannot write the FPzip header: %s\n", fpzip_errstr[fpzip_errno]);
-        else
+        if (stream != NULL)
         {
-            outbytes = fpzip_write(fpz, spectrum);
+            zfp_stream_set_bit_stream(zfp, stream);
 
-            if (!outbytes)
-                fprintf(stderr, "[C] FPzip compression failed: %s\n", fpzip_errstr[fpzip_errno]);
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+            // compress entire array
+            zfpsize = zfp_compress(zfp, field);
+
+            if (zfpsize == 0)
+                printf("[C] ZFP compression failed!\n");
             else
-                success = true;
-        }
+                printf("[C] spectrum compressed size: %zu bytes\n", zfpsize);
 
-        fpzip_write_close(fpz);
+            bitstream_close(stream);
 
-        if (success)
-        {
-            printf("[C] float array size: %zu, compressed: %zu bytes\n", length * sizeof(float), outbytes);
+            // the compressed part is available at compressed_pixels[0..zfpsize-1]
+            printf("[C] float array size: %zu, compressed: %zu bytes\n", length * sizeof(float), zfpsize);
 
             // transmit the data
-            uint32_t transmitted_size = outbytes;
+            uint32_t compressed_size = zfpsize;
 
-            chunked_write(fd, (const char *)&length, sizeof(length));                     // spectrum length after decompressing
-            chunked_write(fd, (const char *)&transmitted_size, sizeof(transmitted_size)); // compressed buffer size
-            chunked_write(fd, compressed, outbytes);
+            chunked_write(fd, (const char *)&length, sizeof(length));                   // spectrum length after decompressing
+            chunked_write(fd, (const char *)&compressed_size, sizeof(compressed_size)); // compressed buffer size
+            chunked_write(fd, compressed, zfpsize);
         }
+
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
 
         free(compressed);
     }
+    else
+        printf("[C] a NULL compressed_pixels buffer!\n");
 }
 
 void rpad(char *dst, const char *src, const char pad, const size_t sz)
