@@ -1431,7 +1431,8 @@ contains
                     print *, 'START', start, 'END', end, 'NUM_PER_NODE', num_per_node
 
                     ! simulate doing work
-                    call sleep(1) ! 1 sec.
+                    ! call sleep(1) ! 1 sec.
+                    
                 else
                     ! no work done at this step
                     num_per_node = 0
