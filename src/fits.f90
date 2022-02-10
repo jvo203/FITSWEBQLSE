@@ -1,7 +1,7 @@
 module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
-    use zfp_array
+    use fixed_array
     use logger_mod, only: logger_init, logger => master_logger
 
     implicit none
@@ -45,7 +45,7 @@ module fits
     !end type fp16
 
     type zfp_ptr
-        type(zfp_block), dimension(:, :), pointer :: ptr
+        type(fixed_block), dimension(:, :), pointer :: ptr
     end type zfp_ptr
 
     type dataset
