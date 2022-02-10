@@ -1390,7 +1390,6 @@ contains
             start = 1
             end = naxes(3)
 
-            ! type(zfp_ptr), dimension(:), allocatable :: compressed
             allocate (item%compressed(start:end))
 
             do i = start, end
