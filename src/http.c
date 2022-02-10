@@ -2263,14 +2263,14 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
             chunked_write(fd, compressed, zfpsize);
         }
 
-        // clean up
-        zfp_field_free(field);
-        zfp_stream_close(zfp);
-
         free(compressed);
     }
     else
         printf("[C] a NULL compressed_pixels buffer!\n");
+
+    // clean up
+    zfp_field_free(field);
+    zfp_stream_close(zfp);
 }
 
 void rpad(char *dst, const char *src, const char pad, const size_t sz)
@@ -2351,13 +2351,13 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
 
             // the compressed part is available at compressed_pixels[0..zfpsize-1]
         }
-
-        // clean up
-        zfp_field_free(field);
-        zfp_stream_close(zfp);
     }
     else
         printf("[C] a NULL compressed_pixels buffer!\n");
+
+    // clean up
+    zfp_field_free(field);
+    zfp_stream_close(zfp);
 
     // compress mask with LZ4-HC
     mask_size = width * height;
