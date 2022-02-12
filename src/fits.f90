@@ -676,6 +676,11 @@ contains
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
 
+      if (get_header_status(ptr) .ne. 1) then
+         get_elapsed = 0.0
+         return
+      end if
+
       call c_f_pointer(ptr, item)
 
       ! lock the mutex
