@@ -6,7 +6,7 @@
 ! Licence: ISC
 module util
     use, intrinsic :: iso_c_binding
-    use :: unix
+    use :: unix_pthread
     implicit none
 
     type(c_pthread_mutex_t), save :: foo_mutex
