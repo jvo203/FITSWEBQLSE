@@ -54,6 +54,8 @@ static pthread_t zmq_t;
 
 static void *autodiscovery_daemon(void *);
 extern void init_fortran_logging(char *log_file, size_t len);
+extern void init_fortran();
+extern void cleanup_fortran();
 
 #define OPTSTR "c:d:p:h"
 #define USAGE_FMT "%s  [-c config file] [-d home directory] [-p HTTP port] [-h]\n"
@@ -198,7 +200,7 @@ int main(int argc, char *argv[])
 
     struct passwd *passwdEnt = getpwuid(getuid());
 
-    //options = {8080, 8081, true, false, 15, strdup(".cache"), strdup(".cache"), strdup("LOGS"), strdup(passwdEnt->pw_dir), strdup("jvo"), NULL, strdup("p10.vo.nao.ac.jp"), 5433, strdup("/home")}; // default values
+    // options = {8080, 8081, true, false, 15, strdup(".cache"), strdup(".cache"), strdup("LOGS"), strdup(passwdEnt->pw_dir), strdup("jvo"), NULL, strdup("p10.vo.nao.ac.jp"), 5433, strdup("/home")}; // default values
     options.http_port = 8080;
     options.ws_port = options.http_port + 1;
     options.local = true;
@@ -264,6 +266,8 @@ int main(int argc, char *argv[])
     else
         printf("Successfully parsed '%s'.\n", config_file);
 
+    init_fortran();
+
     // fortran logging
     {
         GString *log_file = g_string_new(options.logs);
@@ -321,7 +325,7 @@ int main(int argc, char *argv[])
     mg_mgr_init(&mgr);
     mg_log_set("3");
     pipe = mg_mkpipe(&mgr, mg_pipe_event_handler, NULL);  // Create pipe
-    mg_http_listen(&mgr, url, mg_request_callback, pipe); // Create listener    
+    mg_http_listen(&mgr, url, mg_request_callback, pipe); // Create listener
 
     // a mongoose event loop
     while (s_received_signal == 0)
@@ -377,6 +381,8 @@ int main(int argc, char *argv[])
     delete_hash_table();
 
     curl_global_cleanup();
+
+    cleanup_fortran();
 
     return EXIT_SUCCESS;
 }
