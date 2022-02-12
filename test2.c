@@ -5,6 +5,6 @@
 
 int main()
 {
-	printf("__PTHREAD_SIZE__: %d\n",PTHREAD_SIZE);
-	printf("__PTHREAD_MUTEX_SIZE__: %d\n",PTHREAD_MUTEX_SIZE);
+	printf("PTHREAD_SIZE: %d\n",PTHREAD_SIZE);
+	printf("PTHREAD_MUTEX_SIZE: %d\n",PTHREAD_MUTEX_SIZE);
 };
