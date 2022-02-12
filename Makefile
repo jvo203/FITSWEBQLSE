@@ -201,6 +201,9 @@ encode:
 gzfp:
 	gfortran -Ofast -I/home/chris/zfp/build/modules tests/zfp_compress.f90 -o zfp_compress -L/home/chris/zfp/build/lib64 -lzFORp
 
+mutex:
+	gfortran -cpp -D__linux__ src/unix_pthread.f90 mutex.f90 -pthread
+
 #-corray-config-file=./config
 
 clean:
