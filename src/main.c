@@ -266,10 +266,10 @@ int main(int argc, char *argv[])
     else
         printf("Successfully parsed '%s'.\n", config_file);
 
-    init_fortran();
-
     // fortran logging
     {
+        init_fortran();
+
         GString *log_file = g_string_new(options.logs);
 
         g_string_append(log_file, "/fortran.log");
