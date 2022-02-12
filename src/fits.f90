@@ -24,6 +24,8 @@ module fits
       integer(kind=c_intptr_t) :: i = 0
    end type gmutex
 
+   type(gmutex), target, save :: logger_mtx
+
    enum, bind(C)
       enumerator circle
       enumerator square
@@ -381,12 +383,14 @@ contains
       use, intrinsic :: iso_c_binding
       implicit none
 
+      if (logger_mtx%i .eq. 0) call g_mutex_init(c_loc(logger_mtx))
    end subroutine init_fortran
 
    subroutine cleanup_fortran() BIND(C, name='cleanup_fortran')
       use, intrinsic :: iso_c_binding
       implicit none
 
+      if (logger_mtx%i .ne. 0) call g_mutex_clear(c_loc(logger_mtx))
    end subroutine cleanup_fortran
 
    subroutine init_fortran_logging(log_file, len) BIND(C, name='init_fortran_logging')
@@ -881,8 +885,13 @@ contains
       integer :: num_threads
 
       if (.not. c_associated(root)) then
-         ! TO-DO: needs to be protected with a mutex
+         ! needs to be protected with a mutex
+         call g_mutex_lock(c_loc(logger_mtx))
+
          call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
+
+         ! unlock the mutex
+         call g_mutex_unlock(c_loc(logger_mtx))
       end if
 
       ! print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
