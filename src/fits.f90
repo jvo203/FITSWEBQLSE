@@ -1248,6 +1248,9 @@ contains
       item%naxis = naxis
       item%naxes = naxes
 
+      ! start the timer
+      call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
+
       ! reset the progress
       if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
          call set_progress(item, 0, 1)
@@ -1289,9 +1292,6 @@ contains
       else
          test_ignrval = .true.
       end if
-
-      ! start the timer
-      call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
       ! calculate the range for each image
       if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
