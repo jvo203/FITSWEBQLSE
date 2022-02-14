@@ -2286,6 +2286,8 @@ contains
         print *, '"', item%datasetId, '", width', width, ', height', height, ', precision', precision,&
         & ', fetch_data', fetch_data, ', pipe write end', fd
 
+        if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
+
         ! get the inner image bounding box (excluding NaNs)
         call inherent_image_dimensions(item, inner_width, inner_height)
 
