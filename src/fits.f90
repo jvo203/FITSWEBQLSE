@@ -112,14 +112,6 @@ module fits
         ! mutexes
         type(gmutex) :: header_mtx, ok_mtx, error_mtx, progress_mtx
 
-        ! 2D image statistics
-        ! real(kind=c_float) pmin, pmax, pmedian
-        ! real(kind=c_float) mad, madN, madP
-        ! real(kind=c_float) black, white, sensitivity, ratio_sensitivity
-
-        ! image histogram
-        ! integer, allocatable :: hist(:)
-
         ! progress
         integer(8) :: start_time, crate, cmax
         integer :: cursor = 1
@@ -1371,9 +1363,6 @@ contains
             item%pixels = reshape(local_buffer, naxes(1:2))
             item%mask = reshape(local_mask, naxes(1:2))
 
-            ! make an image histogram, decide on the flux etc.
-            call make_image_statistics(item)
-
             call set_ok_status(item, .true.)
 
             call print_dataset(item)
@@ -2269,6 +2258,12 @@ contains
         real(kind=c_float), dimension(:, :), allocatable, target :: pixels
         logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
+        ! image histogram
+        integer, allocatable :: hist(:)
+
+        ! image tone mapping
+        type(image_tone_mapping) :: tone
+
         type(C_PTR) :: json
 
         integer inner_width, inner_height
@@ -2320,9 +2315,12 @@ contains
 
             print *, 'resize mask elapsed time:', 1000*(t2 - t1), '[ms]'
 
-            call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
-                &item%pmin, item%pmax, item%pmedian,&
-                &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
+            ! make an image histogram, decide on the flux etc.
+            call make_image_statistics(pixels, mask, hist, tone)
+
+            call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
+                &tone%pmin, tone%pmax, tone%median,&
+                &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
                 & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
 
             deallocate (pixels)
@@ -2332,9 +2330,12 @@ contains
             img_width = item%naxes(1)
             img_height = item%naxes(2)
 
-            call write_image_spectrum(fd, trim(item%flux)//c_null_char,&
-                &item%pmin, item%pmax, item%pmedian,&
-                &item%black, item%white, item%sensitivity, item%ratio_sensitivity,&
+            ! make an image histogram, decide on the flux etc.
+            call make_image_statistics(item%pixels, item%mask, hist, tone)
+
+            call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
+                &tone%pmin, tone%pmax, tone%median,&
+                &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
                 & img_width, img_height, precision, c_loc(item%pixels), c_loc(item%mask))
 
         end if
