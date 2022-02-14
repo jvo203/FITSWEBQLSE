@@ -1896,6 +1896,9 @@ contains
         pmedian = median(data, n)
         print *, 'median = ', pmedian
 
+        pmedian = quantile_median(data, n)
+        print *, '50th quantile = ', pmedian
+
         ! now the deviations from the median
         mad = 0.0; madP = 0.0; madN = 0.0
         countP = 0; countN = 0
@@ -2022,6 +2025,29 @@ contains
         end do
 
     end subroutine make_histogram
+
+    real function quantile_median(X, N)
+        use quantile_mod
+        implicit none
+
+        integer, intent(in) :: N
+        real, dimension(N), intent(in) :: X
+
+        ! timing
+        integer(8) :: start_t, finish_t, crate, cmax
+        real :: elapsed
+
+        ! start the timer
+        call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+        quantile_median = quantile(N/2, X)
+
+        ! end the timer
+        call system_clock(finish_t)
+        elapsed = real(finish_t - start_t)/real(crate)
+
+        print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]'
+    end function quantile_median
 
     ! --------------------------------------------------------------------
     ! REAL FUNCTION  median() :
