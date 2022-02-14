@@ -879,6 +879,11 @@ contains
       real(kind=4), allocatable :: thread_x(:, :, :)
       logical thread_bSuccess
 
+      real cdelt3, mean_spec_val, int_spec_val
+      real frame_min, frame_max, frame_median
+      real pixel_sum
+      integer pixel_count
+
       ! local statistics
       real(kind=4) :: dmin, dmax
 
@@ -1411,6 +1416,33 @@ contains
          allocate (item%frame_min(start:end))
          allocate (item%frame_max(start:end))
          allocate (item%frame_median(start:end))
+
+         ! spectra
+         allocate (item%mean_spectrum(naxes(3)))
+         allocate (item%integrated_spectrum(naxes(3)))
+
+         allocate (thread_buffer(npixels, max_threads))
+         allocate (thread_pixels(npixels, max_threads))
+         allocate (thread_mask(npixels, max_threads))
+         allocate (thread_x(item%naxes(1), item%naxes(2), max_threads))
+
+         allocate (thread_mean_spec(start:end))
+         allocate (thread_int_spec(start:end))
+         thread_mean_spec = 0.0
+         thread_int_spec = 0.0
+
+         thread_pixels = 0.0
+         thread_mask = .false.
+         thread_bSuccess = .true.
+
+         call get_cdelt3(item, cdelt3)
+
+         ! zero-out the spectra
+         item%mean_spectrum = 0.0
+         item%integrated_spectrum = 0.0
+
+         item%frame_min = 1.0E30
+         item%frame_max = -1.0E30
 
          ! reset the initial counter
          num_per_node = 0
