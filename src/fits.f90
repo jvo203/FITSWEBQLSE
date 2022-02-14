@@ -197,15 +197,6 @@ module fits
 
         end subroutine fetch_channel_range
 
-        ! parallel sort void psrs_sort(float *a, int n);
-        subroutine psrs_sort(a, n) BIND(C, name='psrs_sort')
-            use, intrinsic :: ISO_C_BINDING
-            implicit none
-
-            type(c_ptr), value :: a
-            integer(kind=c_int), value, intent(in) :: n
-        end subroutine psrs_sort
-
         ! void close_pipe(int fd);
         subroutine close_pipe(fd) BIND(C, name='close_pipe')
             use, intrinsic :: ISO_C_BINDING
@@ -1894,10 +1885,7 @@ contains
         if (n .eq. 0) return
 
         pmedian = median(data, n)
-        print *, 'median = ', pmedian
-
-        pmedian = quantile_median(data, n)
-        print *, '50th quantile = ', pmedian
+        print *, '50th quantile (median) = ', pmedian
 
         ! now the deviations from the median
         mad = 0.0; madP = 0.0; madN = 0.0
@@ -2026,7 +2014,14 @@ contains
 
     end subroutine make_histogram
 
-    real function quantile_median(X, N)
+    ! --------------------------------------------------------------------
+    ! REAL FUNCTION  median() :
+    !    This function receives an array X of N entries, sorts it
+    !    and computes the median.
+    !    The returned value is of REAL type.
+    ! --------------------------------------------------------------------
+
+    real function median(X, N)
         use quantile_mod
         implicit none
 
@@ -2040,49 +2035,14 @@ contains
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
-        quantile_median = quantile(N/2, X)
+        median = quantile(N/2, X)
 
         ! end the timer
         call system_clock(finish_t)
         elapsed = real(finish_t - start_t)/real(crate)
 
         print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]'
-    end function quantile_median
-
-    ! --------------------------------------------------------------------
-    ! REAL FUNCTION  median() :
-    !    This function receives an array X of N entries, sorts it
-    !    and computes the median.
-    !    The returned value is of REAL type.
-    ! --------------------------------------------------------------------
-
-    REAL FUNCTION median(X, N)
-        IMPLICIT NONE
-        INTEGER, INTENT(IN)                :: N
-        REAL, DIMENSION(N), INTENT(INOUT), TARGET :: X
-
-        ! timing
-        integer(8) :: start_t, finish_t, crate, cmax
-        real :: elapsed
-
-        ! start the timer
-        call system_clock(count=start_t, count_rate=crate, count_max=cmax)
-
-        call psrs_sort(c_loc(X), N) ! a parallel OpenMP version written in C
-
-        ! end the timer
-        call system_clock(finish_t)
-        elapsed = real(finish_t - start_t)/real(crate)
-
-        print *, 'sort elapsed time:', 1000*elapsed, ' [ms]'
-
-        IF (MOD(N, 2) == 0) THEN           ! compute the median
-            median = (X(N/2) + X(N/2 + 1))/2.0
-        ELSE
-            median = X(N/2 + 1)
-        END IF
-
-    END FUNCTION median
+    end function median
 
     subroutine inherent_image_dimensions(item, width, height)
         type(dataset), pointer, intent(in) :: item
