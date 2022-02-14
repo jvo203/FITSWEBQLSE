@@ -1,6 +1,6 @@
 module quantile_mod    ! quantile finder.    median = quantile( size(a)/2, a)
 contains
-    recursive function quantile(k, a) result(value)
+    pure recursive function quantile(k, a) result(value)
         integer, intent(in)  :: k          ! position in array
         real, dimension(:), intent(in)  :: a
 
