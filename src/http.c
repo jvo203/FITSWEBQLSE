@@ -505,8 +505,6 @@ static enum MHD_Result get_home_directory(struct MHD_Connection *connection)
 
 static enum MHD_Result send_progress(struct MHD_Connection *connection, float progress, float elapsed)
 {
-    printf("[C] send_progress: {\"progress\" : %f, \"elapsed\" : %f}\n", progress, elapsed);
-
     GString *json = g_string_sized_new(128);
 
     g_string_printf(json, "{\"progress\" : %f, \"elapsed\" : %f}", progress, elapsed);
