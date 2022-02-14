@@ -52,14 +52,14 @@ module fits
 
     type image_tone_mapping
         character(len=:), allocatable :: flux
-        real(kind=c_float) :: pmin, pmax, median
+        real(kind=c_float) :: pmin, pmax, pmedian
         real(kind=c_float) :: sensitivity, ratio_sensitivity
         real(kind=c_float) :: white, black
     end type image_tone_mapping
 
     type video_tone_mapping
         character(len=:), allocatable :: flux
-        real(kind=c_float) :: dmin, dmax, median
+        real(kind=c_float) :: dmin, dmax, dmedian
         real(kind=c_float) :: sensitivity, slope
         real(kind=c_float) :: white, black
     end type video_tone_mapping
@@ -462,13 +462,13 @@ contains
         & ', has_velocity:', item%has_velocity,&
         & ', frame_multiplier = ', item%frame_multiplier
 
-        print *, 'pmin:', item%pmin
-        print *, 'pmax:', item%pmax
-        print *, 'pmedian:', item%pmedian
-        print *, 'black:', item%black
-        print *, 'white:', item%white
-        print *, 'sensitivity:', item%sensitivity
-        print *, 'ratio_sensitivity:', item%ratio_sensitivity
+        ! print *, 'pmin:', item%pmin
+        ! print *, 'pmax:', item%pmax
+        ! print *, 'pmedian:', item%pmedian
+        ! print *, 'black:', item%black
+        ! print *, 'white:', item%white
+        ! print *, 'sensitivity:', item%sensitivity
+        ! print *, 'ratio_sensitivity:', item%ratio_sensitivity
 
         if (item%naxes(3) .gt. 1) then
             ! print *, 'frame_min:', item%frame_min
@@ -942,14 +942,6 @@ contains
         item%ctype1 = ''
         item%ctype2 = ''
         item%ctype3 = ''
-
-        item%pmin = 0.0
-        item%pmax = 0.0
-        item%pmedian = 0.0
-        item%black = 0.0
-        item%white = 0.0
-        item%sensitivity = 0.0
-        item%ratio_sensitivity = 0.0
 
         ! reset the FITS header
         if (allocated(item%hdr)) deallocate (item%hdr)
@@ -1840,10 +1832,17 @@ contains
 
     end subroutine get_velocity_bounds
 
-    subroutine make_image_statistics(item)
-        implicit NONE
+    subroutine make_image_statistics(item, width, height, pixels, mask, hist, tone)
+        use, intrinsic :: iso_c_binding
+        implicit none
 
-        type(dataset), pointer, intent(inout) :: item
+        type(dataset), pointer, intent(in) :: item
+        integer, intent(in) :: width, height
+        real(kind=c_float), dimension(width, height) :: pixels
+        logical(kind=c_bool), dimension(width, height) :: mask
+        integer, allocatable, intent(out) :: hist(:)
+        type(image_tone_mapping), intent(out) :: tone
+
         real, dimension(:), allocatable :: data
         real cdelt3, pmin, pmax, pmedian
         real mad, madP, madN
@@ -1853,6 +1852,14 @@ contains
         real u, v
         real black, white, sensitivity, ratio_sensitivity
         integer stat
+
+        tone%pmin = 0.0
+        tone%pmax = 0.0
+        tone%pmedian = 0.0
+        tone%black = 0.0
+        tone%white = 0.0
+        tone%sensitivity = 0.0
+        tone%ratio_sensitivity = 0.0
 
         call get_cdelt3(item, cdelt3)
 
@@ -1880,7 +1887,7 @@ contains
         data = pack(item%pixels, item%mask)
 
         ! make a histogram with a range given by [pmin, pmax]
-        call make_histogram(item, data, pmin, pmax)
+        call make_histogram(hist, data, pmin, pmax)
 
         n = size(data)
 
@@ -1934,7 +1941,7 @@ contains
         end if
 
         ! histogram classifier
-        if (.not. allocated(item%flux)) then
+        if (.not. allocated(tone%flux)) then
             block
                 use classifier
 
@@ -1945,13 +1952,13 @@ contains
                 integer(kind=8) total
 
                 ! the first histogram item
-                total = item%hist(1)
-                cdf(1) = item%hist(1)
+                total = hist(1)
+                cdf(1) = hist(1)
 
                 ! the remaining items
                 do i = 2, NBINS
-                    cdf(i) = cdf(i - 1) + item%hist(i)
-                    total = total + item%hist(i)
+                    cdf(i) = cdf(i - 1) + hist(i)
+                    total = total + hist(i)
                 end do
 
                 Slot = cdf/real(total)
@@ -1960,44 +1967,44 @@ contains
 
                 select case (tone_mapping)
                 case (0)
-                    item%flux = 'legacy'
+                    tone%flux = 'legacy'
                 case (1)
-                    item%flux = 'linear'
+                    tone%flux = 'linear'
                 case (2)
-                    item%flux = 'logistic'
+                    tone%flux = 'logistic'
                 case (3)
-                    item%flux = 'ratio'
+                    tone%flux = 'ratio'
                 case (4)
-                    item%flux = 'square'
+                    tone%flux = 'square'
                 case default
-                    item%flux = 'legacy'
+                    tone%flux = 'legacy'
                 end select
             end block
         end if
 
         print *, 'black = ', black, ', white = ', white, ', sensitivity = ', sensitivity
 
-        item%pmin = pmin
-        item%pmax = pmax
-        item%pmedian = pmedian
-        item%black = black
-        item%white = white
-        item%sensitivity = sensitivity
-        item%ratio_sensitivity = ratio_sensitivity
+        tone%pmin = pmin
+        tone%pmax = pmax
+        tone%pmedian = pmedian
+        tone%black = black
+        tone%white = white
+        tone%sensitivity = sensitivity
+        tone%ratio_sensitivity = ratio_sensitivity
 
     end subroutine make_image_statistics
 
-    subroutine make_histogram(item, data, pmin, pmax)
-        type(dataset), pointer, intent(inout) :: item
+    subroutine make_histogram(hist, data, pmin, pmax)
+        integer, allocatable, intent(out) :: hist(:)
         real, dimension(:), intent(in) :: data
         real, intent(in) :: pmin, pmax
         integer i, index, n
         real value
 
-        allocate (item%hist(NBINS))
+        allocate (hist(NBINS))
 
         ! reset the histogram
-        item%hist = 0
+        hist = 0
 
         n = size(data)
 
@@ -2011,7 +2018,7 @@ contains
             ! clamp the index to within [1,NBINS]
             ! (rounding errors might cause an out-of-bounds index value)
             index = max(min(index, NBINS), 1)
-            item%hist(index) = item%hist(index) + 1
+            hist(index) = hist(index) + 1
         end do
 
     end subroutine make_histogram
@@ -2177,10 +2184,11 @@ contains
         return
     end function get_image_scale
 
-    type(C_PTR) function get_json(item)
+    type(C_PTR) function get_json(item, hist)
         implicit none
 
         type(dataset), pointer, intent(in) :: item
+        integer, target, intent(in) :: hist(:)
         type(C_PTR) :: json
         integer(kind=8) :: filesize
 
@@ -2239,7 +2247,7 @@ contains
         call add_json_string(json, 'LINE'//c_null_char, trim(item%line)//c_null_char)
         call add_json_string(json, 'FILTER'//c_null_char, trim(item%filter)//c_null_char)
 
-        call add_json_integer_array(json, 'histogram'//c_null_char, c_loc(item%hist), size(item%hist))
+        call add_json_integer_array(json, 'histogram'//c_null_char, c_loc(hist), size(hist))
 
         call end_json(json)
 
@@ -2316,10 +2324,10 @@ contains
             print *, 'resize mask elapsed time:', 1000*(t2 - t1), '[ms]'
 
             ! make an image histogram, decide on the flux etc.
-            call make_image_statistics(pixels, mask, hist, tone)
+            call make_image_statistics(item, img_width, img_height, pixels, mask, hist, tone)
 
             call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
-                &tone%pmin, tone%pmax, tone%median,&
+                &tone%pmin, tone%pmax, tone%pmedian,&
                 &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
                 & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
 
@@ -2331,10 +2339,10 @@ contains
             img_height = item%naxes(2)
 
             ! make an image histogram, decide on the flux etc.
-            call make_image_statistics(item%pixels, item%mask, hist, tone)
+            call make_image_statistics(item, img_width, img_height, item%pixels, item%mask, hist, tone)
 
             call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
-                &tone%pmin, tone%pmax, tone%median,&
+                &tone%pmin, tone%pmax, tone%pmedian,&
                 &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
                 & img_width, img_height, precision, c_loc(item%pixels), c_loc(item%mask))
 
@@ -2345,7 +2353,7 @@ contains
         if (fetch_data .eq. 1) then
 
             ! JSON string
-            json = get_json(item)
+            json = get_json(item, hist)
             call write_json(fd, json)
             call delete_json(json)
 
