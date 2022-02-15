@@ -1452,7 +1452,7 @@ contains
             item%frame_min = 1.0E30
             item%frame_max = -1.0E30
 
-            !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
+            !NO !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
             !$omp& REDUCTION(.or.:thread_bSuccess)&
@@ -1609,7 +1609,7 @@ contains
                     num_per_node = 0
                 end if
             end do
-            !$OMP END PARALLEL
+            !NO !$OMP END PARALLEL
 
             ! close any remaining thread file units
             if (allocated(thread_units)) then
