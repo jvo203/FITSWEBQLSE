@@ -53,11 +53,13 @@ TARGET = fitswebqlse
 
 # Intel Integrated Performance Primitives Library
 ifeq ($(UNAME_S),Linux)
-        IPP = -L${IPPROOT}/lib/intel64
+	OS = linux
+    IPP = -L${IPPROOT}/lib/intel64
 endif
 
 ifeq ($(UNAME_S),Darwin)
-        IPP = -L${IPPROOT}/lib 
+	OS = macOS
+    IPP = -L${IPPROOT}/lib 
 endif
 
 IPP += -lippi -lippdc -lipps -lippcore
@@ -72,7 +74,7 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 # src/wavelet.f90
 # src/lz4.f90
 # src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/json_write.c src/m_mrgrnk.f90 src/mod_sort.f90 src/wavelet.f90 src/fixed_array.f90 src/fixed_array2.f90 src/zfp_array.f90 src/histogram.c src/classifier.f90 src/fits_omp.f90 src/net.f90 src/main.f90
-SRC = $(ZFP_SRC) src/webql.ispc src/cpu.c src/json.c src/ini.c src/mongoose.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/ipp.c src/cluster.c src/http.c src/ws.c src/face.f90 src/logging.f90 src/lttb.f90 src/fixed_array.f90 src/classifier.f90 src/quantile.f90 src/fits.f90 src/main.c
+SRC = $(ZFP_SRC) src/webql.ispc src/cpu.c src/json.c src/ini.c src/mongoose.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/ipp.c src/cluster.c src/http.c src/ws.c src/face.f90 src/logging.f90 src/lttb.f90 src/fixed_array.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/fits.f90 src/main.c
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
@@ -87,7 +89,7 @@ ifeq ($(CC),icc)
 # -fast causes static linking problems
 
 	CFLAGS := $(FLAGS)
-	FLAGS += -heap-arrays 32 -align array64byte -fpp
+	FLAGS += -heap-arrays 32 -align array64byte -fpp -D__$(OS)__
 #-mt_mpi
 endif
 
@@ -133,7 +135,7 @@ ifeq ($(UNAME_S),Darwin)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 		FLAGS := -target=core2 -O4 -f2018 -kind=byte -openmp -colour $(MPI_LINK_FLAGS)
 	else
-		FLAGS += -cpp -fallow-invalid-boz -fmax-stack-var-size=32768
+		FLAGS += -cpp -D__$(OS)__ -fallow-invalid-boz -fmax-stack-var-size=32768
 	endif
 endif
 
@@ -146,7 +148,7 @@ ifeq ($(CC),gcc)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 		FLAGS := -target=core2 -O4 -f2018 -kind=byte -openmp -colour $(MPI_LINK_FLAGS)
 	else
-		FLAGS += -cpp -fallow-invalid-boz -fmax-stack-var-size=32768
+		FLAGS += -cpp -D__$(OS)__ -fallow-invalid-boz -fmax-stack-var-size=32768
 	endif
 
 	# GCC FORTRAN runtime
