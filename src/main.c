@@ -673,3 +673,17 @@ static void *autodiscovery_daemon(void *ptr)
 
     return NULL;
 }
+
+#ifdef DEBUG
+static void *jemalloc_daemon(void *)
+{
+    printf("jemalloc memory tracking thread initiated.\n");
+
+    while (s_received_signal == 0)
+    {
+        sleep(1);
+    }
+
+    printf("jemalloc memory tracking thread terminated.\n");
+}
+#endif
