@@ -695,8 +695,22 @@ static void *jemalloc_daemon(void *)
 
     while (s_received_signal == 0)
     {
+        // memory statistics using jemalloc
+        uint64_t epoch = 1;
+        size_t sz = sizeof(epoch);
+        mallctl("thread.tcache.flush", NULL, NULL, NULL, 0);
+        mallctl("epoch", &epoch, &sz, &epoch, sz);
+
+        size_t allocated, active, mapped;
+        sz = sizeof(size_t);
+        mallctl("stats.allocated", &allocated, &sz, NULL, 0);
+        mallctl("stats.active", &active, &sz, NULL, 0);
+        mallctl("stats.mapped", &mapped, &sz, NULL, 0);
+
         time_t now = time(NULL);
-        double duration = difftime(now, offset);
+        double elapsed = difftime(now, offset);
+
+        fprintf(fp, "%f,%zu,%zu,%zu\n", elapsed, allocated, active, mapped);
 
         sleep(1);
     }
