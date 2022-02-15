@@ -684,7 +684,7 @@ static void *jemalloc_daemon(void *)
     if (fp != NULL)
         fprintf(fp,
                 "\"elapsed time "
-                "[ms]\",\"stats.allocated\",\"stats.active\",\"stats.mapped\"\n");
+                "[s]\",\"stats.allocated\",\"stats.active\",\"stats.mapped\"\n");
     else
     {
         printf("cannot open 'memory_usage.csv' for writing.\n");
