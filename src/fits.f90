@@ -19,11 +19,11 @@ module fits
     integer(c_int), parameter :: ZFP_MIN_EXP = -1074
 
     ! FITS channels are allocated to cluster nodes in blocks
-    integer, parameter :: CHANNEL_BLOCK = 64 ! 128
+    integer, parameter :: CHANNEL_BLOCK = 16 ! 64 ! 128
 
-    type, bind(c) :: gmutex
-        integer(kind=c_intptr_t) :: i = 0
-    end type gmutex
+    ! type, bind(c) :: gmutex
+    !    integer(kind=c_intptr_t) :: i = 0
+    ! end type gmutex
 
     ! type(gmutex), target, save :: logger_mtx
     type(c_pthread_mutex_t), save :: logger_mtx
