@@ -1,9 +1,10 @@
 using CSV
+using DataFrames
 using Plots
 
 gr(size = (1000, 500), linewidth = 2)
 
-data = CSV.read("memory_usage.csv")
+data = CSV.read("memory_usage.csv", DataFrame)
 println(data[1:5, :])
 
 timestamp = data[:, 1]
