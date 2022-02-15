@@ -1493,7 +1493,117 @@ contains
                     print *, "TID", tid, 'START', start, 'END', end, 'NUM_PER_NODE', num_per_node
 
                     ! a "plain" DO LOOP
+                    do frame = start, end
+                        ! get a current OpenMP thread (starting from 0 as in C)
+                        tid = 1 + OMP_GET_THREAD_NUM()
 
+                        ! starting bounds
+                        fpixels = (/1, 1, frame, 1/)
+
+                        ! ending bounds
+                        lpixels = (/naxes(1), naxes(2), frame, 1/)
+
+                        ! do not skip over any pixels
+                        incs = 1
+
+                        ! reset the status
+                        status = 0
+
+                        if (thread_units(tid) .ne. -1) then
+                            call ftgsve(thread_units(tid), group, naxis, naxes,&
+                            & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+                        else
+                            thread_bSuccess = .false.
+                            cycle
+                        end if
+
+                        ! abort upon errors
+                        if (status .ne. 0) then
+                            print *, 'error reading frame', frame
+                            thread_bSuccess = .false.
+
+                            if (status .gt. 0) then
+                                call printerror(status)
+                            end if
+
+                            cycle
+                        else
+                            thread_bSuccess = thread_bSuccess .and. .true.
+                        end if
+
+                        mean_spec_val = 0.0
+                        int_spec_val = 0.0
+
+                        pixel_sum = 0.0
+                        pixel_count = 0
+
+                        frame_min = 1.0E30
+                        frame_max = -1.0E30
+
+                        ! calculate the min/max values
+                        do j = 1, npixels
+
+                            tmp = thread_buffer(j, tid)
+
+                            if (isnan(tmp) .neqv. .true.) then
+                                if (test_ignrval) then
+                                    if (tmp .eq. item%ignrval) then
+                                        ! skip the IGNRVAL pixels
+                                        ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
+                                        cycle
+                                    end if
+                                end if
+
+                                frame_min = min(frame_min, tmp)
+                                frame_max = max(frame_max, tmp)
+
+                                ! integrate (sum up) pixels and a NaN mask
+                                thread_pixels(j, tid) = thread_pixels(j, tid) + tmp
+                                thread_mask(j, tid) = thread_mask(j, tid) .or. .true.
+
+                                ! needed by the mean and integrated spectra
+                                pixel_sum = pixel_sum + tmp
+                                pixel_count = pixel_count + 1
+                            else
+                                ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
+                            end if
+
+                        end do
+
+                        ! compress the pixels
+                        if (allocated(item%compressed) .and. allocated(thread_arr)) then
+                            block
+                                real :: ignrval, datamin, datamax
+
+                                if (isnan(item%ignrval)) then
+                                    ignrval = -1.0E30
+                                else
+                                    ignrval = item%ignrval
+                                end if
+
+                                datamin = item%datamin
+                                datamax = item%datamax
+
+                                thread_arr(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                                ! call to_fixed(thread_arr(:, :, tid), item%compressed(:, :, frame), &
+                                ! &ignrval, datamin, datamax) ! , frame_min, frame_max)
+                            end block
+                        end if
+
+                        item%frame_min(frame) = frame_min
+                        item%frame_max(frame) = frame_max
+
+                        dmin = min(dmin, frame_min)
+                        dmax = max(dmax, frame_max)
+
+                        if (pixel_count .gt. 0) then
+                            mean_spec_val = pixel_sum/real(pixel_count)
+                            int_spec_val = pixel_sum*cdelt3
+                        end if
+
+                        thread_mean_spec(frame) = mean_spec_val
+                        thread_int_spec(frame) = int_spec_val
+                    end do
                 end if
             end do
             !$OMP END PARALLEL
