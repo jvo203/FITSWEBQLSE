@@ -1365,7 +1365,7 @@ contains
 
             ! interleave computation with disk access
             ! cap the number of threads to avoid system overload
-            max_threads = min(OMP_GET_MAX_THREADS(), 4)
+            max_threads = min(OMP_GET_MAX_THREADS(), 8)
 
             ! get #physical cores (ignore HT)
             ! max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
