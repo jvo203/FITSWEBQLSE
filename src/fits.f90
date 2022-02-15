@@ -532,6 +532,8 @@ contains
         integer(8) finish
         real elapsed
 
+        integer :: current, total
+
         ! take a time measurement
         call system_clock(finish)
         elapsed = real(finish - item%start_time)/real(item%crate)
@@ -542,8 +544,16 @@ contains
         item%progress = item%progress + progress
         item%elapsed = elapsed
 
+        current = item%progress
+        total = item%total
+
         ! unlock the mutex
         call g_mutex_unlock(c_loc(item%progress_mtx))
+
+        if ((current .eq. total) .and. (total .gt. 0)) then
+            call set_ok_status(item, .true.)
+            call print_dataset(item)
+        end if
 
     end subroutine update_progress
 
@@ -1350,10 +1360,6 @@ contains
 
             item%pixels = reshape(local_buffer, naxes(1:2))
             item%mask = reshape(local_mask, naxes(1:2))
-
-            call set_ok_status(item, .true.)
-
-            call print_dataset(item)
         else
             ! read a range of 2D planes in parallel on each cluster node
 
@@ -2422,6 +2428,9 @@ contains
 
         print *, '"', item%datasetId, '", width', width, ', height', height, ', precision', precision,&
         & ', fetch_data', fetch_data, ', pipe write end', fd
+
+        if (.not. allocated(item%pixels)) return
+        if (.not. allocated(item%mask)) return
 
         if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
 
