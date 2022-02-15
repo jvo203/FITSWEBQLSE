@@ -18,7 +18,7 @@ module fits
     integer(c_int), parameter :: ZFP_MIN_EXP = -1074
 
     ! FITS channels are allocated to cluster nodes in blocks
-    integer, parameter :: CHANNEL_BLOCK = 32 ! 128
+    integer, parameter :: CHANNEL_BLOCK = 64 ! 128
 
     type, bind(c) :: gmutex
         integer(kind=c_intptr_t) :: i = 0
@@ -1365,7 +1365,7 @@ contains
 
             ! interleave computation with disk access
             ! cap the number of threads to avoid system overload
-            max_threads = min(OMP_GET_MAX_THREADS(), 2)
+            max_threads = min(OMP_GET_MAX_THREADS(), 4)
 
             ! get #physical cores (ignore HT)
             ! max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
