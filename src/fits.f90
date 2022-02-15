@@ -21,11 +21,6 @@ module fits
     ! FITS channels are allocated to cluster nodes in blocks
     integer, parameter :: CHANNEL_BLOCK = 16 ! 64 ! 128
 
-    ! type, bind(c) :: gmutex
-    !    integer(kind=c_intptr_t) :: i = 0
-    ! end type gmutex
-
-    ! type(gmutex), target, save :: logger_mtx
     type(c_pthread_mutex_t), save :: logger_mtx
 
     enum, bind(C)
@@ -137,38 +132,6 @@ module fits
             implicit none
 
         end function get_physical_cores
-
-        ! void g_mutex_init (GMutex *mutex);
-        subroutine g_mutex_init(mutex) BIND(C, name='g_mutex_init')
-            use, intrinsic :: ISO_C_BINDING
-            implicit none
-
-            type(c_ptr), value :: mutex
-        end subroutine g_mutex_init
-
-        ! void g_mutex_clear (GMutex *mutex);
-        subroutine g_mutex_clear(mutex) BIND(C, name='g_mutex_clear')
-            use, intrinsic :: ISO_C_BINDING
-            implicit none
-
-            type(c_ptr), value :: mutex
-        end subroutine g_mutex_clear
-
-        ! void g_mutex_lock (GMutex *mutex);
-        subroutine g_mutex_lock(mutex) BIND(C, name='g_mutex_lock')
-            use, intrinsic :: ISO_C_BINDING
-            implicit none
-
-            type(c_ptr), value :: mutex
-        end subroutine g_mutex_lock
-
-        ! void g_mutex_unlock (GMutex *mutex);
-        subroutine g_mutex_unlock(mutex) BIND(C, name='g_mutex_unlock')
-            use, intrinsic :: ISO_C_BINDING
-            implicit none
-
-            type(c_ptr), value :: mutex
-        end subroutine g_mutex_unlock
 
         ! glib hash table
         ! void insert_dataset(const char *datasetid, int len, void *item);
@@ -385,7 +348,6 @@ contains
 
         integer rc
 
-        ! if (logger_mtx%i .eq. 0) call g_mutex_init(c_loc(logger_mtx))
         rc = c_pthread_mutex_init(logger_mtx, c_null_ptr)
     end subroutine init_fortran
 
@@ -395,7 +357,6 @@ contains
 
         integer rc
 
-        ! if (logger_mtx%i .ne. 0) call g_mutex_clear(c_loc(logger_mtx))
         rc = c_pthread_mutex_destroy(logger_mtx)
     end subroutine cleanup_fortran
 
@@ -429,11 +390,6 @@ contains
         call c_f_pointer(ptr, item)
 
         print *, 'deleting ', item%datasetid
-
-        ! if (item%header_mtx%i .ne. 0) call g_mutex_clear(c_loc(item%header_mtx))
-        ! if (item%error_mtx%i .ne. 0) call g_mutex_clear(c_loc(item%error_mtx))
-        ! if (item%ok_mtx%i .ne. 0) call g_mutex_clear(c_loc(item%ok_mtx))
-        ! if (item%progress_mtx%i .ne. 0) call g_mutex_clear(c_loc(item%progress_mtx))
 
         rc = c_pthread_mutex_destroy(item%header_mtx)
         rc = c_pthread_mutex_destroy(item%error_mtx)
@@ -494,13 +450,11 @@ contains
         integer :: rc
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%error_mtx))
         rc = c_pthread_mutex_lock(item%error_mtx)
 
         item%error = error
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%error_mtx))
         rc = c_pthread_mutex_unlock(item%error_mtx)
 
     end subroutine set_error_status
@@ -512,13 +466,11 @@ contains
         integer :: rc
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%ok_mtx))
         rc = c_pthread_mutex_lock(item%ok_mtx)
 
         item%ok = ok
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%ok_mtx))
         rc = c_pthread_mutex_unlock(item%ok_mtx)
 
     end subroutine set_ok_status
@@ -530,13 +482,11 @@ contains
         integer rc
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%header_mtx))
         rc = c_pthread_mutex_lock(item%header_mtx)
 
         item%header = header
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%header_mtx))
         rc = c_pthread_mutex_unlock(item%header_mtx)
 
     end subroutine set_header_status
@@ -547,13 +497,11 @@ contains
         integer :: rc
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_lock(item%progress_mtx)
 
         call system_clock(item%start_time)
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_unlock(item%progress_mtx)
 
     end subroutine reset_clock
@@ -571,7 +519,6 @@ contains
         elapsed = real(finish - item%start_time)/real(item%crate)
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_lock(item%progress_mtx)
 
         item%progress = item%progress + progress
@@ -581,7 +528,6 @@ contains
         total = item%total
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_unlock(item%progress_mtx)
 
         if ((current .eq. total) .and. (total .gt. 0)) then
@@ -596,13 +542,11 @@ contains
         integer :: rc
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_lock(item%progress_mtx)
 
         print *, 'progress:', item%progress, 'out of total:', item%total
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_unlock(item%progress_mtx)
 
     end subroutine print_progress
@@ -620,7 +564,6 @@ contains
         elapsed = real(finish - item%start_time)/real(item%crate)
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_lock(item%progress_mtx)
 
         item%progress = progress
@@ -628,7 +571,6 @@ contains
         item%elapsed = elapsed
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_unlock(item%progress_mtx)
 
     end subroutine set_progress
@@ -642,7 +584,6 @@ contains
         call c_f_pointer(ptr, item)
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%error_mtx))
         rc = c_pthread_mutex_lock(item%error_mtx)
 
         if (item%error) then
@@ -652,7 +593,6 @@ contains
         end if
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%error_mtx))
         rc = c_pthread_mutex_unlock(item%error_mtx)
 
         return
@@ -667,7 +607,6 @@ contains
         call c_f_pointer(ptr, item)
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%ok_mtx))
         rc = c_pthread_mutex_lock(item%ok_mtx)
 
         if (item%ok) then
@@ -677,7 +616,6 @@ contains
         end if
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%ok_mtx))
         rc = c_pthread_mutex_unlock(item%ok_mtx)
 
         return
@@ -692,7 +630,6 @@ contains
         call c_f_pointer(ptr, item)
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%header_mtx))
         rc = c_pthread_mutex_lock(item%header_mtx)
 
         if (item%header) then
@@ -702,7 +639,6 @@ contains
         end if
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%header_mtx))
         rc = c_pthread_mutex_unlock(item%header_mtx)
 
         return
@@ -722,7 +658,6 @@ contains
         call c_f_pointer(ptr, item)
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_unlock(item%progress_mtx)
 
         if (item%total .gt. 0) then
@@ -732,7 +667,6 @@ contains
         end if
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_unlock(item%progress_mtx)
     end function get_progress
 
@@ -750,13 +684,11 @@ contains
         call c_f_pointer(ptr, item)
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_lock(item%progress_mtx)
 
         get_elapsed = item%elapsed
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_unlock(item%progress_mtx)
     end function get_elapsed
 
@@ -782,7 +714,6 @@ contains
         integer :: rc
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%error_mtx))
         rc = c_pthread_mutex_lock(item%error_mtx)
 
         ! check the error
@@ -792,19 +723,16 @@ contains
             status = -2
 
             ! unlock the mutex and exit subroutine
-            ! call g_mutex_unlock(c_loc(item%error_mtx))
             rc = c_pthread_mutex_unlock(item%error_mtx)
             return
         else
             ! unlock the mutex
-            ! call g_mutex_unlock(c_loc(item%error_mtx))
             rc = c_pthread_mutex_unlock(item%error_mtx)
         end if
 
         ! there has been no error up until now, continue
 
         ! lock the mutex
-        ! call g_mutex_lock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_lock(item%progress_mtx)
 
         if (.not. item%header) then
@@ -834,7 +762,6 @@ contains
         end if
 
         ! unlock the mutex
-        ! call g_mutex_unlock(c_loc(item%progress_mtx))
         rc = c_pthread_mutex_unlock(item%progress_mtx)
 
     end subroutine get_channel_range
@@ -882,11 +809,6 @@ contains
         allocate (item)
 
         ! init mutexes
-        ! if (item%header_mtx%i .eq. 0) call g_mutex_init(c_loc(item%header_mtx))
-        ! if (item%error_mtx%i .eq. 0) call g_mutex_init(c_loc(item%error_mtx))
-        ! if (item%ok_mtx%i .eq. 0) call g_mutex_init(c_loc(item%ok_mtx))
-        ! if (item%progress_mtx%i .eq. 0) call g_mutex_init(c_loc(item%progress_mtx))
-
         rc = c_pthread_mutex_init(item%header_mtx, c_null_ptr)
         rc = c_pthread_mutex_init(item%error_mtx, c_null_ptr)
         rc = c_pthread_mutex_init(item%ok_mtx, c_null_ptr)
@@ -978,14 +900,12 @@ contains
 
         if (.not. c_associated(root)) then
             ! needs to be protected with a mutex
-            ! call g_mutex_lock(c_loc(logger_mtx))
             rc = c_pthread_mutex_lock(logger_mtx)
 
             if (rc .eq. 0) then
                 call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
 
                 ! unlock the mutex
-                ! call g_mutex_unlock(c_loc(logger_mtx))
                 rc = c_pthread_mutex_unlock(logger_mtx)
             end if
         end if
