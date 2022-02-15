@@ -12,11 +12,18 @@
 #include <string.h>
 #include <pwd.h>
 
+#include <pthread.h>
+
+#ifdef DEBUG
+#include <jemalloc/jemalloc.h>
+
+static pthread_t jemalloc_t;
+static void *jemalloc_daemon(void *);
+#endif
+
 #include "ini.h"
 #include "http.h"
 #include "ws.h"
-
-#include <pthread.h>
 
 #include "mongoose.h"
 #include "mjson.h"
@@ -196,6 +203,16 @@ void ipp_init()
 
 int main(int argc, char *argv[])
 {
+#ifdef DEBUG
+    int jemalloc_res = pthread_create(&jemalloc_t, NULL, jemalloc_daemon, NULL);
+
+    if (jemalloc_res)
+    {
+        printf("error %d\n", jemalloc_res);
+        exit(EXIT_FAILURE);
+    }
+#endif
+
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
 
     struct passwd *passwdEnt = getpwuid(getuid());
@@ -383,6 +400,11 @@ int main(int argc, char *argv[])
     curl_global_cleanup();
 
     cleanup_fortran();
+
+#ifdef DEBUG
+    // wait for the jemalloc thread
+    pthread_join(jemalloc_t, NULL);
+#endif
 
     return EXIT_SUCCESS;
 }
