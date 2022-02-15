@@ -18,7 +18,7 @@ module fits
     integer(c_int), parameter :: ZFP_MIN_EXP = -1074
 
     ! FITS channels are allocated to cluster nodes in blocks
-    integer, parameter :: CHANNEL_BLOCK = 128
+    integer, parameter :: CHANNEL_BLOCK = 32 ! 128
 
     type, bind(c) :: gmutex
         integer(kind=c_intptr_t) :: i = 0
@@ -1452,10 +1452,47 @@ contains
             item%frame_min = 1.0E30
             item%frame_max = -1.0E30
 
+            !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
+            !$OMP& NUM_THREADS(max_threads)
+            tid = 1 + OMP_GET_THREAD_NUM()
+
             ! reset the initial counter
             num_per_node = 0
 
             do
+                ! update the progress with work done so far
+                call update_progress(item, num_per_node)
+
+                ! dynamically request / get the range blocks
+                if (.not. c_associated(root)) then
+                    ! a direct (local) request
+                    call get_channel_range(item, start, end, status)
+                else
+                    ! submit work completed in the previous step (<num_per_node>)
+                    ! fetch the range from the root node via HTTP
+                    call fetch_channel_range(root, item%datasetid, size(item%datasetid), num_per_node, start, end, status) ! a C function defined in http.c
+                end if
+
+                ! LOOP EXIT
+                ! -2 : a catastrophic error
+                ! -1 : end of FITS file (no more work to do)
+
+                ! LOOP CONTINUE
+                ! 0 : OK
+                ! 1 : accepted, header not ready yet
+                if (status .lt. 0) exit ! one comparison handles it all, neat!
+
+                ! process the block
+                if ((start .gt. 0) .and. (end .gt. 0)) then
+                    num_per_node = end - start + 1
+                    print *, "TID", tid, 'START', start, 'END', end, 'NUM_PER_NODE', num_per_node
+
+                    ! a "plain" DO LOOP
+                end if
+            end do
+            !$OMP END PARALLEL
+
+            do while (.false.) ! deliberately disabled it; re-designing the code
                 ! update the progress with work done so far
                 call update_progress(item, num_per_node)
 
