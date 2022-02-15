@@ -1453,6 +1453,11 @@ contains
             item%frame_max = -1.0E30
 
             !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
+            !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
+            !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
+            !$omp& REDUCTION(.or.:thread_bSuccess)&
+            !$omp& REDUCTION(max:dmax)&
+            !$omp& REDUCTION(min:dmin)&
             !$OMP& NUM_THREADS(max_threads)
             tid = 1 + OMP_GET_THREAD_NUM()
 
@@ -1488,6 +1493,7 @@ contains
                     print *, "TID", tid, 'START', start, 'END', end, 'NUM_PER_NODE', num_per_node
 
                     ! a "plain" DO LOOP
+
                 end if
             end do
             !$OMP END PARALLEL
