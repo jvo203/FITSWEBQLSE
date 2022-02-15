@@ -94,7 +94,7 @@ endif
 INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` -I./$(ZFP)/include -I./$(ZFP)/src
 MOD =
 # -I/home/chris/zfp/include
-DEF = -DLOCAL
+DEF = -DDEBUG
 
 LIBS = -L/usr/local/lib -lmicrohttpd `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` -llz4 -L/usr/local/lib64 -lcfitsio -lsqlite3 -lcurl -lz -pthread -lzmq -lczmq
 # -lzfp before cfitsio
