@@ -10,6 +10,7 @@
 
 # Memory Logging
 /memory_usage.csv 
+/mem_allocated_v5.pdf
 
 # Config files
 *.ini
