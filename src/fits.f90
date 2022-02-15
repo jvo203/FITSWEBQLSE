@@ -1365,7 +1365,7 @@ contains
 
             ! interleave computation with disk access
             ! cap the number of threads to avoid system overload
-            max_threads = min(OMP_GET_MAX_THREADS(), 8)
+            max_threads = min(OMP_GET_MAX_THREADS(), 2)
 
             ! get #physical cores (ignore HT)
             ! max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
@@ -1373,11 +1373,11 @@ contains
             print *, "max_threads:", max_threads
 
             if (.not. allocated(thread_units)) then
-                allocate (thread_units(OMP_GET_MAX_THREADS()))
+                allocate (thread_units(max_threads))
                 thread_units = -1
 
                 ! open the thread-local FITS file if necessary
-                do i = 1, OMP_GET_MAX_THREADS()
+                do i = 1, max_threads
                     if (thread_units(i) .eq. -1) then
                         block
                             ! file operations
@@ -1452,7 +1452,7 @@ contains
             item%frame_min = 1.0E30
             item%frame_max = -1.0E30
 
-            !NO !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
+            !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
             !$omp& REDUCTION(.or.:thread_bSuccess)&
@@ -1609,7 +1609,7 @@ contains
                     num_per_node = 0
                 end if
             end do
-            !NO !$OMP END PARALLEL
+            !$OMP END PARALLEL
 
             ! close any remaining thread file units
             if (allocated(thread_units)) then
