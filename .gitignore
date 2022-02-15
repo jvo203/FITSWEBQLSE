@@ -1,4 +1,4 @@
-#compilation targets
+# Compilation targets
 /fitswebqlse
 /testWavelets
 /zfp_compress
@@ -7,6 +7,9 @@
 /zfp_block
 /zfp_encode
 /*.dSYM
+
+# Memory Logging
+/memory_usage.csv 
 
 # Config files
 *.ini
