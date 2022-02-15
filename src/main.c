@@ -679,11 +679,32 @@ static void *jemalloc_daemon(void *)
 {
     printf("jemalloc memory tracking thread initiated.\n");
 
+    FILE *fp = fopen("memory_usage.csv", "w");
+
+    if (fp != NULL)
+        fprintf(fp,
+                "\"elapsed time "
+                "[ms]\",\"stats.allocated\",\"stats.active\",\"stats.mapped\"\n");
+    else
+    {
+        printf("cannot open 'memory_usage.csv' for writing.\n");
+        return NULL;
+    }
+
+    time_t offset = time(NULL);
+
     while (s_received_signal == 0)
     {
+        time_t now = time(NULL);
+        double duration = difftime(now, offset);
+
         sleep(1);
     }
 
+    fclose(fp);
+
     printf("jemalloc memory tracking thread terminated.\n");
+
+    return NULL;
 }
 #endif
