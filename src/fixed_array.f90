@@ -16,17 +16,6 @@ module fixed_array
         integer(kind=1), dimension(DIM, DIM) :: mantissa
     end type fixed_block
 contains
-    !elemental logical function isnan(x)
-    !    real(kind=4), intent(in) :: x
-
-    !    if (abs(x)*0.0 /= 0.0) then
-    !        isnan = .true.
-    !    else
-    !        isnan = .false.
-    !    end if
-
-    !end function isnan
-
     function to_fixed(x, ignrval, datamin, datamax) result(compressed)
         use, intrinsic :: ieee_arithmetic
         implicit none
