@@ -1523,7 +1523,7 @@ contains
 
                         ! abort upon errors
                         if (status .ne. 0) then
-                            print *, 'error reading frames', start, end
+                            print *, 'error reading frame', frame
                             thread_bSuccess = .false.
 
                             if (status .gt. 0) then
