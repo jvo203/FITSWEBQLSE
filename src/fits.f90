@@ -890,7 +890,7 @@ contains
         real(kind=4), allocatable, target :: thread_buffer(:, :)
         real(kind=4), allocatable :: thread_pixels(:, :)
         logical(kind=1), allocatable :: thread_mask(:, :)
-        ! real(kind=4), allocatable :: thread_arr(:, :, :)
+        real(kind=4), allocatable :: thread_arr(:, :, :)
         logical thread_bSuccess
 
         real cdelt3, mean_spec_val, int_spec_val
@@ -1444,7 +1444,7 @@ contains
             allocate (thread_buffer(npixels, max_threads))
             allocate (thread_pixels(npixels, max_threads))
             allocate (thread_mask(npixels, max_threads))
-            ! allocate (thread_arr(item%naxes(1), item%naxes(2), max_threads))
+            allocate (thread_arr(item%naxes(1), item%naxes(2), max_threads))
 
             thread_pixels = 0.0
             thread_mask = .false.
@@ -1592,7 +1592,7 @@ contains
                         item%integrated_spectrum(frame) = int_spec_val
 
                         ! compress the pixels
-                        if (allocated(item%compressed)) then ! .and. allocated(thread_arr)) then
+                        if (allocated(item%compressed) .and. allocated(thread_arr)) then
                             block
                                 real :: ignrval, datamin, datamax
 
@@ -1605,10 +1605,10 @@ contains
                                 datamin = item%datamin
                                 datamax = item%datamax
 
-                                ! thread_arr(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
-                                ! item%compressed(frame)%ptr => to_fixed(thread_arr(:, :, tid), ignrval, datamin, datamax)
-                                item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
-                                & ignrval, datamin, datamax)
+                                thread_arr(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                                item%compressed(frame)%ptr => to_fixed(thread_arr(:, :, tid), ignrval, datamin, datamax)
+                                ! item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
+                                ! & ignrval, datamin, datamax)
                             end block
                         end if
                     end do
