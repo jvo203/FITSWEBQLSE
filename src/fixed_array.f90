@@ -27,7 +27,7 @@ contains
 
     !end function isnan
 
-    subroutine to_fixed(x, compressed, ignrval, datamin, datamax)
+    function to_fixed(x, ignrval, datamin, datamax) result(compressed)
         ! use wavelet
         use, intrinsic :: ieee_arithmetic
         implicit none
@@ -42,7 +42,7 @@ contains
         integer(kind=4) :: cn, cm
 
         ! the result
-        type(fixed_block), dimension(:, :), intent(out) :: compressed
+        type(fixed_block), dimension(:, :), pointer :: compressed
 
         n = size(x, 1)
         m = size(x, 2)
@@ -55,15 +55,7 @@ contains
         if (mod(n, DIM) .ne. 0) cn = cn + 1
         if (mod(m, DIM) .ne. 0) cm = cm + 1
 
-        if (size(compressed, 1) .lt. cn) then
-            print *, 'compressed array dimension(1) mismatch:', size(compressed, 1), '.ne.', cn
-            return
-        end if
-
-        if (size(compressed, 2) .lt. cm) then
-            print *, 'compressed array dimension(2) mismatch:', size(compressed, 2), '.ne.', cm
-            return
-        end if
+        allocate (compressed(cn, cm))
 
         do concurrent(j=1:m/DIM, i=1:n/DIM)
             block
@@ -85,7 +77,7 @@ contains
             end block
         end do
 
-    end subroutine to_fixed
+    end function to_fixed
 
     pure subroutine to_fixed_block(x, compressed, ignrval, datamin, datamax)
         ! use wavelet

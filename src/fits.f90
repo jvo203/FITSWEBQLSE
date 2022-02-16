@@ -1593,8 +1593,7 @@ contains
 
                                 thread_arr(:, :, tid) = reshape(thread_buffer((offset + 1):(offset + npixels), tid),&
                                 & item%naxes(1:2))
-                                ! call to_fixed(thread_arr(:, :, tid), item%compressed(:, :, frame), &
-                                ! &ignrval, datamin, datamax) ! , frame_min, frame_max)
+                                item%compressed(frame)%ptr => to_fixed(thread_arr(:, :, tid), ignrval, datamin, datamax)
                             end block
                         end if
 
