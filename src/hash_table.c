@@ -53,9 +53,7 @@ bool insert_if_not_exists(const char *datasetid, void *item)
 {
     bool exists;
 
-    int ret = pthread_mutex_lock(&datasets_mtx);
-
-    if (ret != 0)
+    if (pthread_mutex_lock(&datasets_mtx) != 0)
         return false;
 
     if (!g_hash_table_contains(datasets, (gconstpointer)datasetid))
@@ -75,9 +73,7 @@ void *get_dataset(const char *datasetid)
 {
     void *item;
 
-    int ret = pthread_mutex_lock(&datasets_mtx);
-
-    if (ret == 0)
+    if (pthread_mutex_lock(&datasets_mtx) == 0)
     {
         item = g_hash_table_lookup(datasets, (gconstpointer)datasetid);
         pthread_mutex_unlock(&datasets_mtx);
@@ -90,9 +86,7 @@ void *get_dataset(const char *datasetid)
 
 bool dataset_exists(const char *datasetid)
 {
-    int ret = pthread_mutex_lock(&datasets_mtx);
-
-    if (ret != 0)
+    if (pthread_mutex_lock(&datasets_mtx) != 0)
         return false;
 
     if (g_hash_table_contains(datasets, (gconstpointer)datasetid))
