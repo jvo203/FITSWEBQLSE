@@ -874,9 +874,6 @@ contains
       real, allocatable :: mean_spec(:)
       real, allocatable :: int_spec(:)
 
-      ! thread-shared
-      real, allocatable :: thread_mean_spec(:), thread_int_spec(:)
-
       ! thread-local variables
       real(kind=4), allocatable, target :: thread_buffer(:, :)
       real(kind=4), allocatable :: thread_pixels(:, :)
@@ -1433,11 +1430,6 @@ contains
          allocate (thread_mask(npixels, max_threads))
          allocate (thread_arr(item%naxes(1), item%naxes(2), max_threads))
 
-         allocate (thread_mean_spec(start:end))
-         allocate (thread_int_spec(start:end))
-         thread_mean_spec = 0.0
-         thread_int_spec = 0.0
-
          thread_pixels = 0.0
          thread_mask = .false.
          thread_bSuccess = .true.
@@ -1602,8 +1594,8 @@ contains
                      int_spec_val = pixel_sum*cdelt3
                   end if
 
-                  thread_mean_spec(frame) = mean_spec_val
-                  thread_int_spec(frame) = int_spec_val
+                  item%mean_spectrum(frame) = mean_spec_val
+                  item%integrated_spectrum(frame) = int_spec_val
 
                   offset = offset + npixels
                end do
