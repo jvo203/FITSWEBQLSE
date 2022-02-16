@@ -434,11 +434,11 @@ contains
         ! print *, 'ratio_sensitivity:', item%ratio_sensitivity
 
         if (item%naxes(3) .gt. 1) then
-            print *, 'frame_min:', item%frame_min
-            print *, 'frame_max:', item%frame_max
+            ! print *, 'frame_min:', item%frame_min
+            ! print *, 'frame_max:', item%frame_max
 
-            print *, 'mean spectrum:', item%mean_spectrum
-            print *, 'integrated spectrum:', item%integrated_spectrum
+            ! print *, 'mean spectrum:', item%mean_spectrum
+            ! print *, 'integrated spectrum:', item%integrated_spectrum
         end if
 
     end subroutine print_dataset
