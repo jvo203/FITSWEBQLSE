@@ -1591,7 +1591,8 @@ contains
                                 datamin = item%datamin
                                 datamax = item%datamax
 
-                                ! thread_arr(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                                thread_arr(:, :, tid) = reshape(thread_buffer((offset + 1):(offset + npixels), tid),&
+                                & item%naxes(1:2))
                                 ! call to_fixed(thread_arr(:, :, tid), item%compressed(:, :, frame), &
                                 ! &ignrval, datamin, datamax) ! , frame_min, frame_max)
                             end block
