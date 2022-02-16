@@ -1563,6 +1563,20 @@ contains
 
                   end do
 
+                  if (pixel_count .gt. 0) then
+                     mean_spec_val = pixel_sum/real(pixel_count)
+                     int_spec_val = pixel_sum*cdelt3
+                  end if
+
+                  item%frame_min(frame) = frame_min
+                  item%frame_max(frame) = frame_max
+
+                  dmin = min(dmin, frame_min)
+                  dmax = max(dmax, frame_max)
+
+                  item%mean_spectrum(frame) = mean_spec_val
+                  item%integrated_spectrum(frame) = int_spec_val
+
                   ! compress the pixels
                   if (allocated(item%compressed) .and. allocated(thread_arr)) then
                      block
@@ -1582,20 +1596,6 @@ contains
                         ! &ignrval, datamin, datamax) ! , frame_min, frame_max)
                      end block
                   end if
-
-                  item%frame_min(frame) = frame_min
-                  item%frame_max(frame) = frame_max
-
-                  dmin = min(dmin, frame_min)
-                  dmax = max(dmax, frame_max)
-
-                  if (pixel_count .gt. 0) then
-                     mean_spec_val = pixel_sum/real(pixel_count)
-                     int_spec_val = pixel_sum*cdelt3
-                  end if
-
-                  item%mean_spectrum(frame) = mean_spec_val
-                  item%integrated_spectrum(frame) = int_spec_val
 
                   offset = offset + npixels
                end do
