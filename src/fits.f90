@@ -1377,7 +1377,7 @@ contains
 
             ! get #physical cores (ignore HT), and then cut the number in half
             ! to avoid a system overload
-            max_threads = min(max_threads, get_physical_cores()/2)
+            ! max_threads = min(max_threads, get_physical_cores()/2)
 
             print *, "max_threads:", max_threads
 
