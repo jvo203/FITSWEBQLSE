@@ -903,9 +903,7 @@ contains
 
         ! OpenMP multi-threading
         integer, dimension(:), allocatable :: thread_units
-        integer :: num_threads, offset
-
-        integer(kind=8) :: buffer_size
+        integer :: num_threads
 
         integer rc
 
@@ -1440,10 +1438,7 @@ contains
             allocate (item%mean_spectrum(naxes(3)))
             allocate (item%integrated_spectrum(naxes(3)))
 
-            buffer_size = int(npixels, kind=8)*int(CHANNEL_BLOCK, kind=8)
-            allocate (thread_buffer(buffer_size, max_threads))
-
-            ! allocate (thread_buffer(npixels*CHANNEL_BLOCK, max_threads))
+            allocate (thread_buffer(npixels, max_threads))
             allocate (thread_pixels(npixels, max_threads))
             allocate (thread_mask(npixels, max_threads))
             allocate (thread_arr(item%naxes(1), item%naxes(2), max_threads))
@@ -1463,7 +1458,7 @@ contains
 
             !$omp PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
-            !$omp& PRIVATE(offset, mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
+            !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
             !$omp& REDUCTION(.or.:thread_bSuccess)&
             !$omp& REDUCTION(max:dmax)&
             !$omp& REDUCTION(min:dmin)&
@@ -1504,44 +1499,42 @@ contains
                     ! get a current OpenMP thread (starting from 0 as in C)
                     tid = 1 + OMP_GET_THREAD_NUM()
 
-                    ! starting bounds
-                    fpixels = (/1, 1, start, 1/)
-
-                    ! ending bounds
-                    lpixels = (/naxes(1), naxes(2), end, 1/)
-
-                    ! do not skip over any pixels
-                    incs = 1
-
-                    ! reset the status
-                    status = 0
-
-                    if (thread_units(tid) .ne. -1) then
-                        call ftgsve(thread_units(tid), group, naxis, naxes,&
-                        & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
-                    else
-                        thread_bSuccess = .false.
-                        cycle
-                    end if
-
-                    ! abort upon errors
-                    if (status .ne. 0) then
-                        print *, 'error reading frames', start, end
-                        thread_bSuccess = .false.
-
-                        if (status .gt. 0) then
-                            call printerror(status)
-                        end if
-
-                        cycle
-                    else
-                        thread_bSuccess = thread_bSuccess .and. .true.
-                    end if
-
-                    offset = 0
-
                     ! a "plain" DO LOOP
                     do frame = start, end
+                        ! starting bounds
+                        fpixels = (/1, 1, frame, 1/)
+
+                        ! ending bounds
+                        lpixels = (/naxes(1), naxes(2), frame, 1/)
+
+                        ! do not skip over any pixels
+                        incs = 1
+
+                        ! reset the status
+                        status = 0
+
+                        if (thread_units(tid) .ne. -1) then
+                            call ftgsve(thread_units(tid), group, naxis, naxes,&
+                            & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+                        else
+                            thread_bSuccess = .false.
+                            cycle
+                        end if
+
+                        ! abort upon errors
+                        if (status .ne. 0) then
+                            print *, 'error reading frames', start, end
+                            thread_bSuccess = .false.
+
+                            if (status .gt. 0) then
+                                call printerror(status)
+                            end if
+
+                            cycle
+                        else
+                            thread_bSuccess = thread_bSuccess .and. .true.
+                        end if
+
                         mean_spec_val = 0.0
                         int_spec_val = 0.0
 
@@ -1554,7 +1547,7 @@ contains
                         ! calculate the min/max values
                         do j = 1, npixels
 
-                            tmp = thread_buffer(offset + j, tid)
+                            tmp = thread_buffer(j, tid)
 
                             if (isnan(tmp) .neqv. .true.) then
                                 if (test_ignrval) then
@@ -1609,13 +1602,10 @@ contains
                                 datamin = item%datamin
                                 datamax = item%datamax
 
-                                thread_arr(:, :, tid) = reshape(thread_buffer((offset + 1):(offset + npixels), tid),&
-                                & item%naxes(1:2))
+                                thread_arr(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
                                 item%compressed(frame)%ptr => to_fixed(thread_arr(:, :, tid), ignrval, datamin, datamax)
                             end block
                         end if
-
-                        offset = offset + npixels
                     end do
                 else
                     ! no work done at this step
