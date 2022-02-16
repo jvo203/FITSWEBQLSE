@@ -19,7 +19,7 @@ module fits
     integer(c_int), parameter :: ZFP_MIN_EXP = -1074
 
     ! FITS channels are allocated to cluster nodes in blocks
-    integer, parameter :: CHANNEL_BLOCK = 1 ! 16 ! 64 ! 128
+    integer, parameter :: CHANNEL_BLOCK = 16 ! 16 ! 64 ! 128
 
     type(c_pthread_mutex_t), save :: logger_mtx
 
@@ -905,6 +905,8 @@ contains
         integer, dimension(:), allocatable :: thread_units
         integer :: num_threads, offset
 
+        integer(kind=8) :: buffer_size
+
         integer rc
 
         if (.not. c_associated(root)) then
@@ -1438,7 +1440,10 @@ contains
             allocate (item%mean_spectrum(naxes(3)))
             allocate (item%integrated_spectrum(naxes(3)))
 
-            allocate (thread_buffer(npixels*CHANNEL_BLOCK, max_threads))
+            buffer_size = int(npixels, kind=8)*int(CHANNEL_BLOCK, kind=8)
+            allocate (thread_buffer(buffer_size, max_threads))
+
+            ! allocate (thread_buffer(npixels*CHANNEL_BLOCK, max_threads))
             allocate (thread_pixels(npixels, max_threads))
             allocate (thread_mask(npixels, max_threads))
             allocate (thread_arr(item%naxes(1), item%naxes(2), max_threads))
