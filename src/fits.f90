@@ -1379,6 +1379,9 @@ contains
             ! to avoid a system overload
             max_threads = min(max_threads, get_physical_cores()/2)
 
+            ! get #physical cores (ignore HT)
+            max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
             print *, "max_threads:", max_threads
 
             if (.not. allocated(thread_units)) then
