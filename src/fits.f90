@@ -1377,7 +1377,7 @@ contains
 
             ! get #physical cores (ignore HT), and then cut the number in half
             ! to avoid a system overload
-            ! max_threads = min(max_threads, get_physical_cores()/2)
+            max_threads = min(max_threads, get_physical_cores()/2)
 
             print *, "max_threads:", max_threads
 
@@ -1456,13 +1456,13 @@ contains
             item%frame_min = 1.0E30
             item%frame_max = -1.0E30
 
-            !$OMP PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
+            !$omp PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(offset, mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
             !$omp& REDUCTION(.or.:thread_bSuccess)&
             !$omp& REDUCTION(max:dmax)&
             !$omp& REDUCTION(min:dmin)&
-            !$OMP& NUM_THREADS(max_threads)
+            !$omp& NUM_THREADS(max_threads)
             tid = 1 + OMP_GET_THREAD_NUM()
 
             ! reset the initial counter
@@ -1617,7 +1617,7 @@ contains
                     num_per_node = 0
                 end if
             end do
-            !$OMP END PARALLEL
+            !$omp END PARALLEL
 
             ! close any remaining thread file units
             if (allocated(thread_units)) then
