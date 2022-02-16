@@ -20,3 +20,5 @@ while mem=$(ps -o rss= -p "$pid"); do
 done
 
 printf "Find the log at %s\n" "$logfile"
+
+# ps -m -o pid,vsz,rss,%mem,command
