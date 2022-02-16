@@ -1,20 +1,28 @@
 #include <stdio.h>
+#include <pthread.h>
 
 #include "hash_table.h"
 
-static GMutex datasets_mtx;
 static GHashTable *datasets;
+pthread_mutex_t datasets_mtx;
 
 void init_hash_table()
 {
-    g_mutex_init(&datasets_mtx);
+    int ret = pthread_mutex_init(&datasets_mtx, NULL);
+
+    if (ret != 0)
+    {
+        perror("mutex_init error");
+        exit(1);
+    }
+
     datasets = g_hash_table_new_full(g_str_hash, g_str_equal, free, free_hash_data);
 }
 
 void delete_hash_table()
 {
     g_hash_table_destroy(datasets);
-    g_mutex_clear(&datasets_mtx);
+    pthread_mutex_destroy(&datasets_mtx);
 }
 
 void free_hash_data(gpointer item)
@@ -28,11 +36,16 @@ void insert_dataset(const char *datasetid, int len, void *item)
 {
     char *id = strndup(datasetid, len);
 
-    g_mutex_lock(&datasets_mtx);
-    g_hash_table_replace(datasets, (gpointer)strdup(id), item);
-    g_mutex_unlock(&datasets_mtx);
+    int ret = pthread_mutex_lock(&datasets_mtx);
 
-    printf("[C] inserted %s into the hash table\n", id);
+    if (ret == 0)
+    {
+        g_hash_table_replace(datasets, (gpointer)strdup(id), item);
+        pthread_mutex_unlock(&datasets_mtx);
+
+        printf("[C] inserted %s into the hash table\n", id);
+    }
+
     free(id);
 }
 
@@ -40,7 +53,10 @@ bool insert_if_not_exists(const char *datasetid, void *item)
 {
     bool exists;
 
-    g_mutex_lock(&datasets_mtx);
+    int ret = pthread_mutex_lock(&datasets_mtx);
+
+    if (ret != 0)
+        return false;
 
     if (!g_hash_table_contains(datasets, (gconstpointer)datasetid))
     {
@@ -50,7 +66,7 @@ bool insert_if_not_exists(const char *datasetid, void *item)
     else
         exists = true;
 
-    g_mutex_unlock(&datasets_mtx);
+    pthread_mutex_unlock(&datasets_mtx);
 
     return exists;
 }
@@ -59,25 +75,34 @@ void *get_dataset(const char *datasetid)
 {
     void *item;
 
-    g_mutex_lock(&datasets_mtx);
-    item = g_hash_table_lookup(datasets, (gconstpointer)datasetid);
-    g_mutex_unlock(&datasets_mtx);
+    int ret = pthread_mutex_lock(&datasets_mtx);
+
+    if (ret == 0)
+    {
+        item = g_hash_table_lookup(datasets, (gconstpointer)datasetid);
+        pthread_mutex_unlock(&datasets_mtx);
+    }
+    else
+        item = NULL;
 
     return item;
 }
 
 bool dataset_exists(const char *datasetid)
 {
-    g_mutex_lock(&datasets_mtx);
+    int ret = pthread_mutex_lock(&datasets_mtx);
+
+    if (ret != 0)
+        return false;
 
     if (g_hash_table_contains(datasets, (gconstpointer)datasetid))
     {
-        g_mutex_unlock(&datasets_mtx);
+        pthread_mutex_unlock(&datasets_mtx);
         return true;
     }
     else
     {
-        g_mutex_unlock(&datasets_mtx);
+        pthread_mutex_unlock(&datasets_mtx);
         return false;
     }
 }
