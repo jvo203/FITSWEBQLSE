@@ -28,7 +28,6 @@ contains
     !end function isnan
 
     function to_fixed(x, ignrval, datamin, datamax) result(compressed)
-        ! use wavelet
         use, intrinsic :: ieee_arithmetic
         implicit none
 
@@ -80,7 +79,6 @@ contains
     end function to_fixed
 
     pure subroutine to_fixed_block(x, compressed, ignrval, datamin, datamax)
-        ! use wavelet
         implicit none
 
         real(kind=4), dimension(DIM, DIM), intent(inout) :: x
@@ -226,4 +224,3 @@ contains
 
     end function dequantize
 end module fixed_array
-
