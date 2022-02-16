@@ -1375,8 +1375,9 @@ contains
             ! cap the number of threads to avoid system overload
             max_threads = min(OMP_GET_MAX_THREADS(), 8)
 
-            ! get #physical cores (ignore HT)
-            ! max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+            ! get #physical cores (ignore HT), and then cut the number in half
+            ! to avoid a system overload
+            max_threads = min(max_threads, get_physical_cores()/2)
 
             print *, "max_threads:", max_threads
 
