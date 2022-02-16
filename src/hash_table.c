@@ -8,9 +8,7 @@ pthread_mutex_t datasets_mtx;
 
 void init_hash_table()
 {
-    int ret = pthread_mutex_init(&datasets_mtx, NULL);
-
-    if (ret != 0)
+    if (pthread_mutex_init(&datasets_mtx, NULL) != 0)
     {
         perror("mutex_init error");
         exit(1);
@@ -36,9 +34,7 @@ void insert_dataset(const char *datasetid, int len, void *item)
 {
     char *id = strndup(datasetid, len);
 
-    int ret = pthread_mutex_lock(&datasets_mtx);
-
-    if (ret == 0)
+    if (pthread_mutex_lock(&datasets_mtx) == 0)
     {
         g_hash_table_replace(datasets, (gpointer)strdup(id), item);
         pthread_mutex_unlock(&datasets_mtx);
