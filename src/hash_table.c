@@ -19,7 +19,12 @@ void init_hash_table()
 
 void delete_hash_table()
 {
-    g_hash_table_destroy(datasets);
+    if (pthread_mutex_lock(&datasets_mtx) == 0)
+    {
+        g_hash_table_destroy(datasets);
+        pthread_mutex_unlock(&datasets_mtx);
+    }
+
     pthread_mutex_destroy(&datasets_mtx);
 }
 
