@@ -401,7 +401,7 @@ contains
 
         ! deallocate compressed memory regions
         if (allocated(item%compressed)) then
-            do i = 1, size(item%compressed)
+            do concurrent(i=1:size(item%compressed))
                 if (associated(item%compressed(i)%ptr)) then
                     deallocate (item%compressed(i)%ptr)
                     nullify (item%compressed(i)%ptr)
