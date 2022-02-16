@@ -385,7 +385,7 @@ contains
         type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
 
-        integer rc
+        integer i, rc
 
         call c_f_pointer(ptr, item)
 
@@ -398,6 +398,18 @@ contains
 
         ! TO-DO:
         ! write the dataset to a cache file so as to speed up subsequent loading
+
+        ! deallocate compressed memory regions
+        if (allocated(item%compressed)) then
+            do i = 1, size(item%compressed)
+                if (associated(item%compressed(i)%ptr)) then
+                    deallocate (item%compressed(i)%ptr)
+                    nullify (item%compressed(i)%ptr)
+                end if
+            end do
+
+            deallocate (item%compressed)
+        end if
 
         deallocate (item)
     end subroutine delete_dataset
