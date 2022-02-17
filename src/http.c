@@ -68,6 +68,7 @@ extern void image_spectrum_request(void *item, int width, int height, int precis
 extern int get_error_status(void *item);
 extern int get_header_status(void *item);
 extern int get_ok_status(void *item);
+extern int get_image_status(void *item);
 extern float get_progress(void *item);
 extern float get_elapsed(void *item);
 extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
@@ -861,6 +862,9 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (!get_ok_status(item))
             return http_accepted(connection);
+
+        /*if (!get_image_status(item))
+            return http_accepted(connection);*/
 
         // if item%depth > 1 {
         // forward the URL across the cluster, collect the (downsized) {pixels, mask} & spectrum
