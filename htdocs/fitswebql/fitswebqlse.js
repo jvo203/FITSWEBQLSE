@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-02-04.0";
+	return "JS2022-02-17.0";
 }
 
 const wasm_supported = (() => {
@@ -12568,7 +12568,7 @@ function show_welcome() {
 
 	headerDiv.append("h2")
 		.attr("align", "center")
-		.html('WELCOME TO FITSWEBQLSE ALPHA RELEASE');
+		.html('WELCOME TO FITSWEBQLSE (ALPHA)');
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
