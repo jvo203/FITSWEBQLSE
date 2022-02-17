@@ -810,6 +810,7 @@ contains
                 ! move the cursor forward
                 item%cursor = item%cursor + item%CHANNEL_BLOCK
 
+                ! natural geometric progression
                 item%CHANNEL_BLOCK = min(nint(GOLDEN_RATIO*item%CHANNEL_BLOCK), MAX_CHANNEL_BLOCK)
 
                 ! status OK
