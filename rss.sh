@@ -16,8 +16,8 @@ while mem=$(ps -o rss= -p "$pid"); do
     # print the time since starting the program followed by its memory usage
     printf "%d,%s\n" $((time-start)) "$mem" >> "$logfile"
 
-    # sleep for a tenth of a second
-    sleep .1
+    # sleep for one second
+    sleep 1
 done
 
 printf "Find the log at %s\n" "$logfile"
