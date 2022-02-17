@@ -5,7 +5,7 @@ pid=$1
 logfile="memory_usage.csv"
 start=$(date +%s)
 
-printf """elapsed time [s]"",""rss""\n" > "$logfile"
+printf "\"elapsed time [s]\",\"rss\"\n" > "$logfile"
 
 # get the process' memory usage and run until `ps` fails which it will do when
 # the pid cannot be found any longer

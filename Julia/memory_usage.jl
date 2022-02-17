@@ -9,4 +9,4 @@ timestamp = data[:, 1]
 allocated = data[:, 2] ./ (1024^3)
 
 plot(timestamp, allocated, label = "jemalloc stats.allocated memory [GB]", xlabel = "elapsed time [s]", ylabel = "memory [GB]")
-savefig("mem_allocated_v5.pdf")
+savefig(homedir() * "/mem_allocated_v5.pdf")
