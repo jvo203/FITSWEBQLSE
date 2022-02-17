@@ -105,10 +105,10 @@ module fits
         logical :: error = .false.
         logical :: ok = .false.
         logical :: header = .false.
+        logical :: image = .false.
 
         ! mutexes
-        ! type(gmutex) :: header_mtx, ok_mtx, error_mtx, progress_mtx
-        type(c_pthread_mutex_t) :: header_mtx, ok_mtx, error_mtx, progress_mtx
+        type(c_pthread_mutex_t) :: header_mtx, ok_mtx, error_mtx, progress_mtx, image_mtx
 
         ! progress
         integer(8) :: start_time, crate, cmax
@@ -395,6 +395,7 @@ contains
         rc = c_pthread_mutex_destroy(item%error_mtx)
         rc = c_pthread_mutex_destroy(item%ok_mtx)
         rc = c_pthread_mutex_destroy(item%progress_mtx)
+        rc = c_pthread_mutex_destroy(item%image_mtx)
 
         ! TO-DO:
         ! write the dataset to a cache file so as to speed up subsequent loading
@@ -486,6 +487,22 @@ contains
         rc = c_pthread_mutex_unlock(item%ok_mtx)
 
     end subroutine set_ok_status
+
+    subroutine set_image_status(item, image)
+        type(dataset), pointer, intent(inout) :: item
+        logical, intent(in) :: image
+
+        integer :: rc
+
+        ! lock the mutex
+        rc = c_pthread_mutex_lock(item%image_mtx)
+
+        item%image = image
+
+        ! unlock the mutex
+        rc = c_pthread_mutex_unlock(item%image_mtx)
+
+    end subroutine set_image_status
 
     subroutine set_header_status(item, header)
         type(dataset), pointer, intent(inout) :: item
@@ -632,6 +649,29 @@ contains
 
         return
     end function get_ok_status
+
+    integer(c_int) function get_image_status(ptr) bind(c)
+        type(C_PTR), intent(in), value :: ptr
+        type(dataset), pointer :: item
+
+        integer :: rc
+
+        call c_f_pointer(ptr, item)
+
+        ! lock the mutex
+        rc = c_pthread_mutex_lock(item%image_mtx)
+
+        if (item%image) then
+            get_image_status = 1
+        else
+            get_image_status = 0
+        end if
+
+        ! unlock the mutex
+        rc = c_pthread_mutex_unlock(item%image_mtx)
+
+        return
+    end function get_image_status
 
     integer(c_int) function get_header_status(ptr) bind(c)
         type(C_PTR), intent(in), value :: ptr
@@ -825,6 +865,7 @@ contains
         rc = c_pthread_mutex_init(item%error_mtx, c_null_ptr)
         rc = c_pthread_mutex_init(item%ok_mtx, c_null_ptr)
         rc = c_pthread_mutex_init(item%progress_mtx, c_null_ptr)
+        rc = c_pthread_mutex_init(item%image_mtx, c_null_ptr)
 
         item%datasetid = datasetid
         item%progress = 0
