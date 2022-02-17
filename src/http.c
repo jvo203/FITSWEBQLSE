@@ -863,13 +863,13 @@ static enum MHD_Result on_http_connection(void *cls,
         if (!get_ok_status(item))
             return http_accepted(connection);
 
-        /*if (!get_image_status(item))
-            return http_accepted(connection);*/
-
         // if item%depth > 1 {
         // forward the URL across the cluster, collect the (downsized) {pixels, mask} & spectrum
         // and then pass the collated {pixels, mask} & spectrum to the FORTRAN side below
         //}
+
+        if (!get_image_status(item))
+            return http_accepted(connection);
 
         // open a pipe
         status = pipe(pipefd);
