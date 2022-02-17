@@ -1409,6 +1409,8 @@ contains
 
             item%pixels = reshape(local_buffer, naxes(1:2))
             item%mask = reshape(local_mask, naxes(1:2))
+
+            call set_image_status(item, .true.)
         else
             ! read a range of 2D planes in parallel on each cluster node
 
