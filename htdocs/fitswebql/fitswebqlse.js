@@ -12568,7 +12568,7 @@ function show_welcome() {
 
 	headerDiv.append("h2")
 		.attr("align", "center")
-		.html('WELCOME TO FITSWEBQLSE (ALPHA)');
+		.html('WELCOME TO FITSWEBQLSE ALPHA Rel.');
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
