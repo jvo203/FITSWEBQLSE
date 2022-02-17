@@ -1,18 +1,17 @@
 using CSV
+using DataFrames
 using Plots
 
-gr(size = (1000, 500), linewidth = 2)
+data_r = CSV.read(homedir() * "/memory_usage_rust.csv", DataFrame)
+data_f = CSV.read(homedir() * "/memory_usage_fortran.csv", DataFrame)
 
-data4 = CSV.read("../../fits_web_ql/memory_usage.csv")
-data5 = CSV.read("../memory_usage.csv")
+timestamp_r = data_r[:, 1]
+allocated_r = data_r[:, 2] ./ (1024^3)
 
-timestamp4 = data4[:,1] ./ 1000
-allocated4 = data4[:,2] ./ (1024^3)
+timestamp_f = data_f[:, 1]
+allocated_f = data_f[:, 2] ./ (1024^3)
 
-timestamp5 = data5[:,1] ./ 1000
-allocated5 = data5[:,2] ./ (1024^3)
+common = min(size(timestamp_r)[1], size(timestamp_f)[1])
 
-common = min(size(timestamp4)[1], size(timestamp5)[1])
-
-plot(timestamp5[1:common], [allocated4[1:common], allocated5[1:common]], label=["Rust fits_web_ql v4" "C/C++ FITSWebQL v5"], xlabel="elapsed time [s]", ylabel="jemalloc stats.allocated memory [GB]")
-savefig("mem_two_way.pdf")
+plot(timestamp_f[1:common], [allocated_r[1:common], allocated_f[1:common]], label = ["Rust fits_web_ql v4" "C / FORTRAN FITSWEBQLSE v5"], xlabel = "elapsed time [s]", ylabel = "jemalloc stats.allocated memory [GB]")
+savefig(homedir() * "/mem_comparison.pdf")
