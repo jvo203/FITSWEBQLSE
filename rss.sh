@@ -2,7 +2,7 @@
 set -e
 pid=$1
 
-logfile="memory_usage_julia.csv"
+logfile="memory_usage.csv"
 start=$(date +%s)
 
 printf """elapsed time [s]"",""rss""\n" > "$logfile"
