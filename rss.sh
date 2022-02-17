@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -e
-grep -ris "banana" /usr/bin &
-pid=$!
+pid=$1
 
-logfile=$(mktemp -t memory.log.XXXX)
+logfile="memory_usage_julia.csv"
 start=$(date +%s)
+
+printf """elapsed time [s]"",""rss""\n" > "$logfile"
 
 # get the process' memory usage and run until `ps` fails which it will do when
 # the pid cannot be found any longer
