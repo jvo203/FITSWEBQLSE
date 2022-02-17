@@ -19,7 +19,8 @@ module fits
     integer(c_int), parameter :: ZFP_MIN_EXP = -1074
 
     ! FITS channels are allocated to cluster nodes in blocks
-    integer, parameter :: CHANNEL_BLOCK = 16 ! 16 ! 64 ! 128
+    real, parameter :: GOLDEN_RATIO = (1 + sqrt(5.0))/2
+    integer, parameter :: MAX_CHANNEL_BLOCK = 1024 ! 16 ! 64 ! 128
 
     type(c_pthread_mutex_t), save :: logger_mtx
 
@@ -113,6 +114,7 @@ module fits
         ! progress
         integer(8) :: start_time, crate, cmax
         integer :: cursor = 1
+        integer :: CHANNEL_BLOCK = 1
         integer :: progress = 0
         integer :: total = 0
         real :: elapsed = 0
@@ -803,10 +805,12 @@ contains
                 status = -1 ! end of AXIS3
             else
                 startindex = item%cursor
-                endindex = min(startindex + CHANNEL_BLOCK - 1, item%naxes(3))
+                endindex = min(startindex + item%CHANNEL_BLOCK - 1, item%naxes(3))
 
                 ! move the cursor forward
-                item%cursor = item%cursor + CHANNEL_BLOCK
+                item%cursor = item%cursor + item%CHANNEL_BLOCK
+
+                item%CHANNEL_BLOCK = min(nint(GOLDEN_RATIO*item%CHANNEL_BLOCK), MAX_CHANNEL_BLOCK)
 
                 ! status OK
                 status = 0
