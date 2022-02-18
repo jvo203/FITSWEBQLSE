@@ -1689,6 +1689,14 @@ contains
 
             !$omp END PARALLEL
 
+            item%dmin = dmin
+            item%dmax = dmax
+
+            item%pixels = reshape(pixels, naxes(1:2))
+            item%mask = reshape(mask, naxes(1:2))
+
+            call set_image_status(item, .true.)
+
             ! close any remaining thread file units
             if (allocated(thread_units)) then
                 do i = 1, size(thread_units)
