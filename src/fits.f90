@@ -933,7 +933,7 @@ contains
         real, allocatable :: int_spec(:)
 
         ! thread-local variables
-        real(kind=4), allocatable, target :: thread_buffer(:, :)
+        real(kind=4), pointer :: thread_buffer(:)
         real(kind=4), allocatable :: thread_pixels(:, :)
         logical(kind=1), allocatable :: thread_mask(:, :)
         real(kind=4), pointer :: thread_arr(:, :)
@@ -1489,7 +1489,6 @@ contains
             allocate (item%mean_spectrum(naxes(3)))
             allocate (item%integrated_spectrum(naxes(3)))
 
-            allocate (thread_buffer(npixels, max_threads))
             allocate (thread_pixels(npixels, max_threads))
             allocate (thread_mask(npixels, max_threads))
 
@@ -1509,7 +1508,7 @@ contains
             !$omp PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
-            !$omp& PRIVATE(thread_arr)&
+            !$omp& PRIVATE(thread_buffer, thread_arr)&
             !$omp& REDUCTION(.or.:thread_bSuccess)&
             !$omp& REDUCTION(max:dmax)&
             !$omp& REDUCTION(min:dmin)&
@@ -1517,6 +1516,7 @@ contains
             tid = 1 + OMP_GET_THREAD_NUM()
 
             ! allocate thread buffers
+            allocate (thread_buffer(npixels))
             allocate (thread_arr(item%naxes(1), item%naxes(2)))
 
             ! reset the initial counter
@@ -1569,7 +1569,7 @@ contains
 
                         if (thread_units(tid) .ne. -1) then
                             call ftgsve(thread_units(tid), group, naxis, naxes,&
-                            & fpixels, lpixels, incs, nullval, thread_buffer(:, tid), anynull, status)
+                            & fpixels, lpixels, incs, nullval, thread_buffer(:), anynull, status)
                         else
                             thread_bSuccess = .false.
                             cycle
@@ -1601,7 +1601,7 @@ contains
                         ! calculate the min/max values
                         do j = 1, npixels
 
-                            tmp = thread_buffer(j, tid)
+                            tmp = thread_buffer(j)
 
                             if (isnan(tmp) .neqv. .true.) then
                                 if (test_ignrval) then
@@ -1656,7 +1656,7 @@ contains
                                 datamin = item%datamin
                                 datamax = item%datamax
 
-                                thread_arr(:, :) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                                thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
                                 item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), ignrval, datamin, datamax)
                                 ! item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
                                 ! & ignrval, datamin, datamax)
@@ -1670,7 +1670,9 @@ contains
             end do
 
             ! release thread buffers
+            if (associated(thread_buffer)) deallocate (thread_buffer)
             if (associated(thread_arr)) deallocate (thread_arr)
+
             !$omp END PARALLEL
 
             ! close any remaining thread file units
