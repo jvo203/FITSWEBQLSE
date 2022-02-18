@@ -440,17 +440,10 @@ contains
         & ', has_velocity:', item%has_velocity,&
         & ', frame_multiplier = ', item%frame_multiplier
 
-        ! print *, 'pmin:', item%pmin
-        ! print *, 'pmax:', item%pmax
-        ! print *, 'pmedian:', item%pmedian
-        ! print *, 'black:', item%black
-        ! print *, 'white:', item%white
-        ! print *, 'sensitivity:', item%sensitivity
-        ! print *, 'ratio_sensitivity:', item%ratio_sensitivity
-
         if (item%naxes(3) .gt. 1) then
             ! print *, 'frame_min:', item%frame_min
             ! print *, 'frame_max:', item%frame_max
+            print *, 'frame_median:', item%frame_median
 
             ! print *, 'mean spectrum:', item%mean_spectrum
             ! print *, 'integrated spectrum:', item%integrated_spectrum
