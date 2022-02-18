@@ -18,7 +18,7 @@
 #include <jemalloc/jemalloc.h>
 
 static pthread_t jemalloc_t;
-static void *jemalloc_daemon(void *);
+static void *jemalloc_daemon(void *arg);
 #endif
 
 #include "ini.h"
@@ -675,7 +675,7 @@ static void *autodiscovery_daemon(void *ptr)
 }
 
 #ifdef DEBUG
-static void *jemalloc_daemon(void *)
+static void *jemalloc_daemon(void *arg)
 {
     printf("jemalloc memory tracking thread initiated.\n");
 
