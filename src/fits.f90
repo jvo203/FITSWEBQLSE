@@ -936,7 +936,6 @@ contains
         real(kind=4), allocatable, target :: thread_buffer(:, :)
         real(kind=4), allocatable :: thread_pixels(:, :)
         logical(kind=1), allocatable :: thread_mask(:, :)
-        ! real(kind=4), allocatable :: thread_arr(:, :, :)
         real(kind=4), pointer :: thread_arr(:, :)
         logical thread_bSuccess
 
