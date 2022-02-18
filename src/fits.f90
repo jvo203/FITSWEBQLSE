@@ -958,7 +958,8 @@ contains
             rc = c_pthread_mutex_lock(logger_mtx)
 
             if (rc .eq. 0) then
-                call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
+                ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown
+                ! call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
 
                 ! unlock the mutex
                 rc = c_pthread_mutex_unlock(logger_mtx)
