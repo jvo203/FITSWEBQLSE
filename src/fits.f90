@@ -953,17 +953,17 @@ contains
 
         integer rc
 
-        ! if (.not. c_associated(root)) then
-        ! needs to be protected with a mutex
-        !    rc = c_pthread_mutex_lock(logger_mtx)
+        if (.not. c_associated(root)) then
+            ! needs to be protected with a mutex
+            rc = c_pthread_mutex_lock(logger_mtx)
 
-        !    if (rc .eq. 0) then
-        !        call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
+            if (rc .eq. 0) then
+                call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
 
-        ! unlock the mutex
-        !        rc = c_pthread_mutex_unlock(logger_mtx)
-        !    end if
-        !end if
+                ! unlock the mutex
+                rc = c_pthread_mutex_unlock(logger_mtx)
+            end if
+        end if
 
         ! print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
 
