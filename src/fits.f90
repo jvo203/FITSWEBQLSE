@@ -443,7 +443,7 @@ contains
         if (item%naxes(3) .gt. 1) then
             ! print *, 'frame_min:', item%frame_min
             ! print *, 'frame_max:', item%frame_max
-            print *, 'frame_median:', item%frame_median
+            ! print *, 'frame_median:', item%frame_median
 
             ! print *, 'mean spectrum:', item%mean_spectrum
             ! print *, 'integrated spectrum:', item%integrated_spectrum
@@ -930,6 +930,8 @@ contains
         real(kind=4), pointer :: thread_pixels(:)
         logical(kind=1), pointer :: thread_mask(:)
         real(kind=4), pointer :: thread_arr(:, :)
+        real(kind=4), pointer :: thread_data(:)
+        integer :: data_count
         logical thread_bSuccess
 
         real cdelt3, mean_spec_val, int_spec_val
@@ -1503,6 +1505,7 @@ contains
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
             !$omp& PRIVATE(thread_buffer, thread_pixels, thread_mask, thread_arr)&
+            !$omp& PRIVATE(thread_data, data_count)&
             !$omp& REDUCTION(.or.:thread_bSuccess)&
             !$omp& REDUCTION(max:dmax)&
             !$omp& REDUCTION(min:dmin)&
@@ -1512,6 +1515,7 @@ contains
             ! allocate thread buffers
             allocate (thread_buffer(npixels))
             allocate (thread_arr(item%naxes(1), item%naxes(2)))
+            allocate (thread_data(npixels))
 
             allocate (thread_pixels(npixels))
             allocate (thread_mask(npixels))
@@ -1598,6 +1602,8 @@ contains
                         frame_min = 1.0E30
                         frame_max = -1.0E30
 
+                        data_count = 0
+
                         ! calculate the min/max values
                         do j = 1, npixels
 
@@ -1611,6 +1617,9 @@ contains
                                         cycle
                                     end if
                                 end if
+
+                                data_count = data_count + 1
+                                thread_data(data_count) = tmp
 
                                 frame_min = min(frame_min, tmp)
                                 frame_max = max(frame_max, tmp)
@@ -1635,6 +1644,12 @@ contains
 
                         item%frame_min(frame) = frame_min
                         item%frame_max(frame) = frame_max
+
+                        if (data_count .gt. 0) then
+                            item%frame_median(frame) = median(thread_data, data_count)
+                        else
+                            item%frame_median(frame) = ieee_value(0.0, ieee_quiet_nan)
+                        end if
 
                         dmin = min(dmin, frame_min)
                         dmax = max(dmax, frame_max)
@@ -1679,6 +1694,7 @@ contains
             if (associated(thread_pixels)) deallocate (thread_pixels)
             if (associated(thread_mask)) deallocate (thread_mask)
             if (associated(thread_arr)) deallocate (thread_arr)
+            if (associated(thread_data)) deallocate (thread_data)
 
             !$omp END PARALLEL
 
