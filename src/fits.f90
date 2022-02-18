@@ -936,7 +936,8 @@ contains
         real(kind=4), allocatable, target :: thread_buffer(:, :)
         real(kind=4), allocatable :: thread_pixels(:, :)
         logical(kind=1), allocatable :: thread_mask(:, :)
-        real(kind=4), allocatable :: thread_arr(:, :, :)
+        ! real(kind=4), allocatable :: thread_arr(:, :, :)
+        real(kind=4), pointer :: thread_arr(:, :)
         logical thread_bSuccess
 
         real cdelt3, mean_spec_val, int_spec_val
@@ -1492,7 +1493,7 @@ contains
             allocate (thread_buffer(npixels, max_threads))
             allocate (thread_pixels(npixels, max_threads))
             allocate (thread_mask(npixels, max_threads))
-            allocate (thread_arr(item%naxes(1), item%naxes(2), max_threads))
+            ! allocate (thread_arr(item%naxes(1), item%naxes(2), max_threads))
 
             thread_pixels = 0.0
             thread_mask = .false.
@@ -1510,11 +1511,14 @@ contains
             !$omp PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
+            !$omp& PRIVATE(thread_arr)&
             !$omp& REDUCTION(.or.:thread_bSuccess)&
             !$omp& REDUCTION(max:dmax)&
             !$omp& REDUCTION(min:dmin)&
             !$omp& NUM_THREADS(max_threads)
             tid = 1 + OMP_GET_THREAD_NUM()
+
+            allocate (thread_arr(item%naxes(1), item%naxes(2)))
 
             ! reset the initial counter
             num_per_node = 0
@@ -1640,7 +1644,7 @@ contains
                         item%integrated_spectrum(frame) = int_spec_val
 
                         ! compress the pixels
-                        if (allocated(item%compressed) .and. allocated(thread_arr)) then
+                        if (allocated(item%compressed) .and. associated(thread_arr)) then
                             block
                                 real :: ignrval, datamin, datamax
 
@@ -1653,8 +1657,9 @@ contains
                                 datamin = item%datamin
                                 datamax = item%datamax
 
-                                thread_arr(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
-                                item%compressed(frame)%ptr => to_fixed(thread_arr(:, :, tid), ignrval, datamin, datamax)
+                                ! thread_arr(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                                thread_arr(:, :) = reshape(thread_buffer(:, tid), item%naxes(1:2))
+                                item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), ignrval, datamin, datamax)
                                 ! item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
                                 ! & ignrval, datamin, datamax)
                             end block
@@ -1665,6 +1670,9 @@ contains
                     num_per_node = 0
                 end if
             end do
+
+            ! release thread buffers
+            if (associated(thread_arr)) deallocate (thread_arr)
             !$omp END PARALLEL
 
             ! close any remaining thread file units
