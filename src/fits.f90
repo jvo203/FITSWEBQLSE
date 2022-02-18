@@ -1646,7 +1646,7 @@ contains
                         item%frame_max(frame) = frame_max
 
                         if (data_count .gt. 0) then
-                            item%frame_median(frame) = median(thread_data, data_count)
+                            item%frame_median(frame) = median(thread_data(1:data_count))
                         else
                             item%frame_median(frame) = ieee_value(0.0, ieee_quiet_nan)
                         end if
@@ -2139,7 +2139,7 @@ contains
 
         if (n .eq. 0) return
 
-        pmedian = median(data, n)
+        pmedian = median(data)
         print *, '50th quantile (median) = ', pmedian
 
         ! now the deviations from the median
@@ -2276,16 +2276,18 @@ contains
     !    The returned value is of REAL type.
     ! --------------------------------------------------------------------
 
-    real function median(X, N)
+    real function median(X)
         use quantile_mod
         implicit none
 
-        integer, intent(in) :: N
-        real, dimension(N), intent(in) :: X
+        real, dimension(:), intent(in) :: X
+        integer :: N
 
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
         real :: elapsed
+
+        N = size(X)
 
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
