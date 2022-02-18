@@ -2296,7 +2296,7 @@ contains
         call system_clock(finish_t)
         elapsed = real(finish_t - start_t)/real(crate)
 
-        print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]'
+        ! print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]'
     end function median
 
     subroutine inherent_image_dimensions(item, width, height)
