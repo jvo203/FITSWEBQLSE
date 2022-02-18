@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-02-17.1";
+	return "JS2022-02-18.0";
 }
 
 const wasm_supported = (() => {
@@ -10393,7 +10393,12 @@ function display_molecules() {
 		if (intensity != 0.0)
 			cmds = ' CDMS/JPL Int. ' + intensity;
 
-		var htmlStr = molecule.name.trim() + ' ' + text.trim() + ' ' + molecule.qn.trim() + ' <span style="font-size: 80%">(' + molecule.linelist + ')</span>';
+		try {
+			var htmlStr = molecule.name.trim() + ' ' + text.trim() + ' ' + molecule.qn.trim() + ' <span style="font-size: 80%">(' + molecule.linelist + ')</span>';
+		} catch (e) {
+			console.log(molecule);
+			console.error(e);
+		}
 
 		if (htmlStr.indexOf("Unidentified") > -1)
 			htmlStr = molecule.name;

@@ -2095,7 +2095,7 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
 
         // quantum numbers
         encoded = json_encode_string(denull(argv[3]));
-        g_string_append_printf(json, "\"quantum\" : %s,", denull(encoded));
+        g_string_append_printf(json, "\"qn\" : %s,", denull(encoded));
         if (encoded != NULL)
             free(encoded);
 
@@ -2119,7 +2119,7 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
 
         // linelist
         encoded = json_encode_string(denull(argv[7]));
-        g_string_append_printf(json, "\"list\" : %s}", denull(encoded));
+        g_string_append_printf(json, "\"linelist\" : %s}", denull(encoded));
         if (encoded != NULL)
             free(encoded);
 
