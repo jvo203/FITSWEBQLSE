@@ -1676,6 +1676,11 @@ contains
                 end if
             end do
 
+            !$omp critical
+            pixels = pixels + thread_pixels
+            mask = mask .or. thread_mask
+            !$omp end critical
+
             ! release thread buffers
             if (associated(thread_buffer)) deallocate (thread_buffer)
             if (associated(thread_pixels)) deallocate (thread_pixels)
