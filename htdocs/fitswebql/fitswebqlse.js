@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-02-18.0";
+	return "JS2022-02-18.1";
 }
 
 const wasm_supported = (() => {
@@ -10386,12 +10386,6 @@ function display_molecules() {
 			.html(text.trim());
 
 		//console.log("spectral line @ x = ",x, (f/1e9).toPrecision(7), text.trim()) ;
-
-		var cdms = '';
-		var intensity = molecule.cdms_intensity;
-
-		if (intensity != 0.0)
-			cmds = ' CDMS/JPL Int. ' + intensity;
 
 		try {
 			var htmlStr = molecule.name.trim() + ' ' + text.trim() + ' ' + molecule.qn.trim() + ' <span style="font-size: 80%">(' + molecule.linelist + ')</span>';
