@@ -1493,7 +1493,6 @@ contains
             allocate (thread_buffer(npixels, max_threads))
             allocate (thread_pixels(npixels, max_threads))
             allocate (thread_mask(npixels, max_threads))
-            ! allocate (thread_arr(item%naxes(1), item%naxes(2), max_threads))
 
             thread_pixels = 0.0
             thread_mask = .false.
@@ -1518,6 +1517,7 @@ contains
             !$omp& NUM_THREADS(max_threads)
             tid = 1 + OMP_GET_THREAD_NUM()
 
+            ! allocate thread buffers
             allocate (thread_arr(item%naxes(1), item%naxes(2)))
 
             ! reset the initial counter
@@ -1657,7 +1657,6 @@ contains
                                 datamin = item%datamin
                                 datamax = item%datamax
 
-                                ! thread_arr(:, :, tid) = reshape(thread_buffer(:, tid), item%naxes(1:2))
                                 thread_arr(:, :) = reshape(thread_buffer(:, tid), item%naxes(1:2))
                                 item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), ignrval, datamin, datamax)
                                 ! item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
