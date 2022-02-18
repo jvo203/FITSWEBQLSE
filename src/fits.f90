@@ -934,8 +934,8 @@ contains
 
         ! thread-local variables
         real(kind=4), pointer :: thread_buffer(:)
-        real(kind=4), allocatable :: thread_pixels(:, :)
-        logical(kind=1), allocatable :: thread_mask(:, :)
+        real(kind=4), pointer :: thread_pixels(:)
+        logical(kind=1), pointer :: thread_mask(:)
         real(kind=4), pointer :: thread_arr(:, :)
         logical thread_bSuccess
 
@@ -1489,11 +1489,11 @@ contains
             allocate (item%mean_spectrum(naxes(3)))
             allocate (item%integrated_spectrum(naxes(3)))
 
-            allocate (thread_pixels(npixels, max_threads))
-            allocate (thread_mask(npixels, max_threads))
+            allocate (pixels(npixels))
+            allocate (mask(npixels))
 
-            thread_pixels = 0.0
-            thread_mask = .false.
+            pixels = 0.0
+            mask = .false.
             thread_bSuccess = .true.
 
             call get_cdelt3(item, cdelt3)
@@ -1508,7 +1508,7 @@ contains
             !$omp PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
-            !$omp& PRIVATE(thread_buffer, thread_arr)&
+            !$omp& PRIVATE(thread_buffer, thread_pixels, thread_mask, thread_arr)&
             !$omp& REDUCTION(.or.:thread_bSuccess)&
             !$omp& REDUCTION(max:dmax)&
             !$omp& REDUCTION(min:dmin)&
@@ -1518,6 +1518,12 @@ contains
             ! allocate thread buffers
             allocate (thread_buffer(npixels))
             allocate (thread_arr(item%naxes(1), item%naxes(2)))
+
+            allocate (thread_pixels(npixels))
+            allocate (thread_mask(npixels))
+
+            thread_pixels = 0.0
+            thread_mask = .false.
 
             ! reset the initial counter
             num_per_node = 0
@@ -1616,8 +1622,8 @@ contains
                                 frame_max = max(frame_max, tmp)
 
                                 ! integrate (sum up) pixels and a NaN mask
-                                thread_pixels(j, tid) = thread_pixels(j, tid) + tmp
-                                thread_mask(j, tid) = thread_mask(j, tid) .or. .true.
+                                thread_pixels(j) = thread_pixels(j) + tmp
+                                thread_mask(j) = thread_mask(j) .or. .true.
 
                                 ! needed by the mean and integrated spectra
                                 pixel_sum = pixel_sum + tmp
@@ -1671,6 +1677,8 @@ contains
 
             ! release thread buffers
             if (associated(thread_buffer)) deallocate (thread_buffer)
+            if (associated(thread_pixels)) deallocate (thread_pixels)
+            if (associated(thread_mask)) deallocate (thread_mask)
             if (associated(thread_arr)) deallocate (thread_arr)
 
             !$omp END PARALLEL
