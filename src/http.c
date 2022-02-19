@@ -1833,11 +1833,12 @@ void fetch_channel_range(char *root, char *datasetid, int len, int progress, int
 {
     int num_per_node = (*end) - (*start) + 1;
 
-    if (num_per_node != progress)
-    {
-        printf("incorrect num_per_node(%d), progress(%d), start(%d), end(%d).\n", num_per_node, progress, *start, *end);
-        return;
-    }
+    if (*start > 0 && *end > 0)
+        if (num_per_node != progress)
+        {
+            printf("incorrect num_per_node(%d), progress(%d), start(%d), end(%d).\n", num_per_node, progress, *start, *end);
+            return;
+        }
 
     char *id = strndup(datasetid, len);
 
