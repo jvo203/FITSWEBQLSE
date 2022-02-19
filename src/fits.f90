@@ -943,6 +943,7 @@ contains
       logical(kind=c_bool), pointer :: thread_mask(:)
       real(kind=c_float), pointer :: thread_arr(:, :)
       real(kind=c_float), pointer :: thread_data(:)
+      real(kind=c_float), target :: res(4)
       integer :: data_count
       logical thread_bSuccess
 
@@ -1520,7 +1521,7 @@ contains
          !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
          !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
          !$omp& PRIVATE(thread_buffer, thread_pixels, thread_mask, thread_arr)&
-         !$omp& PRIVATE(thread_data, data_count)&
+         !$omp& PRIVATE(thread_data, data_count, res)&
          !$omp& REDUCTION(.or.:thread_bSuccess)&
          !$omp& REDUCTION(max:dmax)&
          !$omp& REDUCTION(min:dmin)&
@@ -1619,8 +1620,15 @@ contains
 
                   data_count = 0
 
+                  res = (/frame_min, frame_max, 0.0, 0.0/)
+
                   call make_image_spectrumF32(c_loc(thread_buffer), c_loc(thread_pixels), c_loc(thread_mask), item%ignrval, &
-                    &item%datamin, item%datamax, cdelt3, frame_min, frame_max, mean_spec_val, int_spec_val, npixels)
+                    &item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
+
+                  frame_min = res(1)
+                  frame_max = res(2)
+                  mean_spec_val = res(3)
+                  int_spec_val = res(4)
 
                   ! calculate the min/max values
                   do j = 1, npixels
