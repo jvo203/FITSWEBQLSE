@@ -11,7 +11,7 @@ bool isinf(float tmp)
   return ( (i & 0x7fffffff) == 0x7f800000 ) || ( (i & 0xffffffff) == 0xff800000 ) ;
 }
 
-export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform unsigned int size)
+export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform int npixels)
 {
   varying float partial_sum = 0.0f ;
   varying unsigned int64 partial_count = 0 ;
@@ -19,7 +19,9 @@ export void  make_image_spectrumF32(uniform float src[], uniform float pixels[],
   varying float vmin = frame_min ;
   varying float vmax = frame_max ;
 
-  foreach(i=0 ... size)
+  // print ("npixels: %, frame_min: %, frame_max: %, datamin: %, datamax: %, cdelt3: %, ignrval: %\n", npixels, frame_min, frame_max, datamin, datamax, cdelt3, ignrval);
+
+  foreach(i=0 ... npixels)
     {      
       float tmp = src[i];
 
@@ -47,10 +49,12 @@ uniform int64 count = reduce_add(partial_count) ;
       integrated = sum * cdelt3 ;
     }
   else
-    {
+    {      
       mean = 0.0f ;
       integrated = 0.0f ;
     }
+
+  // print ("mean: %, integrated: %\n", mean, integrated);
 
   frame_min = reduce_min(vmin) ;
   frame_max = reduce_max(vmax) ;

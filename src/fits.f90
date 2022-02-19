@@ -173,9 +173,9 @@ module fits
          integer(kind=c_int), value, intent(in) :: fd
       end subroutine close_pipe
 
-      ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform unsigned int size)
+      ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform int npixels)
       subroutine make_image_spectrumF32(src, pixels, mask, ignrval, datamin, datamax, cdelt3, &
-        &frame_min, frame_max, mean, integrated, size)&
+        &frame_min, frame_max, mean, integrated, npixels)&
         & BIND(C, name='make_image_spectrumF32')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -183,7 +183,7 @@ module fits
          type(C_PTR), value, intent(in) :: src, pixels, mask
          real(c_float), value, intent(in) :: ignrval, datamin, datamax, cdelt3
          real(c_float), intent(in) :: frame_min, frame_max, mean, integrated
-         integer(c_int), value, intent(in) :: size
+         integer(c_int), value, intent(in) :: npixels
 
       end subroutine make_image_spectrumF32
 
@@ -1193,10 +1193,12 @@ contains
       if (status .ne. 0) item%obsdec = ieee_value(0.0, ieee_quiet_nan)
 
       status = 0; call FTGKYE(unit, 'DATAMIN', item%datamin, comment, status)
-      if (status .ne. 0) item%datamin = ieee_value(0.0, ieee_quiet_nan)
+      ! if (status .ne. 0) item%datamin = ieee_value(0.0, ieee_quiet_nan)
+      if (status .ne. 0) item%datamin = -1.0E30
 
       status = 0; call FTGKYE(unit, 'DATAMAX', item%datamax, comment, status)
-      if (status .ne. 0) item%datamax = ieee_value(0.0, ieee_quiet_nan)
+      ! if (status .ne. 0) item%datamax = ieee_value(0.0, ieee_quiet_nan)
+      if (status .ne. 0) item%datamax = 1.0E30
 
       ! either keyword is valid
       status = 0; call FTGKYS(unit, 'LINE', item%line, comment, status)
@@ -1368,6 +1370,7 @@ contains
       ! should we be checking values against ignrval ?
       if (isnan(item%ignrval)) then
          test_ignrval = .false.
+         item%ignrval = -1.0E30
       else
          test_ignrval = .true.
       end if
@@ -1642,8 +1645,8 @@ contains
                         frame_max = max(frame_max, tmp)
 
                         ! integrate (sum up) pixels and a NaN mask
-                        thread_pixels(j) = thread_pixels(j) + tmp
-                        thread_mask(j) = thread_mask(j) .or. .true.
+                        ! thread_pixels(j) = thread_pixels(j) + tmp
+                        ! thread_mask(j) = thread_mask(j) .or. .true.
 
                         ! needed by the mean and integrated spectra
                         pixel_sum = pixel_sum + tmp
@@ -1655,8 +1658,8 @@ contains
                   end do
 
                   if (pixel_count .gt. 0) then
-                     mean_spec_val = pixel_sum/real(pixel_count)
-                     int_spec_val = pixel_sum*cdelt3
+                     ! mean_spec_val = pixel_sum/real(pixel_count)
+                     ! int_spec_val = pixel_sum*cdelt3
                   end if
 
                   item%frame_min(frame) = frame_min
