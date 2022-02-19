@@ -173,16 +173,14 @@ module fits
          integer(kind=c_int), value, intent(in) :: fd
       end subroutine close_pipe
 
-      ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform int npixels)
-      subroutine make_image_spectrumF32(src, pixels, mask, ignrval, datamin, datamax, cdelt3, &
-        &frame_min, frame_max, mean, integrated, npixels)&
+      ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int npixels)
+      subroutine make_image_spectrumF32(src, pixels, mask, ignrval, datamin, datamax, cdelt3, res, npixels)&
         & BIND(C, name='make_image_spectrumF32')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
-         type(C_PTR), value, intent(in) :: src, pixels, mask
+         type(C_PTR), value, intent(in) :: src, pixels, mask, res
          real(c_float), value, intent(in) :: ignrval, datamin, datamax, cdelt3
-         real(c_float), intent(in) :: frame_min, frame_max, mean, integrated
          integer(c_int), value, intent(in) :: npixels
 
       end subroutine make_image_spectrumF32
