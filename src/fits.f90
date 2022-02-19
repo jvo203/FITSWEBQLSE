@@ -1623,7 +1623,7 @@ contains
                   res = (/frame_min, frame_max, 0.0, 0.0/)
 
                   call make_image_spectrumF32(c_loc(thread_buffer), c_loc(thread_pixels), c_loc(thread_mask), item%ignrval, &
-                    &item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
+                  &item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
 
                   frame_min = res(1)
                   frame_max = res(2)
