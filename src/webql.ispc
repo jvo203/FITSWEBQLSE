@@ -11,10 +11,13 @@ bool isinf(float tmp)
   return ( (i & 0x7fffffff) == 0x7f800000 ) || ( (i & 0xffffffff) == 0xff800000 ) ;
 }
 
-export void process_cube_plane(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax, uniform float& rmin, uniform float& rmax, uniform unsigned int size)
+export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform unsigned int size)
 {
-  varying float vmin = rmin ;
-  varying float vmax = rmax ;
+  varying float partial_sum = 0.0f ;
+  varying unsigned int64 partial_count = 0 ;
+
+  varying float vmin = frame_min ;
+  varying float vmax = frame_max ;
 
   foreach(i=0 ... size)
     {      
@@ -23,16 +26,34 @@ export void process_cube_plane(uniform float src[], uniform float pixels[], unif
       //next the min/max values & the mask
       cif(!(isnan(tmp) || isinf(tmp)) && (tmp > ignrval) && (tmp >= datamin) && (tmp <= datamax))
         {
-                vmin = min(vmin, tmp) ;
-                vmax = max(vmax, tmp) ;
+              vmin = min(vmin, tmp) ;
+              vmax = max(vmax, tmp) ;
 
-                pixels[i] += tmp ;
-                mask[i] |= true;
+              pixels[i] += tmp ;
+              mask[i] |= true;
+
+              partial_sum += tmp ;
+              partial_count += 1 ;
         }
     }
 
-  rmin = reduce_min(vmin) ;
-  rmax = reduce_max(vmax) ;
+uniform float sum = reduce_add(partial_sum) ;
+uniform int64 count = reduce_add(partial_count) ;
+
+  if(count > 0)
+    {
+
+      mean = sum / (float) count ;
+      integrated = sum * cdelt3 ;
+    }
+  else
+    {
+      mean = 0.0f ;
+      integrated = 0.0f ;
+    }
+
+  frame_min = reduce_min(vmin) ;
+  frame_max = reduce_max(vmax) ;
 } ;
 
 export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
