@@ -175,7 +175,8 @@ module fits
 
       ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform unsigned int size)
       subroutine make_image_spectrumF32(src, pixels, mask, ignrval, datamin, datamax, cdelt3, &
-                                        frame_min, frame_max, mean, integrated, size) BIND(C, name='make_image_spectrumF32')
+        frame_min, frame_max, mean, integrated, size)&
+        & BIND(C, name='make_image_spectrumF32')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
