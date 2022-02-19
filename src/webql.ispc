@@ -1,3 +1,18 @@
+typedef int16 int16_t;
+typedef int32 int32_t;
+typedef int64 int64_t;
+typedef unsigned int16 uint16_t;
+typedef unsigned int32 uint32_t;
+typedef unsigned int64 uint64_t;
+
+bool isinf(float tmp)
+{
+  unsigned int i = intbits(tmp) ;
+  return ( (i & 0x7fffffff) == 0x7f800000 ) || ( (i & 0xffffffff) == 0xff800000 ) ;
+}
+
+
+
 export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
 {  
   float partial_sum = 0.0f ;
