@@ -173,6 +173,13 @@ module fits
          integer(kind=c_int), value, intent(in) :: fd
       end subroutine close_pipe
 
+      ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform unsigned int size)
+      subroutine make_image_spectrumF32() BIND(C, name='make_image_spectrumF32')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+      end subroutine make_image_spectrumF32
+
       ! resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
       subroutine resizeCubic(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeCubic')
          use, intrinsic :: ISO_C_BINDING
