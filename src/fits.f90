@@ -1712,6 +1712,8 @@ contains
                end do
             else
                ! no work done at this step
+               start = 0
+               end = 0
                num_per_node = 0
             end if
          end do
