@@ -943,6 +943,7 @@ contains
         logical(kind=c_bool), pointer :: thread_mask(:)
         real(kind=c_float), pointer :: thread_arr(:, :)
         real(kind=c_float), pointer :: thread_data(:)
+        logical(kind=c_bool), pointer :: data_mask(:)
         real(kind=c_float), target :: res(4)
         integer :: data_count
         logical thread_bSuccess
