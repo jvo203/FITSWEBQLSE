@@ -11,8 +11,13 @@ bool isinf(float tmp)
   return ( (i & 0x7fffffff) == 0x7f800000 ) || ( (i & 0xffffffff) == 0xff800000 ) ;
 }
 
-export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform int npixels)
+export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int npixels)
 {
+  uniform float frame_min, frame_max, mean, integrated;
+
+  frame_min = res[0];
+  frame_max = res[1];
+
   varying float partial_sum = 0.0f ;
   varying unsigned int64 partial_count = 0 ;
 
@@ -58,6 +63,11 @@ uniform int64 count = reduce_add(partial_count) ;
 
   frame_min = reduce_min(vmin) ;
   frame_max = reduce_max(vmax) ;
+
+  res[0] = frame_min;
+  res[1] = frame_max;
+  res[2] = mean;
+  res[3] = integrated;
 } ;
 
 export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
