@@ -1831,11 +1831,11 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 
 void fetch_channel_range(char *root, char *datasetid, int len, int progress, int *start, int *end, int *status)
 {
-    int num_per_node = *end - *start + 1;
+    int num_per_node = (*end) - (*start) + 1;
 
     if (num_per_node != progress)
     {
-        perror("incorrect num_per_node.\n");
+        printf("incorrect num_per_node(%d), progress(%d), start(%d), end(%d).\n", num_per_node, progress, *start, *end);
         return;
     }
 
