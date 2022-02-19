@@ -61,7 +61,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
-void fetch_channel_range(char *root, char *datasetid, int len, int progress, int *start, int *end, int *status);
+void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status);
 
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
@@ -1829,16 +1829,14 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     return realsize;
 }
 
-void fetch_channel_range(char *root, char *datasetid, int len, int progress, int *start, int *end, int *status)
+void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status)
 {
-    int num_per_node = *end - *start + 1;
+    int progress;
 
     if (*start > 0 && *end > 0)
-        if (num_per_node != progress)
-        {
-            printf("incorrect num_per_node(%d), progress(%d), start(%d), end(%d).\n", num_per_node, progress, *start, *end);
-            return;
-        }
+        progress = *end - *start + 1;
+    else
+        progress = 0;
 
     char *id = strndup(datasetid, len);
 
