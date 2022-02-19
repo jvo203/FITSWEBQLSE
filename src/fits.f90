@@ -175,7 +175,7 @@ module fits
 
       ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float& frame_min, uniform float& frame_max, uniform float& mean, uniform float& integrated, uniform unsigned int size)
       subroutine make_image_spectrumF32(src, pixels, mask, ignrval, datamin, datamax, cdelt3, &
-        frame_min, frame_max, mean, integrated, size)&
+        &frame_min, frame_max, mean, integrated, size)&
         & BIND(C, name='make_image_spectrumF32')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -1617,6 +1617,9 @@ contains
                   frame_max = -1.0E30
 
                   data_count = 0
+
+                  call make_image_spectrumF32(c_loc(thread_buffer), c_loc(thread_pixels), c_loc(thread_mask), item%ignrval, &
+                    &item%datamin, item%datamax, cdelt3, frame_min, frame_max, mean_spec_val, int_spec_val, npixels)
 
                   ! calculate the min/max values
                   do j = 1, npixels
