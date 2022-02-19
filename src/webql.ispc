@@ -11,7 +11,29 @@ bool isinf(float tmp)
   return ( (i & 0x7fffffff) == 0x7f800000 ) || ( (i & 0xffffffff) == 0xff800000 ) ;
 }
 
+export void process_cube_plane(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax, uniform float& rmin, uniform float& rmax, uniform unsigned int size)
+{
+  varying float vmin = rmin ;
+  varying float vmax = rmax ;
 
+  foreach(i=0 ... size)
+    {      
+      float tmp = src[i];
+
+      //next the min/max values & the mask
+      cif(!(isnan(tmp) || isinf(tmp)) && (tmp > ignrval) && (tmp >= datamin) && (tmp <= datamax))
+        {
+                vmin = min(vmin, tmp) ;
+                vmax = max(vmax, tmp) ;
+
+                pixels[i] += tmp ;
+                mask[i] |= true;
+        }
+    }
+
+  rmin = reduce_min(vmin) ;
+  rmax = reduce_max(vmax) ;
+} ;
 
 export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
 {  
