@@ -1540,6 +1540,8 @@ contains
          thread_mask = .false.
 
          ! reset the initial counter
+         start = 0
+         end = 0
          num_per_node = 0
 
          do
