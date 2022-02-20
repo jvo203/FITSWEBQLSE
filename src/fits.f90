@@ -1008,10 +1008,6 @@ contains
       item%specsys = ''
       item%timesys = ''
 
-      item%dmin = ieee_value(0.0, ieee_quiet_nan)
-      item%dmax = ieee_value(0.0, ieee_quiet_nan)
-      item%dmedian = ieee_value(0.0, ieee_quiet_nan)
-
       ! special handling for the flux
       ! test the first character for 'N' ('NULL')
       if (flux(1:1) .ne. 'N') allocate (item%flux, source=flux)
@@ -1023,6 +1019,10 @@ contains
       item%ctype1 = ''
       item%ctype2 = ''
       item%ctype3 = ''
+
+      item%dmin = ieee_value(0.0, ieee_quiet_nan)
+      item%dmax = ieee_value(0.0, ieee_quiet_nan)
+      item%dmedian = ieee_value(0.0, ieee_quiet_nan)
 
       ! reset the FITS header
       if (allocated(item%hdr)) deallocate (item%hdr)
