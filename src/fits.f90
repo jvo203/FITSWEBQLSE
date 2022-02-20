@@ -92,7 +92,7 @@ module fits
 
       ! derived values
       character(len=:), allocatable :: flux
-      real(kind=c_float) dmin, dmax
+      real(kind=c_float) dmin, dmax, dmedian
       real(kind=4), allocatable :: frame_min(:), frame_max(:), frame_median(:)
       real(kind=c_float), allocatable :: pixels(:, :)
       logical(kind=c_bool), allocatable :: mask(:, :)
@@ -451,6 +451,7 @@ contains
       print *, 'has_frequency:', item%has_frequency,&
       & ', has_velocity:', item%has_velocity,&
       & ', frame_multiplier = ', item%frame_multiplier
+      print *, 'dmin:', item%dmin, 'dmax:', item%dmax, 'dmedian:', item%dmedian
 
       if (item%naxes(3) .gt. 1) then
          ! print *, 'frame_min:', item%frame_min
@@ -571,6 +572,8 @@ contains
 
          if (allocated(item%frame_min)) item%dmin = minval(item%frame_min)
          if (allocated(item%frame_max)) item%dmax = maxval(item%frame_max)
+         if (allocated(item%frame_median)) item%dmedian = &
+         &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
 
          call print_dataset(item)
       end if
@@ -1004,6 +1007,10 @@ contains
       item%bunit = ''
       item%specsys = ''
       item%timesys = ''
+
+      item%dmin = ieee_value(0.0, ieee_quiet_nan)
+      item%dmax = ieee_value(0.0, ieee_quiet_nan)
+      item%dmedian = ieee_value(0.0, ieee_quiet_nan)
 
       ! special handling for the flux
       ! test the first character for 'N' ('NULL')
