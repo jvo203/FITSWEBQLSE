@@ -1635,52 +1635,52 @@ contains
 
                         data_count = 0
 
-                        res = (/frame_min, frame_max, 0.0, 0.0/)
+                        ! res = (/frame_min, frame_max, 0.0, 0.0/)
 
                         ! the 'infamous' AVX-512 slowdown on Mac Pro ... a shame ...
-                        call make_image_spectrumF32(c_loc(thread_buffer), c_loc(thread_pixels), c_loc(thread_mask), &
-                        &c_loc(data_mask), item%ignrval, item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
+                        ! call make_image_spectrumF32(c_loc(thread_buffer), c_loc(thread_pixels), c_loc(thread_mask), &
+                        ! &c_loc(data_mask), item%ignrval, item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
 
-                        frame_min = res(1)
-                        frame_max = res(2)
-                        mean_spec_val = res(3)
-                        int_spec_val = res(4)
+                        ! frame_min = res(1)
+                        ! frame_max = res(2)
+                        ! mean_spec_val = res(3)
+                        ! int_spec_val = res(4)
 
                         ! disable FORTRAN, testing the Intel SPMD C
-                        if (.false.) then
-                            ! calculate the min/max values
-                            do j = 1, npixels
+                        ! if (.false.) then
+                        ! calculate the min/max values
+                        do j = 1, npixels
 
-                                tmp = thread_buffer(j)
+                            tmp = thread_buffer(j)
 
-                                if (isnan(tmp) .neqv. .true.) then
-                                    if (test_ignrval) then
-                                        if (tmp .eq. item%ignrval) then
-                                            ! skip the IGNRVAL pixels
-                                            ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
-                                            cycle
-                                        end if
+                            if (isnan(tmp) .neqv. .true.) then
+                                if (test_ignrval) then
+                                    if (tmp .eq. item%ignrval) then
+                                        ! skip the IGNRVAL pixels
+                                        ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
+                                        cycle
                                     end if
-
-                                    data_count = data_count + 1
-                                    thread_data(data_count) = tmp
-
-                                    frame_min = min(frame_min, tmp)
-                                    frame_max = max(frame_max, tmp)
-
-                                    ! integrate (sum up) pixels and a NaN mask
-                                    thread_pixels(j) = thread_pixels(j) + tmp
-                                    thread_mask(j) = thread_mask(j) .or. .true.
-
-                                    ! needed by the mean and integrated spectra
-                                    pixel_sum = pixel_sum + tmp
-                                    pixel_count = pixel_count + 1
-                                else
-                                    ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
                                 end if
 
-                            end do
-                        end if
+                                data_count = data_count + 1
+                                thread_data(data_count) = tmp
+
+                                frame_min = min(frame_min, tmp)
+                                frame_max = max(frame_max, tmp)
+
+                                ! integrate (sum up) pixels and a NaN mask
+                                thread_pixels(j) = thread_pixels(j) + tmp
+                                thread_mask(j) = thread_mask(j) .or. .true.
+
+                                ! needed by the mean and integrated spectra
+                                pixel_sum = pixel_sum + tmp
+                                pixel_count = pixel_count + 1
+                            else
+                                ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
+                            end if
+
+                        end do
+                        ! end if
 
                         if (pixel_count .gt. 0) then
                             mean_spec_val = pixel_sum/real(pixel_count)
@@ -1689,13 +1689,13 @@ contains
 
                         item%frame_min(frame) = frame_min
                         item%frame_max(frame) = frame_max
-                        item%frame_median(frame) = median(pack(thread_buffer, data_mask))
+                        ! item%frame_median(frame) = median(pack(thread_buffer, data_mask))
 
-                        ! if (data_count .gt. 0) then
-                        !    item%frame_median(frame) = median(thread_data(1:data_count))
-                        !else
-                        !    item%frame_median(frame) = ieee_value(0.0, ieee_quiet_nan)
-                        !end if
+                        if (data_count .gt. 0) then
+                            item%frame_median(frame) = median(thread_data(1:data_count))
+                        else
+                            item%frame_median(frame) = ieee_value(0.0, ieee_quiet_nan)
+                        end if
 
                         dmin = min(dmin, frame_min)
                         dmax = max(dmax, frame_max)
