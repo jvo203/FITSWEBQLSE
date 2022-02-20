@@ -11,7 +11,7 @@ bool isinf(float tmp)
   return ( (i & 0x7fffffff) == 0x7f800000 ) || ( (i & 0xffffffff) == 0xff800000 ) ;
 }
 
-export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int npixels)
+export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform unsigned int8 data_mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int npixels)
 {
   uniform float frame_min, frame_max, mean, integrated;
 
@@ -33,15 +33,18 @@ export void  make_image_spectrumF32(uniform float src[], uniform float pixels[],
       //next the min/max values & the mask
       cif(!(isnan(tmp) || isinf(tmp)) && (tmp > ignrval) && (tmp >= datamin) && (tmp <= datamax))
         {
-              vmin = min(vmin, tmp) ;
-              vmax = max(vmax, tmp) ;
+            vmin = min(vmin, tmp) ;
+            vmax = max(vmax, tmp) ;
 
-              pixels[i] += tmp ;
-              mask[i] |= true;
+            pixels[i] += tmp ;
+            mask[i] |= true;
+            data_mask[i] = true;
 
-              partial_sum += tmp ;
-              partial_count += 1 ;
-        }
+            partial_sum += tmp ;
+            partial_count += 1 ;
+        } 
+        else
+          data_mask[i] = false;
     }
 
 uniform float sum = reduce_add(partial_sum) ;
