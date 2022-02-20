@@ -2330,6 +2330,11 @@ contains
 
       N = size(X)
 
+      if (N .lt. 1) then
+         median = ieee_value(0.0, ieee_quiet_nan)
+         return
+      end if
+
       ! start the timer
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
