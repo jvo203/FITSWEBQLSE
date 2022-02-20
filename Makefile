@@ -64,6 +64,8 @@ endif
 
 IPP += -lippi -lippdc -lipps -lippcore
 
+MKL =  -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+
 ZFP = zfp
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 
@@ -93,7 +95,7 @@ ifeq ($(CC),icc)
 #-mt_mpi
 endif
 
-INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` -I./$(ZFP)/include -I./$(ZFP)/src
+INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` -I./$(ZFP)/include -I./$(ZFP)/src  -I${MKLROOT}/include
 MOD =
 # -I/home/chris/zfp/include
 DEF = -DDEBUG
@@ -168,7 +170,7 @@ endif
 	$(FORT) $(FLAGS) $(MOD) -o $@ -c $<
 
 fitswebqlse: $(OBJ)
-	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBS) $(IPP) $(JEMALLOC)
+	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBS) $(IPP) $(MKL) $(JEMALLOC)
 
 test:
 	$(FORT) $(FLAGS) src/wavelet.f90 src/fixed_array.f90 src/zfp_array.f90 src/lz4.f90 src/testWavelets.f90 -o testWavelets -llz4 $(LIBS)
