@@ -1689,12 +1689,13 @@ contains
 
                         item%frame_min(frame) = frame_min
                         item%frame_max(frame) = frame_max
+                        item%frame_median(frame) = median(pack(thread_buffer, data_mask))
 
-                        if (data_count .gt. 0) then
-                            item%frame_median(frame) = median(thread_data(1:data_count))
-                        else
-                            item%frame_median(frame) = ieee_value(0.0, ieee_quiet_nan)
-                        end if
+                        ! if (data_count .gt. 0) then
+                        !    item%frame_median(frame) = median(thread_data(1:data_count))
+                        !else
+                        !    item%frame_median(frame) = ieee_value(0.0, ieee_quiet_nan)
+                        !end if
 
                         dmin = min(dmin, frame_min)
                         dmax = max(dmax, frame_max)
