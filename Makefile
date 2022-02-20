@@ -55,17 +55,17 @@ TARGET = fitswebqlse
 ifeq ($(UNAME_S),Linux)
 	OS = linux
     IPP = -L${IPPROOT}/lib/intel64
+	MKL =  ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a -L${MKLROOT}/lib/intel64
 endif
 
 ifeq ($(UNAME_S),Darwin)
 	OS = macOS
-    IPP = -L${IPPROOT}/lib 
+    IPP = -L${IPPROOT}/lib
+	MKL =  ${MKLROOT}/lib/libmkl_lapack95_lp64.a -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib
 endif
 
 IPP += -lippi -lippdc -lipps -lippcore
-
-# MKL =  -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
-MKL =  ${MKLROOT}/lib/libmkl_lapack95_lp64.a -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+MKL += -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
 
 ZFP = zfp
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
@@ -97,7 +97,6 @@ ifeq ($(CC),icc)
 endif
 
 INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` -I./$(ZFP)/include -I./$(ZFP)/src -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include
-# -I${MKLROOT}/include
 MOD =
 # -I/home/chris/zfp/include
 DEF = -DDEBUG
