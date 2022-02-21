@@ -2194,8 +2194,11 @@ contains
 
         if (n .eq. 0) return
 
-        pmedian = median(data)
-        print *, '50th quantile (median) = ', pmedian
+        pmedian = hist_median(data, pmin, pmax, 2)
+        print *, 'hist. median = ', pmedian
+
+        ! pmedian = median(data)
+        ! print *, '50th quantile (median) = ', pmedian
 
         ! now the deviations from the median
         mad = 0.0; madP = 0.0; madN = 0.0
@@ -2362,6 +2365,7 @@ contains
 
         if (NPASS .eq. 1) then
             median = bin_start + bin_width*(N/2 - previous_cumulative)/HIST(i)
+            ! print *, "rec_hist_median PASS:", NPASS, ", value:", median
         else
             median = rec_hist_median(X, bin_start, bin_end, HIST, NPASS - 1)
         end if
@@ -2369,16 +2373,17 @@ contains
     end function rec_hist_median
 
     ! histogram-based median estimation
-    function hist_median(X, DMIN, DMAX) result(median)
+    function hist_median(X, DMIN, DMAX, PASSES) result(median)
         implicit none
 
         real, dimension(:), intent(in), target :: X
         real, intent(in) :: DMIN, DMAX
+        integer, intent(in), optional :: PASSES
         integer :: N
 
         integer, allocatable :: hist(:)
-        integer :: i, cumulative, previous_cumulative
-        real :: median, bin_start, bin_end, bin_width
+        integer :: PCOUNT
+        real :: median
 
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
@@ -2391,54 +2396,16 @@ contains
             return
         end if
 
+        if (present(PASSES)) then
+            PCOUNT = PASSES
+        else
+            PCOUNT = 1
+        end if
+
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
-        call make_histogram(hist, X, DMIN, DMAX)
-
-        ! find the bin with the median
-        previous_cumulative = 0
-        cumulative = 0
-
-        do i = 1, N
-            if (cumulative .ge. N/2) exit ! we've got the bin with the median
-
-            previous_cumulative = cumulative
-            cumulative = cumulative + hist(i)
-        end do
-
-        i = max(1, i - 1)
-
-        bin_start = DMIN + (i - 1)*(DMAX - DMIN)/NBINS
-        bin_end = DMIN + i*(DMAX - DMIN)/NBINS
-        bin_width = (DMAX - DMIN)/NBINS
-
-        ! print *, "bin with the median:", i, "bin start:", bin_start, "bin width:", bin_width, "bin count:", hist(i)
-
-        median = bin_start + bin_width*(N/2 - previous_cumulative)/hist(i)
-
-        ! make another pass
-        ! call make_histogram(hist, X, bin_start, bin_end)
-
-        ! again, find the bin with the median
-        ! previous_cumulative = 0
-        ! cumulative = 0
-
-        ! do i = 1, N
-        ! if (cumulative .ge. N/2) exit ! we've got the bin with the median
-
-        ! previous_cumulative = cumulative
-        ! cumulative = cumulative + hist(i)
-        ! end do
-
-        ! i = max(1, i - 1)
-
-        ! bin_width = (bin_end - bin_start)/NBINS
-        ! bin_start = bin_start + (i - 1)*(bin_end - bin_start)/NBINS
-
-        ! print *, "bin with the median:", i, "bin start:", bin_start, "bin width:", bin_width, "bin count:", hist(i)
-
-        ! median = bin_start + bin_width*(N/2 - previous_cumulative)/hist(i)
+        median = rec_hist_median(X, DMIN, DMAX, hist, PCOUNT)
 
         ! end the timer
         call system_clock(finish_t)
