@@ -2356,18 +2356,18 @@ contains
         call system_clock(finish_t)
         elapsed = real(finish_t - start_t)/real(crate)
 
-        print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
+        ! print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
 
         ! start the timer
-        call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+        ! call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
-        median = vsl_median(c_loc(X), N)
+        ! median = vsl_median(c_loc(X), N)
 
         ! end the timer
-        call system_clock(finish_t)
-        elapsed = real(finish_t - start_t)/real(crate)
+        ! call system_clock(finish_t)
+        ! elapsed = real(finish_t - start_t)/real(crate)
 
-        print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; vsl_median:', median
+        ! print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; vsl_median:', median
     end function median
 
     subroutine inherent_image_dimensions(item, width, height)
