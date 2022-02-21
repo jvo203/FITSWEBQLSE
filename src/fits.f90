@@ -2192,6 +2192,7 @@ contains
 
         if (n .eq. 0) return
 
+        pmedian = hist_median(data, pmin, pmax)
         pmedian = median(data)
         print *, '50th quantile (median) = ', pmedian
 
@@ -2331,6 +2332,7 @@ contains
         integer :: N
 
         integer, allocatable :: hist(:)
+        integer :: i, cumulative
         real :: median
 
         ! timing
@@ -2348,6 +2350,18 @@ contains
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
         call make_histogram(hist, X, PMIN, PMAX)
+
+        ! find the bin with the median
+        cumulative = 0
+
+        do i = 1, N
+            if (cumulative .ge. N/2) exit ! we've got the bin with the median
+
+            cumulative = cumulative + hist(i)
+        end do
+
+        print *, "bin with the median:", i
+
         median = 0.0
 
         ! end the timer
@@ -2392,7 +2406,7 @@ contains
         call system_clock(finish_t)
         elapsed = real(finish_t - start_t)/real(crate)
 
-        ! print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
+        print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
 
         ! start the timer
         ! call system_clock(count=start_t, count_rate=crate, count_max=cmax)
