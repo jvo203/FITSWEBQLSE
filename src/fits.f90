@@ -1699,9 +1699,11 @@ contains
                         item%frame_min(frame) = frame_min
                         item%frame_max(frame) = frame_max
                         ! item%frame_median(frame) = median(pack(thread_buffer, data_mask))
+                        ! item%frame_median(frame) = hist_median(pack(thread_buffer, data_mask), frame_min, frame_max)
 
                         if (data_count .gt. 0) then
-                            item%frame_median(frame) = median(thread_data(1:data_count))
+                            ! item%frame_median(frame) = median(thread_data(1:data_count))
+                            item%frame_median(frame) = hist_median(thread_data(1:data_count), frame_min, frame_max)
                         else
                             item%frame_median(frame) = ieee_value(0.0, ieee_quiet_nan)
                         end if
@@ -2192,7 +2194,6 @@ contains
 
         if (n .eq. 0) return
 
-        pmedian = hist_median(data, pmin, pmax)
         pmedian = median(data)
         print *, '50th quantile (median) = ', pmedian
 
@@ -2301,7 +2302,7 @@ contains
         integer i, index, n
         real value
 
-        allocate (hist(NBINS))
+        if (.not. allocated(hist)) allocate (hist(NBINS))
 
         ! reset the histogram
         hist = 0
@@ -2324,16 +2325,16 @@ contains
     end subroutine make_histogram
 
     ! histogram-based median estimation
-    function hist_median(X, PMIN, PMAX) result(median)
+    function hist_median(X, DMIN, DMAX) result(median)
         implicit none
 
         real, dimension(:), intent(in), target :: X
-        real, intent(in) :: PMIN, PMAX
+        real, intent(in) :: DMIN, DMAX
         integer :: N
 
         integer, allocatable :: hist(:)
-        integer :: i, cumulative
-        real :: median
+        integer :: i, cumulative, previous_cumulative
+        real :: median, bin_start, bin_end, bin_width
 
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
@@ -2349,26 +2350,57 @@ contains
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
-        call make_histogram(hist, X, PMIN, PMAX)
+        call make_histogram(hist, X, DMIN, DMAX)
 
         ! find the bin with the median
+        previous_cumulative = 0
         cumulative = 0
 
         do i = 1, N
             if (cumulative .ge. N/2) exit ! we've got the bin with the median
 
+            previous_cumulative = cumulative
             cumulative = cumulative + hist(i)
         end do
 
-        print *, "bin with the median:", i
+        i = max(1, i - 1)
 
-        median = 0.0
+        bin_start = DMIN + (i - 1)*(DMAX - DMIN)/NBINS
+        bin_end = DMIN + i*(DMAX - DMIN)/NBINS
+        bin_width = (DMAX - DMIN)/NBINS
+
+        ! print *, "bin with the median:", i, "bin start:", bin_start, "bin width:", bin_width, "bin count:", hist(i)
+
+        median = bin_start + bin_width*(N/2 - previous_cumulative)/hist(i)
+
+        ! make another pass
+        ! call make_histogram(hist, X, bin_start, bin_end)
+
+        ! again, find the bin with the median
+        ! previous_cumulative = 0
+        ! cumulative = 0
+
+        ! do i = 1, N
+        ! if (cumulative .ge. N/2) exit ! we've got the bin with the median
+
+        ! previous_cumulative = cumulative
+        ! cumulative = cumulative + hist(i)
+        ! end do
+
+        ! i = max(1, i - 1)
+
+        ! bin_width = (bin_end - bin_start)/NBINS
+        ! bin_start = bin_start + (i - 1)*(bin_end - bin_start)/NBINS
+
+        ! print *, "bin with the median:", i, "bin start:", bin_start, "bin width:", bin_width, "bin count:", hist(i)
+
+        ! median = bin_start + bin_width*(N/2 - previous_cumulative)/hist(i)
 
         ! end the timer
         call system_clock(finish_t)
         elapsed = real(finish_t - start_t)/real(crate)
 
-        print *, 'histogram elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
+        ! print *, 'histogram elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
 
     end function hist_median
 
@@ -2406,7 +2438,7 @@ contains
         call system_clock(finish_t)
         elapsed = real(finish_t - start_t)/real(crate)
 
-        print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
+        ! print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
 
         ! start the timer
         ! call system_clock(count=start_t, count_rate=crate, count_max=cmax)
