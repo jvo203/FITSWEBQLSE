@@ -2330,6 +2330,7 @@ contains
         real, intent(in) :: PMIN, PMAX
         integer :: N
 
+        integer, allocatable :: hist(:)
         real :: median
 
         ! timing
@@ -2343,7 +2344,17 @@ contains
             return
         end if
 
+        ! start the timer
+        call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+        call make_histogram(hist, X, PMIN, PMAX)
         median = 0.0
+
+        ! end the timer
+        call system_clock(finish_t)
+        elapsed = real(finish_t - start_t)/real(crate)
+
+        print *, 'histogram elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
 
     end function hist_median
 
