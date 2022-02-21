@@ -2324,6 +2324,50 @@ contains
 
     end subroutine make_histogram
 
+    ! a recursive multi-pass histogram-based median
+    recursive function rec_hist_median(X, DMIN, DMAX, HIST, NPASS) result(median)
+        implicit none
+
+        real, dimension(:), intent(in), target :: X
+        real, intent(in) :: DMIN, DMAX
+        integer, allocatable, intent(inout) :: hist(:)
+        integer :: NPASS
+
+        integer :: i, N
+
+        ! statistics
+        integer :: cumulative, previous_cumulative
+        real :: median, bin_start, bin_end, bin_width
+
+        N = size(X)
+
+        call make_histogram(HIST, X, DMIN, DMAX)
+
+        ! find the bin with the median
+        previous_cumulative = 0
+        cumulative = 0
+
+        do i = 1, N
+            if (cumulative .ge. N/2) exit ! we've got the bin with the median
+
+            previous_cumulative = cumulative
+            cumulative = cumulative + HIST(i)
+        end do
+
+        i = max(1, i - 1)
+
+        bin_start = DMIN + (i - 1)*(DMAX - DMIN)/NBINS
+        bin_end = DMIN + i*(DMAX - DMIN)/NBINS
+        bin_width = (DMAX - DMIN)/NBINS
+
+        if (NPASS .eq. 1) then
+            median = bin_start + bin_width*(N/2 - previous_cumulative)/HIST(i)
+        else
+            median = rec_hist_median(X, bin_start, bin_end, HIST, NPASS - 1)
+        end if
+
+    end function rec_hist_median
+
     ! histogram-based median estimation
     function hist_median(X, DMIN, DMAX) result(median)
         implicit none
