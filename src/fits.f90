@@ -2187,12 +2187,12 @@ contains
         ! pick non-NaN valid pixels only according to mask
         data = pack(item%pixels, item%mask)
 
-        ! make a histogram with a range given by [pmin, pmax]
-        call make_histogram(hist, data, pmin, pmax)
-
         n = size(data)
 
         if (n .eq. 0) return
+
+        ! make a histogram with a range given by [pmin, pmax]
+        call make_histogram(hist, data, pmin, pmax)
 
         pmedian = hist_median(data, pmin, pmax, 2) ! a two-pass median estimation
         print *, 'hist. median = ', pmedian
