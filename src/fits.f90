@@ -2322,6 +2322,31 @@ contains
 
     end subroutine make_histogram
 
+    ! histogram-based median estimation
+    function hist_median(X, PMIN, PMAX) result(median)
+        implicit none
+
+        real, dimension(:), intent(in), target :: X
+        real, intent(in) :: PMIN, PMAX
+        integer :: N
+
+        real :: median
+
+        ! timing
+        integer(8) :: start_t, finish_t, crate, cmax
+        real :: elapsed
+
+        N = size(X)
+
+        if (N .lt. 1) then
+            median = ieee_value(0.0, ieee_quiet_nan)
+            return
+        end if
+
+        median = 0.0
+
+    end function hist_median
+
     ! --------------------------------------------------------------------
     ! REAL FUNCTION  median() :
     !    This function receives an array X of N entries, sorts it
