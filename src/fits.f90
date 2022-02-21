@@ -2194,7 +2194,7 @@ contains
 
         if (n .eq. 0) return
 
-        pmedian = hist_median(data, pmin, pmax, 2)
+        pmedian = hist_median(data, pmin, pmax, 2) ! a two-pass median estimation
         print *, 'hist. median = ', pmedian
 
         ! pmedian = median(data)
@@ -2365,7 +2365,6 @@ contains
 
         if (NPASS .eq. 1) then
             median = bin_start + bin_width*(N/2 - previous_cumulative)/HIST(i)
-            ! print *, "rec_hist_median PASS:", NPASS, ", value:", median
         else
             median = rec_hist_median(X, bin_start, bin_end, HIST, NPASS - 1)
         end if
