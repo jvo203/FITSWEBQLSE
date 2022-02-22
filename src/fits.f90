@@ -954,12 +954,12 @@ contains
         real, allocatable :: int_spec(:)
 
         ! thread-local variables
-        real(kind=c_float), pointer :: thread_buffer(:)
-        real(kind=c_float), pointer :: thread_pixels(:)
-        logical(kind=c_bool), pointer :: thread_mask(:)
-        real(kind=c_float), pointer :: thread_arr(:, :)
-        real(kind=c_float), pointer :: thread_data(:)
-        logical(kind=c_bool), pointer :: data_mask(:)
+        real(kind=c_float), allocatable :: thread_buffer(:)
+        real(kind=c_float), allocatable :: thread_pixels(:)
+        logical(kind=c_bool), allocatable :: thread_mask(:)
+        real(kind=c_float), allocatable :: thread_arr(:, :)
+        real(kind=c_float), allocatable :: thread_data(:)
+        logical(kind=c_bool), allocatable :: data_mask(:)
         real(kind=c_float), target :: res(4)
         integer :: data_count
         logical thread_bSuccess
@@ -1715,7 +1715,7 @@ contains
                         item%integrated_spectrum(frame) = int_spec_val
 
                         ! compress the pixels
-                        if (allocated(item%compressed) .and. associated(thread_arr)) then
+                        if (allocated(item%compressed) .and. allocated(thread_arr)) then
                             block
                                 real :: ignrval, datamin, datamax
 
@@ -1747,12 +1747,12 @@ contains
             !$omp end critical
 
             ! release thread buffers
-            if (associated(thread_buffer)) deallocate (thread_buffer)
-            if (associated(thread_pixels)) deallocate (thread_pixels)
-            if (associated(thread_mask)) deallocate (thread_mask)
-            if (associated(thread_arr)) deallocate (thread_arr)
-            if (associated(thread_data)) deallocate (thread_data)
-            if (associated(data_mask)) deallocate (data_mask)
+            if (allocated(thread_buffer)) deallocate (thread_buffer)
+            if (allocated(thread_pixels)) deallocate (thread_pixels)
+            if (allocated(thread_mask)) deallocate (thread_mask)
+            if (allocated(thread_arr)) deallocate (thread_arr)
+            if (allocated(thread_data)) deallocate (thread_data)
+            if (allocated(data_mask)) deallocate (data_mask)
 
             !$omp END PARALLEL
 
