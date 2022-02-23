@@ -1872,6 +1872,26 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         return;
     }
 
+    // make a POST buffer
+    size_t post_size = sizeof(int); // space for at least <num_per_node (a.k.a. progress)>
+
+    if (progress > 0)
+    {
+        int i, idx;
+
+        // {start, end}
+        post_size += 2 * sizeof(int);
+
+        // include five floating-point arrays too ... for the range [start, end]
+        post_size += 5 * progress * sizeof(float);
+
+        for (i = 0; i < progress; i++)
+        {
+            idx = *start + i - 1;
+            printf("index: %d; frame_min: %f, frame_max: %f, frame_median: %f, mean spec.: %f, int. spec.: %f¥n", idx);
+        }
+    }
+
     // assume a catastrophic error
     *start = 0;
     *end = 0;

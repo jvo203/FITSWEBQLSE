@@ -164,8 +164,8 @@ module fits
             character(kind=c_char), intent(in) :: datasetid(*)
             integer(c_int), value :: len
             integer(c_int) :: start, end, status
-            type(c_ptr), value :: frame_min, frame_max, frame_median
-            type(c_ptr), value :: mean_spectrum, integrated_spectrum
+            type(c_ptr), value, intent(in) :: frame_min, frame_max, frame_median
+            type(c_ptr), value, intent(in) :: mean_spectrum, integrated_spectrum
 
         end subroutine fetch_channel_range
 
