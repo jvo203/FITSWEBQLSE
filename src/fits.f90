@@ -154,7 +154,9 @@ module fits
             character(kind=c_char), intent(in) :: datasetid(*)
         end function get_dataset
 
-        subroutine fetch_channel_range(root, datasetid, len, start, end, status) BIND(C, name='fetch_channel_range')
+        subroutine fetch_channel_range(root, datasetid, len, start, end, status,&
+            &frame_min, frame_max, frame_median,&
+            &mean_spectrum, integrated_spectrum) BIND(C, name='fetch_channel_range')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
@@ -162,6 +164,8 @@ module fits
             character(kind=c_char), intent(in) :: datasetid(*)
             integer(c_int), value :: len
             integer(c_int) :: start, end, status
+            type(c_ptr), value :: frame_min, frame_max, frame_median
+            type(c_ptr), value :: mean_spectrum, integrated_spectrum
 
         end subroutine fetch_channel_range
 
@@ -1577,7 +1581,10 @@ contains
                 else
                     ! submit work completed in the previous step (<num_per_node>)
                     ! fetch the range from the root node via HTTP
-                    call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status) ! a C function defined in http.c
+                    ! a C function defined in http.c
+                    call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status,&
+                    &c_loc(item%frame_min), c_loc(item%frame_max), c_loc(item%frame_median),&
+                    &c_loc(item%mean_spectrum), c_loc(item%integrated_spectrum))
                 end if
 
                 ! LOOP EXIT
