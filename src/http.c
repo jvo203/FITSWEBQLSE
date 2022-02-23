@@ -1873,6 +1873,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     }
 
     // make a POST buffer
+    char *post_buffer = NULL;
     size_t post_size = sizeof(int); // space for at least <num_per_node (a.k.a. progress)>
     int idx = (*start - 1);         // FORTRAN arrays memory offset
 
@@ -1890,81 +1891,90 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     *end = 0;
     *status = -2;
 
-    // form an HTTP request URL
-    CURL *curl;
-    CURLcode res;
+    // allocate memory for the POST buffer
+    post_buffer = (char *)malloc(post_size);
 
-    GString *url = g_string_new("http://");
-
-    g_string_append_printf(url, "%s:", root);
-    g_string_append_printf(url, "%" PRIu16 "/range/%s", options.ws_port, id);
-    // printf("[C] URL: '%s'\n", url->str);
-
-    curl = curl_easy_init();
-
-    if (curl)
+    if (post_buffer != NULL)
     {
-        struct MemoryStruct chunk;
 
-        chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
-        chunk.size = 0;           /* no data at this point */
-        chunk.memory[0] = 0;
+        // form an HTTP request URL
+        CURL *curl;
+        CURLcode res;
 
-        /* POST data */
-        GString *post = g_string_new(NULL);
-        g_string_printf(post, "progress=%d", progress);
+        GString *url = g_string_new("http://");
 
-        curl_easy_setopt(curl, CURLOPT_URL, url->str);
+        g_string_append_printf(url, "%s:", root);
+        g_string_append_printf(url, "%" PRIu16 "/range/%s", options.ws_port, id);
+        // printf("[C] URL: '%s'\n", url->str);
 
-        /* send all data to this function  */
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+        curl = curl_easy_init();
 
-        /* we pass our 'chunk' struct to the callback function */
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
-
-        /* size of the POST data */
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post->len);
-
-        /* the actual POST data */
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post->str);
-
-        /* Perform the request, res will get the return code */
-        res = curl_easy_perform(curl);
-
-        /* Check for errors */
-        if (res != CURLE_OK)
-            fprintf(stderr, "[C] curl_easy_perform() failed: %s\n",
-                    curl_easy_strerror(res));
-        else
+        if (curl)
         {
-            // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
-            // printf("cURL response: %s\n", chunk.memory);
+            struct MemoryStruct chunk;
 
-            // assume accepted (no header yet)
-            *status = 1;
+            chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
+            chunk.size = 0;           /* no data at this point */
+            chunk.memory[0] = 0;
 
-            // parse the JSON response
-            double val;
+            /* POST data */
+            GString *post = g_string_new(NULL);
+            g_string_printf(post, "progress=%d", progress);
 
-            if (mjson_get_number(chunk.memory, chunk.size, "$.startindex", &val))
-                *start = (int)val;
+            curl_easy_setopt(curl, CURLOPT_URL, url->str);
 
-            if (mjson_get_number(chunk.memory, chunk.size, "$.endindex", &val))
-                *end = (int)val;
+            /* send all data to this function  */
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
-            if (mjson_get_number(chunk.memory, chunk.size, "$.status", &val))
-                *status = (int)val;
-        }
+            /* we pass our 'chunk' struct to the callback function */
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
-        free(chunk.memory);
+            /* size of the POST data */
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post->len);
 
-        /* always cleanup */
-        curl_easy_cleanup(curl);
+            /* the actual POST data */
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post->str);
 
-        g_string_free(post, TRUE);
-    };
+            /* Perform the request, res will get the return code */
+            res = curl_easy_perform(curl);
 
-    g_string_free(url, TRUE);
+            /* Check for errors */
+            if (res != CURLE_OK)
+                fprintf(stderr, "[C] curl_easy_perform() failed: %s\n",
+                        curl_easy_strerror(res));
+            else
+            {
+                // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
+                // printf("cURL response: %s\n", chunk.memory);
+
+                // assume accepted (no header yet)
+                *status = 1;
+
+                // parse the JSON response
+                double val;
+
+                if (mjson_get_number(chunk.memory, chunk.size, "$.startindex", &val))
+                    *start = (int)val;
+
+                if (mjson_get_number(chunk.memory, chunk.size, "$.endindex", &val))
+                    *end = (int)val;
+
+                if (mjson_get_number(chunk.memory, chunk.size, "$.status", &val))
+                    *status = (int)val;
+            }
+
+            free(chunk.memory);
+
+            /* always cleanup */
+            curl_easy_cleanup(curl);
+
+            g_string_free(post, TRUE);
+        };
+
+        g_string_free(url, TRUE);
+        free(post_buffer);
+    }
+
     free(id);
 }
 
