@@ -1873,24 +1873,16 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     }
 
     // make a POST buffer
-    size_t post_size = sizeof(int);               // space for at least <num_per_node (a.k.a. progress)>
-    size_t offset = (*start - 1) * sizeof(float); // FORTRAN arrays memory offset (in bytes)
+    size_t post_size = sizeof(int); // space for at least <num_per_node (a.k.a. progress)>
+    int idx = (*start - 1);         // FORTRAN arrays memory offset
 
     if (progress > 0)
     {
-        int i, idx;
-
         // the starting offset <start>
         post_size += sizeof(int);
 
         // include five floating-point arrays too ... for the range [start, end]
         post_size += 5 * progress * sizeof(float);
-
-        /*for (i = 0; i < progress; i++)
-        {
-            idx = (*start - 1) + i; // FORTRAN arrays start at 1 but C uses 0
-            printf("idx: %d; frame_min: %f, frame_max: %f, frame_median: %f, mean spec.: %f, int. spec.: %f\n", idx, frame_min[idx], frame_max[idx], frame_median[idx], mean_spectrum[idx], integrated_spectrum[idx]);
-        }*/
     }
 
     // assume a catastrophic error
