@@ -1879,8 +1879,8 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     {
         int i, idx;
 
-        // {start, end}
-        post_size += 2 * sizeof(int);
+        // the starting offset <start>
+        post_size += sizeof(int);
 
         // include five floating-point arrays too ... for the range [start, end]
         post_size += 5 * progress * sizeof(float);
