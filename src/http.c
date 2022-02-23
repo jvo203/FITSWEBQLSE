@@ -1888,7 +1888,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
         for (i = 0; i < progress; i++)
         {
-            idx = *start + i - 1; // FORTRAN arrays start at 1 but C uses 0
+            idx = (*start - 1) + i; // FORTRAN arrays start at 1 but C uses 0
             printf("idx: %d; frame_min: %f, frame_max: %f, frame_median: %f, mean spec.: %f, int. spec.: %f¥n", idx, frame_min[idx], frame_max[idx], frame_median[idx], mean_spectrum[idx], integrated_spectrum[idx]);
         }
     }
