@@ -1874,6 +1874,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
     // make a POST buffer
     size_t post_size = sizeof(int); // space for at least <num_per_node (a.k.a. progress)>
+    size_t offset = *start - 1;     // FORTRAN arrays offset
 
     if (progress > 0)
     {
