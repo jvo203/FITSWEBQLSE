@@ -779,9 +779,9 @@ contains
 
         type(dataset), pointer :: item
 
-        call c_f_pointer(ptr, item)
-
         if (idx .lt. 1) return
+
+        call c_f_pointer(ptr, item)
 
     end subroutine submit_channel_range
 
