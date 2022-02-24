@@ -1959,10 +1959,15 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
             /* size of the POST data */
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post->len);
+            // curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post->len);
+            /* the actual POST data */
+            // curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post->str);
+
+            /* size of the POST data */
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post_size);
 
             /* the actual POST data */
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post->str);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_buffer);
 
             /* Perform the request, res will get the return code */
             res = curl_easy_perform(curl);
