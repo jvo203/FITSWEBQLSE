@@ -142,6 +142,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     }
                 }
 
+                // submit the POST data arrays to FORTRAN
+                if (progress > 0)
+                    submit_channel_range(item, idx, progress, frame_min, frame_max, frame_median, mean_spectrum, integrated_spectrum);
+
                 char *json = NULL;
                 int start, end, status;
 
