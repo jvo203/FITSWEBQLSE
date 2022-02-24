@@ -57,10 +57,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             int progress = 0;
             int idx = 0;
 
-            /*char buf[100] = "";
-            if (mg_http_get_var(&hm->body, "progress", buf, sizeof(buf)) > 0)
-                progress = atoi(buf);*/
-
             // read the binary buffer
             const char *data = hm->body.ptr;
             size_t size = hm->body.len;
