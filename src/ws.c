@@ -86,13 +86,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (size != expected_size)
                 printf("[C] ERROR expected %zu, received %d bytes.\n", expected_size, size);
+            else if (progress > 0)
+            {
+                // idx
+                memcpy(&idx, data + offset, sizeof(idx));
+                offset += sizeof(progress);
+                idx++; // convert a C index into a FORTRAN array index
+            }
 
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
 
             char *datasetId = strrchr(tmp, '/');
 
             if (datasetId != NULL)
-                printf("<range> POST request for '%s': progress = %d\n", datasetId + 1, progress);
+                printf("<range> POST request for '%s': progress = %d, idx = %d\n", datasetId + 1, progress, idx);
 
             if (datasetId != NULL)
             {
