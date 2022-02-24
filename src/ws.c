@@ -85,7 +85,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             float *integrated_spectrum = NULL;
 
             if (size != expected_size)
-                printf("[C] ERROR expected %zu, received %d bytes.\n", expected_size, size);
+                printf("[C] ERROR expected %zu, received %zu bytes.\n", expected_size, size);
             else if (progress > 0)
             {
                 // idx
