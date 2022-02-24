@@ -783,9 +783,14 @@ contains
 
         if (idx .lt. 1) return
 
-        print *, 'INTEGRATED:', integrated_spectrum(1:progress)
-
         call c_f_pointer(ptr, item)
+
+        ! no need for a mutex as no other thread will be accessing this array range (unless a dataset is being deleted ...)
+        item%frame_min(idx:idx + progress - 1) = frame_min(1:progress)
+        item%frame_max(idx:idx + progress - 1) = frame_max(1:progress)
+        item%frame_median(idx:idx + progress - 1) = frame_median(1:progress)
+        item%mean_spectrum(idx:idx + progress - 1) = mean_spectrum(1:progress)
+        item%integrated_spectrum(idx:idx + progress - 1) = integrated_spectrum(1:progress)
 
     end subroutine submit_channel_range
 
