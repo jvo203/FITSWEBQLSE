@@ -55,14 +55,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
             int progress = 0;
-            int idx = -1;
+            int idx = 0;
 
             /*char buf[100] = "";
             if (mg_http_get_var(&hm->body, "progress", buf, sizeof(buf)) > 0)
                 progress = atoi(buf);*/
 
             // read the binary buffer
-            char *data = hm->body.ptr;
+            const char *data = hm->body.ptr;
             size_t size = hm->body.len;
 
             size_t offset = 0;
