@@ -772,10 +772,10 @@ contains
     end function get_elapsed
 
     ! void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
-    subroutine submit_channel_range(ptr, idx, progress, frame_min, frame_max, frame_median,&
+    subroutine submit_channel_range(ptr, idx, N, frame_min, frame_max, frame_median,&
         &mean_spectrum, integrated_spectrum) BIND(C, name='submit_channel_range')
         type(C_PTR), intent(in), value :: ptr
-        integer(c_int), intent(in), value :: progress, idx
+        integer(c_int), intent(in), value :: idx, N
         real(kind=c_float), dimension(*), intent(in) :: frame_min, frame_max, frame_median
         real(kind=c_float), dimension(*), intent(in) :: mean_spectrum, integrated_spectrum
 
@@ -786,11 +786,11 @@ contains
         call c_f_pointer(ptr, item)
 
         ! no need for a mutex as no other thread will be accessing this array range (unless a dataset is being deleted ...)
-        item%frame_min(idx:idx + progress - 1) = frame_min(1:progress)
-        item%frame_max(idx:idx + progress - 1) = frame_max(1:progress)
-        item%frame_median(idx:idx + progress - 1) = frame_median(1:progress)
-        item%mean_spectrum(idx:idx + progress - 1) = mean_spectrum(1:progress)
-        item%integrated_spectrum(idx:idx + progress - 1) = integrated_spectrum(1:progress)
+        item%frame_min(idx:idx + N - 1) = frame_min(1:N)
+        item%frame_max(idx:idx + N - 1) = frame_max(1:N)
+        item%frame_median(idx:idx + N - 1) = frame_median(1:N)
+        item%mean_spectrum(idx:idx + N - 1) = mean_spectrum(1:N)
+        item%integrated_spectrum(idx:idx + N - 1) = integrated_spectrum(1:N)
 
     end subroutine submit_channel_range
 
