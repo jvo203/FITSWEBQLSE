@@ -1916,6 +1916,14 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
             // frame_median
             memcpy(post_buffer + offset, &(frame_median[idx]), progress * sizeof(float));
             offset += progress * sizeof(float);
+
+            // mean_spectrum
+            memcpy(post_buffer + offset, &(mean_spectrum[idx]), progress * sizeof(float));
+            offset += progress * sizeof(float);
+
+            // integrated_spectrum
+            memcpy(post_buffer + offset, &(integrated_spectrum[idx]), progress * sizeof(float));
+            offset += progress * sizeof(float);
         };
 
         // form an HTTP request URL
