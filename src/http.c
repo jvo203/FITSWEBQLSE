@@ -1872,8 +1872,10 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         return;
     }
 
-    // make a POST buffer
+    // a POST buffer
     char *post_buffer = NULL;
+    size_t offset = 0;
+
     size_t post_size = sizeof(int); // space for at least <num_per_node (a.k.a. progress)>
     int idx = (*start - 1);         // FORTRAN arrays memory offset
 
@@ -1896,6 +1898,25 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
     if (post_buffer != NULL)
     {
+        // fill-in the POST buffer
+        memcpy(post_buffer, &progress, sizeof(progress));
+        offset += sizeof(progress);
+
+        // FORTRAN arrays
+        if (progress > 0)
+        {
+            // frame_min
+            memcpy(post_buffer + offset, &(frame_min[idx]), progress * sizeof(float));
+            offset += progress * sizeof(float);
+
+            // frame_max
+            memcpy(post_buffer + offset, &(frame_max[idx]), progress * sizeof(float));
+            offset += progress * sizeof(float);
+
+            // frame_median
+            memcpy(post_buffer + offset, &(frame_median[idx]), progress * sizeof(float));
+            offset += progress * sizeof(float);
+        };
 
         // form an HTTP request URL
         CURL *curl;
