@@ -92,6 +92,26 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 memcpy(&idx, data + offset, sizeof(idx));
                 offset += sizeof(progress);
                 idx++; // convert a C index into a FORTRAN array index
+
+                // frame_min
+                frame_min = (float *)(data + offset);
+                offset += progress * sizeof(float);
+
+                // frame_max
+                frame_max = (float *)(data + offset);
+                offset += progress * sizeof(float);
+
+                // frame_median
+                frame_median = (float *)(data + offset);
+                offset += progress * sizeof(float);
+
+                // mean_spectrum
+                mean_spectrum = (float *)(data + offset);
+                offset += progress * sizeof(float);
+
+                // integrated_spectrum
+                integrated_spectrum = (float *)(data + offset);
+                offset += progress * sizeof(float);
             }
 
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
