@@ -55,10 +55,22 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
             int progress = 0;
-            char buf[100] = "";
 
+            /*char buf[100] = "";
             if (mg_http_get_var(&hm->body, "progress", buf, sizeof(buf)) > 0)
-                progress = atoi(buf);
+                progress = atoi(buf);*/
+
+            // read the binary buffer
+            char *data = hm->body.ptr;
+            char *size = hm->body.len;
+
+            size_t offset = 0;
+
+            if (size >= sizeof(progress))
+            {
+                memcpy(&progress, data, sizeof(progress));
+                offset += sizeof(progress);
+            }
 
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
 
@@ -129,7 +141,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // Got websocket frame. Received data is wm->data. Echo it back!
         struct mg_ws_message *wm = (struct mg_ws_message *)ev_data;
 
-        //printf("[WS] %.*s\n", (int)wm->data.len, wm->data.ptr);
+        // printf("[WS] %.*s\n", (int)wm->data.len, wm->data.ptr);
 
         mg_ws_send(c, wm->data.ptr, wm->data.len, WEBSOCKET_OP_TEXT);
         break;
