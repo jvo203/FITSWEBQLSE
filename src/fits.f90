@@ -783,6 +783,8 @@ contains
 
         if (idx .lt. 1) return
 
+        print *, 'INTEGRATED:', integrated_spectrum(1:progress)
+
         call c_f_pointer(ptr, item)
 
     end subroutine submit_channel_range
