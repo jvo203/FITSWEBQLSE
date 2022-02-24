@@ -771,6 +771,20 @@ contains
         rc = c_pthread_mutex_unlock(item%progress_mtx)
     end function get_elapsed
 
+    ! void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
+    subroutine submit_channel_range(ptr, idx, progress, frame_min, frame_max, frame_median,&
+        &mean_spectrum, integrated_spectrum) BIND(C, name='submit_channel_range')
+        type(C_PTR), intent(in), value :: ptr
+        integer(c_int), intent(in), value :: progress, idx
+
+        type(dataset), pointer :: item
+
+        call c_f_pointer(ptr, item)
+
+        if (idx .lt. 1) return
+
+    end subroutine submit_channel_range
+
     subroutine get_channel_range_C(ptr, progress, startindex, endindex, status) BIND(C, name='get_channel_range_C')
         type(C_PTR), intent(in), value :: ptr
         integer(c_int), intent(in), value :: progress
