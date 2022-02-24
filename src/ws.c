@@ -55,6 +55,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
             int progress = 0;
+            int idx = -1;
 
             /*char buf[100] = "";
             if (mg_http_get_var(&hm->body, "progress", buf, sizeof(buf)) > 0)
@@ -62,15 +63,29 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // read the binary buffer
             char *data = hm->body.ptr;
-            char *size = hm->body.len;
+            size_t size = hm->body.len;
 
             size_t offset = 0;
+            size_t expected_size = sizeof(int);
 
             if (size >= sizeof(progress))
             {
                 memcpy(&progress, data, sizeof(progress));
                 offset += sizeof(progress);
             }
+
+            if (progress > 0)
+                expected_size += sizeof(int) + 5 * progress * sizeof(float);
+
+            // extract the FORTRAN arrays
+            float *frame_min = NULL;
+            float *frame_max = NULL;
+            float *frame_median = NULL;
+            float *mean_spectrum = NULL;
+            float *integrated_spectrum = NULL;
+
+            if (size != expected_size)
+                printf("[C] ERROR expected %zu, received %d bytes.\n", expected_size, size);
 
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
 

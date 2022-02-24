@@ -1881,7 +1881,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
     if (progress > 0)
     {
-        // the starting offset <start>
+        // the starting offset <idx>
         post_size += sizeof(int);
 
         // include five floating-point arrays too ... for the range [start, end]
@@ -1905,6 +1905,10 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         // FORTRAN arrays
         if (progress > 0)
         {
+            // idx
+            memcpy(post_buffer + offset, &idx, sizeof(idx));
+            offset += sizeof(idx);
+
             // frame_min
             memcpy(post_buffer + offset, &(frame_min[idx]), progress * sizeof(float));
             offset += progress * sizeof(float);
