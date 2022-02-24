@@ -776,6 +776,8 @@ contains
         &mean_spectrum, integrated_spectrum) BIND(C, name='submit_channel_range')
         type(C_PTR), intent(in), value :: ptr
         integer(c_int), intent(in), value :: progress, idx
+        real(kind=c_float), dimension(*), intent(in) :: frame_min, frame_max, frame_median
+        real(kind=c_float), dimension(*), intent(in) :: mean_spectrum, integrated_spectrum
 
         type(dataset), pointer :: item
 
