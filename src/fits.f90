@@ -45,7 +45,7 @@ module fits
     !end type fp16
 
     type array_ptr
-        type(fixed_block), dimension(:, :), pointer :: ptr
+        type(fixed_block), dimension(:, :), allocatable :: ptr
     end type array_ptr
 
     type image_tone_mapping
@@ -430,9 +430,9 @@ contains
         ! deallocate compressed memory regions
         if (allocated(item%compressed)) then
             do concurrent(i=1:size(item%compressed))
-                if (associated(item%compressed(i)%ptr)) then
+                if (allocated(item%compressed(i)%ptr)) then
                     deallocate (item%compressed(i)%ptr)
-                    nullify (item%compressed(i)%ptr)
+                    ! nullify (item%compressed(i)%ptr)
                 end if
             end do
 
@@ -1537,9 +1537,9 @@ contains
 
             allocate (item%compressed(start:end))
 
-            do i = start, end
-                nullify (item%compressed(i)%ptr)
-            end do
+            ! do i = start, end
+            !     nullify (item%compressed(i)%ptr)
+            ! end do
 
             allocate (item%frame_min(start:end))
             allocate (item%frame_max(start:end))
@@ -1759,7 +1759,8 @@ contains
                                 datamax = item%datamax
 
                                 thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
-                                item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), ignrval, datamin, datamax)
+                                call to_fixed(thread_arr(:, :), ignrval, datamin, datamax, item%compressed(frame)%ptr)
+                                ! item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), ignrval, datamin, datamax)
                                 ! item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
                                 ! & ignrval, datamin, datamax)
                             end block
