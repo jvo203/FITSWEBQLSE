@@ -504,9 +504,8 @@ function get_dataset(prefix::String, params, datasets, idx::Integer)
 end
 
 function serveHeartBeat(request::HTTP.Request)
-    timestamp = HTTP.URIs.splitpath(HTTP.unescapeuri(request.target))[3]
-
     try
+        timestamp = HTTP.URIs.splitpath(HTTP.unescapeuri(request.target))[3]
         return HTTP.Response(200, timestamp)
     catch e
         return HTTP.Response(404, "Error: $e")
