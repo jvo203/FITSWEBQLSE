@@ -2387,7 +2387,7 @@ contains
             cumulative = cumulative + HIST(i)
         end do
 
-        i = max(1, i - 1)
+        i = i - 1
 
         bin_start = DMIN + (i - 1)*(DMAX - DMIN)/NBINS
         bin_end = DMIN + i*(DMAX - DMIN)/NBINS
