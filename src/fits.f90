@@ -427,11 +427,13 @@ contains
         ! TO-DO:
         ! write the dataset to a cache file so as to speed up subsequent loading
 
+        ! create a cache directory using the <datasetid> folder name
+
         ! deallocate compressed memory regions
         if (allocated(item%compressed)) then
             do i = 1, size(item%compressed)
                 if (allocated(item%compressed(i)%ptr)) then
-                    print *, "serialising frame", i
+                    print *, "serialising channel", i
 
                     deallocate (item%compressed(i)%ptr)
                     ! nullify (item%compressed(i)%ptr)
