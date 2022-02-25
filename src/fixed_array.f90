@@ -16,7 +16,7 @@ module fixed_array
         integer(kind=1), dimension(DIM, DIM) :: mantissa
     end type fixed_block
 contains
-    function to_fixed(x, ignrval, datamin, datamax) result(compressed)
+    subroutine to_fixed(x, ignrval, datamin, datamax, compressed)
         use, intrinsic :: ieee_arithmetic
         implicit none
 
@@ -30,7 +30,7 @@ contains
         integer(kind=4) :: cn, cm
 
         ! the result
-        type(fixed_block), dimension(:, :), pointer :: compressed
+        type(fixed_block), dimension(:, :), allocatable, intent(inout) :: compressed
 
         n = size(x, 1)
         m = size(x, 2)
@@ -43,6 +43,7 @@ contains
         if (mod(n, DIM) .ne. 0) cn = cn + 1
         if (mod(m, DIM) .ne. 0) cm = cm + 1
 
+        if (allocated(compressed)) deallocate (compressed)
         allocate (compressed(cn, cm))
 
         do concurrent(j=1:m/DIM, i=1:n/DIM)
@@ -65,7 +66,7 @@ contains
             end block
         end do
 
-    end function to_fixed
+    end subroutine to_fixed
 
     pure subroutine to_fixed_block(x, compressed, ignrval, datamin, datamax)
         implicit none
