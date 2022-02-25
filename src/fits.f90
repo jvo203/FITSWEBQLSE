@@ -429,8 +429,10 @@ contains
 
         ! deallocate compressed memory regions
         if (allocated(item%compressed)) then
-            do concurrent(i=1:size(item%compressed))
+            do i = 1, size(item%compressed)
                 if (allocated(item%compressed(i)%ptr)) then
+                    print *, "serialising frame", i
+
                     deallocate (item%compressed(i)%ptr)
                     ! nullify (item%compressed(i)%ptr)
                 end if
