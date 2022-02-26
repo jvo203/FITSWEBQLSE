@@ -415,11 +415,29 @@ contains
         integer(kind=c_int), intent(in), value :: len
         character(kind=c_char), dimension(len), intent(in) :: dir
 
+        character(len=:), allocatable :: cache
+
         integer i, rc
 
         call c_f_pointer(ptr, item)
 
-        print *, 'deleting ', item%datasetid, '; cache dir: ', dir
+        allocate (character(len + 1 + size(item%datasetid))::cache)
+
+        ! the cache directory
+        do i = 1, len
+            cache(i:i) = dir(i)
+        end do
+
+        ! append a slash
+        cache(len + 1:len + 1) = '/'
+
+        ! and append the datasetid
+
+        do i = 1, size(item%datasetid)
+            cache(len + 1 + i:len + 1 + i) = item%datasetid(i)
+        end do
+
+        print *, 'deleting ', item%datasetid, '; cache dir: ', cache
 
         rc = c_pthread_mutex_destroy(item%header_mtx)
         rc = c_pthread_mutex_destroy(item%error_mtx)
