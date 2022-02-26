@@ -437,18 +437,19 @@ contains
             cache(len + 1 + i:len + 1 + i) = item%datasetid(i)
         end do
 
-        print *, 'deleting ', item%datasetid, '; cache dir: ', cache
+        print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', len:', len + 1 + size(item%datasetid)
+
+        ! create a cache directory using the <datasetid> folder name
+        ! mkdir(cache, len(cache))
+
+        ! TO-DO:
+        ! write the dataset to a cache file so as to speed up subsequent loading
 
         rc = c_pthread_mutex_destroy(item%header_mtx)
         rc = c_pthread_mutex_destroy(item%error_mtx)
         rc = c_pthread_mutex_destroy(item%ok_mtx)
         rc = c_pthread_mutex_destroy(item%progress_mtx)
         rc = c_pthread_mutex_destroy(item%image_mtx)
-
-        ! TO-DO:
-        ! write the dataset to a cache file so as to speed up subsequent loading
-
-        ! create a cache directory using the <datasetid> folder name
 
         ! deallocate compressed memory regions
         if (allocated(item%compressed)) then
