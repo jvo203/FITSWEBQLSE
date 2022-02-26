@@ -45,15 +45,19 @@ int mkcache(const char *dir, int len)
 
     char *cache = strndup(dir, len);
 
+    int status = -1; // by default asssume an error
+
     if (cache != NULL)
     {
         if (stat(cache, &st) == -1)
-            return mkdir(cache, S_IRWXU | S_IRWXG | S_IRWXO);
+            status = mkdir(cache, S_IRWXU | S_IRWXG | S_IRWXO);
         else
-            return 0;
+            status = 0;
+
+        free(cache);
     }
-    else
-        return -1;
+
+    return status;
 }
 
 void insert_dataset(const char *datasetid, int len, void *item)
