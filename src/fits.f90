@@ -450,7 +450,7 @@ contains
         ! create a cache directory using the <datasetid> folder name
         status = mkcache(cache, len + 1 + size(item%datasetid))
 
-        print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', status = ', status
+        print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', status', status
 
         ! TO-DO:
         ! write the dataset to a cache file so as to speed up subsequent loading
