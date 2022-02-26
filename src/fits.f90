@@ -2,6 +2,7 @@ module fits
     use, intrinsic :: ISO_C_BINDING
     use, intrinsic :: ieee_arithmetic
     use fixed_array
+    use lz4
     use logger_mod, only: logger_init, logger => master_logger
     use :: unix_pthread
 
@@ -432,6 +433,7 @@ contains
         character(kind=c_char), dimension(len), intent(in) :: dir
 
         character(len=:), allocatable :: cache, file
+        character(kind=c_char), allocatable, target :: buffer(:)
         logical :: file_exists
 
         integer i, rc, status
@@ -479,6 +481,7 @@ contains
 
                         if (.not. file_exists) then
                             print *, "serialising channel", i, 'to a binary file ', file
+                            call compress_fixed_array(item%compressed(i)%ptr, buffer)
                         end if
                     end if
 
