@@ -408,15 +408,18 @@ contains
 
     end subroutine init_fortran_logging
 
-    subroutine delete_dataset(ptr) BIND(C, name='delete_dataset')
+    subroutine delete_dataset(ptr, dir, len) BIND(C, name='delete_dataset')
         type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
+
+        integer(kind=c_int), intent(in), value :: len
+        character(kind=c_char), dimension(len), intent(in) :: dir
 
         integer i, rc
 
         call c_f_pointer(ptr, item)
 
-        print *, 'deleting ', item%datasetid
+        print *, 'deleting ', item%datasetid, '; cache dir:', dir
 
         rc = c_pthread_mutex_destroy(item%header_mtx)
         rc = c_pthread_mutex_destroy(item%error_mtx)
