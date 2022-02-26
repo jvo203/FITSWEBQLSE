@@ -17,8 +17,10 @@ void init_hash_table()
     datasets = g_hash_table_new_full(g_str_hash, g_str_equal, free, free_hash_data);
 }
 
-void delete_hash_table()
+void delete_hash_table(const char *cache)
 {
+    printf("[C] cache dir: %s\n", cache);
+
     if (pthread_mutex_lock(&datasets_mtx) == 0)
     {
         g_hash_table_destroy(datasets);
