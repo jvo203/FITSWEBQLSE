@@ -426,6 +426,9 @@ contains
     end function str
 
     subroutine delete_dataset(ptr, dir, len) BIND(C, name='delete_dataset')
+        use omp_lib
+        implicit none
+
         type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
 
@@ -472,7 +475,9 @@ contains
 
         ! deallocate compressed memory regions
         if (allocated(item%compressed)) then
+
             do i = 1, size(item%compressed)
+
                 if (associated(item%compressed(i)%ptr)) then
 
                     if (status .eq. 0) then
