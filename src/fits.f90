@@ -419,7 +419,7 @@ contains
 
         call c_f_pointer(ptr, item)
 
-        print *, 'deleting ', item%datasetid, '; cache dir:', dir
+        print *, 'deleting ', item%datasetid, '; cache dir: ', dir
 
         rc = c_pthread_mutex_destroy(item%header_mtx)
         rc = c_pthread_mutex_destroy(item%error_mtx)
