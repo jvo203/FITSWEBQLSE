@@ -486,7 +486,7 @@ contains
 
                         if (.not. file_exists) then
                             print *, "serialising channel", i, 'to a binary file ', file
-                            call compress_fixed_array(item%compressed(i)%ptr, buffer)
+                            ! call compress_fixed_array(item%compressed(i)%ptr, buffer)
                         end if
                     end if
 
