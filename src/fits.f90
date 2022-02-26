@@ -432,6 +432,7 @@ contains
         character(kind=c_char), dimension(len), intent(in) :: dir
 
         character(len=:), allocatable :: cache, file
+        logical :: file_exists
 
         integer i, rc, status
 
@@ -474,7 +475,11 @@ contains
 
                     if (status .eq. 0) then
                         file = cache//'/'//trim(str(i))//'.bin'
-                        print *, "serialising channel", i, 'binary frame file: ', file
+                        INQUIRE (FILE=file, EXIST=file_exists)
+
+                        if (.not. file_exists) then
+                            print *, "serialising channel", i, 'binary frame file: ', file
+                        end if
                     end if
 
                     deallocate (item%compressed(i)%ptr)
