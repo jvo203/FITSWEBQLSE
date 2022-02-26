@@ -1,4 +1,4 @@
-# NEWS: Breaking Through the 1TB Barrier
+# Breaking Through the 1TB Barrier
 
 ![Alt text](IVOA.jpg?raw=true "JVO Breaking Through the 1TB Barrier")
 
