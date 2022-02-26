@@ -154,6 +154,16 @@ module fits
             character(kind=c_char), intent(in) :: datasetid(*)
         end function get_dataset
 
+        ! int mkcache(const char *dir, int len);
+        integer(c_int) function mkcache(dir, len) BIND(C, name='mkcache')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            character(kind=c_char), intent(in) :: dir(*)
+            integer(c_int), value :: len
+
+        end function mkcache
+
         subroutine fetch_channel_range(root, datasetid, len, start, end, status,&
             &frame_min, frame_max, frame_median,&
             &mean_spectrum, integrated_spectrum) BIND(C, name='fetch_channel_range')
@@ -417,7 +427,7 @@ contains
 
         character(len=:), allocatable :: cache
 
-        integer i, rc
+        integer i, rc, status
 
         call c_f_pointer(ptr, item)
 
@@ -437,10 +447,10 @@ contains
             cache(len + 1 + i:len + 1 + i) = item%datasetid(i)
         end do
 
-        print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', len:', len + 1 + size(item%datasetid)
+        print *, 'deleting ', item%datasetid, '; cache dir: ', cache
 
         ! create a cache directory using the <datasetid> folder name
-        ! mkdir(cache, len(cache))
+        status = mkcache(cache, len + 1 + size(item%datasetid))
 
         ! TO-DO:
         ! write the dataset to a cache file so as to speed up subsequent loading
