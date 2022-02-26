@@ -154,7 +154,7 @@ module fits
             character(kind=c_char), intent(in) :: datasetid(*)
         end function get_dataset
 
-        ! int mkcache(const char *dir, int len);
+        ! int mkcache(const char *dir);
         integer(c_int) function mkcache(dir) BIND(C, name='mkcache')
             use, intrinsic :: ISO_C_BINDING
             implicit none
