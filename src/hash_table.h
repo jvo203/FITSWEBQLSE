@@ -13,5 +13,5 @@ bool dataset_exists(const char *datasetid);
 void *get_dataset(const char *datasetid);
 
 // Fortran callbacks
-extern void delete_dataset(void *ptr);
+extern void delete_dataset(void *ptr, char *dir, int len);
 extern void get_channel_range_C(void *ptr, int progress, int *startindex, int *endindex, int *status);

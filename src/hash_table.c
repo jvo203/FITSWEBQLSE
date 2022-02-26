@@ -35,7 +35,7 @@ void free_hash_data(gpointer item)
 {
     // call Fortran to delete the dataset
     if (item != NULL)
-        delete_dataset(item);
+        delete_dataset(item, options.cache, strlen(options.cache));
 }
 
 void insert_dataset(const char *datasetid, int len, void *item)
