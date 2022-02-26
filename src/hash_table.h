@@ -11,7 +11,7 @@ void insert_dataset(const char *datasetid, int len, void *item);
 bool insert_if_not_exists(const char *datasetid, void *item);
 bool dataset_exists(const char *datasetid);
 void *get_dataset(const char *datasetid);
-int mkcache(const char *dir, int len);
+int mkcache(const char *dir);
 
 // Fortran callbacks
 extern void delete_dataset(void *ptr, char *dir, int len);

@@ -155,12 +155,11 @@ module fits
         end function get_dataset
 
         ! int mkcache(const char *dir, int len);
-        integer(c_int) function mkcache(dir, len) BIND(C, name='mkcache')
+        integer(c_int) function mkcache(dir) BIND(C, name='mkcache')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
             character(kind=c_char), intent(in) :: dir(*)
-            integer(c_int), value :: len
 
         end function mkcache
 
@@ -448,7 +447,7 @@ contains
         end do
 
         ! create a cache directory using the <datasetid> folder name
-        status = mkcache(cache, len + 1 + size(item%datasetid))
+        status = mkcache(cache//c_null_char)
 
         print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', status', status
 

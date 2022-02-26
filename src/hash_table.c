@@ -39,25 +39,14 @@ void free_hash_data(gpointer item)
         delete_dataset(item, options.cache, strlen(options.cache));
 }
 
-int mkcache(const char *dir, int len)
+int mkcache(const char *dir)
 {
     struct stat st = {0};
 
-    char *cache = strndup(dir, len);
-
-    int status = -1; // by default asssume an error
-
-    if (cache != NULL)
-    {
-        if (stat(cache, &st) == -1)
-            status = mkdir(cache, S_IRWXU | S_IRWXG | S_IRWXO);
-        else
-            status = 0;
-
-        free(cache);
-    }
-
-    return status;
+    if (stat(dir, &st) == -1)
+        return mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO);
+    else
+        return 0;
 }
 
 void insert_dataset(const char *datasetid, int len, void *item)
