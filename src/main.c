@@ -353,18 +353,6 @@ int main(int argc, char *argv[])
 
     stop_http();
 
-    // release any memory allocated in options
-    free(options.fits_home);
-    free(options.cache);
-    free(options.logs);
-    free(options.home_dir);
-    free(options.user);
-    free(options.password);
-    free(options.host);
-    free(options.db_home);
-    free(options.root);
-    free(config_file);
-
     // clean-up ZeroMQ
     if (speaker != NULL)
     {
@@ -400,6 +388,18 @@ int main(int argc, char *argv[])
     curl_global_cleanup();
 
     cleanup_fortran();
+
+    // release any memory allocated in options
+    free(options.fits_home);
+    free(options.cache);
+    free(options.logs);
+    free(options.home_dir);
+    free(options.user);
+    free(options.password);
+    free(options.host);
+    free(options.db_home);
+    free(options.root);
+    free(config_file);
 
 #ifdef DEBUG
     // wait for the jemalloc thread
