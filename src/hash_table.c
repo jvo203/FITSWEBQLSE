@@ -43,6 +43,7 @@ int mkcache(const char *dir)
 {
     struct stat st = {0};
 
+    // make a cache directory if it does not exist
     if (stat(dir, &st) == -1)
         return mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO);
     else
