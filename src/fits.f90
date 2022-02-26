@@ -478,7 +478,7 @@ contains
                         INQUIRE (FILE=file, EXIST=file_exists)
 
                         if (.not. file_exists) then
-                            print *, "serialising channel", i, 'to a binary frame file ', file
+                            print *, "serialising channel", i, 'to a binary file ', file
                         end if
                     end if
 
