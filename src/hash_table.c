@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sys/stat.h>
 #include <pthread.h>
 
 #include "hash_table.h"
@@ -36,6 +37,23 @@ void free_hash_data(gpointer item)
     // call Fortran to delete the dataset
     if (item != NULL)
         delete_dataset(item, options.cache, strlen(options.cache));
+}
+
+int mkcache(const char *dir, int len)
+{
+    struct stat st = {0};
+
+    char *cache = strndup(dir, len);
+
+    if (cache != NULL)
+    {
+        if (stat(cache, &st) == -1)
+            return mkdir(cache, 0700);
+        else
+            return 0;
+    }
+    else
+        return -1;
 }
 
 void insert_dataset(const char *datasetid, int len, void *item)
