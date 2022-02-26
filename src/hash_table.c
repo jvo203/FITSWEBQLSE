@@ -6,6 +6,9 @@
 static GHashTable *datasets;
 pthread_mutex_t datasets_mtx;
 
+#include "http.h"
+extern options_t options; // <options> is defined in main.c
+
 void init_hash_table()
 {
     if (pthread_mutex_init(&datasets_mtx, NULL) != 0)
@@ -17,10 +20,8 @@ void init_hash_table()
     datasets = g_hash_table_new_full(g_str_hash, g_str_equal, free, free_hash_data);
 }
 
-void delete_hash_table(const char *cache)
+void delete_hash_table()
 {
-    printf("[C] cache dir: %s\n", cache);
-
     if (pthread_mutex_lock(&datasets_mtx) == 0)
     {
         g_hash_table_destroy(datasets);
@@ -32,6 +33,8 @@ void delete_hash_table(const char *cache)
 
 void free_hash_data(gpointer item)
 {
+    printf("[C] cache dir: %s\n", options.cache);
+
     // call Fortran to delete the dataset
     if (item != NULL)
         delete_dataset(item);

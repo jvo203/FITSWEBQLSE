@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
 
     delete_cluster();
 
-    delete_hash_table(options.cache);
+    delete_hash_table();
 
     curl_global_cleanup();
 
