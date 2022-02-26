@@ -48,7 +48,7 @@ int mkcache(const char *dir, int len)
     if (cache != NULL)
     {
         if (stat(cache, &st) == -1)
-            return mkdir(cache, 0700);
+            return mkdir(cache, S_IRWXU);
         else
             return 0;
     }
