@@ -35,13 +35,7 @@ void free_hash_data(gpointer item)
 {
     // call Fortran to delete the dataset
     if (item != NULL)
-    {
-        printf("[C] cache dir: %s\n", options.cache);
-
-        // mkdir cache if it does not exist yet
-
         delete_dataset(item);
-    }
 }
 
 void insert_dataset(const char *datasetid, int len, void *item)
