@@ -417,6 +417,13 @@ contains
 
     end subroutine init_fortran_logging
 
+    !   "Convert an integer to string."
+    character(len=16) pure function str(k)
+        integer, intent(in) :: k
+        write (str, *) k
+        str = adjustl(str)
+    end function str
+
     subroutine delete_dataset(ptr, dir, len) BIND(C, name='delete_dataset')
         type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
@@ -424,7 +431,7 @@ contains
         integer(kind=c_int), intent(in), value :: len
         character(kind=c_char), dimension(len), intent(in) :: dir
 
-        character(len=:), allocatable :: cache
+        character(len=:), allocatable :: cache, file
 
         integer i, rc, status
 
@@ -464,7 +471,8 @@ contains
         if (allocated(item%compressed)) then
             do i = 1, size(item%compressed)
                 if (associated(item%compressed(i)%ptr)) then
-                    print *, "serialising channel", i
+                    file = cache//'/'//trim(str(i))//'.bin'
+                    print *, "serialising channel", i, 'binary frame file: ', file
 
                     deallocate (item%compressed(i)%ptr)
                     nullify (item%compressed(i)%ptr)
