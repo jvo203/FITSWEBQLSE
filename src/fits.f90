@@ -596,6 +596,26 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
+      ! item%naxis
+      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%naxis
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%bitpix
+      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%bitpix
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%naxes
+      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%naxes(:)
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%frameid
+      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%frameid
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%object
+      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%object
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
