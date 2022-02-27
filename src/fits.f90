@@ -558,8 +558,16 @@ contains
          return
       end if
 
-      ! close the file
-      close (fileunit)
+      bSuccess = .true.
+
+      ! delete the file upon any write errors
+      if (.not. bSuccess) then
+         ! delete the file
+         close (fileunit, status='delete')
+      else
+         ! close the file
+         close (fileunit)
+      end if
 
       print *, 'serialised ', item%datasetid, ' to ', file
 
