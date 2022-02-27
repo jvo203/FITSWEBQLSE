@@ -712,6 +712,22 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%crpix3
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%obsra
+      write (unit=fileunit, IOSTAT=ios) item%obsra
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%obsdec
+      write (unit=fileunit, IOSTAT=ios) item%obsdec
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%datamin
+      write (unit=fileunit, IOSTAT=ios) item%datamin
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%datamax
+      write (unit=fileunit, IOSTAT=ios) item%datamax
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
