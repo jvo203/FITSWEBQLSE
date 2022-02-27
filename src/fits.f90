@@ -503,6 +503,7 @@ contains
                         ! dump the compressed data
                         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
 
+                        ! delete the file upon a write error
                         if (ios .ne. 0) then
                            print *, "error serialising channel", i, 'to a binary file ', file, ' : ', trim(iomsg)
 
@@ -539,8 +540,16 @@ contains
       character(len=*), intent(in) :: cache
 
       character(len=:), allocatable :: file
+      logical :: file_exists, bSuccess
+
+      integer :: fileunit, ios
+      character(256) :: iomsg
 
       file = cache//'/'//'state.dat'
+
+      INQUIRE (FILE=file, EXIST=file_exists)
+
+      if (file_exists) return
 
       print *, 'serialising ', item%datasetid, ' to ', file
 
