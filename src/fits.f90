@@ -668,6 +668,50 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%ctype3
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%ignrval
+      write (unit=fileunit, IOSTAT=ios) item%ignrval
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%restfrq
+      write (unit=fileunit, IOSTAT=ios) item%restfrq
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%bmaj
+      write (unit=fileunit, IOSTAT=ios) item%bmaj
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%bmin
+      write (unit=fileunit, IOSTAT=ios) item%bmin
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%bpa
+      write (unit=fileunit, IOSTAT=ios) item%bpa
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%crval1
+      write (unit=fileunit, IOSTAT=ios) item%crval1
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%cdelt1
+      write (unit=fileunit, IOSTAT=ios) item%cdelt1
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%crpix1
+      write (unit=fileunit, IOSTAT=ios) item%crpix1
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%crval2
+      write (unit=fileunit, IOSTAT=ios) item%crval2
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%cdelt2
+      write (unit=fileunit, IOSTAT=ios) item%cdelt2
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%crpix3
+      write (unit=fileunit, IOSTAT=ios) item%crpix3
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
