@@ -816,6 +816,30 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
+      ! item%pixels
+      if (allocated(item%pixels)) then
+         write (unit=fileunit, IOSTAT=ios) size(item%pixels)
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+         write (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      else
+         write (unit=fileunit, IOSTAT=ios) 0
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      end if
+
+      ! item%mask
+      if (allocated(item%mask)) then
+         write (unit=fileunit, IOSTAT=ios) size(item%mask)
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+         write (unit=fileunit, IOSTAT=ios) item%mask(:, :)
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      else
+         write (unit=fileunit, IOSTAT=ios) 0
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      end if
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
