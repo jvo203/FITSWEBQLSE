@@ -438,7 +438,8 @@ contains
       character(kind=c_char), allocatable, target :: buffer(:)
       logical :: file_exists, bSuccess
 
-      integer i, rc, status
+      integer :: i, rc, status
+      integer :: fileunit, ios
 
       call c_f_pointer(ptr, item)
 
@@ -461,6 +462,12 @@ contains
       ! create a cache directory using the <datasetid> folder name
       status = mkcache(cache//c_null_char)
 
+      if (status .eq. 0) then
+         bSuccess = .true.
+      else
+         bSuccess = .false.
+      end if
+
       print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', status', status
 
       ! TO-DO:
@@ -471,8 +478,6 @@ contains
       rc = c_pthread_mutex_destroy(item%ok_mtx)
       rc = c_pthread_mutex_destroy(item%progress_mtx)
       rc = c_pthread_mutex_destroy(item%image_mtx)
-
-      bSuccess = .true.
 
       ! deallocate compressed memory regions
       if (allocated(item%compressed)) then
@@ -486,10 +491,22 @@ contains
                   INQUIRE (FILE=file, EXIST=file_exists)
 
                   if (.not. file_exists) then
-                     print *, "serialising channel", i, 'to a binary file ', file
+                     open (newunit=fileunit, file=file, status='replace', access='stream', form='unformatted', IOSTAT=ios)
 
-                     ! upon error
-                     ! bSuccess = bSuccess .and. .false.
+                     if (ios .ne. 0) then
+                        print *, "error serialising channel", i, 'to a binary file ', file
+
+                        ! upon error
+                        bSuccess = bSuccess .and. .false.
+                     else
+                        ! dump the compressed data
+                        write (fileunit) item%compressed(i)%ptr(:, :)
+
+                        ! close the file
+                        close (fileunit)
+
+                        print *, "serialised channel", i, 'to a binary file ', file
+                     end if
 
                   end if
                end if
