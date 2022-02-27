@@ -566,6 +566,17 @@ contains
       write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%datasetid(:)
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      if (allocated(item%uri)) then
+         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) len(item%uri)
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%uri
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      else
+         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) 0
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      end if
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
