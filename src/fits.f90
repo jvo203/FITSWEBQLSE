@@ -756,6 +756,30 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%has_frequency
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%flux
+      if (allocated(item%flux)) then
+         write (unit=fileunit, IOSTAT=ios) len(item%flux)
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+         write (unit=fileunit, IOSTAT=ios) item%flux
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      else
+         write (unit=fileunit, IOSTAT=ios) 0
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      end if
+
+      ! item%dmin
+      write (unit=fileunit, IOSTAT=ios) item%dmin
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%dmax
+      write (unit=fileunit, IOSTAT=ios) item%dmax
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%dmedian
+      write (unit=fileunit, IOSTAT=ios) item%dmedian
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
