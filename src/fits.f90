@@ -495,7 +495,7 @@ contains
                   open (newunit=fileunit, file=file, status='replace', access='stream', form='unformatted', IOSTAT=ios, IOMSG=iomsg)
 
                      if (ios .ne. 0) then
-                        print *, "error serialising channel", i, 'to a binary file ', file, ' : ', iomsg
+                        print *, "error serialising channel", i, 'to a binary file ', file, ' : ', trim(iomsg)
 
                         ! upon error
                         bSuccess = .false.
