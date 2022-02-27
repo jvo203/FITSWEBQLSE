@@ -616,6 +616,34 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%object
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%line
+      write (unit=fileunit, IOSTAT=ios) item%line
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%filter
+      write (unit=fileunit, IOSTAT=ios) item%filter
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%date_obs
+      write (unit=fileunit, IOSTAT=ios) item%date_obs
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%btype
+      write (unit=fileunit, IOSTAT=ios) item%btype
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%bunit
+      write (unit=fileunit, IOSTAT=ios) item%bunit
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%specsys
+      write (unit=fileunit, IOSTAT=ios) item%specsys
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%timesys
+      write (unit=fileunit, IOSTAT=ios) item%timesys
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
