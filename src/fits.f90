@@ -744,6 +744,18 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%cd2_2
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%frame_multiplier
+      write (unit=fileunit, IOSTAT=ios) item%frame_multiplier
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%has_velocity
+      write (unit=fileunit, IOSTAT=ios) item%has_velocity
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%has_frequency
+      write (unit=fileunit, IOSTAT=ios) item%has_frequency
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
