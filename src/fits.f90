@@ -562,58 +562,58 @@ contains
 
       ! item%datasetid
       if (allocated(item%datasetid)) then
-         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) size(item%datasetid)
+         write (unit=fileunit, IOSTAT=ios) size(item%datasetid)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
-         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%datasetid(:)
+         write (unit=fileunit, IOSTAT=ios) item%datasetid(:)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
-         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) 0
+         write (unit=fileunit, IOSTAT=ios) 0
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
       ! item%uri
       if (allocated(item%uri)) then
-         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) len(item%uri)
+         write (unit=fileunit, IOSTAT=ios) len(item%uri)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
-         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%uri
+         write (unit=fileunit, IOSTAT=ios) item%uri
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
-         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) 0
+         write (unit=fileunit, IOSTAT=ios) 0
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
       ! item%hdr
       if (allocated(item%hdr)) then
-         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) size(item%hdr)
+         write (unit=fileunit, IOSTAT=ios) size(item%hdr)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
-         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%hdr(:)
+         write (unit=fileunit, IOSTAT=ios) item%hdr(:)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
-         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) 0
+         write (unit=fileunit, IOSTAT=ios) 0
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
       ! item%naxis
-      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%naxis
+      write (unit=fileunit, IOSTAT=ios) item%naxis
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
       ! item%bitpix
-      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%bitpix
+      write (unit=fileunit, IOSTAT=ios) item%bitpix
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
       ! item%naxes
-      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%naxes(:)
+      write (unit=fileunit, IOSTAT=ios) item%naxes(:)
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
       ! item%frameid
-      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%frameid
+      write (unit=fileunit, IOSTAT=ios) item%frameid
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
       ! item%object
-      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%object
+      write (unit=fileunit, IOSTAT=ios) item%object
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
       ! delete the file upon any write errors
