@@ -728,6 +728,22 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%datamax
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%cd1_1
+      write (unit=fileunit, IOSTAT=ios) item%cd1_1
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%cd1_2
+      write (unit=fileunit, IOSTAT=ios) item%cd1_2
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%cd2_1
+      write (unit=fileunit, IOSTAT=ios) item%cd2_1
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%cd2_2
+      write (unit=fileunit, IOSTAT=ios) item%cd2_2
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
