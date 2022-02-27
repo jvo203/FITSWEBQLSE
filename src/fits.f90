@@ -515,6 +515,10 @@ contains
 
       character(len=:), allocatable :: file
 
+      file = cache//'/'//'state.dat'
+
+      print *, 'serialising ', item%datasetid, ' to ', file
+
    end subroutine save_dataset
 
    subroutine print_dataset(item)
