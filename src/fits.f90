@@ -840,6 +840,14 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
+      ! item%is_optical
+      write (unit=fileunit, IOSTAT=ios) item%is_optical
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%is_xray
+      write (unit=fileunit, IOSTAT=ios) item%is_xray
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
