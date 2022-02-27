@@ -560,6 +560,7 @@ contains
 
       bSuccess = .true.
 
+      ! item%datasetid
       if (allocated(item%datasetid)) then
          write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) size(item%datasetid)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
@@ -571,11 +572,24 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
+      ! item%uri
       if (allocated(item%uri)) then
          write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) len(item%uri)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
          write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%uri
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      else
+         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) 0
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      end if
+
+      ! item%hdr
+      if (allocated(item%hdr)) then
+         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) size(item%hdr)
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%hdr(:)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
          write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) 0
