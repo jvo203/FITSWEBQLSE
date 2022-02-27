@@ -495,13 +495,18 @@ contains
                   open (newunit=fileunit, file=file, status='replace', access='stream', form='unformatted', IOSTAT=ios, IOMSG=iomsg)
 
                      if (ios .ne. 0) then
-                        print *, "error serialising channel", i, 'to a binary file ', file, ' : ', trim(iomsg)
+                        print *, "error creating a file ", file, ' : ', trim(iomsg)
 
                         ! upon error
                         bSuccess = .false.
                      else
                         ! dump the compressed data
-                        write (fileunit) item%compressed(i)%ptr(:, :)
+                        write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
+
+                        ! delete the file upon an error
+                        if (ios .ne. 0) then
+                           print *, "error serialising channel", i, 'to a binary file ', file, ' : ', trim(iomsg)
+                        end if
 
                         ! close the file
                         close (fileunit)
