@@ -560,6 +560,12 @@ contains
 
       bSuccess = .true.
 
+      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) size(item%datasetid)
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%datasetid(:)
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
