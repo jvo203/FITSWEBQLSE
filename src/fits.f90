@@ -551,7 +551,17 @@ contains
 
       if (file_exists) return
 
-      print *, 'serialising ', item%datasetid, ' to ', file
+      open (newunit=fileunit, file=file, status='replace', access='stream', form='unformatted', IOSTAT=ios, IOMSG=iomsg)
+
+      if (ios .ne. 0) then
+         print *, "error creating a file ", file, ' : ', trim(iomsg)
+         return
+      end if
+
+      ! close the file
+      close (fileunit)
+
+      print *, 'serialised ', item%datasetid, ' to ', file
 
    end subroutine save_dataset
 
