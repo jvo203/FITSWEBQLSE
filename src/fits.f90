@@ -644,6 +644,30 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%timesys
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%cunit1
+      write (unit=fileunit, IOSTAT=ios) item%cunit1
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%ctype1
+      write (unit=fileunit, IOSTAT=ios) item%ctype1
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%cunit2
+      write (unit=fileunit, IOSTAT=ios) item%cunit2
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%ctype2
+      write (unit=fileunit, IOSTAT=ios) item%ctype2
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%cunit3
+      write (unit=fileunit, IOSTAT=ios) item%cunit3
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%ctype3
+      write (unit=fileunit, IOSTAT=ios) item%ctype3
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! delete the file upon any write errors
       if (.not. bSuccess) then
          ! delete the file
