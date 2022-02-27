@@ -497,7 +497,7 @@ contains
                         print *, "error serialising channel", i, 'to a binary file ', file
 
                         ! upon error
-                        bSuccess = bSuccess .and. .false.
+                        bSuccess = .false.
                      else
                         ! dump the compressed data
                         write (fileunit) item%compressed(i)%ptr(:, :)
