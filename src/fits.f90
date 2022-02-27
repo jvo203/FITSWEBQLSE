@@ -503,13 +503,15 @@ contains
                         ! dump the compressed data
                         write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
 
-                        ! delete the file upon an error
                         if (ios .ne. 0) then
                            print *, "error serialising channel", i, 'to a binary file ', file, ' : ', trim(iomsg)
-                        end if
 
-                        ! close the file
-                        close (fileunit)
+                           ! delete the file
+                           close (fileunit, status='delete')
+                        else
+                           ! close the file
+                           close (fileunit)
+                        end if
 
                         print *, "serialised channel", i, 'to a binary file ', file
                      end if
