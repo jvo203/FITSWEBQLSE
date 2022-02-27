@@ -440,6 +440,7 @@ contains
 
       integer :: i, rc, status
       integer :: fileunit, ios
+      character(256) :: iomsg
 
       call c_f_pointer(ptr, item)
 
@@ -491,10 +492,10 @@ contains
                   INQUIRE (FILE=file, EXIST=file_exists)
 
                   if (.not. file_exists) then
-                     open (newunit=fileunit, file=file, status='replace', access='stream', form='unformatted', IOSTAT=ios)
+                  open (newunit=fileunit, file=file, status='replace', access='stream', form='unformatted', IOSTAT=ios, IOMSG=iomsg)
 
                      if (ios .ne. 0) then
-                        print *, "error serialising channel", i, 'to a binary file ', file
+                        print *, "error serialising channel", i, 'to a binary file ', file, ' : ', iomsg
 
                         ! upon error
                         bSuccess = .false.
