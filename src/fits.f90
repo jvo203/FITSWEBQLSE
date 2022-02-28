@@ -928,8 +928,20 @@ contains
         if (ios .ne. 0) return
 
         if (N .gt. 0) then
+            if (allocated(item%datasetid)) deallocate (item%datasetid)
             allocate (item%datasetid(N))
             read (unit=fileunit, IOSTAT=ios) item%datasetid(:)
+            if (ios .ne. 0) return
+        end if
+
+        ! item%uri
+        read (unit=fileunit, IOSTAT=ios) N
+        if (ios .ne. 0) return
+
+        if (N .gt. 0) then
+            if (allocated(item%uri)) deallocate (item%uri)
+            allocate (character(len=N)::item%uri)
+            read (unit=fileunit, IOSTAT=ios) item%uri
             if (ios .ne. 0) return
         end if
 
