@@ -945,6 +945,17 @@ contains
             if (ios .ne. 0) return
         end if
 
+        ! item%hdr
+        read (unit=fileunit, IOSTAT=ios) N
+        if (ios .ne. 0) return
+
+        if (N .gt. 0) then
+            if (allocated(item%hdr)) deallocate (item%hdr)
+            allocate (item%hdr(N))
+            read (unit=fileunit, IOSTAT=ios) item%hdr(:)
+            if (ios .ne. 0) return
+        end if
+
         bSuccess = .true.
         call print_dataset(item)
 
