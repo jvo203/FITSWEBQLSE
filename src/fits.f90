@@ -885,14 +885,15 @@ contains
 
     end subroutine save_dataset
 
-    function load_dataset(item, cache) result(bSuccess)
+    subroutine load_dataset(item, cache, bSuccess)
         implicit none
 
         type(dataset), pointer, intent(in) :: item
         character(len=*), intent(in) :: cache
+        logical, intent(out) ::  bSuccess
 
         character(len=:), allocatable :: file
-        logical :: file_exists, bSuccess
+        logical :: file_exists
 
         integer :: fileunit, ios
         character(256) :: iomsg
@@ -907,7 +908,7 @@ contains
 
         bSuccess = .true.
 
-    end function load_dataset
+    end subroutine load_dataset
 
     subroutine print_dataset(item)
         type(dataset), pointer, intent(in) :: item
@@ -1420,7 +1421,11 @@ contains
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
-        call read_fits_file(item, strFilename, strFlux, root, bSuccess)
+        call load_dataset(item, cache, bSuccess)
+
+        if (.not. bSuccess) then
+            call read_fits_file(item, strFilename, strFlux, root, bSuccess)
+        end if
 
         ! end the timer
         call system_clock(finish)
