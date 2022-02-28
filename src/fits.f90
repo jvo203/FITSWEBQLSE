@@ -845,7 +845,7 @@ contains
          write (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
-         write (unit=fileunit, IOSTAT=ios) (/0, 0/)
+         write (unit=fileunit, IOSTAT=ios) 0
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
@@ -858,7 +858,7 @@ contains
          write (unit=fileunit, IOSTAT=ios) item%mask(:, :)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
-         write (unit=fileunit, IOSTAT=ios) (/0, 0/)
+         write (unit=fileunit, IOSTAT=ios) 0
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
@@ -1199,13 +1199,13 @@ contains
          if (ios .ne. 0) return
       end if
 
+      dims = item%naxes(1:2)
+
       ! item%pixels
-      read (unit=fileunit, IOSTAT=ios) dims(:)
+      read (unit=fileunit, IOSTAT=ios) N
       if (ios .ne. 0) return
 
-      print *, 'pixels%dims:', dims
-
-      if ((dims(1) .gt. 0) .and. (dims(2) .gt. 0)) then
+      if ((dims(1)*dims(2) .eq. N) .and. (N .gt. 0)) then
          if (allocated(item%pixels)) deallocate (item%pixels)
          allocate (item%pixels(dims(1), dims(2)))
          read (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
@@ -1213,12 +1213,10 @@ contains
       end if
 
       ! item%mask
-      read (unit=fileunit, IOSTAT=ios) dims(:)
+      read (unit=fileunit, IOSTAT=ios) N
       if (ios .ne. 0) return
 
-      print *, 'mask%dims:', dims
-
-      if ((dims(1) .gt. 0) .and. (dims(2) .gt. 0)) then
+      if ((dims(1)*dims(2) .eq. N) .and. (N .gt. 0)) then
          if (allocated(item%mask)) deallocate (item%mask)
          allocate (item%mask(dims(1), dims(2)))
          read (unit=fileunit, IOSTAT=ios) item%mask(:, :)
