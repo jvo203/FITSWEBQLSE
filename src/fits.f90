@@ -558,7 +558,8 @@ contains
 
         if (file_exists) return
 
-        open (newunit=fileunit, file=file, status='replace', access='stream', form='unformatted', IOSTAT=ios, IOMSG=iomsg)
+        open (newunit=fileunit, file=file, status='replace', access='stream', form='unformatted',&
+        &IOSTAT=ios, IOMSG=iomsg)
 
         if (ios .ne. 0) then
             print *, "error creating a file ", file, ' : ', trim(iomsg)
@@ -914,6 +915,13 @@ contains
         if (.not. file_exists) return
 
         ! open the state file for reading
+        open (newunit=fileunit, file=file, status='old', action='read', access='stream', form='unformatted',&
+        & IOSTAT=ios, IOMSG=iomsg)
+
+        if (ios .ne. 0) then
+            print *, "error opening a file ", file, ' : ', trim(iomsg)
+            return
+        end if
 
         bSuccess = .true.
 
