@@ -1141,6 +1141,40 @@ contains
       read (unit=fileunit, IOSTAT=ios) item%has_frequency
       if (ios .ne. 0) return
 
+      ! item%flux
+      read (unit=fileunit, IOSTAT=ios) N
+      if (ios .ne. 0) return
+
+      if (N .gt. 0) then
+         if (allocated(item%flux)) deallocate (item%flux)
+         allocate (character(len=N)::item%flux)
+         read (unit=fileunit, IOSTAT=ios) item%flux
+         if (ios .ne. 0) return
+      end if
+
+      ! item%dmin
+      read (unit=fileunit, IOSTAT=ios) item%dmin
+      if (ios .ne. 0) return
+
+      ! item%dmax
+      read (unit=fileunit, IOSTAT=ios) item%dmax
+      if (ios .ne. 0) return
+
+      ! item%dmedian
+      read (unit=fileunit, IOSTAT=ios) item%dmedian
+      if (ios .ne. 0) return
+
+      ! item%frame_min
+      read (unit=fileunit, IOSTAT=ios) N
+      if (ios .ne. 0) return
+
+      if (N .gt. 0) then
+         if (allocated(item%frame_min)) deallocate (item%frame_min)
+         allocate (item%frame_min(N))
+         read (unit=fileunit, IOSTAT=ios) item%frame_min(:)
+         if (ios .ne. 0) return
+      end if
+
       bSuccess = .true.
       call print_dataset(item)
 
