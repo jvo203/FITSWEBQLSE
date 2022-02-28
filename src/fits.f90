@@ -885,6 +885,30 @@ contains
 
     end subroutine save_dataset
 
+    function load_dataset(item, cache) result(bSuccess)
+        implicit none
+
+        type(dataset), pointer, intent(in) :: item
+        character(len=*), intent(in) :: cache
+
+        character(len=:), allocatable :: file
+        logical :: file_exists, bSuccess
+
+        integer :: fileunit, ios
+        character(256) :: iomsg
+
+        bSuccess = .false.
+
+        file = cache//'/'//'state.dat'
+
+        INQUIRE (FILE=file, EXIST=file_exists)
+
+        if (.not. file_exists) return
+
+        bSuccess = .true.
+
+    end function load_dataset
+
     subroutine print_dataset(item)
         type(dataset), pointer, intent(in) :: item
 
