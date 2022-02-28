@@ -1154,6 +1154,12 @@ contains
          if (ios .ne. 0) return
       end if
 
+      ! start the timer
+      call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
+
+      ! it is safe to set the header flag at this point
+      if (allocated(item%hdr)) call set_header_status(item, .true.)
+
       ! item%dmin
       read (unit=fileunit, IOSTAT=ios) item%dmin
       if (ios .ne. 0) return
@@ -1253,10 +1259,7 @@ contains
          if (ios .ne. 0) return
       end if
 
-      if (allocated(item%hdr)) call set_header_status(item, .true.)
-
       bSuccess = .true.
-      call print_dataset(item)
 
    end subroutine load_dataset
 
@@ -1766,9 +1769,6 @@ contains
       call set_error_status(item, .false.)
       call set_header_status(item, .false.)
 
-      ! start the item timer
-      call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
-
       call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
 
       ! start the timer
@@ -1862,7 +1862,7 @@ contains
       integer, dimension(:), allocatable :: thread_units
       integer :: num_threads
 
-      integer rc
+      integer :: rc
 
       if (.not. c_associated(root)) then
          ! needs to be protected with a mutex
