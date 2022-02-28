@@ -838,6 +838,7 @@ contains
 
       ! item%pixels
       if (allocated(item%pixels)) then
+         print *, 'pixels%dims:', size(item%pixels)
          write (unit=fileunit, IOSTAT=ios) size(item%pixels)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
@@ -850,6 +851,7 @@ contains
 
       ! item%mask
       if (allocated(item%mask)) then
+         print *, 'mask%dims:', size(item%mask)
          write (unit=fileunit, IOSTAT=ios) size(item%mask)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
@@ -1201,6 +1203,8 @@ contains
       read (unit=fileunit, IOSTAT=ios) dims(:)
       if (ios .ne. 0) return
 
+      print *, 'pixels%dims:', dims
+
       if ((dims(1) .gt. 0) .and. (dims(2) .gt. 0)) then
          if (allocated(item%pixels)) deallocate (item%pixels)
          allocate (item%pixels(dims(1), dims(2)))
@@ -1211,6 +1215,8 @@ contains
       ! item%mask
       read (unit=fileunit, IOSTAT=ios) dims(:)
       if (ios .ne. 0) return
+
+      print *, 'mask%dims:', dims
 
       if ((dims(1) .gt. 0) .and. (dims(2) .gt. 0)) then
          if (allocated(item%mask)) deallocate (item%mask)
@@ -1788,6 +1794,7 @@ contains
       end if
 
       if (allocated(item%pixels) .and. allocated(item%mask)) call set_image_status(item, .true.)
+      print *, 'header:', item%header, 'image:', item%image
 
       ! end the timer
       call system_clock(finish)
