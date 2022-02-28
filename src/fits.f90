@@ -1762,6 +1762,9 @@ contains
       call set_error_status(item, .false.)
       call set_header_status(item, .false.)
 
+      ! start the item timer
+      call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
+
       call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
 
       ! start the timer
