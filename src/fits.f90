@@ -716,6 +716,18 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%cdelt2
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%crpix2
+      write (unit=fileunit, IOSTAT=ios) item%crpix2
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%crval3
+      write (unit=fileunit, IOSTAT=ios) item%crval3
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%cdelt3
+      write (unit=fileunit, IOSTAT=ios) item%cdelt3
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%crpix3
       write (unit=fileunit, IOSTAT=ios) item%crpix3
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
