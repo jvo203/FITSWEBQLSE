@@ -844,7 +844,7 @@ contains
          write (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
-         write (unit=fileunit, IOSTAT=ios) 0
+         write (unit=fileunit, IOSTAT=ios) (/0, 0/)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
@@ -856,7 +856,7 @@ contains
          write (unit=fileunit, IOSTAT=ios) item%mask(:, :)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
-         write (unit=fileunit, IOSTAT=ios) 0
+         write (unit=fileunit, IOSTAT=ios) (/0, 0/)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
@@ -1172,6 +1172,28 @@ contains
          if (allocated(item%frame_min)) deallocate (item%frame_min)
          allocate (item%frame_min(N))
          read (unit=fileunit, IOSTAT=ios) item%frame_min(:)
+         if (ios .ne. 0) return
+      end if
+
+      ! item%frame_max
+      read (unit=fileunit, IOSTAT=ios) N
+      if (ios .ne. 0) return
+
+      if (N .gt. 0) then
+         if (allocated(item%frame_max)) deallocate (item%frame_max)
+         allocate (item%frame_max(N))
+         read (unit=fileunit, IOSTAT=ios) item%frame_max(:)
+         if (ios .ne. 0) return
+      end if
+
+      ! item%frame_median
+      read (unit=fileunit, IOSTAT=ios) N
+      if (ios .ne. 0) return
+
+      if (N .gt. 0) then
+         if (allocated(item%frame_median)) deallocate (item%frame_median)
+         allocate (item%frame_median(N))
+         read (unit=fileunit, IOSTAT=ios) item%frame_median(:)
          if (ios .ne. 0) return
       end if
 
