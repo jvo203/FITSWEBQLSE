@@ -459,16 +459,23 @@ contains
             cache(len + 1 + i:len + 1 + i) = item%datasetid(i)
         end do
 
-        ! create a cache directory using the <datasetid> folder name
-        status = mkcache(cache//c_null_char)
+        ! only make a cache for datasets with valid data/image, no errors
+        if (get_image_status(ptr) .eq. 1) then
+            ! create a cache directory using the <datasetid> folder name
+            status = mkcache(cache//c_null_char)
 
-        if (status .eq. 0) then
-            bSuccess = .true.
+            if (status .eq. 0) then
+                bSuccess = .true.
+            else
+                bSuccess = .false.
+            end if
         else
+            ! error
             bSuccess = .false.
+            status = -1
         end if
 
-        print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', status', status
+        print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', status', status, ', bSuccess', bSuccess
 
         ! TO-DO:
         ! write the dataset to a cache file so as to speed up subsequent loading
@@ -909,6 +916,8 @@ contains
         ! open the state file for reading
 
         bSuccess = .true.
+
+        call print_dataset(item)
 
     end subroutine load_dataset
 
@@ -1423,8 +1432,10 @@ contains
         ! start the timer
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
+        ! first try a cache file
         call load_dataset(item, cache, bSuccess)
 
+        ! if the cache file cannot be found / read, use the underlying FITS file
         if (.not. bSuccess) then
             call read_fits_file(item, strFilename, strFlux, root, bSuccess)
         else
