@@ -455,7 +455,6 @@ contains
         cache(len + 1:len + 1) = '/'
 
         ! and append the datasetid
-
         do i = 1, size(item%datasetid)
             cache(len + 1 + i:len + 1 + i) = item%datasetid(i)
         end do
@@ -1315,7 +1314,7 @@ contains
 
     end subroutine get_channel_range
 
-    subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, root, dir, len) bind(C)
+    subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, root, dir, dir_len) bind(C)
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -1328,11 +1327,13 @@ contains
         ! from the root node and submitting results to the cluster root
         type(c_ptr), intent(in), value :: root
 
-        integer(kind=c_size_t), intent(in), value :: len
-        character(kind=c_char), dimension(len), intent(in) :: dir
+        integer(kind=c_size_t), intent(in), value :: dir_len
+        character(kind=c_char), dimension(dir_len), intent(in) :: dir
 
         character(len=filepath_len) :: strFilename
         character(len=flux_len) :: strFlux
+
+        character(len=:), allocatable :: cache
 
         integer :: i, rc
         logical :: bSuccess
@@ -1356,6 +1357,21 @@ contains
 
         do i = 1, flux_len
             strFlux(i:i) = flux(i)
+        end do
+
+        allocate (character(dir_len + 1 + datasetid_len)::cache)
+
+        ! the cache directory
+        do i = 1, dir_len
+            cache(i:i) = dir(i)
+        end do
+
+        ! append a slash
+        cache(dir_len + 1:dir_len + 1) = '/'
+
+        ! and append the datasetid
+        do i = 1, datasetid_len
+            cache(dir_len + 1 + i:dir_len + 1 + i) = datasetid(i)
         end do
 
         allocate (item)
