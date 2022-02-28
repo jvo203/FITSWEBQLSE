@@ -903,7 +903,7 @@ contains
         character(len=:), allocatable :: file
         logical :: file_exists
 
-        integer :: fileunit, ios
+        integer :: fileunit, ios, N
         character(256) :: iomsg
 
         bSuccess = .false.
@@ -923,8 +923,17 @@ contains
             return
         end if
 
-        bSuccess = .true.
+        ! item%datasetid
+        read (unit=fileunit, IOSTAT=ios) N
+        if (ios .ne. 0) return
 
+        if (N .gt. 0) then
+            allocate (item%datasetid(N))
+            read (unit=fileunit, IOSTAT=ios) item%datasetid(:)
+            if (ios .ne. 0) return
+        end if
+
+        bSuccess = .true.
         call print_dataset(item)
 
     end subroutine load_dataset
