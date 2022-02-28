@@ -1049,6 +1049,42 @@ contains
       read (unit=fileunit, IOSTAT=ios) item%bpa
       if (ios .ne. 0) return
 
+      ! item%crval1
+      read (unit=fileunit, IOSTAT=ios) item%crval1
+      if (ios .ne. 0) return
+
+      ! item%cdelt1
+      read (unit=fileunit, IOSTAT=ios) item%cdelt1
+      if (ios .ne. 0) return
+
+      ! item%crpix1
+      read (unit=fileunit, IOSTAT=ios) item%crpix1
+      if (ios .ne. 0) return
+
+      ! item%crval2
+      read (unit=fileunit, IOSTAT=ios) item%crval2
+      if (ios .ne. 0) return
+
+      ! item%cdelt2
+      read (unit=fileunit, IOSTAT=ios) item%cdelt2
+      if (ios .ne. 0) return
+
+      ! item%crpix2
+      read (unit=fileunit, IOSTAT=ios) item%crpix2
+      if (ios .ne. 0) return
+
+      ! item%crval3
+      read (unit=fileunit, IOSTAT=ios) item%crval3
+      if (ios .ne. 0) return
+
+      ! item%cdelt3
+      read (unit=fileunit, IOSTAT=ios) item%cdelt3
+      if (ios .ne. 0) return
+
+      ! item%crpix3
+      read (unit=fileunit, IOSTAT=ios) item%crpix3
+      if (ios .ne. 0) return
+
       bSuccess = .true.
       call print_dataset(item)
 
