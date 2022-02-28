@@ -1085,6 +1085,50 @@ contains
       read (unit=fileunit, IOSTAT=ios) item%crpix3
       if (ios .ne. 0) return
 
+      ! item%obsra
+      read (unit=fileunit, IOSTAT=ios) item%obsra
+      if (ios .ne. 0) return
+
+      ! item%obsdec
+      read (unit=fileunit, IOSTAT=ios) item%obsdec
+      if (ios .ne. 0) return
+
+      ! item%datamin
+      read (unit=fileunit, IOSTAT=ios) item%datamin
+      if (ios .ne. 0) return
+
+      ! item%datamax
+      read (unit=fileunit, IOSTAT=ios) item%datamax
+      if (ios .ne. 0) return
+
+      ! item%cd1_1
+      read (unit=fileunit, IOSTAT=ios) item%cd1_1
+      if (ios .ne. 0) return
+
+      ! item%cd1_2
+      read (unit=fileunit, IOSTAT=ios) item%cd1_2
+      if (ios .ne. 0) return
+
+      ! item%cd2_1
+      read (unit=fileunit, IOSTAT=ios) item%cd2_1
+      if (ios .ne. 0) return
+
+      ! item%cd2_2
+      read (unit=fileunit, IOSTAT=ios) item%cd2_2
+      if (ios .ne. 0) return
+
+      ! item%frame_multiplier
+      read (unit=fileunit, IOSTAT=ios) item%frame_multiplier
+      if (ios .ne. 0) return
+
+      ! item%has_velocity
+      read (unit=fileunit, IOSTAT=ios) item%has_velocity
+      if (ios .ne. 0) return
+
+      ! item%has_frequency
+      read (unit=fileunit, IOSTAT=ios) item%has_frequency
+      if (ios .ne. 0) return
+
       bSuccess = .true.
       call print_dataset(item)
 
