@@ -906,6 +906,8 @@ contains
 
         if (.not. file_exists) return
 
+        ! open the state file for reading
+
         bSuccess = .true.
 
     end subroutine load_dataset
@@ -1425,6 +1427,8 @@ contains
 
         if (.not. bSuccess) then
             call read_fits_file(item, strFilename, strFlux, root, bSuccess)
+        else
+            ! if it's a 3D cube restore the channel information too
         end if
 
         ! end the timer
