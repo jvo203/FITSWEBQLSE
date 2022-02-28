@@ -1197,6 +1197,58 @@ contains
          if (ios .ne. 0) return
       end if
 
+      ! item%pixels
+      read (unit=fileunit, IOSTAT=ios) dims(:)
+      if (ios .ne. 0) return
+
+      if ((dims(1) .gt. 0) .and. (dims(2) .gt. 0)) then
+         if (allocated(item%pixels)) deallocate (item%pixels)
+         allocate (item%pixels(dims(1), dims(2)))
+         read (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
+         if (ios .ne. 0) return
+      end if
+
+      ! item%mask
+      read (unit=fileunit, IOSTAT=ios) dims(:)
+      if (ios .ne. 0) return
+
+      if ((dims(1) .gt. 0) .and. (dims(2) .gt. 0)) then
+         if (allocated(item%mask)) deallocate (item%mask)
+         allocate (item%mask(dims(1), dims(2)))
+         read (unit=fileunit, IOSTAT=ios) item%mask(:, :)
+         if (ios .ne. 0) return
+      end if
+
+      ! item%is_optical
+      read (unit=fileunit, IOSTAT=ios) item%is_optical
+      if (ios .ne. 0) return
+
+      ! item%is_xray
+      read (unit=fileunit, IOSTAT=ios) item%is_xray
+      if (ios .ne. 0) return
+
+      ! item%mean_spectrum
+      read (unit=fileunit, IOSTAT=ios) N
+      if (ios .ne. 0) return
+
+      if (N .gt. 0) then
+         if (allocated(item%mean_spectrum)) deallocate (item%mean_spectrum)
+         allocate (item%mean_spectrum(N))
+         read (unit=fileunit, IOSTAT=ios) item%mean_spectrum(:)
+         if (ios .ne. 0) return
+      end if
+
+      ! item%integrated_spectrum
+      read (unit=fileunit, IOSTAT=ios) N
+      if (ios .ne. 0) return
+
+      if (N .gt. 0) then
+         if (allocated(item%integrated_spectrum)) deallocate (item%integrated_spectrum)
+         allocate (item%integrated_spectrum(N))
+         read (unit=fileunit, IOSTAT=ios) item%integrated_spectrum(:)
+         if (ios .ne. 0) return
+      end if
+
       bSuccess = .true.
       call print_dataset(item)
 
