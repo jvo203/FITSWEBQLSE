@@ -1772,7 +1772,7 @@ void *handle_fitswebql_request(void *ptr)
     printf("[C] datasetid: '%s', flux: '%s', filepath: '%s'; over to FORTRAN\n", req->datasetid, req->flux, req->filepath);
 
     // call FORTRAN
-    load_fits_file(req->datasetid, strlen(req->datasetid), req->filepath, strlen(req->filepath), req->flux, strlen(req->flux), req->root);
+    load_fits_file(req->datasetid, strlen(req->datasetid), req->filepath, strlen(req->filepath), req->flux, strlen(req->flux), req->root, options.cache, strlen(options.cache));
 
     free(req->datasetid);
     free(req->filepath);

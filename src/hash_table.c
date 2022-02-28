@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <pthread.h>
+#include <string.h>
 
 #include "hash_table.h"
 

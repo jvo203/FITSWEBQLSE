@@ -431,7 +431,7 @@ contains
         type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
 
-        integer(kind=c_int), intent(in), value :: len
+        integer(kind=c_size_t), intent(in), value :: len
         character(kind=c_char), dimension(len), intent(in) :: dir
 
         character(len=:), allocatable :: cache, file
@@ -1328,7 +1328,7 @@ contains
         ! from the root node and submitting results to the cluster root
         type(c_ptr), intent(in), value :: root
 
-        integer(kind=c_int), intent(in), value :: len
+        integer(kind=c_size_t), intent(in), value :: len
         character(kind=c_char), dimension(len), intent(in) :: dir
 
         character(len=filepath_len) :: strFilename
