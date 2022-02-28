@@ -63,7 +63,7 @@ void *handle_fitswebql_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 
-extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root);
+extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, int len);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
 extern int get_error_status(void *item);
 extern int get_header_status(void *item);
