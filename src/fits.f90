@@ -1774,7 +1774,6 @@ contains
       if (.not. bSuccess) then
          call read_fits_file(item, strFilename, strFlux, root, bSuccess)
       else
-
          if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             ! reset the progress
             call set_progress(item, 0, 1)
@@ -1783,7 +1782,6 @@ contains
             call set_progress(item, 0, item%naxes(3))
             ! if it's a 3D cube restore the channel information too
          end if
-
       end if
 
       if (allocated(item%pixels) .and. allocated(item%mask)) call set_image_status(item, .true.)
