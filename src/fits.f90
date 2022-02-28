@@ -1905,6 +1905,7 @@ contains
 
       ! special handling for the flux
       ! test the first character for 'N' ('NULL')
+      if (allocated(item%flux)) deallocate (item%flux)
       if (flux(1:1) .ne. 'N') allocate (item%flux, source=flux)
 
       item%cunit1 = ''
@@ -2394,18 +2395,27 @@ contains
          start = 1
          end = naxes(3)
 
+         if (allocated(item%compressed)) deallocate (item%compressed)
          allocate (item%compressed(start:end))
 
          do i = start, end
             nullify (item%compressed(i)%ptr)
          end do
 
+         if (allocated(item%frame_min)) deallocate (item%frame_min)
          allocate (item%frame_min(start:end))
+
+         if (allocated(item%frame_max)) deallocate (item%frame_max)
          allocate (item%frame_max(start:end))
+
+         if (allocated(item%frame_median)) deallocate (item%frame_median)
          allocate (item%frame_median(start:end))
 
          ! spectra
+         if (allocated(item%mean_spectrum)) deallocate (item%mean_spectrum)
          allocate (item%mean_spectrum(naxes(3)))
+
+         if (allocated(item%integrated_spectrum)) deallocate (item%integrated_spectrum)
          allocate (item%integrated_spectrum(naxes(3)))
 
          allocate (pixels(npixels))
