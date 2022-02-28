@@ -1029,6 +1029,26 @@ contains
       read (unit=fileunit, IOSTAT=ios) item%ctype3
       if (ios .ne. 0) return
 
+      ! item%ignrval
+      read (unit=fileunit, IOSTAT=ios) item%ignrval
+      if (ios .ne. 0) return
+
+      ! item%restfrq
+      read (unit=fileunit, IOSTAT=ios) item%restfrq
+      if (ios .ne. 0) return
+
+      ! item%bmaj
+      read (unit=fileunit, IOSTAT=ios) item%bmaj
+      if (ios .ne. 0) return
+
+      ! item%bmin
+      read (unit=fileunit, IOSTAT=ios) item%bmin
+      if (ios .ne. 0) return
+
+      ! item%bpa
+      read (unit=fileunit, IOSTAT=ios) item%bpa
+      if (ios .ne. 0) return
+
       bSuccess = .true.
       call print_dataset(item)
 
