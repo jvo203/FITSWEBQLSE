@@ -956,6 +956,22 @@ contains
             if (ios .ne. 0) return
         end if
 
+        ! item%naxis
+        read (unit=fileunit, IOSTAT=ios) item%naxis
+        if (ios .ne. 0) return
+
+        ! item%bitpix
+        read (unit=fileunit, IOSTAT=ios) item%bitpix
+        if (ios .ne. 0) return
+
+        ! item%naxes
+        read (unit=fileunit, IOSTAT=ios) item%naxes(:)
+        if (ios .ne. 0) return
+
+        ! item%frameid
+        read (unit=fileunit, IOSTAT=ios) item%frameid
+        if (ios .ne. 0) return
+
         bSuccess = .true.
         call print_dataset(item)
 
