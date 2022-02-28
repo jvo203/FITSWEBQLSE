@@ -1244,6 +1244,8 @@ contains
       read (unit=fileunit, IOSTAT=ios) item%is_xray
       if (ios .ne. 0) return
 
+      if (allocated(item%pixels) .and. allocated(item%mask)) call set_image_status(item, .true.)
+
       ! item%mean_spectrum
       read (unit=fileunit, IOSTAT=ios) N
       if (ios .ne. 0) return
@@ -1794,9 +1796,6 @@ contains
             ! if it's a 3D cube restore the channel information too
          end if
       end if
-
-      if (allocated(item%pixels) .and. allocated(item%mask)) call set_image_status(item, .true.)
-      print *, 'header:', item%header, 'image:', item%image
 
       ! end the timer
       call system_clock(finish)
