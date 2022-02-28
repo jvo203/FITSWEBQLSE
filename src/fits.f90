@@ -908,7 +908,7 @@ contains
    subroutine load_dataset(item, cache, bSuccess)
       implicit none
 
-      type(dataset), pointer, intent(in) :: item
+      type(dataset), pointer, intent(inout) :: item
       character(len=*), intent(in) :: cache
       logical, intent(out) ::  bSuccess
 
@@ -1248,6 +1248,8 @@ contains
          read (unit=fileunit, IOSTAT=ios) item%integrated_spectrum(:)
          if (ios .ne. 0) return
       end if
+
+      if (allocated(item%hdr)) call set_header_status(item, .true.)
 
       bSuccess = .true.
       call print_dataset(item)
@@ -1772,8 +1774,19 @@ contains
       if (.not. bSuccess) then
          call read_fits_file(item, strFilename, strFlux, root, bSuccess)
       else
-         ! if it's a 3D cube restore the channel information too
+
+         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+            ! reset the progress
+            call set_progress(item, 0, 1)
+            call update_progress(item, 1)
+         else
+            call set_progress(item, 0, item%naxes(3))
+            ! if it's a 3D cube restore the channel information too
+         end if
+
       end if
+
+      if (allocated(item%pixels) .and. allocated(item%mask)) call set_image_status(item, .true.)
 
       ! end the timer
       call system_clock(finish)
