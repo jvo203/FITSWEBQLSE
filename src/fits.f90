@@ -1157,6 +1157,13 @@ contains
       ! start the timer
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
+      ! reset the progress
+      if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+         call set_progress(item, 0, 1)
+      else
+         call set_progress(item, 0, item%naxes(3))
+      end if
+
       ! it is safe to set the header flag at this point
       if (allocated(item%hdr)) call set_header_status(item, .true.)
 
@@ -1782,11 +1789,8 @@ contains
          call read_fits_file(item, strFilename, strFlux, root, bSuccess)
       else
          if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
-            ! reset the progress
-            call set_progress(item, 0, 1)
             call update_progress(item, 1)
          else
-            call set_progress(item, 0, item%naxes(3))
             ! if it's a 3D cube restore the channel information too
          end if
       end if
