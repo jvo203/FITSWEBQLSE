@@ -972,6 +972,38 @@ contains
         read (unit=fileunit, IOSTAT=ios) item%frameid
         if (ios .ne. 0) return
 
+        ! item%object
+        read (unit=fileunit, IOSTAT=ios) item%object
+        if (ios .ne. 0) return
+
+        ! item%line
+        read (unit=fileunit, IOSTAT=ios) item%line
+        if (ios .ne. 0) return
+
+        ! item%filter
+        read (unit=fileunit, IOSTAT=ios) item%filter
+        if (ios .ne. 0) return
+
+        ! item%data_obs
+        read (unit=fileunit, IOSTAT=ios) item%date_obs
+        if (ios .ne. 0) return
+
+        ! item%btype
+        read (unit=fileunit, IOSTAT=ios) item%btype
+        if (ios .ne. 0) return
+
+        ! item%bunit
+        read (unit=fileunit, IOSTAT=ios) item%bunit
+        if (ios .ne. 0) return
+
+        ! item%specsys
+        read (unit=fileunit, IOSTAT=ios) item%specsys
+        if (ios .ne. 0) return
+
+        ! item%timesys
+        read (unit=fileunit, IOSTAT=ios) item%timesys
+        if (ios .ne. 0) return
+
         bSuccess = .true.
         call print_dataset(item)
 
