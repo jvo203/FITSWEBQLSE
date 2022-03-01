@@ -1354,7 +1354,10 @@ contains
         & IOSTAT=ios, IOMSG=iomsg)
 
             ! move on if the file does not exist
-            if (ios .ne. 0) cycle
+            if (ios .ne. 0) then
+                print *, "error opening a file ", file, ' : ', trim(iomsg)
+                cycle
+            end if
 
             ! allocate space for compressed data
             allocate (item%compressed(i)%ptr(cn, cm))
