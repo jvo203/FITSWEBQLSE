@@ -2020,7 +2020,7 @@ void submit_progress(char *root, char *datasetid, int len, int progress)
     // a POST buffer
     char post_buf[16];
 
-    if ((progress > 0) && (snprintf(post_buf, sizeof(post_buf), "%d", progress) > 0))
+    if ((progress > 0) && (snprintf(post_buf, sizeof(post_buf), "%d\0", progress) > 0))
     {
         // form an HTTP request URL
         CURL *curl;
