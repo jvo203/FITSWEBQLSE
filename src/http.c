@@ -2034,7 +2034,7 @@ void submit_progress(char *root, char *datasetid, int len, int progress)
             curl_easy_setopt(curl, CURLOPT_URL, url->str);
 
             // CURLOPT_NOBODY hides the response
-            curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+            // curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
 
             /* size of the POST data */
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, sizeof(int));
