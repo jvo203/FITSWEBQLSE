@@ -106,8 +106,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 }
 
                 // submit the POST progress to FORTRAN
-                // if (progress > 0)
-                //    submit_channel_range(item, idx, progress, frame_min, frame_max, frame_median, mean_spectrum, integrated_spectrum);
+                if (progress > 0)
+                    update_progress_C(item, progress);
 
                 mg_http_reply(c, 200, NULL, "OK");
             }
