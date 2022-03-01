@@ -1382,7 +1382,7 @@ contains
                 call update_progress(item, 1)
             else
                 ! a C function defined in http.c
-                ! call submit_progress(root, item%datasetid, 1)
+                ! call submit_progress(root, item%datasetid, size(item%datasetid), 1)
             end if
         end do
         !$omp END DO
