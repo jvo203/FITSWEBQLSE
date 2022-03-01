@@ -1288,6 +1288,7 @@ contains
 
     subroutine load_cube(item, cache, root, bSuccess)
         use fixed_array
+        use omp_lib
         implicit none
 
         type(dataset), pointer, intent(inout) :: item
@@ -1303,6 +1304,10 @@ contains
         character(256) :: iomsg
 
         integer :: i, rc, depth
+
+        ! OpenMP
+        integer :: max_threads
+        logical thread_bSuccess
 
         integer(kind=4) :: n, m ! input dimensions
 
@@ -1329,7 +1334,15 @@ contains
         if (allocated(item%compressed)) deallocate (item%compressed)
         allocate (item%compressed(1:depth))
 
+        ! cap the number of threads to avoid system overload
+        max_threads = min(OMP_GET_MAX_THREADS(), 8)
+
+        thread_bSuccess = .true.
+
         ! this needs to be made parallel
+        !$omp PARALLEL DEFAULT(PRIVATE) SHARED(item)&
+        !$omp& REDUCTION(.and.:thread_bSuccess)
+        !$omp DO
         do i = 1, depth
             nullify (item%compressed(i)%ptr)
 
@@ -1353,7 +1366,9 @@ contains
             ! abort upon a read error
             if (ios .ne. 0) then
                 print *, "error deserialising channel", i, 'from a binary file ', file, ' : ', trim(iomsg)
-                go to 400
+                thread_bSuccess = .false.
+                ! go to 400
+                cycle
             end if
 
             if (.not. c_associated(root)) then
@@ -1363,8 +1378,11 @@ contains
                 ! call submit_progress(root, item%datasetid, 1)
             end if
         end do
+        !$omp END DO
+        !$omp END PARALLEL
 
-        bSuccess = .true.
+        bSuccess = thread_bSuccess
+        ! bSuccess = .true.
 
         if (.not. c_associated(root)) then
             ! needs to be protected with a mutex
