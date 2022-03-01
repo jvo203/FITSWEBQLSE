@@ -905,17 +905,18 @@ contains
 
     end subroutine save_dataset
 
-    subroutine load_dataset(item, cache, bSuccess)
+    subroutine load_dataset(item, cache, root, bSuccess)
         implicit none
 
         type(dataset), pointer, intent(inout) :: item
         character(len=*), intent(in) :: cache
+        type(c_ptr), intent(in), value :: root
         logical, intent(out) ::  bSuccess
 
         character(len=:), allocatable :: file
         logical :: file_exists
 
-        integer :: fileunit, ios, N
+        integer :: fileunit, ios, N, rc
         integer :: dims(2)
         character(256) :: iomsg
 
@@ -1267,6 +1268,19 @@ contains
         end if
 
         bSuccess = .true.
+
+        if (.not. c_associated(root)) then
+            ! needs to be protected with a mutex
+            rc = c_pthread_mutex_lock(logger_mtx)
+
+            if (rc .eq. 0) then
+                ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
+                call logger%info('load_dataset', 'restored from file: '//file)
+
+                ! unlock the mutex
+                rc = c_pthread_mutex_unlock(logger_mtx)
+            end if
+        end if
 
     end subroutine load_dataset
 
@@ -1782,7 +1796,7 @@ contains
         call system_clock(count=start, count_rate=crate, count_max=cmax)
 
         ! first try a cache file
-        call load_dataset(item, cache, bSuccess)
+        call load_dataset(item, cache, root, bSuccess)
 
         ! if the cache file cannot be found / read, use the underlying FITS file
         if (.not. bSuccess) then
