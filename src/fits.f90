@@ -1341,7 +1341,8 @@ contains
 
         ! this needs to be made parallel
         !$omp PARALLEL DEFAULT(PRIVATE) SHARED(item)&
-        !$omp& REDUCTION(.and.:thread_bSuccess)
+        !$omp& REDUCTION(.and.:thread_bSuccess)&
+        !$omp& NUM_THREADS(max_threads)
         !$omp DO
         do i = 1, depth
             nullify (item%compressed(i)%ptr)
