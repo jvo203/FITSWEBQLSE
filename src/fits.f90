@@ -1275,7 +1275,7 @@ contains
 
             if (rc .eq. 0) then
                 ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-                call logger%info('load_dataset', 'successfully restored pixels/mask from '//file)
+                call logger%info('load_dataset', 'restored pixels/mask from '//file)
 
                 ! unlock the mutex
                 rc = c_pthread_mutex_unlock(logger_mtx)
@@ -1357,7 +1357,7 @@ contains
 
             ! move on if the file does not exist
             if (ios .ne. 0) then
-                print *, "error opening a file ", file, ' : ', trim(iomsg)
+                ! print *, "error opening a file ", file, ' : ', trim(iomsg)
                 cycle
             end if
 
@@ -1367,6 +1367,7 @@ contains
             ! read the compressed data
             read (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
 
+            ! and close the file
             close (fileunit)
 
             ! abort upon a read error
@@ -1390,13 +1391,13 @@ contains
         bSuccess = thread_bSuccess
         ! bSuccess = .true.
 
-        if (.not. c_associated(root)) then
+        if (.not. c_associated(root) .and. bSuccess) then
             ! needs to be protected with a mutex
             rc = c_pthread_mutex_lock(logger_mtx)
 
             if (rc .eq. 0) then
                 ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-                call logger%info('load_cube', 'successfully restored cube data from '//cache)
+                call logger%info('load_cube', 'restored cube data from '//cache)
 
                 ! unlock the mutex
                 rc = c_pthread_mutex_unlock(logger_mtx)
