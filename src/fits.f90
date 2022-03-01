@@ -1287,6 +1287,7 @@ contains
     end subroutine load_dataset
 
     subroutine load_cube(item, cache, root, bSuccess)
+        use fixed_array
         implicit none
 
         type(dataset), pointer, intent(inout) :: item
@@ -1297,18 +1298,33 @@ contains
         character(len=:), allocatable :: file
         logical :: file_exists
 
-        integer :: fileunit, ios, N
+        integer :: fileunit, ios
         integer :: dims(2)
         character(256) :: iomsg
 
         integer :: i, rc, depth
+
+        integer(kind=4) :: n, m ! input dimensions
+
+        ! compressed output dimensions
+        integer(kind=4) :: cn, cm
 
         bSuccess = .false.
 
         ! reserved for *CUBES* only
         if (item%naxes(3) .le. 1) return
 
+        n = item%naxes(1)
+        m = item%naxes(2)
         depth = item%naxes(3)
+
+        ! by default compressed is dimension(n/DIM, m/DIM)
+        cn = n/DIM
+        cm = m/DIM
+
+        ! but the input dimensions might not be divisible by <DIM>
+        if (mod(n, DIM) .ne. 0) cn = cn + 1
+        if (mod(m, DIM) .ne. 0) cm = cm + 1
 
         if (allocated(item%compressed)) deallocate (item%compressed)
         allocate (item%compressed(1:depth))
@@ -1326,7 +1342,21 @@ contains
             ! move on if the file does not exist
             if (ios .ne. 0) cycle
 
+            ! allocate space for compressed data
+            allocate (item%compressed(i)%ptr(cn, cm))
+
+            ! read the compressed data
+            read (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
+
             close (fileunit)
+
+            ! abort upon a read error
+            if (ios .ne. 0) then
+                print *, "error deserialising channel", i, 'from a binary file ', file, ' : ', trim(iomsg)
+                go to 400
+            end if
+
+            call update_progress(item, 1)
         end do
 
         bSuccess = .true.
@@ -1344,6 +1374,7 @@ contains
             end if
         end if
 
+400     return
     end subroutine load_cube
     subroutine print_dataset(item)
         type(dataset), pointer, intent(in) :: item
