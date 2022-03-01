@@ -2017,10 +2017,7 @@ void submit_progress(char *root, char *datasetid, int len, int progress)
         return;
     }
 
-    // a POST buffer
-    char post_buf[16];
-
-    if ((progress > 0) && (snprintf(post_buf, sizeof(post_buf), "%d\0", progress) > 0))
+    if (progress > 0)
     {
         // form an HTTP request URL
         CURL *curl;
@@ -2040,10 +2037,10 @@ void submit_progress(char *root, char *datasetid, int len, int progress)
             curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
 
             /* size of the POST data */
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(post_buf));
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, sizeof(int));
 
             /* the actual POST data */
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_buf);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, &progress);
 
             /* Perform the request, res will get the return code */
             res = curl_easy_perform(curl);

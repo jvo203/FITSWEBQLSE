@@ -71,8 +71,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         {
             int progress = 0;
 
-            // parse the text buffer
-            progress = str2int(hm->body.ptr, hm->body.len);
+            // parse the binary buffer
+            if (hm->body.len == sizeof(progress))
+                memcpy(&progress, hm->body.ptr, sizeof(progress));
 
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
             char *datasetId = strrchr(tmp, '/');
