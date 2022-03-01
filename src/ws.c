@@ -7,6 +7,21 @@
 extern options_t options; // <options> is defined in main.c
 extern sig_atomic_t s_received_signal;
 
+// it does not handle negative values!
+int str2int(const char *str, int len)
+{
+    int i;
+    int ret = 0;
+
+    if ((str == NULL) || (len <= 0))
+        return 0;
+
+    for (i = 0; i < len; ++i)
+        ret = ret * 10 + (str[i] - '0');
+
+    return ret;
+}
+
 static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     switch (ev)
@@ -48,6 +63,58 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // Upgrade to websocket. From now on, a connection is a full-duplex
             // Websocket connection, which will receive MG_EV_WS_MSG events.
             mg_ws_upgrade(c, hm, NULL);
+            break;
+        }
+
+        // a simple progress update
+        if (mg_strstr(hm->uri, mg_str("/progress")) != NULL)
+        {
+            int progress = 0;
+
+            // parse the text buffer
+            progress = str2int(hm->body.ptr, hm->body.len);
+
+            char *tmp = strndup(hm->uri.ptr, hm->uri.len);
+            char *datasetId = strrchr(tmp, '/');
+
+            if (datasetId != NULL)
+                printf("<progress> POST request for '%s': progress = %d\n", datasetId + 1, progress);
+
+            if (datasetId != NULL)
+            {
+                datasetId++; // skip the slash character
+
+                void *item = get_dataset(datasetId);
+
+                if (item == NULL)
+                {
+                    if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
+                    {
+                        mg_http_reply(c, 202, NULL, "Accepted");
+
+                        free(tmp);
+                        break;
+                    }
+                    else
+                    {
+                        // signal a catastrophic error
+                        mg_http_reply(c, 500, NULL, "Internal Server Error");
+
+                        free(tmp);
+                        break;
+                    }
+                }
+
+                // submit the POST progress to FORTRAN
+                // if (progress > 0)
+                //    submit_channel_range(item, idx, progress, frame_min, frame_max, frame_median, mean_spectrum, integrated_spectrum);
+
+                mg_http_reply(c, 200, NULL, "OK");
+            }
+            else
+                mg_http_reply(c, 400, NULL, "Bad Request");
+
+            free(tmp);
             break;
         }
 
@@ -111,7 +178,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             }
 
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
-
             char *datasetId = strrchr(tmp, '/');
 
             if (datasetId != NULL)
@@ -128,12 +194,16 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
                     {
                         mg_http_reply(c, 202, NULL, "Accepted");
+
+                        free(tmp);
                         break;
                     }
                     else
                     {
                         // signal a catastrophic error
                         mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+
+                        free(tmp);
                         break;
                     }
                 }
