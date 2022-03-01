@@ -1334,13 +1334,15 @@ contains
         if (allocated(item%compressed)) deallocate (item%compressed)
         allocate (item%compressed(1:depth))
 
-        ! cap the number of threads to avoid system overload
-        max_threads = min(OMP_GET_MAX_THREADS(), 8)
+        ! get #physical cores (ignore HT)
+        max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
+        print *, "max_threads:", max_threads, "depth:", depth
 
         thread_bSuccess = .true.
 
-        ! this needs to be made parallel
-        !$omp PARALLEL DEFAULT(PRIVATE) SHARED(item)&
+        !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+        !$omp& PRIVATE(i, file, fileunit, ios, iomsg)&
         !$omp& REDUCTION(.and.:thread_bSuccess)&
         !$omp& NUM_THREADS(max_threads)
         !$omp DO
@@ -2569,7 +2571,8 @@ contains
             item%frame_min = 1.0E30
             item%frame_max = -1.0E30
 
-            !$omp PARALLEL DEFAULT(SHARED) PRIVATE(tid, start, end, num_per_node, status)&
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+            !$omp& PRIVATE(tid, start, end, num_per_node, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
             !$omp& PRIVATE(thread_buffer, thread_pixels, thread_mask, thread_arr)&
