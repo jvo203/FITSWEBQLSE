@@ -1345,7 +1345,7 @@ contains
         !$omp& PRIVATE(i, file, fileunit, ios, iomsg)&
         !$omp& REDUCTION(.and.:thread_bSuccess)&
         !$omp& NUM_THREADS(max_threads)
-        !$omp DO
+        !$omp DO SCHEDULE(DYNAMIC, 4)
         do i = 1, depth
             nullify (item%compressed(i)%ptr)
 
