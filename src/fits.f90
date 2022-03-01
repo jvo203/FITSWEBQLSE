@@ -1356,7 +1356,12 @@ contains
                 go to 400
             end if
 
-            call update_progress(item, 1)
+            if (.not. c_associated(root)) then
+                call update_progress(item, 1)
+            else
+                ! a C function defined in http.c
+                ! call submit_progress(root, item%datasetid, 1)
+            end if
         end do
 
         bSuccess = .true.
