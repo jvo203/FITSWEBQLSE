@@ -1969,8 +1969,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
             /* Check for errors */
             if (res != CURLE_OK)
-                fprintf(stderr, "[C] curl_easy_perform() failed: %s\n",
-                        curl_easy_strerror(res));
+                fprintf(stderr, "[C] curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             else
             {
                 // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
@@ -2016,6 +2015,46 @@ void submit_progress(char *root, char *datasetid, int len, int progress)
     {
         free(id);
         return;
+    }
+
+    // a POST buffer
+    char post_buf[16];
+
+    if ((progress > 0) && (snprintf(post_buf, sizeof(post_buf), "%d", progress) > 0))
+    {
+        // form an HTTP request URL
+        CURL *curl;
+        CURLcode res;
+
+        GString *url = g_string_new("http://");
+        g_string_append_printf(url, "%s:", root);
+        g_string_append_printf(url, "%" PRIu16 "/progress/%s", options.ws_port, id);
+
+        curl = curl_easy_init();
+
+        if (curl)
+        {
+            curl_easy_setopt(curl, CURLOPT_URL, url->str);
+
+            // CURLOPT_NOBODY hides the response
+            curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+
+            /* size of the POST data */
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(post_buf));
+
+            /* the actual POST data */
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_buf);
+
+            /* Perform the request, res will get the return code */
+            res = curl_easy_perform(curl);
+
+            /* Check for errors */
+            if (res != CURLE_OK)
+                fprintf(stderr, "[C] curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+
+            /* always cleanup */
+            curl_easy_cleanup(curl);
+        }
     }
 
     free(id);
