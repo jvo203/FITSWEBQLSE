@@ -1783,6 +1783,18 @@ contains
 
     end subroutine get_channel_range_C
 
+    subroutine update_progress_C(ptr, progress) BIND(C, name='update_progress_C')
+        type(C_PTR), intent(in), value :: ptr
+        integer(c_int), intent(in), value :: progress
+
+        type(dataset), pointer :: item
+
+        call c_f_pointer(ptr, item)
+
+        if (progress .gt. 0) call update_progress(item, progress)
+
+    end subroutine update_progress_C
+
     subroutine get_channel_range(item, startindex, endindex, status)
         type(dataset), pointer, intent(inout) :: item
         integer, intent(out) :: status, startindex, endindex
