@@ -2012,6 +2012,12 @@ void submit_progress(char *root, char *datasetid, int len, int progress)
     if (id == NULL)
         return;
 
+    if (root == NULL)
+    {
+        free(id);
+        return;
+    }
+
     free(id);
 }
 
