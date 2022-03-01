@@ -1275,7 +1275,7 @@ contains
 
             if (rc .eq. 0) then
                 ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-                call logger%info('load_dataset', 'restored from file: '//file)
+                call logger%info('load_dataset', 'successfully restored pixels/mask from cache @ '//file)
 
                 ! unlock the mutex
                 rc = c_pthread_mutex_unlock(logger_mtx)
@@ -1284,6 +1284,39 @@ contains
 
     end subroutine load_dataset
 
+    subroutine load_cube(item, cache, root, bSuccess)
+        implicit none
+
+        type(dataset), pointer, intent(inout) :: item
+        character(len=*), intent(in) :: cache
+        type(c_ptr), intent(in), value :: root
+        logical, intent(out) ::  bSuccess
+
+        character(len=:), allocatable :: file
+        logical :: file_exists
+
+        integer :: fileunit, ios, N, rc
+        integer :: dims(2)
+        character(256) :: iomsg
+
+        bSuccess = .false.
+
+        bSuccess = .true.
+
+        if (.not. c_associated(root)) then
+            ! needs to be protected with a mutex
+            rc = c_pthread_mutex_lock(logger_mtx)
+
+            if (rc .eq. 0) then
+                ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
+                call logger%info('load_cube', 'successfully restored cube data from cache @ '//cache)
+
+                ! unlock the mutex
+                rc = c_pthread_mutex_unlock(logger_mtx)
+            end if
+        end if
+
+    end subroutine load_cube
     subroutine print_dataset(item)
         type(dataset), pointer, intent(in) :: item
 
@@ -1806,6 +1839,7 @@ contains
                 call update_progress(item, 1)
             else
                 ! if it's a 3D cube restore the channel information too
+                call load_cube(item, cache, root, bSuccess)
             end if
         end if
 
