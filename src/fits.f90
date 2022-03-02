@@ -445,7 +445,6 @@ contains
         character(kind=c_char), dimension(len), intent(in) :: dir
 
         character(len=:), allocatable :: cache, file
-        character(kind=c_char), allocatable, target :: buffer(:)
         logical :: file_exists, bSuccess
 
         integer :: i, rc, status
