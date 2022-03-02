@@ -105,6 +105,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                         break;
                     }
                 }
+                else
+                {
+                    // check if we've gone past the FITS header stage
+                }
 
                 // submit the POST progress to FORTRAN
                 if (progress > 0)

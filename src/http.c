@@ -2061,8 +2061,12 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
                 fprintf(stderr, "[C] curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             else
             {
-                // Examine the HTTP response. Upon success ('OK') set the return value <counter> to <progress>
-                if (strcmp(chunk.memory, "OK") == 0)
+                // Examine the HTTP response code. Upon success ('OK') set the return value <counter> to <progress>
+                long http_code = 0;
+                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+                // if (strcmp(chunk.memory, "OK") == 0)
+                if (http_code == 200)
                     counter = progress;
             }
 
