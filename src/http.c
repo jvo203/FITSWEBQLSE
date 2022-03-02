@@ -2017,6 +2017,8 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
         return 0;
     }
 
+    int counter = 0; // by default return 0, i.e. no progress could be submitted to the cluster root
+
     if (progress > 0)
     {
         // form an HTTP request URL
@@ -2031,10 +2033,19 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
 
         if (curl)
         {
+            struct MemoryStruct chunk;
+
+            chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
+            chunk.size = 0;           /* no data at this point */
+            chunk.memory[0] = 0;
+
             curl_easy_setopt(curl, CURLOPT_URL, url->str);
 
-            // CURLOPT_NOBODY hides the response
-            // curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
+            /* send all data to this function  */
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+            /* we pass our 'chunk' struct to the callback function */
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
             /* size of the POST data */
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, sizeof(int));
@@ -2048,6 +2059,14 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
             /* Check for errors */
             if (res != CURLE_OK)
                 fprintf(stderr, "[C] curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            else
+            {
+                // Examine the HTTP response. Upon success ('OK') set the return value <counter> to <progress>
+                if (strcmp(chunk.memory, "OK") == 0)
+                    counter = progress;
+            }
+
+            free(chunk.memory);
 
             /* always cleanup */
             curl_easy_cleanup(curl);
@@ -2056,7 +2075,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
 
     free(id);
 
-    return progress;
+    return counter;
 }
 
 size_t chunked_write(int fd, const char *src, size_t n)
