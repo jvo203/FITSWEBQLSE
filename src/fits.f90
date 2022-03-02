@@ -1389,13 +1389,17 @@ contains
                 cycle
             end if
 
+            ! increment the thread progress counter
             counter = counter + 1
 
             if (.not. c_associated(root)) then
                 call update_progress(item, 1)
+
+                ! decrement the thread progress counter
                 counter = counter - 1
             else
                 ! a C function defined in http.c
+                ! upon success the thread progress counter will be decremented
                 counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
             end if
         end do
@@ -1408,7 +1412,6 @@ contains
         end if
 
         bSuccess = thread_bSuccess
-        ! bSuccess = .true.
 
         if (.not. c_associated(root) .and. bSuccess) then
             ! needs to be protected with a mutex
