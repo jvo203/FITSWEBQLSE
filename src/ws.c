@@ -6,21 +6,7 @@
 
 extern options_t options; // <options> is defined in main.c
 extern sig_atomic_t s_received_signal;
-
-// it does not handle negative values!
-int str2int(const char *str, int len)
-{
-    int i;
-    int ret = 0;
-
-    if ((str == NULL) || (len <= 0))
-        return 0;
-
-    for (i = 0; i < len; ++i)
-        ret = ret * 10 + (str[i] - '0');
-
-    return ret;
-}
+extern int get_header_status(void *item);
 
 static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
@@ -108,6 +94,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 else
                 {
                     // check if we've gone past the FITS header stage
+                    if (!get_header_status(item))
+                    {
+                        mg_http_reply(c, 202, NULL, "Accepted");
+
+                        free(tmp);
+                        break;
+                    }
                 }
 
                 // submit the POST progress to FORTRAN
