@@ -179,7 +179,7 @@ module fits
 
         end subroutine fetch_channel_range
 
-        subroutine submit_progress(root, datasetid, len, progress) BIND(C, name='submit_progress')
+        integer(c_int) function submit_progress(root, datasetid, len, progress) BIND(C, name='submit_progress')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
@@ -187,7 +187,7 @@ module fits
             character(kind=c_char), intent(in) :: datasetid(*)
             integer(c_int), value :: len, progress
 
-        end subroutine submit_progress
+        end function submit_progress
 
         ! void close_pipe(int fd);
         subroutine close_pipe(fd) BIND(C, name='close_pipe')
@@ -1316,7 +1316,7 @@ contains
         integer :: i, rc, depth
 
         ! OpenMP
-        integer :: max_threads
+        integer :: max_threads, counter
         logical thread_bSuccess
 
         integer(kind=4) :: n, m ! input dimensions
@@ -1349,11 +1349,13 @@ contains
 
         print *, "max_threads:", max_threads, "depth:", depth
 
+        counter = 0
         thread_bSuccess = .true.
 
         !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
         !$omp& PRIVATE(i, file, fileunit, ios, iomsg)&
         !$omp& REDUCTION(.and.:thread_bSuccess)&
+        !$omp& REDUCTION(+:counter)&
         !$omp& NUM_THREADS(max_threads)
         !$omp DO SCHEDULE(DYNAMIC, 4)
         do i = 1, depth
@@ -1388,15 +1390,23 @@ contains
                 cycle
             end if
 
+            counter = counter + 1
+
             if (.not. c_associated(root)) then
                 call update_progress(item, 1)
+                counter = counter - 1
             else
                 ! a C function defined in http.c
-                call submit_progress(root, item%datasetid, size(item%datasetid), 1)
+                counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
             end if
         end do
         !$omp END DO
         !$omp END PARALLEL
+
+        ! submit any left-overs
+        if (counter .gt. 0) then
+            counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
+        end if
 
         bSuccess = thread_bSuccess
         ! bSuccess = .true.
