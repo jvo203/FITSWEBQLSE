@@ -1181,7 +1181,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     printf("[C] FITS filepath:\t%s\n", filepath);
 
-                    // C -> FORTRAN code, not implemented yet (TO-DO)
+                    // C -> FORTRAN
                     fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
 
                     if (req != NULL)
@@ -2040,7 +2040,7 @@ void submit_progress(char *root, char *datasetid, int len, int progress)
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, sizeof(int));
 
             /* the actual POST data */
-            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, &progress);
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)&progress);
 
             /* Perform the request, res will get the return code */
             res = curl_easy_perform(curl);
