@@ -1990,7 +1990,7 @@ contains
         integer naxis, bitpix
         integer npixels, cn, cm
         integer naxes(4)
-        integer(kind=8) firstpix, lastpix, npixels_per_image
+        integer(kind=8) firstpix, lastpix
         integer max_threads, tid, start, end, num_per_node, frame
         integer, dimension(4) :: fpixels, lpixels, incs
         logical test_ignrval
@@ -2006,8 +2006,6 @@ contains
         ! shared variables
         real(kind=4), allocatable :: pixels(:)
         logical(kind=1), allocatable :: mask(:)
-        real, allocatable :: mean_spec(:)
-        real, allocatable :: int_spec(:)
 
         ! thread-local variables
         real(kind=c_float), allocatable :: thread_buffer(:)
