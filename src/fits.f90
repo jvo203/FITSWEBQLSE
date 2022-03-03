@@ -522,7 +522,7 @@ contains
 
                                 ! delete the file upon a write error
                                 if (ios .ne. 0) then
-                                    print *, "error serialising channel", i, 'to a binary file ', file, ' : ', trim(iomsg)
+                                    print *, "error serialising channel", i, 'to a binary file ', trim(file), ' : ', trim(iomsg)
 
                                     ! delete the file
                                     close (fileunit, status='delete')
@@ -531,7 +531,7 @@ contains
                                     close (fileunit)
                                 end if
 
-                                print *, "serialised channel", i, 'to a binary file ', file
+                                print *, "serialised channel", i, 'to a binary file ', trim(file)
                             end if
 
                         end if
@@ -1369,7 +1369,7 @@ contains
 
             ! move on if the file does not exist
             if (ios .ne. 0) then
-                ! print *, "error opening a file ", file, ' : ', trim(iomsg)
+                ! print *, "error opening a file ", trim(file), ' : ', trim(iomsg)
                 cycle
             end if
 
@@ -1384,7 +1384,7 @@ contains
 
             ! abort upon a read error
             if (ios .ne. 0) then
-                print *, "error deserialising channel", i, 'from a binary file ', file, ' : ', trim(iomsg)
+                print *, "error deserialising channel", i, 'from a binary file ', trim(file), ' : ', trim(iomsg)
                 thread_bSuccess = .false.
                 cycle
             end if
