@@ -1893,7 +1893,7 @@ contains
 
         type(dataset), pointer :: item
 
-        integer(8) :: start, finish, crate, cmax, id
+        integer(8) :: start, finish, crate, cmax
         real :: elapsed
 
         print *, "[load_fits_file] datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
@@ -3220,7 +3220,6 @@ contains
         integer i, j, n
         real u, v
         real black, white, sensitivity, ratio_sensitivity
-        integer stat
 
         tone%pmin = 0.0
         tone%pmax = 0.0
