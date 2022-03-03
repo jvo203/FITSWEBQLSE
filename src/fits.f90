@@ -1306,7 +1306,6 @@ contains
         logical, intent(out) ::  bSuccess
 
         character(len=:), allocatable :: file
-        logical :: file_exists
 
         integer :: fileunit, ios
         integer :: dims(2)
