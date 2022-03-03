@@ -502,6 +502,7 @@ contains
                 if (associated(item%compressed(i)%ptr)) then
 
                     if (status .eq. 0) then
+                        if (allocated(file)) deallocate (file)
                         file = cache//'/'//trim(str(i))//'.bin'
                         INQUIRE (FILE=file, EXIST=file_exists)
 
@@ -1357,6 +1358,7 @@ contains
         do i = 1, depth
             nullify (item%compressed(i)%ptr)
 
+            if (allocated(file)) deallocate (file)
             file = cache//'/'//trim(str(i))//'.bin'
 
             ! try to open the file for reading
