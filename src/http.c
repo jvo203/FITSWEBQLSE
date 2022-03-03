@@ -2074,6 +2074,8 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
             /* always cleanup */
             curl_easy_cleanup(curl);
         }
+
+        g_string_free(url, TRUE);
     }
 
     free(id);
