@@ -2029,6 +2029,9 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
         g_string_append_printf(url, "%s:", root);
         g_string_append_printf(url, "%" PRIu16 "/progress/%s", options.ws_port, id);
 
+#ifdef MONGOOSE_HTTP_CLIENT
+        // use mongoose HTTP client as libcURL leaks memory in Intel Clear Linux ...
+#else
         curl = curl_easy_init();
 
         if (curl)
@@ -2074,6 +2077,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
             /* always cleanup */
             curl_easy_cleanup(curl);
         }
+#endif
 
         g_string_free(url, TRUE);
     }
