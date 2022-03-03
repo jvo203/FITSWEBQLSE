@@ -1382,7 +1382,6 @@ contains
             if (ios .ne. 0) then
                 print *, "error deserialising channel", i, 'from a binary file ', file, ' : ', trim(iomsg)
                 thread_bSuccess = .false.
-                ! go to 400
                 cycle
             end if
 
@@ -1423,7 +1422,7 @@ contains
             end if
         end if
 
-400     return
+        return
     end subroutine load_cube
     subroutine print_dataset(item)
         type(dataset), pointer, intent(in) :: item
@@ -3331,7 +3330,7 @@ contains
                     total = total + hist(i)
                 end do
 
-                Slot = cdf/real(total)
+                Slot = real(cdf)/real(total)
 
                 tone_mapping = histogram_classifier(c_loc(Slot))
 
@@ -3768,8 +3767,8 @@ contains
         scale = get_image_scale(width, height, inner_width, inner_height)
 
         if (scale .lt. 1.0) then
-            img_width = scale*item%naxes(1)
-            img_height = scale*item%naxes(2)
+            img_width = nint(scale*item%naxes(1))
+            img_height = nint(scale*item%naxes(2))
 
             allocate (pixels(img_width, img_height))
             allocate (mask(img_width, img_height))
