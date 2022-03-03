@@ -505,7 +505,7 @@ contains
                     if (status .eq. 0) then
                         ! if (allocated(file)) deallocate (file)
                         file = cache//'/'//trim(str(i))//'.bin'
-                        INQUIRE (FILE=file, EXIST=file_exists)
+                        INQUIRE (FILE=trim(file), EXIST=file_exists)
 
                         if (.not. file_exists) then
                             open (newunit=fileunit, file=trim(file), status='replace', access='stream',&
