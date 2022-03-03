@@ -443,7 +443,8 @@ contains
         integer(kind=c_size_t), intent(in), value :: len
         character(kind=c_char), dimension(len), intent(in) :: dir
 
-        character(len=:), allocatable :: cache, file
+        character(len=:), allocatable :: cache
+        character(len=1024) :: file
         logical :: file_exists, bSuccess
 
         integer :: i, rc, status
@@ -502,12 +503,12 @@ contains
                 if (associated(item%compressed(i)%ptr)) then
 
                     if (status .eq. 0) then
-                        if (allocated(file)) deallocate (file)
+                        ! if (allocated(file)) deallocate (file)
                         file = cache//'/'//trim(str(i))//'.bin'
                         INQUIRE (FILE=file, EXIST=file_exists)
 
                         if (.not. file_exists) then
-                            open (newunit=fileunit, file=file, status='replace', access='stream',&
+                            open (newunit=fileunit, file=trim(file), status='replace', access='stream',&
                             &form='unformatted', IOSTAT=ios, IOMSG=iomsg)
 
                             if (ios .ne. 0) then
@@ -1305,7 +1306,8 @@ contains
         type(c_ptr), intent(in), value :: root
         logical, intent(out) ::  bSuccess
 
-        character(len=:), allocatable :: file
+        ! character(len=:), allocatable :: file
+        character(len=1024) :: file
 
         integer :: fileunit, ios
         character(256) :: iomsg
@@ -1358,11 +1360,11 @@ contains
         do i = 1, depth
             nullify (item%compressed(i)%ptr)
 
-            if (allocated(file)) deallocate (file)
+            ! if (allocated(file)) deallocate (file)
             file = cache//'/'//trim(str(i))//'.bin'
 
             ! try to open the file for reading
-            open (newunit=fileunit, file=file, status='old', action='read', access='stream', form='unformatted',&
+            open (newunit=fileunit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
         & IOSTAT=ios, IOMSG=iomsg)
 
             ! move on if the file does not exist
