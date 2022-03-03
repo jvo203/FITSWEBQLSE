@@ -2475,7 +2475,8 @@ contains
 
                 if (isnan(tmp) .neqv. .true.) then
                     if (test_ignrval) then
-                        if (tmp .eq. item%ignrval) then
+                        ! if (tmp .eq. item%ignrval) then
+                        if (abs(tmp - item%ignrval) .le. epsilon(tmp)) then
                             ! skip the IGNRVAL pixels
                             local_buffer(j) = 0.0
                             local_mask(j) = .false.
@@ -2730,7 +2731,8 @@ contains
 
                             if (isnan(tmp) .neqv. .true.) then
                                 if (test_ignrval) then
-                                    if (tmp .eq. item%ignrval) then
+                                    ! if (tmp .eq. item%ignrval) then
+                                    if (abs(tmp - item%ignrval) .le. epsilon(tmp)) then
                                         ! skip the IGNRVAL pixels
                                         ! thread_mask(j, tid) = thread_mask(j, tid) .or. .false.
                                         cycle
