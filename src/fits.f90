@@ -416,7 +416,7 @@ contains
         character(len=len) :: filename
         integer :: i
 
-        do i = 1, len
+        do i = 1, int(len, kind=4)
             filename(i:i) = log_file(i)
         end do
 
@@ -455,7 +455,7 @@ contains
         allocate (character(len + 1 + size(item%datasetid))::cache)
 
         ! the cache directory
-        do i = 1, len
+        do i = 1, int(len, kind=4)
             cache(i:i) = dir(i)
         end do
 
@@ -1903,18 +1903,18 @@ contains
             print *, "[load_fits_file] :: CLIENT NODE"
         end if
 
-        do i = 1, filepath_len
+        do i = 1, int(filepath_len, kind=4)
             strFilename(i:i) = filepath(i)
         end do
 
-        do i = 1, flux_len
+        do i = 1, int(flux_len, kind=4)
             strFlux(i:i) = flux(i)
         end do
 
         allocate (character(dir_len + 1 + datasetid_len)::cache)
 
         ! the cache directory
-        do i = 1, dir_len
+        do i = 1, int(dir_len, kind=4)
             cache(i:i) = dir(i)
         end do
 
@@ -1922,7 +1922,7 @@ contains
         cache(dir_len + 1:dir_len + 1) = '/'
 
         ! and append the datasetid
-        do i = 1, datasetid_len
+        do i = 1, int(datasetid_len, kind=4)
             cache(dir_len + 1 + i:dir_len + 1 + i) = datasetid(i)
         end do
 
