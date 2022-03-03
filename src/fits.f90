@@ -2815,8 +2815,8 @@ contains
             end do
 
             !$omp critical
-            pixels = pixels + thread_pixels
-            mask = mask .or. thread_mask
+            pixels(:) = pixels(:) + thread_pixels(:)
+            mask(:) = mask(:) .or. thread_mask(:)
             !$omp end critical
 
             ! release thread buffers
