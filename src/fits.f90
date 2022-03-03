@@ -9,7 +9,6 @@ module fits
     implicit none
 
     integer(kind=4), parameter :: NBINS = 1024
-    real, parameter :: PI = 4.D0*DATAN(1.D0)
 
     integer(c_int), parameter :: FPZIP_MEDIUM_PRECISION = 16
     integer(c_int), parameter :: FPZIP_HIGH_PRECISION = 24
