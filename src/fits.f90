@@ -2514,7 +2514,7 @@ contains
 
             ! interleave computation with disk access
             ! cap the number of threads to avoid system overload
-            max_threads = min(OMP_GET_MAX_THREADS(), 2) ! 4
+            max_threads = min(OMP_GET_MAX_THREADS(), 4)
 
             ! get #physical cores (ignore HT), and then cut the number in half
             ! to avoid a system overload
@@ -2606,6 +2606,7 @@ contains
 
             item%frame_min = 1.0E30
             item%frame_max = -1.0E30
+            item%frame_median = ieee_value(0.0, ieee_quiet_nan)
 
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
             !$omp& PRIVATE(tid, start, end, num_per_node, status)&
