@@ -912,7 +912,7 @@ contains
             close (fileunit)
         end if
 
-        print *, 'serialised ', item%datasetid, ' to ', file
+        print *, 'serialised ', item%datasetid, ' to ', trim(file)
 
     end subroutine save_dataset
 
