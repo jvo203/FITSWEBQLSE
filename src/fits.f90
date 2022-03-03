@@ -3212,6 +3212,7 @@ contains
         type(image_tone_mapping), intent(out) :: tone
 
         real, dimension(:), allocatable :: data
+        integer :: dims(2)
         real cdelt3, pmin, pmax, pmedian
         real mad, madP, madN
         integer countP, countN
@@ -3228,6 +3229,11 @@ contains
         tone%sensitivity = 0.0
         tone%ratio_sensitivity = 0.0
 
+        if (size(pixels) .ne. size(mask)) return
+
+        dims(1) = size(pixels, 1)
+        dims(2) = size(pixels, 2)
+
         call get_cdelt3(item, cdelt3)
 
         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
@@ -3237,11 +3243,11 @@ contains
             pmin = 1.0E30
             pmax = -1.0E30
 
-            do j = 1, item%naxes(2)
-                do i = 1, item%naxes(1)
-                    if (item%mask(i, j)) then
-                        pixel = item%pixels(i, j)*cdelt3
-                        item%pixels(i, j) = pixel
+            do j = 1, dims(2)
+                do i = 1, dims(1)
+                    if (mask(i, j)) then
+                        pixel = pixels(i, j) ! *cdelt3
+                        ! item%pixels(i, j) = pixel
 
                         pmin = min(pmin, pixel)
                         pmax = max(pmax, pixel)
@@ -3251,7 +3257,7 @@ contains
         end if
 
         ! pick non-NaN valid pixels only according to mask
-        data = pack(item%pixels, item%mask)
+        data = pack(pixels, mask)
 
         n = size(data)
 
