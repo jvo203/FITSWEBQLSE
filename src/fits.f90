@@ -1308,7 +1308,6 @@ contains
         character(len=:), allocatable :: file
 
         integer :: fileunit, ios
-        integer :: dims(2)
         character(256) :: iomsg
 
         integer :: i, rc, depth
