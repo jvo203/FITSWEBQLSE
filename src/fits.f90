@@ -3122,7 +3122,8 @@ contains
         first = 0
         last = 0
 
-        if ((freq_start .eq. 0.0) .or. (freq_end .eq. 0.0)) then
+        ! if ((freq_start .eq. 0.0) .or. (freq_end .eq. 0.0)) then
+        if ((abs(freq_start) .le. epsilon(freq_start)) .or. (abs(freq_end) .le. epsilon(freq_end))) then
             first = 1
             last = item%naxes(3)
             return
