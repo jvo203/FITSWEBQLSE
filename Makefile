@@ -144,7 +144,7 @@ endif
 
 # detect the GNU Compiler under Linux
 ifeq ($(CC),gcc)
-	override CFLAGS += -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	override CFLAGS += -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp -Wall -Wextra
 	FLAGS := $(CFLAGS)
 
 	ifeq ($(FORT),nagfor)
