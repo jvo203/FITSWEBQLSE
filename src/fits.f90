@@ -2749,7 +2749,7 @@ contains
                                 frame_max = max(frame_max, tmp)
 
                                 ! integrate (sum up) pixels and a NaN mask
-                                thread_pixels(j) = thread_pixels(j) + tmp
+                                thread_pixels(j) = thread_pixels(j) + tmp * cdelt3
                                 thread_mask(j) = thread_mask(j) .or. .true.
 
                                 ! needed by the mean and integrated spectra
@@ -3216,7 +3216,7 @@ contains
         type(image_tone_mapping), intent(out) :: tone
 
         real, dimension(:), allocatable :: data
-        real cdelt3, pmin, pmax, pmedian
+        real pmin, pmax, pmedian
         real mad, madP, madN
         integer countP, countN
         real pixel
@@ -3232,8 +3232,6 @@ contains
         tone%sensitivity = 0.0
         tone%ratio_sensitivity = 0.0
 
-        call get_cdelt3(item, cdelt3)
-
         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             pmin = item%dmin
             pmax = item%dmax
@@ -3244,8 +3242,7 @@ contains
             do j = 1, height
                 do i = 1, width
                     if (mask(i, j)) then
-                        pixel = pixels(i, j) ! *cdelt3
-                        ! item%pixels(i, j) = pixel
+                        pixel = pixels(i, j)                        
 
                         pmin = min(pmin, pixel)
                         pmax = max(pmax, pixel)
