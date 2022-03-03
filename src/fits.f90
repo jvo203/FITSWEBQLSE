@@ -1287,7 +1287,7 @@ contains
 
             if (rc .eq. 0) then
                 ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-                call logger%info('load_dataset', 'restored pixels/mask from '//file)
+                call logger%info('load_dataset', 'restored pixels/mask from '//trim(file))
 
                 ! unlock the mutex
                 rc = c_pthread_mutex_unlock(logger_mtx)
