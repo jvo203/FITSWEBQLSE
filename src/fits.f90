@@ -556,7 +556,8 @@ contains
         type(dataset), pointer, intent(in) :: item
         character(len=*), intent(in) :: cache
 
-        character(len=:), allocatable :: file
+        ! character(len=:), allocatable :: file
+        character(len=1024), allocatable :: file
         logical :: file_exists, bSuccess
 
         integer :: fileunit, ios
@@ -564,15 +565,15 @@ contains
 
         file = cache//'/'//'state.dat'
 
-        INQUIRE (FILE=file, EXIST=file_exists)
+        INQUIRE (FILE=trim(file), EXIST=file_exists)
 
         if (file_exists) return
 
-        open (newunit=fileunit, file=file, status='replace', access='stream', form='unformatted',&
+        open (newunit=fileunit, file=trim(file), status='replace', access='stream', form='unformatted',&
         &IOSTAT=ios, IOMSG=iomsg)
 
         if (ios .ne. 0) then
-            print *, "error creating a file ", file, ' : ', trim(iomsg)
+            print *, "error creating a file ", trim(file), ' : ', trim(iomsg)
             return
         end if
 
@@ -923,7 +924,8 @@ contains
         type(c_ptr), intent(in), value :: root
         logical, intent(out) ::  bSuccess
 
-        character(len=:), allocatable :: file
+        ! character(len=:), allocatable :: file
+        character(len=1024), allocatable :: file
         logical :: file_exists
 
         integer :: fileunit, ios, N, rc
@@ -934,16 +936,16 @@ contains
 
         file = cache//'/'//'state.dat'
 
-        INQUIRE (FILE=file, EXIST=file_exists)
+        INQUIRE (FILE=trim(file), EXIST=file_exists)
 
         if (.not. file_exists) return
 
         ! open the state file for reading
-        open (newunit=fileunit, file=file, status='old', action='read', access='stream', form='unformatted',&
+        open (newunit=fileunit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
         & IOSTAT=ios, IOMSG=iomsg)
 
         if (ios .ne. 0) then
-            print *, "error opening a file ", file, ' : ', trim(iomsg)
+            print *, "error opening a file ", trim(file), ' : ', trim(iomsg)
             return
         end if
 
