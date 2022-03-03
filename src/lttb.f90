@@ -1,9 +1,9 @@
 module lttb
     implicit none
 
-    contains
+contains
 
-subroutine lttb_downsize(data, threshold, series)
+    subroutine lttb_downsize(data, threshold, series)
         implicit NONE
 
         real, intent(in) :: data(:)
@@ -12,7 +12,7 @@ subroutine lttb_downsize(data, threshold, series)
 
         ! internal variables
         integer i, sampledIndex, a, nextA, dataLength
-        real maxAreaPoint, maxArea, area, every        
+        real maxAreaPoint, maxArea, area, every
 
         dataLength = size(data)
 
@@ -20,8 +20,8 @@ subroutine lttb_downsize(data, threshold, series)
         if (dataLength .le. threshold) then
             print *, 'no downsizing needed, copying time-series'
 
-            allocate(series(dataLength))
-            series(:) = data(:)    
+            allocate (series(dataLength))
+            series(:) = data(:)
 
             return
         end if
@@ -34,6 +34,8 @@ subroutine lttb_downsize(data, threshold, series)
         series(1) = data(1)
         sampledIndex = 1
         a = 0
+        nextA = 0
+        maxAreaPoint = 0.0
 
         ! Bucket size. Leave room for start and end data points
         every = real(dataLength - 2)/real(threshold - 2)
