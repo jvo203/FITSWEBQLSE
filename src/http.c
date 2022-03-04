@@ -2402,7 +2402,7 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
 
             chunked_write(fd, (const char *)&length, sizeof(length));                   // spectrum length after decompressing
             chunked_write(fd, (const char *)&compressed_size, sizeof(compressed_size)); // compressed buffer size
-            chunked_write(fd, compressed, zfpsize);
+            chunked_write(fd, (const char *)compressed, zfpsize);
         }
 
         free(compressed);
