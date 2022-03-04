@@ -535,6 +535,10 @@ static enum MHD_Result on_http_connection(void *cls,
                                           size_t *upload_data_size,
                                           void **ptr)
 {
+    (void)cls;         // silence gcc warnings
+    (void)version;     // silence gcc warnings
+    (void)upload_data; // silence gcc warnings
+
     static int dummy;
     enum MHD_Result ret;
 
@@ -2193,6 +2197,8 @@ void *stream_molecules(void *args)
 
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
 {
+    (void)azColName; // silence gcc warnings
+
     struct splat_req *req = (struct splat_req *)userp;
 
     if (argc == 8)
