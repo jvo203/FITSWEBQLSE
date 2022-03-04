@@ -2031,6 +2031,8 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
 
 #ifdef MONGOOSE_HTTP_CLIENT
         // use mongoose HTTP client as libcURL leaks memory in Intel Clear Linux ...
+        // apparently it's OK, it is not a real memory leak, just DBus caching ...
+        // https://github.com/clearlinux/distribution/issues/2574#issuecomment-1058618721
 #else
         curl = curl_easy_init();
 
