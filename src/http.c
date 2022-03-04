@@ -1300,7 +1300,7 @@ void include_file(GString *str, const char *filename)
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
 {
-    unsigned int i;
+    int i;
     bool has_fits = true;
 
     // go through the dataset list looking up entries in the hash table
