@@ -57,7 +57,25 @@
 
 # 10. libcURL
 
+    // libcURL appears to leak memory in Intel Clear Linux ...
+    // apparently it's OK, it is not a real memory leak, just dbus caching ...
+    // https://github.com/clearlinux/distribution/issues/2574#issuecomment-1058618721
+
     sudo swupd bundle-add devpkg-curl
+
+    or, just in case, compile / install libcURL manually !?
+
+    wget https://curl.se/download/curl-7.81.0.tar.gz
+
+    tar zxvf curl-7.81.0.tar.gz
+
+    cd curl-7.81.0
+
+    ./configure --with-openssl (or Rust --with-rustls)
+
+    make
+
+    sudo make install
 
 # 11. CFITSIO
     wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.0.0.tar.gz
