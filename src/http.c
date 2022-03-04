@@ -1622,12 +1622,12 @@ void stop_http()
 
 size_t html_encode(char *source, size_t len, char *dest, size_t max)
 {
-    int pos = 0;
+    unsigned int pos = 0;
 
     if (source == NULL)
         return -1;
 
-    for (int i = 0; i < len; i++)
+    for (unsigned int i = 0; i < len; i++)
     {
         char c = source[i];
         switch (c)
