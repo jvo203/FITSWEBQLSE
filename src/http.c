@@ -536,8 +536,6 @@ static enum MHD_Result on_http_connection(void *cls,
                                           void **ptr)
 {
     static int dummy;
-    const char *page = cls;
-    struct MHD_Response *response;
     enum MHD_Result ret;
 
     // accept both "GET" and "PUT"
@@ -1624,7 +1622,6 @@ void stop_http()
 
 size_t html_encode(char *source, size_t len, char *dest, size_t max)
 {
-    char tmp[8] = "";
     int pos = 0;
 
     if (source == NULL)
