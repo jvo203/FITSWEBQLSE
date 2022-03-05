@@ -2600,6 +2600,7 @@ contains
             item%frame_median = ieee_value(0.0, ieee_quiet_nan)
 
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+            !$omp& SHARED(thread_units, group, naxis, naxes, nullval, anynull)&
             !$omp& PRIVATE(tid, start, end, num_per_node, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
