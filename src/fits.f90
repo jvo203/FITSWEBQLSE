@@ -2471,7 +2471,7 @@ contains
 
                 tmp = local_buffer(j)
 
-                if (isnan(tmp) .neqv. .true.) then
+                if ((.not. isnan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
                     if (test_ignrval) then
                         if (abs(tmp - item%ignrval) .le. epsilon(tmp)) then
                             ! skip the IGNRVAL pixels
@@ -2728,7 +2728,7 @@ contains
 
                             tmp = thread_buffer(j)
 
-                            if ((isnan(tmp) .neqv. .true.) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
+                            if ((.not. isnan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
                                 if (test_ignrval) then
                                     if (abs(tmp - item%ignrval) .le. epsilon(tmp)) then
                                         ! skip the IGNRVAL pixels
