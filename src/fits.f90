@@ -2796,6 +2796,7 @@ contains
 
                                 thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
                                 item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), ignrval, datamin, datamax)
+
                                 ! item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
                                 ! & ignrval, datamin, datamax)
                             end block
