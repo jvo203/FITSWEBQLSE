@@ -36,7 +36,7 @@ export void  make_image_spectrumF32(uniform float src[], uniform float pixels[],
             vmin = min(vmin, tmp) ;
             vmax = max(vmax, tmp) ;
 
-            pixels[i] += tmp ;
+            pixels[i] += tmp * cdelt3;
             mask[i] |= true;
             data_mask[i] = true;
 
