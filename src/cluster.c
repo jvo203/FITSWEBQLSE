@@ -42,6 +42,7 @@ int get_cluster_size()
 
 void forward_exit_event(void *item, void *user)
 {
+    (void)user;
     char url[256];
 
     sprintf(url, "http://%s:%" PRIu16 "/exit", (const char *)item, options.http_port);
