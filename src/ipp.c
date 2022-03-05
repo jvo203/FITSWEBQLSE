@@ -9,7 +9,6 @@ IppStatus resizeNearest8u_C1R(Ipp8u *pSrc, IppiSize srcSize, Ipp32s srcStep,
     IppiResizeSpec_32f *pSpec = 0;
     int specSize = 0, initSize = 0, bufSize = 0;
     Ipp8u *pBuffer = 0;
-    Ipp32u numChannels = 1;
     IppiPoint dstOffset = {0, 0};
     IppiPoint srcOffset = {0, 0};
     IppStatus status = ippStsNoErr;
@@ -82,7 +81,6 @@ IppStatus resizeCubic32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     int specSize = 0, initSize = 0, bufSize = 0;
     Ipp8u *pBuffer = 0;
     Ipp8u *pInitBuf = 0;
-    Ipp32u numChannels = 1;
     Ipp32f valueB = 0.0f; // default value for cubic interpolation type
     Ipp32f valueC = 0.0f; // default value for cubic interpolation type
     IppiPoint dstOffset = {0, 0};
@@ -170,7 +168,6 @@ IppStatus resizeLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     int specSize = 0, initSize = 0, bufSize = 0;
     Ipp8u *pBuffer = 0;
     Ipp8u *pInitBuf = 0;
-    Ipp32u numChannels = 1;
     IppiPoint dstOffset = {0, 0};
     IppiPoint srcOffset = {0, 0};
     IppStatus status = ippStsNoErr;
@@ -254,7 +251,6 @@ IppStatus resizeSuper32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     IppiResizeSpec_32f *pSpec = 0;
     int specSize = 0, initSize = 0, bufSize = 0;
     Ipp8u *pBuffer = 0;
-    Ipp32u numChannels = 1;
     IppiPoint dstOffset = {0, 0};
     IppiPoint srcOffset = {0, 0};
     IppStatus status = ippStsNoErr;
