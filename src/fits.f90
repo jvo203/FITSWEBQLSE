@@ -196,15 +196,6 @@ module fits
             integer(kind=c_int), value, intent(in) :: fd
         end subroutine close_pipe
 
-        ! float vsl_median(float *X, int N)
-        real(c_float) function vsl_median(X, N) BIND(C, name='vsl_median')
-            use, intrinsic :: ISO_C_BINDING
-            implicit none
-
-            type(C_PTR), value, intent(in) :: X
-            integer(c_int), value, intent(in) :: N
-        end function vsl_median
-
         ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int npixels)
         subroutine make_image_spectrumF32(src, pixels, mask, data_mask, ignrval, datamin, datamax, cdelt3, res, npixels)&
           & BIND(C, name='make_image_spectrumF32')
@@ -3520,16 +3511,6 @@ contains
 
         ! print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
 
-        ! start the timer
-        ! call system_clock(count=start_t, count_rate=crate, count_max=cmax)
-
-        ! median = vsl_median(c_loc(X), N)
-
-        ! end the timer
-        ! call system_clock(finish_t)
-        ! elapsed = real(finish_t - start_t)/real(crate)
-
-        ! print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; vsl_median:', median
     end function median
 
     subroutine inherent_image_dimensions(item, width, height)
