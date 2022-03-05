@@ -2513,7 +2513,7 @@ contains
 
             ! get #physical cores (ignore HT)
             ! max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
-            
+
             print *, "max_threads:", max_threads
 
             if (.not. allocated(thread_units)) then
@@ -2600,8 +2600,8 @@ contains
             item%frame_median = ieee_value(0.0, ieee_quiet_nan)
 
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
-            !$omp& SHARED(thread_units, group, naxis, naxes, nullval, anynull)&
-            !$omp& PRIVATE(tid, start, end, num_per_node, status)&
+            !$omp& SHARED(thread_units, group, naxis, naxes, nullval)&
+            !$omp& PRIVATE(tid, start, end, num_per_node, anynull, status)&
             !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
             !$omp& PRIVATE(thread_buffer, thread_pixels, thread_mask, thread_arr)&
@@ -2744,7 +2744,7 @@ contains
                                 frame_max = max(frame_max, tmp)
 
                                 ! integrate (sum up) pixels and a NaN mask
-                                thread_pixels(j) = thread_pixels(j) + tmp * cdelt3
+                                thread_pixels(j) = thread_pixels(j) + tmp*cdelt3
                                 thread_mask(j) = thread_mask(j) .or. .true.
 
                                 ! needed by the mean and integrated spectra
@@ -3237,7 +3237,7 @@ contains
             do j = 1, height
                 do i = 1, width
                     if (mask(i, j)) then
-                        pixel = pixels(i, j)                        
+                        pixel = pixels(i, j)
 
                         pmin = min(pmin, pixel)
                         pmax = max(pmax, pixel)
