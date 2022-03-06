@@ -1393,7 +1393,9 @@ contains
             else
                 ! a C function defined in http.c
                 ! upon success the thread progress counter will be decremented
-                counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
+                if (mod(counter, max_threads) .eq. 0) then
+                    counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
+                end if
             end if
         end do
         !$omp END DO
