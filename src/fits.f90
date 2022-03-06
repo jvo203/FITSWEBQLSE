@@ -1393,7 +1393,7 @@ contains
             else
                 ! a C function defined in http.c
                 ! upon success the thread progress counter will be decremented
-                if (mod(counter, max_threads) .eq. 0) then
+                if (mod(counter, 4) .eq. 0) then
                     counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
                 end if
             end if
