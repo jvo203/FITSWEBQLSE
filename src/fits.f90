@@ -1392,12 +1392,12 @@ contains
                 counter = counter - 1
             else
                 ! upon success the thread progress counter will be decremented
-                tid = 1 + OMP_GET_THREAD_NUM()
+                ! tid = 1 + OMP_GET_THREAD_NUM()
 
-                if (mod(counter, tid) .eq. 0) then
-                    ! a C function defined in http.c
-                    counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
-                end if
+                ! if (mod(counter, tid) .eq. 0) then
+                ! a C function defined in http.c
+                counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
+                ! end if
             end if
         end do
         !$omp END DO
