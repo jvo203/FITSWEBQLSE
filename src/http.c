@@ -64,9 +64,11 @@ static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn
         // Connected to server. Extract host name from URL
         struct mg_str host = mg_url_host(req->url);
 
+        printf("%s\n", mg_url_uri(req->url));
+
         // Send request
         mg_printf(c,
-                  "GET %s HTTP/1.0\r\n"
+                  "POST %s HTTP/1.0\r\n"
                   "Host: %.*s:%d\r\n"
                   "\r\n",
                   mg_url_uri(req->url), (int)host.len, host.ptr, req->port);
@@ -2079,7 +2081,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
 
         struct mg_mgr mgr; // Event manager
 
-        // mg_log_set("3");                                    // Set to 0 to disable debug
+        mg_log_set("3");                                    // Set to 0 to disable debug
         mg_mgr_init(&mgr);                                  // Initialise event manager
         mg_http_connect(&mgr, url->str, progress_fn, &req); // Create client connection
         while (!req.done)
