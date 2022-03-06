@@ -46,6 +46,44 @@ extern options_t options; // <options> is defined in main.c
 #ifdef MONGOOSE_HTTP_CLIENT
 #include "mongoose.h"
 
+typedef struct
+{
+    char *url;
+    int port;
+    int progress;
+    bool done;
+} progress_t;
+
+static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
+{
+    progress_t *req = (progress_t *)fn_data;
+
+    if (ev == MG_EV_CONNECT)
+    {
+        // Connected to server. Extract host name from URL
+        struct mg_str host = mg_url_host(req->url);
+
+        // Send request
+        mg_printf(c,
+                  "GET %s HTTP/1.0\r\n"
+                  "Host: %.*s:%d\r\n"
+                  "\r\n",
+                  mg_url_uri(req->url), (int)host.len, host.ptr, req->port);
+    }
+    else if (ev == MG_EV_HTTP_MSG)
+    {
+        // Response is received. Print it
+        struct mg_http_message *hm = (struct mg_http_message *)ev_data;
+        printf("%.*s", (int)hm->message.len, hm->message.ptr);
+        c->is_closing = 1; // Tell mongoose to close this connection
+        req->done = true;  // Tell event loop to stop
+    }
+    else if (ev == MG_EV_ERROR)
+    {
+        req->done = true; // Error, tell event loop to stop
+    }
+}
+
 #endif
 
 inline const char *denull(const char *str)
@@ -2036,6 +2074,17 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
         // use mongoose HTTP client as libcURL leaks memory in Intel Clear Linux ...
         // apparently it's OK, it is not a real memory leak, just DBus caching ...
         // https://github.com/clearlinux/distribution/issues/2574#issuecomment-1058618721
+        progress_t req = {root, options.ws_port, progress, false};
+
+        struct mg_mgr mgr; // Event manager
+
+        mg_log_set("3");                                    // Set to 0 to disable debug
+        mg_mgr_init(&mgr);                                  // Initialise event manager
+        mg_http_connect(&mgr, url->str, progress_fn, &req); // Create client connection
+        while (!req.done)
+            mg_mgr_poll(&mgr, 1000); // Infinite event loop
+
+        mg_mgr_free(&mgr); // Free resources
 #else
         CURL *curl;
         CURLcode res;
