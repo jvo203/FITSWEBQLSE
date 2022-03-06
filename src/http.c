@@ -71,10 +71,10 @@ static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn
                   "Content-Type: application/octet-stream\r\n"
                   "Content-Length: %d\r\n"
                   "\r\n"
-                  //"%.*s",
-                  "0000",
+                  "%.*s",
+                  // "0000",
                   mg_url_uri(req->url),
-                  (int)host.len, host.ptr, req->port, sizeof(int), (int)sizeof(int)); //, &(req->progress));
+                  (int)host.len, host.ptr, req->port, sizeof(int), (int)sizeof(int), &(req->progress));
     }
     else if (ev == MG_EV_HTTP_MSG)
     {
