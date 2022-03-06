@@ -64,11 +64,9 @@ static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn
         // Connected to server. Extract host name from URL
         struct mg_str host = mg_url_host(req->url);
 
-        printf("[C] %s\n", mg_url_uri(req->url));
-
         // Send request
         mg_printf(c,
-                  "POST %s HTTP/1.0\r\n"
+                  "GET %s HTTP/1.0\r\n"
                   "Host: %.*s:%d\r\n"
                   "\r\n",
                   mg_url_uri(req->url), (int)host.len, host.ptr, req->port);
