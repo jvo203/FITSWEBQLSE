@@ -1305,7 +1305,7 @@ contains
         integer :: fileunit, ios
         character(256) :: iomsg
 
-        integer :: i, rc, depth
+        integer :: tid, i, rc, depth
 
         ! OpenMP
         integer :: max_threads, counter
@@ -1345,7 +1345,7 @@ contains
         thread_bSuccess = .true.
 
         !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
-        !$omp& PRIVATE(i, file, fileunit, ios, iomsg)&
+        !$omp& PRIVATE(tid, i, file, fileunit, ios, iomsg)&
         !$omp& REDUCTION(.and.:thread_bSuccess)&
         !$omp& REDUCTION(+:counter)&
         !$omp& NUM_THREADS(max_threads)
@@ -1391,9 +1391,11 @@ contains
                 ! decrement the thread progress counter
                 counter = counter - 1
             else
-                ! a C function defined in http.c
                 ! upon success the thread progress counter will be decremented
-                if (mod(counter, 4) .eq. 0) then
+                tid = 1 + OMP_GET_THREAD_NUM()
+
+                if (mod(counter, tid) .eq. 0) then
+                    ! a C function defined in http.c
                     counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
                 end if
             end if
