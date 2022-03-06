@@ -43,6 +43,11 @@ extern GMutex cluster_mtx;
 static sqlite3 *splat_db = NULL;
 extern options_t options; // <options> is defined in main.c
 
+#ifdef MONGOOSE_HTTP_CLIENT
+#include "mongoose.h"
+
+#endif
+
 inline const char *denull(const char *str)
 {
     if (str != NULL)
@@ -2023,9 +2028,6 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
     if (progress > 0)
     {
         // form an HTTP request URL
-        CURL *curl;
-        CURLcode res;
-
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", root);
         g_string_append_printf(url, "%" PRIu16 "/progress/%s", options.ws_port, id);
@@ -2035,6 +2037,9 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
         // apparently it's OK, it is not a real memory leak, just DBus caching ...
         // https://github.com/clearlinux/distribution/issues/2574#issuecomment-1058618721
 #else
+        CURL *curl;
+        CURLcode res;
+
         curl = curl_easy_init();
 
         if (curl)
