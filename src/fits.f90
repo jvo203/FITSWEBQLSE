@@ -3730,7 +3730,7 @@ contains
     end function get_json
 
     subroutine image_spectrum_request(ptr, width, height, precision, fetch_data, fd) bind(C)
-        ! use json_module
+        use :: unix_pthread
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -3749,6 +3749,9 @@ contains
 
         type(C_PTR) :: json
 
+        type(inner_dims_req_t), target :: inner_dims
+        type(c_pthread_t) :: pid
+
         integer inner_width, inner_height
         integer img_width, img_height
         real scale
@@ -3765,6 +3768,12 @@ contains
         if (.not. allocated(item%mask)) return
 
         if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
+
+        ! fill-in the inner_dims
+        inner_dims%datasetid = c_loc(item%datasetid)
+        inner_dims%len = size(item%datasetid)
+        inner_dims%width = 0
+        inner_dims%height = 0
 
         ! get the inner image bounding box (excluding NaNs)
         call inherent_image_dimensions(item, inner_width, inner_height)
