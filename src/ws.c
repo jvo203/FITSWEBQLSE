@@ -227,6 +227,26 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             break;
         }
 
+        // inner dimensions
+        if (mg_strstr(hm->uri, mg_str("/inner")) != NULL)
+        {
+            char *tmp = strndup(hm->uri.ptr, hm->uri.len);
+            char *datasetId = strrchr(tmp, '/');
+
+            if (datasetId != NULL)
+            {
+                mg_http_reply(c, 202, NULL, "Accepted");
+
+                free(tmp);
+                break;
+            }
+            else
+                mg_http_reply(c, 400, NULL, "Bad Request");
+
+            free(tmp);
+            break;
+        }
+
         // all else
         {
             printf("rejecting the connection.\n");
