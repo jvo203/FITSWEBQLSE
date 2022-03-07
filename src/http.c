@@ -117,6 +117,7 @@ void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
+void *fetch_inner_dimensions(void *ptr);
 int submit_progress(char *root, char *datasetid, int len, int progress);
 
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, int len);
@@ -2660,4 +2661,16 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
 
     if (compressed_mask != NULL)
         free(compressed_mask);
+}
+
+void *fetch_inner_dimensions(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct inner_dims_req *req = (struct inner_dims_req *)ptr;
+
+    printf("[C] fetch_inner_dimensions for '%.*s'\n", req->len, req->datasetid);
+
+    pthread_exit(NULL);
 }
