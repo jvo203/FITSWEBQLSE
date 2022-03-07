@@ -3772,7 +3772,6 @@ contains
 
         ! only for data cubes
         if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
-
             ! fill-in the inner_dims
             inner_dims%datasetid = c_loc(item%datasetid)
             inner_dims%len = size(item%datasetid)
@@ -3793,6 +3792,10 @@ contains
         if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
             ! join a thread
             rc = c_pthread_join(pid, c_null_ptr)
+
+            ! synchronise with the cluster
+            inner_width = max(inner_width, inner_dims%width)
+            inner_height = max(inner_height, inner_dims%height)
         end if
 
         ! get the downscaled image dimensions
