@@ -34,8 +34,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
 
-        // LOG(LL_INFO, ("New request to: [%.*s], body size: %lu", (int)hm->uri.len,
-        //               hm->uri.ptr, (unsigned long)hm->body.len));
+        MG_INFO(("New request to: [%.*s], body size: %lu", (int)hm->uri.len, hm->uri.ptr, (unsigned long)hm->body.len));
 
         // open a WebSocket request
         if (mg_strstr(hm->uri, mg_str("/websocket")) != NULL)
@@ -270,7 +269,7 @@ void start_ws()
 
     struct mg_mgr mgr; // Event manager
     mg_mgr_init(&mgr); // Initialise event manager
-    // mg_log_set("3");
+    mg_log_set("3");
     printf("Starting WS listener on %s\n", url);
 
     mg_http_listen(&mgr, url, mg_http_ws_callback, NULL); // Create HTTP listener
