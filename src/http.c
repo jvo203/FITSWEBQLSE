@@ -2670,7 +2670,7 @@ void *fetch_inner_dimensions(void *ptr)
 
     struct inner_dims_req *req = (struct inner_dims_req *)ptr;
 
-    printf("[C] fetch_inner_dimensions for '%.*s'\n", req->len, req->datasetid);
+    printf("[C] fetch_inner_dimensions for '%.*s'; W:%d, H:%d\n", req->len, req->datasetid, req->width, req->height);
 
     pthread_exit(NULL);
 }
