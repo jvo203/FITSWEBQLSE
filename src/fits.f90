@@ -62,6 +62,13 @@ module fits
         real(kind=c_float) :: white, black
     end type video_tone_mapping
 
+    type, bind(C) :: inner_dims_req
+        type(c_ptr) :: datasetid
+        integer(c_int) :: len
+        integer(c_int) :: width
+        integer(c_int) :: height
+    end type inner_dims_req
+
     type dataset
         character(kind=c_char), dimension(:), allocatable :: datasetid
         character(len=:), allocatable :: uri
