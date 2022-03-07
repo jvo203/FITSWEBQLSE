@@ -62,12 +62,12 @@ module fits
         real(kind=c_float) :: white, black
     end type video_tone_mapping
 
-    type, bind(C) :: inner_dims_req
+    type, bind(C) :: inner_dims_req_t
         type(c_ptr) :: datasetid
         integer(c_int) :: len
         integer(c_int) :: width
         integer(c_int) :: height
-    end type inner_dims_req
+    end type inner_dims_req_t
 
     type dataset
         character(kind=c_char), dimension(:), allocatable :: datasetid
@@ -174,7 +174,7 @@ module fits
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
-            type(c_ptr), intent(in), value :: arg   ! a pointer to type(inner_dims_req)
+            type(c_ptr), intent(in), value :: arg   ! a pointer to type(inner_dims_req_t)
         end subroutine fetch_inner_dimensions
 
         subroutine fetch_channel_range(root, datasetid, len, start, end, status,&

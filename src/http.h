@@ -101,5 +101,13 @@ struct splat_req
     unsigned char out[CHUNK];
 };
 
+struct inner_dims_req
+{
+    char *datasetid;
+    int len;
+    int width;
+    int height;
+};
+
 void start_http();
 void stop_http();
