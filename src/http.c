@@ -70,8 +70,7 @@ static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn
                   "Host: %.*s:%d\r\n"
                   "Content-Type: application/octet-stream\r\n"
                   "Content-Length: %zu\r\n"
-                  "\r\n"
-                  "\0\0\0\0",
+                  "\r\n",
                   mg_url_uri(req->url),
                   (int)host.len, host.ptr, req->port, sizeof(int));
 
