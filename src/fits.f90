@@ -3751,6 +3751,7 @@ contains
 
         type(inner_dims_req_t), target :: inner_dims
         type(c_pthread_t) :: pid
+        integer :: rc
 
         integer inner_width, inner_height
         integer img_width, img_height
@@ -3769,14 +3770,30 @@ contains
 
         if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
 
-        ! fill-in the inner_dims
-        inner_dims%datasetid = c_loc(item%datasetid)
-        inner_dims%len = size(item%datasetid)
-        inner_dims%width = 0
-        inner_dims%height = 0
+        ! only for data cubes
+        if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
+
+            ! fill-in the inner_dims
+            inner_dims%datasetid = c_loc(item%datasetid)
+            inner_dims%len = size(item%datasetid)
+            inner_dims%width = 0
+            inner_dims%height = 0
+
+            ! launch a pthread
+            rc = c_pthread_create(thread=pid, &
+                                  attr=c_null_ptr, &
+                                  start_routine=c_funloc(fetch_inner_dimensions), &
+                                  arg=c_loc(inner_dims))
+        end if
 
         ! get the inner image bounding box (excluding NaNs)
         call inherent_image_dimensions(item, inner_width, inner_height)
+
+        ! only for data cubes
+        if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
+            ! join a thread
+            rc = c_pthread_join(pid, c_null_ptr)
+        end if
 
         ! get the downscaled image dimensions
         scale = get_image_scale(width, height, inner_width, inner_height)
