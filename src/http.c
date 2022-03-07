@@ -1755,13 +1755,13 @@ void *forward_fitswebql_request(void *ptr)
     /* init a multi stack */
     multi_handle = curl_multi_init();
 
-    GString *url = g_string_new("http://");
-    g_string_append_printf(url, "%s:", (char *)iterator->data);
-    g_string_append_printf(url, "%" PRIu16 "%s&root=%s", options.http_port, uri, options.root);
-    // printf("[C] URL: '%s'\n", url->str);
-
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
+        GString *url = g_string_new("http://");
+        g_string_append_printf(url, "%s:", (char *)iterator->data);
+        g_string_append_printf(url, "%" PRIu16 "%s&root=%s", options.http_port, uri, options.root);
+        // printf("[C] URL: '%s'\n", url->str);
+
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
 
@@ -1771,11 +1771,11 @@ void *forward_fitswebql_request(void *ptr)
         // add the individual transfer
         curl_multi_add_handle(multi_handle, handles[i]);
 
+        g_string_free(url, TRUE);
+
         // move on to the next cluster node
         i++;
     }
-
-    g_string_free(url, TRUE);
 
     g_mutex_unlock(&cluster_mtx);
 
