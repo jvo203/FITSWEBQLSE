@@ -249,7 +249,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     char *json = NULL;
                     int width, height;
 
-                    get_inner_dimensions_C(item, &width, &height);
+                    inherent_image_dimensions_C(item, &width, &height);
 
                     // reply with JSON ...
                     mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%d,%Q:%d}", "width", width, "height", height);
