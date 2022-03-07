@@ -70,12 +70,13 @@ static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn
                   "Host: %.*s:%d\r\n"
                   "Content-Type: application/octet-stream\r\n"
                   "Content-Length: %zu\r\n"
-                  "\r\n",
+                  "\r\n"
+                  "\0\0\0\0",
                   mg_url_uri(req->url),
                   (int)host.len, host.ptr, req->port, sizeof(int));
 
         // append the "POST" data buffer
-        mg_send(c, &(req->progress), sizeof(int));
+        // mg_send(c, &(req->progress), sizeof(int));
     }
     else if (ev == MG_EV_HTTP_MSG)
     {
