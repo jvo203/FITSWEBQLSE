@@ -170,6 +170,13 @@ module fits
 
         end function mkcache
 
+        recursive subroutine fetch_inner_dimensions(arg) BIND(C)
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), intent(in), value :: arg   ! a pointer to type(inner_dims_req)
+        end subroutine fetch_inner_dimensions
+
         subroutine fetch_channel_range(root, datasetid, len, start, end, status,&
             &frame_min, frame_max, frame_median,&
             &mean_spectrum, integrated_spectrum) BIND(C, name='fetch_channel_range')
