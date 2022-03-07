@@ -235,10 +235,28 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (datasetId != NULL)
             {
-                mg_http_reply(c, 202, NULL, "Accepted");
+                datasetId++; // skip the slash character
 
-                free(tmp);
-                break;
+                void *item = get_dataset(datasetId);
+
+                if (item == NULL)
+                {
+                    // signal a catastrophic error
+                    mg_http_reply(c, 500, NULL, "Internal Server Error");
+                }
+                else
+                {
+                    char *json = NULL;
+                    int width, height;
+
+                    get_inner_dimensions_C(item, &width, &height);
+
+                    // reply with JSON ...
+                    mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%d,%Q:%d}", "width", width, "height", height);
+                    mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", json);
+
+                    free(json);
+                }
             }
             else
                 mg_http_reply(c, 400, NULL, "Bad Request");
