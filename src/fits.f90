@@ -3810,8 +3810,6 @@ contains
             ! join a thread
             rc = c_pthread_join(pid, c_null_ptr)
 
-            print *, "inner%width", inner_dims%width, "inner%height", inner_dims%height
-
             ! synchronise with the cluster
             inner_width = max(inner_width, inner_dims%width)
             inner_height = max(inner_height, inner_dims%height)
