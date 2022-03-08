@@ -1675,7 +1675,7 @@ contains
         return
     end function get_ok_status
 
-    integer(c_int) function get_image_status(ptr) bind(c)
+    integer(c_int) function get_image_status(ptr) BIND(C, name='get_image_status')
         type(C_PTR), intent(in), value :: ptr
         type(dataset), pointer :: item
 
@@ -3532,6 +3532,23 @@ contains
         ! print *, 'quantile elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
 
     end function median
+
+    subroutine inherent_image_dimensions_C(ptr, width, height) BIND(C, name='inherent_image_dimensions_C')
+        type(C_PTR), intent(in), value :: ptr
+        integer, intent(out) :: width, height
+        type(dataset), pointer :: item
+
+        width = 0
+        height = 0
+
+        if (get_image_status(ptr) .eq. 0) return
+
+        call c_f_pointer(ptr, item)
+
+        call inherent_image_dimensions(item, width, height)
+
+        return
+    end subroutine inherent_image_dimensions_C
 
     subroutine inherent_image_dimensions(item, width, height)
         type(dataset), pointer, intent(in) :: item
