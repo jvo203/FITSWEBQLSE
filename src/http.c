@@ -2711,8 +2711,11 @@ void *fetch_inner_dimensions(void *ptr)
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
 
-        // ignore the response body
-        // curl_easy_setopt(handles[i], CURLOPT_NOBODY, 1);
+        /* send all data to this function  */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+        /* we pass our 'chunk' struct to the callback function */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEDATA, (void *)&(chunks[i]));
 
         // add the individual transfer
         curl_multi_add_handle(multi_handle, handles[i]);
