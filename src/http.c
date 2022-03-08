@@ -2759,6 +2759,27 @@ void *fetch_inner_dimensions(void *ptr)
             curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
             printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+
+            // parse the JSON response
+            if (response_code == 200)
+            {
+                int width, height;
+                double val;
+
+                // width
+                if (mjson_get_number(chunks[i].memory, chunks[i].size, "$.width", &val))
+                    width = (int)val;
+
+                // height
+                if (mjson_get_number(chunks[i].memory, chunks[i].size, "$.height", &val))
+                    height = (int)val;
+
+                if (width > req->width)
+                    req->width = width;
+
+                if (height > req->height)
+                    req->height = height;
+            }
         }
     }
 
