@@ -3535,7 +3535,7 @@ contains
 
     subroutine inherent_image_dimensions_C(ptr, width, height) BIND(C, name='inherent_image_dimensions_C')
         type(C_PTR), intent(in), value :: ptr
-        integer, intent(out) :: width, height
+        integer(c_int), intent(out) :: width, height
         type(dataset), pointer :: item
 
         width = 0
