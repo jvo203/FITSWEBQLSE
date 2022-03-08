@@ -73,7 +73,7 @@ static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn
                   "\r\n"
                   "%.*s",
                   mg_url_uri(req->url),
-                  (int)host.len, host.ptr, req->port, (int)sizeof(int), (char *)&(req->progress), (int)sizeof(int));
+                  (int)host.len, host.ptr, req->port, (int)sizeof(int), (int)sizeof(int), (char *)&(req->progress));
 
         // append the "POST" data buffer
         // mg_send(c, &(req->progress), sizeof(int));
