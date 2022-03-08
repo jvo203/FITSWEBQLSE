@@ -34,7 +34,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
 
-        MG_INFO(("New request to: [%.*s], body size: %lu", (int)hm->uri.len, hm->uri.ptr, (unsigned long)hm->body.len));
+        // MG_INFO(("New request to: [%.*s], body size: %lu", (int)hm->uri.len, hm->uri.ptr, (unsigned long)hm->body.len));
 
         // open a WebSocket request
         if (mg_strstr(hm->uri, mg_str("/websocket")) != NULL)
@@ -249,7 +249,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     char *json = NULL;
                     int width, height;
 
-                    inherent_image_dimensions_C(item, &width, &height);
+                    // inherent_image_dimensions_C(item, &width, &height);
 
                     // reply with JSON ...
                     mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%d,%Q:%d}", "width", width, "height", height);
