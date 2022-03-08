@@ -2680,6 +2680,7 @@ void *fetch_inner_dimensions(void *ptr)
     int handle_count = g_slist_length(cluster);
 
     CURL *handles[handle_count];
+    struct MemoryStruct chunks[handle_count];
     CURLM *multi_handle;
 
     int still_running = 1; /* keep number of running handles */
@@ -2689,7 +2690,13 @@ void *fetch_inner_dimensions(void *ptr)
 
     /* Allocate one CURL handle per transfer */
     for (i = 0; i < handle_count; i++)
+    {
         handles[i] = curl_easy_init();
+
+        chunks[i].memory = malloc(1);
+        chunks[i].size = 0;
+        chunks[i].memory[0] = 0;
+    }
 
     /* init a multi stack */
     multi_handle = curl_multi_init();
@@ -2748,6 +2755,7 @@ void *fetch_inner_dimensions(void *ptr)
     {
         curl_multi_remove_handle(multi_handle, handles[i]);
         curl_easy_cleanup(handles[i]);
+        free(chunks[i].memory);
     }
 
     curl_multi_cleanup(multi_handle);
