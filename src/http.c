@@ -2763,15 +2763,17 @@ void *fetch_inner_dimensions(void *ptr)
             // parse the JSON response
             if (response_code == 200)
             {
-                int width, height;
                 double val;
 
+                int width = 0;
+                int height = 0;
+
                 // width
-                if (mjson_get_number(chunks[i].memory, chunks[i].size, "$.width", &val))
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.width", &val))
                     width = (int)val;
 
                 // height
-                if (mjson_get_number(chunks[i].memory, chunks[i].size, "$.height", &val))
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.height", &val))
                     height = (int)val;
 
                 if (width > req->width)
