@@ -3600,8 +3600,9 @@ contains
 
         print *, 'original dimensions:', width, height
 
-        width = x2 - x1 + 1
-        height = y2 - y1 + 1
+        ! do not return negative dimensions if the entire mask is .false.
+        width = max(x2 - x1 + 1, 0)
+        height = max(y2 - y1 + 1, 0)
 
         print *, 'inherent dimensions:', width, height
 
