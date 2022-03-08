@@ -81,7 +81,7 @@ static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn
     {
         // Response is received. Print it
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
-        printf("%.*s", (int)hm->message.len, hm->message.ptr);
+        // printf("%.*s", (int)hm->message.len, hm->message.ptr);
 
         // Examine the HTTP response code. Upon success ('OK') set the return value <counter> to <progress>
         // if (mg_http_status(hm) == 200)
