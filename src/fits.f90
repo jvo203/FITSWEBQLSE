@@ -3555,6 +3555,12 @@ contains
         integer, intent(out) :: width, height
         integer x1, x2, y1, y2, k
 
+        if (.not. allocated(item%mask)) then
+            width = 0
+            height = 0
+            return
+        end if
+
         width = item%naxes(1)
         height = item%naxes(2)
 
