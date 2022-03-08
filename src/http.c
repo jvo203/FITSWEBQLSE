@@ -84,7 +84,8 @@ static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn
         printf("%.*s", (int)hm->message.len, hm->message.ptr);
 
         // Examine the HTTP response code. Upon success ('OK') set the return value <counter> to <progress>
-        if (mg_http_status(hm) == 200)
+        // if (mg_http_status(hm) == 200)
+        if (atoi(hm->uri.ptr) == 200)
             *(req->counter) = req->progress;
 
         c->is_closing = 1; // Tell mongoose to close this connection
