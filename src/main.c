@@ -412,6 +412,7 @@ int main(int argc, char *argv[])
 
 void usage(char *progname, int opt)
 {
+    (void)opt;
     fprintf(stderr, USAGE_FMT, progname ? progname : DEFAULT_PROGNAME);
     exit(EXIT_FAILURE);
     /* NOTREACHED */
@@ -558,6 +559,8 @@ int gstrcmp(const void *pa, const void *pb)
 
 static void *autodiscovery_daemon(void *ptr)
 {
+    (void)ptr;
+
     speaker = zactor_new(zbeacon, NULL);
     if (speaker == NULL)
         return NULL;
@@ -678,6 +681,8 @@ static void *autodiscovery_daemon(void *ptr)
 #ifdef DEBUG
 static void *jemalloc_daemon(void *arg)
 {
+    (void)arg;
+
     printf("jemalloc memory tracking thread initiated.\n");
 
     FILE *fp = fopen("memory_usage.csv", "w");
