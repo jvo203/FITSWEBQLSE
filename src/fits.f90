@@ -3878,8 +3878,27 @@ contains
 
       print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
 
-      ! fetch/gather pixels/mask from other cluster nodes (3D cubes only, depth > 1)
-      ! TO-DO ...
+      ! only for data cubes
+      if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
+         ! fetch/gather pixels/mask from other cluster nodes (3D cubes only, depth > 1)
+         image_req%datasetid = c_loc(item%datasetid)
+         image_req%len = size(item%datasetid)
+         image_req%pixels = c_loc(pixels)
+         image_req%mask = c_loc(mask)
+         image_req%width = img_width
+         image_req%height = img_height
+
+         ! launch a pthread
+         rc = c_pthread_create(thread=pid, &
+                               attr=c_null_ptr, &
+                               start_routine=c_funloc(fetch_image), &
+                               arg=c_loc(image_req))
+
+         ! join a thread
+         rc = c_pthread_join(pid, c_null_ptr)
+
+         ! no need for any copying, everything should be handled on the C side
+      end if
 
       ! make an image histogram, decide on the flux etc.
       call make_image_statistics(item, img_width, img_height, pixels, mask, hist, tone)
