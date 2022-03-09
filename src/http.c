@@ -983,6 +983,11 @@ static enum MHD_Result on_http_connection(void *cls,
         return ret;
     }
 
+    if (strstr(url, "/image/") != NULL)
+    {
+        return http_accepted(connection);
+    }
+
     // WebQL main entry page
     if (strstr(url, "FITSWebQL.html") != NULL)
     {
@@ -2845,7 +2850,7 @@ void *fetch_image(void *ptr)
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "/image/%.*s?width=%d&height=%d", options.http_port, req->len, req->datasetid, req->width, req->height);
-        printf("[C] URL: '%s'\n", url->str);
+        // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
