@@ -109,5 +109,15 @@ struct inner_dims_req
     int height;
 };
 
+struct image_req
+{
+    char *datasetid;
+    int len;
+    float *pixels;
+    bool *mask;
+    int width;
+    int height;
+};
+
 void start_http();
 void stop_http();
