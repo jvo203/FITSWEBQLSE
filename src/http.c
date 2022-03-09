@@ -2844,7 +2844,7 @@ void *fetch_image(void *ptr)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/image/%.*s?width=%d&height=%d", options.ws_port, req->len, req->datasetid, req->width, req->height);
+        g_string_append_printf(url, "%" PRIu16 "/image/%.*s?width=%d&height=%d", options.http_port, req->len, req->datasetid, req->width, req->height);
         printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
