@@ -1039,13 +1039,57 @@ static enum MHD_Result on_http_connection(void *cls,
         if (item == NULL)
             return http_not_found(connection);
 
-        if (get_error_status(item))
+        if (!get_image_status(item))
             return http_internal_server_error(connection);
 
-        if (!get_ok_status(item))
+        // open a pipe
+        status = pipe(pipefd);
+
+        if (0 != status)
             return http_internal_server_error(connection);
 
-        return http_accepted(connection);
+        // create a response from a pipe by passing the read end of the pipe
+        struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+        // add headers
+        MHD_add_response_header(response, "Cache-Control", "no-cache");
+        MHD_add_response_header(response, "Cache-Control", "no-store");
+        MHD_add_response_header(response, "Pragma", "no-cache");
+        MHD_add_response_header(response, "Content-Type", "application/octet-stream");
+
+        // queue the response
+        enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+        MHD_destroy_response(response);
+
+        // the code below should be run in a separate thread
+        // otherwise libmicrohttpd will not have a chance to read from the pipe
+        // alternatively the pipe capacity should be increased
+        // with fcntl(F_SETPIPE_SZ)
+
+        // pass the write end of the pipe to Fortran
+        // the binary response data will be generated in Fortran
+        printf("[C] calling image_request with the pipe file descriptor %d\n", pipefd[1]);
+
+        struct arg_struct *args = malloc(sizeof(struct arg_struct));
+
+        if (args != NULL)
+        {
+            args->item = get_dataset(datasetId);
+            args->width = width;
+            args->height = height;
+            args->precision = ZFP_HIGH_PRECISION; // in the future might decide to compress the data
+            args->fetch_data = false;
+            args->fd = pipefd[1];
+
+            // create and detach the thread
+            pthread_create(&tid, NULL, &handle_image_request, args);
+            pthread_detach(tid);
+        }
+        else
+            close(pipefd[1]);
+
+        return ret;
     }
 
     // WebQL main entry page
