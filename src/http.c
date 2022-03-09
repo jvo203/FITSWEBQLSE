@@ -2808,5 +2808,114 @@ void *fetch_image(void *ptr)
 
     printf("[C] calling fetch_image across the cluster for '%.*s' with {W:%d,H:%d}\n", req->len, req->datasetid, req->width, req->height);
 
+    int i;
+    GSList *iterator = NULL;
+
+    g_mutex_lock(&cluster_mtx);
+
+    int handle_count = g_slist_length(cluster);
+
+    CURL *handles[handle_count];
+    struct MemoryStruct chunks[handle_count];
+    CURLM *multi_handle;
+
+    int still_running = 1; /* keep number of running handles */
+
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
+    int msgs_left; /* how many messages are left */
+
+    /* Allocate one CURL handle per transfer */
+    for (i = 0; i < handle_count; i++)
+    {
+        handles[i] = curl_easy_init();
+
+        chunks[i].memory = malloc(1);
+        chunks[i].size = 0;
+        chunks[i].memory[0] = 0;
+    }
+
+    /* init a multi stack */
+    multi_handle = curl_multi_init();
+
+    /* init a multi stack */
+    multi_handle = curl_multi_init();
+
+    for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
+    {
+        GString *url = g_string_new("http://");
+        g_string_append_printf(url, "%s:", (char *)iterator->data);
+        g_string_append_printf(url, "%" PRIu16 "/image/%.*s?width=%d&height=%d", options.ws_port, req->len, req->datasetid, req->width, req->height);
+        printf("[C] URL: '%s'\n", url->str);
+
+        // set the individual URL
+        curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
+
+        /* send all data to this function  */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+        /* we pass our 'chunk' struct to the callback function */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEDATA, (void *)&(chunks[i]));
+
+        // add the individual transfer
+        curl_multi_add_handle(multi_handle, handles[i]);
+
+        g_string_free(url, TRUE);
+
+        // move on to the next cluster node
+        i++;
+    }
+
+    g_mutex_unlock(&cluster_mtx);
+
+    /* Wait for the transfers */
+    while (still_running)
+    {
+        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+        if (still_running)
+            /* wait for activity, timeout or "nothing" */
+            mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+        if (mc)
+            break;
+    }
+
+    /* See how the transfers went */
+    while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
+    {
+        if (msg->msg == CURLMSG_DONE)
+        {
+            int idx;
+            /* Find out which handle this message is about */
+            for (idx = 0; idx < handle_count; idx++)
+            {
+                int found = (msg->easy_handle == handles[idx]);
+                if (found)
+                    break;
+            }
+
+            long response_code = 0;
+            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+            printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+
+            // TO-DO: reduce (gather) the pixels & mask
+            if (response_code == 200)
+            {
+                printf("[C] gathered pixels/mask\n");
+            }
+        }
+    }
+
+    /* remove the transfers and cleanup the handles */
+    for (i = 0; i < handle_count; i++)
+    {
+        curl_multi_remove_handle(multi_handle, handles[i]);
+        curl_easy_cleanup(handles[i]);
+        free(chunks[i].memory);
+    }
+
+    curl_multi_cleanup(multi_handle);
+
     pthread_exit(NULL);
 }
