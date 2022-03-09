@@ -1034,6 +1034,17 @@ static enum MHD_Result on_http_connection(void *cls,
         if (width <= 0 || height <= 0)
             return http_not_implemented(connection);
 
+        void *item = get_dataset(datasetId);
+
+        if (item == NULL)
+            return http_not_found(connection);
+
+        if (get_error_status(item))
+            return http_internal_server_error(connection);
+
+        if (!get_ok_status(item))
+            return http_internal_server_error(connection);
+
         return http_accepted(connection);
     }
 
