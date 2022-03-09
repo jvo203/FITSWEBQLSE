@@ -3901,10 +3901,8 @@ contains
                                start_routine=c_funloc(fetch_image), &
                                arg=c_loc(image_req))
 
-         ! join a thread
+         ! join a thread (wait for the results)
          rc = c_pthread_join(pid, c_null_ptr)
-
-         ! no need for any copying, everything should be handled on the C side
       end if
 
       ! make an image histogram, decide on the flux etc.
