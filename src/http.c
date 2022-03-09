@@ -191,6 +191,30 @@ static enum MHD_Result http_not_found(struct MHD_Connection *connection)
         return MHD_NO;
 };
 
+static enum MHD_Result http_bad_request(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *errorstr =
+        "400 Bad Request";
+
+    response =
+        MHD_create_response_from_buffer(strlen(errorstr),
+                                        (void *)errorstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_NOT_FOUND,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
 static enum MHD_Result http_accepted(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
@@ -887,7 +911,7 @@ static enum MHD_Result on_http_connection(void *cls,
         char *fetch_dataStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "fetch_data");
 
         if (datasetId == NULL || widthStr == NULL || heightStr == NULL)
-            return http_not_found(connection);
+            return http_bad_request(connection);
 
         if (fetch_dataStr != NULL)
             if (0 == strcmp(fetch_dataStr, "true"))
@@ -985,6 +1009,31 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/image/") != NULL)
     {
+        int width, height;
+
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+            datasetId++; // skip the slash character
+
+        char *widthStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "width");
+        char *heightStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "height");
+
+        if (datasetId == NULL || widthStr == NULL || heightStr == NULL)
+            return http_bad_request(connection);
+
+        width = atoi(widthStr);
+        height = atoi(heightStr);
+
+        printf("[C] gathering pixels for datasetId(%s), width(%d), height(%d)\n", datasetId, width, height);
+
+        if (width <= 0 || height <= 0)
+            return http_not_implemented(connection);
+
         return http_accepted(connection);
     }
 
