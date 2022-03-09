@@ -1976,6 +1976,30 @@ void *handle_image_spectrum_request(void *args)
     pthread_exit(NULL);
 }
 
+void *handle_image_request(void *args)
+{
+    if (args == NULL)
+        pthread_exit(NULL);
+
+    struct arg_struct *params = (struct arg_struct *)args;
+
+    if (params->item == NULL)
+    {
+        free(params);
+        pthread_exit(NULL);
+    }
+
+    // call FORTRAN
+    image_request(params->item, params->width, params->height, params->precision, params->fetch_data, params->fd);
+
+    // close the write end of the pipe
+    close(params->fd);
+
+    free(params);
+
+    pthread_exit(NULL);
+}
+
 static size_t
 WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
