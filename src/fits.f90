@@ -3866,32 +3866,31 @@ contains
 
          print *, 'resize mask elapsed time:', 1000*(t2 - t1), '[ms]'
 
-         ! make an image histogram, decide on the flux etc.
-         call make_image_statistics(item, img_width, img_height, pixels, mask, hist, tone)
-
-         call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
-             &tone%pmin, tone%pmax, tone%pmedian,&
-             &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
-             & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
-
-         deallocate (pixels)
-         deallocate (mask)
-
       else
          img_width = item%naxes(1)
          img_height = item%naxes(2)
 
-         ! make an image histogram, decide on the flux etc.
-         call make_image_statistics(item, img_width, img_height, item%pixels, item%mask, hist, tone)
-
-         call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
-             &tone%pmin, tone%pmax, tone%pmedian,&
-             &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
-             & img_width, img_height, precision, c_loc(item%pixels), c_loc(item%mask))
+         ! make a copy of item%pixels / item%mask
+         allocate (pixels(img_width, img_height), source=item%pixels)
+         allocate (mask(img_width, img_height), source=item%mask)
 
       end if
 
       print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
+
+      ! fetch/gather pixels/mask from other cluster nodes (3D cubes only, depth > 1)
+      ! TO-DO ...
+
+      ! make an image histogram, decide on the flux etc.
+      call make_image_statistics(item, img_width, img_height, pixels, mask, hist, tone)
+
+      call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
+          &tone%pmin, tone%pmax, tone%pmedian,&
+          &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
+          & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
+
+      deallocate (pixels)
+      deallocate (mask)
 
       if (fetch_data .eq. 1) then
 
