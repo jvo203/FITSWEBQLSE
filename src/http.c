@@ -3050,7 +3050,7 @@ void *fetch_image(void *ptr)
                     const float *pixels = (float *)&(chunks[idx].memory[0]);
                     const bool *mask = (bool *)&(chunks[idx].memory[sizeof(float) * plane_size]);
 
-                    // gather pixels / mask
+                    // reduce pixels / mask
                     for (i = 0; i < plane_size; i++)
                     {
                         req->pixels[i] += pixels[i];
