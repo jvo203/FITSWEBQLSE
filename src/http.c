@@ -125,6 +125,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress);
 
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, int len);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
+extern void image_request(void *item, int width, int height, int fd);
 extern int get_error_status(void *item);
 extern int get_header_status(void *item);
 extern int get_ok_status(void *item);
@@ -1990,7 +1991,7 @@ void *handle_image_request(void *args)
     }
 
     // call FORTRAN
-    image_request(params->item, params->width, params->height, params->precision, params->fetch_data, params->fd);
+    image_request(params->item, params->width, params->height, params->fd);
 
     // close the write end of the pipe
     close(params->fd);

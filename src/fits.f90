@@ -3948,4 +3948,23 @@ contains
       end if
 
    end subroutine image_spectrum_request
+
+   subroutine image_request(ptr, width, height, fd) bind(C)
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: ptr
+      type(dataset), pointer :: item
+      integer(kind=c_int), intent(in), value :: width, height, fd
+
+      real(kind=c_float), dimension(:, :), allocatable, target :: pixels
+      logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
+
+      call c_f_pointer(ptr, item)
+
+      if (.not. allocated(item%pixels)) return
+      if (.not. allocated(item%mask)) return
+
+   end subroutine image_request
 end module fits
