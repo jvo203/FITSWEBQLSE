@@ -3991,8 +3991,6 @@ contains
          s2 = real(height)/real(item%naxes(2))
          scale = 0.5*(s1 + s2)
 
-         print *, 's1:', s1, 's2:', s2, 'scale = ', scale
-
          if (scale .gt. 0.2) then
             call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
          else
