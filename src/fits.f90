@@ -3972,6 +3972,7 @@ contains
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
       real :: scale, s1, s2
+      integer(kind=c_size_t) :: written
 
       call c_f_pointer(ptr, item)
 
@@ -3979,7 +3980,7 @@ contains
       if (.not. allocated(item%mask)) return
 
       ! check the image dimensions; downscaling may not be necessary
-      if (width .lt. item%naxes(1) .or. height .lt. item%naxes(2)) then
+      if ((width .lt. item%naxes(1)) .or. (height .lt. item%naxes(2))) then
          ! downscale item%pixels and item%mask into pixels, mask
 
          allocate (pixels(width, height))
@@ -4000,8 +4001,20 @@ contains
 
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), width, height)
 
+         ! send pixels
+         written = chunked_write(fd, c_loc(pixels), sizeof(pixels))
+
+         ! send mask
+         written = chunked_write(fd, c_loc(mask), sizeof(mask))
+
+         deallocate (pixels)
+         deallocate (mask)
       else
-         ! send item%pixels and item%mask 'as is'
+         ! send item%pixels 'as-is'
+         written = chunked_write(fd, c_loc(item%pixels), sizeof(item%pixels))
+
+         ! send item%mask 'as-is'
+         written = chunked_write(fd, c_loc(item%mask), sizeof(item%mask))
       end if
 
    end subroutine image_request
