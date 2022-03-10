@@ -2319,7 +2319,7 @@ size_t chunked_write(int fd, const char *src, size_t n)
             return offset;
         }
 
-        printf("[C] chars written: %zu out of %zu bytes.\n", offset, n);
+        // printf("[C] chars written: %zu out of %zu bytes.\n", offset, n);
     }
 
     return offset;
