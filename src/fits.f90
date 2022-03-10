@@ -3971,8 +3971,7 @@ contains
       real(kind=c_float), dimension(:, :), allocatable, target :: pixels
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
-      integer :: inner_width, inner_height
-      real :: scale
+      real :: scale, s1, s2
 
       call c_f_pointer(ptr, item)
 
@@ -3986,11 +3985,10 @@ contains
          allocate (pixels(width, height))
          allocate (mask(width, height))
 
-         ! get the inner image bounding box (excluding NaNs)
-         call inherent_image_dimensions(item, inner_width, inner_height)
-
-         ! get the downscaled image dimensions
-         scale = get_image_scale(width, height, inner_width, inner_height)
+         ! s1 and s2 should be pretty much the same (within a rounding error)
+         s1 = width/item%naxes(1)
+         s2 = height/item%naxes(2)
+         scale = 0.5*(s1 + s2)
 
          if (scale .gt. 0.2) then
             call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
