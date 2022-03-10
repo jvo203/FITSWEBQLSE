@@ -3040,7 +3040,12 @@ void *fetch_image(void *ptr)
                 size_t expected = (1 + sizeof(float)) * req->width * req->height;
                 size_t received = chunks[idx].size;
 
-                printf("[C] received pixels/mask %zu bytes,  expected: %zu\n", received, expected);
+                printf("[C] pixels/mask received: %zu,  expected: %zu bytes\n", received, expected);
+
+                if (received == expected)
+                {
+                    // gather pixels / mask
+                }
             }
         }
     }
