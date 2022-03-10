@@ -328,6 +328,16 @@ module fits
          type(C_PTR), value, intent(in) :: spectrum
       end subroutine write_spectrum
 
+      ! size_t chunked_write(int fd, const char *src, size_t n)
+      integer(kind=c_size_t) function chunked_write(fd, src, n) BIND(C, name='chunked_write')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         integer(c_int), value, intent(in) :: fd
+         type(C_PTR), value, intent(in) :: src
+         integer(c_size_t), value, intent(in) :: n
+      end function chunked_write
+
       ! glib functions
       !  GString *begin_json()
       type(C_PTR) function begin_json() BIND(C, name='begin_json')
@@ -3964,9 +3974,6 @@ contains
       integer :: inner_width, inner_height
       real :: scale
 
-      ! timing
-      real :: t1, t2
-
       call c_f_pointer(ptr, item)
 
       if (.not. allocated(item%pixels)) return
@@ -3985,30 +3992,18 @@ contains
          ! get the downscaled image dimensions
          scale = get_image_scale(width, height, inner_width, inner_height)
 
-         call cpu_time(t1)
-
          if (scale .gt. 0.2) then
             call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
          else
             call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height)
          end if
 
-         call cpu_time(t2)
-
-         print *, 'resize pixels elapsed time:', 1000*(t2 - t1), '[ms]'
-
          ! Boolean mask: the naive Nearest-Neighbour method
-
-         call cpu_time(t1)
 
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), width, height)
 
-         call cpu_time(t2)
-
-         print *, 'resize mask elapsed time:', 1000*(t2 - t1), '[ms]'
       else
          ! send item%pixels and item%mask 'as is'
-         print *, "sending item%pixels and item%mask 'as is'"
       end if
 
    end subroutine image_request
