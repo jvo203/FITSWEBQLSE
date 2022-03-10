@@ -3037,16 +3037,25 @@ void *fetch_image(void *ptr)
             // TO-DO: reduce (gather) the pixels & mask
             if (response_code == 200)
             {
-                size_t expected = (1 + sizeof(float)) * req->width * req->height;
+                size_t plane_size = req->width * req->height;
+                size_t expected = (1 + sizeof(float)) * plane_size;
                 size_t received = chunks[idx].size;
 
                 printf("[C] pixels/mask received: %zu,  expected: %zu bytes.\n", received, expected);
 
                 if (received == expected)
                 {
-                    // gather pixels / mask
+                    size_t i;
+
                     const float *pixels = (float *)&(chunks[idx].memory[0]);
-                    const bool *mask = (bool *)&(chunks[idx].memory[sizeof(float) * req->width * req->height]);
+                    const bool *mask = (bool *)&(chunks[idx].memory[sizeof(float) * plane_size]);
+
+                    // gather pixels / mask
+                    for (i = 0; i < plane_size; i++)
+                    {
+                        req->pixels[i] += pixels[i];
+                        req->mask[i] |= mask[i];
+                    }
                 }
             }
         }
