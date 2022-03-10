@@ -4008,6 +4008,7 @@ contains
          print *, 'resize mask elapsed time:', 1000*(t2 - t1), '[ms]'
       else
          ! send item%pixels and item%mask 'as is'
+         print *, "sending item%pixels and item%mask 'as is'"
       end if
 
    end subroutine image_request
