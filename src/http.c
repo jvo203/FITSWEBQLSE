@@ -3034,7 +3034,7 @@ void *fetch_image(void *ptr)
 
             printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
 
-            // TO-DO: reduce (gather) the pixels & mask
+            // reduce (gather) the pixels & mask
             if (response_code == 200)
             {
                 size_t plane_size = req->width * req->height;
