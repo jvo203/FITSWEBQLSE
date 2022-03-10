@@ -3045,6 +3045,8 @@ void *fetch_image(void *ptr)
                 if (received == expected)
                 {
                     // gather pixels / mask
+                    const float *pixels = (float *)&(chunks[idx].memory[0]);
+                    const bool *mask = (bool *)&(chunks[idx].memory[sizeof(float) * req->width * req->height]);
                 }
             }
         }
