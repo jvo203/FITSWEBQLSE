@@ -3987,8 +3987,8 @@ contains
          allocate (mask(width, height))
 
          ! s1 and s2 should be pretty much the same (within a rounding error)
-         s1 = width/item%naxes(1)
-         s2 = height/item%naxes(2)
+         s1 = real(width)/real(item%naxes(1))
+         s2 = real(height)/real(item%naxes(2))
          scale = 0.5*(s1 + s2)
 
          print *, 's1:', s1, 's2:', s2, 'scale = ', scale
