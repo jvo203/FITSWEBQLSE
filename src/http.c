@@ -3037,7 +3037,10 @@ void *fetch_image(void *ptr)
             // TO-DO: reduce (gather) the pixels & mask
             if (response_code == 200)
             {
-                printf("[C] gathered pixels/mask\n");
+                size_t expected = (1 + sizeof(float)) * req->width * req->height;
+                size_t received = chunks[idx].size;
+
+                printf("[C] received pixels/mask %zu bytes,  expected: %zu\n", received, expected);
             }
         }
     }
