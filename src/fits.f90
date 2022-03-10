@@ -3961,10 +3961,54 @@ contains
       real(kind=c_float), dimension(:, :), allocatable, target :: pixels
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
+      integer :: inner_width, inner_height
+      real :: scale
+
+      ! timing
+      real :: t1, t2
+
       call c_f_pointer(ptr, item)
 
       if (.not. allocated(item%pixels)) return
       if (.not. allocated(item%mask)) return
+
+      ! check the image dimensions; downscaling may not be necessary
+      if (width .lt. item%naxes(1) .or. height .lt. item%naxes(2)) then
+         ! downscale item%pixels and item%mask into pixels, mask
+
+         allocate (pixels(width, height))
+         allocate (mask(width, height))
+
+         ! get the inner image bounding box (excluding NaNs)
+         call inherent_image_dimensions(item, inner_width, inner_height)
+
+         ! get the downscaled image dimensions
+         scale = get_image_scale(width, height, inner_width, inner_height)
+
+         call cpu_time(t1)
+
+         if (scale .gt. 0.2) then
+            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
+         else
+            call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height)
+         end if
+
+         call cpu_time(t2)
+
+         print *, 'resize pixels elapsed time:', 1000*(t2 - t1), '[ms]'
+
+         ! Boolean mask: the naive Nearest-Neighbour method
+
+         call cpu_time(t1)
+
+         call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), width, height)
+
+         call cpu_time(t2)
+
+         print *, 'resize mask elapsed time:', 1000*(t2 - t1), '[ms]'
+      else
+         ! send item%pixels and item%mask 'as is'
+      end if
 
    end subroutine image_request
 end module fits
