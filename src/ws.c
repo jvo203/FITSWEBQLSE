@@ -303,7 +303,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (ptr != NULL)
             *ptr = '\0';
 
-        // reject connections without a dataset in a hash table
+        // reject connections without an entry in a hash table
         if (!dataset_exists(datasetId))
             c->is_closing = 1; // Tell mongoose to close this connection
 
