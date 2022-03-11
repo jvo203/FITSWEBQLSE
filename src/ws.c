@@ -289,9 +289,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // use <mg_url_decode()>
         char uri[hm->uri.len + 1];
 
-        // zero-out the buffer
-        memset(uri, '\0', sizeof(uri));
-
         // decode the URI
         mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len + 1, 0);
 
@@ -300,6 +297,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             datasetId++; // skip the slash character
 
         printf("[C] WEBSOCKET DATASETID: '%s'\n", datasetId);
+
+        // split the string by ';', get the leading datasetId
+        char *ptr = strchr(datasetId, ';');
+        if (ptr != NULL)
+            *ptr = '\0';
 
         // reject connections without a dataset in a hash table
         if (!dataset_exists(datasetId))
