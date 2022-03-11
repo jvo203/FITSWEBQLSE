@@ -23,6 +23,7 @@ module fits
     integer, parameter :: MAX_CHANNEL_BLOCK = 32 ! 16 ! 64 ! 128
 
     type(c_pthread_mutex_t), save :: logger_mtx
+    type(c_pthread_mutex_t), save :: file_unit_mtx
 
     enum, bind(C)
         enumerator circle
@@ -426,6 +427,7 @@ contains
         integer rc
 
         rc = c_pthread_mutex_init(logger_mtx, c_null_ptr)
+        rc = c_pthread_mutex_init(file_unit_mtx, c_null_ptr)
     end subroutine init_fortran
 
     subroutine cleanup_fortran() BIND(C, name='cleanup_fortran')
@@ -435,6 +437,7 @@ contains
         integer rc
 
         rc = c_pthread_mutex_destroy(logger_mtx)
+        rc = c_pthread_mutex_destroy(file_unit_mtx)
     end subroutine cleanup_fortran
 
     subroutine init_fortran_logging(log_file, len) BIND(C, name='init_fortran_logging')
@@ -2134,10 +2137,13 @@ contains
         ! The STATUS parameter must always be initialized.
         status = 0
 
+        rc = c_pthread_mutex_lock(file_unit_mtx)
+
         ! Get an unused Logical Unit Number to use to open the FITS file.
         call ftgiou(unit, status)
 
         if (status .ne. 0) then
+            rc = c_pthread_mutex_unlock(file_unit_mtx)
             return
         end if
 
@@ -2146,11 +2152,11 @@ contains
         ! open the FITS file, with read - only access.The returned BLOCKSIZE
         ! parameter is obsolete and should be ignored.
         readwrite = 0
-        print *, "got here#1, unit:", unit
         ! seg. faults on Intel Mac Pro with gfortran when opening multiple FUGIN files !?
         ! file logical unit numbers are identical for all three files ...
         call ftopen(unit, filename, readwrite, blocksize, status)
-        ! print *, "got here#2"
+
+        rc = c_pthread_mutex_unlock(file_unit_mtx)
 
         if (status .ne. 0) then
             return
@@ -2578,10 +2584,13 @@ contains
                             ! The STATUS parameter must always be initialized.
                             status = 0
 
+                            rc = c_pthread_mutex_lock(file_unit_mtx)
+
                             ! Get an unused Logical Unit Number to use to open the FITS file.
                             call ftgiou(unit, status)
 
                             if (status .ne. 0) then
+                                rc = c_pthread_mutex_unlock(file_unit_mtx)
                                 cycle
                             end if
 
@@ -2589,6 +2598,8 @@ contains
                             ! parameter is obsolete and should be ignored.
                             readwrite = 0
                             call ftopen(unit, filename, readwrite, blocksize, status)
+
+                            rc = c_pthread_mutex_unlock(file_unit_mtx)
 
                             if (status .ne. 0) then
                                 print *, 'thread ', i, ': error opening '//filename
