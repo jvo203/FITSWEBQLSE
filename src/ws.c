@@ -287,7 +287,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         // extract / validate the datasetid (check if a dataset is in the hash table)
         // use <mg_url_decode()>
-        char uri[hm->uri.len + 1];
+        char uri[hm->uri.len + 1]; // leave extra space for the string termination character
 
         // decode the URI
         mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len + 1, 0);
