@@ -293,13 +293,17 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         memset(uri, '\0', sizeof(uri));
 
         // decode the URI
-        mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len, 0);
+        mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len + 1, 0);
 
         char *datasetId = strrchr(uri, '/');
         if (datasetId != NULL)
             datasetId++; // skip the slash character
 
         printf("[C] WEBSOCKET DATASETID: '%s'\n", datasetId);
+
+        // reject connections without a dataset in a hash table
+        if (!dataset_exists(datasetId))
+            c->is_closing = 1; // Tell mongoose to close this connection
 
         break;
     }
