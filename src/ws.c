@@ -292,6 +292,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // zero-out the buffer
         memset(uri, '\0', sizeof(uri));
 
+        // decode the URI
+        mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len, 0);
+        printf("[C] URI: %s\n", uri);
+
         break;
     }
     case MG_EV_WS_MSG:
