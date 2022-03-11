@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "http.h"
 #include "ws.h"
 #include "mjson.h"
@@ -285,7 +287,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         // extract / validate the datasetid (check if a dataset is in the hash table)
         // use <mg_url_decode()>
-        char uri[hm->uri.len];
+        char uri[hm->uri.len + 1];
+
+        // zero-out the buffer
+        memset(uri, '\0', sizeof(uri));
 
         break;
     }
