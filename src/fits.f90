@@ -2147,7 +2147,8 @@ contains
         ! parameter is obsolete and should be ignored.
         readwrite = 0
         print *, "got here#1, unit:", unit
-        ! fails on Intel Mac Pro with gfortran when opening multiple FUGIN files !?
+        ! seg. faults on Intel Mac Pro with gfortran when opening multiple FUGIN files !?
+        ! file logical unit numbers are identical for all three files ...
         call ftopen(unit, filename, readwrite, blocksize, status)
         ! print *, "got here#2"
 
