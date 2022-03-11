@@ -283,7 +283,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     case MG_EV_WS_OPEN:
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
-        printf("WEBSOCKET OPEN; URI:\t%.*s\n", (int)hm->uri.len, hm->uri.ptr);
+        printf("[C] WEBSOCKET OPEN; URI:\t%.*s\n", (int)hm->uri.len, hm->uri.ptr);
 
         // extract / validate the datasetid (check if a dataset is in the hash table)
         // use <mg_url_decode()>
