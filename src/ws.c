@@ -319,9 +319,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // Got websocket frame. Received data is wm->data. Echo it back!
         struct mg_ws_message *wm = (struct mg_ws_message *)ev_data;
 
-        // printf("[WS] %.*s\n", (int)wm->data.len, wm->data.ptr);
+        if (mg_strstr(mg_str_n(wm->data.ptr, wm->data.len), mg_str("[heartbeat]")) != NULL)
+        {
+            mg_ws_send(c, wm->data.ptr, wm->data.len, WEBSOCKET_OP_TEXT);
+            break;
+        }
+        else
+            printf("[WS] %.*s\n", (int)wm->data.len, wm->data.ptr);
 
-        mg_ws_send(c, wm->data.ptr, wm->data.len, WEBSOCKET_OP_TEXT);
         break;
     }
     default:
