@@ -27,6 +27,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             printf("WEBSOCKET CONNECTION CLOSED.\n");
             printf("closing a websocket connection for c->fn_data(%s)\n", (char *)c->fn_data);
             printf("closing a websocket connection for fn_data(%s)\n", (char *)fn_data);
+
+            if (c->fn_data != NULL)
+                free(c->fn_data);
         }
 
         // free any user data <c->fn_data>
@@ -306,6 +309,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // reject connections without an entry in a hash table
         if (!dataset_exists(datasetId))
             c->is_closing = 1; // Tell mongoose to close this connection
+        else
+            c->fn_data = strdup(datasetId);
 
         break;
     }
