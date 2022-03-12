@@ -319,7 +319,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // Got websocket frame. Received data is wm->data. Echo it back!
         struct mg_ws_message *wm = (struct mg_ws_message *)ev_data;
 
-        if (mg_strstr(mg_str_n(wm->data.ptr, wm->data.len), mg_str("[heartbeat]")) != NULL)
+        // re-cast the binary data as a text message
+        struct mg_str msg = mg_str_n(wm->data.ptr, wm->data.len);
+
+        if (mg_strstr(msg, mg_str("[heartbeat]")) != NULL)
         {
             mg_ws_send(c, wm->data.ptr, wm->data.len, WEBSOCKET_OP_TEXT);
             break;
