@@ -2142,9 +2142,8 @@ contains
       ! Get an unused Logical Unit Number to use to open the FITS file.
       call ftgiou(unit, status)
 
-      rc = c_pthread_mutex_unlock(file_unit_mtx)
-
       if (status .ne. 0) then
+         rc = c_pthread_mutex_unlock(file_unit_mtx)
          return
       end if
 
@@ -2154,6 +2153,8 @@ contains
       ! parameter is obsolete and should be ignored.
       readwrite = 0
       call ftopen(unit, filename, readwrite, blocksize, status)
+
+      rc = c_pthread_mutex_unlock(file_unit_mtx)
 
       if (status .ne. 0) then
          return
@@ -2586,9 +2587,8 @@ contains
                      ! Get an unused Logical Unit Number to use to open the FITS file.
                      call ftgiou(unit, status)
 
-                     rc = c_pthread_mutex_unlock(file_unit_mtx)
-
                      if (status .ne. 0) then
+                        rc = c_pthread_mutex_unlock(file_unit_mtx)
                         cycle
                      end if
 
@@ -2596,6 +2596,8 @@ contains
                      ! parameter is obsolete and should be ignored.
                      readwrite = 0
                      call ftopen(unit, filename, readwrite, blocksize, status)
+
+                     rc = c_pthread_mutex_unlock(file_unit_mtx)
 
                      if (status .ne. 0) then
                         print *, 'thread ', i, ': error opening '//filename
