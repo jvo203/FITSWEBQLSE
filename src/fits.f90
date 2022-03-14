@@ -584,6 +584,50 @@ contains
       deallocate (item)
    end subroutine delete_dataset
 
+   subroutine serialise_fixed_array(compressed, frame, cache)
+      implicit none
+
+      type(fixed_block), dimension(:, :), intent(in) :: compressed
+      integer, intent(in) :: frame
+      character(len=*), intent(in) :: cache
+
+      character(len=1024) :: file
+      logical :: file_exists
+
+      integer :: fileunit, ios
+      character(256) :: iomsg
+
+      file = cache//'/'//trim(str(frame))//'.bin'
+      INQUIRE (FILE=trim(file), EXIST=file_exists)
+
+      if (.not. file_exists) then
+         open (newunit=fileunit, file=trim(file), status='replace', access='stream',&
+         &form='unformatted', IOSTAT=ios, IOMSG=iomsg)
+
+         if (ios .ne. 0) then
+            print *, "error creating a file ", file, ' : ', trim(iomsg)
+         else
+            ! dump the compressed data
+            write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) compressed(:, :)
+
+            ! delete the file upon a write error
+            if (ios .ne. 0) then
+               print *, "error serialising channel", frame, 'to a binary file ', trim(file), ' : ', trim(iomsg)
+
+               ! delete the file
+               close (fileunit, status='delete')
+            else
+               ! close the file
+               close (fileunit)
+            end if
+
+            print *, "serialised channel", frame, 'to a binary file ', trim(file)
+         end if
+
+      end if
+
+   end subroutine serialise_fixed_array
+
    subroutine save_dataset(item, cache)
       implicit none
 
@@ -1997,7 +2041,7 @@ contains
 
       ! if the cache file cannot be found / read, use the underlying FITS file
       if (.not. bSuccess) then
-         call read_fits_file(item, strFilename, strFlux, root, bSuccess)
+         call read_fits_file(item, cache, strFilename, strFlux, root, bSuccess)
       else
          if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             call update_progress(item, 1)
@@ -2018,11 +2062,12 @@ contains
 
    end subroutine load_fits_file
 
-   subroutine read_fits_file(item, filename, flux, root, bSuccess)
+   subroutine read_fits_file(item, cache, filename, flux, root, bSuccess)
       use omp_lib
       implicit none
 
       type(dataset), pointer, intent(inout) :: item
+      character(len=*), intent(in) :: cache
       character(len=*), intent(in) :: filename, flux
       ! the pointer will be passed back to C when requesting FITS file ranges
       ! from the root node and submitting results to the cluster root
@@ -2853,6 +2898,11 @@ contains
 
                         thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
                         item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), ignrval, datamin, datamax)
+
+                        ! for disk load balancing (not just CPU), try to serialise a frame whilst reading FITS
+                        if (associated(item%compressed(frame)%ptr)) then
+                           call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
+                        end if
 
                         ! item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
                         ! & ignrval, datamin, datamax)
