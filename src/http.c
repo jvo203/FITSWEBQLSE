@@ -2952,7 +2952,7 @@ void *fetch_image(void *ptr)
 
     if (handle_count == 0)
     {
-        printf("[C] no cluster nodes found. Exiting\n");
+        printf("[C] no cluster nodes found. aborting 'fetch_image'\n");
         g_mutex_unlock(&cluster_mtx);
         pthread_exit(NULL);
     };
