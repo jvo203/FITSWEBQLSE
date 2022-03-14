@@ -84,7 +84,7 @@
 
     cd cfitsio-4.0.0
 
-    ./configure --prefix=/usr/local
+    ./configure --prefix=/usr/local --enable-reentrant
 
     make
 
