@@ -386,13 +386,27 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 // 'image'
                 if (strncmp(wm->data.ptr + koff, "\"image\"", klen) == 0)
-                {
                     if (strncmp(wm->data.ptr + voff, "true", vlen) == 0)
                         req.image = true;
+
+                // 'image_quality'
+                if (strncmp(wm->data.ptr + koff, "\"quality\"", klen) == 0)
+                {
+                    // low
+                    if (strncmp(wm->data.ptr + voff, "\"low\"", vlen) == 0)
+                        req.quality = low;
+
+                    // medium
+                    if (strncmp(wm->data.ptr + voff, "\"medium\"", vlen) == 0)
+                        req.quality = medium;
+
+                    // high
+                    if (strncmp(wm->data.ptr + voff, "\"heigh\"", vlen) == 0)
+                        req.quality = high;
                 }
             }
 
-            printf("[C] dx: %d, image: %d\n", req.dx, req.image);
+            printf("[C] dx: %d, image: %d, quality: %d\n", req.dx, req.image, req.quality);
         }
 
         break;
