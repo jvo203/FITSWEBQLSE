@@ -513,6 +513,8 @@ contains
             bSuccess = .false.
          end if
       else
+         ! TO-DO: rmcache(cache//c_null_char)
+
          ! error
          bSuccess = .false.
          status = -1
