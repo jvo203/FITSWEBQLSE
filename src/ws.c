@@ -444,9 +444,21 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (strncmp(wm->data.ptr + voff, "\"integrated\"", vlen) == 0)
                         req.intensity = integrated;
                 }
+
+                // 'frame_start'
+                if (strncmp(wm->data.ptr + koff, "\"frame_start\"", klen) == 0)
+                    req.frame_start = atof2(wm->data.ptr + voff, vlen);
+
+                // 'frame_end'
+                if (strncmp(wm->data.ptr + koff, "\"frame_end\"", klen) == 0)
+                    req.frame_end = atof2(wm->data.ptr + voff, vlen);
+
+                // 'ref_freq'
+                if (strncmp(wm->data.ptr + koff, "\"ref_freq\"", klen) == 0)
+                    req.ref_freq = atof2(wm->data.ptr + voff, vlen);
             }
 
-            printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, beam: %d, intensity: %d\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2, req.beam, req.intensity);
+            printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2, req.beam, req.intensity, req.frame_start, req.frame_end, req.ref_freq);
         }
 
         break;
