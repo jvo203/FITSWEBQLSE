@@ -2950,6 +2950,13 @@ void *fetch_image(void *ptr)
 
     int handle_count = g_slist_length(cluster);
 
+    if (handle_count == 0)
+    {
+        printf("[C] no cluster nodes found. Exiting\n");
+        g_mutex_unlock(&cluster_mtx);
+        pthread_exit(NULL);
+    };
+
     CURL *handles[handle_count];
     struct MemoryStruct chunks[handle_count];
     CURLM *multi_handle;
