@@ -406,7 +406,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 }
             }
 
-            printf("[C] dx: %d, image: %d, quality: %d\n", req.dx, req.image, req.quality);
+            printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2);
         }
 
         break;
