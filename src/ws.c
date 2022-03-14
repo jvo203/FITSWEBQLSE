@@ -383,6 +383,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (strncmp(wm->data.ptr + koff, "dx", klen) == 0)
                     req.dx = atoi2(wm->data.ptr + koff, klen);
             }
+
+            printf("[C] dx: %d\n", req.dx);
         }
 
         break;
