@@ -330,6 +330,18 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         else
             printf("[WS] %.*s\n", (int)wm->data.len, wm->data.ptr);
 
+        // get the JSON message type
+        char buf[32];
+
+        if (mjson_get_string(wm->data.ptr, (int)wm->data.len, "$.type", buf, sizeof(buf)) == -1)
+            break;
+
+        // handle real-time spectrum/viewport requests
+        if (strcmp(buf, "realtime_image_spectrum") == 0)
+        {
+            printf("[C] parsing a real-time spectrum/viewport request.\n");
+        }
+
         break;
     }
     default:
