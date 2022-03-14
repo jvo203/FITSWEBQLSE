@@ -380,11 +380,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             {
                 printf("key: %.*s, value: %.*s\n", klen, wm->data.ptr + koff, vlen, wm->data.ptr + voff);
 
-                if (strncmp(wm->data.ptr + koff, "dx", klen) == 0)
-                {
-                    printf("found 'dx'\n");
+                // 'dx'
+                if (strncmp(wm->data.ptr + koff, "\"dx\"", klen) == 0)
                     req.dx = atoi2(wm->data.ptr + voff, vlen);
-                }
+
+                // 'image'
             }
 
             printf("[C] dx: %d\n", req.dx);
