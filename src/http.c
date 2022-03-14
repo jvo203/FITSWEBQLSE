@@ -2972,9 +2972,6 @@ void *fetch_image(void *ptr)
     /* init a multi stack */
     multi_handle = curl_multi_init();
 
-    /* init a multi stack */
-    multi_handle = curl_multi_init();
-
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
         GString *url = g_string_new("http://");
