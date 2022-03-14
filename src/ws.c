@@ -432,9 +432,21 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (strncmp(wm->data.ptr + voff, "\"square\"", vlen) == 0)
                         req.beam = square;
                 }
+
+                // 'intensity'
+                if (strncmp(wm->data.ptr + koff, "\"intensity\"", klen) == 0)
+                {
+                    // mean
+                    if (strncmp(wm->data.ptr + voff, "\"mean\"", vlen) == 0)
+                        req.intensity = mean;
+
+                    // integrated
+                    if (strncmp(wm->data.ptr + voff, "\"integrated\"", vlen) == 0)
+                        req.intensity = integrated;
+                }
             }
 
-            printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, beam: %d\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2, req.beam);
+            printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, beam: %d, intensity: %d\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2, req.beam, req.intensity);
         }
 
         break;
