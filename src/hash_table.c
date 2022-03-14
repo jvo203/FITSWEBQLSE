@@ -51,6 +51,22 @@ int mkcache(const char *dir)
         return 0;
 }
 
+void rmcache(const char *dir)
+{
+    GString *cmd = g_string_new("rm -rf ");
+
+    g_string_append_printf(cmd, "%s", dir);
+
+    int ret = system(cmd->str);
+
+    if (ret == 0)
+        printf("[C] (non-empty?) directory '%s' deleted successfully.\n", dir);
+    else
+        printf("[C] Unable to delete directory '%s'.\n", dir);
+
+    g_string_free(cmd, TRUE);
+}
+
 void insert_dataset(const char *datasetid, int len, void *item)
 {
     char *id = strndup(datasetid, len);
