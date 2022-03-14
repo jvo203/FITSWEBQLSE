@@ -372,13 +372,16 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // handle real-time spectrum/viewport requests
         if (strcmp(type, "realtime_image_spectrum") == 0)
         {
-            struct image_spectrum_request req;
+            struct image_spectrum_request req = {0, false, medium, -1, -1, -1, -1, 0, 0, circle, integrated, 0.0, 0.0, 0.0, 0, 0.0, -1};
 
             printf("[C] parsing a real-time spectrum/viewport request.\n");
 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
                 printf("key: %.*s, value: %.*s\n", klen, wm->data.ptr + koff, vlen, wm->data.ptr + voff);
+
+                if (strncmp(wm->data.ptr + koff, "dx", klen) == 0)
+                    req.dx = atoi2(wm->data.ptr + koff, klen);
             }
         }
 
