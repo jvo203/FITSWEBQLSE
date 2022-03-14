@@ -180,6 +180,15 @@ module fits
 
       end function mkcache
 
+      ! void rmcache(const char *dir)
+      subroutine rmcache(dir) BIND(C, name='rmcache')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         character(kind=c_char), intent(in) :: dir(*)
+
+      end subroutine rmcache
+
       recursive subroutine fetch_inner_dimensions(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -513,7 +522,7 @@ contains
             bSuccess = .false.
          end if
       else
-         ! TO-DO: rmcache(cache//c_null_char)
+         call rmcache(cache//c_null_char)
 
          ! error
          bSuccess = .false.
