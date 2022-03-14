@@ -40,7 +40,6 @@ struct image_spectrum_request
     double ref_freq;
     int seq_id;
     float timestamp;
-    char *datasetid;
 
     // output
     int fd;
