@@ -522,6 +522,7 @@ contains
             bSuccess = .false.
          end if
       else
+         ! remove the (non-empty) cache directory
          call rmcache(cache//c_null_char)
 
          ! error
@@ -531,7 +532,6 @@ contains
 
       print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', status', status, ', bSuccess', bSuccess
 
-      ! TO-DO:
       ! write the dataset to a cache file so as to speed up subsequent loading
 
       rc = c_pthread_mutex_destroy(item%header_mtx)
