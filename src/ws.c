@@ -385,9 +385,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     req.dx = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'image'
+                if (strncmp(wm->data.ptr + koff, "\"image\"", klen) == 0)
+                {
+                    if (strncmp(wm->data.ptr + voff, "true", vlen) == 0)
+                        req.image = true;
+                }
             }
 
-            printf("[C] dx: %d\n", req.dx);
+            printf("[C] dx: %d, image: %d\n", req.dx, req.image);
         }
 
         break;
