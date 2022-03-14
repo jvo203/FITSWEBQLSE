@@ -404,6 +404,22 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (strncmp(wm->data.ptr + voff, "\"heigh\"", vlen) == 0)
                         req.quality = high;
                 }
+
+                // 'x1'
+                if (strncmp(wm->data.ptr + koff, "\"x1\"", klen) == 0)
+                    req.x1 = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'y1'
+                if (strncmp(wm->data.ptr + koff, "\"y1\"", klen) == 0)
+                    req.y1 = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'x2'
+                if (strncmp(wm->data.ptr + koff, "\"x2\"", klen) == 0)
+                    req.x2 = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'y2'
+                if (strncmp(wm->data.ptr + koff, "\"y2\"", klen) == 0)
+                    req.y2 = atoi2(wm->data.ptr + voff, vlen);
             }
 
             printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2);
