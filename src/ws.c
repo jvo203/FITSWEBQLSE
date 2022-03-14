@@ -11,6 +11,38 @@ extern sig_atomic_t s_received_signal;
 extern int get_header_status(void *item);
 extern void inherent_image_dimensions_C(void *item, int *width, int *height);
 
+char *append_null(const char *chars, const int size)
+{
+    char *tmp = (char *)malloc(size + 1);
+
+    memcpy(tmp, chars, size);
+    tmp[size] = '\0';
+
+    return tmp;
+}
+
+int atoi2(const char *chars, const int size)
+{
+    char *tmp = append_null(chars, size);
+
+    int result = atoi(tmp);
+
+    free(tmp);
+
+    return result;
+}
+
+double atof2(const char *chars, const int size)
+{
+    char *tmp = append_null(chars, size);
+
+    double result = atof(tmp);
+
+    free(tmp);
+
+    return result;
+}
+
 static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     switch (ev)
