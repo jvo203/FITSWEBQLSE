@@ -594,8 +594,17 @@ contains
       character(len=1024) :: file
       logical :: file_exists
 
-      integer :: fileunit, ios
+      integer :: fileunit, ios, status
       character(256) :: iomsg
+
+      ! first check if the "cache" directory exists
+      ! create a cache directory using the <datasetid> folder name
+      status = mkcache(cache//c_null_char)
+
+      if (status .ne. 0) then
+         print *, "could not create a cache directory ", cache
+         return
+      end if
 
       file = cache//'/'//trim(str(frame))//'.bin'
       INQUIRE (FILE=trim(file), EXIST=file_exists)
