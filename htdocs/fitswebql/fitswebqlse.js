@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-02-25.0";
+	return "JS2022-03-15.0";
 }
 
 const wasm_supported = (() => {
@@ -2511,6 +2511,31 @@ function poll_heartbeat() {
 
 	xmlhttp.open("POST", url, true);
 	xmlhttp.responseType = 'text';
+	xmlhttp.timeout = 0;
+	xmlhttp.send();
+}
+
+function poll_cluster() {
+	var xmlhttp = new XMLHttpRequest();
+	var url = 'cluster/' + performance.now();
+
+	xmlhttp.onreadystatechange = function () {
+		var RRT = 0;
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			var data = xmlhttp.response;
+
+			console.log(data);
+
+			setTimeout(poll_cluster, 1000 + RRT);
+
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 0) {
+				setTimeout(poll_cluster, 10000 + RRT);
+			}
+		}
+	}
+
+	xmlhttp.open("POST", url, true);
+	xmlhttp.responseType = 'json';
 	xmlhttp.timeout = 0;
 	xmlhttp.send();
 }
@@ -11715,7 +11740,7 @@ function change_noise_sensitivity(index) {
 	// set image tone mapping
 	var image = imageContainer[index - 1];
 	/*let fitsData = fitsContainer[index - 1];
-
+	
 	if (image.tone_mapping.flux == "ratio")
 		image.tone_mapping.ratio_sensitivity = multiplier * fitsData.ratio_sensitivity;
 	else
@@ -13007,14 +13032,14 @@ function display_FITS_header(index) {
 		/*fitsHeader = new Uint8Array(window.atob(fitsData.HEADER.replace(/\s/g, '')).split("").map(function (c) {
 			return c.charCodeAt(0);
 		}));
-
+	
 		var Buffer = require('buffer').Buffer;
 		var LZ4 = require('lz4');
-
+	
 		var uncompressed = new Buffer(parseInt(fitsData.HEADERSIZE, 10));
 		uncompressedSize = LZ4.decodeBlock(new Buffer(fitsHeader), uncompressed);
 		uncompressed = uncompressed.slice(0, uncompressedSize);
-
+	
 		try {
 			fitsHeader = String.fromCharCode.apply(null, uncompressed);
 		}
@@ -14761,6 +14786,7 @@ async*/ function mainRenderer() {
 		spectrum_count = 0;
 
 		poll_heartbeat();
+		poll_cluster();
 
 		if (va_count == 1) {
 			poll_progress(datasetId, 1);
