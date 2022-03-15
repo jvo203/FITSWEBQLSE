@@ -180,4 +180,11 @@
     cp /mnt/fits/chris/FITSWEBQLSE/intel.txt .
     cp /mnt/fits/chris/FITSWEBQLSE/all.txt .
 
+    # AMD
     mpiexec -silent-abort -machinefile amd.txt -n 4 ./fitswebqlse
+
+    # Intel
+    mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse
+
+    # All
+    mpiexec -silent-abort -machinefile all.txt -n 7 ./fitswebqlse
