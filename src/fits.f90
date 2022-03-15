@@ -2920,9 +2920,9 @@ contains
                         item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), ignrval, datamin, datamax)
 
                         ! for disk load balancing (not just CPU), try to serialise a frame whilst reading FITS
-                        if (associated(item%compressed(frame)%ptr)) then
-                           call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
-                        end if
+                        ! if (associated(item%compressed(frame)%ptr)) then
+                        !    call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
+                        ! end if
 
                         ! item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
                         ! & ignrval, datamin, datamax)
