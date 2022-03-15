@@ -679,6 +679,34 @@ static enum MHD_Result on_http_connection(void *cls,
             return get_home_directory(connection);
     };
 
+    if (strstr(url, "/cluster/") != NULL)
+    {
+        char *timestamp = strrchr(url, '/');
+
+        if (timestamp != NULL)
+        {
+            timestamp++;
+
+            struct MHD_Response *response =
+                MHD_create_response_from_buffer(strlen(timestamp),
+                                                (void *)timestamp,
+                                                MHD_RESPMEM_MUST_COPY);
+            if (NULL != response)
+            {
+                ret =
+                    MHD_queue_response(connection, MHD_HTTP_OK,
+                                       response);
+                MHD_destroy_response(response);
+
+                return ret;
+            }
+            else
+                return MHD_NO;
+        }
+        else
+            return http_bad_request(connection);
+    }
+
     if (strstr(url, "/heartbeat/") != NULL)
     {
         char *timestamp = strrchr(url, '/');
@@ -704,7 +732,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 return MHD_NO;
         }
         else
-            return http_not_found(connection);
+            return http_bad_request(connection);
     }
 
     if (strstr(url, "/progress/") != NULL)
