@@ -687,6 +687,8 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             timestamp++;
 
+            // forward the cluster ping across the cluster
+
             struct MHD_Response *response =
                 MHD_create_response_from_buffer(strlen(timestamp),
                                                 (void *)timestamp,
