@@ -177,5 +177,6 @@
     cp /mnt/fits/chris/FITSWEBQLSE/fitswebqlse .
     cp /mnt/fits/chris/FITSWEBQLSE/splatalogue_v3.db .
     cp /mnt/fits/chris/FITSWEBQLSE/amd.txt .
+    cp /mnt/fits/chris/FITSWEBQLSE/intel.txt .
 
     mpiexec -silent-abort -machinefile amd.txt -n 4 ./fitswebqlse
