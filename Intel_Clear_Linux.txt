@@ -174,3 +174,5 @@
     mkdir -p .cache
     cp /mnt/fits/chris/FITSWEBQLSE/fitswebqlse .
     cp /mnt/fits/chris/FITSWEBQLSE/splatalogue_v3.db .
+
+    mpiexec -silent-abort -machinefile amd.txt -n 4 ./fitswebqlse
