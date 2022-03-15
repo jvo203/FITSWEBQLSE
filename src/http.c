@@ -2170,7 +2170,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
             /* Check for errors */
             if (res != CURLE_OK)
-                fprintf(stderr, "[C] curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+                fprintf(stderr, "[C] fetch_channel_range: curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             else
             {
                 // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
@@ -2275,7 +2275,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
 
             /* Check for errors */
             if (res != CURLE_OK)
-                fprintf(stderr, "[C] curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+                fprintf(stderr, "[C] submit_progress: curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             else
             {
                 // Examine the HTTP response code. Upon success ('OK') set the return value <counter> to <progress>
