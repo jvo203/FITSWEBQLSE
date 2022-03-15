@@ -168,6 +168,7 @@
 
 # 17. Replication
 
+    rm -rf FITSWEBQLSE
     mkdir -p FITSWEBQLSE
     cd FITSWEBQLSE
     mkdir -p LOGS
