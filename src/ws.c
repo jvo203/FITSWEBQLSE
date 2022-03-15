@@ -101,8 +101,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             char *tmp = strndup(hm->uri.ptr, hm->uri.len);
             char *datasetId = strrchr(tmp, '/');
 
-            if (datasetId != NULL)
-                printf("<progress> POST request for '%s': progress = %d\n", datasetId + 1, progress);
+            /*if (datasetId != NULL)
+                printf("<progress> POST request for '%s': progress = %d\n", datasetId + 1, progress);*/
 
             if (datasetId != NULL)
             {
