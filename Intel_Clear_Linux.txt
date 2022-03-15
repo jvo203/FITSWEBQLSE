@@ -165,3 +165,12 @@
 
     # Intel
     mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse -c config_ssd.ini
+
+# 17. Replication
+
+    mkdir -p FITSWEBQLSE
+    cd FITSWEBQLSE
+    mkdir -p LOGS
+    mkdir -p .cache
+    cp /mnt/fits/chris/FITSWEBQLSE/fitswebqlse .
+    cp /mnt/fits/chris/FITSWEBQLSE/splatalogue_v3.db .
