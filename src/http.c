@@ -1853,6 +1853,14 @@ void *forward_fitswebql_request(void *ptr)
 
     int handle_count = g_slist_length(cluster);
 
+    if (handle_count == 0)
+    {
+        printf("[C] aborting forward_fitswebql_request (no cluster nodes found)\n");
+
+        g_mutex_unlock(&cluster_mtx);
+        pthread_exit(NULL);
+    };
+
     CURL *handles[handle_count];
     CURLM *multi_handle;
 
@@ -2814,6 +2822,14 @@ void *fetch_inner_dimensions(void *ptr)
     g_mutex_lock(&cluster_mtx);
 
     int handle_count = g_slist_length(cluster);
+
+    if (handle_count == 0)
+    {
+        printf("[C] aborting fetch_inner_dimensions (no cluster nodes found)\n");
+
+        g_mutex_unlock(&cluster_mtx);
+        pthread_exit(NULL);
+    };
 
     CURL *handles[handle_count];
     struct MemoryStruct chunks[handle_count];
