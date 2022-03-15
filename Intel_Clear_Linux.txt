@@ -172,6 +172,7 @@
     cd FITSWEBQLSE
     mkdir -p LOGS
     mkdir -p .cache
+    cp -r /mnt/fits/chris/FITSWEBQLSE/htdocs .
     cp /mnt/fits/chris/FITSWEBQLSE/fitswebqlse .
     cp /mnt/fits/chris/FITSWEBQLSE/splatalogue_v3.db .
     cp /mnt/fits/chris/FITSWEBQLSE/amd.txt .
