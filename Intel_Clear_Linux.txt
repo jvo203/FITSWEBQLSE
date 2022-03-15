@@ -119,15 +119,19 @@
 
     i) intel-basekit
 
-        wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18445/l_BaseKit_p_2022.1.1.119_offline.sh
+        # wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18445/l_BaseKit_p_2022.1.1.119_offline.sh
+        wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18487/l_BaseKit_p_2022.1.2.146_offline.sh
 
-        sudo sh ./l_BaseKit_p_2022.1.1.119_offline.sh
+        # sudo sh ./l_BaseKit_p_2022.1.1.119_offline.sh
+        sudo sh ./l_BaseKit_p_2022.1.2.146_offline.sh
 
     ii) intel-hpckit
 
-        wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18438/l_HPCKit_p_2022.1.1.97_offline.sh
+        # wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18438/l_HPCKit_p_2022.1.1.97_offline.sh
+        wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18479/l_HPCKit_p_2022.1.2.117_offline.sh
 
-        sudo sh ./l_HPCKit_p_2022.1.1.97_offline.sh
+        # sudo sh ./l_HPCKit_p_2022.1.1.97_offline.sh
+        sudo sh ./l_HPCKit_p_2022.1.2.117_offline.sh
 
     Add
 
