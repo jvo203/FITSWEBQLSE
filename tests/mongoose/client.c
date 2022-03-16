@@ -12,7 +12,7 @@
 #include "mongoose.h"
 
 // The very first web page in history. You can replace it from command line
-static const char *s_url = "http://localhost:8080/float";
+static const char *s_url = "http://localhost:8000/float";
 // static const char *s_post = NULL; // POST data
 
 #define N 16
@@ -27,23 +27,17 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
         // Connected to server. Extract host name from URL
         struct mg_str host = mg_url_host(s_url);
 
-        // If s_url is https://, tell client connection to use TLS
-        if (mg_url_is_ssl(s_url))
-        {
-            struct mg_tls_opts opts = {.ca = "ca.pem", .srvname = host};
-            mg_tls_init(c, &opts);
-        }
-
         // Send request
         int content_length = sizeof(post_buf);
         mg_printf(c,
                   "%s %s HTTP/1.0\r\n"
-                  "Host: %.*s:8080\r\n"
+                  "Host: %.*s:8000\r\n"
                   "Content-Type: octet-stream\r\n"
                   "Content-Length: %d\r\n"
                   "\r\n",
                   "POST", mg_url_uri(s_url), (int)host.len,
                   host.ptr, content_length);
+
         mg_send(c, post_buf, content_length);
     }
     else if (ev == MG_EV_HTTP_MSG)

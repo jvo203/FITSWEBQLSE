@@ -32,9 +32,9 @@ static void cb(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
                 printf("\n");
             }
         }
-    }
 
-    mg_http_reply(c, 200, NULL, "OK");
+        mg_http_reply(c, 200, NULL, "OK");
+    }
 
     (void)fn_data;
 }
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
     mg_http_listen(&mgr, s_url, cb, NULL); // Create HTTP listener
 
-    while (true == 0)
+    while (true)
         mg_mgr_poll(&mgr, 1000); // Infinite event loop
 
     mg_mgr_free(&mgr);
