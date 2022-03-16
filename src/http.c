@@ -707,7 +707,10 @@ static enum MHD_Result on_http_connection(void *cls,
 
             /* Allocate one CURL handle per transfer */
             for (i = 0; i < handle_count; i++)
+            {
                 handles[i] = curl_easy_init();
+                nodes[i] = NULL;
+            }
 
             /* init a multi stack */
             multi_handle = curl_multi_init();
@@ -716,7 +719,7 @@ static enum MHD_Result on_http_connection(void *cls,
             {
                 GString *url = g_string_new("http://");
                 g_string_append_printf(url, "%s:", (char *)iterator->data);
-                g_string_append_printf(url, "%" PRIu16 "/ping", options.http_port);
+                g_string_append_printf(url, "%" PRIu16 "/heartbeat/%s", options.http_port, timestamp);
                 // printf("[C] URL: '%s'\n", url->str);
 
                 // set the individual URL
@@ -772,6 +775,7 @@ static enum MHD_Result on_http_connection(void *cls,
             {
                 curl_multi_remove_handle(multi_handle, handles[i]);
                 curl_easy_cleanup(handles[i]);
+                free(nodes[i]);
             }
 
             curl_multi_cleanup(multi_handle);
