@@ -687,7 +687,17 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             timestamp++;
 
-            // forward the cluster ping across the cluster
+            // forward the cluster ping across the cluster (only from the receiving root node)
+            int i;
+            GSList *iterator = NULL;
+
+            g_mutex_lock(&cluster_mtx);
+
+            int handle_count = g_slist_length(cluster);
+
+            char *nodes[handle_count];
+
+            g_mutex_unlock(&cluster_mtx);
 
             struct MHD_Response *response =
                 MHD_create_response_from_buffer(strlen(timestamp),
