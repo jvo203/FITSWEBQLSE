@@ -722,6 +722,8 @@ static enum MHD_Result on_http_connection(void *cls,
                 g_string_append_printf(url, "%" PRIu16 "/heartbeat/%s", options.http_port, timestamp);
                 // printf("[C] URL: '%s'\n", url->str);
 
+                nodes[i] = strdup((char *)iterator->data);
+
                 // set the individual URL
                 curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
 
