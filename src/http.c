@@ -68,7 +68,7 @@ static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn
         mg_printf(c,
                   "POST %s HTTP/1.0\r\n"
                   "Host: %.*s:%d\r\n"
-                  "Content-Type: application/octet-stream\r\n"
+                  "Content-Type: octet-stream\r\n"
                   "Content-Length: %d\r\n"
                   "\r\n",
                   mg_url_uri(req->url),
