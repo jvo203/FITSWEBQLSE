@@ -12,7 +12,7 @@
 #include "mongoose.h"
 
 // The very first web page in history. You can replace it from command line
-static const char *s_url = "http://localhost:8080/floats";
+static const char *s_url = "http://localhost:8080/float";
 // static const char *s_post = NULL; // POST data
 
 #define N 16
