@@ -778,26 +778,31 @@ static enum MHD_Result on_http_connection(void *cls,
             }
 
             // prepare a JSON response before releasing the memory
-            char *json = NULL;
+            GString *json = g_string_sized_new(1024);
 
-            mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%s}", "timestamp", timestamp);
-
-            printf("[C] %s\n", json);
+            g_string_printf(json, "{\"timestamp\" : %s, \"nodes\" : [", timestamp);
 
             /* remove the transfers and cleanup the handles */
             for (i = 0; i < handle_count; i++)
             {
                 curl_multi_remove_handle(multi_handle, handles[i]);
                 curl_easy_cleanup(handles[i]);
+
+                g_string_append_printf(json, "{\"%s\" : %s},", nodes[i], status[i] ? "true" : "false");
                 free(nodes[i]);
             }
 
             curl_multi_cleanup(multi_handle);
 
-            struct MHD_Response *response =
+            printf("[C] %s\n", json->str);
+
+            /*struct MHD_Response *response =
                 MHD_create_response_from_buffer(strlen(json),
                                                 (void *)json,
-                                                MHD_RESPMEM_MUST_FREE);
+                                                MHD_RESPMEM_MUST_FREE);*/
+
+            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
+            g_string_free(json, FALSE);
 
             if (NULL != response)
             {
