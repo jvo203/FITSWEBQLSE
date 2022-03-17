@@ -2532,7 +2532,7 @@ function poll_cluster() {
 
 			RTT = performance.now() - jsonData.timestamp;
 
-			var clusterStr = "<span>";
+			var clusterStr = "<div>";
 
 			for (var i = 0; i < jsonData.nodes.length; i++) {
 				if (i > 0)
@@ -2557,7 +2557,7 @@ function poll_cluster() {
 				}*/
 			}
 
-			clusterStr += "</span>";
+			clusterStr += "</div>";
 
 			console.log(clusterStr);
 
