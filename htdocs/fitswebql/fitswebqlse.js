@@ -2532,9 +2532,10 @@ function poll_cluster() {
 
 			RTT = performance.now() - jsonData.timestamp;
 
-			var clusterStr = "";
-
+			// only display cluster information if there is more than one node
 			if (jsonData.nodes.length > 1) {
+				var clusterStr = "";
+
 				for (var i = 0; i < jsonData.nodes.length; i++) {
 					if (i > 0)
 						clusterStr += "<span>&nbsp;</span>";
