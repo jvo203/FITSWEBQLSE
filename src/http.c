@@ -789,16 +789,16 @@ static enum MHD_Result on_http_connection(void *cls,
                 curl_easy_cleanup(handles[i]);
 
                 // append and free a cluster node
-                g_string_append_printf(json, "{\"%s\" : %s},", nodes[i], status[i] ? "true" : "false");
+                g_string_append_printf(json, "{\"node\" : \"%s\", \"status\" : %s},", nodes[i], status[i] ? "true" : "false");
                 free(nodes[i]);
             }
 
             curl_multi_cleanup(multi_handle);
 
             // append the ROOT node and close JSON
-            g_string_append_printf(json, "{\"%s\" : true}]}", options.root);
+            g_string_append_printf(json, "{\"node\" : \"%s\", \"status\" : true}]}", options.root);
 
-            // printf("[C] %s\n", json->str);
+            printf("[C] %s\n", json->str);
 
             struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
             g_string_free(json, FALSE);
