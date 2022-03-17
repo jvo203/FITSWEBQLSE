@@ -2524,23 +2524,30 @@ function poll_cluster() {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			var data = xmlhttp.response;
 
-			RTT = performance.now() - data.timestamp;
-
-			console.log(data.nodes, 'length:', data.nodes.length);
-
 			try {
-				var arr = JSON.parse(data.nodes[0]);
-				console.log(arr);
+				var jsonData = JSON.parse(data);
 			} catch (e) {
 				console.log(e);
 			};
 
+			RTT = performance.now() - jsonData.timestamp;
+
 			var clusterStr = "";
 
-			/*for (var i = 0; i < arr.length; i++)
-				clusterStr += String(data.nodes[i]);
+			for (var i = 0; i < jsonData.nodes.length; i++) {
+				clusterStr += jsonData.nodes[i].node + ' : ';
 
-			d3.select("#cluster").text(clusterStr);*/
+				if (jsonData.nodes[i].status) {
+					clusterStr += 'OK';
+				}
+				else {
+					clusterStr += 'NG';
+				}
+
+				clusterStr += '\t';
+			}
+
+			d3.select("#cluster").text(clusterStr.trim());
 
 			setTimeout(poll_cluster, 1000 + RRT);
 
@@ -2551,7 +2558,7 @@ function poll_cluster() {
 	}
 
 	xmlhttp.open("POST", url, true);
-	xmlhttp.responseType = 'json';
+	xmlhttp.responseType = 'text'; // was json
 	xmlhttp.timeout = 0;
 	xmlhttp.send();
 }
