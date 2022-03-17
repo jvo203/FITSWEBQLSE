@@ -788,6 +788,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 curl_multi_remove_handle(multi_handle, handles[i]);
                 curl_easy_cleanup(handles[i]);
 
+                // append and free a cluster node
                 g_string_append_printf(json, "{\"%s\" : %s},", nodes[i], status[i] ? "true" : "false");
                 free(nodes[i]);
             }
