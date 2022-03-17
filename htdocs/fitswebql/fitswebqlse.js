@@ -2561,7 +2561,7 @@ function poll_cluster() {
 
 			console.log(clusterStr);
 
-			d3.select("#cluster").html(clusterStr.trim());
+			// d3.select("#cluster").html(clusterStr.trim());
 
 			setTimeout(poll_cluster, 1000 + RRT);
 
@@ -6530,10 +6530,8 @@ function display_preferences(index) {
 		.attr("opacity", 0.75)
 		.append("xhtml:div")
 		.attr("id", "cluster")
-		.attr("width", svgWidth)
-		.attr("height", 2.0 * emFontSize)
 		.style("float", "left")
-		.html("");
+		.html("this is a test ... this is a test ... this is a test ...");
 
 	var range = get_axes_range(svgWidth, svgHeight);
 
