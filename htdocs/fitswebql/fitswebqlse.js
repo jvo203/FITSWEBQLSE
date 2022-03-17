@@ -2534,32 +2534,20 @@ function poll_cluster() {
 
 			var clusterStr = "";
 
-			for (var i = 0; i < jsonData.nodes.length; i++) {
-				if (i > 0)
-					clusterStr += "<span>&nbsp;</span>";
+			if (jsonData.nodes.length > 1) {
+				for (var i = 0; i < jsonData.nodes.length; i++) {
+					if (i > 0)
+						clusterStr += "<span>&nbsp;</span>";
 
-				if (jsonData.nodes[i].status) {
-					clusterStr += '<span style="color:green;">' + jsonData.nodes[i].node + '</span>';
-				} else {
-					clusterStr += '<span style="color:red;">' + jsonData.nodes[i].node + '</span>';
-				};
-
-				/*if (i > 0)
-					clusterStr += ',\t';
-
-				clusterStr += jsonData.nodes[i].node + ' : ';
-
-				if (jsonData.nodes[i].status) {
-					clusterStr += 'OK';
+					if (jsonData.nodes[i].status) {
+						clusterStr += '<span style="color:green;">' + jsonData.nodes[i].node + '</span>';
+					} else {
+						clusterStr += '<span style="color:red;">' + jsonData.nodes[i].node + '</span>';
+					};
 				}
-				else {
-					clusterStr += 'NG';
-				}*/
-			}
 
-			console.log(clusterStr);
-
-			d3.select("#cluster").html(clusterStr.trim());
+				d3.select("#cluster").html(clusterStr.trim());
+			};
 
 			setTimeout(poll_cluster, 1000 + RRT);
 
