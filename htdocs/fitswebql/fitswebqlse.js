@@ -2535,8 +2535,8 @@ function poll_cluster() {
 			var clusterStr = "<div>";
 
 			for (var i = 0; i < jsonData.nodes.length; i++) {
-				if (i > 0)
-					clusterStr += "<p>&nbsp;</p>";
+				/*if (i > 0)
+					clusterStr += "<p>&nbsp;</p>";*/
 
 				if (jsonData.nodes[i].status) {
 					clusterStr += '<p style="color:green;">' + jsonData.nodes[i].node + '</p>';
