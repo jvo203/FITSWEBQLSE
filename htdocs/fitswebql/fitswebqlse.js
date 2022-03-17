@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-03-15.0";
+	return "JS2022-03-17.0";
 }
 
 const wasm_supported = (() => {
@@ -2524,7 +2524,23 @@ function poll_cluster() {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			var data = xmlhttp.response;
 
-			console.log(data);
+			RTT = performance.now() - data.timestamp;
+
+			console.log(data.nodes, 'length:', data.nodes.length);
+
+			try {
+				var arr = JSON.parse(data.nodes[0]);
+				console.log(arr);
+			} catch (e) {
+				console.log(e);
+			};
+
+			var clusterStr = "";
+
+			/*for (var i = 0; i < arr.length; i++)
+				clusterStr += String(data.nodes[i]);
+
+			d3.select("#cluster").text(clusterStr);*/
 
 			setTimeout(poll_cluster, 1000 + RRT);
 
@@ -6463,6 +6479,18 @@ function display_preferences(index) {
 		.attr("fill", fillColour)
 		.attr("stroke", "none")
 		.attr("opacity", 0.75)
+		.text("");
+
+
+	// show cluster nodes
+	svg.append("text")
+		.attr("id", "cluster")
+		.attr("x", svgWidth / 2)
+		.attr("y", "0.75em")
+		.attr("font-family", "Inconsolata")
+		.attr("font-size", "0.75em")
+		.attr("text-anchor", "middle")
+		.attr("fill", fillColour)
 		.text("");
 
 	var range = get_axes_range(svgWidth, svgHeight);
