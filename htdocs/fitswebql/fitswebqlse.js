@@ -2532,11 +2532,11 @@ function poll_cluster() {
 
 			RTT = performance.now() - jsonData.timestamp;
 
-			var clusterStr = "<div>";
+			var clusterStr = "<span>";
 
 			for (var i = 0; i < jsonData.nodes.length; i++) {
-				/*if (i > 0)
-					clusterStr += "<p>&nbsp;</p>";*/
+				if (i > 0)
+					clusterStr += "<p>&nbsp;</p>";
 
 				if (jsonData.nodes[i].status) {
 					clusterStr += '<p style="color:green;">' + jsonData.nodes[i].node + '</p>';
@@ -2557,11 +2557,11 @@ function poll_cluster() {
 				}*/
 			}
 
-			clusterStr += "</div>";
+			clusterStr += "</span>";
 
 			console.log(clusterStr);
 
-			d3.select("#cluster").html(clusterStr.trim());
+			// d3.select("#cluster").html(clusterStr.trim());
 
 			setTimeout(poll_cluster, 1000 + RRT);
 
@@ -6531,7 +6531,8 @@ function display_preferences(index) {
 		.append("xhtml:div")
 		.attr("id", "cluster")
 		.style("float", "left")
-		.html("<p>this is a test ... this is a test ... this is a test ...</p>");
+		// .html("<p>this is a test ... this is a test ... this is a test ...</p>");
+		.html('<div><p style="color:green;">133.40.215.75</p><p style="color:green;">133.40.215.76</p><p style="color:green;">133.40.215.74</p></span>');
 
 	var range = get_axes_range(svgWidth, svgHeight);
 
