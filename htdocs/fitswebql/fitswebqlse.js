@@ -2561,7 +2561,7 @@ function poll_cluster() {
 
 			console.log(clusterStr);
 
-			// d3.select("#cluster").html(clusterStr.trim());
+			d3.select("#cluster").html(clusterStr.trim());
 
 			setTimeout(poll_cluster, 1000 + RRT);
 
