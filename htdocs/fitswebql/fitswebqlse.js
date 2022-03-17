@@ -2532,7 +2532,7 @@ function poll_cluster() {
 
 			RTT = performance.now() - jsonData.timestamp;
 
-			var clusterStr = "";
+			var clusterStr = "<span>";
 
 			for (var i = 0; i < jsonData.nodes.length; i++) {
 				if (i > 0)
@@ -2556,6 +2556,8 @@ function poll_cluster() {
 					clusterStr += 'NG';
 				}*/
 			}
+
+			clusterStr += "</span>";
 
 			console.log(clusterStr);
 
