@@ -777,6 +777,14 @@ static enum MHD_Result on_http_connection(void *cls,
                 }
             }
 
+            // prepare a JSON response before releasing the memory
+            char *json = NULL;
+
+            mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%s}", "timestamp", timestamp);
+
+            printf("[C] %s\n", json);
+            free(json);
+
             /* remove the transfers and cleanup the handles */
             for (i = 0; i < handle_count; i++)
             {
