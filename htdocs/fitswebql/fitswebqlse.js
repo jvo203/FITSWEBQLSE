@@ -6531,7 +6531,7 @@ function display_preferences(index) {
 		.append("xhtml:div")
 		.attr("id", "cluster")
 		.style("float", "left")
-		.html("this is a test ... this is a test ... this is a test ...");
+		.html("<p>this is a test ... this is a test ... this is a test ...</p>");
 
 	var range = get_axes_range(svgWidth, svgHeight);
 
