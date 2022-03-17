@@ -6532,7 +6532,7 @@ function display_preferences(index) {
 		.attr("id", "cluster")
 		.attr("width", svgWidth)
 		.attr("height", 2.0 * emFontSize)
-		.style("float", "right")
+		.style("float", "left")
 		.html("");
 
 	var range = get_axes_range(svgWidth, svgHeight);
