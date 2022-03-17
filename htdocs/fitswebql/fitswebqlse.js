@@ -6495,7 +6495,7 @@ function display_preferences(index) {
 	svg.append("text")
 		.attr("id", "cluster")
 		.attr("x", svgWidth / 2)
-		.attr("y", "0.75em")
+		.attr("y", "0.85em")
 		.attr("font-family", "Inconsolata")
 		.attr("font-size", "0.75em")
 		.attr("text-anchor", "middle")
