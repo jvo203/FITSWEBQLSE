@@ -795,7 +795,7 @@ static enum MHD_Result on_http_connection(void *cls,
             curl_multi_cleanup(multi_handle);
 
             // append the ROOT node and close JSON
-            g_string_append_printf(json, "{\"%s\" : true},", options.root);
+            g_string_append_printf(json, "{\"%s\" : true}]}", options.root);
 
             printf("[C] %s\n", json->str);
 
