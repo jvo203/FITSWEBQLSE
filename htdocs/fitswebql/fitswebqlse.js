@@ -2535,6 +2535,10 @@ function poll_cluster() {
 			var clusterStr = "";
 
 			for (var i = 0; i < jsonData.nodes.length; i++) {
+
+				if (i > 0)
+					clusterStr += ',\t';
+
 				clusterStr += jsonData.nodes[i].node + ' : ';
 
 				if (jsonData.nodes[i].status) {
@@ -2543,8 +2547,6 @@ function poll_cluster() {
 				else {
 					clusterStr += 'NG';
 				}
-
-				clusterStr += '\t';
 			}
 
 			d3.select("#cluster").text(clusterStr.trim());
