@@ -783,7 +783,6 @@ static enum MHD_Result on_http_connection(void *cls,
             mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%s}", "timestamp", timestamp);
 
             printf("[C] %s\n", json);
-            free(json);
 
             /* remove the transfers and cleanup the handles */
             for (i = 0; i < handle_count; i++)
@@ -796,9 +795,10 @@ static enum MHD_Result on_http_connection(void *cls,
             curl_multi_cleanup(multi_handle);
 
             struct MHD_Response *response =
-                MHD_create_response_from_buffer(strlen(timestamp),
-                                                (void *)timestamp,
-                                                MHD_RESPMEM_MUST_COPY);
+                MHD_create_response_from_buffer(strlen(json),
+                                                (void *)json,
+                                                MHD_RESPMEM_MUST_FREE);
+
             if (NULL != response)
             {
                 ret =
