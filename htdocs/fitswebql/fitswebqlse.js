@@ -2557,7 +2557,7 @@ function poll_cluster() {
 				}*/
 			}
 
-			// console.log(clusterStr);
+			console.log(clusterStr);
 
 			d3.select("#cluster").html(clusterStr.trim());
 
