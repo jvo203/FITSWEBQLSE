@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-03-17.0";
+	return "JS2022-03-17.1";
 }
 
 const wasm_supported = (() => {
@@ -2535,8 +2535,16 @@ function poll_cluster() {
 			var clusterStr = "";
 
 			for (var i = 0; i < jsonData.nodes.length; i++) {
-
 				if (i > 0)
+					clusterStr += "<p>&nbsp;</p>";
+
+				if (jsonData.nodes[i].status) {
+					clusterStr += '<p style="color:green;">' + jsonData.nodes[i].node + '</p>';
+				} else {
+					clusterStr += '<p style="color:red;">' + jsonData.nodes[i].node + '</p>';
+				};
+
+				/*if (i > 0)
 					clusterStr += ',\t';
 
 				clusterStr += jsonData.nodes[i].node + ' : ';
@@ -2546,10 +2554,12 @@ function poll_cluster() {
 				}
 				else {
 					clusterStr += 'NG';
-				}
+				}*/
 			}
 
-			d3.select("#cluster").text(clusterStr.trim());
+			// console.log(clusterStr);
+
+			d3.select("#cluster").html(clusterStr.trim());
 
 			setTimeout(poll_cluster, 1000 + RRT);
 
@@ -6492,17 +6502,34 @@ function display_preferences(index) {
 
 
 	// show cluster nodes
-	svg.append("text")
+	/*svg.append("text")
 		.attr("id", "cluster")
-		.attr("x", svgWidth / 2)
+		.attr("x", svgWidth)
 		.attr("y", "0.85em")
 		.attr("font-family", "Inconsolata")
+		.attr("font-weight", "normal")
 		.attr("font-size", "0.75em")
-		.attr("text-anchor", "middle")
+		.attr("text-anchor", "end")
 		.attr("fill", fillColour)
 		.attr("stroke", "none")
 		.attr("opacity", 0.75)
-		.text("");
+		.text("");*/
+
+	svg.append("foreignObject")
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", svgWidth)
+		.attr("height", 2.0 * emFontSize)
+		.attr("font-family", "Inconsolata")
+		.attr("font-weight", "normal")
+		.attr("font-size", "0.75em")
+		.attr("fill", fillColour)
+		.attr("stroke", "none")
+		.attr("opacity", 0.75)
+		.append("xhtml:div")
+		.attr("id", "cluster")
+		.style("float", "right")
+		.html("");
 
 	var range = get_axes_range(svgWidth, svgHeight);
 
