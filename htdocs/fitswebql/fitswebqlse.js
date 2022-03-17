@@ -2532,16 +2532,16 @@ function poll_cluster() {
 
 			RTT = performance.now() - jsonData.timestamp;
 
-			var clusterStr = "<span>";
+			var clusterStr = "";
 
 			for (var i = 0; i < jsonData.nodes.length; i++) {
 				if (i > 0)
-					clusterStr += "<p>&nbsp;</p>";
+					clusterStr += "<span>&nbsp;</span>";
 
 				if (jsonData.nodes[i].status) {
-					clusterStr += '<p style="color:green;">' + jsonData.nodes[i].node + '</p>';
+					clusterStr += '<span style="color:green;">' + jsonData.nodes[i].node + '</span>';
 				} else {
-					clusterStr += '<p style="color:red;">' + jsonData.nodes[i].node + '</p>';
+					clusterStr += '<span style="color:red;">' + jsonData.nodes[i].node + '</span>';
 				};
 
 				/*if (i > 0)
@@ -2557,11 +2557,9 @@ function poll_cluster() {
 				}*/
 			}
 
-			clusterStr += "</span>";
-
 			console.log(clusterStr);
 
-			// d3.select("#cluster").html(clusterStr.trim());
+			d3.select("#cluster").html(clusterStr.trim());
 
 			setTimeout(poll_cluster, 1000 + RRT);
 
@@ -6530,9 +6528,8 @@ function display_preferences(index) {
 		.attr("opacity", 0.75)
 		.append("xhtml:div")
 		.attr("id", "cluster")
-		.style("float", "left")
-		// .html("<p>this is a test ... this is a test ... this is a test ...</p>");
-		.html('<div><p style="color:green;">133.40.215.75</p><p style="color:green;">133.40.215.76</p><p style="color:green;">133.40.215.74</p></span>');
+		.style("float", "right")
+		.html("");
 
 	var range = get_axes_range(svgWidth, svgHeight);
 
