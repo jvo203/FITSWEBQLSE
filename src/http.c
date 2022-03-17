@@ -770,7 +770,7 @@ static enum MHD_Result on_http_connection(void *cls,
                     long response_code = 0;
                     curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
-                    printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+                    // printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
 
                     if (msg->data.result == CURLE_OK)
                         status[idx] = true;
