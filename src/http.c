@@ -797,12 +797,7 @@ static enum MHD_Result on_http_connection(void *cls,
             // append the ROOT node and close JSON
             g_string_append_printf(json, "{\"%s\" : true}]}", options.root);
 
-            printf("[C] %s\n", json->str);
-
-            /*struct MHD_Response *response =
-                MHD_create_response_from_buffer(strlen(json),
-                                                (void *)json,
-                                                MHD_RESPMEM_MUST_FREE);*/
+            // printf("[C] %s\n", json->str);
 
             struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
             g_string_free(json, FALSE);
