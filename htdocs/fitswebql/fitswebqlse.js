@@ -6500,6 +6500,8 @@ function display_preferences(index) {
 		.attr("font-size", "0.75em")
 		.attr("text-anchor", "middle")
 		.attr("fill", fillColour)
+		.attr("stroke", "none")
+		.attr("opacity", 0.75)
 		.text("");
 
 	var range = get_axes_range(svgWidth, svgHeight);
