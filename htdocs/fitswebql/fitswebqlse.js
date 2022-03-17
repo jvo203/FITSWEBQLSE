@@ -6530,6 +6530,8 @@ function display_preferences(index) {
 		.attr("opacity", 0.75)
 		.append("xhtml:div")
 		.attr("id", "cluster")
+		.attr("width", svgWidth)
+		.attr("height", 2.0 * emFontSize)
 		.style("float", "right")
 		.html("");
 
