@@ -696,6 +696,7 @@ static enum MHD_Result on_http_connection(void *cls,
             int handle_count = g_slist_length(cluster);
 
             char *nodes[handle_count];
+            bool status[handle_count];
 
             CURL *handles[handle_count];
             CURLM *multi_handle;
@@ -710,6 +711,7 @@ static enum MHD_Result on_http_connection(void *cls,
             {
                 handles[i] = curl_easy_init();
                 nodes[i] = NULL;
+                status[i] = false;
             }
 
             /* init a multi stack */
@@ -769,6 +771,9 @@ static enum MHD_Result on_http_connection(void *cls,
                     curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
                     printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+
+                    if (msg->data.result == CURLE_OK)
+                        status[idx] = true;
                 }
             }
 
