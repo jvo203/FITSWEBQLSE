@@ -4102,4 +4102,13 @@ contains
       end if
 
    end subroutine image_request
+
+   subroutine realtime_image_spectrum_request(ptr, req) BIND(C, name='realtime_image_spectrum_request')
+      implicit none
+
+      type(C_PTR), intent(in), value :: ptr, req
+      type(dataset), pointer :: item
+
+      call c_f_pointer(ptr, item)
+   end subroutine realtime_image_spectrum_request
 end module fits
