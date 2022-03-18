@@ -4122,6 +4122,7 @@ contains
    end subroutine image_request
 
    subroutine realtime_image_spectrum_request(ptr, user) BIND(C, name='realtime_image_spectrum_request')
+      use omp_lib
       implicit none
 
       type(C_PTR), intent(in), value :: ptr, user
@@ -4198,6 +4199,11 @@ contains
       spectrum = 0.0
 
       call get_cdelt3(item, cdelt3)
+
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
+      print *, "max_threads:", max_threads
 
       ! end the timer
       call system_clock(finish_t)
