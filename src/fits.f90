@@ -4156,6 +4156,12 @@ contains
       bSuccess = .true.
 
       call c_f_pointer(ptr, item)
+
+      if (.not. allocated(item%compressed)) then
+         print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum'"
+         return
+      end if
+
       call c_f_pointer(user, req)
 
       print *, 'realtime_image_spectrum for ', item%datasetid,&
