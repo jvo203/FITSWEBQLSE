@@ -4137,6 +4137,14 @@ contains
       integer :: first, last, length
       logical :: bSuccess
 
+      integer :: max_threads, npixels, frame
+      integer :: x1, x2, y1, y2, cx, cy, r, r2
+      logical :: average, test_ignrval
+      real :: cdelt3
+
+      integer :: dimx, dimy, native_size, viewport_size
+      real :: scale
+
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
       real :: elapsed
@@ -4163,9 +4171,33 @@ contains
 
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
 
+      ! sanity checks
+      x1 = max(1, req%x1)
+      y1 = max(1, req%y1)
+      x2 = min(item%naxes(1), req%x2)
+      y2 = min(item%naxes(2), req%y2)
+
+      ! calculate the centre and squared radius
+      cx = abs(x1 + x2)/2
+      cy = abs(y1 + y2)/2
+      r = min(abs(x2 - x1)/2, abs(y2 - y1)/2)
+      r2 = r*r
+
+      if (req%intensity .eq. mean) then
+         average = .true.
+      else
+         average = .false.
+      end if
+
+      dimx = abs(x2 - x1 + 1)
+      dimy = abs(y2 - y1 + 1)
+      npixels = dimx*dimy
+
       ! allocate and zero-out the spectrum
       allocate (spectrum(first:last))
       spectrum = 0.0
+
+      call get_cdelt3(item, cdelt3)
 
       ! end the timer
       call system_clock(finish_t)
