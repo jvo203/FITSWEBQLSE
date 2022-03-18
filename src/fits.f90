@@ -4129,6 +4129,20 @@ contains
       type(dataset), pointer :: item
       type(image_spectrum_request_f), pointer :: req
 
+      ! output variables
+      real(kind=c_float), dimension(:), allocatable, target :: pixels
+      logical(kind=c_bool), dimension(:), allocatable, target :: mask
+      real(kind=c_float), dimension(:), allocatable, target :: spectrum
+
+      integer :: first, last, length
+      logical :: bSuccess
+
+      ! timing
+      integer(8) :: start_t, finish_t, crate, cmax
+      real :: elapsed
+
+      bSuccess = .true.
+
       call c_f_pointer(ptr, item)
       call c_f_pointer(p_req, req)
 
@@ -4138,6 +4152,26 @@ contains
           &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
           &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
           req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
+
+      ! get the range of the cube planes
+      call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
+
+      length = last - first + 1
+
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      ! start the timer
+      call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+      ! allocate and zero-out the spectrum
+      allocate (spectrum(first:last))
+      spectrum = 0.0
+
+      ! end the timer
+      call system_clock(finish_t)
+      elapsed = real(finish_t - start_t)/real(crate)
+
+      print *, 'realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
 
    end subroutine realtime_image_spectrum_request
 end module fits
