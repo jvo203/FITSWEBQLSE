@@ -419,6 +419,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (strncmp(wm->data.ptr + koff, "\"y2\"", klen) == 0)
                     req.y2 = atoi2(wm->data.ptr + voff, vlen);
 
+                // 'width'
+                if (strncmp(wm->data.ptr + koff, "\"width\"", klen) == 0)
+                    req.width = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'height'
+                if (strncmp(wm->data.ptr + koff, "\"height\"", klen) == 0)
+                    req.height = atoi2(wm->data.ptr + voff, vlen);
+
                 // 'beam'
                 if (strncmp(wm->data.ptr + koff, "\"beam\"", klen) == 0)
                 {
