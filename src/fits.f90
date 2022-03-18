@@ -4131,5 +4131,13 @@ contains
 
       call c_f_pointer(ptr, item)
       call c_f_pointer(p_req, req)
+
+      print *, 'realtime_image_spectrum for ', item%datasetid,&
+      &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
+          &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
+          &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
+          &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
+          req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
+
    end subroutine realtime_image_spectrum_request
 end module fits
