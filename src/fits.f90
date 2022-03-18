@@ -4205,6 +4205,16 @@ contains
 
       print *, "max_threads:", max_threads
 
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+      !$omp& PRIVATE(frame)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
+      do frame = first, last
+
+      end do
+      !$omp END DO
+      !$omp END PARALLEL
+
       ! end the timer
       call system_clock(finish_t)
       elapsed = real(finish_t - start_t)/real(crate)
