@@ -4216,7 +4216,8 @@ contains
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
-
+         ! skip frame for which there is no data on this node
+         if (.not. associated(item%compressed(frame)%ptr)) cycle
       end do
       !$omp END DO
       !$omp END PARALLEL
