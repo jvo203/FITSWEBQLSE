@@ -41,6 +41,24 @@ module fits
       enumerator high
    end enum
 
+   type, bind(c) :: image_spectrum_request_f
+      ! input
+      integer(kind=c_int) :: dx
+      logical(kind=c_bool) :: image
+      integer(kind(medium)) :: quality
+      integer(c_int) :: x1, y1, x2, y2
+      integer(c_int) :: width, height
+      integer(kind(circle)) :: beam
+      integer(kind(medium)) :: intensity
+      real(c_double) :: frame_start, frame_end, ref_freq
+      integer(c_int) :: seq_id
+      real(c_float) :: timestamp
+
+      ! output
+      integer(kind=c_int) :: fd
+
+   end type image_spectrum_request_f
+
    !type fp16
    !    integer(kind=2), dimension(:, :), pointer :: ptr
    !end type fp16
@@ -4103,12 +4121,15 @@ contains
 
    end subroutine image_request
 
-   subroutine realtime_image_spectrum_request(ptr, req) BIND(C, name='realtime_image_spectrum_request')
+   subroutine realtime_image_spectrum_request(ptr, p_req) BIND(C, name='realtime_image_spectrum_request')
       implicit none
 
-      type(C_PTR), intent(in), value :: ptr, req
+      type(C_PTR), intent(in), value :: ptr, p_req
+
       type(dataset), pointer :: item
+      type(image_spectrum_request_f), pointer :: req
 
       call c_f_pointer(ptr, item)
+      call c_f_pointer(p_req, req)
    end subroutine realtime_image_spectrum_request
 end module fits
