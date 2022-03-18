@@ -4205,7 +4205,7 @@ contains
 
       print *, "max_threads:", max_threads
 
-      !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
       !$omp& PRIVATE(frame)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
