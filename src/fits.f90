@@ -4121,10 +4121,10 @@ contains
 
    end subroutine image_request
 
-   subroutine realtime_image_spectrum_request(ptr, p_req) BIND(C, name='realtime_image_spectrum_request')
+   subroutine realtime_image_spectrum_request(ptr, user) BIND(C, name='realtime_image_spectrum_request')
       implicit none
 
-      type(C_PTR), intent(in), value :: ptr, p_req
+      type(C_PTR), intent(in), value :: ptr, user
 
       type(dataset), pointer :: item
       type(image_spectrum_request_f), pointer :: req
@@ -4155,7 +4155,7 @@ contains
       bSuccess = .true.
 
       call c_f_pointer(ptr, item)
-      call c_f_pointer(p_req, req)
+      call c_f_pointer(user, req)
 
       print *, 'realtime_image_spectrum for ', item%datasetid,&
       &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
