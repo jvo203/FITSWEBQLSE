@@ -373,7 +373,7 @@ opacity: 0.75;
 .cluster {
     font-family: Inconsolata;
 	font-weight: normal;
-    font-size: 0.5em;
+    font-size: 0.75em;
     float: right;
     vertical-align: middle;
     opacity: 0.5;
