@@ -4141,6 +4141,9 @@ contains
       integer(8) :: start_t, finish_t, crate, cmax
       real :: elapsed
 
+      ! start the timer
+      call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
       bSuccess = .true.
 
       call c_f_pointer(ptr, item)
@@ -4159,9 +4162,6 @@ contains
       length = last - first + 1
 
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
-
-      ! start the timer
-      call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
       ! allocate and zero-out the spectrum
       allocate (spectrum(first:last))
