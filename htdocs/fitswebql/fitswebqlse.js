@@ -6506,20 +6506,17 @@ function display_preferences(index) {
 		.attr("opacity", 0.75)
 		.text("");*/
 
-	svg.append("foreignObject")
+	svg.append("g")
+		.append("foreignObject")
 		.attr("x", 0)
 		.attr("y", 0)
 		.attr("width", svgWidth)
-		.attr("height", 2.0 * emFontSize)
-		.attr("font-family", "Inconsolata")
-		.attr("font-weight", "normal")
-		.attr("font-size", "0.75em")
+		.attr("height", 1.0 * emFontSize)
 		.attr("fill", fillColour)
 		.attr("stroke", "none")
-		.attr("opacity", 0.75)
 		.append("xhtml:div")
 		.attr("id", "cluster")
-		.style("float", "right")
+		.attr("class", "cluster")
 		.html("");
 
 	var range = get_axes_range(svgWidth, svgHeight);

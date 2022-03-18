@@ -370,6 +370,15 @@ opacity: 0.75;
     border-radius: 0.5em;
 }
 
+.cluster {
+    font-family: Inconsolata;
+	font-weight: normal;
+    font-size: 0.5em;
+    float: right;
+    vertical-align: middle;
+    opacity: 0.5;
+}
+
 .button {
     color: black
 }
