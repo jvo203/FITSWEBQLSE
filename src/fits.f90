@@ -659,7 +659,7 @@ contains
                close (fileunit)
             end if
 
-            print *, "serialised channel", frame, 'to a binary file ', trim(file)
+            ! print *, "serialised channel", frame, 'to a binary file ', trim(file)
          end if
 
       end if
