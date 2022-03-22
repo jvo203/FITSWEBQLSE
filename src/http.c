@@ -729,6 +729,9 @@ static enum MHD_Result on_http_connection(void *cls,
                 // set the individual URL
                 curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
 
+                /* get us the resource without a body - use HEAD! */
+                curl_easy_setopt(handles[i], CURLOPT_NOBODY, 1L);
+
                 // add the individual transfer
                 curl_multi_add_handle(multi_handle, handles[i]);
 
