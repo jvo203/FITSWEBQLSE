@@ -2540,13 +2540,13 @@ function poll_cluster() {
 					if (i > 0)
 						clusterStr += "<span>&nbsp;</span>";
 
-					// ■ or ●
+					// ■ or ● or ⎯
 					if (jsonData.nodes[i].status) {
 						// clusterStr += '<span style="color:green;">' + jsonData.nodes[i].node + '</span>';
-						clusterStr += '<span style="color:green;">■</span>';
+						clusterStr += '<span style="color:green;">⎯</span>';
 					} else {
 						// clusterStr += '<span style="color:red;">' + jsonData.nodes[i].node + '</span>';
-						clusterStr += '<span style="color:red;">■</span>';
+						clusterStr += '<span style="color:red;">⎯</span>';
 					};
 				}
 
