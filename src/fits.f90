@@ -4233,7 +4233,13 @@ contains
             real(kind=4), dimension(DIM, DIM) :: x
             integer(kind=2) :: bitmask
 
-            integer :: ix, iy, pixel_count
+            ! the maximum exponent
+            integer :: max_exp
+
+            integer :: i, j, pos, ix, iy, pixel_count, src_x, src_y, dist2
+            integer :: offset_x, offset_y, offset
+            logical :: valid_pixel
+
             real :: tmp, pixel_sum
 
             ! process the data
@@ -4245,8 +4251,34 @@ contains
                do ix = start_x, end_x
                   compressed = item%compressed(frame)%ptr(ix, iy)
 
+                  max_exp = int(compressed%common_exp) + 1
+                  x = dequantize(compressed%mantissa, max_exp, significant_bits)
+
+                  do j = 1, DIM
+
+                     ! for 16x16 blocks
+                     pos = 0
+                     bitmask = compressed%mask(j)
+
+                     do i = 1, DIM
+                        ! test a NaN mask
+                        if (.not. btest(bitmask, pos)) then
+                           ! we have a non-NaN pixel
+                           tmp = x(i, j)
+
+                        end if
+
+                        pos = pos + 1
+                     end do
+                  end do
                end do
             end do
+
+            if (pixel_count .gt. 0) then
+               if (req%intensity .eq. mean) spectrum(frame) = pixel_sum/real(pixel_count)
+               if (req%intensity .eq. integrated) spectrum(frame) = pixel_sum*cdelt3
+            end if
+
          end block
       end do
       !$omp END DO
