@@ -14652,7 +14652,7 @@ async*/ function mainRenderer() {
 			.attr("id", "ClusterSVG")
 			.attr("width", width)
 			.attr("height", 9)
-			.attr('style', 'position: fixed; left: 10px; top: -3px; z-index: -1');
+			.attr('style', 'position: fixed; left: 10px; top: -2px; z-index: -1');
 
 		d3.select("#mainDiv").append("canvas")
 			.attr("id", "BackHTMLCanvas")
