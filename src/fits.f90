@@ -20,7 +20,7 @@ module fits
 
    ! FITS channels are allocated to cluster nodes in blocks
    real, parameter :: GOLDEN_RATIO = (1 + sqrt(5.0))/2
-   integer, parameter :: MAX_CHANNEL_BLOCK = 32 ! 16 ! 64 ! 128
+   integer, parameter :: MAX_CHANNEL_BLOCK = 4 ! 32 ! 16 ! 64 ! 128
 
    type(c_pthread_mutex_t), save :: logger_mtx
    type(c_pthread_mutex_t), save :: file_unit_mtx
