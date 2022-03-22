@@ -4227,6 +4227,12 @@ contains
       do frame = first, last
          ! skip frames for which there is no data on this node
          if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+         block
+            type(fixed_block) :: compressed
+            real(kind=4), dimension(DIM, DIM) :: x
+            integer(kind=2) :: bitmask
+         end block
       end do
       !$omp END DO
       !$omp END PARALLEL
