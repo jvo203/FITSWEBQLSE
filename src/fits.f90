@@ -1698,7 +1698,7 @@ contains
          if (allocated(item%frame_median)) item%dmedian = &
          &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
 
-         call print_dataset(item)
+         ! call print_dataset(item)
       end if
 
    end subroutine update_progress
