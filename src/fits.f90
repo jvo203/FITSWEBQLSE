@@ -4140,6 +4140,7 @@ contains
 
       integer :: max_threads, npixels, frame
       integer :: x1, x2, y1, y2, cx, cy, r, r2
+      integer :: start_x, start_y, end_x, end_y
       logical :: average, test_ignrval
       real :: cdelt3
 
@@ -4200,6 +4201,13 @@ contains
       dimy = abs(y2 - y1 + 1)
       npixels = dimx*dimy
 
+      ! real-time data decompression
+      start_x = 1 + (x1 - 1)/DIM
+      start_y = 1 + (y1 - 1)/DIM
+
+      end_x = 1 + (x2 - 1)/DIM
+      end_y = 1 + (y2 - 1)/DIM
+
       ! allocate and zero-out the spectrum
       allocate (spectrum(first:last))
       spectrum = 0.0
@@ -4209,7 +4217,8 @@ contains
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
-      print *, "max_threads:", max_threads
+      print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y,&
+      & "max_threads:", max_threads
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
       !$omp& PRIVATE(frame)&
