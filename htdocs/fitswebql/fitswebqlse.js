@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-03-18.0";
+	return "JS2022-03-22.0";
 }
 
 const wasm_supported = (() => {
@@ -2540,12 +2540,13 @@ function poll_cluster() {
 					if (i > 0)
 						clusterStr += "<span>&nbsp;</span>";
 
+					// ■ or ●
 					if (jsonData.nodes[i].status) {
 						// clusterStr += '<span style="color:green;">' + jsonData.nodes[i].node + '</span>';
-						clusterStr += '<span style="color:green;">●</span>';
+						clusterStr += '<span style="color:green;">■</span>';
 					} else {
 						// clusterStr += '<span style="color:red;">' + jsonData.nodes[i].node + '</span>';
-						clusterStr += '<span style="color:red;">●</span>';
+						clusterStr += '<span style="color:red;">■</span>';
 					};
 				}
 
@@ -6506,18 +6507,27 @@ function display_preferences(index) {
 		.attr("opacity", 0.75)
 		.text("");*/
 
-	svg.append("g")
-		.append("foreignObject")
-		.attr("x", 0)
-		.attr("y", 0)
-		.attr("width", svgWidth)
-		.attr("height", 1.0 * emFontSize)
-		.attr("fill", fillColour)
-		.attr("stroke", "none")
-		.append("xhtml:div")
-		.attr("id", "cluster")
-		.attr("class", "cluster")
-		.html("");
+	// a cluster element
+	{
+
+		var svg = d3.select("#ClusterSVG");
+		var svgWidth = parseFloat(svg.attr("width"));
+		var svgHeight = parseFloat(svg.attr("height"));
+
+		svg.append("g")
+			.append("foreignObject")
+			.attr("x", 0)
+			.attr("y", 0)
+			.attr("width", svgWidth)
+			// .attr("height", 1.0 * emFontSize)
+			.attr("height", 1.0 * svgHeight)
+			.attr("fill", fillColour)
+			.attr("stroke", "none")
+			.append("xhtml:div")
+			.attr("id", "cluster")
+			.attr("class", "cluster")
+			.html("");
+	}
 
 	var range = get_axes_range(svgWidth, svgHeight);
 
@@ -14637,6 +14647,12 @@ async*/ function mainRenderer() {
 
 		var width = rect.width - 20;
 		var height = rect.height - 20;
+
+		d3.select("#mainDiv").append("svg")
+			.attr("id", "ClusterSVG")
+			.attr("width", rect.width)
+			.attr("height", 9)
+			.attr('style', 'position: fixed; left: 0px; top: 0px; z-index: 0');
 
 		d3.select("#mainDiv").append("canvas")
 			.attr("id", "BackHTMLCanvas")
