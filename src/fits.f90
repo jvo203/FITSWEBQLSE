@@ -4266,6 +4266,40 @@ contains
                            ! we have a non-NaN pixel
                            tmp = x(i, j)
 
+                           ! calculate the original pixel coordinates
+                           src_x = i + shiftl(ix - 1, BASE)
+                           src_y = j + shiftl(iy - 1, BASE)
+
+                           ! check if a pixel resides within the bounding box
+                           if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
+                           if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
+
+                           valid_pixel = .true.
+
+                           ! check if a pixel resides within the bounding circle
+                           if (req%beam .eq. circle) then
+                              dist2 = (cx - src_x)*(cx - src_x) + (cy - src_y)*(cy - src_y)
+                              if (dist2 > r2) valid_pixel = .false.
+                           end if
+
+                           ! we have a valid pixel
+                           if (valid_pixel) then
+                              pixel_sum = pixel_sum + tmp
+                              pixel_count = pixel_count + 1
+                           end if
+
+                           ! do we need the viewport too?
+                           if (req%image) then
+                              offset_x = 1 + src_x - x1
+                              offset_y = src_y - y1
+                              offset = offset_y*dimx + offset_x
+
+                              ! integrate (sum up) pixels and a NaN mask
+                              if ((offset .ge. 1) .and. (offset .le. npixels)) then
+                                 ! thread_pixels(offset, tid) = thread_pixels(offset, tid) + tmp
+                                 ! thread_mask(offset, tid) = thread_mask(offset, tid) .or. .true.
+                              end if
+                           end if
                         end if
 
                         pos = pos + 1
@@ -4288,6 +4322,7 @@ contains
       call system_clock(finish_t)
       elapsed = real(finish_t - start_t)/real(crate)
 
+      ! print *, 'spectrum:', spectrum
       print *, 'realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
 
    end subroutine realtime_image_spectrum_request
