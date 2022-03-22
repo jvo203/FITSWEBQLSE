@@ -4232,6 +4232,21 @@ contains
             type(fixed_block) :: compressed
             real(kind=4), dimension(DIM, DIM) :: x
             integer(kind=2) :: bitmask
+
+            integer :: ix, iy, pixel_count
+            real :: tmp, pixel_sum
+
+            ! process the data
+            pixel_sum = 0.0
+            pixel_count = 0
+
+            ! decompress each DIMxDIM block
+            do iy = start_y, end_y
+               do ix = start_x, end_x
+                  compressed = item%compressed(frame)%ptr(ix, iy)
+
+               end do
+            end do
          end block
       end do
       !$omp END DO
