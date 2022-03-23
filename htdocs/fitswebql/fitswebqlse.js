@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-03-22.0";
+	return "JS2022-03-23.0";
 }
 
 const wasm_supported = (() => {
@@ -2543,10 +2543,10 @@ function poll_cluster() {
 					// ■ or ● or ⎯
 					if (jsonData.nodes[i].status) {
 						// clusterStr += '<span style="color:green;">' + jsonData.nodes[i].node + '</span>';
-						clusterStr += '<span style="color:green;">⎯</span>';
+						clusterStr += '<span style="color:green;">■</span>';
 					} else {
 						// clusterStr += '<span style="color:red;">' + jsonData.nodes[i].node + '</span>';
-						clusterStr += '<span style="color:red;">⎯</span>';
+						clusterStr += '<span style="color:red;">■</span>';
 					};
 				}
 
