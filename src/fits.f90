@@ -4251,7 +4251,7 @@ contains
                 ! the maximum exponent
                 integer :: max_exp
 
-                integer :: i, j, pos, ix, iy, pixel_count, src_x, src_y, dist2
+                integer :: i, j, ix, iy, pixel_count, src_x, src_y, dist2
                 integer :: offset_x, offset_y, offset
                 logical :: valid_pixel
 
@@ -4269,15 +4269,15 @@ contains
                         max_exp = int(compressed%common_exp) + 1
                         x = dequantize(compressed%mantissa, max_exp, significant_bits)
 
-                        do j = 1, DIM
+                        do concurrent(j=1:DIM) ! not sure about the safety of 'concurrent' in this case
+                            ! do j = 1, DIM
 
                             ! for 16x16 blocks
-                            pos = 0
                             bitmask = compressed%mask(j)
 
                             do i = 1, DIM
                                 ! test a NaN mask
-                                if (.not. btest(bitmask, pos)) then
+                                if (.not. btest(bitmask, i - 1)) then ! notice that <pos> = i - 1
                                     ! we have a non-NaN pixel
                                     tmp = x(i, j)
 
@@ -4316,8 +4316,6 @@ contains
                                         end if
                                     end if
                                 end if
-
-                                pos = pos + 1
                             end do
                         end do
                     end do
