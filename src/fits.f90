@@ -4333,6 +4333,14 @@ contains
         !$omp END DO
         !$omp END PARALLEL
 
+        ! reduce the pixels/mask locally
+        if (req%image .and. (max_threads .gt. 1)) then
+            do tid = 2, max_threads
+                thread_pixels(:, 1) = thread_pixels(:, 1) + thread_pixels(:, tid)
+                thread_mask(:, 1) = thread_mask(:, 1) .or. thread_mask(:, tid)
+            end do
+        end if
+
         ! end the timer
         call system_clock(finish_t)
         elapsed = real(finish_t - start_t)/real(crate)
