@@ -4272,7 +4272,7 @@ contains
                         do concurrent(j=1:DIM) ! not sure about the safety of 'concurrent' in this case
                             ! do j = 1, DIM
 
-                            ! for 16x16 blocks
+                            ! 16x16 blocks
                             bitmask = compressed%mask(j)
 
                             do i = 1, DIM
