@@ -4269,8 +4269,8 @@ contains
                         max_exp = int(compressed%common_exp) + 1
                         x = dequantize(compressed%mantissa, max_exp, significant_bits)
 
-                        do concurrent(j=1:DIM) ! not sure about the safety of 'concurrent' in this case
-                            ! do j = 1, DIM
+                        ! do concurrent(j=1:DIM) ! not sure about the safety of 'concurrent' in this case
+                        do j = 1, DIM
 
                             ! 16x16 blocks
                             bitmask = compressed%mask(j)
