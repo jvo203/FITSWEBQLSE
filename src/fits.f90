@@ -4277,7 +4277,7 @@ contains
 
                             do i = 1, DIM
                                 ! test a NaN mask
-                                if (.not. btest(bitmask, i - 1)) then ! notice that <pos> = i - 1
+                                if (.not. btest(bitmask, i - 1)) then ! notice that pos = i - 1
                                     ! we have a non-NaN pixel
                                     tmp = x(i, j)
 
