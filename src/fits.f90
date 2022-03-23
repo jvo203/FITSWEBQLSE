@@ -4223,8 +4223,14 @@ contains
         print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y,&
         & "max_threads:", max_threads
 
-        allocate (thread_pixels(npixels, max_threads))
-        allocate (thread_mask(npixels, max_threads))
+        ! do we need the viewport too?
+        if (req%image) then
+            allocate (thread_pixels(npixels, max_threads))
+            allocate (thread_mask(npixels, max_threads))
+
+            thread_pixels = 0.0
+            thread_mask = .false.
+        end if
 
         !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
         !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
