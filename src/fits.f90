@@ -4311,7 +4311,7 @@ contains
 
                                         ! integrate (sum up) pixels and a NaN mask
                                         if ((offset .ge. 1) .and. (offset .le. npixels)) then
-                                            thread_pixels(offset, tid) = thread_pixels(offset, tid) + tmp
+                                            thread_pixels(offset, tid) = thread_pixels(offset, tid) + tmp*cdelt3
                                             thread_mask(offset, tid) = thread_mask(offset, tid) .or. .true.
                                         end if
                                     end if
