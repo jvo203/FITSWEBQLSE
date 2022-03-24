@@ -6,6 +6,7 @@
 /test_zmq
 /zfp_block
 /zfp_encode
+/test_fixed_array
 /*.dSYM
 
 # Memory Logging

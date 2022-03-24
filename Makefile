@@ -198,6 +198,9 @@ block:
 block128:
 	$(FORT) $(FLAGS) src/wavelet.f90 tests/zfp_block_128.f90 -o zfp_block_128 $(LIBS)
 
+fixed:
+	$(FORT) $(FLAGS) tests/test_fixed_array.f90 -o test_fixed_array $(LIBS)
+
 encode:
 	ispc -g -O3 --pic --opt=fast-math --addressing=32 src/webql.ispc -o src/zfp.o -h tests/webql.h
 	$(CC) $(CFLAGS) tests/zfp_encode.c src/zfp.o -o zfp_encode -lm
