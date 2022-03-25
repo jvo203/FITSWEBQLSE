@@ -54,7 +54,7 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
     emax = exponent_block(fblock);
 
     // get the maximum exponent
-    compressed[0].common_exp = emax - 1;
+    compressed[0].common_exp = (int8)(emax - 1);
     
     //foreach (k = 0 ... BLOCK_SIZE)    
     //    compressed[0].mantissa[k] = (int)(s * fblock[k]);
