@@ -11,9 +11,9 @@ struct fixed_block_t {
     int8 mantissa[BLOCK_SIZE];
 };
 
-inline uniform int exponent(uniform float x)
+inline int exponent(float x)
 {
-    uniform int e, val;
+    int e, val;
     frexp(x, &e);
 
     /* clamp exponent in case x is denormal */
@@ -24,15 +24,15 @@ inline uniform int exponent(uniform float x)
 
 inline uniform int8 exponent_block(const uniform float p[BLOCK_SIZE])
 {
-    uniform float max = 0;
+    float max = 0;
 
-    for(uniform int i=0; i<BLOCK_SIZE; i++)
+    foreach (i=0 ... BLOCK_SIZE)
     {
-        uniform float f = abs(p[i]);
+        float f = abs(p[i]);
         max = (max < f) ? f : max;
     }
 
-    return exponent(max);
+    return reduce_max(exponent(max));
 }
 
 export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform struct fixed_block_t compressed[])
