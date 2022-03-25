@@ -17,4 +17,8 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
     for (uniform int k = 0; k < BLOCK_SIZE; k++)
         print("%\t", fblock[k]);
     print("\n");
+
+    // first the mask (zero for now)
+    foreach (k = 0 ... DIM) // (k goes from 0 to DIM - 1)
+        compressed[0].mask[k] = 0;
 }
