@@ -9,7 +9,7 @@ struct fixed_block_t {
 };
 
 export void encode_float_block()
-{
+{    
     print("DIM: %\n", DIM);
-    print("BLOCK_SIZE: %\n", BLOCK_SIZE);
+    print("BLOCK_SIZE: %\n", BLOCK_SIZE); 
 }
