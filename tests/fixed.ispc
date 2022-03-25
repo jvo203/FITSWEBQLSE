@@ -45,14 +45,23 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
         print("%\t", fblock[k]);
     print("\n");
 
-    uniform int max_exp;
+    uniform int emax;
 
     // first the mask (zero for now)
     foreach (k = 0 ... DIM) // (k goes from 0 to DIM - 1)
         compressed[0].mask[k] = 0;
 
-    max_exp = exponent_block(fblock);
+    emax = exponent_block(fblock);
 
     // get the maximum exponent
-    compressed[0].common_exp = max_exp - 1;
+    compressed[0].common_exp = emax - 1;
+    
+    //foreach (k = 0 ... BLOCK_SIZE)    
+    //    compressed[0].mantissa[k] = (int)(s * fblock[k]);
+
+    varying float scale = significant_bits - emax;
+    print("scale factor = %\n", scale);
+
+    foreach(k=0 ... BLOCK_SIZE)    
+        compressed[0].mantissa[k] = (int8)ldexp(fblock[k], scale);    
 }
