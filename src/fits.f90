@@ -1532,11 +1532,12 @@ contains
       ! submit any left-overs
       repeat = 0
       do while (counter .gt. 0)
-         repeat = repeat + 1
+
          counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
 
          ! wait a while upon a submission failure
          if (counter .gt. 0) then
+            repeat = repeat + 1
             print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
             call sleep(1) ! 1 sec.
          end if
