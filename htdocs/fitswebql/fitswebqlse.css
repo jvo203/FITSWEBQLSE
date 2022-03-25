@@ -170,7 +170,7 @@ img {
 }
 
 .progress-bar {
-    transition-duration: 0.5s;
+    transition-duration: 1.0s; /*0.5s*/
 }
 
 .main {
