@@ -115,7 +115,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
                     {
                         mg_http_reply(c, 202, NULL, "Accepted");
-
                         free(tmp);
                         break;
                     }
@@ -123,7 +122,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     {
                         // signal a catastrophic error
                         mg_http_reply(c, 500, NULL, "Internal Server Error");
-
                         free(tmp);
                         break;
                     }
@@ -134,7 +132,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (!get_header_status(item))
                     {
                         mg_http_reply(c, 202, NULL, "Accepted");
-
                         free(tmp);
                         break;
                     }
