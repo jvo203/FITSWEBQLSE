@@ -8,8 +8,14 @@ struct fixed_block_t {
     int8 mantissa[BLOCK_SIZE];
 };
 
-export void encode_float_block()
+export void encode_float_block(const uniform float fblock[BLOCK_SIZE])
 {    
     print("DIM: %\n", DIM);
-    print("BLOCK_SIZE: %\n", BLOCK_SIZE); 
+    print("BLOCK_SIZE: %\n", BLOCK_SIZE);
+
+    
+    print("fblock:\n");
+    for (uniform int k = 0; k < BLOCK_SIZE; k++)
+        print("%\t", fblock[k]);
+    print("\n");
 }
