@@ -24,6 +24,17 @@ program main
    ! a test array
    real(kind=4), dimension(DIM, DIM) :: x
 
+   interface
+
+      ! void encode_float_block()
+      subroutine encode_float_block()&
+          & BIND(C, name='encode_float_block')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+      end subroutine encode_float_block
+   end interface
+
    print *, "DIM:", DIM
 
    do j = 1, DIM
@@ -37,6 +48,8 @@ program main
 
    call to_fixed_block(x, compressed, -1000.0, -1000.0, 1000.0)
    call print_fixed_block(compressed)
+
+   call encode_float_block()
 
 contains
 

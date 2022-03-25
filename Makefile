@@ -200,7 +200,7 @@ block128:
 
 fixed:
 	ispc -g -O3 --pic --opt=fast-math --addressing=32 tests/fixed.ispc -o tests/fixed.o
-	$(FORT) $(FLAGS) tests/test_fixed_array.f90 -o test_fixed_array $(LIBS)
+	$(FORT) $(FLAGS) tests/test_fixed_array.f90 tests/fixed.o -o test_fixed_array $(LIBS)
 
 encode:
 	ispc -g -O3 --pic --opt=fast-math --addressing=32 src/webql.ispc -o src/zfp.o -h tests/webql.h

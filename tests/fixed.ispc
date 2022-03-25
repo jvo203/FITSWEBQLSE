@@ -2,7 +2,7 @@
 #define DIM (1 << (2 * BASE)) /* block dimensions */
 #define BLOCK_SIZE (1 << (2 * DIM)) /* values per block */
 
-void encode_float_bloack()
+export void encode_float_block()
 {
     print("BASE: %, DIM: %\n", BASE, DIM);
 }
