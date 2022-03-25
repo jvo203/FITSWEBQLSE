@@ -19,10 +19,10 @@ inline int exponent(float x)
     /* clamp exponent in case x is denormal */
     val = (x > 0) ? max(e, 1 - EBIAS) : -EBIAS;
    
-    return val - 1; // subtract 1 to fit within 8 bits
+    return val;
 }
 
-inline uniform int8 exponent_block(const uniform float p[BLOCK_SIZE])
+inline uniform int exponent_block(const uniform float p[BLOCK_SIZE])
 {
     float max = 0;
 
@@ -45,10 +45,14 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
         print("%\t", fblock[k]);
     print("\n");
 
+    uniform int max_exp;
+
     // first the mask (zero for now)
     foreach (k = 0 ... DIM) // (k goes from 0 to DIM - 1)
         compressed[0].mask[k] = 0;
 
+    max_exp = exponent_block(fblock);
+
     // get the maximum exponent
-    compressed[0].common_exp = exponent_block(fblock);
+    compressed[0].common_exp = max_exp - 1;
 }
