@@ -19,6 +19,7 @@ program main
 
    integer :: i, j
    real :: foo
+   type(fixed_block), target :: bar
 
    type(fixed_block) :: compressed
 
@@ -28,12 +29,12 @@ program main
    interface
 
       ! export void encode_float_block(const uniform float fblock[BLOCK_SIZE])
-      subroutine encode_float_block(fblock)&
+      subroutine encode_float_block(fblock, compressed)&
           & BIND(C, name='encode_float_block')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
-         type(C_PTR), value, intent(in) :: fblock
+         type(C_PTR), value, intent(in) :: fblock, compressed
 
       end subroutine encode_float_block
    end interface
@@ -52,7 +53,8 @@ program main
    call to_fixed_block(x, compressed, -1000.0, -1000.0, 1000.0)
    call print_fixed_block(compressed)
 
-   call encode_float_block(c_loc(x))
+   call encode_float_block(c_loc(x), c_loc(bar))
+   call print_fixed_block(bar)
 
 contains
 
