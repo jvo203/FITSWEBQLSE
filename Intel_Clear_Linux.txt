@@ -168,6 +168,8 @@
 
 # 17. Replication
 
+    # full
+
     rm -rf FITSWEBQLSE
     mkdir -p FITSWEBQLSE
     cd FITSWEBQLSE
@@ -179,6 +181,12 @@
     cp /mnt/fits/chris/FITSWEBQLSE/amd.txt .
     cp /mnt/fits/chris/FITSWEBQLSE/intel.txt .
     cp /mnt/fits/chris/FITSWEBQLSE/all.txt .
+
+    # abbreviated
+
+    cd FITSWEBQLSE
+    cp -r /mnt/fits/chris/FITSWEBQLSE/htdocs .
+    cp /mnt/fits/chris/FITSWEBQLSE/fitswebqlse .
 
     # AMD
     mpiexec -silent-abort -machinefile amd.txt -n 4 ./fitswebqlse
