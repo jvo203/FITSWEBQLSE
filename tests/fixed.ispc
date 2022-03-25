@@ -50,5 +50,5 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
         compressed[0].mask[k] = 0;
 
     // get the maximum exponent
-    compressed[0]. common_exp = exponent_block(fblock);
+    compressed[0].common_exp = exponent_block(fblock);
 }
