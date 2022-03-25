@@ -1433,7 +1433,7 @@ contains
       integer :: tid, i, rc, depth
 
       ! OpenMP
-      integer :: max_threads, counter
+      integer :: max_threads, counter, repeat
       logical thread_bSuccess
 
       integer(kind=4) :: n, m ! input dimensions
@@ -1530,10 +1530,24 @@ contains
       !$omp END PARALLEL
 
       ! submit any left-overs
-      ! if (counter .gt. 0) then
-      if (counter .gt. 0) then
+      repeat = 0
+      do while (counter .gt. 0)
+         repeat = repeat + 1
          counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
-      end if
+
+         ! wait a while upon a submission failure
+         if (counter .gt. 0) then
+            print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
+            call sleep(1) ! 1 sec.
+         end if
+
+         ! break the loop after 60s
+         if (repeat .gt. 60) then
+            print *, item%datasetid, ":: breaking the final 'submit_progress' loop, counter = ", counter
+            exit
+         end if
+
+      end do
 
       bSuccess = thread_bSuccess
 
