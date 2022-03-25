@@ -9,7 +9,7 @@ module fixed_array
    ! 1 sign bit + 7 bits for the magnitude
    integer(kind=4), parameter :: significant_bits = 7
 
-   type, bind(C) fixed_block
+   type fixed_block
       ! a NaN mask: 16 x 16 bits = 64 bits (2 bytes per column)
       integer(kind=2) :: mask(DIM)
       integer(kind=1) :: common_exp
