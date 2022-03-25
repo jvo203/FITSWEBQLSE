@@ -4,6 +4,8 @@
 
 struct fixed_block_t {
     int16 mask[DIM];
+    int8 common_exp;
+    int8 mantissa[BLOCK_SIZE];
 };
 
 export void encode_float_block()
