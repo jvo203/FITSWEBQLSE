@@ -4,5 +4,5 @@
 
 void encode_float_bloack()
 {
-    print("BASE: %\n", BASE);
+    print("BASE: %, DIM: %\n", BASE, DIM);
 }
