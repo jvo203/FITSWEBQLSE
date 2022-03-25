@@ -23,15 +23,17 @@ program main
    type(fixed_block) :: compressed
 
    ! a test array
-   real(kind=4), dimension(DIM, DIM) :: x
+   real(kind=4), dimension(DIM, DIM), target :: x
 
    interface
 
-      ! void encode_float_block()
-      subroutine encode_float_block()&
+      ! export void encode_float_block(const uniform float fblock[BLOCK_SIZE])
+      subroutine encode_float_block(fblock)&
           & BIND(C, name='encode_float_block')
          use, intrinsic :: ISO_C_BINDING
          implicit none
+
+         type(C_PTR), value, intent(in) :: fblock
 
       end subroutine encode_float_block
    end interface
@@ -50,7 +52,7 @@ program main
    call to_fixed_block(x, compressed, -1000.0, -1000.0, 1000.0)
    call print_fixed_block(compressed)
 
-   call encode_float_block()
+   call encode_float_block(c_loc(x))
 
 contains
 
