@@ -65,5 +65,11 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
     foreach(k=0 ... BLOCK_SIZE)    
         compressed[0].mantissa[k] = (int8)round(ldexp(fblock[k], scale));
 
-    print("sizeof(fixed_block_t): %\n", sizeof(uniform fixed_block_t));     
+    print("sizeof(fixed_block_t): %\n", sizeof(uniform fixed_block_t));
+
+    print("%\n", round(3.7));
+    print("%\n", round(3.4));
+
+    print("%\n", round(-3.7));
+    print("%\n", round(-3.4));
 }
