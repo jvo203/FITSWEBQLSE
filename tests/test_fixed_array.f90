@@ -56,6 +56,9 @@ program main
    call encode_float_block(c_loc(x), c_loc(bar))
    call print_fixed_block(bar)
 
+   print *, "sizeof(compressed)", sizeof(compressed), "bytes"
+   print *, "storage_size(compressed)", storage_size(compressed)/8, "bytes"
+
 contains
 
    subroutine print_fixed_block(compressed)
