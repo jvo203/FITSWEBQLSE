@@ -68,7 +68,7 @@ contains
       type(fixed_block), intent(in) :: compressed
 
       print *, 'mask', compressed%mask
-      print *, 'max exp.', int(compressed%common_exp) + 1
+      print *, 'max exp.', int(compressed%common_exp)
       print *, 'mantissa', compressed%mantissa
 
    end subroutine print_fixed_block
