@@ -63,5 +63,5 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
     print("scale factor = %\n", scale);
 
     foreach(k=0 ... BLOCK_SIZE)    
-        compressed[0].mantissa[k] = (int8)ldexp(fblock[k], scale);    
+        compressed[0].mantissa[k] = (int8)round(ldexp(fblock[k], scale));    
 }

@@ -199,7 +199,7 @@ block128:
 	$(FORT) $(FLAGS) src/wavelet.f90 tests/zfp_block_128.f90 -o zfp_block_128 $(LIBS)
 
 fixed:
-	ispc -g -O3 --pic --opt=fast-math --addressing=32 tests/fixed_tiled.ispc -o tests/fixed.o
+	ispc -g -O3 --pic --opt=fast-math --addressing=32 tests/fixed.ispc -o tests/fixed.o
 	$(FORT) $(FLAGS) tests/test_fixed_array.f90 tests/fixed.o -o test_fixed_array $(LIBS)
 
 encode:
