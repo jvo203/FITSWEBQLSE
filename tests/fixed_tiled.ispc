@@ -59,5 +59,5 @@ export void encode_float_block(const uniform float fblock[DIM][DIM], uniform str
     print("scale factor = %\n", scale);
 
     foreach_tiled (j = 0 ... DIM, i=0 ... DIM)
-        compressed[0].mantissa[i][j] = (int8)ldexp(fblock[i][j], scale);    
+        compressed[0].mantissa[i][j] = (int8)round(ldexp(fblock[i][j], scale));    
 }
