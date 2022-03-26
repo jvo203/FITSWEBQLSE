@@ -13,7 +13,7 @@ program main
    type, bind(C) :: fixed_block
       ! a NaN mask: 16 x 16 bits = 64 bits (2 bytes per column)
       integer(kind=2) :: mask(DIM)
-      integer(kind=1) :: common_exp ! can be made kind=2 because there is a one-byte padding anyway
+      integer(kind=2) :: common_exp ! can be made <kind=2> because there is a one-byte padding anyway
       integer(kind=1), dimension(DIM, DIM) :: mantissa
    end type fixed_block
 
@@ -148,7 +148,7 @@ contains
 
       end do
 
-      compressed%common_exp = int(max_exp - 1, kind=1)
+      compressed%common_exp = int(max_exp, kind=2)
 
       ! 8-bit quantization (7 bits + sign)
       compressed%mantissa = quantize(x, e, max_exp, significant_bits)
