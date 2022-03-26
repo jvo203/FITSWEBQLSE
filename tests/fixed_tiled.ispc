@@ -1,5 +1,4 @@
 #define DIM 16
-#define BLOCK_SIZE (DIM * DIM) /* values per block */
 #define significant_bits 7
 
 #define EBITS 8                        /* single-precision floating-point */
@@ -8,7 +7,7 @@
 struct fixed_block_t {
     int16 mask[DIM];
     int8 common_exp;
-    int8 mantissa[BLOCK_SIZE];
+    int8 mantissa[DIM][DIM];
 };
 
 inline int exponent(float x)
@@ -22,27 +21,27 @@ inline int exponent(float x)
     return val;
 }
 
-inline uniform int exponent_block(const uniform float p[BLOCK_SIZE])
+inline uniform int exponent_block(const uniform float p[DIM][DIM])
 {
-    float max = 0;
+    varying float max = 0;
 
-    foreach (i=0 ... BLOCK_SIZE)
+    foreach_tiled (j = 0 ... DIM, i=0 ... DIM)
     {
-        float f = abs(p[i]);
+        float f = abs(p[i][j]);
         max = (max < f) ? f : max;
     }
 
     return reduce_max(exponent(max));
 }
 
-export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform struct fixed_block_t compressed[])
+export void encode_float_block(const uniform float fblock[DIM][DIM], uniform struct fixed_block_t compressed[])
 {    
-    print("DIM: %\n", DIM);
-    print("BLOCK_SIZE: %\n", BLOCK_SIZE);
+    print("DIM: %\n", DIM);    
 
     print("fblock:\n");
-    for (uniform int k = 0; k < BLOCK_SIZE; k++)
-        print("%\t", fblock[k]);
+    for (uniform int j = 0; j < DIM; j++)
+        for (uniform int i = 0; i < DIM; i++)
+            print("%\t", fblock[i][j]);
     print("\n");
 
     uniform int emax;
@@ -56,12 +55,9 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
     // get the maximum exponent
     compressed[0].common_exp = (int8)(emax - 1);
     
-    //foreach (k = 0 ... BLOCK_SIZE)    
-    //    compressed[0].mantissa[k] = (int)(s * fblock[k]);
-
     varying float scale = significant_bits - emax;
     print("scale factor = %\n", scale);
 
-    foreach(k=0 ... BLOCK_SIZE)    
-        compressed[0].mantissa[k] = (int8)ldexp(fblock[k], scale);    
+    foreach_tiled (j = 0 ... DIM, i=0 ... DIM)
+        compressed[0].mantissa[i][j] = (int8)ldexp(fblock[i][j], scale);    
 }
