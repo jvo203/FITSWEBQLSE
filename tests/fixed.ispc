@@ -63,7 +63,7 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
     print("scale factor = %\n", scale);
 
     foreach(k=0 ... BLOCK_SIZE)    
-        compressed[0].mantissa[k] = (int8)round(ldexp(fblock[k], scale));
+        compressed[0].mantissa[k] = (int8)round(ldexp(fblock[k], scale)); // make sure the argument is not 0
 
     print("sizeof(fixed_block_t): %\n", sizeof(uniform fixed_block_t));
 }
@@ -75,15 +75,24 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
 
     uniform int emax = (int)compressed[0].common_exp;
 
+    print("emax: %\n", emax);
+
     varying float scale = emax - significant_bits;
+    print("scale factor = %\n", scale);
 
     foreach(k=0 ... BLOCK_SIZE)
     {
-        varying float x = compressed[0].mantissa[k];
-        sum += ldexp(x, scale);
+        varying float x = (float)compressed[0].mantissa[k];
+        varying float reconstructed = (x != 0.0) ? ldexp(x, scale) : 0.0;
+        sum += reconstructed;
+
+        print("x: %, scale: %\n", x, scale);
+        print("reconstructed: %\n", reconstructed);
     }
 
     reduced = reduce_add(sum);
+
+    print("reduced: %\n", reduced);
 
     return reduced;
 }
