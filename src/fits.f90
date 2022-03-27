@@ -4282,7 +4282,7 @@ contains
                     do ix = start_x, end_x
                         compressed = item%compressed(frame)%ptr(ix, iy)
 
-                        max_exp = int(compressed%common_exp) + 1
+                        max_exp = int(compressed%common_exp)
                         x = dequantize(compressed%mantissa, max_exp, significant_bits)
 
                         ! do concurrent(j=1:DIM) ! not sure about the safety of 'concurrent' in this case
