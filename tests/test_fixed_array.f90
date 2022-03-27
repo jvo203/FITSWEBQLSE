@@ -19,7 +19,6 @@ program main
     end type fixed_block
 
     integer :: i, j
-    real :: foo
 
     type(fixed_block), target :: bar
     type(fixed_block), target :: compressed
