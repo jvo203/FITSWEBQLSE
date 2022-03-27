@@ -84,8 +84,8 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
 
     foreach(k=0 ... BLOCK_SIZE)
     {
-        varying float x = (float)compressed[0].mantissa[k];
-        varying float reconstructed = (x != 0.0f) ? ldexp(x, scale) : 0.0f;
+        varying int8 x = compressed[0].mantissa[k];
+        varying float reconstructed = (x != 0) ? ldexp((float)x, scale) : 0.0f;
         sum += reconstructed;
 
         //print("x: %, scale: %\n", x, scale);
