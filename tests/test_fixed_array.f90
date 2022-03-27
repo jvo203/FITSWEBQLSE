@@ -20,9 +20,9 @@ program main
 
     integer :: i, j
     real :: foo
-    type(fixed_block), target :: bar
 
-    type(fixed_block) :: compressed
+    type(fixed_block), target :: bar
+    type(fixed_block), target :: compressed
 
     ! a test array
     real(kind=4), dimension(DIM, DIM), target :: x
@@ -72,7 +72,7 @@ program main
     print *, "sizeof(compressed)", sizeof(compressed), "bytes"
     print *, "storage_size(compressed)", storage_size(compressed)/8, "bytes"
 
-    reduced = reduce_fixed_block(c_loc(bar))
+    reduced = reduce_fixed_block(c_loc(compressed))
     print *, "reduced:", reduced
 
 contains
