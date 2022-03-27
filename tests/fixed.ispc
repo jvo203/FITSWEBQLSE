@@ -125,7 +125,9 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
 
         count += 1;
 
-        //print("reconstructed: %\n", reconstructed);
+        print("reconstructed: %\n", reconstructed);
+        print("idx: %\n", idx);
+        // print("mask: %\n", mask);
     }
 
     reduced = reduce_add(sum);
