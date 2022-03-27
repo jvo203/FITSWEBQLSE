@@ -1,5 +1,6 @@
 program main
     use, intrinsic :: iso_c_binding
+    use, intrinsic :: ieee_arithmetic
     implicit none
 
     ! a 16 x 16 block of floating-point values
@@ -58,6 +59,7 @@ program main
         end do
     end do
 
+    x(3, 4) = ieee_value(0.0, ieee_quiet_nan); 
     print *, "x:", x
     print *, "sum:", sum(x)
 
