@@ -102,7 +102,10 @@ export uniform float reduce_fixed_block_ldexp(uniform struct fixed_block_t compr
 export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[])
 {
     varying float sum = 0.0f;
+    varying int count = 0;
+
     uniform float reduced = 0.0f;
+    uniform int valid = 0;
 
     uniform int emax = (int)compressed[0].common_exp;
     print("emax: %\n", emax);
@@ -114,11 +117,15 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
     {
         varying float reconstructed = scale * (float)compressed[0].mantissa[k];
         sum += reconstructed;
+        count += 1;
+
         //print("reconstructed: %\n", reconstructed);
     }
 
     reduced = reduce_add(sum);
-    print("reduced: %\n", reduced);
+    valid = reduce_add(count);
+
+    print("reduced: %, valid count: %\n", reduced, valid);
 
     return reduced;
 }
