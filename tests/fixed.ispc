@@ -1,3 +1,4 @@
+#define BASE 4
 #define DIM 16
 #define BLOCK_SIZE (DIM * DIM) /* values per block */
 #define significant_bits 7
@@ -117,6 +118,11 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
     {
         varying float reconstructed = scale * (float)compressed[0].mantissa[k];
         sum += reconstructed;
+
+        // find out which FORTRAN column the value is located
+        varying int idx = k >> BASE;
+        varying int16 mask = compressed[0].mask[idx];
+
         count += 1;
 
         //print("reconstructed: %\n", reconstructed);

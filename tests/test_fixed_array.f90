@@ -54,7 +54,7 @@ program main
 
     do j = 1, DIM
         do i = 1, DIM
-            x(i, j) = 0.1*i*j
+            x(i, j) = -(0.1*i*j - 5.0)
         end do
     end do
 
