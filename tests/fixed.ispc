@@ -68,7 +68,7 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
     print("sizeof(fixed_block_t): %\n", sizeof(uniform fixed_block_t));
 }
 
-export uniform float reduce_float_block(uniform struct fixed_block_t compressed[])
+export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[])
 {
     varying float sum = 0.0f;
     uniform float reduced = 0.0f;
