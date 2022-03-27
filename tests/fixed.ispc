@@ -119,14 +119,18 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
         varying float reconstructed = scale * (float)compressed[0].mantissa[k];
         sum += reconstructed;
 
-        // find out which FORTRAN column the value is located
+        // find out which FORTRAN column the value is located        
         varying int idx = k >> BASE;
-        varying int16 mask = compressed[0].mask[idx];
+        varying int mask = compressed[0].mask[idx];
+        varying int pos = k % DIM;
 
-        count += 1;
+        varying bool isnan = (mask >> pos) & 1;
+        count += isnan ? 0 : 1;
 
         print("reconstructed: %\n", reconstructed);
         print("idx: %\n", idx);
+        print("pos: %\n", pos);
+        print("isnan: %\n", isnan);
         // print("mask: %\n", mask);
     }
 
