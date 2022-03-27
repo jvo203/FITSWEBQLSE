@@ -77,7 +77,6 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
     uniform float reduced = 0.0f;
 
     uniform int emax = (int)compressed[0].common_exp;
-
     print("emax: %\n", emax);
 
     varying float scale = emax - significant_bits;
@@ -94,7 +93,6 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
     }
 
     reduced = reduce_add(sum);
-
     print("reduced: %\n", reduced);
 
     return reduced;
