@@ -116,6 +116,7 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
 
     foreach(k=0 ... BLOCK_SIZE)
     {
+        // NaNs are stored as ZERO anyway
         varying float reconstructed = scale * (float)compressed[0].mantissa[k];
         sum += reconstructed;
 
