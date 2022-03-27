@@ -12,7 +12,7 @@ module fixed_array
     type, bind(C) :: fixed_block
         ! a NaN mask: 16 x 16 bits = 64 bits (2 bytes per column)
         integer(kind=2) :: mask(DIM)
-        integer(kind=2) :: common_exp ! originally kind=1 but kind=2 can be used too (due to padding)
+        integer(kind=2) :: common_exp ! can be made <kind=2> because there is a one-byte padding anyway
         integer(kind=1), dimension(DIM, DIM) :: mantissa
     end type fixed_block
 contains
