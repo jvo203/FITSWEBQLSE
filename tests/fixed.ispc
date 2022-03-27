@@ -114,7 +114,6 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
     {
         varying float reconstructed = scale * (float)compressed[0].mantissa[k];
         sum += reconstructed;
-
         //print("reconstructed: %\n", reconstructed);
     }
 
