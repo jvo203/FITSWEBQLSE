@@ -64,10 +64,8 @@ export void encode_float_block(const uniform float fblock[BLOCK_SIZE], uniform s
 
     foreach(k=0 ... BLOCK_SIZE)
     {
-        // make sure the argument is not 0
-        varying float x = (fblock[k] != 0.0) ? ldexp(fblock[k], scale) : 0.0;
-
-        compressed[0].mantissa[k] = (int8)round(x); 
+        // make sure the argument is not 0        
+        compressed[0].mantissa[k] = (fblock[k] != 0.0) ? (int8)round(ldexp(fblock[k], scale)) : 0;
     }
 
     print("sizeof(fixed_block_t): %\n", sizeof(uniform fixed_block_t));
