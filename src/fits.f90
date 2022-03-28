@@ -4396,9 +4396,8 @@ contains
       logical :: bSuccess
 
       integer :: tid, max_threads, npixels, frame
-      integer :: x1, x2, y1, y2, cx, cy, r, r2
+      integer(c_int) :: x1, x2, y1, y2, cx, cy, r, r2, width, height, average
       integer :: start_x, start_y, end_x, end_y
-      logical :: average, test_ignrval
       real :: cdelt3
 
       real(kind=4), allocatable :: thread_pixels(:, :)
@@ -4452,10 +4451,13 @@ contains
       r2 = r*r
 
       if (req%intensity .eq. mean) then
-         average = .true.
+         average = 1
       else
-         average = .false.
+         average = 0
       end if
+
+      width = item%naxes(1)
+      height = item%naxes(2)
 
       dimx = abs(x2 - x1 + 1)
       dimy = abs(y2 - y1 + 1)
@@ -4500,90 +4502,8 @@ contains
          ! get a current OpenMP thread (starting from 0 as in C)
          tid = 1 + OMP_GET_THREAD_NUM()
 
-         block
-            type(fixed_block) :: compressed
-            real(kind=4), dimension(DIM, DIM) :: x
-            integer(kind=2) :: bitmask
-
-            ! the maximum exponent
-            integer :: max_exp
-
-            integer :: i, j, ix, iy, pixel_count, src_x, src_y, dist2
-            integer :: offset_x, offset_y, offset
-            logical :: valid_pixel
-
-            real :: tmp, pixel_sum
-
-            ! process the data
-            pixel_sum = 0.0
-            pixel_count = 0
-
-            ! decompress each DIMxDIM block
-            do iy = start_y, end_y
-               do ix = start_x, end_x
-                  compressed = item%compressed(frame)%ptr(ix, iy)
-
-                  max_exp = int(compressed%common_exp)
-                  x = dequantize(compressed%mantissa, max_exp, significant_bits)
-
-                  ! do concurrent(j=1:DIM) ! not sure about the safety of 'concurrent' in this case
-                  do j = 1, DIM
-
-                     ! 16x16 blocks
-                     bitmask = compressed%mask(j)
-
-                     do i = 1, DIM
-                        ! test a NaN mask
-                        if (.not. btest(bitmask, i - 1)) then ! notice that pos = i - 1
-                           ! we have a non-NaN pixel
-                           tmp = x(i, j)
-
-                           ! calculate the original pixel coordinates
-                           src_x = i + shiftl(ix - 1, BASE)
-                           src_y = j + shiftl(iy - 1, BASE)
-
-                           ! check if a pixel resides within the bounding box
-                           if ((src_x .lt. x1) .or. (src_x .gt. x2)) cycle
-                           if ((src_y .lt. y1) .or. (src_y .gt. y2)) cycle
-
-                           valid_pixel = .true.
-
-                           ! check if a pixel resides within the bounding circle
-                           if (req%beam .eq. circle) then
-                              dist2 = (cx - src_x)*(cx - src_x) + (cy - src_y)*(cy - src_y)
-                              if (dist2 > r2) valid_pixel = .false.
-                           end if
-
-                           ! we have a valid pixel
-                           if (valid_pixel) then
-                              pixel_sum = pixel_sum + tmp
-                              pixel_count = pixel_count + 1
-                           end if
-
-                           ! do we need the viewport too?
-                           if (req%image) then
-                              offset_x = 1 + src_x - x1
-                              offset_y = src_y - y1
-                              offset = offset_y*dimx + offset_x
-
-                              ! integrate (sum up) pixels and a NaN mask
-                              if ((offset .ge. 1) .and. (offset .le. npixels)) then
-                                 thread_pixels(offset, tid) = thread_pixels(offset, tid) + tmp*cdelt3
-                                 thread_mask(offset, tid) = thread_mask(offset, tid) .or. .true.
-                              end if
-                           end if
-                        end if
-                     end do
-                  end do
-               end do
-            end do
-
-            if (pixel_count .gt. 0) then
-               if (req%intensity .eq. mean) spectrum(frame) = pixel_sum/real(pixel_count)
-               if (req%intensity .eq. integrated) spectrum(frame) = pixel_sum*cdelt3
-            end if
-
-         end block
+         spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
+         &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
       end do
       !$omp END DO
       !$omp END PARALLEL
