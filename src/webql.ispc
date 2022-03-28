@@ -445,7 +445,7 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
           varying int mask = compressed[src_idx].mask[idx];
           varying int pos = k & (DIM -1); // does 'k % DIM' (modulus of 2^n)
 
-          varying bool isnan = (mask >> pos) & 1;
+          varying bool isnan = (mask >> pos) & 1;          
           partial_count += isnan ? 0 : 1;
       }
 
