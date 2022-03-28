@@ -123,7 +123,7 @@ export uniform float reduce_fixed_block(uniform struct fixed_block_t compressed[
         // find out which FORTRAN column the value is located        
         varying int idx = k >> BASE;
         varying int mask = compressed[0].mask[idx];
-        varying int pos = k % DIM;
+        varying int pos = k & (DIM -1); // does 'k % DIM' (modulus of 2^n)
 
         varying bool isnan = (mask >> pos) & 1;
         count += isnan ? 0 : 1;
