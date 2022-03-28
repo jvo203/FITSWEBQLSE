@@ -400,23 +400,23 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
 {
     uniform int cn, cm;
 
-    cn = width / 4;
-    cm = height / 4;
+    cn = width / DIM;
+    cm = height / DIM;
 
-    // the input dimensions might not be divisible by 4
-    if (width % 4 != 0)
+    // the input dimensions might not be divisible by <DIM>
+    if (width % DIM != 0)
         cn = cn + 1;
 
-    if (height % 4 != 0)
+    if (height % DIM != 0)
         cm = cm + 1;
 
     uniform int cn_start, cn_end;
     uniform int cm_start, cm_end;
 
-    cn_start = x1 / 4;
-    cn_end = x2 / 4;
-    cm_start = y1 / 4;
-    cm_end = y2 / 4;
+    cn_start = x1 / DIM;
+    cn_end = x2 / DIM;
+    cm_start = y1 / DIM;
+    cm_end = y2 / DIM;
 
     // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
 
@@ -428,7 +428,7 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
       { 
         // compressed array entry index
         uniform int src_idx = j * cn + i;
-        src_idx = 0;      
+        // src_idx = 0;
 
         uniform int emax = (int)compressed[src_idx].common_exp;
         varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
