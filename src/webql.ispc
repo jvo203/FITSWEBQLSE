@@ -5,6 +5,19 @@ typedef unsigned int16 uint16_t;
 typedef unsigned int32 uint32_t;
 typedef unsigned int64 uint64_t;
 
+/* FIXED-POINT COMPRESSION */
+#define BASE 4
+#define DIM 16
+#define BLOCK_SIZE (DIM * DIM) /* values per block */
+#define significant_bits 7
+
+struct fixed_block_t {
+    int16 mask[DIM];
+    int16 common_exp;
+    int8 mantissa[BLOCK_SIZE];
+};
+/* END OF FIXED POINT */
+
 bool isinf(float tmp)
 {
   unsigned int i = intbits(tmp) ;
@@ -382,3 +395,46 @@ export void make_video_frameF16_legacy(uniform unsigned int16 src[], uniform int
       }
     } ;  
 } ;
+
+export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+{
+    uniform int cn, cm;
+
+    cn = width / 4;
+    cm = height / 4;
+
+    // the input dimensions might not be divisible by 4
+    if (width % 4 != 0)
+        cn = cn + 1;
+
+    if (height % 4 != 0)
+        cm = cm + 1;
+
+    uniform int cn_start, cn_end;
+    uniform int cm_start, cm_end;
+
+    cn_start = x1 / 4;
+    cn_end = x2 / 4;
+    cm_start = y1 / 4;
+    cm_end = y2 / 4;
+
+    print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
+
+    varying float partial_sum = 0.0f ;
+    varying unsigned int64 partial_count = 0 ;
+
+    // TO-DO: fixed-point decompression
+
+    uniform float sum = reduce_add(partial_sum) ;
+    uniform int64 count = reduce_add(partial_count) ;
+
+    if(count > 0)
+    {
+        if(average)
+	        return sum / (float) count ;
+        else
+	        return sum * cdelt3 ;
+    }
+    else
+        return 0.0f ;
+}
