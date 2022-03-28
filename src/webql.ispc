@@ -443,13 +443,14 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
           varying int idx = k >> BASE;
           varying int mask = compressed[src_idx].mask[idx];
           varying int pos = k & (DIM -1); // does 'k % DIM' (modulus of 2^n)
+          varying bool isnan = (mask >> pos) & 1;
 
           // TO BE RE-DONE
-          varying int pixel_x = src_x + k;
-          varying int pixel_y = src_y + k;
+          varying int pixel_x = src_x + 0;
+          varying int pixel_y = src_y + 0;
 
-          varying bool isnan = (mask >> pos) & 1;
-          varying bool valid = !isnan;
+          // check if a pixel lies within the viewport window
+          varying bool valid = !isnan && (pixel_x >= x1) && (pixel_x <= x2) && (pixel_y >= y1) && (pixel_y <= y2);          
 
           cif(valid)
           {            
