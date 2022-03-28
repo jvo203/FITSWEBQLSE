@@ -427,12 +427,26 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
       for(uniform int i=cn_start; i <= cn_end; i++)
       { 
         // compressed array entry index
-        uniform int k = j * cn + i;
+        uniform int src_idx = j * cn + i;
 
-        uniform int emax = (int)compressed[k].common_exp;
+        uniform int emax = (int)compressed[src_idx].common_exp;
         varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
 
-        // TO-DO: fixed-point decompression (the moment of truth)
+        // TO-DO: fixed-point decompression (the moment of truth)      
+        foreach(k=0 ... BLOCK_SIZE)
+        {
+          // NaNs are stored as ZERO anyway
+          varying float reconstructed = scale * (float)compressed[src_idx].mantissa[k];
+          partial_sum += reconstructed;
+
+          // find out which FORTRAN column the value is located        
+          varying int idx = k >> BASE;
+          varying int mask = compressed[src_idx].mask[idx];
+          varying int pos = k & (DIM -1); // does 'k % DIM' (modulus of 2^n)
+
+          varying bool isnan = (mask >> pos) & 1;
+          partial_count += isnan ? 0 : 1;
+      }
 
       }
 
