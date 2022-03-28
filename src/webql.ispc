@@ -425,8 +425,15 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
     
     for(uniform int j=cm_start; j<= cm_end; j++)
       for(uniform int i=cn_start; i <= cn_end; i++)
-      {        
-        // TO-DO: fixed-point decompression
+      { 
+        // compressed array entry index
+        uniform int k = j * cn + i;
+
+        uniform int emax = (int)compressed[k].common_exp;
+        varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
+
+        // TO-DO: fixed-point decompression (the moment of truth)
+
       }
 
     uniform float sum = reduce_add(partial_sum) ;
