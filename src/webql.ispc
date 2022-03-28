@@ -424,6 +424,11 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
     varying unsigned int64 partial_count = 0 ;
 
     // TO-DO: fixed-point decompression
+    for(uniform int j=cm_start; j<= cm_end; j++)
+      for(uniform int i=cn_start; i <= cn_end; i++)
+      {
+        // the real stuff
+      }
 
     uniform float sum = reduce_add(partial_sum) ;
     uniform int64 count = reduce_add(partial_count) ;
