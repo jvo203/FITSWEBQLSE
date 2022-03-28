@@ -4520,7 +4520,7 @@ contains
       call system_clock(finish_t)
       elapsed = real(finish_t - start_t)/real(crate)
 
-      ! print *, 'spectrum:', spectrum
+      print *, 'spectrum:', spectrum
       print *, 'realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
 
    end subroutine realtime_image_spectrum_request_simd
