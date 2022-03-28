@@ -476,7 +476,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             void *item = get_dataset(datasetId);
 
             if (item != NULL)
-                realtime_image_spectrum_request(item, &req);
+                realtime_image_spectrum_request_simd(item, &req);
             else
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
         }
