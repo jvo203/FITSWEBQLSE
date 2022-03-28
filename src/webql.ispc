@@ -423,8 +423,8 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
     varying float partial_sum = 0.0f ;
     varying unsigned int64 partial_count = 0 ;
     
-    for(uniform int j=cm_start; j< cm_end; j++)
-      for(uniform int i=cn_start; i < cn_end; i++)
+    for(uniform int j=cm_start; j<= cm_end; j++)
+      for(uniform int i=cn_start; i <= cn_end; i++)
       { 
         // compressed array entry index
         uniform int src_idx = j * cn + i;
