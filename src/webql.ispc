@@ -442,7 +442,7 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
           // find out which FORTRAN column the value is located
           varying int idx = k >> BASE;
           varying int mask = compressed[src_idx].mask[idx];
-          varying int pos = k & (DIM -1); // does 'k % DIM' (modulus of 2^n)
+          varying int pos = k & (DIM -1); // k % DIM
           varying bool isnan = (mask >> pos) & 1;
 
           // get the coordinates within a DIMxDIM block
