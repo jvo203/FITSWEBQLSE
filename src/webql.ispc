@@ -449,7 +449,7 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
           varying int pixel_x = src_x + 0;
           varying int pixel_y = src_y + 0;
 
-          // check if a pixel lies within the viewport window
+          // check if a pixel is not a NaN and if it lies within the viewport window
           varying bool valid = !isnan && (pixel_x >= x1) && (pixel_x <= x2) && (pixel_y >= y1) && (pixel_y <= y2);          
 
           cif(valid)
