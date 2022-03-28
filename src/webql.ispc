@@ -434,20 +434,21 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
 
         // TO-DO: fixed-point decompression (the moment of truth)      
         foreach(k=0 ... BLOCK_SIZE)
-        {
-          // NaNs are stored as ZERO anyway
-          varying float reconstructed = scale * (float)compressed[src_idx].mantissa[k];
-          partial_sum += reconstructed;
-
-          // find out which FORTRAN column the value is located        
+        {          
+          // find out which FORTRAN column the value is located
           varying int idx = k >> BASE;
           varying int mask = compressed[src_idx].mask[idx];
           varying int pos = k & (DIM -1); // does 'k % DIM' (modulus of 2^n)
 
-          varying bool isnan = (mask >> pos) & 1;          
-          partial_count += isnan ? 0 : 1;
-      }
+          varying bool isnan = (mask >> pos) & 1;
+          varying bool valid = !isnan;
 
+          cif(valid)
+          {            
+            partial_sum += scale * (float)compressed[src_idx].mantissa[k];
+            partial_count += isnan ? 0 : 1;
+          }      
+        }
       }
 
     uniform float sum = reduce_add(partial_sum) ;
