@@ -428,7 +428,6 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
       { 
         // compressed array entry index
         uniform int src_idx = j * cn + i;
-        // src_idx = 0;
 
         uniform int emax = (int)compressed[src_idx].common_exp;
         varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
