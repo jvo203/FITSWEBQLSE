@@ -432,6 +432,10 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
         uniform int emax = (int)compressed[src_idx].common_exp;
         varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
 
+        // block coordinate offset (the same for each point in the block)
+        uniform int src_x = i * DIM;
+        uniform int src_y = j * DIM;
+
         // TO-DO: fixed-point decompression (the moment of truth)      
         foreach(k=0 ... BLOCK_SIZE)
         {          
@@ -439,6 +443,10 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
           varying int idx = k >> BASE;
           varying int mask = compressed[src_idx].mask[idx];
           varying int pos = k & (DIM -1); // does 'k % DIM' (modulus of 2^n)
+
+          // TO BE RE-DONE
+          varying int pixel_x = src_x + k;
+          varying int pixel_y = src_y + k;
 
           varying bool isnan = (mask >> pos) & 1;
           varying bool valid = !isnan;
