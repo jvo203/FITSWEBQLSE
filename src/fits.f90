@@ -4475,7 +4475,7 @@ contains
         logical(kind=c_bool), dimension(:), allocatable, target :: mask
         real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum
 
-        integer :: first, last, length
+        integer :: first, last, length, threshold
 
         integer :: tid, max_threads, npixels, frame
         integer(c_int) :: x1, x2, y1, y2, cx, cy, r, r2, width, height, average
@@ -4499,7 +4499,7 @@ contains
 
         if (.not. allocated(item%compressed)) then
             print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum'"
-            if (req%fd .ne. -1) call close_pipe(req%fd)
+            ! if (req%fd .ne. -1) call close_pipe(req%fd)
             return
         end if
 
@@ -4603,6 +4603,24 @@ contains
 
         ! print *, 'spectrum:', spectrum
         print *, 'realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
+
+        ! the spectrum part
+        if (req%fd .ne. -1) then
+
+            threshold = req%dx/2
+
+            if (size(spectrum) .gt. threshold) then
+                ! downsize the spectrum
+                call LTTB(spectrum, threshold, reduced_spectrum)
+                print *, 'reduced spectrum:', reduced_spectrum
+
+                ! call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
+            else
+                ! call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+            end if
+
+            ! call close_pipe(req%fd)
+        end if
 
     end subroutine realtime_image_spectrum_request_simd
 end module fits
