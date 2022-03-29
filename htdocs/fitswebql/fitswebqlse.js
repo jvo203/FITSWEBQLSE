@@ -1,5 +1,10 @@
 function get_js_version() {
-	return "JS2022-03-23.1";
+	return "JS2022-03-29.0";
+}
+
+function uuidv4() {
+	return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+		(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
 }
 
 const wasm_supported = (() => {
@@ -2606,7 +2611,8 @@ function poll_progress(datasetId, index) {
 
 function open_websocket_connection(_datasetId, index) {
 	if ("WebSocket" in window) {
-		//alert("WebSocket is supported by your Browser!");
+		// make a unique session id
+		session_id = uuidv4();
 
 		// Let us open a web socket
 		var loc = window.location, ws_uri;
@@ -2619,7 +2625,7 @@ function open_websocket_connection(_datasetId, index) {
 			ws_uri = WS_SOCKET + loc.hostname + ':' + WS_PORT;
 		}
 
-		ws_uri += ROOT_PATH + "websocket/" + encodeURIComponent(_datasetId);
+		ws_uri += ROOT_PATH + "websocket/" + encodeURIComponent(_datasetId) + "/" + session_id;
 
 		//d3.select("#welcome").append("p").text("ws_uri: " + ws_uri) ;
 
