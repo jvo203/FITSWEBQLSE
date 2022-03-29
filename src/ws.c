@@ -324,6 +324,17 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // decode the URI
         mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len + 1, 0);
 
+        char *sessionId = strrchr(uri, '/');
+        if (sessionId != NULL)
+        {
+            // zero-out the slash (get rid of it) to cancel the session id part
+            *sessionId = '\0';
+
+            sessionId++; // skip the slash character
+
+            printf("[C] WEBSOCKET SESSIONID: '%s'\n", sessionId);
+        }
+
         char *datasetId = strrchr(uri, '/');
         if (datasetId != NULL)
             datasetId++; // skip the slash character
