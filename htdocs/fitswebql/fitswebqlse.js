@@ -2612,7 +2612,7 @@ function poll_progress(datasetId, index) {
 function open_websocket_connection(_datasetId, index) {
 	if ("WebSocket" in window) {
 		// make a unique session id
-		session_id = uuidv4();
+		var session_id = uuidv4();
 
 		// Let us open a web socket
 		var loc = window.location, ws_uri;
