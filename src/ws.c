@@ -57,8 +57,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (c->is_websocket)
         {
             printf("WEBSOCKET CONNECTION CLOSED.\n");
-            printf("closing a websocket connection for c->fn_data(%s)\n", (char *)c->fn_data);
-            printf("closing a websocket connection for fn_data(%s)\n", (char *)fn_data);
+            printf("closing a websocket connection for c->fn_data(%s)/%s\n", (char *)c->fn_data, c->label);
+            // printf("closing a websocket connection for fn_data(%s)\n", (char *)fn_data);
 
             if (c->fn_data != NULL)
                 free(c->fn_data);
@@ -336,8 +336,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // copy the session id into the connection custom label
             strncpy(c->label, sessionId, sizeof(c->label));
-
-            printf("[C] CONNECTION LABEL: '%s'\n", c->label);
         }
 
         char *datasetId = strrchr(uri, '/');
