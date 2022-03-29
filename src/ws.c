@@ -335,7 +335,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             printf("[C] WEBSOCKET SESSIONID: '%s'\n", sessionId);
 
             // copy the session id into the connection custom label
-            strncpy(c->label, sessionId, sizeof(c->label));
+            strncpy(c->label, sessionId, sizeof(c->label) - 1); // leave space for the string termination character
         }
 
         char *datasetId = strrchr(uri, '/');
