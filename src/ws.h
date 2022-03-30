@@ -45,6 +45,10 @@ struct image_spectrum_request
     int fd;
 
     void *ptr;
+};
+
+struct image_spectrum_response
+{
     char *session_id;
 };
 

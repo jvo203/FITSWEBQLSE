@@ -57,7 +57,7 @@ module fits
         ! output
         integer(kind=c_int) :: fd
 
-        type(C_PTR) :: ptr, session_id
+        type(C_PTR) :: ptr
 
     end type image_spectrum_request_f
 

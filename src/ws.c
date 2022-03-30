@@ -383,7 +383,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // handle real-time spectrum/viewport requests
         if (strcmp(type, "realtime_image_spectrum") == 0)
         {
-            struct image_spectrum_request req = {0, false, medium, -1, -1, -1, -1, 0, 0, circle, integrated, 0.0, 0.0, 0.0, 0, 0.0, -1, NULL, NULL};
+            struct image_spectrum_request req = {0, false, medium, -1, -1, -1, -1, 0, 0, circle, integrated, 0.0, 0.0, 0.0, 0, 0.0, -1, NULL};
 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
@@ -492,19 +492,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (item != NULL)
             {
                 req.ptr = item;
-                req.session_id = strdup(c->label); // don't forget to release the memory
 
                 pthread_t tid;
 
                 // launch a pthread, release memory inside the thread
                 int stat = pthread_create(&tid, NULL, &realtime_image_spectrum_request_thread, &req);
 
-                if (stat != 0)
-                {
-                    // release memory
-                    free(req.session_id);
-                }
-                else
+                if (stat == 0)
                     pthread_detach(tid);
             }
             else
@@ -556,9 +550,6 @@ void *realtime_image_spectrum_request_thread(void *req)
 
     // call FORTRAN
     realtime_image_spectrum_request_simd(req);
-
-    // release memory
-    free(((struct image_spectrum_request *)req)->session_id);
 
     pthread_exit(NULL);
 }
