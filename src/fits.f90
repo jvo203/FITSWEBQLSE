@@ -4501,8 +4501,8 @@ contains
         call c_f_pointer(req%ptr, item)
 
         if (.not. allocated(item%compressed)) then
-            print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum'"
-            ! if (req%fd .ne. -1) call close_pipe(req%fd)
+            print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
+            if (req%fd .ne. -1) call close_pipe(req%fd)
             return
         end if
 
@@ -4620,7 +4620,7 @@ contains
                 ! call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
             end if
 
-            ! call close_pipe(req%fd)
+            call close_pipe(req%fd)
         end if
 
     end subroutine realtime_image_spectrum_request_simd
