@@ -1027,8 +1027,10 @@ static enum MHD_Result on_http_connection(void *cls,
                 args->fd = pipefd[1];
 
                 // create and detach the thread
-                pthread_create(&tid, NULL, &stream_molecules, args);
-                pthread_detach(tid);
+                int stat = pthread_create(&tid, NULL, &stream_molecules, args);
+
+                if (stat == 0)
+                    pthread_detach(tid);
             }
             else
                 close(pipefd[1]);
