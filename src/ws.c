@@ -490,7 +490,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             void *item = get_dataset(datasetId);
 
             if (item != NULL)
-                realtime_image_spectrum_request_simd(item, &req);
+            {
+                req.ptr = item;
+                req.session_id = strdup(c->label); // don't forget to release the memory
+
+                realtime_image_spectrum_request_simd(&req);
+            }
             else
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
         }

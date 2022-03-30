@@ -43,9 +43,12 @@ struct image_spectrum_request
 
     // output
     int fd;
+
+    void *ptr;
+    char *session_id;
 };
 
 void start_ws();
 extern void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 extern void realtime_image_spectrum_request(void *ptr, void *req);
-extern void realtime_image_spectrum_request_simd(void *ptr, void *req);
+extern void realtime_image_spectrum_request_simd(void *req);

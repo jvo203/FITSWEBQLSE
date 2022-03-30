@@ -57,6 +57,8 @@ module fits
         ! output
         integer(kind=c_int) :: fd
 
+        type(C_PTR) :: ptr, session_id
+
     end type image_spectrum_request_f
 
     !type fp16
@@ -4461,11 +4463,11 @@ contains
 
     end subroutine LTTB
 
-    subroutine realtime_image_spectrum_request_simd(ptr, user) BIND(C, name='realtime_image_spectrum_request_simd')
+    subroutine realtime_image_spectrum_request_simd(user) BIND(C, name='realtime_image_spectrum_request_simd')
         use omp_lib
         implicit none
 
-        type(C_PTR), intent(in), value :: ptr, user
+        type(C_PTR), intent(in), value :: user
 
         type(dataset), pointer :: item
         type(image_spectrum_request_f), pointer :: req
@@ -4495,15 +4497,14 @@ contains
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
-        call c_f_pointer(ptr, item)
+        call c_f_pointer(user, req)
+        call c_f_pointer(req%ptr, item)
 
         if (.not. allocated(item%compressed)) then
             print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum'"
             ! if (req%fd .ne. -1) call close_pipe(req%fd)
             return
         end if
-
-        call c_f_pointer(user, req)
 
         print *, 'realtime_image_spectrum for ', item%datasetid,&
         &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
