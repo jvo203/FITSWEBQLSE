@@ -518,14 +518,19 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 pthread_t tid;
 
-                // launch a FORTRAN pthread directly from C
+                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
                 int stat = pthread_create(&tid, NULL, &realtime_image_spectrum_request_simd, req);
 
                 if (stat == 0)
                     pthread_detach(tid);
+                else
+                    free(req);
             }
             else
+            {
+                free(req);
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
+            }
         }
 
         break;
