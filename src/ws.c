@@ -543,6 +543,7 @@ void *realtime_image_spectrum_request_thread(void *req)
     if (req == NULL)
         pthread_exit(NULL);
 
+    // call FORTRAN
     realtime_image_spectrum_request_simd(req);
 
     // release memory
