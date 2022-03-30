@@ -506,8 +506,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 }
                 else
                     pthread_detach(tid);
-
-                // realtime_image_spectrum_request_simd(&req);
             }
             else
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
@@ -538,4 +536,17 @@ void start_ws()
         mg_mgr_poll(&mgr, 1000); // Infinite event loop
 
     mg_mgr_free(&mgr);
+}
+
+void *realtime_image_spectrum_request_thread(void *req)
+{
+    if (req == NULL)
+        pthread_exit(NULL);
+
+    realtime_image_spectrum_request_simd(req);
+
+    // release memory
+    free(((struct image_spectrum_request *)req)->session_id);
+
+    pthread_exit(NULL);
 }
