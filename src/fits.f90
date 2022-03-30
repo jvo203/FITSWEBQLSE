@@ -4153,11 +4153,11 @@ contains
 
     end subroutine image_request
 
-    subroutine realtime_image_spectrum_request(ptr, user) BIND(C, name='realtime_image_spectrum_request')
+    recursive subroutine realtime_image_spectrum_request(user) BIND(C, name='realtime_image_spectrum_request')
         use omp_lib
         implicit none
 
-        type(C_PTR), intent(in), value :: ptr, user
+        type(C_PTR), intent(in), value :: user
 
         type(dataset), pointer :: item
         type(image_spectrum_request_f), pointer :: req
@@ -4191,14 +4191,13 @@ contains
 
         bSuccess = .true.
 
-        call c_f_pointer(ptr, item)
+        call c_f_pointer(user, req)
+        call c_f_pointer(req%ptr, item)
 
         if (.not. allocated(item%compressed)) then
             print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum'"
             return
         end if
-
-        call c_f_pointer(user, req)
 
         print *, 'realtime_image_spectrum for ', item%datasetid,&
         &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
