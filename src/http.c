@@ -1031,6 +1031,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 if (stat == 0)
                     pthread_detach(tid);
+                else
+                    close(pipefd[1]);
             }
             else
                 close(pipefd[1]);
@@ -1145,8 +1147,12 @@ static enum MHD_Result on_http_connection(void *cls,
             args->fd = pipefd[1];
 
             // create and detach the thread
-            pthread_create(&tid, NULL, &handle_image_spectrum_request, args);
-            pthread_detach(tid);
+            int stat = pthread_create(&tid, NULL, &handle_image_spectrum_request, args);
+
+            if (stat == 0)
+                pthread_detach(tid);
+            else
+                close(pipefd[1]);
         }
         else
             close(pipefd[1]);
@@ -1230,8 +1236,12 @@ static enum MHD_Result on_http_connection(void *cls,
             args->fd = pipefd[1];
 
             // create and detach the thread
-            pthread_create(&tid, NULL, &handle_image_request, args);
-            pthread_detach(tid);
+            int stat = pthread_create(&tid, NULL, &handle_image_request, args);
+
+            if (stat == 0)
+                pthread_detach(tid);
+            else
+                close(pipefd[1]);
         }
         else
             close(pipefd[1]);
