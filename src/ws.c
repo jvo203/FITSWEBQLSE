@@ -497,7 +497,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 pthread_t tid;
 
                 // launch a pthread, release memory inside the thread
-                int stat = pthread_create(&tid, NULL, &realtime_image_spectrum_request_simd, &req);
+                int stat = pthread_create(&tid, NULL, &realtime_image_spectrum_request_thread, &req);
 
                 if (stat != 0)
                 {
