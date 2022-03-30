@@ -538,6 +538,17 @@ void start_ws()
     mg_mgr_free(&mgr);
 }
 
+extern void close_pipe(int fd)
+{
+    int status;
+
+    // close a pipe (to be called from Fortran)
+    status = close(fd);
+
+    if (0 != status)
+        printf("[C] close_pipe status: %d\n", status);
+}
+
 void *realtime_image_spectrum_request_thread(void *req)
 {
     if (req == NULL)
