@@ -256,6 +256,14 @@ module fits
             integer(kind=c_int), value, intent(in) :: fd
         end subroutine close_pipe
 
+        ! void free()
+        subroutine free(ptr) BIND(C, name='free')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            type(c_ptr), value :: ptr
+        end Subroutine
+
         ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int npixels)
         subroutine make_image_spectrumF32(src, pixels, mask, data_mask, ignrval, datamin, datamax, cdelt3, res, npixels)&
           & BIND(C, name='make_image_spectrumF32')
@@ -4501,7 +4509,10 @@ contains
 
         if (.not. allocated(item%compressed)) then
             print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
+
             if (req%fd .ne. -1) call close_pipe(req%fd)
+            call free(user) ! release C memory
+
             return
         end if
 
@@ -4620,6 +4631,7 @@ contains
             end if
 
             call close_pipe(req%fd)
+            call free(user) ! release C memory
         end if
 
     end subroutine realtime_image_spectrum_request_simd
