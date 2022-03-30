@@ -4631,8 +4631,9 @@ contains
             end if
 
             call close_pipe(req%fd)
-            call free(user) ! release C memory
         end if
+
+        call free(user) ! release C memory
 
     end subroutine realtime_image_spectrum_request_simd
 end module fits
