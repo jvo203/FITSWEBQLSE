@@ -495,8 +495,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 pthread_t tid;
 
-                // launch a pthread, release memory inside the thread
-                int stat = pthread_create(&tid, NULL, &realtime_image_spectrum_request_thread, &req);
+                // launch a FORTRAN pthread directly from C
+                int stat = pthread_create(&tid, NULL, &realtime_image_spectrum_request_simd, &req);
 
                 if (stat == 0)
                     pthread_detach(tid);
@@ -543,13 +543,12 @@ extern void close_pipe(int fd)
         printf("[C] close_pipe status: %d\n", status);
 }
 
-void *realtime_image_spectrum_request_thread(void *req)
+void *realtime_image_spectrum_response(void *ptr)
 {
-    if (req == NULL)
+    if (ptr == NULL)
         pthread_exit(NULL);
 
-    // call FORTRAN
-    realtime_image_spectrum_request_simd(req);
+    // (...)
 
     pthread_exit(NULL);
 }

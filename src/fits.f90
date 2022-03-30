@@ -4463,7 +4463,7 @@ contains
 
     end subroutine LTTB
 
-    subroutine realtime_image_spectrum_request_simd(user) BIND(C, name='realtime_image_spectrum_request_simd')
+    recursive subroutine realtime_image_spectrum_request_simd(user) BIND(C, name='realtime_image_spectrum_request_simd')
         use omp_lib
         implicit none
 
