@@ -51,6 +51,7 @@ struct image_spectrum_response
 {
     char *session_id;
     int seq_id;
+    float timestamp;
 
     // input (the 'read' end of a Unix pipe)
     int fd;
