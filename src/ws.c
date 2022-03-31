@@ -671,7 +671,19 @@ void *realtime_image_spectrum_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    // prepare a WebSockets spectrum payload
+    uint32_t length, view_width, view_height;
+    uint32_t compressed_size;
+    size_t msg_len, view_size;
+
+    // process the received data, prepare WebSocket response(s)
+    if (offset > 8)
+    {
+        memcpy(&length, buf, sizeof(uint32_t));
+        memcpy(&compressed_size, buf + 4, sizeof(uint32_t));
+        msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + compressed_size;
+
+        printf("[C] length: %u, compressed_size: %u, msg_len: %zu\n", length, compressed_size, msg_len);
+    }
 
     // then check if there is a viewport available too
 
