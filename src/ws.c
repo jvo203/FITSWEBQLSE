@@ -549,10 +549,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     {
                         pthread_detach(tid);
 
-                        // launch a pipe read thread 'realtime_image_spectrum_response'
+                        // launch a pipe read C pthread
+                        stat = pthread_create(&tid, NULL, &realtime_image_spectrum_response, resp);
 
-                        // close the read end of the pipe
-                        close(pipefd[0]);
+                        if (stat == 0)
+                            pthread_detach(tid);
+                        else
+                        {
+                            // close the read end of the pipe
+                            close(pipefd[0]);
+
+                            // release the response memory since there is no reader
+                            free(resp->session_id);
+                            free(resp);
+                        }
                     }
                     else
                     {
@@ -625,7 +635,14 @@ void *realtime_image_spectrum_response(void *ptr)
     if (ptr == NULL)
         pthread_exit(NULL);
 
-    // (...)
+    struct image_spectrum_response *resp = (struct image_spectrum_response *)ptr;
+
+    // close the read end of the pipe
+    close(resp->fd);
+
+    // release the memory
+    free(resp->session_id);
+    free(resp);
 
     pthread_exit(NULL);
 }
