@@ -4637,6 +4637,7 @@ contains
             call close_pipe(req%fd)
         end if
 
+        nullify (req) ! disassociate the FORTRAN pointer from the C memory region
         call free(user) ! release C memory
 
     end subroutine realtime_image_spectrum_request_simd
