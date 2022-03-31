@@ -2013,6 +2013,10 @@ void *forward_fitswebql_request(void *ptr)
         printf("[C] aborting forward_fitswebql_request (no cluster nodes found)\n");
 
         g_mutex_unlock(&cluster_mtx);
+
+        // release memory
+        free(uri);
+
         pthread_exit(NULL);
     };
 
