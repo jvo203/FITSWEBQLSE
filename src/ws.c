@@ -514,15 +514,43 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (item != NULL)
             {
-                req->ptr = item;
+                int stat;
+                int pipefd[2];
 
-                pthread_t tid;
-
-                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                int stat = pthread_create(&tid, NULL, &realtime_image_spectrum_request_simd, req);
+                // open a Unix pipe
+                stat = pipe(pipefd);
 
                 if (stat == 0)
-                    pthread_detach(tid);
+                {
+                    // pass the write end of the pipe to FORTRAN
+                    req->fd = pipefd[1];
+                    req->ptr = item;
+
+                    pthread_t tid;
+
+                    // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                    stat = pthread_create(&tid, NULL, &realtime_image_spectrum_request_simd, req);
+
+                    if (stat == 0)
+                    {
+                        pthread_detach(tid);
+
+                        // launch a pipe read thread 'realtime_image_spectrum_response'
+
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+                    }
+                    else
+                    {
+                        free(req);
+
+                        // close the write end of the pipe
+                        close(pipefd[1]);
+
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+                    }
+                }
                 else
                     free(req);
             }
