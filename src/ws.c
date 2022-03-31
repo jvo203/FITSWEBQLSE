@@ -508,6 +508,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2, req.width, req.height, req.beam, req.intensity, req.frame_start, req.frame_end, req.ref_freq, req.seq_id, req.timestamp);
 
+            struct image_spectrum_response *resp = (struct image_spectrum_response *)malloc(sizeof(struct image_spectrum_response));
+
+            if (resp == NULL)
+            {
+                free(req);
+                break;
+            }
+
             // pass the request to FORTRAN
             char *datasetId = (char *)fn_data;
             void *item = get_dataset(datasetId);
@@ -522,7 +530,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 if (stat == 0)
                 {
-                    // pass the write end of the pipe to FORTRAN
+                    // pass the read end of the pipe to a C thread
+                    resp->session_id = strdup(c->label);
+                    resp->timestamp = req->timestamp;
+                    resp->seq_id = req->seq_id;
+                    resp->fd = pipefd[0];
+
+                    // pass the write end of the pipe to a FORTRAN thread
                     req->fd = pipefd[1];
                     req->ptr = item;
 
@@ -552,7 +566,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     }
                 }
                 else
+                {
                     free(req);
+                    free(resp);
+                }
             }
             else
             {
