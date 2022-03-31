@@ -713,7 +713,7 @@ void *realtime_image_spectrum_response(void *ptr)
             memcpy((char *)payload + ws_offset, buf + 8, compressed_size);
             ws_offset += compressed_size;
 
-            // pass the message over to mongoose
+            // pass the message over to mongoose via a UDP pipe (a memory pointer? or data?)
 
             // release memory
             free(payload);
