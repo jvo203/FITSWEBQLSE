@@ -41,7 +41,7 @@ struct image_spectrum_request
     int seq_id;
     float timestamp;
 
-    // output
+    // output (the 'write' end of a Unix pipe)
     int fd;
 
     void *ptr;
@@ -50,6 +50,10 @@ struct image_spectrum_request
 struct image_spectrum_response
 {
     char *session_id;
+    int seq_id;
+
+    // input (the 'read' end of a Unix pipe)
+    int fd;
 };
 
 void start_ws();
