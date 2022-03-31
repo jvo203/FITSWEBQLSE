@@ -682,7 +682,7 @@ void *realtime_image_spectrum_response(void *ptr)
         memcpy(&compressed_size, buf + 4, sizeof(uint32_t));
         msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + compressed_size;
 
-        printf("[C] length: %u, compressed_size: %u, msg_len: %zu\n", length, compressed_size, msg_len);
+        printf("[C] spectrum length: %u, compressed_size: %u, msg_len: %zu\n", length, compressed_size, msg_len);
     }
 
     // then check if there is a viewport available too
