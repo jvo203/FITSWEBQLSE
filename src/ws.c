@@ -671,6 +671,10 @@ void *realtime_image_spectrum_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
+    // prepare a WebSockets spectrum payload
+
+    // then check if there is a viewport available too
+
     // release the incoming buffer
     if (buf != NULL)
         free(buf);
