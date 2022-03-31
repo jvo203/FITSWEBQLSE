@@ -563,6 +563,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                         // close the read end of the pipe
                         close(pipefd[0]);
+
+                        // release the response memory since there is no writer
+                        free(resp->session_id);
+                        free(resp);
                     }
                 }
                 else
