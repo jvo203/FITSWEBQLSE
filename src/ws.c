@@ -606,7 +606,9 @@ void start_ws()
     char url[256] = "";
     sprintf(url, "ws://0.0.0.0:%d", options.ws_port);
 
-    struct mg_mgr mgr; // Event manager
+    struct mg_mgr mgr;          // Event manager
+    struct mg_connection *pipe; // Used to wake up event manager
+
     mg_mgr_init(&mgr); // Initialise event manager
     // mg_log_set("3");
     printf("Starting WS listener on %s\n", url);
