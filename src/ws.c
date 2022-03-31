@@ -683,6 +683,41 @@ void *realtime_image_spectrum_response(void *ptr)
         msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + compressed_size;
 
         printf("[C] spectrum length: %u, compressed_size: %u, msg_len: %zu\n", length, compressed_size, msg_len);
+
+        char *payload = malloc(msg_len);
+
+        if (payload != NULL)
+        {
+            float ts = resp->timestamp;
+            uint32_t id = resp->seq_id;
+            uint32_t msg_type = 0;
+            // 0 - spectrum, 1 - viewport,
+            // 2 - image, 3 - full, spectrum,  refresh,
+            // 4 - histogram
+            float elapsed = 0.0f;
+
+            size_t ws_offset = 0;
+
+            memcpy((char *)payload + ws_offset, &ts, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, buf + 8, compressed_size);
+            ws_offset += compressed_size;
+
+            // pass the message over to mongoose
+
+            // release memory
+            free(payload);
+        }
     }
 
     // then check if there is a viewport available too
