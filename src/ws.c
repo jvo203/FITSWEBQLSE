@@ -608,7 +608,13 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
 {
     if (ev == MG_EV_READ)
     {
-        printf("[C] PIPE: %.*s\n", c->recv.len, c->recv.buf);
+        if (c->recv.len != sizeof(struct websocket_message))
+        {
+            printf("[C] mg_pipe_callback::abort!\n");
+            return;
+        }
+
+        struct websocket_message *msg = (struct websocket_message *)c->recv.buf;
 
         struct mg_connection *t;
         for (t = c->mgr->conns; t != NULL; t = t->next)
@@ -619,6 +625,10 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
                           c->recv.buf); // Respond!
             t->label[0] = 0;            // Clear mark*/
         }
+
+        // release memory
+        free(msg->session_id);
+        free(msg->buf);
     }
 }
 
@@ -746,10 +756,11 @@ void *realtime_image_spectrum_response(void *ptr)
 
                 // pass the message over to mongoose via a UDP pipe (a memory pointer? or data?)
                 mg_mgr_wakeup(udp_pipe, msg, sizeof(struct websocket_message)); // Wakeup event manager
-            };
 
-            // release memory
-            free(payload);
+                free(msg);
+            }
+            else
+                free(payload);
         }
     }
 
