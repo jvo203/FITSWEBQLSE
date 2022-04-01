@@ -749,7 +749,7 @@ void *realtime_image_spectrum_response(void *ptr)
             // create a UDP message
             struct websocket_message msg = {strdup(resp->session_id), payload, ws_offset};
 
-            // pass the message over to mongoose via a UDP pipe (a memory pointer? or data?)
+            // pass the message over to mongoose via a UDP pipe
             mg_mgr_wakeup(udp_pipe, &msg, sizeof(struct websocket_message)); // Wakeup event manager
         }
     }
