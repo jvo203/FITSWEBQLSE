@@ -725,7 +725,7 @@ void *realtime_image_spectrum_response(void *ptr)
     {
         memcpy(&length, buf, sizeof(uint32_t));
         memcpy(&compressed_size, buf + sizeof(uint32_t), sizeof(uint32_t));
-        msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + compressed_size;
+        msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + compressed_size;
 
         printf("[C] spectrum length: %u, compressed_size: %u, msg_len: %zu\n", length, compressed_size, msg_len);
 
@@ -758,11 +758,11 @@ void *realtime_image_spectrum_response(void *ptr)
             memcpy((char *)payload + ws_offset, &length, sizeof(uint32_t));
             ws_offset += sizeof(uint32_t);
 
-            memcpy((char *)payload + ws_offset, &compressed_size, sizeof(uint32_t));
-            ws_offset += sizeof(uint32_t);
-
             memcpy((char *)payload + ws_offset, buf + 2 * sizeof(uint32_t), compressed_size);
             ws_offset += compressed_size;
+
+            if (ws_offset != msg_len)
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
             // create a UDP message
             struct websocket_message msg = {strdup(resp->session_id), payload, ws_offset};
