@@ -724,7 +724,7 @@ void *realtime_image_spectrum_response(void *ptr)
     if (offset > 8)
     {
         memcpy(&length, buf, sizeof(uint32_t));
-        memcpy(&compressed_size, buf + 4, sizeof(uint32_t));
+        memcpy(&compressed_size, buf + sizeof(uint32_t), sizeof(uint32_t));
         msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + compressed_size;
 
         printf("[C] spectrum length: %u, compressed_size: %u, msg_len: %zu\n", length, compressed_size, msg_len);
@@ -755,7 +755,13 @@ void *realtime_image_spectrum_response(void *ptr)
             memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
             ws_offset += sizeof(float);
 
-            memcpy((char *)payload + ws_offset, buf + 8, compressed_size);
+            memcpy((char *)payload + ws_offset, &length, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &compressed_size, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, buf + 2 * sizeof(uint32_t), compressed_size);
             ws_offset += compressed_size;
 
             // create a UDP message

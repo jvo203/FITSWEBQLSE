@@ -2693,6 +2693,7 @@ function open_websocket_connection(_datasetId, index) {
 						offset += 4;
 
 						var frame = new Uint8Array(received_msg, offset);
+						// console.log("computed:", computed, "spectrum length:", spectrum_len, "frame.length:", frame.length);
 
 						// FPZIP decoder part				
 						Module.ready
@@ -2701,7 +2702,7 @@ function open_websocket_connection(_datasetId, index) {
 								var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
 								let elapsed = Math.round(performance.now() - start);
 
-								//console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
+								// console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
 
 								if (spectrum.length > 0) {
 									if (!windowLeft) {
