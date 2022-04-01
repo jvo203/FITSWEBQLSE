@@ -625,6 +625,12 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         struct mg_connection *t;
         for (t = c->mgr->conns; t != NULL; t = t->next)
         {
+            if ((strcmp(t->label, msg->session_id) == 0) && (t->is_websocket))
+            {
+                printf("[C] found a WebSocket connection\n");
+                return;
+            }
+
             /*if (t->label[0] != 'W')
                 continue; // Ignore un-marked connections
             mg_http_reply(t, 200, "Host: foo.com\r\n", "%.*s\n", c->recv.len,
