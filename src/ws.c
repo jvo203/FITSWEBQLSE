@@ -58,7 +58,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         {
             printf("WEBSOCKET CONNECTION CLOSED.\n");
             printf("closing a websocket connection for %s/%s\n", (char *)c->fn_data, c->label);
-            // printf("closing a websocket connection for fn_data(%s)\n", (char *)fn_data);
+            printf("closing a websocket connection for fn_data(%s)\n", (char *)fn_data);
 
             if (c->fn_data != NULL)
                 free(c->fn_data);
@@ -597,8 +597,23 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     default:
         break;
     }
+}
 
-    (void)fn_data;
+// Pipe event handler
+static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
+{
+    if (ev == MG_EV_READ)
+    {
+        struct mg_connection *t;
+        for (t = c->mgr->conns; t != NULL; t = t->next)
+        {
+            /*if (t->label[0] != 'W')
+                continue; // Ignore un-marked connections
+            mg_http_reply(t, 200, "Host: foo.com\r\n", "%.*s\n", c->recv.len,
+                          c->recv.buf); // Respond!
+            t->label[0] = 0;            // Clear mark*/
+        }
+    }
 }
 
 void start_ws()
