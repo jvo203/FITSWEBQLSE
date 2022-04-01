@@ -746,6 +746,7 @@ void *realtime_image_spectrum_response(void *ptr)
             memcpy((char *)payload + ws_offset, buf + 8, compressed_size);
             ws_offset += compressed_size;
 
+            // create a UDP message
             struct websocket_message msg = {strdup(resp->session_id), payload, ws_offset};
 
             // pass the message over to mongoose via a UDP pipe (a memory pointer? or data?)
