@@ -625,9 +625,10 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         struct mg_connection *t;
         for (t = c->mgr->conns; t != NULL; t = t->next)
         {
+            // do not bother comparing strings for non-WebSocket connections
             if ((t->is_websocket) && (strcmp(t->label, msg->session_id) == 0))
             {
-                printf("[C] found a WebSocket connection\n");
+                printf("[C] found a WebSocket connection.\n");
                 return;
             }
 
