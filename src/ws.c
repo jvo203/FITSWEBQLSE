@@ -608,6 +608,8 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
 {
     if (ev == MG_EV_READ)
     {
+        printf("[C] PIPE: %.*s\n", c->recv.len, c->recv.buf);
+
         struct mg_connection *t;
         for (t = c->mgr->conns; t != NULL; t = t->next)
         {
@@ -735,6 +737,7 @@ void *realtime_image_spectrum_response(void *ptr)
             ws_offset += compressed_size;
 
             // pass the message over to mongoose via a UDP pipe (a memory pointer? or data?)
+            mg_mgr_wakeup(udp_pipe, "TEST", 4); // Wakeup event manager
 
             // release memory
             free(payload);
