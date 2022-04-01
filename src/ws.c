@@ -736,8 +736,17 @@ void *realtime_image_spectrum_response(void *ptr)
             memcpy((char *)payload + ws_offset, buf + 8, compressed_size);
             ws_offset += compressed_size;
 
-            // pass the message over to mongoose via a UDP pipe (a memory pointer? or data?)
-            mg_mgr_wakeup(udp_pipe, "TEST", 4); // Wakeup event manager
+            struct websocket_message *msg = (struct websocket_message *)malloc(sizeof(struct websocket_message));
+
+            if (msg != NULL)
+            {
+                msg->session_id = strdup(resp->session_id);
+                msg->buf = payload;
+                msg->len = ws_offset;
+
+                // pass the message over to mongoose via a UDP pipe (a memory pointer? or data?)
+                mg_mgr_wakeup(udp_pipe, msg, sizeof(struct websocket_message)); // Wakeup event manager
+            };
 
             // release memory
             free(payload);
