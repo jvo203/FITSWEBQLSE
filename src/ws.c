@@ -43,6 +43,9 @@ double atof2(const char *chars, const int size)
     return result;
 }
 
+// needs to be global so that various connection handlers can get access to it
+static struct mg_connection *udp_pipe; // Used to wake up event manager
+
 static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     switch (ev)
@@ -58,10 +61,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         {
             printf("WEBSOCKET CONNECTION CLOSED.\n");
             printf("closing a websocket connection for %s/%s\n", (char *)c->fn_data, c->label);
-            printf("closing a websocket connection for fn_data(%s)\n", (char *)fn_data);
 
             if (c->fn_data != NULL)
+            {
                 free(c->fn_data);
+                c->fn_data = NULL;
+            }
         }
 
         // free any user data <c->fn_data>
@@ -621,15 +626,14 @@ void start_ws()
     char url[256] = "";
     sprintf(url, "ws://0.0.0.0:%d", options.ws_port);
 
-    struct mg_mgr mgr;          // Event manager
-    struct mg_connection *pipe; // Used to wake up event manager
+    struct mg_mgr mgr; // Event manager
 
     mg_mgr_init(&mgr); // Initialise event manager
     // mg_log_set("3");
     printf("Starting WS listener on %s\n", url);
 
-    pipe = mg_mkpipe(&mgr, mg_pipe_callback, NULL);       // Create pipe
-    mg_http_listen(&mgr, url, mg_http_ws_callback, pipe); // Create HTTP listener
+    udp_pipe = mg_mkpipe(&mgr, mg_pipe_callback, NULL);   // Create pipe
+    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL); // Create HTTP listener
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 1000); // Infinite event loop
