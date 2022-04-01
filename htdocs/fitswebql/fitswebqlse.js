@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-03-30.0";
+	return "JS2022-04-01.0";
 }
 
 function uuidv4() {
@@ -2687,6 +2687,9 @@ function open_websocket_connection(_datasetId, index) {
 
 						var offset = 16;
 						var spectrum_len = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						// skip the compressed size
 						offset += 4;
 
 						var frame = new Uint8Array(received_msg, offset);
