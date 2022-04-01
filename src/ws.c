@@ -601,6 +601,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     default:
         break;
     }
+
+    (void)fn_data;
 }
 
 // Pipe event handler
@@ -629,6 +631,11 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
             if ((t->is_websocket) && (strcmp(t->label, msg->session_id) == 0))
             {
                 printf("[C] found a WebSocket connection.\n");
+                size_t sent = mg_ws_send(t, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
+
+                if (sent != msg->len)
+                    printf("[C] mg_pipe_callback::mg_ws_send failed!\n");
+
                 break;
             }
 
@@ -643,6 +650,8 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         free(msg->session_id);
         free(msg->buf);
     }
+
+    (void)fn_data;
 }
 
 void start_ws()
