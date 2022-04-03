@@ -641,6 +641,7 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         free(msg->buf);
     }
 
+    (void)ev_data;
     (void)fn_data;
 }
 
@@ -768,7 +769,12 @@ void *realtime_image_spectrum_response(void *ptr)
             struct websocket_message msg = {strdup(resp->session_id), payload, ws_offset};
 
             // pass the message over to mongoose via a UDP pipe
-            mg_mgr_wakeup(udp_pipe, &msg, sizeof(struct websocket_message)); // Wakeup event manager
+            if (!mg_mgr_wakeup(udp_pipe, &msg, sizeof(struct websocket_message))) // Wakeup event manager
+            {
+                // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                free(msg.session_id);
+                free(payload);
+            };
         }
     }
 
