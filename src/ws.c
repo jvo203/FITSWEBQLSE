@@ -632,7 +632,7 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
             // do not bother comparing strings for non-WebSocket connections
             if ((t->is_websocket) && (strcmp(t->label, msg->session_id) == 0))
             {
-                printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+                // printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
                 mg_ws_send(t, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
                 break;
             }
