@@ -621,6 +621,8 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         if (msg->len == 0)
         {
             printf("[C] mg_pipe_callback::abort (an empty buffer)!\n");
+            free(msg->session_id);
+            free(msg->buf);
             return;
         }
 
