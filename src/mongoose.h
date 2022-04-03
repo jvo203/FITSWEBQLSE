@@ -35,6 +35,8 @@ extern "C" {
 #define MG_ARCH_FREERTOS_TCP 5
 #define MG_ARCH_FREERTOS_LWIP 6
 #define MG_ARCH_AZURERTOS 7
+#define MG_ARCH_RTX_LWIP 8
+#define MG_ARCH_ZEPHYR 9
 
 #if !defined(MG_ARCH)
 #if defined(__unix__) || defined(__APPLE__)
@@ -49,6 +51,8 @@ extern "C" {
 #define MG_ARCH MG_ARCH_FREERTOS_TCP
 #elif defined(AZURE_RTOS_THREADX)
 #define MG_ARCH MG_ARCH_AZURERTOS
+#elif defined(__ZEPHYR__)
+#define MG_ARCH MG_ARCH_ZEPHYR
 #endif
 
 #if !defined(MG_ARCH)
@@ -65,6 +69,7 @@ extern "C" {
 #if MG_ARCH == MG_ARCH_CUSTOM
 #include <mongoose_custom.h>
 #endif
+
 
 
 
@@ -287,6 +292,46 @@ struct timeval {
 #endif  // MG_ARCH == MG_ARCH_FREERTOS_TCP
 
 
+#if MG_ARCH == MG_ARCH_RTX_LWIP
+
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#if defined(__GNUC__)
+#include <sys/stat.h>
+#include <sys/time.h>
+#else
+struct timeval {
+  time_t tv_sec;
+  long tv_usec;
+};
+#endif
+
+#include <lwip/sockets.h>
+
+#if LWIP_SOCKET != 1
+// Sockets support disabled in LWIP by default
+#error Set LWIP_SOCKET variable to 1 (in lwipopts.h)
+#endif
+
+#define mkdir(a, b) (-1)
+
+#ifndef MG_IO_SIZE
+#define MG_IO_SIZE 512
+#endif
+
+#ifndef MG_PATH_MAX
+#define MG_PATH_MAX 128
+#endif
+
+
+#endif
+
+
 #if MG_ARCH == MG_ARCH_UNIX
 
 #define _DARWIN_UNLIMITED_SELECT 1  // No limit on file descriptors
@@ -414,6 +459,34 @@ typedef int socklen_t;
 #ifndef MG_ENABLE_DIRLIST
 #define MG_ENABLE_DIRLIST 1
 #endif
+
+#endif
+
+
+#if MG_ARCH == MG_ARCH_ZEPHYR
+
+#include <zephyr.h>
+
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <net/socket.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <time.h>
+
+#define strerror(x) zsock_gai_strerror(x)
+#define FD_CLOEXEC 0
+#define F_SETFD 0
+#define MG_ENABLE_SSI 0
+
+int rand(void);
+int sscanf(const char *, const char *, ...);
 
 #endif
 
@@ -772,9 +845,6 @@ typedef struct {
 void mg_sha1_init(mg_sha1_ctx *);
 void mg_sha1_update(mg_sha1_ctx *, const unsigned char *data, size_t len);
 void mg_sha1_final(unsigned char digest[20], mg_sha1_ctx *);
-void mg_hmac_sha1(const unsigned char *key, size_t key_len,
-                  const unsigned char *text, size_t text_len,
-                  unsigned char out[20]);
 
 
 struct mg_connection;
@@ -883,7 +953,7 @@ bool mg_aton(struct mg_str str, struct mg_addr *addr);
 char *mg_ntoa(const struct mg_addr *addr, char *buf, size_t len);
 
 struct mg_connection *mg_mkpipe(struct mg_mgr *, mg_event_handler_t, void *);
-void mg_mgr_wakeup(struct mg_connection *pipe, const void *buf, size_t len);
+bool mg_mgr_wakeup(struct mg_connection *pipe, const void *buf, size_t len);
 
 // These functions are used to integrate with custom network stacks
 struct mg_connection *mg_alloc_conn(struct mg_mgr *);
@@ -994,7 +1064,6 @@ void mg_tls_handshake(struct mg_connection *);
 struct mg_tls {
   char *cafile;             // CA certificate path
   mbedtls_x509_crt ca;      // Parsed CA certificate
-  mbedtls_x509_crl crl;     // Parsed Certificate Revocation List
   mbedtls_x509_crt cert;    // Parsed certificate
   mbedtls_ssl_context ssl;  // SSL/TLS context
   mbedtls_ssl_config conf;  // SSL-TLS config
