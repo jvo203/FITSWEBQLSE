@@ -369,13 +369,13 @@ module fits
             type(C_PTR), value :: pixels, mask
         end subroutine write_image_spectrum
 
-        ! void write_elapsed(int fd, float* elapsed)
+        ! void write_elapsed(int fd, const float* elapsed)
         subroutine write_elapsed(fd, elapsed) BIND(C, name='write_elapsed')
             use, intrinsic :: ISO_C_BINDING
             implicit none
 
             integer(c_int), value, intent(in) :: fd
-            real(c_float), value, intent(in) :: elapsed
+            real(c_float), intent(in) :: elapsed
         end subroutine write_elapsed
 
         subroutine write_spectrum(fd, spectrum, n, prec) BIND(C, name='write_spectrum')
