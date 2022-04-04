@@ -4506,7 +4506,7 @@ contains
 
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
-        real :: elapsed
+        real(c_float) :: elapsed
 
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
