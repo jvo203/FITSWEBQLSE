@@ -4615,13 +4615,6 @@ contains
             end do
         end if
 
-        ! end the timer
-        call system_clock(finish_t)
-        elapsed = real(finish_t - start_t)/real(crate)
-
-        ! print *, 'spectrum:', spectrum
-        print *, 'realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
-
         if (req%image) then
             precision = ZFP_HIGH_PRECISION
         else
@@ -4638,9 +4631,20 @@ contains
                 call LTTB(spectrum, threshold, reduced_spectrum)
                 ! print *, 'reduced spectrum:', reduced_spectrum
 
+                ! end the timer
+                call system_clock(finish_t)
+                elapsed = real(finish_t - start_t)/real(crate)
+
                 call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
+                call write_elapsed(req%fd, elapsed)
             else
+
+                ! end the timer
+                call system_clock(finish_t)
+                elapsed = real(finish_t - start_t)/real(crate)
+
                 call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+                call write_elapsed(req%fd, elapsed)
             end if
 
             call close_pipe(req%fd)
@@ -4648,6 +4652,8 @@ contains
 
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
         call free(user) ! release C memory
+
+        print *, 'realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
 
     end subroutine realtime_image_spectrum_request_simd
 end module fits
