@@ -4608,6 +4608,7 @@ contains
         !$omp& NUM_THREADS(max_threads)
         !$omp DO
         do frame = first, last
+
             ! skip frames for which there is no data on this node
             if (.not. associated(item%compressed(frame)%ptr)) cycle
 
@@ -4618,6 +4619,12 @@ contains
                 spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
                 &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
             end if
+
+            if (req%beam .eq. circle) then
+                spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
+                &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
+            end if
+
         end do
         !$omp END DO
         !$omp END PARALLEL
