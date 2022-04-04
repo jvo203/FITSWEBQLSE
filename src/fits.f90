@@ -4633,7 +4633,7 @@ contains
 
                 ! end the timer
                 call system_clock(finish_t)
-                elapsed = real(finish_t - start_t)/real(crate)
+                elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
                 call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
                 call write_elapsed(req%fd, elapsed)
@@ -4641,7 +4641,7 @@ contains
 
                 ! end the timer
                 call system_clock(finish_t)
-                elapsed = real(finish_t - start_t)/real(crate)
+                elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
                 call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
                 call write_elapsed(req%fd, elapsed)
@@ -4653,7 +4653,7 @@ contains
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
         call free(user) ! release C memory
 
-        print *, 'realtime_image_spectrum elapsed time:', 1000*elapsed, '[ms]'
+        print *, 'realtime_image_spectrum elapsed time:', elapsed, '[ms]'
 
     end subroutine realtime_image_spectrum_request_simd
 end module fits
