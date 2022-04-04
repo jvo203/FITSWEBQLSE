@@ -137,8 +137,8 @@ extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq
 size_t chunked_write(int fd, const char *src, size_t n);
 void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
+void write_elapsed(int fd, float *elapsed);
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
-void write_elapsed(int fd, float elapsed);
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *pixels, const bool *mask);
 
 void *stream_molecules(void *args);
@@ -2717,9 +2717,10 @@ void write_header(int fd, const char *header_str, int str_len)
         free(compressed_header);
 }
 
-void write_elapsed(int fd, float elapsed)
+void write_elapsed(int fd, float *elapsed)
 {
-    chunked_write(fd, (const char *)&elapsed, sizeof(elapsed)); // elapsed compute time
+    printf("[C] computed = %f\n", *elapsed);
+    chunked_write(fd, (const char *)elapsed, sizeof(float)); // elapsed compute time
 }
 
 void write_spectrum(int fd, const float *spectrum, int n, int precision)
