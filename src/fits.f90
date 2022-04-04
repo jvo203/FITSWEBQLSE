@@ -4635,16 +4635,16 @@ contains
                 call system_clock(finish_t)
                 elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-                call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
                 call write_elapsed(req%fd, elapsed)
+                call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
             else
 
                 ! end the timer
                 call system_clock(finish_t)
                 elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-                call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
                 call write_elapsed(req%fd, elapsed)
+                call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
             end if
 
             call close_pipe(req%fd)
