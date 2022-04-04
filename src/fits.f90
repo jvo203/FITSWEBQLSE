@@ -4601,8 +4601,10 @@ contains
             ! get a current OpenMP thread (starting from 0 as in C)
             tid = 1 + OMP_GET_THREAD_NUM()
 
-            spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-            &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+            if (req%beam .eq. square) then
+                spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
+                &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+            end if
         end do
         !$omp END DO
         !$omp END PARALLEL
