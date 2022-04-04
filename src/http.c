@@ -2719,7 +2719,6 @@ void write_header(int fd, const char *header_str, int str_len)
 
 void write_elapsed(int fd, const float *elapsed)
 {
-    printf("[C] elapsed = %f\n", *elapsed);
     chunked_write(fd, (const char *)elapsed, sizeof(float)); // elapsed compute time
 }
 
