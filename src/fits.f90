@@ -4759,7 +4759,7 @@ contains
 
             call write_elapsed(req%fd, elapsed)
             call write_spectrum(req%fd, c_null_ptr, 0, precision)
-            ! call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+            call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
         else
             ! no need for downsizing
 
@@ -4769,7 +4769,7 @@ contains
 
             call write_elapsed(req%fd, elapsed)
             call write_spectrum(req%fd, c_null_ptr, 0, precision)
-            ! call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+            call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
         end if
 
         print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
