@@ -4537,7 +4537,7 @@ contains
         ! respond with a 2D viewport if req%image .eq. .true.
         if (.not. allocated(item%compressed)) then
             if (req%image) then
-                print *, "calling handle_viewport_request(item, req)"
+                call realtime_viewport_request(item, req)
             else
                 print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
             end if
@@ -4684,4 +4684,41 @@ contains
         print *, 'realtime_image_spectrum elapsed time:', elapsed, '[ms]'
 
     end subroutine realtime_image_spectrum_request_simd
+
+    subroutine realtime_viewport_request(item, req)
+        implicit none
+
+        type(dataset), pointer :: item
+        type(image_spectrum_request_f), pointer :: req
+
+        ! timing
+        integer(8) :: start_t, finish_t, crate, cmax
+        real(c_float) :: elapsed
+
+        integer :: x1, x2, y1, y2
+        integer :: dimx, dimy, native_size, viewport_size
+
+        real(kind=4), allocatable :: pixels(:, :)
+        logical(kind=1), allocatable :: mask(:, :)
+
+        ! start the timer
+        call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+        if ((.not. allocated(item%pixels)) .or. (.not. allocated(item%mask))) return
+
+        ! sanity checks
+        x1 = max(1, req%x1)
+        y1 = max(1, req%y1)
+        x2 = min(item%naxes(1), req%x2)
+        y2 = min(item%naxes(2), req%y2)
+
+        dimx = abs(x2 - x1 + 1)
+        dimy = abs(y2 - y1 + 1)
+
+        ! automatic memory allocation
+        pixels = item%pixels(x1:x2, y1:y2)
+        mask = item%mask(x1:x2, y1:y2)
+
+        print *, "handle_viewport_request(item, req)"
+    end subroutine realtime_viewport_request
 end module fits
