@@ -139,6 +139,7 @@ void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
+void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask, int precision);
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *pixels, const bool *mask);
 
 void *stream_molecules(void *args);
@@ -2803,6 +2804,117 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
     // clean up
     zfp_field_free(field);
     zfp_stream_close(zfp);
+}
+
+void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask, int precision)
+{
+    uchar *compressed_pixels = NULL;
+    char *compressed_mask = NULL;
+
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = width;
+    uint ny = height;
+
+    int mask_size, worst_size;
+    int compressed_size = 0;
+
+    if (pixels == NULL || mask == NULL)
+        return;
+
+    if (width <= 0 || height <= 0)
+        return;
+
+    // compress pixels with ZFP
+    field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    compressed_pixels = (uchar *)malloc(bufsize);
+
+    if (compressed_pixels != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)compressed_pixels, bufsize);
+
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+
+            zfp_write_header(zfp, field, ZFP_HEADER_MODE);
+
+            // compress entire array
+            zfpsize = zfp_compress(zfp, field);
+
+            if (zfpsize == 0)
+                printf("[C] ZFP compression failed!\n");
+            else
+                printf("[C] viewport pixels compressed size: %zu bytes\n", zfpsize);
+
+            bitstream_close(stream);
+
+            // the compressed part is available at compressed_pixels[0..zfpsize-1]
+        }
+
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+    }
+    else
+        printf("[C] a NULL compressed_pixels buffer!\n");
+
+    // compress mask with LZ4-HC
+    mask_size = width * height;
+
+    worst_size = LZ4_compressBound(mask_size);
+
+    compressed_mask = (char *)malloc(worst_size);
+
+    if (compressed_mask != NULL)
+    {
+        // compress the mask as much as possible
+        compressed_size = LZ4_compress_HC((const char *)mask, compressed_mask, mask_size, worst_size, LZ4HC_CLEVEL_MAX);
+
+        printf("[C] viewport mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
+    }
+
+    // pipe the compressed viewport
+    uint32_t view_width = width;
+    uint32_t view_height = height;
+    uint32_t pixels_len = zfpsize;
+    uint32_t mask_len = compressed_size;
+
+    chunked_write(fd, (const char *)&view_width, sizeof(view_width));
+    chunked_write(fd, (const char *)&view_height, sizeof(view_height));
+
+    // pixels (use a chunked version for larger tranfers)
+    chunked_write(fd, (const char *)&pixels_len, sizeof(pixels_len));
+    if (compressed_pixels != NULL)
+        chunked_write(fd, (char *)compressed_pixels, pixels_len);
+
+    // mask (use a chunked version for larger tranfers)
+    chunked_write(fd, (const char *)&mask_len, sizeof(mask_len));
+    if (compressed_mask != NULL)
+        chunked_write(fd, compressed_mask, mask_len);
+
+    // release the memory
+    if (compressed_pixels != NULL)
+        free(compressed_pixels);
+
+    if (compressed_mask != NULL)
+        free(compressed_mask);
 }
 
 void rpad(char *dst, const char *src, const char pad, const size_t sz)
