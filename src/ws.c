@@ -791,7 +791,7 @@ void *realtime_image_spectrum_response(void *ptr)
     if (offset > base + 2 * sizeof(uint32_t))
     {
         memcpy(&view_width, buf + base, sizeof(uint32_t));
-        memcpy(&view_height, buf + 8 + base + sizeof(uint32_t), sizeof(uint32_t));
+        memcpy(&view_height, buf + base + sizeof(uint32_t), sizeof(uint32_t));
         view_size = offset - base;
 
         if (view_width > 0 && view_height > 0)
