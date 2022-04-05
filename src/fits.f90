@@ -4697,6 +4697,7 @@ contains
 
         integer :: x1, x2, y1, y2
         integer :: dimx, dimy, native_size, viewport_size
+        integer(c_int) :: precision
 
         real(kind=4), allocatable :: pixels(:, :)
         logical(kind=1), allocatable :: mask(:, :)
@@ -4718,6 +4719,15 @@ contains
         ! automatic memory allocation
         pixels = item%pixels(x1:x2, y1:y2)
         mask = item%mask(x1:x2, y1:y2)
+
+        select case (req%quality)
+        case (low)
+            precision = ZFP_LOW_PRECISION
+        case (high)
+            precision = ZFP_HIGH_PRECISION
+        case default
+            precision = ZFP_MEDIUM_PRECISION
+        end select
 
         print *, "handle_viewport_request(item, req)"
     end subroutine realtime_viewport_request
