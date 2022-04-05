@@ -796,7 +796,12 @@ void *realtime_image_spectrum_response(void *ptr)
 
         if (view_width > 0 && view_height > 0)
         {
-            printf("[C] viewport elapsed: %f [ms], processing %ux%u viewport.\n", elapsed, view_width, view_height);
+            // header
+            msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
+            // body
+            msg_len += view_size;
+
+            printf("[C] viewport elapsed: %f [ms], processing %ux%u viewport, msg_len = %zu\n", elapsed, view_width, view_height, msg_len);
         }
     }
 
