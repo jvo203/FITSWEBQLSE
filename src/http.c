@@ -2736,11 +2736,19 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
 
     uint32_t length = n;
 
-    if (spectrum == NULL)
-        return;
+    if (spectrum == NULL || n <= 0)
+    {
+        // emit a zero-size spectrum
+        length = 0;
 
-    if (n <= 0)
+        uint32_t compressed_size = 0;
+
+        // transmit the data
+        chunked_write(fd, (const char *)&length, sizeof(length));                   // spectrum length after decompressing
+        chunked_write(fd, (const char *)&compressed_size, sizeof(compressed_size)); // compressed buffer size
+
         return;
+    }
 
     // spectrum with ZFP
     field = zfp_field_1d((void *)spectrum, data_type, nx);
