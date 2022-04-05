@@ -4535,7 +4535,7 @@ contains
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
 
         ! respond with a 2D viewport if req%image .eq. .true.
-        if (.not. allocated(item%compressed) .and. .not. req%image) then
+        if (.not. allocated(item%compressed)) then
             print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
 
             if (req%fd .ne. -1) call close_pipe(req%fd)
