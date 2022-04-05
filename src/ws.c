@@ -725,60 +725,64 @@ void *realtime_image_spectrum_response(void *ptr)
     float elapsed;
 
     // process the received data, prepare WebSocket response(s)
-    if (offset > 2 * sizeof(uint32_t) + sizeof(float))
+    if (offset >= 2 * sizeof(uint32_t) + sizeof(float))
     {
         memcpy(&elapsed, buf, sizeof(float));
         memcpy(&length, buf + sizeof(float), sizeof(uint32_t));
         memcpy(&compressed_size, buf + sizeof(float) + sizeof(uint32_t), sizeof(uint32_t));
 
-        msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + compressed_size;
-
-        printf("[C] spectrum length: %u, elapsed: %f [ms], compressed_size: %u, msg_len: %zu\n", length, elapsed, compressed_size, msg_len);
-
-        char *payload = malloc(msg_len);
-
-        if (payload != NULL)
+        // respond with the spectrum only if the spectrum data is available, else proceed to the viewport part
+        if (length > 0 && compressed_size > 0)
         {
-            float ts = resp->timestamp;
-            uint32_t id = resp->seq_id;
-            uint32_t msg_type = 0;
-            // 0 - spectrum, 1 - viewport,
-            // 2 - image, 3 - full, spectrum,  refresh,
-            // 4 - histogram
+            msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + compressed_size;
 
-            size_t ws_offset = 0;
+            printf("[C] spectrum length: %u, elapsed: %f [ms], compressed_size: %u, msg_len: %zu\n", length, elapsed, compressed_size, msg_len);
 
-            memcpy((char *)payload + ws_offset, &ts, sizeof(float));
-            ws_offset += sizeof(float);
+            char *payload = malloc(msg_len);
 
-            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
-            ws_offset += sizeof(uint32_t);
-
-            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
-            ws_offset += sizeof(uint32_t);
-
-            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
-            ws_offset += sizeof(float);
-
-            memcpy((char *)payload + ws_offset, &length, sizeof(uint32_t));
-            ws_offset += sizeof(uint32_t);
-
-            memcpy((char *)payload + ws_offset, buf + 2 * sizeof(uint32_t) + sizeof(float), compressed_size);
-            ws_offset += compressed_size;
-
-            if (ws_offset != msg_len)
-                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
-
-            // create a UDP message
-            struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
-
-            // pass the message over to mongoose via a UDP pipe
-            if (!mg_mgr_wakeup(udp_pipe, &msg, sizeof(struct websocket_message))) // Wakeup event manager
+            if (payload != NULL)
             {
-                // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
-                free(msg.session_id);
-                free(payload);
-            };
+                float ts = resp->timestamp;
+                uint32_t id = resp->seq_id;
+                uint32_t msg_type = 0;
+                // 0 - spectrum, 1 - viewport,
+                // 2 - image, 3 - full, spectrum,  refresh,
+                // 4 - histogram
+
+                size_t ws_offset = 0;
+
+                memcpy((char *)payload + ws_offset, &ts, sizeof(float));
+                ws_offset += sizeof(float);
+
+                memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+                ws_offset += sizeof(uint32_t);
+
+                memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+                ws_offset += sizeof(uint32_t);
+
+                memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+                ws_offset += sizeof(float);
+
+                memcpy((char *)payload + ws_offset, &length, sizeof(uint32_t));
+                ws_offset += sizeof(uint32_t);
+
+                memcpy((char *)payload + ws_offset, buf + 2 * sizeof(uint32_t) + sizeof(float), compressed_size);
+                ws_offset += compressed_size;
+
+                if (ws_offset != msg_len)
+                    printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+                // create a UDP message
+                struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+
+                // pass the message over to mongoose via a UDP pipe
+                if (!mg_mgr_wakeup(udp_pipe, &msg, sizeof(struct websocket_message))) // Wakeup event manager
+                {
+                    // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                    free(msg.session_id);
+                    free(payload);
+                };
+            }
         }
     }
 
