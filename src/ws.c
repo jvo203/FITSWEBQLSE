@@ -786,7 +786,19 @@ void *realtime_image_spectrum_response(void *ptr)
         }
     }
 
-    // then check if there is a viewport available too
+    // check if there is an optional viewport too
+    size_t base = 2 * sizeof(uint32_t) + sizeof(float) + compressed_size;
+    if (offset > base + 2 * sizeof(uint32_t))
+    {
+        memcpy(&view_width, buf + base, sizeof(uint32_t));
+        memcpy(&view_height, buf + 8 + base + sizeof(uint32_t), sizeof(uint32_t));
+        view_size = offset - base;
+
+        if (view_width > 0 && view_height > 0)
+        {
+            printf("[C] viewport elapsed: %f [ms], processing %ux%u viewport.\n", elapsed, view_width, view_height);
+        }
+    }
 
     // release the incoming buffer
     if (buf != NULL)
