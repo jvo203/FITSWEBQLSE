@@ -828,7 +828,8 @@ void *realtime_image_spectrum_response(void *ptr)
                 memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
                 ws_offset += sizeof(float);
 
-                // <view_size>
+                memcpy((char *)payload + ws_offset, buf + base, view_size);
+                ws_offset += view_size;
 
                 if (ws_offset != msg_len)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
