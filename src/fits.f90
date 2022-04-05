@@ -4697,10 +4697,11 @@ contains
 
         integer :: x1, x2, y1, y2
         integer :: dimx, dimy, native_size, viewport_size
+        real :: scale
         integer(c_int) :: precision
 
-        real(kind=4), allocatable :: pixels(:, :)
-        logical(kind=1), allocatable :: mask(:, :)
+        real(kind=4), allocatable, target :: pixels(:, :), view_pixels(:, :)
+        logical(kind=1), allocatable, target :: mask(:, :), view_mask(:, :)
 
         ! start the timer
         call system_clock(count=start_t, count_rate=crate, count_max=cmax)
@@ -4729,6 +4730,46 @@ contains
             precision = ZFP_MEDIUM_PRECISION
         end select
 
-        print *, "handle_viewport_request(item, req)"
+        native_size = dimx*dimy
+        viewport_size = req%width*req%height
+        scale = real(req%width)/real(dimx)
+
+        print *, 'native:', native_size, 'viewport:', viewport_size, 'scale:', scale
+
+        if (native_size .gt. viewport_size) then
+            ! downsize the pixels/mask from {dimx,dimy} to {req%width,req%height}
+
+            allocate (view_pixels(req%width, req%height))
+            allocate (view_mask(req%width, req%height))
+
+            if (scale .gt. 0.2) then
+                call resizeLanczos(c_loc(pixels), dimx, dimy,&
+                & c_loc(view_pixels), req%width, req%height, 3)
+            else
+                call resizeSuper(c_loc(pixels), dimx, dimy,&
+                & c_loc(view_pixels), req%width, req%height)
+            end if
+
+            call resizeNearest(c_loc(mask), dimx, dimy,&
+            & c_loc(view_mask), req%width, req%height)
+
+            ! end the timer
+            call system_clock(finish_t)
+            elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
+            call write_elapsed(req%fd, elapsed)
+            ! call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+        else
+            ! no need for downsizing
+
+            ! end the timer
+            call system_clock(finish_t)
+            elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
+            call write_elapsed(req%fd, elapsed)
+            ! call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+        end if
+
+        print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
     end subroutine realtime_viewport_request
 end module fits
