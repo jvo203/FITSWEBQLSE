@@ -4536,7 +4536,11 @@ contains
 
         ! respond with a 2D viewport if req%image .eq. .true.
         if (.not. allocated(item%compressed)) then
-            print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
+            if (req%image) then
+                print *, "calling handle_viewport_request(item, req)"
+            else
+                print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
+            end if
 
             if (req%fd .ne. -1) call close_pipe(req%fd)
             nullify (req) ! disassociate the FORTRAN pointer from the C memory region
