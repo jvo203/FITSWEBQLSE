@@ -4758,6 +4758,7 @@ contains
             elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
             call write_elapsed(req%fd, elapsed)
+            call write_spectrum(req%fd, c_null_ptr, 0, precision)
             ! call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
         else
             ! no need for downsizing
@@ -4767,6 +4768,7 @@ contains
             elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
             call write_elapsed(req%fd, elapsed)
+            call write_spectrum(req%fd, c_null_ptr, 0, precision)
             ! call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
         end if
 
