@@ -399,6 +399,16 @@ module fits
             type(C_PTR), value, intent(in) :: spectrum
         end subroutine write_spectrum
 
+        ! void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask)
+        subroutine write_viewport(fd, width, height, pixels, mask, precision) BIND(C, name='write_viewport')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(c_int), value, intent(in) :: fd, width, height, precision
+            type(C_PTR), value :: pixels, mask
+
+        end subroutine write_viewport
+
         ! size_t chunked_write(int fd, const char *src, size_t n)
         integer(kind=c_size_t) function chunked_write(fd, src, n) BIND(C, name='chunked_write')
             use, intrinsic :: ISO_C_BINDING
