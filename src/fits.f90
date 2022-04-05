@@ -4527,21 +4527,23 @@ contains
         call c_f_pointer(user, req)
         call c_f_pointer(req%ptr, item)
 
-        if (.not. allocated(item%compressed)) then
-            print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
-
-            if (req%fd .ne. -1) call close_pipe(req%fd)
-            call free(user) ! release C memory
-
-            return
-        end if
-
         print *, 'realtime_image_spectrum for ', item%datasetid,&
         &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
             &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
             &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
             &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
+
+        if (.not. allocated(item%compressed)) then
+            print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
+
+            if (req%fd .ne. -1) call close_pipe(req%fd)
+
+            nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+            call free(user) ! release C memory
+
+            return
+        end if
 
         ! get the range of the cube planes
         call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
