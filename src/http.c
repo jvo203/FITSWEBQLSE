@@ -2853,7 +2853,7 @@ void write_viewport(int fd, int width, int height, const float *pixels, const bo
         {
             zfp_stream_set_bit_stream(zfp, stream);
 
-            zfp_write_header(zfp, field, ZFP_HEADER_MODE);
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
 
             // compress entire array
             zfpsize = zfp_compress(zfp, field);
