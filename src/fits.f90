@@ -4534,11 +4534,11 @@ contains
             &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
             req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
 
+        ! respond with a 2D viewport if req%image .eq. .true.
         if (.not. allocated(item%compressed)) then
             print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
 
             if (req%fd .ne. -1) call close_pipe(req%fd)
-
             nullify (req) ! disassociate the FORTRAN pointer from the C memory region
             call free(user) ! release C memory
 
