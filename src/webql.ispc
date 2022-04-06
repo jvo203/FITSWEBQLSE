@@ -615,7 +615,8 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
 
           cif(valid)
           {                        
-            varying float tmp = scale * (float)compressed[src_idx].mantissa[k]; 
+            varying float tmp = scale * (float)compressed[src_idx].mantissa[k];
+            
             partial_sum += tmp;
             partial_count += isnan ? 0 : 1;
 
