@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-04-01.1";
+	return "JS2022-04-06.0";
 }
 
 function uuidv4() {
@@ -10010,10 +10010,14 @@ function setup_image_selection() {
 			d3.select("#" + zoom_location + "Cross").attr("opacity", 0.75);
 			d3.select("#" + zoom_location + "Beam").attr("opacity", 0.75);
 
-			var offset;
-
 			try {
-				offset = d3.pointer(event);
+				var offset = d3.pointer(event);
+
+				// there seems to be a bug in d3.js !? offset coordinates go negative !?
+				if ((offset[0] < 0) || (offset[1] < 0)) {
+					offset[0] = mouse_position.x;
+					offset[1] = mouse_position.y;
+				}
 			}
 			catch (e) {
 				console.log(e);
@@ -10167,8 +10171,9 @@ function setup_image_selection() {
 					let h2 = parseFloat(tmp.attr("height"));
 
 					if (zoom_location == "upper")
-						if (((offset[0] - w1 / 2) < (x2 + w2)) && (offset[1] - h1 / 2) < (y2 + h2))
+						if (((offset[0] - w1 / 2) < (x2 + w2)) && (offset[1] - h1 / 2) < (y2 + h2)) {
 							collision_detected = true;
+						}
 
 					if (zoom_location == "lower")
 						if (((offset[0] + w1 / 2) > x2) && (offset[1] + h1 / 2) > y2)
