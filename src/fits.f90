@@ -4652,10 +4652,10 @@ contains
       !$omp END PARALLEL
 
       ! reduce the pixels/mask locally
-      if (req%image .and. (max_threads .gt. 1)) then
-         do tid = 2, max_threads
-            thread_pixels(:, 1) = thread_pixels(:, 1) + thread_pixels(:, tid)
-            thread_mask(:, 1) = thread_mask(:, 1) .or. thread_mask(:, tid)
+      if (req%image) then
+         do tid = 1, max_threads
+            pixels(:) = thread_pixels(:, 1) + thread_pixels(:, tid)
+            mask(:) = thread_mask(:, 1) .or. thread_mask(:, tid)
          end do
       end if
 
