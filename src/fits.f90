@@ -301,6 +301,20 @@ module fits
 
       end function viewport_spectrum_circle
 
+      ! export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width,, uniform int height,&
+      ! uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+      real(c_float) function viewport_image_spectrum_rect(compressed, width, height,&
+      &x1, x2, y1, y2, average, cdelt3) BIND(C, name="viewport_image_spectrum_rect")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: compressed
+         integer(c_int), value, intent(in) :: width, height
+         integer(c_int), value, intent(in) :: x1, x2, y1, y2, average
+         real(c_float), value, intent(in) :: cdelt3
+
+      end function viewport_image_spectrum_rect
+
       ! resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
       subroutine resizeCubic(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeCubic')
          use, intrinsic :: ISO_C_BINDING
@@ -4640,14 +4654,21 @@ contains
          ! get a current OpenMP thread (starting from 0 as in C)
          tid = 1 + OMP_GET_THREAD_NUM()
 
-         if (req%beam .eq. square) then
-            spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-            &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
-         end if
+         if (.not. req%image) then
+            if (req%beam .eq. square) then
+               spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
+               &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+            end if
 
-         if (req%beam .eq. circle) then
-            spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
-            &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
+            if (req%beam .eq. circle) then
+               spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
+               &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
+            end if
+         else
+            if (req%beam .eq. square) then
+               spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
+               &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+            end if
          end if
 
       end do
