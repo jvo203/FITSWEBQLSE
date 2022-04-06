@@ -3934,6 +3934,7 @@ contains
       call add_json_integer(json, 'depth'//c_null_char, item%naxes(3))
       call add_json_integer(json, 'polarisation'//c_null_char, item%naxes(4))
       call add_json_long(json, 'filesize'//c_null_char, filesize)
+      call add_json_integer(json, 'BITPIX'//c_null_char, item%bitpix)
       call add_json_real(json, 'IGNRVAL'//c_null_char, item%ignrval)
 
       call add_json_real(json, 'CD1_1'//c_null_char, item%cd1_1)
