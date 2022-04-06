@@ -4578,7 +4578,7 @@ contains
       cx = 0.5*abs(x1 + x2)
       cy = 0.5*abs(y1 + y2)
       ! r = 0.5*min(abs(x2 - x1), abs(y2 - y1))
-      r = min(abs(cx - x1), abs(cy - y1))
+      r = min(abs(cx - x1), abs(cy - y1)) + 1
       r2 = r*r
 
       if (req%intensity .eq. mean) then
