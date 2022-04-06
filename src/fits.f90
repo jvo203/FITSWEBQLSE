@@ -4656,7 +4656,7 @@ contains
          if (.not. associated(item%compressed(frame)%ptr)) cycle
 
          ! get a current OpenMP thread (starting from 0 as in C)
-         tid = OMP_GET_THREAD_NUM() ! 0 ..
+         tid = 1 + OMP_GET_THREAD_NUM()
 
          if (.not. req%image) then
             if (req%beam .eq. square) then
@@ -4671,7 +4671,7 @@ contains
          else
             if (req%beam .eq. square) then
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-               &width, height, c_loc(thread_pixels), c_loc(thread_mask), npixels, tid, dimx, &
+               &width, height, c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), npixels, tid, dimx, &
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
             end if
          end if
@@ -4683,8 +4683,8 @@ contains
       ! reduce the pixels/mask locally
       if (req%image) then
          do tid = 1, max_threads
-            pixels(:) = thread_pixels(:, 1) + thread_pixels(:, tid)
-            mask(:) = thread_mask(:, 1) .or. thread_mask(:, tid)
+            pixels(:) = pixels(:) + thread_pixels(:, tid)
+            mask(:) = mask(:) .or. thread_mask(:, tid)
          end do
       end if
 

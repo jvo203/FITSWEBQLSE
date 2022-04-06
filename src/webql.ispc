@@ -579,7 +579,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
 
     varying float partial_sum = 0.0f ;
     varying unsigned int64 partial_count = 0 ;
-    
+
     for(uniform int j=cm_start; j<= cm_end; j++)
       for(uniform int i=cn_start; i <= cn_end; i++)
       { 
@@ -616,7 +616,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
           cif(valid)
           {                        
             varying float tmp = scale * (float)compressed[src_idx].mantissa[k];
-            
+
             partial_sum += tmp;
             partial_count += isnan ? 0 : 1;
 
