@@ -302,9 +302,9 @@ module fits
       end function viewport_spectrum_circle
 
       ! export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[],&
-      ! uniform int width, uniform int height, uniform float pixels[], uniform unsigned int8 mask[], &
+      ! uniform int width, uniform int height, uniform float pixels[], uniform unsigned int8 mask[],  uniform int stride,&
       ! uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
-      real(c_float) function viewport_image_spectrum_rect(compressed, width, height, pixels, mask,&
+      real(c_float) function viewport_image_spectrum_rect(compressed, width, height, pixels, mask, stride,&
       &x1, x2, y1, y2, average, cdelt3) BIND(C, name="viewport_image_spectrum_rect")
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -312,7 +312,7 @@ module fits
          type(C_PTR), value, intent(in) :: compressed
          integer(c_int), value, intent(in) :: width, height
          type(C_PTR), value, intent(in) :: pixels, mask
-         integer(c_int), value, intent(in) :: x1, x2, y1, y2, average
+         integer(c_int), value, intent(in) :: stride, x1, x2, y1, y2, average
          real(c_float), value, intent(in) :: cdelt3
 
       end function viewport_image_spectrum_rect
@@ -4669,7 +4669,7 @@ contains
          else
             if (req%beam .eq. square) then
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-               &width, height, c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)),&
+               &width, height, c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
             end if
          end if
