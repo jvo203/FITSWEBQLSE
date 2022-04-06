@@ -287,7 +287,7 @@ module fits
 
       end function viewport_spectrum_rect
 
-      ! export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
+      ! export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform float cdelt3)
       real(c_float) function viewport_spectrum_circle(compressed, width, height,&
       &x1, x2, y1, y2, cx, cy, r2, average, cdelt3) BIND(C, name="viewport_spectrum_circle")
          use, intrinsic :: ISO_C_BINDING
@@ -295,7 +295,8 @@ module fits
 
          type(C_PTR), value, intent(in) :: compressed
          integer(c_int), value, intent(in) :: width, height
-         integer(c_int), value, intent(in) :: x1, x2, y1, y2, cx, cy, r2, average
+         integer(c_int), value, intent(in) :: x1, x2, y1, y2, average
+         real(c_float), value, intent(in) :: cx, cy, r2
          real(c_float), value, intent(in) :: cdelt3
 
       end function viewport_spectrum_circle
@@ -4516,7 +4517,8 @@ contains
       integer :: first, last, length, threshold
 
       integer :: tid, max_threads, npixels, frame
-      integer(c_int) :: x1, x2, y1, y2, cx, cy, r, r2, width, height, average
+      integer(c_int) :: x1, x2, y1, y2, width, height, average
+      real(c_float) :: cx, cy, r, r2
       integer :: start_x, start_y, end_x, end_y
       real :: cdelt3
 
@@ -4573,9 +4575,10 @@ contains
       y2 = min(item%naxes(2), req%y2)
 
       ! calculate the centre and squared radius
-      cx = abs(x1 + x2)/2
-      cy = abs(y1 + y2)/2
-      r = min(abs(x2 - x1)/2, abs(y2 - y1)/2)
+      cx = 0.5*abs(x1 + x2)
+      cy = 0.5*abs(y1 + y2)
+      ! r = 0.5*min(abs(x2 - x1), abs(y2 - y1))
+      r = min(abs(cx - x1), abs(cy - y1))
       r2 = r*r
 
       if (req%intensity .eq. mean) then
