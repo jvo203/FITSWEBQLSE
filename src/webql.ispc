@@ -553,7 +553,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pixels[], uniform unsigned int8 mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
 {
     uniform int cn, cm;
 
@@ -615,8 +615,12 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
 
           cif(valid)
           {                        
-            partial_sum += scale * (float)compressed[src_idx].mantissa[k];
+            varying float tmp = scale * (float)compressed[src_idx].mantissa[k]; 
+            partial_sum += tmp;
             partial_count += isnan ? 0 : 1;
+
+            view_pixels[offset] += tmp * cdelt3 ;
+            view_mask[offset] |= true ;
           }      
         }
       }
