@@ -606,11 +606,15 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
           varying int pixel_x = src_x + pos; // ix = pos
           varying int pixel_y = src_y + idx; // iy = idx;
 
+          varying int offset_x = pixel_x - x1;
+          varying int offset_y = pixel_y - y1;
+          varying int offset = offset_y*stride + offset_x;
+
           // check if a pixel is not a NaN and if it lies within the viewport window
           varying bool valid = !isnan && (pixel_x >= x1) && (pixel_x <= x2) && (pixel_y >= y1) && (pixel_y <= y2);          
 
           cif(valid)
-          {            
+          {                        
             partial_sum += scale * (float)compressed[src_idx].mantissa[k];
             partial_count += isnan ? 0 : 1;
           }      
