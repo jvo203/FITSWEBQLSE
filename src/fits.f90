@@ -4673,6 +4673,12 @@ contains
                &width, height, c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
             end if
+
+            if (req%beam .eq. circle) then
+               spectrum(frame) = viewport_image_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
+               &width, height, c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
+               & x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
+            end if
          end if
 
       end do
