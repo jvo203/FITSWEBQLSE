@@ -318,6 +318,22 @@ module fits
 
       end function viewport_image_spectrum_rect
 
+      ! export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform float cdelt3)
+      real(c_float) function viewport_image_spectrum_circle(compressed, width, height, pixels, mask, &
+      &stride, x1, x2, y1, y2, cx, cy, r2, average, cdelt3) BIND(C, name="viewport_image_spectrum_circle")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: compressed
+         integer(c_int), value, intent(in) :: width, height
+         type(C_PTR), value, intent(in) :: pixels, mask
+         integer(c_int), value, intent(in) :: stride
+         integer(c_int), value, intent(in) :: x1, x2, y1, y2, average
+         real(c_float), value, intent(in) :: cx, cy, r2
+         real(c_float), value, intent(in) :: cdelt3
+
+      end function viewport_image_spectrum_circle
+
       ! resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
       subroutine resizeCubic(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeCubic')
          use, intrinsic :: ISO_C_BINDING
