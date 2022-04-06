@@ -4668,8 +4668,9 @@ contains
             end if
          else
             if (req%beam .eq. square) then
+               ! need to create FORTRAN pointers to <thread_{pixels,mask}>(:,tid)
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-               &width, height, c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
+               &width, height, c_loc(thread_pixels), c_loc(thread_mask), dimx, &
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
             end if
          end if
