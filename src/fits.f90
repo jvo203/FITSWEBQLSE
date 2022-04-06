@@ -4509,8 +4509,8 @@ contains
       type(image_spectrum_request_f), pointer :: req
 
       ! output variables
-      real(kind=c_float), allocatable, target :: pixels(:, :), view_pixels(:, :)
-      logical(kind=c_bool), allocatable, target :: mask(:, :), view_mask(:, :)
+      real(kind=c_float), allocatable, target :: pixels(:), view_pixels(:, :)
+      logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum
 
       integer :: first, last, length, threshold
@@ -4612,6 +4612,12 @@ contains
 
       ! do we need the viewport too?
       if (req%image) then
+         allocate (pixels(npixels))
+         allocate (mask(npixels))
+
+         pixels = 0.0
+         mask = .false.
+
          allocate (thread_pixels(npixels, max_threads))
          allocate (thread_mask(npixels, max_threads))
 
@@ -4653,15 +4659,15 @@ contains
          end do
       end if
 
-      if (req%image) then
-         precision = ZFP_HIGH_PRECISION
-      else
-         precision = ZFP_MEDIUM_PRECISION
-      end if
-
       if (req%fd .ne. -1) then
 
          ! the spectrum part
+
+         if (req%image) then
+            precision = ZFP_HIGH_PRECISION
+         else
+            precision = ZFP_MEDIUM_PRECISION
+         end if
 
          threshold = req%dx/2
 
@@ -4702,6 +4708,29 @@ contains
             scale = real(req%width)/real(dimx)
 
             print *, 'native:', native_size, 'viewport:', viewport_size, 'scale:', scale
+
+            if (native_size .gt. viewport_size) then
+               ! downsize the pixels/mask from {dimx,dimy} to {req%width,req%height}
+
+               allocate (view_pixels(req%width, req%height))
+               allocate (view_mask(req%width, req%height))
+
+               if (scale .gt. 0.2) then
+                  call resizeLanczos(c_loc(pixels), dimx, dimy,&
+                  & c_loc(view_pixels), req%width, req%height, 3)
+               else
+                  call resizeSuper(c_loc(pixels), dimx, dimy,&
+                  & c_loc(view_pixels), req%width, req%height)
+               end if
+
+               call resizeNearest(c_loc(mask), dimx, dimy,&
+               & c_loc(view_mask), req%width, req%height)
+
+               call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+            else
+               ! no need for downsizing
+               call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+            end if
          end if
 
          call close_pipe(req%fd)
