@@ -4660,10 +4660,7 @@ contains
 
         ! allocate and zero-out the spectrum
         allocate (spectrum(first:last))
-        allocate (cluster_spectrum(first:last))
-
         spectrum = 0.0
-        cluster_spectrum = 0.0
 
         call get_cdelt3(item, cdelt3)
 
@@ -4688,7 +4685,10 @@ contains
             thread_mask = .false.
         end if
 
-        ! launch a cluster thread
+        ! launch a cluster thread (check if the number of cluster nodes is .gt. 0)
+        allocate (cluster_spectrum(first:last))
+        cluster_spectrum = 0.0
+
         cluster_req%datasetid = c_loc(item%datasetid)
 
         ! inputs
