@@ -109,6 +109,7 @@ module fits
         type(c_ptr) :: pixels
         type(c_ptr) :: mask
         type(c_ptr) :: spectrum
+        logical(kind=c_bool) :: valid
     end type image_spectrum_request_t
 
     type dataset
@@ -4659,7 +4660,10 @@ contains
 
         ! allocate and zero-out the spectrum
         allocate (spectrum(first:last))
+        allocate (cluster_spectrum(first:last))
+
         spectrum = 0.0
+        cluster_spectrum = 0.0
 
         call get_cdelt3(item, cdelt3)
 
@@ -4683,6 +4687,23 @@ contains
             thread_pixels = 0.0
             thread_mask = .false.
         end if
+
+        ! launch a cluster thread
+        cluster_req%datasetid = c_loc(item%datasetid)
+
+        ! inputs
+
+        ! outputs
+        if (req%image) then
+            cluster_req%pixels = c_loc(pixels)
+            cluster_req%mask = c_loc(mask)
+        else
+            cluster_req%pixels = c_null_ptr
+            cluster_req%mask = c_null_ptr
+        end if
+        cluster_req%spectrum = c_loc(cluster_spectrum)
+        cluster_req%valid = .false.
+        ! end of cluster
 
         !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
         !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
