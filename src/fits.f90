@@ -4580,6 +4580,11 @@ contains
         integer(c_int) :: precision
         real :: scale
 
+        ! cluster
+        type(image_spectrum_request_t), target :: cluster_req
+        type(c_pthread_t) :: pid
+        integer :: rc
+
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
         real(c_float) :: elapsed
