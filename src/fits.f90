@@ -4692,6 +4692,16 @@ contains
         cluster_req%datasetid = c_loc(item%datasetid)
 
         ! inputs
+        cluster_req%image = req%image
+        cluster_req%x1 = req%x1
+        cluster_req%y1 = req%y1
+        cluster_req%x2 = req%x2
+        cluster_req%y2 = req%y2
+        cluster_req%beam = req%beam
+        cluster_req%intensity = req%intensity
+        cluster_req%frame_start = req%frame_start
+        cluster_req%frame_end = req%frame_end
+        cluster_req%ref_freq = req%ref_freq
 
         ! outputs
         if (req%image) then
