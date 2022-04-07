@@ -4594,7 +4594,7 @@ contains
 
          return
       end if
-
+      
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
@@ -4724,8 +4724,7 @@ contains
 
          if (size(spectrum) .gt. threshold) then
             ! downsize the spectrum
-            call LTTB(spectrum, threshold, reduced_spectrum)
-            ! print *, 'reduced spectrum:', reduced_spectrum
+            call LTTB(spectrum, threshold, reduced_spectrum)            
 
             ! end the timer
             call system_clock(finish_t)
