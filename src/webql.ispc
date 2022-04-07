@@ -620,8 +620,8 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
             partial_sum += tmp;
             partial_count += isnan ? 0 : 1;
 
-            view_pixels[offset] += tmp * cdelt3 ;
-            view_mask[offset] |= true ;
+            view_pixels[offset] += tmp * cdelt3 ;            
+            view_mask[offset] |= isnan ? false : true ;
           }      
         }
       }
@@ -698,18 +698,27 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
           varying int offset_y = pixel_y - y1;
           varying int offset = offset_y*stride + offset_x;
 
-          // check if a pixel is not a NaN and if it lies within the viewport circle
-          varying bool valid = !isnan && (dist2 <= r2);
-                     
-          cif(valid)
-          {            
-            varying float tmp = scale * (float)compressed[src_idx].mantissa[k];
+          // compute the underlying floating-point value
+          varying float tmp = scale * (float)compressed[src_idx].mantissa[k];
 
-            partial_sum += tmp;
-            partial_count += isnan ? 0 : 1;
-            
+          // check if a pixel is not a NaN and if it lies within the viewport rectangular window
+          varying bool valid = !isnan && (pixel_x >= x1) && (pixel_x <= x2) && (pixel_y >= y1) && (pixel_y <= y2);          
+
+          // the viewport (use the square, JavaScript will truncate / turn it into a circle)
+          cif(valid)
+          {                        
             view_pixels[offset] += tmp * cdelt3 ;
-            view_mask[offset] |= true ;
+            view_mask[offset] |= isnan ? false : true ;
+          }      
+
+          // further restrict the pixels to within the viewport circle
+          valid = valid && (dist2 <= r2);
+                     
+          // the spectrum
+          cif(valid)
+          {                        
+            partial_sum += tmp;
+            partial_count += isnan ? 0 : 1;            
           }      
         }
       }
