@@ -98,7 +98,12 @@ module fits
 
     type, bind(C) :: image_spectrum_request_t
         type(c_ptr) :: datasetid
-        type_c_ptr) :: pixels
+        ! input parameters
+
+        ! outputs
+        type(c_ptr) :: pixels
+        type(c_ptr) :: mask
+        type(c_ptr) :: spectrum
     end type image_spectrum_request_t
 
     type dataset
