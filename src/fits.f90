@@ -99,6 +99,11 @@ module fits
     type, bind(C) :: image_spectrum_request_t
         type(c_ptr) :: datasetid
         ! input parameters
+        logical(kind=c_bool) :: image
+        integer(c_int) :: x1, y1, x2, y2
+        integer(kind(circle)) :: beam
+        integer(kind(medium)) :: intensity
+        real(c_double) :: frame_start, frame_end, ref_freq
 
         ! outputs
         type(c_ptr) :: pixels
