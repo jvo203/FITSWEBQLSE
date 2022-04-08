@@ -4964,4 +4964,39 @@ contains
 
       print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
    end subroutine realtime_viewport_request
+
+   recursive subroutine viewport_request(user) BIND(C, name='viewport_request')
+      use omp_lib
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(image_spectrum_request_f), pointer :: req
+
+      ! timing
+      integer(8) :: start_t, finish_t, crate, cmax
+      real(c_float) :: elapsed
+
+      ! start the timer
+      call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+      call c_f_pointer(user, req)
+      call c_f_pointer(req%ptr, item)
+
+      print *, 'viewport_request for ', item%datasetid,&
+      &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
+          &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
+          &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
+          &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
+          req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
+
+      ! for now do nothing, close the connection
+      call close_pipe(req%fd)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+      return
+
+   end subroutine viewport_request
 end module fits
