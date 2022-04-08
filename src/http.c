@@ -1171,6 +1171,10 @@ static enum MHD_Result on_http_connection(void *cls,
         enum zoom_shape beam;
         enum intensity_mode intensity;
 
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
         char *datasetId = strrchr(url, '/');
 
         if (datasetId != NULL)
@@ -1256,12 +1260,72 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_not_found(connection);
 
         if (!get_ok_status(item))
-            return http_not_found(connection);
+            return http_internal_server_error(connection);
+
+        // open a pipe
+        status = pipe(pipefd);
+
+        if (0 != status)
+            return http_internal_server_error(connection);
+
+        // create a response from a pipe by passing the read end of the pipe
+        struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+        // add headers
+        MHD_add_response_header(response, "Cache-Control", "no-cache");
+        MHD_add_response_header(response, "Cache-Control", "no-store");
+        MHD_add_response_header(response, "Pragma", "no-cache");
+        MHD_add_response_header(response, "Content-Type", "application/octet-stream");
+
+        // queue the response
+        enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+        MHD_destroy_response(response);
+
+        // the code below should be run in a separate thread
+        // otherwise libmicrohttpd will not have a chance to read from the pipe
+
+        // pass the write end of the pipe to Fortran
+        // the binary response data will be generated in Fortran
+        printf("[C] calling viewport_request with the pipe file descriptor %d\n", pipefd[1]);
 
         // got all the data, prepare a request structure and pass it to FORTRAN
-        // struct http_image_spectrum_request req = {NULL, 0, image, x1, };
+        struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
 
-        return http_not_implemented(connection);
+        if (req != NULL)
+        {
+            req->dx = 0;
+            req->image = false;
+            req->quality = medium;
+            req->x1 = -1;
+            req->x2 = -1;
+            req->y1 = -1;
+            req->y2 = -1;
+            req->width = 0;
+            req->height = 0;
+            req->beam = circle;
+            req->intensity = integrated;
+            req->frame_start = 0.0;
+            req->frame_end = 0.0;
+            req->ref_freq = 0.0;
+            req->seq_id = 0;
+            req->timestamp = 0.0;
+
+            req->fd = pipefd[1];
+            req->ptr = item;
+
+            // create and detach the thread
+            int stat = pthread_create(&tid, NULL, &handle_viewport_request, req);
+
+            if (stat == 0)
+                pthread_detach(tid);
+            else
+                close(pipefd[1]);
+        }
+        else
+            close(pipefd[1]);
+
+        return ret;
     }
 
     if (strstr(url, "/image/") != NULL)
@@ -1321,8 +1385,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // the code below should be run in a separate thread
         // otherwise libmicrohttpd will not have a chance to read from the pipe
-        // alternatively the pipe capacity should be increased
-        // with fcntl(F_SETPIPE_SZ)
 
         // pass the write end of the pipe to Fortran
         // the binary response data will be generated in Fortran
