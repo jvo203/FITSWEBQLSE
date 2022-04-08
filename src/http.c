@@ -118,6 +118,7 @@ void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *args);
+extern void *viewport_request(void *req); // a FORTRAN subroutine
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 void *fetch_inner_dimensions(void *ptr);
 void *fetch_image(void *ptr);
@@ -1314,7 +1315,7 @@ static enum MHD_Result on_http_connection(void *cls,
             req->fd = pipefd[1];
             req->ptr = item;
 
-            // create and detach the thread
+            // create and detach the FORTRAN thread
             int stat = pthread_create(&tid, NULL, &viewport_request, req);
 
             if (stat == 0)
