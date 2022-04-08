@@ -3243,6 +3243,23 @@ void *fetch_realtime_image_spectrum(void *ptr)
 
     // struct image_req *req = (struct image_req *)ptr;
 
+    // printf("[C] calling fetch_realtime_image_spectrum across the cluster for '%.*s'\n", req->len, req->datasetid);
+
+    int i;
+    GSList *iterator = NULL;
+
+    g_mutex_lock(&cluster_mtx);
+
+    int handle_count = g_slist_length(cluster);
+
+    if (handle_count == 0)
+    {
+        printf("[C] aborting fetch_realtime_image_spectrum (no cluster nodes found)\n");
+
+        g_mutex_unlock(&cluster_mtx);
+        pthread_exit(NULL);
+    };
+
     pthread_exit(NULL);
 }
 
