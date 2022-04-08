@@ -121,6 +121,7 @@ void *handle_image_request(void *args);
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 void *fetch_inner_dimensions(void *ptr);
 void *fetch_image(void *ptr);
+void *fetch_realtime_image_spectrum(void *ptr);
 int submit_progress(char *root, char *datasetid, int len, int progress);
 
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, int len);
@@ -3231,6 +3232,16 @@ void *fetch_inner_dimensions(void *ptr)
     }
 
     curl_multi_cleanup(multi_handle);
+
+    pthread_exit(NULL);
+}
+
+void *fetch_realtime_image_spectrum(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    // struct image_req *req = (struct image_req *)ptr;
 
     pthread_exit(NULL);
 }
