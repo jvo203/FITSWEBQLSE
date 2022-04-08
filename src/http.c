@@ -3259,6 +3259,59 @@ void *fetch_realtime_image_spectrum(void *ptr)
         pthread_exit(NULL);
     };
 
+    CURL *handles[handle_count];
+    struct MemoryStruct chunks[handle_count];
+    CURLM *multi_handle;
+
+    int still_running = 1; /* keep number of running handles */
+
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
+    int msgs_left; /* how many messages are left */
+
+    /* Allocate one CURL handle per transfer */
+    for (i = 0; i < handle_count; i++)
+    {
+        handles[i] = curl_easy_init();
+
+        chunks[i].memory = malloc(1);
+        chunks[i].size = 0;
+        chunks[i].memory[0] = 0;
+    }
+
+    /* init a multi stack */
+    multi_handle = curl_multi_init();
+
+    for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
+    {
+    }
+
+    g_mutex_unlock(&cluster_mtx);
+
+    /* Wait for the transfers */
+    while (still_running)
+    {
+        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+        if (still_running)
+            /* wait for activity, timeout or "nothing" */
+            mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+        if (mc)
+            break;
+    }
+
+    /* See how the transfers went */
+
+    /* remove the transfers and cleanup the handles */
+    for (i = 0; i < handle_count; i++)
+    {
+        curl_multi_remove_handle(multi_handle, handles[i]);
+        curl_easy_cleanup(handles[i]);
+        free(chunks[i].memory);
+    }
+
+    curl_multi_cleanup(multi_handle);
+
     pthread_exit(NULL);
 }
 
