@@ -110,6 +110,9 @@ module fits
       type(c_ptr) :: pixels
       type(c_ptr) :: mask
       type(c_ptr) :: spectrum
+      integer(c_int) :: dimx
+      integer(c_int) :: dimy
+      integer(c_int) :: length
       logical(kind=c_bool) :: valid
    end type image_spectrum_request_t
 
@@ -4721,6 +4724,10 @@ contains
          cluster_req%mask = c_null_ptr
       end if
       cluster_req%spectrum = c_loc(cluster_spectrum)
+
+      cluster_req%dimx = dimx
+      cluster_req%dimy = dimy
+      cluster_req%length = size(cluster_spectrum)
       cluster_req%valid = .false.
 
       ! launch a thread
