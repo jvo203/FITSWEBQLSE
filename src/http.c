@@ -1167,6 +1167,9 @@ static enum MHD_Result on_http_connection(void *cls,
     {
         int x1, y1, x2, y2;
         double frame_start, frame_end, ref_freq;
+        bool image;
+        enum zoom_shape beam;
+        enum intensity_mode intensity;
 
         char *datasetId = strrchr(url, '/');
 
@@ -1225,7 +1228,30 @@ static enum MHD_Result on_http_connection(void *cls,
         else
             ref_freq = atof(ref_freq_str);
 
-        struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+        char *image_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "image");
+
+        if (image_str == NULL)
+            return http_bad_request(connection);
+        else
+            image = strcmp(image_str, "true") == 0 ? true : false;
+
+        char *beam_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "beam");
+
+        if (beam_str == NULL)
+            return http_bad_request(connection);
+        else
+            beam = strcmp(beam_str, "circle") == 0 ? circle : square;
+
+        char *intensity_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "intensity");
+
+        if (intensity_str == NULL)
+            return http_bad_request(connection);
+        else
+            intensity = strcmp(intensity_str, "integrated") == 0 ? integrated : mean;
+
+        // got all the data, prepare a request structure and pass it to FORTRAN
+
+        struct http_image_spectrum_request *req = (struct http_image_spectrum_request *)malloc(sizeof(struct http_image_spectrum_request));
 
         if (req == NULL)
             return http_internal_server_error(connection);
