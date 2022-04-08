@@ -1225,6 +1225,13 @@ static enum MHD_Result on_http_connection(void *cls,
         else
             ref_freq = atof(ref_freq_str);
 
+        struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+
+        if (req == NULL)
+            return http_internal_server_error(connection);
+
+        free(req); // the request will be freed in FORTRAN
+
         return http_not_implemented(connection);
     }
 
