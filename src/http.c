@@ -1315,12 +1315,15 @@ static enum MHD_Result on_http_connection(void *cls,
             req->ptr = item;
 
             // create and detach the thread
-            int stat = pthread_create(&tid, NULL, &handle_viewport_request, req);
+            int stat = pthread_create(&tid, NULL, &viewport_request, req);
 
             if (stat == 0)
                 pthread_detach(tid);
             else
+            {
                 close(pipefd[1]);
+                free(req);
+            }
         }
         else
             close(pipefd[1]);
@@ -1407,7 +1410,10 @@ static enum MHD_Result on_http_connection(void *cls,
             if (stat == 0)
                 pthread_detach(tid);
             else
+            {
                 close(pipefd[1]);
+                free(args);
+            }
         }
         else
             close(pipefd[1]);
