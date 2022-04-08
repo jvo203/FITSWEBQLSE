@@ -3287,6 +3287,27 @@ void *fetch_realtime_image_spectrum(void *ptr)
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
+        GString *url = g_string_new("http://");
+        g_string_append_printf(url, "%s:", (char *)iterator->data);
+        g_string_append_printf(url, "%" PRIu16 "/viewport/%.*s?x1=%d&y1=%d", options.http_port, (int)len, datasetid, req->x1, req->y1);
+        // printf("[C] URL: '%s'\n", url->str);
+
+        // set the individual URL
+        curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
+
+        /* send all data to this function  */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+        /* we pass our 'chunk' struct to the callback function */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEDATA, (void *)&(chunks[i]));
+
+        // add the individual transfer
+        curl_multi_add_handle(multi_handle, handles[i]);
+
+        g_string_free(url, TRUE);
+
+        // move on to the next cluster node
+        i++;
     }
 
     g_mutex_unlock(&cluster_mtx);
