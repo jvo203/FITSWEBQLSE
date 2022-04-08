@@ -98,6 +98,7 @@ module fits
 
    type, bind(C) :: image_spectrum_request_t
       type(c_ptr) :: datasetid
+      integer(c_int) :: len
       ! input parameters
       logical(kind=c_bool) :: image
       integer(c_int) :: x1, y1, x2, y2
@@ -4697,6 +4698,7 @@ contains
       cluster_spectrum = 0.0
 
       cluster_req%datasetid = c_loc(item%datasetid)
+      cluster_req%len = size(item%datasetid)
 
       ! inputs
       cluster_req%image = req%image
