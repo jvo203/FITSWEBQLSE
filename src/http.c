@@ -3241,9 +3241,8 @@ void *fetch_realtime_image_spectrum(void *ptr)
     if (ptr == NULL)
         pthread_exit(NULL);
 
-    // struct image_req *req = (struct image_req *)ptr;
-
-    // printf("[C] calling fetch_realtime_image_spectrum across the cluster for '%.*s'\n", req->len, req->datasetid);
+    struct http_image_spectrum_request *req = (struct http_image_spectrum_request *)ptr;
+    printf("[C] calling fetch_realtime_image_spectrum across the cluster for '%.*s'\n", req->len, req->datasetid);
 
     int i;
     GSList *iterator = NULL;
