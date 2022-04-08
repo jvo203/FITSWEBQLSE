@@ -1296,19 +1296,19 @@ static enum MHD_Result on_http_connection(void *cls,
         if (req != NULL)
         {
             req->dx = 0;
-            req->image = false;
+            req->image = image;
             req->quality = medium;
-            req->x1 = -1;
-            req->x2 = -1;
-            req->y1 = -1;
-            req->y2 = -1;
+            req->x1 = x1;
+            req->x2 = x2;
+            req->y1 = y1;
+            req->y2 = y2;
             req->width = 0;
             req->height = 0;
-            req->beam = circle;
-            req->intensity = integrated;
-            req->frame_start = 0.0;
-            req->frame_end = 0.0;
-            req->ref_freq = 0.0;
+            req->beam = beam;
+            req->intensity = intensity;
+            req->frame_start = frame_start;
+            req->frame_end = frame_end;
+            req->ref_freq = ref_freq;
             req->seq_id = 0;
             req->timestamp = 0.0;
 
