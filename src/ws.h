@@ -1,25 +1,7 @@
 #pragma once
 
 #include "mongoose.h"
-
-enum zoom_shape
-{
-    circle,
-    square
-};
-
-enum intensity_mode
-{
-    mean,
-    integrated
-};
-
-enum image_quality
-{
-    low,
-    medium,
-    high
-};
+#include "fits_types.h"
 
 struct image_spectrum_request
 {

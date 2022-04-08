@@ -40,6 +40,8 @@
 #define FPZIP_MEDIUM_PRECISION 16
 #define FPZIP_HIGH_PRECISION 24
 
+#include "fits_types.h"
+
 typedef struct
 {
     // fitswebql
@@ -119,7 +121,7 @@ struct image_req
     int height;
 };
 
-struct image_spectrum_request_http
+struct http_image_spectrum_request
 {
     char *datasetid;
     int len;
