@@ -236,6 +236,13 @@ module fits
          type(c_ptr), intent(in), value :: arg   ! a pointer to type(image_req_t)
       end subroutine fetch_image
 
+      recursive subroutine fetch_realtime_image_spectrum(arg) BIND(C)
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), intent(in), value :: arg   ! a pointer to type(image_spectrum_request_t)
+      end subroutine fetch_realtime_image_spectrum
+
       subroutine fetch_channel_range(root, datasetid, len, start, end, status,&
           &frame_min, frame_max, frame_median,&
           &mean_spectrum, integrated_spectrum) BIND(C, name='fetch_channel_range')
@@ -4713,6 +4720,13 @@ contains
       end if
       cluster_req%spectrum = c_loc(cluster_spectrum)
       cluster_req%valid = .false.
+
+      ! launch a thread
+      rc = c_pthread_create(thread=pid, &
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
+                            arg=c_loc(cluster_req))
+
       ! end of cluster
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
@@ -4754,6 +4768,9 @@ contains
       end do
       !$omp END DO
       !$omp END PARALLEL
+
+      ! join a thread
+      rc = c_pthread_join(pid, c_null_ptr)
 
       ! reduce the pixels/mask locally
       if (req%image) then
