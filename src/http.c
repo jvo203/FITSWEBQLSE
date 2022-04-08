@@ -1166,6 +1166,7 @@ static enum MHD_Result on_http_connection(void *cls,
     if (strstr(url, "/viewport/") != NULL)
     {
         int x1, y1, x2, y2;
+        double frame_start, frame_end, ref_freq;
 
         char *datasetId = strrchr(url, '/');
 
@@ -1202,6 +1203,27 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
         else
             y2 = atoi(y2str);
+
+        char *frame_start_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame_start");
+
+        if (frame_start_str == NULL)
+            return http_bad_request(connection);
+        else
+            frame_start = atof(frame_start_str);
+
+        char *frame_end_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame_end");
+
+        if (frame_end_str == NULL)
+            return http_bad_request(connection);
+        else
+            frame_end = atof(frame_end_str);
+
+        char *ref_freq_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ref_freq");
+
+        if (ref_freq_str == NULL)
+            return http_bad_request(connection);
+        else
+            ref_freq = atof(ref_freq_str);
 
         return http_not_implemented(connection);
     }
