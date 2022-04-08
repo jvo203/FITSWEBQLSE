@@ -1163,6 +1163,28 @@ static enum MHD_Result on_http_connection(void *cls,
         return ret;
     }
 
+    if (strstr(url, "/viewport/") != NULL)
+    {
+        int x1, y1, x2, y2;
+
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+            datasetId++; // skip the slash character
+
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+        char *x1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x1");
+
+        if (x1str == NULL)
+            return http_bad_request(connection);
+        else
+            x1 = atoi(x1str);
+
+        return http_not_implemented(connection);
+    }
+
     if (strstr(url, "/image/") != NULL)
     {
         int width, height;
