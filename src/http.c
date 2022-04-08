@@ -3292,7 +3292,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
         g_string_append_printf(url, "%" PRIu16 "/viewport/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&frame_start=%f&frame_end=%f&ref_freq=%f", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->frame_start, req->frame_end, req->ref_freq);
         g_string_append_printf(url, "&image=%s", req->image ? "true" : "false");                            // image
         g_string_append_printf(url, "&beam=%s", req->beam == circle ? "circle" : "square");                 // beam
-        g_string_append_printf(url, "&intensity%s=", req->intensity == integrated ? "integrated" : "mean"); // intensity
+        g_string_append_printf(url, "&intensity=%s", req->intensity == integrated ? "integrated" : "mean"); // intensity
         printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
