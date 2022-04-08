@@ -1249,8 +1249,16 @@ static enum MHD_Result on_http_connection(void *cls,
         else
             intensity = strcmp(intensity_str, "integrated") == 0 ? integrated : mean;
 
-        // got all the data, prepare a request structure and pass it to FORTRAN
+        // do we have a dataset?
+        void *item = get_dataset(datasetId);
 
+        if (item == NULL)
+            return http_not_found(connection);
+
+        if (!get_ok_status(item))
+            return http_not_found(connection);
+
+        // got all the data, prepare a request structure and pass it to FORTRAN
         struct http_image_spectrum_request *req = (struct http_image_spectrum_request *)malloc(sizeof(struct http_image_spectrum_request));
 
         if (req == NULL)
