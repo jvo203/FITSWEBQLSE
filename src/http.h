@@ -143,6 +143,10 @@ struct http_image_spectrum_request
     float *pixels;
     bool *mask;
     float *spectrum;
+
+    int dimx;
+    int dimy;
+    int length;
     bool valid;
 };
 
