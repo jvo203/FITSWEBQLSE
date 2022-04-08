@@ -128,7 +128,6 @@ struct http_image_spectrum_request
 
     // input
     bool image;
-    enum image_quality quality;
     int x1;
     int y1;
     int x2;
