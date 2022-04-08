@@ -3290,7 +3290,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "/viewport/%.*s?x1=%d&y1=%d", options.http_port, (int)len, datasetid, req->x1, req->y1);
-        // printf("[C] URL: '%s'\n", url->str);
+        printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
