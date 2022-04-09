@@ -4985,6 +4985,12 @@ contains
         !     &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
         !    req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
 
+        if (req%fd .ne. -1) then
+            call close_pipe(req%fd)
+            nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+            call free(user) ! release C memory
+        end if
+
         ! for now do nothing, close the connection
         call close_pipe(req%fd)
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
