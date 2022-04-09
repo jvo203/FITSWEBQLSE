@@ -4975,6 +4975,8 @@ contains
         type(dataset), pointer :: item
         type(image_spectrum_request_f), pointer :: req
 
+        integer :: first, last, length
+
         call c_f_pointer(user, req)
         call c_f_pointer(req%ptr, item)
 
@@ -4990,6 +4992,13 @@ contains
             nullify (req) ! disassociate the FORTRAN pointer from the C memory region
             call free(user) ! release C memory
         end if
+
+        ! get the range of the cube planes
+        call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
+
+        length = last - first + 1
+
+        print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
 
         ! for now do nothing, close the connection
         call close_pipe(req%fd)
