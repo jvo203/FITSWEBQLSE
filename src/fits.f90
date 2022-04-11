@@ -4989,6 +4989,7 @@ contains
 
         if (req%fd .ne. -1) then
             call close_pipe(req%fd)
+            nullify (item)
             nullify (req) ! disassociate the FORTRAN pointer from the C memory region
             call free(user) ! release C memory
         end if
@@ -5002,6 +5003,7 @@ contains
 
         ! for now do nothing, close the connection
         call close_pipe(req%fd)
+        nullify (item)
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
         call free(user) ! release C memory
         return
