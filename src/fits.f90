@@ -4995,6 +4995,7 @@ contains
         real(kind=c_float), dimension(:), allocatable, target :: spectrum
 
         integer :: dimx, dimy
+        integer(kind=c_size_t) :: written
 
         call c_f_pointer(user, req)
         call c_f_pointer(req%ptr, item)
@@ -5126,7 +5127,22 @@ contains
         !$omp END PARALLEL
 
         if (valid) then
-            print *, 'valid:', valid
+            ! send spectrum
+            written = chunked_write(req%fd, c_loc(spectrum), sizeof(spectrum))
+
+            if (req%image) then
+                ! reduce the pixels/mask locally
+                do tid = 1, max_threads
+                    pixels(:) = pixels(:) + thread_pixels(:, tid)
+                    mask(:) = mask(:) .or. thread_mask(:, tid)
+                end do
+
+                ! send pixels
+                written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+
+                ! send mask
+                written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+            end if
         end if
 
         ! for now do nothing, close the connection
