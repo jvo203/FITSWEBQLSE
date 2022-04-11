@@ -3545,7 +3545,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
                     req->valid = true;
                 }
 
-                // are there pixels and a mask
+                // are there pixels and a mask?
                 if (chunks[idx].size == spectrum_size + pixels_size + mask_size)
                 {
                     size_t plane_size = req->dimx * req->dimy;
