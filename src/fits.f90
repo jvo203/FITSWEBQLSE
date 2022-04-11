@@ -4623,6 +4623,7 @@ contains
             end if
 
             if (req%fd .ne. -1) call close_pipe(req%fd)
+            nullify (item)
             nullify (req) ! disassociate the FORTRAN pointer from the C memory region
             call free(user) ! release C memory
 
@@ -4868,6 +4869,7 @@ contains
             call close_pipe(req%fd)
         end if
 
+        nullify (item)
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
         call free(user) ! release C memory
 
@@ -4987,11 +4989,12 @@ contains
         !     &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
         !    req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
 
-        if (req%fd .ne. -1) then
-            call close_pipe(req%fd)
+        if (req%fd .eq. -1) then
             nullify (item)
             nullify (req) ! disassociate the FORTRAN pointer from the C memory region
             call free(user) ! release C memory
+
+            return
         end if
 
         ! get the range of the cube planes
