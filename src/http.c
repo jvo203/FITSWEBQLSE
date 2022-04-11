@@ -3548,7 +3548,20 @@ void *fetch_realtime_image_spectrum(void *ptr)
                 // are there pixels and a mask
                 if (chunks[idx].size == spectrum_size + pixels_size + mask_size)
                 {
-                    printf("[C] fetch_realtime_image_spectrum gathering the pixels/mask..\n");
+                    size_t plane_size = req->dimx * req->dimy;
+
+                    const float *pixels = (float *)&(chunks[idx].memory[offset]);
+                    offset += pixels_size;
+
+                    const bool *mask = (bool *)&(chunks[idx].memory[offset]);
+                    offset += mask_size;
+
+                    // gather pixels / mask
+                    for (size_t i = 0; i < plane_size; i++)
+                    {
+                        req->pixels[i] += pixels[i];
+                        req->mask[i] |= mask[i];
+                    }
                 }
             }
         }
@@ -3687,13 +3700,11 @@ void *fetch_image(void *ptr)
 
                 if (received == expected)
                 {
-                    size_t i;
-
                     const float *pixels = (float *)&(chunks[idx].memory[0]);
                     const bool *mask = (bool *)&(chunks[idx].memory[sizeof(float) * plane_size]);
 
-                    // reduce pixels / mask
-                    for (i = 0; i < plane_size; i++)
+                    // gather pixels / mask
+                    for (size_t i = 0; i < plane_size; i++)
                     {
                         req->pixels[i] += pixels[i];
                         req->mask[i] |= mask[i];
