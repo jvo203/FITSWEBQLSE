@@ -1,0 +1,5 @@
+1. sudo apt-get install build-essential
+2. sudo apt-get install cmake
+3. sudo apt-get install gfortran
+4. sudo apt install nasm
+5. 
