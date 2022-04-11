@@ -1291,7 +1291,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // pass the write end of the pipe to Fortran
         // the binary response data will be generated in Fortran
-        printf("[C] calling viewport_request with the pipe file descriptor %d\n", pipefd[1]);
+        // printf("[C] calling viewport_request with the pipe file descriptor %d\n", pipefd[1]);
 
         // got all the data, prepare a request structure and pass it to FORTRAN
         struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
