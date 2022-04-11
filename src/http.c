@@ -3544,6 +3544,12 @@ void *fetch_realtime_image_spectrum(void *ptr)
                     offset += spectrum_size;
                     req->valid = true;
                 }
+
+                // are there pixels and a mask
+                if (chunks[idx].size == spectrum_size + pixels_size + mask_size)
+                {
+                    printf("[C] fetch_realtime_image_spectrum gathering the pixels/mask..\n");
+                }
             }
         }
     }
