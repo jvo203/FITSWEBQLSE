@@ -4793,11 +4793,13 @@ contains
         ! combine the spectra from other cluster nodes (if any)
         if (cluster_req%valid) then
             print *, "adding the cluster spectrum"
-            spectrum = spectrum + cluster_spectrum
 
             do i = 1, size(spectrum)
                 print *, i, spectrum(i), cluster_spectrum(i)
             end do
+
+            spectrum = spectrum + cluster_spectrum
+
         end if
 
         if (req%fd .ne. -1) then
