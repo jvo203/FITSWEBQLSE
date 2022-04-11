@@ -4791,7 +4791,10 @@ contains
         end if
 
         ! combine the spectra from other cluster nodes (if any)
-        if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
+        if (cluster_req%valid) then
+            print *, "adding the cluster spectrum"
+            spectrum = spectrum + cluster_spectrum
+        end if
 
         if (req%fd .ne. -1) then
 
