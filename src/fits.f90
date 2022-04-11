@@ -4792,7 +4792,7 @@ contains
 
         ! combine the spectra from other cluster nodes (if any)
         if (cluster_req%valid) then
-            print *, "adding the cluster spectrum"
+            print *, "adding the cluster spectrum", cluster_spectrum
             spectrum = spectrum + cluster_spectrum
         end if
 
