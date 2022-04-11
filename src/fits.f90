@@ -5079,6 +5079,56 @@ contains
             thread_mask = .false.
         end if
 
+        valid = .false.
+
+        !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
+        !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
+        !$omp& REDUCTION(.or.:valid)&
+        !$omp& NUM_THREADS(max_threads)
+        !$omp DO
+        do frame = first, last
+
+            ! skip frames for which there is no data on this node
+            if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+            ! there is at least one frame with data
+            valid = .true.
+
+            ! get a current OpenMP thread (starting from 0 as in C)
+            tid = 1 + OMP_GET_THREAD_NUM()
+
+            if (.not. req%image) then
+                if (req%beam .eq. square) then
+                    spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
+                    &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+                end if
+
+                if (req%beam .eq. circle) then
+                    spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
+                    &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
+                end if
+            else
+                if (req%beam .eq. square) then
+                    spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
+                    &width, height, c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
+                    &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+                end if
+
+                if (req%beam .eq. circle) then
+                    spectrum(frame) = viewport_image_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
+                    &width, height, c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
+                    & x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
+                end if
+            end if
+
+        end do
+        !$omp END DO
+        !$omp END PARALLEL
+
+        if (valid) then
+            print *, 'valid:', valid
+        end if
+
         ! for now do nothing, close the connection
         call close_pipe(req%fd)
         nullify (item)
