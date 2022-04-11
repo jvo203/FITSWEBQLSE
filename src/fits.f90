@@ -5126,19 +5126,24 @@ contains
         !$omp END DO
         !$omp END PARALLEL
 
+        ! interleave transmitting data via a network with array reductions
         if (valid) then
             ! send spectrum
             written = chunked_write(req%fd, c_loc(spectrum), sizeof(spectrum))
 
             if (req%image) then
-                ! reduce the pixels/mask locally
+                ! reduce the pixels locally
                 do tid = 1, max_threads
                     pixels(:) = pixels(:) + thread_pixels(:, tid)
-                    mask(:) = mask(:) .or. thread_mask(:, tid)
                 end do
 
                 ! send pixels
                 written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+
+                ! reduce the mask locally
+                do tid = 1, max_threads
+                    mask(:) = mask(:) .or. thread_mask(:, tid)
+                end do
 
                 ! send mask
                 written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
