@@ -3539,7 +3539,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
                     const float *spectrum = (float *)&(chunks[idx].memory[offset]);
 
                     for (int i = 0; i < req->length; i++)
-                        req->spectrum[i] = spectrum[i];
+                        req->spectrum[i] += spectrum[i];
 
                     offset += spectrum_size;
                     req->valid = true;
