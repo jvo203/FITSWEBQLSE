@@ -4985,6 +4985,15 @@ contains
         integer :: start_x, start_y, end_x, end_y
         real :: cdelt3
 
+        real(kind=c_float), allocatable, target :: thread_pixels(:, :)
+        logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
+        logical :: valid
+
+        ! output variables
+        real(kind=c_float), allocatable, target :: pixels(:)
+        logical(kind=c_bool), allocatable, target :: mask(:)
+        real(kind=c_float), dimension(:), allocatable, target :: spectrum
+
         integer :: dimx, dimy
 
         call c_f_pointer(user, req)
