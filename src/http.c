@@ -3519,6 +3519,28 @@ void *fetch_realtime_image_spectrum(void *ptr)
             curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
             printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+
+            // reduce (gather) the spectrum, pixels and mask
+            if (response_code == 200 && chunks[idx].size > 0)
+            {
+                size_t spectrum_size = req->length * sizeof(float);
+                size_t pixels_size = req->dimx * req->dimy * sizeof(float);
+                size_t mask_size = req->dimx * req->dimy * sizeof(uint8);
+
+                size_t offset = 0;
+
+                // do we have the spectrum?
+                if (chunks[idx].size >= spectrum_size)
+                {
+                    const float *spectrum = (float *)&(chunks[idx].memory[offset]);
+
+                    for (int i = 0; i < req->length; i++)
+                        req->spectrum[i] = spectrum[i];
+
+                    offset += spectrum_size;
+                    req->valid = true;
+                }
+            }
         }
     }
 
