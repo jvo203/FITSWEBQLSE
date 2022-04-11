@@ -4979,6 +4979,14 @@ contains
 
         integer :: first, last, length
 
+        integer :: max_threads, frame, tid, npixels
+        integer(c_int) :: x1, x2, y1, y2, width, height, average
+        real(c_float) :: cx, cy, r, r2
+        integer :: start_x, start_y, end_x, end_y
+        real :: cdelt3
+
+        integer :: dimx, dimy
+
         call c_f_pointer(user, req)
         call c_f_pointer(req%ptr, item)
 
@@ -5002,7 +5010,31 @@ contains
 
         length = last - first + 1
 
-        print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+        ! sanity checks
+        x1 = max(1, req%x1)
+        y1 = max(1, req%y1)
+        x2 = min(item%naxes(1), req%x2)
+        y2 = min(item%naxes(2), req%y2)
+
+        ! calculate the centre and squared radius
+        cx = 0.5*abs(x1 + x2)
+        cy = 0.5*abs(y1 + y2)
+        ! r = 0.5*min(abs(x2 - x1), abs(y2 - y1))
+        r = min(abs(cx - x1), abs(cy - y1)) + 1
+        r2 = r*r
+
+        if (req%intensity .eq. mean) then
+            average = 1
+        else
+            average = 0
+        end if
+
+        width = item%naxes(1)
+        height = item%naxes(2)
+
+        dimx = abs(x2 - x1 + 1)
+        dimy = abs(y2 - y1 + 1)
+        npixels = dimx*dimy
 
         ! for now do nothing, close the connection
         call close_pipe(req%fd)
