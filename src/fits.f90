@@ -5062,9 +5062,6 @@ contains
         ! get #physical cores (ignore HT)
         max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
-        print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y,&
-        & "max_threads:", max_threads
-
         ! do we need the viewport too?
         if (req%image) then
             allocate (pixels(npixels))
@@ -5150,7 +5147,7 @@ contains
             end if
         end if
 
-        ! for now do nothing, close the connection
+        ! close the connection, release pointers
         call close_pipe(req%fd)
         nullify (item)
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
