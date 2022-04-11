@@ -4794,9 +4794,9 @@ contains
         if (cluster_req%valid) then
             print *, "adding the cluster spectrum"
 
-            do i = 1, size(spectrum)
-                print *, i, spectrum(i), cluster_spectrum(i)
-            end do
+            ! do i = 1, size(spectrum)
+            !     print *, i, spectrum(i), cluster_spectrum(i)
+            ! end do
 
             spectrum = spectrum + cluster_spectrum
 
