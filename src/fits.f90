@@ -3066,7 +3066,7 @@ contains
                         datamax = item%datamax
 
                         thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
-                        item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), ignrval, datamin, datamax)
+                        item%compressed(frame)%ptr => to_fixed(thread_arr(:, :), frame_min, frame_max, ignrval, datamin, datamax)
 
                         ! for disk load balancing (not just CPU), try to serialise a frame whilst reading FITS
                         if (associated(item%compressed(frame)%ptr)) then
