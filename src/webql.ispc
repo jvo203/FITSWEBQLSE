@@ -457,7 +457,7 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
             varying float pixel = scale * (float)compressed[src_idx].mantissa[k];
 
             // recover the original range            
-            partial_sum += pmin + (exp(pixel) - 0.5f)*(pmax - pmin);
+            partial_sum += pixel; // pmin + (exp(pixel) - 0.5f)*(pmax - pmin);
             partial_count += isnan ? 0 : 1;
           }      
         }
@@ -539,7 +539,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
             varying float pixel = scale * (float)compressed[src_idx].mantissa[k];
 
             // recover the original range            
-            partial_sum += pmin + (exp(pixel) - 0.5f)*(pmax - pmin);
+            partial_sum += pixel; // pmin + (exp(pixel) - 0.5f)*(pmax - pmin);
             partial_count += isnan ? 0 : 1;
           }      
         }
@@ -624,7 +624,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
             varying float tmp = scale * (float)compressed[src_idx].mantissa[k];
 
             // recover the original range
-            tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
+            // tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
 
             partial_sum += tmp;
             partial_count += isnan ? 0 : 1;
@@ -711,7 +711,7 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
           varying float tmp = scale * (float)compressed[src_idx].mantissa[k];
 
           // recover the original range
-          tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
+          // tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
 
           // check if a pixel is not a NaN and if it lies within the viewport rectangular window
           varying bool valid = !isnan && (pixel_x >= x1) && (pixel_x <= x2) && (pixel_y >= y1) && (pixel_y <= y2);          
