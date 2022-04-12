@@ -3072,9 +3072,6 @@ contains
                         if (associated(item%compressed(frame)%ptr)) then
                            call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
                         end if
-
-                        ! item%compressed(frame)%ptr => to_fixed(reshape(thread_buffer(:, tid), item%naxes(1:2)),&
-                        ! & ignrval, datamin, datamax)
                      end block
                   end if
                end do
