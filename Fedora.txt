@@ -178,7 +178,9 @@ ulimit -s unlimited
 
 	to .bashrc and re-login
 
-10. Examples running using one MPI host:
+10. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
+
+11. Examples running using one MPI host:
 
 	mpiexec -silent-abort -n 1 ./fitswebqlse
 
