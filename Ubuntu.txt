@@ -44,3 +44,6 @@
         source /opt/intel/oneapi/setvars.sh
 
     to .bashrc and re-login
+
+# 16. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
+
