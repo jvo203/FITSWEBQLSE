@@ -533,7 +533,10 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
                      
           cif(valid)
           {            
-            partial_sum += scale * (float)compressed[src_idx].mantissa[k];
+            varying float pixel = scale * (float)compressed[src_idx].mantissa[k];
+
+            // recover the original range            
+            partial_sum += pmin + (exp(pixel) - 0.5f)*(pmax - pmin);
             partial_count += isnan ? 0 : 1;
           }      
         }
