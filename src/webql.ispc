@@ -396,7 +396,7 @@ export void make_video_frameF16_legacy(uniform unsigned int16 src[], uniform int
     } ;  
 } ;
 
-export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
 {
     uniform int cn, cm;
 
@@ -454,7 +454,10 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
 
           cif(valid)
           {            
-            partial_sum += scale * (float)compressed[src_idx].mantissa[k];
+            varying float pixel = scale * (float)compressed[src_idx].mantissa[k];
+
+            // recover the original range            
+            partial_sum += pmin + (exp(pixel) - 0.5f)*(pmax - pmin);
             partial_count += isnan ? 0 : 1;
           }      
         }
@@ -556,7 +559,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
 {
     uniform int cn, cm;
 
@@ -619,6 +622,9 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
           cif(valid)
           {                        
             varying float tmp = scale * (float)compressed[src_idx].mantissa[k];
+
+            // recover the original range
+            tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
 
             partial_sum += tmp;
             partial_count += isnan ? 0 : 1;
