@@ -315,13 +315,14 @@ module fits
       end function viewport_spectrum_rect
 
       ! export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform float cdelt3)
-      real(c_float) function viewport_spectrum_circle(compressed, width, height,&
+      real(c_float) function viewport_spectrum_circle(compressed, width, height, pmin, pmax,&
       &x1, x2, y1, y2, cx, cy, r2, average, cdelt3) BIND(C, name="viewport_spectrum_circle")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
          type(C_PTR), value, intent(in) :: compressed
          integer(c_int), value, intent(in) :: width, height
+         real(c_float), value, intent(in) :: pmin, pmax
          integer(c_int), value, intent(in) :: x1, x2, y1, y2, average
          real(c_float), value, intent(in) :: cx, cy, r2
          real(c_float), value, intent(in) :: cdelt3
@@ -4756,7 +4757,8 @@ contains
 
             if (req%beam .eq. circle) then
                spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
-               &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
+               &width, height, item%frame_min(frame), item%frame_max(frame), &
+               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
             end if
          else
             if (req%beam .eq. square) then
@@ -5100,7 +5102,8 @@ contains
 
             if (req%beam .eq. circle) then
                spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
-               &width, height, x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
+               &width, height, item%frame_min(frame), item%frame_max(frame), &
+               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
             end if
          else
             if (req%beam .eq. square) then
