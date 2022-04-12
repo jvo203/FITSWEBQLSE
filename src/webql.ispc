@@ -643,7 +643,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform float cdelt3)
 {
     uniform int cn, cm;
 
@@ -703,6 +703,9 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
 
           // compute the underlying floating-point value
           varying float tmp = scale * (float)compressed[src_idx].mantissa[k];
+
+          // recover the original range
+          tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
 
           // check if a pixel is not a NaN and if it lies within the viewport rectangular window
           varying bool valid = !isnan && (pixel_x >= x1) && (pixel_x <= x2) && (pixel_y >= y1) && (pixel_y <= y2);          
