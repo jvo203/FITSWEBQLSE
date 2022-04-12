@@ -16,12 +16,13 @@ module fixed_array
         integer(kind=1), dimension(DIM, DIM) :: mantissa
     end type fixed_block
 contains
-    function to_fixed(x, ignrval, datamin, datamax) result(compressed)
+    function to_fixed(x, pmin, pmax, ignrval, datamin, datamax) result(compressed)
         use, intrinsic :: ieee_arithmetic
         implicit none
 
         integer(kind=4) :: n, m ! input dimensions
         real(kind=4), dimension(:, :), intent(in) :: x
+        real, intent(in) :: pmin, pmax
         real, intent(in) :: ignrval, datamin, datamax
 
         integer(kind=4) :: i, j
@@ -61,6 +62,9 @@ contains
                 y2 = min(m, shiftl(j, BASE))
 
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
+
+                ! pre-condition the input array
+                input = log(0.5 + (input - pmin)/(pmax - pmin))
 
                 call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
             end block
