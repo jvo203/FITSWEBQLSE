@@ -64,7 +64,8 @@ contains
                 input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
                 ! pre-condition the input array
-                input = log(0.5 + (input - pmin)/(pmax - pmin))
+                ! or not
+                ! input = log(0.5 + (input - pmin)/(pmax - pmin))
 
                 call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
             end block
