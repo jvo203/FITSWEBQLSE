@@ -2,6 +2,7 @@
 
 #include "mongoose.h"
 #include "fits_types.h"
+#include <pthread.h>
 
 struct websocket_session
 {
@@ -13,6 +14,7 @@ struct websocket_session
     bool bDownsize;
 
     // x265 (TO-DO)
+    pthread_mutex_t *vid_mtx;
     // encoder
     // picture
     // param
