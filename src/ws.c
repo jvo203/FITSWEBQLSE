@@ -651,7 +651,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 // 'height'
                 if (strncmp(wm->data.ptr + koff, "\"height\"", klen) == 0)
-                    width = atoi2(wm->data.ptr + voff, vlen);
+                    height = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'flux'
                 if (strncmp(wm->data.ptr + koff, "\"flux\"", klen) == 0)
