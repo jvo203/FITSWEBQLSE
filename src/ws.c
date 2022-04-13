@@ -665,11 +665,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     session->flux = strndup(wm->data.ptr + voff, vlen);
             }
 
-            printf("[C]::init_video width: %d, height: %d, flux: %s\n", width, height, session->flux);
+            // printf("[C]::init_video width: %d, height: %d, flux: %s\n", width, height, session->flux);
 
             get_inner_dimensions(item, width, height, &fits_width, &fits_height, &inner_width, &inner_height, &scale);
-
-            printf("[C] FITS dims: %d x %d, INNER: %d x %d, SCALE: %f\n", fits_width, fits_height, inner_width, inner_height, scale);
+            // printf("[C] FITS dims: %d x %d, INNER: %d x %d, SCALE: %f\n", fits_width, fits_height, inner_width, inner_height, scale);
 
             if (scale < 1.0f)
             {
@@ -685,7 +684,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             };
 
             // send a JSON reply
-            // TO-DO ...
+            char *json = NULL;
+
+            mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%Q,%Q:%d,%Q:%d,%Q:%d,%Q:%d}", "type", "init_video", "width", session->image_width, "height", session->image_height, "padded_width", session->image_width, "padded_height", session->image_height);
+
+            free(json);
+
+            // x265 (TO-DO)
 
             break;
         }
