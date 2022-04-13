@@ -4014,15 +4014,18 @@ contains
    end function get_json
 
 
-   subroutine get_inner_dimensions(ptr, width, height) bind(c)
+   subroutine get_inner_dimensions(ptr, fits_width, fits_height, inner_width, inner_height) bind(c)
       type(C_PTR), intent(in), value :: ptr
-      integer(c_int), intent(out) :: width, height
+      integer(c_int), intent(out) :: fits_width, fits_height, inner_width, inner_height
       type(dataset), pointer :: item      
 
       call c_f_pointer(ptr, item)
 
-      width = 0
-      height = 0
+      fits_width = item%naxes(1)
+      fits_height = item%naxes(2)
+
+      inner_width = 0
+      inner_height = 0
 
    end subroutine get_inner_dimensions
 
