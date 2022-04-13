@@ -57,17 +57,22 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     }
     case MG_EV_CLOSE:
     {
+        // only WebSocket sessions allocate memory for user data
         if (c->is_websocket)
         {
-            printf("WEBSOCKET CONNECTION CLOSED.\n");
-            printf("closing a websocket connection for %s/%s\n", (char *)c->fn_data, c->label);
-        }
 
-        // free any user data <c->fn_data>
-        if (c->fn_data != NULL)
-        {
-            free(c->fn_data);
-            c->fn_data = NULL;
+            if (c->fn_data != NULL)
+            {
+                struct websocket_session *session = (struct websocket_session *)c->fn_data;
+                printf("closing a websocket connection for %s/%s\n", session->datasetid, c->label);
+
+                free(session->datasetid);
+                free(session);
+
+                c->fn_data = NULL;
+            }
+
+            printf("WEBSOCKET CONNECTION CLOSED.\n");
         }
 
         break;
@@ -358,7 +363,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             c->is_closing = 1; // Tell mongoose to close this connection
         else
         {
-            c->fn_data = strdup(datasetId);
+            struct websocket_session *session = (struct websocket_session *)malloc(sizeof(struct websocket_session));
+
+            if (session != NULL)
+            {
+                session->datasetid = strdup(datasetId);
+                c->fn_data = session;
+            }
         }
 
         break;
@@ -523,7 +534,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             }
 
             // pass the request to FORTRAN
-            char *datasetId = (char *)fn_data;
+            char *datasetId = NULL;
+
+            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+            if (session != NULL)
+                datasetId = session->datasetid;
+
             void *item = get_dataset(datasetId);
 
             if (item != NULL)
