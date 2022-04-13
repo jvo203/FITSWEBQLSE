@@ -670,6 +670,19 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             printf("[C] FITS dims: %d x %d, INNER: %d x %d, SCALE: %f\n", fits_width, fits_height, inner_width, inner_height, scale);
 
+            if (scale < 1.0f)
+            {
+                session->image_width = roundf(scale * fits_width);
+                session->image_height = roundf(scale * fits_height);
+                session->bDownsize = true;
+            }
+            else
+            {
+                session->image_width = fits_width;
+                session->image_height = fits_height;
+                session->bDownsize = false;
+            };
+
             // send a JSON reply
             // TO-DO ...
 
