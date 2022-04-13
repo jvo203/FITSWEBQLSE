@@ -687,6 +687,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             char *json = NULL;
 
             mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%Q,%Q:%d,%Q:%d,%Q:%d,%Q:%d}", "type", "init_video", "width", session->image_width, "height", session->image_height, "padded_width", session->image_width, "padded_height", session->image_height);
+            mg_ws_send(c, json, strlen(json), WEBSOCKET_OP_TEXT);
 
             free(json);
 
