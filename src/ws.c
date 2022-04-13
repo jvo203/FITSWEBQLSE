@@ -537,6 +537,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             char *datasetId = NULL;
 
             struct websocket_session *session = (struct websocket_session *)c->fn_data;
+
             if (session != NULL)
                 datasetId = session->datasetid;
 
@@ -612,6 +613,35 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(req);
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
             }
+
+            break;
+        }
+
+        // init_video
+        if (strcmp(type, "init_video") == 0)
+        {
+            // width, height, flux, last_video_seq, last_frame_idx, bitrate, fps
+
+            char *datasetId = NULL;
+
+            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+
+            if (session != NULL)
+                datasetId = session->datasetid;
+
+            void *item = get_dataset(datasetId);
+
+            if (item == NULL)
+            {
+
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                break;
+            }
+
+            // send a JSON reply
+            // TO-DO ...
+
+            break;
         }
 
         break;
