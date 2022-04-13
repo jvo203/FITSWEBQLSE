@@ -622,8 +622,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // init_video
         if (strcmp(type, "init_video") == 0)
         {
-            // width, height, flux, last_video_seq, last_frame_idx, bitrate, fps
-
             char *datasetId = NULL;
 
             struct websocket_session *session = (struct websocket_session *)c->fn_data;
@@ -639,6 +637,28 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
                 break;
             }
+
+            // read the parameters
+            // last_video_seq, last_frame_idx, bitrate, fps
+            int width = 0;
+            int height = 0;
+
+            for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // 'width'
+                if (strncmp(wm->data.ptr + koff, "\"width\"", klen) == 0)
+                    width = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'height'
+                if (strncmp(wm->data.ptr + koff, "\"height\"", klen) == 0)
+                    width = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'flux'
+                if (strncmp(wm->data.ptr + koff, "\"flux\"", klen) == 0)
+                    session->flux = strndup(wm->data.ptr + voff, vlen);
+            }
+
+            printf("[C] width: %d, height: %d, flux: %s\n", width, height, session->flux);
 
             // send a JSON reply
             // TO-DO ...
