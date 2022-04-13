@@ -4013,6 +4013,19 @@ contains
       get_json = json
    end function get_json
 
+
+   subroutine get_inner_dimensions(ptr, width, height) bind(c)
+      type(C_PTR), intent(in), value :: ptr
+      integer(c_int), intent(out) :: width, height
+      type(dataset), pointer :: item      
+
+      call c_f_pointer(ptr, item)
+
+      width = 0
+      height = 0
+
+   end subroutine get_inner_dimensions
+
    subroutine image_spectrum_request(ptr, width, height, precision, fetch_data, fd) bind(C)
       use :: unix_pthread
       use, intrinsic :: iso_c_binding
