@@ -6,6 +6,7 @@
 struct websocket_session
 {
     char *datasetid;
+    char *flux;
 
     // x265 (TO-DO)
     // encoder

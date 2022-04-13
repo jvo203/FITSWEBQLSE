@@ -67,6 +67,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 printf("closing a websocket connection for %s/%s\n", session->datasetid, c->label);
 
                 free(session->datasetid);
+                free(session->flux);
                 free(session);
 
                 c->fn_data = NULL;
@@ -368,6 +369,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (session != NULL)
             {
                 session->datasetid = strdup(datasetId);
+                session->flux = NULL;
                 c->fn_data = session;
             }
         }
