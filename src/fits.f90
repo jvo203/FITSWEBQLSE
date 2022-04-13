@@ -4014,18 +4014,54 @@ contains
    end function get_json
 
 
-   subroutine get_inner_dimensions(ptr, fits_width, fits_height, inner_width, inner_height) bind(c)
+   subroutine get_inner_dimensions(ptr, width, height, fits_width, fits_height, inner_width, inner_height, scale) bind(c)
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
       type(C_PTR), intent(in), value :: ptr
+      integer(c_int), intent(in), value :: width, height
       integer(c_int), intent(out) :: fits_width, fits_height, inner_width, inner_height
-      type(dataset), pointer :: item      
+      real(c_float), intent(out) :: scale
+
+      type(dataset), pointer :: item
+
+      type(inner_dims_req_t), target :: inner_dims
+      type(c_pthread_t) :: pid
+      integer :: rc
 
       call c_f_pointer(ptr, item)
+
 
       fits_width = item%naxes(1)
       fits_height = item%naxes(2)
 
-      inner_width = 0
-      inner_height = 0
+      ! fill-in the inner_dims
+      inner_dims%datasetid = c_loc(item%datasetid)
+      inner_dims%len = size(item%datasetid)
+      inner_dims%width = 0
+      inner_dims%height = 0
+
+      ! launch a pthread
+      rc = c_pthread_create(thread=pid, &
+         attr=c_null_ptr, &
+         start_routine=c_funloc(fetch_inner_dimensions), &
+         arg=c_loc(inner_dims))
+
+
+      ! get the inner image bounding box (excluding NaNs)
+      call inherent_image_dimensions(item, inner_width, inner_height)
+
+      ! join a thread
+      rc = c_pthread_join(pid, c_null_ptr)
+
+      ! synchronise with the cluster
+      inner_width = max(inner_width, inner_dims%width)
+      inner_height = max(inner_height, inner_dims%height)
+
+
+      ! get the downscaled image dimensions
+      scale = get_image_scale(width, height, inner_width, inner_height)
 
    end subroutine get_inner_dimensions
 
