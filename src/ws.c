@@ -646,6 +646,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             int width = 0;
             int height = 0;
 
+            int inner_width, inner_height;
+            float scale;
+
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
                 // 'width'
@@ -661,7 +664,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     session->flux = strndup(wm->data.ptr + voff, vlen);
             }
 
-            printf("[C] width: %d, height: %d, flux: %s\n", width, height, session->flux);
+            printf("[C]::init_video width: %d, height: %d, flux: %s\n", width, height, session->flux);
 
             // send a JSON reply
             // TO-DO ...
