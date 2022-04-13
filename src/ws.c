@@ -622,13 +622,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // init_video
         if (strcmp(type, "init_video") == 0)
         {
-            char *datasetId = NULL;
-
             struct websocket_session *session = (struct websocket_session *)c->fn_data;
 
-            if (session != NULL)
-                datasetId = session->datasetid;
+            if (session == NULL)
+                break;
 
+            char *datasetId = session->datasetid;
             void *item = get_dataset(datasetId);
 
             if (item == NULL)
