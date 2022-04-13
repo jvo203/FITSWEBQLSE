@@ -4032,7 +4032,6 @@ contains
 
       call c_f_pointer(ptr, item)
 
-
       fits_width = item%naxes(1)
       fits_height = item%naxes(2)
 
@@ -4048,7 +4047,6 @@ contains
          start_routine=c_funloc(fetch_inner_dimensions), &
          arg=c_loc(inner_dims))
 
-
       ! get the inner image bounding box (excluding NaNs)
       call inherent_image_dimensions(item, inner_width, inner_height)
 
@@ -4058,7 +4056,6 @@ contains
       ! synchronise with the cluster
       inner_width = max(inner_width, inner_dims%width)
       inner_height = max(inner_height, inner_dims%height)
-
 
       ! get the downscaled image dimensions
       scale = get_image_scale(width, height, inner_width, inner_height)
