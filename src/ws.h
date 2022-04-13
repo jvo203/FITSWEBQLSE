@@ -40,3 +40,4 @@ extern void submit_channel_range(void *ptr, int idx, int progress, float *frame_
 extern void *realtime_image_spectrum_request(void *req);
 extern void *realtime_image_spectrum_request_simd(void *req);
 void *realtime_image_spectrum_response(void *ptr);
+extern void get_inner_dimensions(void *ptr, int *width, int *height);
