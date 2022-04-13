@@ -3,6 +3,13 @@
 #include "mongoose.h"
 #include "fits_types.h"
 
+struct websocket_session
+{
+    char *datasetid;
+
+    // x265 (TO-DO)
+};
+
 struct image_spectrum_response
 {
     char *session_id;

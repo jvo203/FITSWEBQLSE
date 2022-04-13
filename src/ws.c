@@ -357,7 +357,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (!dataset_exists(datasetId))
             c->is_closing = 1; // Tell mongoose to close this connection
         else
+        {
             c->fn_data = strdup(datasetId);
+        }
 
         break;
     }
