@@ -8,6 +8,9 @@ struct websocket_session
     char *datasetid;
 
     // x265 (TO-DO)
+    // encoder
+    // picture
+    // param
 };
 
 struct image_spectrum_response
