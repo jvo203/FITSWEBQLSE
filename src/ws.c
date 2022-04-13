@@ -69,9 +69,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 free(session->datasetid);
                 free(session->flux);
-
-                if (session->vid_mtx != NULL)
-                    pthread_mutex_destroy(session->vid_mtx);
+                pthread_mutex_destroy(&session->vid_mtx);
 
                 free(session);
 
@@ -378,9 +376,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->image_width = 0;
                 session->image_height = 0;
                 session->bDownsize = false;
-
-                if (pthread_mutex_init(session->vid_mtx, NULL) != 0)
-                    session->vid_mtx = NULL;
+                pthread_mutex_init(&session->vid_mtx, NULL);
 
                 c->fn_data = session;
             }

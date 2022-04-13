@@ -14,7 +14,7 @@ struct websocket_session
     bool bDownsize;
 
     // x265 (TO-DO)
-    pthread_mutex_t *vid_mtx;
+    pthread_mutex_t vid_mtx;
     // encoder
     // picture
     // param
