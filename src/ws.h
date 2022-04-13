@@ -8,6 +8,10 @@ struct websocket_session
     char *datasetid;
     char *flux;
 
+    int image_width;
+    int image_height;
+    bool bDownsize;
+
     // x265 (TO-DO)
     // encoder
     // picture

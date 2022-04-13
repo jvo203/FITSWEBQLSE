@@ -370,6 +370,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             {
                 session->datasetid = strdup(datasetId);
                 session->flux = NULL;
+                session->image_width = 0;
+                session->image_height = 0;
+                session->bDownsize = false;
+
                 c->fn_data = session;
             }
         }
