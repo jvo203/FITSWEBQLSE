@@ -666,9 +666,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             printf("[C]::init_video width: %d, height: %d, flux: %s\n", width, height, session->flux);
 
-            get_inner_dimensions(item, &fits_width, &fits_height, &inner_width, &inner_height);
+            get_inner_dimensions(item, width, height, &fits_width, &fits_height, &inner_width, &inner_height, &scale);
 
-            printf("[C] FITS dims: %d x %d, INNER: %d x %d\n", fits_width, fits_height, inner_width, inner_height);
+            printf("[C] FITS dims: %d x %d, INNER: %d x %d, SCALE: %f\n", fits_width, fits_height, inner_width, inner_height, scale);
 
             // send a JSON reply
             // TO-DO ...
