@@ -21,6 +21,8 @@ static pthread_t jemalloc_t;
 static void *jemalloc_daemon(void *arg);
 #endif
 
+#include <x265.h>
+
 #include "ini.h"
 #include "http.h"
 #include "ws.h"
@@ -401,6 +403,8 @@ int main(int argc, char *argv[])
     free(options.db_home);
     free(options.root);
     free(config_file);
+
+    x265_cleanup();
 
 #ifdef DEBUG
     // wait for the jemalloc thread
