@@ -141,8 +141,8 @@ void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
-void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask, int precision);
-void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *pixels, const bool *mask);
+void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
+void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
 
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
@@ -2980,10 +2980,10 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
     zfp_stream_close(zfp);
 }
 
-void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask, int precision)
+void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
 {
-    uchar *compressed_pixels = NULL;
-    char *compressed_mask = NULL;
+    uchar *restrict compressed_pixels = NULL;
+    char *restrict compressed_mask = NULL;
 
     // ZFP variables
     zfp_type data_type = zfp_type_float;
@@ -3098,10 +3098,10 @@ void rpad(char *dst, const char *src, const char pad, const size_t sz)
     memcpy(dst, src, strlen(src));
 }
 
-void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *pixels, const bool *mask)
+void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask)
 {
-    uchar *compressed_pixels = NULL;
-    char *compressed_mask = NULL;
+    uchar *restrict compressed_pixels = NULL;
+    char *restrict compressed_mask = NULL;
 
     // ZFP variables
     zfp_type data_type = zfp_type_float;
@@ -3536,7 +3536,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
                 {
                     // printf("[C] fetch_realtime_image_spectrum gathering the spectrum.\n");
 
-                    const float *spectrum = (float *)&(chunks[idx].memory[offset]);
+                    const float *restrict spectrum = (float *)&(chunks[idx].memory[offset]);
 
                     for (int i = 0; i < req->length; i++)
                         req->spectrum[i] += spectrum[i];
@@ -3550,10 +3550,10 @@ void *fetch_realtime_image_spectrum(void *ptr)
                 {
                     size_t plane_size = req->dimx * req->dimy;
 
-                    const float *pixels = (float *)&(chunks[idx].memory[offset]);
+                    const float *restrict pixels = (float *)&(chunks[idx].memory[offset]);
                     offset += pixels_size;
 
-                    const bool *mask = (bool *)&(chunks[idx].memory[offset]);
+                    const bool *restrict mask = (bool *)&(chunks[idx].memory[offset]);
                     offset += mask_size;
 
                     // gather pixels / mask
