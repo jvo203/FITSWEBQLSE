@@ -746,7 +746,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // alloc HEVC params
             x265_param *param = x265_param_alloc();
-
             if (param == NULL)
                 goto unlock_mutex_and_break;
 
@@ -771,11 +770,32 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // HEVC encoder
             session->encoder = x265_encoder_open(param);
-
             if (session->encoder == NULL)
                 goto unlock_mutex_and_break;
 
             // HEVC picture
+            x265_picture *picture = x265_picture_alloc();
+            if (picture == NULL)
+                goto unlock_mutex_and_break;
+
+            x265_picture_init(param, picture);
+
+            // allocate a dummy B channel
+            const size_t frame_size = session->image_width * session->image_height;
+            uint8_t *B_buf = (uint8_t *)malloc(frame_size);
+
+            if (B_buf != NULL)
+                memset(B_buf, 128, frame_size);
+
+            picture->planes[0] = NULL;
+            picture->planes[1] = NULL;
+            picture->planes[2] = B_buf;
+
+            picture->stride[0] = 0;
+            picture->stride[1] = 0;
+            picture->stride[2] = session->image_width;
+
+            session->picture = picture;
 
         unlock_mutex_and_break:
             pthread_mutex_unlock(&session->vid_mtx);
