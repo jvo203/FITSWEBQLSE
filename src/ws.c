@@ -715,8 +715,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // alloc HEVC params
             x265_param *param = x265_param_alloc();
+
             if (param == NULL)
                 goto unlock_mutex_and_break;
+
+            x265_param_default_preset(param, "superfast", "zerolatency");
 
             session->param = param;
 
