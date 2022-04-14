@@ -746,12 +746,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // alloc HEVC params
             x265_param *param = x265_param_alloc();
+
             if (param == NULL)
                 goto unlock_mutex_and_break;
 
             x265_param_default_preset(param, "superfast", "zerolatency");
 
-            // HEVC config
+            // HEVC param
             param->fpsNum = fps;
             param->fpsDenom = 1;
             param->bRepeatHeaders = 1;
@@ -768,7 +769,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // finally point the user session param
             session->param = param;
 
+            // HEVC encoder
             session->encoder = x265_encoder_open(param);
+
+            if (session->encoder == NULL)
+                goto unlock_mutex_and_break;
+
+            // HEVC picture
 
         unlock_mutex_and_break:
             pthread_mutex_unlock(&session->vid_mtx);
