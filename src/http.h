@@ -115,8 +115,8 @@ struct image_req
 {
     char *datasetid;
     int len;
-    float *pixels;
-    bool *mask;
+    float *restrict pixels;
+    bool *restrict mask;
     int width;
     int height;
 };
@@ -139,9 +139,9 @@ struct http_image_spectrum_request
     double ref_freq;
 
     // output
-    float *pixels;
-    bool *mask;
-    float *spectrum;
+    float *restrict pixels;
+    bool *restrict mask;
+    float *restrict spectrum;
 
     int dimx;
     int dimy;
