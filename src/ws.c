@@ -718,6 +718,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (param == NULL)
                 goto unlock_mutex_and_break;
 
+            session->param = param;
+
         unlock_mutex_and_break:
             pthread_mutex_unlock(&session->vid_mtx);
             break;
