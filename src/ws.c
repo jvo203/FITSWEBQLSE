@@ -377,6 +377,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->image_height = 0;
                 session->bDownsize = false;
                 pthread_mutex_init(&session->vid_mtx, NULL);
+                session->last_frame_idx = -1;
 
                 c->fn_data = session;
             }
@@ -695,6 +696,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             free(json);
 
             // x265 (TO-DO)
+            pthread_mutex_lock(&session->vid_mtx);
+
+            // reset the frame index
+            session->last_frame_idx = -1;
+
+            pthread_mutex_unlock(&session->vid_mtx);
 
             break;
         }

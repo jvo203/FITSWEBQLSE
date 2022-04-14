@@ -15,6 +15,7 @@ struct websocket_session
 
     // x265 (TO-DO)
     pthread_mutex_t vid_mtx;
+    int last_frame_idx;
     // encoder
     // picture
     // param
