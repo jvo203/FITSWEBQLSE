@@ -15,13 +15,13 @@ struct websocket_session
     int image_height;
     bool bDownsize;
 
-    // x265 (TO-DO)
     pthread_mutex_t vid_mtx;
     int last_frame_idx;
-    // encoder
+
+    // x265
     // picture
-    // param
     x265_param *param;
+    x265_encoder *encoder;
 };
 
 struct image_spectrum_response

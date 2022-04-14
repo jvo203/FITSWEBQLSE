@@ -78,6 +78,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     session->param = NULL;
                 }
 
+                if (session->encoder != NULL)
+                {
+                    x265_encoder_close(session->encoder);
+                    session->encoder = NULL;
+                }
+
                 pthread_mutex_unlock(&session->vid_mtx);
                 pthread_mutex_destroy(&session->vid_mtx);
 
@@ -390,6 +396,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 pthread_mutex_init(&session->vid_mtx, NULL);
                 session->last_frame_idx = -1;
                 session->param = NULL;
+                session->encoder = NULL;
 
                 c->fn_data = session;
             }
@@ -746,6 +753,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // finally point the user session param
             session->param = param;
+
+            session->encoder = x265_encoder_open(param);
 
         unlock_mutex_and_break:
             pthread_mutex_unlock(&session->vid_mtx);
