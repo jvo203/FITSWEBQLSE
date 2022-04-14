@@ -683,7 +683,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // last_video_seq
             int width = 0;
             int height = 0;
-            int fps = 10;
+            int fps = 30; // hard-code the initial FPS
             int bitrate = 1000;
 
             int fits_width, fits_height, inner_width, inner_height;
@@ -704,8 +704,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     session->flux = strndup(wm->data.ptr + voff, vlen);
 
                 // 'fps'
-                if (strncmp(wm->data.ptr + koff, "\"fps\"", klen) == 0)
-                    fps = atoi2(wm->data.ptr + voff, vlen);
+                /*if (strncmp(wm->data.ptr + koff, "\"fps\"", klen) == 0)
+                    fps = atoi2(wm->data.ptr + voff, vlen);*/
 
                 // 'bitrate'
                 if (strncmp(wm->data.ptr + koff, "\"bitrate\"", klen) == 0)
