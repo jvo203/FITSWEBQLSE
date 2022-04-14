@@ -691,7 +691,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     bitrate = atoi2(wm->data.ptr + voff, vlen);
             }
 
-            printf("[C]::init_video width: %d, height: %d, flux: %s, fps: %d, bitrate: %d\n", width, height, session->flux, fps, bitrate);
+            // printf("[C]::init_video width: %d, height: %d, flux: %s, fps: %d, bitrate: %d\n", width, height, session->flux, fps, bitrate);
 
             get_inner_dimensions(item, width, height, &fits_width, &fits_height, &inner_width, &inner_height, &scale);
             // printf("[C] FITS dims: %d x %d, INNER: %d x %d, SCALE: %f\n", fits_width, fits_height, inner_width, inner_height, scale);
