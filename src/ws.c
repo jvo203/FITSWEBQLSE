@@ -725,7 +725,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // alloc HEVC params
             x265_param *param = x265_param_alloc();
-
             if (param == NULL)
                 goto unlock_mutex_and_break;
 
@@ -745,6 +744,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             param->rc.rateControlMode = X265_RC_CRF;
             param->rc.bitrate = bitrate;
 
+            // finally point the user session param
             session->param = param;
 
         unlock_mutex_and_break:
