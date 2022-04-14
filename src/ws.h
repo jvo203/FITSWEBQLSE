@@ -19,9 +19,9 @@ struct websocket_session
     int last_frame_idx;
 
     // x265
-    // picture
     x265_param *param;
     x265_encoder *encoder;
+    x265_picture *picture;
 };
 
 struct image_spectrum_response

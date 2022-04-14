@@ -84,6 +84,19 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     session->encoder = NULL;
                 }
 
+                if (session->picture != NULL)
+                {
+                    // deallocate RGB planes
+                    for (int i = 0; i < 3; i++)
+                        if (session->picture->planes[i] != NULL)
+                            free(session->picture->planes[i]);
+
+                    // finally free the picture
+                    x265_picture_free(session->picture);
+
+                    session->picture = NULL;
+                }
+
                 pthread_mutex_unlock(&session->vid_mtx);
                 pthread_mutex_destroy(&session->vid_mtx);
 
@@ -397,6 +410,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->last_frame_idx = -1;
                 session->param = NULL;
                 session->encoder = NULL;
+                session->picture = NULL;
 
                 c->fn_data = session;
             }
