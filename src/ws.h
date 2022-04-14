@@ -4,6 +4,8 @@
 #include "fits_types.h"
 #include <pthread.h>
 
+#include <x265.h>
+
 struct websocket_session
 {
     char *datasetid;
@@ -19,6 +21,7 @@ struct websocket_session
     // encoder
     // picture
     // param
+    x265_param *param;
 };
 
 struct image_spectrum_response

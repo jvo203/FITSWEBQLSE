@@ -67,8 +67,18 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 struct websocket_session *session = (struct websocket_session *)c->fn_data;
                 printf("closing a websocket connection for %s/%s\n", session->datasetid, c->label);
 
+                pthread_mutex_lock(&session->vid_mtx);
+
                 free(session->datasetid);
                 free(session->flux);
+
+                if (session->param != NULL)
+                {
+                    x265_param_free(session->param);
+                    session->param = NULL;
+                }
+
+                pthread_mutex_unlock(&session->vid_mtx);
                 pthread_mutex_destroy(&session->vid_mtx);
 
                 free(session);
@@ -376,8 +386,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->image_width = 0;
                 session->image_height = 0;
                 session->bDownsize = false;
+
                 pthread_mutex_init(&session->vid_mtx, NULL);
                 session->last_frame_idx = -1;
+                session->param = NULL;
 
                 c->fn_data = session;
             }
@@ -701,8 +713,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // reset the frame index
             session->last_frame_idx = -1;
 
-            pthread_mutex_unlock(&session->vid_mtx);
+            // alloc HEVC params
+            x265_param *param = x265_param_alloc();
+            if (param == NULL)
+                goto unlock_mutex_and_break;
 
+        unlock_mutex_and_break:
+            pthread_mutex_unlock(&session->vid_mtx);
             break;
         }
 
