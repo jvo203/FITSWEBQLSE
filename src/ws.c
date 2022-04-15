@@ -75,6 +75,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(session->flux);
                 session->flux = NULL;
 
+                if (session->param != NULL)
+                {
+                    x265_param_free(session->param);
+                    session->param = NULL;
+                }
+
                 if (session->encoder != NULL)
                 {
                     x265_encoder_close(session->encoder);
@@ -91,12 +97,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     // finally free the picture
                     x265_picture_free(session->picture);
                     session->picture = NULL;
-                }
-
-                if (session->param != NULL)
-                {
-                    x265_param_free(session->param);
-                    session->param = NULL;
                 }
 
                 pthread_mutex_unlock(&session->vid_mtx);
@@ -829,6 +829,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             free(session->flux);
             session->flux = NULL;
 
+            if (session->param != NULL)
+            {
+                x265_param_free(session->param);
+                session->param = NULL;
+            }
+
             if (session->encoder != NULL)
             {
                 x265_encoder_close(session->encoder);
@@ -845,12 +851,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 // finally free the picture
                 x265_picture_free(session->picture);
                 session->picture = NULL;
-            }
-
-            if (session->param != NULL)
-            {
-                x265_param_free(session->param);
-                session->param = NULL;
             }
 
             pthread_mutex_unlock(&session->vid_mtx);
