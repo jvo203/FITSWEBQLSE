@@ -1,43 +1,43 @@
-# 1. 
+# 1. development tools 
     sudo apt-get install build-essential
 
-# 2. 
+# 2. cmake
     sudo apt-get install cmake
 
-# 3. 
+# 3. gfortran
     sudo apt-get install gfortran
 
-# 4. 
+# 4. assembler
     sudo apt install nasm
 
-# 5. 
+# 5. czmq
     sudo apt install libczmq-dev
 
-# 6. 
+# 6. libmicrohttpd
     sudo apt install libmicrohttpd-dev
 
-# 7. 
+# 7. sqlite
     sudo apt install libsqlite3-dev
 
-# 8. 
+# 8. PostgreSQL
     sudo apt install libpq-dev
 
-# 9. 
+# 9. jemalloc
     sudo apt install libjemalloc-dev
 
-# 10. 
+# 10. lz4
     sudo apt install liblz4-dev
 
-# 11. 
+# 11. cpuid
     sudo apt install libcpuid-dev
 
-# 12. 
+# 12. libcURL
     sudo apt install libcurl4-openssl-dev
 
-# 13. 
+# 13. CFITSIO
     sudo apt install libcfitsio-dev
 
-# 14. 
+# 14. x265
     sudo apt install libx265-dev
 
     or compile from source:
