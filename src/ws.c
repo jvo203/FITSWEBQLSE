@@ -701,7 +701,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 // 'flux'
                 if (strncmp(wm->data.ptr + koff, "\"flux\"", klen) == 0)
+                {
+                    free(session->flux);
                     session->flux = strndup(wm->data.ptr + voff, vlen);
+                }
 
                 // 'fps'
                 /*if (strncmp(wm->data.ptr + koff, "\"fps\"", klen) == 0)
