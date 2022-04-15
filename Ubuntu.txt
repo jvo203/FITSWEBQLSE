@@ -24,9 +24,11 @@
 
 # 13. sudo apt install libcfitsio-dev
 
-# 14. manually add ispc from https://ispc.github.io/downloads.html
+# 14. sudo apt install libx265-dev
 
-# 15. Intel oneAPI
+# 15. manually add ispc from https://ispc.github.io/downloads.html
+
+# 16. Intel oneAPI
 
     cd /tmp
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
@@ -45,5 +47,5 @@
 
     to .bashrc and re-login
 
-# 16. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
+# 17. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
