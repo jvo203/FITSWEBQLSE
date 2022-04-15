@@ -72,6 +72,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(session->datasetid);
                 free(session->flux);
 
+                if (session->encoder != NULL)
+                {
+                    x265_encoder_close(session->encoder);
+                    session->encoder = NULL;
+                }
+
                 if (session->picture != NULL)
                 {
                     // deallocate RGB planes
@@ -83,12 +89,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     x265_picture_free(session->picture);
 
                     session->picture = NULL;
-                }
-
-                if (session->encoder != NULL)
-                {
-                    x265_encoder_close(session->encoder);
-                    session->encoder = NULL;
                 }
 
                 if (session->param != NULL)
@@ -744,6 +744,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // reset the frame index
             session->last_frame_idx = -1;
 
+            if (session->param != NULL)
+                goto unlock_mutex_and_break;
+
             // alloc HEVC params
             x265_param *param = x265_param_alloc();
             if (param == NULL)
@@ -768,9 +771,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // finally point the user session param
             session->param = param;
 
+            if (session->encoder != NULL)
+                goto unlock_mutex_and_break;
+
             // HEVC encoder
             session->encoder = x265_encoder_open(param);
             if (session->encoder == NULL)
+                goto unlock_mutex_and_break;
+
+            if (session->picture != NULL)
                 goto unlock_mutex_and_break;
 
             // HEVC picture
@@ -799,6 +808,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         unlock_mutex_and_break:
             pthread_mutex_unlock(&session->vid_mtx);
+            break;
+        }
+
+        // end_video
+        if (strcmp(type, "end_video") == 0)
+        {
+
             break;
         }
 
