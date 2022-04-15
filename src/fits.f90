@@ -1867,6 +1867,10 @@ contains
          if (allocated(item%frame_median)) item%dmedian = &
          &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
 
+         ! calculate global dmad, dmadN, dmadP based on the dmedian
+
+         ! call set_video_status(item, .true.)
+
          ! call print_dataset(item)
       end if
 
