@@ -34,9 +34,11 @@
 
     wget https://anduin.linuxfromscratch.org/BLFS/x265/x265-20220219.tar.xz
 
-    tar zxvf x265_3.4.tar.gz
+    xz -d -v x265-20220219.tar.xz
 
-    cd x265_3.4
+    tar xvf x265-20220219.tar
+
+    cd x265-20220219
 
     mkdir -p build
 
