@@ -2375,6 +2375,10 @@ contains
       item%dmax = ieee_value(0.0, ieee_quiet_nan)
       item%dmedian = ieee_value(0.0, ieee_quiet_nan)
 
+      item%dmad = ieee_value(0.0, ieee_quiet_nan)
+      item%dmadN = ieee_value(0.0, ieee_quiet_nan)
+      item%dmadP = ieee_value(0.0, ieee_quiet_nan)
+
       ! reset the FITS header
       if (allocated(item%hdr)) deallocate (item%hdr)
 
