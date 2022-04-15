@@ -26,6 +26,28 @@
 
 # 14. sudo apt install libx265-dev
 
+    or compile from source:
+
+    sudo apt install nasm
+
+    visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
+
+    wget https://anduin.linuxfromscratch.org/BLFS/x265/x265-20220219.tar.xz
+
+    tar zxvf x265_3.4.tar.gz
+
+    cd x265_3.4
+
+    mkdir -p build
+
+    cd build
+
+    cmake ../source
+
+    make
+
+    sudo make install    
+
 # 15. manually add ispc from https://ispc.github.io/downloads.html
 
 # 16. Intel oneAPI
