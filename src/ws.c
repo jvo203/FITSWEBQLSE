@@ -741,7 +741,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             free(json);
 
-            // x265 (TO-DO)
+            // x265
             pthread_mutex_lock(&session->vid_mtx);
 
             // reset the frame index
