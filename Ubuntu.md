@@ -1,30 +1,44 @@
-# 1. sudo apt-get install build-essential
+# 1. 
+    sudo apt-get install build-essential
 
-# 2. sudo apt-get install cmake
+# 2. 
+    sudo apt-get install cmake
 
-# 3. sudo apt-get install gfortran
+# 3. 
+    sudo apt-get install gfortran
 
-# 4. sudo apt install nasm
+# 4. 
+    sudo apt install nasm
 
-# 5. sudo apt install libczmq-dev
+# 5. 
+    sudo apt install libczmq-dev
 
-# 6. sudo apt install libmicrohttpd-dev
+# 6. 
+    sudo apt install libmicrohttpd-dev
 
-# 7. sudo apt install libsqlite3-dev
+# 7. 
+    sudo apt install libsqlite3-dev
 
-# 8. sudo apt install libpq-dev
+# 8. 
+    sudo apt install libpq-dev
 
-# 9. sudo apt install libjemalloc-dev
+# 9. 
+    sudo apt install libjemalloc-dev
 
-# 10. sudo apt install liblz4-dev
+# 10. 
+    sudo apt install liblz4-dev
 
-# 11. sudo apt install libcpuid-dev
+# 11. 
+    sudo apt install libcpuid-dev
 
-# 12. sudo apt install libcurl4-openssl-dev
+# 12. 
+    sudo apt install libcurl4-openssl-dev
 
-# 13. sudo apt install libcfitsio-dev
+# 13. 
+    sudo apt install libcfitsio-dev
 
-# 14. sudo apt install libx265-dev
+# 14. 
+    sudo apt install libx265-dev
 
     or compile from source:
 
@@ -86,5 +100,6 @@
 
     to .bashrc and re-login
 
-# 18. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
+# 18. Splatalogue 
+    wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
