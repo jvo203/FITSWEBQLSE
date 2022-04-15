@@ -40,11 +40,11 @@
 
     cd x265-20220219
 
-    Apply a manual change in "encoder/api.cpp / x265_encoder_open()"
+    Apply a manual change in "encoder/api.cpp / x265_encoder_open()":
 
-    x265_print_params(param);
-    PARAM_NS::x265_param_free(zoneParam); <-- this line needs to be added -->
-    return encoder;
+        x265_print_params(param);
+        PARAM_NS::x265_param_free(zoneParam); <-- this line needs to be added -->
+        return encoder;
 
     mkdir -p build
 
