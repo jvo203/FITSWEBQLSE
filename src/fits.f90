@@ -1438,6 +1438,18 @@ contains
       read (unit=fileunit, IOSTAT=ios) item%dmedian
       if (ios .ne. 0) go to 300
 
+      ! item%dmad
+      read (unit=fileunit, IOSTAT=ios) item%dmad
+      if (ios .ne. 0) go to 300
+
+      ! item%dmadN
+      read (unit=fileunit, IOSTAT=ios) item%dmadN
+      if (ios .ne. 0) go to 300
+
+      ! item%dmadP
+      read (unit=fileunit, IOSTAT=ios) item%dmadP
+      if (ios .ne. 0) go to 300
+
       ! item%frame_min
       read (unit=fileunit, IOSTAT=ios) N
       if (ios .ne. 0) go to 300
