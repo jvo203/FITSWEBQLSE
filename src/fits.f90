@@ -1047,6 +1047,18 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%dmedian
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%dmad
+      write (unit=fileunit, IOSTAT=ios) item%dmad
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%dmadN
+      write (unit=fileunit, IOSTAT=ios) item%dmadN
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%dmadP
+      write (unit=fileunit, IOSTAT=ios) item%dmadP
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%frame_min
       if (allocated(item%frame_min)) then
          write (unit=fileunit, IOSTAT=ios) size(item%frame_min)
