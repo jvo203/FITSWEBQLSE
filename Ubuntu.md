@@ -48,11 +48,20 @@
 
     make -j8
 
-    sudo make install    
+    sudo make install
 
-# 15. manually add ispc from https://ispc.github.io/downloads.html
+# 15. Adjust the environment variables in the .bashrc
 
-# 16. Intel oneAPI
+    Add
+
+        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
+        export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
+
+    to .bashrc and re-login
+
+# 16. manually add ispc from https://ispc.github.io/downloads.html
+
+# 17. Intel oneAPI
 
     cd /tmp
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
@@ -71,5 +80,5 @@
 
     to .bashrc and re-login
 
-# 17. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
+# 18. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
