@@ -46,7 +46,7 @@
 
     cmake ../source
 
-    make
+    make -j8
 
     sudo make install    
 
