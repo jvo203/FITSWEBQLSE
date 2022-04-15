@@ -1127,6 +1127,10 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%is_xray
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%video
+      write (unit=fileunit, IOSTAT=ios) item%video
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%mean_spectrum
       if (allocated(item%mean_spectrum)) then
          write (unit=fileunit, IOSTAT=ios) size(item%mean_spectrum)
@@ -1513,6 +1517,10 @@ contains
 
       ! item%is_xray
       read (unit=fileunit, IOSTAT=ios) item%is_xray
+      if (ios .ne. 0) go to 300
+
+      ! item%video
+      read (unit=fileunit, IOSTAT=ios) item%video
       if (ios .ne. 0) go to 300
 
       if (allocated(item%pixels) .and. allocated(item%mask)) call set_image_status(item, .true.)
