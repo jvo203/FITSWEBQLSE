@@ -3272,7 +3272,7 @@ void *fetch_global_statistics(void *ptr)
     if (ptr == NULL)
         pthread_exit(NULL);
 
-    struct mad_req *req = (struct inner_dims_req *)ptr;
+    struct mad_req *req = (struct mad_req *)ptr;
 
     printf("[C] calling fetch_global_statistics across the cluster for '%.*s' with median = %f for the frame range [%d,%d]\n", req->len, req->datasetid, req->dmedian, req->first, req->last);
 
