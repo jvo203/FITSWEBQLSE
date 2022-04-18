@@ -83,8 +83,19 @@ module fits
    type, bind(C) :: mad_req_t
       type(c_ptr) :: datasetid
       integer(c_int) :: len
-      real(c_double) :: madA
+      real(c_float) :: dmedian
+
+      ! all data
+      real(c_float) :: sumA
       integer(c_int64_t) :: countA
+
+      ! positive
+      real(c_float) :: sumP
+      integer(c_int64_t) :: countP
+
+      ! negative
+      real(c_float) :: sumN
+      integer(c_int64_t) :: countN
    end type mad_req_t
 
    type, bind(C) :: inner_dims_req_t
