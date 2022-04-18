@@ -254,6 +254,13 @@ module fits
          type(c_ptr), intent(in), value :: arg   ! a pointer to type(inner_dims_req_t)
       end subroutine fetch_inner_dimensions
 
+      recursive subroutine fetch_global_statistics(arg) BIND(C)
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), intent(in), value :: arg   ! a pointer to type(mad_req_t)
+      end subroutine fetch_global_statistics
+
       recursive subroutine fetch_image(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
