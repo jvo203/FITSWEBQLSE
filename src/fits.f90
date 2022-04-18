@@ -1872,6 +1872,9 @@ contains
       type(mad_req_t), target :: req
       type(c_pthread_t) :: pid
 
+      real(c_float) :: sumP, sumN
+      integer(c_int64_t) :: countP, countN
+
       ! take a time measurement
       call system_clock(finish)
       elapsed = real(finish - item%start_time)/real(item%crate)
@@ -1914,7 +1917,12 @@ contains
                start_routine=c_funloc(fetch_global_statistics), &
                arg=c_loc(req))
 
-            ! calculate_global_statistics locally
+            ! calculate global statistics locally
+            sumP = 0.0
+            countP = 0
+            sumN = 0.0
+            countN = 0
+            call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, 1, item%naxes(3))
 
             ! join a thread
             rc = c_pthread_join(pid, c_null_ptr)
@@ -3966,9 +3974,9 @@ contains
 
    subroutine calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last)
       type(dataset), pointer, intent(in) :: item
-      integer, intent(in) :: dmedian
-      real, intent(out) :: sumP, sumN
-      integer, intent(out) :: countP, countN
+      real(c_float), intent(in) :: dmedian
+      real(c_float), intent(out) :: sumP, sumN
+      integer(c_int64_t), intent(out) :: countP, countN
       integer, intent(in) :: first, last ! frame range
 
       if(.not. allocated(item%compressed)) return
