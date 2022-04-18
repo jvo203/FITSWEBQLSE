@@ -83,6 +83,8 @@ module fits
    type, bind(C) :: mad_req_t
       type(c_ptr) :: datasetid
       integer(c_int) :: len
+
+      ! the all-data median (input)
       real(c_float) :: dmedian
 
       ! all data
@@ -96,6 +98,9 @@ module fits
       ! negative
       real(c_float) :: sumN
       integer(c_int64_t) :: countN
+
+      ! FITS cube range
+      integer(c_int) :: first, last
    end type mad_req_t
 
    type, bind(C) :: inner_dims_req_t
