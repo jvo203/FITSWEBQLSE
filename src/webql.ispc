@@ -751,11 +751,35 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
 
 export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
 {
+  uniform int cn, cm;
+
+  cn = width / DIM;
+  cm = height / DIM;
+
+  // the input dimensions might not be divisible by <DIM>
+  if (width % DIM != 0)
+    cn = cn + 1;
+
+  if (height % DIM != 0)
+    cm = cm + 1;
+
   varying float partial_sumP = 0.0f ;
   varying unsigned int64 partial_countP = 0 ;
 
   varying float partial_sumN = 0.0f ;
   varying unsigned int64 partial_countN = 0 ;
+
+  // go through the entire plane
+  for(uniform int j=0; j<cm; j++)
+    for(uniform int i=0; i <cn; i++)
+    { 
+      // compressed array entry index
+      uniform int src_idx = j * cn + i;
+
+      uniform int emax = (int)compressed[src_idx].common_exp;
+      varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
+
+    }
 
   // the final reduction
   sumP[0] += reduce_add(partial_sumP) ;
