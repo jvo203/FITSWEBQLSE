@@ -87,10 +87,6 @@ module fits
       ! the all-data median (input)
       real(c_float) :: dmedian
 
-      ! all data
-      real(c_float) :: sumA
-      integer(c_int64_t) :: countA
-
       ! positive
       real(c_float) :: sumP
       integer(c_int64_t) :: countP
@@ -1894,8 +1890,19 @@ contains
          &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
 
          ! calculate global dmad, dmadN, dmadP based on the dmedian
+         if (item%naxes(3) .gt. 1) then
+            req%datasetid = c_loc(item%datasetid)
+            req%len = size(item%datasetid)
+            req%dmedian = item%dmedian
+            req%sumP = 0.0
+            req%countP = 0
+            req%sumN = 0.0
+            req%countN = 0
+            req%first = 1
+            req%last = item%naxes(3)
 
-         ! call set_video_status(item, .true.)
+            ! call set_video_status(item, .true.)
+         end if
 
          ! call print_dataset(item)
       end if
