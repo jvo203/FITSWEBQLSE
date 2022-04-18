@@ -3285,7 +3285,7 @@ void *fetch_global_statistics(void *ptr)
 
     if (handle_count == 0)
     {
-        printf("[C] aborting fetch_inner_dimensions (no cluster nodes found)\n");
+        printf("[C] aborting fetch_global_statistics (no cluster nodes found)\n");
 
         g_mutex_unlock(&cluster_mtx);
         pthread_exit(NULL);
