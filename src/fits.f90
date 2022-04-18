@@ -1918,10 +1918,6 @@ contains
                arg=c_loc(req))
 
             ! calculate global statistics locally
-            sumP = 0.0
-            countP = 0
-            sumN = 0.0
-            countN = 0
             call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, 1, item%naxes(3))
 
             ! join a thread
@@ -1933,6 +1929,10 @@ contains
 
             sumN = sumN + req%sumN
             countN = countN + req%countN
+
+            if (countP .gt. 0) item%dmadP = sumP / countP
+            if (countN .gt. 0) item%dmadN = sumN / countN
+            if (countP + countN .gt. 0) item%dmad = (sumP + sumN) / (countP + countN)
 
             ! call set_video_status(item, .true.)
          end if
@@ -3983,6 +3983,11 @@ contains
       real(c_float), intent(out) :: sumP, sumN
       integer(c_int64_t), intent(out) :: countP, countN
       integer, intent(in) :: first, last ! frame range
+
+      sumP = 0.0
+      countP = 0
+      sumN = 0.0
+      countN = 0
 
       if(.not. allocated(item%compressed)) return
 
