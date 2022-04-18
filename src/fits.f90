@@ -4004,7 +4004,7 @@ contains
       real(c_float), intent(in) :: dmedian
       real(c_float), intent(out) :: sumP, sumN
       integer(c_int64_t), intent(out) :: countP, countN
-      integer, intent(in) :: first, last ! frame range
+      integer, intent(in) :: first, last ! FITS data cube frame range
 
       integer :: max_threads, frame
       real(c_float) :: thread_sumP, thread_sumN
@@ -4026,6 +4026,25 @@ contains
       thread_countN = 0
 
       ! iterate through all the available planes
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+      !$omp& PRIVATE(frame)&
+      !$omp& REDUCTION(+:thread_sumP,countP)&
+      !$omp& REDUCTION(+:thread_sumN,countN)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
+      do frame = first, last
+
+         ! skip frames for which there is no data on this node
+         if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+      end do
+      !$omp END DO
+      !$omp END PARALLEL
+
+      sumP = thread_sumP
+      countP = thread_countP
+      sumN = thread_sumN
+      countN = thread_countN
 
    end subroutine calculate_global_statistics
 
