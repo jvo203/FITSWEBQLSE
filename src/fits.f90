@@ -1914,10 +1914,12 @@ contains
                start_routine=c_funloc(fetch_global_statistics), &
                arg=c_loc(req))
 
-            ! calculate_global_statistics
+            ! calculate_global_statistics locally
 
             ! join a thread
             rc = c_pthread_join(pid, c_null_ptr)
+
+            ! merge with the responses from the cluster
 
             ! call set_video_status(item, .true.)
          end if
