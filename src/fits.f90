@@ -393,6 +393,19 @@ module fits
 
       end function viewport_image_spectrum_circle
 
+      ! export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
+      subroutine make_global_statistics(compressed, width, height,&
+         &sumP, countP, sumN, countN) BIND(C, name="make_global_statistics")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: compressed
+         integer(c_int), value, intent(in) :: width, height
+         real(c_float), intent(inout) :: sumP, sumN
+         integer(c_int64_t), intent(inout) :: countP, countN
+
+      end subroutine make_global_statistics
+
       ! resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
       subroutine resizeCubic(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeCubic')
          use, intrinsic :: ISO_C_BINDING
