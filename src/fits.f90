@@ -399,8 +399,11 @@ module fits
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
+         ! passed by value
          type(C_PTR), value, intent(in) :: compressed
          integer(c_int), value, intent(in) :: width, height
+
+         ! passed by reference
          real(c_float), intent(inout) :: sumP, sumN
          integer(c_int64_t), intent(inout) :: countP, countN
 
