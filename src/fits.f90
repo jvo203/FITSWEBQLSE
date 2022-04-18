@@ -4037,6 +4037,8 @@ contains
          ! skip frames for which there is no data on this node
          if (.not. associated(item%compressed(frame)%ptr)) cycle
 
+         ! call Intel SPMD C
+
       end do
       !$omp END DO
       !$omp END PARALLEL
