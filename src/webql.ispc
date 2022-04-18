@@ -436,7 +436,7 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
         uniform int src_x = i * DIM;
         uniform int src_y = j * DIM;
 
-        // TO-DO: fixed-point decompression (the moment of truth)      
+        // fixed-point decompression
         foreach(k=0 ... BLOCK_SIZE)
         {          
           // find out which FORTRAN column the value is located
@@ -517,7 +517,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
         uniform int src_x = i * DIM;
         uniform int src_y = j * DIM;
 
-        // TO-DO: fixed-point decompression (the moment of truth)      
+        // fixed-point decompression
         foreach(k=0 ... BLOCK_SIZE)
         {          
           // find out which FORTRAN column the value is located
@@ -689,7 +689,7 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
         uniform int src_x = i * DIM;
         uniform int src_y = j * DIM;
 
-        // TO-DO: fixed-point decompression (the moment of truth)      
+        // fixed-point decompression
         foreach(k=0 ... BLOCK_SIZE)
         {          
           // find out which FORTRAN column the value is located
@@ -778,6 +778,23 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
 
       uniform int emax = (int)compressed[src_idx].common_exp;
       varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
+
+      foreach(k=0 ... BLOCK_SIZE)
+      {          
+          // find out which FORTRAN column the value is located
+          varying int idx = k >> BASE;
+          varying int mask = compressed[src_idx].mask[idx];
+          varying int pos = k & (DIM -1); // k % DIM
+          varying bool isnan = (mask >> pos) & 1;
+
+          cif(!isnan)
+          {
+            varying float pixel = scale * (float)compressed[src_idx].mantissa[k];
+            
+            // calculate the mean absolute deviation from the median
+          }
+
+        }
 
     }
 
