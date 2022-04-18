@@ -4007,6 +4007,7 @@ contains
       integer, intent(in) :: first, last ! FITS data cube frame range
 
       integer :: max_threads, frame
+      integer(c_int) :: width, height
       real(c_float) :: thread_sumP, thread_sumN
       integer(c_int64_t) :: thread_countP, thread_countN
 
@@ -4024,6 +4025,9 @@ contains
       thread_countP = 0
       thread_sumN = 0.0
       thread_countN = 0
+
+      width = item%naxes(1)
+      height = item%naxes(2)
 
       ! iterate through all the available planes
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
