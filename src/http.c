@@ -3267,6 +3267,33 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
         free(compressed_mask);
 }
 
+void *fetch_global_statistics(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct mad_req *req = (struct inner_dims_req *)ptr;
+
+    printf("[C] calling fetch_global_statistics across the cluster for '%.*s' with median = %f for the frame range [%d,%d]\n", req->len, req->datasetid, req->dmedian, req->first, req->last);
+
+    int i;
+    GSList *iterator = NULL;
+
+    g_mutex_lock(&cluster_mtx);
+
+    int handle_count = g_slist_length(cluster);
+
+    if (handle_count == 0)
+    {
+        printf("[C] aborting fetch_inner_dimensions (no cluster nodes found)\n");
+
+        g_mutex_unlock(&cluster_mtx);
+        pthread_exit(NULL);
+    };
+
+    pthread_exit(NULL);
+}
+
 void *fetch_inner_dimensions(void *ptr)
 {
     if (ptr == NULL)
