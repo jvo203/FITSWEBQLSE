@@ -1928,6 +1928,11 @@ contains
             rc = c_pthread_join(pid, c_null_ptr)
 
             ! merge with the responses from the cluster
+            sumP = sumP + req%sumP
+            countP = countP + req%countP
+
+            sumN = sumN + req%sumN
+            countN = countN + req%countN
 
             ! call set_video_status(item, .true.)
          end if
