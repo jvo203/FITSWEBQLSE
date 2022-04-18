@@ -3291,6 +3291,8 @@ void *fetch_global_statistics(void *ptr)
         pthread_exit(NULL);
     };
 
+    g_mutex_unlock(&cluster_mtx);
+
     pthread_exit(NULL);
 }
 
