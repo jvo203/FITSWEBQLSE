@@ -790,8 +790,12 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
           cif(!isnan)
           {
             varying float pixel = scale * (float)compressed[src_idx].mantissa[k];
-            
+
             // calculate the mean absolute deviation from the median
+
+            // increment the counters
+            partial_countP += 1;
+            partial_countN += 1;
           }
 
         }
