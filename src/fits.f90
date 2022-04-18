@@ -4040,6 +4040,7 @@ contains
          ! call Intel SPMD C
          ! call make_global_statistics(c_loc(item%compressed(frame)%ptr),width, height&
          ! &thread_sumP, thread_countP, thread_sumN, thread_countN)
+
       end do
       !$omp END DO
       !$omp END PARALLEL
