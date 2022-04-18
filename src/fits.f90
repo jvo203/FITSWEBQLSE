@@ -3964,6 +3964,17 @@ contains
 
    end subroutine inherent_image_dimensions
 
+   subroutine calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last)
+      type(dataset), pointer, intent(in) :: item
+      integer, intent(in) :: dmedian
+      real, intent(out) :: sumP, sumN
+      integer, intent(out) :: countP, countN
+      integer, intent(in) :: first, last ! frame range
+
+      if(.not. allocated(item%compressed)) return
+
+   end subroutine calculate_global_statistics
+
    function get_screen_scale(x) result(scale)
       integer, intent(in) :: x
       real scale
