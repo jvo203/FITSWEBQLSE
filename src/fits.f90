@@ -1954,7 +1954,7 @@ contains
             call set_video_status(item, .true.)
          end if
 
-         ! call print_dataset(item)
+         call print_dataset(item)
       end if
 
    end subroutine update_progress
