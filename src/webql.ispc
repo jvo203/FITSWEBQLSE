@@ -748,3 +748,8 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
     else
         return 0.0f ;
 }
+
+export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float sumP, uniform int64 countP, uniform float sumN, uniform int64 countN)
+{
+
+}
