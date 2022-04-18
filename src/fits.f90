@@ -1935,7 +1935,7 @@ contains
                arg=c_loc(req))
 
             ! calculate global statistics locally
-            call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, 1, item%naxes(3))
+            call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, req%first, req%last)
 
             ! join a thread
             rc = c_pthread_join(pid, c_null_ptr)
