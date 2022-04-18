@@ -184,7 +184,7 @@ module fits
       logical :: video = .false.
 
       ! mutexes
-      type(c_pthread_mutex_t) :: header_mtx, ok_mtx, error_mtx, progress_mtx, image_mtx
+      type(c_pthread_mutex_t) :: header_mtx, ok_mtx, error_mtx, progress_mtx, image_mtx, video_mtx
 
       ! progress
       integer(8) :: start_time, crate, cmax
@@ -703,6 +703,7 @@ contains
       rc = c_pthread_mutex_destroy(item%ok_mtx)
       rc = c_pthread_mutex_destroy(item%progress_mtx)
       rc = c_pthread_mutex_destroy(item%image_mtx)
+      rc = c_pthread_mutex_destroy(item%video_mtx)
 
       ! deallocate compressed memory regions
       if (allocated(item%compressed)) then
@@ -1830,6 +1831,22 @@ contains
 
    end subroutine set_image_status
 
+   subroutine set_video_status(item, video)
+      type(dataset), pointer, intent(inout) :: item
+      logical, intent(in) :: video
+
+      integer :: rc
+
+      ! lock the mutex
+      rc = c_pthread_mutex_lock(item%video_mtx)
+
+      item%video = video
+
+      ! unlock the mutex
+      rc = c_pthread_mutex_unlock(item%video_mtx)
+
+   end subroutine set_video_status
+
    subroutine set_header_status(item, header)
       type(dataset), pointer, intent(inout) :: item
       logical, intent(in) :: header
@@ -1934,7 +1951,7 @@ contains
             if (countN .gt. 0) item%dmadN = sumN / countN
             if (countP + countN .gt. 0) item%dmad = (sumP + sumN) / (countP + countN)
 
-            ! call set_video_status(item, .true.)
+            call set_video_status(item, .true.)
          end if
 
          ! call print_dataset(item)
@@ -2300,6 +2317,7 @@ contains
       rc = c_pthread_mutex_init(item%ok_mtx, c_null_ptr)
       rc = c_pthread_mutex_init(item%progress_mtx, c_null_ptr)
       rc = c_pthread_mutex_init(item%image_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%video_mtx, c_null_ptr)
 
       item%datasetid = datasetid
       item%progress = 0
