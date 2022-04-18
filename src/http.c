@@ -121,6 +121,7 @@ void *handle_image_request(void *args);
 extern void *viewport_request(void *req); // a FORTRAN subroutine
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 void *fetch_inner_dimensions(void *ptr);
+void *fetch_global_statistics(void *ptr);
 void *fetch_image(void *ptr);
 void *fetch_realtime_image_spectrum(void *ptr);
 int submit_progress(char *root, char *datasetid, int len, int progress);

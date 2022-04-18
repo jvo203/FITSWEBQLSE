@@ -103,6 +103,18 @@ struct splat_req
     unsigned char out[CHUNK];
 };
 
+struct mad_req
+{
+    char *datasetid;
+    int len;
+    float dmedian;
+    float sumP;
+    int64_t countP;
+    float sumN;
+    int64_t countN;
+    int first, last;
+};
+
 struct inner_dims_req
 {
     char *datasetid;
