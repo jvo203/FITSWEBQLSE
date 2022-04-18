@@ -1889,8 +1889,8 @@ contains
          if (allocated(item%frame_median)) item%dmedian = &
          &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
 
-         ! calculate global dmad, dmadN, dmadP based on the dmedian
-         if (item%naxes(3) .gt. 1) then
+         ! calculate global dmad, dmadN, dmadP based on the all-data median
+         if (total .gt. 1) then
             req%datasetid = c_loc(item%datasetid)
             req%len = size(item%datasetid)
             req%dmedian = item%dmedian
@@ -1900,6 +1900,17 @@ contains
             req%countN = 0
             req%first = 1
             req%last = item%naxes(3)
+
+            ! launch a pthread
+            rc = c_pthread_create(thread=pid, &
+               attr=c_null_ptr, &
+               start_routine=c_funloc(fetch_global_statistics), &
+               arg=c_loc(req))
+
+            ! calculate_global_statistics
+
+            ! join a thread
+            rc = c_pthread_join(pid, c_null_ptr)
 
             ! call set_video_status(item, .true.)
          end if
