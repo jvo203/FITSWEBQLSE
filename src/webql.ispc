@@ -751,15 +751,15 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
 
 export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
 {
-  varying float partial_sumP = sumP[0] ;
-  varying unsigned int64 partial_countP = countP[0] ;
+  varying float partial_sumP = 0.0f ;
+  varying unsigned int64 partial_countP = 0 ;
 
-  varying float partial_sumN = sumN[0] ;
-  varying unsigned int64 partial_countN = countN[0] ;
+  varying float partial_sumN = 0.0f ;
+  varying unsigned int64 partial_countN = 0 ;
 
   // the final reduction
-  sumP[0] = reduce_add(partial_sumP) ;
-  countP[0] = reduce_add(partial_countP) ;
-  sumN[0] = reduce_add(partial_sumN) ;
-  countN[0] = reduce_add(partial_countN) ;
+  sumP[0] += reduce_add(partial_sumP) ;
+  countP[0] += reduce_add(partial_countP) ;
+  sumN[0] += reduce_add(partial_sumN) ;
+  countN[0] += reduce_add(partial_countN) ;
 }
