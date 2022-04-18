@@ -3996,11 +3996,19 @@ contains
    end subroutine inherent_image_dimensions
 
    subroutine calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last)
+      use omp_lib
+      use, intrinsic :: iso_c_binding
+      implicit none
+
       type(dataset), pointer, intent(in) :: item
       real(c_float), intent(in) :: dmedian
       real(c_float), intent(out) :: sumP, sumN
       integer(c_int64_t), intent(out) :: countP, countN
       integer, intent(in) :: first, last ! frame range
+
+      integer :: max_threads, frame
+      real(c_float) :: thread_sumP, thread_sumN
+      integer(c_int64_t) :: thread_countP, thread_countN
 
       sumP = 0.0
       countP = 0
@@ -4008,6 +4016,16 @@ contains
       countN = 0
 
       if (.not. allocated(item%compressed)) return
+
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
+      thread_sumP = 0.0
+      thread_countP = 0
+      thread_sumN = 0.0
+      thread_countN = 0
+
+      ! iterate through all the available planes
 
    end subroutine calculate_global_statistics
 
