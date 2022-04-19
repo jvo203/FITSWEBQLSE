@@ -1165,6 +1165,13 @@ static enum MHD_Result on_http_connection(void *cls,
         return ret;
     }
 
+    if (strstr(url, "/statistics/") != NULL)
+    {
+        float median;
+
+        return http_not_found(connection);
+    }
+
     if (strstr(url, "/viewport/") != NULL)
     {
         int x1, y1, x2, y2;
