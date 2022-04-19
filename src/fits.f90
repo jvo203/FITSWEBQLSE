@@ -1901,6 +1901,7 @@ contains
       real elapsed
 
       integer :: current, total, rc
+      type(c_pthread_t) :: pid
 
       ! take a time measurement
       call system_clock(finish)
@@ -1928,8 +1929,16 @@ contains
 
          ! calculate global dmad, dmadN, dmadP based on the all-data median
          if ((total .gt. 1) .and. (.not. item%video)) then
-            ! this should be done in a detached thread
-            call global_statistics(c_loc(item))
+            ! call global_statistics(c_loc(item))
+
+            ! launch a pthread
+            rc = c_pthread_create(thread=pid, &
+                                  attr=c_null_ptr, &
+                                  start_routine=c_funloc(global_statistics), &
+                                  arg=c_loc(item))
+
+            ! detach a thread
+            if (rc .eq. 0) rc = c_pthread_detach(pid)
          else
             call print_dataset(item)
          end if
@@ -4022,7 +4031,7 @@ contains
 
          ! call Intel SPMD C
          call make_global_statistics(c_loc(item%compressed(frame)%ptr), width, height,&
-         &thread_sumP, thread_countP, thread_sumN, thread_countN)
+         &dmedian, thread_sumP, thread_countP, thread_sumN, thread_countN)
 
       end do
       !$omp END DO
