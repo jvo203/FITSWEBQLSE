@@ -3351,6 +3351,43 @@ void *fetch_global_statistics(void *ptr)
             break;
     }
 
+    /* See how the transfers went */
+    while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
+    {
+        if (msg->msg == CURLMSG_DONE)
+        {
+            int idx;
+            /* Find out which handle this message is about */
+            for (idx = 0; idx < handle_count; idx++)
+            {
+                int found = (msg->easy_handle == handles[idx]);
+                if (found)
+                    break;
+            }
+
+            long response_code = 0;
+            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+            printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+
+            // parse the JSON response
+            if (response_code == 200)
+            {
+                double val;
+            }
+        }
+    }
+
+    /* remove the transfers and cleanup the handles */
+    for (i = 0; i < handle_count; i++)
+    {
+        curl_multi_remove_handle(multi_handle, handles[i]);
+        curl_easy_cleanup(handles[i]);
+        free(chunks[i].memory);
+    }
+
+    curl_multi_cleanup(multi_handle);
+
     pthread_exit(NULL);
 }
 
