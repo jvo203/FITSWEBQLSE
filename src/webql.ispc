@@ -749,7 +749,7 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
         return 0.0f ;
 }
 
-export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
+export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
 {
   uniform int cn, cm;
 
@@ -787,15 +787,19 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
           varying int pos = k & (DIM -1); // k % DIM
           varying bool isnan = (mask >> pos) & 1;
 
+          // calculate the mean absolute deviation from the median
           cif(!isnan)
           {
-            varying float pixel = scale * (float)compressed[src_idx].mantissa[k];
+            varying float x = scale * (float)compressed[src_idx].mantissa[k];
+            varying float tmp = abs(x - median); // absolute deviation from the median
 
-            // calculate the mean absolute deviation from the median
+            // the '=' sign is to make sure datasets with all pixels being identical are handled too            
+            partial_sumP += (x >= median) ? tmp : 0.0f;
+            partial_sumN += (x <= median) ? tmp : 0.0f;
 
             // increment the counters
-            partial_countP += 1;
-            partial_countN += 1;
+            partial_countP += (x >= median) ? 1 : 0;
+            partial_countN += (x <= median) ? 1 : 0;
           }
 
         }
