@@ -106,7 +106,39 @@
 
     sudo make install
 
-# 13. Adjust the environment variables in the .bashrc
+# 13. NASM
+
+    sudo swupd bundle-add nasm
+
+# 14. x265
+
+    visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
+
+    wget https://anduin.linuxfromscratch.org/BLFS/x265/x265-20220219.tar.xz
+
+    xz -d -v x265-20220219.tar.xz
+
+    tar xvf x265-20220219.tar
+
+    cd x265-20220219
+
+    Apply a manual change in "source/encoder/api.cpp / x265_encoder_open()":
+
+        x265_print_params(param);
+        PARAM_NS::x265_param_free(zoneParam); /* this line needs to be added */
+        return encoder;
+
+    mkdir -p build
+
+    cd build
+
+    cmake ../source
+
+    make -j8
+
+    sudo make install
+
+# 15. Adjust the environment variables in the .bashrc
 
     Add
 
@@ -115,7 +147,7 @@
 
     to .bashrc and re-login
 
-# 14. Intel oneAPI
+# 16. Intel oneAPI
 
     i) intel-basekit
         
@@ -135,7 +167,7 @@
 
     to .bashrc and re-login
 
-# 15. libdill (C coroutines) 
+# 17. libdill (C coroutines) 
 
     (compilation errors in both Fedora 35 and Intel Clear Linux ...)
     (a fix: make CC=clang)
@@ -158,9 +190,9 @@
 
     sudo make install
 
-# 16. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
+# 18. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
-# 17. MPI launcher (we do not use MPI internally!)
+# 19. MPI launcher (we do not use MPI internally!)
 
     # AMD
     mpiexec -silent-abort -machinefile amd.txt -n 4 ./fitswebqlse -c config.ini
@@ -168,7 +200,7 @@
     # Intel
     mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse -c config_ssd.ini
 
-# 18. Replication
+# 20. Replication
 
     # full
 
