@@ -3307,12 +3307,16 @@ void *fetch_global_statistics(void *ptr)
     /* init a multi stack */
     multi_handle = curl_multi_init();
 
+    // html-encode the datasetid
+    char datasetid[2 * req->len];
+    size_t len = html_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median=%f", options.http_port, req->len, req->datasetid, req->dmedian);
-        // printf("[C] URL: '%s'\n", url->str);
+        g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median=%f", options.http_port, (int)len, datasetid, req->dmedian);
+        printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
