@@ -1923,14 +1923,11 @@ contains
       if ((current .eq. total) .and. (total .gt. 0)) then
          call set_ok_status(item, .true.)
 
-         if (allocated(item%frame_min)) item%dmin = minval(item%frame_min)
-         if (allocated(item%frame_max)) item%dmax = maxval(item%frame_max)
-         if (allocated(item%frame_median)) item%dmedian = &
-         &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
-
-         ! calculate global dmad, dmadN, dmadP based on the all-data median
          if ((total .gt. 1) .and. (.not. item%video)) then
-            ! call global_statistics(c_loc(item))
+            if (allocated(item%frame_min)) item%dmin = minval(item%frame_min)
+            if (allocated(item%frame_max)) item%dmax = maxval(item%frame_max)
+            if (allocated(item%frame_median)) item%dmedian = &
+            &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
 
             ! launch a pthread
             rc = c_pthread_create(thread=pid, &
@@ -5389,6 +5386,7 @@ contains
 
    end subroutine viewport_request
 
+   ! calculate global dmad, dmadN, dmadP based on the all-data median
    recursive subroutine global_statistics(arg) BIND(C)
       use, intrinsic :: ISO_C_BINDING
       implicit none
