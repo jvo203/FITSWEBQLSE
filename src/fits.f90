@@ -1787,7 +1787,7 @@ contains
       & ', has_velocity:', item%has_velocity,&
       & ', frame_multiplier = ', item%frame_multiplier
       print *, 'dmin:', item%dmin, 'dmax:', item%dmax, 'dmedian:', item%dmedian
-      print *, 'dmad:', item%dmad, 'dmadN:', item%dmadN, 'dmadP:', item%dmadP, 'video:', item%video
+      print *, 'dmad:', item%dmad, 'dmadP:', item%dmadP, 'dmadN:', item%dmadN, 'video:', item%video
 
       if (item%naxes(3) .gt. 1) then
          ! print *, 'frame_min:', item%frame_min
