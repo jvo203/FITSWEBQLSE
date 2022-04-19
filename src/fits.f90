@@ -1933,7 +1933,7 @@ contains
          &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
 
          ! calculate global dmad, dmadN, dmadP based on the all-data median
-         if (total .gt. 1) then
+         if ((total .gt. 1) .and. (.not. item%video)) then
             req%datasetid = c_loc(item%datasetid)
             req%len = size(item%datasetid)
             req%dmedian = item%dmedian
