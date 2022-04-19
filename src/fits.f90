@@ -1934,6 +1934,7 @@ contains
 
          ! calculate global dmad, dmadN, dmadP based on the all-data median
          if ((total .gt. 1) .and. (.not. item%video)) then
+            ! this should be done in a detached thread
             print *, 'calculating "all-data" global statistics'
 
             req%datasetid = c_loc(item%datasetid)
@@ -1970,9 +1971,12 @@ contains
             if (countP + countN .gt. 0) item%dmad = (sumP + sumN)/(countP + countN)
 
             call set_video_status(item, .true.)
+
+            call print_dataset(item)
+         else
+            call print_dataset(item)
          end if
 
-         call print_dataset(item)
       end if
 
    end subroutine update_progress
