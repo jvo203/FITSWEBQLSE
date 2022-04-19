@@ -1929,7 +1929,7 @@ contains
             if (allocated(item%frame_median)) item%dmedian = &
             &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
 
-            ! launch a pthread, passing the <item> dataset via a C pointer
+            ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
             rc = c_pthread_create(thread=pid, &
                                   attr=c_null_ptr, &
                                   start_routine=c_funloc(global_statistics), &
