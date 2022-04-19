@@ -393,8 +393,8 @@ module fits
 
       end function viewport_image_spectrum_circle
 
-      ! export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
-      subroutine make_global_statistics(compressed, width, height,&
+      ! export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
+      subroutine make_global_statistics(compressed, width, height, median,&
          &sumP, countP, sumN, countN) BIND(C, name="make_global_statistics")
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -402,6 +402,7 @@ module fits
          ! passed by value
          type(C_PTR), value, intent(in) :: compressed
          integer(c_int), value, intent(in) :: width, height
+         real(c_float), value, intent(in) :: median
 
          ! passed by reference
          real(c_float), intent(inout) :: sumP, sumN
