@@ -1169,6 +1169,22 @@ static enum MHD_Result on_http_connection(void *cls,
     {
         float median;
 
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+            datasetId++; // skip the slash character
+
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+        char *median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median");
+
+        if (median_str == NULL)
+            return http_bad_request(connection);
+        else
+            median = atof(median_str);
+
+        // for now do nothing
         return http_not_found(connection);
     }
 
