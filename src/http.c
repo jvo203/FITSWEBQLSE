@@ -1190,9 +1190,6 @@ static enum MHD_Result on_http_connection(void *cls,
         if (item == NULL)
             return http_not_found(connection);
 
-        if (!get_ok_status(item))
-            return http_internal_server_error(connection);
-
         // for now do nothing
         return http_not_found(connection);
     }
