@@ -1902,12 +1902,6 @@ contains
 
       integer :: current, total, rc
 
-      type(mad_req_t), target :: req
-      type(c_pthread_t) :: pid
-
-      real(c_float) :: sumP, sumN
-      integer(c_int64_t) :: countP, countN
-
       ! take a time measurement
       call system_clock(finish)
       elapsed = real(finish - item%start_time)/real(item%crate)
@@ -1935,44 +1929,7 @@ contains
          ! calculate global dmad, dmadN, dmadP based on the all-data median
          if ((total .gt. 1) .and. (.not. item%video)) then
             ! this should be done in a detached thread
-            print *, 'calculating "all-data" global statistics'
-
-            req%datasetid = c_loc(item%datasetid)
-            req%len = size(item%datasetid)
-            req%dmedian = item%dmedian
-            req%sumP = 0.0
-            req%countP = 0
-            req%sumN = 0.0
-            req%countN = 0
-            req%first = 1
-            req%last = item%naxes(3)
-
-            ! launch a pthread
-            rc = c_pthread_create(thread=pid, &
-                                  attr=c_null_ptr, &
-                                  start_routine=c_funloc(fetch_global_statistics), &
-                                  arg=c_loc(req))
-
-            ! calculate global statistics locally
-            call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, req%first, req%last)
-
-            ! join a thread
-            rc = c_pthread_join(pid, c_null_ptr)
-
-            ! merge the responses from the cluster
-            sumP = sumP + req%sumP
-            countP = countP + req%countP
-
-            sumN = sumN + req%sumN
-            countN = countN + req%countN
-
-            if (countP .gt. 0) item%dmadP = sumP/countP
-            if (countN .gt. 0) item%dmadN = sumN/countN
-            if (countP + countN .gt. 0) item%dmad = (sumP + sumN)/(countP + countN)
-
-            call set_video_status(item, .true.)
-
-            call print_dataset(item)
+            call global_statistics(c_loc(item))
          else
             call print_dataset(item)
          end if
@@ -5421,4 +5378,63 @@ contains
       return
 
    end subroutine viewport_request
+
+   recursive subroutine global_statistics(arg) BIND(C)
+      use, intrinsic :: ISO_C_BINDING
+      implicit none
+
+      type(c_ptr), intent(in), value :: arg   ! a pointer to the FORTRAN FITS dataset
+
+      type(dataset), pointer :: item
+
+      type(mad_req_t), target :: req
+      type(c_pthread_t) :: pid
+
+      real(c_float) :: sumP, sumN
+      integer(c_int64_t) :: countP, countN
+
+      integer :: rc
+
+      call c_f_pointer(arg, item)
+
+      print *, 'calculating "all-data" global statistics'
+
+      req%datasetid = c_loc(item%datasetid)
+      req%len = size(item%datasetid)
+      req%dmedian = item%dmedian
+      req%sumP = 0.0
+      req%countP = 0
+      req%sumN = 0.0
+      req%countN = 0
+      req%first = 1
+      req%last = item%naxes(3)
+
+      ! launch a pthread
+      rc = c_pthread_create(thread=pid, &
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_global_statistics), &
+                            arg=c_loc(req))
+
+      ! calculate global statistics locally
+      call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, req%first, req%last)
+
+      ! join a thread
+      rc = c_pthread_join(pid, c_null_ptr)
+
+      ! merge the responses from the cluster
+      sumP = sumP + req%sumP
+      countP = countP + req%countP
+
+      sumN = sumN + req%sumN
+      countN = countN + req%countN
+
+      if (countP .gt. 0) item%dmadP = sumP/countP
+      if (countN .gt. 0) item%dmadN = sumN/countN
+      if (countP + countN .gt. 0) item%dmad = (sumP + sumN)/(countP + countN)
+
+      call set_video_status(item, .true.)
+
+      call print_dataset(item)
+
+   end subroutine global_statistics
 end module fits
