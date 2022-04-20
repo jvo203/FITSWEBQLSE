@@ -158,6 +158,7 @@ bool dataset_exists(const char *datasetid)
     }
     else
     {
+        printf("[C] '%s' does not exist.\n", datasetid);
         pthread_mutex_unlock(&datasets_mtx);
         return false;
     }
