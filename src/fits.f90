@@ -4023,6 +4023,10 @@ contains
 
       if (.not. allocated(item%compressed)) return
 
+      ! range validation
+      if (first .lt. 1) return
+      if (last .gt. item%naxes(3)) return
+
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
