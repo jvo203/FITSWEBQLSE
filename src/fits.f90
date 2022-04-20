@@ -3987,10 +3987,16 @@ contains
       implicit none
 
       type(C_PTR), intent(in), value :: ptr
+      real(c_float), intent(in), value :: dmedian
+      real(c_float), intent(out) :: sumP, sumN
+      integer(c_int64_t), intent(out) :: countP, countN
+      integer(c_int), intent(in), value :: first, last
 
       type(dataset), pointer :: item
 
       call c_f_pointer(ptr, item)
+
+      call calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last)
 
    end subroutine calculate_global_statistics_C
 
