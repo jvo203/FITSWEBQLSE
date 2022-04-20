@@ -2433,15 +2433,12 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     else
         progress = 0;
 
-    // html-encode the datasetid
-    char _id[2 * len];
-    size_t _len = html_encode(datasetid, len, _id, sizeof(_id) - 1);
-
     if (root == NULL)
     {
+        printf("[C] root == NULL\n");
+
         char *id = strndup(datasetid, len);
         void *item = get_dataset(id);
-        free(id);
 
         if (item == NULL)
         {
@@ -2462,6 +2459,10 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         free(id);
         return;
     }
+
+    // html-encode the datasetid
+    char _id[2 * len];
+    size_t _len = html_encode(datasetid, len, _id, sizeof(_id) - 1);
 
     // a POST buffer
     char *post_buffer = NULL;
