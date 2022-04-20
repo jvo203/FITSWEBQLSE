@@ -5460,6 +5460,8 @@ contains
       ! join a thread
       rc = c_pthread_join(pid, c_null_ptr)
 
+      print *, "cluster statistics... sumP", req%sumP, ", countP", req%countP, ", sumN", req%sumN, ", countN", req%countN
+
       ! merge the responses from the cluster
       sumP = sumP + req%sumP
       countP = countP + req%countP
