@@ -2433,19 +2433,15 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
     else
         progress = 0;
 
-    char *id = strndup(datasetid, len);
-
-    if (id == NULL)
-    {
-        *start = 0;
-        *end = 0;
-        *status = -1;
-        return;
-    }
+    // html-encode the datasetid
+    char _id[2 * len];
+    size_t _len = html_encode(datasetid, len, _id, sizeof(_id) - 1);
 
     if (root == NULL)
     {
+        char *id = strndup(datasetid, len);
         void *item = get_dataset(id);
+        free(id);
 
         if (item == NULL)
         {
@@ -2531,7 +2527,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", root);
-        g_string_append_printf(url, "%" PRIu16 "/range/%s", options.ws_port, id);
+        g_string_append_printf(url, "%" PRIu16 "/range/%.*s", options.ws_port, (int)_len, _id);
         // printf("[C] URL: '%s'\n", url->str);
 
         curl = curl_easy_init();
@@ -2594,8 +2590,6 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         g_string_free(url, TRUE);
         free(post_buffer);
     }
-
-    free(id);
 }
 
 int submit_progress(char *root, char *datasetid, int len, int progress)
