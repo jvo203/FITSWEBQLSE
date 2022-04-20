@@ -54,7 +54,7 @@ module unix_pthread
 
       ! int pthread_detach(pthread_t thread);
       function c_pthread_detach(thread) bind(c, name='pthread_detach')
-         import :: c_int, c_ptr, c_pthread_t
+         import :: c_int, c_pthread_t
          implicit none
          type(c_pthread_t), intent(in), value :: thread
          integer(kind=c_int)                  :: c_pthread_detach
