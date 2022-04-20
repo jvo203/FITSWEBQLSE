@@ -3195,9 +3195,9 @@ contains
                         & frame_min, frame_max, ignrval, datamin, datamax)
 
                         ! for disk load balancing (not just CPU), try to serialise a frame whilst reading FITS
-                        if (associated(item%compressed(frame)%ptr)) then
-                           call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
-                        end if
+                        ! if (associated(item%compressed(frame)%ptr)) then
+                        !   call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
+                        ! end if
                      end block
                   end if
                end do
