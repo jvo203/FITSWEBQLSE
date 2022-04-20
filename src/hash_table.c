@@ -57,6 +57,8 @@ int mkcache(const char *dir)
             // ignore an existing directory, other threads might have created it in the meantime
             if (errno == EEXIST)
                 return 0;
+            else
+                printf("[C] mkcache errno = %d\n", errno);
         }
 
         return stat;
