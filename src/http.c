@@ -3431,8 +3431,8 @@ void *fetch_global_statistics(void *ptr)
             // parse the JSON response
             if (response_code == 200)
             {
-                printf("%lu bytes retrieved\n", (unsigned long)chunks[idx].size);
-                printf("cURL response: %s\n", chunks[idx].memory);
+                // printf("%lu bytes retrieved\n", (unsigned long)chunks[idx].size);
+                // printf("cURL response: %s\n", chunks[idx].memory);
 
                 double val;
 
