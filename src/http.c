@@ -1190,6 +1190,8 @@ static enum MHD_Result on_http_connection(void *cls,
         if (item == NULL)
             return http_not_found(connection);
 
+        // calculate_global_statistics_C(void *ptr, float dmedian, float *sumP, int64_t *countP, float *sumN, int64_t *countN, int first, int last);
+
         // for now do nothing
         return http_not_found(connection);
     }
@@ -3344,7 +3346,7 @@ void *fetch_global_statistics(void *ptr)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median=%f", options.http_port, (int)len, datasetid, req->dmedian);
+        g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median=%f&first=%d&last=%d", options.http_port, (int)len, datasetid, req->dmedian, req->first, req->last);
         printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
