@@ -1205,12 +1205,18 @@ static enum MHD_Result on_http_connection(void *cls,
         if (item == NULL)
             return http_not_found(connection);
 
+        char *json = NULL;
         float sumP, sumN;
         int64_t countP, countN;
 
         calculate_global_statistics_C(item, median, &sumP, &countP, &sumN, &countN, first, last);
-
         printf("[C] calculate_global_statistics_C sumP = %f, countP = %ld, sumN = %f, countN = %ld\n", sumP, countP, sumN, countN);
+
+        mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%g,%Q:%ld,%Q:%g,%Q:%ld}", "sumP", sumP, "countP", countP, "sumN", sumN, "countN", countN);
+        printf("[C] %s\n", json);
+        free(json);
+
+        // the response will be freed by libmicrohttpd
 
         // for now do nothing
         return http_not_found(connection);
