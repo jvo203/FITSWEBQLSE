@@ -3047,7 +3047,7 @@ contains
             ! 0 : OK
             ! 1 : accepted, header not ready yet
             if (status .lt. 0) then
-               print *, "status = ", status
+               ! print *, "status = ", status
                exit ! one comparison handles it all, neat!
             end if
 
