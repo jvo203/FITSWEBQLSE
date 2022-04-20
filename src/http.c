@@ -1727,7 +1727,6 @@ static enum MHD_Result on_http_connection(void *cls,
                     pthread_t tid;
 
                     // try to insert a NULL dataset
-
                     if (insert_if_not_exists(datasetId[i], NULL))
                         continue;
 

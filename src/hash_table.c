@@ -136,7 +136,10 @@ void *get_dataset(const char *datasetid)
 bool dataset_exists(const char *datasetid)
 {
     if (pthread_mutex_lock(&datasets_mtx) != 0)
+    {
+        printf("[C] cannot lock datasets_mtx!\n");
         return false;
+    }
 
     if (g_hash_table_contains(datasets, (gconstpointer)datasetid))
     {
