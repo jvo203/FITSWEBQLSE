@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include <pthread.h>
 #include <string.h>
@@ -50,7 +51,13 @@ int mkcache(const char *dir)
         int stat = mkdir(dir, S_IRWXU | S_IRWXG | S_IRWXO);
 
         if (stat == -1)
-            perror("dir");
+        {
+            perror(dir);
+
+            // ignore an existing directory, other threads might have created it in the meantime
+            if (errno == EEXIST)
+                return 0;
+        }
 
         return stat;
     }
