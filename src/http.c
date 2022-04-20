@@ -1210,16 +1210,23 @@ static enum MHD_Result on_http_connection(void *cls,
         int64_t countP, countN;
 
         calculate_global_statistics_C(item, median, &sumP, &countP, &sumN, &countN, first, last);
-        printf("[C] calculate_global_statistics_C sumP = %f, countP = %ld, sumN = %f, countN = %ld\n", sumP, countP, sumN, countN);
+        // printf("[C] calculate_global_statistics_C sumP = %f, countP = %ld, sumN = %f, countN = %ld\n", sumP, countP, sumN, countN);
 
         mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%.*g,%Q:%ld,%Q:%.*g,%Q:%ld}", "sumP", 12, sumP, "countP", countP, "sumN", 12, sumN, "countN", countN);
-        printf("[C] %s\n", json);
-        free(json);
 
         // the response will be freed by libmicrohttpd
+        struct MHD_Response *response = MHD_create_response_from_buffer(strlen(json), (void *)json, MHD_RESPMEM_MUST_FREE);
 
-        // for now do nothing
-        return http_not_found(connection);
+        MHD_add_response_header(response, "Cache-Control", "no-cache");
+        MHD_add_response_header(response, "Cache-Control", "no-store");
+        MHD_add_response_header(response, "Pragma", "no-cache");
+        MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
+
+        enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+        MHD_destroy_response(response);
+
+        return ret;
     }
 
     if (strstr(url, "/viewport/") != NULL)
