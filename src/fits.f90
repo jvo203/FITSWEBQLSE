@@ -3046,7 +3046,10 @@ contains
             ! LOOP CONTINUE
             ! 0 : OK
             ! 1 : accepted, header not ready yet
-            if (status .lt. 0) exit ! one comparison handles it all, neat!
+            if (status .lt. 0) then
+               print *, "status = ", status
+               exit ! one comparison handles it all, neat!
+            end if
 
             ! process the block
             if ((start .gt. 0) .and. (end .gt. 0)) then
