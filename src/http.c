@@ -1205,7 +1205,10 @@ static enum MHD_Result on_http_connection(void *cls,
         if (item == NULL)
             return http_not_found(connection);
 
-        // calculate_global_statistics_C(void *ptr, float dmedian, float *sumP, int64_t *countP, float *sumN, int64_t *countN, int first, int last);
+        float sumP, sumN;
+        int64_t countP, countN;
+
+        calculate_global_statistics_C(item, median, &sumP, &countP, &sumN, &countN, first, last);
 
         // for now do nothing
         return http_not_found(connection);
