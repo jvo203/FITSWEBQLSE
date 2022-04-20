@@ -277,8 +277,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     else
                     {
                         // signal a catastrophic error
-                        printf("[C] a catastrophic error: cannot find %s.\n", datasetId);
-                        mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+                        printf("[C] a catastrophic error: cannot find '%s'.\n", datasetId);
+                        // mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+                        mg_http_reply(c, 202, NULL, "Accepted");
 
                         free(tmp);
                         break;

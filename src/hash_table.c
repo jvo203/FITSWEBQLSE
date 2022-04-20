@@ -94,6 +94,8 @@ void insert_dataset(const char *datasetid, int len, void *item)
 
         printf("[C] inserted %s into the hash table\n", id);
     }
+    else
+        printf("[C] cannot lock datasets_mtx!\n");
 
     free(id);
 }
@@ -103,7 +105,10 @@ bool insert_if_not_exists(const char *datasetid, void *item)
     bool exists;
 
     if (pthread_mutex_lock(&datasets_mtx) != 0)
+    {
+        printf("[C] cannot lock datasets_mtx!\n");
         return false;
+    }
 
     if (!g_hash_table_contains(datasets, (gconstpointer)datasetid))
     {
@@ -128,7 +133,10 @@ void *get_dataset(const char *datasetid)
         pthread_mutex_unlock(&datasets_mtx);
     }
     else
+    {
+        printf("[C] cannot lock datasets_mtx!\n");
         item = NULL;
+    }
 
     return item;
 }
