@@ -2562,8 +2562,8 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
                 fprintf(stderr, "[C] fetch_channel_range: curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
             else
             {
-                printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
-                printf("cURL response: %s\n", chunk.memory);
+                // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
+                // printf("cURL response: %s\n", chunk.memory);
 
                 // assume accepted (no header yet)
                 *status = 1;

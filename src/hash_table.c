@@ -102,6 +102,8 @@ void insert_dataset(const char *datasetid, int len, void *item)
 
 bool insert_if_not_exists(const char *datasetid, void *item)
 {
+    printf("[C] insert_if_not_exists(%s,%p)\n", datasetid, item);
+
     bool exists;
 
     if (pthread_mutex_lock(&datasets_mtx) != 0)
