@@ -3981,6 +3981,19 @@ contains
 
    end subroutine inherent_image_dimensions
 
+   subroutine calculate_global_statistics_C(ptr, dmedian, sumP, countP, sumN, countN, first, last)&
+      & BIND(C, name='calculate_global_statistics_C')
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: ptr
+
+      type(dataset), pointer :: item
+
+      call c_f_pointer(ptr, item)
+
+   end subroutine calculate_global_statistics_C
+
    subroutine calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last)
       use omp_lib
       use, intrinsic :: iso_c_binding
