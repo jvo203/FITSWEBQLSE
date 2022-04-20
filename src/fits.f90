@@ -795,8 +795,13 @@ contains
       status = mkcache(cache//c_null_char)
 
       if (status .ne. 0) then
-         print *, "could not create a cache directory ", cache
-         return
+         print *, "could not create a cache directory ", cache, "re-trying"
+         status = mkcache(cache//c_null_char)
+
+         if (status .ne. 0) then
+            print *, "could not create a cache directory ", cache, "aborting 'serialise_fixed_array'"
+            return
+         end if
       end if
 
       file = cache//'/'//trim(str(frame))//'.bin'
