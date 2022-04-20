@@ -1168,6 +1168,7 @@ static enum MHD_Result on_http_connection(void *cls,
     if (strstr(url, "/statistics/") != NULL)
     {
         float median;
+        int first, last;
 
         char *datasetId = strrchr(url, '/');
 
@@ -1183,6 +1184,20 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
         else
             median = atof(median_str);
+
+        char *first_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "first");
+
+        if (first_str == NULL)
+            return http_bad_request(connection);
+        else
+            first = atoi(first_str);
+
+        char *last_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "last");
+
+        if (last_str == NULL)
+            return http_bad_request(connection);
+        else
+            last = atoi(last_str);
 
         // do we have a dataset?
         void *item = get_dataset(datasetId);
