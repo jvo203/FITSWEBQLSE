@@ -5469,6 +5469,8 @@ contains
       sumN = sumN + req%sumN
       countN = countN + req%countN
 
+      print *, "final statistics... sumP", sumP, ", countP", countP, ", sumN", sumN, ", countN", countN
+
       if (countP .gt. 0) item%dmadP = sumP/countP
       if (countN .gt. 0) item%dmadN = sumN/countN
       if (countP + countN .gt. 0) item%dmad = (sumP + sumN)/(countP + countN)
