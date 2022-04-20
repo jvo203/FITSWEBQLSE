@@ -4019,7 +4019,7 @@ contains
       integer(c_int64_t), intent(out) :: countP, countN
       integer, intent(in) :: first, last ! FITS data cube frame range
 
-      integer :: max_threads, frame
+      integer :: max_threads, frame, counter
       integer(c_int) :: width, height
       real(c_float) :: thread_sumP, thread_sumN
       integer(c_int64_t) :: thread_countP, thread_countN
@@ -4038,6 +4038,7 @@ contains
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
+      counter = 0
       thread_sumP = 0.0
       thread_countP = 0
       thread_sumN = 0.0
@@ -4051,6 +4052,7 @@ contains
       !$omp& PRIVATE(frame)&
       !$omp& REDUCTION(+:thread_sumP,countP)&
       !$omp& REDUCTION(+:thread_sumN,countN)&
+      !$omp& REDUCTION(+:counter)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
@@ -4062,6 +4064,8 @@ contains
          call make_global_statistics(c_loc(item%compressed(frame)%ptr), width, height,&
          &dmedian, thread_sumP, thread_countP, thread_sumN, thread_countN)
 
+         counter = counter + 1
+
       end do
       !$omp END DO
       !$omp END PARALLEL
@@ -4070,6 +4074,8 @@ contains
       countP = thread_countP
       sumN = thread_sumN
       countN = thread_countN
+
+      print *, "calculate_global_statistics processed frame counter:", counter
 
    end subroutine calculate_global_statistics
 
