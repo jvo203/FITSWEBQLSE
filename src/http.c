@@ -1212,7 +1212,7 @@ static enum MHD_Result on_http_connection(void *cls,
         calculate_global_statistics_C(item, median, &sumP, &countP, &sumN, &countN, first, last);
         printf("[C] calculate_global_statistics_C sumP = %f, countP = %ld, sumN = %f, countN = %ld\n", sumP, countP, sumN, countN);
 
-        mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%g,%Q:%ld,%Q:%g,%Q:%ld}", "sumP", sumP, "countP", countP, "sumN", sumN, "countN", countN);
+        mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%f,%Q:%ld,%Q:%f,%Q:%ld}", "sumP", sumP, "countP", countP, "sumN", sumN, "countN", countN);
         printf("[C] %s\n", json);
         free(json);
 
