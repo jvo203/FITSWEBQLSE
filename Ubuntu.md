@@ -79,7 +79,9 @@
 
     to .bashrc and re-login
 
-# 16. manually add ispc from https://ispc.github.io/downloads.html
+# 16. Intel SPMD C (ispc)
+
+    manually add ispc from https://ispc.github.io/downloads.html
 
 # 17. Intel oneAPI
 
