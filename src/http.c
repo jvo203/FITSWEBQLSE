@@ -3374,7 +3374,7 @@ void *fetch_global_statistics(void *ptr)
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median=%f&first=%d&last=%d", options.http_port, (int)len, datasetid, req->dmedian, req->first, req->last);
-        printf("[C] URL: '%s'\n", url->str);
+        // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
@@ -3668,7 +3668,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
         g_string_append_printf(url, "&image=%s", req->image ? "true" : "false");                            // image
         g_string_append_printf(url, "&beam=%s", req->beam == circle ? "circle" : "square");                 // beam
         g_string_append_printf(url, "&intensity=%s", req->intensity == integrated ? "integrated" : "mean"); // intensity
-        printf("[C] URL: '%s'\n", url->str);
+        // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
