@@ -80,9 +80,9 @@
 # 11. CFITSIO    
     wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.1.0.tar.gz
 
-    tar zxvf cfitsio-4.0.0.tar.gz
+    tar zxvf cfitsio-4.1.0.tar.gz
 
-    cd cfitsio-4.0.0
+    cd cfitsio-4.1.0
 
     ./configure --prefix=/usr/local --enable-reentrant
 
