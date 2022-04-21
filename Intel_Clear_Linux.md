@@ -167,7 +167,7 @@
 
     to .bashrc and re-login
 
-# 17. libdill (C coroutines) 
+# 17. libdill (C coroutines) (not needed / not used at the moment)
 
     (compilation errors in both Fedora 35 and Intel Clear Linux ...)
     (a fix: make CC=clang)
