@@ -194,7 +194,11 @@
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
-# 19. MPI launcher (we do not use MPI internally!)
+# 19. Intel SPMD C (ispc)
+
+    manually add ispc from https://ispc.github.io/downloads.html
+
+# 20. MPI launcher (we do not use MPI internally!)
 
     # AMD
     mpiexec -silent-abort -machinefile amd.txt -n 4 ./fitswebqlse -c config.ini
@@ -202,7 +206,7 @@
     # Intel
     mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse -c config_ssd.ini
 
-# 20. Replication
+# 21. Replication
 
     # full
 
