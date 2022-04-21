@@ -877,6 +877,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
                 break;
             }
+
+            int fps = 30;
+            int bitrate = 1000;
+            bool key = false;
+            int seq_id = -1;
+
+            double frame, ref_freq;
+            float timestamp;
         }
 
         break;
