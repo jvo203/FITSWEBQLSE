@@ -190,7 +190,9 @@
 
     sudo make install
 
-# 18. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
+# 18. Splatalogue
+
+    wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
 # 19. MPI launcher (we do not use MPI internally!)
 
