@@ -4,8 +4,8 @@
 # 2. ZeroMQ
     sudo swupd bundle-add devpkg-libzmq
 
-# 3. CZMQ
-    git clone git://github.com/zeromq/czmq.git
+# 3. CZMQ    
+    git clone https://github.com/zeromq/czmq.git
 
     cd czmq
 
