@@ -892,6 +892,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->frame = 0;
             req->timestamp = 0.0;
 
+            req->flux = NULL;
+            req->len = 0;
+
             req->fd = -1;
             req->ptr = item;
 
@@ -954,6 +957,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             else
                 session->last_frame_idx = frame_idx;
 
+            req->flux = strdup(session->flux);
+            req->len = strlen(req->flux);
+
+            // for now do nothing
+            free(req->flux);
             free(req);
         }
 

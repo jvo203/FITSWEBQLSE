@@ -55,6 +55,10 @@ struct video_request
     int frame;
     float timestamp;
 
+    // needed by tone mapping
+    char *flux;
+    int len;
+
     // output (the 'write' end of a Unix pipe)
     int fd;
 
