@@ -945,6 +945,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f->%d}, ref_freq: %f, timestamp: %f\n", req->fps, req->bitrate, req->seq_id, req->keyframe, frame, req->frame, ref_freq, req->timestamp);
 
             // skip repeated frames
+            if (frame_idx == session->last_frame_idx)
+            {
+                printf("[C] skipping a repeat video frame #%d\n", frame_idx);
+                free(req);
+                break;
+            }
+            else
+                session->last_frame_idx = frame_idx;
 
             free(req);
         }
