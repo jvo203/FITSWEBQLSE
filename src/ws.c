@@ -1345,7 +1345,7 @@ void *video_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    // TO-DO - compress the planes with x265
+    // TO-DO - compress the planes with x265 and pass the response (payload) over to mongoose
 
     // release the incoming buffer
     free(buf);
