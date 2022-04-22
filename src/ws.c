@@ -908,9 +908,21 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 // 'seq_id'
                 if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
                     req->seq_id = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'key'
+                if (strncmp(wm->data.ptr + koff, "\"key\"", klen) == 0)
+                {
+                    // false
+                    if (strncmp(wm->data.ptr + voff, "\"false\"", vlen) == 0)
+                        req->keyframe = false;
+
+                    // true
+                    if (strncmp(wm->data.ptr + voff, "\"true\"", vlen) == 0)
+                        req->keyframe = true;
+                }
             }
 
-            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d\n", req->fps, req->bitrate, req->seq_id);
+            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d\n", req->fps, req->bitrate, req->seq_id, req->keyframe);
 
             free(req);
         }
