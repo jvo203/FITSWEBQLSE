@@ -5516,7 +5516,27 @@ contains
 
       type(C_PTR), intent(in), value :: user
 
-      ! for now it is leaking memory (req%flux and req, a.k.a. user)
+      type(dataset), pointer :: item
+      type(video_request_f), pointer :: req
+
+      ! timing
+      integer(8) :: start_t, finish_t, crate, cmax
+      real(c_float) :: elapsed
+
+      ! start the timer
+      call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+      call c_f_pointer(user, req)
+      call c_f_pointer(req%ptr, item)
+
+      print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', req%frame, 'fd:', req%fd
+
+      call close_pipe(req%fd)
+
+      nullify (item)
+      call free(req%flux)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
 
    end subroutine video_request_simd
 
