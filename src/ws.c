@@ -603,6 +603,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 {
                     // pass the read end of the pipe to a C thread
                     resp->session_id = strdup(c->label);
+                    resp->bitrate = 0;
                     resp->timestamp = req->timestamp;
                     resp->seq_id = req->seq_id;
                     resp->fd = pipefd[0];
@@ -940,8 +941,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             int frame_idx;
 
             // skip repeated frames
-
-            // update the encoder bitframe
 
             free(req);
         }

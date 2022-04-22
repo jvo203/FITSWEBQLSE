@@ -28,6 +28,7 @@ struct websocket_response
 {
     char *session_id;
     int seq_id;
+    int bitrate;
     float timestamp;
 
     // input (the 'read' end of a Unix pipe)
