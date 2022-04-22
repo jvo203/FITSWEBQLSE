@@ -603,6 +603,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 {
                     // pass the read end of the pipe to a C thread
                     resp->session_id = strdup(c->label);
+                    resp->fps = 0;
                     resp->bitrate = 0;
                     resp->timestamp = req->timestamp;
                     resp->seq_id = req->seq_id;
@@ -887,13 +888,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (req == NULL)
                 break;
 
-            req->fps = 30;
-            req->bitrate = 1000;
+            int fps = 30;
+            int bitrate = 1000;
             req->keyframe = false; // is it a keyframe?
-            req->seq_id = -1;
+            int seq_id = -1;
 
             req->frame = 0;
-            req->timestamp = 0.0;
+            float timestamp = 0.0;
 
             req->flux = NULL;
             req->len = 0;
@@ -908,15 +909,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             {
                 // 'fps'
                 if (strncmp(wm->data.ptr + koff, "\"fps\"", klen) == 0)
-                    req->fps = atoi2(wm->data.ptr + voff, vlen);
+                    fps = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'bitrate'
                 if (strncmp(wm->data.ptr + koff, "\"bitrate\"", klen) == 0)
-                    req->bitrate = atoi2(wm->data.ptr + voff, vlen);
+                    bitrate = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'seq_id'
                 if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
-                    req->seq_id = atoi2(wm->data.ptr + voff, vlen);
+                    seq_id = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'key'
                 if (strncmp(wm->data.ptr + koff, "\"key\"", klen) == 0)
@@ -940,7 +941,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 // 'timestamp'
                 if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
-                    req->timestamp = atof2(wm->data.ptr + voff, vlen);
+                    timestamp = atof2(wm->data.ptr + voff, vlen);
             }
 
             // get the video frame index
@@ -948,7 +949,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
             req->frame = frame_idx;
 
-            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f --> %d}, ref_freq: %f, timestamp: %f\n", req->fps, req->bitrate, req->seq_id, req->keyframe, frame, req->frame, ref_freq, req->timestamp);
+            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f --> %d}, ref_freq: %f, timestamp: %f\n", fps, bitrate, seq_id, req->keyframe, frame, req->frame, ref_freq, timestamp);
 
             // skip repeated frames
             if (frame_idx == session->last_frame_idx)
@@ -982,9 +983,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             {
                 // pass the read end of the pipe to a C thread
                 resp->session_id = strdup(c->label);
-                resp->bitrate = req->bitrate;
-                resp->timestamp = req->timestamp;
-                resp->seq_id = req->seq_id;
+                resp->fps = fps;
+                resp->bitrate = bitrate;
+                resp->timestamp = timestamp;
+                resp->seq_id = seq_id;
                 resp->fd = pipefd[0];
 
                 // pass the write end of the pipe to a FORTRAN thread

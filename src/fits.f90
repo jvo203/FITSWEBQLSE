@@ -58,6 +58,21 @@ module fits
 
    end type image_spectrum_request_f
 
+   type, bind(c) :: video_request_f
+      ! input
+      logical(kind=c_bool) :: keyframe
+      integer(c_int) :: frame
+
+      ! needed by tone mapping
+      type(C_PTR) :: flux
+      integer(kind=c_int) :: len
+
+      ! output
+      integer(kind=c_int) :: fd
+
+      type(C_PTR) :: ptr
+   end type video_request_f
+
    !type fp16
    !    integer(kind=2), dimension(:, :), pointer :: ptr
    !end type fp16

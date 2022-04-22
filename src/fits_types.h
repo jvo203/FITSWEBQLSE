@@ -48,12 +48,8 @@ struct image_spectrum_request
 struct video_request
 {
     // input
-    int fps;
-    int bitrate;
     bool keyframe; // is it a keyframe?
-    int seq_id;
     int frame;
-    float timestamp;
 
     // needed by tone mapping
     char *flux;

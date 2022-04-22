@@ -28,6 +28,7 @@ struct websocket_response
 {
     char *session_id;
     int seq_id;
+    int fps;
     int bitrate;
     float timestamp;
 
