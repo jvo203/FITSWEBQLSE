@@ -937,12 +937,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     req->timestamp = atof2(wm->data.ptr + voff, vlen);
             }
 
-            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: %f, ref_freq: %f, timestamp: %f\n", req->fps, req->bitrate, req->seq_id, req->keyframe, frame, ref_freq, req->timestamp);
-
             // get the video frame index
             int frame_idx;
             get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
             req->frame = frame_idx;
+
+            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f->%d}, ref_freq: %f, timestamp: %f\n", req->fps, req->bitrate, req->seq_id, req->keyframe, frame, req->frame, ref_freq, req->timestamp);
 
             // skip repeated frames
 
