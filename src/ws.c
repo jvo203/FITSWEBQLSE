@@ -920,9 +920,21 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (strncmp(wm->data.ptr + voff, "true", vlen) == 0)
                         req->keyframe = true;
                 }
+
+                // 'frame'
+                if (strncmp(wm->data.ptr + koff, "\"frame\"", klen) == 0)
+                    req->frame = atof2(wm->data.ptr + voff, vlen);
+
+                // 'ref_freq'
+                if (strncmp(wm->data.ptr + koff, "\"ref_freq\"", klen) == 0)
+                    req->ref_freq = atof2(wm->data.ptr + voff, vlen);
+
+                // 'timestamp'
+                if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
+                    req->timestamp = atof2(wm->data.ptr + voff, vlen);
             }
 
-            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d\n", req->fps, req->bitrate, req->seq_id, req->keyframe);
+            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: %f, ref_freq: %f, timestamp: %f\n", req->fps, req->bitrate, req->seq_id, req->keyframe, req->frame, req->ref_freq, req->timestamp);
 
             free(req);
         }
