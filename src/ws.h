@@ -24,7 +24,7 @@ struct websocket_session
     x265_picture *picture;
 };
 
-struct image_spectrum_response
+struct websocket_response
 {
     char *session_id;
     int seq_id;

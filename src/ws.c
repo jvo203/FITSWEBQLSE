@@ -573,7 +573,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2, req.width, req.height, req.beam, req.intensity, req.frame_start, req.frame_end, req.ref_freq, req.seq_id, req.timestamp);
 
-            struct image_spectrum_response *resp = (struct image_spectrum_response *)malloc(sizeof(struct image_spectrum_response));
+            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
             if (resp == NULL)
             {
@@ -1014,7 +1014,7 @@ void *realtime_image_spectrum_response(void *ptr)
     if (ptr == NULL)
         pthread_exit(NULL);
 
-    struct image_spectrum_response *resp = (struct image_spectrum_response *)ptr;
+    struct websocket_response *resp = (struct websocket_response *)ptr;
 
     ssize_t n = 0;
     size_t offset = 0;
