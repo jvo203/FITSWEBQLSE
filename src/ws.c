@@ -880,11 +880,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             int fps = 30;
             int bitrate = 1000;
-            bool key = false;
+            bool keyframe = false; // is it a keyframe?
             int seq_id = -1;
 
-            double frame, ref_freq;
-            float timestamp;
+            double frame = 0.0;
+            double ref_freq = 0.0;
+            float timestamp = 0.0;
         }
 
         break;
