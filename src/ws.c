@@ -936,6 +936,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: %f, ref_freq: %f, timestamp: %f\n", req->fps, req->bitrate, req->seq_id, req->keyframe, req->frame, req->ref_freq, req->timestamp);
 
+            // get the video frame index
+            int frame_idx;
+
+            // skip repeated frames
+
             free(req);
         }
 
