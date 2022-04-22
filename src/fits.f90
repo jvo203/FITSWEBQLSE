@@ -5492,4 +5492,17 @@ contains
       call print_dataset(item)
 
    end subroutine global_statistics
+
+   recursive subroutine video_request_simd(user) BIND(C, name='video_request_simd')
+      use omp_lib
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      ! for now it is leaking memory (req%flux and req, a.k.a. user)
+
+   end subroutine video_request_simd
+
 end module fits
