@@ -3386,8 +3386,8 @@ contains
 
    subroutine get_spectrum_range_C(ptr, frame_start, frame_end, ref_freq, first, last) BIND(C, name='get_spectrum_range_C')
       type(C_PTR), intent(in), value :: ptr
-      real(kind=8), intent(in), value :: frame_start, frame_end, ref_freq
-      integer, intent(out) :: first, last
+      real(kind=c_double), intent(in), value :: frame_start, frame_end, ref_freq
+      integer(kind=c_int), intent(out) :: first, last
       type(dataset), pointer :: item
 
       call c_f_pointer(ptr, item)
