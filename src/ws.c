@@ -913,11 +913,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (strncmp(wm->data.ptr + koff, "\"key\"", klen) == 0)
                 {
                     // false
-                    if (strncmp(wm->data.ptr + voff, "\"false\"", vlen) == 0)
+                    if (strncmp(wm->data.ptr + voff, "false", vlen) == 0)
                         req->keyframe = false;
 
                     // true
-                    if (strncmp(wm->data.ptr + voff, "\"true\"", vlen) == 0)
+                    if (strncmp(wm->data.ptr + voff, "true", vlen) == 0)
                         req->keyframe = true;
                 }
             }
