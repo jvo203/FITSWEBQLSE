@@ -890,13 +890,19 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
                 // 'fps'
-                /*if (strncmp(wm->data.ptr + koff, "\"fps\"", klen) == 0)
-                    fps = atoi2(wm->data.ptr + voff, vlen);*/
+                if (strncmp(wm->data.ptr + koff, "\"fps\"", klen) == 0)
+                    fps = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'bitrate'
                 if (strncmp(wm->data.ptr + koff, "\"bitrate\"", klen) == 0)
                     bitrate = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'seq_id'
+                if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
+                    seq_id = atoi2(wm->data.ptr + voff, vlen);
             }
+
+            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d\n", fps, bitrate, seq_id);
         }
 
         break;
