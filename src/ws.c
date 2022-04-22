@@ -941,6 +941,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // skip repeated frames
 
+            // update the encoder bitframe
+
             free(req);
         }
 
