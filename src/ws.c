@@ -886,6 +886,17 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             double frame = 0.0;
             double ref_freq = 0.0;
             float timestamp = 0.0;
+
+            for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // 'fps'
+                /*if (strncmp(wm->data.ptr + koff, "\"fps\"", klen) == 0)
+                    fps = atoi2(wm->data.ptr + voff, vlen);*/
+
+                // 'bitrate'
+                if (strncmp(wm->data.ptr + koff, "\"bitrate\"", klen) == 0)
+                    bitrate = atoi2(wm->data.ptr + voff, vlen);
+            }
         }
 
         break;
