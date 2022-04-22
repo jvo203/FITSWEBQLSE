@@ -951,7 +951,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (frame_idx == session->last_frame_idx)
             {
                 printf("[C] skipping a repeat video frame #%d\n", frame_idx);
-                free(req);
+                free(req); // req->flux is NULL at this point, no need to free it
                 break;
             }
             else
@@ -961,7 +961,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->len = strlen(req->flux);
 
             // for now do nothing
-            free(req->flux);
+            free(req->flux); // req->flux is *NOT* NULL at this point
             free(req);
         }
 
