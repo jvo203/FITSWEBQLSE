@@ -44,3 +44,20 @@ struct image_spectrum_request
 
     void *ptr;
 };
+
+struct video_request
+{
+    // input
+    int fps;
+    int bitrate;
+    bool keyframe; // is it a keyframe?
+    int seq_id;
+    double frame;
+    double ref_freq;
+    float timestamp;
+
+    // output (the 'write' end of a Unix pipe)
+    int fd;
+
+    void *ptr;
+};

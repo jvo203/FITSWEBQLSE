@@ -878,31 +878,41 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 break;
             }
 
-            int fps = 30;
-            int bitrate = 1000;
-            bool keyframe = false; // is it a keyframe?
-            int seq_id = -1;
+            struct video_request *req = (struct video_request *)malloc(sizeof(struct video_request));
 
-            double frame = 0.0;
-            double ref_freq = 0.0;
-            float timestamp = 0.0;
+            if (req == NULL)
+                break;
+
+            req->fps = 30;
+            req->bitrate = 1000;
+            req->keyframe = false; // is it a keyframe?
+            req->seq_id = -1;
+
+            req->frame = 0.0;
+            req->ref_freq = 0.0;
+            req->timestamp = 0.0;
+
+            req->fd = -1;
+            req->ptr = item;
 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
                 // 'fps'
                 if (strncmp(wm->data.ptr + koff, "\"fps\"", klen) == 0)
-                    fps = atoi2(wm->data.ptr + voff, vlen);
+                    req->fps = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'bitrate'
                 if (strncmp(wm->data.ptr + koff, "\"bitrate\"", klen) == 0)
-                    bitrate = atoi2(wm->data.ptr + voff, vlen);
+                    req->bitrate = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'seq_id'
                 if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
-                    seq_id = atoi2(wm->data.ptr + voff, vlen);
+                    req->seq_id = atoi2(wm->data.ptr + voff, vlen);
             }
 
-            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d\n", fps, bitrate, seq_id);
+            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d\n", req->fps, req->bitrate, req->seq_id);
+
+            free(req);
         }
 
         break;
