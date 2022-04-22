@@ -889,12 +889,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->keyframe = false; // is it a keyframe?
             req->seq_id = -1;
 
-            req->frame = 0.0;
-            req->ref_freq = 0.0;
+            req->frame = 0;
             req->timestamp = 0.0;
 
             req->fd = -1;
             req->ptr = item;
+
+            double frame = 0.0;
+            double ref_freq = 0.0;
 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
@@ -924,21 +926,23 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 // 'frame'
                 if (strncmp(wm->data.ptr + koff, "\"frame\"", klen) == 0)
-                    req->frame = atof2(wm->data.ptr + voff, vlen);
+                    frame = atof2(wm->data.ptr + voff, vlen);
 
                 // 'ref_freq'
                 if (strncmp(wm->data.ptr + koff, "\"ref_freq\"", klen) == 0)
-                    req->ref_freq = atof2(wm->data.ptr + voff, vlen);
+                    ref_freq = atof2(wm->data.ptr + voff, vlen);
 
                 // 'timestamp'
                 if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
                     req->timestamp = atof2(wm->data.ptr + voff, vlen);
             }
 
-            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: %f, ref_freq: %f, timestamp: %f\n", req->fps, req->bitrate, req->seq_id, req->keyframe, req->frame, req->ref_freq, req->timestamp);
+            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: %f, ref_freq: %f, timestamp: %f\n", req->fps, req->bitrate, req->seq_id, req->keyframe, frame, ref_freq, req->timestamp);
 
             // get the video frame index
             int frame_idx;
+            get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
+            req->frame = frame_idx;
 
             // skip repeated frames
 

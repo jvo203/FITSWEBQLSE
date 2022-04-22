@@ -52,8 +52,7 @@ struct video_request
     int bitrate;
     bool keyframe; // is it a keyframe?
     int seq_id;
-    double frame;
-    double ref_freq;
+    int frame;
     float timestamp;
 
     // output (the 'write' end of a Unix pipe)
