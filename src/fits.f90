@@ -5519,6 +5519,8 @@ contains
       type(dataset), pointer :: item
       type(video_request_f), pointer :: req
 
+      type(video_tone_mapping) :: tone
+
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
       real(c_float) :: elapsed
@@ -5541,6 +5543,11 @@ contains
          call close_pipe(req%fd)
          goto 5000
       end if
+
+      ! set the video tone mapping
+      tone%dmin = item%dmin
+      tone%dmax = item%dmax
+      tone%dmedian = item%dmedian
 
       call close_pipe(req%fd)
 
