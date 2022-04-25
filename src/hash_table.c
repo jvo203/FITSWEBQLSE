@@ -16,7 +16,7 @@ void init_hash_table()
 {
     if (pthread_mutex_init(&datasets_mtx, NULL) != 0)
     {
-        perror("mutex_init error");
+        perror("datasets mutex_init error");
         exit(1);
     }
 

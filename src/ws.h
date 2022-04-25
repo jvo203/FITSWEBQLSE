@@ -3,7 +3,7 @@
 #include "mongoose.h"
 #include "fits_types.h"
 #include <pthread.h>
-
+#include <glib.h>
 #include <x265.h>
 
 struct websocket_session

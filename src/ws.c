@@ -7,10 +7,35 @@
 
 #include "hash_table.h"
 
+static GHashTable *sessions;
+pthread_mutex_t sessions_mtx;
+
 extern options_t options; // <options> is defined in main.c
 extern sig_atomic_t s_received_signal;
 extern int get_header_status(void *item);
 extern void inherent_image_dimensions_C(void *item, int *width, int *height);
+
+void init_session_table()
+{
+    if (pthread_mutex_init(&sessions_mtx, NULL) != 0)
+    {
+        perror("sessions mutex_init error");
+        exit(1);
+    }
+
+    sessions = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+}
+
+void delete_session_table()
+{
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        g_hash_table_destroy(sessions);
+        pthread_mutex_unlock(&sessions_mtx);
+    }
+
+    pthread_mutex_destroy(&sessions_mtx);
+}
 
 char *append_null(const char *chars, const int size)
 {
