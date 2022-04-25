@@ -89,7 +89,7 @@ module fits
    end type image_tone_mapping
 
    type video_tone_mapping
-      character(len=:), allocatable :: flux
+      ! character(len=:), allocatable :: flux
       real(kind=c_float) :: dmin, dmax, dmedian
       real(kind=c_float) :: sensitivity, slope
       real(kind=c_float) :: white, black
@@ -5521,6 +5521,8 @@ contains
 
       type(video_tone_mapping) :: tone
 
+      real, parameter :: u = 7.5
+
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
       real(c_float) :: elapsed
@@ -5548,6 +5550,12 @@ contains
       tone%dmin = item%dmin
       tone%dmax = item%dmax
       tone%dmedian = item%dmedian
+      tone%black = max(item%dmin, item%dmedian - u*item%dmadN)
+      tone%white = min(item%dmax, item%dmedian + u*item%dmadP)
+      tone%sensitivity = 1.0/(tone%white - tone%black)
+      tone%slope = tone%sensitivity
+
+      print *, 'video tone mapping:', tone
 
       call close_pipe(req%fd)
 
