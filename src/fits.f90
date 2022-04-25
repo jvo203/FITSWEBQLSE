@@ -3132,7 +3132,7 @@ contains
                   mean_spec_val = res(3)
                   int_spec_val = res(4)
 
-                  ! disable FORTRAN, testing the Intel SPMD C
+                  ! disable FORTRAN, use the Intel SPMD C
                   if (.false.) then
                      ! calculate the min/max values
                      do j = 1, npixels
