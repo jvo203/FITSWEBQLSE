@@ -43,6 +43,9 @@ struct websocket_message
     size_t len;
 };
 
+void init_session_table();
+void delete_session_table();
+
 void start_ws();
 extern void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 extern void *realtime_image_spectrum_request(void *req);
