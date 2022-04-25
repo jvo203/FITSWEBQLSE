@@ -2558,7 +2558,7 @@ function ws_gatekeeper(req, ws)
 
     @info "\nOrigin: $orig   Target: $target   subprotocol: $(subprotocol(req))"
 
-    # check if there is a <datasetid> present in <target>
+    # check if there is a '<sessionid>/<datasetid>' present in <target>
     pos = findlast("/", target)
 
     if !isnothing(pos)
@@ -2566,8 +2566,8 @@ function ws_gatekeeper(req, ws)
         @info "\n[ws] sessionid $sessionid"
 
         target = SubString(target, 1, pos[1] - 1)
-
         pos = findlast("/", target)
+
         if !isnothing(pos)
 
             targets = SubString(target, pos[1] + 1)
