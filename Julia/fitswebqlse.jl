@@ -2562,14 +2562,25 @@ function ws_gatekeeper(req, ws)
     pos = findlast("/", target)
 
     if !isnothing(pos)
-        targets = SubString(target, pos[1] + 1)
-        ids = split(targets, ";")
+        sessionid = SubString(target, pos[1] + 1)
+        @info "\n[ws] sessionid $sessionid"
 
-        @info "\n[ws] datasetid $(ids[1])"
+        target = SubString(target, 1, pos[1] - 1)
 
-        ws_coroutine(ws, ids)
+        pos = findlast("/", target)
+        if !isnothing(pos)
+
+            targets = SubString(target, pos[1] + 1)
+            ids = split(targets, ";")
+
+            @info "\n[ws] datasetid $(ids[1])"
+
+            ws_coroutine(ws, ids)
+        else
+            @info "[ws] Missing datasetid"
+        end
     else
-        @info "[ws] Missing datasetid"
+        @info "[ws] Missing sessionid"
     end
 
 end
