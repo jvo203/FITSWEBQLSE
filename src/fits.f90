@@ -5531,9 +5531,20 @@ contains
 
       print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', req%frame, 'fd:', req%fd
 
+      if (.not. allocated(item%compressed)) then
+         call close_pipe(req%fd)
+         goto 5000
+      end if
+
+      ! if a frame has not been found it needs to be fetched from the cluster (TO-DO)
+      if (.not. associated(item%compressed(req%frame)%ptr)) then
+         call close_pipe(req%fd)
+         goto 5000
+      end if
+
       call close_pipe(req%fd)
 
-      nullify (item)
+5000  nullify (item)
       call free(req%flux)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
