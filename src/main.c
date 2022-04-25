@@ -310,6 +310,7 @@ int main(int argc, char *argv[])
 
     init_cluster();
     init_hash_table();
+    init_session_table();
 
     // ZeroMQ node auto-discovery
     setenv("ZSYS_SIGHANDLER", "false", 1);
@@ -387,6 +388,7 @@ int main(int argc, char *argv[])
     delete_cluster();
 
     delete_hash_table();
+    delete_session_table();
 
     curl_global_cleanup();
 
