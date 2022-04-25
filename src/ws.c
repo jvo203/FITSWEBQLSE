@@ -92,6 +92,16 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 struct websocket_session *session = (struct websocket_session *)c->fn_data;
                 printf("closing a websocket connection for %s/%s\n", session->datasetid, c->label);
 
+                // remove a session pointer from the hash table
+                if (pthread_mutex_lock(&sessions_mtx) == 0)
+                {
+                    if (g_hash_table_remove(sessions, (gpointer)c->label))
+                        printf("[C] remove %s from the hash table\n", c->label);
+                    pthread_mutex_unlock(&sessions_mtx);
+                }
+                else
+                    printf("[C] cannot lock sessions_mtx!\n");
+
                 pthread_mutex_lock(&session->vid_mtx);
 
                 free(session->datasetid);
@@ -442,6 +452,17 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->picture = NULL;
 
                 c->fn_data = session;
+
+                // add a session pointer to the hash table
+                if (pthread_mutex_lock(&sessions_mtx) == 0)
+                {
+                    g_hash_table_replace(sessions, (gpointer)strdup(c->label), session);
+                    pthread_mutex_unlock(&sessions_mtx);
+
+                    printf("[C] inserted %s into the hash table\n", c->label);
+                }
+                else
+                    printf("[C] cannot lock sessions_mtx!\n");
             }
         }
 
