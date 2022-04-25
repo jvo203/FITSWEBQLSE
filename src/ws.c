@@ -96,7 +96,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
                 {
                     if (g_hash_table_remove(sessions, (gpointer)c->label))
-                        printf("[C] remove %s from the hash table\n", c->label);
+                        printf("[C] removed %s from the hash table\n", c->label);
                     pthread_mutex_unlock(&sessions_mtx);
                 }
                 else
