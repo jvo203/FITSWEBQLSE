@@ -3178,12 +3178,12 @@ contains
                   ! item%frame_median(frame) = median(pack(thread_buffer, data_mask))
                   item%frame_median(frame) = hist_median(pack(thread_buffer, data_mask), frame_min, frame_max)
 
-                  if (data_count .gt. 0) then
-                     ! item%frame_median(frame) = median(thread_data(1:data_count))
-                     item%frame_median(frame) = hist_median(thread_data(1:data_count), frame_min, frame_max)
-                  else
-                     item%frame_median(frame) = ieee_value(0.0, ieee_quiet_nan)
-                  end if
+                  ! if (data_count .gt. 0) then
+                  !    ! item%frame_median(frame) = median(thread_data(1:data_count))
+                  !   item%frame_median(frame) = hist_median(thread_data(1:data_count), frame_min, frame_max)
+                  ! else
+                  !    item%frame_median(frame) = ieee_value(0.0, ieee_quiet_nan)
+                  ! end if
 
                   dmin = min(dmin, frame_min)
                   dmax = max(dmax, frame_max)
