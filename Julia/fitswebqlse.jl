@@ -1959,7 +1959,7 @@ function ws_coroutine(ws, ids)
 
                         # video tone mapping
                         tone =
-                            VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
+                            VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)                        
                     else
                         error("video tone mapping has not been initialised.")
                     end
@@ -1967,7 +1967,7 @@ function ws_coroutine(ws, ids)
                     println("video tone mapping:", tone)
                 end
 
-                # by this point the VideoToneMapping variable is valid
+                # by this point the VideoToneMapping variable is valid                
 
                 Threads.@spawn begin
                     # interpolate variable values into a thread
