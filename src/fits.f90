@@ -5524,7 +5524,8 @@ contains
 
         type(video_tone_mapping) :: tone
         integer(kind=1), allocatable, target :: pixels(:), mask(:)
-        integer :: npixels
+        integer :: npixels, i
+        character(kind=c_char), pointer :: flux(:)
 
         real, parameter :: u = 7.5
 
@@ -5537,6 +5538,7 @@ contains
 
         call c_f_pointer(user, req)
         call c_f_pointer(req%ptr, item)
+        call c_f_pointer(req%flux, flux, [req%len])
 
         print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', req%frame, 'fd:', req%fd
 
@@ -5557,6 +5559,12 @@ contains
         end if
 
         ! set the video tone mapping
+        allocate (character(len=req%len)::tone%flux)
+
+        do i = 1, req%len
+            tone%flux(i:i) = flux(i)
+        end do
+
         tone%dmin = item%dmin
         tone%dmax = item%dmax
         tone%dmedian = item%dmedian
@@ -5564,7 +5572,6 @@ contains
         tone%white = min(item%dmax, item%dmedian + u*item%dmadP)
         tone%sensitivity = 1.0/(tone%white - tone%black)
         tone%slope = tone%sensitivity
-        ! print *, 'video tone mapping:', tone
 
         ! end the timer
         call system_clock(finish_t)
