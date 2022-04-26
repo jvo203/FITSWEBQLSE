@@ -5566,12 +5566,18 @@ contains
         tone%slope = tone%sensitivity
         ! print *, 'video tone mapping:', tone
 
+        ! end the timer
+        call system_clock(finish_t)
+        elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
         call close_pipe(req%fd)
 
 5000    nullify (item)
         call free(req%flux)
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
         call free(user) ! release C memory
+
+        print *, 'video_request elapsed time:', elapsed, '[ms]'
 
     end subroutine video_request_simd
 
