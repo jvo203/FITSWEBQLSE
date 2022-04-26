@@ -945,6 +945,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->flux = NULL;
             req->len = 0;
 
+            req->width = session->image_width;
+            req->height = session->image_height;
+            req->downsize = session->bDownsize;
             req->fd = -1;
             req->ptr = item;
 

@@ -56,6 +56,9 @@ struct video_request
     int len;
 
     // output (the 'write' end of a Unix pipe)
+    int width;
+    int height;
+    bool downsize;
     int fd;
 
     void *ptr;
