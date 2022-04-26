@@ -5523,6 +5523,8 @@ contains
         type(video_request_f), pointer :: req
 
         type(video_tone_mapping) :: tone
+        integer(kind=1), allocatable, target :: pixels(:), mask(:)
+        integer :: npixels
 
         real, parameter :: u = 7.5
 
@@ -5542,6 +5544,11 @@ contains
             call close_pipe(req%fd)
             goto 5000
         end if
+
+        ! allocate the pixels/mask
+        npixels = req%width*req%height
+        allocate (pixels(npixels))
+        allocate (mask(npixels))
 
         ! if a frame has not been found it needs to be fetched from the cluster (TO-DO)
         if (.not. associated(item%compressed(req%frame)%ptr)) then
