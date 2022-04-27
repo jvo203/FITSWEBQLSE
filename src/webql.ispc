@@ -858,12 +858,12 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
 
           varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
 
-          // calculate the mean absolute deviation from the median
+          // apply tone mapping
           cif(valid)
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];
-
-            float pixel = 255.0f / ( 1.0f + exp(-6.0f * (x - black) * slope) ) ;             
+            varying float pixel = 255.0f / ( 1.0f + exp(-6.0f * (x - black) * slope) ) ;
+            
             dst_luma[offset] = (int) clamp(pixel, 0.0f, 255.0f) ;
             dst_mask[offset] = 255 ;
       
