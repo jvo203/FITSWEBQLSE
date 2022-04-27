@@ -5684,9 +5684,15 @@ contains
          ! downsize into {dst_pixels, dst_mask}
       else
          ! call SIMD on {dst_pixels, dst_mask}
+
          if (tone%flux .eq. "linear") then
             call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
                &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%slope)
+         end if
+
+         if (tone%flux .eq. "logistic") then
+            call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
+               &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmedian, tone%sensitivity)
          end if
       end if
 
