@@ -5675,7 +5675,7 @@ contains
       width = item%naxes(1)
       height = item%naxes(2)
 
-      if (.not. downsize) then
+      if (downsize) then
          allocate (pixels(width, height))
          allocate (mask(width, height))
 
@@ -5684,6 +5684,10 @@ contains
          ! downsize into {dst_pixels, dst_mask}
       else
          ! call SIMD on {dst_pixels, dst_mask}
+         if (tone%flux .eq. "linear") then
+            call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
+               &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%slope)
+         end if
       end if
 
    end subroutine get_video_frame
