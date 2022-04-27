@@ -812,3 +812,48 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
   sumN[0] += reduce_add(partial_sumN) ;
   countN[0] += reduce_add(partial_countN) ;
 }
+
+export void make_video_frame_fixed_linear(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope)
+{
+  uniform int cn, cm;
+
+  cn = width / DIM;
+  cm = height / DIM;
+
+  // the input dimensions might not be divisible by <DIM>
+  if (width % DIM != 0)
+    cn = cn + 1;
+
+  if (height % DIM != 0)
+    cm = cm + 1;
+
+    // go through the entire plane
+  for(uniform int j=0; j<cm; j++)
+    for(uniform int i=0; i <cn; i++)
+    { 
+      // compressed array entry index
+      uniform int src_idx = j * cn + i;
+
+      uniform int emax = (int)compressed[src_idx].common_exp;
+      varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
+
+      foreach(k=0 ... BLOCK_SIZE)
+      {          
+          // find out which FORTRAN column the value is located
+          varying int idx = k >> BASE;
+          varying int mask = compressed[src_idx].mask[idx];
+          varying int pos = k & (DIM -1); // k % DIM
+          varying bool isnan = (mask >> pos) & 1;
+
+          // calculate the mean absolute deviation from the median
+          cif(!isnan)
+          {
+            varying float x = scale * (float)compressed[src_idx].mantissa[k];
+      
+          }
+
+        }
+
+    }
+
+}
