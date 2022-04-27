@@ -5684,7 +5684,7 @@ contains
          ! downsize into {dst_pixels, dst_mask}
       else
          ! call SIMD on {dst_pixels, dst_mask}
-         print *, "making a video frame with flux:", tone%flux
+         print *, "making a video frame with flux ", tone%flux
 
          if (tone%flux .eq. "linear") then
             call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
