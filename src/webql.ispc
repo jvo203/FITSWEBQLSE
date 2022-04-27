@@ -853,6 +853,9 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
           varying int pixel_x = src_x + pos; // ix = pos
           varying int pixel_y = src_y + idx; // iy = idx;
 
+          // destination index
+          varying int offset = pixel_y*stride + pixel_x;
+
           varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
 
           // calculate the mean absolute deviation from the median
@@ -860,6 +863,11 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];
       
+          }
+          else
+          {
+            dst_luma[offset] = 0 ;
+	          dst_mask[offset] = 0 ;
           }
 
         }
