@@ -428,6 +428,14 @@ module fits
 
       end subroutine make_global_statistics
 
+      ! export void make_video_frame_fixed_linear(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope)
+      subroutine make_video_frame_fixed_linear(compressed, width, height,&
+        &dst_luma, dst_mask, stride, black, slope) BIND(C, name="make_video_frame_fixed_linear")
+        use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+      end subroutine make_video_frame_fixed_linear
+
       ! resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
       subroutine resizeCubic(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeCubic')
          use, intrinsic :: ISO_C_BINDING
