@@ -837,6 +837,10 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
       uniform int emax = (int)compressed[src_idx].common_exp;
       varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
 
+      // block coordinate offset (the same for each point in the block)
+      uniform int src_x = i * DIM;
+      uniform int src_y = j * DIM;
+
       foreach(k=0 ... BLOCK_SIZE)
       {          
           // find out which FORTRAN column the value is located
@@ -845,8 +849,14 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
           varying int pos = k & (DIM -1); // k % DIM
           varying bool isnan = (mask >> pos) & 1;
 
+          // get the coordinates within a DIMxDIM block
+          varying int pixel_x = src_x + pos; // ix = pos
+          varying int pixel_y = src_y + idx; // iy = idx;
+
+          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+
           // calculate the mean absolute deviation from the median
-          cif(!isnan)
+          cif(valid)
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];
       
