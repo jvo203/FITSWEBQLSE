@@ -5594,6 +5594,7 @@ contains
       type(video_tone_mapping) :: tone
       integer(kind=1), allocatable, target :: pixels(:, :), mask(:, :)
       integer :: i
+      integer(kind=c_size_t) :: written
       character(kind=c_char), pointer :: flux(:)
 
       real, parameter :: u = 7.5
@@ -5647,7 +5648,15 @@ contains
       call system_clock(finish_t)
       elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-      call close_pipe(req%fd)
+      if (req%fd .ne. -1) then
+         ! send pixels
+         written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+
+         ! send mask
+         written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+
+         call close_pipe(req%fd)
+      end if
 
 5000  nullify (item)
       call free(req%flux)
