@@ -5688,31 +5688,31 @@ contains
          ! call SIMD on {dst_pixels, dst_mask}
          print *, "making a video frame with flux ", tone%flux
 
-         if (tone%flux .eq. "linear") then
+         if (tone%flux .eq. '"linear"') then
             print *, "calling make_video_frame_fixed_linear"
             call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
                &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%slope)
          end if
 
-         if (tone%flux .eq. "logistic") then
+         if (tone%flux .eq. '"logistic"') then
             print *, "calling make_video_frame_fixed_logistic"
             call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
                &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmedian, tone%sensitivity)
          end if
 
-         if (tone%flux .eq. "ratio") then
+         if (tone%flux .eq. '"ratio"') then
             print *, "calling make_video_frame_fixed_ratio"
             call make_video_frame_fixed_ratio(c_loc(item%compressed(frame)%ptr), width, height,&
                &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
          end if
 
-         if (tone%flux .eq. "square") then
+         if (tone%flux .eq. '"square"') then
             print *, "calling make_video_frame_fixed_square"
             call make_video_frame_fixed_square(c_loc(item%compressed(frame)%ptr), width, height,&
                &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
          end if
 
-         if (tone%flux .eq. "legacy") then
+         if (tone%flux .eq. '"legacy"') then
             lmin = log(0.5)
             lmax = log(1.5)
 
