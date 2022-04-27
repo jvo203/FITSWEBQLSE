@@ -1364,7 +1364,7 @@ void *video_response(void *ptr)
 
     ssize_t n = 0;
     size_t offset = 0;
-    size_t buf_size = 0x2000;
+    size_t buf_size = 0x40000;
 
     char *buf = malloc(buf_size);
 
