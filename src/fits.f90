@@ -470,6 +470,20 @@ module fits
 
       end subroutine make_video_frame_fixed_ratio
 
+      ! export void make_video_frame_fixed_square(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity)
+      subroutine make_video_frame_fixed_square(compressed, width, height,&
+         &dst_luma, dst_mask, stride, black, sensitivity) BIND(C, name="make_video_frame_fixed_square")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: compressed
+         integer(c_int), value, intent(in) :: width, height
+         type(C_PTR), value, intent(in) :: dst_luma, dst_mask
+         integer(c_int), value, intent(in) :: stride
+         real(c_float), value, intent(in) :: black, sensitivity
+
+      end subroutine make_video_frame_fixed_square
+
       ! resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
       subroutine resizeCubic(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeCubic')
          use, intrinsic :: ISO_C_BINDING
