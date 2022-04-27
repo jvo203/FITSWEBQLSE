@@ -5672,6 +5672,8 @@ contains
       integer(kind=1), allocatable, target :: pixels(:, :), mask(:, :)
       integer :: width, height
 
+      real(kind=c_float) :: lmin, lmax
+
       width = item%naxes(1)
       height = item%naxes(2)
 
@@ -5708,6 +5710,15 @@ contains
             print *, "calling make_video_frame_fixed_square"
             call make_video_frame_fixed_square(c_loc(item%compressed(frame)%ptr), width, height,&
                &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
+         end if
+
+         if (tone%flux .eq. "legacy") then
+            lmin = log(0.5)
+            lmax = log(1.5)
+
+            print *, "calling make_video_frame_fixed_legacy"
+            call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
+               &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmin, tone%dmax, lmin, lmax)
          end if
       end if
 
