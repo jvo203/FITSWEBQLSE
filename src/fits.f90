@@ -5684,6 +5684,7 @@ contains
          ! downsize into {dst_pixels, dst_mask}
       else
          ! call SIMD on {dst_pixels, dst_mask}
+         print *, "making a video frame with flux:", tone%flux
 
          if (tone%flux .eq. "linear") then
             call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
@@ -5696,6 +5697,7 @@ contains
          end if
 
          if (tone%flux .eq. "ratio") then
+            print *, "calling make_video_frame_fixed_ratio"
             call make_video_frame_fixed_ratio(c_loc(item%compressed(frame)%ptr), width, height,&
                &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
          end if
