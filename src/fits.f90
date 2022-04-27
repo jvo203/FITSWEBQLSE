@@ -5571,7 +5571,7 @@ contains
       tone%sensitivity = 1.0/(tone%white - tone%black)
       tone%slope = tone%sensitivity
 
-      call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height)
+      call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
 
       ! end the timer
       call system_clock(finish_t)
@@ -5588,14 +5588,15 @@ contains
 
    end subroutine video_request_simd
 
-   subroutine get_video_frame(item, frame, tone, pixels, mask, width, height)
+   subroutine get_video_frame(item, frame, tone, dst_pixels, dst_mask, width, height, downsize)
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(dataset), intent(in), pointer :: item
       type(video_tone_mapping), intent(in) :: tone
       integer, intent(in) :: frame, width, height
-      integer(kind=1), intent(out), target :: pixels(width, height), mask(width, height)
+      logical(kind=c_bool) :: downsize
+      integer(kind=1), intent(out), target :: dst_pixels(width, height), dst_mask(width, height)
 
    end subroutine get_video_frame
 
