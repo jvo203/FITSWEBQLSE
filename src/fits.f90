@@ -5588,15 +5588,33 @@ contains
 
    end subroutine video_request_simd
 
-   subroutine get_video_frame(item, frame, tone, dst_pixels, dst_mask, width, height, downsize)
+   subroutine get_video_frame(item, frame, tone, dst_pixels, dst_mask, dst_width, dst_height, downsize)
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(dataset), intent(in), pointer :: item
       type(video_tone_mapping), intent(in) :: tone
-      integer, intent(in) :: frame, width, height
+      integer, intent(in) :: frame, dst_width, dst_height
       logical(kind=c_bool) :: downsize
-      integer(kind=1), intent(out), target :: dst_pixels(width, height), dst_mask(width, height)
+      integer(kind=1), intent(out), target :: dst_pixels(dst_width, dst_height)
+      integer(kind=1), intent(out), target :: dst_mask(dst_width, dst_height)
+
+      integer(kind=1), allocatable, target :: pixels(:, :), mask(:, :)
+      integer :: width, height
+
+      width = item%naxes(1)
+      height = item%naxes(2)
+
+      if (.not. downsize) then
+         allocate (pixels(width, height))
+         allocate (mask(width, height))
+
+         ! call SIMD
+
+         ! downsize into {dst_pixels, dst_mask}
+      else
+         ! call SIMD on {dst_pixels, dst_mask}
+      end if
 
    end subroutine get_video_frame
 
