@@ -5694,6 +5694,11 @@ contains
             call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
                &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmedian, tone%sensitivity)
          end if
+
+         if (tone%flux .eq. "ratio") then
+            call make_video_frame_fixed_ratio(c_loc(item%compressed(frame)%ptr), width, height,&
+               &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
+         end if
       end if
 
    end subroutine get_video_frame
