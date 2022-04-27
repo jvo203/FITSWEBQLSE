@@ -5512,7 +5512,6 @@ contains
    end subroutine global_statistics
 
    recursive subroutine video_request_simd(user) BIND(C, name='video_request_simd')
-      use omp_lib
       use :: unix_pthread
       use, intrinsic :: iso_c_binding
       implicit none
@@ -5572,7 +5571,7 @@ contains
       tone%sensitivity = 1.0/(tone%white - tone%black)
       tone%slope = tone%sensitivity
 
-      ! call get_video_frame(item, frame, tone, pixels, mask, req%width, req%height)
+      call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height)
 
       ! end the timer
       call system_clock(finish_t)
@@ -5588,5 +5587,16 @@ contains
       print *, 'video_request elapsed time:', elapsed, '[ms]'
 
    end subroutine video_request_simd
+
+   subroutine get_video_frame(item, frame, tone, pixels, mask, width, height)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(dataset), intent(in), pointer :: item
+      type(video_tone_mapping), intent(in) :: tone
+      integer, intent(in) :: frame, width, height
+      integer(kind=1), intent(out), target :: pixels(width, height), mask(width, height)
+
+   end subroutine get_video_frame
 
 end module fits
