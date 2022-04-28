@@ -1436,6 +1436,13 @@ void *video_response(void *ptr)
     session->picture->stride[0] = session->image_width;
     session->picture->stride[1] = session->image_width;
 
+    // done with the planes
+    session->picture->planes[0] = NULL;
+    session->picture->planes[1] = NULL;
+
+    session->picture->stride[0] = 0;
+    session->picture->stride[1] = 0;
+
     pthread_mutex_unlock(&session->vid_mtx);
 
     // release the incoming buffer
