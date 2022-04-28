@@ -5686,6 +5686,10 @@ contains
         width = item%naxes(1)
         height = item%naxes(2)
 
+        ! a blank canvas by default
+        dst_pixels = 0
+        dst_mask = 0
+
         if (downsize) then
             allocate (pixels(width, height))
             allocate (mask(width, height))
@@ -5727,8 +5731,6 @@ contains
             end if
 
             ! downsize {pixels, mask} into {dst_pixels, dst_mask}
-            dst_pixels = 0
-            dst_mask = 0
         else
             ! call SIMD on {dst_pixels, dst_mask}
             print *, "making a video frame with flux '", tone%flux, "'"

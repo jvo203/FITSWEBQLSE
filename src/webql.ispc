@@ -1066,14 +1066,8 @@ export void make_video_frame_fixed_square(uniform struct fixed_block_t compresse
             varying float pixel = (x - black) * sensitivity ;
             
             dst_luma[offset] = pixel > 0.0f ? (int) clamp( 255.0f*pixel*pixel, 0.0f, 255.0f) : 0 ;            
-            dst_mask[offset] = 255 ;
-      
-          }
-          else
-          {
-            dst_luma[offset] = 0 ;
-	          dst_mask[offset] = 0 ;
-          }
+            dst_mask[offset] = 255 ;    
+          }          
 
         }
 
@@ -1134,13 +1128,7 @@ export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compresse
         
             dst_luma[offset] = pixel > 0.0f ? (int) clamp( 255.0f * (log(pixel) - lmin) / (lmax - lmin), 0.0f, 255.0f) : 0 ;        
             dst_mask[offset] = 255 ;
-      
-          }
-          else
-          {
-            dst_luma[offset] = 0 ;
-	          dst_mask[offset] = 0 ;
-          }
+          }          
 
         }
 
