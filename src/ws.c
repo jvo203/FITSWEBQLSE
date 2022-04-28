@@ -1436,6 +1436,13 @@ void *video_response(void *ptr)
     session->picture->stride[0] = session->image_width;
     session->picture->stride[1] = session->image_width;
 
+    // RGB-encode
+    x265_nal *pNals = NULL;
+    uint32_t iNal = 0;
+
+    int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL);
+    printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
+
     // done with the planes
     session->picture->planes[0] = NULL;
     session->picture->planes[1] = NULL;
