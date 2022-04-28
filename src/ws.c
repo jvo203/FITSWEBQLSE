@@ -1230,7 +1230,7 @@ void *realtime_image_spectrum_response(void *ptr)
         {
             msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + compressed_size;
 
-            printf("[C] spectrum length: %u, elapsed: %f [ms], compressed_size: %u, msg_len: %zu\n", length, elapsed, compressed_size, msg_len);
+            printf("[C] spectrum length: %u, elapsed: %f [ms], compressed_size: %u, msg_len: %zu bytes.\n", length, elapsed, compressed_size, msg_len);
 
             char *payload = malloc(msg_len);
 
@@ -1450,6 +1450,49 @@ void *video_response(void *ptr)
         size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + pNals[i].sizeBytes;
 
         printf("[C] video_response elapsed: %f [ms], msg_len: %zu bytes.\n", elapsed, msg_len);
+
+        char *payload = malloc(msg_len);
+
+        if (payload != NULL)
+        {
+            float ts = resp->timestamp;
+            uint32_t id = resp->seq_id;
+            uint32_t msg_type = 5;
+            // 0 - spectrum, 1 - viewport,
+            // 2 - image, 3 - full, spectrum,  refresh,
+            // 4 - histogram, 5 - video frame
+
+            size_t ws_offset = 0;
+
+            memcpy((char *)payload + ws_offset, &ts, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, pNals[i].payload, pNals[i].sizeBytes);
+            ws_offset += pNals[i].sizeBytes;
+
+            if (ws_offset != msg_len)
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+            // create a UDP message
+            struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+
+            // pass the message over to mongoose via a UDP pipe
+            if (!mg_mgr_wakeup(udp_pipe, &msg, sizeof(struct websocket_message))) // Wakeup event manager
+            {
+                // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                free(msg.session_id);
+                free(payload);
+            };
+        }
     }
 
     // done with the planes
