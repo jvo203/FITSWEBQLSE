@@ -1408,8 +1408,14 @@ void *video_response(void *ptr)
         goto free_mem;
 
     // TO-DO - compress the planes with x265 and pass the response (payload) over to mongoose
-    // size_t plane_size = resp->width * resp->height;
-    // size_t expected = 2 * sizeof(uint8_t) * plane_size;
+    size_t plane_size = session->image_width * session->image_height;
+    size_t expected = 2 * sizeof(uint8_t) * plane_size;
+
+    if (offset != expected)
+    {
+        printf("[C] video_response::received size mismatch; received %zu, expected %zu bytes.\n", offset, expected);
+        goto free_mem;
+    }
 
     // release the incoming buffer
 free_mem:
