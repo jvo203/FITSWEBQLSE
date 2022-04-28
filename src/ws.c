@@ -1448,6 +1448,8 @@ void *video_response(void *ptr)
     for (unsigned int i = 0; i < iNal; i++)
     {
         size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + pNals[i].sizeBytes;
+
+        printf("[C] video_response elapsed: %f, msg_len: %zu bytes.\n", elapsed, msg_len);
     }
 
     // done with the planes
