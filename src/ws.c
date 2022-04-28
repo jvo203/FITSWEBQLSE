@@ -1421,6 +1421,11 @@ void *video_response(void *ptr)
     const uint8_t *luma = (const uint8_t *)buf;
     const uint8_t *alpha = (const uint8_t *)(buf + plane_size);
 
+    // x265 encoding
+    pthread_mutex_lock(&session->vid_mtx);
+
+    pthread_mutex_unlock(&session->vid_mtx);
+
     // release the incoming buffer
 free_mem:
     free(buf);
