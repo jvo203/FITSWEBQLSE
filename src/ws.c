@@ -1418,6 +1418,9 @@ void *video_response(void *ptr)
         goto free_mem;
     }
 
+    const uint8_t *luma = (const uint8_t *)buf;
+    const uint8_t *alpha = (const uint8_t *)(buf + plane_size);
+
     // release the incoming buffer
 free_mem:
     free(buf);
