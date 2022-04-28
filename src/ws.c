@@ -1410,7 +1410,8 @@ void *video_response(void *ptr)
 
     // TO-DO - compress the planes with x265 and pass the response (payload) over to mongoose
     size_t plane_size = session->image_width * session->image_height;
-    size_t expected = 2 * sizeof(uint8_t) * plane_size;
+    size_t expected = sizeof(float) + 2 * sizeof(uint8_t) * plane_size;
+    float elapsed;
 
     if (offset != expected)
     {
@@ -1418,8 +1419,9 @@ void *video_response(void *ptr)
         goto free_mem;
     }
 
-    uint8_t *luma = (uint8_t *)buf;
-    uint8_t *alpha = (uint8_t *)(buf + plane_size);
+    memcpy(&elapsed, buf, sizeof(float));
+    uint8_t *luma = (uint8_t *)(buf + sizeof(float));
+    uint8_t *alpha = (uint8_t *)(buf + sizeof(float) + plane_size);
 
     // x265 encoding
     pthread_mutex_lock(&session->vid_mtx);
@@ -1442,6 +1444,11 @@ void *video_response(void *ptr)
 
     int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL);
     printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
+
+    for (unsigned int i = 0; i < iNal; i++)
+    {
+        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + pNals[i].sizeBytes;
+    }
 
     // done with the planes
     session->picture->planes[0] = NULL;
