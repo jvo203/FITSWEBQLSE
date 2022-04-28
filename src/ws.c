@@ -1418,11 +1418,23 @@ void *video_response(void *ptr)
         goto free_mem;
     }
 
-    const uint8_t *luma = (const uint8_t *)buf;
-    const uint8_t *alpha = (const uint8_t *)(buf + plane_size);
+    uint8_t *luma = (uint8_t *)buf;
+    uint8_t *alpha = (uint8_t *)(buf + plane_size);
 
     // x265 encoding
     pthread_mutex_lock(&session->vid_mtx);
+
+    if ((session->picture == NULL) || (session->encoder == NULL))
+    {
+        pthread_mutex_unlock(&session->vid_mtx);
+        goto free_mem;
+    }
+
+    session->picture->planes[0] = luma;
+    session->picture->planes[1] = alpha;
+
+    session->picture->stride[0] = session->image_width;
+    session->picture->stride[1] = session->image_width;
 
     pthread_mutex_unlock(&session->vid_mtx);
 
