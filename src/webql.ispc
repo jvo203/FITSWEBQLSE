@@ -865,14 +865,8 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
             varying float pixel = 255.0f / ( 1.0f + exp(-6.0f * (x - black) * slope) ) ;
 
             dst_luma[offset] = (int) clamp(pixel, 0.0f, 255.0f) ;
-            dst_mask[offset] = 255 ;
-      
-          }
-          else
-          {
-            dst_luma[offset] = 0 ;
-	          dst_mask[offset] = 0 ;
-          }
+            dst_mask[offset] = 255 ;      
+          }          
 
         }
 
@@ -932,14 +926,8 @@ export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compres
             varying float pixel = 255.0f / ( 1.0f + exp(-6.0f * (x - median) * sensitivity) ) ;
 
             dst_luma[offset] = (int) clamp(pixel, 0.0f, 255.0f) ;
-            dst_mask[offset] = 255 ;
-      
-          }
-          else
-          {
-            dst_luma[offset] = 0 ;
-	          dst_mask[offset] = 0 ;
-          }
+            dst_mask[offset] = 255 ;      
+          }          
 
         }
 
@@ -999,14 +987,8 @@ export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed
             varying float pixel = 5.0f * (x - black) * sensitivity ;
 
             dst_luma[offset] = pixel > 0.0f ? (int) clamp( 255.0f*pixel/(1.0f + pixel), 0.0f, 255.0f) : 0 ;
-            dst_mask[offset] = 255 ;
-      
-          }
-          else
-          {
-            dst_luma[offset] = 0 ;
-	          dst_mask[offset] = 0 ;
-          }
+            dst_mask[offset] = 255 ;      
+          }          
 
         }
 
