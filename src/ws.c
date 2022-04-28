@@ -1396,9 +1396,23 @@ void *video_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
+    // get the session
+    struct websocket_session *session = NULL;
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        pthread_mutex_unlock(&sessions_mtx);
+    }
+
+    if (session == NULL)
+        goto free_mem;
+
     // TO-DO - compress the planes with x265 and pass the response (payload) over to mongoose
+    // size_t plane_size = resp->width * resp->height;
+    // size_t expected = 2 * sizeof(uint8_t) * plane_size;
 
     // release the incoming buffer
+free_mem:
     free(buf);
 
     // close the read end of the pipe
