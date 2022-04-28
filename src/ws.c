@@ -1396,8 +1396,9 @@ void *video_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    // get the session
     struct websocket_session *session = NULL;
+
+    // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
         session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
