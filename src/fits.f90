@@ -5733,6 +5733,11 @@ contains
             end if
 
             ! downsize {pixels, mask} into {dst_pixels, dst_mask}
+            call resizeNearest(c_loc(pixels), width, height,&
+            & c_loc(dst_pixels), dst_width, dst_height)
+
+            call resizeNearest(c_loc(mask), width, height,&
+            & c_loc(dst_mask), dst_width, dst_height)
         else
             ! call SIMD on {dst_pixels, dst_mask}
             print *, "making a video frame with flux '", tone%flux, "'"
