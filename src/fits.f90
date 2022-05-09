@@ -5617,16 +5617,6 @@ contains
             goto 5000
         end if
 
-        ! allocate the pixels/mask
-        allocate (pixels(req%width, req%height))
-        allocate (mask(req%width, req%height))
-
-        ! if a frame has not been found it needs to be fetched from the cluster (TO-DO)
-        if (.not. associated(item%compressed(req%frame)%ptr)) then
-            call close_pipe(req%fd)
-            goto 5000
-        end if
-
         ! set the video tone mapping
         allocate (character(len=req%len)::tone%flux)
 
@@ -5641,6 +5631,16 @@ contains
         tone%white = min(item%dmax, item%dmedian + u*item%dmadP)
         tone%sensitivity = 1.0/(tone%white - tone%black)
         tone%slope = tone%sensitivity
+
+        ! allocate the pixels/mask
+        allocate (pixels(req%width, req%height))
+        allocate (mask(req%width, req%height))
+
+        ! if a frame has not been found it needs to be fetched from the cluster (TO-DO)
+        if (.not. associated(item%compressed(req%frame)%ptr)) then
+            call close_pipe(req%fd)
+            goto 5000
+        end if
 
         call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
 
