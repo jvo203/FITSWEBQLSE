@@ -76,6 +76,24 @@ module fits
         type(C_PTR) :: ptr
     end type video_request_f
 
+    type, bind(c) :: video_fetch_f
+        ! input
+        logical(kind=c_bool) :: keyframe
+        integer(c_int) :: frame
+
+        ! tone mapping
+        type(C_PTR) :: flux
+        real(kind=c_float) :: dmin, dmax, dmedian
+        real(kind=c_float) :: sensitivity, slope
+        real(kind=c_float) :: white, black
+
+        ! output
+        integer(kind=c_int) :: width
+        integer(kind=c_int) :: height
+        logical(kind=c_bool) :: downsize
+        type(C_PTR) :: pixels, mask
+    end type video_fetch_f
+
     !type fp16
     !    integer(kind=2), dimension(:, :), pointer :: ptr
     !end type fp16
