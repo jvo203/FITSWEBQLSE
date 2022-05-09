@@ -25,7 +25,7 @@
     sudo swupd bundle-add devpkg-postgresql
 
 # 7. jemalloc    
-    wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2    
+    wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
 
     bunzip2 jemalloc-5.3.0.tar.bz2
 
