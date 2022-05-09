@@ -5640,9 +5640,9 @@ contains
         if (.not. associated(item%compressed(req%frame)%ptr)) then
             call close_pipe(req%fd)
             goto 5000
+        else
+            call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
         end if
-
-        call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
 
         ! end the timer
         call system_clock(finish_t)
