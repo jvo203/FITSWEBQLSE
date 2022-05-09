@@ -5617,6 +5617,8 @@ contains
 
         real, parameter :: u = 7.5
 
+        type(video_fetch_f), allocatable, target :: fetch_req
+
         ! timing
         integer(8) :: start_t, finish_t, crate, cmax
         real(c_float) :: elapsed
@@ -5656,6 +5658,8 @@ contains
 
         ! if a frame has not been found it needs to be fetched from the cluster (TO-DO)
         if (.not. associated(item%compressed(req%frame)%ptr)) then
+            allocate (fetch_req)
+
             call close_pipe(req%fd)
             goto 5000
         else
