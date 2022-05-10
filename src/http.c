@@ -1491,6 +1491,22 @@ static enum MHD_Result on_http_connection(void *cls,
         return ret;
     }
 
+    if (strstr(url, "/video/") != NULL)
+    {
+        int width, height;
+
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+            datasetId++; // skip the slash character
+
+        return http_not_implemented(connection);
+    }
+
     // WebQL main entry page
     if (strstr(url, "FITSWebQL.html") != NULL)
     {
