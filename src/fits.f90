@@ -78,6 +78,8 @@ module fits
 
    type, bind(c) :: video_fetch_f
       ! input
+      type(c_ptr) :: datasetid
+      integer(c_int) :: len
       logical(kind=c_bool) :: keyframe
       integer(c_int) :: frame
 
@@ -91,7 +93,10 @@ module fits
       integer(kind=c_int) :: width
       integer(kind=c_int) :: height
       logical(kind=c_bool) :: downsize
+
+      ! to be filled in C
       type(C_PTR) :: pixels, mask
+      logical(kind=c_bool) :: valid
    end type video_fetch_f
 
    !type fp16
@@ -5662,6 +5667,9 @@ contains
       if (.not. associated(item%compressed(req%frame)%ptr)) then
          allocate (fetch_req)
 
+         fetch_req%datasetid = c_loc(item%datasetid)
+         fetch_req%len = size(item%datasetid)
+
          fetch_req%keyframe = req%keyframe
          fetch_req%frame = req%frame
 
@@ -5677,11 +5685,15 @@ contains
          fetch_req%width = req%width
          fetch_req%height = req%height
          fetch_req%downsize = req%downsize
+
          fetch_req%pixels = c_loc(pixels)
          fetch_req%mask = c_loc(mask)
+         fetch_req%valid = .false.
 
-         call close_pipe(req%fd)
-         goto 5000
+         if (.not. fetch_req%valid) then
+            call close_pipe(req%fd)
+            goto 5000
+         end if
       else
          call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
       end if
