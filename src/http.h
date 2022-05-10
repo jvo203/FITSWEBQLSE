@@ -133,6 +133,27 @@ struct image_req
     int height;
 };
 
+struct video_fetch
+{
+    char *datasetid;
+    int len;
+    bool keyframe;
+    int frame;
+
+    char *flux;
+    float dmin, dmax, dmedian;
+    float sensitivity, slope;
+    float white, black;
+
+    int width;
+    int height;
+    bool downsize;
+
+    int8_t *restrict pixels;
+    int8_t *restrict mask;
+    bool valid;
+};
+
 struct http_image_spectrum_request
 {
     char *datasetid;
