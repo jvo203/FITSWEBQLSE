@@ -3559,6 +3559,16 @@ void *fetch_video_frame(void *ptr)
             break;
     }
 
+    /* remove the transfers and cleanup the handles */
+    for (i = 0; i < handle_count; i++)
+    {
+        curl_multi_remove_handle(multi_handle, handles[i]);
+        curl_easy_cleanup(handles[i]);
+        free(chunks[i].memory);
+    }
+
+    curl_multi_cleanup(multi_handle);
+
     pthread_exit(NULL);
 }
 
