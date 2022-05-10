@@ -5662,10 +5662,21 @@ contains
 
          fetch_req%keyframe = req%keyframe
          fetch_req%frame = req%frame
+
          fetch_req%flux = req%flux
          fetch_req%dmin = tone%dmin
          fetch_req%dmax = tone%dmax
          fetch_req%dmedian = tone%dmedian
+         fetch_req%sensitivity = tone%sensitivity
+         fetch_req%slope = tone%slope
+         fetch_req%white = tone%white
+         fetch_req%black = tone%black
+
+         fetch_req%width = req%width
+         fetch_req%height = req%height
+         fetch_req%downsize = req%downsize
+         fetch_req%pixels = c_loc(pixels)
+         fetch_req%mask = c_loc(mask)
 
          call close_pipe(req%fd)
          goto 5000
