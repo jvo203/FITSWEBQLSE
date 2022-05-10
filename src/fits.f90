@@ -5618,6 +5618,8 @@ contains
       real, parameter :: u = 7.5
 
       type(video_fetch_f), allocatable, target :: fetch_req
+      type(c_pthread_t) :: pid
+      integer :: rc
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
@@ -5678,8 +5680,9 @@ contains
          fetch_req%pixels = c_loc(pixels)
          fetch_req%mask = c_loc(mask)
 
-         call close_pipe(req%fd)
-         goto 5000
+         ! a temporary filler
+         pixels = 0
+         mask = 0
       else
          call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
       end if
