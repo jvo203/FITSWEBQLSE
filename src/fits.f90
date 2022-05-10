@@ -5690,6 +5690,7 @@ contains
          fetch_req%mask = c_loc(mask)
          fetch_req%valid = .false.
 
+         ! skip invalid frames (not found on other cluster nodes)
          if (.not. fetch_req%valid) then
             call close_pipe(req%fd)
             goto 5000
