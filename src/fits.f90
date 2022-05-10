@@ -309,6 +309,13 @@ module fits
          type(c_ptr), intent(in), value :: arg   ! a pointer to type(image_req_t)
       end subroutine fetch_image
 
+      recursive subroutine fetch_video_frame(arg) BIND(C)
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), intent(in), value :: arg   ! a pointer to type(video_fetch_f)
+      end subroutine fetch_video_frame
+
       recursive subroutine fetch_realtime_image_spectrum(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -5689,6 +5696,15 @@ contains
          fetch_req%pixels = c_loc(pixels)
          fetch_req%mask = c_loc(mask)
          fetch_req%valid = .false.
+
+         ! launch a pthread
+         rc = c_pthread_create(thread=pid, &
+                               attr=c_null_ptr, &
+                               start_routine=c_funloc(fetch_video_frame), &
+                               arg=c_loc(fetch_req))
+
+         ! join a thread
+         rc = c_pthread_join(pid, c_null_ptr)
 
          ! skip invalid frames (not found on other cluster nodes)
          if (.not. fetch_req%valid) then
