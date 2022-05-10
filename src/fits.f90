@@ -5680,9 +5680,8 @@ contains
          fetch_req%pixels = c_loc(pixels)
          fetch_req%mask = c_loc(mask)
 
-         ! a temporary filler
-         pixels = 0
-         mask = 0
+         call close_pipe(req%fd)
+         goto 5000
       else
          call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
       end if
