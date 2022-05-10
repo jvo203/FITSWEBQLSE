@@ -3524,7 +3524,7 @@ void *fetch_video_frame(void *ptr)
         g_string_append_printf(url, "&flux=%s&dmin=%f&dmax=%f&dmedian=%f", req->flux, req->dmin, req->dmax, req->dmedian);
         g_string_append_printf(url, "&sensitivity=%f&slope=%f", req->sensitivity, req->slope);
         g_string_append_printf(url, "&white=%f&black=%f", req->white, req->black);
-        printf("[C] URL: '%s'\n", url->str);
+        // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
@@ -3557,6 +3557,26 @@ void *fetch_video_frame(void *ptr)
 
         if (mc)
             break;
+    }
+
+    while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
+    {
+        if (msg->msg == CURLMSG_DONE)
+        {
+            int idx;
+            /* Find out which handle this message is about */
+            for (idx = 0; idx < handle_count; idx++)
+            {
+                int found = (msg->easy_handle == handles[idx]);
+                if (found)
+                    break;
+            }
+
+            long response_code = 0;
+            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+            printf("[C] HTTP transfer #%d completed; cURL status %d, HTTP code %ld.\n", idx + 1, msg->data.result, response_code);
+        }
     }
 
     /* remove the transfers and cleanup the handles */
