@@ -3700,7 +3700,7 @@ void *fetch_video_frame(void *ptr)
         g_string_append_printf(url, "&flux=%s&dmin=%f&dmax=%f&dmedian=%f", req->flux, req->dmin, req->dmax, req->dmedian);
         g_string_append_printf(url, "&sensitivity=%f&slope=%f", req->sensitivity, req->slope);
         g_string_append_printf(url, "&white=%f&black=%f", req->white, req->black);
-        printf("[C] URL: '%s'\n", url->str);
+        // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
