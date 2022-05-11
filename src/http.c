@@ -1496,6 +1496,9 @@ static enum MHD_Result on_http_connection(void *cls,
         int frame, width, height;
         bool downsize;
         char *flux;
+        float dmin, dmax, dmedian;
+        float sensitivity, slope;
+        float white, black;
 
         int status;
         int pipefd[2];
@@ -1537,6 +1540,24 @@ static enum MHD_Result on_http_connection(void *cls,
         flux = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "flux");
         if (flux == NULL)
             return http_bad_request(connection);
+
+        char *dminStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dmin");
+        if (dminStr == NULL)
+            return http_bad_request(connection);
+
+        dmin = atof(dminStr);
+
+        char *dmaxStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dmax");
+        if (dmaxStr == NULL)
+            return http_bad_request(connection);
+
+        dmax = atof(dmaxStr);
+
+        char *dmedianStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dmedian");
+        if (dmedianStr == NULL)
+            return http_bad_request(connection);
+
+        dmedian = atof(dmedianStr);
 
         return http_not_implemented(connection);
     }
