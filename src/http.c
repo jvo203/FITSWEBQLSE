@@ -3765,7 +3765,7 @@ void *fetch_video_frame(void *ptr)
                 if (received == expected)
                 {
                     const uint8_t *pixels = (uint8_t *)&(chunks[idx].memory[0]);
-                    const uint8_t *mask = (uint8_t *)&(chunks[idx].memory[sizeof(float) * plane_size]);
+                    const uint8_t *mask = (uint8_t *)&(chunks[idx].memory[sizeof(uint8_t) * plane_size]);
 
                     memcpy(req->pixels, pixels, plane_size);
                     memcpy(req->mask, mask, plane_size);
