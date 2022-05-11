@@ -1493,6 +1493,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/video/") != NULL)
     {
+        int frame;
         int width, height;
 
         int status;
@@ -1503,6 +1504,16 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (datasetId != NULL)
             datasetId++; // skip the slash character
+
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+        char *frameStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame");
+
+        if (frameStr == NULL)
+            return http_bad_request(connection);
+
+        frame = atoi(frameStr);
 
         return http_not_implemented(connection);
     }
