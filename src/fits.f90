@@ -5678,11 +5678,13 @@ contains
 
       call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
 
-      ! send pixels
-      written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+      if (req%fd .ne. -1) then
+         ! send pixels
+         written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
 
-      ! send mask
-      written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+         ! send mask
+         written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+      end if
 
       ! clean up
 6000  nullify (item)
