@@ -1559,6 +1559,30 @@ static enum MHD_Result on_http_connection(void *cls,
 
         dmedian = atof(dmedianStr);
 
+        char *sensitivityStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "sensitivity");
+        if (sensitivityStr == NULL)
+            return http_bad_request(connection);
+
+        sensitivity = atof(sensitivityStr);
+
+        char *slopeStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "slope");
+        if (slopeStr == NULL)
+            return http_bad_request(connection);
+
+        slope = atof(slopeStr);
+
+        char *whiteStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "white");
+        if (whiteStr == NULL)
+            return http_bad_request(connection);
+
+        white = atof(whiteStr);
+
+        char *blackStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "black");
+        if (blackStr == NULL)
+            return http_bad_request(connection);
+
+        black = atof(blackStr);
+
         return http_not_implemented(connection);
     }
 
