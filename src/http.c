@@ -3752,6 +3752,26 @@ void *fetch_video_frame(void *ptr)
             curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
             printf("[C] HTTP transfer #%d completed; cURL status %d, HTTP code %ld.\n", idx + 1, msg->data.result, response_code);
+
+            // copy the pixels & mask
+            if (response_code == 200)
+            {
+                size_t plane_size = req->width * req->height;
+                size_t expected = 2 * sizeof(uint8_t) * plane_size;
+                size_t received = chunks[idx].size;
+
+                printf("[C] pixels/mask received: %zu, expected: %zu bytes.\n", received, expected);
+
+                if (received == expected)
+                {
+                    const uint8_t *pixels = (uint8_t *)&(chunks[idx].memory[0]);
+                    const uint8_t *mask = (uint8_t *)&(chunks[idx].memory[sizeof(float) * plane_size]);
+
+                    memcpy(req->pixels, pixels, plane_size);
+                    memcpy(req->mask, mask, plane_size);
+                    req->valid = true;
+                }
+            }
         }
     }
 
@@ -4202,7 +4222,7 @@ void *fetch_image(void *ptr)
                 size_t expected = (1 + sizeof(float)) * plane_size;
                 size_t received = chunks[idx].size;
 
-                printf("[C] pixels/mask received: %zu,  expected: %zu bytes.\n", received, expected);
+                printf("[C] pixels/mask received: %zu, expected: %zu bytes.\n", received, expected);
 
                 if (received == expected)
                 {
