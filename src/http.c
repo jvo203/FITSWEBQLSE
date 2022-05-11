@@ -118,6 +118,7 @@ void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *args);
+extern void *video_request(void *req);
 extern void *viewport_request(void *req); // a FORTRAN subroutine
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 void *fetch_inner_dimensions(void *ptr);
@@ -1614,6 +1615,28 @@ static enum MHD_Result on_http_connection(void *cls,
         // pass the write end of the pipe to Fortran
         // the binary response data will be generated in Fortran
         printf("[C] calling video_request with the pipe file descriptor %d\n", pipefd[1]);
+
+        struct video_req *req = malloc(sizeof(struct video_req));
+
+        if (req != NULL)
+        {
+            req->width = width;
+            args->height = height;
+            args->fd = pipefd[1];
+
+            // create and detach the thread
+            int stat = pthread_create(&tid, NULL, &video_request, req);
+
+            if (stat == 0)
+                pthread_detach(tid);
+            else
+            {
+                close(pipefd[1]);
+                free(args);
+            }
+        }
+        else
+            close(pipefd[1]);
 
         return ret;
     }

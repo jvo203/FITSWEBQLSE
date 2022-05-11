@@ -5654,7 +5654,6 @@ contains
 
       if (.not. allocated(item%compressed)) goto 6000
       if (.not. associated(item%compressed(req%frame)%ptr)) goto 6000
-
       ! OK, we've got the frame in question
 
       ! set the video tone mapping
