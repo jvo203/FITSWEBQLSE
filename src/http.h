@@ -154,6 +154,24 @@ struct video_fetch
     bool valid;
 };
 
+struct video_req
+{
+    bool keyframe;
+    int frame;
+
+    char *flux;
+    float dmin, dmax, dmedian;
+    float sensitivity, slope;
+    float white, black;
+
+    int width;
+    int height;
+    bool downsize;
+
+    int fd;
+    void *ptr;
+};
+
 struct http_image_spectrum_request
 {
     char *datasetid;
