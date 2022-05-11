@@ -160,6 +160,7 @@ struct video_req
     int frame;
 
     char *flux;
+    int len;
     float dmin, dmax, dmedian;
     float sensitivity, slope;
     float white, black;

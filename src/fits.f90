@@ -106,6 +106,7 @@ module fits
 
       ! tone mapping
       type(C_PTR) :: flux
+      integer(c_int) :: len
       real(kind=c_float) :: dmin, dmax, dmedian
       real(kind=c_float) :: sensitivity, slope
       real(kind=c_float) :: white, black
@@ -5630,6 +5631,66 @@ contains
       call print_dataset(item)
 
    end subroutine global_statistics
+
+   recursive subroutine video_request(user) BIND(C, name='video_request')
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(video_req_f), pointer :: req
+
+      type(video_tone_mapping) :: tone
+      integer(kind=1), allocatable, target :: pixels(:, :), mask(:, :)
+      integer :: i
+      integer(kind=c_size_t) :: written
+      character(kind=c_char), pointer :: flux(:)
+
+      call c_f_pointer(user, req)
+      call c_f_pointer(req%ptr, item)
+      call c_f_pointer(req%flux, flux, [req%len])
+
+      if (.not. allocated(item%compressed)) goto 6000
+      if (.not. associated(item%compressed(req%frame)%ptr)) goto 6000
+
+      ! OK, we've got the frame in question
+
+      ! set the video tone mapping
+      allocate (character(len=req%len)::tone%flux)
+
+      do i = 1, req%len
+         tone%flux(i:i) = flux(i)
+      end do
+
+      tone%dmin = req%dmin
+      tone%dmax = req%dmax
+      tone%dmedian = req%dmedian
+      tone%black = req%black
+      tone%white = req%white
+      tone%sensitivity = req%sensitivity
+      tone%slope = tone%slope
+
+      ! allocate the pixels/mask
+      allocate (pixels(req%width, req%height))
+      allocate (mask(req%width, req%height))
+
+      call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
+
+      ! send pixels
+      written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+
+      ! send mask
+      written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+
+      ! clean up
+6000  nullify (item)
+      if (req%fd .ne. -1) call close_pipe(req%fd)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+
+   end subroutine video_request
 
    recursive subroutine video_request_simd(user) BIND(C, name='video_request_simd')
       use :: unix_pthread
