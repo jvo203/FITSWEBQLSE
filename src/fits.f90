@@ -99,6 +99,26 @@ module fits
       logical(kind=c_bool) :: valid
    end type video_fetch_f
 
+   type, bind(c) :: video_req_f
+      ! input
+      logical(kind=c_bool) :: keyframe
+      integer(c_int) :: frame
+
+      ! tone mapping
+      type(C_PTR) :: flux
+      real(kind=c_float) :: dmin, dmax, dmedian
+      real(kind=c_float) :: sensitivity, slope
+      real(kind=c_float) :: white, black
+
+      ! output
+      integer(kind=c_int) :: width
+      integer(kind=c_int) :: height
+      logical(kind=c_bool) :: downsize
+      integer(kind=c_int) :: fd
+      type(C_PTR) :: ptr
+
+   end type video_req_f
+
    !type fp16
    !    integer(kind=2), dimension(:, :), pointer :: ptr
    !end type fp16
