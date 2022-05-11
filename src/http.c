@@ -1501,19 +1501,28 @@ static enum MHD_Result on_http_connection(void *cls,
         pthread_t tid;
 
         char *datasetId = strrchr(url, '/');
-
-        if (datasetId != NULL)
-            datasetId++; // skip the slash character
-
         if (datasetId == NULL)
             return http_bad_request(connection);
 
-        char *frameStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame");
+        datasetId++; // skip the slash character
 
+        char *frameStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame");
         if (frameStr == NULL)
             return http_bad_request(connection);
 
         frame = atoi(frameStr);
+
+        char *widthStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "width");
+        if (widthStr == NULL)
+            return http_bad_request(connection);
+
+        width = atoi(widthStr);
+
+        char *heightStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "height");
+        if (heightStr == NULL)
+            return http_bad_request(connection);
+
+        height = atoi(heightStr);
 
         return http_not_implemented(connection);
     }
