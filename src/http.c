@@ -1493,8 +1493,9 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/video/") != NULL)
     {
-        int frame;
-        int width, height;
+        int frame, width, height;
+        bool downsize;
+        char *flux;
 
         int status;
         int pipefd[2];
@@ -1523,6 +1524,19 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
 
         height = atoi(heightStr);
+
+        char *downsizeStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "downsize");
+        if (downsizeStr == NULL)
+            return http_bad_request(connection);
+
+        if (atoi(downsizeStr) == 1)
+            downsize = true;
+        else
+            downsize = false;
+
+        flux = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "flux");
+        if (flux == NULL)
+            return http_bad_request(connection);
 
         return http_not_implemented(connection);
     }
