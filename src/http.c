@@ -1620,9 +1620,26 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (req != NULL)
         {
+            req->keyframe = false;
+            req->frame = frame;
+            req->flux = strdup(flux);
+            req->len = strlen(req->flux);
+
+            req->dmin = dmin;
+            req->dmax = dmax;
+            req->dmedian = dmedian;
+
+            req->sensitivity = sensitivity;
+            req->slope = slope;
+            req->white = white;
+            req->black = black;
+
             req->width = width;
-            args->height = height;
-            args->fd = pipefd[1];
+            req->height = height;
+            req->downsize = downsize;
+
+            req->fd = pipefd[1];
+            req->ptr = item;
 
             // create and detach the thread
             int stat = pthread_create(&tid, NULL, &video_request, req);
@@ -1632,7 +1649,7 @@ static enum MHD_Result on_http_connection(void *cls,
             else
             {
                 close(pipefd[1]);
-                free(args);
+                free(req);
             }
         }
         else
