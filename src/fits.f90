@@ -5688,6 +5688,7 @@ contains
       ! clean up
 6000  nullify (item)
       if (req%fd .ne. -1) call close_pipe(req%fd)
+      call free(req%flux)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
