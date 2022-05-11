@@ -1495,7 +1495,7 @@ static enum MHD_Result on_http_connection(void *cls,
     if (strstr(url, "/video/") != NULL)
     {
         int frame, width, height;
-        bool downsize;
+        bool downsize, keyframe;
         char *flux;
         float dmin, dmax, dmedian;
         float sensitivity, slope;
@@ -1516,6 +1516,15 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
 
         frame = atoi(frameStr);
+
+        char *keyframeStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "keyframe");
+        if (keyframeStr == NULL)
+            return http_bad_request(connection);
+
+        if (atoi(keyframeStr) == 1)
+            keyframe = true;
+        else
+            keyframe = false;
 
         char *widthStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "width");
         if (widthStr == NULL)
@@ -1620,7 +1629,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (req != NULL)
         {
-            req->keyframe = false;
+            req->keyframe = keyframe;
             req->frame = frame;
             req->flux = strdup(flux);
             req->len = strlen(req->flux);
@@ -3687,7 +3696,7 @@ void *fetch_video_frame(void *ptr)
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "/video/%.*s", options.http_port, (int)len, datasetid);
-        g_string_append_printf(url, "?frame=%d&width=%d&height=%d&downsize=%d", req->frame, req->width, req->height, req->downsize);
+        g_string_append_printf(url, "?frame=%d&keyframe=%d&width=%d&height=%d&downsize=%d", req->frame, req->keyframe, req->width, req->height, req->downsize);
         g_string_append_printf(url, "&flux=%s&dmin=%f&dmax=%f&dmedian=%f", req->flux, req->dmin, req->dmax, req->dmedian);
         g_string_append_printf(url, "&sensitivity=%f&slope=%f", req->sensitivity, req->slope);
         g_string_append_printf(url, "&white=%f&black=%f", req->white, req->black);
