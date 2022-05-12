@@ -931,6 +931,7 @@ contains
 
       integer :: i, rc, status
       integer :: fileunit, ios
+      integer :: index_unit, data_unit
       character(256) :: iomsg
 
       call c_f_pointer(ptr, item)
@@ -980,45 +981,61 @@ contains
       rc = c_pthread_mutex_destroy(item%image_mtx)
       rc = c_pthread_mutex_destroy(item%video_mtx)
 
+      index_unit = -1
+      data_unit = -1
+
       ! deallocate compressed memory regions
       if (allocated(item%compressed)) then
+
+         file = cache//'/index'
+         INQUIRE (FILE=trim(file), EXIST=file_exists)
+
+         if (.not. file_exists) then
+            open (newunit=index_unit, file=trim(file), status='replace', access='stream',&
+            &form='unformatted', IOSTAT=ios, IOMSG=iomsg)
+
+            if (ios .ne. 0) then
+               print *, "error creating an index file ", file, ' : ', trim(iomsg)
+
+               ! upon error
+               bSuccess = .false.
+            end if
+         end if
+
+         file = cache//'/data'
+         INQUIRE (FILE=trim(file), EXIST=file_exists)
+
+         if (.not. file_exists) then
+            open (newunit=data_unit, file=trim(file), status='replace', access='stream',&
+            &form='unformatted', IOSTAT=ios, IOMSG=iomsg)
+
+            if (ios .ne. 0) then
+               print *, "error creating a data file ", file, ' : ', trim(iomsg)
+
+               ! upon error
+               bSuccess = .false.
+            end if
+         end if
 
          do i = 1, size(item%compressed)
 
             if (associated(item%compressed(i)%ptr)) then
 
-               if (status .eq. 0) then
-                  ! if (allocated(file)) deallocate (file)
-                  file = cache//'/'//trim(str(i))//'.bin'
-                  INQUIRE (FILE=trim(file), EXIST=file_exists)
+               if (index_unit .ne. -1 .and. data_unit .ne. -1) then
+                  ! add an index entry
+                  write (unit=index_unit, IOSTAT=ios, IOMSG=iomsg) i
 
-                  if (.not. file_exists) then
-                     open (newunit=fileunit, file=trim(file), status='replace', access='stream',&
-                     &form='unformatted', IOSTAT=ios, IOMSG=iomsg)
+                  if (ios .ne. 0) then
+                     print *, "error adding an index entry", i, ' : ', trim(iomsg)
+                     bSuccess = .false.
+                  end if
 
-                     if (ios .ne. 0) then
-                        print *, "error creating a file ", file, ' : ', trim(iomsg)
+                  ! dump the compressed data
+                  write (unit=data_unit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
 
-                        ! upon error
-                        bSuccess = .false.
-                     else
-                        ! dump the compressed data
-                        write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
-
-                        ! delete the file upon a write error
-                        if (ios .ne. 0) then
-                           print *, "error serialising channel", i, 'to a binary file ', trim(file), ' : ', trim(iomsg)
-
-                           ! delete the file
-                           close (fileunit, status='delete')
-                        else
-                           ! close the file
-                           close (fileunit)
-                        end if
-
-                        print *, "serialised channel", i, 'to a binary file ', trim(file)
-                     end if
-
+                  if (ios .ne. 0) then
+                     print *, "error serialising channel", i, 'to a binary data file : ', trim(iomsg)
+                     bSuccess = .false.
                   end if
                end if
 
@@ -1028,6 +1045,22 @@ contains
          end do
 
          deallocate (item%compressed)
+      end if
+
+      if (index_unit .ne. -1) then
+         if (bSuccess) then
+            close (index_unit)
+         else
+            close (index_unit, status='delete')
+         end if
+      end if
+
+      if (data_unit .ne. -1) then
+         if (bSuccess) then
+            close (data_unit)
+         else
+            close (data_unit, status='delete')
+         end if
       end if
 
       if (bSuccess) call save_dataset(item, cache)
