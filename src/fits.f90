@@ -797,6 +797,125 @@ contains
       str = adjustl(str)
    end function str
 
+   subroutine delete_dataset_prev(ptr, dir, len) BIND(C, name='delete_dataset_prev')
+      implicit none
+
+      type(C_PTR), intent(in), value :: ptr
+      type(dataset), pointer :: item
+
+      integer(kind=c_size_t), intent(in), value :: len
+      character(kind=c_char), dimension(len), intent(in) :: dir
+
+      character(len=:), allocatable :: cache
+      character(len=1024) :: file
+      logical :: file_exists, bSuccess
+
+      integer :: i, rc, status
+      integer :: fileunit, ios
+      character(256) :: iomsg
+
+      call c_f_pointer(ptr, item)
+
+      allocate (character(len + 1 + size(item%datasetid))::cache)
+
+      ! the cache directory
+      do i = 1, int(len, kind=4)
+         cache(i:i) = dir(i)
+      end do
+
+      ! append a slash
+      cache(len + 1:len + 1) = '/'
+
+      ! and append the datasetid
+      do i = 1, size(item%datasetid)
+         cache(len + 1 + i:len + 1 + i) = item%datasetid(i)
+      end do
+
+      ! only make a cache for datasets with valid data/image, no errors
+      if (get_image_status(ptr) .eq. 1) then
+         ! create a cache directory using the <datasetid> folder name
+         status = mkcache(cache//c_null_char)
+
+         if (status .eq. 0) then
+            bSuccess = .true.
+         else
+            bSuccess = .false.
+         end if
+      else
+         ! remove the (non-empty) cache directory
+         call rmcache(cache//c_null_char)
+
+         ! error
+         bSuccess = .false.
+         status = -1
+      end if
+
+      print *, 'deleting ', item%datasetid, '; cache dir: ', cache, ', status', status, ', bSuccess', bSuccess
+
+      ! write the dataset to a cache file so as to speed up subsequent loading
+
+      rc = c_pthread_mutex_destroy(item%header_mtx)
+      rc = c_pthread_mutex_destroy(item%error_mtx)
+      rc = c_pthread_mutex_destroy(item%ok_mtx)
+      rc = c_pthread_mutex_destroy(item%progress_mtx)
+      rc = c_pthread_mutex_destroy(item%image_mtx)
+      rc = c_pthread_mutex_destroy(item%video_mtx)
+
+      ! deallocate compressed memory regions
+      if (allocated(item%compressed)) then
+
+         do i = 1, size(item%compressed)
+
+            if (associated(item%compressed(i)%ptr)) then
+
+               if (status .eq. 0) then
+                  ! if (allocated(file)) deallocate (file)
+                  file = cache//'/'//trim(str(i))//'.bin'
+                  INQUIRE (FILE=trim(file), EXIST=file_exists)
+
+                  if (.not. file_exists) then
+                     open (newunit=fileunit, file=trim(file), status='replace', access='stream',&
+                     &form='unformatted', IOSTAT=ios, IOMSG=iomsg)
+
+                     if (ios .ne. 0) then
+                        print *, "error creating a file ", file, ' : ', trim(iomsg)
+
+                        ! upon error
+                        bSuccess = .false.
+                     else
+                        ! dump the compressed data
+                        write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
+
+                        ! delete the file upon a write error
+                        if (ios .ne. 0) then
+                           print *, "error serialising channel", i, 'to a binary file ', trim(file), ' : ', trim(iomsg)
+
+                           ! delete the file
+                           close (fileunit, status='delete')
+                        else
+                           ! close the file
+                           close (fileunit)
+                        end if
+
+                        print *, "serialised channel", i, 'to a binary file ', trim(file)
+                     end if
+
+                  end if
+               end if
+
+               deallocate (item%compressed(i)%ptr)
+               nullify (item%compressed(i)%ptr)
+            end if
+         end do
+
+         deallocate (item%compressed)
+      end if
+
+      if (bSuccess) call save_dataset(item, cache)
+
+      deallocate (item)
+   end subroutine delete_dataset_prev
+
    subroutine delete_dataset(ptr, dir, len) BIND(C, name='delete_dataset')
       implicit none
 
