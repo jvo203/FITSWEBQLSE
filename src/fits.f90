@@ -2061,6 +2061,7 @@ contains
    end subroutine load_cube_prev
 
    subroutine load_cube(item, cache, root, bSuccess)
+      use :: iso_fortran_env, only:FILE_STORAGE_SIZE
       use fixed_array
       use omp_lib
       implicit none
@@ -2074,9 +2075,11 @@ contains
       character(len=1024) :: file
 
       integer :: fileunit, ios
+      integer :: index_unit, data_unit
       character(256) :: iomsg
 
-      integer :: tid, i, rc, depth
+      integer :: tid, i, rc, depth, frame
+      integer, allocatable :: indices(:)
 
       ! OpenMP
       integer :: max_threads, counter, repeat
@@ -2112,45 +2115,73 @@ contains
 
       print *, "max_threads:", max_threads, "depth:", depth
 
-      counter = 0
-      thread_bSuccess = .true.
-
-      !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
-      !$omp& PRIVATE(tid, i, file, fileunit, ios, iomsg)&
-      !$omp& REDUCTION(.and.:thread_bSuccess)&
-      !$omp& REDUCTION(+:counter)&
-      !$omp& NUM_THREADS(max_threads)
-      !$omp DO SCHEDULE(DYNAMIC, 4)
-      do i = 1, depth
+      do concurrent(i=1:depth)
          nullify (item%compressed(i)%ptr)
+      end do
 
-         ! if (allocated(file)) deallocate (file)
-         file = cache//'/'//trim(str(i))//'.bin'
+      counter = 0
+      index_unit = -1
+      data_unit = -1
 
-         ! try to open the file for reading
-         open (newunit=fileunit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
-         & IOSTAT=ios, IOMSG=iomsg)
+      ! open an index file
+      file = cache//'/index'
 
-         ! move on if the file does not exist
-         if (ios .ne. 0) then
-            ! print *, "error opening a file ", trim(file), ' : ', trim(iomsg)
-            cycle
-         end if
+      ! read the file size
+      INQUIRE (FILE=file, SIZE=n)  ! return -1 if cannot determine file size_t
+      if (n .eq. -1) goto 7000
+
+      n = n*(FILE_STORAGE_SIZE/8)/sizeof(frame)
+      allocate (indices(n))
+
+      ! try to open the file for reading
+      open (newunit=index_unit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
+      & IOSTAT=ios, IOMSG=iomsg)
+
+      ! move on if the file does not exist
+      if (ios .ne. 0) then
+         ! print *, "error opening an index file ", trim(file), ' : ', trim(iomsg)
+         goto 7000
+      end if
+
+      read (unit=index_unit, IOSTAT=ios) indices(1:n)
+      if (ios .ne. 0) then
+         print *, "error reading from the index file ", trim(file), ' : ', trim(iomsg)
+         goto 7000
+      end if
+
+      print *, "#frames:", n, "indices:", indices
+
+      ! open a data file
+      file = cache//'/data'
+
+      ! try to open the file for reading
+      open (newunit=data_unit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
+      & IOSTAT=ios, IOMSG=iomsg)
+
+      ! move on if the file does not exist
+      if (ios .ne. 0) then
+         ! print *, "error opening a data file ", trim(file), ' : ', trim(iomsg)
+         goto 7000
+      end if
+
+      do i = 1, n
+         frame = indices(i)
 
          ! allocate space for compressed data
-         allocate (item%compressed(i)%ptr(cn, cm))
+         allocate (item%compressed(frame)%ptr(cn, cm))
 
          ! read the compressed data
-         read (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
-
-         ! and close the file
-         close (fileunit)
+         read (unit=data_unit, IOSTAT=ios, IOMSG=iomsg) item%compressed(frame)%ptr(:, :)
 
          ! abort upon a read error
          if (ios .ne. 0) then
-            print *, "error deserialising channel", i, 'from a binary file ', trim(file), ' : ', trim(iomsg)
-            thread_bSuccess = .false.
-            cycle
+            print *, "error deserialising channel", frame, 'from a data file ', trim(file), ' : ', trim(iomsg)
+
+            deallocate (item%compressed(frame)%ptr)
+            nullify (item%compressed(frame)%ptr)
+
+            bSuccess = .false.
+            exit
          end if
 
          ! increment the thread progress counter
@@ -2163,20 +2194,16 @@ contains
             counter = counter - 1
          else
             ! upon success the thread progress counter will be decremented
-            ! tid = 1 + OMP_GET_THREAD_NUM()
-
-            ! if (mod(counter, tid) .eq. 0) then
             if (mod(counter, 4) .eq. 0) then
                ! a C function defined in http.c
                counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
             end if
          end if
+
       end do
-      !$omp END DO
-      !$omp END PARALLEL
 
       ! submit any left-overs
-      repeat = 0
+7000  repeat = 0
       do while (counter .gt. 0)
 
          counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
@@ -2196,7 +2223,8 @@ contains
 
       end do
 
-      bSuccess = thread_bSuccess
+      if (index_unit .ne. -1) close (index_unit)
+      if (data_unit .ne. -1) close (data_unit)
 
       if (.not. c_associated(root) .and. bSuccess) then
          ! needs to be protected with a mutex
@@ -3640,9 +3668,9 @@ contains
                         & frame_min, frame_max, ignrval, datamin, datamax)
 
                         ! for disk load balancing (not just CPU), try to serialise a frame whilst reading FITS
-                        if (associated(item%compressed(frame)%ptr)) then
-                           call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
-                        end if
+                        ! if (associated(item%compressed(frame)%ptr)) then
+                        !    call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
+                        ! end if
                      end block
                   end if
                end do
