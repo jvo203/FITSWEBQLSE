@@ -1906,6 +1906,160 @@ contains
 
    end subroutine load_dataset
 
+   subroutine load_cube_prev(item, cache, root, bSuccess)
+      use fixed_array
+      use omp_lib
+      implicit none
+
+      type(dataset), pointer, intent(inout) :: item
+      character(len=*), intent(in) :: cache
+      type(c_ptr), intent(in), value :: root
+      logical, intent(out) ::  bSuccess
+
+      ! character(len=:), allocatable :: file
+      character(len=1024) :: file
+
+      integer :: fileunit, ios
+      character(256) :: iomsg
+
+      integer :: tid, i, rc, depth
+
+      ! OpenMP
+      integer :: max_threads, counter, repeat
+      logical thread_bSuccess
+
+      integer(kind=4) :: n, m ! input dimensions
+
+      ! compressed output dimensions
+      integer(kind=4) :: cn, cm
+
+      bSuccess = .false.
+
+      ! reserved for *CUBES* only
+      if (item%naxes(3) .le. 1) return
+
+      n = item%naxes(1)
+      m = item%naxes(2)
+      depth = item%naxes(3)
+
+      ! by default compressed is dimension(n/DIM, m/DIM)
+      cn = n/DIM
+      cm = m/DIM
+
+      ! but the input dimensions might not be divisible by <DIM>
+      if (mod(n, DIM) .ne. 0) cn = cn + 1
+      if (mod(m, DIM) .ne. 0) cm = cm + 1
+
+      if (allocated(item%compressed)) deallocate (item%compressed)
+      allocate (item%compressed(1:depth))
+
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
+      print *, "max_threads:", max_threads, "depth:", depth
+
+      counter = 0
+      thread_bSuccess = .true.
+
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+      !$omp& PRIVATE(tid, i, file, fileunit, ios, iomsg)&
+      !$omp& REDUCTION(.and.:thread_bSuccess)&
+      !$omp& REDUCTION(+:counter)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO SCHEDULE(DYNAMIC, 4)
+      do i = 1, depth
+         nullify (item%compressed(i)%ptr)
+
+         ! if (allocated(file)) deallocate (file)
+         file = cache//'/'//trim(str(i))//'.bin'
+
+         ! try to open the file for reading
+         open (newunit=fileunit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
+         & IOSTAT=ios, IOMSG=iomsg)
+
+         ! move on if the file does not exist
+         if (ios .ne. 0) then
+            ! print *, "error opening a file ", trim(file), ' : ', trim(iomsg)
+            cycle
+         end if
+
+         ! allocate space for compressed data
+         allocate (item%compressed(i)%ptr(cn, cm))
+
+         ! read the compressed data
+         read (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
+
+         ! and close the file
+         close (fileunit)
+
+         ! abort upon a read error
+         if (ios .ne. 0) then
+            print *, "error deserialising channel", i, 'from a binary file ', trim(file), ' : ', trim(iomsg)
+            thread_bSuccess = .false.
+            cycle
+         end if
+
+         ! increment the thread progress counter
+         counter = counter + 1
+
+         if (.not. c_associated(root)) then
+            call update_progress(item, 1)
+
+            ! decrement the thread progress counter
+            counter = counter - 1
+         else
+            ! upon success the thread progress counter will be decremented
+            ! tid = 1 + OMP_GET_THREAD_NUM()
+
+            ! if (mod(counter, tid) .eq. 0) then
+            if (mod(counter, 4) .eq. 0) then
+               ! a C function defined in http.c
+               counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
+            end if
+         end if
+      end do
+      !$omp END DO
+      !$omp END PARALLEL
+
+      ! submit any left-overs
+      repeat = 0
+      do while (counter .gt. 0)
+
+         counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
+
+         ! wait a while upon a submission failure
+         if (counter .gt. 0) then
+            repeat = repeat + 1
+            print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
+            call sleep(1) ! 1 sec.
+         end if
+
+         ! break the loop after 60s
+         if (repeat .gt. 60) then
+            print *, item%datasetid, ":: breaking the final 'submit_progress' loop, counter = ", counter
+            exit
+         end if
+
+      end do
+
+      bSuccess = thread_bSuccess
+
+      if (.not. c_associated(root) .and. bSuccess) then
+         ! needs to be protected with a mutex
+         rc = c_pthread_mutex_lock(logger_mtx)
+
+         if (rc .eq. 0) then
+            ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
+            call logger%info('load_cube', 'restored cube data from '//cache)
+
+            ! unlock the mutex
+            rc = c_pthread_mutex_unlock(logger_mtx)
+         end if
+      end if
+
+      return
+   end subroutine load_cube_prev
+
    subroutine load_cube(item, cache, root, bSuccess)
       use fixed_array
       use omp_lib
