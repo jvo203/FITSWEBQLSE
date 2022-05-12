@@ -797,7 +797,7 @@ contains
       str = adjustl(str)
    end function str
 
-   subroutine delete_dataset_prev(ptr, dir, len) BIND(C, name='delete_dataset_prev')
+   subroutine delete_dataset(ptr, dir, len) BIND(C, name='delete_dataset')
       implicit none
 
       type(C_PTR), intent(in), value :: ptr
@@ -914,9 +914,9 @@ contains
       if (bSuccess) call save_dataset(item, cache)
 
       deallocate (item)
-   end subroutine delete_dataset_prev
+   end subroutine delete_dataset
 
-   subroutine delete_dataset(ptr, dir, len) BIND(C, name='delete_dataset')
+   subroutine delete_dataset_monolithic(ptr, dir, len) BIND(C, name='delete_dataset_monolithic')
       implicit none
 
       type(C_PTR), intent(in), value :: ptr
@@ -1066,7 +1066,7 @@ contains
       if (bSuccess) call save_dataset(item, cache)
 
       deallocate (item)
-   end subroutine delete_dataset
+   end subroutine delete_dataset_monolithic
 
    subroutine serialise_fixed_array(compressed, frame, cache)
       implicit none
@@ -3681,9 +3681,9 @@ contains
                         & frame_min, frame_max, ignrval, datamin, datamax)
 
                         ! for disk load balancing (not just CPU), try to serialise a frame whilst reading FITS
-                        ! if (associated(item%compressed(frame)%ptr)) then
-                        !    call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
-                        ! end if
+                        if (associated(item%compressed(frame)%ptr)) then
+                           call serialise_fixed_array(item%compressed(frame)%ptr, frame, cache)
+                        end if
                      end block
                   end if
                end do
