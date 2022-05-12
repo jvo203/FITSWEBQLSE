@@ -1906,7 +1906,7 @@ contains
 
    end subroutine load_dataset
 
-   subroutine load_cube_prev(item, cache, root, bSuccess)
+   subroutine load_cube(item, cache, root, bSuccess)
       use fixed_array
       use omp_lib
       implicit none
@@ -2058,9 +2058,9 @@ contains
       end if
 
       return
-   end subroutine load_cube_prev
+   end subroutine load_cube
 
-   subroutine load_cube(item, cache, root, bSuccess)
+   subroutine load_cube_monolithic(item, cache, root, bSuccess)
       use :: iso_fortran_env, only:FILE_STORAGE_SIZE
       use fixed_array
       use omp_lib
@@ -2253,7 +2253,7 @@ contains
       end if
 
       return
-   end subroutine load_cube
+   end subroutine load_cube_monolithic
 
    subroutine print_dataset(item)
       type(dataset), pointer, intent(in) :: item
