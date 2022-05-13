@@ -2148,7 +2148,7 @@ contains
             goto 7000
         end if
 
-        print *, "#frames:", n, "indices:", indices
+        print *, "[load_cube_monolithic] #frames:", n ! , "indices:", indices
 
         data_unit = -1
 
