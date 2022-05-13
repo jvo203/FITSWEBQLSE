@@ -2075,8 +2075,7 @@ contains
         character(len=1024) :: file
 
         integer :: fileunit, ios
-        integer :: index_unit
-        integer, allocatable :: data_unit(:)
+        integer :: index_unit, data_unit
         character(256) :: iomsg
 
         integer :: tid, i, rc, depth, frame
@@ -2151,33 +2150,30 @@ contains
 
         print *, "#frames:", n, "indices:", indices
 
-        allocate (data_unit(1:max_threads))
         data_unit = -1
 
         ! open a data file
         file = cache//'/data'
 
-        do i = 1, max_threads
-            ! try to open the file for reading
-            open (newunit=data_unit(i), file=trim(file), status='old', action='read', access='stream', form='unformatted',&
-            & IOSTAT=ios, IOMSG=iomsg)
+        ! try to open the file for reading
+        open (newunit=data_unit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
+        & IOSTAT=ios, IOMSG=iomsg)
 
-            ! move on if the file does not exist
-            if (ios .ne. 0) then
-                print *, "error opening a data file ", trim(file), ", tid:", i, ' : ', trim(iomsg)
-                goto 7000
-            end if
-        end do
+        ! move on if the file does not exist
+        if (ios .ne. 0) then
+            print *, "error opening a data file ", trim(file), ", tid:", i, ' : ', trim(iomsg)
+            goto 7000
+        end if
 
         do i = 1, n
-            tid = 1 + OMP_GET_THREAD_NUM()
+            ! tid = 1 + OMP_GET_THREAD_NUM()
             frame = indices(i)
 
             ! allocate space for compressed data
             allocate (item%compressed(frame)%ptr(cn, cm))
 
             ! read the compressed data
-            read (unit=data_unit(tid), IOSTAT=ios, IOMSG=iomsg) item%compressed(frame)%ptr(:, :)
+            read (unit=data_unit, IOSTAT=ios, IOMSG=iomsg) item%compressed(frame)%ptr(:, :)
 
             ! abort upon a read error
             if (ios .ne. 0) then
@@ -2230,14 +2226,7 @@ contains
         end do
 
         if (index_unit .ne. -1) close (index_unit)
-
-        if (allocated(data_unit)) then
-            do concurrent(i=1:max_threads)
-                if (data_unit(i) .ne. -1) close (data_unit(i))
-            end do
-
-            deallocate (data_unit)
-        end if
+        if (data_unit .ne. -1) close (data_unit)
 
         if (.not. c_associated(root) .and. bSuccess) then
             ! needs to be protected with a mutex
