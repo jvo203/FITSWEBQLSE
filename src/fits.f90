@@ -318,6 +318,15 @@ module fits
 
       end function rdopen
 
+      ! close(int fd);
+      subroutine closefd(fd) BIND(C, name='close')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         integer(c_int), value, intent(in) :: fd
+
+      end subroutine closefd
+
       recursive subroutine fetch_inner_dimensions(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -2165,13 +2174,12 @@ contains
       file = cache//'/data'
 
       ! try to open the file for reading
-      ! open (newunit=data_unit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
-      ! & IOSTAT=ios, IOMSG=iomsg)
-      data_unit = rdopen(trim(file)//c_null_char)
+      open (newunit=data_unit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
+      & IOSTAT=ios, IOMSG=iomsg)
 
       ! move on if the file does not exist
-      if (data_unit .lt. 0) then
-         print *, "error opening a data file ", trim(file), ", tid:", i
+      if (ios .ne. 0) then
+         print *, "error opening a data file ", trim(file), ", tid:", i, ' : ', trim(iomsg)
          goto 7000
       end if
 
@@ -2352,12 +2360,11 @@ contains
       file = cache//'/data'
 
       ! try to open the file for reading
-      open (newunit=data_unit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
-      & IOSTAT=ios, IOMSG=iomsg)
+      data_unit = rdopen(trim(file)//c_null_char)
 
       ! move on if the file does not exist
-      if (ios .ne. 0) then
-         print *, "error opening a data file ", trim(file), ", tid:", i, ' : ', trim(iomsg)
+      if (data_unit .lt. 0) then
+         print *, "error opening a data file ", trim(file), ", tid:", i
          goto 7000
       end if
 
@@ -2438,7 +2445,7 @@ contains
       end do
 
       if (index_unit .ne. -1) close (index_unit)
-      if (data_unit .ne. -1) close (data_unit)
+      if (data_unit .ge. 0) call closefd(data_unit)
 
       if (.not. c_associated(root) .and. bSuccess) then
          ! needs to be protected with a mutex

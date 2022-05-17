@@ -13,7 +13,9 @@ bool dataset_exists(const char *datasetid);
 void *get_dataset(const char *datasetid);
 int mkcache(const char *dir);
 void rmcache(const char *dir);
+
 int rdopen(const char *file);
+int read_frame(int fd, void *dst, int pos, size_t frame_size);
 
 // Fortran callbacks
 extern void delete_dataset(void *ptr, char *dir, int len);
