@@ -2273,6 +2273,7 @@ contains
 
       ! compressed output dimensions
       integer(kind=4) :: cn, cm
+      integer(kind=c_size_t) :: array_size
 
       bSuccess = .false.
 
@@ -2352,7 +2353,7 @@ contains
       thread_bSuccess = .true.
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
-      !$omp& PRIVATE(tid, i, file, frame, ios)&
+      !$omp& PRIVATE(tid, i, file, frame, ios, array_size)&
       !$omp& REDUCTION(.and.:thread_bSuccess)&
       !$omp& REDUCTION(+:counter)&
       !$omp& NUM_THREADS(max_threads)
@@ -2363,6 +2364,9 @@ contains
 
          ! allocate space for compressed data
          allocate (item%compressed(frame)%ptr(cn, cm))
+
+         array_size = int(sizeof(item%compressed(frame)%ptr(:, :)), kind=c_size_t)
+         ! print *, 'sizeof(compressed_frame) = ', array_size, 'bytes'
 
          ! read the compressed data
          ios = 0
