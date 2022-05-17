@@ -47,6 +47,16 @@ int rdopen(const char *file)
     return open(file, O_RDONLY);
 }
 
+int read_frame(int fd, void *dst, int pos, size_t frame_size)
+{
+    ssize_t bytes_read = pread(fd, dst, frame_size, pos * frame_size);
+
+    if (bytes_read != (ssize_t)frame_size)
+        return -1;
+    else
+        return 0;
+}
+
 int mkcache(const char *dir)
 {
     struct stat st = {0};
