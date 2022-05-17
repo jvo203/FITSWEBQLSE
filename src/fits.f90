@@ -2349,6 +2349,14 @@ contains
          goto 7000
       end if
 
+      thread_bSuccess = .true.
+
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+      !$omp& PRIVATE(tid, i, file, frame, ios)&
+      !$omp& REDUCTION(.and.:thread_bSuccess)&
+      !$omp& REDUCTION(+:counter)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO SCHEDULE(DYNAMIC, 4)
       do i = 1, n
          ! tid = 1 + OMP_GET_THREAD_NUM()
          frame = indices(i)
@@ -2357,7 +2365,8 @@ contains
          allocate (item%compressed(frame)%ptr(cn, cm))
 
          ! read the compressed data
-         read (unit=data_unit, IOSTAT=ios, IOMSG=iomsg) item%compressed(frame)%ptr(:, :)
+         ios = 0
+         ! read (unit=data_unit, IOSTAT=ios, IOMSG=iomsg) item%compressed(frame)%ptr(:, :)
 
          ! abort upon a read error
          if (ios .ne. 0) then
@@ -2366,8 +2375,8 @@ contains
             deallocate (item%compressed(frame)%ptr)
             nullify (item%compressed(frame)%ptr)
 
-            bSuccess = .false.
-            exit
+            thread_bSuccess = .false.
+            cycle
          end if
 
          ! increment the thread progress counter
@@ -2387,6 +2396,10 @@ contains
          end if
 
       end do
+      !$omp END DO
+      !$omp END PARALLEL
+
+      bSuccess = thread_bSuccess
 
       ! submit any left-overs
 7000  repeat = 0
