@@ -62,6 +62,16 @@ int read_frame(int fd, void *dst, int pos, size_t frame_size)
         return 0;
 }
 
+int write_frame(int fd, void *src, size_t frame_size)
+{
+    ssize_t bytes_written = write(fd, src, frame_size);
+
+    if (bytes_written != (ssize_t)frame_size)
+        return -1;
+    else
+        return 0;
+}
+
 int mkcache(const char *dir)
 {
     struct stat st = {0};
