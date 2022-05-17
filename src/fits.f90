@@ -1169,7 +1169,7 @@ contains
       integer :: fileunit, ios
       character(256) :: iomsg
 
-      file = cache//'/'//'state.dat'
+      file = cache//'/'//'state'
 
       INQUIRE (FILE=trim(file), EXIST=file_exists)
 
@@ -1556,7 +1556,7 @@ contains
 
       bSuccess = .false.
 
-      file = cache//'/'//'state.dat'
+      file = cache//'/'//'state'
 
       INQUIRE (FILE=trim(file), EXIST=file_exists)
 
