@@ -309,6 +309,15 @@ module fits
 
       end subroutine rmcache
 
+      ! int rdopen(const char *file);
+      integer(c_int) function rdopen(file) BIND(C, name='rdopen')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         character(kind=c_char), intent(in) :: file(*)
+
+      end function rdopen
+
       recursive subroutine fetch_inner_dimensions(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -2156,12 +2165,13 @@ contains
       file = cache//'/data'
 
       ! try to open the file for reading
-      open (newunit=data_unit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
-      & IOSTAT=ios, IOMSG=iomsg)
+      ! open (newunit=data_unit, file=trim(file), status='old', action='read', access='stream', form='unformatted',&
+      ! & IOSTAT=ios, IOMSG=iomsg)
+      data_unit = rdopen(trim(file)//c_null_char)
 
       ! move on if the file does not exist
-      if (ios .ne. 0) then
-         print *, "error opening a data file ", trim(file), ", tid:", i, ' : ', trim(iomsg)
+      if (data_unit .lt. 0) then
+         print *, "error opening a data file ", trim(file), ", tid:", i
          goto 7000
       end if
 
@@ -2259,7 +2269,8 @@ contains
       character(len=1024) :: file
 
       integer :: fileunit, ios
-      integer :: index_unit, data_unit
+      integer :: index_unit
+      integer(kind=c_int) :: data_unit
       character(256) :: iomsg
 
       integer :: tid, i, rc, depth, frame
