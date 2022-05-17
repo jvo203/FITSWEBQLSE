@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <string.h>
 
@@ -39,6 +40,11 @@ void free_hash_data(gpointer item)
     // call Fortran to delete the dataset
     if (item != NULL)
         delete_dataset(item, options.cache, strlen(options.cache));
+}
+
+int rdopen(const char *file)
+{
+    return open(file, O_RDONLY);
 }
 
 int mkcache(const char *dir)
