@@ -318,6 +318,18 @@ module fits
 
       end function rdopen
 
+      ! int read_frame(int fd, void *dst, int pos, size_t frame_size)
+      integer(c_int) function read_frame(fd, dst, pos, frame_size)&
+      &BIND(C, name='read_frame')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         integer(c_int), value, intent(in) :: fd
+         type(c_ptr), value :: dst
+         integer(c_int), value, intent(in) :: pos
+         integer(c_size_t), value, intent(in) :: frame_size
+      end function read_frame
+
       ! close(int fd);
       subroutine closefd(fd) BIND(C, name='close')
          use, intrinsic :: ISO_C_BINDING
@@ -2387,8 +2399,7 @@ contains
          ! print *, 'sizeof(compressed_frame) = ', array_size, 'bytes'
 
          ! read the compressed data
-         ios = 0
-         ! read (unit=data_unit, IOSTAT=ios, IOMSG=iomsg) item%compressed(frame)%ptr(:, :)
+         ios = read_frame(data_unit, c_loc(item%compressed(frame)%ptr(:, :)), i - 1, array_size)
 
          ! abort upon a read error
          if (ios .ne. 0) then
