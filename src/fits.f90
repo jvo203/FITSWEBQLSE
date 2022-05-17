@@ -309,6 +309,15 @@ module fits
 
         end subroutine rmcache
 
+        ! int remove(const char *file)
+        subroutine remove(file) BIND(C, name='remove')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            character(kind=c_char), intent(in) :: file(*)
+
+        end subroutine remove
+
         ! int rdopen(const char *file);
         integer(c_int) function rdopen(file) BIND(C, name='rdopen')
             use, intrinsic :: ISO_C_BINDING
@@ -1135,6 +1144,7 @@ contains
         integer :: fileunit, ios
         integer :: index_unit
         integer(kind=c_int) :: data_unit
+        integer(kind=c_size_t) :: array_size
         character(256) :: iomsg
 
         call c_f_pointer(ptr, item)
@@ -1209,11 +1219,11 @@ contains
             INQUIRE (FILE=trim(file), EXIST=file_exists)
 
             if (.not. file_exists) then
-                open (newunit=data_unit, file=trim(file), status='replace', access='stream',&
-                &form='unformatted', IOSTAT=ios, IOMSG=iomsg)
+                ! try to open the file for writing
+                data_unit = wropen(trim(file)//c_null_char)
 
-                if (ios .ne. 0) then
-                    print *, "error creating a data file ", file, ' : ', trim(iomsg)
+                if (data_unit .lt. 0) then
+                    print *, "error creating a data file ", file
 
                     ! upon error
                     bSuccess = .false.
@@ -1233,11 +1243,13 @@ contains
                             bSuccess = .false.
                         end if
 
+                        array_size = int(sizeof(item%compressed(i)%ptr(:, :)), kind=c_size_t)
+
                         ! dump the compressed data
-                        write (unit=data_unit, IOSTAT=ios, IOMSG=iomsg) item%compressed(i)%ptr(:, :)
+                        ios = write_frame(data_unit, c_loc(item%compressed(i)%ptr(:, :)), array_size)
 
                         if (ios .ne. 0) then
-                            print *, "error serialising channel", i, 'to a binary data file : ', trim(iomsg)
+                            print *, "error serialising channel", i, 'to a binary data file ', trim(file)
                             bSuccess = .false.
                         end if
                     end if
@@ -1258,13 +1270,8 @@ contains
             end if
         end if
 
-        if (data_unit .ne. -1) then
-            if (bSuccess) then
-                close (data_unit)
-            else
-                close (data_unit, status='delete')
-            end if
-        end if
+        if (data_unit .ge. 0) call closefd(data_unit)
+        if (.not. bSuccess) call remove(trim(file)//c_null_char)
 
         if (bSuccess) call save_dataset(item, cache)
 
