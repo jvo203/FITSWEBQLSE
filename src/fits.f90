@@ -318,6 +318,15 @@ module fits
 
       end function rdopen
 
+      ! int wropen(const char *file);
+      integer(c_int) function wropen(file) BIND(C, name='wropen')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         character(kind=c_char), intent(in) :: file(*)
+
+      end function wropen
+
       ! int read_frame(int fd, void *dst, int pos, size_t frame_size)
       integer(c_int) function read_frame(fd, dst, pos, frame_size)&
       &BIND(C, name='read_frame')
@@ -329,6 +338,17 @@ module fits
          integer(c_int), value, intent(in) :: pos
          integer(c_size_t), value, intent(in) :: frame_size
       end function read_frame
+
+      ! int write_frame(int fd, void *src, size_t frame_size)
+      integer(c_int) function write_frame(fd, src, frame_size)&
+      &BIND(C, name='write_frame')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         integer(c_int), value, intent(in) :: fd
+         type(c_ptr), value :: src
+         integer(c_size_t), value, intent(in) :: frame_size
+      end function write_frame
 
       ! close(int fd);
       subroutine closefd(fd) BIND(C, name='close')
