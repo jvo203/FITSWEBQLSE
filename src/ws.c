@@ -501,7 +501,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // default values just in case ...
             req->dx = 0;
-            req->image = false;
+            req->image = true;
             req->quality = medium;
             req->x1 = -1;
             req->x2 = -1;
@@ -518,6 +518,85 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->timestamp = 0.0;
             req->fd = -1;
             req->ptr = NULL;
+
+            for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // printf("key: %.*s, value: %.*s\n", klen, wm->data.ptr + koff, vlen, wm->data.ptr + voff);
+
+                // 'dx'
+                if (strncmp(wm->data.ptr + koff, "\"dx\"", klen) == 0)
+                    req->dx = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'quality'
+                if (strncmp(wm->data.ptr + koff, "\"quality\"", klen) == 0)
+                {
+                    // low
+                    if (strncmp(wm->data.ptr + voff, "\"low\"", vlen) == 0)
+                        req->quality = low;
+
+                    // medium
+                    if (strncmp(wm->data.ptr + voff, "\"medium\"", vlen) == 0)
+                        req->quality = medium;
+
+                    // high
+                    if (strncmp(wm->data.ptr + voff, "\"heigh\"", vlen) == 0)
+                        req->quality = high;
+                }
+
+                // 'width'
+                if (strncmp(wm->data.ptr + koff, "\"width\"", klen) == 0)
+                    req->width = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'height'
+                if (strncmp(wm->data.ptr + koff, "\"height\"", klen) == 0)
+                    req->height = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'beam'
+                if (strncmp(wm->data.ptr + koff, "\"beam\"", klen) == 0)
+                {
+                    // circle
+                    if (strncmp(wm->data.ptr + voff, "\"circle\"", vlen) == 0)
+                        req->beam = circle;
+
+                    // square
+                    if (strncmp(wm->data.ptr + voff, "\"square\"", vlen) == 0)
+                        req->beam = square;
+                }
+
+                // 'intensity'
+                if (strncmp(wm->data.ptr + koff, "\"intensity\"", klen) == 0)
+                {
+                    // mean
+                    if (strncmp(wm->data.ptr + voff, "\"mean\"", vlen) == 0)
+                        req->intensity = mean;
+
+                    // integrated
+                    if (strncmp(wm->data.ptr + voff, "\"integrated\"", vlen) == 0)
+                        req->intensity = integrated;
+                }
+
+                // 'frame_start'
+                if (strncmp(wm->data.ptr + koff, "\"frame_start\"", klen) == 0)
+                    req->frame_start = atof2(wm->data.ptr + voff, vlen);
+
+                // 'frame_end'
+                if (strncmp(wm->data.ptr + koff, "\"frame_end\"", klen) == 0)
+                    req->frame_end = atof2(wm->data.ptr + voff, vlen);
+
+                // 'ref_freq'
+                if (strncmp(wm->data.ptr + koff, "\"ref_freq\"", klen) == 0)
+                    req->ref_freq = atof2(wm->data.ptr + voff, vlen);
+
+                // 'seq_id'
+                if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
+                    req->seq_id = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'timestamp'
+                if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
+                    req->timestamp = atof2(wm->data.ptr + voff, vlen);
+            }
+
+            printf("[C] dx: %d, quality: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req->dx, req->quality, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->seq_id, req->timestamp);
 
             free(req); // free the request for now
 
