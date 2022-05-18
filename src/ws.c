@@ -1223,7 +1223,7 @@ void *realtime_image_spectrum_response(void *ptr)
         {
             offset += n;
 
-            printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+            // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
 
             if (offset == buf_size)
             {
@@ -1406,7 +1406,7 @@ void *video_response(void *ptr)
         {
             offset += n;
 
-            printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+            // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
 
             if (offset == buf_size)
             {
