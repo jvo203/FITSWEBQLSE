@@ -598,7 +598,96 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // printf("[C] dx: %d, quality: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req->dx, req->quality, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->seq_id, req->timestamp);
 
-            free(req); // free the request for now
+            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+
+            if (resp == NULL)
+            {
+                free(req);
+                break;
+            }
+
+            // pass the request to FORTRAN
+            char *datasetId = NULL;
+
+            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+
+            if (session != NULL)
+                datasetId = session->datasetid;
+
+            void *item = get_dataset(datasetId);
+
+            if (item != NULL)
+            {
+                int stat;
+                int pipefd[2];
+
+                // open a Unix pipe
+                stat = pipe(pipefd);
+
+                if (stat == 0)
+                {
+                    // pass the read end of the pipe to a C thread
+                    resp->session_id = strdup(c->label);
+                    resp->fps = 0;
+                    resp->bitrate = 0;
+                    resp->timestamp = req->timestamp;
+                    resp->seq_id = req->seq_id;
+                    resp->fd = pipefd[0];
+
+                    // pass the write end of the pipe to a FORTRAN thread
+                    req->fd = pipefd[1];
+                    req->ptr = item;
+
+                    pthread_t tid;
+
+                    // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                    stat = pthread_create(&tid, NULL, &ws_image_spectrum_request, req);
+
+                    if (stat == 0)
+                    {
+                        pthread_detach(tid);
+
+                        // launch a pipe read C pthread
+                        stat = pthread_create(&tid, NULL, &ws_image_spectrum_response, resp);
+
+                        if (stat == 0)
+                            pthread_detach(tid);
+                        else
+                        {
+                            // close the read end of the pipe
+                            close(pipefd[0]);
+
+                            // release the response memory since there is no reader
+                            free(resp->session_id);
+                            free(resp);
+                        }
+                    }
+                    else
+                    {
+                        free(req);
+
+                        // close the write end of the pipe
+                        close(pipefd[1]);
+
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+
+                        // release the response memory since there is no writer
+                        free(resp->session_id);
+                        free(resp);
+                    }
+                }
+                else
+                {
+                    free(req);
+                    free(resp);
+                }
+            }
+            else
+            {
+                free(req);
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+            }
 
             break;
         }
@@ -1293,7 +1382,7 @@ void *ws_image_spectrum_response(void *ptr)
 
     ssize_t n = 0;
     size_t offset = 0;
-    size_t buf_size = 0x2000;
+    size_t buf_size = 0x40000;
 
     char *buf = malloc(buf_size);
 

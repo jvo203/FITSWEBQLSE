@@ -6701,7 +6701,7 @@ contains
         if (req%fd .ne. -1) call close_pipe(req%fd)
         nullify (item)
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
-        ! call free(user) ! release C memory
+        call free(user) ! release C memory
 
         return
 
