@@ -491,6 +491,39 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (mjson_get_string(wm->data.ptr, (int)wm->data.len, "$.type", type, sizeof(type)) == -1)
             break;
 
+        // [WS] {"type":"image","dx":1462,"width":1541.5999755859375,"height":794,"quality":"medium","intensity":"integrated","frame_start":344401602984.4286,"frame_end":344629439356.3494,"ref_freq":345115000000,"timestamp":8141.999999999999}
+        if (strcmp(type, "image") == 0)
+        {
+            struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+
+            if (req == NULL)
+                break;
+
+            // default values just in case ...
+            req->dx = 0;
+            req->image = false;
+            req->quality = medium;
+            req->x1 = -1;
+            req->x2 = -1;
+            req->y1 = -1;
+            req->y2 = -1;
+            req->width = 0;
+            req->height = 0;
+            req->beam = circle;
+            req->intensity = integrated;
+            req->frame_start = 0.0;
+            req->frame_end = 0.0;
+            req->ref_freq = 0.0;
+            req->seq_id = 0;
+            req->timestamp = 0.0;
+            req->fd = -1;
+            req->ptr = NULL;
+
+            free(req); // free the request for now
+
+            break;
+        }
+
         // handle real-time spectrum/viewport requests
         if (strcmp(type, "realtime_image_spectrum") == 0)
         {
