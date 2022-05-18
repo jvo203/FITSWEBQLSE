@@ -53,6 +53,7 @@ extern void *realtime_image_spectrum_request_simd(void *req);
 extern void *ws_image_spectrum_request(void *req);
 extern void *video_request_simd(void *req);
 void *realtime_image_spectrum_response(void *ptr);
+void *ws_image_spectrum_response(void *ptr);
 void *video_response(void *ptr);
 extern void get_inner_dimensions(void *ptr, int width, int height, int *fits_width, int *fits_height, int *inner_width, int *inner_height, float *scale);
 extern void get_spectrum_range_C(void *ptr, double frame_start, double frame_end, double ref_freq, int *first, int *last);
