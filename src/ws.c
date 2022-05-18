@@ -1284,6 +1284,62 @@ extern void close_pipe(int fd)
         printf("[C] close_pipe status: %d\n", status);
 }
 
+void *ws_image_spectrum_response(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct websocket_response *resp = (struct websocket_response *)ptr;
+
+    ssize_t n = 0;
+    size_t offset = 0;
+    size_t buf_size = 0x2000;
+
+    char *buf = malloc(buf_size);
+
+    if (buf != NULL)
+        while ((n = read(resp->fd, buf + offset, buf_size - offset)) > 0)
+        {
+            offset += n;
+
+            // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+
+            if (offset == buf_size)
+            {
+                printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
+
+                size_t new_size = buf_size << 1;
+                char *tmp = realloc(buf, new_size);
+
+                if (tmp != NULL)
+                {
+                    buf = tmp;
+                    buf_size = new_size;
+                }
+            }
+        }
+
+    if (0 == n)
+        printf("[C] PIPE_END_OF_STREAM\n");
+
+    if (n < 0)
+        printf("[C] PIPE_END_WITH_ERROR\n");
+
+    // TO-DO ...
+
+    // release the incoming buffer
+    free(buf);
+
+    // close the read end of the pipe
+    close(resp->fd);
+
+    // release the memory
+    free(resp->session_id);
+    free(resp);
+
+    pthread_exit(NULL);
+}
+
 void *realtime_image_spectrum_response(void *ptr)
 {
     if (ptr == NULL)
