@@ -6678,4 +6678,32 @@ contains
 
     end subroutine get_video_frame
 
+    recursive subroutine ws_image_spectrum_request(user) BIND(C, name='ws_image_spectrum_request')
+        use omp_lib
+        use :: unix_pthread
+        use, intrinsic :: iso_c_binding
+        implicit none
+
+        type(C_PTR), intent(in), value :: user
+
+        type(dataset), pointer :: item
+        type(image_spectrum_request_f), pointer :: req
+
+        call c_f_pointer(user, req)
+        call c_f_pointer(req%ptr, item)
+
+        print *, 'ws_image_spectrum for ', item%datasetid,&
+        &', dx:', req%dx, ', quality:', req%quality, ', width:', req%width, &
+        &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
+        &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
+           req%ref_freq, ', timestamp:', req%timestamp, ', fd:', req%fd
+
+        if (req%fd .ne. -1) call close_pipe(req%fd)
+        nullify (item)
+        nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+        ! call free(user) ! release C memory
+
+        return
+
+    end subroutine ws_image_spectrum_request
 end module fits
