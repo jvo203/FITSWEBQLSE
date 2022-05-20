@@ -1,5 +1,3 @@
-WARNING:File - , line 6854
-auto indentation failed due to chars limit, line should be split(limit:132)
 module fits
    use, intrinsic :: ISO_C_BINDING
    use, intrinsic :: ieee_arithmetic
