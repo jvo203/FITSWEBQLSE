@@ -6841,6 +6841,15 @@ contains
       ! join a thread
       rc = c_pthread_join(pid, c_null_ptr)
 
+      ! reduce the pixels/mask locally
+      do tid = 1, max_threads
+         pixels(:) = pixels(:) + thread_pixels(:, tid)
+         mask(:) = mask(:) .or. thread_mask(:, tid)
+      end do
+
+      ! combine the spectra from other cluster nodes (if any)
+      if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
+
       if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
