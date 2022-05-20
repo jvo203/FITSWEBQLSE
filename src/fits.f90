@@ -6816,6 +6816,31 @@ contains
 
       ! end of cluster
 
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
+      !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
+      do frame = first, last
+
+         ! skip frames for which there is no data on this node
+         if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+         ! get a current OpenMP thread (starting from 0 as in C)
+         tid = 1 + OMP_GET_THREAD_NUM()
+
+         ! the image is square (rectangular)
+         spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
+         &width, height, item%frame_min(frame), item%frame_max(frame),&
+         &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
+         &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+
+      end do
+      !$omp END DO
+      !$omp END PARALLEL
+
+      ! join a thread
+      rc = c_pthread_join(pid, c_null_ptr)
+
       if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
