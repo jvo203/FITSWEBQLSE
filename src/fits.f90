@@ -1,3 +1,5 @@
+WARNING:File - , line 6854
+auto indentation failed due to chars limit, line should be split(limit:132)
 module fits
    use, intrinsic :: ISO_C_BINDING
    use, intrinsic :: ieee_arithmetic
@@ -6696,7 +6698,6 @@ contains
       integer :: first, last, length, threshold
       integer :: max_threads, frame, tid, npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
-      real(c_float) :: cx, cy, r, r2
       real :: cdelt3
 
       real(kind=c_float), allocatable, target :: thread_pixels(:, :)
@@ -6756,6 +6757,19 @@ contains
       ! allocate and zero-out the spectrum
       allocate (spectrum(first:last))
       spectrum = 0.0
+
+      ! we need the viewport too
+      allocate (pixels(npixels))
+      allocate (mask(npixels))
+
+      pixels = 0.0
+      mask = .false.
+
+      allocate (thread_pixels(npixels, max_threads))
+      allocate (thread_mask(npixels, max_threads))
+
+      thread_pixels = 0.0
+      thread_mask = .false.
 
       call get_cdelt3(item, cdelt3)
 
