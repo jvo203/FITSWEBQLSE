@@ -6697,7 +6697,6 @@ contains
       integer :: max_threads, frame, tid, npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
       real(c_float) :: cx, cy, r, r2
-      integer :: start_x, start_y, end_x, end_y
       real :: cdelt3
 
       real(kind=c_float), allocatable, target :: thread_pixels(:, :)
@@ -6749,6 +6748,19 @@ contains
 
       width = item%naxes(1)
       height = item%naxes(2)
+
+      dimx = abs(x2 - x1 + 1)
+      dimy = abs(y2 - y1 + 1)
+      npixels = dimx*dimy
+
+      ! allocate and zero-out the spectrum
+      allocate (spectrum(first:last))
+      spectrum = 0.0
+
+      call get_cdelt3(item, cdelt3)
+
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
       if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
