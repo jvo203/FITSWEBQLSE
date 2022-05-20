@@ -6721,11 +6721,34 @@ contains
       &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
          req%ref_freq, ', timestamp:', req%timestamp, ', fd:', req%fd
 
+      if (.not. allocated(item%compressed)) then
+         if (req%fd .ne. -1) call close_pipe(req%fd)
+         nullify (item)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+      end if
+
       ! set the viewport to the whole image
       req%x1 = 1
       req%y1 = 1
       req%x2 = item%naxes(1)
       req%y2 = item%naxes(2)
+
+      ! get the range of the cube planes
+      call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
+
+      length = last - first + 1
+
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      if (req%intensity .eq. mean) then
+         average = 1
+      else
+         average = 0
+      end if
+
+      width = item%naxes(1)
+      height = item%naxes(2)
 
       if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
