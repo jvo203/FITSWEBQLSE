@@ -509,7 +509,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->y2 = -1;
             req->width = 0;
             req->height = 0;
-            req->beam = circle;
+            req->beam = square;
             req->intensity = integrated;
             req->frame_start = 0.0;
             req->frame_end = 0.0;
@@ -550,18 +550,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 // 'height'
                 if (strncmp(wm->data.ptr + koff, "\"height\"", klen) == 0)
                     req->height = atoi2(wm->data.ptr + voff, vlen);
-
-                // 'beam'
-                if (strncmp(wm->data.ptr + koff, "\"beam\"", klen) == 0)
-                {
-                    // circle
-                    if (strncmp(wm->data.ptr + voff, "\"circle\"", vlen) == 0)
-                        req->beam = circle;
-
-                    // square
-                    if (strncmp(wm->data.ptr + voff, "\"square\"", vlen) == 0)
-                        req->beam = square;
-                }
 
                 // 'intensity'
                 if (strncmp(wm->data.ptr + koff, "\"intensity\"", klen) == 0)
