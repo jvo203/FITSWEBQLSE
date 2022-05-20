@@ -6774,6 +6774,48 @@ contains
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
+      ! launch a cluster thread (check if the number of cluster nodes is .gt. 0)
+      allocate (cluster_spectrum(first:last))
+      cluster_spectrum = 0.0
+
+      cluster_req%datasetid = c_loc(item%datasetid)
+      cluster_req%len = size(item%datasetid)
+
+      ! inputs
+      cluster_req%image = req%image
+      cluster_req%x1 = req%x1
+      cluster_req%y1 = req%y1
+      cluster_req%x2 = req%x2
+      cluster_req%y2 = req%y2
+      cluster_req%beam = req%beam
+      cluster_req%intensity = req%intensity
+      cluster_req%frame_start = req%frame_start
+      cluster_req%frame_end = req%frame_end
+      cluster_req%ref_freq = req%ref_freq
+
+      ! outputs
+      if (req%image) then
+         cluster_req%pixels = c_loc(pixels)
+         cluster_req%mask = c_loc(mask)
+      else
+         cluster_req%pixels = c_null_ptr
+         cluster_req%mask = c_null_ptr
+      end if
+      cluster_req%spectrum = c_loc(cluster_spectrum)
+
+      cluster_req%dimx = dimx
+      cluster_req%dimy = dimy
+      cluster_req%length = size(cluster_spectrum)
+      cluster_req%valid = .false.
+
+      ! launch a thread
+      rc = c_pthread_create(thread=pid, &
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
+                            arg=c_loc(cluster_req))
+
+      ! end of cluster
+
       if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
