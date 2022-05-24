@@ -6714,7 +6714,8 @@ contains
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
       integer :: dimx, dimy, native_size, viewport_size
-      integer inner_width, inner_height
+      integer :: inner_width, inner_height
+      integer :: img_width, img_height
       integer(c_int) :: precision
       real :: scale
 
@@ -6865,6 +6866,13 @@ contains
 
       ! get the inner image bounding box (excluding NaNs)
       call inherent_image_dimensions_from_mask(reshape(mask, (/dimx, dimy/)), inner_width, inner_height)
+
+      ! get the downscaled image dimensions
+      scale = get_image_scale(req%width, req%height, inner_width, inner_height)
+
+      ! if scale < 1.0 downsize into view_pixels, view_mask
+      ! else view_pixels = allocate(source = pixels) view_mask = reshape(mask, (/ /)/))
+      ! make_image_statistics(view_pixels, view_mask)
 
       if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
