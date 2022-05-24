@@ -4823,31 +4823,34 @@ contains
 
       call c_f_pointer(ptr, item)
 
-      call inherent_image_dimensions(item%mask, width, height)
+      call inherent_image_dimensions(item, width, height)
 
       return
    end subroutine inherent_image_dimensions_C
 
-   subroutine inherent_image_dimensions(mask, width, height)
-      ! type(dataset), pointer, intent(in) :: item
+   subroutine inherent_image_dimensions(item, width, height)
+      type(dataset), pointer, intent(in) :: item
+      integer, intent(out) :: width, height
+
+      if (.not. allocated(item%mask)) then
+         width = 0
+         height = 0
+         return
+      end if
+
+      call inherent_image_dimensions_from_mask(item%mask, width, height)
+
+   end subroutine inherent_image_dimensions
+
+   subroutine inherent_image_dimensions_from_mask(mask, width, height)
       logical(kind=c_bool), dimension(:, :), intent(in) :: mask
       integer, intent(out) :: width, height
 
       integer x1, x2, y1, y2, k
       integer, dimension(2) :: dims
 
-      ! if (.not. allocated(item%mask)) then
-      !    width = 0
-      !   height = 0
-      !   return
-      !end if
-
-      ! width = item%naxes(1)
-      ! height = item%naxes(2)
-
       ! get the dimensions from the mask
       dims = shape(mask)
-      print *, "dims:", dims
       width = dims(1)
       height = dims(2)
 
@@ -4893,7 +4896,7 @@ contains
 
       print *, 'inherent dimensions:', width, height
 
-   end subroutine inherent_image_dimensions
+   end subroutine inherent_image_dimensions_from_mask
 
    subroutine calculate_global_statistics_C(ptr, dmedian, sumP, countP, sumN, countN, first, last)&
       & BIND(C, name='calculate_global_statistics_C')
@@ -5159,7 +5162,7 @@ contains
                             arg=c_loc(inner_dims))
 
       ! get the inner image bounding box (excluding NaNs)
-      call inherent_image_dimensions(item%mask, inner_width, inner_height)
+      call inherent_image_dimensions(item, inner_width, inner_height)
 
       ! join a thread
       rc = c_pthread_join(pid, c_null_ptr)
@@ -5231,7 +5234,7 @@ contains
       end if
 
       ! get the inner image bounding box (excluding NaNs)
-      call inherent_image_dimensions(item%mask, inner_width, inner_height)
+      call inherent_image_dimensions(item, inner_width, inner_height)
 
       ! only for data cubes
       if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
@@ -6861,7 +6864,7 @@ contains
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
 
       ! get the inner image bounding box (excluding NaNs)
-      call inherent_image_dimensions(reshape(mask, (/dimx, dimy/)), inner_width, inner_height)
+      call inherent_image_dimensions_from_mask(reshape(mask, (/dimx, dimy/)), inner_width, inner_height)
 
       if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
