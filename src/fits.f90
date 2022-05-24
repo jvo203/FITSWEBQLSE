@@ -4823,24 +4823,33 @@ contains
 
       call c_f_pointer(ptr, item)
 
-      call inherent_image_dimensions(item, width, height)
+      call inherent_image_dimensions(item%mask, width, height)
 
       return
    end subroutine inherent_image_dimensions_C
 
-   subroutine inherent_image_dimensions(item, width, height)
-      type(dataset), pointer, intent(in) :: item
+   subroutine inherent_image_dimensions(mask, width, height)
+      ! type(dataset), pointer, intent(in) :: item
+      logical(kind=c_bool), dimension(:, :), intent(in) :: mask
       integer, intent(out) :: width, height
+
       integer x1, x2, y1, y2, k
+      integer, dimension(2) :: dims
 
-      if (.not. allocated(item%mask)) then
-         width = 0
-         height = 0
-         return
-      end if
+      ! if (.not. allocated(item%mask)) then
+      !    width = 0
+      !   height = 0
+      !   return
+      !end if
 
-      width = item%naxes(1)
-      height = item%naxes(2)
+      ! width = item%naxes(1)
+      ! height = item%naxes(2)
+
+      ! get the dimensions from the mask
+      dims = shape(mask)
+      print *, "dims:", dims
+      width = dims(1)
+      height = dims(2)
 
       x1 = 1; x2 = width
       y1 = 1; y2 = height
@@ -4852,28 +4861,28 @@ contains
       do k = 1, width
          x1 = k
 
-         if (any(item%mask(k, :))) exit
+         if (any(mask(k, :))) exit
       end do
 
       ! x2
       do k = width, 1, -1
          x2 = k
 
-         if (any(item%mask(k, :))) exit
+         if (any(mask(k, :))) exit
       end do
 
       ! y1
       do k = 1, height
          y1 = k
 
-         if (any(item%mask(:, k))) exit
+         if (any(mask(:, k))) exit
       end do
 
       ! y2
       do k = height, 1, -1
          y2 = k
 
-         if (any(item%mask(:, k))) exit
+         if (any(mask(:, k))) exit
       end do
 
       print *, 'original dimensions:', width, height
@@ -5150,7 +5159,7 @@ contains
                             arg=c_loc(inner_dims))
 
       ! get the inner image bounding box (excluding NaNs)
-      call inherent_image_dimensions(item, inner_width, inner_height)
+      call inherent_image_dimensions(item%mask, inner_width, inner_height)
 
       ! join a thread
       rc = c_pthread_join(pid, c_null_ptr)
@@ -5222,7 +5231,7 @@ contains
       end if
 
       ! get the inner image bounding box (excluding NaNs)
-      call inherent_image_dimensions(item, inner_width, inner_height)
+      call inherent_image_dimensions(item%mask, inner_width, inner_height)
 
       ! only for data cubes
       if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
@@ -6695,13 +6704,14 @@ contains
 
       integer :: first, last, length, threshold
       integer :: max_threads, frame, tid, npixels
-      integer(c_int) :: x1, x2, y1, y2, width, height, average
+      integer(c_int) :: width, height, average
       real :: cdelt3
 
       real(kind=c_float), allocatable, target :: thread_pixels(:, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
       integer :: dimx, dimy, native_size, viewport_size
+      integer inner_width, inner_height
       integer(c_int) :: precision
       real :: scale
 
@@ -6748,13 +6758,18 @@ contains
       width = item%naxes(1)
       height = item%naxes(2)
 
-      dimx = abs(x2 - x1 + 1)
-      dimy = abs(y2 - y1 + 1)
+      dimx = abs(req%x2 - req%x1 + 1)
+      dimy = abs(req%y2 - req%y1 + 1)
       npixels = dimx*dimy
 
       ! allocate and zero-out the spectrum
       allocate (spectrum(first:last))
       spectrum = 0.0
+
+      call get_cdelt3(item, cdelt3)
+
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
       ! we need the viewport too
       allocate (pixels(npixels))
@@ -6768,11 +6783,6 @@ contains
 
       thread_pixels = 0.0
       thread_mask = .false.
-
-      call get_cdelt3(item, cdelt3)
-
-      ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
       ! launch a cluster thread (check if the number of cluster nodes is .gt. 0)
       allocate (cluster_spectrum(first:last))
@@ -6832,7 +6842,7 @@ contains
          spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
          &width, height, item%frame_min(frame), item%frame_max(frame),&
          &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-         &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+         &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, average, cdelt3)
 
       end do
       !$omp END DO
@@ -6849,6 +6859,9 @@ contains
 
       ! combine the spectra from other cluster nodes (if any)
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
+
+      ! get the inner image bounding box (excluding NaNs)
+      call inherent_image_dimensions(reshape(mask, (/dimx, dimy/)), inner_width, inner_height)
 
       if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
