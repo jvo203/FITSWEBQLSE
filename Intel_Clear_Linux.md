@@ -235,4 +235,5 @@
     mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse
 
     # All
+    cd ~/FITSWEBQLSE
     mpiexec -silent-abort -machinefile all.txt -n 7 ./fitswebqlse
