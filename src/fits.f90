@@ -2644,7 +2644,7 @@ contains
 
          if (rc .eq. 0) then
             ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-            call logger%info('load_cube', 'restored cube data from '//cache)
+            call logger%info('load_cube_mp', 'restored cube data from '//cache)
 
             ! unlock the mutex
             rc = c_pthread_mutex_unlock(logger_mtx)
