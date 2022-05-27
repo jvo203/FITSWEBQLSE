@@ -6719,6 +6719,12 @@ contains
         integer(c_int) :: precision
         real :: scale
 
+        ! image histogram
+        integer, allocatable :: hist(:)
+
+        ! image tone mapping
+        type(image_tone_mapping) :: tone
+
         ! cluster
         type(image_spectrum_request_t), target :: cluster_req
         type(c_pthread_t) :: pid
@@ -6885,11 +6891,16 @@ contains
 
             call resizeNearest(c_loc(mask), item%naxes(1), item%naxes(2), c_loc(view_mask), img_width, img_height)
         else
+            img_width = item%naxes(1)
+            img_height = item%naxes(2)
+
             view_pixels = reshape(pixels, item%naxes(1:2))
             view_mask = reshape(mask, item%naxes(1:2))
         end if
 
-        ! make_image_statistics(view_pixels, view_mask)
+        if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
+
+        call make_image_statistics(item, img_width, img_height, view_pixels, view_mask, hist, tone)
 
         if (req%fd .ne. -1) call close_pipe(req%fd)
         nullify (item)
