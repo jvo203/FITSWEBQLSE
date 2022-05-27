@@ -6923,7 +6923,16 @@ contains
 
             threshold = req%dx/2
 
-            ! call write_spectrum(fd, c_loc(item%mean_spectrum), size(item%mean_spectrum), ZFP_HIGH_PRECISION)
+            if (size(spectrum) .gt. threshold) then
+                ! downsize the spectrum
+                call LTTB(spectrum, threshold, reduced_spectrum)
+
+                call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), ZFP_HIGH_PRECISION)
+            else
+                call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), ZFP_HIGH_PRECISION)
+            end if
+
+            ! call write_histogram(fd, c_loc(histogram))
 
             call close_pipe(req%fd)
         end if
