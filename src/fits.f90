@@ -6902,6 +6902,18 @@ contains
 
         call make_image_statistics(item, img_width, img_height, view_pixels, view_mask, hist, tone)
 
+        if (req%fd .ne. -1) then
+            call write_image_spectrum(req%fd, trim(tone%flux)//c_null_char,&
+            &tone%pmin, tone%pmax, tone%pmedian,&
+            &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
+            & img_width, img_height, precision, c_loc(view_pixels), c_loc(view_mask))
+        end if
+
+        deallocate (view_pixels)
+        deallocate (view_mask)
+
+        ! call write_spectrum(fd, c_loc(item%mean_spectrum), size(item%mean_spectrum), ZFP_HIGH_PRECISION)
+
         if (req%fd .ne. -1) call close_pipe(req%fd)
         nullify (item)
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
