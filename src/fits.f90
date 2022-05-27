@@ -6884,7 +6884,6 @@ contains
             end if
 
             call resizeNearest(c_loc(mask), item%naxes(1), item%naxes(2), c_loc(view_mask), img_width, img_height)
-
         else
             view_pixels = reshape(pixels, item%naxes(1:2))
             view_mask = reshape(mask, item%naxes(1:2))
