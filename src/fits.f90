@@ -2602,7 +2602,7 @@ contains
             counter = counter - 1
          else
             ! upon success the thread progress counter will be decremented
-            if (mod(counter, 16) .eq. 0) then
+            if (mod(counter, 32) .eq. 0) then
                ! a C function defined in http.c
                counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
             end if
