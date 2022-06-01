@@ -70,7 +70,7 @@ double atof2(const char *chars, const int size)
 }
 
 // needs to be global so that various connection handlers can get access to it
-static struct mg_connection *udp_pipe; // Used to wake up event manager
+static int channel = -1; // Used to wake up event manager
 
 static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
@@ -1341,8 +1341,8 @@ void start_ws()
     // mg_log_set("3");
     printf("Starting WS listener on %s\n", url);
 
-    udp_pipe = mg_mkpipe(&mgr, mg_pipe_callback, NULL);   // Create pipe
-    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL); // Create HTTP listener
+    channel = mg_mkpipe(&mgr, mg_pipe_callback, NULL, true); // Create pipe
+    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);    // Create HTTP listener
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 1000); // Infinite event loop
@@ -1514,8 +1514,10 @@ void *realtime_image_spectrum_response(void *ptr)
                 // create a UDP message
                 struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
-                // pass the message over to mongoose via a UDP pipe
-                if (!mg_mgr_wakeup(udp_pipe, &msg, sizeof(struct websocket_message))) // Wakeup event manager
+                // pass the message over to mongoose via a communications channel
+                ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+                if (sent != sizeof(struct websocket_message))
                 {
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(msg.session_id);
@@ -1576,8 +1578,10 @@ void *realtime_image_spectrum_response(void *ptr)
                 // create a UDP message
                 struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
-                // pass the message over to mongoose via a UDP pipe
-                if (!mg_mgr_wakeup(udp_pipe, &msg, sizeof(struct websocket_message))) // Wakeup event manager
+                // pass the message over to mongoose via a communications channel
+                ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+                if (sent != sizeof(struct websocket_message))
                 {
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(msg.session_id);
@@ -1730,8 +1734,10 @@ void *video_response(void *ptr)
             // create a UDP message
             struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
-            // pass the message over to mongoose via a UDP pipe
-            if (!mg_mgr_wakeup(udp_pipe, &msg, sizeof(struct websocket_message))) // Wakeup event manager
+            // pass the message over to mongoose via a communications channel
+            ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+            if (sent != sizeof(struct websocket_message))
             {
                 // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                 free(msg.session_id);
