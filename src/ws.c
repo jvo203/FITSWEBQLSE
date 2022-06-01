@@ -1296,6 +1296,7 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         if (c->recv.len != sizeof(struct websocket_message))
         {
             printf("[C] mg_pipe_callback::abort (size mismatch): expected: %zu, received: %zu bytes!\n", sizeof(struct websocket_message), c->recv.len);
+            c->recv.len = 0; // Tell Mongoose we've consumed data
             return;
         }
 
@@ -1306,6 +1307,7 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
             printf("[C] mg_pipe_callback::abort (an empty buffer)!\n");
             free(msg->session_id);
             free(msg->buf);
+            c->recv.len = 0; // Tell Mongoose we've consumed data
             return;
         }
 
@@ -1324,6 +1326,8 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         // release memory
         free(msg->session_id);
         free(msg->buf);
+
+        c->recv.len = 0; // Tell Mongoose we've consumed data
     }
 
     (void)ev_data;
@@ -1341,8 +1345,8 @@ void start_ws()
     // mg_log_set("3");
     printf("Starting WS listener on %s\n", url);
 
-    channel = mg_mkpipe(&mgr, mg_pipe_callback, NULL, false); // Create pipe
-    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);     // Create HTTP listener
+    channel = mg_mkpipe(&mgr, mg_pipe_callback, NULL, true); // Create pipe
+    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);    // Create HTTP listener
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 1000); // Infinite event loop
