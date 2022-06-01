@@ -1295,7 +1295,7 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
     {
         if (c->recv.len != sizeof(struct websocket_message))
         {
-            printf("[C] mg_pipe_callback::abort (size mismatch)!\n");
+            printf("[C] mg_pipe_callback::abort (size mismatch): expected: %zu, received: %zu!\n", sizeof(struct websocket_message), c->recv.len);
             return;
         }
 
