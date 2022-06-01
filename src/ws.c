@@ -1295,7 +1295,7 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
     {
         if (c->recv.len != sizeof(struct websocket_message))
         {
-            printf("[C] mg_pipe_callback::abort (size mismatch): expected: %zu, received: %zu!\n", sizeof(struct websocket_message), c->recv.len);
+            printf("[C] mg_pipe_callback::abort (size mismatch): expected: %zu, received: %zu bytes!\n", sizeof(struct websocket_message), c->recv.len);
             return;
         }
 
@@ -1341,8 +1341,8 @@ void start_ws()
     // mg_log_set("3");
     printf("Starting WS listener on %s\n", url);
 
-    channel = mg_mkpipe(&mgr, mg_pipe_callback, NULL, true); // Create pipe
-    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);    // Create HTTP listener
+    channel = mg_mkpipe(&mgr, mg_pipe_callback, NULL, false); // Create pipe
+    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);     // Create HTTP listener
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 1000); // Infinite event loop
