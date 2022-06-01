@@ -75,15 +75,6 @@ void usage(char *progname, int opt);
 static int handler(void *user, const char *section, const char *name,
                    const char *value);
 
-// HTTP request callback
-static void mg_request_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data);
-
-// Pipe event handler
-static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data, void *fn_data);
-
-// Thread utility function
-static void start_thread(void (*f)(void *), void *p);
-
 options_t options; // the one and only one definition
 
 void ipp_init()
@@ -336,24 +327,6 @@ int main(int argc, char *argv[])
     // a blocking mongoose websocket server
     start_ws();
 
-    /*
-    char url[256] = "";
-    sprintf(url, "0.0.0.0:%d", options.ws_port);
-
-    struct mg_connection *pipe; // Used to wake up event manager
-    struct mg_mgr mgr;
-    mg_mgr_init(&mgr);
-    mg_log_set("3");
-    pipe = mg_mkpipe(&mgr, mg_pipe_event_handler, NULL);  // Create pipe
-    mg_http_listen(&mgr, url, mg_request_callback, pipe); // Create listener
-
-    // a mongoose event loop
-    while (s_received_signal == 0)
-        mg_mgr_poll(&mgr, 1000); // Event loop
-
-    mg_mgr_free(&mgr); // Cleanup
-    */
-
     stop_http();
 
     // clean-up ZeroMQ
@@ -501,60 +474,6 @@ static int handler(void *user, const char *section, const char *name,
         return 0; /* unknown section/name, error */
     }
     return 1;
-}
-
-static void start_thread(void (*f)(void *), void *p)
-{
-    pthread_t thread_id = (pthread_t)0;
-    pthread_attr_t attr;
-    (void)pthread_attr_init(&attr);
-    (void)pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    pthread_create(&thread_id, &attr, (void *(*)(void *))f, p);
-    pthread_attr_destroy(&attr);
-}
-
-static void thread_function(void *param)
-{
-    struct mg_connection *c = param; // Pipe connection
-    sleep(2);                        // Simulate long execution
-    mg_mgr_wakeup(c, "", 0);         // Wakeup event manager
-}
-
-// HTTP request callback
-static void mg_request_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
-{
-    if (ev == MG_EV_HTTP_MSG)
-    {
-        struct mg_http_message *hm = (struct mg_http_message *)ev_data;
-        if (mg_http_match_uri(hm, "/fast"))
-        {
-            // Single-threaded code path, for performance comparison
-            // The /fast URI responds immediately
-            mg_http_reply(c, 200, "Host: foo.com\r\n", "hi\n");
-        }
-        else
-        {
-            // Multithreading code path
-            c->label[0] = 'W';                      // Mark us as waiting for data
-            start_thread(thread_function, fn_data); // Start handling thread
-        }
-    }
-}
-
-// Pipe event handler
-static void mg_pipe_event_handler(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
-{
-    if (ev == MG_EV_READ)
-    {
-        struct mg_connection *t;
-        for (t = c->mgr->conns; t != NULL; t = t->next)
-        {
-            if (t->label[0] != 'W')
-                continue;                                       // Ignore un-marked connections
-            mg_http_reply(t, 200, "Host: foo.com\r\n", "hi\n"); // Respond!
-            t->label[0] = 0;                                    // Clear mark
-        }
-    }
 }
 
 int gstrcmp(const void *pa, const void *pb)

@@ -1348,6 +1348,10 @@ void start_ws()
         mg_mgr_poll(&mgr, 1000); // Infinite event loop
 
     mg_mgr_free(&mgr);
+
+    // close the commucation channel
+    if (channel != -1)
+        close(channel);
 }
 
 extern void close_pipe(int fd)
