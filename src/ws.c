@@ -1293,18 +1293,11 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
 {
     if (ev == MG_EV_READ)
     {
-        /*if (c->recv.len != sizeof(struct websocket_message))
-        {
-            printf("[C] mg_pipe_callback::abort (size mismatch): expected: %zu, received: %zu bytes!\n", sizeof(struct websocket_message), c->recv.len);
-            c->recv.len = 0; // Tell Mongoose we've consumed data
-            return;
-        }*/
-
         int i, n;
         size_t offset = 0;
 
         n = c->recv.len / sizeof(struct websocket_message);
-        printf("[C] mg_pipe_callback: received %d message(s).\n", n);
+        printf("[C] mg_pipe_callback: received %d binary message(s).\n", n);
 
         for (i = 0; i < n; i++)
         {
@@ -1313,13 +1306,10 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
 
             if (msg->len == 0)
             {
-                printf("[C] mg_pipe_callback::abort (an empty buffer)!\n");
+                printf("[C] mg_pipe_callback::continue (an empty message buffer)!\n");
                 free(msg->session_id);
                 free(msg->buf);
                 continue;
-
-                // c->recv.len = 0; // Tell Mongoose we've consumed data
-                // return;
             }
 
             struct mg_connection *t;
