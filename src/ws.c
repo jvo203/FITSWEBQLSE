@@ -1523,6 +1523,8 @@ void *realtime_image_spectrum_response(void *ptr)
 
                 if (sent != sizeof(struct websocket_message))
                 {
+                    printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(msg.session_id);
                     free(payload);
@@ -1587,6 +1589,8 @@ void *realtime_image_spectrum_response(void *ptr)
 
                 if (sent != sizeof(struct websocket_message))
                 {
+                    printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(msg.session_id);
                     free(payload);
@@ -1743,6 +1747,8 @@ void *video_response(void *ptr)
 
             if (sent != sizeof(struct websocket_message))
             {
+                printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
                 // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                 free(msg.session_id);
                 free(payload);
