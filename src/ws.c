@@ -1293,39 +1293,51 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
 {
     if (ev == MG_EV_READ)
     {
-        if (c->recv.len != sizeof(struct websocket_message))
+        /*if (c->recv.len != sizeof(struct websocket_message))
         {
             printf("[C] mg_pipe_callback::abort (size mismatch): expected: %zu, received: %zu bytes!\n", sizeof(struct websocket_message), c->recv.len);
             c->recv.len = 0; // Tell Mongoose we've consumed data
             return;
-        }
+        }*/
 
-        struct websocket_message *msg = (struct websocket_message *)c->recv.buf;
+        int i, n;
+        size_t offset = 0;
 
-        if (msg->len == 0)
+        n = c->recv.len / sizeof(struct websocket_message);
+        printf("[C] mg_pipe_callback: received %d message(s).\n", n);
+
+        for (i = 0; i < n; i++)
         {
-            printf("[C] mg_pipe_callback::abort (an empty buffer)!\n");
+            struct websocket_message *msg = (struct websocket_message *)(c->recv.buf + offset);
+            offset += sizeof(struct websocket_message);
+
+            if (msg->len == 0)
+            {
+                printf("[C] mg_pipe_callback::abort (an empty buffer)!\n");
+                free(msg->session_id);
+                free(msg->buf);
+                continue;
+
+                // c->recv.len = 0; // Tell Mongoose we've consumed data
+                // return;
+            }
+
+            struct mg_connection *t;
+            for (t = c->mgr->conns; t != NULL; t = t->next)
+            {
+                // do not bother comparing strings for non-WebSocket connections
+                if (t->is_websocket && (strcmp(t->label, msg->session_id) == 0))
+                {
+                    // printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+                    mg_ws_send(t, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
+                    break;
+                }
+            }
+
+            // release memory
             free(msg->session_id);
             free(msg->buf);
-            c->recv.len = 0; // Tell Mongoose we've consumed data
-            return;
         }
-
-        struct mg_connection *t;
-        for (t = c->mgr->conns; t != NULL; t = t->next)
-        {
-            // do not bother comparing strings for non-WebSocket connections
-            if (t->is_websocket && (strcmp(t->label, msg->session_id) == 0))
-            {
-                // printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
-                mg_ws_send(t, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
-                break;
-            }
-        }
-
-        // release memory
-        free(msg->session_id);
-        free(msg->buf);
 
         c->recv.len = 0; // Tell Mongoose we've consumed data
     }
@@ -1345,8 +1357,8 @@ void start_ws()
     // mg_log_set("3");
     printf("Starting WS listener on %s\n", url);
 
-    channel = mg_mkpipe(&mgr, mg_pipe_callback, NULL, true); // Create pipe
-    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);    // Create HTTP listener
+    channel = mg_mkpipe(&mgr, mg_pipe_callback, NULL, false); // Create pipe
+    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);     // Create HTTP listener
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 1000); // Infinite event loop
