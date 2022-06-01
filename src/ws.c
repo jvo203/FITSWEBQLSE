@@ -1294,12 +1294,12 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
     if (ev == MG_EV_READ)
     {
         int i, n;
-        size_t offset = 0;
+        size_t offset;
 
         n = c->recv.len / sizeof(struct websocket_message);
         printf("[C] mg_pipe_callback: received %d binary message(s).\n", n);
 
-        for (i = 0; i < n; i++)
+        for (offset = 0, i = 0; i < n; i++)
         {
             struct websocket_message *msg = (struct websocket_message *)(c->recv.buf + offset);
             offset += sizeof(struct websocket_message);
