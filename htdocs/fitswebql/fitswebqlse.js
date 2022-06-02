@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-05-29.0";
+	return "JS2022-06-02.0";
 }
 
 function uuidv4() {
@@ -2616,13 +2616,12 @@ function open_websocket_connection(_datasetId, index) {
 
 		// Let us open a web socket
 		var loc = window.location, ws_uri;
+		var prot = loc.protocol;
 
-		var pos = WS_SOCKET.indexOf("wss");
-
-		if (pos >= 0) {
-			ws_uri = WS_SOCKET + loc.hostname;
+		if (prot === "https:") {
+			ws_uri = "wss://" + loc.hostname;
 		} else {
-			ws_uri = WS_SOCKET + loc.hostname + ':' + WS_PORT;
+			ws_uri = "ws://" + loc.hostname + ':' + WS_PORT;
 		}
 
 		ws_uri += ROOT_PATH + "websocket/" + encodeURIComponent(_datasetId) + "/" + session_id;
