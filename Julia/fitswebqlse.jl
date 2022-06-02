@@ -159,7 +159,6 @@ catch _
 end
 
 LOCAL_VERSION = true
-PRODUCTION = false
 TIMEOUT = 60 # [s]
 LOGS = "LOGS"
 
@@ -1667,11 +1666,6 @@ try
 
     try
         global LOCAL_VERSION = parse(Bool, retrieve(conf, "fitswebql", "local"))
-    catch _
-    end
-
-    try
-        global PRODUCTION = parse(Bool, retrieve(conf, "fitswebql", "production"))
     catch _
     end
 
