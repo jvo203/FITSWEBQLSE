@@ -364,7 +364,7 @@ function serveFile(path::String)
     end
 
     try
-        return isfile(path) ? HTTP.Response(200, headers; body = read(path)) :
+        return isfile(path) ? HTTP.Response(200, headers; body=read(path)) :
                HTTP.Response(404, "$path Not Found.")
     catch e
         return HTTP.Response(404, "Error: $e")
@@ -401,7 +401,7 @@ function serveDirectory(request::HTTP.Request)
 
     println("Scanning $dir ...")
 
-    resp = chop(JSON.json(Dict("location" => dir)), tail = 1) * ", \"contents\":["
+    resp = chop(JSON.json(Dict("location" => dir)), tail=1) * ", \"contents\":["
 
     elements = false
 
@@ -449,13 +449,13 @@ function serveDirectory(request::HTTP.Request)
     end
 
     if elements
-        resp = chop(resp, tail = 1) * "]}"
+        resp = chop(resp, tail=1) * "]}"
     else
         resp *= "]}"
     end
 
     try
-        return HTTP.Response(200, headers; body = resp)
+        return HTTP.Response(200, headers; body=resp)
     catch e
         return HTTP.Response(404, "Error: $e")
     end
@@ -544,7 +544,7 @@ function serveProgress(request::HTTP.Request)
     headers = ["Content-Type" => "application/json"]
 
     try
-        return HTTP.Response(200, headers; body = take!(resp))
+        return HTTP.Response(200, headers; body=take!(resp))
     catch e
         return HTTP.Response(404, "Error: $e")
     end
@@ -651,7 +651,7 @@ function streamMolecules(http::HTTP.Stream)
         json = "{\"molecules\" : []}"
     else
         # remove the last character (comma) from json, end an array
-        json = chop(json, tail = 1) * "]}"
+        json = chop(json, tail=1) * "]}"
     end
 
     # compress with bzip2 (more efficient than LZ4HC)
@@ -1029,7 +1029,7 @@ function streamImageSpectrum(http::HTTP.Stream)
         histogram, tone_mapping, pixels, mask = fetch(image_task)
 
         # chop the first '{' character only
-        json = json * chop(JSON.json("histogram" => histogram), head = 1, tail = 0)
+        json = json * chop(JSON.json("histogram" => histogram), head=1, tail=0)
 
         println(tone_mapping)
 
@@ -1075,7 +1075,7 @@ function streamImageSpectrum(http::HTTP.Stream)
 
         println("pixels type: ", typeof(pixels))
 
-        compressed_pixels = zfp_compress(pixels, precision = prec)
+        compressed_pixels = zfp_compress(pixels, precision=prec)
         write(http, Int32(length(compressed_pixels)))
         write(http, compressed_pixels)
 
@@ -1106,7 +1106,7 @@ function streamImageSpectrum(http::HTTP.Stream)
             if fits_object.mean_spectrum != Nothing
                 compressed_spectrum = zfp_compress(
                     fits_object.mean_spectrum,
-                    precision = SPECTRUM_HIGH_PRECISION,
+                    precision=SPECTRUM_HIGH_PRECISION,
                 )
 
                 write(http, Int32(length(fits_object.mean_spectrum)))
@@ -1117,7 +1117,7 @@ function streamImageSpectrum(http::HTTP.Stream)
             if fits_object.integrated_spectrum != Nothing
                 compressed_spectrum = zfp_compress(
                     fits_object.integrated_spectrum,
-                    precision = SPECTRUM_HIGH_PRECISION,
+                    precision=SPECTRUM_HIGH_PRECISION,
                 )
 
                 write(http, Int32(length(fits_object.integrated_spectrum)))
@@ -1567,12 +1567,6 @@ function serveFITS(request::HTTP.Request)
     has_fits_str = has_fits ? "1" : "0"
     write(resp, "' data-has-fits='$has_fits_str'></div>\n")
 
-    if PRODUCTION
-        write(resp, "<script>var WS_SOCKET = 'wss://';</script>\n")
-    else
-        write(resp, "<script>var WS_SOCKET = 'ws://';</script>\n")
-    end
-
     write(resp, "<script>var WS_PORT = $WS_PORT;</script>\n")
 
     # the page entry point
@@ -1959,7 +1953,7 @@ function ws_coroutine(ws, ids)
 
                         # video tone mapping
                         tone =
-                            VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)                        
+                            VideoToneMapping(flux, _dmin, _dmax, _median, _sensitivity, _slope, _white, _black)
                     else
                         error("video tone mapping has not been initialised.")
                     end
@@ -2592,7 +2586,7 @@ const ws_server = WebSockets.ServerWS(ws_handle, ws_gatekeeper)
 function remove_symlinks()
     # scan HT_DOCS for any symlinks and remove them
 
-    foreach(readdir(HT_DOCS, join = true)) do f
+    foreach(readdir(HT_DOCS, join=true)) do f
 
         # is it a symbolic link ?
         if islink(f)
@@ -2608,7 +2602,7 @@ function remove_symlinks()
     end
 end
 
-function exitFunc(exception = false)
+function exitFunc(exception=false)
     global ws_server
 
     remove_symlinks()
@@ -2635,7 +2629,7 @@ function exitFunc(exception = false)
     for w in workers()
         try
             println("removing a distributed worker #$w")
-            rmprocs(w, waitfor = 10)
+            rmprocs(w, waitfor=10)
         catch e
             println(e)
         end
