@@ -2260,11 +2260,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     g_string_append_printf(html, "' data-has-fits='%d'></div>\n", (has_fits ? 1 : 0));
 
-    if (options.production)
-        g_string_append(html, "<script>var WS_SOCKET = 'wss://';</script>\n");
-    else
-        g_string_append(html, "<script>var WS_SOCKET = 'ws://';</script>\n");
-
     g_string_append_printf(html, "<script>var WS_PORT = %" PRIu16 ";</script>\n", options.ws_port);
 
     // the page entry point
