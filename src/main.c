@@ -210,11 +210,9 @@ int main(int argc, char *argv[])
 
     struct passwd *passwdEnt = getpwuid(getuid());
 
-    // options = {8080, 8081, true, false, 15, strdup(".cache"), strdup(".cache"), strdup("LOGS"), strdup(passwdEnt->pw_dir), strdup("jvo"), NULL, strdup("p10.vo.nao.ac.jp"), 5433, strdup("/home")}; // default values
     options.http_port = 8080;
     options.ws_port = options.http_port + 1;
     options.local = true;
-    options.production = false;
     options.timeout = 15;
     options.fits_home = strdup(".cache");
     options.cache = strdup(".cache");
@@ -411,14 +409,6 @@ static int handler(void *user, const char *section, const char *name,
 
         if (MATCH(value, "false"))
             options->local = false;
-    }
-    else if (MATCH("fitswebql", "production"))
-    {
-        if (MATCH(value, "true"))
-            options->production = true;
-
-        if (MATCH(value, "false"))
-            options->production = false;
     }
     else if (MATCH("fitswebql", "timeout"))
     {
