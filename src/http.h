@@ -48,7 +48,6 @@ typedef struct
     uint16_t http_port;
     uint16_t ws_port;
     bool local;
-    bool production;
     uint32_t timeout;
     char *fits_home;
     char *cache;
