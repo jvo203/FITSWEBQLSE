@@ -1297,7 +1297,7 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         size_t offset;
 
         n = c->recv.len / sizeof(struct websocket_message);
-        printf("[C] mg_pipe_callback: received %d binary message(s).\n", n);
+        // printf("[C] mg_pipe_callback: received %d binary message(s).\n", n);
 
         for (offset = 0, i = 0; i < n; i++)
         {
