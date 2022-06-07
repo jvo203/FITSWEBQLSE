@@ -3125,6 +3125,10 @@ void write_elapsed(int fd, const float *elapsed)
 
 void write_histogram(int fd, const int *hist, int n)
 {
+    uint32_t length = n;
+
+    chunked_write(fd, (const char *)&length, sizeof(length)); // histogram length
+    chunked_write(fd, (const char *)hist, n * sizeof(int));
 }
 
 void write_spectrum(int fd, const float *spectrum, int n, int precision)
