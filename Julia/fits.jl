@@ -2999,19 +2999,42 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     len = 4 * (length(flux) ÷ 4 + 1)
     flux = lpad(flux, len, " ")
 
+    # keep track of bytes written
+    offset = 0
+
     write(image_resp, UInt32(length(flux)))
+    offset += sizeof(UInt32)
+
     write(image_resp, flux)
+    offset += sizeof(flux)
+
     write(image_resp, image_tone_mapping.pmin)
+    offset += sizeof(image_tone_mapping.pmin)
+
     write(image_resp, image_tone_mapping.pmax)
+    offset += sizeof(image_tone_mapping.pmax)
+
     write(image_resp, image_tone_mapping.med)
+    offset += sizeof(image_tone_mapping.med)
+
     write(image_resp, image_tone_mapping.sensitivity)
+    offset += sizeof(image_tone_mapping.sensitivity)
+
     write(image_resp, image_tone_mapping.ratio_sensitivity)
+    offset += sizeof(image_tone_mapping.ratio_sensitivity)
+
     write(image_resp, image_tone_mapping.white)
+    offset += sizeof(image_tone_mapping.white)
+
     write(image_resp, image_tone_mapping.black)
+    offset += sizeof(image_tone_mapping.black)
 
     # next the image
     write(image_resp, UInt32(view_width))
+    offset += sizeof(UInt32)
+
     write(image_resp, UInt32(view_height))
+    offset += sizeof(UInt32)
 
     # compress pixels with ZFP
     prec = ZFP_MEDIUM_PRECISION
@@ -3026,14 +3049,21 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     compressed_pixels = zfp_compress(pixels, precision=prec)
     write(image_resp, UInt32(length(compressed_pixels)))
+    offset += sizeof(UInt32)
+
     write(image_resp, compressed_pixels)
+    offset += sizeof(compressed_pixels)
 
     compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
     write(image_resp, UInt32(length(compressed_mask)))
+    offset += sizeof(UInt32)
+
     write(image_resp, compressed_mask)
+    offset += sizeof(compressed_mask)
 
     # add a padding to make sure the histogram is aligned
     # (a multiple of 4 in needed by JavaScript)
+    println("Julia histogram offset: $offset")
 
     # and the histogram
     println("typeof(bins):", typeof(bins))
