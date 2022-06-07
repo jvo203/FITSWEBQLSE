@@ -144,6 +144,7 @@ void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
+void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
 
@@ -3120,6 +3121,10 @@ void write_header(int fd, const char *header_str, int str_len)
 void write_elapsed(int fd, const float *elapsed)
 {
     chunked_write(fd, (const char *)elapsed, sizeof(float)); // elapsed compute time
+}
+
+void write_histogram(int fd, const int *hist, int n)
+{
 }
 
 void write_spectrum(int fd, const float *spectrum, int n, int precision)
