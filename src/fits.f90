@@ -707,6 +707,14 @@ module fits
          type(C_PTR), value, intent(in) :: spectrum
       end subroutine write_spectrum
 
+      subroutine write_histogram(fd, histogram, n) BIND(C, name='write_histogram')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         integer(c_int), value, intent(in) :: fd, n
+         type(C_PTR), value, intent(in) :: histogram
+      end subroutine write_histogram
+
       ! void write_viewport(int fd, int width, int height, const float *pixels, const bool *mask)
       subroutine write_viewport(fd, width, height, pixels, mask, precision) BIND(C, name='write_viewport')
          use, intrinsic :: ISO_C_BINDING
@@ -6720,7 +6728,7 @@ contains
       real :: scale
 
       ! image histogram
-      integer, allocatable :: hist(:)
+      integer(c_int), allocatable, target :: hist(:)
 
       ! image tone mapping
       type(image_tone_mapping) :: tone
@@ -6932,7 +6940,7 @@ contains
             call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), ZFP_HIGH_PRECISION)
          end if
 
-         ! call write_histogram(fd, c_loc(histogram))
+         call write_histogram(req%fd, c_loc(hist), size(hist))
 
          call close_pipe(req%fd)
       end if
