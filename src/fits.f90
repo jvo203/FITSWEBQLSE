@@ -6929,6 +6929,8 @@ contains
          deallocate (view_pixels)
          deallocate (view_mask)
 
+         call write_histogram(req%fd, c_loc(hist), size(hist))
+
          threshold = req%dx/2
 
          if (size(spectrum) .gt. threshold) then
@@ -6939,8 +6941,6 @@ contains
          else
             call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), ZFP_HIGH_PRECISION)
          end if
-
-         call write_histogram(req%fd, c_loc(hist), size(hist))
 
          call close_pipe(req%fd)
       end if
