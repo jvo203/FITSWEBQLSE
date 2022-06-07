@@ -889,7 +889,7 @@ end
 @everywhere function remove_fits_cache(cache_dir::String)
     try
         if isdir(cache_dir)
-            rm(cache_dir, recursive = true)
+            rm(cache_dir, recursive=true)
         end
     catch _
     end
@@ -948,7 +948,7 @@ function read_header(f::FITSFile)
     return (header, headerRec)
 end
 
-function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String} = missing)
+function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String}=missing)
     global FITS_CACHE
 
     if fits.datasetid == ""
@@ -963,7 +963,7 @@ function loadFITS(fits::FITSDataSet, filepath::String, url::Union{Missing,String
     if !ismissing(url)
         try
             # download a FITS file from <uri>, save it under <filepath>
-            Downloads.download(url, filepath, progress = download_progress, verbose = true)
+            Downloads.download(url, filepath, progress=download_progress, verbose=true)
         catch err
             println(err)
             fits.has_error[] = true
@@ -1721,7 +1721,7 @@ end
         # downsize the pixels & mask
         try
             pixels = Float32.(imresize(local_pixels, (width, height)))
-            mask = Bool.(imresize(local_mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
+            mask = Bool.(imresize(local_mask, (width, height), method=Constant())) # use Nearest-Neighbours for the mask
             put!(results, (pixels, mask))
         catch e
             println(e)
@@ -1803,7 +1803,7 @@ function getHistogram(fits::FITSDataSet, pixels, mask)
         slots = Float64.(acc) ./ Float64(acc_tot)
 
         # upsample the slots array to <NBINS>
-        cum = imresize(slots, (NBINS,), method = Linear())
+        cum = imresize(slots, (NBINS,), method=Linear())
         println("slots length: $(length(cum))")
 
         try
@@ -1931,7 +1931,7 @@ function getImage(fits::FITSDataSet, width::Integer, height::Integer)
                         imresize(
                             fits.mask,
                             (image_width, image_height),
-                            method = Constant(),
+                            method=Constant(),
                         ),
                     ) # use Nearest-Neighbours for the mask
             catch e
@@ -2551,7 +2551,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
             try
                 pixels = Float32.(imresize(pixels, (width, height)))
-                mask = Bool.(imresize(mask, (width, height), method = Constant())) # use Nearest-Neighbours for the mask
+                mask = Bool.(imresize(mask, (width, height), method=Constant())) # use Nearest-Neighbours for the mask
             catch e
                 println(e)
             end
@@ -2577,7 +2577,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             prec = ZFP_LOW_PRECISION
         end
 
-        compressed_pixels = zfp_compress(pixels, precision = prec)
+        compressed_pixels = zfp_compress(pixels, precision=prec)
         write(resp, Int32(length(compressed_pixels)))
         write(resp, compressed_pixels)
 
@@ -2710,7 +2710,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
                 prec = ZFP_LOW_PRECISION
             end
 
-            compressed_pixels = zfp_compress(pixels, precision = prec)
+            compressed_pixels = zfp_compress(pixels, precision=prec)
             write(image_resp, Int32(length(compressed_pixels)))
             write(image_resp, compressed_pixels)
 
@@ -2730,7 +2730,7 @@ function getViewportSpectrum(fits::FITSDataSet, req::Dict{String,Any})
             prec = SPECTRUM_HIGH_PRECISION
         end
 
-        compressed_spectrum = zfp_compress(spectrum, precision = prec)
+        compressed_spectrum = zfp_compress(spectrum, precision=prec)
 
         write(spec_resp, Int32(length(spectrum)))
         write(spec_resp, compressed_spectrum)
@@ -3009,11 +3009,6 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     write(image_resp, image_tone_mapping.white)
     write(image_resp, image_tone_mapping.black)
 
-    # the histogram
-    println("typeof(bins):", typeof(bins))
-    write(image_resp, UInt32(length(bins)))
-    write(image_resp, Int32.(bins))
-
     # next the image
     write(image_resp, UInt32(view_width))
     write(image_resp, UInt32(view_height))
@@ -3029,7 +3024,7 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
         prec = ZFP_LOW_PRECISION
     end
 
-    compressed_pixels = zfp_compress(pixels, precision = prec)
+    compressed_pixels = zfp_compress(pixels, precision=prec)
     write(image_resp, UInt32(length(compressed_pixels)))
     write(image_resp, compressed_pixels)
 
@@ -3037,11 +3032,16 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     write(image_resp, UInt32(length(compressed_mask)))
     write(image_resp, compressed_mask)
 
+    # and the histogram
+    println("typeof(bins):", typeof(bins))
+    write(image_resp, UInt32(length(bins)))
+    write(image_resp, Int32.(bins))
+
     # spectrum response
     spec_resp = IOBuffer()
 
     # compress spectrum with ZFP        
-    compressed_spectrum = zfp_compress(spectrum, precision = SPECTRUM_HIGH_PRECISION)
+    compressed_spectrum = zfp_compress(spectrum, precision=SPECTRUM_HIGH_PRECISION)
 
     write(spec_resp, UInt32(length(spectrum)))
     write(spec_resp, compressed_spectrum)
@@ -4013,7 +4013,7 @@ end
                 view_pixels = Float32.(imresize(view_pixels, (view_width, view_height)),)
                 view_mask =
                     Bool.(
-                        imresize(view_mask, (view_width, view_height), method = Constant()),
+                        imresize(view_mask, (view_width, view_height), method=Constant()),
                     ) # use Nearest-Neighbours for the mask
             catch e
                 # println(e)
@@ -4103,7 +4103,7 @@ function zfp_compress_pixels(datasetid, frame, pixels, mask)
         cache_dir = FITS_CACHE * Base.Filesystem.path_separator * datasetid
         filename = cache_dir * Base.Filesystem.path_separator * string(frame)
 
-        compressed_pixels = zfp_compress(pixels, precision = 14)
+        compressed_pixels = zfp_compress(pixels, precision=14)
         compressed_mask = lz4_hc_compress(collect(flatten(UInt8.(mask))))
 
         serialize(filename * ".zfp", compressed_pixels)
