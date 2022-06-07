@@ -2817,7 +2817,7 @@ function open_websocket_connection(_datasetId, index) {
 							imageContainer[index - 1].tone_mapping = tone_mapping;
 						}
 
-						// next the histogram length + bins
+						// update the tone mapping
 						fitsContainer[index - 1].min = tone_mapping.min;
 						fitsContainer[index - 1].max = tone_mapping.max;
 						fitsContainer[index - 1].median = tone_mapping.median;
@@ -2826,18 +2826,7 @@ function open_websocket_connection(_datasetId, index) {
 						fitsContainer[index - 1].black = tone_mapping.black;
 						fitsContainer[index - 1].white = tone_mapping.white;
 
-						var nbins = dv.getUint32(offset, endianness);
-						offset += 4;
-
-						var histogram = new Int32Array(received_msg, offset, nbins);
-						offset += nbins * 4;
-
-						fitsContainer[index - 1].histogram = histogram;
-
-						//refresh the histogram
-						redraw_histogram(index);
-
-						// and finally receive/process the 32-bit floating-point image frame
+						// next receive/process the 32-bit floating-point image frame
 						var img_width = dv.getUint32(offset, endianness);
 						offset += 4;
 
@@ -2878,6 +2867,18 @@ function open_websocket_connection(_datasetId, index) {
 
 							display_legend();
 						}
+
+						// next the histogram length + bins
+						var nbins = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						var histogram = new Int32Array(received_msg, offset, nbins);
+						offset += nbins * 4;
+
+						fitsContainer[index - 1].histogram = histogram;
+
+						//refresh the histogram
+						redraw_histogram(index);
 
 						return;
 
