@@ -3032,6 +3032,9 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
     write(image_resp, UInt32(length(compressed_mask)))
     write(image_resp, compressed_mask)
 
+    # add a padding to make sure the histogram is aligned
+    # (a multiple of 4 in needed by JavaScript)
+
     # and the histogram
     println("typeof(bins):", typeof(bins))
     write(image_resp, UInt32(length(bins)))

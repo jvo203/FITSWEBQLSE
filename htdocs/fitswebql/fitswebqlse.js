@@ -2868,12 +2868,16 @@ function open_websocket_connection(_datasetId, index) {
 							display_legend();
 						}
 
+						console.log("histogram offset:", offset);
+
 						// next the histogram length + bins
 						var nbins = dv.getUint32(offset, endianness);
 						offset += 4;
 
 						var histogram = new Int32Array(received_msg, offset, nbins);
 						offset += nbins * 4;
+
+						console.log(histogram);
 
 						fitsContainer[index - 1].histogram = histogram;
 
