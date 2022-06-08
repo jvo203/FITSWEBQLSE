@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-07.0";
+	return "JS2022-06-08.0";
 }
 
 function uuidv4() {
@@ -2868,7 +2868,9 @@ function open_websocket_connection(_datasetId, index) {
 							display_legend();
 						}
 
-						console.log("histogram offset:", offset);
+						let padding = 4 - offset % 4;
+						console.log("histogram offset:", offset, "padding:", padding);
+						offset += padding;
 
 						// next the histogram length + bins
 						var nbins = dv.getUint32(offset, endianness);
