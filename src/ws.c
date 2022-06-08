@@ -1417,6 +1417,7 @@ void *ws_image_spectrum_response(void *ptr)
         goto free_mem;
 
     size_t read_offset = 0; // a 'read' cursor into <buf>
+    size_t msg_len = 0;
 
     uint32_t flux_len = 0;
     uint32_t pixels_len = 0;
@@ -1453,6 +1454,63 @@ void *ws_image_spectrum_response(void *ptr)
 
     int padding = 4 - read_offset % 4;
     printf("[C] got here; #hist. elements: %u, padding: %d byte(s)\n", hist_len, padding);
+
+    msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + read_offset + padding;
+    char *image_payload = malloc(msg_len);
+
+    if (image_payload != NULL)
+    {
+        float ts = resp->timestamp;
+        uint32_t id = resp->seq_id;
+        uint32_t msg_type = 2;
+        float elapsed = 0.0f;
+        // 0 - spectrum, 1 - viewport,
+        // 2 - image, 3 - full, spectrum,  refresh,
+        // 4 - histogram
+
+        size_t ws_offset = 0;
+
+        memcpy((char *)image_payload + ws_offset, &ts, sizeof(float));
+        ws_offset += sizeof(float);
+
+        memcpy((char *)image_payload + ws_offset, &id, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        memcpy((char *)image_payload + ws_offset, &msg_type, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        memcpy((char *)image_payload + ws_offset, &elapsed, sizeof(float));
+        ws_offset += sizeof(float);
+
+        // fill-in the content up to pixels/mask
+
+        // add an optional padding
+
+        // and the histogram
+
+        if (ws_offset != msg_len)
+            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+        // create a UDP message
+        struct websocket_message msg = {strdup(resp->session_id), image_payload, msg_len};
+
+        // pass the message over to mongoose via a communications channel
+        ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+        if (sent != sizeof(struct websocket_message))
+        {
+            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+            // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+            free(msg.session_id);
+            free(image_payload);
+        };
+    }
+    else
+    {
+        // all-or-nothing, skip the spectrum if the image message cannot not be created
+        goto free_mem;
+    }
 
     // release the incoming buffer
 free_mem:
