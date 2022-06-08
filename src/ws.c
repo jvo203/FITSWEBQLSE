@@ -1448,7 +1448,11 @@ void *ws_image_spectrum_response(void *ptr)
     memcpy(&hist_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + hist_len * sizeof(int);
 
-    printf("[C] got here; #hist. elements: %u\n", hist_len);
+    if (offset < read_offset)
+        goto free_mem;
+
+    int padding = 4 - read_offset % 4;
+    printf("[C] got here; #hist. elements: %u, padding: %d byte(s)\n", hist_len, padding);
 
     // release the incoming buffer
 free_mem:
