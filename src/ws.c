@@ -1479,7 +1479,7 @@ void *ws_image_spectrum_response(void *ptr)
         ws_offset += sizeof(uint32_t);
 
         // fill-in the content up to pixels/mask
-        size_t write_offset = sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len;
+        size_t write_offset = sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len + sizeof(uint32_t) + mask_len;
         memcpy((char *)image_payload + ws_offset, buf, write_offset);
         ws_offset += write_offset;
 
@@ -1496,6 +1496,8 @@ void *ws_image_spectrum_response(void *ptr)
         }
 
         // and the histogram
+        memcpy((char *)image_payload + ws_offset, buf + write_offset, sizeof(uint32_t) + hist_len * sizeof(int));
+        ws_offset += sizeof(uint32_t) + hist_len * sizeof(int);
 
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
