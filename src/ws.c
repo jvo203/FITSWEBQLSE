@@ -1460,6 +1460,7 @@ void *ws_image_spectrum_response(void *ptr)
 
     int padding = 4 - read_offset % 4;
 
+    size_t write_offset = 0;
     msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + read_offset + padding;
     char *image_payload = malloc(msg_len);
 
@@ -1484,7 +1485,7 @@ void *ws_image_spectrum_response(void *ptr)
         ws_offset += sizeof(uint32_t);
 
         // fill-in the content up to pixels/mask
-        size_t write_offset = sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len + sizeof(uint32_t) + mask_len;
+        write_offset = sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len + sizeof(uint32_t) + mask_len;
         memcpy((char *)image_payload + ws_offset, buf, write_offset);
         ws_offset += write_offset;
 
@@ -1545,6 +1546,51 @@ void *ws_image_spectrum_response(void *ptr)
 
     printf("[C] offset: %zu, read_offset: %zu\n", offset, read_offset);
     printf("[C] got here; #hist. elements: %u, padding: %d byte(s), orig. spectrum length: %u, compressed_size: %u\n", hist_len, padding, spectrum_len, compressed_size);
+
+    msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + 2 * sizeof(uint32_t) + compressed_size;
+    char *spectrum_payload = malloc(msg_len);
+
+    if (spectrum_payload != NULL)
+    {
+        float ts = resp->timestamp;
+        uint32_t id = resp->seq_id;
+        uint32_t msg_type = 3;
+        // 0 - spectrum, 1 - viewport,
+        // 2 - image, 3 - full, spectrum,  refresh,
+        // 4 - histogram
+
+        size_t ws_offset = 0;
+
+        memcpy((char *)spectrum_payload + ws_offset, &ts, sizeof(float));
+        ws_offset += sizeof(float);
+
+        memcpy((char *)spectrum_payload + ws_offset, &id, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        memcpy((char *)spectrum_payload + ws_offset, &msg_type, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        memcpy((char *)spectrum_payload + ws_offset, buf + write_offset, 2 * sizeof(uint32_t) + compressed_size);
+        ws_offset += 2 * sizeof(uint32_t) + compressed_size;
+
+        if (ws_offset != msg_len)
+            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+        // create a UDP message
+        struct websocket_message msg = {strdup(resp->session_id), spectrum_payload, msg_len};
+
+        // pass the message over to mongoose via a communications channel
+        ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+        if (sent != sizeof(struct websocket_message))
+        {
+            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+            // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+            free(msg.session_id);
+            free(spectrum_payload);
+        };
+    }
 
     // release the incoming buffer
 free_mem:
