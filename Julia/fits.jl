@@ -3063,7 +3063,12 @@ function getImageSpectrum(fits::FITSDataSet, req::Dict{String,Any})
 
     # add a padding to make sure the histogram is aligned
     # (a multiple of 4 in needed by JavaScript)
-    println("Julia histogram offset: $offset")
+    padding = 4 - mod(offset, 4)
+    println("Julia histogram offset: $offset, padding: $padding byte(s).")
+
+    if padding > 0
+        write(image_resp, zeros(UInt8, padding))
+    end
 
     # and the histogram
     println("typeof(bins):", typeof(bins))
