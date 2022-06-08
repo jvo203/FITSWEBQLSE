@@ -1484,6 +1484,16 @@ void *ws_image_spectrum_response(void *ptr)
         ws_offset += write_offset;
 
         // add an optional padding
+        if (padding > 0)
+        {
+            char extra[padding];
+
+            // fill-in the padding with zeroes
+            memset(extra, 0, padding);
+
+            memcpy((char *)image_payload + ws_offset, extra, padding);
+            ws_offset += padding;
+        }
 
         // and the histogram
 
