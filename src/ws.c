@@ -1412,11 +1412,34 @@ void *ws_image_spectrum_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    // TO-DO ...
-    // offset contains the number of valid bytes in <buf>
+    // <offset> contains the number of valid bytes in <buf>
+    if (offset < sizeof(uint32_t))
+        goto free_mem;
+
+    size_t read_offset = 0; // a 'read' cursor into <buf>
+
+    uint32_t flux_len = 0;
+    uint32_t pixels_len = 0;
+    uint32_t mask_len = 0;
+    uint32_t hist_len = 0;
+
+    memcpy(&flux_len, buf + read_offset, sizeof(uint32_t));
+
+    if (flux_len < 0)
+        goto free_mem;
+    else
+        read_offset += sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t);
+
+    if (offset < read_offset + sizeof(uint32_t))
+        goto free_mem;
+
+    memcpy(&pixels_len, buf + read_offset + sizeof(uint32_t), sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
+
+    printf("[C] got here.\n");
 
     // release the incoming buffer
-free_memory:
+free_mem:
     free(buf);
 
     // close the read end of the pipe
