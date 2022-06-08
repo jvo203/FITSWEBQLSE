@@ -1425,23 +1425,30 @@ void *ws_image_spectrum_response(void *ptr)
 
     memcpy(&flux_len, buf + read_offset, sizeof(uint32_t));
 
-    if (flux_len < 0)
-        goto free_mem;
-    else
-        read_offset += sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t);
+    read_offset += sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t);
 
     if (offset < read_offset + sizeof(uint32_t))
         goto free_mem;
 
+    // pixels
     memcpy(&pixels_len, buf + read_offset, sizeof(uint32_t));
-    read_offset += sizeof(uint32_t);
+    read_offset += sizeof(uint32_t) + pixels_len;
 
-    if (pixels_len < 0)
+    if (offset < read_offset + sizeof(uint32_t))
         goto free_mem;
-    else
-        read_offset += pixels_len;
 
-    printf("[C] got here.\n");
+    // mask
+    memcpy(&mask_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t) + mask_len;
+
+    if (offset < read_offset + sizeof(uint32_t))
+        goto free_mem;
+
+    // histogram
+    memcpy(&hist_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t) + hist_len * sizeof(int);
+
+    printf("[C] got here; #hist. elements: %du\n", hist_len);
 
     // release the incoming buffer
 free_mem:
