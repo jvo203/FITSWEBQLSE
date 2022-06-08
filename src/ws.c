@@ -1455,7 +1455,7 @@ void *ws_image_spectrum_response(void *ptr)
     int padding = 4 - read_offset % 4;
     printf("[C] got here; #hist. elements: %u, padding: %d byte(s)\n", hist_len, padding);
 
-    msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + read_offset + padding;
+    msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + read_offset + padding;
     char *image_payload = malloc(msg_len);
 
     if (image_payload != NULL)
@@ -1463,7 +1463,6 @@ void *ws_image_spectrum_response(void *ptr)
         float ts = resp->timestamp;
         uint32_t id = resp->seq_id;
         uint32_t msg_type = 2;
-        float elapsed = 0.0f;
         // 0 - spectrum, 1 - viewport,
         // 2 - image, 3 - full, spectrum,  refresh,
         // 4 - histogram
@@ -1478,9 +1477,6 @@ void *ws_image_spectrum_response(void *ptr)
 
         memcpy((char *)image_payload + ws_offset, &msg_type, sizeof(uint32_t));
         ws_offset += sizeof(uint32_t);
-
-        memcpy((char *)image_payload + ws_offset, &elapsed, sizeof(float));
-        ws_offset += sizeof(float);
 
         // fill-in the content up to pixels/mask
 
