@@ -1479,6 +1479,9 @@ void *ws_image_spectrum_response(void *ptr)
         ws_offset += sizeof(uint32_t);
 
         // fill-in the content up to pixels/mask
+        size_t write_offset = sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len;
+        memcpy((char *)image_payload + ws_offset, buf, write_offset);
+        ws_offset += write_offset;
 
         // add an optional padding
 
