@@ -1547,7 +1547,7 @@ void *ws_image_spectrum_response(void *ptr)
     printf("[C] offset: %zu, read_offset: %zu\n", offset, read_offset);
     printf("[C] got here; #hist. elements: %u, padding: %d byte(s), orig. spectrum length: %u, compressed_size: %u\n", hist_len, padding, spectrum_len, compressed_size);
 
-    msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + 2 * sizeof(uint32_t) + compressed_size;
+    msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t) + compressed_size;
     char *spectrum_payload = malloc(msg_len);
 
     if (spectrum_payload != NULL)
@@ -1570,8 +1570,12 @@ void *ws_image_spectrum_response(void *ptr)
         memcpy((char *)spectrum_payload + ws_offset, &msg_type, sizeof(uint32_t));
         ws_offset += sizeof(uint32_t);
 
-        memcpy((char *)spectrum_payload + ws_offset, buf + write_offset, 2 * sizeof(uint32_t) + compressed_size);
-        ws_offset += 2 * sizeof(uint32_t) + compressed_size;
+        memcpy((char *)spectrum_payload + ws_offset, &spectrum_len, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        write_offset += 2 * sizeof(uint32_t); // skip the first 2 ints; get to the compressed data
+        memcpy((char *)spectrum_payload + ws_offset, buf + write_offset, compressed_size);
+        ws_offset += compressed_size;
 
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
