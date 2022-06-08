@@ -1417,12 +1417,18 @@ void *ws_image_spectrum_response(void *ptr)
         goto free_mem;
 
     size_t read_offset = 0; // a 'read' cursor into <buf>
+
     size_t msg_len = 0;
 
+    // image + histogram
     uint32_t flux_len = 0;
     uint32_t pixels_len = 0;
     uint32_t mask_len = 0;
     uint32_t hist_len = 0;
+
+    // spectrum
+    uint32_t spectrum_len = 0;
+    uint32_t compressed_size = 0;
 
     memcpy(&flux_len, buf + read_offset, sizeof(uint32_t));
 
@@ -1453,7 +1459,6 @@ void *ws_image_spectrum_response(void *ptr)
         goto free_mem;
 
     int padding = 4 - read_offset % 4;
-    printf("[C] got here; #hist. elements: %u, padding: %d byte(s)\n", hist_len, padding);
 
     msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + read_offset + padding;
     char *image_payload = malloc(msg_len);
@@ -1498,6 +1503,7 @@ void *ws_image_spectrum_response(void *ptr)
         // and the histogram
         memcpy((char *)image_payload + ws_offset, buf + write_offset, sizeof(uint32_t) + hist_len * sizeof(int));
         ws_offset += sizeof(uint32_t) + hist_len * sizeof(int);
+        write_offset += sizeof(uint32_t) + hist_len * sizeof(int);
 
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
@@ -1522,6 +1528,23 @@ void *ws_image_spectrum_response(void *ptr)
         // all-or-nothing, skip the spectrum if the image message cannot not be created
         goto free_mem;
     }
+
+    // original spectrum length
+    memcpy(&spectrum_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
+
+    if (offset < read_offset)
+        goto free_mem;
+
+    // compressed spectrum
+    memcpy(&compressed_size, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t) + compressed_size;
+
+    if (offset < read_offset)
+        goto free_mem;
+
+    printf("[C] offset: %zu, read_offset: %zu\n", offset, read_offset);
+    printf("[C] got here; #hist. elements: %u, padding: %d byte(s), orig. spectrum length: %u, compressed_size: %u\n", hist_len, padding, spectrum_len, compressed_size);
 
     // release the incoming buffer
 free_mem:
