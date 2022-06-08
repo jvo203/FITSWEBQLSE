@@ -1413,8 +1413,10 @@ void *ws_image_spectrum_response(void *ptr)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
     // TO-DO ...
+    // offset contains the number of valid bytes in <buf>
 
     // release the incoming buffer
+free_memory:
     free(buf);
 
     // close the read end of the pipe
