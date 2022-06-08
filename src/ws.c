@@ -1433,8 +1433,13 @@ void *ws_image_spectrum_response(void *ptr)
     if (offset < read_offset + sizeof(uint32_t))
         goto free_mem;
 
-    memcpy(&pixels_len, buf + read_offset + sizeof(uint32_t), sizeof(uint32_t));
+    memcpy(&pixels_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t);
+
+    if (pixels_len < 0)
+        goto free_mem;
+    else
+        read_offset += pixels_len;
 
     printf("[C] got here.\n");
 
