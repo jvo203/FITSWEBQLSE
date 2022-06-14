@@ -6781,10 +6781,14 @@ contains
       ! image tone mapping
       type(image_tone_mapping) :: tone
 
-      ! video tone mapping
+      ! regenerate the video tone mapping global statistics
       real(c_float) :: dmin, dmax, dmedian
+      real(c_float) :: dmadP, dmadN
       real(c_float) :: sumP, sumN
       integer(c_int64_t) :: countP, countN
+      ! OpenMP thread-local variables
+      real(c_float) :: thread_sumP, thread_sumN
+      integer(c_int64_t) :: thread_countP, thread_countN
 
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
