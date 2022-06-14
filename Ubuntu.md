@@ -105,3 +105,7 @@
 # 18. Splatalogue 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
+# 19. TCMalloc
+    sudo apt install google-perftools
+
+
