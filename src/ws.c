@@ -1147,6 +1147,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->flux = NULL;
             req->len = 0;
 
+            req->dmin = session->dmin;
+            req->dmax = session->dmax;
+            req->dmedian = session->dmedian;
+            req->dmadN = session->dmadN;
+            req->dmadP = session->dmadP;
+
             req->width = session->image_width;
             req->height = session->image_height;
             req->downsize = session->bDownsize;
