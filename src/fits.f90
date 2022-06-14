@@ -6531,11 +6531,11 @@ contains
          tone%flux(i:i) = flux(i)
       end do
 
-      tone%dmin = item%dmin
-      tone%dmax = item%dmax
-      tone%dmedian = item%dmedian
-      tone%black = max(item%dmin, item%dmedian - u*item%dmadN)
-      tone%white = min(item%dmax, item%dmedian + u*item%dmadP)
+      tone%dmin = req%dmin
+      tone%dmax = req%dmax
+      tone%dmedian = req%dmedian
+      tone%black = max(req%dmin, req%dmedian - u*req%dmadN)
+      tone%white = min(req%dmax, req%dmedian + u*req%dmadP)
       tone%sensitivity = 1.0/(tone%white - tone%black)
       tone%slope = tone%sensitivity
 
