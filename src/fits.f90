@@ -6781,6 +6781,11 @@ contains
       ! image tone mapping
       type(image_tone_mapping) :: tone
 
+      ! video tone mapping
+      real(c_float) :: dmin, dmax, dmedian
+      real(c_float) :: sumP, sumN
+      integer(c_int64_t) :: countP, countN
+
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
       type(c_pthread_t) :: pid
