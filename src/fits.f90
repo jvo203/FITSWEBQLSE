@@ -66,6 +66,8 @@ module fits
       ! needed by tone mapping
       type(C_PTR) :: flux
       integer(kind=c_int) :: len
+      real(kind=c_float) dmin, dmax, dmedian
+      real(kind=c_float) dmadN, dmadP
 
       ! output
       integer(kind=c_int) :: width
