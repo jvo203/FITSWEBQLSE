@@ -441,11 +441,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             {
                 session->datasetid = strdup(datasetId);
                 session->flux = NULL;
-                session->dmin = 0.0f;
-                session->dmax = 0.0f;
-                session->dmedian = 0.0f;
-                session->dmadN = 0.0f;
-                session->dmadP = 0.0f;
+                session->dmin = NAN;
+                session->dmax = NAN;
+                session->dmedian = NAN;
+                session->dmadN = NAN;
+                session->dmadP = NAN;
                 session->image_width = 0;
                 session->image_height = 0;
                 session->bDownsize = false;
