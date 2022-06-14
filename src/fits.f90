@@ -6784,8 +6784,11 @@ contains
       ! regenerate the video tone mapping global statistics
       real(c_float) :: dmin, dmax, dmedian
       real(c_float) :: dmadP, dmadN
+
+      ! accumulators, counters
       real(c_float) :: sumP, sumN
       integer(c_int64_t) :: countP, countN
+
       ! OpenMP thread-local variables
       real(c_float) :: thread_sumP, thread_sumN
       integer(c_int64_t) :: thread_countP, thread_countN
