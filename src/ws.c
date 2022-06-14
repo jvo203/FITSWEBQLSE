@@ -1123,10 +1123,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 break;
             }
 
-            // check if the session video tone mapping has been filled
+            // check if the session video tone mapping has been filled already
+            // if not, fetch the global data statistics from FORTRAN
             if (isnanf(session->dmin) || isnanf(session->dmax) || isnanf(session->dmedian) || isnanf(session->dmadN) || isnanf(session->dmadP))
             {
-                // fetch the global data statistics from FORTRAN
             }
 
             struct video_request *req = (struct video_request *)malloc(sizeof(struct video_request));
