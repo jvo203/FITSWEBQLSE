@@ -2950,6 +2950,29 @@ contains
       return
    end function get_image_status
 
+   integer(c_int) function get_video_status(ptr) BIND(C, name='get_video_status')
+      type(C_PTR), intent(in), value :: ptr
+      type(dataset), pointer :: item
+
+      integer :: rc
+
+      call c_f_pointer(ptr, item)
+
+      ! lock the mutex
+      rc = c_pthread_mutex_lock(item%video_mtx)
+
+      if (item%video) then
+         get_video_status = 1
+      else
+         get_video_status = 0
+      end if
+
+      ! unlock the mutex
+      rc = c_pthread_mutex_unlock(item%video_mtx)
+
+      return
+   end function get_video_status
+
    integer(c_int) function get_header_status(ptr) bind(c)
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
@@ -6588,14 +6611,27 @@ contains
 
    end subroutine video_request_simd
 
-   subroutine fill_global_statistics(ptr) BIND(C, name='fill_global_statistics')
+   subroutine fill_global_statistics(ptr, dmin, dmax, dmedian, dmadN, dmadP) BIND(C, name='fill_global_statistics')
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(C_PTR), intent(in), value :: ptr
+      real(kind=c_float), intent(out) :: dmin, dmax, dmedian
+      real(kind=c_float), intent(out) :: dmadN, dmadP
+
       type(dataset), pointer :: item
 
+      if (get_video_status(ptr) .ne. 1) return
+
       call c_f_pointer(ptr, item)
+
+      dmin = item%dmin
+      dmax = item%dmax
+      dmedian = item%dmedian
+      dmadN = item%dmadN
+      dmadP = item%dmadP
+
+      return
    end subroutine fill_global_statistics
 
    subroutine get_video_frame(item, frame, tone, dst_pixels, dst_mask, dst_width, dst_height, downsize)
