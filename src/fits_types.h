@@ -54,6 +54,8 @@ struct video_request
     // needed by tone mapping
     char *flux;
     int len;
+    float dmin, dmax, dmedian;
+    float dmadN, dmadP;
 
     // output (the 'write' end of a Unix pipe)
     int width;
