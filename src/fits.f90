@@ -6588,6 +6588,16 @@ contains
 
    end subroutine video_request_simd
 
+   subroutine fill_global_statistics(ptr) BIND(C, name='fill_global_statistics')
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: ptr
+      type(dataset), pointer :: item
+
+      call c_f_pointer(ptr, item)
+   end subroutine fill_global_statistics
+
    subroutine get_video_frame(item, frame, tone, dst_pixels, dst_mask, dst_width, dst_height, downsize)
       use, intrinsic :: iso_c_binding
       implicit none
