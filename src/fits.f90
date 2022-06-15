@@ -6208,12 +6208,13 @@ contains
       call c_f_pointer(user, req)
       call c_f_pointer(req%ptr, item)
 
-      ! print *, 'viewport_request for ', item%datasetid,&
-      ! &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
-      !     &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
-      !    &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
-      !     &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
-      !    req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
+      print *, 'viewport_request for ', item%datasetid,&
+      &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
+      &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
+      &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
+      &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
+      req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd, &
+      &', median:', req%median
 
       if (req%fd .eq. -1) then
          nullify (item)
