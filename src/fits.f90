@@ -6970,6 +6970,16 @@ contains
          mask(:) = mask(:) .or. thread_mask(:, tid)
       end do
 
+      ! merge the local and cluster responses
+      sumP = thread_sumP + cluster_req%sumP
+      countP = thread_countP + cluster_req%countP
+
+      sumN = thread_sumN + cluster_req%sumN
+      countN = thread_countN + cluster_req%countN
+
+      if (countP .gt. 0) dmadP = sumP/countP
+      if (countN .gt. 0) dmadN = sumN/countN
+
       ! combine the spectra from other cluster nodes (if any)
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
 
