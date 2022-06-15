@@ -5003,8 +5003,8 @@ contains
       ! iterate through all the available planes
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
       !$omp& PRIVATE(frame)&
-      !$omp& REDUCTION(+:thread_sumP,countP)&
-      !$omp& REDUCTION(+:thread_sumN,countN)&
+      !$omp& REDUCTION(+:thread_sumP,thread_countP)&
+      !$omp& REDUCTION(+:thread_sumN,thread_countN)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
@@ -6962,8 +6962,8 @@ contains
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
       !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
-      !$omp& REDUCTION(+:thread_sumP,countP)&
-      !$omp& REDUCTION(+:thread_sumN,countN)&
+      !$omp& REDUCTION(+:thread_sumP,thread_countP)&
+      !$omp& REDUCTION(+:thread_sumN,thread_countN)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
