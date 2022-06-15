@@ -559,7 +559,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3, uniform float median)
+export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
 {
     uniform int cn, cm;
 
@@ -592,6 +592,8 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
     varying float partial_sumN = 0.0f ;
     varying unsigned int64 partial_countN = 0 ;
 
+    uniform bool do_stat = !isnan(median);
+
     for(uniform int j=cm_start; j<= cm_end; j++)
       for(uniform int i=cn_start; i <= cn_end; i++)
       { 
@@ -604,8 +606,6 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
         // block coordinate offset (the same for each point in the block)
         uniform int src_x = i * DIM;
         uniform int src_y = j * DIM;
-
-        uniform bool do_stat = !isnan(median);
 
         // TO-DO: fixed-point decompression (the moment of truth)      
         foreach(k=0 ... BLOCK_SIZE)
@@ -659,6 +659,14 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
     // the final reductions
     uniform float sum = reduce_add(partial_sum) ;
     uniform int64 count = reduce_add(partial_count) ;
+
+    if(do_stat)
+    {
+      sumP[0] += reduce_add(partial_sumP) ;
+      countP[0] += reduce_add(partial_countP) ;
+      sumN[0] += reduce_add(partial_sumN) ;
+      countN[0] += reduce_add(partial_countN) ;
+    }
 
     if(count > 0)
     {
