@@ -5805,6 +5805,10 @@ contains
       type(c_pthread_t) :: pid
       integer :: rc
 
+      ! OpenMP thread-local variables
+      real(c_float) :: thread_sumP, thread_sumN
+      integer(c_int64_t) :: thread_countP, thread_countN
+
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
       real(c_float) :: elapsed
@@ -5952,6 +5956,11 @@ contains
 
       ! end of cluster
 
+      thread_sumP = 0.0
+      thread_countP = 0
+      thread_sumN = 0.0
+      thread_countN = 0
+
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
       !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
       !$omp& NUM_THREADS(max_threads)
@@ -5981,7 +5990,8 @@ contains
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
                &width, height, item%frame_min(frame), item%frame_max(frame),&
                &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3, req%median)
+               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3, req%median,&
+               &thread_sumP, thread_countP, thread_sumN, thread_countN)
             end if
 
             if (req%beam .eq. circle) then
@@ -6205,6 +6215,10 @@ contains
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
       logical :: valid
 
+      ! OpenMP thread-local variables
+      real(c_float) :: thread_sumP, thread_sumN
+      integer(c_int64_t) :: thread_countP, thread_countN
+
       ! output variables
       real(kind=c_float), allocatable, target :: pixels(:)
       logical(kind=c_bool), allocatable, target :: mask(:)
@@ -6296,9 +6310,16 @@ contains
 
       valid = .false.
 
+      thread_sumP = 0.0
+      thread_countP = 0
+      thread_sumN = 0.0
+      thread_countN = 0
+
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
       !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
       !$omp& REDUCTION(.or.:valid)&
+      !$omp& REDUCTION(+:thread_sumP,thread_countP)&
+      !$omp& REDUCTION(+:thread_sumN,thread_countN)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
@@ -6329,7 +6350,8 @@ contains
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
                &width, height, item%frame_min(frame), item%frame_max(frame),&
                &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3, req%median)
+               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3, req%median,&
+               &thread_sumP, thread_countP, thread_sumN, thread_countN)
             end if
 
             if (req%beam .eq. circle) then
@@ -6364,6 +6386,8 @@ contains
 
             ! send mask
             written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+
+            ! TO-DO: send partial statistics
          end if
       end if
 
