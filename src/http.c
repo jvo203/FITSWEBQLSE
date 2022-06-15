@@ -4089,7 +4089,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
                 }
 
                 // are there pixels and a mask?
-                if (chunks[idx].size == spectrum_size + pixels_size + mask_size)
+                if (chunks[idx].size >= offset + pixels_size + mask_size)
                 {
                     size_t plane_size = req->dimx * req->dimy;
 
@@ -4105,6 +4105,15 @@ void *fetch_realtime_image_spectrum(void *ptr)
                         req->pixels[i] += pixels[i];
                         req->mask[i] |= mask[i];
                     }
+                }
+
+                // do we have statistics too ?
+                if (chunks[idx].size == offset + 2 * sizeof(float) + 2 * sizeof(int64_t))
+                {
+                    float sumP, sumN;
+                    int64_t countP, countN;
+
+                    printf("[C] /viewport/<statistics> OK.\n");
                 }
             }
         }
