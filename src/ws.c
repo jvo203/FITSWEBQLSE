@@ -519,6 +519,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->frame_start = 0.0;
             req->frame_end = 0.0;
             req->ref_freq = 0.0;
+            req->median = NAN;
             req->seq_id = 0;
             req->timestamp = 0.0;
             req->fd = -1;
