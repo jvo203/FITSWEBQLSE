@@ -1309,12 +1309,8 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
         else
         {
-            // first check for a NaN value
-            if (strcmp(median_str, "nan") == 0)
-                median = NAN;
-            else
-                // if not NaN parse the string
-                median = atof(median_str);
+            // check for a NaN value, if not NaN parse the string
+            median = strcmp(median_str, "nan") == 0 ? NAN : atof(median_str);
         }
 
         char *image_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "image");
