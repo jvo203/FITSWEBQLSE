@@ -713,6 +713,18 @@ module fits
          real(c_float), intent(in) :: elapsed
       end subroutine write_elapsed
 
+      ! void write_partial_statistics(int fd, const float *sumP, &
+      ! const int64_t *countP, const float *sumN, const int64_t *countN)
+      subroutine write_partial_statistics(fd, sumP, countP, sumN, countN)&
+         & BIND(C, name='write_partial_statistics')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         integer(c_int), value, intent(in) :: fd
+         real(c_float), intent(in) :: sumP, sumN
+         integer(c_int64_t), intent(in) :: countP, countN
+      end subroutine write_partial_statistics
+
       subroutine write_spectrum(fd, spectrum, n, prec) BIND(C, name='write_spectrum')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -6387,7 +6399,8 @@ contains
             ! send mask
             written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
 
-            ! TO-DO: send partial statistics
+            ! send partial statistics
+            call write_partial_statistics(req%fd, thread_sumP, thread_countP, thread_sumN, thread_countN)
          end if
       end if
 
