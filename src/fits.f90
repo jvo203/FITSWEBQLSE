@@ -494,9 +494,10 @@ module fits
 
       ! export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[],&
       ! uniform int width, uniform int height, uniform float pixels[], uniform unsigned int8 mask[], uniform int stride,&
-      ! uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+      ! uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3,&
+      ! uniform float median)
       real(c_float) function viewport_image_spectrum_rect(compressed, width, height, pmin, pmax, pixels, mask, &
-      & stride, x1, x2, y1, y2, average, cdelt3) BIND(C, name="viewport_image_spectrum_rect")
+      & stride, x1, x2, y1, y2, average, cdelt3, median) BIND(C, name="viewport_image_spectrum_rect")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -507,6 +508,7 @@ module fits
          integer(c_int), value, intent(in) :: stride
          integer(c_int), value, intent(in) :: x1, x2, y1, y2, average
          real(c_float), value, intent(in) :: cdelt3
+         real(c_float), value, intent(in) :: median
 
       end function viewport_image_spectrum_rect
 
@@ -5973,7 +5975,7 @@ contains
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
                &width, height, item%frame_min(frame), item%frame_max(frame),&
                &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3, req%median)
             end if
 
             if (req%beam .eq. circle) then
@@ -6321,7 +6323,7 @@ contains
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
                &width, height, item%frame_min(frame), item%frame_max(frame),&
                &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3, req%median)
             end if
 
             if (req%beam .eq. circle) then
@@ -6939,7 +6941,7 @@ contains
          spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
          &width, height, item%frame_min(frame), item%frame_max(frame),&
          &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-         &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, average, cdelt3)
+         &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, average, cdelt3, dmedian)
 
       end do
       !$omp END DO
