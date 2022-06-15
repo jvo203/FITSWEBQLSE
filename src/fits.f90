@@ -6931,8 +6931,15 @@ contains
 
       ! end of cluster
 
+      thread_sumP = 0.0
+      thread_countP = 0
+      thread_sumN = 0.0
+      thread_countN = 0
+
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
       !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
+      !$omp& REDUCTION(+:thread_sumP,countP)&
+      !$omp& REDUCTION(+:thread_sumN,countN)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
@@ -6947,7 +6954,8 @@ contains
          spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
          &width, height, item%frame_min(frame), item%frame_max(frame),&
          &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-         &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, average, cdelt3, dmedian)
+         &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, average, cdelt3,&
+         &dmedian, thread_sumP, thread_countP, thread_sumN, thread_countN)
 
       end do
       !$omp END DO
