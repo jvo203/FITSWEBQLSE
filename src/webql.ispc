@@ -559,7 +559,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3, uniform float median)
 {
     uniform int cn, cm;
 
@@ -598,6 +598,8 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
         // block coordinate offset (the same for each point in the block)
         uniform int src_x = i * DIM;
         uniform int src_y = j * DIM;
+
+        uniform bool do_statistics = isnan(median);
 
         // TO-DO: fixed-point decompression (the moment of truth)      
         foreach(k=0 ... BLOCK_SIZE)
