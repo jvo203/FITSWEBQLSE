@@ -1236,6 +1236,7 @@ static enum MHD_Result on_http_connection(void *cls,
     {
         int x1, y1, x2, y2;
         double frame_start, frame_end, ref_freq;
+        float median;
         bool image;
         enum zoom_shape beam;
         enum intensity_mode intensity;
@@ -1300,6 +1301,18 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
         else
             ref_freq = atof(ref_freq_str);
+
+        char *median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median");
+
+        if (median_str == NULL)
+            return http_bad_request(connection);
+        else
+        {
+            // first check for a NaN value
+
+            // if not NaN parse the string
+            median = atof(median_str);
+        }
 
         char *image_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "image");
 
