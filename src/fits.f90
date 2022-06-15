@@ -6977,6 +6977,8 @@ contains
       sumN = thread_sumN + cluster_req%sumN
       countN = thread_countN + cluster_req%countN
 
+      print *, "final statistics... sumP", sumP, ", countP", countP, ", sumN", sumN, ", countN", countN
+
       if (countP .gt. 0) dmadP = sumP/countP
       if (countN .gt. 0) dmadN = sumN/countN
 
@@ -7046,6 +7048,9 @@ contains
          else
             call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), ZFP_HIGH_PRECISION)
          end if
+
+         ! TO-DO: send the revised global statistics too
+         ! call write_statistics(req%fd, ...)
 
          call close_pipe(req%fd)
       end if
