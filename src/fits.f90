@@ -495,12 +495,14 @@ module fits
       ! export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[],&
       ! uniform int width, uniform int height, uniform float pixels[], uniform unsigned int8 mask[], uniform int stride,&
       ! uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3,&
-      ! uniform float median)
+      ! uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
       real(c_float) function viewport_image_spectrum_rect(compressed, width, height, pmin, pmax, pixels, mask, &
-      & stride, x1, x2, y1, y2, average, cdelt3, median) BIND(C, name="viewport_image_spectrum_rect")
+      & stride, x1, x2, y1, y2, average, cdelt3, median,&
+      &sumP, countP, sumN, countN) BIND(C, name="viewport_image_spectrum_rect")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
+         ! passed by value
          type(C_PTR), value, intent(in) :: compressed
          integer(c_int), value, intent(in) :: width, height
          real(c_float), value, intent(in) :: pmin, pmax
@@ -509,6 +511,10 @@ module fits
          integer(c_int), value, intent(in) :: x1, x2, y1, y2, average
          real(c_float), value, intent(in) :: cdelt3
          real(c_float), value, intent(in) :: median
+
+         ! passed by reference
+         real(c_float), intent(inout) :: sumP, sumN
+         integer(c_int64_t), intent(inout) :: countP, countN
 
       end function viewport_image_spectrum_rect
 
