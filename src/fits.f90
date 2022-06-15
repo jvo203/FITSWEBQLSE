@@ -5914,7 +5914,7 @@ contains
       cluster_req%frame_start = req%frame_start
       cluster_req%frame_end = req%frame_end
       cluster_req%ref_freq = req%ref_freq
-      cluster_req%median = 0.0
+      cluster_req%median = ieee_value(0.0, ieee_quiet_nan) ! unused
 
       ! outputs
       if (req%image) then
@@ -5929,10 +5929,10 @@ contains
       cluster_req%dimx = dimx
       cluster_req%dimy = dimy
       cluster_req%length = size(cluster_spectrum)
-      cluster_req%sumP = 0.0
-      cluster_req%sumN = 0.0
-      cluster_req%countP = 0
-      cluster_req%countN = 0
+      cluster_req%sumP = 0.0 ! unused
+      cluster_req%sumN = 0.0 ! unused
+      cluster_req%countP = 0 ! unused
+      cluster_req%countN = 0 ! unused
       cluster_req%valid = .false.
 
       ! launch a thread
