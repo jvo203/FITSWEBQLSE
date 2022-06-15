@@ -48,6 +48,7 @@ module fits
       integer(kind(circle)) :: beam
       integer(kind(medium)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq
+      real(c_float) :: median
       integer(c_int) :: seq_id
       real(c_float) :: timestamp
 
