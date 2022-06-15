@@ -6823,8 +6823,12 @@ contains
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
-      length = last - first + 1
+      dmin = minval(item%frame_min(first:last))
+      dmax = maxval(item%frame_max(first:last))
+      dmedian = &
+      &median(pack(item%frame_median(first:last),.not. isnan(item%frame_median(first:last)))) ! extract non-NaN values
 
+      length = last - first + 1
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
 
       if (req%intensity .eq. mean) then
