@@ -1125,7 +1125,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // check if the session video tone mapping has been filled already
             // if not, fetch the global data statistics from FORTRAN
-            if (isnanf(session->dmin) || isnanf(session->dmax) || isnanf(session->dmedian) || isnanf(session->dmadN) || isnanf(session->dmadP))
+            if (isnan(session->dmin) || isnan(session->dmax) || isnan(session->dmedian) || isnan(session->dmadN) || isnan(session->dmadP))
             {
                 printf("[C] calling 'fill_global_statistics(...)'\n");
                 fill_global_statistics(item, &(session->dmin), &(session->dmax), &(session->dmedian), &(session->dmadN), &(session->dmadP));
