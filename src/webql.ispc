@@ -599,7 +599,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
         uniform int src_x = i * DIM;
         uniform int src_y = j * DIM;
 
-        uniform bool do_statistics = isnan(median);
+        uniform bool do_stat = !isnan(median);
 
         // TO-DO: fixed-point decompression (the moment of truth)      
         foreach(k=0 ... BLOCK_SIZE)
@@ -633,6 +633,11 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
 
             view_pixels[offset] += tmp * cdelt3 ;            
             view_mask[offset] |= isnan ? false : true ;
+
+            cif(do_stat)
+            {
+              // TO-DO
+            }
           }      
         }
       }
