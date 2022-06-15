@@ -36,6 +36,7 @@ struct image_spectrum_request
     double frame_start;
     double frame_end;
     double ref_freq;
+    float median;
     int seq_id;
     float timestamp;
 

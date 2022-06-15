@@ -1392,6 +1392,7 @@ static enum MHD_Result on_http_connection(void *cls,
             req->frame_start = frame_start;
             req->frame_end = frame_end;
             req->ref_freq = ref_freq;
+            req->median = median;
             req->seq_id = 0;
             req->timestamp = 0.0;
 
