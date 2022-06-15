@@ -188,6 +188,7 @@ struct http_image_spectrum_request
     double frame_start;
     double frame_end;
     double ref_freq;
+    float median;
 
     // output
     float *restrict pixels;
@@ -197,6 +198,12 @@ struct http_image_spectrum_request
     int dimx;
     int dimy;
     int length;
+
+    float sumP;
+    float sumN;
+    int64_t countP;
+    int64_t countN;
+
     bool valid;
 };
 
