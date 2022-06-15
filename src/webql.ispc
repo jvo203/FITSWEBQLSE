@@ -586,6 +586,12 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
     varying float partial_sum = 0.0f ;
     varying unsigned int64 partial_count = 0 ;
 
+    varying float partial_sumP = 0.0f ;
+    varying unsigned int64 partial_countP = 0 ;
+
+    varying float partial_sumN = 0.0f ;
+    varying unsigned int64 partial_countN = 0 ;
+
     for(uniform int j=cm_start; j<= cm_end; j++)
       for(uniform int i=cn_start; i <= cn_end; i++)
       { 
@@ -636,12 +642,21 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
 
             cif(do_stat)
             {
-              // TO-DO
+              varying float deviation = abs(tmp - median); // absolute deviation from the median
+
+              // the '=' sign is to make sure datasets with all pixels being identical are handled too            
+              partial_sumP += (tmp >= median) ? deviation : 0.0f;
+              partial_sumN += (tmp <= median) ? deviation : 0.0f;
+
+              // increment the counters
+              partial_countP += (tmp >= median) ? 1 : 0;
+              partial_countN += (tmp <= median) ? 1 : 0;
             }
           }      
         }
       }
 
+    // the final reductions
     uniform float sum = reduce_add(partial_sum) ;
     uniform int64 count = reduce_add(partial_count) ;
 
@@ -813,7 +828,7 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
 
     }
 
-  // the final reduction
+  // the final reductions
   sumP[0] += reduce_add(partial_sumP) ;
   countP[0] += reduce_add(partial_countP) ;
   sumN[0] += reduce_add(partial_sumN) ;
