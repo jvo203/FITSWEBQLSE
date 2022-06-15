@@ -188,6 +188,7 @@ module fits
       integer(kind(circle)) :: beam
       integer(kind(medium)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq
+      real(c_float) :: median
 
       ! outputs
       type(c_ptr) :: pixels
@@ -196,6 +197,8 @@ module fits
       integer(c_int) :: dimx
       integer(c_int) :: dimy
       integer(c_int) :: length
+      real(c_float) :: sumP, sumN
+      integer(c_int64_t) :: countP, countN
       logical(kind=c_bool) :: valid
    end type image_spectrum_request_t
 
@@ -5911,6 +5914,7 @@ contains
       cluster_req%frame_start = req%frame_start
       cluster_req%frame_end = req%frame_end
       cluster_req%ref_freq = req%ref_freq
+      cluster_req%median = 0.0
 
       ! outputs
       if (req%image) then
@@ -5925,6 +5929,10 @@ contains
       cluster_req%dimx = dimx
       cluster_req%dimy = dimy
       cluster_req%length = size(cluster_spectrum)
+      cluster_req%sumP = 0.0
+      cluster_req%sumN = 0.0
+      cluster_req%countP = 0
+      cluster_req%countN = 0
       cluster_req%valid = .false.
 
       ! launch a thread
@@ -6884,6 +6892,7 @@ contains
       cluster_req%frame_start = req%frame_start
       cluster_req%frame_end = req%frame_end
       cluster_req%ref_freq = req%ref_freq
+      cluster_req%median = dmedian
 
       ! outputs
       if (req%image) then
@@ -6898,6 +6907,10 @@ contains
       cluster_req%dimx = dimx
       cluster_req%dimy = dimy
       cluster_req%length = size(cluster_spectrum)
+      cluster_req%sumP = 0.0
+      cluster_req%sumN = 0.0
+      cluster_req%countP = 0
+      cluster_req%countN = 0
       cluster_req%valid = .false.
 
       ! launch a thread
