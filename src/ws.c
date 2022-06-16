@@ -1566,7 +1566,7 @@ void *ws_image_spectrum_response(void *ptr)
         goto free_mem;
 
     printf("[C] offset: %zu, read_offset: %zu\n", offset, read_offset);
-    printf("[C] got here; #hist. elements: %u, padding: %d byte(s), orig. spectrum length: %u, compressed_size: %u\n", hist_len, padding, spectrum_len, compressed_size);
+    printf("[C] #hist. elements: %u, padding: %d byte(s), orig. spectrum length: %u, compressed_size: %u\n", hist_len, padding, spectrum_len, compressed_size);
 
     msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t) + compressed_size;
     char *spectrum_payload = malloc(msg_len);
@@ -1615,6 +1615,11 @@ void *ws_image_spectrum_response(void *ptr)
             free(msg.session_id);
             free(spectrum_payload);
         };
+    }
+
+    if (offset == read_offset + 5 * sizeof(float))
+    {
+        printf("[C] extra video tone mapping information detected.\n");
     }
 
     // release the incoming buffer
