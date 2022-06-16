@@ -145,6 +145,7 @@ void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
 void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, const float *sumN, const int64_t *countN);
+void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
 void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
@@ -3139,11 +3140,20 @@ void write_elapsed(int fd, const float *elapsed)
 
 void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, const float *sumN, const int64_t *countN)
 {
-    chunked_write(fd, (const char *)sumP, sizeof(float));     // sumP
-    chunked_write(fd, (const char *)countP, sizeof(int64_t)); // countP
+    chunked_write(fd, (const char *)sumP, sizeof(float));
+    chunked_write(fd, (const char *)countP, sizeof(int64_t));
 
-    chunked_write(fd, (const char *)sumN, sizeof(float));     // sumN
-    chunked_write(fd, (const char *)countN, sizeof(int64_t)); // countN
+    chunked_write(fd, (const char *)sumN, sizeof(float));
+    chunked_write(fd, (const char *)countN, sizeof(int64_t));
+}
+
+void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP)
+{
+    chunked_write(fd, (const char *)dmin, sizeof(float));
+    chunked_write(fd, (const char *)dmax, sizeof(float));
+    chunked_write(fd, (const char *)dmedian, sizeof(float));
+    chunked_write(fd, (const char *)dmadN, sizeof(float));
+    chunked_write(fd, (const char *)dmadP, sizeof(float));
 }
 
 void write_histogram(int fd, const int *hist, int n)
