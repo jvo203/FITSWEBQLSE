@@ -1148,11 +1148,17 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->flux = NULL;
             req->len = 0;
 
+            // lock the video mutex
+            pthread_mutex_lock(&session->vid_mtx);
+
             req->dmin = session->dmin;
             req->dmax = session->dmax;
             req->dmedian = session->dmedian;
             req->dmadN = session->dmadN;
             req->dmadP = session->dmadP;
+
+            // unlock the video mutex
+            pthread_mutex_unlock(&session->vid_mtx);
 
             req->width = session->image_width;
             req->height = session->image_height;
@@ -1631,6 +1637,14 @@ void *ws_image_spectrum_response(void *ptr)
 
         if (session == NULL)
             goto free_mem;
+
+        // lock the video mutex
+        pthread_mutex_lock(&session->vid_mtx);
+
+        // TO-DO: copy the statistics
+
+        // unlock the video mutex
+        pthread_mutex_unlock(&session->vid_mtx);
     }
 
     // release the incoming buffer
