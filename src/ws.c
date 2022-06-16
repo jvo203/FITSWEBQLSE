@@ -1641,7 +1641,21 @@ void *ws_image_spectrum_response(void *ptr)
         // lock the video mutex
         pthread_mutex_lock(&session->vid_mtx);
 
-        // TO-DO: copy the statistics
+        // copy the statistics
+        memcpy(&(session->dmin), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
+
+        memcpy(&(session->dmax), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
+
+        memcpy(&(session->dmedian), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
+
+        memcpy(&(session->dmadN), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
+
+        memcpy(&(session->dmadP), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
 
         // unlock the video mutex
         pthread_mutex_unlock(&session->vid_mtx);
