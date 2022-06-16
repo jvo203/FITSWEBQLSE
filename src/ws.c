@@ -1620,6 +1620,18 @@ void *ws_image_spectrum_response(void *ptr)
     if (offset == read_offset + 5 * sizeof(float))
     {
         printf("[C] extra video tone mapping information detected.\n");
+
+        struct websocket_session *session = NULL;
+
+        // get the session
+        if (pthread_mutex_lock(&sessions_mtx) == 0)
+        {
+            session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+            pthread_mutex_unlock(&sessions_mtx);
+        }
+
+        if (session == NULL)
+            goto free_mem;
     }
 
     // release the incoming buffer
@@ -1880,7 +1892,7 @@ void *video_response(void *ptr)
     if (session == NULL)
         goto free_mem;
 
-    // TO-DO - compress the planes with x265 and pass the response (payload) over to mongoose
+    // compress the planes with x265 and pass the response (payload) over to mongoose
     size_t plane_size = session->image_width * session->image_height;
     size_t expected = sizeof(float) + 2 * sizeof(uint8_t) * plane_size;
     float elapsed;
