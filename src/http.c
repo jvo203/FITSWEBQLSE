@@ -2293,6 +2293,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "var USER_SELFRQ = 0.0;"
               "var USER_DELTAV = 0.0;"
               "var ROOT_PATH = '/fitswebql/';"
+              "var idleSearch = -1;"
               "var idleResize = -1;"
               "window.onresize = resizeMe;"
               "window.onbeforeunload = function() {"
