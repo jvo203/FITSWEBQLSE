@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-17.2";
+	return "JS2022-06-17.3";
 }
 
 function uuidv4() {
@@ -12185,14 +12185,17 @@ function display_menu() {
 		m.onblur = display_molecules;
 		m.onmouseleave = display_molecules;
 		m.onkeyup = function (e) {
-			var event = e || window.event;
+			/*var event = e || window.event;
 			var charCode = event.which || event.keyCode;
 
 			if (charCode == '13') {
 				// Enter pressed
 				display_molecules();
 				return false;
-			}
+			}*/
+
+			clearTimeout(idleSearch);
+			idleSearch = setTimeout(display_molecules, 500);
 		}
 
 		var htmlStr;
