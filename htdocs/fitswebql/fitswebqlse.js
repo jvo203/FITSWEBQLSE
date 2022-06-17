@@ -10350,10 +10350,18 @@ function setup_image_selection() {
 	zoom.scaleTo(rect, zoom_scale);
 }
 
+function stripHTML(html) {
+	var div = document.createElement("div");
+	div.innerHTML = html;
+	var text = div.textContent || div.innerText || "";
+
+	return text;
+}
+
 function screen_molecule(molecule, search) {
 	// strip any HTML from the name and species (like <sup>, etc.)
-	var name = molecule.name.toLowerCase().trim();
-	var species = molecule.species.toLowerCase().trim();
+	var name = stripHTML(molecule.name.toLowerCase()).trim();
+	var species = stripHTML(molecule.species.toLowerCase()).trim();
 
 	if (search != '') {
 		if (name.indexOf(search) == -1 && species.indexOf(search) == -1)
@@ -10403,7 +10411,7 @@ function display_molecules() {
 	var band_hi = data_band_hi;//[Hz]
 
 	// get the search term (if any)
-	var searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+	var searchTerm = stripHTML(document.getElementById('searchInput').value.toLowerCase()).trim();
 
 	var checkbox = document.getElementById('restcheckbox');
 
