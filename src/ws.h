@@ -9,9 +9,11 @@
 struct websocket_session
 {
     char *datasetid;
+
     char *flux;
     float dmin, dmax, dmedian;
     float dmadN, dmadP;
+    pthread_mutex_t stat_mtx;
 
     int image_width;
     int image_height;

@@ -134,6 +134,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     session->picture = NULL;
                 }
 
+                pthread_mutex_destroy(&session->stat_mtx);
                 pthread_mutex_unlock(&session->vid_mtx);
                 pthread_mutex_destroy(&session->vid_mtx);
 
@@ -440,12 +441,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (session != NULL)
             {
                 session->datasetid = strdup(datasetId);
+
                 session->flux = NULL;
                 session->dmin = NAN;
                 session->dmax = NAN;
                 session->dmedian = NAN;
                 session->dmadN = NAN;
                 session->dmadP = NAN;
+                pthread_mutex_init(&session->stat_mtx, NULL);
+
                 session->image_width = 0;
                 session->image_height = 0;
                 session->bDownsize = false;
