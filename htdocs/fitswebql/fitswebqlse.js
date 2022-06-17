@@ -10350,7 +10350,16 @@ function setup_image_selection() {
 	zoom.scaleTo(rect, zoom_scale);
 }
 
-function screen_molecule(molecule) {
+function screen_molecule(molecule, search) {
+	// strip any HTML from the name and species (like <sup>, etc.)
+	var name = molecule.name.toLowerCase().trim();
+	var species = molecule.species.toLowerCase().trim();
+
+	if (search != '') {
+		if (name.indexOf(search) == -1 && species.indexOf(search) == -1)
+			return false;
+	}
+
 	var intensity = parseFloat(molecule.cdms_intensity);
 
 	if (intensity < displayIntensity)
@@ -10393,6 +10402,9 @@ function display_molecules() {
 	var band_lo = data_band_lo;//[Hz]
 	var band_hi = data_band_hi;//[Hz]
 
+	// get the search term (if any)
+	var searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+
 	var checkbox = document.getElementById('restcheckbox');
 
 	if (checkbox.checked) {
@@ -10420,7 +10432,7 @@ function display_molecules() {
 	for (var i = 0; i < molecules.length; i++) {
 		molecule = molecules[i];
 
-		if (!screen_molecule(molecule))
+		if (!screen_molecule(molecule, searchTerm))
 			continue;
 
 		var f = molecule.frequency * 1e9;
@@ -10453,7 +10465,7 @@ function display_molecules() {
 	for (var i = 0; i < molecules.length; i++) {
 		molecule = molecules[i];
 
-		if (!screen_molecule(molecule))
+		if (!screen_molecule(molecule, searchTerm))
 			continue;
 
 		var f = molecule.frequency * 1e9;
