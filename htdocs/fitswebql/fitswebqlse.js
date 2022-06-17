@@ -12180,7 +12180,6 @@ function display_menu() {
 		splatDropdown.append("li")
 			.html('<label>&nbsp;search for:&nbsp;<input class="form-control search" type="text" id="searchInput" value="" placeholder="water, H2O, CH3, etc." onmouseenter="javascript:this.focus();"></label>');
 
-
 		//add onblur
 		var m = document.getElementById('searchInput');
 		m.onblur = display_molecules;
