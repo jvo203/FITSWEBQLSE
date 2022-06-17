@@ -10351,6 +10351,9 @@ function setup_image_selection() {
 }
 
 function stripHTML(html) {
+	if (html.trim() == '')
+		return html;
+
 	var div = document.createElement("div");
 	div.innerHTML = html;
 	var text = div.textContent || div.innerText || "";
