@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-18.0";
+	return "JS2022-06-18.1";
 }
 
 function uuidv4() {
@@ -8453,7 +8453,7 @@ function zoom_molecules(freq) {
 
 		pos = Math.max(0, pos - 5);
 
-		m[pos].scrollIntoView({ block: "start", behavior: "smooth" });
+		m[pos].scrollIntoView({ block: "start", behavior: "smooth" }); // does not work correctly in Safari
 	};
 
 	var modal = document.getElementById('molecularlist');
