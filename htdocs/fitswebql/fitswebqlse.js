@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-17.5";
+	return "JS2022-06-18.0";
 }
 
 function uuidv4() {
@@ -10359,12 +10359,8 @@ function stripHTML(html) {
 }
 
 function screen_molecule(molecule, search) {
-	// strip any HTML from the name and species (like <sup>, etc.)
-	var name = stripHTML(molecule.name.toLowerCase()).trim();
-	var species = stripHTML(molecule.species.toLowerCase()).trim();
-
 	if (search != '') {
-		if (name.indexOf(search) == -1 && species.indexOf(search) == -1)
+		if (molecule.text.indexOf(search) == -1)
 			return false;
 	}
 
@@ -10400,7 +10396,22 @@ function screen_molecule(molecule, search) {
 	return true;
 }
 
-async function display_molecules() {
+function index_molecules() {
+	if (molecules.length <= 0)
+		return;
+
+	for (var i = 0; i < molecules.length; i++) {
+		var molecule = molecules[i];
+
+		// strip any HTML from the name and species (like <sup>, etc.)
+		let name = stripHTML(molecule.name.toLowerCase()).trim();
+		let species = stripHTML(molecule.species.toLowerCase()).trim();
+
+		molecule.text = name + " " + species;
+	}
+}
+
+function display_molecules() {
 	if (molecules.length <= 0)
 		return;
 
@@ -10592,6 +10603,7 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 				};
 			};
 
+			index_molecules();
 			console.log("#SPLATALOGUE molecules: ", molecules.length);
 
 			let fitsData = fitsContainer[va_count - 1];
