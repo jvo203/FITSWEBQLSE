@@ -1152,8 +1152,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->flux = NULL;
             req->len = 0;
 
-            // lock the video mutex
-            pthread_mutex_lock(&session->vid_mtx);
+            // lock the stat mutex
+            pthread_mutex_lock(&session->stat_mtx);
 
             req->dmin = session->dmin;
             req->dmax = session->dmax;
@@ -1161,8 +1161,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->dmadN = session->dmadN;
             req->dmadP = session->dmadP;
 
-            // unlock the video mutex
-            pthread_mutex_unlock(&session->vid_mtx);
+            // unlock the stat mutex
+            pthread_mutex_unlock(&session->stat_mtx);
 
             req->width = session->image_width;
             req->height = session->image_height;
@@ -1642,8 +1642,8 @@ void *ws_image_spectrum_response(void *ptr)
         if (session == NULL)
             goto free_mem;
 
-        // lock the video mutex
-        pthread_mutex_lock(&session->vid_mtx);
+        // lock the stat mutex
+        pthread_mutex_lock(&session->stat_mtx);
 
         // copy the statistics
         memcpy(&(session->dmin), buf + read_offset, sizeof(float));
@@ -1661,8 +1661,8 @@ void *ws_image_spectrum_response(void *ptr)
         memcpy(&(session->dmadP), buf + read_offset, sizeof(float));
         read_offset += sizeof(float);
 
-        // unlock the video mutex
-        pthread_mutex_unlock(&session->vid_mtx);
+        // unlock the stat mutex
+        pthread_mutex_unlock(&session->stat_mtx);
     }
 
     // release the incoming buffer
