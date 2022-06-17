@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-18.2";
+	return "JS2022-06-18.3";
 }
 
 function uuidv4() {
@@ -8427,8 +8427,8 @@ function zoom_molecules(freq) {
 	var pos = -1;
 	var minDist = 10 * freq;
 
-	var div_molecules = document.getElementById('molecularlist');
-	var scroller = zenscroll.createScroller(div_molecules);
+	var modal = document.getElementById('molecularlist');
+	var scroller = zenscroll.createScroller(modal);
 
 	var m = document.getElementsByClassName("molecularp");
 
@@ -8459,8 +8459,6 @@ function zoom_molecules(freq) {
 		//m[pos].scrollIntoView({ block: "start", behavior: "smooth" }); // does not work correctly in Safari
 		scroller.to(m[pos], 500); // 'center' or 'to'
 	};
-
-	var modal = document.getElementById('molecularlist');
 
 	if (m.length > 0 && displayMolecules)
 		modal.style.display = "block";
