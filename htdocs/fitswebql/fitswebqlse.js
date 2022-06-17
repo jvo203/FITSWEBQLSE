@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-17.3";
+	return "JS2022-06-17.4";
 }
 
 function uuidv4() {
@@ -12195,7 +12195,7 @@ function display_menu() {
 			}*/
 
 			clearTimeout(idleSearch);
-			idleSearch = setTimeout(display_molecules, 500);
+			idleSearch = setTimeout(display_molecules, 250);
 		}
 
 		var htmlStr;
