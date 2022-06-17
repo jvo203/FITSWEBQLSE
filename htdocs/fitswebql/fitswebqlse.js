@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-18.4";
+	return "JS2022-06-18.6";
 }
 
 function uuidv4() {
@@ -10448,19 +10448,21 @@ function display_molecules() {
 		.attr("id", "molecules")
 		.attr("opacity", 0.0);
 
-	//count the number of molecules
-	var num = 0;
+	// filter the molecules
+	var mol_list = [];
 	for (var i = 0; i < molecules.length; i++) {
-		molecule = molecules[i];
+		let molecule = molecules[i];
 
 		if (!screen_molecule(molecule, searchTerm))
 			continue;
 
-		var f = molecule.frequency * 1e9;
+		let f = molecule.frequency * 1e9;
 
 		if ((f >= band_lo) && (f <= band_hi))
-			num++;
+			mol_list.push(molecule);
 	};
+
+	var num = mol_list.length;
 
 	var fontStyle = Math.round(0.67 * emFontSize) + "px";// Helvetica";
 	var strokeStyle = "#FFCC00";
@@ -10483,16 +10485,9 @@ function display_molecules() {
 	var div_molecules = d3.select("#molecularlist");
 	div_molecules.selectAll("*").remove();
 
-	for (var i = 0; i < molecules.length; i++) {
-		molecule = molecules[i];
-
-		if (!screen_molecule(molecule, searchTerm))
-			continue;
-
-		var f = molecule.frequency * 1e9;
-
-		if ((f < band_lo) || (f > band_hi))
-			continue;
+	for (var i = 0; i < mol_list.length; i++) {
+		let molecule = mol_list[i];
+		let f = molecule.frequency * 1e9;
 
 		var x = range.xMin + dx * (f - band_lo) / (band_hi - band_lo);
 
