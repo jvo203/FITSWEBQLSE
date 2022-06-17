@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-17.1";
+	return "JS2022-06-17.2";
 }
 
 function uuidv4() {
@@ -10400,7 +10400,7 @@ function screen_molecule(molecule, search) {
 	return true;
 }
 
-function display_molecules() {
+async function display_molecules() {
 	if (molecules.length <= 0)
 		return;
 
@@ -12178,7 +12178,7 @@ function display_menu() {
 			.html('<label>intensity cutoff < <span id="intVal">' + displayIntensity.toFixed(1) + '</span> <input id="intensity" class="slider" type="range" min="-10" max="0" step="0.1" value="' + displayIntensity + '" onmousemove="javascript:change_intensity_threshold(false);" onchange="javascript:change_intensity_threshold(true);"/></label>');
 
 		splatDropdown.append("li")
-			.html('<label>&nbsp;search for:&nbsp;<input class="form-control search" type="text" id="searchInput" value="" placeholder="water, H2O, CH3, etc." onmouseenter="javascript:this.focus();"></label>');
+			.html('<label>&nbsp;search for:&nbsp;<input class="form-control search" type="text" id="searchInput" value="" placeholder="water, H2O, CH3, etc." onmouseenter="javascript:this.focus();"/></label>');
 
 		//add onblur
 		var m = document.getElementById('searchInput');
