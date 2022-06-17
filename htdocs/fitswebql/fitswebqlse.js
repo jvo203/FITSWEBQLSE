@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-08.0";
+	return "JS2022-06-17.0";
 }
 
 function uuidv4() {
@@ -12156,6 +12156,25 @@ function display_menu() {
 		splatDropdown.append("li")
 			.append("a")
 			.html('<label>intensity cutoff < <span id="intVal">' + displayIntensity.toFixed(1) + '</span> <input id="intensity" class="slider" type="range" min="-10" max="0" step="0.1" value="' + displayIntensity + '" onmousemove="javascript:change_intensity_threshold(false);" onchange="javascript:change_intensity_threshold(true);"/></label>');
+
+		splatDropdown.append("li")
+			.html('<label>&nbsp;search for:&nbsp;<input class="form-control search" type="text" id="searchInput" value="" placeholder="water, H2O, etc." onmouseenter="javascript:this.focus();"></label>');
+
+
+		//add onblur
+		var m = document.getElementById('searchInput');
+		m.onblur = display_molecules;
+		m.onmouseleave = display_molecules;
+		m.onkeyup = function (e) {
+			var event = e || window.event;
+			var charCode = event.which || event.keyCode;
+
+			if (charCode == '13') {
+				// Enter pressed
+				display_molecules();
+				return false;
+			}
+		}
 
 		var htmlStr;
 
