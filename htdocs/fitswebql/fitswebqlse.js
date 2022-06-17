@@ -8427,6 +8427,9 @@ function zoom_molecules(freq) {
 	var pos = -1;
 	var minDist = 10 * freq;
 
+	var div_molecules = document.getElementById('molecularlist');
+	var scroller = zenscroll.createScroller(div_molecules);
+
 	var m = document.getElementsByClassName("molecularp");
 
 	for (var i = 0; i < m.length; i++) {
@@ -8453,7 +8456,8 @@ function zoom_molecules(freq) {
 
 		pos = Math.max(0, pos - 5);
 
-		m[pos].scrollIntoView({ block: "start", behavior: "smooth" }); // does not work correctly in Safari
+		//m[pos].scrollIntoView({ block: "start", behavior: "smooth" }); // does not work correctly in Safari
+		scroller.to(m[pos], 500); // 'center' or 'to'
 	};
 
 	var modal = document.getElementById('molecularlist');
