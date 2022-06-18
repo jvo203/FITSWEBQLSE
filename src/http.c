@@ -2279,8 +2279,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append_printf(html, "<script>var WS_PORT = %" PRIu16 ";</script>\n", options.ws_port);
 
     // scrollIntoView with ZenScroll (the original one does not work in Safari)
-    // g_string_append(html, "<script src=\"zenscroll-min.js\"></script>\n");
-    g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/zenscroll-min.js\"></script>\n");
+    g_string_append(html, "<script "
+                          "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                          "fitswebql/zenscroll-min.js\"></script>\n");
 
     // the page entry point
     g_string_append(
