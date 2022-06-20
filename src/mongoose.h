@@ -63,12 +63,6 @@ extern "C" {
 #endif
 #endif  // !defined(MG_ARCH)
 
-#if defined(__GNUC__) && defined(__arm__)
-#define PRINTF_LIKE(f, a) __attribute__((format(printf, f, a)))
-#else
-#define PRINTF_LIKE(f, a)
-#endif
-
 #if MG_ARCH == MG_ARCH_CUSTOM
 #include <mongoose_custom.h>
 #endif
@@ -582,6 +576,10 @@ int sscanf(const char *, const char *, ...);
 #endif
 
 
+#ifndef MG_ENABLE_LOG
+#define MG_ENABLE_LOG 1
+#endif
+
 #ifndef MG_ENABLE_MIP
 #define MG_ENABLE_MIP 0
 #endif
@@ -649,8 +647,8 @@ int sscanf(const char *, const char *, ...);
 #endif
 
 // Maximum size of the recv IO buffer
-#ifndef MG_MAX_RECV_BUF_SIZE
-#define MG_MAX_RECV_BUF_SIZE (3 * 1024 * 1024)
+#ifndef MG_MAX_RECV_SIZE
+#define MG_MAX_RECV_SIZE (3 * 1024 * 1024)
 #endif
 
 #ifndef MG_MAX_HTTP_HEADERS
@@ -685,10 +683,6 @@ int sscanf(const char *, const char *, ...);
 #endif
 #endif
 
-#ifndef MG_PUTCHAR
-#define MG_PUTCHAR(x) putchar(x)
-#endif
-
 
 
 
@@ -721,32 +715,44 @@ bool mg_match(struct mg_str str, struct mg_str pattern, struct mg_str *caps);
 bool mg_globmatch(const char *pattern, size_t plen, const char *s, size_t n);
 bool mg_commalist(struct mg_str *s, struct mg_str *k, struct mg_str *v);
 bool mg_split(struct mg_str *s, struct mg_str *k, struct mg_str *v, char delim);
-size_t mg_vsnprintf(char *buf, size_t len, const char *fmt, va_list ap);
-size_t mg_snprintf(char *, size_t, const char *fmt, ...) PRINTF_LIKE(3, 4);
+size_t mg_vsnprintf(char *buf, size_t len, const char *fmt, va_list *ap);
+size_t mg_snprintf(char *, size_t, const char *fmt, ...);
 char *mg_hex(const void *buf, size_t len, char *dst);
 void mg_unhex(const char *buf, size_t len, unsigned char *to);
 unsigned long mg_unhexn(const char *s, size_t len);
-size_t mg_asprintf(char **, size_t, const char *fmt, ...) PRINTF_LIKE(3, 4);
+size_t mg_asprintf(char **, size_t, const char *fmt, ...);
 size_t mg_vasprintf(char **buf, size_t size, const char *fmt, va_list ap);
+char *mg_mprintf(const char *fmt, ...);
+char *mg_vmprintf(const char *fmt, va_list ap);
 int mg_check_ip_acl(struct mg_str acl, uint32_t remote_ip);
 int64_t mg_to64(struct mg_str str);
 uint64_t mg_tou64(struct mg_str str);
 size_t mg_lld(char *buf, int64_t val, bool is_signed, bool is_hex);
+double mg_atod(const char *buf, int len, int *numlen);
+size_t mg_dtoa(char *buf, size_t len, double d, int width);
 
 
 
 
 
 enum { MG_LL_NONE, MG_LL_ERROR, MG_LL_INFO, MG_LL_DEBUG, MG_LL_VERBOSE };
-void mg_log(const char *fmt, ...) PRINTF_LIKE(1, 2);
+void mg_log(const char *fmt, ...);
 bool mg_log_prefix(int ll, const char *file, int line, const char *fname);
 void mg_log_set(const char *spec);
 void mg_hexdump(const void *buf, size_t len);
+void mg_log_set_fn(void (*logfunc)(unsigned char ch));
 
+#if MG_ENABLE_LOG
 #define MG_LOG(level, args)                                                \
   do {                                                                     \
     if (mg_log_prefix((level), __FILE__, __LINE__, __func__)) mg_log args; \
   } while (0)
+#else
+#define MG_LOG(level, args) \
+  do {                      \
+    if (0) mg_log args;     \
+  } while (0)
+#endif
 
 #define MG_ERROR(args) MG_LOG(MG_LL_ERROR, args)
 #define MG_INFO(args) MG_LOG(MG_LL_INFO, args)
@@ -1000,6 +1006,7 @@ struct mg_connection {
   unsigned is_hexdumping : 1;  // Hexdump in/out traffic
   unsigned is_draining : 1;    // Send remaining data, then close and free
   unsigned is_closing : 1;     // Close and free the connection immediately
+  unsigned is_full : 1;        // Stop reads, until cleared
   unsigned is_readable : 1;    // Connection is ready to read
   unsigned is_writable : 1;    // Connection is ready to write
 };
@@ -1084,6 +1091,7 @@ void mg_http_serve_file(struct mg_connection *, struct mg_http_message *hm,
 void mg_http_reply(struct mg_connection *, int status_code, const char *headers,
                    const char *body_fmt, ...);
 struct mg_str *mg_http_get_header(struct mg_http_message *, const char *name);
+struct mg_str mg_http_var(struct mg_str buf, struct mg_str name);
 int mg_http_get_var(const struct mg_str *, const char *name, char *, size_t);
 int mg_url_decode(const char *s, size_t n, char *to, size_t to_len, int form);
 size_t mg_url_encode(const char *s, size_t n, char *buf, size_t len);
@@ -1177,6 +1185,8 @@ void mg_ws_upgrade(struct mg_connection *, struct mg_http_message *,
                    const char *fmt, ...);
 size_t mg_ws_send(struct mg_connection *, const char *buf, size_t len, int op);
 size_t mg_ws_wrap(struct mg_connection *, size_t len, int op);
+size_t mg_ws_printf(struct mg_connection *c, int op, const char *fmt, ...);
+size_t mg_ws_vprintf(struct mg_connection *c, int op, const char *fmt, va_list);
 
 
 
@@ -1289,6 +1299,23 @@ size_t mg_dns_parse_rr(const uint8_t *buf, size_t len, size_t ofs,
 
 
 
+#ifndef MG_JSON_MAX_DEPTH
+#define MG_JSON_MAX_DEPTH 30
+#endif
+
+// Error return values - negative. Successful returns are >= 0
+enum { MG_JSON_TOO_DEEP = -1, MG_JSON_INVALID = -2, MG_JSON_NOT_FOUND = -3 };
+int mg_json_get(const char *buf, int len, const char *path, int *toklen);
+
+bool mg_json_get_num(struct mg_str json, const char *path, double *v);
+bool mg_json_get_bool(struct mg_str json, const char *path, bool *v);
+char *mg_json_get_str(struct mg_str json, const char *path);
+char *mg_json_get_hex(struct mg_str json, const char *path);
+
+
+
+
+
 struct mip_driver {
   void *data;                                       // Driver-specific data
   void (*init)(void *data);                         // Initialise driver
@@ -1305,6 +1332,8 @@ struct mip_ipcfg {
 };
 
 void mip_init(struct mg_mgr *, struct mip_ipcfg *, struct mip_driver *);
+
+extern struct mip_driver mip_driver_stm32;
 
 #ifdef __cplusplus
 }
