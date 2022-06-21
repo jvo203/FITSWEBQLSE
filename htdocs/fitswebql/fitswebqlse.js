@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-21.0";
+	return "JS2022-06-21.1";
 }
 
 function uuidv4() {
@@ -10559,7 +10559,7 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 	var xmlhttp = new XMLHttpRequest();
 
 	//freq_start, freq_end [Hz]
-	var url = 'get_molecules?datasetId=' + encodeURIComponent(datasetId) + '&freq_start=' + freq_start + '&freq_end=' + freq_end + '&' + encodeURIComponent(get_js_version());
+	var url = 'get_splatalogue?datasetId=' + encodeURIComponent(datasetId) + '&freq_start=' + freq_start + '&freq_end=' + freq_end + '&' + encodeURIComponent(get_js_version());
 
 	xmlhttp.onreadystatechange = function () {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 502) {
