@@ -2843,7 +2843,7 @@ contains
 
       ! obtain file size
       inquire (FILE=filename, SIZE=item%filesize)
-      print *, 'filename:', filename, 'filesize:', item%filesize
+      print *, 'filename: ', filename, ', filesize:', item%filesize
 
       j = 0
 100   continue
