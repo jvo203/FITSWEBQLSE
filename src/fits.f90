@@ -2594,25 +2594,6 @@ contains
          strFlux(i:i) = flux(i)
       end do
 
-      ! get the number of cache levels
-      cache_levels = count_cache_levels(dir, dir_len)
-      print *, "cache levels:", cache_levels
-
-      allocate (character(dir_len + 1 + datasetid_len)::cache)
-
-      ! the cache directory
-      do i = 1, int(dir_len, kind=4)
-         cache(i:i) = dir(i)
-      end do
-
-      ! append a slash
-      cache(dir_len + 1:dir_len + 1) = '/'
-
-      ! and append the datasetid
-      do i = 1, int(datasetid_len, kind=4)
-         cache(dir_len + 1 + i:dir_len + 1 + i) = datasetid(i)
-      end do
-
       allocate (item)
 
       ! init mutexes
@@ -2638,29 +2619,46 @@ contains
 
       cache_idx = 1
 
+      ! get the number of cache levels
+      cache_levels = count_cache_levels(dir, dir_len)
+      print *, "cache levels:", cache_levels
+
+      allocate (character(dir_len + 1 + datasetid_len)::cache)
+
       do while (cache_idx .lt. dir_len)
          ! try each successive cache
          cache_len = 0
+
          do i = 1, int(dir_len, kind=4)
+            if (cache_idx .gt. dir_len) exit
+
             if (dir(cache_idx) .eq. ':') then
                cache_idx = cache_idx + 1
                exit
             end if
 
             cache(i:i) = dir(cache_idx)
-
             cache_len = cache_len + 1
             cache_idx = cache_idx + 1
          end do
+
+         print *, 'cache directory: ', cache(1:cache_len)
 
          ! append a slash
          cache_len = cache_len + 1
          cache(cache_len:cache_len) = '/'
 
-         print *, 'trying cache: ', cache(1:cache_len)
+         ! and append the datasetid
+         do i = 1, int(datasetid_len, kind=4)
+            cache(cache_len + i:cache_len + i) = datasetid(i)
+         end do
+
+         cache_len = cache_len + datasetid_len
+
+         print *, 'trying to open a cache file: ', cache(1:cache_len)
 
          ! try each cache directory
-         call load_dataset(item, cache, root, bSuccess)
+         call load_dataset(item, cache(1:cache_len), root, bSuccess)
 
          if (bSuccess) exit
       end do
@@ -2673,7 +2671,7 @@ contains
             call update_progress(item, 1)
          else
             ! if it's a 3D cube restore the channel information too
-            call load_cube(item, cache, root, bSuccess)
+            call load_cube(item, cache(1:cache_len), root, bSuccess)
          end if
       end if
 
