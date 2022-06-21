@@ -2568,7 +2568,7 @@ contains
 
       ! handle hierarchical cache
       character(len=:), allocatable :: cache
-      integer :: cache_idx, cache_levels
+      integer :: cache_idx, cache_levels, cache_len
 
       integer :: i, rc
       logical :: bSuccess
@@ -2636,8 +2636,34 @@ contains
       ! start the timer
       call system_clock(count=start, count_rate=crate, count_max=cmax)
 
-      ! first try a cache file
-      call load_dataset(item, cache, root, bSuccess)
+      cache_idx = 1
+
+      do while (cache_idx .lt. dir_len)
+         ! try each successive cache
+         cache_len = 0
+         do i = 1, int(dir_len, kind=4)
+            if (dir(cache_idx) .eq. ':') then
+               cache_idx = cache_idx + 1
+               exit
+            end if
+
+            cache(i:i) = dir(cache_idx)
+
+            cache_len = cache_len + 1
+            cache_idx = cache_idx + 1
+         end do
+
+         ! append a slash
+         cache_len = cache_len + 1
+         cache(cache_len:cache_len) = '/'
+
+         print *, 'trying cache: ', cache(1:cache_len)
+
+         ! try each cache directory
+         call load_dataset(item, cache, root, bSuccess)
+
+         if (bSuccess) exit
+      end do
 
       ! if the cache file cannot be found / read, use the underlying FITS file
       if (.not. bSuccess) then
