@@ -1054,64 +1054,6 @@ contains
       deallocate (item)
    end subroutine delete_dataset
 
-   subroutine serialise_fixed_array(compressed, frame, cache)
-      implicit none
-
-      type(fixed_block), dimension(:, :), intent(in) :: compressed
-      integer, intent(in) :: frame
-      character(len=*), intent(in) :: cache
-
-      character(len=1024) :: file
-      logical :: file_exists
-
-      integer :: fileunit, ios, status
-      character(256) :: iomsg
-
-      ! first check if the "cache" directory exists
-      ! create a cache directory using the <datasetid> folder name
-      status = mkcache(cache//c_null_char)
-
-      if (status .ne. 0) then
-         print *, "could not create a cache directory ", cache, ", re-trying"
-         status = mkcache(cache//c_null_char)
-
-         if (status .ne. 0) then
-            print *, "could not create a cache directory ", cache, ", aborting 'serialise_fixed_array'"
-            return
-         end if
-      end if
-
-      file = cache//'/'//trim(str(frame))//'.bin'
-      INQUIRE (FILE=trim(file), EXIST=file_exists)
-
-      if (.not. file_exists) then
-         open (newunit=fileunit, file=trim(file), status='replace', access='stream',&
-         &form='unformatted', IOSTAT=ios, IOMSG=iomsg)
-
-         if (ios .ne. 0) then
-            print *, "error creating a file ", file, ' : ', trim(iomsg)
-         else
-            ! dump the compressed data
-            write (unit=fileunit, IOSTAT=ios, IOMSG=iomsg) compressed(:, :)
-
-            ! delete the file upon a write error
-            if (ios .ne. 0) then
-               print *, "error serialising channel", frame, 'to a binary file ', trim(file), ' : ', trim(iomsg)
-
-               ! delete the file
-               close (fileunit, status='delete')
-            else
-               ! close the file
-               close (fileunit)
-            end if
-
-            ! print *, "serialised channel", frame, 'to a binary file ', trim(file)
-         end if
-
-      end if
-
-   end subroutine serialise_fixed_array
-
    subroutine save_dataset(item, cache)
       implicit none
 
