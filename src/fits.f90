@@ -2528,6 +2528,25 @@ contains
 
    end subroutine get_channel_range
 
+   function count_cache_levels(dir, dir_len) result(entries)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      integer(kind=c_size_t), intent(in), value :: dir_len
+      character(kind=c_char), dimension(dir_len), intent(in) :: dir
+
+      integer :: i, entries
+
+      ! by default there is at least one cache entry
+      entries = 1
+
+      ! count the number of ':' characters
+      do i = 1, int(dir_len, kind=4)
+         if (dir(i) .eq. ':') entries = entries + 1
+      end do
+
+   end function count_cache_levels
+
    subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, root, dir, dir_len) bind(C)
       use, intrinsic :: iso_c_binding
       implicit none
@@ -2551,7 +2570,7 @@ contains
 
       ! handle hierarchical cache
       character(len=:), allocatable :: cache_arr(:)
-      integer :: cache_idx
+      integer :: cache_idx, cache_levels
 
       integer :: i, rc
       logical :: bSuccess
@@ -2576,6 +2595,10 @@ contains
       do i = 1, int(flux_len, kind=4)
          strFlux(i:i) = flux(i)
       end do
+
+      ! get the number of cache levels
+      cache_levels = count_cache_levels(dir, dir_len)
+      print *, "cache levels:", cache_levels
 
       allocate (character(dir_len + 1 + datasetid_len)::cache)
 
