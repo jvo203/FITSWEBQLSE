@@ -2549,6 +2549,10 @@ contains
 
       character(len=:), allocatable :: cache
 
+      ! handle hierarchical cache
+      character(len=:), allocatable :: cache_arr(:)
+      integer :: cache_idx
+
       integer :: i, rc
       logical :: bSuccess
 
