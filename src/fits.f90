@@ -984,7 +984,7 @@ contains
             &form='unformatted', IOSTAT=ios, IOMSG=iomsg)
 
             if (ios .ne. 0) then
-               print *, "error creating an index file ", file, ' : ', trim(iomsg)
+               print *, "error creating an index file ", trim(file), ' : ', trim(iomsg)
 
                ! upon error
                bSuccess = .false.
@@ -999,7 +999,7 @@ contains
             data_unit = wropen(trim(file)//c_null_char)
 
             if (data_unit .lt. 0) then
-               print *, "error creating a data file ", file
+               print *, "error creating a data file ", trim(file)
 
                ! upon error
                bSuccess = .false.
