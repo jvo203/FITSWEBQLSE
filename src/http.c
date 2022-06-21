@@ -946,7 +946,7 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_not_found(connection);
     }
 
-    if (strstr(url, "/get_molecules") != NULL)
+    if (strstr(url, "/get_splatalogue") != NULL)
     {
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
         char *freqStartStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "freq_start");
@@ -997,7 +997,7 @@ static enum MHD_Result on_http_connection(void *cls,
             get_frequency_range(item, freq_start_ptr, freq_end_ptr);
         }
 
-        printf("[C] get_molecules: datasetId(%s); freq_start: %gGHz, freq_end: %gGHz\n", datasetId, freq_start, freq_end);
+        printf("[C] get_splatalogue: datasetId(%s); freq_start: %gGHz, freq_end: %gGHz\n", datasetId, freq_start, freq_end);
 
         if (freq_start > 0.0 && freq_end > 0.0)
         {
