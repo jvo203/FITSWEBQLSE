@@ -208,6 +208,7 @@ module fits
       character(len=:), allocatable :: uri
       ! the id will be made by hashing the dataset uri
       integer :: unit = -1! a FITS file handle
+      integer(kind=8) :: filesize = -1
 
       ! FITS header values
       character(kind=c_char), dimension(:), allocatable :: hdr
@@ -2839,6 +2840,10 @@ contains
       if (status .ne. 0) then
          return
       end if
+
+      ! obtain file size
+      inquire (FILE=filename, SIZE=item%filesize)
+      print *, 'filename:', filename, 'filesize:', item%filesize
 
       j = 0
 100   continue
