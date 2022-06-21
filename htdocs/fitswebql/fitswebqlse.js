@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-20.1";
+	return "JS2022-06-21.0";
 }
 
 function uuidv4() {
@@ -8457,7 +8457,7 @@ function zoom_molecules(freq) {
 		pos = Math.max(0, pos - 5);
 
 		//m[pos].scrollIntoView({ block: "start", behavior: "smooth" }); // does not work correctly in Safari
-		scroller.to(m[pos], 250); // 'center' or 'to'
+		scroller.to(m[pos], 0); // 'center' or 'to'
 	};
 
 	if (m.length > 0 && displayMolecules)
