@@ -2566,10 +2566,8 @@ contains
       character(len=filepath_len) :: strFilename
       character(len=flux_len) :: strFlux
 
-      character(len=:), allocatable :: cache
-
       ! handle hierarchical cache
-      character(len=:), allocatable :: cache_arr(:)
+      character(len=:), allocatable :: cache
       integer :: cache_idx, cache_levels
 
       integer :: i, rc
