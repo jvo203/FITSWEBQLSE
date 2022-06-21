@@ -2568,7 +2568,7 @@ contains
 
       ! handle hierarchical cache
       character(len=:), allocatable :: cache
-      integer :: cache_idx, cache_levels, cache_len
+      integer :: cache_idx, cache_len
 
       integer :: i, rc
       logical :: bSuccess
@@ -2619,10 +2619,6 @@ contains
 
       cache_idx = 1
 
-      ! get the number of cache levels
-      cache_levels = count_cache_levels(dir, dir_len)
-      print *, "cache levels:", cache_levels
-
       allocate (character(dir_len + 1 + datasetid_len)::cache)
 
       do while (cache_idx .lt. dir_len)
@@ -2655,7 +2651,7 @@ contains
 
          cache_len = cache_len + datasetid_len
 
-         print *, 'trying to open a cache file: ', cache(1:cache_len)
+         print *, 'trying a cache file: ', cache(1:cache_len)
 
          ! try each cache directory
          call load_dataset(item, cache(1:cache_len), root, bSuccess)
