@@ -953,6 +953,9 @@ contains
 
             print *, 'cache directory: ', cache(1:cache_len)
 
+            INQUIRE (FILE=cache(1:cache_len), EXIST=file_exists)
+            if (.not. file_exists) continue
+
             ! append a slash
             cache_len = cache_len + 1
             cache(cache_len:cache_len) = '/'
@@ -1021,7 +1024,7 @@ contains
       ! deallocate compressed memory regions
       if (allocated(item%compressed)) then
 
-         file = cache//'/index'
+         file = cache(1:cache_len)//'/index'
          INQUIRE (FILE=trim(file), EXIST=file_exists)
 
          if (.not. file_exists) then
@@ -1036,7 +1039,7 @@ contains
             end if
          end if
 
-         file = cache//'/data'
+         file = cache(1:cache_len)//'/data'
          INQUIRE (FILE=trim(file), EXIST=file_exists)
 
          if (.not. file_exists) then
@@ -1094,7 +1097,7 @@ contains
       if (data_unit .ge. 0) call closefd(data_unit)
       if (.not. bSuccess) call remove(trim(file)//c_null_char)
 
-      if (bSuccess) call save_dataset(item, cache)
+      if (bSuccess) call save_dataset(item, cache(1:cache_len))
 
       deallocate (item)
    end subroutine delete_dataset
