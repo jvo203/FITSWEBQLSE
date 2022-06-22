@@ -955,6 +955,11 @@ contains
 
             INQUIRE (FILE=cache(1:cache_len), EXIST=file_exists)
 
+            if (.not. file_exists) then
+               print *, cache(1:cache_len), " does not exist, will try another cache"
+               cycle
+            end if
+
             ! append a slash
             cache_len = cache_len + 1
             cache(cache_len:cache_len) = '/'
