@@ -914,7 +914,7 @@ contains
 
       ! handle hierarchical cache
       character(len=:), allocatable :: cache
-      integer :: cache_idx, cache_len
+      integer :: cache_idx, cache_len, num_cache_entries
 
       character(len=1024) :: file
       logical :: file_exists, bSuccess
@@ -930,57 +930,63 @@ contains
 
       allocate (character(len + 1 + size(item%datasetid))::cache)
 
-      cache_idx = 1
-      do while (cache_idx .lt. len)
-         ! try each successive cache
-         cache_len = 0
+      num_cache_entries = count_cache_levels(dir, len)
 
-         do i = 1, int(len, kind=4)
-            if (cache_idx .gt. len) exit
+      if (num_cache_entries .gt. 1) then
+         cache_idx = 1
+         do while (cache_idx .lt. len)
+            ! try each successive cache
+            cache_len = 0
 
-            if (dir(cache_idx) .eq. ':') then
+            do i = 1, int(len, kind=4)
+               if (cache_idx .gt. len) exit
+
+               if (dir(cache_idx) .eq. ':') then
+                  cache_idx = cache_idx + 1
+                  exit
+               end if
+
+               cache(i:i) = dir(cache_idx)
+               cache_len = cache_len + 1
                cache_idx = cache_idx + 1
-               exit
-            end if
+            end do
 
-            cache(i:i) = dir(cache_idx)
+            print *, 'cache directory: ', cache(1:cache_len)
+
+            ! append a slash
             cache_len = cache_len + 1
-            cache_idx = cache_idx + 1
+            cache(cache_len:cache_len) = '/'
+
+            ! and append the datasetid
+            do i = 1, size(item%datasetid)
+               cache(cache_len + i:cache_len + i) = item%datasetid(i)
+            end do
+
+            cache_len = cache_len + size(item%datasetid)
+
+            print *, 'trying a cache file: ', cache(1:cache_len)
+         end do
+      else
+         ! the cache directory
+         do i = 1, int(len, kind=4)
+            cache(i:i) = dir(i)
          end do
 
-         print *, 'cache directory: ', cache(1:cache_len)
-
          ! append a slash
-         cache_len = cache_len + 1
-         cache(cache_len:cache_len) = '/'
+         cache(len + 1:len + 1) = '/'
 
          ! and append the datasetid
          do i = 1, size(item%datasetid)
-            cache(cache_len + i:cache_len + i) = item%datasetid(i)
+            cache(len + 1 + i:len + 1 + i) = item%datasetid(i)
          end do
 
-         cache_len = cache_len + size(item%datasetid)
-
-         print *, 'trying a cache file: ', cache(1:cache_len)
-      end do
-
-      ! the cache directory
-      do i = 1, int(len, kind=4)
-         cache(i:i) = dir(i)
-      end do
-
-      ! append a slash
-      cache(len + 1:len + 1) = '/'
-
-      ! and append the datasetid
-      do i = 1, size(item%datasetid)
-         cache(len + 1 + i:len + 1 + i) = item%datasetid(i)
-      end do
+         cache_len = len + 1 + size(item%datasetid)
+      end if
 
       ! only make a cache for datasets with valid data/image, no errors
       if (get_image_status(ptr) .eq. 1) then
          ! create a cache directory using the <datasetid> folder name
-         status = mkcache(cache//c_null_char)
+         status = mkcache(cache(1:cache_len)//c_null_char)
 
          if (status .eq. 0) then
             bSuccess = .true.
@@ -988,8 +994,10 @@ contains
             bSuccess = .false.
          end if
       else
+         ! WARNING: there is no need to remove the cache directory in the current code
+
          ! remove the (non-empty) cache directory
-         call rmcache(cache//c_null_char)
+         call rmcache(cache(1:cache_len)//c_null_char)
 
          ! error
          bSuccess = .false.
