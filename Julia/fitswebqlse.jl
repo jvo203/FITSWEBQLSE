@@ -619,7 +619,7 @@ function streamMolecules(http::HTTP.Stream)
         end
     end
 
-    println("get_molecules::$datasetid; [$freq_start, $freq_end] [GHz]")
+    println("get_splatalogue::$datasetid; [$freq_start, $freq_end] [GHz]")
 
     # fetch the molecules from Splatalogue
     strSQL = "SELECT * FROM lines WHERE frequency>=$freq_start AND frequency<=$freq_end;"
@@ -1625,7 +1625,7 @@ HTTP.@register(
 HTTP.@register(
     FITSWEBQL_ROUTER,
     "GET",
-    "/*/get_molecules/",
+    "/*/get_splatalogue/",
     HTTP.StreamHandlerFunction(streamMolecules)
 )
 HTTP.@register(
