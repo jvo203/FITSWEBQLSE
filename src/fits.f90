@@ -19,6 +19,9 @@ module fits
    real, parameter :: GOLDEN_RATIO = (1 + sqrt(5.0))/2
    integer, parameter :: MAX_CHANNEL_BLOCK = 4 ! 32 ! 16 ! 64 ! 128
 
+   ! files over this threshold will be put into the fast cache preferentially
+   integer(kind=8), parameter :: CACHE_THRESHOLD = 25*(1024**3) ! [GiB]
+
    type(c_pthread_mutex_t), save :: logger_mtx
    type(c_pthread_mutex_t), save :: file_unit_mtx
 
@@ -934,8 +937,9 @@ contains
 
       if (num_cache_entries .gt. 1) then
          cache_idx = 1
+
+         ! try each successive cache
          do while (cache_idx .lt. len)
-            ! try each successive cache
             cache_len = 0
 
             do i = 1, int(len, kind=4)
@@ -973,6 +977,10 @@ contains
 
             print *, 'trying a cache file: ', cache(1:cache_len)
 
+            ! large files go to the first available priority (fastest) cache
+            if (item%filesize .ge. CACHE_THRESHOLD) exit
+
+            ! all the rest goes here
             if (file_exists) exit
          end do
       else
