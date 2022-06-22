@@ -1173,6 +1173,10 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
+      ! item%filesize
+      write (unit=fileunit, IOSTAT=ios) item%filesize
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%hdr
       if (allocated(item%hdr)) then
          write (unit=fileunit, IOSTAT=ios) size(item%hdr)
@@ -1556,6 +1560,10 @@ contains
          read (unit=fileunit, IOSTAT=ios) item%uri
          if (ios .ne. 0) go to 300
       end if
+
+      ! item%filesize
+      read (unit=fileunit, IOSTAT=ios) item%filesize
+      if (ios .ne. 0) go to 300
 
       ! item%hdr
       read (unit=fileunit, IOSTAT=ios) N
