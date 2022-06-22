@@ -912,7 +912,10 @@ contains
       integer(kind=c_size_t), intent(in), value :: len
       character(kind=c_char), dimension(len), intent(in) :: dir
 
+      ! handle hierarchical cache
       character(len=:), allocatable :: cache
+      integer :: cache_idx, cache_len
+
       character(len=1024) :: file
       logical :: file_exists, bSuccess
 
@@ -926,6 +929,40 @@ contains
       call c_f_pointer(ptr, item)
 
       allocate (character(len + 1 + size(item%datasetid))::cache)
+
+      cache_idx = 1
+      do while (cache_idx .lt. len)
+         ! try each successive cache
+         cache_len = 0
+
+         do i = 1, int(len, kind=4)
+            if (cache_idx .gt. len) exit
+
+            if (dir(cache_idx) .eq. ':') then
+               cache_idx = cache_idx + 1
+               exit
+            end if
+
+            cache(i:i) = dir(cache_idx)
+            cache_len = cache_len + 1
+            cache_idx = cache_idx + 1
+         end do
+
+         print *, 'cache directory: ', cache(1:cache_len)
+
+         ! append a slash
+         cache_len = cache_len + 1
+         cache(cache_len:cache_len) = '/'
+
+         ! and append the datasetid
+         do i = 1, size(item%datasetid)
+            cache(cache_len + i:cache_len + i) = item%datasetid(i)
+         end do
+
+         cache_len = cache_len + size(item%datasetid)
+
+         print *, 'trying a cache file: ', cache(1:cache_len)
+      end do
 
       ! the cache directory
       do i = 1, int(len, kind=4)
@@ -2617,10 +2654,9 @@ contains
       ! start the timer
       call system_clock(count=start, count_rate=crate, count_max=cmax)
 
-      cache_idx = 1
-
       allocate (character(dir_len + 1 + datasetid_len)::cache)
 
+      cache_idx = 1
       do while (cache_idx .lt. dir_len)
          ! try each successive cache
          cache_len = 0
