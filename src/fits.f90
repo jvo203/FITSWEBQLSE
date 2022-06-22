@@ -954,7 +954,11 @@ contains
             print *, 'cache directory: ', cache(1:cache_len)
 
             INQUIRE (FILE=cache(1:cache_len), EXIST=file_exists)
-            if (.not. file_exists) continue
+
+            if (.not. file_exists) then
+               print *, cache(1:cache_len), " does not exist, will try another cache"
+               cycle
+            end if
 
             ! append a slash
             cache_len = cache_len + 1
@@ -968,6 +972,8 @@ contains
             cache_len = cache_len + size(item%datasetid)
 
             print *, 'trying a cache file: ', cache(1:cache_len)
+
+            if (file_exists) exit
          end do
       else
          ! the cache directory
