@@ -978,7 +978,11 @@ contains
             print *, 'trying a cache file: ', cache(1:cache_len)
 
             ! large files go to the first available priority (fastest) cache
-            if (item%filesize .ge. CACHE_THRESHOLD) exit
+            if (item%filesize .ge. CACHE_THRESHOLD) then
+               exit
+            else
+               cycle
+            end if
 
             ! all the rest goes here
             if (file_exists) exit
