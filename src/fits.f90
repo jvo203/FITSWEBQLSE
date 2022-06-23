@@ -917,7 +917,7 @@ contains
 
         call c_f_pointer(ptr, item)
 
-        dataset_timeout = 1
+        dataset_timeout = 0
     end function dataset_timeout
 
     subroutine delete_dataset(ptr, dir, len) BIND(C, name='delete_dataset')
