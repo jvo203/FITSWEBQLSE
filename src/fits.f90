@@ -998,6 +998,19 @@ contains
                 cache(i:i) = dir(i)
             end do
 
+            cache_len = len
+
+            INQUIRE (FILE=cache(1:cache_len), EXIST=file_exists)
+
+            if (.not. file_exists) then
+                print *, cache(1:cache_len), " does not exist, will try to create it"
+                status = mkcache(cache(1:cache_len)//c_null_char)
+
+                if (status .ne. 0) then
+                    print *, "could not create ", cache(1:cache_len), ", writing to cache will fail"
+                end if
+            end if
+
             ! append a slash
             cache(len + 1:len + 1) = '/'
 
@@ -1006,7 +1019,7 @@ contains
                 cache(len + 1 + i:len + 1 + i) = item%datasetid(i)
             end do
 
-            cache_len = len + 1 + size(item%datasetid)
+            cache_len = cache_len + 1 + size(item%datasetid)
         end if
 
         ! only make a cache for datasets with valid data/image, no errors
