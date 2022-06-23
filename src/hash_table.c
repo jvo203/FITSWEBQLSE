@@ -44,7 +44,7 @@ void garbage_collect()
     }
 }
 
-void garbage_collect_hash_data(gpointer key, gpointer value, gpointer userdata)
+void garbage_collect_hash_data(gpointer id, gpointer item, gpointer userdata)
 {
     (void)userdata; // ignore user data
 }
