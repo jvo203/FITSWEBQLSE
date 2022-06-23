@@ -614,6 +614,8 @@ static void *garbage_collection_daemon(void *ptr)
         sleep(1);
     }
 
+    printf("garbage collection thread terminated.\n");
+
     return NULL;
 }
 
