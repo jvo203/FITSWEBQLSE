@@ -23,6 +23,7 @@ int write_frame(int fd, void *src, size_t frame_size);
 
 // Fortran callbacks
 extern void delete_dataset(void *ptr, char *dir, int len);
+extern int dataset_timeout(void *ptr, int timeout);
 extern void get_channel_range_C(void *ptr, int progress, int *startindex, int *endindex, int *status);
 extern void update_progress_C(void *ptr, int progress);
 extern void calculate_global_statistics_C(void *ptr, float dmedian, float *sumP, int64_t *countP, float *sumN, int64_t *countN, int first, int last);

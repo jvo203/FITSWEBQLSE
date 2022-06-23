@@ -47,6 +47,12 @@ void garbage_collect()
 void garbage_collect_hash_data(gpointer id, gpointer item, gpointer userdata)
 {
     (void)userdata; // ignore user data
+
+    // check if a dataset has exceeded the timeout
+    if (dataset_timeout(item, options.timeout))
+    {
+        printf("[C] marking %s for garbage collection.\n", id);
+    }
 }
 
 void free_hash_data(gpointer item)
