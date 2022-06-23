@@ -906,6 +906,20 @@ contains
         str = adjustl(str)
     end function str
 
+    ! int dataset_timeout(void *ptr, int timeout);
+    integer(kind=c_int) function dataset_timeout(ptr, timeout) BIND(C, name='dataset_timeout')
+        implicit none
+
+        type(C_PTR), intent(in), value :: ptr
+        type(dataset), pointer :: item
+
+        integer(kind=c_int), intent(in), value :: timeout
+
+        call c_f_pointer(ptr, item)
+
+        dataset_timeout = 1
+    end function dataset_timeout
+
     subroutine delete_dataset(ptr, dir, len) BIND(C, name='delete_dataset')
         implicit none
 
