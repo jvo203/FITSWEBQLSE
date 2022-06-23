@@ -39,9 +39,14 @@ void garbage_collect()
 {
     if (pthread_mutex_lock(&datasets_mtx) == 0)
     {
-        // foreach dataset
+        g_hash_table_foreach(datasets, garbage_collect_hash_data, NULL);
         pthread_mutex_unlock(&datasets_mtx);
     }
+}
+
+void garbage_collect_hash_data(gpointer key, gpointer value, gpointer userdata)
+{
+    (void)userdata; // ignore user data
 }
 
 void free_hash_data(gpointer item)
