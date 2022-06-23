@@ -35,6 +35,15 @@ void delete_hash_table()
     pthread_mutex_destroy(&datasets_mtx);
 }
 
+void garbage_collect()
+{
+    if (pthread_mutex_lock(&datasets_mtx) == 0)
+    {
+        // foreach dataset
+        pthread_mutex_unlock(&datasets_mtx);
+    }
+}
+
 void free_hash_data(gpointer item)
 {
     // call Fortran to delete the dataset

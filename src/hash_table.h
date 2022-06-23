@@ -6,6 +6,7 @@
 
 void init_hash_table();
 void delete_hash_table();
+void garbage_collect();
 void free_hash_data(gpointer item);
 void insert_dataset(const char *datasetid, int len, void *item);
 bool insert_if_not_exists(const char *datasetid, void *item);

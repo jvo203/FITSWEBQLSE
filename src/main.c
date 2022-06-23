@@ -611,6 +611,7 @@ static void *garbage_collection_daemon(void *ptr)
 
     while (s_received_signal == 0)
     {
+        garbage_collect();
         sleep(1);
     }
 
