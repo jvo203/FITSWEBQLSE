@@ -60,8 +60,10 @@ extern GMutex cluster_mtx;
 static zactor_t *speaker = NULL;
 static zactor_t *listener = NULL;
 static pthread_t zmq_t;
+static pthread_t garbage_collection_t;
 
 static void *autodiscovery_daemon(void *);
+static void *garbage_collection_daemon(void *);
 extern void init_fortran_logging(char *log_file, size_t len);
 extern void init_fortran();
 extern void cleanup_fortran();
@@ -312,6 +314,14 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    res = pthread_create(&garbage_collection_t, NULL, garbage_collection_daemon, NULL);
+
+    if (res)
+    {
+        printf("error %d\n", res);
+        exit(EXIT_FAILURE);
+    }
+
     printf("Browser URL: http://localhost:%" PRIu16 "\n", options.http_port);
     printf("*** To quit FITSWEBQLSE press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
 
@@ -355,6 +365,8 @@ int main(int argc, char *argv[])
 
         zactor_destroy(&listener);
     }
+
+    pthread_join(garbage_collection_t, NULL);
 
     delete_cluster();
 
@@ -589,6 +601,18 @@ static void *autodiscovery_daemon(void *ptr)
     }
 
     free(my_hostname);
+
+    return NULL;
+}
+
+static void *garbage_collection_daemon(void *ptr)
+{
+    (void)ptr;
+
+    while (s_received_signal == 0)
+    {
+        sleep(1);
+    }
 
     return NULL;
 }
