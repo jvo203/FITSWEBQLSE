@@ -2567,6 +2567,25 @@ contains
       rc = c_pthread_mutex_unlock(item%progress_mtx)
    end function get_elapsed
 
+   subroutine update_timestamp(ptr) bind(c)
+      type(C_PTR), intent(in), value :: ptr
+      type(dataset), pointer :: item
+
+      integer :: rc
+
+      call c_f_pointer(ptr, item)
+
+      ! lock the mutex
+      rc = c_pthread_mutex_lock(item%timestamp_mtx)
+
+      ! start the timeout timer
+      call system_clock(item%timestamp)
+
+      ! unlock the mutex
+      rc = c_pthread_mutex_unlock(item%timestamp_mtx)
+
+   end subroutine update_timestamp
+
    ! void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
    subroutine submit_channel_range(ptr, idx, N, frame_min, frame_max, frame_median,&
    &mean_spectrum, integrated_spectrum) BIND(C, name='submit_channel_range')
