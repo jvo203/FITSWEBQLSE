@@ -917,6 +917,11 @@ contains
       integer rc
       real elapsed
 
+      ! by default there is no timeout
+      dataset_timeout = 0
+
+      if (.not. c_associated(ptr)) return
+
       ! remove datasets with errors
       if (get_error_status(ptr) .eq. 1) then
          dataset_timeout = 1
@@ -928,9 +933,6 @@ contains
          dataset_timeout = 0
          return
       end if
-
-      ! by default there is no timeout
-      dataset_timeout = 0
 
       call c_f_pointer(ptr, item)
 
@@ -972,6 +974,8 @@ contains
       integer(kind=c_int) :: data_unit
       integer(kind=c_size_t) :: array_size
       character(256) :: iomsg
+
+      if (.not. c_associated(ptr)) return
 
       ! files over this threshold will be put into the fast cache preferentially
       cache_threshold = threshold*(1024**3)! [GiB]
@@ -2410,6 +2414,11 @@ contains
 
       integer :: rc
 
+      if (.not. c_associated(ptr)) then
+         get_error_status = 1
+         return
+      end if
+
       call c_f_pointer(ptr, item)
 
       ! lock the mutex
@@ -2432,6 +2441,11 @@ contains
       type(dataset), pointer :: item
 
       integer :: rc
+
+      if (.not. c_associated(ptr)) then
+         get_ok_status = 0
+         return
+      end if
 
       call c_f_pointer(ptr, item)
 
@@ -2456,6 +2470,11 @@ contains
 
       integer :: rc
 
+      if (.not. c_associated(ptr)) then
+         get_image_status = 0
+         return
+      end if
+
       call c_f_pointer(ptr, item)
 
       ! lock the mutex
@@ -2479,6 +2498,11 @@ contains
 
       integer :: rc
 
+      if (.not. c_associated(ptr)) then
+         get_video_status = 0
+         return
+      end if
+
       call c_f_pointer(ptr, item)
 
       ! lock the mutex
@@ -2501,6 +2525,11 @@ contains
       type(dataset), pointer :: item
 
       integer rc
+
+      if (.not. c_associated(ptr)) then
+         get_header_status = 0
+         return
+      end if
 
       call c_f_pointer(ptr, item)
 
@@ -2600,6 +2629,8 @@ contains
 
       if (idx .lt. 1) return
 
+      if (.not. c_associated(ptr)) return
+
       call c_f_pointer(ptr, item)
 
       ! no need for a mutex as no other thread will be accessing this array range (unless a dataset is being deleted ...)
@@ -2618,6 +2649,8 @@ contains
 
       type(dataset), pointer :: item
 
+      if (.not. c_associated(ptr)) return
+
       call c_f_pointer(ptr, item)
 
       if (progress .gt. 0) call update_progress(item, progress)
@@ -2631,6 +2664,8 @@ contains
       integer(c_int), intent(in), value :: progress
 
       type(dataset), pointer :: item
+
+      if (.not. c_associated(ptr)) return
 
       call c_f_pointer(ptr, item)
 
@@ -3893,6 +3928,8 @@ contains
       integer(kind=c_int), intent(out) :: first, last
       type(dataset), pointer :: item
 
+      if (.not. c_associated(ptr)) return
+
       call c_f_pointer(ptr, item)
 
       call get_spectrum_range(item, frame_start, frame_end, ref_freq, first, last)
@@ -3934,6 +3971,8 @@ contains
       ! the speed of light [m/s]
       real(kind=8), parameter :: c = 299792458.0
       real(kind=8) :: f1, f2, v1, v2
+
+      if (.not. c_associated(ptr)) return
 
       call c_f_pointer(ptr, item)
 
@@ -4529,6 +4568,8 @@ contains
 
       type(dataset), pointer :: item
 
+      if (.not. c_associated(ptr)) return
+
       call c_f_pointer(ptr, item)
 
       call calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last)
@@ -4762,6 +4803,8 @@ contains
       type(c_pthread_t) :: pid
       integer :: rc
 
+      if (.not. c_associated(ptr)) return
+
       call c_f_pointer(ptr, item)
 
       fits_width = item%naxes(1)
@@ -4825,6 +4868,8 @@ contains
 
       ! timing
       real :: t1, t2
+
+      if (.not. c_associated(ptr)) return
 
       call c_f_pointer(ptr, item)
 
@@ -4989,6 +5034,8 @@ contains
       real :: scale, s1, s2
       integer(kind=c_size_t) :: written
 
+      if (.not. c_associated(ptr)) return
+
       call c_f_pointer(ptr, item)
 
       if (.not. allocated(item%pixels)) return
@@ -5072,7 +5119,10 @@ contains
 
       bSuccess = .true.
 
+      if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
 
       if (.not. allocated(item%compressed)) then
@@ -5389,7 +5439,10 @@ contains
       ! start the timer
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
+      if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
 
       print *, 'realtime_image_spectrum for ', item%datasetid,&
@@ -5800,7 +5853,10 @@ contains
       integer :: dimx, dimy
       integer(kind=c_size_t) :: written
 
+      if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
 
       print *, 'viewport_request for ', item%datasetid,&
@@ -5991,6 +6047,8 @@ contains
 
       integer :: rc
 
+      if (.not. c_associated(arg)) return
+
       call c_f_pointer(arg, item)
 
       print *, 'calculating "all-data" global statistics'
@@ -6054,8 +6112,13 @@ contains
       integer(kind=c_size_t) :: written
       character(kind=c_char), pointer :: flux(:)
 
+      if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
+
+      if (.not. c_associated(req%flux)) return
       call c_f_pointer(req%flux, flux, [req%len])
 
       if (.not. allocated(item%compressed)) goto 6000
@@ -6129,8 +6192,13 @@ contains
       ! start the timer
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
+      if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
+
+      if (.not. c_associated(req%flux)) return
       call c_f_pointer(req%flux, flux, [req%len])
 
       print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', req%frame, 'fd:', req%fd
@@ -6414,7 +6482,10 @@ contains
       type(c_pthread_t) :: pid
       integer :: rc
 
+      if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
 
       print *, 'ws_image_spectrum for ', item%datasetid,&
