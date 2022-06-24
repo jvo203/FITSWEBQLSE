@@ -59,7 +59,7 @@ void free_hash_data(gpointer item)
 {
     // call Fortran to delete the dataset
     if (item != NULL)
-        delete_dataset(item, options.cache, strlen(options.cache));
+        delete_dataset(item, options.cache, strlen(options.cache), options.threshold);
 }
 
 int rdopen(const char *file)

@@ -215,10 +215,10 @@ int main(int argc, char *argv[])
     options.http_port = 8080;
     options.ws_port = options.http_port + 1;
     options.local = true;
-    options.timeout = 15;
+    options.timeout = 15; // [s]
     options.fits_home = strdup(".cache");
     options.cache = strdup(".cache");
-    options.threshold = 25;
+    options.threshold = 25; // [GiB]
     options.logs = strdup("LOGS");
     options.home_dir = strdup(passwdEnt->pw_dir);
 
