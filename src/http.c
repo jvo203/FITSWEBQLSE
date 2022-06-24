@@ -4325,8 +4325,11 @@ void *http_update_timestamp(void *arg)
         pthread_exit(NULL);
 
     char *id = (char *)arg;
+    size_t idlen = strlen(id);
 
-    // turn id into a datasetid
+    // html-encode the datasetid
+    char datasetid[2 * idlen];
+    size_t len = html_encode(id, idlen, datasetid, sizeof(datasetid) - 1);
 
     free(arg);
 
