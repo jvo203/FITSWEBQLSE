@@ -63,13 +63,16 @@ void garbage_collect_hash_data(gpointer id, gpointer item, gpointer userdata)
         {
             rc = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-            // strdup((char *)id), launch a 'delete' pthread in a detached state
-            char *key = strdup((char *)id);
+            if (rc == 0)
+            {
+                // strdup((char *)id), launch a 'delete' pthread in a detached state
+                char *key = strdup((char *)id);
 
-            rc = pthread_create(&tid, &attr, delete_hash_data, key);
+                rc = pthread_create(&tid, &attr, delete_hash_data, key);
 
-            if (rc != 0)
-                free(key);
+                if (rc != 0)
+                    free(key);
+            }
 
             pthread_attr_destroy(&attr);
         }
@@ -83,7 +86,17 @@ void *delete_hash_data(void *arg)
 
     gpointer id = (gpointer)arg;
 
-    // get the value from the hash table
+    // lock the hash table
+
+    // get the item from the hash table
+
+    // re-confirm the timeout
+
+    // remove the item from the hash table
+
+    // unlock the hash table
+
+    // destruct the item
 
     // gpointer item = (gpointer)arg;
     // delete_dataset(item, options.cache, strlen(options.cache), options.threshold);
