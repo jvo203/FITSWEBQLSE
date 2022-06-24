@@ -257,6 +257,7 @@ module fits
 
       ! progress
       integer(8) :: start_time, crate, cmax
+      integer(8) :: timestamp = -1
       integer :: cursor = 1
       integer :: CHANNEL_BLOCK = 1
       integer :: progress = 0
@@ -1807,6 +1808,7 @@ contains
 
       ! start the timer
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
+      call system_clock(item%timestamp)
 
       ! reset the progress
       if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
@@ -3245,6 +3247,7 @@ contains
 
       ! start the timer
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
+      call system_clock(item%timestamp)
 
       ! reset the progress
       if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
