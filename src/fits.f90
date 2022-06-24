@@ -2573,6 +2573,8 @@ contains
 
       integer :: rc
 
+      if (.not. c_associated(ptr)) return
+
       call c_f_pointer(ptr, item)
 
       ! lock the mutex
