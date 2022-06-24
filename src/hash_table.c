@@ -86,17 +86,38 @@ void *delete_hash_data(void *arg)
 
     gpointer id = (gpointer)arg;
 
+    void *item;
+    gboolean steal = false;
+    gpointer stolen_key = NULL;
+    gpointer stolen_value = NULL;
+    int timeout = 0;
+
     // lock the hash table
+    if (pthread_mutex_lock(&datasets_mtx) == 0)
+    {
+        // get the item from the hash table
+        item = g_hash_table_lookup(datasets, (gconstpointer)id);
 
-    // get the item from the hash table
+        if (item != NULL)
+        {
+            // re-confirm the timeout
+            timeout = dataset_timeout(item, options.timeout);
 
-    // re-confirm the timeout
+            // remove (steal) the item from the hash table
+            if (timeout)
+                steal = g_hash_table_steal_extended(datasets, (gconstpointer)id, &stolen_key, &stolen_value);
+        }
 
-    // remove the item from the hash table
+        // unlock the hash table
+        pthread_mutex_unlock(&datasets_mtx);
 
-    // unlock the hash table
-
-    // destruct the item
+        // destruct the item
+        if (timeout && steal)
+        {
+            free(stolen_key);
+            free_hash_data(stolen_value);
+        }
+    }
 
     // gpointer item = (gpointer)arg;
     // delete_dataset(item, options.cache, strlen(options.cache), options.threshold);
