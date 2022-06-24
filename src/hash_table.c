@@ -51,9 +51,28 @@ void garbage_collect_hash_data(gpointer id, gpointer item, gpointer userdata)
     // check if a dataset has exceeded the timeout
     if (dataset_timeout(item, options.timeout))
     {
+        pthread_t tid;
+        pthread_attr_t attr; // thread's attribute
+        int rc;              // return code
+
         printf("[C] marking %s for garbage collection.\n", (char *)id);
 
-        // strdup((char *)id), launch a 'delete' pthread in a detached state
+        rc = pthread_attr_init(&attr);
+
+        if (rc == 0)
+        {
+            rc = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+            // strdup((char *)id), launch a 'delete' pthread in a detached state
+            char *key = strdup((char *)id);
+
+            rc = pthread_create(&tid, &attr, delete_hash_data, key);
+
+            if (rc != 0)
+                free(key);
+
+            pthread_attr_destroy(&attr);
+        }
     }
 }
 
