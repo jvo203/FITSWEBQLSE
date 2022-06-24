@@ -4318,3 +4318,17 @@ void *fetch_image(void *ptr)
 
     pthread_exit(NULL);
 }
+
+void *http_update_timestamp(void *arg)
+{
+    if (arg == NULL)
+        pthread_exit(NULL);
+
+    char *id = (char *)arg;
+
+    // turn id into a datasetid
+
+    free(arg);
+
+    pthread_exit(NULL);
+}
