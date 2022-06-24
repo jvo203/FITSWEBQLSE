@@ -4324,12 +4324,32 @@ void *http_update_timestamp(void *arg)
     if (arg == NULL)
         pthread_exit(NULL);
 
+    int i;
+    GSList *iterator = NULL;
+
+    g_mutex_lock(&cluster_mtx);
+
+    int handle_count = g_slist_length(cluster);
+
+    if (handle_count == 0)
+    {
+        printf("[C] aborting http_update_timestamp (no cluster nodes found)\n");
+
+        g_mutex_unlock(&cluster_mtx);
+
+        free(arg);
+        pthread_exit(NULL);
+    };
+
     char *id = (char *)arg;
     size_t idlen = strlen(id);
 
     // html-encode the datasetid
     char datasetid[2 * idlen];
     size_t len = html_encode(id, idlen, datasetid, sizeof(datasetid) - 1);
+
+    // ...
+    g_mutex_unlock(&cluster_mtx);
 
     free(arg);
 
