@@ -8,6 +8,7 @@ void init_hash_table();
 void delete_hash_table();
 void garbage_collect();
 void free_hash_data(gpointer item);
+void *delete_hash_data(void *arg);
 void garbage_collect_hash_data(gpointer id, gpointer item, gpointer userdata);
 void insert_dataset(const char *datasetid, int len, void *item);
 bool insert_if_not_exists(const char *datasetid, void *item);

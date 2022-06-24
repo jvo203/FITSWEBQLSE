@@ -52,7 +52,26 @@ void garbage_collect_hash_data(gpointer id, gpointer item, gpointer userdata)
     if (dataset_timeout(item, options.timeout))
     {
         printf("[C] marking %s for garbage collection.\n", (char *)id);
+
+        // strdup((char *)id), launch a 'delete' pthread in a detached state
     }
+}
+
+void *delete_hash_data(void *arg)
+{
+    if (arg == NULL)
+        pthread_exit(NULL);
+
+    gpointer id = (gpointer)arg;
+
+    // get the value from the hash table
+
+    // gpointer item = (gpointer)arg;
+    // delete_dataset(item, options.cache, strlen(options.cache), options.threshold);
+
+    free(arg);
+
+    pthread_exit(NULL);
 }
 
 void free_hash_data(gpointer item)
