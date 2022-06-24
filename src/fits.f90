@@ -912,9 +912,22 @@ contains
 
       integer(kind=c_int), intent(in), value :: timeout
 
+      integer(8) finish
+      real elapsed
+
       call c_f_pointer(ptr, item)
 
-      dataset_timeout = 0
+      ! take a time measurement
+      call system_clock(finish)
+      elapsed = real(finish - item%start_time)/real(item%crate)
+
+      if (elapsed .gt. timeout) then
+         dataset_timeout = 1
+      else
+         dataset_timeout = 0
+      end if
+
+      return
    end function dataset_timeout
 
    subroutine delete_dataset(ptr, dir, len, threshold) BIND(C, name='delete_dataset')
