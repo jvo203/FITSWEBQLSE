@@ -218,6 +218,7 @@ int main(int argc, char *argv[])
     options.timeout = 15;
     options.fits_home = strdup(".cache");
     options.cache = strdup(".cache");
+    options.threshold = 25;
     options.logs = strdup("LOGS");
     options.home_dir = strdup(passwdEnt->pw_dir);
 

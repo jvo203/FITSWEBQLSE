@@ -51,6 +51,7 @@ typedef struct
     uint32_t timeout;
     char *fits_home;
     char *cache;
+    uint32_t threshold;
     char *logs;
     char *home_dir;
 

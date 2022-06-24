@@ -51,7 +51,7 @@ void garbage_collect_hash_data(gpointer id, gpointer item, gpointer userdata)
     // check if a dataset has exceeded the timeout
     if (dataset_timeout(item, options.timeout))
     {
-        printf("[C] marking %s for garbage collection.\n", id);
+        printf("[C] marking %s for garbage collection.\n", (char *)id);
     }
 }
 
