@@ -2578,7 +2578,7 @@ contains
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%timestamp_mtx)
 
-      ! start the timeout timer
+      ! re-set the timeout timer
       call system_clock(item%timestamp)
 
       ! unlock the mutex
