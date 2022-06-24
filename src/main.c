@@ -442,6 +442,10 @@ static int handler(void *user, const char *section, const char *name,
         free(options->cache);
         options->cache = strdup(value);
     }
+    else if (MATCH("fitswebql", "threshold"))
+    {
+        options->threshold = atoi(value);
+    }
     else if (MATCH("fitswebql", "port"))
     {
         options->http_port = atoi(value);
