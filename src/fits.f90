@@ -920,7 +920,7 @@ contains
 
       ! take a time measurement
       call system_clock(finish)
-      elapsed = real(finish - item%start_time)/real(item%crate)
+      elapsed = real(finish - item%timestamp)/real(item%crate)
 
       if (elapsed .gt. timeout) then
          dataset_timeout = 1
