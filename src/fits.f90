@@ -253,11 +253,11 @@ module fits
       logical :: video = .false.
 
       ! mutexes
-      type(c_pthread_mutex_t) :: header_mtx, ok_mtx, error_mtx, progress_mtx, image_mtx, video_mtx
+      type(c_pthread_mutex_t) :: header_mtx, ok_mtx, error_mtx, progress_mtx,&
+      & image_mtx, video_mtx, timestamp_mtx
 
       ! progress
-      integer(8) :: start_time, crate, cmax
-      integer(8) :: timestamp = -1
+      integer(8) :: start_time, timestamp, crate, cmax
       integer :: cursor = 1
       integer :: CHANNEL_BLOCK = 1
       integer :: progress = 0
@@ -914,19 +914,35 @@ contains
       integer(kind=c_int), intent(in), value :: timeout
 
       integer(8) finish
+      integer rc
       real elapsed
 
+      if (get_error_status(ptr) .eq. 1) then
+         dataset_timeout = 1
+         return
+      end if
+
+      if (get_ok_status(ptr) .eq. 0) then
+         dataset_timeout = 0
+         return
+      end if
+
+      ! by default there is no timeout
+      dataset_timeout = 0
+
       call c_f_pointer(ptr, item)
+
+      ! lock the mutex
+      rc = c_pthread_mutex_lock(item%timestamp_mtx)
 
       ! take a time measurement
       call system_clock(finish)
       elapsed = real(finish - item%timestamp)/real(item%crate)
 
-      if (elapsed .gt. timeout) then
-         dataset_timeout = 1
-      else
-         dataset_timeout = 0
-      end if
+      ! unlock the mutex
+      rc = c_pthread_mutex_unlock(item%timestamp_mtx)
+
+      if (elapsed .gt. timeout) dataset_timeout = 1
 
       return
    end function dataset_timeout
@@ -1082,6 +1098,7 @@ contains
       rc = c_pthread_mutex_destroy(item%progress_mtx)
       rc = c_pthread_mutex_destroy(item%image_mtx)
       rc = c_pthread_mutex_destroy(item%video_mtx)
+      rc = c_pthread_mutex_destroy(item%timestamp_mtx)
 
       index_unit = -1
       data_unit = -1
@@ -2725,6 +2742,7 @@ contains
       rc = c_pthread_mutex_init(item%progress_mtx, c_null_ptr)
       rc = c_pthread_mutex_init(item%image_mtx, c_null_ptr)
       rc = c_pthread_mutex_init(item%video_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%timestamp_mtx, c_null_ptr)
 
       item%datasetid = datasetid
       item%progress = 0
