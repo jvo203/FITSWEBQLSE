@@ -917,6 +917,7 @@ contains
       integer rc
       real elapsed
 
+      ! remove datasets with errors
       if (get_error_status(ptr) .eq. 1) then
          dataset_timeout = 1
          return
