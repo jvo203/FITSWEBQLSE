@@ -922,6 +922,7 @@ contains
          return
       end if
 
+      ! the dataset has not been loaded yet
       if (get_ok_status(ptr) .eq. 0) then
          dataset_timeout = 0
          return
@@ -1825,7 +1826,6 @@ contains
 
       ! start the timer
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
-      call system_clock(item%timestamp)
 
       ! reset the progress
       if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
@@ -2235,6 +2235,17 @@ contains
       rc = c_pthread_mutex_lock(item%ok_mtx)
 
       item%ok = ok
+
+      if (ok) then
+         ! lock the mutex
+         rc = c_pthread_mutex_lock(item%timestamp_mtx)
+
+         ! start the timeout timer
+         call system_clock(item%timestamp)
+
+         ! unlock the mutex
+         rc = c_pthread_mutex_unlock(item%timestamp_mtx)
+      end if
 
       ! unlock the mutex
       rc = c_pthread_mutex_unlock(item%ok_mtx)
@@ -3265,7 +3276,6 @@ contains
 
       ! start the timer
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
-      call system_clock(item%timestamp)
 
       ! reset the progress
       if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
