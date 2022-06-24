@@ -616,6 +616,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (item != NULL)
             {
+                update_timestamp(item);
+
                 int stat;
                 int pipefd[2];
 
@@ -839,6 +841,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (item != NULL)
             {
+                update_timestamp(item);
+
                 int stat;
                 int pipefd[2];
 
@@ -930,6 +934,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
                 break;
             }
+
+            update_timestamp(item);
 
             // read the parameters
             // last_video_seq
@@ -1127,6 +1133,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
                 break;
             }
+
+            update_timestamp(item);
 
             // check if the session video tone mapping has been filled already
             // if not, fetch the global data statistics from FORTRAN
