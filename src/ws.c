@@ -488,6 +488,24 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (mg_strstr(msg, mg_str("[heartbeat]")) != NULL)
         {
             mg_ws_send(c, wm->data.ptr, wm->data.len, WEBSOCKET_OP_TEXT);
+
+            // get the dataset and update its timestamp
+            char *datasetId = NULL;
+
+            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+
+            if (session != NULL)
+                datasetId = session->datasetid;
+
+            void *item = get_dataset(datasetId);
+
+            if (item != NULL)
+            {
+                update_timestamp(item);
+
+                // trigger updates across the cluster too
+            }
+
             break;
         }
         else
