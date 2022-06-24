@@ -212,6 +212,7 @@ int main(int argc, char *argv[])
 
     struct passwd *passwdEnt = getpwuid(getuid());
 
+    // default initial values
     options.http_port = 8080;
     options.ws_port = options.http_port + 1;
     options.local = true;
