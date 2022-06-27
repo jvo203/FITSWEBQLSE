@@ -616,12 +616,17 @@ static void *garbage_collection_daemon(void *ptr)
     (void)ptr;
 
     // disable garbage collection if timeout == 0
-    if (options.timeout > 0)
-        while (s_received_signal == 0)
-        {
-            garbage_collect();
-            sleep(1);
-        }
+    if (options.timeout <= 0)
+    {
+        printf("timeout = %" PRIu32 ", disabling dataset garbage collection.\n", options.timeout);
+        pthread_exit(NULL);
+    }
+
+    while (s_received_signal == 0)
+    {
+        garbage_collect();
+        sleep(1);
+    }
 
     printf("garbage collection thread terminated.\n");
 
