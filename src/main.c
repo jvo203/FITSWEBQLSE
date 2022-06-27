@@ -649,7 +649,7 @@ static void *jemalloc_daemon(void *arg)
     else
     {
         printf("cannot open 'memory_usage.csv' for writing.\n");
-        return NULL;
+        pthread_exit(NULL);
     }
 
     time_t offset = time(NULL);
@@ -680,6 +680,6 @@ static void *jemalloc_daemon(void *arg)
 
     printf("jemalloc memory tracking thread terminated.\n");
 
-    return NULL;
+    pthread_exit(NULL);
 }
 #endif
