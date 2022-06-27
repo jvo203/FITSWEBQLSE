@@ -608,22 +608,24 @@ static void *autodiscovery_daemon(void *ptr)
 
     free(my_hostname);
 
-    return NULL;
+    pthread_exit(NULL);
 }
 
 static void *garbage_collection_daemon(void *ptr)
 {
     (void)ptr;
 
-    while (s_received_signal == 0)
-    {
-        garbage_collect();
-        sleep(1);
-    }
+    // disable garbage collection if timeout == 0
+    if (options.timeout > 0)
+        while (s_received_signal == 0)
+        {
+            garbage_collect();
+            sleep(1);
+        }
 
     printf("garbage collection thread terminated.\n");
 
-    return NULL;
+    pthread_exit(NULL);
 }
 
 #ifdef DEBUG
