@@ -115,17 +115,31 @@ void *delete_hash_data(void *arg)
         if (timeout && steal)
         {
             // notify the cluster nodes
-            /*{
-                // strdup((char *)id), launch a 'delete' pthread in a detached state
-                char *key = strdup((char *)id);
+            pthread_t tid;
+            pthread_attr_t attr; // thread's attribute
+            int rc;              // return code
 
-                rc = pthread_create(&tid, &attr, http_update_timestamp, key);
+            rc = pthread_attr_init(&attr);
 
-                if (rc != 0)
-                    free(key);
-            }*/
+            if (rc == 0)
+            {
+                rc = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-            free(stolen_key);
+                if (rc == 0)
+                {
+                    // launch a 'delete' pthread in a detached state with the stolen_key
+                    // stolen_key will be freeded from another thread
+                    rc = pthread_create(&tid, &attr, http_update_timestamp, stolen_key);
+
+                    if (rc != 0)
+                        free(stolen_key);
+                }
+                else
+                    free(stolen_key);
+
+                pthread_attr_destroy(&attr);
+            }
+
             free_hash_data(stolen_value);
         }
     }
