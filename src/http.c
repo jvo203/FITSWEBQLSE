@@ -1200,7 +1200,7 @@ static enum MHD_Result on_http_connection(void *cls,
                     // duplicate the datasetid, launch a 'delete' pthread in a detached state
                     char *key = strdup(datasetId);
 
-                    rc = pthread_create(&tid, &attr, delete_hash_data, key);
+                    rc = pthread_create(&tid, &attr, delete_hash_data_no_timeout, key);
 
                     if (rc != 0)
                         free(key);
