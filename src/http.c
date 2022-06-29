@@ -4405,15 +4405,6 @@ void *http_update_timestamp(void *arg)
     {
         if (msg->msg == CURLMSG_DONE)
         {
-            int idx;
-            /* Find out which handle this message is about */
-            for (idx = 0; idx < handle_count; idx++)
-            {
-                int found = (msg->easy_handle == handles[idx]);
-                if (found)
-                    break;
-            }
-
             long response_code = 0;
             curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
