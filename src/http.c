@@ -1171,6 +1171,19 @@ static enum MHD_Result on_http_connection(void *cls,
         return ret;
     }
 
+    if (strstr(url, "/timeout/") != NULL)
+    {
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+            datasetId++; // skip the slash character
+
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+        return http_not_implemented(connection);
+    }
+
     if (strstr(url, "/statistics/") != NULL)
     {
         float median;
