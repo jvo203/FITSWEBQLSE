@@ -1181,7 +1181,7 @@ static enum MHD_Result on_http_connection(void *cls,
         if (datasetId == NULL)
             return http_bad_request(connection);
 
-        return http_not_implemented(connection);
+        return http_ok(connection);
     }
 
     if (strstr(url, "/statistics/") != NULL)
