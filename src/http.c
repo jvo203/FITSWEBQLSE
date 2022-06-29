@@ -1181,8 +1181,36 @@ static enum MHD_Result on_http_connection(void *cls,
         if (datasetId == NULL)
             return http_bad_request(connection);
 
-        // pass the datasetid to a delete thread
+        // launch a delete thread
+        {
+            pthread_t tid;
+            pthread_attr_t attr; // thread's attribute
+            int rc;              // return code
 
+            printf("[C] marking %s for garbage collection.\n", datasetId);
+
+            rc = pthread_attr_init(&attr);
+
+            if (rc == 0)
+            {
+                rc = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+                if (rc == 0)
+                {
+                    // duplicate the datasetid, launch a 'delete' pthread in a detached state
+                    char *key = strdup(datasetId);
+
+                    rc = pthread_create(&tid, &attr, delete_hash_data, key);
+
+                    if (rc != 0)
+                        free(key);
+                }
+
+                pthread_attr_destroy(&attr);
+            }
+        }
+
+        // a dummy response
         return http_ok(connection);
     }
 
