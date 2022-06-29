@@ -51,7 +51,7 @@ void garbage_collect_hash_data(gpointer id, gpointer item, gpointer userdata)
     // check if a dataset has exceeded the timeout
     if (dataset_timeout(item, options.timeout))
     {
-        pthread_t tid_local, tid_cluster;
+        pthread_t tid;
         pthread_attr_t attr; // thread's attribute
         int rc;              // return code
 
@@ -65,27 +65,13 @@ void garbage_collect_hash_data(gpointer id, gpointer item, gpointer userdata)
 
             if (rc == 0)
             {
-                // launch a local delete thread
-                {
-                    // strdup((char *)id), launch a 'delete' pthread in a detached state
-                    char *key = strdup((char *)id);
+                // strdup((char *)id), launch a 'delete' pthread in a detached state
+                char *key = strdup((char *)id);
 
-                    rc = pthread_create(&tid_local, &attr, delete_hash_data, key);
+                rc = pthread_create(&tid, &attr, delete_hash_data, key);
 
-                    if (rc != 0)
-                        free(key);
-                }
-
-                // notify the cluster nodes
-                {
-                    // strdup((char *)id), launch a 'delete' pthread in a detached state
-                    char *key = strdup((char *)id);
-
-                    rc = pthread_create(&tid_cluster, &attr, http_update_timestamp, key);
-
-                    if (rc != 0)
-                        free(key);
-                }
+                if (rc != 0)
+                    free(key);
             }
 
             pthread_attr_destroy(&attr);
@@ -116,8 +102,6 @@ void *delete_hash_data(void *arg)
         {
             // re-confirm the timeout
             timeout = dataset_timeout(item, options.timeout);
-            // override:
-            timeout = true;
 
             // remove (steal) the item from the hash table
             if (timeout)
@@ -130,6 +114,17 @@ void *delete_hash_data(void *arg)
         // destruct the item
         if (timeout && steal)
         {
+            // notify the cluster nodes
+            /*{
+                // strdup((char *)id), launch a 'delete' pthread in a detached state
+                char *key = strdup((char *)id);
+
+                rc = pthread_create(&tid, &attr, http_update_timestamp, key);
+
+                if (rc != 0)
+                    free(key);
+            }*/
+
             free(stolen_key);
             free_hash_data(stolen_value);
         }
