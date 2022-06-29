@@ -128,7 +128,7 @@ void *delete_hash_data(void *arg)
                 if (rc == 0)
                 {
                     // launch a 'delete' pthread in a detached state with the stolen_key
-                    // stolen_key will be freeded from another thread
+                    // stolen_key will be freeded inside the thread
                     rc = pthread_create(&tid, &attr, http_update_timestamp, stolen_key);
 
                     if (rc != 0)
@@ -139,6 +139,8 @@ void *delete_hash_data(void *arg)
 
                 pthread_attr_destroy(&attr);
             }
+            else
+                free(stolen_key);
 
             free_hash_data(stolen_value);
         }
