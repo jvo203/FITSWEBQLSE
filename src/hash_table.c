@@ -116,6 +116,8 @@ void *delete_hash_data(void *arg)
         {
             // re-confirm the timeout
             timeout = dataset_timeout(item, options.timeout);
+            // override:
+            timeout = true;
 
             // remove (steal) the item from the hash table
             if (timeout)
