@@ -13,8 +13,6 @@ pthread_mutex_t datasets_mtx;
 #include "http.h"
 extern options_t options; // <options> is defined in main.c
 
-void *http_update_timestamp(void *arg); // the function is defined in http.c
-
 void init_hash_table()
 {
     if (pthread_mutex_init(&datasets_mtx, NULL) != 0)
