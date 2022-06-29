@@ -4348,8 +4348,87 @@ void *http_update_timestamp(void *arg)
     char datasetid[2 * idlen];
     size_t len = html_encode(id, idlen, datasetid, sizeof(datasetid) - 1);
 
-    // ...
+    CURL *handles[handle_count];
+    CURLM *multi_handle;
+
+    int still_running = 1; /* keep number of running handles */
+
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
+    int msgs_left; /* how many messages are left */
+
+    /* Allocate one CURL handle per transfer */
+    for (i = 0; i < handle_count; i++)
+        handles[i] = curl_easy_init();
+
+    /* init a multi stack */
+    multi_handle = curl_multi_init();
+
+    for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
+    {
+        GString *url = g_string_new("http://");
+        g_string_append_printf(url, "%s:", (char *)iterator->data);
+        g_string_append_printf(url, "%" PRIu16 "/timeout/%.*s", options.http_port, (int)len, datasetid);
+        // printf("[C] URL: '%s'\n", url->str);
+
+        // set the individual URL
+        curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
+
+        /* get us the resource without a body - use HEAD! */
+        curl_easy_setopt(handles[i], CURLOPT_NOBODY, 1L);
+
+        // add the individual transfer
+        curl_multi_add_handle(multi_handle, handles[i]);
+
+        g_string_free(url, TRUE);
+
+        // move on to the next cluster node
+        i++;
+    }
+
     g_mutex_unlock(&cluster_mtx);
+
+    /* Wait for the transfers */
+    while (still_running)
+    {
+        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+        if (still_running)
+            /* wait for activity, timeout or "nothing" */
+            mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+        if (mc)
+            break;
+    }
+
+    /* See how the transfers went */
+    while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
+    {
+        if (msg->msg == CURLMSG_DONE)
+        {
+            int idx;
+            /* Find out which handle this message is about */
+            for (idx = 0; idx < handle_count; idx++)
+            {
+                int found = (msg->easy_handle == handles[idx]);
+                if (found)
+                    break;
+            }
+
+            long response_code = 0;
+            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+            // printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+        }
+    }
+
+    /* remove the transfers and cleanup the handles */
+    for (i = 0; i < handle_count; i++)
+    {
+        curl_multi_remove_handle(multi_handle, handles[i]);
+        curl_easy_cleanup(handles[i]);
+    }
+
+    curl_multi_cleanup(multi_handle);
 
     free(arg);
 
