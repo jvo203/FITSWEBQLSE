@@ -1181,6 +1181,8 @@ static enum MHD_Result on_http_connection(void *cls,
         if (datasetId == NULL)
             return http_bad_request(connection);
 
+        // pass the datasetid to a delete thread
+
         return http_ok(connection);
     }
 
