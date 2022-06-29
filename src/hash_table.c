@@ -147,7 +147,45 @@ void *delete_hash_data(void *arg)
     }
 
     free(arg);
+    pthread_exit(NULL);
+}
 
+void *delete_hash_data_no_timeout(void *arg)
+{
+    if (arg == NULL)
+        pthread_exit(NULL);
+
+    gpointer id = (gpointer)arg;
+
+    void *item;
+    gboolean steal = false;
+    gpointer stolen_key = NULL;
+    gpointer stolen_value = NULL;
+
+    // lock the hash table
+    if (pthread_mutex_lock(&datasets_mtx) == 0)
+    {
+        // get the item from the hash table
+        item = g_hash_table_lookup(datasets, (gconstpointer)id);
+
+        if (item != NULL)
+        {
+            // remove (steal) the item from the hash table
+            steal = g_hash_table_steal_extended(datasets, (gconstpointer)id, &stolen_key, &stolen_value);
+        }
+
+        // unlock the hash table
+        pthread_mutex_unlock(&datasets_mtx);
+
+        // destruct the item
+        if (steal)
+        {
+            free(stolen_key);
+            free_hash_data(stolen_value);
+        }
+    }
+
+    free(arg);
     pthread_exit(NULL);
 }
 
