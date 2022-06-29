@@ -119,9 +119,6 @@ void *delete_hash_data(void *arg)
         }
     }
 
-    // gpointer item = (gpointer)arg;
-    // delete_dataset(item, options.cache, strlen(options.cache), options.threshold);
-
     free(arg);
 
     pthread_exit(NULL);
