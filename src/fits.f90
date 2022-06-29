@@ -943,10 +943,10 @@ contains
       call system_clock(finish)
       elapsed = real(finish - item%timestamp)/real(item%crate)
 
+      if (elapsed .gt. timeout) dataset_timeout = 1
+
       ! unlock the mutex
       rc = c_pthread_mutex_unlock(item%timestamp_mtx)
-
-      if (elapsed .gt. timeout) dataset_timeout = 1
 
       return
    end function dataset_timeout
