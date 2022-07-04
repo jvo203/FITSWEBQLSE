@@ -39,3 +39,6 @@
 
 # 11. jemalloc
     brew install jemalloc
+
+# 12. CZMQ
+    brew install czmq
