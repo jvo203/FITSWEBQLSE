@@ -17,3 +17,6 @@
 # 5. libcpuid
     brew install libcpuid or
     brew install --build-from-source libcpuid
+
+# 6. glib
+    brew install glib
