@@ -13,3 +13,7 @@
 
 # 4. pkg-config
     brew install pkg-config
+
+# 5. libcpuid
+    brew install libcpuid or
+    brew install --build-from-source libcpuid
