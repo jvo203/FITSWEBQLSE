@@ -20,3 +20,9 @@
 
 # 6. glib
     brew install glib
+
+# Intel oneAPI
+    base-kit: exclude the Intel Python distribution
+
+# libmicrohttpd
+    brew install libmicrohttpd
