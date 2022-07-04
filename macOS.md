@@ -28,6 +28,100 @@
 
     source /opt/intel/oneapi/setvars.sh
 
+    on Apple Silicon there are linking problems:
+
+    ld: warning: ignoring file /opt/intel/oneapi/ipp/2021.6.0/lib/libippi.dylib, building for macOS-arm64 but attempting to link with file built for macOS-x86_64
+ld: warning: ignoring file /opt/intel/oneapi/ipp/2021.6.0/lib/libippdc.dylib, building for macOS-arm64 but attempting to link with file built for macOS-x86_64
+ld: warning: ignoring file /opt/intel/oneapi/ipp/2021.6.0/lib/libippcore.dylib, building for macOS-arm64 but attempting to link with file built for macOS-x86_64
+ld: warning: ignoring file /opt/intel/oneapi/ipp/2021.6.0/lib/libipps.dylib, building for macOS-arm64 but attempting to link with file built for macOS-x86_64
+ld: warning: ignoring file /opt/intel/oneapi/mkl/2022.1.0/lib/libmkl_lapack95_lp64.a, building for macOS-arm64 but attempting to link with file built for unknown-x86_64
+ld: warning: ignoring file /opt/intel/oneapi/mkl/2022.1.0/lib/libmkl_intel_lp64.dylib, building for macOS-arm64 but attempting to link with file built for macOS-x86_64
+ld: warning: ignoring file /opt/intel/oneapi/mkl/2022.1.0/lib/libmkl_sequential.dylib, building for macOS-arm64 but attempting to link with file built for macOS-x86_64
+ld: warning: ignoring file /opt/intel/oneapi/mkl/2022.1.0/lib/libmkl_core.dylib, building for macOS-arm64 but attempting to link with file built for macOS-x86_64
+Undefined symbols for architecture arm64:
+  "_ippGetLibVersion", referenced from:
+      _ipp_init in main.o
+  "_ippInit", referenced from:
+      _ipp_init in main.o
+  "_ippiResizeCubicInit_32f", referenced from:
+      _resizeCubic32f_C1R in ipp.o
+      _resizeCubic in ipp.o
+  "_ippiResizeCubic_32f_C1R", referenced from:
+      _resizeCubic32f_C1R in ipp.o
+      _resizeCubic in ipp.o
+  "_ippiResizeGetBorderSize_32f", referenced from:
+      _resizeCubic32f_C1R in ipp.o
+      _resizeLanczos32f_C1R in ipp.o
+      _resizeCubic in ipp.o
+      _resizeLanczos in ipp.o
+  "_ippiResizeGetBufferSize_32f", referenced from:
+      _resizeCubic32f_C1R in ipp.o
+      _resizeLanczos32f_C1R in ipp.o
+      _resizeSuper32f_C1R in ipp.o
+      _resizeCubic in ipp.o
+      _resizeLanczos in ipp.o
+      _resizeSuper in ipp.o
+  "_ippiResizeGetBufferSize_8u", referenced from:
+      _resizeNearest8u_C1R in ipp.o
+      _resizeNearest in ipp.o
+  "_ippiResizeGetSize_32f", referenced from:
+      _resizeCubic32f_C1R in ipp.o
+      _resizeLanczos32f_C1R in ipp.o
+      _resizeSuper32f_C1R in ipp.o
+      _resizeCubic in ipp.o
+      _resizeLanczos in ipp.o
+      _resizeSuper in ipp.o
+  "_ippiResizeGetSize_8u", referenced from:
+      _resizeNearest8u_C1R in ipp.o
+      _resizeNearest in ipp.o
+  "_ippiResizeGetSrcRoi_32f", referenced from:
+      _resizeCubic32f_C1R in ipp.o
+      _resizeLanczos32f_C1R in ipp.o
+      _resizeSuper32f_C1R in ipp.o
+      _resizeCubic in ipp.o
+      _resizeLanczos in ipp.o
+      _resizeSuper in ipp.o
+  "_ippiResizeGetSrcRoi_8u", referenced from:
+      _resizeNearest8u_C1R in ipp.o
+      _resizeNearest in ipp.o
+  "_ippiResizeLanczosInit_32f", referenced from:
+      _resizeLanczos32f_C1R in ipp.o
+      _resizeLanczos in ipp.o
+  "_ippiResizeLanczos_32f_C1R", referenced from:
+      _resizeLanczos32f_C1R in ipp.o
+      _resizeLanczos in ipp.o
+  "_ippiResizeNearestInit_8u", referenced from:
+      _resizeNearest8u_C1R in ipp.o
+      _resizeNearest in ipp.o
+  "_ippiResizeNearest_8u_C1R", referenced from:
+      _resizeNearest8u_C1R in ipp.o
+      _resizeNearest in ipp.o
+  "_ippiResizeSuperInit_32f", referenced from:
+      _resizeSuper32f_C1R in ipp.o
+      _resizeSuper in ipp.o
+  "_ippiResizeSuper_32f_C1R", referenced from:
+      _resizeSuper32f_C1R in ipp.o
+      _resizeSuper in ipp.o
+  "_ippsFree", referenced from:
+      _resizeNearest8u_C1R in ipp.o
+      _resizeCubic32f_C1R in ipp.o
+      _resizeLanczos32f_C1R in ipp.o
+      _resizeSuper32f_C1R in ipp.o
+      _resizeCubic in ipp.o
+      _resizeLanczos in ipp.o
+      _resizeSuper in ipp.o
+      ...
+  "_ippsMalloc_8u", referenced from:
+      _resizeNearest8u_C1R in ipp.o
+      _resizeCubic32f_C1R in ipp.o
+      _resizeLanczos32f_C1R in ipp.o
+      _resizeSuper32f_C1R in ipp.o
+      _resizeCubic in ipp.o
+      _resizeLanczos in ipp.o
+      _resizeSuper in ipp.o
+      ...
+ld: symbol(s) not found for architecture arm64
+
 # 8. libmicrohttpd
     brew install libmicrohttpd
 
