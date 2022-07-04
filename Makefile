@@ -85,7 +85,7 @@ OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
 ifeq ($(CC),icc)
-	FLAGS = -g -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=medium -shared-intel
+	FLAGS = -g -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel
 # -parallel
 #-mcmodel=medium
 #-ipo -parallel -fast
@@ -121,7 +121,7 @@ ifeq ($(UNAME_S),Darwin)
 
 	CC = gcc-11
 	FORT = gfortran-11
-	FLAGS = -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	FLAGS = -march=native -mcmodel=large -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	CFLAGS := $(FLAGS)
 
 	# GCC FORTRAN runtime
@@ -145,7 +145,7 @@ endif
 
 # detect the GNU Compiler under Linux
 ifeq ($(CC),gcc)
-	override CFLAGS += -march=native -mcmodel=medium -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp -Wall -Wextra
+	override CFLAGS += -march=native -mcmodel=large -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp -Wall -Wextra
 	FLAGS := $(CFLAGS) -std=f2018 -fall-intrinsics
 
 	ifeq ($(FORT),nagfor)
