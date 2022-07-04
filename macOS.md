@@ -30,3 +30,6 @@
 
 # libmicrohttpd
     brew install libmicrohttpd
+
+# LZ4
+    brew install lz4
