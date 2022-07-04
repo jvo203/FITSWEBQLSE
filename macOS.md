@@ -21,18 +21,21 @@
 # 6. glib
     brew install glib
 
-# Intel oneAPI
+# 7. Intel oneAPI
     base-kit: exclude the Intel Python distribution
 
     .zshrc : append
 
     source /opt/intel/oneapi/setvars.sh
 
-# libmicrohttpd
+# 8. libmicrohttpd
     brew install libmicrohttpd
 
-# LZ4
+# 9. LZ4
     brew install lz4
 
-# x265
+# 10. x265
     brew install x265
+
+# 11. jemalloc
+    brew install jemalloc
