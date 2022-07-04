@@ -33,3 +33,6 @@
 
 # LZ4
     brew install lz4
+
+# x265
+    brew install x265
