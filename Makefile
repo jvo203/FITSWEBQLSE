@@ -123,6 +123,7 @@ ifeq ($(UNAME_S),Darwin)
 	FORT = gfortran-11
 	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
+	# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
 	CFLAGS := $(FLAGS)
 
 	# GCC FORTRAN runtime
