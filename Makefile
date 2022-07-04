@@ -102,7 +102,7 @@ MOD =
 # -I/home/chris/zfp/include
 DEF = -DDEBUG -DNO_MONGOOSE_HTTP_CLIENT
 
-LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` -lsqlite3 -lcurl -lz -pthread -lzmq `pkg-config --libs libczmq` `pkg-config --libs x265`
+LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` -lsqlite3 -lcurl -lz -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265`
 # -lzfp before cfitsio
 #`pkg-config --libs json-fortran`
 
