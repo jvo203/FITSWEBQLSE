@@ -42,3 +42,6 @@
 
 # 12. CZMQ
     brew install czmq
+
+# 13. NASA CFITSIO
+    brew install cfitsio
