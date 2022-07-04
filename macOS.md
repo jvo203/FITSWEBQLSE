@@ -10,3 +10,6 @@
 
 # 3. ISPC
     brew install ispc
+
+# 4. pkg-config
+    brew install pkg-config
