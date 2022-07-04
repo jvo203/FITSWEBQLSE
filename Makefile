@@ -121,7 +121,8 @@ ifeq ($(UNAME_S),Darwin)
 
 	CC = gcc-11
 	FORT = gfortran-11
-	FLAGS = -march=native -mcmodel=large -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
 	CFLAGS := $(FLAGS)
 
 	# GCC FORTRAN runtime
