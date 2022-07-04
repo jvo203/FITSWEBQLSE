@@ -97,12 +97,12 @@ ifeq ($(CC),icc)
 #-mt_mpi
 endif
 
-INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` -I./$(ZFP)/include -I./$(ZFP)/src -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include
+INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` `pkg-config --cflags libmicrohttpd` -I./$(ZFP)/include -I./$(ZFP)/src -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include
 MOD =
 # -I/home/chris/zfp/include
 DEF = -DDEBUG -DNO_MONGOOSE_HTTP_CLIENT
 
-LIBS = -L/usr/local/lib -lmicrohttpd `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` -llz4 -L/usr/local/lib64 -lcfitsio -lsqlite3 -lcurl -lz -pthread -lzmq -lczmq -lx265
+LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` `pkg-config --libs libmicrohttpd` -llz4 -L/usr/local/lib64 -lcfitsio -lsqlite3 -lcurl -lz -pthread -lzmq -lczmq -lx265
 # -lzfp before cfitsio
 #`pkg-config --libs json-fortran`
 
