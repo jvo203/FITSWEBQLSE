@@ -1,6 +1,6 @@
-1. Install Intel oneAPI Base + HPC kits (works well on AMD CPUs too, not just Intel's)
+# 1. Install Intel oneAPI Base + HPC kits (works well on AMD CPUs too, not just Intel's)
 
-2. Install dependencies
+# 2. Install dependencies
 
 	sudo dnf install cmake
 
@@ -42,7 +42,7 @@
 
 	sudo make install
 
-3. zfp Fortran bindings
+# 3. zfp Fortran bindings
 
 	# this step is not needed anymore
 	# FITSWEBQLSE contains its own version of ZFP
@@ -80,7 +80,7 @@
 
 	The library path is different in each of the above cases.
 
-4. FPzip
+# 4. FPzip
 
 	git clone https://github.com/LLNL/fpzip.git
 
@@ -96,7 +96,7 @@
 
 	sudo make install
 
-5. JSON-FORTRAN
+# 5. JSON-FORTRAN
 
 	# the library does not work (segmentation faults) !? (works in Linux)
 
@@ -120,13 +120,13 @@
 
 	make install
 
-6. FORTRAN-UNIX
+# 6. FORTRAN-UNIX
 
 	$ git clone https://github.com/interkosmos/fortran-unix
 	$ cd fortran-unix/
 	$ make
 
-7. FZMQ (ØMQ bindings)
+# 7. FZMQ (ØMQ bindings)
 
 	pre-requisites: latex, pandoc
 
@@ -142,7 +142,7 @@
 
 	sudo make install
 
-8. OpenCoarrays
+# 8. OpenCoarrays
 
 	pre-requisites: gcc, gfortran
 
@@ -166,7 +166,7 @@
 
 	to $LD_LIBRARY_PATH in .bashrc
 
-9. Adjust environment variables
+# 9. Adjust environment variables
 
 	Add
 
@@ -178,9 +178,9 @@ ulimit -s unlimited
 
 	to .bashrc and re-login
 
-10. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
+# 10. wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
-11. Examples running using one MPI host:
+# 11. Examples running using one MPI host:
 
 	mpiexec -silent-abort -n 1 ./fitswebqlse
 
