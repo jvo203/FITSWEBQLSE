@@ -48,7 +48,7 @@ ifeq ($(UNAME_S),Linux)
 
 endif
 
-JEMALLOC = -L`jemalloc-config --libdir` -Wl,-rpath,`jemalloc-config --libdir` -ljemalloc `jemalloc-config --libs`
+JEMALLOC = `pkg-config --libs jemalloc` -L`jemalloc-config --libdir` -Wl,-rpath,`jemalloc-config --libdir` -ljemalloc `jemalloc-config --libs`
 TCMALLOC = -ltcmalloc
 TARGET = fitswebqlse
 
@@ -97,7 +97,7 @@ ifeq ($(CC),icc)
 #-mt_mpi
 endif
 
-INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags liblz4` `pkg-config --cflags x265` -I./$(ZFP)/include -I./$(ZFP)/src -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include
+INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags liblz4` `pkg-config --cflags x265` `pkg-config --cflags jemalloc` -I./$(ZFP)/include -I./$(ZFP)/src -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include
 MOD =
 # -I/home/chris/zfp/include
 DEF = -DDEBUG -DNO_MONGOOSE_HTTP_CLIENT
