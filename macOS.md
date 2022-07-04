@@ -24,5 +24,9 @@
 # Intel oneAPI
     base-kit: exclude the Intel Python distribution
 
+    .zshrc : append
+
+    source /opt/intel/oneapi/setvars.sh
+
 # libmicrohttpd
     brew install libmicrohttpd
