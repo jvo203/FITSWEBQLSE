@@ -140,6 +140,6 @@ ld: symbol(s) not found for architecture arm64
 # 13. NASA CFITSIO
     brew install cfitsio
 
-# 14. FORTRAN formatting in VSCode
+# 14. FORTRAN formatting in Visual Studio Code
     brew install fortran-language-server
     brew install findent
