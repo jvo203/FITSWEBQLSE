@@ -1967,8 +1967,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 for (i = 0; i < va_count; i++)
                 {
-                    pthread_t tid;
-
                     // try to insert a NULL dataset
                     if (insert_if_not_exists(datasetId[i], NULL))
                     {
@@ -2023,6 +2021,7 @@ static enum MHD_Result on_http_connection(void *cls,
                         else
                             req->root = NULL;
 
+                        pthread_t tid;
                         int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
 
                         if (stat != 0)
