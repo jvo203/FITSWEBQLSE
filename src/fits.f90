@@ -539,7 +539,7 @@ module fits
 
       ! export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
       subroutine make_global_statistics(compressed, width, height, median,&
-         &sumP, countP, sumN, countN) BIND(C, name="make_global_statistics")
+      &sumP, countP, sumN, countN) BIND(C, name="make_global_statistics")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -556,7 +556,7 @@ module fits
 
       ! export void make_video_frame_fixed_linear(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope)
       subroutine make_video_frame_fixed_linear(compressed, width, height,&
-        &dst_luma, dst_mask, stride, black, slope) BIND(C, name="make_video_frame_fixed_linear")
+      &dst_luma, dst_mask, stride, black, slope) BIND(C, name="make_video_frame_fixed_linear")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -570,7 +570,7 @@ module fits
 
       ! export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity)
       subroutine make_video_frame_fixed_logistic(compressed, width, height,&
-         &dst_luma, dst_mask, stride, median, sensitivity) BIND(C, name="make_video_frame_fixed_logistic")
+      &dst_luma, dst_mask, stride, median, sensitivity) BIND(C, name="make_video_frame_fixed_logistic")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -584,7 +584,7 @@ module fits
 
       ! export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity)
       subroutine make_video_frame_fixed_ratio(compressed, width, height,&
-         &dst_luma, dst_mask, stride, black, sensitivity) BIND(C, name="make_video_frame_fixed_ratio")
+      &dst_luma, dst_mask, stride, black, sensitivity) BIND(C, name="make_video_frame_fixed_ratio")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -598,7 +598,7 @@ module fits
 
       ! export void make_video_frame_fixed_square(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity)
       subroutine make_video_frame_fixed_square(compressed, width, height,&
-         &dst_luma, dst_mask, stride, black, sensitivity) BIND(C, name="make_video_frame_fixed_square")
+      &dst_luma, dst_mask, stride, black, sensitivity) BIND(C, name="make_video_frame_fixed_square")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -612,7 +612,7 @@ module fits
 
       ! export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax)
       subroutine make_video_frame_fixed_legacy(compressed, width, height,&
-         &dst_luma, dst_mask, stride, dmin, dmax, lmin, lmax) BIND(C, name="make_video_frame_fixed_legacy")
+      &dst_luma, dst_mask, stride, dmin, dmax, lmin, lmax) BIND(C, name="make_video_frame_fixed_legacy")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -718,7 +718,7 @@ module fits
       ! void write_partial_statistics(int fd, const float *sumP, &
       ! const int64_t *countP, const float *sumN, const int64_t *countN)
       subroutine write_partial_statistics(fd, sumP, countP, sumN, countN)&
-         & BIND(C, name='write_partial_statistics')
+      & BIND(C, name='write_partial_statistics')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -730,7 +730,7 @@ module fits
       ! void write_statistics(int fd, float *dmin, float *dmax, float *dmedian,&
       !  float *dmadN, float *dmadP)
       subroutine write_statistics(fd, dmin, dmax, dmedian, dmadN, dmadP)&
-       & BIND(C, name='write_statistics')
+      & BIND(C, name='write_statistics')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -2356,9 +2356,9 @@ contains
 
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
             rc = c_pthread_create(thread=pid, &
-                                  attr=c_null_ptr, &
-                                  start_routine=c_funloc(global_statistics), &
-                                  arg=c_loc(item))
+               attr=c_null_ptr, &
+               start_routine=c_funloc(global_statistics), &
+               arg=c_loc(item))
 
             ! detach a thread
             if (rc .eq. 0) rc = c_pthread_detach(pid)
@@ -4286,17 +4286,17 @@ contains
             tone_mapping = histogram_classifier(c_loc(Slot))
 
             select case (tone_mapping)
-            case (0)
+             case (0)
                tone%flux = 'legacy'
-            case (1)
+             case (1)
                tone%flux = 'linear'
-            case (2)
+             case (2)
                tone%flux = 'logistic'
-            case (3)
+             case (3)
                tone%flux = 'ratio'
-            case (4)
+             case (4)
                tone%flux = 'square'
-            case default
+             case default
                tone%flux = 'legacy'
             end select
          end block
@@ -4556,7 +4556,7 @@ contains
    end subroutine inherent_image_dimensions_from_mask
 
    subroutine calculate_global_statistics_C(ptr, dmedian, sumP, countP, sumN, countN, first, last)&
-      & BIND(C, name='calculate_global_statistics_C')
+   & BIND(C, name='calculate_global_statistics_C')
       use, intrinsic :: iso_c_binding
       implicit none
 
@@ -4726,7 +4726,7 @@ contains
 
       ! calculate the FITS file size
       filesize = nint(real(size(item%hdr)) + real(item%naxes(1))*real(item%naxes(2))&
-                     &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
+      &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
 
       json = begin_json()
 
@@ -4818,9 +4818,9 @@ contains
 
       ! launch a pthread
       rc = c_pthread_create(thread=pid, &
-                            attr=c_null_ptr, &
-                            start_routine=c_funloc(fetch_inner_dimensions), &
-                            arg=c_loc(inner_dims))
+         attr=c_null_ptr, &
+         start_routine=c_funloc(fetch_inner_dimensions), &
+         arg=c_loc(inner_dims))
 
       ! get the inner image bounding box (excluding NaNs)
       call inherent_image_dimensions(item, inner_width, inner_height)
@@ -4891,9 +4891,9 @@ contains
 
          ! launch a pthread
          rc = c_pthread_create(thread=pid, &
-                               attr=c_null_ptr, &
-                               start_routine=c_funloc(fetch_inner_dimensions), &
-                               arg=c_loc(inner_dims))
+            attr=c_null_ptr, &
+            start_routine=c_funloc(fetch_inner_dimensions), &
+            arg=c_loc(inner_dims))
       end if
 
       ! get the inner image bounding box (excluding NaNs)
@@ -4967,9 +4967,9 @@ contains
 
          ! launch a pthread
          rc = c_pthread_create(thread=pid, &
-                               attr=c_null_ptr, &
-                               start_routine=c_funloc(fetch_image), &
-                               arg=c_loc(image_req))
+            attr=c_null_ptr, &
+            start_routine=c_funloc(fetch_image), &
+            arg=c_loc(image_req))
 
          ! join a thread (wait for the results)
          rc = c_pthread_join(pid, c_null_ptr)
@@ -5576,9 +5576,9 @@ contains
 
       ! launch a thread
       rc = c_pthread_create(thread=pid, &
-                            attr=c_null_ptr, &
-                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
-                            arg=c_loc(cluster_req))
+         attr=c_null_ptr, &
+         start_routine=c_funloc(fetch_realtime_image_spectrum), &
+         arg=c_loc(cluster_req))
 
       ! end of cluster
 
@@ -5680,11 +5680,11 @@ contains
          ! the image (viewport) part
          if (req%image) then
             select case (req%quality)
-            case (low)
+             case (low)
                precision = ZFP_LOW_PRECISION
-            case (high)
+             case (high)
                precision = ZFP_HIGH_PRECISION
-            case default
+             case default
                precision = ZFP_MEDIUM_PRECISION
             end select
 
@@ -5766,11 +5766,11 @@ contains
       mask = item%mask(x1:x2, y1:y2)
 
       select case (req%quality)
-      case (low)
+       case (low)
          precision = ZFP_LOW_PRECISION
-      case (high)
+       case (high)
          precision = ZFP_HIGH_PRECISION
-      case default
+       case default
          precision = ZFP_MEDIUM_PRECISION
       end select
 
@@ -5864,7 +5864,7 @@ contains
       &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
       &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
       &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
-      req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd, &
+         req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd, &
       &', median:', req%median
 
       if (req%fd .eq. -1) then
@@ -6065,9 +6065,9 @@ contains
 
       ! launch a pthread
       rc = c_pthread_create(thread=pid, &
-                            attr=c_null_ptr, &
-                            start_routine=c_funloc(fetch_global_statistics), &
-                            arg=c_loc(req))
+         attr=c_null_ptr, &
+         start_routine=c_funloc(fetch_global_statistics), &
+         arg=c_loc(req))
 
       ! calculate global statistics locally
       call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, req%first, req%last)
@@ -6256,9 +6256,9 @@ contains
 
          ! launch a pthread
          rc = c_pthread_create(thread=pid, &
-                               attr=c_null_ptr, &
-                               start_routine=c_funloc(fetch_video_frame), &
-                               arg=c_loc(fetch_req))
+            attr=c_null_ptr, &
+            start_routine=c_funloc(fetch_video_frame), &
+            arg=c_loc(fetch_req))
 
          ! join a thread
          rc = c_pthread_join(pid, c_null_ptr)
@@ -6353,25 +6353,25 @@ contains
          if (tone%flux .eq. "linear") then
             print *, "calling make_video_frame_fixed_linear"
             call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(pixels), c_loc(mask), width, tone%black, tone%slope)
+            &c_loc(pixels), c_loc(mask), width, tone%black, tone%slope)
          end if
 
          if (tone%flux .eq. "logistic") then
             print *, "calling make_video_frame_fixed_logistic"
             call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(pixels), c_loc(mask), width, tone%dmedian, tone%sensitivity)
+            &c_loc(pixels), c_loc(mask), width, tone%dmedian, tone%sensitivity)
          end if
 
          if (tone%flux .eq. "ratio") then
             print *, "calling make_video_frame_fixed_ratio"
             call make_video_frame_fixed_ratio(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity)
+            &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity)
          end if
 
          if (tone%flux .eq. "square") then
             print *, "calling make_video_frame_fixed_square"
             call make_video_frame_fixed_square(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity)
+            &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity)
          end if
 
          if (tone%flux .eq. "legacy") then
@@ -6380,7 +6380,7 @@ contains
 
             print *, "calling make_video_frame_fixed_legacy"
             call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax)
+            &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax)
          end if
 
          ! downsize {pixels, mask} into {dst_pixels, dst_mask}
@@ -6396,25 +6396,25 @@ contains
          if (tone%flux .eq. "linear") then
             print *, "calling make_video_frame_fixed_linear"
             call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%slope)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%slope)
          end if
 
          if (tone%flux .eq. "logistic") then
             print *, "calling make_video_frame_fixed_logistic"
             call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmedian, tone%sensitivity)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmedian, tone%sensitivity)
          end if
 
          if (tone%flux .eq. "ratio") then
             print *, "calling make_video_frame_fixed_ratio"
             call make_video_frame_fixed_ratio(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
          end if
 
          if (tone%flux .eq. "square") then
             print *, "calling make_video_frame_fixed_square"
             call make_video_frame_fixed_square(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
          end if
 
          if (tone%flux .eq. "legacy") then
@@ -6423,7 +6423,7 @@ contains
 
             print *, "calling make_video_frame_fixed_legacy"
             call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
-               &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmin, tone%dmax, lmin, lmax)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmin, tone%dmax, lmin, lmax)
          end if
       end if
 
@@ -6594,9 +6594,9 @@ contains
 
       ! launch a thread
       rc = c_pthread_create(thread=pid, &
-                            attr=c_null_ptr, &
-                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
-                            arg=c_loc(cluster_req))
+         attr=c_null_ptr, &
+         start_routine=c_funloc(fetch_realtime_image_spectrum), &
+         arg=c_loc(cluster_req))
 
       ! end of cluster
 
@@ -6689,11 +6689,11 @@ contains
       if (req%fd .ne. -1) then
 
          select case (req%quality)
-         case (low)
+          case (low)
             precision = ZFP_LOW_PRECISION
-         case (high)
+          case (high)
             precision = ZFP_HIGH_PRECISION
-         case default
+          case default
             precision = ZFP_MEDIUM_PRECISION
          end select
 
