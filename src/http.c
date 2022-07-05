@@ -1974,6 +1974,26 @@ static enum MHD_Result on_http_connection(void *cls,
                         if (!is_root_rank)
                         {
                             // notify the root of the progress (in a detached thread)
+                            fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
+
+                            if (req != NULL)
+                            {
+                                req->datasetid = strdup(datasetId[i]);
+
+                                if (root_ip != NULL)
+                                    req->root = strdup(root_ip);
+                                else
+                                    req->root = NULL;
+
+                                // ignore all the other fields
+                                req->filepath = NULL;
+                                req->flux = NULL;
+                                // ...
+
+                                free(req->datasetid);
+                                free(root);
+                                free(req);
+                            }
                         }
 
                         continue;
