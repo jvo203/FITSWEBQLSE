@@ -115,9 +115,9 @@ ifeq ($(CC),icc)
 endif
 
 ifeq ($(UNAME_S),Darwin)
-	INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
-	LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
-#MOD += `pkg-config --cflags json-fortran`
+	# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
+	# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
+	#MOD += `pkg-config --cflags json-fortran`
 
 	CC = gcc-11
 	FORT = gfortran-11
