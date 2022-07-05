@@ -139,3 +139,6 @@ ld: symbol(s) not found for architecture arm64
 
 # 13. NASA CFITSIO
     brew install cfitsio
+
+# 14. findent (FORTRAN formatting in VSCode)
+    brew install findent
