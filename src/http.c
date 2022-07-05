@@ -1971,7 +1971,15 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     // try to insert a NULL dataset
                     if (insert_if_not_exists(datasetId[i], NULL))
+                    {
+                        // the dataset has already been loaded
+                        if (!is_root_rank)
+                        {
+                            // notify the root of the progress (in a detached thread)
+                        }
+
                         continue;
+                    }
 
                     if (directory != NULL)
                     {
