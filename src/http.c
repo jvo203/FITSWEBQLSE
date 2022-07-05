@@ -1988,8 +1988,13 @@ static enum MHD_Result on_http_connection(void *cls,
                                 // ignore all the other fields
                                 req->filepath = NULL;
                                 req->flux = NULL;
+
+                                pthread_t tid;
+                                int stat;
+
                                 // ...
 
+                                // free all allocated memory
                                 free(req->datasetid);
                                 free(root);
                                 free(req);
