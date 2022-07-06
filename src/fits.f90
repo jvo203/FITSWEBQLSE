@@ -2012,7 +2012,7 @@ contains
 
       bSuccess = .false.
 
-      ! reserved for *CUBES* only
+      ! applicable to *FITS DATA CUBES* only
       if (item%naxes(3) .le. 1) return
 
       n = item%naxes(1)
@@ -2668,6 +2668,9 @@ contains
 
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
+
+      ! applicable to *FITS DATA CUBES* only
+      if (item%naxes(3) .le. 1) return
 
       ! submit a progress report to the root node
 
