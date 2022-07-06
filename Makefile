@@ -102,7 +102,7 @@ MOD =
 # -I/home/chris/zfp/include
 DEF = -DDEBUG -DNO_MONGOOSE_HTTP_CLIENT
 
-LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` -lsqlite3 -lcurl -lz -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265`
+LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` -lsqlite3 -lcurl -lz -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` -lpq
 # -lzfp before cfitsio
 #`pkg-config --libs json-fortran`
 
@@ -118,6 +118,9 @@ ifeq ($(UNAME_S),Darwin)
 	# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
 	# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
 	#MOD += `pkg-config --cflags json-fortran`
+
+	INC += -I/usr/local/opt/libpq/include
+	LIBS += -L/usr/local/opt/libpq/lib -lpq
 
 	CC = gcc-11
 	FORT = gfortran-11
