@@ -971,7 +971,7 @@ static enum MHD_Result on_http_connection(void *cls,
         if (freqEndStr != NULL)
             freq_end = atof(freqEndStr);
 
-        printf("[C] Accept-Encoding: %s\n", encoding);
+        // printf("[C] Accept-Encoding: %s\n", encoding);
 
         if (strstr(encoding, "gzip") != NULL)
             compress = true;
@@ -2072,7 +2072,53 @@ static enum MHD_Result on_http_connection(void *cls,
             }
             else
             {
-                // get the full path from the postgresql db
+                // get a filepath from the PostgreSQL database
+                int i;
+                char filepath[1024];
+                memset(filepath, '\0', sizeof(filepath));
+
+                for (i = 0; i < va_count; i++)
+                {
+                    // try to insert a NULL dataset
+                    if (insert_if_not_exists(datasetId[i], NULL))
+                    {
+                        // the dataset has already been loaded
+                        if (!is_root_rank)
+                        {
+                            // notify the root of the progress (in a detached thread)
+                            fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
+
+                            if (req != NULL)
+                            {
+                                req->datasetid = strdup(datasetId[i]);
+
+                                if (root_ip != NULL)
+                                    req->root = strdup(root_ip);
+                                else
+                                    req->root = NULL;
+
+                                // ignore all the other fields
+                                req->filepath = NULL;
+                                req->flux = NULL;
+
+                                pthread_t tid;
+                                int stat = pthread_create(&tid, NULL, &handle_notify_request, req);
+
+                                if (stat != 0)
+                                {
+                                    // release memory
+                                    free(req->datasetid);
+                                    free(req->root);
+                                    free(req);
+                                }
+                                else
+                                    pthread_detach(tid);
+                            }
+                        }
+
+                        continue;
+                    }
+                }
 
                 // if a file does not exist form a download URL (jvox...)
 
