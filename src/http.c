@@ -2077,8 +2077,6 @@ static enum MHD_Result on_http_connection(void *cls,
                 // if a file does not exist form a download URL (jvox...)
 
                 // then call FORTRAN with a filepath or URL
-
-                ret = http_ok(connection);
             }
         }
         else
