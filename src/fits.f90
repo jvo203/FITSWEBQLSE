@@ -2663,14 +2663,14 @@ contains
 
       type(dataset), pointer :: item
 
-      ! there is no point in sending anything if the root itself is NULL
-      if (.not. c_associated(root)) return
-
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
       ! applicable to *FITS DATA CUBES* only
       if (item%naxes(3) .le. 1) return
+
+      ! there is no point in sending anything if the root itself is NULL
+      if (.not. c_associated(root)) return
 
       ! submit a progress report to the root node
 
