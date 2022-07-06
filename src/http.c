@@ -2647,6 +2647,10 @@ void *handle_notify_request(void *ptr)
     printf("[C] datasetid: '%s', root IP: '%s'; over to FORTRAN\n", req->datasetid, req->root);
 
     // get a dataset
+    void *item = get_dataset(req->datasetid);
+
+    if (item == NULL)
+        goto quit_notify_request;
 
     // call FORTRAN
     // notify_root(item, req->root);
