@@ -119,8 +119,8 @@ ifeq ($(UNAME_S),Darwin)
 	# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
 	#MOD += `pkg-config --cflags json-fortran`
 
-	INC += -I/usr/local/opt/libpq/include
-	LIBS += -L/usr/local/opt/libpq/lib
+	INC += -I/usr/local/opt/libpq/include -I/opt/homebrew/opt/libpq/include
+	LIBS += -L/usr/local/opt/libpq/lib -L/opt/homebrew/opt/libpq/lib
 
 	CC = gcc-11
 	FORT = gfortran-11
