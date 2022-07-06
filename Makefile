@@ -120,7 +120,7 @@ ifeq ($(UNAME_S),Darwin)
 	#MOD += `pkg-config --cflags json-fortran`
 
 	INC += -I/usr/local/opt/libpq/include
-	LIBS += -L/usr/local/opt/libpq/lib -lpq
+	LIBS += -L/usr/local/opt/libpq/lib
 
 	CC = gcc-11
 	FORT = gfortran-11
