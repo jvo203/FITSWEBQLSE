@@ -2653,7 +2653,7 @@ void *handle_notify_request(void *ptr)
         goto quit_notify_request;
 
     // call FORTRAN
-    // notify_root(item, req->root);
+    notify_root(item, req->root);
 
 quit_notify_request:
     free(req->datasetid);
