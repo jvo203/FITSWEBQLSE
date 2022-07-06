@@ -117,6 +117,7 @@ struct MHD_Daemon *http_server = NULL;
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
 void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
+void *handle_notify_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *args);
 extern void *video_request(void *req);
@@ -1990,14 +1991,17 @@ static enum MHD_Result on_http_connection(void *cls,
                                 req->flux = NULL;
 
                                 pthread_t tid;
-                                int stat;
+                                int stat = pthread_create(&tid, NULL, &handle_notify_request, req);
 
-                                // ...
-
-                                // free all allocated memory
-                                free(req->datasetid);
-                                free(root);
-                                free(req);
+                                if (stat != 0)
+                                {
+                                    // release memory
+                                    free(req->datasetid);
+                                    free(req->root);
+                                    free(req);
+                                }
+                                else
+                                    pthread_detach(tid);
                             }
                         }
 
@@ -2623,6 +2627,25 @@ void *handle_fitswebql_request(void *ptr)
     free(req->datasetid);
     free(req->filepath);
     free(req->flux);
+    free(req->root);
+    free(req);
+
+    pthread_exit(NULL);
+}
+
+void *handle_notify_request(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    fits_req_t *req = (fits_req_t *)ptr;
+
+    printf("[C] datasetid: '%s', root IP: '%s'; over to FORTRAN\n", req->datasetid, req->root);
+
+    // call FORTRAN
+    // notify_root(req->datasetid, strlen(req->datasetid), req->filepath, strlen(req->filepath), req->flux, strlen(req->flux), req->root, options.cache, strlen(options.cache));
+
+    free(req->datasetid);
     free(req->root);
     free(req);
 
