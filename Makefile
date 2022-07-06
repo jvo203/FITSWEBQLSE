@@ -130,8 +130,7 @@ ifeq ($(UNAME_S),Darwin)
 	CFLAGS := $(FLAGS)
 
 	# GCC FORTRAN runtime
-	LIBS += -lgfortran -lm
-	# -L/usr/local/Cellar/gcc/11.3.0/lib/gcc/11
+	LIBS += -L${HOMEBREW_PREFIX}/Cellar/gcc/11.3.0_2/lib/gcc/11 -lgfortran -lm 
 
 	# try Intel compilers for a change! ... linking problems ...
 	# CC = icc
