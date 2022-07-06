@@ -2662,6 +2662,7 @@ contains
       type(C_PTR), intent(in), value :: ptr, root
 
       type(dataset), pointer :: item
+      integer :: i, counter, repeat
 
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
@@ -2671,6 +2672,16 @@ contains
 
       ! there is no point in sending anything if the root itself is NULL
       if (.not. c_associated(root)) return
+
+      ! if no planes have been allocated do nothing
+      if (.not. allocated(item%compressed)) return
+
+      ! count the number of valid 2D planes (associated pointers)
+      counter = 0
+
+      do i=1, item%naxes(3)
+         if (associated(item%compressed(i)%ptr)) counter = counter + 1
+      end do
 
       ! submit a progress report to the root node
 
