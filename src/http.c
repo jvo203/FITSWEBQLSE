@@ -27,6 +27,9 @@
 // ZFP floating-point compressor
 #include <zfp.h>
 
+// PostgreSQL
+#include <libpq-fe.h>
+
 #include "json.h"
 #include "http.h"
 #include "mjson.h"
