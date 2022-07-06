@@ -131,6 +131,7 @@ void *fetch_realtime_image_spectrum(void *ptr);
 int submit_progress(char *root, char *datasetid, int len, int progress);
 
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, int len);
+extern void notify_root(void *item, char *root);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
 extern void image_request(void *item, int width, int height, int fd);
 extern int get_error_status(void *item);
@@ -2642,8 +2643,10 @@ void *handle_notify_request(void *ptr)
 
     printf("[C] datasetid: '%s', root IP: '%s'; over to FORTRAN\n", req->datasetid, req->root);
 
+    // get a dataset
+
     // call FORTRAN
-    // notify_root(req->datasetid, strlen(req->datasetid), req->filepath, strlen(req->filepath), req->flux, strlen(req->flux), req->root, options.cache, strlen(options.cache));
+    // notify_root(item, req->root);
 
     free(req->datasetid);
     free(req->root);
