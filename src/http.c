@@ -2641,6 +2641,9 @@ void *handle_notify_request(void *ptr)
 
     fits_req_t *req = (fits_req_t *)ptr;
 
+    if (req->root == NULL)
+        goto quit_notify_request;
+
     printf("[C] datasetid: '%s', root IP: '%s'; over to FORTRAN\n", req->datasetid, req->root);
 
     // get a dataset
@@ -2648,6 +2651,7 @@ void *handle_notify_request(void *ptr)
     // call FORTRAN
     // notify_root(item, req->root);
 
+quit_notify_request:
     free(req->datasetid);
     free(req->root);
     free(req);
