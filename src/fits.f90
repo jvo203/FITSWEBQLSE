@@ -2001,7 +2001,7 @@ contains
       integer, allocatable :: indices(:)
 
       ! OpenMP
-      integer :: max_threads, counter, repeat
+      integer :: max_threads, counter
       logical thread_bSuccess
 
       integer(kind=4) :: n, m ! input dimensions
@@ -2139,25 +2139,7 @@ contains
       bSuccess = thread_bSuccess
 
       ! submit any left-overs
-7000  repeat = 0
-      do while (counter .gt. 0)
-
-         counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
-
-         ! wait a while upon a submission failure
-         if (counter .gt. 0) then
-            repeat = repeat + 1
-            print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
-            call sleep(1) ! 1 sec.
-         end if
-
-         ! break the loop after 60s
-         if (repeat .gt. 60) then
-            print *, item%datasetid, ":: breaking the final 'submit_progress' loop, counter = ", counter
-            exit
-         end if
-
-      end do
+7000  call submit_progress_counter(item, counter, root)
 
       if (index_unit .ne. -1) close (index_unit)
       if (data_unit .ge. 0) call closefd(data_unit)
@@ -2662,7 +2644,7 @@ contains
       type(C_PTR), intent(in), value :: ptr, root
 
       type(dataset), pointer :: item
-      integer :: i, counter, repeat
+      integer :: i, counter
 
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
@@ -2684,8 +2666,41 @@ contains
       end do
 
       ! submit a progress report to the root node
+      call submit_progress_counter(item, counter, root)
 
    end subroutine notify_root
+
+   subroutine submit_progress_counter(item, counter, root)
+      type(dataset), pointer, intent(in) :: item
+      integer, intent(inout) :: counter
+      type(C_PTR), intent(in), value :: root
+
+      integer :: repeat
+
+      ! there is no point in sending anything if the root itself is NULL
+      if (.not. c_associated(root)) return
+
+      repeat = 0
+      do while (counter .gt. 0)
+
+         counter = counter - submit_progress(root, item%datasetid, size(item%datasetid), counter)
+
+         ! wait a while upon a submission failure
+         if (counter .gt. 0) then
+            repeat = repeat + 1
+            print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
+            call sleep(1) ! 1 sec.
+         end if
+
+         ! break the loop after 60s
+         if (repeat .gt. 60) then
+            print *, item%datasetid, ":: breaking the final 'submit_progress' loop, counter = ", counter
+            exit
+         end if
+
+      end do
+
+   end subroutine submit_progress_counter
 
    subroutine update_progress_C(ptr, progress) BIND(C, name='update_progress_C')
       type(C_PTR), intent(in), value :: ptr
