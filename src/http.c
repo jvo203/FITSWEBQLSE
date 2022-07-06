@@ -1173,7 +1173,7 @@ static enum MHD_Result on_http_connection(void *cls,
         return ret;
     }
 
-    if (strstr(url, "/timeout/") != NULL)
+    if (strstr(url, "/timeout2/") != NULL)
     {
         char *datasetId = strrchr(url, '/');
 
