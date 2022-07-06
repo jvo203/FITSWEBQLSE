@@ -116,7 +116,7 @@ endif
 
 ifeq ($(UNAME_S),Darwin)
 	# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
-	# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
+	# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib
 	#MOD += `pkg-config --cflags json-fortran`
 
 	INC += -I${HOMEBREW_PREFIX}/opt/libpq/include
