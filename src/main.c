@@ -418,10 +418,10 @@ static int handler(void *user, const char *section, const char *name,
 
     if (MATCH("fitswebql", "local"))
     {
-        if (MATCH(value, "true"))
+        if (strcmp(value, "true") == 0)
             options->local = true;
 
-        if (MATCH(value, "false"))
+        if (strcmp(value, "false") == 0)
             options->local = false;
     }
     else if (MATCH("fitswebql", "timeout"))
