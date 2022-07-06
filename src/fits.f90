@@ -2650,7 +2650,6 @@ contains
       type(dataset), pointer :: item
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       if (progress .gt. 0) call update_progress(item, progress)
@@ -2658,6 +2657,21 @@ contains
       call get_channel_range(item, startindex, endindex, status)
 
    end subroutine get_channel_range_C
+
+   subroutine notify_root(ptr, root) BIND(C, name='notify_root')
+      type(C_PTR), intent(in), value :: ptr, root
+
+      type(dataset), pointer :: item
+
+      ! there is no point in sending anything if the root itself is NULL
+      if (.not. c_associated(root)) return
+
+      if (.not. c_associated(ptr)) return
+      call c_f_pointer(ptr, item)
+
+      ! submit a progress report to the root node
+
+   end subroutine notify_root
 
    subroutine update_progress_C(ptr, progress) BIND(C, name='update_progress_C')
       type(C_PTR), intent(in), value :: ptr
