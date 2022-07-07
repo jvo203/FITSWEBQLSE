@@ -146,3 +146,8 @@ ld: symbol(s) not found for architecture arm64
 # 15. FORTRAN formatting in Visual Studio Code
     brew install fortran-language-server
     brew install findent
+
+# 16. set HOMEBREW_PREFIX
+    if the "HOMEBREW_PREFIX" environment variable is not set add the following line to .zshrc
+    
+    export HOMEBREW_PREFIX="/usr/local"
