@@ -1,5 +1,9 @@
 # 0. Homebrew
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    if the "HOMEBREW_PREFIX" environment variable is not set add the following line to .zshrc (the actual path might depend on your system):
+
+    export HOMEBREW_PREFIX="/usr/local"
 
 # 1. gcc + gfortran
     brew install gfortran
@@ -146,8 +150,3 @@ ld: symbol(s) not found for architecture arm64
 # 15. FORTRAN formatting in Visual Studio Code
     brew install fortran-language-server
     brew install findent
-
-# 16. set HOMEBREW_PREFIX
-    if the "HOMEBREW_PREFIX" environment variable is not set add the following line to .zshrc (the actual path might depend on your system):
-
-    export HOMEBREW_PREFIX="/usr/local"
