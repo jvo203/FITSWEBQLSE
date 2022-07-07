@@ -1962,14 +1962,14 @@ static enum MHD_Result on_http_connection(void *cls,
             else
                 ret = http_acknowledge(connection);
 
+            int i;
+            char filepath[1024];
+            memset(filepath, '\0', sizeof(filepath));
+
             // pass the filepath to FORTRAN
             if (options.local)
             {
                 // make a filepath from the dir/extension
-                int i;
-                char filepath[1024];
-                memset(filepath, '\0', sizeof(filepath));
-
                 for (i = 0; i < va_count; i++)
                 {
                     // try to insert a NULL dataset
@@ -2076,10 +2076,6 @@ static enum MHD_Result on_http_connection(void *cls,
             else
             {
                 // get a filepath from the PostgreSQL database
-                int i;
-                char filepath[1024];
-                memset(filepath, '\0', sizeof(filepath));
-
                 for (i = 0; i < va_count; i++)
                 {
                     // try to insert a NULL dataset
