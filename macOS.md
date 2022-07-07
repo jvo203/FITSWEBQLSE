@@ -148,6 +148,6 @@ ld: symbol(s) not found for architecture arm64
     brew install findent
 
 # 16. set HOMEBREW_PREFIX
-    if the "HOMEBREW_PREFIX" environment variable is not set add the following line to .zshrc
-    
+    if the "HOMEBREW_PREFIX" environment variable is not set add the following line to .zshrc (the actual path might depend on your system):
+
     export HOMEBREW_PREFIX="/usr/local"
