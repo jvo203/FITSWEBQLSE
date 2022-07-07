@@ -2117,6 +2117,10 @@ static enum MHD_Result on_http_connection(void *cls,
 
                         continue;
                     }
+
+                    // # try the FITS home first
+                    // filepath = FITS_HOME * "/" * f * ".fits"
+                    // printf("[C] FITS filepath:\t%s\n", filepath);
                 }
 
                 // if a file does not exist form a download URL (jvox...)
