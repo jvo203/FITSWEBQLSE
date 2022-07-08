@@ -2073,7 +2073,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 // directory/extension should not be freed (libmicrohttpd does that)
             }
-
+            else
             {
                 // get a filepath from the PostgreSQL database
                 for (i = 0; i < va_count; i++)
