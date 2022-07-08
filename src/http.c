@@ -133,6 +133,8 @@ void *fetch_global_statistics(void *ptr);
 void *fetch_image(void *ptr);
 void *fetch_realtime_image_spectrum(void *ptr);
 int submit_progress(char *root, char *datasetid, int len, int progress);
+
+PGconn *jvo_db_connect(char *db);
 char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id);
 
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, int len);
@@ -4554,6 +4556,29 @@ void *http_update_timestamp(void *arg)
     pthread_exit(NULL);
 }
 
+PGconn *jvo_db_connect(char *db)
+{
+    PGconn *jvo_db = NULL;
+    char strConn[1024] = "";
+
+    // std::string conn_str =
+    //     "dbname=" + db + " host=" + JVO_HOST + " user=" + JVO_USER;
+
+    jvo_db = PQconnectdb(strConn);
+
+    if (PQstatus(jvo_db) != CONNECTION_OK)
+    {
+        fprintf(stderr, "PostgreSQL connection failed: %s\n",
+                PQerrorMessage(jvo_db));
+        PQfinish(jvo_db);
+        jvo_db = NULL;
+    }
+    else
+        printf("[C] PostgreSQL connection successful.\n");
+
+    return jvo_db;
+}
+
 char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
 {
     char path[1024] = "";
@@ -4571,7 +4596,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
         char *pos = strchr(table, '.');
 
         if (pos == NULL)
-            strncat(path, (const char *)PQgetvalue(res, 0, 0), sizeof(path) - 1);
+            strcat(path, (const char *)PQgetvalue(res, 0, 0));
         else
         {
             // convert a part of table to uppercase and append it to the path
@@ -4584,8 +4609,10 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
                 strncat(path, &ch, 1);
             }
 
-            // strcat(path,  boost::algorithm::to_upper_copy(table.substr(0, pos)) + "/" +
-            //         std::string((const char *)PQgetvalue(res, 0, 0)));
+            ch = '/';
+            strncat(path, &ch, 1);
+
+            strcat(path, (const char *)PQgetvalue(res, 0, 0));
         }
     }
 
