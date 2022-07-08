@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <math.h>
@@ -4572,9 +4573,15 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
         if (pos == NULL)
             strncat(path, (const char *)PQgetvalue(res, 0, 0), sizeof(path) - 1);
         else
-            ;
-        // strcat(path,  boost::algorithm::to_upper_copy(table.substr(0, pos)) + "/" +
-        //         std::string((const char *)PQgetvalue(res, 0, 0)));
+        {
+            // convert (in-place) table to uppercase
+            int i;
+            while (table[i])
+                table[i] = toupper(table[i]);
+
+            // strcat(path,  boost::algorithm::to_upper_copy(table.substr(0, pos)) + "/" +
+            //         std::string((const char *)PQgetvalue(res, 0, 0)));
+        }
     }
 
     PQclear(res);
