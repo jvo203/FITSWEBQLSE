@@ -2610,8 +2610,10 @@ function poll_progress(datasetId, index) {
 }
 
 function close_websocket_connections() {
-	for (let index = 1; index <= va_count; index++)
+	for (let index = 1; index <= va_count; index++) {
+		wsConn[index - 1].close();
 		wsConn[index - 1] = null;
+	}
 }
 
 function open_websocket_connection(_datasetId, index) {
