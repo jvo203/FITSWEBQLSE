@@ -2029,7 +2029,14 @@ static enum MHD_Result on_http_connection(void *cls,
                     else
                         snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, datasetId[i], extension);
 
+                    struct stat st;
+                    int status = stat(filepath, &st);
+
                     // if the file does not exist get the JVO path from PostgreSQL
+                    if (status == -1)
+                    {
+                        printf("[C] '%s' does not exist, trying a JVO path next.\n", filepath);
+                    }
 
                     // if there is still no luck, as a last resort try a download URL (jvox...)
 
