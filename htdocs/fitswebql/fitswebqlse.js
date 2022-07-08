@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-06-21.1";
+	return "JS2022-07-08.0";
 }
 
 function uuidv4() {
@@ -2607,6 +2607,11 @@ function poll_progress(datasetId, index) {
 	xmlhttp.responseType = 'json';
 	xmlhttp.timeout = 0;
 	xmlhttp.send();
+}
+
+function close_websocket_connections() {
+	for (let index = 1; index <= va_count; index++)
+		wsConn[index - 1] = null;
 }
 
 function open_websocket_connection(_datasetId, index) {
@@ -10654,7 +10659,8 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 500) {
 			hide_hourglass();
-			show_critical_error();
+			//show_critical_error();
+			show_not_found();
 		}
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 502) {
@@ -12636,7 +12642,7 @@ function show_critical_error() {
 		.append("div")
 		.attr("class", "container timeout");
 
-	var title = div.append("h1")
+	div.append("h1")
 		.style("margin-top", "20%")
 		.style("color", "red")
 		.attr("align", "center")
@@ -12649,6 +12655,8 @@ function show_critical_error() {
 		.attr("class", "links")
 		.attr("href", "mailto:help_desk@jvo.nao.ac.jp?subject=" + votable.getAttribute('data-server-string') + " error [" + votable.getAttribute('data-server-version') + "/" + get_js_version() + "]&body=Error accessing " + datasetId)
 		.html('PLEASE INFORM AN ADMINISTRATOR');
+
+	close_websocket_connections();
 }
 
 function show_unsupported_media_type() {
@@ -12671,6 +12679,8 @@ function show_unsupported_media_type() {
 		.attr("align", "center")
 		//.style("color", "red")
 		.text("FITSWEBQL SUPPORTS ONLY FITS DATA");
+
+	close_websocket_connections();
 }
 
 function show_not_found() {
@@ -12683,7 +12693,7 @@ function show_not_found() {
 		.append("div")
 		.attr("class", "container timeout");
 
-	var title = div.append("h1")
+	div.append("h1")
 		.style("margin-top", "20%")
 		.style("color", "red")
 		.attr("align", "center")
@@ -12704,6 +12714,7 @@ function show_not_found() {
 		//.style("color", "red")
 		.text("THE REMOTE URL MAY BE INCORRECT/OUT-OF-DATE");
 
+	close_websocket_connections();
 }
 
 function show_welcome() {
