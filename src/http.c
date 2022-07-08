@@ -4568,8 +4568,7 @@ PGconn *jvo_db_connect(char *db)
 
     if (PQstatus(jvo_db) != CONNECTION_OK)
     {
-        fprintf(stderr, "PostgreSQL connection failed: %s\n",
-                PQerrorMessage(jvo_db));
+        fprintf(stderr, "[C] PostgreSQL connection failed: %s\n", PQerrorMessage(jvo_db));
         PQfinish(jvo_db);
         jvo_db = NULL;
     }
