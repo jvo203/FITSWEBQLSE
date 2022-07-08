@@ -12669,7 +12669,7 @@ function show_unsupported_media_type() {
 		.append("div")
 		.attr("class", "container timeout");
 
-	var title = div.append("h1")
+	div.append("h1")
 		.style("margin-top", "25%")
 		.style("color", "red")
 		.attr("align", "center")
