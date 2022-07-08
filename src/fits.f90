@@ -2948,6 +2948,15 @@ contains
          ! start the timer
          call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
+         ! lock the mutex
+         rc = c_pthread_mutex_lock(item%timestamp_mtx)
+
+         ! re-set the timeout timer
+         call system_clock(item%timestamp)
+
+         ! unlock the mutex
+         rc = c_pthread_mutex_unlock(item%timestamp_mtx)
+
          call set_error_status(item, .true.)
       end if
 
