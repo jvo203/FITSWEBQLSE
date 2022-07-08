@@ -2945,7 +2945,7 @@ contains
 
       ! set the error status upon failure
       if (.not. bSuccess) then
-         ! start the timer
+         ! start the timer and set the timestamp
          call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
          ! lock the mutex
