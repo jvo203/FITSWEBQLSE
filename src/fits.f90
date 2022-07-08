@@ -921,10 +921,23 @@ contains
       dataset_timeout = 0
 
       if (.not. c_associated(ptr)) return
+      call c_f_pointer(ptr, item)
 
-      ! remove datasets with errors
+      ! remove datasets with errors only after a 1 minute delay
+      ! so that <get_image_spectrum> gets a chance to reply with http_not_found()
       if (get_error_status(ptr) .eq. 1) then
-         dataset_timeout = 1
+         ! lock the mutex
+         rc = c_pthread_mutex_lock(item%timestamp_mtx)
+
+         ! take a time measurement
+         call system_clock(finish)
+         elapsed = real(finish - item%timestamp)/real(item%crate)
+
+         if (elapsed .gt. 60) dataset_timeout = 1
+
+         ! unlock the mutex
+         rc = c_pthread_mutex_unlock(item%timestamp_mtx)
+
          return
       end if
 
@@ -933,8 +946,6 @@ contains
          dataset_timeout = 0
          return
       end if
-
-      call c_f_pointer(ptr, item)
 
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%timestamp_mtx)
@@ -2927,11 +2938,11 @@ contains
 
       print *, "finished loading ", item%datasetid, ", bSuccess: ", bSuccess, ", elapsed time: ", elapsed, " [s]"
 
-      ! set the error status upon failure
-      if (.not. bSuccess) call set_error_status(item, .true.)
-
       ! reset the timeout clock
       call reset_clock(item)
+
+      ! set the error status upon failure
+      if (.not. bSuccess) call set_error_status(item, .true.)
 
    end subroutine load_fits_file
 
