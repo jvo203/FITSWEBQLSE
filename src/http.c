@@ -4576,8 +4576,12 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
         {
             // convert (in-place) table to uppercase
             int i;
+
             while (table[i])
+            {
                 table[i] = toupper(table[i]);
+                i++;
+            }
 
             // strcat(path,  boost::algorithm::to_upper_copy(table.substr(0, pos)) + "/" +
             //         std::string((const char *)PQgetvalue(res, 0, 0)));
