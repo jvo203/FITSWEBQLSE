@@ -2034,7 +2034,7 @@ static enum MHD_Result on_http_connection(void *cls,
                     // then call FORTRAN with a filepath or URL
                 }
 
-                printf("[C] FITS filepath:\t%s\n", filepath);
+                printf("[C] FITS filepath: '%s'\n", filepath);
 
                 // C -> FORTRAN
                 fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
