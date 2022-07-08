@@ -2927,6 +2927,9 @@ contains
 
       print *, "finished loading ", item%datasetid, ", bSuccess: ", bSuccess, ", elapsed time: ", elapsed, " [s]"
 
+      ! set the error status upon failure
+      if (.not. bSuccess) call set_error_status(item, .true.)
+
       ! reset the timeout clock
       call reset_clock(item)
 
