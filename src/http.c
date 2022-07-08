@@ -2029,7 +2029,9 @@ static enum MHD_Result on_http_connection(void *cls,
                     else
                         snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, datasetId[i], extension);
 
-                    // if a file does not exist form a download URL (jvox...)
+                    // if the file does not exist get the JVO path from PostgreSQL
+
+                    // if there is still no luck, as a last resort try a download URL (jvox...)
 
                     // then call FORTRAN with a filepath or URL
                 }
