@@ -132,6 +132,7 @@ void *fetch_global_statistics(void *ptr);
 void *fetch_image(void *ptr);
 void *fetch_realtime_image_spectrum(void *ptr);
 int submit_progress(char *root, char *datasetid, int len, int progress);
+char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id);
 
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, int len);
 extern void notify_root(void *item, char *root);
@@ -4550,4 +4551,33 @@ void *http_update_timestamp(void *arg)
     free(arg);
 
     pthread_exit(NULL);
+}
+
+char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
+{
+    char path[1024] = "";
+    char strSQL[1024] = "";
+
+    sprintf(strSQL, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
+
+    PGresult *res = PQexec(jvo_db, strSQL);
+    int status = PQresultStatus(res);
+
+    if (PQresultStatus(res) == PGRES_TUPLES_OK)
+    {
+        sprintf(path, "%s/%s/", options.db_home, db);
+
+        char *pos = strchr(table, '.');
+
+        if (pos == NULL)
+            strncat(path, (const char *)PQgetvalue(res, 0, 0), sizeof(path) - 1);
+        else
+            ;
+        // strcat(path,  boost::algorithm::to_upper_copy(table.substr(0, pos)) + "/" +
+        //         std::string((const char *)PQgetvalue(res, 0, 0)));
+    }
+
+    PQclear(res);
+
+    return strndup(path, sizeof(path) - 1);
 }
