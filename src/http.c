@@ -2013,14 +2013,16 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 // handle both local and server cases in one go
                 if (directory != NULL)
-                {
+                { // options.local == true
+
                     if (extension == NULL)
                         snprintf(filepath, sizeof(filepath), "%s/%s.fits", directory, datasetId[i]);
                     else
                         snprintf(filepath, sizeof(filepath), "%s/%s.%s", directory, datasetId[i], extension);
                 }
                 else
-                {
+                { // options.local == false
+
                     // # try the FITS home first
                     // filepath = FITS_HOME * "/" * f * ".fits"
 
