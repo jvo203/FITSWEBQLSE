@@ -2023,8 +2023,11 @@ static enum MHD_Result on_http_connection(void *cls,
                 else
                 { // options.local == false
 
-                    // # try the FITS home first
-                    // filepath = FITS_HOME * "/" * f * ".fits"
+                    // try the <FITS_HOME> first
+                    if (extension == NULL)
+                        snprintf(filepath, sizeof(filepath), "%s/%s.fits", options.fits_home, datasetId[i]);
+                    else
+                        snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, datasetId[i], extension);
 
                     // if a file does not exist form a download URL (jvox...)
 
