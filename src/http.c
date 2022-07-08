@@ -2120,12 +2120,61 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     // # try the FITS home first
                     // filepath = FITS_HOME * "/" * f * ".fits"
-                    // printf("[C] FITS filepath:\t%s\n", filepath);
+
+                    // if a file does not exist form a download URL (jvox...)
+
+                    // then call FORTRAN with a filepath or URL
+
+                    printf("[C] FITS filepath:\t%s\n", filepath);
+
+                    // C -> FORTRAN
+                    fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
+
+                    if (req != NULL)
+                    {
+                        req->datasetid = strdup(datasetId[i]);
+                        req->filepath = strndup(filepath, sizeof(filepath));
+
+                        if (flux != NULL)
+                            req->flux = strdup(flux);
+                        else
+                            req->flux = strdup("NULL");
+
+                        if (db != NULL)
+                            if (strstr(db, "hsc") != NULL)
+                            {
+                                free(req->flux);
+                                req->flux = strdup("ratio");
+                            }
+
+                        if (table != NULL)
+                            if (strstr(table, "fugin") != NULL)
+                            {
+                                free(req->flux);
+                                req->flux = strdup("logistic");
+                            }
+
+                        if (root_ip != NULL)
+                            req->root = strdup(root_ip);
+                        else
+                            req->root = NULL;
+
+                        pthread_t tid;
+                        int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
+
+                        if (stat != 0)
+                        {
+                            // release memory
+                            free(req->datasetid);
+                            free(req->filepath);
+                            free(req->flux);
+                            free(req->root);
+                            free(req);
+                        }
+                        else
+                            pthread_detach(tid);
+                    }
                 }
-
-                // if a file does not exist form a download URL (jvox...)
-
-                // then call FORTRAN with a filepath or URL
             }
         }
         else
