@@ -2019,71 +2019,114 @@ static enum MHD_Result on_http_connection(void *cls,
                         else
                             snprintf(filepath, sizeof(filepath), "%s/%s.%s", directory, datasetId[i], extension);
                     }
-                }
-            }
-            else
-            {
-                // try the FITS home first
-                // filepath = FITS_HOME * "/" * f * ".fits"
 
+                    printf("[C] FITS filepath:\t%s\n", filepath);
+
+                    // C -> FORTRAN
+                    fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
+
+                    if (req != NULL)
+                    {
+                        req->datasetid = strdup(datasetId[i]);
+                        req->filepath = strndup(filepath, sizeof(filepath));
+
+                        if (flux != NULL)
+                            req->flux = strdup(flux);
+                        else
+                            req->flux = strdup("NULL");
+
+                        if (db != NULL)
+                            if (strstr(db, "hsc") != NULL)
+                            {
+                                free(req->flux);
+                                req->flux = strdup("ratio");
+                            }
+
+                        if (table != NULL)
+                            if (strstr(table, "fugin") != NULL)
+                            {
+                                free(req->flux);
+                                req->flux = strdup("logistic");
+                            }
+
+                        if (root_ip != NULL)
+                            req->root = strdup(root_ip);
+                        else
+                            req->root = NULL;
+
+                        pthread_t tid;
+                        int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
+
+                        if (stat != 0)
+                        {
+                            // release memory
+                            free(req->datasetid);
+                            free(req->filepath);
+                            free(req->flux);
+                            free(req->root);
+                            free(req);
+                        }
+                        else
+                            pthread_detach(tid);
+                    }
+                }
+
+                // directory/extension should not be freed (libmicrohttpd does that)
+            }
+
+            {
                 // get a filepath from the PostgreSQL database
+                for (i = 0; i < va_count; i++)
+                {
+                    // try to insert a NULL dataset
+                    if (insert_if_not_exists(datasetId[i], NULL))
+                    {
+                        // the dataset has already been loaded
+                        if (!is_root_rank)
+                        {
+                            // notify the root of the progress (in a detached thread)
+                            fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
+
+                            if (req != NULL)
+                            {
+                                req->datasetid = strdup(datasetId[i]);
+
+                                if (root_ip != NULL)
+                                    req->root = strdup(root_ip);
+                                else
+                                    req->root = NULL;
+
+                                // ignore all the other fields
+                                req->filepath = NULL;
+                                req->flux = NULL;
+
+                                pthread_t tid;
+                                int stat = pthread_create(&tid, NULL, &handle_notify_request, req);
+
+                                if (stat != 0)
+                                {
+                                    // release memory
+                                    free(req->datasetid);
+                                    free(req->root);
+                                    free(req);
+                                }
+                                else
+                                    pthread_detach(tid);
+                            }
+                        }
+
+                        continue;
+                    }
+
+                    // # try the FITS home first
+                    // filepath = FITS_HOME * "/" * f * ".fits"
+                    // printf("[C] FITS filepath:\t%s\n", filepath);
+                }
 
                 // if a file does not exist form a download URL (jvox...)
 
                 // then call FORTRAN with a filepath or URL
-            };
-
-            printf("[C] FITS filepath:\t%s\n", filepath);
-
-            // C -> FORTRAN
-            fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
-
-            if (req != NULL)
-            {
-                req->datasetid = strdup(datasetId[i]);
-                req->filepath = strndup(filepath, sizeof(filepath));
-
-                if (flux != NULL)
-                    req->flux = strdup(flux);
-                else
-                    req->flux = strdup("NULL");
-
-                if (db != NULL)
-                    if (strstr(db, "hsc") != NULL)
-                    {
-                        free(req->flux);
-                        req->flux = strdup("ratio");
-                    }
-
-                if (table != NULL)
-                    if (strstr(table, "fugin") != NULL)
-                    {
-                        free(req->flux);
-                        req->flux = strdup("logistic");
-                    }
-
-                if (root_ip != NULL)
-                    req->root = strdup(root_ip);
-                else
-                    req->root = NULL;
-
-                pthread_t tid;
-                int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
-
-                if (stat != 0)
-                {
-                    // release memory
-                    free(req->datasetid);
-                    free(req->filepath);
-                    free(req->flux);
-                    free(req->root);
-                    free(req);
-                }
-                else
-                    pthread_detach(tid);
             }
-
-            // directory/extension should not be freed (libmicrohttpd does that)
         }
         else
             ret = http_not_found(connection);
