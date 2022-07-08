@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-08.0";
+	return "JS2022-07-08.1";
 }
 
 function uuidv4() {
@@ -2611,8 +2611,21 @@ function poll_progress(datasetId, index) {
 
 function close_websocket_connections() {
 	for (let index = 1; index <= va_count; index++) {
-		wsConn[index - 1].close();
-		wsConn[index - 1] = null;
+		if (wsConn[index - 1] != null) {
+			try {
+				wsConn[index - 1].close();
+			} catch (_) {
+			};
+
+			wsConn[index - 1] = null;
+		}
+	}
+
+	// clear all timeouts (poll_progress in particular)
+	var id = window.setTimeout(function () { }, 0);
+
+	while (id--) {
+		window.clearTimeout(id); // will do nothing if no timeout with id is present
 	}
 }
 
