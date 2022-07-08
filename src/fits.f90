@@ -938,6 +938,8 @@ contains
          ! unlock the mutex
          rc = c_pthread_mutex_unlock(item%timestamp_mtx)
 
+         print *, "elapsed:", elapsed, "dataset_timeout:", dataset_timeout
+
          return
       end if
 
@@ -2942,7 +2944,12 @@ contains
       call reset_clock(item)
 
       ! set the error status upon failure
-      if (.not. bSuccess) call set_error_status(item, .true.)
+      if (.not. bSuccess) then
+         ! start the timer
+         call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
+
+         call set_error_status(item, .true.)
+      end if
 
    end subroutine load_fits_file
 
