@@ -938,8 +938,6 @@ contains
          ! unlock the mutex
          rc = c_pthread_mutex_unlock(item%timestamp_mtx)
 
-         print *, "elapsed:", elapsed, "dataset_timeout:", dataset_timeout
-
          return
       end if
 
