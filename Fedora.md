@@ -22,6 +22,8 @@
 
 	sudo dnf install zeromq-devel czmq-devel
 
+	sudo dnf install libpq-devel
+
 	sudo dnf install ispc # (not needed yet)
 
 	sudo dnf install zlib-devel
