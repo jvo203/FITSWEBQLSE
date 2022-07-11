@@ -4636,7 +4636,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
             }
 
             ch = '/';
-            strncat(path, &ch, 1);
+            memcpy(path, &ch, 1);
 
             strcat(path, (const char *)PQgetvalue(res, 0, 0));
         }
