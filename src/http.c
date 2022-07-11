@@ -2029,9 +2029,9 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     // try the <FITS_HOME> first
                     if (extension == NULL)
-                        snprintf(filepath, sizeof(filepath), "%s/%s.fits", options.fits_home, datasetId[i]);
+                        snprintf(filepath, sizeof(filepath) - 1, "%s/%s.fits", options.fits_home, datasetId[i]);
                     else
-                        snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, datasetId[i], extension);
+                        snprintf(filepath, sizeof(filepath) - 1, "%s/%s.%s", options.fits_home, datasetId[i], extension);
 
                     int status = access(filepath, R_OK);
 
@@ -2040,7 +2040,26 @@ static enum MHD_Result on_http_connection(void *cls,
                     {
                         printf("[C] '%s' cannot be accessed for reading, trying a JVO path next.\n", filepath);
 
-                        // get_jvo_path();
+                        char *path = NULL;
+                        char dataid[256] = "";
+
+                        if (strcmp(db, "alma") == 0)
+                            snprintf(dataid, sizeof(dataid) - 1, "%s_00_00_00", datasetId[i]);
+                        else
+                            snprintf(dataid, sizeof(dataid) - 1, "%s", datasetId[i]);
+
+                        PGconn *jvo_db = jvo_db_connect(db);
+
+                        if (jvo_db != NULL && table != "")
+                        {
+                            path = get_jvo_path(jvo_db, db, table, dataid);
+                            snprintf(filepath, sizeof(filepath) - 1, "%s/%s", options.db_home, path);
+                        }
+
+                        if (jvo_db != NULL)
+                            PQfinish(jvo_db);
+
+                        free(path);
                     }
 
                     // if there is still no luck, as a last resort try a download URL (jvox...)
@@ -4562,6 +4581,11 @@ PGconn *jvo_db_connect(char *db)
     char strConn[1024] = "";
 
     // std::string conn_str = "dbname=" + db + " host=" + JVO_HOST + " user=" + JVO_USER;
+
+    if (options.password == NULL)
+        snprintf(strConn, sizeof(strConn) - 1, "dbname= %s host=%s user=%s", db, options.host, options.user);
+    else
+        snprintf(strConn, sizeof(strConn) - 1, "dbname= %s host=%s user=%s password=%s", db, options.host, options.user, options.password);
 
     jvo_db = PQconnectdb(strConn);
 
