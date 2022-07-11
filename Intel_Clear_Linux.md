@@ -158,7 +158,14 @@
 
     Add
 
-        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
+        either
+
+        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH
+        
+        or with PostgreSQL compiled manually:
+
+        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/local/pgsql/lib/pkgconfig:$PKG_CONFIG_PATH
+        
         export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
 
     to .bashrc and re-login
