@@ -4683,7 +4683,8 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
         }
     }
 
-    PQclear(res);
+    if (res != NULL)
+        PQclear(res);
 
     return strndup(path, sizeof(path) - 1);
 }
