@@ -4616,7 +4616,7 @@ PGconn *jvo_db_connect(char *db)
 char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
 {
     char path[1024];
-    char strSQL[1024] = "";
+    char strSQL[1024];
 
     int no_rows = 0;
     int no_fields = 0;
