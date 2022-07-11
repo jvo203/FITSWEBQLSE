@@ -225,8 +225,8 @@ int main(int argc, char *argv[])
 
     options.user = strdup("jvo");
     options.password = NULL;
-    options.host = strdup("p10.vo.nao.ac.jp");
-    options.port = 5433;
+    options.host = strdup("localhost");
+    options.port = 5432;
     options.db_home = strdup("/home");
 
     options.root = NULL;
