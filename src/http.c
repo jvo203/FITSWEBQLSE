@@ -4617,7 +4617,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
     PGresult *res = PQexec(jvo_db, strSQL);
     PQresultStatus(res);
 
-    if (PQresultStatus(res) == PGRES_TUPLES_OK)
+    if (res != NULL && PQresultStatus(res) == PGRES_TUPLES_OK)
     {
         char *pos = strchr(table, '.');
 
