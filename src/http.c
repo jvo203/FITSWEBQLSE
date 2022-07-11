@@ -4561,8 +4561,7 @@ PGconn *jvo_db_connect(char *db)
     PGconn *jvo_db = NULL;
     char strConn[1024] = "";
 
-    // std::string conn_str =
-    //     "dbname=" + db + " host=" + JVO_HOST + " user=" + JVO_USER;
+    // std::string conn_str = "dbname=" + db + " host=" + JVO_HOST + " user=" + JVO_USER;
 
     jvo_db = PQconnectdb(strConn);
 
@@ -4583,14 +4582,14 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
     char path[1024] = "";
     char strSQL[1024] = "";
 
-    snprintf(strSQL, sizeof(strSQL), "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
+    snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
 
     PGresult *res = PQexec(jvo_db, strSQL);
     int status = PQresultStatus(res);
 
     if (PQresultStatus(res) == PGRES_TUPLES_OK)
     {
-        sprintf(path, "%s/%s/", options.db_home, db);
+        snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
 
         char *pos = strchr(table, '.');
 
