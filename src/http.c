@@ -4584,8 +4584,6 @@ PGconn *jvo_db_connect(char *db)
     PGconn *jvo_db = NULL;
     char strConn[1024] = "";
 
-    // std::string conn_str = "dbname=" + db + " host=" + JVO_HOST + " user=" + JVO_USER;
-
     if (options.password == NULL)
         snprintf(strConn, sizeof(strConn) - 1, "dbname=%s host=%s user=%s", db, options.host, options.user);
     else
