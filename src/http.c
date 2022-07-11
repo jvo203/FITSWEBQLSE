@@ -2050,7 +2050,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                         PGconn *jvo_db = jvo_db_connect(db);
 
-                        if (jvo_db != NULL && table != "")
+                        if (jvo_db != NULL && table != NULL)
                         {
                             path = get_jvo_path(jvo_db, db, table, dataid);
                             snprintf(filepath, sizeof(filepath) - 1, "%s", path);
