@@ -4615,9 +4615,12 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
     snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
 
     PGresult *res = PQexec(jvo_db, strSQL);
-    PQresultStatus(res);
+    int no_rows = 0;
 
     if (res != NULL && PQresultStatus(res) == PGRES_TUPLES_OK)
+        no_rows = PQntuples(res);
+
+    if (no_rows >= 1)
     {
         char *pos = strchr(table, '.');
 
