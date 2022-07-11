@@ -4613,7 +4613,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
     snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
 
     PGresult *res = PQexec(jvo_db, strSQL);
-    int status = PQresultStatus(res);
+    PQresultStatus(res);
 
     if (PQresultStatus(res) == PGRES_TUPLES_OK)
     {
