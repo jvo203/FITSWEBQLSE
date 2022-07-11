@@ -38,7 +38,7 @@
 
     sudo make install
 
-    append /usr/local/pgsql/lib/pkgconfig to PKG_CONFIG_PATH in .bashrc
+    adjust LD_LIBRARY_PATH and PKG_CONFIG_PATH in .bashrc (see point 15.)
 
 # 7. jemalloc    
     wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
@@ -158,15 +158,9 @@
 
     Add
 
-        either
-
-        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH
-        
-        or with PostgreSQL compiled manually:
-
         export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/local/pgsql/lib/pkgconfig:$PKG_CONFIG_PATH
         
-        export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:$LD_LIBRARY_PATH
+        export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64:/usr/local/pgsql/lib/:$LD_LIBRARY_PATH
 
     to .bashrc and re-login
 
