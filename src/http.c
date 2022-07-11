@@ -4585,9 +4585,9 @@ PGconn *jvo_db_connect(char *db)
     char strConn[1024] = "";
 
     if (options.password == NULL)
-        snprintf(strConn, sizeof(strConn) - 1, "dbname=%s host=%s user=%s", db, options.host, options.user);
+        snprintf(strConn, sizeof(strConn) - 1, "dbname=%s host=%s port=%" PRIu32 " user=%s", db, options.host, options.port, options.user);
     else
-        snprintf(strConn, sizeof(strConn) - 1, "dbname=%s host=%s user=%s password=%s", db, options.host, options.user, options.password);
+        snprintf(strConn, sizeof(strConn) - 1, "dbname=%s host=%s port=%" PRIu32 " user=%s password=%s", db, options.host, options.port, options.user, options.password);
 
     printf("[C] %s\n", strConn);
 
