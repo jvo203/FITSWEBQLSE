@@ -32,9 +32,7 @@
 
     cd postgresql-14.4/
 
-    ./configure --with-openssl --without-readline
-
-    cd src/interfaces/libpq
+    ./configure --with-openssl --without-readline    
 
     make
 
