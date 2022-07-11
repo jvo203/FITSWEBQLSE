@@ -4583,7 +4583,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
     char path[1024] = "";
     char strSQL[1024] = "";
 
-    sprintf(strSQL, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
+    snprintf(strSQL, sizeof(strSQL), "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
 
     PGresult *res = PQexec(jvo_db, strSQL);
     int status = PQresultStatus(res);
