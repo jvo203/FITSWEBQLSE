@@ -4646,7 +4646,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
             else
                 snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
 
-            if (PQgetisnull(res, 0, 0) == 0)
+            if (!PQgetisnull(res, 0, 0))
             {
                 const char *value = PQgetvalue(res, 0, 0);
 
@@ -4673,7 +4673,13 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
             ch = '/';
             memcpy(dst + i, &ch, 1);
 
-            strcat(path, (const char *)PQgetvalue(res, 0, 0));
+            if (!PQgetisnull(res, 0, 0))
+            {
+                const char *value = PQgetvalue(res, 0, 0);
+
+                if (value != NULL)
+                    strcat(path, value);
+            }
         }
     }
 
