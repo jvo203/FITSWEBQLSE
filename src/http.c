@@ -4611,6 +4611,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
     char path[1024];
     char strSQL[1024] = "";
 
+    memset(path, 0, sizeof(path));
     snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
 
     PGresult *res = PQexec(jvo_db, strSQL);
@@ -4618,15 +4619,21 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
 
     if (PQresultStatus(res) == PGRES_TUPLES_OK)
     {
-        memset(path, 0, sizeof(path));
-        snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
-
         char *pos = strchr(table, '.');
 
         if (pos == NULL)
+        {
+            if (strcmp(db, "spcam") == 0 || strcmp(db, "moircs") == 0)
+                snprintf(path, sizeof(path) - 1, "%s/subaru/%s/mosaic/", options.db_home, db);
+            else
+                snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
+
             strcat(path, (const char *)PQgetvalue(res, 0, 0));
+        }
         else
         {
+            snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
+
             // convert a part of table to uppercase and append it to the path
             int i = 0;
             char ch;
