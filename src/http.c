@@ -2043,17 +2043,24 @@ static enum MHD_Result on_http_connection(void *cls,
                         char *path = NULL;
                         char dataid[256] = "";
 
-                        if (strcmp(db, "alma") == 0)
-                            snprintf(dataid, sizeof(dataid) - 1, "%s_00_00_00", datasetId[i]);
-                        else
-                            snprintf(dataid, sizeof(dataid) - 1, "%s", datasetId[i]);
+                        PGconn *jvo_db = NULL;
 
-                        PGconn *jvo_db = jvo_db_connect(db);
+                        if (db != NULL)
+                        {
+                            if (strcmp(db, "alma") == 0)
+                                snprintf(dataid, sizeof(dataid) - 1, "%s_00_00_00", datasetId[i]);
+                            else
+                                snprintf(dataid, sizeof(dataid) - 1, "%s", datasetId[i]);
+
+                            jvo_db = jvo_db_connect(db);
+                        }
 
                         if (jvo_db != NULL && table != NULL)
                         {
                             path = get_jvo_path(jvo_db, db, table, dataid);
-                            snprintf(filepath, sizeof(filepath) - 1, "%s", path);
+
+                            if (path != NULL)
+                                snprintf(filepath, sizeof(filepath) - 1, "%s", path);
                         }
 
                         int status = access(filepath, R_OK);
@@ -4611,16 +4618,24 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
     char path[1024];
     char strSQL[1024] = "";
 
+    int no_rows = 0;
+    int no_fields = 0;
+
+    if (jvo_db == NULL || db == NULL || table == NULL || data_id == NULL)
+        return NULL;
+
     memset(path, 0, sizeof(path));
     snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
 
     PGresult *res = PQexec(jvo_db, strSQL);
-    int no_rows = 0;
 
     if (res != NULL && PQresultStatus(res) == PGRES_TUPLES_OK)
+    {
         no_rows = PQntuples(res);
+        no_fields = PQnfields(res);
+    }
 
-    if (no_rows >= 1)
+    if (no_rows == 1 && no_fields == 1)
     {
         char *pos = strchr(table, '.');
 
@@ -4631,7 +4646,10 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
             else
                 snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
 
-            strcat(path, (const char *)PQgetvalue(res, 0, 0));
+            const char *value = PQgetvalue(res, 0, 0);
+
+            if (value != NULL)
+                strcat(path, value);
         }
         else
         {
