@@ -2053,7 +2053,7 @@ static enum MHD_Result on_http_connection(void *cls,
                         if (jvo_db != NULL && table != "")
                         {
                             path = get_jvo_path(jvo_db, db, table, dataid);
-                            snprintf(filepath, sizeof(filepath) - 1, "%s/%s", options.db_home, path);
+                            snprintf(filepath, sizeof(filepath) - 1, "%s", path);
                         }
                         else
                         {
