@@ -22,7 +22,23 @@
     sudo swupd bundle-add devpkg-sqlite-autoconf
 
 # 6. PostgreSQL
-    sudo swupd bundle-add devpkg-postgresql
+    sudo swupd bundle-add devpkg-postgresql --> forget about this line, a version greater than 10 is needed for SCRAM authentication
+
+    sudo swupd bundle-add devpkg-openssl
+
+    wget https://ftp.postgresql.org/pub/source/v14.4/postgresql-14.4.tar.bz2
+
+    tar xjf postgresql-14.4.tar.bz2
+
+    cd postgresql-14.4/
+
+    ./configure --with-openssl --without-readline
+
+    cd src/interfaces/libpq
+
+    make
+
+    sudo make install
 
 # 7. jemalloc    
     wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
