@@ -4636,6 +4636,9 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
                 strncat(path, &ch, 1);
             }
 
+            /*ch = '/';
+            strncat(path, &ch, 1);*/
+
             char slash[2] = "/";
             strncat(path, slash, 1);
 
