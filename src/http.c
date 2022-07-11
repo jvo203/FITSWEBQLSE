@@ -2055,6 +2055,10 @@ static enum MHD_Result on_http_connection(void *cls,
                             path = get_jvo_path(jvo_db, db, table, dataid);
                             snprintf(filepath, sizeof(filepath) - 1, "%s/%s", options.db_home, path);
                         }
+                        else
+                        {
+                            // the last resort: form a URL using jvox
+                        }
 
                         if (jvo_db != NULL)
                             PQfinish(jvo_db);
