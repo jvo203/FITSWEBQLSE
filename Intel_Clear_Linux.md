@@ -32,7 +32,7 @@
 
     cd postgresql-14.4/
 
-    ./configure --with-openssl --without-readline    
+    ./configure --with-openssl --without-readline
 
     make
 
