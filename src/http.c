@@ -4630,17 +4630,14 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
             // convert a part of table to uppercase and append it to the path
             int i = 0;
             char ch;
+
             char *dst = path + strlen(path);
 
             while (table + i != pos)
             {
                 ch = (char)toupper(table[i]);
-                // strncat(path, &ch, 1);
                 memcpy(dst + (i++), &ch, 1);
             }
-
-            /*char slash[2] = "/";
-            strncat(path, slash, 1);*/
 
             ch = '/';
             memcpy(dst + i, &ch, 1);
