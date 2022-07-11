@@ -4589,8 +4589,6 @@ PGconn *jvo_db_connect(char *db)
     else
         snprintf(strConn, sizeof(strConn) - 1, "dbname=%s host=%s port=%" PRIu32 " user=%s password=%s", db, options.host, options.port, options.user, options.password);
 
-    printf("[C] %s\n", strConn);
-
     jvo_db = PQconnectdb(strConn);
 
     if (PQstatus(jvo_db) != CONNECTION_OK)
