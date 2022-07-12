@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-12.1";
+	return "JS2022-07-12.2";
 }
 
 function uuidv4() {
@@ -3105,7 +3105,6 @@ function open_websocket_connection(_datasetId, index) {
 							}
 
 							log += ' vidFPS = ' + Math.round(vidFPS);
-							//wsConn[0].send('[debug] ' + log);
 
 							if (videoFrame[index - 1] != null)
 								d3.select("#fps").text('video: ' + Math.round(vidFPS) + ' fps, bitrate: ' + Math.round(bitrate) + ' kbps');//, η: ' + eta.toFixed(4) + ' var: ' + variance
@@ -5497,6 +5496,8 @@ function cube_refresh(index) {
 	//send an [image] request to the server    
 	if (wsConn[index - 1].readyState == 1)
 		wsConn[index - 1].send(JSON.stringify(request));
+
+	setup_window_timeout();
 }
 
 function display_scale_range_ui(called_from_menu = false) {
@@ -7507,6 +7508,8 @@ function setup_csv_export() {
 			if (wsConn[index].readyState == 1)
 				wsConn[index].send(JSON.stringify(request));
 		}
+
+		setup_window_timeout();
 	};
 }
 
@@ -8109,6 +8112,8 @@ function x_axis_mouseenter(offset) {
 	shortcut.add("Left", x_axis_left);
 	shortcut.add("Right", x_axis_right);
 	shortcut.add("Enter", go_to_splatalogue);
+
+	setup_window_timeout();
 }
 
 function x_axis_mouseleave() {
@@ -8216,6 +8221,8 @@ function x_axis_mouseleave() {
 	modal.style.display = "none";
 
 	display_legend();
+
+	setup_window_timeout();
 }
 
 function x_axis_mousemove(offset) {
@@ -8440,6 +8447,8 @@ function x_axis_move(offset) {
 	};
 
 	zoom_molecules(mol_freq);
+
+	setup_window_timeout();
 }
 
 function zoom_molecules(freq) {
@@ -9870,6 +9879,8 @@ function setup_image_selection() {
 				if (wsConn[index].readyState == 1)
 					wsConn[index].send(JSON.stringify(msg));
 			}
+
+			setup_window_timeout();
 		})
 		.on("mouseleave", (event) => {
 			clearTimeout(idleMouse);
@@ -9884,6 +9895,8 @@ function setup_image_selection() {
 				if (wsConn[index].readyState == 1)
 					wsConn[index].send(JSON.stringify(msg));
 			}
+
+			setup_window_timeout();
 
 			// clear the ViewportCanvas in WebGL
 			if (viewport != null) {
@@ -10371,6 +10384,8 @@ function setup_image_selection() {
 							wsConn[index].send(JSON.stringify(request));
 					}
 				}
+
+				setup_window_timeout();
 			}
 
 			idleMouse = setTimeout(imageTimeout, 250);//was 250ms + latency
@@ -11370,6 +11385,8 @@ function videoTimeout(freq) {
 		if (wsConn[index].readyState == 1)
 			wsConn[index].send(JSON.stringify(request));
 	}
+
+	setup_window_timeout();
 }
 
 function blink() {
@@ -11484,6 +11501,8 @@ function tileTimeout(force = false) {
 		stop_blinking = false;
 		blink();
 	}
+
+	setup_window_timeout();
 }
 
 function imageTimeout() {
@@ -11675,6 +11694,8 @@ function imageTimeout() {
 		if (wsConn[index].readyState == 1)
 			wsConn[index].send(JSON.stringify(request));
 	}
+
+	setup_window_timeout();
 
 	if (moving || streaming)
 		return;
