@@ -710,6 +710,17 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             break;
         }
 
+        // handle CSV spectrum export requests
+        if (strcmp(type, "spectrum") == 0)
+        {
+            struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+
+            if (req == NULL)
+                break;
+
+            free(req);
+        }
+
         // handle real-time spectrum/viewport requests
         if (strcmp(type, "realtime_image_spectrum") == 0)
         {
