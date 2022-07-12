@@ -2436,16 +2436,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "var idleSearch = -1;"
               "var idleResize = -1;"
               "window.onresize = resizeMe;"
-              "window.onbeforeunload = function() {"
-              "    if (wsConn != null)"
-              "    {"
-              "        for (let i = 0; i < va_count; i++)"
-              "            wsConn[i].close();"
-              "    }"
-              ""
-              "          if (wsVideo != null)"
-              "             wsVideo.close();"
-              "    };"
+              "window.onbeforeunload = close_websocket_connections;"
               "mainRenderer(); </script>\n");
 
     g_string_append(html, "</body></html>");
