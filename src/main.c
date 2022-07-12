@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
     options.port = 5432;
     options.db_home = strdup("/home");
 
-    options.url_host = strdup("localhost");
+    options.url_host = strdup("http://localhost");
     options.url_port = 80;
 
     options.root = NULL;
