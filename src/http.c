@@ -2063,16 +2063,16 @@ static enum MHD_Result on_http_connection(void *cls,
                                 snprintf(filepath, sizeof(filepath) - 1, "%s", path);
                         }
 
+                        if (jvo_db != NULL)
+                            PQfinish(jvo_db);
+
                         int status = access(filepath, R_OK);
 
                         if (status == -1)
                         {
                             // the last resort: try to download a FITS file from jvox
-                            snprintf(filepath, sizeof(filepath) - 1, "%s", path);
+                            snprintf(filepath, sizeof(filepath) - 1, "ftp://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_host, options.url_port, db, dataid);
                         }
-
-                        if (jvo_db != NULL)
-                            PQfinish(jvo_db);
 
                         free(path);
                     }
