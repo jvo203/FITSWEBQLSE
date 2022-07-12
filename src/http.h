@@ -63,6 +63,7 @@ typedef struct
     char *db_home;
 
     // download from URL
+    char *url_protocol;
     char *url_host;
     uint32_t url_port;
 

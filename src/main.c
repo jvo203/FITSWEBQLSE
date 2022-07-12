@@ -229,7 +229,8 @@ int main(int argc, char *argv[])
     options.port = 5432;
     options.db_home = strdup("/home");
 
-    options.url_host = strdup("http://localhost");
+    options.url_protocol = strdup("http");
+    options.url_host = strdup("localhost");
     options.url_port = 80;
 
     options.root = NULL;
@@ -393,6 +394,7 @@ int main(int argc, char *argv[])
     free(options.db_home);
     free(options.root);
     free(config_file);
+    free(options.url_protocol);
     free(options.url_host);
 
     x265_cleanup();
@@ -479,6 +481,11 @@ static int handler(void *user, const char *section, const char *name,
     else if (MATCH("postgresql", "port"))
     {
         options->port = atoi(value);
+    }
+    else if (MATCH("download", "protocol"))
+    {
+        free(options->url_protocol);
+        options->url_protocol = strdup(value);
     }
     else if (MATCH("download", "host"))
     {
