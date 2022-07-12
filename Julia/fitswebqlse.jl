@@ -1586,16 +1586,7 @@ function serveFITS(request::HTTP.Request)
         "var ROOT_PATH = '/fitswebql/';",
         "var idleResize = -1;",
         "window.onresize = resizeMe;",
-        "window.onbeforeunload = function() {",
-        "    if (wsConn != null)",
-        "    {",
-        "        for (let i = 0; i < va_count; i++)",
-        "            wsConn[i].close();",
-        "    }",
-        "",
-        "          if (wsVideo != null)",
-        "             wsVideo.close();",
-        "    };",
+        "window.onbeforeunload = close_websocket_connections;"        
         "mainRenderer(); </script>\n",
     )
 
