@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-12.0";
+	return "JS2022-07-12.1";
 }
 
 function uuidv4() {
@@ -2608,6 +2608,13 @@ function poll_progress(datasetId, index) {
 	xmlhttp.timeout = 0;
 	xmlhttp.send();
 }
+
+function setup_window_timeout() {
+	window.clearTimeout(idleWindow); // cancel any previous timeouts
+
+	let timeout = 60 * 60 * 1000; // 1h
+	idleWindow = window.setTimeout(show_timeout, timeout);
+};
 
 function close_websocket_connections() {
 	for (let index = 1; index <= va_count; index++) {
@@ -10694,11 +10701,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 
-			/*if (va_count == 1) {
-				open_websocket_connection(datasetId, 1);
-			} else {
-				open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
-			}*/
+			setup_window_timeout();
 
 			// wait for WebAssembly to get compiled
 			Module.ready
