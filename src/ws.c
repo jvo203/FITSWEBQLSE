@@ -742,8 +742,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 // printf("key: %.*s, value: %.*s\n", klen, wm->data.ptr + koff, vlen, wm->data.ptr + voff);
 
                 // 'ra'
+                if (strncmp(wm->data.ptr + koff, "\"ra\"", klen) == 0)
+                    req->ra = strndup(wm->data.ptr + voff + 1, vlen - 1); // skip the surrounding ""
 
                 // 'dec'
+                if (strncmp(wm->data.ptr + koff, "\"dec\"", klen) == 0)
+                    req->dec = strndup(wm->data.ptr + voff + 1, vlen - 1); // skip the surrounding ""
 
                 // 'x1'
                 if (strncmp(wm->data.ptr + koff, "\"x1\"", klen) == 0)
