@@ -2071,7 +2071,7 @@ static enum MHD_Result on_http_connection(void *cls,
                         if (status == -1)
                         {
                             // the last resort: try to download a FITS file from jvox
-                            snprintf(filepath, sizeof(filepath) - 1, "%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_host, options.url_port, db, dataid);
+                            snprintf(filepath, sizeof(filepath) - 1, "%s://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_protocol, options.url_host, options.url_port, db, dataid);
                         }
 
                         free(path);
