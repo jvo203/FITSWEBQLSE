@@ -719,21 +719,19 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 break;
 
             // default values just in case ...
-            req->dx = 0;
-            req->image = false;
-            req->quality = medium;
+            req->ra = NULL;
+            req->dec = NULL;
             req->x1 = -1;
             req->x2 = -1;
             req->y1 = -1;
             req->y2 = -1;
-            req->width = 0;
-            req->height = 0;
             req->beam = circle;
             req->intensity = integrated;
             req->frame_start = 0.0;
             req->frame_end = 0.0;
             req->ref_freq = 0.0;
-            req->median = NAN;
+            req->deltaV = 0.0;
+            req->rest = false;
             req->seq_id = 0;
             req->timestamp = 0.0;
             req->fd = -1;
@@ -743,21 +741,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             {
                 // printf("key: %.*s, value: %.*s\n", klen, wm->data.ptr + koff, vlen, wm->data.ptr + voff);
 
-                // 'quality'
-                if (strncmp(wm->data.ptr + koff, "\"quality\"", klen) == 0)
-                {
-                    // low
-                    if (strncmp(wm->data.ptr + voff, "\"low\"", vlen) == 0)
-                        req->quality = low;
+                // 'ra'
 
-                    // medium
-                    if (strncmp(wm->data.ptr + voff, "\"medium\"", vlen) == 0)
-                        req->quality = medium;
-
-                    // high
-                    if (strncmp(wm->data.ptr + voff, "\"heigh\"", vlen) == 0)
-                        req->quality = high;
-                }
+                // 'dec'
 
                 // 'x1'
                 if (strncmp(wm->data.ptr + koff, "\"x1\"", klen) == 0)
@@ -774,14 +760,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 // 'y2'
                 if (strncmp(wm->data.ptr + koff, "\"y2\"", klen) == 0)
                     req->y2 = atoi2(wm->data.ptr + voff, vlen);
-
-                // 'width'
-                if (strncmp(wm->data.ptr + koff, "\"width\"", klen) == 0)
-                    req->width = atoi2(wm->data.ptr + voff, vlen);
-
-                // 'height'
-                if (strncmp(wm->data.ptr + koff, "\"height\"", klen) == 0)
-                    req->height = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'beam'
                 if (strncmp(wm->data.ptr + koff, "\"beam\"", klen) == 0)
@@ -819,6 +797,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (strncmp(wm->data.ptr + koff, "\"ref_freq\"", klen) == 0)
                     req->ref_freq = atof2(wm->data.ptr + voff, vlen);
 
+                // 'deltaV'
+                if (strncmp(wm->data.ptr + koff, "\"deltaV\"", klen) == 0)
+                    req->deltaV = atof2(wm->data.ptr + voff, vlen);
+
+                // 'rest'
+                if (strncmp(wm->data.ptr + koff, "\"rest\"", klen) == 0)
+                    if (strncmp(wm->data.ptr + voff, "true", vlen) == 0)
+                        req->rest = true;
+
                 // 'seq_id'
                 if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
                     req->seq_id = atoi2(wm->data.ptr + voff, vlen);
@@ -830,6 +817,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // printf("[C] CSV spectrum export: dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2, req.width, req.height, req.beam, req.intensity, req.frame_start, req.frame_end, req.ref_freq, req.seq_id, req.timestamp);
 
+            free(req->ra);
+            free(req->dec);
             free(req);
 
             break;
