@@ -11655,6 +11655,8 @@ function imageTimeout() {
 					if (wsConn[index].readyState == 1)
 						wsConn[index].send(JSON.stringify(request));
 				}
+
+				setup_window_timeout();
 			};
 		}
 	}
