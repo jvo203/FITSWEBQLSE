@@ -2067,7 +2067,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
                         if (status == -1)
                         {
-                            // the last resort: form a URL using jvox
+                            // the last resort: try to download a FITS file from jvox
+                            snprintf(filepath, sizeof(filepath) - 1, "%s", path);
                         }
 
                         if (jvo_db != NULL)
