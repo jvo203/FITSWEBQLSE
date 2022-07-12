@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-08.1";
+	return "JS2022-07-12.0";
 }
 
 function uuidv4() {
@@ -12637,7 +12637,7 @@ function show_timeout() {
 		.append("div")
 		.attr("class", "container timeout");
 
-	var title = div.append("h1")
+	div.append("h1")
 		.style("margin-top", "20%")
 		.attr("align", "center")
 		.text("60 min. inactivity time-out");
@@ -12645,6 +12645,8 @@ function show_timeout() {
 	div.append("h2")
 		.attr("align", "center")
 		.text("PLEASE RELOAD THE PAGE");
+
+	close_websocket_connections();
 }
 
 function show_critical_error() {
