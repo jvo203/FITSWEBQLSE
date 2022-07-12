@@ -46,6 +46,31 @@ struct image_spectrum_request
     void *ptr;
 };
 
+struct spectrum_request
+{
+    // input
+    char *ra;
+    char *dec;
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    enum zoom_shape beam;
+    enum intensity_mode intensity;
+    double frame_start;
+    double frame_end;
+    double ref_freq;
+    double deltaV;
+    bool rest;
+    int seq_id;
+    float timestamp;
+
+    // output (the 'write' end of a Unix pipe)
+    int fd;
+
+    void *ptr;
+};
+
 struct video_request
 {
     // input
