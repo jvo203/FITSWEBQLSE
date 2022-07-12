@@ -62,6 +62,10 @@ typedef struct
     uint32_t port;
     char *db_home;
 
+    // download from URL
+    char *url_host;
+    uint32_t url_port;
+
     // cluster
     char *root;
 } options_t;
