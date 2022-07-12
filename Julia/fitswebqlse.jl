@@ -1584,9 +1584,11 @@ function serveFITS(request::HTTP.Request)
         "var USER_SELFRQ = 0.0;",
         "var USER_DELTAV = 0.0;",
         "var ROOT_PATH = '/fitswebql/';",
+        "var idleSearch = -1;",
         "var idleResize = -1;",
+        "var idleWindow = -1;",
         "window.onresize = resizeMe;",
-        "window.onbeforeunload = close_websocket_connections;"        
+        "window.onbeforeunload = close_websocket_connections;",
         "mainRenderer(); </script>\n",
     )
 
