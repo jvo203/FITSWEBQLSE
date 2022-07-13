@@ -1059,6 +1059,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             else
             {
                 free(req);
+                free(resp);
                 printf("[C] cannot find '%s' in the hash table\n", datasetId);
             }
 
