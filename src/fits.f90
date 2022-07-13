@@ -5491,9 +5491,30 @@ contains
       type(C_PTR), intent(in), value :: user
 
       type(dataset), pointer :: item
-      type(image_spectrum_request_f), pointer :: req
+      type(spectrum_request_f), pointer :: req
 
+      ! cluster
+      type(image_spectrum_request_t), target :: cluster_req
+      type(c_pthread_t) :: pid
+      integer :: rc
 
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
+      call c_f_pointer(req%ptr, item)
+
+      ! only applicable to FITS data cubes
+      if (.not. allocated(item%compressed)) goto 8000
+
+8000  if (req%fd .ne. -1) call close_pipe(req%fd)
+      nullify (item)
+      call free(req%ra)
+      call free(req%dec)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+
+      return
    end subroutine spectrum_request_simd
 
    recursive subroutine realtime_image_spectrum_request_simd(user) BIND(C, name='realtime_image_spectrum_request_simd')
