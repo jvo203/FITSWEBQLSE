@@ -56,6 +56,7 @@ extern void *realtime_image_spectrum_request(void *req);
 extern void *realtime_image_spectrum_request_simd(void *req);
 extern void *ws_image_spectrum_request(void *req);
 extern void *video_request_simd(void *req);
+void *spectrum_response(void *ptr);
 void *realtime_image_spectrum_response(void *ptr);
 void *ws_image_spectrum_response(void *ptr);
 void *video_response(void *ptr);

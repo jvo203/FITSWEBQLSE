@@ -1922,6 +1922,14 @@ free_mem:
     pthread_exit(NULL);
 }
 
+void *spectrum_response(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    pthread_exit(NULL);
+}
+
 void *realtime_image_spectrum_response(void *ptr)
 {
     if (ptr == NULL)
