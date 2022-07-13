@@ -1986,7 +1986,52 @@ void *spectrum_response(void *ptr)
 
             if (compressed_size > 0)
             {
-                size_t msg_len;
+                size_t msg_len = sizeof(float) + 3 * sizeof(uint32_t) + compressed_size;
+
+                char *payload = malloc(msg_len);
+
+                if (payload != NULL)
+                {
+                    float ts = resp->timestamp;
+                    uint32_t id = 0;
+                    uint32_t msg_type = 6;
+                    uint32_t payload_len = compressed_size;
+
+                    size_t ws_offset = 0;
+
+                    memcpy((char *)payload + ws_offset, &ts, sizeof(float));
+                    ws_offset += sizeof(float);
+
+                    memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+                    ws_offset += sizeof(uint32_t);
+
+                    memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+                    ws_offset += sizeof(uint32_t);
+
+                    memcpy((char *)payload + ws_offset, &payload_len, sizeof(uint32_t));
+                    ws_offset += sizeof(uint32_t);
+
+                    memcpy((char *)payload + ws_offset, compressed_csv, compressed_size);
+                    ws_offset += compressed_size;
+
+                    if (ws_offset != msg_len)
+                        printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+                    // create a UDP message
+                    struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+
+                    // pass the message over to mongoose via a communications channel
+                    ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+                    if (sent != sizeof(struct websocket_message))
+                    {
+                        printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+                        // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                        free(msg.session_id);
+                        free(payload);
+                    };
+                }
             }
 
             free(compressed_csv);
