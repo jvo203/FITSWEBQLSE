@@ -1963,7 +1963,11 @@ void *spectrum_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    // TO-DO: prepare a WebSocket payload (LZ4 compress)
+    // TO-DO: prepare a WebSocket payload
+    if (offset > 0)
+    {
+        // LZ4-compress the CSV content
+    }
 
     // release the incoming buffer
     free(buf);
