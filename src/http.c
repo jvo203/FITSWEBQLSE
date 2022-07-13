@@ -2066,10 +2066,8 @@ static enum MHD_Result on_http_connection(void *cls,
                         if (jvo_db != NULL)
                             PQfinish(jvo_db);
 
-                        int status = access(filepath, R_OK);
-
                         // the last resort: try to download a FITS file from jvox
-                        if (status == -1)
+                        if (access(filepath, R_OK) == -1)
                         {
                             // disabled as FITSIO handling of downloads is inefficient
                             // TO-DO: a manual cluster-aware implementation is needed
