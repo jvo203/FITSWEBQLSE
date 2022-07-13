@@ -5498,7 +5498,7 @@ contains
 
       integer :: first, last, length
       integer :: max_threads, frame, tid
-      integer(c_int) :: x1, x2, y1, y2, average
+      integer(c_int) :: x1, x2, y1, y2, width, height, average
       real(c_float) :: cx, cy, r, r2
       real :: cdelt3
 
@@ -5542,6 +5542,9 @@ contains
          average = 0
       end if
 
+      width = item%naxes(1)
+      height = item%naxes(2)
+
       ! allocate and zero-out the spectrum
       allocate (spectrum(first:last))
       spectrum = 0.0
@@ -5550,6 +5553,36 @@ contains
 
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
+      !$omp& PRIVATE(tid, frame)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
+      do frame = first, last
+
+         ! skip frames for which there is no data on this node
+         if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+         ! get a current OpenMP thread (starting from 0 as in C)
+         tid = 1 + OMP_GET_THREAD_NUM()
+
+         if (req%beam .eq. square) then
+            spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
+            &width, height, item%frame_min(frame), item%frame_max(frame),&
+            &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
+         end if
+
+         if (req%beam .eq. circle) then
+            spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
+            &width, height, item%frame_min(frame), item%frame_max(frame), &
+            &x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
+         end if
+
+      end do
+      !$omp END DO
+      !$omp END PARALLEL
+
+      print *, spectrum
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
