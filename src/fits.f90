@@ -5513,6 +5513,12 @@ contains
       if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
 
+      print *, 'CSV spectrum for ', item%datasetid,&
+      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
+      &', beam:', req%beam, ', intensity:', req%intensity, ', frame_start:', req%frame_start,&
+      & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
+      &', rest:', req%rest, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
+
       ! only applicable to FITS data cubes
       if (.not. allocated(item%compressed)) goto 8000
 
