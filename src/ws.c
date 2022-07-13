@@ -1,6 +1,9 @@
 #include <math.h>
 #include <string.h>
 
+// LZ4 character streams compressor
+#include <lz4hc.h>
+
 #include "http.h"
 #include "ws.h"
 #include "mjson.h"
@@ -1966,7 +1969,28 @@ void *spectrum_response(void *ptr)
     // process the received data, prepare a WebSocket response
     if (offset > 0)
     {
+        char *compressed_csv = NULL;
+        int compressed_size, worst_size;
+
         // LZ4-compress the CSV payload
+        worst_size = LZ4_compressBound(offset);
+
+        compressed_csv = (char *)malloc(worst_size);
+
+        if (compressed_csv != NULL)
+        {
+            // compress CSV as much as possible
+            compressed_size = LZ4_compress_HC((const char *)buf, compressed_csv, offset, worst_size, LZ4HC_CLEVEL_MAX);
+
+            printf("[C] CSV length: %zu; compressed: %d bytes\n", offset, compressed_size);
+
+            if (compressed_size > 0)
+            {
+                size_t msg_len;
+            }
+
+            free(compressed_csv);
+        }
     }
 
     // release the incoming buffer
