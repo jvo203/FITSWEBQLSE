@@ -5529,6 +5529,12 @@ contains
 
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
 
+      ! manually override image dimensions if they are not available
+      if (req%x1 .eq. -1) req%x1 = 1
+      if (req%y1 .eq. -1) req%y1 = 1
+      if (req%x2 .eq. -1) req%x2 = item%naxes(1)
+      if (req%y2 .eq. -1) req%y2 = item%naxes(2)
+
       ! sanity checks
       x1 = max(1, req%x1)
       y1 = max(1, req%y1)
