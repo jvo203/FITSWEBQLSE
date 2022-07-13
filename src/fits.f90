@@ -5497,6 +5497,10 @@ contains
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, cluster_spectrum
 
       integer :: first, last, length
+      integer :: max_threads, frame, tid
+      integer(c_int) :: x1, x2, y1, y2, average
+      real(c_float) :: cx, cy, r, r2
+      real :: cdelt3
 
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
@@ -5518,6 +5522,34 @@ contains
       length = last - first + 1
 
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      ! sanity checks
+      x1 = max(1, req%x1)
+      y1 = max(1, req%y1)
+      x2 = min(item%naxes(1), req%x2)
+      y2 = min(item%naxes(2), req%y2)
+
+      ! calculate the centre and squared radius
+      cx = 0.5*abs(x1 + x2)
+      cy = 0.5*abs(y1 + y2)
+      ! r = 0.5*min(abs(x2 - x1), abs(y2 - y1))
+      r = min(abs(cx - x1), abs(cy - y1)) + 1
+      r2 = r*r
+
+      if (req%intensity .eq. mean) then
+         average = 1
+      else
+         average = 0
+      end if
+
+      ! allocate and zero-out the spectrum
+      allocate (spectrum(first:last))
+      spectrum = 0.0
+
+      call get_cdelt3(item, cdelt3)
+
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
