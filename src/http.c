@@ -2033,10 +2033,8 @@ static enum MHD_Result on_http_connection(void *cls,
                     else
                         snprintf(filepath, sizeof(filepath) - 1, "%s/%s.%s", options.fits_home, datasetId[i], extension);
 
-                    int status = access(filepath, R_OK);
-
                     // if the file does not exist get the JVO path from PostgreSQL
-                    if (status == -1)
+                    if (access(filepath, R_OK) == -1)
                     {
                         printf("[C] '%s' cannot be accessed for reading, trying a JVO path next.\n", filepath);
 
