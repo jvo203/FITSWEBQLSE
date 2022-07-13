@@ -821,6 +821,18 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             printf("[C] CSV spectrum request: ra: %s, dec: %s, x1: %d, y1: %d, x2: %d, y2: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, seq_id: %d, timestamp: %f\n", req->ra, req->dec, req->x1, req->y1, req->x2, req->y2, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->seq_id, req->timestamp);
 
+            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+
+            if (resp == NULL)
+            {
+                free(req->ra);
+                free(req->dec);
+                free(req);
+                break;
+            }
+
+            free(resp);
+
             free(req->ra);
             free(req->dec);
             free(req);
