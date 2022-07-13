@@ -59,6 +59,24 @@ module fits
 
    end type image_spectrum_request_f
 
+   type, bind(c) :: spectrum_request_f
+      ! input
+      type(C_PTR) :: ra, dec
+      integer(c_int) :: x1, y1, x2, y2
+      integer(kind(circle)) :: beam
+      integer(kind(medium)) :: intensity
+      real(c_double) :: frame_start, frame_end, ref_freq, deltaV
+      logical(kind=c_bool) :: rest
+      integer(c_int) :: seq_id
+      real(c_float) :: timestamp
+
+      ! output
+      integer(kind=c_int) :: fd
+
+      type(C_PTR) :: ptr
+
+   end type spectrum_request_f
+
    type, bind(c) :: video_request_f
       ! input
       logical(kind=c_bool) :: keyframe
