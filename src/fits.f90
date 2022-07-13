@@ -5493,6 +5493,11 @@ contains
       type(dataset), pointer :: item
       type(spectrum_request_f), pointer :: req
 
+      ! output variables
+      real(kind=c_float), dimension(:), allocatable, target :: spectrum, cluster_spectrum
+
+      integer :: first, last, length
+
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
       type(c_pthread_t) :: pid
@@ -5506,6 +5511,13 @@ contains
 
       ! only applicable to FITS data cubes
       if (.not. allocated(item%compressed)) goto 8000
+
+      ! get the range of the cube planes
+      call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
+
+      length = last - first + 1
+
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
