@@ -5482,6 +5482,20 @@ contains
 
    end subroutine LTTB
 
+   recursive subroutine spectrum_request_simd(user) BIND(C, name='spectrum_request_simd')
+      use omp_lib
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(image_spectrum_request_f), pointer :: req
+
+
+   end subroutine spectrum_request_simd
+
    recursive subroutine realtime_image_spectrum_request_simd(user) BIND(C, name='realtime_image_spectrum_request_simd')
       use omp_lib
       use :: unix_pthread
