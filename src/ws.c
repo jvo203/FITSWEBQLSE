@@ -831,11 +831,97 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 break;
             }
 
-            free(resp);
+            // pass the request to FORTRAN
+            char *datasetId = NULL;
 
-            free(req->ra);
-            free(req->dec);
-            free(req);
+            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+
+            if (session != NULL)
+                datasetId = session->datasetid;
+
+            void *item = get_dataset(datasetId);
+
+            if (item != NULL)
+            {
+                update_timestamp(item);
+
+                int stat;
+                int pipefd[2];
+
+                // open a Unix pipe
+                stat = pipe(pipefd);
+
+                if (stat == 0)
+                {
+                    // pass the read end of the pipe to a C thread
+                    resp->session_id = strdup(c->label);
+                    resp->fps = 0;
+                    resp->bitrate = 0;
+                    resp->timestamp = req->timestamp;
+                    resp->seq_id = req->seq_id;
+                    resp->fd = pipefd[0];
+
+                    // pass the write end of the pipe to a FORTRAN thread
+                    req->fd = pipefd[1];
+                    req->ptr = item;
+
+                    pthread_t tid;
+
+                    // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                    stat = pthread_create(&tid, NULL, &spectrum_request_simd, req);
+
+                    if (stat == 0)
+                    {
+                        pthread_detach(tid);
+
+                        // launch a pipe read C pthread
+                        stat = pthread_create(&tid, NULL, &spectrum_response, resp);
+
+                        if (stat == 0)
+                            pthread_detach(tid);
+                        else
+                        {
+                            // close the read end of the pipe
+                            close(pipefd[0]);
+
+                            // release the response memory since there is no reader
+                            free(resp->session_id);
+                            free(resp);
+                        }
+                    }
+                    else
+                    {
+                        free(req->ra);
+                        free(req->dec);
+                        free(req);
+
+                        // close the write end of the pipe
+                        close(pipefd[1]);
+
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+
+                        // release the response memory since there is no writer
+                        free(resp->session_id);
+                        free(resp);
+                    }
+                }
+                else
+                {
+                    free(req->ra);
+                    free(req->dec);
+                    free(req);
+                    free(resp);
+                }
+            }
+            else
+            {
+                free(req->ra);
+                free(req->dec);
+                free(req);
+                free(resp);
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+            }
 
             break;
         }
