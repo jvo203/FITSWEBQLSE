@@ -2068,18 +2068,16 @@ static enum MHD_Result on_http_connection(void *cls,
 
                         int status = access(filepath, R_OK);
 
+                        // the last resort: try to download a FITS file from jvox
                         if (status == -1)
                         {
-                            // the last resort: try to download a FITS file from jvox
-                            snprintf(filepath, sizeof(filepath) - 1, "%s://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_protocol, options.url_host, options.url_port, db, dataid);
+                            // disabled as FITSIO handling of downloads is inefficient
+                            // TO-DO: a manual cluster-aware implementation is needed
+                            // snprintf(filepath, sizeof(filepath) - 1, "%s://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_protocol, options.url_host, options.url_port, db, dataid);
                         }
 
                         free(path);
                     }
-
-                    // if there is still no luck, as a last resort try a download URL (jvox...)
-
-                    // then call FORTRAN with a filepath or URL
                 }
 
                 printf("[C] FITS filepath: '%s'\n", filepath);
