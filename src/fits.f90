@@ -5557,6 +5557,48 @@ contains
       width = item%naxes(1)
       height = item%naxes(2)
 
+      ! launch a cluster thread (check if the number of cluster nodes is .gt. 0)
+      allocate (cluster_spectrum(first:last))
+      cluster_spectrum = 0.0
+
+      cluster_req%datasetid = c_loc(item%datasetid)
+      cluster_req%len = size(item%datasetid)
+
+      ! inputs
+      cluster_req%image = .false.
+      cluster_req%x1 = x1
+      cluster_req%y1 = y1
+      cluster_req%x2 = x2
+      cluster_req%y2 = y2
+      cluster_req%beam = req%beam
+      cluster_req%intensity = req%intensity
+      cluster_req%frame_start = req%frame_start
+      cluster_req%frame_end = req%frame_end
+      cluster_req%ref_freq = req%ref_freq
+      cluster_req%median = ieee_value(0.0, ieee_quiet_nan) ! unused
+
+      ! outputs
+      cluster_req%pixels = c_null_ptr
+      cluster_req%mask = c_null_ptr
+      cluster_req%spectrum = c_loc(cluster_spectrum)
+
+      cluster_req%dimx = abs(x2 - x1 + 1)
+      cluster_req%dimy = abs(y2 - y1 + 1)
+      cluster_req%length = size(cluster_spectrum)
+      cluster_req%sumP = 0.0 ! unused
+      cluster_req%sumN = 0.0 ! unused
+      cluster_req%countP = 0 ! unused
+      cluster_req%countN = 0 ! unused
+      cluster_req%valid = .false.
+
+      ! launch a thread
+      rc = c_pthread_create(thread=pid, &
+         attr=c_null_ptr, &
+         start_routine=c_funloc(fetch_realtime_image_spectrum), &
+         arg=c_loc(cluster_req))
+
+      ! end of cluster
+
       ! allocate and zero-out the spectrum
       allocate (spectrum(first:last))
       spectrum = ieee_value(0.0, ieee_quiet_nan)
@@ -5593,6 +5635,12 @@ contains
       end do
       !$omp END DO
       !$omp END PARALLEL
+
+      ! join a thread
+      rc = c_pthread_join(pid, c_null_ptr)
+
+      ! combine the spectra from other cluster nodes (if any)
+      if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
 
       print *, spectrum
 
