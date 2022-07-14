@@ -5486,7 +5486,7 @@ contains
       implicit none
 
       type(dataset), pointer, intent(in) :: item
-      integer, intent(in) :: x, y
+      real, intent(in) :: x, y
       real(kind=c_double), intent(out) :: ra, dec
 
       ! N/A by default
@@ -5494,11 +5494,11 @@ contains
       dec = ieee_value(0.0, ieee_quiet_nan)
 
       if( index(item%ctype1, 'RA') .ne. 0 .or. index(item%ctype1, 'GLON') .ne. 0 .or. index(item%ctype1, 'ELON') .ne. 0) then
-         ra = item%crval1 + (real(x) - item%crpix1) * item%cdelt1 ! [deg]
+         ra = item%crval1 + (x - item%crpix1) * item%cdelt1 ! [deg]
       end if
 
       if( index(item%ctype1, 'DEC') .ne. 0 .or. index(item%ctype1, 'GLAT') .ne. 0 .or. index(item%ctype1, 'ELAT') .ne. 0) then
-         dec = item%crval2 + (real(y) - item%crpix2) * item%cdelt2 ! [deg]
+         dec = item%crval2 + (y - item%crpix2) * item%cdelt2 ! [deg]
       end if
    end subroutine pix_to_world
 
@@ -5520,8 +5520,12 @@ contains
       integer :: dimx, dimy
       integer :: max_threads, frame, tid
       integer(c_int) :: x1, x2, y1, y2, width, height, average
-      real(c_float) :: cx, cy, r, r2
+      real(c_float) :: cx, cy, rx, ry, r, r2
       real :: cdelt3
+
+      real(kind=c_double) :: lng, lat;
+      real(kind=c_double) :: ra1, dec1, ra2, dec2
+      real(kind=c_double) :: beam_width, beam_height
 
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
@@ -5568,6 +5572,10 @@ contains
       ! calculate the centre and squared radius
       cx = 0.5*abs(x1 + x2)
       cy = 0.5*abs(y1 + y2)
+
+      rx = 0.5*abs(x2 - x1)
+      ry = 0.5*abs(y2 - y1)
+
       ! r = 0.5*min(abs(x2 - x1), abs(y2 - y1))
       r = min(abs(cx - x1), abs(cy - y1)) + 1
       r2 = r*r
@@ -5667,6 +5675,15 @@ contains
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
 
       print *, spectrum
+
+      call pix_to_world(item, cx, cy, lng, lat)
+      call pix_to_world(item, cx-rx, cy-ry, ra1, dec1)
+      call pix_to_world(item, cx+rx, cy+ry, ra2, dec2)
+
+      beam_width = abs(ra2 - ra1) ! [deg]
+      beam_height = abs(dec2 - dec1) ! [deg]
+
+      print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
