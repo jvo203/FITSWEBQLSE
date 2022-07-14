@@ -3690,11 +3690,18 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
         free(compressed_mask);
 }
 
+void split_wcs(const char *coord, char *key, char *value)
+{
+}
+
 void write_csv_header(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq)
 {
     char strLine[1024];
     char ra_key[32], ra_value[32];
     char dec_key[32], dec_value[32];
+
+    split_wcs(ra, ra_key, ra_value);
+    split_wcs(dec, dec_key, dec_value);
 }
 
 void *fetch_global_statistics(void *ptr)
