@@ -153,6 +153,7 @@ size_t chunked_write(int fd, const char *src, size_t n);
 void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
+void write_csv_header(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq);
 void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, const float *sumN, const int64_t *countN);
 void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
@@ -3687,6 +3688,10 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
 
     if (compressed_mask != NULL)
         free(compressed_mask);
+}
+
+void write_csv_header(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq)
+{
 }
 
 void *fetch_global_statistics(void *ptr)

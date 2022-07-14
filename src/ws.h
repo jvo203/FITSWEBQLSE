@@ -61,7 +61,6 @@ void *spectrum_response(void *ptr);
 void *realtime_image_spectrum_response(void *ptr);
 void *ws_image_spectrum_response(void *ptr);
 void *video_response(void *ptr);
-void write_csv_header(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq);
 extern void get_inner_dimensions(void *ptr, int width, int height, int *fits_width, int *fits_height, int *inner_width, int *inner_height, float *scale);
 extern void get_spectrum_range_C(void *ptr, double frame_start, double frame_end, double ref_freq, int *first, int *last);
 extern void fill_global_statistics(void *ptr, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
