@@ -5482,6 +5482,17 @@ contains
 
    end subroutine LTTB
 
+   subroutine pix_to_world(item, x, y, ra, dec)
+      implicit none
+
+      type(dataset), pointer, intent(in) :: item
+      integer, intent(in) :: x, y
+      real(kind=c_double), intent(out) :: ra, dec
+
+      ra = 0.0
+      dec = 0.0
+   end subroutine pix_to_world
+
    recursive subroutine spectrum_request_simd(user) BIND(C, name='spectrum_request_simd')
       use omp_lib
       use :: unix_pthread
