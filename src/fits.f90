@@ -5497,7 +5497,7 @@ contains
          ra = item%crval1 + (x - item%crpix1) * item%cdelt1 ! [deg]
       end if
 
-      if( index(item%ctype1, 'DEC') .ne. 0 .or. index(item%ctype1, 'GLAT') .ne. 0 .or. index(item%ctype1, 'ELAT') .ne. 0) then
+      if( index(item%ctype2, 'DEC') .ne. 0 .or. index(item%ctype2, 'GLAT') .ne. 0 .or. index(item%ctype2, 'ELAT') .ne. 0) then
          dec = item%crval2 + (y - item%crpix2) * item%cdelt2 ! [deg]
       end if
    end subroutine pix_to_world
