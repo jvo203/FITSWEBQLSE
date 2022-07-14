@@ -3718,7 +3718,7 @@ void split_wcs(const char *coord, char *key, char *value, const char *null_key)
     if (pos != NULL)
     {
         *pos = *(pos + 1); // this overwrites '\' with the next character (most likely a double quote)
-        *(++pos) = '\0';   // hide the last character
+        *(++pos) = '\0';   // hide the next (last) character
     }
 }
 
