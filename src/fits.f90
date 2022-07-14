@@ -5489,8 +5489,17 @@ contains
       integer, intent(in) :: x, y
       real(kind=c_double), intent(out) :: ra, dec
 
-      ra = 0.0
-      dec = 0.0
+      ! N/A by default
+      ra = ieee_value(0.0, ieee_quiet_nan)
+      dec = ieee_value(0.0, ieee_quiet_nan)
+
+      if( index(item%ctype1, 'RA') .ne. 0 .or. index(item%ctype1, 'GLON') .ne. 0 .or. index(item%ctype1, 'ELON') .ne. 0) then
+         ra = item%crval1 + (real(x) - item%crpix1) * item%cdelt1 ! [deg]
+      end if
+
+      if( index(item%ctype1, 'DEC') .ne. 0 .or. index(item%ctype1, 'GLAT') .ne. 0 .or. index(item%ctype1, 'ELAT') .ne. 0) then
+         dec = item%crval2 + (real(y) - item%crpix2) * item%cdelt2 ! [deg]
+      end if
    end subroutine pix_to_world
 
    recursive subroutine spectrum_request_simd(user) BIND(C, name='spectrum_request_simd')
