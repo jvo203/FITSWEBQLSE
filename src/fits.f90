@@ -394,6 +394,22 @@ module fits
 
       end subroutine closefd
 
+      subroutine write_csv_header(fd, ra,  dec, lng, lat, beam, beam_width, beam_height,&
+      &cx, cy, dimx, dimy, deltaV, ref_freq) BIND(C, name='write_csv_header')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         integer(c_int), value, intent(in) :: fd
+         type(c_ptr), value :: ra, dec
+         real(kind=c_double), value :: lng, lat
+         integer(c_int), value :: beam
+         real(kind=c_double), value :: beam_width, beam_height
+         real(kind=c_float), value :: cx, cy
+         integer(c_int), value :: dimx, dimy
+         real(kind=c_double), value :: deltaV, ref_freq
+
+      end subroutine write_csv_header
+
       recursive subroutine fetch_inner_dimensions(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
