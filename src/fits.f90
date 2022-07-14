@@ -5685,6 +5685,12 @@ contains
 
       print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
 
+      ! write the CSV header lines (prepended by #)
+      if (req%fd .ne. -1) then
+         call write_csv_header(req%fd, req%ra, req%dec, lng, lat, req%beam, beam_width, beam_height,&
+         &cx, cy, dimx, dimy, req%deltaV, req%ref_freq)
+      end if
+
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
       call free(req%ra)
