@@ -5497,6 +5497,7 @@ contains
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, cluster_spectrum
 
       integer :: first, last, length
+      integer :: dimx, dimy
       integer :: max_threads, frame, tid
       integer(c_int) :: x1, x2, y1, y2, width, height, average
       real(c_float) :: cx, cy, r, r2
@@ -5541,6 +5542,9 @@ contains
       x2 = min(item%naxes(1), req%x2)
       y2 = min(item%naxes(2), req%y2)
 
+      dimx = abs(x2 - x1 + 1)
+      dimy = abs(y2 - y1 + 1)
+
       ! calculate the centre and squared radius
       cx = 0.5*abs(x1 + x2)
       cy = 0.5*abs(y1 + y2)
@@ -5582,8 +5586,8 @@ contains
       cluster_req%mask = c_null_ptr
       cluster_req%spectrum = c_loc(cluster_spectrum)
 
-      cluster_req%dimx = abs(x2 - x1 + 1)
-      cluster_req%dimy = abs(y2 - y1 + 1)
+      cluster_req%dimx = dimx
+      cluster_req%dimy = dimy
       cluster_req%length = size(cluster_spectrum)
       cluster_req%sumP = 0.0 ! unused
       cluster_req%sumN = 0.0 ! unused
