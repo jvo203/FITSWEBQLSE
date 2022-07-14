@@ -394,8 +394,8 @@ module fits
 
       end subroutine closefd
 
-      subroutine write_csv_header(fd, ra,  dec, lng, lat, beam, beam_width, beam_height,&
-      &cx, cy, dimx, dimy, deltaV, ref_freq) BIND(C, name='write_csv_header')
+      subroutine write_csv_comments(fd, ra,  dec, lng, lat, beam, beam_width, beam_height,&
+      &cx, cy, dimx, dimy, deltaV, ref_freq) BIND(C, name='write_csv_comments')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -408,7 +408,7 @@ module fits
          integer(c_int), value :: dimx, dimy
          real(kind=c_double), value :: deltaV, ref_freq
 
-      end subroutine write_csv_header
+      end subroutine write_csv_comments
 
       recursive subroutine fetch_inner_dimensions(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
@@ -5703,7 +5703,7 @@ contains
 
       ! write the CSV header lines (prepended by #)
       if (req%fd .ne. -1) then
-         call write_csv_header(req%fd, req%ra, req%dec, lng, lat, req%beam, beam_width, beam_height,&
+         call write_csv_comments(req%fd, req%ra, req%dec, lng, lat, req%beam, beam_width, beam_height,&
          &cx, cy, dimx, dimy, req%deltaV, req%ref_freq)
       end if
 
