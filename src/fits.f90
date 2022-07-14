@@ -5674,7 +5674,6 @@ contains
       integer :: max_threads, frame, tid, npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
       real(c_float) :: cx, cy, r, r2
-      integer :: start_x, start_y, end_x, end_y
       real :: cdelt3
 
       real(kind=c_float), allocatable, target :: thread_pixels(:, :)
@@ -5762,26 +5761,7 @@ contains
       dimy = abs(y2 - y1 + 1)
       npixels = dimx*dimy
 
-      ! real-time data decompression
-      start_x = 1 + (x1 - 1)/DIM
-      start_y = 1 + (y1 - 1)/DIM
-
-      end_x = 1 + (x2 - 1)/DIM
-      end_y = 1 + (y2 - 1)/DIM
-
-      ! allocate and zero-out the spectrum
-      allocate (spectrum(first:last))
-      spectrum = 0.0
-
-      call get_cdelt3(item, cdelt3)
-
-      ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
-
-      print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y,&
-      & "max_threads:", max_threads
-
-      ! do we need the viewport too?
+      ! do we need the viewport?
       if (req%image) then
          allocate (pixels(npixels))
          allocate (mask(npixels))
@@ -5842,6 +5822,15 @@ contains
          arg=c_loc(cluster_req))
 
       ! end of cluster
+
+      ! allocate and zero-out the spectrum
+      allocate (spectrum(first:last))
+      spectrum = 0.0
+
+      call get_cdelt3(item, cdelt3)
+
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
       thread_sumP = 0.0
       thread_countP = 0
