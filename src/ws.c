@@ -728,7 +728,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->x2 = -1;
             req->y1 = -1;
             req->y2 = -1;
-            req->beam = square;
+            req->beam = square; // by default assume a rectangular (square) viewport
             req->intensity = integrated;
             req->frame_start = 0.0;
             req->frame_end = 0.0;
