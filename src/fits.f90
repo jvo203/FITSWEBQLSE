@@ -5559,7 +5559,7 @@ contains
 
       ! allocate and zero-out the spectrum
       allocate (spectrum(first:last))
-      spectrum = 0.0
+      spectrum = ieee_value(0.0, ieee_quiet_nan)
 
       call get_cdelt3(item, cdelt3)
 
