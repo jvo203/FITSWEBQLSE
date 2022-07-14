@@ -3690,8 +3690,36 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
         free(compressed_mask);
 }
 
-void split_wcs(const char *coord, char *key, char *value)
+void split_wcs(const char *coord, char *key, char *value, const char *null_key)
 {
+    char *pos = strchr(coord, ':');
+
+    if (pos == NULL)
+    {
+        // default dummy values
+        strcpy(key, null_key);
+        strcpy(value, "N/A");
+        return;
+    }
+
+    size_t len = strlen(coord);
+    size_t key_len = pos - coord + 1;
+
+    memcpy(key, coord, key_len);
+    memcpy(value, pos + 1, len - key_len);
+
+    // blank out ':' with '\0'
+    pos = strrchr(key, ':');
+    if (pos != NULL)
+        *pos = '\0';
+
+    // remove the '\' character before the final double quote
+    pos = strrchr(value, '\\');
+    if (pos != NULL)
+    {
+        *pos = *(pos + 1); // this overwrites '\' with the next character (most likely a double quote)
+        *(++pos) = '\0';   // hide the last character
+    }
 }
 
 void write_csv_header(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq)
@@ -3700,8 +3728,13 @@ void write_csv_header(int fd, const char *ra, const char *dec, double lng, doubl
     char ra_key[32], ra_value[32];
     char dec_key[32], dec_value[32];
 
-    split_wcs(ra, ra_key, ra_value);
-    split_wcs(dec, dec_key, dec_value);
+    split_wcs(ra, ra_key, ra_value, "beam ra");
+    split_wcs(dec, dec_key, dec_value, "beam dec");
+
+    // printf("[C] RA '%s' : '%s'\n", ra_key, ra_value);
+    // printf("[C] DEC '%s' : '%s'\n", dec_key, dec_value);
+
+    printf("# beam ra (%s):%s, beam dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
 }
 
 void *fetch_global_statistics(void *ptr)
