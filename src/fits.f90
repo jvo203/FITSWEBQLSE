@@ -4117,6 +4117,7 @@ contains
       real(kind=8), parameter :: c = 299792458.0
 
       logical :: has_frequency, has_velocity
+      real(kind=8) :: val
 
       ! by default assume the worst case
       f = ieee_value(0.0, ieee_quiet_nan)
@@ -4142,6 +4143,9 @@ contains
          v = v / 1.0e3 ! [km/s]
          return
       end if
+
+      ! handle the remaining cases
+      val = item%crval3 * item%frame_multiplier + item%cdelt3 * item%frame_multiplier * (real(frame) - item%crpix3)
 
    end subroutine get_frame2freq_vel
 
