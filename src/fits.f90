@@ -4068,6 +4068,14 @@ contains
 
    end subroutine get_spectrum_range
 
+   subroutine get_frame2freq_vel(item, frame, ref_freq, deltaV, frequency, velocity)
+      type(dataset), pointer, intent(in) :: item
+      integer, intent(in) :: frame
+      real(kind=8), intent(in) :: ref_freq, deltaV
+      real(kind=8), intent(out) :: frequency, velocity
+
+   end subroutine get_frame2freq_vel
+
    subroutine get_frequency_range(ptr, freq_start, freq_end) bind(c)
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
@@ -5710,7 +5718,7 @@ contains
 
       ! write out the spectrum line by line
       do frame = first, last
-         call get_frame2freq_vel(item, frame, frequency, velocity)
+         call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, frequency, velocity)
       end do
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
