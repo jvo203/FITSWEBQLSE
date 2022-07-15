@@ -3736,7 +3736,7 @@ void write_csv_row(int fd, int channel, double f, double v, float intensity, int
         else
             snprintf(frequency_column, sizeof(frequency_column) - 1, "frequency [GHz]");
 
-        strcpy(intensity_column, "intensity");
+        snprintf(intensity_column, sizeof(intensity_column) - 1, "intensity [%s]", bunit);
     }
 
     if (!isnan(f) && !isnan(v))
