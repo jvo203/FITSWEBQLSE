@@ -3740,7 +3740,7 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     chunked_write(fd, line, strlen(line));
 
     // lng / lat [deg]
-    snprintf(line, sizeof(line) - 1, "# wcs.lng: %g [deg]\n# wcs.lat: %g [deg]\n", lng, lat);
+    snprintf(line, sizeof(line) - 1, "# wcs.lng [deg]: %g\n# wcs.lat [deg]: %g\n", lng, lat);
     chunked_write(fd, line, strlen(line));
 
     // beam type
@@ -3755,25 +3755,25 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     chunked_write(fd, line, strlen(line));
 
     // beam width / height [deg]
-    snprintf(line, sizeof(line) - 1, "# beam width: %f [deg]\n# beam height: %f [deg]\n", beam_width, beam_height);
+    snprintf(line, sizeof(line) - 1, "# beam width [deg]: %f\n# beam height [deg]: %f\n", beam_width, beam_height);
     chunked_write(fd, line, strlen(line));
 
     // beam cx / cy [px]
-    snprintf(line, sizeof(line) - 1, "# beam centre (x): %g [px]\n# beam centre (y): %g [px]\n", cx, cy);
+    snprintf(line, sizeof(line) - 1, "# field centre (x) [px]: %g\n# field centre (y) [px]: %g\n", cx, cy);
     chunked_write(fd, line, strlen(line));
 
     // beam width / height [px]
-    snprintf(line, sizeof(line) - 1, "# beam width: %d [px]\n# beam height: %d [px]\n", dimx, dimy);
+    snprintf(line, sizeof(line) - 1, "# beam width [px]: %d\n# beam height [px]: %d\n", dimx, dimy);
     chunked_write(fd, line, strlen(line));
 
     // deltaV
-    snprintf(line, sizeof(line) - 1, "# source velocity: %g [km/s]\n", deltaV / 1e3);
+    snprintf(line, sizeof(line) - 1, "# source velocity [km/s]: %g\n", deltaV / 1e3);
     chunked_write(fd, line, strlen(line));
 
     // ref_freq
     if (ref_freq > 0.0)
     {
-        snprintf(line, sizeof(line) - 1, "# reference frequency: %g [GHz]\n", ref_freq / 1e9);
+        snprintf(line, sizeof(line) - 1, "# reference frequency [GHz]: %g\n", ref_freq / 1e9);
         chunked_write(fd, line, strlen(line));
     }
 }
