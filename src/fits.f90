@@ -4074,9 +4074,16 @@ contains
       real(kind=8), intent(in) :: ref_freq, deltaV
       real(kind=8), intent(out) :: frequency, velocity
 
+      logical :: has_frequency, has_velocity
+
       ! by default assume the worst case
       frequency = ieee_value(0.0, ieee_quiet_nan)
       velocity = ieee_value(0.0, ieee_quiet_nan)
+
+      has_frequency = item%has_frequency
+      has_velocity = item%has_velocity
+
+      if (ref_freq .gt. 0.0) has_frequency = .true.
 
    end subroutine get_frame2freq_vel
 
