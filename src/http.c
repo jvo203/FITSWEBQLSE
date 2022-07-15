@@ -3733,14 +3733,14 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
 
     // printf("[C] RA '%s' : '%s'\n", ra_key, ra_value);
     // printf("[C] DEC '%s' : '%s'\n", dec_key, dec_value);
-    // printf("# beam ra (%s):%s, beam dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
+    // printf("# ra (%s):%s, dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
 
     // ra/dec
     snprintf(line, sizeof(line) - 1, "# beam ra (%s):%s\n# beam dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
     chunked_write(fd, line, strlen(line));
 
     // lng / lat [deg]
-    snprintf(line, sizeof(line) - 1, "# beam wcs.lng: %g [deg]\n# beam wcs.lat: %g [deg]\n", lng, lat);
+    snprintf(line, sizeof(line) - 1, "# wcs.lng: %g [deg]\n# wcs.lat: %g [deg]\n", lng, lat);
     chunked_write(fd, line, strlen(line));
 
     // beam type
