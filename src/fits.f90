@@ -4147,6 +4147,32 @@ contains
       ! handle the remaining cases
       val = item%crval3 * item%frame_multiplier + item%cdelt3 * item%frame_multiplier * (real(frame) - item%crpix3)
 
+      if (has_frequency) then
+
+         if(rest) then
+            f = relativistic_rest_frequency(val, deltaV)
+         else
+            f = val
+         end if
+
+         ! find the corresponding velocity
+         v = Einstein_relative_velocity(f, ref_freq, deltaV)
+
+         ! unit conversion
+         f = f / 1.0e9 ! [GHz]
+         v = v / 1.0e3 ! [km/s]
+         return
+      end if
+
+      if(has_velocity) then
+         ! there is no frequency information, only velocity
+         ! what about deltaV ???
+
+         ! unit conversion
+         v = val / 1.0e3 ! [km/s]
+         return
+      end if
+
    end subroutine get_frame2freq_vel
 
    subroutine get_frequency_range(ptr, freq_start, freq_end) bind(c)
