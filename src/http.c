@@ -3742,6 +3742,17 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     // lng / lat
     snprintf(line, sizeof(line) - 1, "# beam wcs.lng: %f deg, beam wcs.lat: %f deg\n", lng, lat);
     chunked_write(fd, line, strlen(line));
+
+    // beam type
+    strcpy(line, "# beam type: N/A\n");
+
+    if (beam == square)
+        snprintf(line, sizeof(line) - 1, "# beam type: square/rect.\n");
+
+    if (beam == circle)
+        snprintf(line, sizeof(line) - 1, "# beam type: circle\n");
+
+    chunked_write(fd, line, strlen(line));
 }
 
 void *fetch_global_statistics(void *ptr)
