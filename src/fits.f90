@@ -5818,6 +5818,8 @@ contains
       ! write out the spectrum line by line
       do frame = first, last
          call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, frequency, velocity)
+
+         print *, "channel:", frame, ", f: ", frequency, "GHz, velocity: ", velocity, "km/s, intensity: ", spectrum(frame)
       end do
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
