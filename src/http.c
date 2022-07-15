@@ -3763,7 +3763,7 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     chunked_write(fd, line, strlen(line));
 
     // beam width / height [px]
-    snprintf(line, sizeof(line) - 1, "# beam width: %f px, beam height: %f\n", dimx, dimy);
+    snprintf(line, sizeof(line) - 1, "# beam width: %d px, beam height: %d px\n", dimx, dimy);
     chunked_write(fd, line, strlen(line));
 
     // deltaV
