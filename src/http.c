@@ -3766,11 +3766,11 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     snprintf(line, sizeof(line) - 1, "# beam width [px]: %d\n# beam height [px]: %d\n", dimx, dimy);
     chunked_write(fd, line, strlen(line));
 
-    // deltaV
+    // deltaV [km/s]
     snprintf(line, sizeof(line) - 1, "# source velocity [km/s]: %g\n", deltaV / 1e3);
     chunked_write(fd, line, strlen(line));
 
-    // ref_freq
+    // ref_freq [GHz]
     if (ref_freq > 0.0)
     {
         snprintf(line, sizeof(line) - 1, "# reference frequency [GHz]: %g\n", ref_freq / 1e9);
