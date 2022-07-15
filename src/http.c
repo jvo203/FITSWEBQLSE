@@ -3759,7 +3759,7 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     chunked_write(fd, line, strlen(line));
 
     // beam cx / cy [px]
-    snprintf(line, sizeof(line) - 1, "# beam cx: %g [px], beam cy: %g [px]\n", cx, cy);
+    snprintf(line, sizeof(line) - 1, "# beam centre x: %g [px], beam centre y: %g [px]\n", cx, cy);
     chunked_write(fd, line, strlen(line));
 
     // beam width / height [px]
