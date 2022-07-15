@@ -3723,7 +3723,7 @@ void split_wcs(const char *coord, char *key, char *value, const char *null_key)
     }
 }
 
-void write_csv_row(int fd, int channel, double f, double v, float intensity, bool header)
+void write_csv_row(int fd, int channel, double f, double v, float intensity, int intensity_type, bool rest, const char *bunit, bool header)
 {
     char line[1024];
 
