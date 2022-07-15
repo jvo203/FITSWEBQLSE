@@ -5661,6 +5661,7 @@ contains
       real(kind=c_double) :: ra1, dec1, ra2, dec2
       real(kind=c_double) :: beam_width, beam_height
       real(kind=c_double) :: frequency, velocity
+      logical(kind=c_bool) :: header
 
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
@@ -5826,10 +5827,20 @@ contains
          &cx, cy, dimx, dimy, req%deltaV, req%ref_freq, trim(item%specsys)//c_null_char)
       end if
 
+      ! force a CSV header output
+      header = .true.
+
       ! write out the spectrum line by line
       do frame = first, last
          call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, frequency, velocity)
          ! print *, "channel:", frame, "f [GHz]: ", frequency, "v [km/s]:", velocity, "intensity: ", spectrum(frame)
+
+         if (req%fd .ne. -1) then
+            call write_csv_row(req%fd, frame, frequency, velocity, header)
+         end if
+
+         ! the header row is no longer needed
+         if (header) header = .false.
       end do
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
