@@ -5819,7 +5819,7 @@ contains
       do frame = first, last
          call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, frequency, velocity)
 
-         print *, "channel:", frame, ", f [GHz]: ", frequency, "v [km/s]:", velocity, "intensity: ", spectrum(frame)
+         print *, "channel:", frame, "f [GHz]: ", frequency, "v [km/s]:", velocity, "intensity: ", spectrum(frame)
       end do
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
