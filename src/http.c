@@ -153,7 +153,7 @@ size_t chunked_write(int fd, const char *src, size_t n);
 void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
-void write_csv_comments(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq);
+void write_csv_comments(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys);
 void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, const float *sumN, const int64_t *countN);
 void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
@@ -3722,7 +3722,7 @@ void split_wcs(const char *coord, char *key, char *value, const char *null_key)
     }
 }
 
-void write_csv_comments(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq)
+void write_csv_comments(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys)
 {
     char line[1024];
     char ra_key[32], ra_value[32];
@@ -3764,6 +3764,10 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
 
     // beam width / height [px]
     snprintf(line, sizeof(line) - 1, "# beam width [px]: %d\n# beam height [px]: %d\n", dimx, dimy);
+    chunked_write(fd, line, strlen(line));
+
+    // specsys
+    snprintf(line, sizeof(line) - 1, "# spectral reference frame: %s\n", specsys);
     chunked_write(fd, line, strlen(line));
 
     // deltaV [km/s]
