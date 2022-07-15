@@ -4074,6 +4074,10 @@ contains
       real(kind=8), intent(in) :: ref_freq, deltaV
       real(kind=8), intent(out) :: frequency, velocity
 
+      ! by default assume the worst case
+      frequency = ieee_value(0.0, ieee_quiet_nan)
+      velocity = ieee_value(0.0, ieee_quiet_nan)
+
    end subroutine get_frame2freq_vel
 
    subroutine get_frequency_range(ptr, freq_start, freq_end) bind(c)
