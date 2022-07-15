@@ -411,12 +411,13 @@ module fits
 
       end subroutine write_csv_comments
 
-      subroutine write_csv_row(fd, channel, f, v, header) BIND(C)
+      subroutine write_csv_row(fd, channel, f, v, intensity, header) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
          integer(c_int), value, intent(in) :: fd, channel
          real(kind=c_double), value :: f, v
+         real(kind=c_float), value :: intensity
          logical(kind=c_bool), value :: header
 
       end subroutine write_csv_row
@@ -5836,7 +5837,7 @@ contains
          ! print *, "channel:", frame, "f [GHz]: ", frequency, "v [km/s]:", velocity, "intensity: ", spectrum(frame)
 
          if (req%fd .ne. -1) then
-            call write_csv_row(req%fd, frame, frequency, velocity, header)
+            call write_csv_row(req%fd, frame, frequency, velocity, spectrum(frame), header)
          end if
 
          ! the header row is no longer needed
