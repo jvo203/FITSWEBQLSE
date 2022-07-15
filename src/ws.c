@@ -1997,7 +1997,7 @@ void *spectrum_response(void *ptr)
                     float ts = resp->timestamp;
                     uint32_t id = 0;
                     uint32_t msg_type = 6;
-                    uint32_t payload_len = compressed_size;
+                    uint32_t payload_len = offset; // the original size
 
                     size_t ws_offset = 0;
 
