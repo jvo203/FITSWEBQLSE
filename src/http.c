@@ -154,7 +154,7 @@ void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
 void write_csv_comments(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys);
-void write_csv_row(int fd, int channel, double f, double v, float intensity, bool header);
+void write_csv_row(int fd, int channel, double f, double v, float intensity, int intensity_type, bool rest, const char *bunit, bool header);
 void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, const float *sumN, const int64_t *countN);
 void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
