@@ -3726,12 +3726,24 @@ void split_wcs(const char *coord, char *key, char *value, const char *null_key)
 void write_csv_row(int fd, int channel, double f, double v, float intensity, int intensity_type, bool rest, const char *bunit, bool header)
 {
     char line[1024];
+    char frequency_column[32] = "";
+    char intensity_column[32] = "";
+
+    if (header)
+    {
+        if (rest)
+            snprintf(frequency_column, sizeof(frequency_column) - 1, "rest frequency [GHz]");
+        else
+            snprintf(frequency_column, sizeof(frequency_column) - 1, "frequency [GHz]");
+
+        strcpy(intensity_column, "intensity");
+    }
 
     if (!isnan(f) && !isnan(v))
     {
         if (header)
         {
-            snprintf(line, sizeof(line) - 1, "\"channel\",\"frequency [GHz]\",\"velocity [km/s]\",\"intensity\"\n");
+            snprintf(line, sizeof(line) - 1, "\"channel\",\"%s\",\"velocity [km/s]\",\"%s\"\n", frequency_column, intensity_column);
             chunked_write(fd, line, strlen(line));
         }
 
@@ -3745,7 +3757,7 @@ void write_csv_row(int fd, int channel, double f, double v, float intensity, int
     {
         if (header)
         {
-            snprintf(line, sizeof(line) - 1, "\"channel\",\"velocity [km/s]\",\"intensity\"\n");
+            snprintf(line, sizeof(line) - 1, "\"channel\",\"velocity [km/s]\",\"%s\"\n", intensity_column);
             chunked_write(fd, line, strlen(line));
         }
 
@@ -3759,7 +3771,7 @@ void write_csv_row(int fd, int channel, double f, double v, float intensity, int
     {
         if (header)
         {
-            snprintf(line, sizeof(line) - 1, "\"channel\",\"frequency [GHz]\",\"intensity\"\n");
+            snprintf(line, sizeof(line) - 1, "\"channel\",\"%s\",\"%s\"\n", frequency_column, intensity_column);
             chunked_write(fd, line, strlen(line));
         }
 
