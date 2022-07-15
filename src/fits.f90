@@ -4074,6 +4074,9 @@ contains
       real(kind=8), intent(in) :: ref_freq, deltaV
       real(kind=8), intent(out) :: frequency, velocity
 
+      ! the speed of light [m/s]
+      real(kind=8), parameter :: c = 299792458.0
+
       logical :: has_frequency, has_velocity
 
       ! by default assume the worst case
