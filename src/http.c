@@ -3739,7 +3739,7 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     snprintf(line, sizeof(line) - 1, "# beam ra (%s):%s, beam dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
     chunked_write(fd, line, strlen(line));
 
-    // lng / lat
+    // lng / lat [deg]
     snprintf(line, sizeof(line) - 1, "# beam wcs.lng: %f deg, beam wcs.lat: %f deg\n", lng, lat);
     chunked_write(fd, line, strlen(line));
 
@@ -3752,6 +3752,18 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     if (beam == circle)
         snprintf(line, sizeof(line) - 1, "# beam type: circle\n");
 
+    chunked_write(fd, line, strlen(line));
+
+    // beam width / height [deg]
+    snprintf(line, sizeof(line) - 1, "# beam width: %f deg, beam height: %f\n", beam_width, beam_height);
+    chunked_write(fd, line, strlen(line));
+
+    // beam cx / cy [px]
+    snprintf(line, sizeof(line) - 1, "# beam cx: %f px, beam cy: %f\n", cx, cy);
+    chunked_write(fd, line, strlen(line));
+
+    // beam width / height [px]
+    snprintf(line, sizeof(line) - 1, "# beam width: %f px, beam height: %f\n", dimx, dimy);
     chunked_write(fd, line, strlen(line));
 }
 
