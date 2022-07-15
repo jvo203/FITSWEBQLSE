@@ -3736,7 +3736,16 @@ void write_csv_row(int fd, int channel, double f, double v, float intensity, int
         else
             snprintf(frequency_column, sizeof(frequency_column) - 1, "frequency [GHz]");
 
+        // default intensity unit
         snprintf(intensity_column, sizeof(intensity_column) - 1, "intensity [%s]", bunit);
+
+        if (intensity_type == mean)
+            snprintf(intensity_column, sizeof(intensity_column) - 1, "mean intensity [%s]", bunit);
+
+        if (intensity_type == integrated)
+        {
+            snprintf(intensity_column, sizeof(intensity_column) - 1, "integrated intensity [%s]", bunit);
+        }
     }
 
     if (!isnan(f) && !isnan(v))
