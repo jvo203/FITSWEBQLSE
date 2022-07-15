@@ -12892,7 +12892,7 @@ function setup_help() {
 		.style("color", "red")
 		.text("×");
 
-	var title = headerDiv.append("h2")
+	headerDiv.append("h2")
 		.text("FITSWEBQLSE HOW-TO");
 
 	var bodyDiv = contentDiv.append("div")
