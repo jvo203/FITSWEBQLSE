@@ -4068,11 +4068,50 @@ contains
 
    end subroutine get_spectrum_range
 
-   subroutine get_frame2freq_vel(item, frame, ref_freq, deltaV, frequency, velocity)
+   real(kind=8) function relativistic_rest_frequency(f, deltaV)
+      real(kind=8), intent(in) :: f, deltaV
+      real(kind=8) :: beta, tmp
+
+      ! the speed of light [m/s]
+      real(kind=8), parameter :: c = 299792458.0
+
+      beta = deltaV / c
+      tmp = sqrt((1.0+beta) / (1.0 - beta))
+
+      relativistic_rest_frequency = f * tmp
+      return
+
+   end function relativistic_rest_frequency
+
+   real(kind=8) function Einstein_velocity_addition(v1, v2)
+      real(kind=8), intent(in) :: v1, v2
+      ! the speed of light [m/s]
+      real(kind=8), parameter :: c = 299792458.0
+
+      Einstein_velocity_addition = (v1 + v2) / (1.0 + v1 * v2 / (c**2))
+      return
+   end function Einstein_velocity_addition
+
+   real(kind=8) function Einstein_relative_velocity(f, f0, deltaV)
+      real(kind=8), intent(in) :: f, f0, deltaV
+      real(kind=8) :: fRatio, v
+
+      ! the speed of light [m/s]
+      real(kind=8), parameter :: c = 299792458.0
+
+      fRatio = f / f0
+      v = (1.0 - fRatio**2) / (1.0 + fRatio**2) * c
+
+      Einstein_relative_velocity = Einstein_velocity_addition(v, deltaV)
+      return
+   end function Einstein_relative_velocity
+
+   subroutine get_frame2freq_vel(item, frame, ref_freq, deltaV, rest, f, v)
       type(dataset), pointer, intent(in) :: item
       integer, intent(in) :: frame
       real(kind=8), intent(in) :: ref_freq, deltaV
-      real(kind=8), intent(out) :: frequency, velocity
+      logical(kind=c_bool), intent(in) :: rest
+      real(kind=8), intent(out) :: f, v
 
       ! the speed of light [m/s]
       real(kind=8), parameter :: c = 299792458.0
@@ -4080,13 +4119,29 @@ contains
       logical :: has_frequency, has_velocity
 
       ! by default assume the worst case
-      frequency = ieee_value(0.0, ieee_quiet_nan)
-      velocity = ieee_value(0.0, ieee_quiet_nan)
+      f = ieee_value(0.0, ieee_quiet_nan)
+      v = ieee_value(0.0, ieee_quiet_nan)
 
       has_frequency = item%has_frequency
       has_velocity = item%has_velocity
-
       if (ref_freq .gt. 0.0) has_frequency = .true.
+
+      if (has_velocity .and. has_frequency) then
+         ! go from v to f then apply a deltaV correction to v
+         v = item%crval3 * item%frame_multiplier +&
+         &item%cdelt3 * item%frame_multiplier * (real(frame) - item%crpix3) ! [m/s]
+
+         f = ref_freq * sqrt((1.0 - v / c) / (1.0 + v / c)) ! [Hz]
+         if (rest) f = relativistic_rest_frequency(f, deltaV)
+
+         ! find the corresponding velocity
+         v = Einstein_relative_velocity(f, ref_freq, deltaV)
+
+         ! unit conversion
+         f = f / 1.0e9 ! [GHz]
+         v = v / 1.0e3 ! [km/s]
+         return
+      end if
 
    end subroutine get_frame2freq_vel
 
@@ -5732,7 +5787,7 @@ contains
 
       ! write out the spectrum line by line
       do frame = first, last
-         call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, frequency, velocity)
+         call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, frequency, velocity)
       end do
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
