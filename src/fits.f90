@@ -395,7 +395,7 @@ module fits
       end subroutine closefd
 
       subroutine write_csv_comments(fd, ra,  dec, lng, lat, beam, beam_width, beam_height,&
-      &cx, cy, dimx, dimy, deltaV, ref_freq) BIND(C, name='write_csv_comments')
+      &cx, cy, dimx, dimy, deltaV, ref_freq, specsys) BIND(C, name='write_csv_comments')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -407,6 +407,7 @@ module fits
          real(kind=c_float), value :: cx, cy
          integer(c_int), value :: dimx, dimy
          real(kind=c_double), value :: deltaV, ref_freq
+         character(kind=c_char), intent(in) :: specsys(*)
 
       end subroutine write_csv_comments
 
@@ -5812,7 +5813,7 @@ contains
       ! write the CSV header lines (prepended by #)
       if (req%fd .ne. -1) then
          call write_csv_comments(req%fd, req%ra, req%dec, lng, lat, req%beam, beam_width, beam_height,&
-         &cx, cy, dimx, dimy, req%deltaV, req%ref_freq)
+         &cx, cy, dimx, dimy, req%deltaV, req%ref_freq, trim(item%specsys)//c_null_char)
       end if
 
       ! write out the spectrum line by line
