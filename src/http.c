@@ -3767,13 +3767,13 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     chunked_write(fd, line, strlen(line));
 
     // deltaV
-    snprintf(line, sizeof(line) - 1, "# source velocity: %f km/s\n", deltaV);
+    snprintf(line, sizeof(line) - 1, "# source velocity: %f km/s\n", deltaV / 1e3);
     chunked_write(fd, line, strlen(line));
 
     // ref_freq
     if (ref_freq > 0.0)
     {
-        snprintf(line, sizeof(line) - 1, "# reference frequency: %f GHz\n", ref_freq);
+        snprintf(line, sizeof(line) - 1, "# reference frequency: %f GHz\n", ref_freq / 1e9);
         chunked_write(fd, line, strlen(line));
     }
 }
