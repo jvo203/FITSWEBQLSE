@@ -3736,11 +3736,11 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     // printf("# beam ra (%s):%s, beam dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
 
     // ra/dec
-    snprintf(line, sizeof(line) - 1, "# beam ra (%s):%s, beam dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
+    snprintf(line, sizeof(line) - 1, "# beam ra (%s):%s\n# beam dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
     chunked_write(fd, line, strlen(line));
 
     // lng / lat [deg]
-    snprintf(line, sizeof(line) - 1, "# beam wcs.lng: %g [deg], beam wcs.lat: %g [deg]\n", lng, lat);
+    snprintf(line, sizeof(line) - 1, "# beam wcs.lng: %g [deg]\n# beam wcs.lat: %g [deg]\n", lng, lat);
     chunked_write(fd, line, strlen(line));
 
     // beam type
@@ -3755,15 +3755,15 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     chunked_write(fd, line, strlen(line));
 
     // beam width / height [deg]
-    snprintf(line, sizeof(line) - 1, "# beam width: %f [deg], beam height: %f [deg]\n", beam_width, beam_height);
+    snprintf(line, sizeof(line) - 1, "# beam width: %f [deg]\n# beam height: %f [deg]\n", beam_width, beam_height);
     chunked_write(fd, line, strlen(line));
 
     // beam cx / cy [px]
-    snprintf(line, sizeof(line) - 1, "# beam centre x: %g [px], beam centre y: %g [px]\n", cx, cy);
+    snprintf(line, sizeof(line) - 1, "# beam centre (x): %g [px]\n# beam centre (y): %g [px]\n", cx, cy);
     chunked_write(fd, line, strlen(line));
 
     // beam width / height [px]
-    snprintf(line, sizeof(line) - 1, "# beam width: %d [px], beam height: %d [px]\n", dimx, dimy);
+    snprintf(line, sizeof(line) - 1, "# beam width: %d [px]\n# beam height: %d [px]\n", dimx, dimy);
     chunked_write(fd, line, strlen(line));
 
     // deltaV
