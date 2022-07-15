@@ -3736,7 +3736,7 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     // printf("# ra (%s):%s, dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
 
     // ra/dec
-    snprintf(line, sizeof(line) - 1, "# beam ra (%s):%s\n# beam dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
+    snprintf(line, sizeof(line) - 1, "# ra (%s):%s\n# dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
     chunked_write(fd, line, strlen(line));
 
     // lng / lat [deg]
