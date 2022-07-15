@@ -3740,6 +3740,34 @@ void write_csv_row(int fd, int channel, double f, double v, float intensity, boo
 
         return;
     }
+
+    if (!isnan(v))
+    {
+        if (header)
+        {
+            snprintf(line, sizeof(line) - 1, "\"channel\",\"velocity [km/s]\",\"intensity\"\n");
+            chunked_write(fd, line, strlen(line));
+        }
+
+        snprintf(line, sizeof(line) - 1, "%d,%f,%f\n", channel, v, intensity);
+        chunked_write(fd, line, strlen(line));
+
+        return;
+    }
+
+    if (!isnan(f))
+    {
+        if (header)
+        {
+            snprintf(line, sizeof(line) - 1, "\"channel\",\"frequency [GHz]\",\"intensity\"\n");
+            chunked_write(fd, line, strlen(line));
+        }
+
+        snprintf(line, sizeof(line) - 1, "%d,%f,%f\n", channel, f, intensity);
+        chunked_write(fd, line, strlen(line));
+
+        return;
+    }
 }
 
 void write_csv_comments(int fd, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys)
