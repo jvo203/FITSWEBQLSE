@@ -3765,6 +3765,17 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     // beam width / height [px]
     snprintf(line, sizeof(line) - 1, "# beam width: %f px, beam height: %f\n", dimx, dimy);
     chunked_write(fd, line, strlen(line));
+
+    // deltaV
+    snprintf(line, sizeof(line) - 1, "source velocity: %f km/s\n", deltaV);
+    chunked_write(fd, line, strlen(line));
+
+    // ref_freq
+    if (ref_freq > 0.0)
+    {
+        snprintf(line, sizeof(line) - 1, "reference frequency: %f GHz\n", ref_freq);
+        chunked_write(fd, line, strlen(line));
+    }
 }
 
 void *fetch_global_statistics(void *ptr)
