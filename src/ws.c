@@ -1969,7 +1969,7 @@ void *spectrum_response(void *ptr)
     // process the received data, prepare a WebSocket response
     if (offset > 0)
     {
-        printf("%.*s\n", (int)offset, buf);
+        printf("\n%.*s\n", (int)offset, buf);
 
         char *compressed_csv = NULL;
         int compressed_size, worst_size;
