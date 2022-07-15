@@ -411,6 +411,16 @@ module fits
 
       end subroutine write_csv_comments
 
+      subroutine write_csv_row(fd, channel, f, v, header) BIND(C)
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         integer(c_int), value, intent(in) :: fd, channel
+         real(kind=c_double), value :: f, v
+         logical(kind=c_bool), value :: header
+
+      end subroutine write_csv_row
+
       recursive subroutine fetch_inner_dimensions(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
