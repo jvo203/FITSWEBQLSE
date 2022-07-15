@@ -5542,6 +5542,7 @@ contains
       real(kind=c_double) :: lng, lat;
       real(kind=c_double) :: ra1, dec1, ra2, dec2
       real(kind=c_double) :: beam_width, beam_height
+      real(kind=c_double) :: frequency, velocity
 
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
@@ -5706,6 +5707,11 @@ contains
          call write_csv_comments(req%fd, req%ra, req%dec, lng, lat, req%beam, beam_width, beam_height,&
          &cx, cy, dimx, dimy, req%deltaV, req%ref_freq)
       end if
+
+      ! write out the spectrum line by line
+      do frame = first, last
+         call get_frame2freq_vel(item, frame, frequency, velocity)
+      end do
 
 8000  if (req%fd .ne. -1) call close_pipe(req%fd)
       nullify (item)
