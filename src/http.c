@@ -3740,7 +3740,7 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     chunked_write(fd, line, strlen(line));
 
     // lng / lat [deg]
-    snprintf(line, sizeof(line) - 1, "# beam wcs.lng: %f deg, beam wcs.lat: %f deg\n", lng, lat);
+    snprintf(line, sizeof(line) - 1, "# beam wcs.lng: %g [deg], beam wcs.lat: %g [deg]\n", lng, lat);
     chunked_write(fd, line, strlen(line));
 
     // beam type
