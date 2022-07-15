@@ -3744,26 +3744,26 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     chunked_write(fd, line, strlen(line));
 
     // beam type
-    strcpy(line, "# beam type: N/A\n");
+    strcpy(line, "# region type: N/A\n");
 
     if (beam == square)
-        snprintf(line, sizeof(line) - 1, "# beam type: square/rect.\n");
+        snprintf(line, sizeof(line) - 1, "# region type: square/rect.\n");
 
     if (beam == circle)
-        snprintf(line, sizeof(line) - 1, "# beam type: circle\n");
+        snprintf(line, sizeof(line) - 1, "# region type: circle\n");
 
     chunked_write(fd, line, strlen(line));
 
     // beam width / height [deg]
-    snprintf(line, sizeof(line) - 1, "# beam width [deg]: %f\n# beam height [deg]: %f\n", beam_width, beam_height);
+    snprintf(line, sizeof(line) - 1, "# region width [deg]: %f\n# region height [deg]: %f\n", beam_width, beam_height);
     chunked_write(fd, line, strlen(line));
 
     // beam cx / cy [px]
-    snprintf(line, sizeof(line) - 1, "# field centre (x) [px]: %g\n# field centre (y) [px]: %g\n", cx, cy);
+    snprintf(line, sizeof(line) - 1, "# region centre (x) [px]: %g\n# region centre (y) [px]: %g\n", cx, cy);
     chunked_write(fd, line, strlen(line));
 
     // beam width / height [px]
-    snprintf(line, sizeof(line) - 1, "# beam width [px]: %d\n# beam height [px]: %d\n", dimx, dimy);
+    snprintf(line, sizeof(line) - 1, "# region width [px]: %d\n# region height [px]: %d\n", dimx, dimy);
     chunked_write(fd, line, strlen(line));
 
     // specsys
