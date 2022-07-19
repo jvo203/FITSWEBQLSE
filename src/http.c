@@ -3826,10 +3826,18 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
 
     chunked_write(fd, line, strlen(line));
 
+    // beam cx / cy [px]
+    snprintf(line, sizeof(line) - 1, "# region centre (x) [px]: %g\n# region centre (y) [px]: %g\n", cx, cy);
+    chunked_write(fd, line, strlen(line));
+
     if (beam == square)
     {
         // beam width / height [deg]
         snprintf(line, sizeof(line) - 1, "# region width [deg]: %f\n# region height [deg]: %f\n", beam_width, beam_height);
+        chunked_write(fd, line, strlen(line));
+
+        // beam width / height [px]
+        snprintf(line, sizeof(line) - 1, "# region width [px]: %d\n# region height [px]: %d\n", dimx, dimy);
         chunked_write(fd, line, strlen(line));
     }
 
@@ -3838,21 +3846,7 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
         // beam diameter [deg]
         snprintf(line, sizeof(line) - 1, "# region diameter [deg]: %f\n", beam_width);
         chunked_write(fd, line, strlen(line));
-    }
 
-    // beam cx / cy [px]
-    snprintf(line, sizeof(line) - 1, "# region centre (x) [px]: %g\n# region centre (y) [px]: %g\n", cx, cy);
-    chunked_write(fd, line, strlen(line));
-
-    if (beam == square)
-    {
-        // beam width / height [px]
-        snprintf(line, sizeof(line) - 1, "# region width [px]: %d\n# region height [px]: %d\n", dimx, dimy);
-        chunked_write(fd, line, strlen(line));
-    }
-
-    if (beam == circle)
-    {
         // beam diameter [px]
         snprintf(line, sizeof(line) - 1, "# region diameter [px]: %d\n", dimx);
         chunked_write(fd, line, strlen(line));
