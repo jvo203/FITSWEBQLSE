@@ -1651,6 +1651,9 @@ contains
       integer :: dims(2)
       character(256) :: iomsg
 
+      ! skip <item%uri>, use a local variable instead
+      character(len=:), allocatable :: uri
+
       bSuccess = .false.
 
       file = cache//'/'//'state'
@@ -1684,9 +1687,9 @@ contains
       if (ios .ne. 0) go to 300
 
       if (N .gt. 0) then
-         if (allocated(item%uri)) deallocate (item%uri)
-         allocate (character(len=N)::item%uri)
-         read (unit=fileunit, IOSTAT=ios) item%uri
+         if (allocated(uri)) deallocate (uri)
+         allocate (character(len=N)::uri)
+         read (unit=fileunit, IOSTAT=ios) uri
          if (ios .ne. 0) go to 300
       end if
 
