@@ -6327,6 +6327,7 @@ contains
 
       if (.not. c_associated(req%ptr)) then
          call close_pipe(req%fd)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
          call free(user) ! release C memory
          return
       else
@@ -6517,6 +6518,7 @@ contains
 
       if (.not. c_associated(req%ptr)) then
          call close_pipe(req%fd)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
          call free(user) ! release C memory
          return
       else
