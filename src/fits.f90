@@ -6486,6 +6486,18 @@ contains
 
    end subroutine viewport_request
 
+   recursive subroutine download_request(user) BIND(C, name='download_request')
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(download_request_f), pointer :: req
+
+   end subroutine download_request
+
    ! calculate global dmad, dmadN, dmadP based on the all-data median
    recursive subroutine global_statistics(arg) BIND(C)
       use, intrinsic :: ISO_C_BINDING
