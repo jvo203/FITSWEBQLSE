@@ -97,6 +97,19 @@ module fits
       type(C_PTR) :: ptr
    end type video_request_f
 
+
+   type, bind(c) :: download_request_f
+      ! input
+      integer(c_int) :: x1, y1, x2, y2
+      real(c_double) :: frame_start, frame_end, ref_freq
+
+      ! output
+      integer(kind=c_int) :: fd
+
+      type(C_PTR) :: ptr
+
+   end type download_request_f
+
    type, bind(c) :: video_fetch_f
       ! input
       type(c_ptr) :: datasetid
