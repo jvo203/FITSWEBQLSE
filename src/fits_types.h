@@ -19,6 +19,23 @@ enum image_quality
     high
 };
 
+struct download_request
+{
+    // input
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    double frame_start;
+    double frame_end;
+    double ref_freq;
+
+    // output (the 'write' end of a Unix pipe)
+    int fd;
+
+    void *ptr;
+};
+
 struct image_spectrum_request
 {
     // input
