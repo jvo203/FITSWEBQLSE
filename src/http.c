@@ -959,6 +959,63 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/get_fits") != NULL)
     {
+        int x1, y1, x2, y2;
+        double frame_start, frame_end, ref_freq;
+
+        char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+        char *x1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x1");
+
+        if (x1str == NULL)
+            return http_bad_request(connection);
+        else
+            x1 = atoi(x1str);
+
+        char *y1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "y1");
+
+        if (y1str == NULL)
+            return http_bad_request(connection);
+        else
+            y1 = atoi(y1str);
+
+        char *x2str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x2");
+
+        if (x2str == NULL)
+            return http_bad_request(connection);
+        else
+            x2 = atoi(x2str);
+
+        char *y2str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "y2");
+
+        if (y2str == NULL)
+            return http_bad_request(connection);
+        else
+            y2 = atoi(y2str);
+
+        char *frame_start_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame_start");
+
+        if (frame_start_str == NULL)
+            return http_bad_request(connection);
+        else
+            frame_start = atof(frame_start_str);
+
+        char *frame_end_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame_end");
+
+        if (frame_end_str == NULL)
+            return http_bad_request(connection);
+        else
+            frame_end = atof(frame_end_str);
+
+        char *ref_freq_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ref_freq");
+
+        if (ref_freq_str == NULL)
+            return http_bad_request(connection);
+        else
+            ref_freq = atof(ref_freq_str);
+
         return http_not_implemented(connection);
     }
 
