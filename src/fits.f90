@@ -6325,8 +6325,13 @@ contains
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
-      if (.not. c_associated(req%ptr)) return
-      call c_f_pointer(req%ptr, item)
+      if (.not. c_associated(req%ptr)) then
+         call close_pipe(req%fd)
+         call free(user) ! release C memory
+         return
+      else
+         call c_f_pointer(req%ptr, item)
+      end if
 
       print *, 'viewport_request for ', item%datasetid,&
       &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
@@ -6508,6 +6513,34 @@ contains
 
       type(dataset), pointer :: item
       type(download_request_f), pointer :: req
+
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) then
+         call close_pipe(req%fd)
+         call free(user) ! release C memory
+         return
+      else
+         call c_f_pointer(req%ptr, item)
+      end if
+
+      if (req%fd .eq. -1) then
+         nullify (item)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+
+         return
+      end if
+
+      ! open a FITS file <item%uri> using a special FITSIO file syntax
+
+      ! close the connection, release pointers
+      call close_pipe(req%fd)
+      nullify (item)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+      return
 
    end subroutine download_request
 
