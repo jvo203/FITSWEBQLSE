@@ -6345,7 +6345,6 @@ contains
          nullify (item)
          nullify (req) ! disassociate the FORTRAN pointer from the C memory region
          call free(user) ! release C memory
-
          return
       end if
 
@@ -6508,7 +6507,6 @@ contains
       use, intrinsic :: iso_c_binding
       implicit none
 
-
       type(C_PTR), intent(in), value :: user
 
       type(dataset), pointer :: item
@@ -6529,7 +6527,6 @@ contains
          nullify (item)
          nullify (req) ! disassociate the FORTRAN pointer from the C memory region
          call free(user) ! release C memory
-
          return
       end if
 
