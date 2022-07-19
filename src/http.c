@@ -957,6 +957,11 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_not_found(connection);
     }
 
+    if (strstr(url, "/get_fits") != NULL)
+    {
+        return http_not_implemented(connection);
+    }
+
     if (strstr(url, "/get_splatalogue") != NULL)
     {
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
