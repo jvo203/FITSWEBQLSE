@@ -962,6 +962,10 @@ static enum MHD_Result on_http_connection(void *cls,
         int x1, y1, x2, y2;
         double frame_start, frame_end, ref_freq;
 
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
 
         if (datasetId == NULL)
@@ -1015,6 +1019,12 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
         else
             ref_freq = atof(ref_freq_str);
+
+        // do we have a dataset?
+        void *item = get_dataset(datasetId);
+
+        if (item == NULL)
+            return http_not_found(connection);
 
         return http_not_implemented(connection);
     }
