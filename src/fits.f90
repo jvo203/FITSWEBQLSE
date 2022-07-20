@@ -329,6 +329,16 @@ module fits
             character(kind=c_char), intent(in) :: datasetid(*)
         end function get_dataset
 
+        ! void download_response(int fd, const char *filename);
+        subroutine download_response(fd, filename) BIND(C, name='download_response')
+            use, intrinsic :: ISO_C_BINDING
+            implicit none
+
+            integer(kind=c_int), value, intent(in) :: fd
+            character(kind=c_char), intent(in) :: filename(*)
+
+        end subroutine download_response
+
         ! int mkcache(const char *dir);
         integer(c_int) function mkcache(dir) BIND(C, name='mkcache')
             use, intrinsic :: ISO_C_BINDING
@@ -6567,9 +6577,8 @@ contains
         write (filter, 10) "[", x1, ":", x2, ",", y1, ":", y2, ",", first, ":", last, "]"
         print *, item%uri//trim(filter)
 
-        ! open a FITS file <item%uri> using a special FITSIO filter to select a sub-region
-        ! stream the FITS file from C ?
-        ! call download_response(req%fd, item%uri // trim(filter) // c_null_char)
+        ! stream the FITS file from C, using a special FITSIO filter to select a sub-region
+        call download_response(req%fd, item%uri//trim(filter)//c_null_char)
 
         ! close the connection, release pointers
         call close_pipe(req%fd)
