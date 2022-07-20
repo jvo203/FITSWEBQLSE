@@ -6561,7 +6561,11 @@ contains
         x2 = min(item%naxes(1), req%x2)
         y2 = min(item%naxes(2), req%y2)
 
+        ! create a FITSIO filter
+        ! filter = "[" * string(x1) * ":" * string(x2) * "," * string(y1) * ":" * string(y2) * "," * string(first_frame) * ":" * string(last_frame) * "]"
+
         ! open a FITS file <item%uri> using a special FITSIO file syntax
+        ! item%uri // trim(filter)
 
         ! close the connection, release pointers
         call close_pipe(req%fd)
