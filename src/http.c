@@ -3181,6 +3181,10 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
     return counter;
 }
 
+void download_response(int fd, const char *filename)
+{
+}
+
 size_t chunked_write(int fd, const char *src, size_t n)
 {
     size_t nchar, remaining, offset;
