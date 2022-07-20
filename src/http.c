@@ -3183,11 +3183,18 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
 
 void download_response(int fd, const char *filename)
 {
-    // call FILE* fp = fdopen(fd, "w");
+    FILE *fp = fdopen(fd, "w");
 
-    close(fd); // close a pipe if it could not have been converted into FILE*
+    if (fp == NULL)
+    {
+        perror("download_response");
+        close(fd); // close a pipe if it could not have been converted into FILE*
+        return;
+    }
 
     // otherwise call fclose(fp) and return
+    fclose(fp);
+    return;
 }
 
 size_t chunked_write(int fd, const char *src, size_t n)
