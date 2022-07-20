@@ -6563,10 +6563,10 @@ contains
         x2 = min(item%naxes(1), req%x2)
         y2 = min(item%naxes(2), req%y2)
 
-        ! create a FITSIO filter
+        ! create a FITSIO region filter
         write (filter, 10) "[", x1, ":", x2, ",", y1, ":", y2, ",", first, ":", last, "]"
 
-        ! open a FITS file <item%uri> using a special FITSIO file syntax
+        ! open a FITS file <item%uri> using a special FITSIO filter to select a sub-region
         print *, item%uri//trim(filter)
         ! item%uri // trim(filter)
 
