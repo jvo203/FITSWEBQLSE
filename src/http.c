@@ -127,6 +127,7 @@ void *handle_image_request(void *args);
 extern void *video_request(void *req);
 extern void *download_request(void *req); // a FORTRAN subroutine
 extern void *viewport_request(void *req); // a FORTRAN subroutine
+void download_response(int fd, const char *filename);
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 void *fetch_inner_dimensions(void *ptr);
 void *fetch_video_frame(void *ptr);
