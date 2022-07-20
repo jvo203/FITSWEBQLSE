@@ -1027,6 +1027,12 @@ static enum MHD_Result on_http_connection(void *cls,
         if (item == NULL)
             return http_not_found(connection);
 
+        if (get_error_status(item))
+            return http_internal_server_error(connection);
+
+        if (!get_header_status(item))
+            return http_not_found(connection);
+
         // open a pipe
         status = pipe(pipefd);
 
