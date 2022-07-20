@@ -6513,7 +6513,7 @@ contains
         type(download_request_f), pointer :: req
 
         integer :: first, last, length, frame
-        integer :: x1, x2, y1, y2
+        integer :: x1, x2, y1, y2, tmp
 
         if (.not. c_associated(user)) return
         call c_f_pointer(user, req)
@@ -6540,6 +6540,20 @@ contains
         length = last - first + 1
 
         print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+        ! impose ordering: x1, x2 = x2, x1
+        if (req%x2 < req%x1) then
+            tmp = req%x1
+            req%x1 = req%x2
+            req%x2 = tmp
+        end if
+
+        ! impose ordering: y1, y2 = y2, y1
+        if (req%y2 < req%y1) then
+            tmp = req%y1
+            req%y1 = req%y2
+            req%y2 = tmp
+        end if
 
         ! sanity checks
         x1 = max(1, req%x1)
