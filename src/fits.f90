@@ -6565,10 +6565,11 @@ contains
 
         ! create a FITSIO region filter
         write (filter, 10) "[", x1, ":", x2, ",", y1, ":", y2, ",", first, ":", last, "]"
+        print *, item%uri//trim(filter)
 
         ! open a FITS file <item%uri> using a special FITSIO filter to select a sub-region
-        print *, item%uri//trim(filter)
-        ! item%uri // trim(filter)
+        ! stream the FITS file from C ?
+        ! call download_response(req%fd, item%uri // trim(filter) // c_null_char)
 
         ! close the connection, release pointers
         call close_pipe(req%fd)
