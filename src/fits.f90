@@ -6564,7 +6564,6 @@ contains
         y2 = min(item%naxes(2), req%y2)
 
         ! create a FITSIO filter
-        ! filter = "[" * string(x1) * ":" * string(x2) * "," * string(y1) * ":" * string(y2) * "," * string(first_frame) * ":" * string(last_frame) * "]"
         write (filter, 10) "[", x1, ":", x2, ",", y1, ":", y2, ",", first, ":", last, "]"
 
         ! open a FITS file <item%uri> using a special FITSIO file syntax
