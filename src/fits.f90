@@ -6581,7 +6581,7 @@ contains
         call download_response(req%fd, item%uri//trim(filter)//c_null_char)
 
         ! close the connection, release pointers
-        call close_pipe(req%fd)
+        ! the pipe (or a FILE stream associated with it) will be closed in C
         nullify (item)
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
         call free(user) ! release C memory
