@@ -1039,6 +1039,11 @@ static enum MHD_Result on_http_connection(void *cls,
         if (0 != status)
             return http_internal_server_error(connection);
 
+        char filename[1024];
+
+        // suggest a filename for saving the downloaded file
+        snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId);
+
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
 
@@ -1046,7 +1051,10 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_add_response_header(response, "Cache-Control", "no-cache");
         MHD_add_response_header(response, "Cache-Control", "no-store");
         MHD_add_response_header(response, "Pragma", "no-cache");
-        MHD_add_response_header(response, "Content-Type", "application/octet-stream");
+
+        MHD_add_response_header(response, "Content-Type", "application/force-download");
+        MHD_add_response_header(response, "Content-Disposition", filename);
+        MHD_add_response_header(response, "Content-Transfer-Encoding", "binary");
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
