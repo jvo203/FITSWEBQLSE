@@ -3183,6 +3183,8 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
 
 void download_response(int fd, const char *filename)
 {
+    // call FILE* fp = fdopen(fd, "w");
+
     close(fd); // close a pipe if it could not have been converted into FILE*
 }
 
