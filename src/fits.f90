@@ -6515,6 +6515,8 @@ contains
         integer :: first, last, length, frame
         integer :: x1, x2, y1, y2, tmp
 
+        character(len=256) :: filter
+
         if (.not. c_associated(user)) return
         call c_f_pointer(user, req)
 
@@ -6563,8 +6565,10 @@ contains
 
         ! create a FITSIO filter
         ! filter = "[" * string(x1) * ":" * string(x2) * "," * string(y1) * ":" * string(y2) * "," * string(first_frame) * ":" * string(last_frame) * "]"
+        write (filter, 10) "[", x1, ":", x2, ",", y1, ":", y2, ",", first, ":", last, "]"
 
         ! open a FITS file <item%uri> using a special FITSIO file syntax
+        print *, item%uri//trim(filter)
         ! item%uri // trim(filter)
 
         ! close the connection, release pointers
@@ -6573,6 +6577,8 @@ contains
         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
         call free(user) ! release C memory
         return
+
+10      format(a, i0, a, i0, a, i0, a, i0, a, i0, a, i0, a)
 
     end subroutine download_request
 
