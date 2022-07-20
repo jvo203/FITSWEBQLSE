@@ -1055,6 +1055,7 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_add_response_header(response, "Content-Type", "application/force-download");
         MHD_add_response_header(response, "Content-Disposition", filename);
         MHD_add_response_header(response, "Content-Transfer-Encoding", "binary");
+        MHD_add_response_header(response, "Accept-Ranges", "bytes");
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
