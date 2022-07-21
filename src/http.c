@@ -28,6 +28,9 @@
 // ZFP floating-point compressor
 #include <zfp.h>
 
+// NASA CFITSIO
+#include <fitsio.h>
+
 // PostgreSQL
 #include <libpq-fe.h>
 
