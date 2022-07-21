@@ -3199,8 +3199,7 @@ void download_response(int fd, const char *filename)
     int status = 0;
 
     fits_open_image(&fptr, filename, READONLY, &status);
-
-    if (fptr == NULL || status)
+    if (status)
     {
         printf("[C] error opening a fits file '%s' for reading.\n", filename);
         fits_report_error(stderr, status);
@@ -3209,8 +3208,11 @@ void download_response(int fd, const char *filename)
         return;
     }
 
-    fits_close_file(fptr, &status);
+    fits_write_hdu(fptr, fp, &status);
+    if (status) /* print any error messages */
+        fits_report_error(stderr, status);
 
+    fits_close_file(fptr, &status);
     if (status) /* print any error messages */
         fits_report_error(stderr, status);
 
