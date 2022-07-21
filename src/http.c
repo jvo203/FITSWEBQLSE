@@ -3190,10 +3190,29 @@ void download_response(int fd, const char *filename)
 
     if (fp == NULL)
     {
-        perror("download_response");
+        perror("[C] download_response");
         close(fd); // close a pipe if it could not have been converted into FILE*
         return;
     }
+
+    fitsfile *fptr;
+    int status = 0;
+
+    fits_open_image(&fptr, filename, READONLY, &status);
+
+    if (fptr == NULL || status)
+    {
+        printf("[C] error opening a fits file '%s' for reading.\n", filename);
+        fits_report_error(stderr, status);
+
+        fclose(fp);
+        return;
+    }
+
+    fits_close_file(fptr, &status);
+
+    if (status) /* print any error messages */
+        fits_report_error(stderr, status);
 
     // otherwise call fclose(fp) and return
     fclose(fp);
