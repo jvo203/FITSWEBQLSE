@@ -2422,9 +2422,9 @@ contains
 
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
             rc = c_pthread_create(thread=pid, &
-               attr=c_null_ptr, &
-               start_routine=c_funloc(global_statistics), &
-               arg=c_loc(item))
+                                  attr=c_null_ptr, &
+                                  start_routine=c_funloc(global_statistics), &
+                                  arg=c_loc(item))
 
             ! detach a thread
             if (rc .eq. 0) rc = c_pthread_detach(pid)
@@ -4537,17 +4537,17 @@ contains
             tone_mapping = histogram_classifier(c_loc(Slot))
 
             select case (tone_mapping)
-             case (0)
+            case (0)
                tone%flux = 'legacy'
-             case (1)
+            case (1)
                tone%flux = 'linear'
-             case (2)
+            case (2)
                tone%flux = 'logistic'
-             case (3)
+            case (3)
                tone%flux = 'ratio'
-             case (4)
+            case (4)
                tone%flux = 'square'
-             case default
+            case default
                tone%flux = 'legacy'
             end select
          end block
@@ -4977,7 +4977,7 @@ contains
 
       ! calculate the FITS file size
       filesize = nint(real(size(item%hdr)) + real(item%naxes(1))*real(item%naxes(2))&
-      &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
+                     &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
 
       json = begin_json()
 
@@ -5069,9 +5069,9 @@ contains
 
       ! launch a pthread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_inner_dimensions), &
-         arg=c_loc(inner_dims))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_inner_dimensions), &
+                            arg=c_loc(inner_dims))
 
       ! get the inner image bounding box (excluding NaNs)
       call inherent_image_dimensions(item, inner_width, inner_height)
@@ -5142,9 +5142,9 @@ contains
 
          ! launch a pthread
          rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(fetch_inner_dimensions), &
-            arg=c_loc(inner_dims))
+                               attr=c_null_ptr, &
+                               start_routine=c_funloc(fetch_inner_dimensions), &
+                               arg=c_loc(inner_dims))
       end if
 
       ! get the inner image bounding box (excluding NaNs)
@@ -5218,9 +5218,9 @@ contains
 
          ! launch a pthread
          rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(fetch_image), &
-            arg=c_loc(image_req))
+                               attr=c_null_ptr, &
+                               start_routine=c_funloc(fetch_image), &
+                               arg=c_loc(image_req))
 
          ! join a thread (wait for the results)
          rc = c_pthread_join(pid, c_null_ptr)
@@ -5685,7 +5685,7 @@ contains
       real(c_float) :: cx, cy, rx, ry, r, r2
       real :: cdelt3
 
-      real(kind=c_double) :: lng, lat;
+      real(kind=c_double) :: lng, lat; 
       real(kind=c_double) :: ra1, dec1, ra2, dec2
       real(kind=c_double) :: beam_width, beam_height
       real(kind=c_double) :: frequency, velocity
@@ -5789,9 +5789,9 @@ contains
 
       ! launch a thread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_realtime_image_spectrum), &
-         arg=c_loc(cluster_req))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
+                            arg=c_loc(cluster_req))
 
       ! end of cluster
 
@@ -5970,8 +5970,8 @@ contains
       y2 = min(item%naxes(2), req%y2)
 
       ! calculate the centre and squared radius
-      cx = 0.5*abs(x1 + x2)
-      cy = 0.5*abs(y1 + y2)
+      cx = abs(x1 + x2)/2
+      cy = abs(y1 + y2)/2
       ! r = 0.5*min(abs(x2 - x1), abs(y2 - y1))
       r = min(abs(cx - x1), abs(cy - y1)) + 1
       r2 = r*r
@@ -6045,9 +6045,9 @@ contains
 
       ! launch a thread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_realtime_image_spectrum), &
-         arg=c_loc(cluster_req))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
+                            arg=c_loc(cluster_req))
 
       ! end of cluster
 
@@ -6158,11 +6158,11 @@ contains
          ! the image (viewport) part
          if (req%image) then
             select case (req%quality)
-             case (low)
+            case (low)
                precision = ZFP_LOW_PRECISION
-             case (high)
+            case (high)
                precision = ZFP_HIGH_PRECISION
-             case default
+            case default
                precision = ZFP_MEDIUM_PRECISION
             end select
 
@@ -6244,11 +6244,11 @@ contains
       mask = item%mask(x1:x2, y1:y2)
 
       select case (req%quality)
-       case (low)
+      case (low)
          precision = ZFP_LOW_PRECISION
-       case (high)
+      case (high)
          precision = ZFP_HIGH_PRECISION
-       case default
+      case default
          precision = ZFP_MEDIUM_PRECISION
       end select
 
@@ -6626,9 +6626,9 @@ contains
 
       ! launch a pthread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_global_statistics), &
-         arg=c_loc(req))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_global_statistics), &
+                            arg=c_loc(req))
 
       ! calculate global statistics locally
       call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, req%first, req%last)
@@ -6817,9 +6817,9 @@ contains
 
          ! launch a pthread
          rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(fetch_video_frame), &
-            arg=c_loc(fetch_req))
+                               attr=c_null_ptr, &
+                               start_routine=c_funloc(fetch_video_frame), &
+                               arg=c_loc(fetch_req))
 
          ! join a thread
          rc = c_pthread_join(pid, c_null_ptr)
@@ -7156,9 +7156,9 @@ contains
 
       ! launch a thread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_realtime_image_spectrum), &
-         arg=c_loc(cluster_req))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
+                            arg=c_loc(cluster_req))
 
       ! end of cluster
 
@@ -7251,11 +7251,11 @@ contains
       if (req%fd .ne. -1) then
 
          select case (req%quality)
-          case (low)
+         case (low)
             precision = ZFP_LOW_PRECISION
-          case (high)
+         case (high)
             precision = ZFP_HIGH_PRECISION
-          case default
+         case default
             precision = ZFP_MEDIUM_PRECISION
          end select
 
