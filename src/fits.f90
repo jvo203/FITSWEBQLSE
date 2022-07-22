@@ -5989,6 +5989,9 @@ contains
       dimy = abs(y2 - y1 + 1)
       npixels = dimx*dimy
 
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
       ! do we need the viewport?
       if (req%image) then
          allocate (pixels(npixels))
@@ -6056,9 +6059,6 @@ contains
       spectrum = 0.0
 
       call get_cdelt3(item, cdelt3)
-
-      ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
 
       thread_sumP = 0.0
       thread_countP = 0
