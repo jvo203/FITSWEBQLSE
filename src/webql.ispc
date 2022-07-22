@@ -701,7 +701,7 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
     cm_start = y1 / DIM;
     cm_end = y2 / DIM;
 
-    // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
+    // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);    
 
     varying float partial_sum = 0.0f ;
     varying unsigned int64 partial_count = 0 ;
