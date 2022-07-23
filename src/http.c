@@ -2585,6 +2585,18 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "window.onbeforeunload = close_websocket_connections;"
               "mainRenderer(); </script>\n");
 
+    // Google Analytics
+    g_string_append(html,
+                    "<!-- Global site tag (gtag.js) - Google Analytics -->"
+                    "<script async src='https://www.googletagmanager.com/gtag/js?id=UA-72136224-3'></script>"
+                    "<script>"
+                    "window.dataLayer = window.dataLayer || [];"
+                    "function gtag(){"
+                    "dataLayer.push(arguments);}"
+                    "gtag('js', new Date());"
+                    "gtag('config', 'UA-72136224-3');"
+                    "</script>\n");
+
     g_string_append(html, "</body></html>");
 
     struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html->len, (void *)html->str, g_free);
