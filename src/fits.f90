@@ -4572,10 +4572,8 @@ contains
       integer, parameter :: max_iter = 20
 
       real :: a, b, ratio_sensitivity
-      real :: a_brightness, b_brightness
+      real :: a_brightness, b_brightness, brightness
       integer :: iter
-
-      ratio_sensitivity = sensitivity
 
       a = 0.01 * sensitivity
       b = 100.0 * sensitivity
@@ -4584,13 +4582,32 @@ contains
       a_brightness = calculate_brightness(data, black, a)
       b_brightness = calculate_brightness(data, black, b)
 
-      if (target_brightness .lt. a_brightness .or. target_brightness .gt. b_brightness) return
+      if (target_brightness .lt. a_brightness .or. target_brightness .gt. b_brightness) then
+         ratio_sensitivity = sensitivity
+         return
+      end if
 
+      ! a bi-section algorithm
       iter = 0
       do while (iter .lt. max_iter)
+         ratio_sensitivity = 0.5 * (a + b)
+         brightness = calculate_brightness(data, black, ratio_sensitivity)
+
+         print *, "iteration:", iter, ", sensitivity:", ratio_sensitivity, ", brightness:", brightness&
+         &,", divergence:", abs(target_brightness-brightness)
+
+         if (brightness .gt. target_brightness) b = ratio_sensitivity
+         if (brightness .lt. target_brightness) a = ratio_sensitivity
+
+         if (abs(target_brightness - brightness) .lt. 0.1 * target_brightness) exit
 
          iter = iter + 1
       end do
+
+      ! an approximate solution
+      ratio_sensitivity = 0.5 * (a + b)
+
+      print *, "bi-section sensitivity = ", ratio_sensitivity
 
    end function auto_brightness
 
