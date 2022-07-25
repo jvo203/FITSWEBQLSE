@@ -522,9 +522,9 @@ module fits
          type(c_ptr), value :: ptr
       end Subroutine
 
-      ! export uniform float mean_brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
-      integer(c_int) function mean_brightness_ratio(pixels, black, sensitivity, offset, total_size)&
-      &BIND(C, name='mean_brightness_ratio')
+      ! export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
+      integer(c_int) function brightness_ratio(pixels, black, sensitivity, offset, total_size)&
+      &BIND(C, name='brightness_ratio')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -532,7 +532,7 @@ module fits
          real(c_float), value, intent(in) :: black, sensitivity
          integer(c_int), value, intent(in) :: offset, total_size
 
-      end function mean_brightness_ratio
+      end function brightness_ratio
 
       ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int npixels)
       subroutine make_image_spectrumF32(src, pixels, mask, data_mask, ignrval, datamin, datamax, cdelt3, res, npixels)&
@@ -4658,12 +4658,12 @@ contains
          ! handle the last thread
          if (tid .eq. num_threads) work_size = total_size - start
 
-         brightness = mean_brightness_ratio(c_loc(data), black, sensitivity, start, work_size)
+         brightness = brightness_ratio(c_loc(data), black, sensitivity, start, work_size)
       end do
       !$omp END DO
       !$omp END PARALLEL
 
-      brightness = brightness / real(num_threads)
+      brightness = brightness / total_size
 
    end function calculate_brightness
 
