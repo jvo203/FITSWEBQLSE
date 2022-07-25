@@ -4624,15 +4624,26 @@ contains
    end function auto_brightness
 
    function calculate_brightness(data, black, sensitivity) result(brightness)
+      use omp_lib
+
       real, dimension(:), intent(in) :: data
       real, intent(in) :: black, sensitivity
 
+      integer, parameter :: max_work_size = 1024 * 1024 * 1024
+
       real :: brightness
-      integer :: n
+      integer ::  num_threads, max_threads
+      integer :: total_size, work_size
 
       ! default values
       brightness = 0.0
-      n = size(data)
+      total_size = size(data)
+
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+      work_size = min(total_size / max_threads, max_work_size)
+      num_threads = total_size / work_size
+
    end function calculate_brightness
 
    subroutine make_histogram(hist, data, pmin, pmax)
