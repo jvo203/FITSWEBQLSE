@@ -4594,6 +4594,8 @@ contains
       a_brightness = calculate_brightness(data, black, a)
       b_brightness = calculate_brightness(data, black, b)
 
+      print *, "A_BR.:", a_brightness, ", B_BR.:", b_brightness, ", TARGET:", target_brightness
+
       if (target_brightness .lt. a_brightness .or. target_brightness .gt. b_brightness) then
          ratio_sensitivity = sensitivity
          return
