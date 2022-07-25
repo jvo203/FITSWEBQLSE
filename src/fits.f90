@@ -4591,8 +4591,8 @@ contains
       b = 100.0 * sensitivity
 
       ! perform the first step manually (verify that br(a) <= target_brightness <= br(b) )
-      a_brightness = calculate_brightness(data, black, a)
-      b_brightness = calculate_brightness(data, black, b)
+      a_brightness = get_brightness(data, black, a)
+      b_brightness = get_brightness(data, black, b)
 
       print *, "A_BR.:", a_brightness, ", B_BR.:", b_brightness, ", TARGET:", target_brightness
 
@@ -4605,7 +4605,7 @@ contains
       iter = 0
       do while (iter .lt. max_iter)
          ratio_sensitivity = 0.5 * (a + b)
-         brightness = calculate_brightness(data, black, ratio_sensitivity)
+         brightness = get_brightness(data, black, ratio_sensitivity)
 
          print *, "iteration:", iter, ", sensitivity:", ratio_sensitivity, ", brightness:", brightness&
          &,", divergence:", abs(target_brightness-brightness)
@@ -4639,6 +4639,8 @@ contains
          pixel = 5.0*(data(i) - black) * sensitivity
          if (pixel .gt. 0.0) brightness = brightness + pixel / (1.0 + pixel)
       end do
+
+      brightness = brightness / n
 
    end function get_brightness
 
@@ -4680,7 +4682,7 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      brightness = brightness_ratio(c_loc(data), black, sensitivity, 0, total_size)
+      ! brightness = brightness_ratio(c_loc(data), black, sensitivity, 0, total_size)
       brightness = brightness / total_size
 
    end function calculate_brightness
