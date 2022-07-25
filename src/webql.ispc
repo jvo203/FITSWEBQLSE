@@ -86,14 +86,14 @@ uniform int64 count = reduce_add(partial_count) ;
   res[3] = integrated;
 } ;
 
-export uniform float mean_brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform unsigned int total_size)
+export uniform float mean_brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
 {
   float partial_sum = 0.0f ;
   unsigned int partial_count = 0 ;
 
   foreach(j=0 ... total_size)
   {    
-    float pixel = 5.0f * (pixels[j] - black) * sensitivity ;
+    float pixel = 5.0f * (pixels[offset + j] - black) * sensitivity ;
     partial_sum += pixel > 0.0f ? pixel/(1.0f + pixel) : 0.0f ;       
     partial_count += 1 ; 
   }
