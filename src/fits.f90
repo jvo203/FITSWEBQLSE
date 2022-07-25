@@ -4577,7 +4577,6 @@ contains
 
       ratio_sensitivity = sensitivity
 
-      iter = 0
       a = 0.01 * sensitivity
       b = 100.0 * sensitivity
 
@@ -4586,6 +4585,12 @@ contains
       b_brightness = calculate_brightness(data, black, b)
 
       if (target_brightness .lt. a_brightness .or. target_brightness .gt. b_brightness) return
+
+      iter = 0
+      do while (iter .lt. max_iter)
+
+         iter = iter + 1
+      end do
 
    end function auto_brightness
 
