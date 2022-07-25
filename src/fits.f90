@@ -4626,15 +4626,14 @@ contains
    function calculate_brightness(data, black, sensitivity) result(brightness)
       use omp_lib
 
-      real, dimension(:), intent(in) :: data
+      real, dimension(:), intent(in), target :: data
       real, intent(in) :: black, sensitivity
 
       integer, parameter :: max_work_size = 1024 * 1024 * 1024
 
       real :: brightness
-      integer ::  num_threads, max_threads, tid
-      integer :: total_size, work_size
-      integer(kind=c_int) :: start
+      integer ::  num_threads, max_threads, tid, work_size
+      integer(kind=c_int) :: start, total_size
 
       ! default values
       brightness = 0.0
@@ -4651,7 +4650,11 @@ contains
 
          ! handle the last thread
          if (tid .eq. num_threads) work_size = total_size - start
+
+         brightness = mean_brightness_ratio(c_loc(data), black, sensitivity, start, total_size)
       end do
+
+      brightness = brightness / real(num_threads)
 
    end function calculate_brightness
 
