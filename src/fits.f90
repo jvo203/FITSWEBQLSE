@@ -522,6 +522,18 @@ module fits
          type(c_ptr), value :: ptr
       end Subroutine
 
+      ! export uniform float mean_brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
+      integer(c_int) function mean_brightness_ratio(pixels, black, sensitivity, offset, total_size)&
+      &BIND(C, name='mean_brightness_ratio')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: pixels
+         real(c_float), value, intent(in) :: black, sensitivity
+         integer(c_int), value, intent(in) :: offset, total_size
+
+      end function mean_brightness_ratio
+
       ! export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int npixels)
       subroutine make_image_spectrumF32(src, pixels, mask, data_mask, ignrval, datamin, datamax, cdelt3, res, npixels)&
       & BIND(C, name='make_image_spectrumF32')
