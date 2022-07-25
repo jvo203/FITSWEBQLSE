@@ -4632,8 +4632,9 @@ contains
       integer, parameter :: max_work_size = 1024 * 1024 * 1024
 
       real :: brightness
-      integer ::  num_threads, max_threads
+      integer ::  num_threads, max_threads, tid
       integer :: total_size, work_size
+      integer(kind=c_int) :: start
 
       ! default values
       brightness = 0.0
@@ -4643,6 +4644,14 @@ contains
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
       work_size = min(total_size / max_threads, max_work_size)
       num_threads = total_size / work_size
+
+      do tid=1,num_threads
+         work_size = total_size / num_threads
+         start = (tid-1) * work_size ! C-style array 0-start
+
+         ! handle the last thread
+         if (tid .eq. num_threads) work_size = total_size - start
+      end do
 
    end function calculate_brightness
 
