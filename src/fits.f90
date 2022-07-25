@@ -4625,6 +4625,23 @@ contains
 
    end function auto_brightness
 
+   function get_brightness(data, black, sensitivity) result(brightness)
+      real, dimension(:), intent(in) :: data
+      real, intent(in) :: black, sensitivity
+
+      real :: brightness, pixel
+      integer :: i, n
+
+      brightness = 0.0
+      n = size(data)
+
+      do i=1,n
+         pixel = 5.0*(data(i) - black) * sensitivity
+         if (pixel .gt. 0.0) brightness = brightness + pixel / (1.0 + pixel)
+      end do
+
+   end function get_brightness
+
    function calculate_brightness(data, black, sensitivity) result(brightness)
       use omp_lib
 
