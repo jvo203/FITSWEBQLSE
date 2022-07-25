@@ -4567,10 +4567,39 @@ contains
    function auto_brightness(data, black, sensitivity) result(ratio_sensitivity)
       real, dimension(:), intent(in) :: data
       real, intent(in) :: black, sensitivity
-      real :: ratio_sensitivity
 
-      ratio_sensitivity = ratio_sensitivity
+      real, parameter :: target_brightness = 0.1
+      integer, parameter :: max_iter = 20
+
+      real :: a, b, ratio_sensitivity
+      real :: a_brightness, b_brightness
+      integer :: iter
+
+      ratio_sensitivity = sensitivity
+
+      iter = 0
+      a = 0.01 * sensitivity
+      b = 100.0 * sensitivity
+
+      ! perform the first step manually (verify that br(a) <= target_brightness <= br(b) )
+      a_brightness = calculate_brightness(data, black, a)
+      b_brightness = calculate_brightness(data, black, b)
+
+      if (target_brightness .lt. a_brightness .or. target_brightness .gt. b_brightness) return
+
    end function auto_brightness
+
+   function calculate_brightness(data, black, sensitivity) result(brightness)
+      real, dimension(:), intent(in) :: data
+      real, intent(in) :: black, sensitivity
+
+      real :: brightness
+      integer :: n
+
+      ! default values
+      brightness = 0.0
+      n = size(data)
+   end function calculate_brightness
 
    subroutine make_histogram(hist, data, pmin, pmax)
       integer, allocatable, intent(out) :: hist(:)
