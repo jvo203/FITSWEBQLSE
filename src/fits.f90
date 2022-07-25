@@ -4644,6 +4644,11 @@ contains
       work_size = min(total_size / max_threads, max_work_size)
       num_threads = total_size / work_size
 
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(data)&
+      !$omp& PRIVATE(tid, work_size, start)&
+      !$omp& REDUCTION(+:brightness)&
+      !$omp& NUM_THREADS(num_threads)
+      !$omp DO
       do tid=1,num_threads
          work_size = total_size / num_threads
          start = (tid-1) * work_size ! C-style array 0-start
@@ -4653,6 +4658,8 @@ contains
 
          brightness = mean_brightness_ratio(c_loc(data), black, sensitivity, start, total_size)
       end do
+      !$omp END DO
+      !$omp END PARALLEL
 
       brightness = brightness / real(num_threads)
 
