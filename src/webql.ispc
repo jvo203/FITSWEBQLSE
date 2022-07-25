@@ -86,6 +86,27 @@ uniform int64 count = reduce_add(partial_count) ;
   res[3] = integrated;
 } ;
 
+export uniform float mean_brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform unsigned int total_size)
+{
+  float partial_sum = 0.0f ;
+  unsigned int partial_count = 0 ;
+
+  foreach(j=0 ... total_size)
+  {    
+    float pixel = 5.0f * (pixels[j] - black) * sensitivity ;
+    partial_sum += pixel > 0.0f ? pixel/(1.0f + pixel) : 0.0f ;       
+    partial_count += 1 ; 
+  }
+
+  uniform float sum = reduce_add(partial_sum) ;
+  uniform int count = reduce_add(partial_count) ;
+
+  if(count > 0)
+    return sum / (float) count ;
+  else
+    return 0.0f;
+} ;
+
 export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
 {  
   float partial_sum = 0.0f ;
