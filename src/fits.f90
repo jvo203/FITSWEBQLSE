@@ -4656,7 +4656,7 @@ contains
          ! handle the last thread
          if (tid .eq. num_threads) work_size = total_size - start
 
-         brightness = mean_brightness_ratio(c_loc(data), black, sensitivity, start, total_size)
+         brightness = mean_brightness_ratio(c_loc(data), black, sensitivity, start, work_size)
       end do
       !$omp END DO
       !$omp END PARALLEL
