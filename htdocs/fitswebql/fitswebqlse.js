@@ -1479,13 +1479,15 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
 	if (streaming || moving || windowLeft)
 		return;
 
-	// combine pixels with a mask
-	let len = pixels.length | 0;
+	// combine pixels with a mask	
+	// let len = pixels.length | 0; // Float32Array
+	let len = pixels.size() | 0; // Float()
 	var texture = new Float32Array(2 * len);
 	let offset = 0 | 0;
 
 	for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
-		texture[offset] = pixels[i];
+		// texture[offset] = pixels[i]; // Float32Array
+		texture[offset] = pixels.get(i); // Float()
 		offset = (offset + 1) | 0;
 
 		texture[offset] = (alpha[i] > 0) ? 1.0 : 0.0;
@@ -2782,7 +2784,9 @@ function open_websocket_connection(_datasetId, index) {
 							console.log("processing an HDR viewport");
 							let start = performance.now();
 
-							var pixels = Module.decompressZFPimage(view_width, view_height, frame_pixels);
+							// decompressZFP returns std::vector<float>
+							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
+							var pixels = Module.decompressZFP(view_width, view_height, frame_pixels);
 
 							var alpha = Module.decompressLZ4mask(view_width, view_height, frame_mask);
 
