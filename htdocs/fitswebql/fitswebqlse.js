@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-22.0";
+	return "JS2022-07-26.0";
 }
 
 function uuidv4() {
@@ -1631,6 +1631,8 @@ function webgl_image_renderer(index, gl, width, height) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);*/
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+	console.log("image width:", image.width, "height:", image.height);
 
 	if (webgl2)
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, image.width, image.height, 0, gl.RG, gl.FLOAT, image.texture);
@@ -14368,7 +14370,7 @@ function test_webgl_support() {
 	try {
 		var canvas = document.createElement('canvas');
 		return !!window.WebGLRenderingContext && (
-			canvas.getContext('webgl') /*|| canvas.getContext('experimental-webgl')*/);
+			canvas.getContext('webgl') || canvas.getContext('webgl2'));
 	} catch (e) { return false; }
 };
 
@@ -14433,6 +14435,12 @@ function enable_3d_view() {
 async*/ function mainRenderer() {
 	webgl1 = test_webgl1();
 	webgl2 = test_webgl2();
+
+	if (webgl2) {
+		// prefer WebGL2 over 1
+		webgl1 = false;
+		webgl2 = true;
+	}
 
 	try {
 		enable_3d_view();
