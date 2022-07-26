@@ -97,7 +97,7 @@ export uniform float brightness_ratio(uniform float pixels[], uniform float blac
   }
 
   uniform float sum = reduce_add(partial_sum);
-  print("black: %, sensitivity: %, sum: %\n", black, sensitivity, sum);
+  // print("black: %, sensitivity: %, sum: %\n", black, sensitivity, sum);
 
   return sum;
 } ;
