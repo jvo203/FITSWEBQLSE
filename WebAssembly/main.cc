@@ -114,9 +114,9 @@ val decompressZFPimage(int img_width, int img_height, std::string const &bytes)
   /*for (size_t i = 0; i < pixelLength; i++)
     if (pixelBuffer[i] != 0.0f)
       printf("%zu:%f|", i, pixelBuffer[i]);
-  printf("\n");
+  printf("\n");*/
 
-  printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);*/
+  printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);
 
   return val(typed_memory_view(pixelLength, pixelBuffer));
 }
