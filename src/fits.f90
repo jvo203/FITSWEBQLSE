@@ -4660,6 +4660,10 @@ contains
       brightness = 0.0
       total_size = size(data)
 
+      ! OK, do it all in one go since large images are getting downsized anyway
+      brightness = brightness_ratio(c_loc(data), black, sensitivity, 0, total_size) / total_size
+      return
+
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
       work_size = min(total_size / max_threads, max_work_size)
