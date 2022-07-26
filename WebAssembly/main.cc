@@ -42,8 +42,16 @@ using namespace emscripten;
 typedef std::vector<float> Float;
 typedef std::vector<unsigned char> UChar;
 
-val decompressZFPimage(int img_width, int img_height, std::string const &bytes)
+struct buffer
 {
+  unsigned int ptr;
+  unsigned int size;
+};
+
+/*val*/ buffer decompressZFPimage(int img_width, int img_height, std::string const &bytes)
+{
+  buffer wasmBuffer = {0, 0};
+
   std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
 
   size_t img_size = size_t(img_width) * size_t(img_height);
@@ -65,7 +73,8 @@ val decompressZFPimage(int img_width, int img_height, std::string const &bytes)
   if (pixelBuffer == NULL)
   {
     pixelLength = 0;
-    return val(typed_memory_view(pixelLength, pixelBuffer));
+    // return val(typed_memory_view(pixelLength, pixelBuffer));
+    return wasmBuffer;
   }
 
   // ZFP variables
@@ -118,7 +127,12 @@ val decompressZFPimage(int img_width, int img_height, std::string const &bytes)
 
   printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);*/
 
-  return val(typed_memory_view(pixelLength, pixelBuffer));
+  wasmBuffer.ptr = (unsigned int)pixelBuffer;
+  wasmBuffer.size = (unsigned int)pixelLength;
+
+  return wasmBuffer;
+
+  // return val(typed_memory_view(pixelLength, pixelBuffer));
   // return val(memory_view<unsigned char>(img_width * img_height * sizeof(float), (unsigned char *)pixelBuffer));
 
   // another try - create an array in JavaScript
@@ -373,6 +387,9 @@ EMSCRIPTEN_BINDINGS(Wrapper)
 {
   register_vector<float>("Float");
   register_vector<unsigned char>("UChar");
+  value_array<buffer>("buffer")
+      .element(&buffer::ptr)
+      .element(&buffer::size);
   function("decompressZFP", &decompressZFP);
   function("decompressZFPimage", &decompressZFPimage);
   function("decompressZFPspectrum", &decompressZFPspectrum);
