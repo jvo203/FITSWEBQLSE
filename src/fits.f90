@@ -523,7 +523,7 @@ module fits
       end Subroutine
 
       ! export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
-      integer(c_int) function brightness_ratio(pixels, black, sensitivity, offset, total_size)&
+      real(c_float) function brightness_ratio(pixels, black, sensitivity, offset, total_size)&
       &BIND(C, name='brightness_ratio')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -4591,8 +4591,8 @@ contains
       b = 100.0 * sensitivity
 
       ! perform the first step manually (verify that br(a) <= target_brightness <= br(b) )
-      a_brightness = get_brightness(data, black, a)
-      b_brightness = get_brightness(data, black, b)
+      a_brightness = calculate_brightness(data, black, a)
+      b_brightness = calculate_brightness(data, black, b)
 
       print *, "A_BR.:", a_brightness, ", B_BR.:", b_brightness, ", TARGET:", target_brightness
 
@@ -4605,7 +4605,7 @@ contains
       iter = 0
       do while (iter .lt. max_iter)
          ratio_sensitivity = 0.5 * (a + b)
-         brightness = get_brightness(data, black, ratio_sensitivity)
+         brightness = calculate_brightness(data, black, ratio_sensitivity)
 
          print *, "iteration:", iter, ", sensitivity:", ratio_sensitivity, ", brightness:", brightness&
          &,", divergence:", abs(target_brightness-brightness)
@@ -4647,18 +4647,21 @@ contains
    function calculate_brightness(data, black, sensitivity) result(brightness)
       use omp_lib
 
-      real, dimension(:), intent(in), target :: data
-      real, intent(in) :: black, sensitivity
+      real(c_float), dimension(:), intent(in), target :: data
+      real(c_float), intent(in) :: black, sensitivity
 
       integer, parameter :: max_work_size = 1024 * 1024 * 1024
 
-      real :: brightness
+      real(c_float) :: brightness
       integer ::  num_threads, max_threads, tid, work_size
       integer(kind=c_int) :: start, total_size
 
       ! default values
       brightness = 0.0
       total_size = size(data)
+
+      brightness = brightness_ratio(c_loc(data), black, sensitivity, 0, total_size) / total_size
+      return
 
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
