@@ -1513,12 +1513,14 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 	console.log(image_bounding_dims, pixel_range);
 
 	// combine pixels with a mask
-	let len = pixels.length | 0;
+	// let len = pixels.length | 0; // Float32Array
+	let len = pixels.size() | 0; // Float()
 	var texture = new Float32Array(2 * len);
 	let offset = 0 | 0;
 
 	for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
-		texture[offset] = pixels[i];
+		// texture[offset] = pixels[i]; // Float32Array
+		texture[offset] = pixels.get(i); // Float()
 		offset = (offset + 1) | 0;
 
 		texture[offset] = (alpha[i] > 0) ? 1.0 : 0.0;
@@ -2882,7 +2884,9 @@ function open_websocket_connection(_datasetId, index) {
 							console.log("processing an HDR image");
 							let start = performance.now();
 
-							var pixels = Module.decompressZFPimage(img_width, img_height, frame_pixels);
+							// decompressZFP returns std::vector<float>
+							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
+							var pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
 
 							var alpha = Module.decompressLZ4mask(img_width, img_height, frame_mask);
 
@@ -3328,7 +3332,8 @@ function image_pixel_range(pixels, mask, width, height) {
 
 	for (let i = 0; i < plane_size; i++) {
 		if (mask[i] > 0) {
-			let pixel = pixels[i];
+			// let pixel = pixels[i]; // Float32Array
+			let pixel = pixels.get(i); // Float()
 
 			if (pixel > max_pixel)
 				max_pixel = pixel;
@@ -11066,14 +11071,18 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							console.log("processing an HDR image");
 							let start = performance.now();
 
-							var pixels = Module.decompressZFPimage(img_width, img_height, frame_pixels);
+							// decompressZFP returns std::vector<float>
+							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
+							var pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
 
 							var alpha = Module.decompressLZ4mask(img_width, img_height, frame_mask);
 
 							let elapsed = Math.round(performance.now() - start);
 
-							console.log("pixels.length:", pixels.length, "alpha.length:", alpha.length);
+							//console.log("pixels.length:", pixels.length, "alpha.length:", alpha.length);
+							console.log("pixels.size():", pixels.size(), "alpha.length:", alpha.length);
 							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+							console.log(pixels);
 
 							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
