@@ -129,7 +129,7 @@ val decompressZFPimage(int img_width, int img_height, std::string const &bytes)
 
 val decompressZFPspectrum(int length, std::string const &bytes)
 {
-  std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+  // std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
 
   if (spectrumBuffer != NULL && spectrumLength != length)
   {
@@ -181,8 +181,8 @@ val decompressZFPspectrum(int length, std::string const &bytes)
 
     if (zfpsize == 0)
       printf("ZFP decompression failed!\n");
-    else
-      printf("decompressed %zu spectrum bytes.\n", zfpsize);
+    /*else
+      printf("decompressed %zu spectrum bytes.\n", zfpsize);*/
 
     stream_close(stream);
   }
@@ -194,7 +194,6 @@ val decompressZFPspectrum(int length, std::string const &bytes)
   /*for (size_t i = 0; i < spectrumLength; i++)
     printf("%zu:%f|", i, spectrumBuffer[i]);
   printf("\n");
-
   printf("spectrumLength: %zu, buffer:%p\n", spectrumLength, spectrumBuffer);*/
 
   return val(typed_memory_view(spectrumLength, spectrumBuffer));

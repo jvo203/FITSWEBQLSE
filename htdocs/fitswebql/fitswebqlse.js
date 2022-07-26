@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-26.1";
+	return "JS2022-07-26.2";
 }
 
 function uuidv4() {
@@ -267,7 +267,7 @@ function get_freq2vel_bounds(freq_start, freq_end, fitsData) {
 }
 
 function get_frequency_bounds(freq_start, freq_end, fitsData) {
-	console.log("get_frequency_bounds(" + freq_start + "," + freq_end + ")");
+	//console.log("get_frequency_bounds(" + freq_start + "," + freq_end + ")");
 
 	var f1, f2, band_lo, band_hi;
 
@@ -277,7 +277,7 @@ function get_frequency_bounds(freq_start, freq_end, fitsData) {
 	band_lo = Math.min(f1, f2);
 	band_hi = Math.max(f1, f2);
 
-	console.log("band_lo:", band_lo, "band_hi:", band_hi);
+	//console.log("band_lo:", band_lo, "band_hi:", band_hi);
 
 	var _frame_start, _frame_end;
 
@@ -310,7 +310,7 @@ function get_frequency_bounds(freq_start, freq_end, fitsData) {
 }
 
 function get_velocity_bounds(vel_start, vel_end, fitsData) {
-	console.log("get_velocity_bounds(" + vel_start + "," + vel_end + ")");
+	//console.log("get_velocity_bounds(" + vel_start + "," + vel_end + ")");
 
 	var v1, v2, vel_lo, vel_hi;
 
@@ -320,7 +320,7 @@ function get_velocity_bounds(vel_start, vel_end, fitsData) {
 	vel_lo = Math.min(v1, v2);
 	vel_hi = Math.max(v1, v2);
 
-	console.log("vel_lo:", vel_lo, "vel_hi:", vel_hi);
+	//console.log("vel_lo:", vel_lo, "vel_hi:", vel_hi);
 
 	var _frame_start, _frame_end;
 
@@ -378,7 +378,7 @@ function largestTriangleThreeBuckets(data, threshold) {
 		return data; // Nothing to do
 	}
 
-	console.log("applying 'largestTriangleThreeBuckets'");
+	//console.log("applying 'largestTriangleThreeBuckets'");
 
 	var sampled = [],
 		sampledIndex = 0;
@@ -1498,7 +1498,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
 
 	if (viewport != null) {
 		// Clear the ZOOM Canvas
-		console.log("clearing the ZOOM Canvas");
+		//console.log("clearing the ZOOM Canvas");
 		var gl = viewport.gl;
 		gl.clearColor(0, 0, 0, 0);
 		gl.clear(gl.COLOR_BUFFER_BIT);
@@ -1512,7 +1512,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
 	let image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
 	var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
-	console.log(image_bounding_dims, pixel_range);
+	//console.log(image_bounding_dims, pixel_range);
 
 	// combine pixels with a mask
 	// let len = pixels.length | 0; // Float32Array
@@ -1564,7 +1564,7 @@ function webgl_image_renderer(index, gl, width, height) {
 	var scale = get_image_scale(width, height, image.image_bounding_dims.width, image.image_bounding_dims.height);
 	var img_width = scale * image.image_bounding_dims.width;
 	var img_height = scale * image.image_bounding_dims.height;
-	console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
+	//console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
 
 	// setup GLSL program
 	var vertexShaderCode = document.getElementById("vertex-shader").text;
@@ -1670,7 +1670,7 @@ function webgl_image_renderer(index, gl, width, height) {
 
 		//WebGL how to convert from clip space to pixels	
 		gl.viewport((width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
-		console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
+		//console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
 
 		// Clear the canvas
 		gl.clearColor(0, 0, 0, 0);
@@ -1729,7 +1729,7 @@ function process_image(width, height, w, h, bytes, stride, alpha, index) {
 	//let image_bounding_dims = {x1: 0, y1: 0, width: w, height: h};
 	let image_bounding_dims = true_image_dimensions(alpha, width, height);
 	var pixel_range = image_pixel_range(bytes, w, h, stride);
-	console.log("min pixel:", pixel_range.min_pixel, "max pixel:", pixel_range.max_pixel);
+	//console.log("min pixel:", pixel_range.min_pixel, "max pixel:", pixel_range.max_pixel);
 
 	let imageCanvas = document.createElement('canvas');
 	imageCanvas.style.visibility = "hidden";
@@ -1737,7 +1737,7 @@ function process_image(width, height, w, h, bytes, stride, alpha, index) {
 
 	imageCanvas.width = width;
 	imageCanvas.height = height;
-	console.log(imageCanvas.width, imageCanvas.height);
+	//console.log(imageCanvas.width, imageCanvas.height);
 
 	var imageFrame;
 	let imageData = context.createImageData(width, height);
@@ -1934,7 +1934,7 @@ function process_image(width, height, w, h, bytes, stride, alpha, index) {
 
 				setup_viewports();
 
-				console.log(imageContainer);
+				//console.log(imageContainer);
 
 				try {
 					display_scale_info();
@@ -1986,7 +1986,7 @@ function process_video(index) {
 
 	imageCanvas.width = imageData.width;
 	imageCanvas.height = imageData.height;
-	console.log(imageCanvas.width, imageCanvas.height);
+	//console.log(imageCanvas.width, imageCanvas.height);
 
 	context.putImageData(imageData, 0, 0);
 
@@ -2085,14 +2085,14 @@ function process_viewport_canvas(viewportCanvas, index) {
 	if (streaming)
 		return;
 
-	console.log("process_viewport_canvas(" + index + ")");
+	//console.log("process_viewport_canvas(" + index + ")");
 
 	document.getElementById('welcome').style.display = "none";
 
 	viewport_count++;
 
 	if (va_count > 1 && !composite_view) {
-		console.log("refresh_viewport for index:", index);
+		//console.log("refresh_viewport for index:", index);
 
 		if (viewport_count == va_count) {
 			//hide_hourglass();
@@ -2196,7 +2196,7 @@ function process_viewport_canvas(viewportCanvas, index) {
 			}
 		}
 		else {
-			console.log("cancelled a viewport refresh; recv_seq_id =", recv_seq_id, " sent_seq_id =", sent_seq_id, " moving:", moving);
+			//console.log("cancelled a viewport refresh; recv_seq_id =", recv_seq_id, " sent_seq_id =", sent_seq_id, " moving:", moving);
 		}
 	}
 }
@@ -2205,7 +2205,7 @@ function process_viewport(width, height, w, h, bytes, stride, alpha, index, swap
 	if (streaming)
 		return;
 
-	console.log("process_viewport(" + index + ")");
+	//console.log("process_viewport(" + index + ")");
 
 	document.getElementById('welcome').style.display = "none";
 
@@ -2215,7 +2215,7 @@ function process_viewport(width, height, w, h, bytes, stride, alpha, index, swap
 
 	viewportCanvas.width = width;
 	viewportCanvas.height = height;
-	console.log(viewportCanvas.width, viewportCanvas.height);
+	//console.log(viewportCanvas.width, viewportCanvas.height);
 
 	viewport_count++;
 
@@ -2273,7 +2273,7 @@ function process_viewport(width, height, w, h, bytes, stride, alpha, index, swap
 	}
 
 	if (va_count > 1 && !composite_view) {
-		console.log("refresh_viewport for index:", index);
+		//console.log("refresh_viewport for index:", index);
 
 		if (viewport_count == va_count) {
 			//hide_hourglass();
@@ -2377,7 +2377,7 @@ function process_viewport(width, height, w, h, bytes, stride, alpha, index, swap
 			}
 		}
 		else {
-			console.log("cancelled a viewport refresh; recv_seq_id =", recv_seq_id, " sent_seq_id =", sent_seq_id, " moving:", moving);
+			//console.log("cancelled a viewport refresh; recv_seq_id =", recv_seq_id, " sent_seq_id =", sent_seq_id, " moving:", moving);
 		}
 	}
 }
@@ -2739,7 +2739,7 @@ function open_websocket_connection(_datasetId, index) {
 								if (spectrum.length > 0) {
 									if (!windowLeft) {
 										spectrum_stack[index - 1].push({ spectrum: spectrum, id: recv_seq_id });
-										console.log("index:", index, "spectrum_stack length:", spectrum_stack[index - 1].length);
+										//console.log("index:", index, "spectrum_stack length:", spectrum_stack[index - 1].length);
 									};
 								}
 
@@ -2764,7 +2764,7 @@ function open_websocket_connection(_datasetId, index) {
 						var pixels_length = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						console.log('pixels length:', pixels_length);
+						//console.log('pixels length:', pixels_length);
 
 						var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
 						offset += pixels_length;
@@ -2772,7 +2772,7 @@ function open_websocket_connection(_datasetId, index) {
 						var mask_length = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						console.log('mask length:', mask_length);
+						//console.log('mask length:', mask_length);
 
 						var frame_mask = new Uint8Array(received_msg, offset, mask_length);
 						offset += mask_length;
@@ -2781,7 +2781,7 @@ function open_websocket_connection(_datasetId, index) {
 						/*Module.ready
 							.then(_ => {*/
 						{
-							console.log("processing an HDR viewport");
+							//console.log("processing an HDR viewport");
 							let start = performance.now();
 
 							// decompressZFP returns std::vector<float>
@@ -2792,7 +2792,7 @@ function open_websocket_connection(_datasetId, index) {
 
 							let elapsed = Math.round(performance.now() - start);
 
-							console.log("viewport width: ", view_width, "height: ", view_height, "elapsed: ", elapsed, "[ms]");
+							//console.log("viewport width: ", view_width, "height: ", view_height, "elapsed: ", elapsed, "[ms]");
 
 							process_hdr_viewport(view_width, view_height, pixels, alpha);
 						}
@@ -2843,7 +2843,7 @@ function open_websocket_connection(_datasetId, index) {
 							tone_mapping.white = tone_mapping.max;
 						}
 
-						console.log(tone_mapping);
+						//console.log(tone_mapping);
 
 						if (imageContainer[index - 1] != null) {
 							// re-set the existing tone mapping settings
@@ -2866,12 +2866,12 @@ function open_websocket_connection(_datasetId, index) {
 						var img_height = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						console.log('img_width:', img_width, 'img_height:', img_height);
+						//console.log('img_width:', img_width, 'img_height:', img_height);
 
 						var pixels_length = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						console.log('pixels length:', pixels_length);
+						//console.log('pixels length:', pixels_length);
 
 						var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
 						offset += pixels_length;
@@ -2879,13 +2879,13 @@ function open_websocket_connection(_datasetId, index) {
 						var mask_length = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						console.log('mask length:', mask_length);
+						//console.log('mask length:', mask_length);
 
 						var frame_mask = new Uint8Array(received_msg, offset, mask_length);
 						offset += mask_length;
 
 						{
-							console.log("processing an HDR image");
+							//console.log("processing an HDR image");
 							let start = performance.now();
 
 							// decompressZFP returns std::vector<float>
@@ -2896,7 +2896,7 @@ function open_websocket_connection(_datasetId, index) {
 
 							let elapsed = Math.round(performance.now() - start);
 
-							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+							//console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
 							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
@@ -2904,7 +2904,7 @@ function open_websocket_connection(_datasetId, index) {
 						}
 
 						let padding = 4 - offset % 4;
-						console.log("histogram offset:", offset, "padding:", padding);
+						//console.log("histogram offset:", offset, "padding:", padding);
 						offset += padding;
 
 						// next the histogram length + bins
@@ -2913,8 +2913,6 @@ function open_websocket_connection(_datasetId, index) {
 
 						var histogram = new Int32Array(received_msg, offset, nbins);
 						offset += nbins * 4;
-
-						console.log(histogram);
 
 						fitsContainer[index - 1].histogram = histogram;
 
@@ -3004,16 +3002,16 @@ function open_websocket_connection(_datasetId, index) {
 						var sensitivity = dv.getFloat32(32, endianness);
 						var ratio_sensitivity = dv.getFloat32(36, endianness);
 
-						console.log("histogram refresh", min, max, median, sensitivity, ratio_sensitivity, black, white);
+						//console.log("histogram refresh", min, max, median, sensitivity, ratio_sensitivity, black, white);
 
 						let fitsData = fitsContainer[index - 1];
-						console.log("min: ", fitsData.min, "-->", min);
-						console.log("max: ", fitsData.max, "-->", max);
-						console.log("median: ", fitsData.median, "-->", median);
-						console.log("sensitivity: ", fitsData.sensitivity, "-->", sensitivity);
-						console.log("ratio sensitivity: ", fitsData.ratio_sensitivity, "-->", ratio_sensitivity);
-						console.log("black: ", fitsData.black, "-->", black);
-						console.log("white: ", fitsData.white, "-->", white);
+						//console.log("min: ", fitsData.min, "-->", min);
+						//console.log("max: ", fitsData.max, "-->", max);
+						//console.log("median: ", fitsData.median, "-->", median);
+						//console.log("sensitivity: ", fitsData.sensitivity, "-->", sensitivity);
+						//console.log("ratio sensitivity: ", fitsData.ratio_sensitivity, "-->", ratio_sensitivity);
+						//console.log("black: ", fitsData.black, "-->", black);
+						//console.log("white: ", fitsData.white, "-->", white);
 
 						fitsContainer[index - 1].min = min;
 						fitsContainer[index - 1].max = max;
@@ -3027,7 +3025,7 @@ function open_websocket_connection(_datasetId, index) {
 						var histogram = new Int32Array(received_msg, 44, nbins);
 						fitsContainer[index - 1].histogram = histogram;
 
-						console.log("NBINS:", nbins, histogram);
+						//console.log("NBINS:", nbins, histogram);
 
 						//refresh the histogram
 						redraw_histogram(index);
@@ -3054,7 +3052,7 @@ function open_websocket_connection(_datasetId, index) {
 							target_bitrate = 0.8 * bitrate;
 						}
 
-						console.log("[ws] computed = " + computed.toFixed(1) + " [ms], latency = " + latency.toFixed(1) + "[ms], n/w transfer time = " + (1000 * transfer).toFixed(1) + " [ms],  n/w bandwidth = " + Math.round(bandwidth) + " [kbps], frame length:" + frame.length);
+						//console.log("[ws] computed = " + computed.toFixed(1) + " [ms], latency = " + latency.toFixed(1) + "[ms], n/w transfer time = " + (1000 * transfer).toFixed(1) + " [ms],  n/w bandwidth = " + Math.round(bandwidth) + " [kbps], frame length:" + frame.length);
 
 						//call the wasm decoder
 						{
@@ -3073,7 +3071,7 @@ function open_websocket_connection(_datasetId, index) {
 									//HEVC
 									data = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, colourmap, fill);
 								} catch (e) {
-									console.log(e);
+									//console.log(e);
 								};
 
 								var img = new ImageData(new Uint8ClampedArray(data), videoFrame[index - 1].width, videoFrame[index - 1].height);
@@ -3094,7 +3092,7 @@ function open_websocket_connection(_datasetId, index) {
 
 							let delta = performance.now() - start;
 
-							console.log('total decoding/processing/rendering time: ' + delta.toFixed() + ' [ms]');
+							//console.log('total decoding/processing/rendering time: ' + delta.toFixed() + ' [ms]');
 
 							let log = 'video frame length ' + frame.length + ' bytes, decoding/processing/rendering time: ' + delta.toFixed() + ' [ms], bandwidth: ' + Math.round(bandwidth) + " [kbps], request latency: " + latency.toFixed() + ' [ms]';
 
@@ -3237,7 +3235,7 @@ function open_websocket_connection(_datasetId, index) {
 						}
 
 						if (data.type == "init_video") {
-							console.log(data);
+							//console.log(data);
 
 							var width = data.width;
 							var height = data.height;
@@ -3268,7 +3266,7 @@ function open_websocket_connection(_datasetId, index) {
 								//init the HEVC decoder		
 								Module.hevc_init_frame(va_count, width, height);
 							} catch (e) {
-								console.log(e);
+								//console.log(e);
 							};
 						}
 
@@ -3305,7 +3303,7 @@ function fetch_binned_image(dataId) {
 		if (has_image)
 			return;
 
-		console.log("JVO Image Resolution: ", img.width, img.height);
+		//console.log("JVO Image Resolution: ", img.width, img.height);
 
 		try {
 			var c = document.getElementById('BackHTMLCanvas');
@@ -3410,7 +3408,7 @@ function true_image_dimensions(alpha, width, height) {
 			break;
 	}
 
-	console.log("image bounding box: y1 =", y1, "y2 =", y2, "x1 =", x1, "x2 =", x2);
+	//console.log("image bounding box: y1 =", y1, "y2 =", y2, "x1 =", x1, "x2 =", x2);
 
 	return {
 		x1: x1,
@@ -3587,7 +3585,7 @@ function inverse_CD_matrix(arcx, arcy) {
 	x = x * toDegrees;
 	y = y * toDegrees;
 
-	console.log("inverse: x = ", x, "y = ", y);
+	//console.log("inverse: x = ", x, "y = ", y);
 
 	var CD1_1 = fitsData.CD1_1;
 	var CD1_2 = fitsData.CD1_2;
@@ -3725,7 +3723,7 @@ function display_scale_info() {
 
 	if (Math.abs(gridScale[1]) * scale > 1) {
 		//reduce the scale
-		console.log("Vertical height:", Math.abs(gridScale[1]) * scale);
+		//console.log("Vertical height:", Math.abs(gridScale[1]) * scale);
 
 		arcmins = 10;
 		gridScale = inverse_CD_matrix(arcmins, arcmins);
@@ -3734,7 +3732,7 @@ function display_scale_info() {
 			if (isNaN(gridScale[i]))
 				throw "NaN gridScale";
 
-		console.log("Reduced vertical height:", Math.abs(gridScale[1]) * scale);
+		//console.log("Reduced vertical height:", Math.abs(gridScale[1]) * scale);
 	}
 
 	var svg = d3.select("#BackgroundSVG");
@@ -4390,7 +4388,7 @@ function display_beam() {
 			beam_multiplier *= 2;
 			max_dim /= beam_multiplier;
 
-			console.log("beam_reduce scale multiplier = ", beam_multiplier);
+			//console.log("beam_reduce scale multiplier = ", beam_multiplier);
 		}
 
 		if (!beam_reduce) {
@@ -4399,7 +4397,7 @@ function display_beam() {
 				beam_multiplier *= 2;
 				max_dim *= beam_multiplier;
 
-				console.log("beam_enlarge multiplier = ", beam_multiplier);
+				//console.log("beam_enlarge multiplier = ", beam_multiplier);
 			}
 		}
 
@@ -4415,7 +4413,7 @@ function display_beam() {
 
 		var rectSize = 2.5 * Math.max(rx, ry);
 
-		console.log("rx:", rx, "ry:", ry);
+		//console.log("rx:", rx, "ry:", ry);
 
 		var cx = (width + img_width) / 2 - rectSize - 0.025 * img_width;
 		var cy = (height - img_height) / 2 + rectSize + 0.025 * img_height;
@@ -4888,8 +4886,8 @@ function display_dataset_info() {
 		data_band_lo = Math.min(f1, f2);
 		data_band_hi = Math.max(f1, f2);
 
-		console.log("v1:", v1, "v2:", v2);
-		console.log("f1:", f1, "f2:", f2);
+		//console.log("v1:", v1, "v2:", v2);
+		//console.log("f1:", f1, "f2:", f2);
 	}
 	else if (has_frequency_info) {
 		/*if(fitsData.CTYPE3 != "")
@@ -4904,7 +4902,7 @@ function display_dataset_info() {
 		data_band_hi = Math.max(val1, val2);
 	}
 
-	console.log("CTYPE3 = ", fitsData.CTYPE3, "has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
+	//console.log("CTYPE3 = ", fitsData.CTYPE3, "has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
 
 	if (has_frequency_info > 0.0 && va_count == 1) {
 
@@ -4947,7 +4945,7 @@ function display_dataset_info() {
 			var charCode = event.which || event.keyCode;
 
 			if (charCode == '13') {
-				console.log('REF FRQ ENTER');
+				//console.log('REF FRQ ENTER');
 				// Enter pressed
 				submit_corrections();
 				return false;
@@ -5241,7 +5239,7 @@ function toggle_redshift_input_source(selection) {
 	var m = document.getElementById('velocityInput');
 	m.focus();
 
-	console.log("toggled redshift input source");
+	//console.log("toggled redshift input source");
 }
 
 function submit_delta_v() {
@@ -5323,7 +5321,7 @@ function submit_delta_v() {
 function submit_corrections() {
 	var referenceFrequency = document.getElementById('frequencyInput').valueAsNumber * 1e9;
 
-	console.log("user referenceFrequency:", referenceFrequency);
+	//console.log("user referenceFrequency:", referenceFrequency);
 
 	if (referenceFrequency > 0.0) {
 		USER_SELFRQ = referenceFrequency;
@@ -5363,7 +5361,7 @@ function submit_corrections() {
 			var charCode = event.which || event.keyCode;
 
 			if (charCode == '13') {
-				console.log('REF FRQ ENTER');
+				//console.log('REF FRQ ENTER');
 				// Enter pressed
 				submit_corrections();
 				return false;
@@ -5632,7 +5630,7 @@ function change_intensity_mode() {
 	intensity_mode = document.getElementById('intensity_mode').value;
 	localStorage.setItem("intensity_mode", intensity_mode);
 
-	console.log("new intensity mode:", intensity_mode);
+	//console.log("new intensity mode:", intensity_mode);
 
 	display_hourglass();
 
@@ -5804,7 +5802,7 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
 	var max = fitsData.max;
 	var x = (pos - min) / (max - min) * width;
 
-	console.log(info, pos, width);
+	//console.log(info, pos, width);
 
 	var flux_elem = d3.select("#flux_path" + index);
 	flux_elem.attr(info, pos);
@@ -6371,7 +6369,7 @@ function setup_histogram_interaction(index) {
 
 	let fitsData = imageContainer[index - 1].tone_mapping;
 
-	console.log("min:", fitsData.min, "max:", fitsData.max, "median:", fitsData.median, "black:", fitsData.black, "white:", fitsData.white);
+	//console.log("min:", fitsData.min, "max:", fitsData.max, "median:", fitsData.median, "black:", fitsData.black, "white:", fitsData.white);
 
 	var flux = document.getElementById('flux' + index).value;
 	var min = fitsData.min;
@@ -7369,8 +7367,7 @@ function getFrequencyPrecision() {
 
 	if (has_frequency_info) {
 		let dF = fitsData.CDELT3 / 1e9;//[GHz]
-
-		console.log("dF = ", dF, "decimal = ", decimalPlaces(dF));
+		//console.log("dF = ", dF, "decimal = ", decimalPlaces(dF));
 
 		return decimalPlaces(dF);
 	};
@@ -7401,7 +7398,6 @@ function getVelocityPrecision() {
 	if (has_frequency_info) {
 		/*let dF = fitsData.CDELT3 ;
 		let dV = Einstein_relative_velocity(RESTFRQ+dF, RESTFRQ) ;//[km/s]
-	
 		console.log("dV = ", dV, "decimal = ", decimalPlaces(dV)) ;*/
 
 		return 2;
@@ -7417,8 +7413,7 @@ function getMinMaxVel(fitsData) {
 	if (has_frequency_info) {
 		vMin = Einstein_relative_velocity(data_band_lo, RESTFRQ);
 		vMax = Einstein_relative_velocity(data_band_hi, RESTFRQ);
-
-		console.log("setup_axes:", "vMin = ", vMin, "vMax = ", vMax);
+		//console.log("setup_axes:", "vMin = ", vMin, "vMax = ", vMax);
 	}
 	else {
 		if (has_velocity_info) {
@@ -8197,7 +8192,7 @@ function x_axis_mouseleave() {
 		try {
 			Module.hevc_destroy_frame(va_count);
 		} catch (e) {
-			console.log(e);
+			//console.log(e);
 		};
 	}
 
@@ -8374,8 +8369,7 @@ function x_axis_move(offset) {
 		//return ;//commented out by Chris on 2018/08/03
 	};
 
-	console.log("RESTFRQ:", RESTFRQ);
-
+	//console.log("RESTFRQ:", RESTFRQ);
 
 	var relvel = Einstein_relative_velocity(freq, RESTFRQ);
 
@@ -8706,7 +8700,7 @@ function setup_viewports() {
 function swap_viewports() {
 	if (viewport != null) {
 		// Clear the ZOOM Canvas
-		console.log("clearing the ZOOM Canvas");
+		//console.log("clearing the ZOOM Canvas");
 		var gl = viewport.gl;
 		gl.clearColor(0, 0, 0, 0);
 		gl.clear(gl.COLOR_BUFFER_BIT);
@@ -8762,7 +8756,7 @@ function fits_subregion_start(event) {
 
 	if (viewport != null) {
 		// Clear the ZOOM Canvas
-		console.log("clearing the ZOOM Canvas");
+		//console.log("clearing the ZOOM Canvas");
 		var gl = viewport.gl;
 		gl.clearColor(0, 0, 0, 0);
 		gl.clear(gl.COLOR_BUFFER_BIT);
@@ -8801,7 +8795,7 @@ function fits_subregion_drag(event) {
 
 	if (viewport != null) {
 		// Clear the ZOOM Canvas
-		console.log("clearing the ZOOM Canvas");
+		//console.log("clearing the ZOOM Canvas");
 		var gl = viewport.gl;
 		gl.clearColor(0, 0, 0, 0);
 		gl.clear(gl.COLOR_BUFFER_BIT);
@@ -9122,7 +9116,7 @@ function add_line_label(index) {
 		//line = "line #" + index ;
 		line = datasetId[index - 1];
 
-	console.log("SPECTRAL LINE:", line, "FILTER:", filter);
+	//console.log("SPECTRAL LINE:", line, "FILTER:", filter);
 
 	var label;
 
@@ -9344,7 +9338,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
 			if (go_ahead) {
 				last_seq_id = new_seq_id;
-				console.log("last_seq_id:", last_seq_id);
+				//console.log("last_seq_id:", last_seq_id);
 
 				//pop all <va_count> spectrum stacks
 				var data = [];
@@ -9388,18 +9382,18 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 			if (isLocal) {
 				//parse window.location to get the value of filename<index>
 				let params = window.location.search.split("&");
-				console.log('URL PARAMS:', params);
+				//console.log('URL PARAMS:', params);
 
 				let search = 'filename' + index;
 
 				for (let i = 0; i < params.length; i++) {
 					if (params[i].indexOf(search) > -1) {
-						console.log("found a parameter", params[i]);
+						//console.log("found a parameter", params[i]);
 						let values = params[i].split("=");
 
 						if (values.length > 1) {
 							let val = values[values.length - 1];
-							console.log('VALUE:', val);
+							//console.log('VALUE:', val);
 
 							window.location = window.location + '&filename=' + val;
 
@@ -9411,18 +9405,18 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 			else {
 				//parse window.location to get the value of datasetId<index>
 				let params = window.location.search.split("&");
-				console.log('URL PARAMS:', params);
+				//console.log('URL PARAMS:', params);
 
 				let search = 'datasetId' + index;
 
 				for (let i = 0; i < params.length; i++) {
 					if (params[i].indexOf(search) > -1) {
-						console.log("found a parameter", params[i]);
+						//console.log("found a parameter", params[i]);
 						let values = params[i].split("=");
 
 						if (values.length > 1) {
 							let val = values[values.length - 1];
-							console.log('VALUE:', val);
+							//console.log('VALUE:', val);
 
 							window.location = window.location + '&datasetId=' + val;
 
@@ -9513,7 +9507,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 				if (fitsData.CTYPE2.indexOf("ELAT") > -1)
 					decText = 'β: ' + RadiansPrintDMS(xradec[1]);
 
-				console.log(raText, decText);
+				//console.log(raText, decText);
 				d3.select("#ra").text(raText);
 				d3.select("#dec").text(decText);
 			}
@@ -9775,7 +9769,7 @@ function setup_image_selection() {
 
 				if (go_ahead) {
 					last_seq_id = new_seq_id;
-					console.log("last_seq_id:", last_seq_id);
+					//console.log("last_seq_id:", last_seq_id);
 
 					//pop all <va_count> spectrum stacks
 					var data = [];
@@ -9910,7 +9904,7 @@ function setup_image_selection() {
 			// clear the ViewportCanvas in WebGL
 			if (viewport != null) {
 				// Clear the Viewport Canvas
-				console.log("clearing the Viewport Canvas");
+				//console.log("clearing the Viewport Canvas");
 				var gl = viewport.gl;
 
 				if (gl != undefined) {
@@ -10095,7 +10089,7 @@ function setup_image_selection() {
 				mouse_position = { x: offset[0], y: offset[1] };
 			};
 
-			console.log("mouse position:", mouse_position);
+			//console.log("mouse position:", mouse_position);
 
 			var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 			var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
@@ -10310,7 +10304,7 @@ function setup_image_selection() {
 				then = now - (elapsed % fpsInterval);
 				//ALMAWS.send('[mouse] t=' + now + ' x=' + offset[0] + ' y=' + offset[1]);
 
-				console.log("refresh interval: " + elapsed.toFixed(3) + " [ms]", "fps = ", Math.round(1000 / elapsed));
+				//console.log("refresh interval: " + elapsed.toFixed(3) + " [ms]", "fps = ", Math.round(1000 / elapsed));
 
 				if (!initKalmanFilter)
 					initKalman();
@@ -10322,7 +10316,7 @@ function setup_image_selection() {
 				//var pred_mouse_x = Math.round(mouse_position.x + last_x.elements[0] * latency + 0.5 * last_x.elements[2] * latency * latency) ;
 				//var pred_mouse_y = Math.round(mouse_position.y + last_x.elements[1] * latency + 0.5 * last_x.elements[3] * latency * latency) ;				
 
-				console.log("latency = ", latency.toFixed(1), "[ms]", "mx = ", mouse_position.x, "px = ", pred_mouse_x, "my = ", mouse_position.y, "py = ", pred_mouse_y);
+				//console.log("latency = ", latency.toFixed(1), "[ms]", "mx = ", mouse_position.x, "px = ", pred_mouse_x, "my = ", mouse_position.y, "py = ", pred_mouse_y);
 				/*var pred_x = image_bounding_dims.x1 + (pred_mouse_x - d3.select(this).attr("x")) / (d3.select(this).attr("width") - 1) * (image_bounding_dims.width - 1);
 				var pred_y = image_bounding_dims.y2 + (pred_mouse_y - d3.select(this).attr("y")) / (d3.select(this).attr("height") - 1) * (image_bounding_dims.height - 1);*/
 
@@ -10528,7 +10522,7 @@ function display_molecules() {
 	if (num > 20)
 		fontStyle = Math.max(8, Math.round(0.67 * emFontSize * .25)) + "px";// Helvetica";
 
-	console.log("valid molecules:", num);
+	//console.log("valid molecules:", num);
 
 	var dx = range.xMax - range.xMin;
 	var offsety = height - 1;
@@ -10652,7 +10646,7 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 			};
 
 			index_molecules();
-			console.log("#SPLATALOGUE molecules: ", molecules.length);
+			//console.log("#SPLATALOGUE molecules: ", molecules.length);
 
 			let fitsData = fitsContainer[va_count - 1];
 
@@ -10731,7 +10725,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 			Module.ready
 				.then(_ => {
 					document.getElementById('welcome').style.display = "none";
-					console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
+					//console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
 
 					var received_msg = xmlhttp.response;
 
@@ -10745,7 +10739,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 						var fitsHeader, mean_spectrum, integrated_spectrum;
 
 						var dv = new DataView(received_msg);
-						console.log("FITSImage dataview byte length: ", dv.byteLength);
+						//console.log("FITSImage dataview byte length: ", dv.byteLength);
 
 						var tone_mapping = new Object();
 						let p = 0.5;
@@ -10781,7 +10775,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 						tone_mapping.black = dv.getFloat32(offset, endianness);
 						offset += 4;
 
-						console.log(tone_mapping);
+						//console.log(tone_mapping);
 
 						var img_width = dv.getUint32(offset, endianness);
 						offset += 4;
@@ -10789,12 +10783,12 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 						var img_height = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						console.log('img_width:', img_width, 'img_height:', img_height);
+						//console.log('img_width:', img_width, 'img_height:', img_height);
 
 						var pixels_length = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						console.log('pixels length:', pixels_length);
+						//console.log('pixels length:', pixels_length);
 
 						var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
 						offset += pixels_length;
@@ -10802,7 +10796,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 						var mask_length = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						console.log('mask length:', mask_length);
+						//console.log('mask length:', mask_length);
 
 						var frame_mask = new Uint8Array(received_msg, offset, mask_length);
 						offset += mask_length;
@@ -10812,7 +10806,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							tone_mapping.white = tone_mapping.max;
 						}
 
-						console.log(tone_mapping);
+						//console.log(tone_mapping);
 
 						var has_json = true;
 
@@ -10825,7 +10819,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 							var json = new Uint8Array(received_msg, offset, buffer_len);
 							offset += buffer_len;
-							console.log("FITS json length:", json_len);
+							//console.log("FITS json length:", json_len);
 						} catch (err) {
 							has_json = false;
 						}
@@ -10841,7 +10835,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 							var header = new Uint8Array(received_msg, offset, buffer_len);
 							offset += buffer_len;
-							console.log("FITS header length:", header_len);
+							//console.log("FITS header length:", header_len);
 						} catch (err) {
 							has_header = false;
 						}
@@ -10857,7 +10851,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 							var buffer = new Uint8Array(received_msg, offset, buffer_len);
 							offset += buffer_len;
-							console.log("FITS mean spectrum length:", spectrum_len);
+							//console.log("FITS mean spectrum length:", spectrum_len);
 
 							// FPZIP decoder part				
 							/*Module.ready
@@ -10867,8 +10861,6 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
-
-							// console.log(mean_spectrum);
 							/*})
 							.catch(e => {
 								console.error(e);
@@ -10889,7 +10881,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 							var buffer = new Uint8Array(received_msg, offset, buffer_len);
 							offset += buffer_len;
-							console.log("FITS integrated spectrum length:", spectrum_len);
+							//console.log("FITS integrated spectrum length:", spectrum_len);
 
 							// FPZIP decoder part				
 							/*Module.ready
@@ -10899,8 +10891,6 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
-
-							//console.log(integrated_spectrum);
 							/*})
 							.catch(e => {
 								console.error(e);
@@ -10990,7 +10980,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 								frame_reference_type(index);
 
-								console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
+								//console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
 							}
 
 							if (index == va_count)
@@ -11036,8 +11026,8 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 								}
 								else {
 									if (spectrum_count == va_count) {
-										console.log("mean spectrumContainer:", mean_spectrumContainer);
-										console.log("integrated spectrumContainer:", integrated_spectrumContainer);
+										//console.log("mean spectrumContainer:", mean_spectrumContainer);
+										//console.log("integrated spectrumContainer:", integrated_spectrumContainer);
 
 										//display an RGB legend in place of REF FRQ			
 										display_composite_legend();
@@ -11072,7 +11062,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 						/*Module.ready
 							.then(_ => {*/
 						{
-							console.log("processing an HDR image");
+							//console.log("processing an HDR image");
 							let start = performance.now();
 
 							// decompressZFP returns std::vector<float>
@@ -11083,7 +11073,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 							let elapsed = Math.round(performance.now() - start);
 
-							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+							//console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
 							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
@@ -11502,7 +11492,7 @@ function tileTimeout(force = false) {
 
 		var strRequest = 'x1=' + clamp(Math.round(x1), 0, fitsData.width - 1) + '&y1=' + clamp(Math.round(y2), 0, fitsData.height - 1) + '&x2=' + clamp(Math.round(x2), 0, fitsData.width - 1) + '&y2=' + clamp(Math.round(y1), 0, fitsData.height - 1) + '&image=' + (image ? 'true' : 'false') + '&beam=' + beam + '&intensity=' + intensity_mode + '&frame_start=' + data_band_lo + '&frame_end=' + data_band_hi + '&ref_freq=' + RESTFRQ + '&seq_id=' + sent_seq_id + '&timestamp=' + performance.now();
 
-		console.log(strRequest);
+		//console.log(strRequest);
 
 		wsConn[index].send('[spectrum] ' + strRequest);
 	}
@@ -11517,7 +11507,7 @@ function tileTimeout(force = false) {
 }
 
 function imageTimeout() {
-	console.log("image inactive event");
+	//console.log("image inactive event");
 
 	if (mousedown || streaming)
 		return;
@@ -11526,7 +11516,7 @@ function imageTimeout() {
 
 	//d3.select("#image_rectangle").style('cursor','crosshair');
 
-	console.log("idle mouse position: ", mouse_position);
+	//console.log("idle mouse position: ", mouse_position);
 
 	var svg = d3.select("#FrontSVG");
 	var width = parseFloat(svg.attr("width"));
@@ -11569,7 +11559,7 @@ function imageTimeout() {
 	else
 		image_update = false;
 
-	console.log('idle', 'x = ', x, 'y = ', y, 'clipSize = ', clipSize, 'fitsX = ', fitsX, 'fitsY = ', fitsY, 'fitsSize = ', fitsSize, 'image_update:', image_update);
+	//console.log('idle', 'x = ', x, 'y = ', y, 'clipSize = ', clipSize, 'fitsX = ', fitsX, 'fitsY = ', fitsY, 'fitsSize = ', fitsSize, 'image_update:', image_update);
 
 	fitsX = Math.round(fitsX);
 	fitsY = Math.round(fitsY);
@@ -11589,7 +11579,7 @@ function imageTimeout() {
 
 	var zoomed_size = get_zoomed_size(width, height, img_width, img_height);
 
-	console.log("zoomed_size:", zoomed_size);
+	//console.log("zoomed_size:", zoomed_size);
 
 	if (moving || streaming)
 		return;
@@ -11739,7 +11729,7 @@ function imageTimeout() {
 
 	//ctx.clearRect(px, py, zoomed_size, zoomed_size);
 
-	console.log("imageTimeout::END");
+	//console.log("imageTimeout::END");
 }
 
 function resetKalman() {
@@ -11937,14 +11927,14 @@ function partial_fits_size() {
 	let frame_bounds = get_frame_bounds(data_band_lo, data_band_hi, va_count - 1);
 	let len = frame_bounds.frame_end - frame_bounds.frame_start + 1;
 
-	console.log("frame_bounds:", frame_bounds, "#frames:", len);
+	//console.log("frame_bounds:", frame_bounds, "#frames:", len);
 
 	var offsetx = d3.select("#image_rectangle").attr("x");
 	var offsety = d3.select("#image_rectangle").attr("y");
 
 	let fitsData = fitsContainer[va_count - 1];
 	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
-	console.log("BITPIX = ", fitsData.BITPIX);
+	//console.log("BITPIX = ", fitsData.BITPIX);
 
 	var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 1);
 	var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 1);
@@ -13379,7 +13369,7 @@ function download_confirmation(partialSize) {
 }
 
 function display_rgb_legend() {
-	console.log("display_rgb_legend()");
+	//console.log("display_rgb_legend()");
 
 	if (va_count > 3)
 		return;
@@ -13576,7 +13566,7 @@ function display_rgb_legend() {
 }
 
 function display_legend() {
-	console.log("display_legend()");
+	//console.log("display_legend()");
 
 	if (va_count > 1)
 		return;
@@ -14141,13 +14131,13 @@ function contour_surface_marching_squares() {
 	//console.log(data);
 
 	//console.log("min_pixel:", min_pixel, "max_pixel:", max_pixel) ;
-	console.log("min_value:", min_value, "max_value:", max_value);
+	//console.log("min_value:", min_value, "max_value:", max_value);
 
 	var contours = parseInt(document.getElementById('contour_lines').value) + 1;
 	var step = (max_value - min_value) / contours;
 	var zs = d3.range(min_value + step, max_value, step);
 
-	console.log(zs);
+	//console.log(zs);
 
 	var isoBands = [];
 	for (var i = 1; i < zs.length; i++) {
@@ -14155,7 +14145,7 @@ function contour_surface_marching_squares() {
 		var upperBand = zs[i];
 
 		var band = MarchingSquaresJS.isoBands(data, lowerBand, upperBand - lowerBand);
-		console.log('band', band);
+		//console.log('band', band);
 		isoBands.push({ "coords": band, "level": i, "val": zs[i] });
 	}
 
@@ -14278,12 +14268,12 @@ function contour_surface_webworker() {
 	}
 
 	//console.log(data);
-	console.log("min_value:", min_value, "max_value:", max_value);
+	//console.log("min_value:", min_value, "max_value:", max_value);
 
 	var contours = parseInt(document.getElementById('contour_lines').value) + 1;
 	var step = (max_value - min_value) / contours;
 	var zs = d3.range(min_value + step, max_value, step);
-	console.log("zs:", zs);
+	//console.log("zs:", zs);
 
 	min_value = 0;
 	max_value = 1;
@@ -14291,7 +14281,7 @@ function contour_surface_webworker() {
 	var zs = d3.range(min_value + step, max_value, step);
 	for (var i = 0; i < zs.length; i++)
 		zs[i] = get_pixel_flux(zs[i], va_count);
-	console.log("zs:", zs);
+	//console.log("zs:", zs);
 
 	var completed_levels = 0;
 	//parallel isoBands    
@@ -14584,7 +14574,7 @@ async*/ function mainRenderer() {
 		video_fps_control = localStorage.getItem("video_fps_control");
 
 	composite_view = (parseInt(votable.getAttribute('data-composite')) == 1) ? true : false;
-	console.log("composite view:", composite_view);
+	//console.log("composite view:", composite_view);
 
 	optical_view = false;
 
@@ -14730,7 +14720,7 @@ async*/ function mainRenderer() {
 					if (document.styleSheets[i].href != null)
 						if (document.styleSheets[i].href.indexOf('fitswebqlse.css') > 0) {
 							let stylesheet = document.styleSheets[i];
-							console.log(document.styleSheets[i]);
+							//console.log(document.styleSheets[i]);
 
 							if (stylesheet.cssRules) {
 								for (let j = 0; j < stylesheet.cssRules.length; j++)
@@ -14742,7 +14732,7 @@ async*/ function mainRenderer() {
 										stylesheet.deleteRule(j);
 							}
 
-							console.log(document.styleSheets[i]);
+							//console.log(document.styleSheets[i]);
 						}
 				}
 			}
@@ -14788,7 +14778,7 @@ async*/ function mainRenderer() {
 		emFontSize = Math.max(12, 0.011 * (0.2 * rect.width + 0.8 * rect.height));
 		emStrokeWidth = Math.max(1, 0.1 * emFontSize);
 		document.body.style.fontSize = emFontSize + "px";
-		console.log("emFontSize : ", emFontSize.toFixed(2), "emStrokeWidth : ", emStrokeWidth.toFixed(2));
+		//console.log("emFontSize : ", emFontSize.toFixed(2), "emStrokeWidth : ", emStrokeWidth.toFixed(2));
 
 		var width = rect.width - 20;
 		var height = rect.height - 20;
@@ -15013,7 +15003,7 @@ async*/ function mainRenderer() {
 		}
 		else {
 			for (let index = 1; index <= va_count; index++) {
-				console.log(index, datasetId.rotate(index - 1));
+				//console.log(index, datasetId.rotate(index - 1));
 
 				poll_progress(datasetId.rotate(index - 1)[0], index);
 				open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
