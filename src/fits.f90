@@ -4668,7 +4668,7 @@ contains
       !$omp PARALLEL DEFAULT(SHARED) SHARED(data, num_threads)&
       !$omp& PRIVATE(tid, work_size, start)&
       !$omp& REDUCTION(+:brightness)&
-      !$omp& NUM_THREADS(num_threads)
+      !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do tid=1,num_threads
          work_size = total_size / num_threads
