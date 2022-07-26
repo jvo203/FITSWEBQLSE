@@ -4660,8 +4660,8 @@ contains
       brightness = 0.0
       total_size = size(data)
 
-      brightness = brightness_ratio(c_loc(data), black, sensitivity, 0, total_size) / total_size
-      return
+      ! brightness = brightness_ratio(c_loc(data), black, sensitivity, 0, total_size) / total_size
+      ! return
 
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
@@ -4685,7 +4685,6 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      ! brightness = brightness_ratio(c_loc(data), black, sensitivity, 0, total_size)
       brightness = brightness / total_size
 
    end function calculate_brightness
