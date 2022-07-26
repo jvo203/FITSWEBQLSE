@@ -1632,8 +1632,6 @@ function webgl_image_renderer(index, gl, width, height) {
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-	console.log("image width:", image.width, "height:", image.height);
-
 	if (webgl2)
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, image.width, image.height, 0, gl.RG, gl.FLOAT, image.texture);
 	else
