@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-26.0";
+	return "JS2022-07-26.1";
 }
 
 function uuidv4() {
@@ -11084,7 +11084,6 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							let elapsed = Math.round(performance.now() - start);
 
 							console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
-							console.log(pixels);
 
 							process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 

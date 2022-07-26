@@ -114,11 +114,17 @@ val decompressZFPimage(int img_width, int img_height, std::string const &bytes)
   /*for (size_t i = 0; i < pixelLength; i++)
     if (pixelBuffer[i] != 0.0f)
       printf("%zu:%f|", i, pixelBuffer[i]);
-  printf("\n");*/
+  printf("\n");
 
-  printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);
+  printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);*/
 
   return val(typed_memory_view(pixelLength, pixelBuffer));
+  // return val(memory_view<unsigned char>(img_width * img_height * sizeof(float), (unsigned char *)pixelBuffer));
+
+  // another try - create an array in JavaScript
+  /*val js_pixels = val::global("Float32Array").new_(pixelLength);
+  js_pixels.call<void>("set", val(typed_memory_view((int)pixelLength, (float *)pixelBuffer)));
+  return js_pixels;*/
 }
 
 val decompressZFPspectrum(int length, std::string const &bytes)
