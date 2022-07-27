@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-26.2";
+	return "JS2022-07-27.0";
 }
 
 function uuidv4() {
@@ -11068,6 +11068,8 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							// decompressZFP returns std::vector<float>
 							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
 							var pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
+							/*var pixels = Module.HEAPF32.subarray(res[0] / 4, res[0] / 4 + res[1]);
+							console.log(res, pixels);*/
 
 							var alpha = Module.decompressLZ4mask(img_width, img_height, frame_mask);
 
