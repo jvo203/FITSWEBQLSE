@@ -861,6 +861,9 @@ static enum MHD_Result on_http_connection(void *cls,
                 MHD_create_response_from_buffer(strlen(timestamp),
                                                 (void *)timestamp,
                                                 MHD_RESPMEM_MUST_COPY);
+
+            MHD_add_response_header(response, "Content-Type", "text/plain");
+
             if (NULL != response)
             {
                 ret =
