@@ -3091,14 +3091,25 @@ function open_websocket_connection(_datasetId, index) {
 								else
 									fill = 255;
 
+								var data;
+
 								try {
 									//HEVC
-									data = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, colourmap, fill);
+									var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, colourmap, fill);
+
+									let buf_start = res[0] / 4;
+									let buf_end = buf_start + res[1] / 4;
+
+									// alpha needs to be adjusted for the uneven array endings
+									if (buf_end % 4 > 0)
+										buf_end++;
+
+									data = new Uint8ClampedArray(Module.HEAP32.slice(buf_start, buf_end).buffer, 0, res[1]);
 								} catch (e) {
 									//console.log(e);
 								};
 
-								var img = new ImageData(new Uint8ClampedArray(data), videoFrame[index - 1].width, videoFrame[index - 1].height);
+								var img = new ImageData(data, videoFrame[index - 1].width, videoFrame[index - 1].height);
 								videoFrame[index - 1].img = img;
 
 								requestAnimationFrame(function () {

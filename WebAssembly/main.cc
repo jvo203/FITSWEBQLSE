@@ -380,8 +380,10 @@ void hevc_destroy_frame(int va_count)
   printf("[hevc_destroy_frame] done.\n");
 }
 
-val hevc_decode_frame(unsigned int _w, unsigned int _h, std::string const &bytes, int index, std::string const &colourmap, unsigned char fill)
+/*val*/ buffer hevc_decode_frame(unsigned int _w, unsigned int _h, std::string const &bytes, int index, std::string const &colourmap, unsigned char fill)
 {
+  buffer wasmBuffer = {0, 0};
+
   size_t len = _w * _h * 4;
 
   if (canvasBuffer != NULL && canvasLength == len)
@@ -393,7 +395,11 @@ val hevc_decode_frame(unsigned int _w, unsigned int _h, std::string const &bytes
     hevc_decode_nal_unit(index, (unsigned char *)bytes.data(), bytes.size(), NULL, _w, _h, colourmap.c_str(), fill);
   }
 
-  return val(typed_memory_view(canvasLength, canvasBuffer));
+  wasmBuffer.ptr = (unsigned int)canvasBuffer;
+  wasmBuffer.size = (unsigned int)canvasLength;
+  return wasmBuffer;
+
+  // return val(typed_memory_view(canvasLength, canvasBuffer));
 }
 
 EMSCRIPTEN_BINDINGS(Wrapper)
