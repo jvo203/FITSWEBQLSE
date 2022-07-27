@@ -11079,7 +11079,6 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
 							var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
 							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-							// console.log(res, pixels);
 
 							var alpha = Module.decompressLZ4mask(img_width, img_height, frame_mask);
 
