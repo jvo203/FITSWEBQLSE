@@ -116,7 +116,7 @@ inline const char *denull(const char *str)
 };
 
 // HTML
-#define PAGE "<html><head><title>FITSWEBQL SE</title>" \
+#define PAGE "<html lang=\"en\"><head><title>FITSWEBQL SE</title>" \
              "</head><body>FITSWEBQLSE (libmicrohttpd)</body></html>"
 
 struct MHD_Daemon *http_server = NULL;
@@ -2349,7 +2349,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         has_fits = has_fits && dataset_exists(va_list[i]);
 
     // the string holding the dynamically generated HTML content
-    GString *html = g_string_new("<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n");
+    GString *html = g_string_new("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n");
 
     g_string_append(html,
                     "<link href=\"https://fonts.googleapis.com/css?family=Inconsolata\" "
