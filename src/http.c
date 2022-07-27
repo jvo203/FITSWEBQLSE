@@ -478,7 +478,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
 
         pos = (char *)strstr(url, ".css");
         if (pos != NULL)
-            MHD_add_response_header(response, "Content-Type", "text/css");
+            MHD_add_response_header(response, "Content-Type", "text/css; charset=utf-8");
 
         pos = (char *)strstr(url, ".pdf");
         if (pos != NULL)
@@ -862,7 +862,7 @@ static enum MHD_Result on_http_connection(void *cls,
                                                 (void *)timestamp,
                                                 MHD_RESPMEM_MUST_COPY);
 
-            MHD_add_response_header(response, "Content-Type", "text/plain");
+            MHD_add_response_header(response, "Content-Type", "text/plain; charset=utf-8");
 
             if (NULL != response)
             {
