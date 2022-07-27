@@ -2731,7 +2731,9 @@ function open_websocket_connection(_datasetId, index) {
 						Module.ready
 							.then(_ => {
 								let start = performance.now();
-								var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
+								// var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
+								var res = Module.decompressZFPspectrum(spectrum_len, frame);
+								var spectrum = new Float32Array(Module.HEAPF32.subarray(res[0] / 4, res[0] / 4 + res[1]));
 								let elapsed = Math.round(performance.now() - start);
 
 								// console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
@@ -2891,7 +2893,8 @@ function open_websocket_connection(_datasetId, index) {
 
 							// decompressZFP returns std::vector<float>
 							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-							var pixels = Module.decompressZFP(img_width, img_height, frame_pixels);
+							var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
+							var pixels = new Float32Array(Module.HEAPF32.subarray(res[0] / 4, res[0] / 4 + res[1]));
 
 							var alpha = Module.decompressLZ4mask(img_width, img_height, frame_mask);
 
@@ -2946,7 +2949,9 @@ function open_websocket_connection(_datasetId, index) {
 						// FPZIP decoder part				
 						Module.ready
 							.then(_ => {
-								var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
+								// var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
+								var res = Module.decompressZFPspectrum(spectrum_len, frame);
+								var spectrum = new Float32Array(Module.HEAPF32.subarray(res[0] / 4, res[0] / 4 + res[1]));
 
 								// console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
 
@@ -10858,7 +10863,9 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							/*Module.ready
 								.then(_ => {*/
 							let start = performance.now();
-							mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
+							// mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
+							var res = Module.decompressZFPspectrum(spectrum_len, buffer);
+							mean_spectrum = new Float32Array(Module.HEAPF32.subarray(res[0] / 4, res[0] / 4 + res[1]));
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
@@ -10888,7 +10895,9 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							/*Module.ready
 								.then(_ => {*/
 							let start = performance.now();
-							integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
+							// integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
+							var res = Module.decompressZFPspectrum(spectrum_len, buffer);
+							integrated_spectrum = new Float32Array(Module.HEAPF32.subarray(res[0] / 4, res[0] / 4 + res[1]));
 							let elapsed = Math.round(performance.now() - start);
 
 							//console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");

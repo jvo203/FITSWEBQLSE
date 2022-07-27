@@ -52,7 +52,7 @@ struct buffer
 {
   buffer wasmBuffer = {0, 0};
 
-  std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+  // std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
 
   size_t img_size = size_t(img_width) * size_t(img_height);
 
@@ -108,8 +108,8 @@ struct buffer
 
     if (zfpsize == 0)
       printf("ZFP decompression failed!\n");
-    else
-      printf("decompressed %zu bytes (image pixels).\n", zfpsize);
+    /*else
+      printf("decompressed %zu bytes (image pixels).\n", zfpsize);*/
 
     stream_close(stream);
 
@@ -129,7 +129,6 @@ struct buffer
 
   wasmBuffer.ptr = (unsigned int)pixelBuffer;
   wasmBuffer.size = (unsigned int)pixelLength;
-
   return wasmBuffer;
 
   // return val(typed_memory_view(pixelLength, pixelBuffer));
@@ -141,8 +140,10 @@ struct buffer
   return js_pixels;*/
 }
 
-val decompressZFPspectrum(int length, std::string const &bytes)
+/*val*/ buffer decompressZFPspectrum(int length, std::string const &bytes)
 {
+  buffer wasmBuffer = {0, 0};
+
   // std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
 
   if (spectrumBuffer != NULL && spectrumLength != length)
@@ -162,7 +163,8 @@ val decompressZFPspectrum(int length, std::string const &bytes)
   if (spectrumBuffer == NULL)
   {
     spectrumLength = 0;
-    return val(typed_memory_view(spectrumLength, spectrumBuffer));
+    // return val(typed_memory_view(spectrumLength, spectrumBuffer));
+    return wasmBuffer;
   }
 
   // ZFP variables
@@ -210,7 +212,11 @@ val decompressZFPspectrum(int length, std::string const &bytes)
   printf("\n");
   printf("spectrumLength: %zu, buffer:%p\n", spectrumLength, spectrumBuffer);*/
 
-  return val(typed_memory_view(spectrumLength, spectrumBuffer));
+  wasmBuffer.ptr = (unsigned int)spectrumBuffer;
+  wasmBuffer.size = (unsigned int)spectrumLength;
+  return wasmBuffer;
+
+  // return val(typed_memory_view(spectrumLength, spectrumBuffer));
 }
 
 std::vector<float> decompressZFP(int img_width, int img_height, std::string const &bytes)
