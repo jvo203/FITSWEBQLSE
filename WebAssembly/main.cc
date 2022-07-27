@@ -295,9 +295,11 @@ std::vector<unsigned char> decompressLZ4(int img_width, int img_height, std::str
   return mask;
 }
 
-val decompressLZ4mask(int img_width, int img_height, std::string const &bytes)
+/*val*/ buffer decompressLZ4mask(int img_width, int img_height, std::string const &bytes)
 {
-  std::cout << "[decompressLZ4val] " << bytes.size() << " bytes." << std::endl;
+  buffer wasmBuffer = {0, 0};
+
+  // std::cout << "[decompressLZ4val] " << bytes.size() << " bytes." << std::endl;
 
   size_t mask_size = size_t(img_width) * size_t(img_height);
   int compressed_size = bytes.size();
@@ -320,14 +322,19 @@ val decompressLZ4mask(int img_width, int img_height, std::string const &bytes)
   if (alphaBuffer == NULL)
   {
     alphaLength = 0;
-    return val(typed_memory_view(alphaLength, alphaBuffer));
+    // return val(typed_memory_view(alphaLength, alphaBuffer));
+    return wasmBuffer;
   }
 
   decompressed_size = LZ4_decompress_safe((char *)bytes.data(), (char *)alphaBuffer, compressed_size, alphaLength);
 
-  std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " bytes." << std::endl;
+  // std::cout << "[decompressLZ4] mask size: " << mask_size << ", decompressed " << decompressed_size << " bytes." << std::endl;
 
-  return val(typed_memory_view(alphaLength, alphaBuffer));
+  wasmBuffer.ptr = (unsigned int)alphaBuffer;
+  wasmBuffer.size = (unsigned int)alphaLength;
+  return wasmBuffer;
+
+  // return val(typed_memory_view(alphaLength, alphaBuffer));
 }
 
 void hevc_init_frame(int va_count, int width, int height)
