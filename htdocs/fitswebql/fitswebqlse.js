@@ -2791,7 +2791,16 @@ function open_websocket_connection(_datasetId, index) {
 							var res = Module.decompressZFPimage(view_width, view_height, frame_pixels);
 							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-							var alpha = Module.decompressLZ4mask(view_width, view_height, frame_mask);
+							var res = Module.decompressLZ4mask(view_width, view_height, frame_mask);
+
+							let buf_start = res[0] / 4;
+							let buf_end = buf_start + res[1] / 4;
+
+							// alpha needs to be adjusted for the uneven array endings
+							if (buf_end % 4 > 0)
+								buf_end++;
+
+							var alpha = new Uint8Array(Module.HEAP32.slice(buf_start, buf_end).buffer, 0, res[1]);
 
 							let elapsed = Math.round(performance.now() - start);
 
@@ -2896,7 +2905,16 @@ function open_websocket_connection(_datasetId, index) {
 							var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
 							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-							var alpha = Module.decompressLZ4mask(img_width, img_height, frame_mask);
+							var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
+
+							let buf_start = res[0] / 4;
+							let buf_end = buf_start + res[1] / 4;
+
+							// alpha needs to be adjusted for the uneven array endings
+							if (buf_end % 4 > 0)
+								buf_end++;
+
+							var alpha = new Uint8Array(Module.HEAP32.slice(buf_start, buf_end).buffer, 0, res[1]);
 
 							let elapsed = Math.round(performance.now() - start);
 
@@ -11080,7 +11098,16 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
 							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-							var alpha = Module.decompressLZ4mask(img_width, img_height, frame_mask);
+							var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
+
+							let buf_start = res[0] / 4;
+							let buf_end = buf_start + res[1] / 4;
+
+							// alpha needs to be adjusted for the uneven array endings
+							if (buf_end % 4 > 0)
+								buf_end++;
+
+							var alpha = new Uint8Array(Module.HEAP32.slice(buf_start, buf_end).buffer, 0, res[1]);
 
 							let elapsed = Math.round(performance.now() - start);
 
