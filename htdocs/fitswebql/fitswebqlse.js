@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-28.0";
+	return "JS2022-07-28.1";
 }
 
 function uuidv4() {
@@ -2792,15 +2792,7 @@ function open_websocket_connection(_datasetId, index) {
 							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
 							var res = Module.decompressLZ4mask(view_width, view_height, frame_mask);
-
-							let buf_start = res[0] / 4;
-							let buf_end = buf_start + res[1] / 4;
-
-							// alpha needs to be adjusted for the uneven array endings
-							if (buf_end % 4 > 0)
-								buf_end++;
-
-							var alpha = new Uint8Array(Module.HEAP32.slice(buf_start, buf_end).buffer, 0, res[1]);
+							var alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
 
 							let elapsed = Math.round(performance.now() - start);
 
@@ -2906,15 +2898,7 @@ function open_websocket_connection(_datasetId, index) {
 							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
 							var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
-
-							let buf_start = res[0] / 4;
-							let buf_end = buf_start + res[1] / 4;
-
-							// alpha needs to be adjusted for the uneven array endings
-							if (buf_end % 4 > 0)
-								buf_end++;
-
-							var alpha = new Uint8Array(Module.HEAP32.slice(buf_start, buf_end).buffer, 0, res[1]);
+							var alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
 
 							let elapsed = Math.round(performance.now() - start);
 
@@ -3096,15 +3080,7 @@ function open_websocket_connection(_datasetId, index) {
 								try {
 									//HEVC
 									var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, colourmap, fill);
-
-									let buf_start = res[0] / 4;
-									let buf_end = buf_start + res[1] / 4;
-
-									// alpha needs to be adjusted for the uneven array endings
-									if (buf_end % 4 > 0)
-										buf_end++;
-
-									data = new Uint8ClampedArray(Module.HEAP32.slice(buf_start, buf_end).buffer, 0, res[1]);
+									data = new Uint8ClampedArray(Module.HEAPU8.slice(res[0], res[0] + res[1]));
 								} catch (e) {
 									//console.log(e);
 								};
@@ -11110,15 +11086,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // .slice() works, .subarray() does not for large array sizes on Apple Silicon
 
 							var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
-
-							let buf_start = res[0] / 4;
-							let buf_end = buf_start + res[1] / 4;
-
-							// alpha needs to be adjusted for the uneven array endings
-							if (buf_end % 4 > 0)
-								buf_end++;
-
-							var alpha = new Uint8Array(Module.HEAP32.slice(buf_start, buf_end).buffer, 0, res[1]);
+							var alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
 
 							let elapsed = Math.round(performance.now() - start);
 
