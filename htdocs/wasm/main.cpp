@@ -43,16 +43,22 @@ int main()
       /*const img_width = 500;
       const img_height = 500;*/
 
-      const pixels = Module.decompressZFPimage(img_width, img_height, "frame_pixels");
+      const pixels1 = Module.decompressZFPimage(img_width, img_height, "frame_pixels");
+      const pixels2 = Module.decompressZFPimage(img_width, img_height, "frame_pixels");
+      const pixels3 = Module.decompressZFPimage(img_width, img_height, "frame_pixels");
       const mask = Module.decompressLZ4mask(img_width, img_height, "frame_mask");
 
-      test_array("pixels", pixels);
+      test_array("pixels1", pixels1);
+      test_array("pixels2", pixels2);
+      test_array("pixels3", pixels3);
       test_array("mask", mask);
 
       const timeout = 5000;
       setTimeout(
           function() {
-            test_array("pixels", pixels);
+            test_array("pixels1", pixels1);
+            test_array("pixels2", pixels2);
+            test_array("pixels3", pixels3);
             test_array("mask", mask);
           },
           timeout);
