@@ -3094,7 +3094,7 @@ function open_websocket_connection(_datasetId, index) {
 							}
 							else {
 								try {
-									//HEVC
+									//HEVC, ignore the decompressed output, just purge the HEVC buffers
 									Module.hevc_decode_frame(0, 0, frame, index - 1, 'greyscale', fill);
 								} catch (e) {
 									// console.log(e);
