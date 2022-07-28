@@ -4580,14 +4580,14 @@ contains
       real, dimension(:), intent(in) :: data
       real, intent(in) :: black, sensitivity
 
-      real, parameter :: target_brightness = 0.1
+      real, parameter :: target_brightness = 0.05
       integer, parameter :: max_iter = 20
 
       real :: a, b, ratio_sensitivity
       real :: a_brightness, b_brightness, brightness
       integer :: iter
 
-      a = 0.01 * sensitivity
+      a = 0.001 * sensitivity
       b = 100.0 * sensitivity
 
       ! perform the first step manually (verify that br(a) <= target_brightness <= br(b) )
