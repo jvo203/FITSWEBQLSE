@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-27.0";
+	return "JS2022-07-28.0";
 }
 
 function uuidv4() {
@@ -11107,7 +11107,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							// decompressZFP returns std::vector<float>
 							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
 							var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
-							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // .slice() works, .subarray() does not for large array sizes on Apple Silicon
 
 							var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
 
