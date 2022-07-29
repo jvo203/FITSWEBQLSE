@@ -6387,7 +6387,7 @@ contains
       x2 = min(item%naxes(1), req%x2)
       y2 = min(item%naxes(2), req%y2)
 
-      ! only copy the region from within item%pixels&item%mask
+      ! only copy valid parts from within item%pixels&item%mask
       pixels(x1:x2, y1:y2) = item%pixels(x1:x2, y1:y2)
       mask(x1:x2, y1:y2) = item%mask(x1:x2, y1:y2)
 
