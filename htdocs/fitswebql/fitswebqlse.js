@@ -3080,7 +3080,7 @@ function open_websocket_connection(_datasetId, index) {
 								try {
 									//HEVC
 									var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, colourmap, fill);
-									data = new Uint8ClampedArray(Module.HEAPU8.slice(res[0], res[0] + res[1]));
+									data = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
 								} catch (e) {
 									//console.log(e);
 								};
@@ -10371,31 +10371,33 @@ function setup_image_selection() {
 						var range = get_axes_range(width, height);
 						var dx = range.xMax - range.xMin;
 
-						let _width = viewport_zoom_settings.zoomed_size;
-						let _height = viewport_zoom_settings.zoomed_size;
+						if (viewport_zoom_settings != null) {
+							let _width = viewport_zoom_settings.zoomed_size;
+							let _height = viewport_zoom_settings.zoomed_size;
 
-						var request = {
-							type: "realtime_image_spectrum",
-							dx: dx,
-							image: false,
-							quality: image_quality,
-							x1: x1 + 1,
-							y1: y1 + 1,
-							x2: x2 + 1,
-							y2: y2 + 1,
-							width: _width,
-							height: _height,
-							beam: zoom_shape,
-							intensity: intensity_mode,
-							frame_start: data_band_lo,
-							frame_end: data_band_hi,
-							ref_freq: RESTFRQ,
-							seq_id: sent_seq_id,
-							timestamp: performance.now()
-						};
+							var request = {
+								type: "realtime_image_spectrum",
+								dx: dx,
+								image: false,
+								quality: image_quality,
+								x1: x1 + 1,
+								y1: y1 + 1,
+								x2: x2 + 1,
+								y2: y2 + 1,
+								width: _width,
+								height: _height,
+								beam: zoom_shape,
+								intensity: intensity_mode,
+								frame_start: data_band_lo,
+								frame_end: data_band_hi,
+								ref_freq: RESTFRQ,
+								seq_id: sent_seq_id,
+								timestamp: performance.now()
+							};
 
-						if (wsConn[index].readyState == 1)
-							wsConn[index].send(JSON.stringify(request));
+							if (wsConn[index].readyState == 1)
+								wsConn[index].send(JSON.stringify(request));
+						}
 					}
 				}
 
