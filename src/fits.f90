@@ -6370,12 +6370,12 @@ contains
       if ((.not. allocated(item%pixels)) .or. (.not. allocated(item%mask))) return
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
-      dimx = abs(x2 - x1 + 1)
-      dimy = abs(y2 - y1 + 1)
+      dimx = abs(req%x2 - req%x1 + 1)
+      dimy = abs(req%y2 - req%y1 + 1)
 
       ! memory allocation
-      allocate (pixels(dimx, dimy))
-      allocate (mask(dimx, dimy))
+      allocate (pixels(req%x1:req%x2, req%y1:req%y2))
+      allocate (mask(req%x1:req%x2, req%y1:req%y2))
 
       ! clear the viewport
       pixels = 0.0
@@ -6388,8 +6388,8 @@ contains
       y2 = min(item%naxes(2), req%y2)
 
       ! only copy the region from within item%pixels&item%mask
-      pixels = item%pixels(x1:x2, y1:y2)
-      mask = item%mask(x1:x2, y1:y2)
+      pixels(x1:x2, y1:y2) = item%pixels(x1:x2, y1:y2)
+      mask(x1:x2, y1:y2) = item%mask(x1:x2, y1:y2)
 
       select case (req%quality)
       case (low)
