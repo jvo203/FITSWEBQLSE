@@ -575,7 +575,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int vertical, uniform bool average, uniform float cdelt3, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
+export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform bool average, uniform float cdelt3, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
 {
     uniform int cn, cm;
 
@@ -636,7 +636,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
           varying int pixel_x = src_x + pos; // ix = pos
           varying int pixel_y = src_y + idx; // iy = idx;
 
-          varying int offset_x = pixel_x - x1;
+          varying int offset_x = pixel_x - x1 + horizontal;
           varying int offset_y = pixel_y - y1 + vertical;
           varying int offset = offset_y*stride + offset_x;
 
@@ -695,7 +695,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int vertical, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform float cdelt3)
 {
     uniform int cn, cm;
 
@@ -749,7 +749,7 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
           varying int pixel_y = src_y + idx; // iy = idx;
           varying float dist2 = (cx-pixel_x)*(cx-pixel_x) + (cy-pixel_y)*(cy-pixel_y) ;
           
-          varying int offset_x = pixel_x - x1;
+          varying int offset_x = pixel_x - x1 + horizontal;
           varying int offset_y = pixel_y - y1 + vertical;
           varying int offset = offset_y*stride + offset_x;
 
