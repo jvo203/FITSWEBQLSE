@@ -2434,9 +2434,9 @@ contains
 
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
             rc = c_pthread_create(thread=pid, &
-               attr=c_null_ptr, &
-               start_routine=c_funloc(global_statistics), &
-               arg=c_loc(item))
+                                  attr=c_null_ptr, &
+                                  start_routine=c_funloc(global_statistics), &
+                                  arg=c_loc(item))
 
             ! detach a thread
             if (rc .eq. 0) rc = c_pthread_detach(pid)
@@ -4518,7 +4518,7 @@ contains
          v = 15.0
          black = max(pmin, pmedian - u*madN)
          white = min(pmax, pmedian + u*madP)
-         sensitivity = 1.0 / (v * mad)
+         sensitivity = 1.0/(v*mad)
          ratio_sensitivity = auto_brightness(data, black, sensitivity)
       end if
 
@@ -4548,17 +4548,17 @@ contains
             tone_mapping = histogram_classifier(c_loc(Slot))
 
             select case (tone_mapping)
-             case (0)
+            case (0)
                tone%flux = 'legacy'
-             case (1)
+            case (1)
                tone%flux = 'linear'
-             case (2)
+            case (2)
                tone%flux = 'logistic'
-             case (3)
+            case (3)
                tone%flux = 'ratio'
-             case (4)
+            case (4)
                tone%flux = 'square'
-             case default
+            case default
                tone%flux = 'legacy'
             end select
          end block
@@ -4587,8 +4587,8 @@ contains
       real :: a_brightness, b_brightness, brightness
       integer :: iter
 
-      a = 0.001 * sensitivity
-      b = 100.0 * sensitivity
+      a = 0.001*sensitivity
+      b = 100.0*sensitivity
 
       ! perform the first step manually (verify that br(a) <= target_brightness <= br(b) )
       a_brightness = calculate_brightness(data, black, a)
@@ -4604,22 +4604,22 @@ contains
       ! a bi-section algorithm
       iter = 0
       do while (iter .lt. max_iter)
-         ratio_sensitivity = 0.5 * (a + b)
+         ratio_sensitivity = 0.5*(a + b)
          brightness = calculate_brightness(data, black, ratio_sensitivity)
 
          print *, "iteration:", iter, ", sensitivity:", ratio_sensitivity, ", brightness:", brightness&
-         &,", divergence:", abs(target_brightness-brightness)
+         &, ", divergence:", abs(target_brightness - brightness)
 
          if (brightness .gt. target_brightness) b = ratio_sensitivity
          if (brightness .lt. target_brightness) a = ratio_sensitivity
 
-         if (abs(target_brightness - brightness) .lt. 0.1 * target_brightness) exit
+         if (abs(target_brightness - brightness) .lt. 0.1*target_brightness) exit
 
          iter = iter + 1
       end do
 
       ! an approximate solution
-      ratio_sensitivity = 0.5 * (a + b)
+      ratio_sensitivity = 0.5*(a + b)
 
       print *, "bi-section sensitivity = ", ratio_sensitivity
 
@@ -4635,12 +4635,12 @@ contains
       brightness = 0.0
       n = size(data)
 
-      do i=1,n
-         pixel = 5.0*(data(i) - black) * sensitivity
-         if (pixel .gt. 0.0) brightness = brightness + pixel / (1.0 + pixel)
+      do i = 1, n
+         pixel = 5.0*(data(i) - black)*sensitivity
+         if (pixel .gt. 0.0) brightness = brightness + pixel/(1.0 + pixel)
       end do
 
-      brightness = brightness / n
+      brightness = brightness/n
 
    end function get_brightness
 
@@ -4650,7 +4650,7 @@ contains
       real(c_float), dimension(:), intent(in), target :: data
       real(c_float), intent(in) :: black, sensitivity
 
-      integer, parameter :: max_work_size = 1024 * 1024
+      integer, parameter :: max_work_size = 1024*1024
 
       real(c_float) :: brightness
       integer ::  num_threads, max_threads, tid, work_size
@@ -4661,22 +4661,22 @@ contains
       total_size = size(data)
 
       ! OK, do it all in one go since large images are getting downsized anyway
-      brightness = brightness_ratio(c_loc(data), black, sensitivity, 0, total_size) / total_size
+      brightness = brightness_ratio(c_loc(data), black, sensitivity, 0, total_size)/total_size
       return
 
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
-      work_size = min(total_size / max_threads, max_work_size)
-      num_threads = total_size / work_size
+      work_size = min(total_size/max_threads, max_work_size)
+      num_threads = total_size/work_size
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(data, num_threads)&
       !$omp& PRIVATE(tid, work_size, start)&
       !$omp& REDUCTION(+:brightness)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
-      do tid=1,num_threads
-         work_size = total_size / num_threads
-         start = (tid-1) * work_size ! C-style array 0-start
+      do tid = 1, num_threads
+         work_size = total_size/num_threads
+         start = (tid - 1)*work_size ! C-style array 0-start
 
          ! handle the last thread
          if (tid .eq. num_threads) work_size = total_size - start
@@ -4686,7 +4686,7 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      brightness = brightness / total_size
+      brightness = brightness/total_size
 
    end function calculate_brightness
 
@@ -5102,7 +5102,7 @@ contains
 
       ! calculate the FITS file size
       filesize = nint(real(size(item%hdr)) + real(item%naxes(1))*real(item%naxes(2))&
-      &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
+                     &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
 
       json = begin_json()
 
@@ -5194,9 +5194,9 @@ contains
 
       ! launch a pthread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_inner_dimensions), &
-         arg=c_loc(inner_dims))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_inner_dimensions), &
+                            arg=c_loc(inner_dims))
 
       ! get the inner image bounding box (excluding NaNs)
       call inherent_image_dimensions(item, inner_width, inner_height)
@@ -5267,9 +5267,9 @@ contains
 
          ! launch a pthread
          rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(fetch_inner_dimensions), &
-            arg=c_loc(inner_dims))
+                               attr=c_null_ptr, &
+                               start_routine=c_funloc(fetch_inner_dimensions), &
+                               arg=c_loc(inner_dims))
       end if
 
       ! get the inner image bounding box (excluding NaNs)
@@ -5343,9 +5343,9 @@ contains
 
          ! launch a pthread
          rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(fetch_image), &
-            arg=c_loc(image_req))
+                               attr=c_null_ptr, &
+                               start_routine=c_funloc(fetch_image), &
+                               arg=c_loc(image_req))
 
          ! join a thread (wait for the results)
          rc = c_pthread_join(pid, c_null_ptr)
@@ -5484,6 +5484,7 @@ contains
       logical(kind=1), allocatable :: thread_mask(:, :)
 
       integer :: dimx, dimy, native_size, viewport_size
+      integer :: n, m, cn, cm
       real :: scale
 
       ! timing
@@ -5519,6 +5520,19 @@ contains
       length = last - first + 1
 
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      n = item%naxes(1)
+      m = item%naxes(2)
+
+      ! by default compressed is dimension(n/DIM, m/DIM)
+      cn = n/DIM
+      cm = m/DIM
+
+      ! but the input dimensions might not be divisible by <DIM>
+      if (mod(n, DIM) .ne. 0) cn = cn + 1
+      if (mod(m, DIM) .ne. 0) cm = cm + 1
+
+      print *, 'cn:', cn, 'cm:', cm
 
       ! sanity checks
       x1 = max(1, req%x1)
@@ -5810,7 +5824,7 @@ contains
       real(c_float) :: cx, cy, rx, ry, r, r2
       real :: cdelt3
 
-      real(kind=c_double) :: lng, lat;
+      real(kind=c_double) :: lng, lat; 
       real(kind=c_double) :: ra1, dec1, ra2, dec2
       real(kind=c_double) :: beam_width, beam_height
       real(kind=c_double) :: frequency, velocity
@@ -5914,9 +5928,9 @@ contains
 
       ! launch a thread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_realtime_image_spectrum), &
-         arg=c_loc(cluster_req))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
+                            arg=c_loc(cluster_req))
 
       ! end of cluster
 
@@ -6175,9 +6189,9 @@ contains
 
       ! launch a thread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_realtime_image_spectrum), &
-         arg=c_loc(cluster_req))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
+                            arg=c_loc(cluster_req))
 
       ! end of cluster
 
@@ -6283,11 +6297,11 @@ contains
          ! the image (viewport) part
          if (req%image) then
             select case (req%quality)
-             case (low)
+            case (low)
                precision = ZFP_LOW_PRECISION
-             case (high)
+            case (high)
                precision = ZFP_HIGH_PRECISION
-             case default
+            case default
                precision = ZFP_MEDIUM_PRECISION
             end select
 
@@ -6369,11 +6383,11 @@ contains
       mask = item%mask(x1:x2, y1:y2)
 
       select case (req%quality)
-       case (low)
+      case (low)
          precision = ZFP_LOW_PRECISION
-       case (high)
+      case (high)
          precision = ZFP_HIGH_PRECISION
-       case default
+      case default
          precision = ZFP_MEDIUM_PRECISION
       end select
 
@@ -6751,9 +6765,9 @@ contains
 
       ! launch a pthread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_global_statistics), &
-         arg=c_loc(req))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_global_statistics), &
+                            arg=c_loc(req))
 
       ! calculate global statistics locally
       call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, req%first, req%last)
@@ -6942,9 +6956,9 @@ contains
 
          ! launch a pthread
          rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(fetch_video_frame), &
-            arg=c_loc(fetch_req))
+                               attr=c_null_ptr, &
+                               start_routine=c_funloc(fetch_video_frame), &
+                               arg=c_loc(fetch_req))
 
          ! join a thread
          rc = c_pthread_join(pid, c_null_ptr)
@@ -7281,9 +7295,9 @@ contains
 
       ! launch a thread
       rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_realtime_image_spectrum), &
-         arg=c_loc(cluster_req))
+                            attr=c_null_ptr, &
+                            start_routine=c_funloc(fetch_realtime_image_spectrum), &
+                            arg=c_loc(cluster_req))
 
       ! end of cluster
 
@@ -7376,11 +7390,11 @@ contains
       if (req%fd .ne. -1) then
 
          select case (req%quality)
-          case (low)
+         case (low)
             precision = ZFP_LOW_PRECISION
-          case (high)
+         case (high)
             precision = ZFP_HIGH_PRECISION
-          case default
+         case default
             precision = ZFP_MEDIUM_PRECISION
          end select
 
