@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-28.1";
+	return "JS2022-07-29.0";
 }
 
 function uuidv4() {
@@ -1276,7 +1276,7 @@ function init_webgl_zoom_buffers() {
 	if (webgl2) {
 		var ctx = canvas.getContext("webgl2");
 		viewport.gl = ctx;
-		console.log("init_webgl is using the WebGL2 context.");
+		// console.log("init_webgl is using the WebGL2 context.");
 
 		// enable floating-point textures filtering			
 		ctx.getExtension('OES_texture_float_linear');
@@ -1289,7 +1289,7 @@ function init_webgl_zoom_buffers() {
 	} else if (webgl1) {
 		var ctx = canvas.getContext("webgl");
 		viewport.gl = ctx;
-		console.log("init_webgl is using the WebGL1 context.");
+		// console.log("init_webgl is using the WebGL1 context.");
 
 		// enable floating-point textures
 		ctx.getExtension('OES_texture_float');
@@ -1352,7 +1352,7 @@ function init_webgl_viewport_buffers(container) {
 
 	if (webgl2) {
 		var ctx = canvas.getContext("webgl2");
-		console.log("init_webgl is using the WebGL2 context.");
+		// console.log("init_webgl is using the WebGL2 context.");
 
 		// enable floating-point textures filtering			
 		ctx.getExtension('OES_texture_float_linear');
@@ -1364,7 +1364,7 @@ function init_webgl_viewport_buffers(container) {
 		webgl_viewport_renderer(ctx, container, height);
 	} else if (webgl1) {
 		var ctx = canvas.getContext("webgl");
-		console.log("init_webgl is using the WebGL1 context.");
+		// console.log("init_webgl is using the WebGL1 context.");
 
 		// enable floating-point textures
 		ctx.getExtension('OES_texture_float');
@@ -1423,7 +1423,7 @@ function init_webgl_image_buffers(index) {
 	if (webgl2) {
 		var ctx = canvas.getContext("webgl2");
 		imageContainer[index - 1].gl = ctx;
-		console.log("init_webgl is using the WebGL2 context.");
+		// console.log("init_webgl is using the WebGL2 context.");
 
 		// enable floating-point textures filtering			
 		ctx.getExtension('OES_texture_float_linear');
@@ -1436,7 +1436,7 @@ function init_webgl_image_buffers(index) {
 	} else if (webgl1) {
 		var ctx = canvas.getContext("webgl");
 		imageContainer[index - 1].gl = ctx;
-		console.log("init_webgl is using the WebGL1 context.");
+		// console.log("init_webgl is using the WebGL1 context.");
 
 		// enable floating-point textures
 		ctx.getExtension('OES_texture_float');
@@ -2733,7 +2733,7 @@ function open_websocket_connection(_datasetId, index) {
 								let start = performance.now();
 								// var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
 								var res = Module.decompressZFPspectrum(spectrum_len, frame);
-								var spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+								const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 								let elapsed = Math.round(performance.now() - start);
 
 								// console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
@@ -2789,10 +2789,10 @@ function open_websocket_connection(_datasetId, index) {
 							// decompressZFP returns std::vector<float>
 							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
 							var res = Module.decompressZFPimage(view_width, view_height, frame_pixels);
-							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+							const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
 							var res = Module.decompressLZ4mask(view_width, view_height, frame_mask);
-							var alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+							const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
 
 							let elapsed = Math.round(performance.now() - start);
 
@@ -2895,10 +2895,10 @@ function open_websocket_connection(_datasetId, index) {
 							// decompressZFP returns std::vector<float>
 							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
 							var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
-							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+							const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
 							var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
-							var alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+							const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
 
 							let elapsed = Math.round(performance.now() - start);
 
@@ -2953,7 +2953,7 @@ function open_websocket_connection(_datasetId, index) {
 							.then(_ => {
 								// var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
 								var res = Module.decompressZFPspectrum(spectrum_len, frame);
-								var spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+								const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
 								// console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
 
@@ -10851,6 +10851,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							has_header = false;
 						}
 
+						var mean_spectrum;
 						var has_mean_spectrum = true;
 
 						try {
@@ -10883,6 +10884,7 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							has_mean_spectrum = false;
 						}
 
+						var integrated_spectrum;
 						var has_integrated_spectrum = true;
 
 						try {
@@ -11083,10 +11085,10 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 							// decompressZFP returns std::vector<float>
 							// decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
 							var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
-							var pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // .slice() works, .subarray() does not for large array sizes on Apple Silicon
+							const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
 							var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
-							var alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+							const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
 
 							let elapsed = Math.round(performance.now() - start);
 
@@ -11688,31 +11690,33 @@ function imageTimeout() {
 		var range = get_axes_range(width, height);
 		var dx = range.xMax - range.xMin;
 
-		let _width = viewport_zoom_settings.zoomed_size;
-		let _height = viewport_zoom_settings.zoomed_size;
+		if (viewport_zoom_settings != null) {
+			let _width = viewport_zoom_settings.zoomed_size;
+			let _height = viewport_zoom_settings.zoomed_size;
 
-		var request = {
-			type: "realtime_image_spectrum",
-			dx: dx,
-			image: image_update,
-			quality: image_quality,
-			x1: x1 + 1,
-			y1: y1 + 1,
-			x2: x2 + 1,
-			y2: y2 + 1,
-			width: _width,
-			height: _height,
-			beam: zoom_shape,
-			intensity: intensity_mode,
-			frame_start: data_band_lo,
-			frame_end: data_band_hi,
-			ref_freq: RESTFRQ,
-			seq_id: sent_seq_id,
-			timestamp: performance.now()
-		};
+			var request = {
+				type: "realtime_image_spectrum",
+				dx: dx,
+				image: image_update,
+				quality: image_quality,
+				x1: x1 + 1,
+				y1: y1 + 1,
+				x2: x2 + 1,
+				y2: y2 + 1,
+				width: _width,
+				height: _height,
+				beam: zoom_shape,
+				intensity: intensity_mode,
+				frame_start: data_band_lo,
+				frame_end: data_band_hi,
+				ref_freq: RESTFRQ,
+				seq_id: sent_seq_id,
+				timestamp: performance.now()
+			};
 
-		if (wsConn[index].readyState == 1)
-			wsConn[index].send(JSON.stringify(request));
+			if (wsConn[index].readyState == 1)
+				wsConn[index].send(JSON.stringify(request));
+		}
 	}
 
 	setup_window_timeout();
@@ -13871,7 +13875,7 @@ function init_webgl_legend_buffers(index) {
 	if (webgl2) {
 		var ctx = canvas.getContext("webgl2");
 		imageContainer[index - 1].legend_gl = ctx;
-		console.log("init_webgl is using the WebGL2 context.");
+		// console.log("init_webgl is using the WebGL2 context.");
 
 		// enable floating-point textures filtering			
 		ctx.getExtension('OES_texture_float_linear');
@@ -13884,7 +13888,7 @@ function init_webgl_legend_buffers(index) {
 	} else if (webgl1) {
 		var ctx = canvas.getContext("webgl");
 		imageContainer[index - 1].legend_gl = ctx;
-		console.log("init_webgl is using the WebGL1 context.");
+		// console.log("init_webgl is using the WebGL1 context.");
 
 		// enable floating-point textures
 		ctx.getExtension('OES_texture_float');
