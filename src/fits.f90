@@ -6102,6 +6102,11 @@ contains
 
       print *, 'cn:', cn, 'cm:', cm
 
+      ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
+      dimx = abs(req%x2 - req%x1 + 1)
+      dimy = abs(req%y2 - req%y1 + 1)
+      npixels = dimx*dimy
+
       ! sanity checks
       x1 = max(1, req%x1)
       y1 = max(1, req%y1)
@@ -6123,10 +6128,6 @@ contains
 
       width = item%naxes(1)
       height = item%naxes(2)
-
-      dimx = abs(x2 - x1 + 1)
-      dimy = abs(y2 - y1 + 1)
-      npixels = dimx*dimy
 
       call get_cdelt3(item, cdelt3)
 
