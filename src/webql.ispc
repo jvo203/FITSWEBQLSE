@@ -575,7 +575,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int vertical, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
+export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int vertical, uniform bool average, uniform float cdelt3, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
 {
     uniform int cn, cm;
 
