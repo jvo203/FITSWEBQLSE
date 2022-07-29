@@ -6033,7 +6033,6 @@ contains
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
       integer :: dimx, dimy, native_size, viewport_size
-      integer :: n, m, cn, cm
       integer(c_int) :: precision
       real :: scale
 
@@ -6088,19 +6087,6 @@ contains
       length = last - first + 1
 
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
-
-      n = item%naxes(1)
-      m = item%naxes(2)
-
-      ! by default compressed is dimension(n/DIM, m/DIM)
-      cn = n/DIM
-      cm = m/DIM
-
-      ! but the input dimensions might not be divisible by <DIM>
-      if (mod(n, DIM) .ne. 0) cn = cn + 1
-      if (mod(m, DIM) .ne. 0) cm = cm + 1
-
-      print *, 'cn:', cn, 'cm:', cm
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1 + 1)
@@ -6512,6 +6498,11 @@ contains
 
       length = last - first + 1
 
+      ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
+      dimx = abs(req%x2 - req%x1 + 1)
+      dimy = abs(req%y2 - req%y1 + 1)
+      npixels = dimx*dimy
+
       ! sanity checks
       x1 = max(1, req%x1)
       y1 = max(1, req%y1)
@@ -6533,10 +6524,6 @@ contains
 
       width = item%naxes(1)
       height = item%naxes(2)
-
-      dimx = abs(x2 - x1 + 1)
-      dimy = abs(y2 - y1 + 1)
-      npixels = dimx*dimy
 
       ! real-time data decompression
       start_x = 1 + (x1 - 1)/DIM
