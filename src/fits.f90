@@ -5484,7 +5484,6 @@ contains
       logical(kind=1), allocatable :: thread_mask(:, :)
 
       integer :: dimx, dimy, native_size, viewport_size
-      integer :: n, m, cn, cm
       real :: scale
 
       ! timing
@@ -5520,19 +5519,6 @@ contains
       length = last - first + 1
 
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
-
-      n = item%naxes(1)
-      m = item%naxes(2)
-
-      ! by default compressed is dimension(n/DIM, m/DIM)
-      cn = n/DIM
-      cm = m/DIM
-
-      ! but the input dimensions might not be divisible by <DIM>
-      if (mod(n, DIM) .ne. 0) cn = cn + 1
-      if (mod(m, DIM) .ne. 0) cm = cm + 1
-
-      print *, 'cn:', cn, 'cm:', cm
 
       ! sanity checks
       x1 = max(1, req%x1)
@@ -6047,6 +6033,7 @@ contains
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
       integer :: dimx, dimy, native_size, viewport_size
+      integer :: n, m, cn, cm
       integer(c_int) :: precision
       real :: scale
 
@@ -6101,6 +6088,19 @@ contains
       length = last - first + 1
 
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      n = item%naxes(1)
+      m = item%naxes(2)
+
+      ! by default compressed is dimension(n/DIM, m/DIM)
+      cn = n/DIM
+      cm = m/DIM
+
+      ! but the input dimensions might not be divisible by <DIM>
+      if (mod(n, DIM) .ne. 0) cn = cn + 1
+      if (mod(m, DIM) .ne. 0) cm = cm + 1
+
+      print *, 'cn:', cn, 'cm:', cm
 
       ! sanity checks
       x1 = max(1, req%x1)
