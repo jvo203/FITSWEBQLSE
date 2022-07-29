@@ -6230,13 +6230,11 @@ contains
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
             end if
          else
-            print *, "vertical offset = ", y1 - req%y1
-
             if (req%beam .eq. square) then
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
                &width, height, item%frame_min(frame), item%frame_max(frame),&
                &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3, req%median,&
+               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, y1 - req%y1, average, cdelt3, req%median,&
                &thread_sumP, thread_countP, thread_sumN, thread_countN)
             end if
 
@@ -6613,7 +6611,7 @@ contains
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
                &width, height, item%frame_min(frame), item%frame_max(frame),&
                &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3, req%median,&
+               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, y1 - req%y1, average, cdelt3, req%median,&
                &thread_sumP, thread_countP, thread_sumN, thread_countN)
             end if
 
@@ -7336,7 +7334,7 @@ contains
          spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
          &width, height, item%frame_min(frame), item%frame_max(frame),&
          &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-         &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, average, cdelt3,&
+         &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, average, cdelt3,&
          &dmedian, thread_sumP, thread_countP, thread_sumN, thread_countN)
 
       end do
