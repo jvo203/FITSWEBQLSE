@@ -6369,16 +6369,25 @@ contains
 
       if ((.not. allocated(item%pixels)) .or. (.not. allocated(item%mask))) return
 
-      ! sanity checks
+      ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
+      dimx = abs(x2 - x1 + 1)
+      dimy = abs(y2 - y1 + 1)
+
+      ! memory allocation
+      allocate (pixels(dimx, dimy))
+      allocate (mask(dimx, dimy))
+
+      ! clear the viewport
+      pixels = 0.0
+      mask = .false.
+
+      ! trim the source dimensions
       x1 = max(1, req%x1)
       y1 = max(1, req%y1)
       x2 = min(item%naxes(1), req%x2)
       y2 = min(item%naxes(2), req%y2)
 
-      dimx = abs(x2 - x1 + 1)
-      dimy = abs(y2 - y1 + 1)
-
-      ! automatic memory allocation
+      ! only copy the region from within item%pixels&item%mask
       pixels = item%pixels(x1:x2, y1:y2)
       mask = item%mask(x1:x2, y1:y2)
 
