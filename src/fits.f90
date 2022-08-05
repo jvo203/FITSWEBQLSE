@@ -384,6 +384,28 @@ module fits
 
       end function wropen
 
+      ! int read_array(const char *file, void *dst, size_t frame_size)
+      integer(c_int) function read_array(file, dst, frame_size)&
+      &BIND(C, name='read_frame')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         character(kind=c_char), intent(in) :: file(*)
+         type(c_ptr), value :: dst
+         integer(c_size_t), value, intent(in) :: frame_size
+      end function read_array
+
+      ! int write_array(const char *file, void *src, size_t frame_size)
+      integer(c_int) function write_array(file, src, frame_size)&
+      &BIND(C, name='read_frame')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         character(kind=c_char), intent(in) :: file(*)
+         type(c_ptr), value :: src
+         integer(c_size_t), value, intent(in) :: frame_size
+      end function write_array
+
       ! int read_frame(int fd, void *dst, int pos, size_t frame_size)
       integer(c_int) function read_frame(fd, dst, pos, frame_size)&
       &BIND(C, name='read_frame')

@@ -226,14 +226,14 @@ int write_frame(int fd, void *src, size_t frame_size)
         return 0;
 }
 
-int read_array(const char *file, void *src, size_t frame_size)
+int read_array(const char *file, void *dst, size_t frame_size)
 {
     int fd = rdopen(file);
 
     if (fd < 0)
         return -1; // signal an error
 
-    int stat = read_frame(fd, src, 0, frame_size);
+    int stat = read_frame(fd, dst, 0, frame_size);
 
     close(fd);
 
