@@ -1709,7 +1709,9 @@ contains
       character(len=1024), allocatable :: file
       logical :: file_exists
 
-      integer :: fileunit, ios, N, rc
+      integer :: fileunit, N, rc
+      integer(kind=c_int) :: ios
+      integer(kind=c_size_t) :: array_size
       integer :: dims(2)
       character(256) :: iomsg
 
@@ -2032,7 +2034,9 @@ contains
       if ((dims(1)*dims(2) .eq. N) .and. (N .gt. 0)) then
          if (allocated(item%pixels)) deallocate (item%pixels)
          allocate (item%pixels(dims(1), dims(2)))
-         read (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
+         ! read (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
+         array_size = int(sizeof(item%pixels), kind=c_size_t)
+         ios = read_array(cache//'/'//'pixels'//c_null_char, c_loc(item%pixels), array_size)
          if (ios .ne. 0) go to 300
       end if
 
@@ -2043,7 +2047,9 @@ contains
       if ((dims(1)*dims(2) .eq. N) .and. (N .gt. 0)) then
          if (allocated(item%mask)) deallocate (item%mask)
          allocate (item%mask(dims(1), dims(2)))
-         read (unit=fileunit, IOSTAT=ios) item%mask(:, :)
+         ! read (unit=fileunit, IOSTAT=ios) item%mask(:, :)
+         array_size = int(sizeof(item%mask), kind=c_size_t)
+         ios = write_array(cache//'/'//'mask'//c_null_char, c_loc(item%mask), array_size)
          if (ios .ne. 0) go to 300
       end if
 
