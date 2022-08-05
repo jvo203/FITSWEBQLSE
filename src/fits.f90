@@ -252,7 +252,7 @@ module fits
       character cunit3*70, ctype3*70
       real :: ignrval
       real :: restfrq = 0.0
-      real:: bmaj, bmin, bpa      
+      real:: bmaj, bmin, bpa
       real crval1, cdelt1, crpix1
       real crval2, cdelt2, crpix2
       real crval3, cdelt3, crpix3
@@ -2051,7 +2051,7 @@ contains
          allocate (item%mask(dims(1), dims(2)))
          ! read (unit=fileunit, IOSTAT=ios) item%mask(:, :)
          array_size = int(sizeof(item%mask), kind=c_size_t)
-         ios = write_array(cache//'/'//'mask'//c_null_char, c_loc(item%mask), array_size)
+         ios = read_array(cache//'/'//'mask'//c_null_char, c_loc(item%mask), array_size)
          if (ios .ne. 0) go to 300
       end if
 
