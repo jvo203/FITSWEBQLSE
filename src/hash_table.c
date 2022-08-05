@@ -211,7 +211,7 @@ int read_frame(int fd, void *dst, int pos, size_t frame_size)
     ssize_t bytes_read = pread(fd, dst, frame_size, pos * frame_size);
 
     if (bytes_read != (ssize_t)frame_size)
-        return -1;
+        return -1; // signal an error
     else
         return 0;
 }
@@ -221,14 +221,37 @@ int write_frame(int fd, void *src, size_t frame_size)
     ssize_t bytes_written = write(fd, src, frame_size);
 
     if (bytes_written != (ssize_t)frame_size)
-        return -1;
+        return -1; // signal an error
     else
         return 0;
 }
 
+int read_array(const char *file, void *src, size_t frame_size)
+{
+    int fd = rdopen(file);
+
+    if (fd < 0)
+        return -1; // signal an error
+
+    int stat = read_frame(fd, src, 0, frame_size);
+
+    close(fd);
+
+    return stat;
+}
+
 int write_array(const char *file, void *src, size_t frame_size)
 {
-    int fd = open(file, O_WRONLY | O_APPEND | O_CREAT, (mode_t)0600);
+    int fd = wropen(file);
+
+    if (fd < 0)
+        return -1; // signal an error
+
+    int stat = write_frame(fd, src, frame_size);
+
+    close(fd);
+
+    return stat;
 }
 
 int mkcache(const char *dir)
