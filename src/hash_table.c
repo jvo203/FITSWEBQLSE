@@ -251,6 +251,10 @@ int write_array(const char *file, void *src, size_t frame_size)
 
     close(fd);
 
+    // delete the file upon any write errors
+    if (stat != 0)
+        remove(file);
+
     return stat;
 }
 
