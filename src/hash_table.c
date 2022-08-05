@@ -226,6 +226,11 @@ int write_frame(int fd, void *src, size_t frame_size)
         return 0;
 }
 
+int write_array(const char *file, void *src, size_t frame_size)
+{
+    int fd = open(file, O_WRONLY | O_APPEND | O_CREAT, (mode_t)0600);
+}
+
 int mkcache(const char *dir)
 {
     struct stat st = {0};

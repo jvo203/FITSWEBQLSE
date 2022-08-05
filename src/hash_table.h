@@ -22,6 +22,8 @@ int rdopen(const char *file);
 int wropen(const char *file);
 int read_frame(int fd, void *dst, int pos, size_t frame_size);
 int write_frame(int fd, void *src, size_t frame_size);
+int read_array(const char *file, void *src, size_t frame_size);
+int write_array(const char *file, void *src, size_t frame_size);
 
 // Fortran callbacks
 extern void delete_dataset(void *ptr, char *dir, int len, int threshold);
