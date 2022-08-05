@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-07-29.0";
+	return "JS2022-08-05.0";
 }
 
 function uuidv4() {
@@ -1263,7 +1263,7 @@ function init_webgl_zoom_buffers() {
 			event.preventDefault();
 
 			cancelAnimationFrame(viewport.loopId);
-			console.err("ZOOMCanvas: webglcontextlost");
+			console.error("ZOOMCanvas: webglcontextlost");
 		}, false);
 
 		canvas.addEventListener(
@@ -1340,7 +1340,7 @@ function init_webgl_viewport_buffers(container) {
 		canvas.addEventListener("webglcontextlost", function (event) {
 			event.preventDefault();
 
-			console.err("ViewportCanvas: webglcontextlost");
+			console.error("ViewportCanvas: webglcontextlost");
 		}, false);
 
 		canvas.addEventListener(
@@ -1410,7 +1410,7 @@ function init_webgl_image_buffers(index) {
 
 			var image = imageContainer[index - 1];
 			cancelAnimationFrame(image.loopId);
-			console.err("HTMLCanvas: webglcontextlost");
+			console.error("HTMLCanvas: webglcontextlost");
 		}, false);
 
 		canvas.addEventListener(
@@ -1433,6 +1433,28 @@ function init_webgl_image_buffers(index) {
 
 		// call the common WebGL renderer
 		webgl_image_renderer(index, ctx, width, height);
+
+		// simulate losing and restoring WebGL context
+		/*setTimeout(function () {
+			ctx.getExtension('WEBGL_lose_context').loseContext();
+		}, 10000);*/
+
+		/*function makeCanvas() {
+			const canvas = document.createElement("canvas");
+			canvas.addEventListener('webglcontextlost', (e) => {
+				e.preventDefault();
+				console.log('lost');
+			});
+			document.body.appendChild(canvas);
+			const gl = canvas.getContext('webgl');
+		}
+
+		setTimeout(function () {
+			var i;
+			for (i = 0; i < 20; i++)
+				makeCanvas();
+			console.log(`created ${i} WebGL contexts`);
+		}, 10000);*/
 	} else if (webgl1) {
 		var ctx = canvas.getContext("webgl");
 		imageContainer[index - 1].gl = ctx;
@@ -5278,7 +5300,7 @@ function submit_delta_v() {
 		tmp = document.getElementById('velocityInput').valueAsNumber;
 	}
 	catch (e) {
-		console.err(e);
+		console.error(e);
 	}
 
 	//range checks
@@ -13864,7 +13886,7 @@ function init_webgl_legend_buffers(index) {
 	if (webgl1 || webgl2) {
 		canvas.addEventListener("webglcontextlost", function (event) {
 			event.preventDefault();
-			console.err("legendCanvas: webglcontextlost");
+			console.error("legendCanvas: webglcontextlost");
 		}, false);
 
 		canvas.addEventListener(
