@@ -250,7 +250,9 @@ module fits
       character cunit1*70, ctype1*70
       character cunit2*70, ctype2*70
       character cunit3*70, ctype3*70
-      real :: ignrval, restfrq, bmaj, bmin, bpa
+      real :: ignrval
+      real :: restfrq = 0.0
+      real:: bmaj, bmin, bpa      
       real crval1, cdelt1, crpix1
       real crval2, cdelt2, crpix2
       real crval3, cdelt3, crpix3
