@@ -1315,7 +1315,9 @@ contains
       character(len=1024), allocatable :: file
       logical :: file_exists, bSuccess
 
-      integer :: fileunit, ios
+      integer :: fileunit
+      integer(kind=c_int) :: ios
+      integer(kind=c_size_t) :: array_size
       character(256) :: iomsg
 
       file = cache//'/'//'state'
@@ -1623,7 +1625,9 @@ contains
          write (unit=fileunit, IOSTAT=ios) size(item%pixels)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
-         write (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
+         ! write (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
+         array_size = int(sizeof(item%pixels), kind=c_size_t)
+         ios = write_array(cache//'/'//'pixels'//c_null_char, c_loc(item%pixels), array_size)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
          write (unit=fileunit, IOSTAT=ios) 0
@@ -1635,7 +1639,9 @@ contains
          write (unit=fileunit, IOSTAT=ios) size(item%mask)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
-         write (unit=fileunit, IOSTAT=ios) item%mask(:, :)
+         ! write (unit=fileunit, IOSTAT=ios) item%mask(:, :)
+         array_size = int(sizeof(item%mask), kind=c_size_t)
+         ios = write_array(cache//'/'//'mask'//c_null_char, c_loc(item%mask), array_size)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
          write (unit=fileunit, IOSTAT=ios) 0
