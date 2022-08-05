@@ -386,7 +386,7 @@ module fits
 
       ! int read_array(const char *file, void *dst, size_t frame_size)
       integer(c_int) function read_array(file, dst, frame_size)&
-      &BIND(C, name='read_frame')
+      &BIND(C, name='read_array')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -397,7 +397,7 @@ module fits
 
       ! int write_array(const char *file, void *src, size_t frame_size)
       integer(c_int) function write_array(file, src, frame_size)&
-      &BIND(C, name='read_frame')
+      &BIND(C, name='write_array')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
