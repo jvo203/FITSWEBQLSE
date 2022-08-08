@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-08-05.0";
+	return "JS2022-08-08.0";
 }
 
 function uuidv4() {
@@ -12833,7 +12833,7 @@ function show_welcome() {
 
 	headerDiv.append("h2")
 		.attr("align", "center")
-		.html('WELCOME TO FITSWEBQLSE (alpha rel.)');
+		.html('WELCOME TO FITSWEBQLSE');
 
 	var bodyDiv = contentDiv.append("div")
 		.attr("id", "modal-body")
