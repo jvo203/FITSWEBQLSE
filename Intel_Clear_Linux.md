@@ -81,11 +81,11 @@
 
     or, just in case, compile / install libcURL manually !?
 
-    wget https://curl.se/download/curl-7.81.0.tar.gz
+    wget https://curl.se/download/curl-7.84.0.tar.gz
 
-    tar zxvf curl-7.81.0.tar.gz
+    tar zxvf curl-7.84.0.tar.gz
 
-    cd curl-7.81.0
+    cd curl-7.84.0
 
     ./configure --with-openssl (or Rust --with-rustls)
 
