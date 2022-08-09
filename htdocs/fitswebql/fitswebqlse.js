@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-08-08.0";
+	return "JS2022-08-09.0";
 }
 
 function uuidv4() {
@@ -1565,6 +1565,12 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 		init_webgl_image_buffers(index);
 
 		setup_image_selection();
+
+		try {
+			display_scale_info();
+		}
+		catch (err) {
+		};
 
 		has_image = true;
 
@@ -3729,6 +3735,8 @@ function y2dms(y) {
 };
 
 function display_scale_info() {
+	console.log("calling display_scale_info");
+
 	let fitsData = fitsContainer[va_count - 1];
 
 	if (fitsData == null)
@@ -3738,13 +3746,30 @@ function display_scale_info() {
 		return;
 
 	var elem = d3.select("#image_rectangle");
-	var img_width = parseFloat(elem.attr("width"));
-	var img_height = parseFloat(elem.attr("height"));
-	var img_x = parseFloat(elem.attr("x"));
-	var img_y = parseFloat(elem.attr("y"));
+	//var img_width = parseFloat(elem.attr("width"));
+	//var img_height = parseFloat(elem.attr("height"));
+	console.log("got here #0");
+
+	var elem = document.getElementById("image_rectangle");
+	if (elem == null)
+		return;
+
+	var img_width = parseFloat(elem.getAttribute("width"));
+	var img_height = parseFloat(elem.getAttribute("height"));
+	console.log("got here #1");
+
+	//var img_x = parseFloat(elem.attr("x"));
+	//var img_y = parseFloat(elem.attr("y"));
+	var img_x = parseFloat(elem.getAttribute("x"));
+	var img_y = parseFloat(elem.getAttribute("y"));
+
+	console.log("got here #2");
+
 	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 	var imageCanvas = imageContainer[va_count - 1].imageCanvas;
 	var scale = imageCanvas.height / image_bounding_dims.height;
+
+	console.log("got here #3");
 
 	//scale
 	var arcmins = 60;
@@ -11029,8 +11054,9 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
 							if (va_count == 1 || composite_view) {
 								try {
-									if (index == va_count)
+									if (index == va_count) {
 										display_scale_info();
+									}
 								}
 								catch (err) {
 								};
