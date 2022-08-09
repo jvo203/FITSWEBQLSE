@@ -497,6 +497,10 @@ static int handler(void *user, const char *section, const char *name,
     {
         options->url_port = atoi(value);
     }
+    else if (MATCH("zeromq", "port"))
+    {
+        options->zmq_port = atoi(value);
+    }
     else
     {
         printf("unknown option %s/%s\n", section, name);
