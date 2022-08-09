@@ -69,6 +69,7 @@ typedef struct
 
     // cluster
     char *root;
+    uint32_t zmq_port; // ZeroMQ beacon port
 } options_t;
 
 typedef struct

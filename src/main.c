@@ -234,6 +234,7 @@ int main(int argc, char *argv[])
     options.url_port = 80;
 
     options.root = NULL;
+    options.zmq_port = BEACON_PORT;
 
     // parse options command-line options (over-rides the .ini config file)
     int opt;
