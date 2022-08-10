@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-08-09.0";
+	return "JS2022-08-10.0";
 }
 
 function uuidv4() {
@@ -3735,8 +3735,6 @@ function y2dms(y) {
 };
 
 function display_scale_info() {
-	console.log("calling display_scale_info");
-
 	let fitsData = fitsContainer[va_count - 1];
 
 	if (fitsData == null)
@@ -3745,31 +3743,18 @@ function display_scale_info() {
 	if (fitsData.depth > 1)
 		return;
 
-	var elem = d3.select("#image_rectangle");
-	//var img_width = parseFloat(elem.attr("width"));
-	//var img_height = parseFloat(elem.attr("height"));
-	console.log("got here #0");
-
 	var elem = document.getElementById("image_rectangle");
 	if (elem == null)
 		return;
 
 	var img_width = parseFloat(elem.getAttribute("width"));
 	var img_height = parseFloat(elem.getAttribute("height"));
-	console.log("got here #1");
-
-	//var img_x = parseFloat(elem.attr("x"));
-	//var img_y = parseFloat(elem.attr("y"));
 	var img_x = parseFloat(elem.getAttribute("x"));
 	var img_y = parseFloat(elem.getAttribute("y"));
 
-	console.log("got here #2");
-
-	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
-	var imageCanvas = imageContainer[va_count - 1].imageCanvas;
-	var scale = imageCanvas.height / image_bounding_dims.height;
-
-	console.log("got here #3");
+	var image = imageContainer[va_count - 1];
+	var image_bounding_dims = image.image_bounding_dims;
+	var scale = image.height / image_bounding_dims.height;
 
 	//scale
 	var arcmins = 60;
