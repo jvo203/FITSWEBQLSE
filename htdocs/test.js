@@ -14,6 +14,16 @@ function randomise_alma() {
     view_alma();
 }
 
+function randomise_almb() {
+    var timestamp = new Date();
+    var Id = 500 + timestamp.getUTCMilliseconds();
+
+    var datasetId = "ALMB0101" + pad(Id.toString(), 4);
+    document.getElementById("arilid").value = datasetId;
+
+    view_almb();
+}
+
 function view_akari() {
     var dataId = document.getElementById("akari_dataid").value.trim();
     var db = document.getElementById("akari_db").value.trim();
@@ -69,6 +79,22 @@ function view_alma() {
     var datasetId = document.getElementById("datasetid").value.trim();
     var db = document.getElementById("alma_db").value.trim();
     var table = document.getElementById("alma_table").value.trim();
+
+    if (datasetId != "") {
+        var url = null;
+
+        url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(datasetId);
+
+        window.location.href = url;
+    }
+    else
+        alert("no datasetId found !");
+}
+
+function view_almb() {
+    var datasetId = document.getElementById("arilid").value.trim();
+    var db = document.getElementById("almb_db").value.trim();
+    var table = document.getElementById("almb_table").value.trim();
 
     if (datasetId != "") {
         var url = null;
