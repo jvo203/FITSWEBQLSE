@@ -18,7 +18,7 @@ function randomise_almb() {
     var timestamp = new Date();
     var Id = 500 + timestamp.getUTCMilliseconds();
 
-    var datasetId = "ALMB0101" + pad(Id.toString(), 4);
+    var datasetId = "ALMB0001" + pad(Id.toString(), 4);
     document.getElementById("arilid").value = datasetId;
 
     view_almb();
