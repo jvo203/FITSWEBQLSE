@@ -204,7 +204,7 @@ contains
 
         tmp = nint(set_exponent(x, i))
 
-        ! cap the range to 8 bit to prevent under- / over-flows
+        ! cap the range to 8 bits [-128, 127] in order to prevent under- / over-flows
         if (tmp .lt. -128) then
             quantize = -128
             return
