@@ -194,14 +194,30 @@ contains
         real, intent(in) :: x
         integer, intent(in) :: e, max_exp, bits
         integer(kind=1) :: quantize
-        integer i
+        integer i, tmp
 
         ! what it does
         ! quantize = nint(x*(2**bits)/(2**max_exp), kind=1)
 
         i = e - max_exp + bits
-        quantize = nint(set_exponent(x, i), kind=1)
+        ! quantize = nint(set_exponent(x, i), kind=1)
 
+        tmp = nint(set_exponent(x, i))
+
+        ! cap the range to 8 bit to prevent under- / over-flows
+        if (tmp .lt. -128) then
+            quantize = -128
+            return
+        end if
+
+        if (tmp .gt. 127) then
+            quantize = 127
+            return
+        end if
+
+        ! squeeze the value into 8 bits
+        quantize = int(tmp, kind=1)
+        return
     end function quantize
 
     elemental function dequantize(x, max_exp, bits)
