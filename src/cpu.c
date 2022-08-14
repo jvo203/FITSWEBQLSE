@@ -22,40 +22,19 @@ int get_physical_cores()
 int get_physical_cores()
 {
     int mib[4];
-    int numCPU;
+    int numCPU = 0;
     size_t len = sizeof(numCPU);
-
-    /* set the mib for hw.ncpu */
-    // mib[0] = CTL_HW;
-    //  mib[1] = HW_NCPU; // HW_AVAILCPU; // alternatively, try HW_NCPU;
 
     // sysctl -n hw.perflevel0.physicalcpu
     // 16
 
-    /* Fill out the mib */
-    len = 4;
-    int status = sysctlnametomib("hw.perflevel0.physicalcpu", mib, &len);
-
-    if (status != 0)
-        perror("sysctlnametomib");
-    else
-    {
-        printf("[C] sysctlnametomib status : %d\n", status);
-        for (int i = 0; i < 4; i++)
-            printf("mib[%d] : %d\n", i, mib[i]);
-        printf("\n");
-    }
-
-    len = sizeof(numCPU);
-
-    /* get the number of CPUs from the system */
-    if (sysctl(mib, 2, &numCPU, &len, NULL, 0) == -1)
-        perror("sysctl");
-    else
-        printf("[C] sysctl numCPU : %d\n", numCPU);
+    // get the number of Apple Silicon performance cores
+    if (sysctlbyname("hw.perflevel0.physicalcpu", &numCPU, &len, NULL, 0) == -1)
+        perror("sysctlbyname");
 
     if (numCPU < 1)
     {
+        /* set the mib for hw.ncpu */
         mib[0] = CTL_HW;
         mib[1] = HW_NCPU;
         sysctl(mib, 2, &numCPU, &len, NULL, 0);
@@ -63,7 +42,7 @@ int get_physical_cores()
             numCPU = 1;
     }
 
-    printf("[C] No. of Physical Core(s) : %d\n", numCPU);
+    printf("[C] No. of Performance Core(s) : %d\n", numCPU);
 
     return numCPU;
 }
