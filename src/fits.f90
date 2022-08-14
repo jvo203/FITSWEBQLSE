@@ -6145,6 +6145,8 @@ contains
 
       ! get #physical cores (ignore HT)
       max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+      print *, "OMP_GET_MAX_THREADS:", OMP_GET_MAX_THREADS()
+      print *, "max_threads:", max_threads
 
       ! do we need the viewport?
       if (req%image) then
