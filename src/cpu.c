@@ -25,6 +25,7 @@ int get_physical_cores()
     int numCPU = 0;
     size_t len = sizeof(numCPU);
 
+    // on the Apple M1 Ultra
     // sysctl -n hw.perflevel0.physicalcpu
     // 16
 
