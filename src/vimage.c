@@ -50,5 +50,6 @@ extern void resizeNearest(unsigned char *pSrc, int srcWidth, int srcHeight, unsi
     dst.width = dstWidth;
     dst.rowBytes = dstWidth * sizeof(unsigned char);
 
-    res = vImageScale_Planar8(&src, &dst, NULL, kvImageNoFlags); // kvImageHighQualityResampling
+    // WARNING: for now Lanczos is used instead of the Nearest Neighbour !!!
+    res = vImageScale_Planar8(&src, &dst, NULL, kvImageNoFlags);
 }
