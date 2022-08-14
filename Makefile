@@ -136,10 +136,10 @@ ifeq ($(UNAME_S),Darwin)
 
 	CC = gcc-12
 	FORT = gfortran-12
-	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp -flax-vector-conversions
+	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
 	# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
-	CFLAGS := $(FLAGS)
+	CFLAGS := $(FLAGS) -flax-vector-conversions
 
 	# GCC FORTRAN runtime
 	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/12 -lgfortran -lm -framework Accelerate
