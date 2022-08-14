@@ -22,6 +22,8 @@ extern void resizeLanczos(float *pSrc, int srcWidth, int srcHeight, float *pDest
 
 extern void resizeSuper(float *pSrc, int srcWidth, int srcHeight, float *pDest, int dstWidth, int dstHeight)
 {
+    // for now pass all calls to a high-quality Lanczos scaling function
+    resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, 5);
 }
 
 extern void resizeNearest(unsigned char *pSrc, int srcWidth, int srcHeight, unsigned char *pDest, int dstWidth, int dstHeight)
