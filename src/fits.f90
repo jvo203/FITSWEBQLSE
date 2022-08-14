@@ -2153,7 +2153,7 @@ contains
       allocate (item%compressed(1:depth))
 
       ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+      max_threads = get_max_threads()
 
       print *, "max_threads:", max_threads, "depth:", depth
 
@@ -3620,13 +3620,6 @@ contains
          ! cap the number of threads to avoid system overload
          max_threads = min(OMP_GET_MAX_THREADS(), 4)
 
-         ! get #physical cores (ignore HT), and then cut the number in half
-         ! to avoid a system overload
-         ! max_threads = min(max_threads, get_physical_cores()/2)
-
-         ! get #physical cores (ignore HT)
-         ! max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
-
          print *, "max_threads:", max_threads
 
          if (.not. allocated(thread_units)) then
@@ -4691,7 +4684,7 @@ contains
       return
 
       ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+      max_threads = get_max_threads()
       work_size = min(total_size/max_threads, max_work_size)
       num_threads = total_size/work_size
 
@@ -5006,7 +4999,7 @@ contains
       if (last .gt. item%naxes(3)) return
 
       ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+      max_threads = get_max_threads()
 
       thread_sumP = 0.0
       thread_countP = 0
@@ -5582,7 +5575,7 @@ contains
       call get_cdelt3(item, cdelt3)
 
       ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+      max_threads = get_max_threads()
 
       print *, 'start_x:', start_x, 'start_y:', start_y, 'end_x:', end_x, 'end_y:', end_y,&
       & "max_threads:", max_threads
@@ -5953,7 +5946,7 @@ contains
       call get_cdelt3(item, cdelt3)
 
       ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+      max_threads = get_max_threads()
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
       !$omp& PRIVATE(tid, frame)&
@@ -6144,9 +6137,7 @@ contains
       call get_cdelt3(item, cdelt3)
 
       ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
-      print *, "OMP_GET_MAX_THREADS:", OMP_GET_MAX_THREADS()
-      print *, "max_threads:", max_threads
+      max_threads = get_max_threads()
 
       ! do we need the viewport?
       if (req%image) then
@@ -6568,7 +6559,7 @@ contains
       call get_cdelt3(item, cdelt3)
 
       ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+      max_threads = get_max_threads()
 
       ! do we need the viewport too?
       if (req%image) then
@@ -7266,7 +7257,7 @@ contains
       call get_cdelt3(item, cdelt3)
 
       ! get #physical cores (ignore HT)
-      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+      max_threads = get_max_threads()
 
       ! we need the viewport too
       allocate (pixels(npixels))
@@ -7459,4 +7450,19 @@ contains
       return
 
    end subroutine ws_image_spectrum_request
+
+   function get_max_threads() result(max_threads)
+      use omp_lib
+
+      integer :: max_threads
+
+      ! get #physical cores (ignore HT)
+      max_threads = min(OMP_GET_MAX_THREADS(), get_physical_cores())
+
+      ! libcpuid does not seem to recognise Apple Silicon yet and returns 0 !!!
+      if(max_threads .eq. 0) then
+         max_threads = OMP_GET_MAX_THREADS()
+      endif
+
+   end function get_max_threads
 end module fits
