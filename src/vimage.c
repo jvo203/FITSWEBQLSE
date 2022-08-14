@@ -8,6 +8,7 @@
 extern void resizeLanczos(float *pSrc, int srcWidth, int srcHeight, float *pDest, int dstWidth, int dstHeight, int numLobes)
 {
     struct vImage_Buffer src, dst;
+    vImage_Flags flags;
     vImage_Error res;
 
     src.data = pSrc;
@@ -20,7 +21,12 @@ extern void resizeLanczos(float *pSrc, int srcWidth, int srcHeight, float *pDest
     dst.width = dstWidth;
     dst.rowBytes = dstWidth * sizeof(float);
 
-    res = vImageScale_PlanarF(&src, &dst, NULL, kvImageNoFlags); // kvImageHighQualityResampling
+    if (numLobes == 5)
+        flags = kvImageHighQualityResampling;
+    else
+        flags = kvImageNoFlags;
+
+    res = vImageScale_PlanarF(&src, &dst, NULL, kvImageNoFlags);
 }
 
 extern void resizeSuper(float *pSrc, int srcWidth, int srcHeight, float *pDest, int dstWidth, int dstHeight)
