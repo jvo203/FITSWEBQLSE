@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := fitswebqlse
 
 # get the Homebrew installation directory
-HOMEBREW_PREFIX := $(brew --prefix)
+HOMEBREW_PREFIX := $(shell brew --prefix)
 
 # the stack should be unlimited to avoid problems
 # with ifort creating on the stack large temporary arrays
