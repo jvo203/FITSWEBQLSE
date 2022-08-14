@@ -142,7 +142,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress);
 PGconn *jvo_db_connect(char *db);
 char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id);
 
-extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, int len);
+extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, size_t len);
 extern void notify_root(void *item, char *root);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
 extern void image_request(void *item, int width, int height, int fd);
