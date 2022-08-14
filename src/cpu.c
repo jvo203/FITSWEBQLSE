@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#if !defined(__APPLE__) || !defined(__MACH__)
 #include <libcpuid.h>
 
 int get_physical_cores()
@@ -14,3 +15,33 @@ int get_physical_cores()
 
     return data.num_cores;
 }
+#else
+// on macOS
+#include <sys/sysctl.h>
+
+int get_physical_cores()
+{
+    int mib[4];
+    int numCPU;
+    size_t len = sizeof(numCPU);
+
+    /* set the mib for hw.ncpu */
+    mib[0] = CTL_HW;
+    mib[1] = HW_NCPU; // HW_AVAILCPU; // alternatively, try HW_NCPU;
+
+    /* get the number of CPUs from the system */
+    sysctl(mib, 2, &numCPU, &len, NULL, 0);
+
+    if (numCPU < 1)
+    {
+        mib[1] = HW_NCPU;
+        sysctl(mib, 2, &numCPU, &len, NULL, 0);
+        if (numCPU < 1)
+            numCPU = 1;
+    }
+
+    printf("[C] No. of Physical Core(s) : %d\n", numCPU);
+
+    return numCPU;
+}
+#endif
