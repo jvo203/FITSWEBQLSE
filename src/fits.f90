@@ -730,16 +730,6 @@ module fits
 
       end subroutine make_video_frame_fixed_legacy
 
-      ! resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight)
-      subroutine resizeCubic(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight) BIND(C, name='resizeCubic')
-         use, intrinsic :: ISO_C_BINDING
-         implicit none
-
-         integer(c_int), value, intent(in) :: srcWidth, srcHeight
-         integer(c_int), value, intent(in) :: dstWidth, dstHeight
-         type(C_PTR), value, intent(in) :: pSrc, pDest
-      end subroutine resizeCubic
-
       ! resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
       subroutine resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, numLobes) BIND(C, name='resizeLanczos')
          use, intrinsic :: ISO_C_BINDING
