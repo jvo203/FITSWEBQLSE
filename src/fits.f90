@@ -3011,7 +3011,6 @@ contains
          end do
 
          print *, 'cache directory: ', cache(1:cache_len)
-         print *, 'cache_idx:', cache_idx, 'dir_len:', dir_len
 
          ! append a slash
          cache_len = cache_len + 1
