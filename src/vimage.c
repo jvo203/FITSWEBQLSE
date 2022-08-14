@@ -7,17 +7,20 @@
 
 extern void resizeLanczos(float *pSrc, int srcWidth, int srcHeight, float *pDest, int dstWidth, int dstHeight, int numLobes)
 {
-    struct vImage_Buffer srcBuffer, dstBuffer;
+    struct vImage_Buffer src, dst;
+    vImage_Error res;
 
-    srcBuffer.data = pSrc;
-    srcBuffer.height = srcHeight;
-    srcBuffer.width = srcWidth;
-    srcBuffer.rowBytes = srcWidth * sizeof(float);
+    src.data = pSrc;
+    src.height = srcHeight;
+    src.width = srcWidth;
+    src.rowBytes = srcWidth * sizeof(float);
 
-    dstBuffer.data = pDest;
-    dstBuffer.height = dstHeight;
-    dstBuffer.width = dstWidth;
-    dstBuffer.rowBytes = dstWidth * sizeof(float);
+    dst.data = pDest;
+    dst.height = dstHeight;
+    dst.width = dstWidth;
+    dst.rowBytes = dstWidth * sizeof(float);
+
+    res = vImageScale_PlanarF(&src, &dst, NULL, kvImageHighQualityResampling);
 }
 
 extern void resizeSuper(float *pSrc, int srcWidth, int srcHeight, float *pDest, int dstWidth, int dstHeight)
@@ -28,4 +31,18 @@ extern void resizeSuper(float *pSrc, int srcWidth, int srcHeight, float *pDest, 
 
 extern void resizeNearest(unsigned char *pSrc, int srcWidth, int srcHeight, unsigned char *pDest, int dstWidth, int dstHeight)
 {
+    struct vImage_Buffer src, dst;
+    vImage_Error res;
+
+    src.data = pSrc;
+    src.height = srcHeight;
+    src.width = srcWidth;
+    src.rowBytes = srcWidth * sizeof(unsigned char);
+
+    dst.data = pDest;
+    dst.height = dstHeight;
+    dst.width = dstWidth;
+    dst.rowBytes = dstWidth * sizeof(unsigned char);
+
+    res = vImageScale_Planar8(&src, &dst, NULL, kvImageHighQualityResampling);
 }
