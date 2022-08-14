@@ -78,7 +78,14 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 # src/wavelet.f90
 # src/lz4.f90
 # src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/json_write.c src/m_mrgrnk.f90 src/mod_sort.f90 src/wavelet.f90 src/fixed_array.f90 src/fixed_array2.f90 src/zfp_array.f90 src/histogram.c src/classifier.f90 src/fits_omp.f90 src/net.f90 src/main.f90
-SRC = $(ZFP_SRC) src/webql.ispc src/cpu.c src/json.c src/ini.c src/mongoose.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/ipp.c src/cluster.c src/http.c src/ws.c src/face.f90 src/logging.f90 src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/fits.f90 src/main.c
+SRC = $(ZFP_SRC) src/webql.ispc src/cpu.c src/json.c src/ini.c src/mongoose.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/cluster.c src/http.c src/ws.c src/face.f90 src/logging.f90 src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/fits.f90 src/main.c
+
+ifeq ($(UNAME_S),Darwin)
+	SRC += src/vimage.c
+else
+	SRC += src/ipp.c
+endif
+
 OBJ := $(SRC:.f90=.o)
 OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
@@ -124,7 +131,7 @@ ifeq ($(UNAME_S),Darwin)
 
 	CC = gcc-12
 	FORT = gfortran-12
-	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp -flax-vector-conversions
 	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
 	# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
 	CFLAGS := $(FLAGS)
