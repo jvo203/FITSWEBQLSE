@@ -35,7 +35,10 @@ static void *jemalloc_daemon(void *arg);
 
 #include "version.h"
 
+#if !defined(__APPLE__) || !defined(__MACH__)
 #include <ipp.h>
+#endif
+
 #include <curl/curl.h>
 #include <glib.h>
 
@@ -79,6 +82,7 @@ static int handler(void *user, const char *section, const char *name,
 
 options_t options; // the one and only one definition
 
+#if !defined(__APPLE__) || !defined(__MACH__)
 void ipp_init()
 {
     const IppLibraryVersion *lib;
@@ -195,6 +199,7 @@ void ipp_init()
         printf("Intel(R) Xeon Phi(TM) Coprocessor instruction set\n");
     }
 }
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -303,7 +308,10 @@ int main(int argc, char *argv[])
         options.ws_port = options.http_port + 1;
     }
 
+#if !defined(__APPLE__) || !defined(__MACH__)
     ipp_init();
+#endif
+
     curl_global_init(CURL_GLOBAL_ALL);
 
     init_cluster();
