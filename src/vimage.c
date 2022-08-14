@@ -20,7 +20,7 @@ extern void resizeLanczos(float *pSrc, int srcWidth, int srcHeight, float *pDest
     dst.width = dstWidth;
     dst.rowBytes = dstWidth * sizeof(float);
 
-    res = vImageScale_PlanarF(&src, &dst, NULL, kvImageHighQualityResampling);
+    res = vImageScale_PlanarF(&src, &dst, NULL, kvImageNoFlags); // kvImageHighQualityResampling
 }
 
 extern void resizeSuper(float *pSrc, int srcWidth, int srcHeight, float *pDest, int dstWidth, int dstHeight)
@@ -44,5 +44,5 @@ extern void resizeNearest(unsigned char *pSrc, int srcWidth, int srcHeight, unsi
     dst.width = dstWidth;
     dst.rowBytes = dstWidth * sizeof(unsigned char);
 
-    res = vImageScale_Planar8(&src, &dst, NULL, kvImageHighQualityResampling);
+    res = vImageScale_Planar8(&src, &dst, NULL, kvImageNoFlags); // kvImageHighQualityResampling
 }
