@@ -1,5 +1,8 @@
 .DEFAULT_GOAL := fitswebqlse
 
+# get the Homebrew installation directory
+HOMEBREW_PREFIX := $(brew --prefix)
+
 # the stack should be unlimited to avoid problems
 # with ifort creating on the stack large temporary arrays
 # ulimit -s unlimited
@@ -112,7 +115,7 @@ endif
 
 MOD =
 # -I/home/chris/zfp/include
-DEF = -DDEBUG -DNO_MONGOOSE_HTTP_CLIENT
+DEF = -DNODEBUG -DNO_MONGOOSE_HTTP_CLIENT
 
 LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` -lsqlite3 `pkg-config --libs libcurl` -lz -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq`
 # -lzfp before cfitsio
