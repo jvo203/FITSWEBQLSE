@@ -6431,6 +6431,8 @@ contains
             allocate (view_pixels(req%width, req%height))
             allocate (view_mask(req%width, req%height))
 
+            !$omp parallel
+            !$omp task
             if (scale .gt. 0.2) then
                 call resizeLanczos(c_loc(pixels), dimx, dimy,&
                 & c_loc(view_pixels), req%width, req%height, 3)
@@ -6438,9 +6440,13 @@ contains
                 call resizeSuper(c_loc(pixels), dimx, dimy,&
                 & c_loc(view_pixels), req%width, req%height)
             end if
+            !$omp end task
 
+            !$omp task
             call resizeNearest(c_loc(mask), dimx, dimy,&
             & c_loc(view_mask), req%width, req%height)
+            !$omp end task
+            !$omp end parallel
 
             ! end the timer
             call system_clock(finish_t)
