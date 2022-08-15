@@ -1,0 +1,8 @@
+progress:        1018 out of total:         700
+ finished loading ALMA01567567, bSuccess:  T , elapsed time:    133.365677      [s]
+ progress:         240 out of total:         700
+ finished loading ALMA01567567, bSuccess:  T , elapsed time:    133.534668      [s]
+ progress:         232 out of total:         700
+ finished loading ALMA01567567, bSuccess:  T , elapsed time:    133.925354      [s]
+
+Clearly something fishy is going on ...
