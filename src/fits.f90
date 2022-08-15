@@ -6654,7 +6654,7 @@ contains
                     spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
                     &width, height, item%frame_min(frame), item%frame_max(frame),&
                     &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-                    &x1 - 1, x2 - 1, y1 - 1, x1 - req%x1, y2 - 1, y1 - req%y1, average, cdelt3, req%median,&
+                    &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median,&
                     &thread_sumP, thread_countP, thread_sumN, thread_countN)
                 end if
 
