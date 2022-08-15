@@ -987,7 +987,7 @@ contains
             filename(i:i) = log_file(i)
         end do
 
-        print *, "FORTRAN LOG FILE: ", filename
+        print *, "FORTRAN LOG FILE: '", filename, "'."
 
         INQUIRE (FILE=filename, EXIST=file_exists)
 
