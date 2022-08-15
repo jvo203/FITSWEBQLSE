@@ -2649,7 +2649,9 @@ void start_http()
             splat_db = NULL;
         }
 
+#ifdef DEBUG
         printf("[C] µHTTP daemon listening on port %" PRIu16 "... Press CTRL-C to stop it.\n", options.http_port);
+#endif
     }
 };
 
