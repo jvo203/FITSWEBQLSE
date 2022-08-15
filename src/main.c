@@ -222,8 +222,15 @@ int main(int argc, char *argv[])
     options.ws_port = options.http_port + 1;
     options.local = true;
     options.timeout = 15; // [s]
+#if !defined(__APPLE__) || !defined(__MACH__)
     options.fits_home = strdup(".cache");
     options.cache = strdup(".cache");
+#else
+    char cache[1024];
+    snprintf(cache, sizeof(cache), "%s/.cache", passwdEnt->pw_dir);
+    options.fits_home = strdup(cache);
+    options.cache = strdup(cache);
+#endif
     options.threshold = 25; // [GiB]
     options.logs = strdup("LOGS");
     options.home_dir = strdup(passwdEnt->pw_dir);
@@ -280,13 +287,15 @@ int main(int argc, char *argv[])
         }
 
     if (options.local)
-        printf("Home Directory: %s\n", options.home_dir);
+        printf("Home Directory: '%s'.\n", options.home_dir);
 
     // parse a config file
     if (ini_parse(config_file, handler, &options) < 0)
         printf("Can't load '%s', assuming default options.\n", config_file);
     else
         printf("Successfully parsed '%s'.\n", config_file);
+
+    printf("Cache Directory: '%s'. Please clean it periodically to prevent excessive disk usage.\n", options.cache);
 
     // fortran logging
     {
