@@ -7418,6 +7418,8 @@ contains
 
         ! combine the spectra from other cluster nodes (if any)
         if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
+        spectrum = spectrum + cluster_spectrum
+        print *, "combined spectrum:", spectrum
 
         ! get the inner image bounding box (excluding NaNs)
         call inherent_image_dimensions_from_mask(reshape(mask, (/dimx, dimy/)), inner_width, inner_height)
