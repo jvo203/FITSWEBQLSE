@@ -7475,6 +7475,16 @@ contains
 
     end subroutine ws_image_spectrum_request
 
+    subroutine resizeMask(src, srcWidth, srcHeight, dst, dstWidth, dstHeight)
+        use, intrinsic :: ISO_C_BINDING
+        implicit none
+
+        integer, intent(in) :: srcWidth, srcHeight
+        integer, intent(in) :: dstWidth, dstHeight
+        logical(kind=c_bool), intent(in) :: src(srcWidth, srcHeight)
+        logical(kind=c_bool), intent(out) :: dst(dstWidth, dstHeight)
+    end subroutine resizeMask
+
     function get_max_threads() result(max_threads)
         use omp_lib
 
