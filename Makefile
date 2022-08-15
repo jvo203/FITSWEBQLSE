@@ -110,7 +110,11 @@ endif
 INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags x265` `pkg-config --cflags jemalloc` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src 
 
 ifneq ($(UNAME_S),Darwin)
-	INC += -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include `pkg-config --cflags libcpuid`
+	INC += `pkg-config --cflags libcpuid`
+endif
+
+ifneq ($(UNAME_S),Darwin)
+	INC += -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include
 endif
 
 MOD =
