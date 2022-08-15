@@ -107,17 +107,22 @@ ifeq ($(CC),icc)
 #-mt_mpi
 endif
 
-INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libcpuid` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags x265` `pkg-config --cflags jemalloc` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src 
+INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags x265` `pkg-config --cflags jemalloc` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src 
 
 ifneq ($(UNAME_S),Darwin)
-	INC += -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include
+	INC += -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include `pkg-config --cflags libcpuid`
 endif
 
 MOD =
 # -I/home/chris/zfp/include
 DEF = -DNODEBUG -DNO_MONGOOSE_HTTP_CLIENT
 
-LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libcpuid` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` -lsqlite3 `pkg-config --libs libcurl` -lz -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq`
+LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` -lsqlite3 `pkg-config --libs libcurl` -lz -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq`
+
+ifneq ($(UNAME_S),Darwin)
+	LIBS += `pkg-config --libs libcpuid`
+endif
+
 # -lzfp before cfitsio
 #`pkg-config --libs json-fortran`
 
