@@ -190,6 +190,11 @@ contains
 
     end subroutine print_fixed_block
 
+    elemental integer function clamp(x, xmin, xmax) result(res)
+        integer, intent(in) :: x, xmin, xmax
+        res = min(max(x, xmin), xmax)
+    end function clamp
+
     elemental function quantize(x, e, max_exp, bits)
         real, intent(in) :: x
         integer, intent(in) :: e, max_exp, bits
@@ -200,24 +205,11 @@ contains
         ! quantize = nint(x*(2**bits)/(2**max_exp), kind=1)
 
         i = e - max_exp + bits
-        ! quantize = nint(set_exponent(x, i), kind=1)
-
         tmp = nint(set_exponent(x, i))
 
-        ! cap the range to 8 bits [-128, 127] in order to prevent under- / over-flows
-        if (tmp .lt. -128) then
-            quantize = -128
-            return
-        end if
-
-        if (tmp .gt. 127) then
-            quantize = 127
-            return
-        end if
-
+        ! cap the range to 8 bits [-128, 127] in order to prevent 8-bit under- / over-flows
         ! squeeze the value into 8 bits
-        quantize = int(tmp, kind=1)
-        return
+        quantize = int(clamp(tmp, -128, 127), kind=1)
     end function quantize
 
     elemental function dequantize(x, max_exp, bits)
