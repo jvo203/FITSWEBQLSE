@@ -544,7 +544,9 @@ static void *autodiscovery_daemon(void *ptr)
     if (speaker == NULL)
         return NULL;
 
+#ifdef DEBUG
     zstr_send(speaker, "VERBOSE");
+#endif
     zsock_send(speaker, "si", "CONFIGURE", options.zmq_port);
     char *my_hostname = zstr_recv(speaker);
 
@@ -564,7 +566,9 @@ static void *autodiscovery_daemon(void *ptr)
     if (listener == NULL)
         return NULL;
 
+#ifdef DEBUG
     zstr_send(listener, "VERBOSE");
+#endif
     zsock_send(listener, "si", "CONFIGURE", options.zmq_port);
     char *hostname = zstr_recv(listener);
     if (hostname != NULL)
