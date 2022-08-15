@@ -7475,14 +7475,32 @@ contains
 
     end subroutine ws_image_spectrum_request
 
-    subroutine resizeMask(src, srcWidth, srcHeight, dst, dstWidth, dstHeight)
+    subroutine resizeMask(src, srcW, srcH, dst, dstW, dstH)
         use, intrinsic :: ISO_C_BINDING
         implicit none
 
-        integer, intent(in) :: srcWidth, srcHeight
-        integer, intent(in) :: dstWidth, dstHeight
-        logical(kind=c_bool), intent(in) :: src(srcWidth, srcHeight)
-        logical(kind=c_bool), intent(out) :: dst(dstWidth, dstHeight)
+        integer, intent(in) :: srcW, srcH
+        integer, intent(in) :: dstW, dstH
+        logical(kind=c_bool), intent(in) :: src(srcW, srcH)
+        logical(kind=c_bool), intent(out) :: dst(dstW, dstH)
+
+        integer :: i, j
+        real :: xR, yR
+        integer :: srcX, srcY
+
+        if (dstW .le. 0) return
+        if (dstH .le. 0) return
+
+        xR = real(srcW)/real(dstW)
+        yR = real(srcH)/real(dstH)
+
+        do j = 1, dstH
+            do i = 1, dstW
+                srcX = max(1, floor(i*xR))
+                srcY = max(1, floor(j*yR))
+                dst(i, j) = src(srcX, srcY)
+            end do
+        end do
     end subroutine resizeMask
 
     function get_max_threads() result(max_threads)
