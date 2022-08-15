@@ -225,14 +225,18 @@ int main(int argc, char *argv[])
 #if !defined(__APPLE__) || !defined(__MACH__)
     options.fits_home = strdup(".cache");
     options.cache = strdup(".cache");
+    options.logs = strdup("LOGS");
 #else
     char cache[1024];
+
     snprintf(cache, sizeof(cache), "%s/.cache", passwdEnt->pw_dir);
     options.fits_home = strdup(cache);
     options.cache = strdup(cache);
+
+    strcat(cache, "/LOGS");
+    options.logs = strdup(cache);
 #endif
     options.threshold = 25; // [GiB]
-    options.logs = strdup("LOGS");
     options.home_dir = strdup(passwdEnt->pw_dir);
 
     options.user = strdup("jvo");
