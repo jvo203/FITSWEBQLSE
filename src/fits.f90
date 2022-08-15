@@ -7404,13 +7404,19 @@ contains
             allocate (view_pixels(img_width, img_height))
             allocate (view_mask(img_width, img_height))
 
+            !$omp parallel
+            !$omp task
             if (scale .gt. 0.2) then
                 call resizeLanczos(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height, 3)
             else
                 call resizeSuper(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height)
             end if
+            !$omp end task
 
+            !$omp task
             call resizeNearest(c_loc(mask), item%naxes(1), item%naxes(2), c_loc(view_mask), img_width, img_height)
+            !$omp end task
+            !$omp end parallel
         else
             img_width = item%naxes(1)
             img_height = item%naxes(2)
