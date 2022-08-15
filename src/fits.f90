@@ -5449,15 +5449,20 @@ contains
             s2 = real(height)/real(item%naxes(2))
             scale = 0.5*(s1 + s2)
 
+            !$omp parallel
+            !$omp task
             if (scale .gt. 0.2) then
                 call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
             else
                 call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height)
             end if
+            !$omp end task
 
+            !$omp task
             ! Boolean mask: the naive Nearest-Neighbour method
-
             call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), width, height)
+            !$omp end task
+            !$omp end parallel
 
             ! send pixels
             written = chunked_write(fd, c_loc(pixels), sizeof(pixels))
@@ -6325,6 +6330,8 @@ contains
                     allocate (view_pixels(req%width, req%height))
                     allocate (view_mask(req%width, req%height))
 
+                    !$omp parallel
+                    !$omp task
                     if (scale .gt. 0.2) then
                         call resizeLanczos(c_loc(pixels), dimx, dimy,&
                         & c_loc(view_pixels), req%width, req%height, 3)
@@ -6332,9 +6339,13 @@ contains
                         call resizeSuper(c_loc(pixels), dimx, dimy,&
                         & c_loc(view_pixels), req%width, req%height)
                     end if
+                    !$omp end task
 
+                    !$omp task
                     call resizeNearest(c_loc(mask), dimx, dimy,&
                     & c_loc(view_mask), req%width, req%height)
+                    !$omp end task
+                    !$omp end parallel
 
                     call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
                 else
