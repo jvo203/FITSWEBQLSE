@@ -7418,7 +7418,6 @@ contains
 
         ! combine the spectra from other cluster nodes (if any)
         if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
-        spectrum = spectrum + cluster_spectrum
         print *, "combined spectrum:", spectrum
 
         ! get the inner image bounding box (excluding NaNs)
