@@ -10,6 +10,9 @@ HOMEBREW_PREFIX := $(shell brew --prefix)
 # detect the OS
 UNAME_S := $(shell uname -s)
 
+# detect the CPU architecture (ARM64 or x86-64)
+UNAME_M := $(shell uname -m)
+
 # the macOS Darwin target is handled further down the line
 ifeq ($(UNAME_S),Linux)
 
@@ -83,7 +86,9 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 # src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/json_write.c src/m_mrgrnk.f90 src/mod_sort.f90 src/wavelet.f90 src/fixed_array.f90 src/fixed_array2.f90 src/zfp_array.f90 src/histogram.c src/classifier.f90 src/fits_omp.f90 src/net.f90 src/main.f90
 SRC = $(ZFP_SRC) src/webql.ispc src/cpu.c src/json.c src/ini.c src/mongoose.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/cluster.c src/http.c src/ws.c src/face.f90 src/logging.f90 src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/fits.f90 src/main.c
 
-ifeq ($(UNAME_S),Darwin)
+# macOS Accelerate vImage is actually rather slow
+#ifeq ($(UNAME_S),Darwin)
+ifeq ($(UNAME_M),arm64)
 	SRC += src/vimage.c
 else
 	SRC += src/ipp.c
@@ -113,7 +118,8 @@ ifneq ($(UNAME_S),Darwin)
 	INC += `pkg-config --cflags libcpuid`
 endif
 
-ifneq ($(UNAME_S),Darwin)
+#ifneq ($(UNAME_S),Darwin)
+ifneq ($(UNAME_M),arm64)
 	INC += -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include
 endif
 
@@ -156,9 +162,11 @@ ifeq ($(UNAME_S),Darwin)
 	# GCC FORTRAN runtime
 	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/12 -lgfortran -lm -framework Accelerate
 
-	# use the built-in macOS Accelerate instead
-	IPP =
-	MKL =
+	# use the built-in macOS Accelerate instead but only on Apple Silicon
+	ifeq ($(UNAME_M),arm64)
+		IPP =
+		MKL =
+	endif
 
 	# try Intel compilers for a change! ... linking problems ...
 	# CC = icc
