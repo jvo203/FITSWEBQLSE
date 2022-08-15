@@ -1156,7 +1156,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         }
 
         // init_video
-        if (strcmp(type, "init_video...") == 0)
+        if (strcmp(type, "init_video") == 0)
         {
             struct websocket_session *session = (struct websocket_session *)c->fn_data;
 
@@ -1311,7 +1311,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         }
 
         // end_video
-        if (strcmp(type, "end_video...") == 0)
+        if (strcmp(type, "end_video") == 0)
         {
             struct websocket_session *session = (struct websocket_session *)c->fn_data;
 
@@ -1353,7 +1353,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         }
 
         // encode and stream video
-        if (strcmp(type, "video...") == 0)
+        if (strcmp(type, "video") == 0)
         {
             struct websocket_session *session = (struct websocket_session *)c->fn_data;
 
