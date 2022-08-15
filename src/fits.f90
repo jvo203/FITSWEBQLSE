@@ -7509,9 +7509,11 @@ contains
 
         do j = 1, dstH
             do i = 1, dstW
+                ! do concurrent(j=1:dstH, i=1:dstW)
                 srcX = max(1, floor(i*xR))
                 srcY = max(1, floor(j*yR))
                 dst(i, j) = src(srcX, srcY)
+                ! end do
             end do
         end do
     end subroutine resizeMask
