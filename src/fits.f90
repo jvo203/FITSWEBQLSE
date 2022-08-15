@@ -5235,6 +5235,7 @@ contains
 
     subroutine image_spectrum_request(ptr, width, height, precision, fetch_data, fd) bind(C)
         use :: unix_pthread
+        use omp_lib
         use, intrinsic :: iso_c_binding
         implicit none
 
@@ -5263,7 +5264,7 @@ contains
         real scale
 
         ! timing
-        real :: t1, t2
+        real(8) :: t1, t2 ! OpenMP TIME
 
         if (.not. c_associated(ptr)) return
 
@@ -5317,18 +5318,24 @@ contains
 
             ! downscale item%pixels and item%mask into pixels, mask
 
-            call cpu_time(t1)
+            t1 = omp_get_wtime()
 
+            !$omp parallel
+            !$omp task
             if (scale .gt. 0.2) then
                 call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
             else
                 call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
             end if
+            !$omp end task
 
+            !$omp task
             ! Boolean mask: the naive Nearest-Neighbour method
             call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
+            !$omp end task
+            !$omp end parallel
 
-            call cpu_time(t2)
+            t2 = omp_get_wtime()
 
             print *, 'resize pixels/mask elapsed time:', 1000*(t2 - t1), '[ms]'
 
