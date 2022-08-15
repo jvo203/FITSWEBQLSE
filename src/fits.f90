@@ -5331,7 +5331,8 @@ contains
 
             !$omp task
             ! Boolean mask: the naive Nearest-Neighbour method
-            call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
+            ! call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
+            call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, img_width, img_height)
             !$omp end task
             !$omp end parallel
 
