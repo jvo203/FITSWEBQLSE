@@ -1620,8 +1620,10 @@ void start_ws()
     struct mg_mgr mgr; // Event manager
 
     mg_mgr_init(&mgr); // Initialise event manager
-    // mg_log_set("3");
+// mg_log_set("3");
+#ifdef DEBUG
     printf("Starting WS listener on %s\n", url);
+#endif
 
     channel = mg_mkpipe(&mgr, mg_pipe_callback, NULL, false); // Create pipe
     mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);     // Create HTTP listener
