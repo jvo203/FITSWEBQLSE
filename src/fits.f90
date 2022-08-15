@@ -2132,7 +2132,8 @@ contains
         integer, allocatable :: indices(:)
 
         ! OpenMP
-        integer :: max_threads, counter
+        integer :: max_threads
+        integer(c_int) :: counter
         logical thread_bSuccess
 
         integer(kind=4) :: n, m ! input dimensions
@@ -2775,7 +2776,8 @@ contains
         type(C_PTR), intent(in), value :: ptr, root
 
         type(dataset), pointer :: item
-        integer :: i, counter
+        integer :: i
+        integer(c_int) :: counter
 
         if (.not. c_associated(ptr)) return
         call c_f_pointer(ptr, item)
@@ -2803,7 +2805,7 @@ contains
 
     subroutine submit_progress_counter(item, counter, root)
         type(dataset), pointer, intent(in) :: item
-        integer, intent(inout) :: counter
+        integer(c_int), intent(inout) :: counter
         type(C_PTR), intent(in), value :: root
 
         integer :: repeat
