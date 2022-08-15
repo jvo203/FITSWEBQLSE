@@ -5461,7 +5461,8 @@ contains
 
             !$omp task
             ! Boolean mask: the naive Nearest-Neighbour method
-            call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), width, height)
+            ! call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), width, height)
+            call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, width, height)
             !$omp end task
             !$omp end parallel
 
@@ -6343,8 +6344,10 @@ contains
                     !$omp end task
 
                     !$omp task
-                    call resizeNearest(c_loc(mask), dimx, dimy,&
-                    & c_loc(view_mask), req%width, req%height)
+                    ! call resizeNearest(c_loc(mask), dimx, dimy,&
+                    ! & c_loc(view_mask), req%width, req%height)
+                    call resizeMask(mask, dimx, dimy,&
+                    & view_mask, req%width, req%height)
                     !$omp end task
                     !$omp end parallel
 
@@ -6444,8 +6447,10 @@ contains
             !$omp end task
 
             !$omp task
-            call resizeNearest(c_loc(mask), dimx, dimy,&
-            & c_loc(view_mask), req%width, req%height)
+            ! call resizeNearest(c_loc(mask), dimx, dimy,&
+            ! & c_loc(view_mask), req%width, req%height)
+            call resizeMask(mask, dimx, dimy,&
+            & view_mask, req%width, req%height)
             !$omp end task
             !$omp end parallel
 
@@ -7121,11 +7126,17 @@ contains
             end if
 
             ! downsize {pixels, mask} into {dst_pixels, dst_mask}
+            !$omp parallel
+            !$omp task
             call resizeNearest(c_loc(pixels), width, height,&
             & c_loc(dst_pixels), dst_width, dst_height)
+            !$omp end task
 
+            !$omp task
             call resizeNearest(c_loc(mask), width, height,&
             & c_loc(dst_mask), dst_width, dst_height)
+            !$omp end task
+            !$omp end parallel
         else
             ! call SIMD on {dst_pixels, dst_mask}
             print *, "making a video frame with flux '", tone%flux, "'"
@@ -7415,7 +7426,8 @@ contains
             !$omp end task
 
             !$omp task
-            call resizeNearest(c_loc(mask), item%naxes(1), item%naxes(2), c_loc(view_mask), img_width, img_height)
+            ! call resizeNearest(c_loc(mask), item%naxes(1), item%naxes(2), c_loc(view_mask), img_width, img_height)
+            call resizeMask(mask, item%naxes(1), item%naxes(2), view_mask, img_width, img_height)
             !$omp end task
             !$omp end parallel
         else
