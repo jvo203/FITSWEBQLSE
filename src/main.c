@@ -311,6 +311,11 @@ int main(int argc, char *argv[])
 
         g_string_append(log_file, "/fortran.log");
 
+        FILE *fp;
+        fp = fopen(log_file->str, "w");
+        if (fp != NULL)
+            fclose(fp);
+
         init_fortran_logging(log_file->str, log_file->len);
 
         g_string_free(log_file, TRUE);
