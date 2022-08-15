@@ -980,6 +980,7 @@ contains
         character(kind=c_char), dimension(len), intent(in) :: log_file
 
         character(len=len) :: filename
+        logical :: file_exists
         integer :: i
 
         do i = 1, int(len, kind=4)
@@ -988,8 +989,16 @@ contains
 
         print *, "FORTRAN LOG FILE: ", filename
 
+        INQUIRE (FILE=filename, EXIST=file_exists)
+
         ! Initialise the logger prior to use
-        call logger_init(filename)
+        if (file_exists) then
+            call logger_init(filename)
+        else
+            ! redirect logging to /dev/null
+            print *, filename, " does not exist. Redirecting logging to '/dev/null'."
+            call logger_init('/dev/null')
+        end if
 
     end subroutine init_fortran_logging
 
