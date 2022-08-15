@@ -555,7 +555,9 @@ static void *autodiscovery_daemon(void *ptr)
         zsock_send(speaker, "sbi", "PUBLISH", message, strlen(message), interval);
 
         options.root = strdup(my_hostname);
+#ifdef DEBUG
         printf("<options.root>: %s\n", options.root);
+#endif
     }
 
     listener = zactor_new(zbeacon, NULL);
