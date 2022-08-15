@@ -305,6 +305,8 @@ int main(int argc, char *argv[])
     {
         init_fortran();
 
+        mkcache(options.logs);
+
         GString *log_file = g_string_new(options.logs);
 
         g_string_append(log_file, "/fortran.log");
