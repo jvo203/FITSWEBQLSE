@@ -3098,7 +3098,8 @@ contains
         integer npixels, cn, cm
         integer naxes(4)
         integer(kind=8) firstpix, lastpix
-        integer max_threads, tid, start, end, num_per_node, frame
+        integer max_threads, tid, frame
+        integer(c_int) :: start, end, num_per_node
         integer, dimension(4) :: fpixels, lpixels, incs
         logical test_ignrval
 
