@@ -39,6 +39,7 @@ int get_physical_cores()
         mib[0] = CTL_HW;
         mib[1] = HW_NCPU;
         sysctl(mib, 2, &numCPU, &len, NULL, 0);
+
         if (numCPU < 1)
             numCPU = 1;
     }
