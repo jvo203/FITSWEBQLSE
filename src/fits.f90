@@ -5128,7 +5128,7 @@ contains
       implicit none
 
       type(dataset), pointer, intent(in) :: item
-      integer, target, intent(in) :: hist(:)
+      integer, allocatable, target, intent(in) :: hist(:)
       type(C_PTR) :: json
       integer(kind=8) :: filesize
 
@@ -5188,7 +5188,9 @@ contains
       call add_json_string(json, 'LINE'//c_null_char, trim(item%line)//c_null_char)
       call add_json_string(json, 'FILTER'//c_null_char, trim(item%filter)//c_null_char)
 
-      call add_json_integer_array(json, 'histogram'//c_null_char, c_loc(hist), size(hist))
+      if(allocated(hist)) then
+         call add_json_integer_array(json, 'histogram'//c_null_char, c_loc(hist), size(hist))
+      end if
 
       call end_json(json)
 
@@ -5304,6 +5306,8 @@ contains
             start_routine=c_funloc(fetch_inner_dimensions), &
             arg=c_loc(inner_dims))
       end if
+
+      item%mask = .false.
 
       ! get the inner image bounding box (excluding NaNs)
       call inherent_image_dimensions(item, inner_width, inner_height)
