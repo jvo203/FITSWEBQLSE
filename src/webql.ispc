@@ -1164,7 +1164,7 @@ export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compresse
     
 }
 
-export void resizeNearestSIMD(uniform unsigned int8 src[], uniform int srcWidth, uniform int srcHeight, uniform unsigned int8 dst[], uniform int dstWidth, uniform int dstHeight)
+export void resizeNearest(uniform unsigned int8 src[], uniform int srcWidth, uniform int srcHeight, uniform unsigned int8 dst[], uniform int dstWidth, uniform int dstHeight)
 {
   foreach (i = 0 ... dstHeight, j = 0 ... dstWidth) {
     // loop body--process data element (j,i)

@@ -55,7 +55,7 @@ extern void resizeSuper(float *restrict pSrc, int srcWidth, int srcHeight, float
     res = vImageScale_Planar8(&src, &dst, NULL, kvImageNoFlags);
 }*/
 
-extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHeight, unsigned char *restrict pDest, int dstWidth, int dstHeight)
+/*extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHeight, unsigned char *restrict pDest, int dstWidth, int dstHeight)
 {
     int num_threads, max_threads;
 
@@ -87,4 +87,4 @@ extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHei
             pDest[offset_dst + j] = pSrc[offset_src + x2];
         }
     }
-}
+}*/
