@@ -72,7 +72,7 @@ extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHei
     for (int i = 0; i < dstHeight; i++)
     {
         const int idx = i * y_ratio;
-        const int y2 = (idx >> 16);
+        const int y2 = idx >> 16;
         const size_t offset_src = y2 * srcWidth;
 
         int jdx = 0;
@@ -81,7 +81,7 @@ extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHei
 #pragma GCC ivdep
         for (int j = 0; j < dstWidth; j++)
         {
-            int x2 = (jdx >> 16);
+            int x2 = jdx >> 16;
             jdx += x_ratio;
 
             pDest[offset_dst + j] = pSrc[offset_src + x2];
