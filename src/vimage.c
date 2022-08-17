@@ -5,7 +5,7 @@
 
 // entry functions from Fortran
 
-extern void resizeLanczos(float *pSrc, int srcWidth, int srcHeight, float *pDest, int dstWidth, int dstHeight, int numLobes)
+extern void resizeLanczos(float *restrict pSrc, int srcWidth, int srcHeight, float *restrict pDest, int dstWidth, int dstHeight, int numLobes)
 {
     struct vImage_Buffer src, dst;
     vImage_Flags flags;
@@ -29,13 +29,13 @@ extern void resizeLanczos(float *pSrc, int srcWidth, int srcHeight, float *pDest
     res = vImageScale_PlanarF(&src, &dst, NULL, kvImageNoFlags);
 }
 
-extern void resizeSuper(float *pSrc, int srcWidth, int srcHeight, float *pDest, int dstWidth, int dstHeight)
+extern void resizeSuper(float *restrict pSrc, int srcWidth, int srcHeight, float *restrict pDest, int dstWidth, int dstHeight)
 {
     // for now pass all calls to a high-quality Lanczos scaling function
     resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, 5);
 }
 
-extern void resizeNearest(unsigned char *pSrc, int srcWidth, int srcHeight, unsigned char *pDest, int dstWidth, int dstHeight)
+extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHeight, unsigned char *restrict pDest, int dstWidth, int dstHeight)
 {
     struct vImage_Buffer src, dst;
     vImage_Error res;
