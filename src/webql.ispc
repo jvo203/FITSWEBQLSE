@@ -1166,7 +1166,17 @@ export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compresse
 
 export void resizeNearest(uniform unsigned int8 src[], uniform int srcWidth, uniform int srcHeight, uniform unsigned int8 dst[], uniform int dstWidth, uniform int dstHeight)
 {
-  foreach (i = 0 ... dstHeight, j = 0 ... dstWidth) {
-    // loop body--process data element (j,i)
+  const uniform int x_ratio = (int)((srcWidth << 16) / dstWidth) + 1;
+  const uniform int y_ratio = (int)((srcHeight << 16) / dstHeight) + 1;
+
+  foreach (i = 0 ... dstHeight, j = 0 ... dstWidth)
+  {
+    // loop body--process data element (j,i)    
+    varying int x2 = (j * x_ratio)  >> 16;
+    varying int y2 = (i * y_ratio) >> 16;
+
+    // const unsigned int offset_src = y2 * srcWidth;
+    // const unsigned int offset_dst = i * dstWidth;
+    dst[i * dstWidth + j] = src[y2 * srcWidth + x2];
   }
 }
