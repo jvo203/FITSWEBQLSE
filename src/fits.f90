@@ -3155,9 +3155,8 @@ contains
 
       ! print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
 
-      num_threads = OMP_GET_MAX_THREADS()
-
-      print *, "OpenMP max #threads: ", num_threads
+      ! num_threads = OMP_GET_MAX_THREADS()
+      ! print *, "OpenMP max #threads: ", num_threads
 
       naxis = 0
       naxes = (/0, 0, 0, 0/)
@@ -3578,15 +3577,30 @@ contains
             return
          end if
 
-         ! read a 2D image on the root node only
-         firstpix = 1
-         lastpix = npixels
-
          ! local buffers
          allocate (local_buffer(npixels))
          allocate (local_mask(npixels))
 
-         call ftgpve(unit, group, firstpix, npixels, nullval, local_buffer, anynull, status)
+         ! read a 2D image on the root node only
+         ! firstpix = 1
+         ! lastpix = npixels
+         ! call ftgpve(unit, group, firstpix, npixels, nullval, local_buffer, anynull, status)
+
+         ! use a code capable of supporting very large 2D images
+
+         ! starting bounds
+         fpixels = (/1, 1, 1, 1/)
+
+         ! ending bounds
+         lpixels = (/naxes(1), naxes(2), 1, 1/)
+
+         ! do not skip over any pixels
+         incs = 1
+
+         ! reset the status
+         status = 0
+
+         call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, local_buffer, anynull, status)
 
          ! abort upon an error
          if (status .ne. 0) go to 200
