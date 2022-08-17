@@ -3,7 +3,7 @@
 ![Alt text](IVOA.jpg?raw=true "JVO Breaking Through the 1TB Barrier")
 
 # FITSWEBQLSE STATUS
-The first _stable_ **BETA** milestone has been reached. It works fine on Apple Silicon. The attention has turned towards debugging and adding support for extra higher moments.
+The first _stable_ **BETA** milestone has been reached. It works fine on **Apple Silicon**. The attention has turned towards debugging and adding support for extra higher moments.
 
 ## PROJECT LAZARUS (a.k.a. FORTRAN RESURRECTED) (January 2022 ~)
 A resurrection of the previous Fortran code, this time without CoArrays but with manual HTTP-based distributed computing. Julia has been found to suffer from serious RAM fragmentation and/or automatic garbage collection issues after running for "long-enough" in a 24h server environment.
