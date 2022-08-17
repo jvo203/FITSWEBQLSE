@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-08-10.0";
+	return "JS2022-08-18.0";
 }
 
 function uuidv4() {
@@ -1596,7 +1596,12 @@ function webgl_image_renderer(index, gl, width, height) {
 
 	// setup GLSL program
 	var vertexShaderCode = document.getElementById("vertex-shader").text;
-	var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById(image.tone_mapping.flux + "-shader").text;
+	try {
+		var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById(image.tone_mapping.flux + "-shader").text;
+	} catch (_) {
+		// this will be triggered only for datasets where the tone mapping has not been set (i.e. the mask is null etc...)
+		var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById("legacy-shader").text;
+	}
 
 	if (webgl2)
 		fragmentShaderCode = fragmentShaderCode + "\ncolour.a = colour.g;\n";
@@ -6495,6 +6500,11 @@ function update_contours() {
 function redraw_histogram(index) {
 	let fitsData = fitsContainer[index - 1];
 	var histogram = fitsData.histogram;
+
+	if (histogram === undefined) {
+		console.log("an undefined histogram was found");
+		return;
+	}
 
 	var c = document.getElementById("HistogramCanvas" + index);
 	var ctx = c.getContext("2d");
