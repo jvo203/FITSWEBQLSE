@@ -29,7 +29,7 @@ int get_physical_cores()
     // sysctl -n hw.perflevel0.physicalcpu
     // 16
 
-    // get the number of Apple Silicon performance cores
+    // get the number of Apple Silicon Performance Cores, ignoring the Efficiency Cores
     if (sysctlbyname("hw.perflevel0.physicalcpu", &numCPU, &len, NULL, 0) == -1)
         perror("sysctlbyname");
 
