@@ -3155,9 +3155,6 @@ contains
 
       ! print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
 
-      ! num_threads = OMP_GET_MAX_THREADS()
-      ! print *, "OpenMP max #threads: ", num_threads
-
       naxis = 0
       naxes = (/0, 0, 0, 0/)
       bSuccess = .false.
