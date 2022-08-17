@@ -35,7 +35,7 @@ extern void resizeSuper(float *restrict pSrc, int srcWidth, int srcHeight, float
     resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, 5);
 }
 
-extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHeight, unsigned char *restrict pDest, int dstWidth, int dstHeight)
+/*extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHeight, unsigned char *restrict pDest, int dstWidth, int dstHeight)
 {
     struct vImage_Buffer src, dst;
     vImage_Error res;
@@ -52,4 +52,21 @@ extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHei
 
     // WARNING: for now Lanczos is used instead of the Nearest Neighbour !!!
     res = vImageScale_Planar8(&src, &dst, NULL, kvImageNoFlags);
+}*/
+
+extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHeight, unsigned char *restrict pDest, int dstWidth, int dstHeight)
+{
+    int x_ratio = (int)((srcWidth << 16) / dstWidth) + 1;
+    int y_ratio = (int)((srcHeight << 16) / dstHeight) + 1;
+
+    for (int i = 0; i < dstHeight; i++)
+    {
+        for (int j = 0; j < dstWidth; j++)
+        {
+            int x2 = ((j * x_ratio) >> 16);
+            int y2 = ((i * y_ratio) >> 16);
+
+            pDest[(i * dstWidth) + j] = pSrc[(y2 * srcWidth) + x2];
+        }
+    }
 }
