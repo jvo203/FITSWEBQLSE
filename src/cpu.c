@@ -43,7 +43,7 @@ int get_physical_cores()
             numCPU = 1;
     }
 
-    printf("[C] No. of Performance Core(s) : %d\n", numCPU);
+    // printf("[C] No. of Performance Core(s) : %d\n", numCPU);
 
     return numCPU;
 }
