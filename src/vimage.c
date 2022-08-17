@@ -27,7 +27,7 @@ extern void resizeLanczos(float *restrict pSrc, int srcWidth, int srcHeight, flo
     else
         flags = kvImageNoFlags;
 
-    res = vImageScale_PlanarF(&src, &dst, NULL, kvImageNoFlags);
+    res = vImageScale_PlanarF(&src, &dst, NULL, flags);
 }
 
 extern void resizeSuper(float *restrict pSrc, int srcWidth, int srcHeight, float *restrict pDest, int dstWidth, int dstHeight)
