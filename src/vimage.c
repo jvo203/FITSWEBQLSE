@@ -59,8 +59,8 @@ extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHei
 {
     int num_threads, max_threads;
 
-    int x_ratio = (int)((srcWidth << 16) / dstWidth) + 1;
-    int y_ratio = (int)((srcHeight << 16) / dstHeight) + 1;
+    const int x_ratio = (int)((srcWidth << 16) / dstWidth) + 1;
+    const int y_ratio = (int)((srcHeight << 16) / dstHeight) + 1;
 
     max_threads = get_physical_cores();
 
@@ -71,9 +71,9 @@ extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHei
 #pragma omp parallel for shared(x_ratio, y_ratio) num_threads(num_threads)
     for (int i = 0; i < dstHeight; i++)
     {
-        int idx = i * y_ratio;
+        const int idx = i * y_ratio;
         int jdx = 0;
-        size_t offset_i = i * dstWidth;
+        const size_t offset_i = i * dstWidth;
 
 #pragma GCC ivdep
         for (int j = 0; j < dstWidth; j++)
