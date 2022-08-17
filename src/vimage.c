@@ -4,6 +4,7 @@
 #include <Accelerate/Accelerate.h>
 
 extern int get_physical_cores();
+extern void resizeNearestSIMD(unsigned char *restrict pSrc, int srcWidth, int srcHeight, unsigned char *restrict pDest, int dstWidth, int dstHeight);
 
 // entry functions from Fortran
 extern void resizeLanczos(float *restrict pSrc, int srcWidth, int srcHeight, float *restrict pDest, int dstWidth, int dstHeight, int numLobes)
@@ -88,3 +89,8 @@ extern void resizeSuper(float *restrict pSrc, int srcWidth, int srcHeight, float
         }
     }
 }*/
+
+extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHeight, unsigned char *restrict pDest, int dstWidth, int dstHeight)
+{
+    resizeNearestSIMD(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight);
+}

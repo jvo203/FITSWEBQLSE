@@ -1164,7 +1164,7 @@ export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compresse
     
 }
 
-export void resizeNearest(uniform unsigned int8 src[], uniform int srcWidth, uniform int srcHeight, uniform unsigned int8 dst[], uniform int dstWidth, uniform int dstHeight)
+export void resizeNearestSIMD(uniform unsigned int8 src[], uniform int srcWidth, uniform int srcHeight, uniform unsigned int8 dst[], uniform int dstWidth, uniform int dstHeight)
 {
   const uniform int x_ratio = (int)((srcWidth << 16) / dstWidth) + 1;
   const uniform int y_ratio = (int)((srcHeight << 16) / dstHeight) + 1;
