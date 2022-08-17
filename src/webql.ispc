@@ -1173,9 +1173,6 @@ export void resizeNearest(uniform unsigned int8 src[], uniform int srcWidth, uni
   {    
     varying int x2 = (j * x_ratio)  >> 16;
     varying int y2 = (i * y_ratio) >> 16;
-
-    varying int64 offset_src = y2 * srcWidth;
-    varying int64 offset_dst = i * dstWidth;
-    dst[offset_dst + j] = src[offset_src + x2];    
+    dst[(int64)(i * dstWidth) + j] = src[(int64)(y2 * srcWidth) + x2];
   }
 }
