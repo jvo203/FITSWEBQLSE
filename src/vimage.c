@@ -3,8 +3,9 @@
 
 #include <Accelerate/Accelerate.h>
 
-// entry functions from Fortran
+extern int get_physical_cores();
 
+// entry functions from Fortran
 extern void resizeLanczos(float *restrict pSrc, int srcWidth, int srcHeight, float *restrict pDest, int dstWidth, int dstHeight, int numLobes)
 {
     struct vImage_Buffer src, dst;
@@ -56,9 +57,18 @@ extern void resizeSuper(float *restrict pSrc, int srcWidth, int srcHeight, float
 
 extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHeight, unsigned char *restrict pDest, int dstWidth, int dstHeight)
 {
+    int num_threads, max_threads;
+
     int x_ratio = (int)((srcWidth << 16) / dstWidth) + 1;
     int y_ratio = (int)((srcHeight << 16) / dstHeight) + 1;
 
+    max_threads = get_physical_cores();
+
+    // restrict the number of threads
+    // take into account the fact that there are other parallel 'resizeNearest' calls
+    num_threads = (max_threads >= 4) ? 2 : 1;
+
+#pragma omp parallel for shared(x_ratio, y_ratio) num_threads(num_threads)
     for (int i = 0; i < dstHeight; i++)
     {
         int idx = i * y_ratio;
