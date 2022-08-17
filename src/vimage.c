@@ -75,7 +75,8 @@ extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHei
         int jdx = 0;
         size_t offset_i = i * dstWidth;
 
-#pragma GCC ivdep
+// #pragma GCC ivdep
+#pragma simd
         for (int j = 0; j < dstWidth; j++)
         {
             int x2 = (jdx >> 16);
