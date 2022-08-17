@@ -3579,10 +3579,6 @@ contains
          allocate (local_mask(npixels))
 
          ! read a 2D image on the root node only
-         ! firstpix = 1
-         ! lastpix = npixels
-         ! call ftgpve(unit, group, firstpix, npixels, nullval, local_buffer, anynull, status)
-
          ! use a code capable of supporting very large 2D images
 
          ! starting bounds
