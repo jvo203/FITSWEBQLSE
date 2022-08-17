@@ -204,7 +204,7 @@ endif
 -include $(DEP)
 
 %.o: %.ispc
-	ispc -g -O3 --pic --opt=fast-math --addressing=32 -o $@ $<
+	ispc -g -O3 --pic --opt=fast-math --addressing=64 -o $@ $<
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
