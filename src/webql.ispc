@@ -622,8 +622,8 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
         // block coordinate offset (the same for each point in the block)
         uniform int src_x = i * DIM;
         uniform int src_y = j * DIM;
-
-        // TO-DO: fixed-point decompression (the moment of truth)      
+        
+        // fixed-point decompression
         foreach(k=0 ... BLOCK_SIZE)
         {          
           // find out which FORTRAN column the value is located
