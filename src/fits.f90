@@ -5307,8 +5307,6 @@ contains
             arg=c_loc(inner_dims))
       end if
 
-      item%mask = .false.
-
       ! get the inner image bounding box (excluding NaNs)
       call inherent_image_dimensions(item, inner_width, inner_height)
 
