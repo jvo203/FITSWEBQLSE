@@ -1170,8 +1170,7 @@ export void resizeNearest(uniform unsigned int8 src[], uniform int srcWidth, uni
   const uniform int y_ratio = (int)((srcHeight << 16) / dstHeight) + 1;
 
   foreach (i = 0 ... dstHeight, j = 0 ... dstWidth)
-  {
-    // loop body--process data element (j,i)    
+  {    
     varying int x2 = (j * x_ratio)  >> 16;
     varying int y2 = (i * y_ratio) >> 16;
 
