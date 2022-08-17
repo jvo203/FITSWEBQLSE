@@ -3641,39 +3641,32 @@ contains
             ! open the thread-local FITS file if necessary
             do i = 1, max_threads
                if (thread_units(i) .eq. -1) then
-                  block
-                     ! file operations
-                     integer unit, readwrite, blocksize, status
+                  ! The STATUS parameter must always be initialized.
+                  status = 0
 
-                     ! The STATUS parameter must always be initialized.
-                     status = 0
+                  rc = c_pthread_mutex_lock(file_unit_mtx)
 
-                     rc = c_pthread_mutex_lock(file_unit_mtx)
+                  ! Get an unused Logical Unit Number to use to open the FITS file.
+                  call ftgiou(unit, status)
 
-                     ! Get an unused Logical Unit Number to use to open the FITS file.
-                     call ftgiou(unit, status)
-
-                     if (status .ne. 0) then
-                        rc = c_pthread_mutex_unlock(file_unit_mtx)
-                        cycle
-                     end if
-
-                     ! open the FITS file, with read - only access.The returned BLOCKSIZE
-                     ! parameter is obsolete and should be ignored.
-                     readwrite = 0
-                     call ftopen(unit, filename, readwrite, blocksize, status)
-
+                  if (status .ne. 0) then
                      rc = c_pthread_mutex_unlock(file_unit_mtx)
+                     cycle
+                  end if
 
-                     if (status .ne. 0) then
-                        print *, 'thread ', i, ': error opening '//filename
-                        cycle
-                     end if
+                  ! open the FITS file, with read - only access.The returned BLOCKSIZE
+                  ! parameter is obsolete and should be ignored.
+                  readwrite = 0
+                  call ftopen(unit, filename, readwrite, blocksize, status)
 
-                     thread_units(i) = unit
+                  rc = c_pthread_mutex_unlock(file_unit_mtx)
 
-                  end block
+                  if (status .ne. 0) then
+                     print *, 'thread ', i, ': error opening '//filename
+                     cycle
+                  end if
 
+                  thread_units(i) = unit
                end if
             end do
          end if
