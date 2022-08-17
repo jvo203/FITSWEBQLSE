@@ -61,12 +61,14 @@ extern void resizeNearest(unsigned char *restrict pSrc, int srcWidth, int srcHei
 
     for (int i = 0; i < dstHeight; i++)
     {
-        size_t offset_i = i * dstWidth;
         int idx = i * y_ratio;
+        int jdx = 0;
+        size_t offset_i = i * dstWidth;
 
         for (int j = 0; j < dstWidth; j++)
         {
-            int x2 = ((j * x_ratio) >> 16);
+            int x2 = (jdx >> 16);
+            jdx += x_ratio;
             int y2 = (idx >> 16);
 
             pDest[offset_i + j] = pSrc[(y2 * srcWidth) + x2];
