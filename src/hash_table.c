@@ -13,6 +13,7 @@ pthread_mutex_t datasets_mtx;
 #include "http.h"
 extern options_t options;                                       // <options> is defined in main.c
 extern size_t chunked_write(int fd, const char *src, size_t n); // defined in http.c
+extern size_t chunked_read(int fd, const char *dst, size_t n);  // defined in http.c
 
 // define a 128KB CHUNK_SIZE
 #define CHUNK_SIZE 131072
@@ -220,9 +221,14 @@ int read_frame(int fd, void *dst, int pos, size_t frame_size)
         return 0;
 }
 
-int chunked_read_frame(int fd, void *dst, int pos, size_t frame_size)
+int chunked_read_frame(int fd, void *dst, size_t frame_size)
 {
-    return -1;
+    size_t bytes_read = chunked_read(fd, dst, frame_size);
+
+    if (bytes_read != frame_size)
+        return -1; // signal an error
+    else
+        return 0;
 }
 
 int write_frame(int fd, void *src, size_t frame_size)
@@ -260,7 +266,7 @@ int read_array(const char *file, void *dst, size_t frame_size)
         printf("[C] Switching to a chunked read mode for '%s'.\n", file);
 
         // read the data in a chunked mode
-        stat = chunked_read_frame(fd, dst, 0, frame_size);
+        stat = chunked_read_frame(fd, dst, frame_size);
     }
 
     close(fd);
