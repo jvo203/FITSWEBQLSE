@@ -6850,8 +6850,8 @@ contains
       integer(kind=1), intent(out), target :: dst_mask(dst_width, dst_height)
 
       integer(kind=1), allocatable, target :: pixels(:, :), mask(:, :)
-      integer(c_int) :: width, height, cm
-      integer :: max_threads
+      integer(c_int) :: width, height, cm, start, work_size
+      integer :: max_threads, num_threads, tid
 
       real(kind=c_float) :: lmin, lmax
 
@@ -6873,6 +6873,10 @@ contains
 
          ! but the input dimensions might not be divisible by <DIM>
          if (mod(height, DIM) .ne. 0) cm = cm + 1
+
+         num_threads = max_threads
+
+         print *, "max_threads:", max_threads, "cm:", cm
 
          ! call SIMD on {pixels, mask}
          print *, "making a video frame with flux '", tone%flux, "' and downsizing"
@@ -6904,6 +6908,21 @@ contains
          if (tone%flux .eq. "legacy") then
             lmin = log(0.5)
             lmax = log(1.5)
+
+            do tid=1, num_threads
+               work_size = ceiling(real(cm) / num_threads)
+               start = (tid -1)*work_size ! C-style array 0-start
+
+               ! handle the last thread
+               if (tid .eq. num_threads) work_size = max(cm - start, 0)
+
+               print *, "calling make_video_frame_legacy, tid:", tid, "start:", start, "work_size:", work_size
+
+               if(work_size .gt. 0) then
+                  call make_video_frame_legacy_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax, start, work_size)
+               end if
+            end do
 
             print *, "calling make_video_frame_fixed_legacy"
             call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
