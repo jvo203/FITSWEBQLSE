@@ -3258,7 +3258,7 @@ size_t chunked_read(int fd, char *dst, size_t n)
             offset += nread;
         }
 
-        // the connection might have been closed, bail out
+        // bail out upon errors
         if (nread < 0)
         {
             printf("[C] read returned %ld, aborting.\n", nread);
@@ -3290,7 +3290,7 @@ size_t chunked_write(int fd, const char *src, size_t n)
             offset += written;
         }
 
-        // the connection might have been closed, bail out
+        // bail out upon errors
         if (written < 0)
         {
             printf("[C] write returned %ld, aborting.\n", written);
