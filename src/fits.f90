@@ -6963,9 +6963,26 @@ contains
          end if
 
          if (tone%flux .eq. "logistic") then
-            print *, "calling make_video_frame_fixed_logistic"
-            call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
-            &c_loc(pixels), c_loc(mask), width, tone%dmedian, tone%sensitivity)
+            print *, "calling make_video_frame_fixed_logistic_threaded"
+
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
+            !$omp& PRIVATE(tid, work_size, start)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
+            do tid=1, num_threads
+               work_size = ceiling(real(cm) / num_threads)
+               start = (tid -1)*work_size ! C-style array 0-start
+
+               ! handle the last thread
+               if (tid .eq. num_threads) work_size = cm - start
+
+               if(work_size .gt. 0) then
+                  call make_video_frame_fixed_logistic_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  &c_loc(pixels), c_loc(mask), width, tone%dmedian, tone%sensitivity, start, work_size)
+               end if
+            end do
+            !$omp END DO
+            !$omp END PARALLEL
          end if
 
          if (tone%flux .eq. "ratio") then
