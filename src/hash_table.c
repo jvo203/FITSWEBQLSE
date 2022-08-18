@@ -263,6 +263,8 @@ int write_array(const char *file, void *src, size_t frame_size)
     // switch to a chunked mode upon failure
     if (stat != 0)
     {
+        printf("[C] Switching to a chunked mode for '%s'.\n", file);
+
         // reposition the file offset to the beginning
         lseek(fd, 0, SEEK_SET);
 
