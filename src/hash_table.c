@@ -11,12 +11,10 @@ static GHashTable *datasets;
 pthread_mutex_t datasets_mtx;
 
 #include "http.h"
-extern options_t options;                                       // <options> is defined in main.c
-extern size_t chunked_write(int fd, const char *src, size_t n); // defined in http.c
-extern size_t chunked_read(int fd, const char *dst, size_t n);  // defined in http.c
+extern options_t options; // <options> is defined in main.c
 
-// define a 128KB CHUNK_SIZE
-#define CHUNK_SIZE 131072
+extern size_t chunked_read(int fd, const char *dst, size_t n);  // defined in http.c
+extern size_t chunked_write(int fd, const char *src, size_t n); // defined in http.c
 
 void init_hash_table()
 {
