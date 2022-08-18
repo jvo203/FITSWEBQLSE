@@ -1117,7 +1117,7 @@ export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compresse
   if (height % DIM != 0)
     cm = cm + 1;
 
-    // go through the entire plane
+  // go through the entire plane
   for(uniform int j=0; j<cm; j++)
     for(uniform int i=0; i <cn; i++)
     { 
@@ -1172,7 +1172,7 @@ export void make_video_frame_fixed_legacy_threaded(uniform struct fixed_block_t 
   if (width % DIM != 0)
     cn = cn + 1;
 
-    // go through the entire plane
+  // go through the entire plane
   for(uniform int j=start; j<start+work_size; j++)
     for(uniform int i=0; i <cn; i++)
     { 
