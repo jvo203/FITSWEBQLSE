@@ -3136,7 +3136,6 @@ contains
 
       ! OpenMP multi-threading
       integer, dimension(:), allocatable :: thread_units
-      integer :: num_threads
 
       integer :: rc
 
