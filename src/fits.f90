@@ -6850,7 +6850,8 @@ contains
       integer(kind=1), intent(out), target :: dst_mask(dst_width, dst_height)
 
       integer(kind=1), allocatable, target :: pixels(:, :), mask(:, :)
-      integer :: width, height
+      integer(c_int) :: width, height, cm
+      integer :: max_threads
 
       real(kind=c_float) :: lmin, lmax
 
@@ -6864,6 +6865,14 @@ contains
       if (downsize) then
          allocate (pixels(width, height))
          allocate (mask(width, height))
+
+         max_threads = get_max_threads()
+
+         ! by default compressed is dimension(n/DIM, m/DIM)
+         cm = height/DIM
+
+         ! but the input dimensions might not be divisible by <DIM>
+         if (mod(height, DIM) .ne. 0) cm = cm + 1
 
          ! call SIMD on {pixels, mask}
          print *, "making a video frame with flux '", tone%flux, "' and downsizing"
