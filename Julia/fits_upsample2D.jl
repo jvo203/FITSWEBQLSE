@@ -3,11 +3,8 @@ using ImageTransformations
 
 println(libcfitsio_version())
 
-# src = homedir() * "/Downloads/ALMA00000006.fits"
-# dst = homedir() * "/upsampled.fits"
-
-src = "/Volumes/OWC/fits_web_ql/FITSCACHE/ALMA01567567.fits"
-dst = "/Volumes/OWC/I_AM_BIG.fits"
+src = homedir() * "/Downloads/smiley.fits"
+dst = homedir() * "/Downloads/smiley_upsampled.fits"
 
 f = fits_open_diskfile(src)
 
@@ -31,17 +28,15 @@ end
 
 width, = fits_read_keyword(f, "NAXIS1")
 height, = fits_read_keyword(f, "NAXIS2")
-depth, = fits_read_keyword(f, "NAXIS3")
 
 width = parse(Int64, width)
 height = parse(Int64, height)
-depth = parse(Int64, depth)
 
-println("width: $(width), height: $(height), depth: $(depth)")
+println("width: $(width), height: $(height)")
 
 # new dimensions
-new_width = 2 * width
-new_height = 2 * height
+new_width = 26300 * width
+new_height = 26300 * height
 
 println("new width: $new_width, new_height: $new_height")
 
@@ -76,18 +71,15 @@ new_data = Array{Float32}(undef, new_width, new_height)
 
 nelements = width * height
 
-for frame = 1:depth
-    global new_data
+frame = 1
+fpixel = [1, 1, frame, 1]
+fits_read_pix(f, fpixel, nelements, data)
 
-    fpixel = [1, 1, frame, 1]
-    fits_read_pix(f, fpixel, nelements, data)
+println("HDU $(frame): ", size(data))
 
-    println("HDU $(frame): ", size(data))
+new_data = Float32.(imresize(data, (new_width, new_height)))
 
-    new_data = Float32.(imresize(data, (new_width, new_height)))
-
-    fits_write_pix(out, fpixel, new_width * new_height, new_data)
-end
+fits_write_pix(out, fpixel, new_width * new_height, new_data)
 
 println("upsampled size:", size(new_data))
 
