@@ -1703,6 +1703,7 @@ contains
 
          ! write (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
          array_size = int(sizeof(item%pixels), kind=c_size_t)
+         print *, 'pixels size = ', array_size
          ios = write_array(cache//'/'//'pixels'//c_null_char, c_loc(item%pixels), array_size)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
@@ -1717,6 +1718,7 @@ contains
 
          ! write (unit=fileunit, IOSTAT=ios) item%mask(:, :)
          array_size = int(sizeof(item%mask), kind=c_size_t)
+         ! array_size = sizeof(item%mask)
          ios = write_array(cache//'/'//'mask'//c_null_char, c_loc(item%mask), array_size)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
@@ -1769,7 +1771,7 @@ contains
          close (fileunit)
       end if
 
-      print *, 'serialised ', item%datasetid, ' to ', trim(file)
+      print *, 'serialised ', item%datasetid, ' to ', trim(file), ' (', bSuccess, ')'
 
    end subroutine save_dataset
 
