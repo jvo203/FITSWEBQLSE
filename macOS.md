@@ -1,9 +1,5 @@
 # 0. Homebrew
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    
-    if the "HOMEBREW_PREFIX" environment variable is not set add the following line to .zshrc (the actual path might depend on your system):
-
-    export HOMEBREW_PREFIX="/usr/local"
 
 # 1. gcc + gfortran
     brew install gfortran
