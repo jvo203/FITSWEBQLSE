@@ -219,6 +219,16 @@ int read_frame(int fd, void *dst, int pos, size_t frame_size)
 
 int write_frame(int fd, void *src, size_t frame_size)
 {
+    ssize_t bytes_written = write(fd, src, frame_size);
+
+    if (bytes_written != (ssize_t)frame_size)
+        return -1; // signal an error
+    else
+        return 0;
+}
+
+int chunked_write_frame(int fd, void *src, size_t frame_size)
+{
     size_t bytes_written = chunked_write(fd, src, frame_size);
 
     if (bytes_written != frame_size)
@@ -249,6 +259,16 @@ int write_array(const char *file, void *src, size_t frame_size)
         return -1; // signal an error
 
     int stat = write_frame(fd, src, frame_size);
+
+    // switch to a chunked mode upon failure
+    if (stat != 0)
+    {
+        // reposition the file offset to the beginning
+        lseek(fd, 0, SEEK_SET);
+
+        // write the data in a chunked mode
+        stat = chunked_write_frame(fd, src, frame_size);
+    }
 
     close(fd);
 
