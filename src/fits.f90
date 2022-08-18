@@ -730,6 +730,21 @@ module fits
 
       end subroutine make_video_frame_fixed_legacy
 
+      ! export void make_video_frame_fixed_legacy_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax, uniform int start, uniform int work_size)
+      subroutine make_video_frame_fixed_legacy_threaded(compressed, width, height,&
+      &dst_luma, dst_mask, stride, dmin, dmax, lmin, lmax, start, work_size) BIND(C, name="make_video_frame_fixed_legacy_threaded")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: compressed
+         integer(c_int), value, intent(in) :: width, height
+         type(C_PTR), value, intent(in) :: dst_luma, dst_mask
+         integer(c_int), value, intent(in) :: stride
+         real(c_float), value, intent(in) :: dmin, dmax, lmin, lmax
+         integer(c_int), value, intent(in) :: start, work_size
+
+      end subroutine make_video_frame_fixed_legacy_threaded
+
       ! resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
       subroutine resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, numLobes) BIND(C, name='resizeLanczos')
          use, intrinsic :: ISO_C_BINDING
@@ -6909,6 +6924,12 @@ contains
             lmin = log(0.5)
             lmax = log(1.5)
 
+            print *, "calling make_video_frame_fixed_legacy_threaded"
+
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
+            !$omp& PRIVATE(tid, work_size, start)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
             do tid=1, num_threads
                work_size = ceiling(real(cm) / num_threads)
                start = (tid -1)*work_size ! C-style array 0-start
@@ -6916,17 +6937,19 @@ contains
                ! handle the last thread
                if (tid .eq. num_threads) work_size = max(cm - start, 0)
 
-               print *, "calling make_video_frame_legacy, tid:", tid, "start:", start, "work_size:", work_size
+               ! print *, "calling make_video_frame_legacy, tid:", tid, "start:", start, "work_size:", work_size
 
                if(work_size .gt. 0) then
-                  call make_video_frame_legacy_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  call make_video_frame_fixed_legacy_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
                   &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax, start, work_size)
                end if
             end do
+            !$omp END DO
+            !$omp END PARALLEL
 
-            print *, "calling make_video_frame_fixed_legacy"
-            call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
-            &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax)
+            ! print *, "calling make_video_frame_fixed_legacy"
+            ! call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
+            ! &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax)
          end if
 
          ! downsize {pixels, mask} into {dst_pixels, dst_mask}
