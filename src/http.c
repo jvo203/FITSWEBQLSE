@@ -3247,9 +3247,6 @@ size_t chunked_read(int fd, char *dst, size_t n)
     remaining = n;
     offset = 0;
 
-    // reposition the file offset to the beginning (just in case the fd had been used before and failed)
-    lseek(fd, 0, SEEK_SET);
-
     while (remaining > 0)
     {
         nchar = MIN(remaining, CHUNK);

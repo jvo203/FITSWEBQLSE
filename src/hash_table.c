@@ -263,6 +263,9 @@ int read_array(const char *file, void *dst, size_t frame_size)
     {
         printf("[C] Switching to a chunked read mode for '%s'.\n", file);
 
+        // reposition the file offset to the beginning (just in case the fd had been used before and failed)
+        lseek(fd, 0, SEEK_SET);
+
         // read the data in a chunked mode
         stat = chunked_read_frame(fd, dst, frame_size);
     }
