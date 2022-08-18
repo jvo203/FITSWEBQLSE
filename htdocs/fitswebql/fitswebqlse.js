@@ -6502,7 +6502,7 @@ function redraw_histogram(index) {
 	var histogram = fitsData.histogram;
 
 	if (histogram === undefined) {
-		console.log("an undefined histogram was found");
+		console.error("an undefined histogram was found");
 		return;
 	}
 
