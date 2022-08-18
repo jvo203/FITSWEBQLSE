@@ -14,6 +14,9 @@ pthread_mutex_t datasets_mtx;
 extern options_t options;                                       // <options> is defined in main.c
 extern size_t chunked_write(int fd, const char *src, size_t n); // defined in http.c
 
+// define a 128KB CHUNK
+#define CHUNK 131072
+
 void init_hash_table()
 {
     if (pthread_mutex_init(&datasets_mtx, NULL) != 0)
