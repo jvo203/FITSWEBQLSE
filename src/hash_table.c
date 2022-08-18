@@ -11,7 +11,8 @@ static GHashTable *datasets;
 pthread_mutex_t datasets_mtx;
 
 #include "http.h"
-extern options_t options; // <options> is defined in main.c
+extern options_t options;                                       // <options> is defined in main.c
+extern size_t chunked_write(int fd, const char *src, size_t n); // defined in http.c
 
 void init_hash_table()
 {
@@ -218,9 +219,9 @@ int read_frame(int fd, void *dst, int pos, size_t frame_size)
 
 int write_frame(int fd, void *src, size_t frame_size)
 {
-    ssize_t bytes_written = write(fd, src, frame_size);
+    size_t bytes_written = chunked_write(fd, src, frame_size);
 
-    if (bytes_written != (ssize_t)frame_size)
+    if (bytes_written != frame_size)
         return -1; // signal an error
     else
         return 0;

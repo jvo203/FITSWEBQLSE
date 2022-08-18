@@ -1697,13 +1697,12 @@ contains
       end if
 
       ! item%pixels
-      if (allocated(item%pixels)) then
+      if (allocated(item%pixels) .and. bSuccess) then
          write (unit=fileunit, IOSTAT=ios) size(item%pixels)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
          ! write (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
          array_size = int(sizeof(item%pixels), kind=c_size_t)
-         print *, 'pixels size = ', array_size
          ios = write_array(cache//'/'//'pixels'//c_null_char, c_loc(item%pixels), array_size)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
@@ -1712,7 +1711,7 @@ contains
       end if
 
       ! item%mask
-      if (allocated(item%mask)) then
+      if (allocated(item%mask) .and. bSuccess) then
          write (unit=fileunit, IOSTAT=ios) size(item%mask)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
