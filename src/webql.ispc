@@ -981,6 +981,61 @@ export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compres
     
 }
 
+export void make_video_frame_fixed_logistic_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity, uniform int start, uniform int work_size)
+{
+  uniform int cn = width / DIM;  
+
+  // the input dimensions might not be divisible by <DIM>
+  if (width % DIM != 0)
+    cn = cn + 1;
+
+  // go through the entire plane
+  for(uniform int j=start; j<start+work_size; j++)
+    for(uniform int i=0; i <cn; i++)
+    { 
+      // compressed array entry index
+      uniform int src_idx = j * cn + i;
+
+      uniform int emax = (int)compressed[src_idx].common_exp;
+      varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
+
+      // block coordinate offset (the same for each point in the block)
+      uniform int src_x = i * DIM;
+      uniform int src_y = j * DIM;
+
+      foreach(k=0 ... BLOCK_SIZE)
+      {          
+          // find out which FORTRAN column the value is located
+          varying int idx = k >> BASE;
+          varying int mask = compressed[src_idx].mask[idx];
+          varying int pos = k & (DIM -1); // k % DIM
+          varying bool isnan = (mask >> pos) & 1;
+
+          // get the coordinates within a DIMxDIM block
+          varying int pixel_x = src_x + pos; // ix = pos
+          varying int pixel_y = src_y + idx; // iy = idx;
+
+          // destination index
+          varying int offset = pixel_y*stride + pixel_x;
+
+          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+
+          // apply tone mapping
+          cif(valid)
+          {
+            varying float x = scale * (float)compressed[src_idx].mantissa[k];            
+            varying float pixel = 255.0f / ( 1.0f + exp(-6.0f * (x - median) * sensitivity) ) ;
+
+            dst_luma[offset] = (int) clamp(pixel, 0.0f, 255.0f) ;
+            dst_mask[offset] = 255 ;      
+          }          
+
+        }
+
+    }
+    
+}
+
 export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity)
 {
   uniform int cn, cm;
