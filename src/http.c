@@ -3239,6 +3239,38 @@ void download_response(int fd, const char *filename)
     return;
 }
 
+size_t chunked_read(int fd, char *dst, size_t n)
+{
+    size_t nchar, remaining, offset;
+    ssize_t nread;
+
+    remaining = n;
+    offset = 0;
+
+    while (remaining > 0)
+    {
+        nchar = MIN(remaining, CHUNK);
+        nread = read(fd, dst + offset, nchar);
+
+        if (nread > 0)
+        {
+            remaining -= nread;
+            offset += nread;
+        }
+
+        // the connection might have been closed, bail out
+        if (nread < 0)
+        {
+            printf("[C] read returned %ld, aborting.\n", nread);
+            return offset;
+        }
+
+        // printf("[C] chars read: %zu out of %zu bytes.\n", offset, n);
+    }
+
+    return offset;
+}
+
 size_t chunked_write(int fd, const char *src, size_t n)
 {
     size_t nchar, remaining, offset;
