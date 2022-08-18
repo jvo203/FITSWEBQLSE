@@ -674,6 +674,21 @@ module fits
 
       end subroutine make_video_frame_fixed_linear
 
+      ! export void make_video_frame_fixed_linear_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope, uniform int start, uniform int work_size)
+      subroutine make_video_frame_fixed_linear_threaded(compressed, width, height,&
+      &dst_luma, dst_mask, stride, black, slope, start, work_size) BIND(C, name="make_video_frame_fixed_linear_threaded")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: compressed
+         integer(c_int), value, intent(in) :: width, height
+         type(C_PTR), value, intent(in) :: dst_luma, dst_mask
+         integer(c_int), value, intent(in) :: stride
+         real(c_float), value, intent(in) :: black, slope
+         integer(c_int), value, intent(in) :: start, work_size
+
+      end subroutine make_video_frame_fixed_linear_threaded
+
       ! export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity)
       subroutine make_video_frame_fixed_logistic(compressed, width, height,&
       &dst_luma, dst_mask, stride, median, sensitivity) BIND(C, name="make_video_frame_fixed_logistic")
