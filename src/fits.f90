@@ -6964,7 +6964,7 @@ contains
             !$omp& NUM_THREADS(max_threads)
             !$omp DO
             do tid=1, num_threads
-               work_size = ceiling(real(cm) / num_threads) ! one thread might be left with nothing to do
+               work_size = cm / num_threads
                start = (tid -1)*work_size ! C-style array 0-start
 
                ! handle the last thread
@@ -6986,7 +6986,7 @@ contains
             !$omp& NUM_THREADS(max_threads)
             !$omp DO
             do tid=1, num_threads
-               work_size = ceiling(real(cm) / num_threads) ! one thread might be left with nothing to do
+               work_size = cm / num_threads
                start = (tid -1)*work_size ! C-style array 0-start
 
                ! handle the last thread
@@ -7008,7 +7008,7 @@ contains
             !$omp& NUM_THREADS(max_threads)
             !$omp DO
             do tid=1, num_threads
-               work_size = ceiling(real(cm) / num_threads) ! one thread might be left with nothing to do
+               work_size = cm / num_threads
                start = (tid -1)*work_size ! C-style array 0-start
 
                ! handle the last thread
@@ -7030,7 +7030,7 @@ contains
             !$omp& NUM_THREADS(max_threads)
             !$omp DO
             do tid=1, num_threads
-               work_size = ceiling(real(cm) / num_threads) ! one thread might be left with nothing to do
+               work_size = cm / num_threads
                start = (tid -1)*work_size ! C-style array 0-start
 
                ! handle the last thread
@@ -7055,7 +7055,7 @@ contains
             !$omp& NUM_THREADS(max_threads)
             !$omp DO
             do tid=1, num_threads
-               work_size = ceiling(real(cm) / num_threads) ! one thread might be left with nothing to do
+               work_size = cm / num_threads
                start = (tid -1)*work_size ! C-style array 0-start
 
                ! handle the last thread
