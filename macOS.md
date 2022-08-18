@@ -26,7 +26,9 @@
     brew install glib
 
 # 7. Intel oneAPI
-    base-kit: exclude the Intel Python distribution
+    The Intel oneAPI is only needed on Intel-based macOS. On Apple Silicon we take advantage of the macOS Accelerate framework (vImage) instead.
+
+    install 'base-kit' and 'hpc-kit' (base-kit: exclude the Intel Python distribution)
 
     .zshrc : append
 
