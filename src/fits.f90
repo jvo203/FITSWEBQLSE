@@ -6975,9 +6975,26 @@ contains
          end if
 
          if (tone%flux .eq. "square") then
-            print *, "calling make_video_frame_fixed_square"
-            call make_video_frame_fixed_square(c_loc(item%compressed(frame)%ptr), width, height,&
-            &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity)
+            print *, "calling make_video_frame_fixed_square_threaded"
+
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
+            !$omp& PRIVATE(tid, work_size, start)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
+            do tid=1, num_threads
+               work_size = ceiling(real(cm) / num_threads)
+               start = (tid -1)*work_size ! C-style array 0-start
+
+               ! handle the last thread
+               if (tid .eq. num_threads) work_size = cm - start
+
+               if(work_size .gt. 0) then
+                  call make_video_frame_fixed_square_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity, start, work_size)
+               end if
+            end do
+            !$omp END DO
+            !$omp END PARALLEL
          end if
 
          if (tone%flux .eq. "legacy") then
@@ -6995,7 +7012,7 @@ contains
                start = (tid -1)*work_size ! C-style array 0-start
 
                ! handle the last thread
-               if (tid .eq. num_threads) work_size = max(cm - start, 0)
+               if (tid .eq. num_threads) work_size = cm - start
 
                ! print *, "calling make_video_frame_legacy, tid:", tid, "start:", start, "work_size:", work_size
 
@@ -7006,10 +7023,6 @@ contains
             end do
             !$omp END DO
             !$omp END PARALLEL
-
-            ! print *, "calling make_video_frame_fixed_legacy"
-            ! call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
-            ! &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax)
          end if
 
          ! downsize {pixels, mask} into {dst_pixels, dst_mask}
