@@ -246,6 +246,15 @@ int read_array(const char *file, void *dst, size_t frame_size)
 
     int stat = read_frame(fd, dst, 0, frame_size);
 
+    // switch to a chunked mode upon failure
+    if (stat != 0)
+    {
+        printf("[C] Switching to a chunked read mode for '%s'.\n", file);
+
+        // write the data in a chunked mode
+        stat = chunked_read_frame(fd, dst, 0, frame_size);
+    }
+
     close(fd);
 
     return stat;
