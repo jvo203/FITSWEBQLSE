@@ -1,7 +1,7 @@
 using CFITSIO
 using ImageTransformations
 
-println(libcfitsio_version())
+println("CFITSIO version: ", libcfitsio_version())
 
 src = homedir() * "/Downloads/smiley.fits"
 dst = homedir() * "/Downloads/smiley_upsampled.fits"
@@ -35,8 +35,8 @@ height = parse(Int64, height)
 println("width: $(width), height: $(height)")
 
 # new dimensions
-new_width = 26300 * width
-new_height = 26300 * height
+new_width = 26300
+new_height = 26300
 
 println("new width: $new_width, new_height: $new_height")
 
