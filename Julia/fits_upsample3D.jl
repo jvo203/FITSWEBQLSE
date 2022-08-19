@@ -78,6 +78,20 @@ wcs = WCSTransform(2;
 # convert a WCSTransform to a FITS header
 header = WCS.to_header(wcs)
 println(header)
+println("header length: ", length(header))
+
+# divide the header into 80-character strings
+nkeywords = Int(length(header) / 80)
+
+for i = 1:nkeywords
+    global rec
+    rec = SubString(header, (i - 1) * 80 + 1, i * 80)
+
+    if !isempty(strip(rec))
+        println(rec, length(rec))
+        fits_write_record(out, String(rec))
+    end
+end
 
 # the extra one is the <END> keyword
 rec = fits_read_record(f, keysexist + 1)
