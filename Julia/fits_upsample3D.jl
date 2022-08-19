@@ -1,13 +1,11 @@
 using CFITSIO
+using WCS
 using ImageTransformations
 
-println(libcfitsio_version())
+println("CFITSIO version: ", libcfitsio_version())
 
-# src = homedir() * "/Downloads/ALMA00000006.fits"
-# dst = homedir() * "/upsampled.fits"
-
-src = "/Volumes/OWC/fits_web_ql/FITSCACHE/ALMA01567567.fits"
-dst = "/Volumes/OWC/I_AM_BIG.fits"
+src = homedir() * "/Downloads/numbers.fits"
+dst = homedir() * "/Downloads/numbers_upsampled.fits"
 
 f = fits_open_diskfile(src)
 
@@ -40,8 +38,8 @@ depth = parse(Int64, depth)
 println("width: $(width), height: $(height), depth: $(depth)")
 
 # new dimensions
-new_width = 2 * width
-new_height = 2 * height
+new_width = 1 * width
+new_height = 1 * height
 
 println("new width: $new_width, new_height: $new_height")
 
@@ -49,7 +47,7 @@ keysexist, morekeys = fits_get_hdrspace(f)
 
 out = fits_clobber_file(dst)
 
-for i = 1:keysexist+1 # the extra one is the <END> keyword
+for i = 1:keysexist
     rec = fits_read_record(f, i)
     name, value, comment = fits_read_keyn(f, i)
 
@@ -68,6 +66,22 @@ for i = 1:keysexist+1 # the extra one is the <END> keyword
 
     fits_write_record(out, rec)
 end
+
+# add the WCS keywords
+wcs = WCSTransform(2;
+    cdelt=[-0.066667, 0.066667],
+    ctype=["RA---AIR", "DEC--AIR"],
+    crpix=[-234.75, 8.3393],
+    crval=[0.0, -90],
+    pv=[(2, 1, 45.0)])
+
+# convert a WCSTransform to a FITS header
+header = WCS.to_header(wcs)
+println(header)
+
+# the extra one is the <END> keyword
+rec = fits_read_record(f, keysexist + 1)
+fits_write_record(out, rec)
 
 println("FITS image dimensions: ", fits_get_img_size(f))
 
