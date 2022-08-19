@@ -155,6 +155,7 @@ extern float get_elapsed(void *item);
 extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
 
 size_t chunked_write(int fd, const char *src, size_t n);
+size_t chunked_write_with_chunk(int fd, const char *src, size_t n, size_t chunk);
 void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
@@ -3273,6 +3274,11 @@ size_t chunked_read(int fd, char *dst, size_t n)
 
 size_t chunked_write(int fd, const char *src, size_t n)
 {
+    chunked_write_with_chunk(fd, src, n, CHUNK);
+}
+
+size_t chunked_write_with_chunk(int fd, const char *src, size_t n, size_t chunk)
+{
     size_t nchar, remaining, offset;
     ssize_t written;
 
@@ -3281,7 +3287,7 @@ size_t chunked_write(int fd, const char *src, size_t n)
 
     while (remaining > 0)
     {
-        nchar = MIN(remaining, CHUNK);
+        nchar = MIN(remaining, chunk);
         written = write(fd, src + offset, nchar);
 
         if (written > 0)
