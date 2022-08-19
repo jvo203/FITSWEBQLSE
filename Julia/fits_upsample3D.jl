@@ -68,12 +68,11 @@ for i = 1:keysexist
 end
 
 # add the WCS keywords
-wcs = WCSTransform(2;
-    cdelt=[-0.066667, 0.066667],
-    ctype=["RA---AIR", "DEC--AIR"],
-    crpix=[-234.75, 8.3393],
-    crval=[0.0, -90],
-    pv=[(2, 1, 45.0)])
+wcs = WCSTransform(3;
+    cdelt=[-2.777777777778E-05, 2.777777777778E-05, -2.929537207031E+04],
+    ctype=["RA---SIN", "DEC--SIN", "FREQ"],
+    crpix=[1.510000000000E+02, 1.510000000000E+02, 1.0],
+    crval=[2.690886656602E+02, -2.195623208439E+01, 2.195706138430E+11])
 
 # convert a WCSTransform to a FITS header
 header = WCS.to_header(wcs)
@@ -92,6 +91,13 @@ for i = 1:nkeywords
         fits_write_record(out, String(rec))
     end
 end
+
+fits_write_key(out, "RESTFRQ", "2.195632900000E+11", "Rest Frequency (Hz)")
+fits_write_key(out, "SPECSYS", "LSRK", "Spectral reference frame")
+fits_write_key(out, "BUNIT", "JY/BEAM", "Brightness (pixel) unit")
+fits_write_key(out, "OBSRA", "2.690886656602E+02", "Right Ascension of observation")
+fits_write_key(out, "OBSDEC", "-2.195623208439E+01", "Declination of observation")
+fits_write_key(out, "OBJNAME", "NUMBERS", "Name of observed object")
 
 # the extra one is the <END> keyword
 rec = fits_read_record(f, keysexist + 1)
