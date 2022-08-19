@@ -13,8 +13,11 @@ pthread_mutex_t datasets_mtx;
 #include "http.h"
 extern options_t options; // <options> is defined in main.c
 
-extern size_t chunked_read(int fd, const char *dst, size_t n);  // defined in http.c
-extern size_t chunked_write(int fd, const char *src, size_t n); // defined in http.c
+// FILE_CHUNK 256KB
+#define FILE_CHUNK 262144
+
+extern size_t chunked_write_with_chunk(int fd, const char *src, size_t n, size_t chunk); // defined in http.c
+extern size_t chunked_read_with_chunk(int fd, const char *src, size_t n, size_t chunk);  // defined in http.c
 
 void init_hash_table()
 {
@@ -221,7 +224,7 @@ int read_frame(int fd, void *dst, int pos, size_t frame_size)
 
 int chunked_read_frame(int fd, void *dst, size_t frame_size)
 {
-    size_t bytes_read = chunked_read(fd, dst, frame_size);
+    size_t bytes_read = chunked_read_with_chunk(fd, dst, frame_size, FILE_CHUNK);
 
     if (bytes_read != frame_size)
         return -1; // signal an error
@@ -241,7 +244,7 @@ int write_frame(int fd, void *src, size_t frame_size)
 
 int chunked_write_frame(int fd, void *src, size_t frame_size)
 {
-    size_t bytes_written = chunked_write(fd, src, frame_size);
+    size_t bytes_written = chunked_write_with_chunk(fd, src, frame_size, FILE_CHUNK);
 
     if (bytes_written != frame_size)
         return -1; // signal an error
