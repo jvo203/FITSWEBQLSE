@@ -3240,7 +3240,7 @@ void download_response(int fd, const char *filename)
     return;
 }
 
-size_t chunked_read(int fd, char *dst, size_t n)
+size_t chunked_read_with_chunk(int fd, char *dst, size_t n, size_t chunk)
 {
     size_t nchar, remaining, offset;
     ssize_t nread;
@@ -3250,7 +3250,7 @@ size_t chunked_read(int fd, char *dst, size_t n)
 
     while (remaining > 0)
     {
-        nchar = MIN(remaining, CHUNK);
+        nchar = MIN(remaining, chunk);
         nread = read(fd, dst + offset, nchar);
 
         if (nread > 0)
