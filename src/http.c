@@ -3274,7 +3274,7 @@ size_t chunked_read_with_chunk(int fd, char *dst, size_t n, size_t chunk)
 
 size_t chunked_write(int fd, const char *src, size_t n)
 {
-    chunked_write_with_chunk(fd, src, n, CHUNK);
+    return chunked_write_with_chunk(fd, src, n, CHUNK);
 }
 
 size_t chunked_write_with_chunk(int fd, const char *src, size_t n, size_t chunk)
