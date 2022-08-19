@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-08-18.0";
+	return "JS2022-08-19.0";
 }
 
 function uuidv4() {
@@ -6584,11 +6584,13 @@ function display_preferences(index) {
 	if (theme == 'bright')
 		fillColour = 'black';
 
+	let bottomY = svgHeight - offset / 4;
+
 	group.append("text")
 		.attr("id", "latency")
 		.attr("x", (0 * emFontSize / 4 + 0 * 1.75 * emFontSize))
 		//.attr("y", offset)//"0.85em")
-		.attr("y", (svgHeight - offset / 4))
+		.attr("y", bottomY)
 		.attr("font-family", "Inconsolata")
 		//.attr("font-weight", "bold")
 		.attr("font-size", "0.75em")//0.75 Helvetica
@@ -6615,7 +6617,6 @@ function display_preferences(index) {
 
 	// a cluster element
 	{
-
 		var svg = d3.select("#ClusterSVG");
 		var svgWidth = parseFloat(svg.attr("width"));
 		var svgHeight = parseFloat(svg.attr("height"));
@@ -6637,12 +6638,11 @@ function display_preferences(index) {
 
 	var range = get_axes_range(svgWidth, svgHeight);
 
-
 	group.append("text")
 		.attr("id", "fps")
 		.attr("x", range.xMax - 0.25 * emFontSize)
 		//.attr("y", offset)
-		.attr("y", (svgHeight - offset / 4))
+		.attr("y", bottomY)
 		.attr("font-family", "Inconsolata")
 		//.attr("font-weight", "bold")
 		.attr("font-size", "0.75em")//0.75 Helvetica
