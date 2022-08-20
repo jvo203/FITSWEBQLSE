@@ -38,8 +38,8 @@ depth = parse(Int64, depth)
 println("width: $(width), height: $(height), depth: $(depth)")
 
 # new dimensions
-new_width = 1 * width
-new_height = 1 * height
+new_width = 10 * width
+new_height = 10 * height
 
 println("new width: $new_width, new_height: $new_height")
 
