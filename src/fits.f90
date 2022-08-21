@@ -5867,7 +5867,8 @@ contains
         real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
         integer :: first, last, length, threshold
-        integer :: max_threads, frame, tid, npixels
+        integer :: max_threads, frame, tid
+        integer(kind=8) :: npixels
         integer(c_int) :: x1, x2, y1, y2, width, height, average
         real(c_float) :: cx, cy, r, r2
         real :: cdelt3
@@ -6296,7 +6297,8 @@ contains
 
         integer :: first, last, length
 
-        integer :: max_threads, frame, tid, npixels
+        integer :: max_threads, frame, tid
+        integer(kind=8) :: npixels
         integer(c_int) :: x1, x2, y1, y2, width, height, average
         real(c_float) :: cx, cy, r, r2
         integer :: start_x, start_y, end_x, end_y
@@ -7097,7 +7099,8 @@ contains
         real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
         integer :: first, last, length, threshold
-        integer :: max_threads, frame, tid, npixels
+        integer :: max_threads, frame, tid
+        integer(kind=8) :: npixels
         integer(c_int) :: width, height, average
         real :: cdelt3
 
