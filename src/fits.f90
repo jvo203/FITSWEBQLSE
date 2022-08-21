@@ -3205,8 +3205,6 @@ contains
 
       real cdelt3, mean_spec_val, int_spec_val
       real frame_min, frame_max, frame_median
-      real pixel_sum
-      integer pixel_count
 
       ! local statistics
       real(kind=4) :: dmin, dmax
@@ -3802,7 +3800,7 @@ contains
          !$omp& SHARED(thread_units, group, naxis, naxes, nullval)&
          !$omp& PRIVATE(tid, start, end, num_per_node, anynull, status)&
          !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
-         !$omp& PRIVATE(mean_spec_val, int_spec_val, pixel_sum, pixel_count)&
+         !$omp& PRIVATE(mean_spec_val, int_spec_val)&
          !$omp& PRIVATE(thread_buffer, thread_pixels, thread_mask, thread_arr)&
          !$omp& PRIVATE(thread_data, data_mask, res)&
          !$omp& REDUCTION(.or.:thread_bSuccess)&
@@ -3901,12 +3899,6 @@ contains
                      thread_bSuccess = thread_bSuccess .and. .true.
                   end if
 
-                  mean_spec_val = 0.0
-                  int_spec_val = 0.0
-
-                  pixel_sum = 0.0
-                  pixel_count = 0
-
                   frame_min = 1.0E30
                   frame_max = -1.0E30
 
@@ -3920,11 +3912,6 @@ contains
                   frame_max = res(2)
                   mean_spec_val = res(3)
                   int_spec_val = res(4)
-
-                  if (pixel_count .gt. 0) then
-                     mean_spec_val = pixel_sum/real(pixel_count)
-                     int_spec_val = pixel_sum*cdelt3
-                  end if
 
                   item%frame_min(frame) = frame_min
                   item%frame_max(frame) = frame_max
