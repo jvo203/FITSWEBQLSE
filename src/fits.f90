@@ -3173,7 +3173,7 @@ contains
         integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i
         integer naxis, bitpix
         integer cn, cm
-        integer(c_long) :: npixels, j
+        integer(kind=8) :: npixels, j
         integer naxes(4)
         integer(kind=8) firstpix, lastpix
         integer max_threads, tid, frame
