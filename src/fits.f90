@@ -3713,8 +3713,7 @@ contains
 
          ! interleave computation with disk access
          ! cap the number of threads to avoid system overload
-         ! max_threads = min(OMP_GET_MAX_THREADS(), 4)
-         max_threads = get_max_threads()
+         max_threads = min(get_max_threads(), 4)
 
          print *, "max_threads:", max_threads
 
