@@ -75,7 +75,7 @@ uniform int64 count = reduce_add(partial_count) ;
       integrated = 0.0f ;
     }
 
-  // print ("mean: %, integrated: %\n", mean, integrated);
+  print ("mean: %, integrated: %, sum: %, count: %\n", mean, integrated, sum, count);
 
   frame_min = reduce_min(vmin) ;
   frame_max = reduce_max(vmax) ;
