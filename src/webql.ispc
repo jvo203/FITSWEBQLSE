@@ -848,7 +848,7 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
 
             // increment the counters
             partial_countP += (x >= median) ? 1 : 0;
-            partial_countN += (x <= median) ? 1 : 0;
+            partial_countN += (x < median) ? 1 : 0;
 
             /*if(x > max_value)
               max_value = x;*/
