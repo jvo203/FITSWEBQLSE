@@ -815,6 +815,8 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
   varying float partial_sumN = 0.0f ;
   varying unsigned int64 partial_countN = 0 ;
 
+  // varying float max_value = 0.0f ;
+
   // go through the entire plane
   for(uniform int j=0; j<cm; j++)
     for(uniform int i=0; i <cn; i++)
@@ -846,17 +848,22 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
             // increment the counters
             partial_countP += (x >= median) ? 1 : 0;
             partial_countN += (x <= median) ? 1 : 0;
+
+            /*if(x > max_value)
+              max_value = x;*/
           }
 
         }
 
-    }
+    }  
 
   // the final reductions
   sumP[0] += reduce_add(partial_sumP) ;
   countP[0] += reduce_add(partial_countP) ;
   sumN[0] += reduce_add(partial_sumN) ;
   countN[0] += reduce_add(partial_countN) ;
+
+  // print("median: %, sumP: %, sumN: %, countP: %, countN: %, max_value: %\n", median, sumP[0], sumN[0], countP[0], countN[0], reduce_max(max_value));
 }
 
 export void make_video_frame_fixed_linear(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope)
