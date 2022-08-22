@@ -566,7 +566,7 @@ module fits
 
          type(C_PTR), value, intent(in) :: src, pixels, mask, data_mask, res
          real(c_float), value, intent(in) :: ignrval, datamin, datamax, cdelt3
-         integer(c_long), value, intent(in) :: npixels
+         integer(c_int64_t), value, intent(in) :: npixels
 
       end subroutine make_image_spectrumF32
 
