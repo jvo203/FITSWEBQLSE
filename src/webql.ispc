@@ -843,6 +843,7 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
 
             // the '=' sign is to make sure datasets with all pixels being identical are handled too            
             // disabled the '=' sign after all (the sum countP + countN must add up to the total number of pixels!)
+            
             partial_sumP += (x >= median) ? tmp : 0.0f;
             partial_sumN += (x < median) ? tmp : 0.0f;
 
