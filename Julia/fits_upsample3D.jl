@@ -98,6 +98,7 @@ fits_write_key(out, "BUNIT", "JY/BEAM", "Brightness (pixel) unit")
 fits_write_key(out, "OBSRA", "2.690886656602E+02", "Right Ascension of observation")
 fits_write_key(out, "OBSDEC", "-2.195623208439E+01", "Declination of observation")
 fits_write_key(out, "OBJECT", "NUMBERS", "Name of observed object")
+fits_write_key(out, "TELESCOP", "ALMA", "Telescope")
 
 # the extra one is the <END> keyword
 rec = fits_read_record(f, keysexist + 1)
