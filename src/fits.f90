@@ -3913,8 +3913,8 @@ contains
                   mean_spec_val = res(3)
                   int_spec_val = res(4)
 
-                  print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
-                  & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
+                  ! print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
+                  ! & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
 
                   item%frame_min(frame) = frame_min
                   item%frame_max(frame) = frame_max

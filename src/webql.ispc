@@ -26,12 +26,13 @@ bool isinf(float tmp)
 
 export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform unsigned int8 data_mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int64 npixels)
 {
-  uniform float frame_min, frame_max, mean, integrated;
+  uniform float frame_min, frame_max;
+  uniform double mean, integrated;
 
   frame_min = res[0];
   frame_max = res[1];
 
-  varying float partial_sum = 0.0f ;
+  varying double partial_sum = 0.0f ;
   varying unsigned int64 partial_count = 0 ;
 
   varying float vmin = frame_min ;
@@ -60,30 +61,30 @@ export void  make_image_spectrumF32(uniform float src[], uniform float pixels[],
           data_mask[i] = false;
     }
 
-uniform float sum = reduce_add(partial_sum) ;
+uniform double sum = reduce_add(partial_sum) ;
 uniform int64 count = reduce_add(partial_count) ;
 
   if(count > 0)
     {
 
-      mean = sum / (float) count ;
+      mean = sum / (double) count ;
       integrated = sum * cdelt3 ;
     }
   else
     {      
-      mean = 0.0f ;
-      integrated = 0.0f ;
+      mean = 0.0 ;
+      integrated = 0.0 ;
     }
-
-  // print ("mean: %, integrated: %, sum: %, count: %\n", mean, integrated, sum, count);
+  
+  // print ("npixels: %, cdelt3: %, mean: %, integrated: %, sum: %, count: %\n", npixels, cdelt3, mean, integrated, sum, count);
 
   frame_min = reduce_min(vmin) ;
   frame_max = reduce_max(vmax) ;
 
   res[0] = frame_min;
   res[1] = frame_max;
-  res[2] = mean;
-  res[3] = integrated;
+  res[2] = (float)mean;
+  res[3] = (float)integrated;
 } ;
 
 export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
