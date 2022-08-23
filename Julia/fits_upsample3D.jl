@@ -92,7 +92,7 @@ for i = 1:nkeywords
     end
 end
 
-fits_write_key(out, "RESTFRQ", "2.195632900000E+11", "Rest Frequency (Hz)")
+fits_write_key(out, "RESTFRQ", 2.195632900000E+11, "Rest Frequency (Hz)")
 fits_write_key(out, "SPECSYS", "LSRK", "Spectral reference frame")
 fits_write_key(out, "BUNIT", "JY/BEAM", "Brightness (pixel) unit")
 fits_write_key(out, "OBSRA", "2.690886656602E+02", "Right Ascension of observation")
