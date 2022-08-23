@@ -7,10 +7,10 @@
 #include <ipp.h>
 
 // IPP Threading Layer
-#include <ippcore_tl.h>
+/*#include <ippcore_tl.h>
 #include <ippi_tl.h>
 #include <ipps.h>
-#include <ippcore_tl.h>
+#include <ippcore_tl.h>*/
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
