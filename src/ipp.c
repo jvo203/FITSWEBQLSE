@@ -251,8 +251,8 @@ IppStatus resizeLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     return status;
 }
 
-IppStatus resizeLanczos32f_C1R_LT(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
-                                  Ipp32f *pDst, IppiSize dstSize, Ipp32s dstStep,
+IppStatus resizeLanczos32f_C1R_LT(Ipp32f *pSrc, IppiSizeL srcSize, Ipp32s srcStep,
+                                  Ipp32f *pDst, IppiSizeL dstSize, Ipp32s dstStep,
                                   int numLobes)
 {
     int threads = get_physical_cores();
@@ -435,17 +435,17 @@ extern void resizeCubic(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest
 
 extern void resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
 {
-    IppiSize srcSize;
+    IppiSizeL srcSize;
     srcSize.width = srcWidth;
     srcSize.height = srcHeight;
     Ipp32s srcStep = srcSize.width;
 
-    IppiSize dstSize;
+    IppiSizeL dstSize;
     dstSize.width = dstWidth;
     dstSize.height = dstHeight;
     Ipp32s dstStep = dstSize.width;
 
-    IppStatus stat = resizeLanczos32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
+    IppStatus stat = resizeLanczos32f_C1R_LT(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
 
 #if !defined(__APPLE__) || !defined(__MACH__)
 #ifdef DEBUG
