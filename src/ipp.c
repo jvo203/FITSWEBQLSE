@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <ipp.h>
+
 // IPP Threading Layer
 #include <ippcore_tl.h>
 #include <ippi_tl.h>
@@ -259,7 +261,11 @@ IppStatus resizeLanczos32f_C1R_LT(Ipp32f *pSrc, IppiSizeL srcSize, Ipp32s srcSte
     omp_set_num_threads(threads);
 
     IppiResizeSpec_32f *pSpec = 0;
-    int specSize = 0, initSize = 0, bufSize = 0;
+    // int specSize = 0, initSize = 0, bufSize = 0;
+    IppSizeL specSize = 0;
+    IppSizeL initSize = 0;
+    IppDataType ippType = ipp32f;
+
     Ipp8u *pBuffer = 0;
     Ipp8u *pInitBuf = 0;
     IppiPointL dstOffset = {0, 0};
@@ -270,7 +276,9 @@ IppStatus resizeLanczos32f_C1R_LT(Ipp32f *pSrc, IppiSizeL srcSize, Ipp32s srcSte
     IppStatus pStatus;
 
     /* Spec and init buffer sizes */
-    status = ippiResizeGetSize_32f(srcSize, dstSize, ippLanczos, 0, &specSize, &initSize);
+    // status = ippiResizeGetSize_32f(srcSize, dstSize, ippLanczos, 0, &specSize, &initSize);
+    status = ippiResizeGetSize_LT(srcSize, dstSize, ippType, ippLanczos, 0, &specSize, &initSize);
+    CHECK_STATUS_PRINT_BR(status, "ippiResizeGetSize_LT()", ippGetStatusString(status));
 
     if (status != ippStsNoErr)
         return status;
