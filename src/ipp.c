@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <omp.h>
+
 #include <ipp.h>
 
 // IPP Threading Layer
@@ -9,6 +11,14 @@
 #include <ippi_tl.h>
 #include <ipps.h>
 #include <ippcore_tl.h>
+
+#ifndef MIN
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#endif
 
 extern int get_physical_cores();
 
@@ -262,10 +272,12 @@ IppStatus tileLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
 
     // a per-thread limit
     size_t max_work_size = 1024 * 1024 * 4;
-    size_t plane_size = size_t(srcSize.width) * size_t(srcSize.height);
+    size_t plane_size = (size_t)srcSize.width * (size_t)srcSize.height;
     size_t work_size = MIN(plane_size, max_work_size);
-    int MAX_NUM_THREADS = MAX((int)roundf(float(plane_size) / float(work_size)), 1);
-    // printf("tileResize32f_C1R::num_threads = %d\n", MAX_NUM_THREADS);
+    int MAX_NUM_THREADS = MAX((int)roundf((float)plane_size / (float)work_size), 1);
+    int num_threads = MIN(max_threads, MAX_NUM_THREADS);
+
+    printf("tileLanczos32f_C1R::num_threads = %d\n", num_threads);
 
     IppiResizeSpec_32f *pSpec = 0;
     int specSize = 0, initSize = 0, bufSize = 0;
@@ -319,7 +331,7 @@ IppStatus tileLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
 
     /* General transform function */
     /* Parallelized only by Y-direction here */
-#pragma omp parallel num_threads(MAX_NUM_THREADS)
+#pragma omp parallel num_threads(num_threads)
     {
 #pragma omp master
         {
