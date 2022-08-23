@@ -110,6 +110,7 @@ data = Array{Float32}(undef, width, height)
 new_data = Array{Float32}(undef, new_width, new_height)
 
 nelements = width * height
+new_nelements = new_width * new_height
 
 for frame = 1:depth
     global new_data
@@ -119,9 +120,20 @@ for frame = 1:depth
 
     println("HDU $(frame): ", size(data))
 
+    # calculate the mean and sum of data
+    integrated_intensity = sum(data)
+    mean_intensity = integrated_intensity / nelements
+    println("intensity: int.: $(integrated_intensity), mean: $(mean_intensity)")
+
     new_data = Float32.(imresize(data, (new_width, new_height)))
 
+    # calculate the mean and sum of new_data
+    new_integrated_intensity = sum(new_data)
+    new_mean_intensity = new_integrated_intensity / new_nelements
+    println("new intensity: int.: $(new_integrated_intensity), mean: $(new_mean_intensity)")
+
     fits_write_pix(out, fpixel, new_width * new_height, new_data)
+    println("")
 end
 
 println("upsampled size:", size(new_data))
