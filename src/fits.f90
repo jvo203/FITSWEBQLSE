@@ -5490,6 +5490,7 @@ contains
          scale = 0.5*(s1 + s2)
 
          !$omp parallel
+         !$omp single
          !$omp task
          if (scale .gt. 0.2) then
             call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
@@ -5497,12 +5498,15 @@ contains
             call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height)
          end if
          !$omp end task
+         !$omp end single
 
+         !$omp single
          !$omp task
          ! Boolean mask: the naive Nearest-Neighbour method
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), width, height)
          ! call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, width, height)
          !$omp end task
+         !$omp end single
          !$omp end parallel
 
          ! send pixels
@@ -6144,6 +6148,7 @@ contains
                allocate (view_mask(req%width, req%height))
 
                !$omp parallel
+               !$omp single
                !$omp task
                if (scale .gt. 0.2) then
                   call resizeLanczos(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height, 3)
@@ -6151,11 +6156,14 @@ contains
                   call resizeSuper(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height)
                end if
                !$omp end task
+               !$omp end single
 
+               !$omp single
                !$omp task
                call resizeNearest(c_loc(mask), dimx, dimy, c_loc(view_mask), req%width, req%height)
                ! call resizeMask(mask, dimx, dimy, view_mask, req%width, req%height)
                !$omp end task
+               !$omp end single
                !$omp end parallel
 
                call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
@@ -6243,6 +6251,7 @@ contains
          allocate (view_mask(req%width, req%height))
 
          !$omp parallel
+         !$omp single
          !$omp task
          if (scale .gt. 0.2) then
             call resizeLanczos(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height, 3)
@@ -6250,11 +6259,14 @@ contains
             call resizeSuper(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height)
          end if
          !$omp end task
+         !$omp end single
 
+         !$omp single
          !$omp task
          call resizeNearest(c_loc(mask), dimx, dimy, c_loc(view_mask), req%width, req%height)
          ! call resizeMask(mask, dimx, dimy, view_mask, req%width, req%height)
          !$omp end task
+         !$omp end single
          !$omp end parallel
 
          ! end the timer
@@ -7026,15 +7038,19 @@ contains
 
          ! downsize {pixels, mask} into {dst_pixels, dst_mask}
          !$omp parallel
+         !$omp single
          !$omp task
          call resizeNearest(c_loc(pixels), width, height,&
          & c_loc(dst_pixels), dst_width, dst_height)
          !$omp end task
+         !$omp end single
 
+         !$omp single
          !$omp task
          call resizeNearest(c_loc(mask), width, height,&
          & c_loc(dst_mask), dst_width, dst_height)
          !$omp end task
+         !$omp end single
          !$omp end parallel
       else
          ! call SIMD on {dst_pixels, dst_mask}
@@ -7317,6 +7333,7 @@ contains
          allocate (view_mask(img_width, img_height))
 
          !$omp parallel
+         !$omp single
          !$omp task
          if (scale .gt. 0.2) then
             call resizeLanczos(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height, 3)
@@ -7324,11 +7341,14 @@ contains
             call resizeSuper(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height)
          end if
          !$omp end task
+         !$omp end single
 
+         !$omp single
          !$omp task
          call resizeNearest(c_loc(mask), item%naxes(1), item%naxes(2), c_loc(view_mask), img_width, img_height)
          ! call resizeMask(mask, item%naxes(1), item%naxes(2), view_mask, img_width, img_height)
          !$omp end task
+         !$omp end single
          !$omp end parallel
       else
          img_width = item%naxes(1)
