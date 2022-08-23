@@ -83,8 +83,8 @@ uniform int64 count = reduce_add(partial_count) ;
 
   res[0] = frame_min;
   res[1] = frame_max;
-  res[2] = (float)mean;
-  res[3] = (float)integrated;
+  res[2] = (float) mean;
+  res[3] = (float) integrated;
 } ;
 
 export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
@@ -105,7 +105,7 @@ export uniform float brightness_ratio(uniform float pixels[], uniform float blac
 
 export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
 {  
-  float partial_sum = 0.0f ;
+  double partial_sum = 0.0 ;
   unsigned int64 partial_count = 0 ;
   
   foreach (y=y1 ... y2, x=x1 ... x2)
@@ -120,15 +120,15 @@ export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], unif
       partial_count += (nan || exclude) ? 0 : 1 ;
     } ;
 
-  uniform float sum = reduce_add(partial_sum) ;
+  uniform double sum = reduce_add(partial_sum) ;
   uniform int64 count = reduce_add(partial_count) ;
 
   if(count > 0)
     {
       if(average)
-	      return sum / (float) count ;
+	      return (float)(sum / (double) count) ;
       else
-	      return sum * cdelt3 ;
+	      return (float)(sum * cdelt3) ;
     }
   else
     return 0.0f ;
@@ -136,7 +136,7 @@ export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], unif
 
 export uniform float calculate_square_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
 {
-  float partial_sum = 0.0f ;
+  double partial_sum = 0.0 ;
   unsigned int64 partial_count = 0 ;
   
   foreach (y=y1 ... y2, x=x1 ... x2)
@@ -148,15 +148,15 @@ export uniform float calculate_square_spectrumF16(uniform int16 cubeData[], unif
       partial_count += nan ? 0 : 1 ;
     } ;
 
-  uniform float sum = reduce_add(partial_sum) ;
+  uniform double sum = reduce_add(partial_sum) ;
   uniform int64 count = reduce_add(partial_count) ;
 
   if(count > 0)
     {
       if(average)
-	      return sum / (float) count ;
+	      return (float)(sum / (double) count) ;
       else
-	      return sum * cdelt3 ;
+	      return (float)(sum * cdelt3) ;
     }
   else
     return 0.0f ;
@@ -164,7 +164,7 @@ export uniform float calculate_square_spectrumF16(uniform int16 cubeData[], unif
 
 export uniform float calculate_radial_viewport_spectrumF16(uniform int16 cubeData[], uniform unsigned int cubeStride, uniform float pixels[], uniform bool mask[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
 {  
-  float partial_sum = 0.0f ;
+  double partial_sum = 0.0 ;
   unsigned int64 partial_count = 0 ;
   
   foreach (y=y1 ... y2, x=x1 ... x2)
@@ -184,15 +184,15 @@ export uniform float calculate_radial_viewport_spectrumF16(uniform int16 cubeDat
       mask[idx] |= (nan || exclude) ? false : true ;
     } ;
 
-  uniform float sum = reduce_add(partial_sum) ;
+  uniform double sum = reduce_add(partial_sum) ;
   uniform int64 count = reduce_add(partial_count) ;
 
   if(count > 0)
     {
       if(average)
-	      return sum / (float) count ;
+	      return (float)(sum / (double) count) ;
       else
-	      return sum * cdelt3 ;
+	      return (float)(sum * cdelt3) ;
     }
   else
     return 0.0f ;
@@ -200,7 +200,7 @@ export uniform float calculate_radial_viewport_spectrumF16(uniform int16 cubeDat
 
 export uniform float calculate_square_viewport_spectrumF16(uniform int16 cubeData[], uniform unsigned int cubeStride, uniform float pixels[], uniform bool mask[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
 {
-  float partial_sum = 0.0f ;
+  double partial_sum = 0.0 ;
   unsigned int64 partial_count = 0 ;
   
   foreach (y=y1 ... y2, x=x1 ... x2)
@@ -217,15 +217,15 @@ export uniform float calculate_square_viewport_spectrumF16(uniform int16 cubeDat
       mask[idx] |= nan ? false : true ;
     } ;
 
-  uniform float sum = reduce_add(partial_sum) ;
+  uniform double sum = reduce_add(partial_sum) ;
   uniform int64 count = reduce_add(partial_count) ;
 
   if(count > 0)
     {
       if(average)
-	      return sum / (float) count ;
+	      return (float)(sum / (double) count) ;
       else
-	      return sum * cdelt3 ;
+	      return (float)(sum * cdelt3) ;
     }
   else
     return 0.0f ;
