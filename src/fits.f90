@@ -3904,7 +3904,7 @@ contains
 
                   res = (/frame_min, frame_max, 0.0, 0.0/)
 
-                  ! the 'infamous' AVX-512 slowdown on the Mac Pro ... a shame ...
+                  ! the 'infamous' AVX-512 slowdown on the Apple Mac Pro ... a shame ...
                   call make_image_spectrumF32(c_loc(thread_buffer), c_loc(thread_pixels), c_loc(thread_mask), &
                   &c_loc(data_mask), item%ignrval, item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
 
