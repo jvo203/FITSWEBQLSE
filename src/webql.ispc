@@ -32,7 +32,7 @@ export void  make_image_spectrumF32(uniform float src[], uniform float pixels[],
   frame_min = res[0];
   frame_max = res[1];
 
-  varying double partial_sum = 0.0f ;
+  varying double partial_sum = 0.0 ;
   varying unsigned int64 partial_count = 0 ;
 
   varying float vmin = frame_min ;
@@ -437,7 +437,7 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
 
     // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
 
-    varying float partial_sum = 0.0f ;
+    varying double partial_sum = 0.0 ;
     varying unsigned int64 partial_count = 0 ;
     
     for(uniform int j=cm_start; j<= cm_end; j++)
@@ -480,15 +480,15 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
         }
       }
 
-    uniform float sum = reduce_add(partial_sum) ;
+    uniform double sum = reduce_add(partial_sum) ;
     uniform int64 count = reduce_add(partial_count) ;
 
     if(count > 0)
     {
         if(average)
-	        return sum / (float) count ;
+	        return (float)(sum / (double) count) ;
         else
-	        return sum * cdelt3 ;
+	        return (float)(sum * cdelt3) ;
     }
     else
         return 0.0f ;
@@ -518,7 +518,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
 
     // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
 
-    varying float partial_sum = 0.0f ;
+    varying double partial_sum = 0.0 ;
     varying unsigned int64 partial_count = 0 ;
     
     for(uniform int j=cm_start; j<= cm_end; j++)
@@ -562,15 +562,15 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
         }
       }
 
-    uniform float sum = reduce_add(partial_sum) ;
+    uniform double sum = reduce_add(partial_sum) ;
     uniform int64 count = reduce_add(partial_count) ;
 
     if(count > 0)
     {
         if(average)
-	        return sum / (float) count ;
+	        return (float)(sum / (double) count) ;
         else
-	        return sum * cdelt3 ;
+	        return (float)(sum * cdelt3) ;
     }
     else
         return 0.0f ;
