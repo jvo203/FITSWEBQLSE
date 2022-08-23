@@ -262,8 +262,8 @@ IppStatus resizeLanczos32f_C1R_LT(Ipp32f *pSrc, IppiSizeL srcSize, Ipp32s srcSte
     int specSize = 0, initSize = 0, bufSize = 0;
     Ipp8u *pBuffer = 0;
     Ipp8u *pInitBuf = 0;
-    IppiPoint dstOffset = {0, 0};
-    IppiPoint srcOffset = {0, 0};
+    IppiPointL dstOffset = {0, 0};
+    IppiPointL srcOffset = {0, 0};
     IppStatus status = ippStsNoErr;
     IppiBorderSize borderSize = {0, 0, 0, 0};
     IppiBorderType border = ippBorderRepl;
