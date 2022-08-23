@@ -600,13 +600,13 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
 
     // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
 
-    varying float partial_sum = 0.0f ;
+    varying double partial_sum = 0.0 ;
     varying unsigned int64 partial_count = 0 ;
 
-    varying float partial_sumP = 0.0f ;
+    varying double partial_sumP = 0.0 ;
     varying unsigned int64 partial_countP = 0 ;
 
-    varying float partial_sumN = 0.0f ;
+    varying double partial_sumN = 0.0 ;
     varying unsigned int64 partial_countN = 0 ;
 
     uniform bool do_stat = !isnan(median);
@@ -663,34 +663,34 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
 
               // the '=' sign is to make sure datasets with all pixels being identical are handled too            
               partial_sumP += (tmp >= median) ? deviation : 0.0f;
-              partial_sumN += (tmp <= median) ? deviation : 0.0f;
+              partial_sumN += (tmp < median) ? deviation : 0.0f;
 
               // increment the counters
               partial_countP += (tmp >= median) ? 1 : 0;
-              partial_countN += (tmp <= median) ? 1 : 0;
+              partial_countN += (tmp < median) ? 1 : 0;
             }
           }      
         }
       }
 
     // the final reductions
-    uniform float sum = reduce_add(partial_sum) ;
+    uniform double sum = reduce_add(partial_sum) ;
     uniform int64 count = reduce_add(partial_count) ;
 
     if(do_stat)
     {
-      sumP[0] += reduce_add(partial_sumP) ;
+      sumP[0] += (float)reduce_add(partial_sumP) ;
       countP[0] += reduce_add(partial_countP) ;
-      sumN[0] += reduce_add(partial_sumN) ;
+      sumN[0] += (float)reduce_add(partial_sumN) ;
       countN[0] += reduce_add(partial_countN) ;
     }
 
     if(count > 0)
     {
         if(average)
-	        return sum / (float) count ;
+	        return (float)(sum / (double) count) ;
         else
-	        return sum * cdelt3 ;
+	        return (float)(sum * cdelt3) ;
     }
     else
         return 0.0f ;
@@ -720,7 +720,7 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
 
     // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);    
 
-    varying float partial_sum = 0.0f ;
+    varying double partial_sum = 0.0 ;
     varying unsigned int64 partial_count = 0 ;
     
     for(uniform int j=cm_start; j<= cm_end; j++)
@@ -782,15 +782,15 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
         }
       }
 
-    uniform float sum = reduce_add(partial_sum) ;
+    uniform double sum = reduce_add(partial_sum) ;
     uniform int64 count = reduce_add(partial_count) ;
 
     if(count > 0)
     {
         if(average)
-	        return sum / (float) count ;
+	        return (float)(sum / (double) count) ;
         else
-	        return sum * cdelt3 ;
+	        return (float)(sum * cdelt3) ;
     }
     else
         return 0.0f ;
@@ -810,10 +810,10 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
   if (height % DIM != 0)
     cm = cm + 1;
 
-  varying float partial_sumP = 0.0f ;
+  varying double partial_sumP = 0.0 ;
   varying unsigned int64 partial_countP = 0 ;
 
-  varying float partial_sumN = 0.0f ;
+  varying double partial_sumN = 0.0 ;
   varying unsigned int64 partial_countN = 0 ;
 
   // varying float max_value = 0.0f ;
@@ -861,9 +861,9 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
     }  
 
   // the final reductions
-  sumP[0] += reduce_add(partial_sumP) ;
+  sumP[0] += (float)reduce_add(partial_sumP) ;
   countP[0] += reduce_add(partial_countP) ;
-  sumN[0] += reduce_add(partial_sumN) ;
+  sumN[0] += (float)reduce_add(partial_sumN) ;
   countN[0] += reduce_add(partial_countN) ;
 
   // print("median: %, sumP: %, sumN: %, countP: %, countN: %, max_value: %\n", median, sumP[0], sumN[0], countP[0], countN[0], reduce_max(max_value));
