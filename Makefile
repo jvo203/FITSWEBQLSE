@@ -61,18 +61,22 @@ TARGET = fitswebqlse
 # Intel Integrated Performance Primitives Library
 ifeq ($(UNAME_S),Linux)
 	OS = linux
-    IPP = -L${IPPROOT}/lib/intel64 -L${IPPROOT}/lib/intel64/tl/openmp
+    IPP = -L${IPPROOT}/lib/intel64
+	# -L${IPPROOT}/lib/intel64/tl/openmp
 	MKL =  ${MKLROOT}/lib/intel64/libmkl_lapack95_lp64.a -L${MKLROOT}/lib/intel64
 endif
 
 ifeq ($(UNAME_S),Darwin)
 	OS = macOS
-    IPP = -L${IPPROOT}/lib -L${IPPROOT}/lib/tl/openmp
+    IPP = -L${IPPROOT}/lib
+	# -L${IPPROOT}/lib/tl/openmp
 	MKL =  ${MKLROOT}/lib/libmkl_lapack95_lp64.a -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib
 endif
 
-IPP += -lippi -lippdc -lipps -lippcore -lippcore_tl_omp -lippi_tl_omp
-MKL += -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -liomp5 -lm -ldl
+IPP += -lippi -lippdc -lipps -lippcore
+# -lippcore_tl_omp -lippi_tl_omp
+MKL += -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+# -liomp5
 
 ZFP = zfp
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
