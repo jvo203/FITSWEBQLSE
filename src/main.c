@@ -86,21 +86,19 @@ options_t options; // the one and only one definition
 #if !defined(__APPLE__) || !defined(__MACH__)
 void ipp_init()
 {
-    const IppLibraryVersion *lib;
     IppStatus status;
     Ipp64u mask, emask;
 
     /* Init IPP library */
     ippInit();
-    /* Get IPP library version info */
-    lib = ippGetLibVersion();
-    printf("%s %s\n", lib->Name, lib->Version);
 
+    /* Get IPP library version info */
     const IppLibraryVersion *pVer = ippsGetLibVersion();
 
+    /* Get IPP library threading model */
     IppThreadingType thrType;
     ippGetThreadingType_LT(&thrType);
-    printf("\nIntel(R) IPP Threading Layer (%s)", (thrType == OMP) ? "OpenMP" : "TBB");
+    printf("Intel(R) IPP Threading Layer (%s)", (thrType == OMP) ? "OpenMP" : "TBB");
 
     printf("\nIntel(R) IPP: %s %s %s", pVer->Name, pVer->Version, pVer->BuildDate);
     printf("\n");
