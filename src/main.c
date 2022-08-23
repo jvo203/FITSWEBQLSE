@@ -37,6 +37,7 @@ static void *jemalloc_daemon(void *arg);
 
 #if !defined(__APPLE__) || !defined(__MACH__)
 #include <ipp.h>
+#include <ippcore_tl.h>
 #endif
 
 #include <curl/curl.h>
@@ -94,6 +95,15 @@ void ipp_init()
     /* Get IPP library version info */
     lib = ippGetLibVersion();
     printf("%s %s\n", lib->Name, lib->Version);
+
+    const IppLibraryVersion *pVer = ippsGetLibVersion();
+
+    IppThreadingType thrType;
+    ippGetThreadingType_LT(&thrType);
+    printf("\nIntel(R) IPP Threading Layer (%s)", (thrType == OMP) ? "OpenMP" : "TBB");
+
+    printf("\nIntel(R) IPP: %s %s %s", pVer->Name, pVer->Version, pVer->BuildDate);
+    printf("\n");
 
     return;
 
