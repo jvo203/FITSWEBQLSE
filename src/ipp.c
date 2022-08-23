@@ -265,7 +265,7 @@ IppStatus resizeLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
 }
 
 IppStatus tileLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
-                             Ipp32f *pDst, IppiSize dstSize, Ipp32s dstStep)
+                             Ipp32f *pDst, IppiSize dstSize, Ipp32s dstStep, int numLobes)
 {
 
     int max_threads = get_physical_cores();
@@ -313,7 +313,7 @@ IppStatus tileLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     }
 
     /* Filter initialization */
-    status = ippiResizeLanczosInit_32f(srcSize, dstSize, 3, pSpec, pInitBuf);
+    status = ippiResizeLanczosInit_32f(srcSize, dstSize, numLobes, pSpec, pInitBuf);
     ippsFree(pInitBuf);
 
     if (status != ippStsNoErr)
