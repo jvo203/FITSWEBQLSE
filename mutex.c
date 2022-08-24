@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-void *foo(void *)
+void *foo(void *arg)
 {
-    printf("foo.\n")
+    printf("foo.\n");
 
-        return NULL;
+    return NULL;
 }
 
 int main()
@@ -15,10 +15,10 @@ int main()
     int rc;
 
     rc = pthread_create(&t1, NULL, foo, NULL);
-    printf("pthread_create rc = %d", rc);
+    printf("pthread_create rc = %d\n", rc);
 
     rc = pthread_join(t1, NULL);
-    printf("pthread_join rc = %d", rc);
+    printf("pthread_join rc = %d\n", rc);
 
     return 0;
 }

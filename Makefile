@@ -259,6 +259,9 @@ gzfp:
 mutex:
 	gfortran -cpp -D__macOS__ src/unix_pthread.f90 mutex.f90 -pthread
 
+mutexC:
+	gcc mutex.c -pthread
+
 mutexL:
 	gfortran -cpp -D__linux__ src/unix_pthread.f90 mutex.f90 -pthread
 
