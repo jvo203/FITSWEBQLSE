@@ -27,13 +27,11 @@ module util
 
    interface
       ! extern int my_pthread_create(pthread_t *thread, void *(*start_routine)(void *), void *arg)
-      function my_pthread_create(thread, start_routine, arg) bind(c, name='my_pthread_create')
+      function my_pthread_create(start_routine, arg) bind(c, name='my_pthread_create')
          import :: c_int, c_ptr, c_funptr, my_pthread_t
          implicit none
-         type(my_pthread_t), intent(inout)     :: thread
          type(c_funptr), intent(in), value :: start_routine
          type(c_ptr), intent(in), value :: arg
-         ! integer(kind=c_int)                  :: my_pthread_create
          type(c_ptr) :: my_pthread_create
       end function my_pthread_create
 
@@ -84,9 +82,7 @@ program main
 
    print '(a)', 'Starting a thread ...'
 
-   tid = my_pthread_create(thread=thread, &
-      start_routine=c_funloc(foo), &
-      arg=c_null_ptr)
+   tid = my_pthread_create(start_routine=c_funloc(foo), arg=c_null_ptr)
 
    ! print *, "my_pthread_create::rc", rc
    print *, "my_pthread_create::tid", tid
