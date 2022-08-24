@@ -329,14 +329,6 @@ module fits
          integer(c_int) :: rc
       end function my_pthread_create
 
-      function my_pthread_detach(thread) bind(c, name='my_pthread_detach')
-         import :: c_int, c_ptr
-         implicit none
-         ! type(my_pthread_t), intent(in), value :: thread
-         type(c_ptr), intent(in), value :: thread
-         integer(kind=c_int)                  :: my_pthread_detach
-      end function my_pthread_detach
-
       function my_pthread_join(thread) bind(c, name='my_pthread_join')
          import :: c_int, c_ptr
          implicit none
@@ -344,6 +336,15 @@ module fits
          type(c_ptr), intent(in), value :: thread
          integer(kind=c_int)                  :: my_pthread_join
       end function my_pthread_join
+
+      ! extern int my_pthread_create_detached(void *(*start_routine)(void *), void *arg)
+      function my_pthread_create_detached(start_routine, arg) bind(c, name='my_pthread_create_detached')
+         import :: c_int, c_ptr, c_funptr
+         implicit none
+         type(c_funptr), intent(in), value :: start_routine
+         type(c_ptr), intent(in), value :: arg
+         integer(c_int) :: my_pthread_create_detached
+      end function my_pthread_create_detached
 
       ! glib hash table
       ! void insert_dataset(const char *datasetid, int len, void *item);
