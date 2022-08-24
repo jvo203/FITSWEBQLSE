@@ -5328,7 +5328,7 @@ contains
       type(inner_dims_req_t), target :: inner_dims
       type(image_req_t), target :: image_req
       type(c_pthread_t) :: pid
-      integer :: rc
+      integer(c_int) :: rc
 
       integer inner_width, inner_height
       integer img_width, img_height
@@ -5524,6 +5524,7 @@ contains
 
       type(resize_task_t), target :: task
       type(c_ptr) :: task_pid
+      integer(c_int) :: rc
 
       real :: scale, s1, s2
       integer(kind=c_size_t) :: written
@@ -5547,25 +5548,41 @@ contains
          s2 = real(height)/real(item%naxes(2))
          scale = 0.5*(s1 + s2)
 
-         !$omp parallel num_threads(2)
-         !$omp single
-         !$omp task
          if (scale .gt. 0.2) then
-            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
-         else
-            call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height)
-         end if
-         !$omp end task
-         !$omp end single
+            task%pSrc = c_loc(item%pixels)
+            task%srcWidth = item%naxes(1)
+            task%srcHeight = item%naxes(2)
 
-         !$omp single
-         !$omp task
+            task%pDest = c_loc(pixels)
+            task%dstWidth = width
+            task%dstHeight = height
+
+            task%numLobes = 3
+
+            ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
+         else
+            task%pSrc = c_loc(item%pixels)
+            task%srcWidth = item%naxes(1)
+            task%srcHeight = item%naxes(2)
+
+            task%pDest = c_loc(pixels)
+            task%dstWidth = width
+            task%dstHeight = height
+
+            task%numLobes = 0
+
+            ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height)
+         end if
+
+         ! launch a pthread to resize pixels
+         task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
+
          ! Boolean mask: the naive Nearest-Neighbour method
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), width, height)
          ! call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, width, height)
-         !$omp end task
-         !$omp end single
-         !$omp end parallel
+
+         ! join a thread
+         rc = my_pthread_join(task_pid)
 
          ! send pixels
          written = chunked_write(fd, c_loc(pixels), sizeof(pixels))
