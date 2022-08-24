@@ -5305,6 +5305,8 @@ contains
       integer img_width, img_height
       real scale
 
+      type(resize_task_t), target :: task
+
       ! timing
       real(8) :: t1, t2 ! OpenMP TIME
 
@@ -5362,14 +5364,35 @@ contains
 
          t1 = omp_get_wtime()
 
+         ! launch a pthread to resize pixels
+         if (scale .gt. 0.2) then
+            task%pSrc = c_loc(item%pixels)
+            task%srcWidth = item%naxes(1)
+            task%srcHeight = item%naxes(2)
+
+            task%pDest = c_loc(pixels)
+            task%dstWidth = img_width
+            task%dstHeight = img_height
+            task%numLobes = 3
+
+            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
+         else
+            task%pSrc = c_loc(item%pixels)
+            task%srcWidth = item%naxes(1)
+            task%srcHeight = item%naxes(2)
+
+            task%pDest = c_loc(pixels)
+            task%dstWidth = img_width
+            task%dstHeight = img_height
+            task%numLobes = 0
+
+            call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+         end if
+
          !$omp parallel
          !$omp single
          !$omp task
-         if (scale .gt. 0.2) then
-            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
-         else
-            call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
-         end if
+
          !$omp end task
          !$omp end single
 
@@ -5647,6 +5670,16 @@ contains
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, task)
+
+      if (task%numLobes .gt. 0) then
+         ! use Lanczos
+         call resizeLanczos(task%pSrc, task%srcWidth, task%srcHeight, task%pDest, task%dstWidth, task%dstHeight, task%numLobes)
+      else
+         ! use Super
+         call resizeSuper(task%pSrc, task%srcWidth, task%srcHeight, task%pDest, task%dstWidth, task%dstHeight)
+      end if
+
+      nullify (task)
 
    end subroutine launch_resize_task
 
