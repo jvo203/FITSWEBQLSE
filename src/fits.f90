@@ -319,6 +319,32 @@ module fits
 
       end function get_physical_cores
 
+      ! custom bindings to POSIX threads
+      function my_pthread_create(start_routine, arg, rc) bind(c, name='my_pthread_create')
+         import :: c_int, c_ptr, c_funptr
+         implicit none
+         type(c_funptr), intent(in), value :: start_routine
+         type(c_ptr), intent(in), value :: arg
+         type(c_ptr) :: my_pthread_create
+         integer(c_int) :: rc
+      end function my_pthread_create
+
+      function my_pthread_detach(thread) bind(c, name='my_pthread_detach')
+         import :: c_int, c_ptr
+         implicit none
+         ! type(my_pthread_t), intent(in), value :: thread
+         type(c_ptr), intent(in), value :: thread
+         integer(kind=c_int)                  :: my_pthread_detach
+      end function my_pthread_detach
+
+      function my_pthread_join(thread) bind(c, name='my_pthread_join')
+         import :: c_int, c_ptr
+         implicit none
+         ! type(my_pthread_t), intent(in), value :: thread
+         type(c_ptr), intent(in), value :: thread
+         integer(kind=c_int)                  :: my_pthread_join
+      end function my_pthread_join
+
       ! glib hash table
       ! void insert_dataset(const char *datasetid, int len, void *item);
       subroutine insert_dataset(datasetid, len, item) BIND(C, name='insert_dataset')
