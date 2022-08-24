@@ -5637,6 +5637,19 @@ contains
       end if
    end subroutine pix_to_world
 
+   recursive subroutine launch_resize_task(user) BIND(C, name='launch_resize_task')
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+      type(resize_task_t), pointer :: task
+
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, task)
+
+   end subroutine launch_resize_task
+
    recursive subroutine spectrum_request_simd(user) BIND(C, name='spectrum_request_simd')
       use omp_lib
       use :: unix_pthread
