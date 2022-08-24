@@ -37,8 +37,6 @@ contains
       type(c_ptr), intent(in), value :: arg   ! Client data.
       real :: r
 
-      if (.not. c_associated(arg)) return
-
       ! get a random interval between 1 and 10 seconds
       call random_number(r)
       call sleep(nint(10*r))
@@ -63,7 +61,6 @@ program main
 
    print *, "my_pthread_create::rc", rc
    print *, "my_pthread_create::tid", tid
-
 
    print '(a)', 'Joining a thread ...'
 
