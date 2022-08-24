@@ -15,3 +15,10 @@ extern int my_pthread_join(pthread_t thread)
     printf("pthread_join rc = %d\n", rc);
     return rc;
 }
+
+extern int my_pthread_detach(pthread_t thread)
+{
+    int rc = pthread_detach(thread);
+    printf("pthread_detach rc = %d\n", rc);
+    return rc;
+}
