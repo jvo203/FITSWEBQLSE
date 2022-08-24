@@ -22,7 +22,7 @@ extern void *my_pthread_create(void *(*start_routine)(void *), void *arg, int *r
 {
     pthread_t *ptid = (pthread_t *)malloc(sizeof(pthread_t));
     *rc = pthread_create(ptid, NULL, start_routine, arg);
-    printf("pthread_create rc = %d\n", rc);
+    printf("[C] pthread_create rc = %d\n", rc);
     return ptid;
 }
 
@@ -37,7 +37,7 @@ extern int my_pthread_create_detached(void *(*start_routine)(void *), void *arg)
 
     if (rc != 0)
     {
-        printf("pthread_attr_init rc = %d\n", rc);
+        printf("[C] pthread_attr_init rc = %d\n", rc);
         return rc;
     }
 
@@ -45,7 +45,7 @@ extern int my_pthread_create_detached(void *(*start_routine)(void *), void *arg)
 
     if (rc != 0)
     {
-        printf("pthread_attr_setdetachstate rc = %d\n", rc);
+        printf("[C] pthread_attr_setdetachstate rc = %d\n", rc);
         pthread_attr_destroy(&attr);
         return rc;
     }
@@ -53,14 +53,14 @@ extern int my_pthread_create_detached(void *(*start_routine)(void *), void *arg)
     rc = pthread_create(&thread, &attr, start_routine, arg);
     pthread_attr_destroy(&attr);
 
-    printf("pthread_create_detached rc = %d\n", rc);
+    printf("[C] pthread_create_detached rc = %d\n", rc);
     return rc;
 }
 
 extern int my_pthread_join(pthread_t *tid)
 {
     int rc = pthread_join(*tid, NULL);
-    printf("pthread_join rc = %d\n", rc);
+    printf("[C] pthread_join rc = %d\n", rc);
     free(tid);
     return rc;
 }
