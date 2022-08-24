@@ -276,8 +276,7 @@ IppStatus tileLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
     size_t work_size = MIN(plane_size, max_work_size);
     int MAX_NUM_THREADS = MAX((int)roundf((float)plane_size / (float)work_size), 1);
     MAX_NUM_THREADS = MIN(max_threads, MAX_NUM_THREADS);
-
-    printf("tileLanczos32f_C1R::num_threads = %d\n", MAX_NUM_THREADS);
+    // printf("tileLanczos32f_C1R::num_threads = %d\n", MAX_NUM_THREADS);
 
     IppiResizeSpec_32f *pSpec = 0;
     int specSize = 0, initSize = 0, bufSize = 0;
@@ -511,7 +510,7 @@ extern void resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDe
     dstSize.height = dstHeight;
     Ipp32s dstStep = dstSize.width;
 
-    IppStatus stat = resizeLanczos32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
+    IppStatus stat = tileLanczos32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
 
 #if !defined(__APPLE__) || !defined(__MACH__)
 #ifdef DEBUG
