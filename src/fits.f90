@@ -2580,13 +2580,15 @@ contains
             &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
 
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
-            rc = c_pthread_create(thread=pid, &
-               attr=c_null_ptr, &
-               start_routine=c_funloc(global_statistics), &
-               arg=c_loc(item))
+            ! rc = c_pthread_create(thread=pid, &
+            !   attr=c_null_ptr, &
+            !   start_routine=c_funloc(global_statistics), &
+            !   arg=c_loc(item))
 
             ! detach a thread
-            if (rc .eq. 0) rc = c_pthread_detach(pid)
+            !if (rc .eq. 0) rc = c_pthread_detach(pid)
+
+            rc = my_pthread_create_detached(start_routine=c_funloc(global_statistics), arg=c_loc(item))
          else
             call print_dataset(item)
          end if
