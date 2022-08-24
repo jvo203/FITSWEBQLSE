@@ -22,7 +22,7 @@ extern void *my_pthread_create(void *(*start_routine)(void *), void *arg, int *r
 {
     pthread_t *ptid = (pthread_t *)malloc(sizeof(pthread_t));
     *rc = pthread_create(ptid, NULL, start_routine, arg);
-    printf("[C] pthread_create rc = %d\n", rc);
+    printf("[C] pthread_create rc = %d\n", *rc);
     return ptid;
 }
 
