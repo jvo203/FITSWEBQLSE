@@ -43,7 +43,6 @@ extern int my_pthread_create_detached(void *(*start_routine)(void *), void *arg)
 
 extern int my_pthread_join(pthread_t *tid)
 {
-    // int rc = pthread_join(thread, NULL);
     int rc = pthread_join(*tid, NULL);
     printf("pthread_join rc = %d\n", rc);
     free(tid);
