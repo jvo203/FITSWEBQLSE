@@ -5391,21 +5391,34 @@ contains
             ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
          end if
 
-         rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(launch_resize_task), &
-            arg=c_loc(task))
+         ! rc = c_pthread_create(thread=pid, &
+         !    attr=c_null_ptr, &
+         !    start_routine=c_funloc(launch_resize_task), &
+         !   arg=c_loc(task))
+         ! print *, 'launch_resize_task', rc
 
-         print *, 'launch_resize_task', rc
+         !$omp parallel num_threads(2)
+         !$omp single
+         !$omp task
+         if (scale .gt. 0.2) then
+            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
+         else
+            call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+         end if
+         !$omp end task
+         !$omp end single
 
+         !$omp single
+         !$omp task
          ! Boolean mask: the naive Nearest-Neighbour method
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
          ! call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, img_width, img_height)
+         !$omp end task
+         !$omp end single
+         !$omp end parallel
 
          ! join a thread
-         rc = c_pthread_join(pid, c_null_ptr)
-
-         ! call sleep(1) ! 1 sec.
+         ! rc = c_pthread_join(pid, c_null_ptr)
 
          t2 = omp_get_wtime()
 
@@ -5521,7 +5534,7 @@ contains
          s2 = real(height)/real(item%naxes(2))
          scale = 0.5*(s1 + s2)
 
-         !$omp parallel
+         !$omp parallel num_threads(2)
          !$omp single
          !$omp task
          if (scale .gt. 0.2) then
@@ -6201,7 +6214,7 @@ contains
                allocate (view_pixels(req%width, req%height))
                allocate (view_mask(req%width, req%height))
 
-               !$omp parallel
+               !$omp parallel num_threads(2)
                !$omp single
                !$omp task
                if (scale .gt. 0.2) then
@@ -6304,7 +6317,7 @@ contains
          allocate (view_pixels(req%width, req%height))
          allocate (view_mask(req%width, req%height))
 
-         !$omp parallel
+         !$omp parallel num_threads(2)
          !$omp single
          !$omp task
          if (scale .gt. 0.2) then
@@ -7091,7 +7104,7 @@ contains
          end if
 
          ! downsize {pixels, mask} into {dst_pixels, dst_mask}
-         !$omp parallel
+         !$omp parallel num_threads(2)
          !$omp single
          !$omp task
          call resizeNearest(c_loc(pixels), width, height,&
@@ -7386,7 +7399,7 @@ contains
          allocate (view_pixels(img_width, img_height))
          allocate (view_mask(img_width, img_height))
 
-         !$omp parallel
+         !$omp parallel num_threads(2)
          !$omp single
          !$omp task
          if (scale .gt. 0.2) then
