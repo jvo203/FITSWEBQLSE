@@ -1,9 +1,58 @@
-! Author:  Philipp Engel
-! Licence: ISC
 module util
    use, intrinsic :: iso_c_binding
-   use :: unix_pthread
+   ! use :: unix_pthread
    implicit none
+
+#if defined (__linux__)
+
+   integer, parameter :: PTHREAD_SIZE = 8    ! 8 Bytes.
+   integer, parameter :: PTHREAD_MUTEX_SIZE = 40   ! 40 Bytes.
+
+#elif defined (__FreeBSD__)
+
+   integer, parameter :: PTHREAD_SIZE = 8    ! 8 Bytes.
+   integer, parameter :: PTHREAD_MUTEX_SIZE = 8    ! 8 Bytes.
+
+#elif defined (__macOS__)
+
+   integer, parameter :: PTHREAD_SIZE = 8176    ! 8176 Bytes.
+   integer, parameter :: PTHREAD_MUTEX_SIZE = 56    ! 56 Bytes.
+
+#endif
+
+   type, bind(c), public :: my_pthread_t
+      private
+      character(kind=c_char) :: hidden(PTHREAD_SIZE)
+   end type my_pthread_t
+
+   interface
+      ! extern int my_pthread_create(pthread_t *thread, void *(*start_routine)(void *), void *arg)
+      function my_pthread_create(thread, start_routine, arg) bind(c, name='my_pthread_create')
+         import :: c_int, c_ptr, c_funptr, my_pthread_t
+         implicit none
+         type(my_pthread_t), intent(inout)     :: thread
+         type(c_funptr), intent(in), value :: start_routine
+         type(c_ptr), intent(in), value :: arg
+         integer(kind=c_int)                  :: my_pthread_create
+      end function my_pthread_create
+
+      ! extern int my_pthread_detach(pthread_t thread)
+      function my_pthread_detach(thread) bind(c, name='my_pthread_detach')
+         import :: c_int, my_pthread_t
+         implicit none
+         type(my_pthread_t), intent(in), value :: thread
+         integer(kind=c_int)                  :: my_pthread_detach
+      end function my_pthread_detach
+
+      ! extern int my_pthread_join(pthread_t thread)
+      function my_pthread_join(thread, value_ptr) bind(c, name='my_pthread_join')
+         import :: c_int, c_ptr, my_pthread_t
+         implicit none
+         type(my_pthread_t), intent(in), value :: thread
+         type(c_ptr), intent(in)        :: value_ptr
+         integer(kind=c_int)                  :: my_pthread_join
+      end function my_pthread_join
+   end interface
 
 contains
    recursive subroutine foo(arg) bind(c)
@@ -23,26 +72,25 @@ end module util
 
 program main
    use, intrinsic :: iso_c_binding
-   use :: unix_pthread
+   ! use :: unix_pthread
    use :: util
    implicit none
 
    integer            :: rc
-   type(c_pthread_t)  :: thread
+   type(my_pthread_t)  :: thread
 
    print '(a)', 'Starting a thread ...'
 
-   rc = c_pthread_create(thread=thread, &
-      attr=c_null_ptr, &
+   rc = my_pthread_create(thread=thread, &
       start_routine=c_funloc(foo), &
       arg=c_null_ptr)
 
-   print *, "c_pthread_create::rc", rc
+   print *, "my_pthread_create::rc", rc
 
 
    print '(a)', 'Joining a thread ...'
 
-   rc = c_pthread_join(thread, c_null_ptr)
-   print *, "c_pthread_join::rc", rc
+   rc = my_pthread_join(thread, c_null_ptr)
+   print *, "my_pthread_join::rc", rc
 
 end program main
