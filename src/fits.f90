@@ -5405,7 +5405,7 @@ contains
          ! join a thread
          rc = c_pthread_join(pid, c_null_ptr)
 
-         call sleep(1) ! 1 sec.
+         ! call sleep(1) ! 1 sec.
 
          t2 = omp_get_wtime()
 
@@ -5663,7 +5663,6 @@ contains
    end subroutine pix_to_world
 
    recursive subroutine launch_resize_task(user) BIND(C, name='launch_resize_task')
-      use :: unix_pthread
       use, intrinsic :: iso_c_binding
       implicit none
 

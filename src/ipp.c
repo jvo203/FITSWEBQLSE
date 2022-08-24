@@ -511,7 +511,7 @@ extern void resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDe
     dstSize.height = dstHeight;
     Ipp32s dstStep = dstSize.width;
 
-    IppStatus stat = tileLanczos32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
+    IppStatus stat = resizeLanczos32f_C1R(pSrc, srcSize, srcStep, pDest, dstSize, dstStep, numLobes);
 
 #if !defined(__APPLE__) || !defined(__MACH__)
 #ifdef DEBUG
