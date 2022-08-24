@@ -91,8 +91,8 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 SRC = $(ZFP_SRC) src/webql.ispc src/cpu.c src/json.c src/ini.c src/mongoose.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/cluster.c src/http.c src/ws.c src/face.f90 src/logging.f90 src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/fits.f90 src/main.c
 
 # macOS Accelerate vImage is actually rather slow
-#ifeq ($(UNAME_S),Darwin)
-ifeq ($(UNAME_M),arm64)
+ifeq ($(UNAME_S),Darwin)
+#ifeq ($(UNAME_M),arm64)
 	SRC += src/vimage.c
 else
 	SRC += src/ipp.c
@@ -122,8 +122,8 @@ ifneq ($(UNAME_S),Darwin)
 	INC += `pkg-config --cflags libcpuid`
 endif
 
-#ifneq ($(UNAME_S),Darwin)
-ifneq ($(UNAME_M),arm64)
+ifneq ($(UNAME_S),Darwin)
+#ifneq ($(UNAME_M),arm64)
 	INC += -I${MKLROOT}/include/intel64/lp64 -I${MKLROOT}/include
 endif
 
@@ -166,11 +166,11 @@ ifeq ($(UNAME_S),Darwin)
 	# GCC FORTRAN runtime
 	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/12 -lgfortran -lm -framework Accelerate
 
-	# use the built-in macOS Accelerate instead but only on Apple Silicon
-	ifeq ($(UNAME_M),arm64)
-		IPP =
-		MKL =
-	endif
+	# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
+	#ifeq ($(UNAME_M),arm64)
+	IPP =
+	MKL =
+	#endif
 
 	# try Intel compilers for a change! ... linking problems ...
 	# CC = icc
