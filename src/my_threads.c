@@ -2,6 +2,22 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+// #define __PTHREAD_SIZE__ 596
+
+// struct __darwin_pthread_handler_rec
+//{
+//     void (*__routine)(void *); /* Routine to call */
+//     void *__arg;               /* Argument to pass */
+//     struct __darwin_pthread_handler_rec *__next;
+// };
+
+/*struct _opaque_pthread_t
+{
+    long __sig;
+    struct __darwin_pthread_handler_rec *__cleanup_stack;
+    char __opaque[__PTHREAD_SIZE__];
+};*/
+
 extern void *my_pthread_create(void *(*start_routine)(void *), void *arg, int *rc)
 {
     pthread_t *ptid = (pthread_t *)malloc(sizeof(pthread_t));
