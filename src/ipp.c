@@ -329,11 +329,11 @@ IppStatus tileLanczos32f_C1R(Ipp32f *pSrc, IppiSize srcSize, Ipp32s srcStep,
         return status;
     }
 
-    /* General transform function */
-    /* Parallelized only by Y-direction here */
+/* General transform function */
+/* Parallelized only by Y-direction here */
 #pragma omp parallel num_threads(MAX_NUM_THREADS)
     {
-#pragma omp master
+#pragma omp single
         {
             // numThreads = MAX_NUM_THREADS;
             numThreads = omp_get_num_threads();

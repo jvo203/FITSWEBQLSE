@@ -5355,7 +5355,7 @@ contains
 
          t1 = omp_get_wtime()
 
-         !$omp parallel NUM_THREADS(2)
+         !$omp parallel
          !$omp single
          !$omp task
          if (scale .gt. 0.2) then
