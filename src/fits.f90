@@ -5394,7 +5394,6 @@ contains
 
          t1 = omp_get_wtime()
 
-         ! launch a pthread to resize pixels
          if (scale .gt. 0.2) then
             task%pSrc = c_loc(item%pixels)
             task%srcWidth = item%naxes(1)
@@ -5421,6 +5420,7 @@ contains
             ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
          end if
 
+         ! launch a pthread to resize pixels
          task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
 
          ! Boolean mask: the naive Nearest-Neighbour method
@@ -5521,6 +5521,9 @@ contains
 
       real(kind=c_float), dimension(:, :), allocatable, target :: pixels
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
+
+      type(resize_task_t), target :: task
+      type(c_ptr) :: task_pid
 
       real :: scale, s1, s2
       integer(kind=c_size_t) :: written
@@ -5955,6 +5958,9 @@ contains
       integer(c_int) :: precision
       real :: scale
 
+      type(resize_task_t), target :: task
+      type(c_ptr) :: task_pid
+
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
       type(c_pthread_t) :: pid
@@ -6275,6 +6281,9 @@ contains
       integer :: dimx, dimy, native_size, viewport_size
       real :: scale
       integer(c_int) :: precision
+
+      type(resize_task_t), target :: task
+      type(c_ptr) :: task_pid
 
       real(kind=c_float), allocatable, target :: pixels(:, :), view_pixels(:, :)
       logical(kind=c_bool), allocatable, target :: mask(:, :), view_mask(:, :)
@@ -7199,6 +7208,9 @@ contains
       integer :: img_width, img_height
       integer(c_int) :: precision
       real :: scale
+
+      type(resize_task_t), target :: task
+      type(c_ptr) :: task_pid
 
       ! image histogram
       integer(c_int), allocatable, target :: hist(:)
