@@ -53,12 +53,15 @@ program main
          attr=c_null_ptr, &
          start_routine=c_funloc(foo), &
          arg=c_loc(routines(i)))
+
+      print *, "c_pthread_create", i, "rc", rc
    end do
 
    print '(a)', 'Joining threads ...'
 
    do i = 1, NTHREADS
       rc = c_pthread_join(threads(i), c_loc(routines(i)))
+      print *, "c_pthread_join", i, "rc", rc
    end do
 
    rc = c_pthread_mutex_destroy(foo_mutex)
