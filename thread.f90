@@ -33,23 +33,25 @@ module util
          type(my_pthread_t), intent(inout)     :: thread
          type(c_funptr), intent(in), value :: start_routine
          type(c_ptr), intent(in), value :: arg
-         integer(kind=c_int)                  :: my_pthread_create
+         ! integer(kind=c_int)                  :: my_pthread_create
+         type(c_ptr) :: my_pthread_create
       end function my_pthread_create
 
       ! extern int my_pthread_detach(pthread_t thread)
       function my_pthread_detach(thread) bind(c, name='my_pthread_detach')
-         import :: c_int, my_pthread_t
+         import :: c_int, c_ptr
          implicit none
-         type(my_pthread_t), intent(in), value :: thread
+         ! type(my_pthread_t), intent(in), value :: thread
+         type(c_ptr), intent(in), value :: thread
          integer(kind=c_int)                  :: my_pthread_detach
       end function my_pthread_detach
 
       ! extern int my_pthread_join(pthread_t thread)
-      function my_pthread_join(thread, value_ptr) bind(c, name='my_pthread_join')
-         import :: c_int, c_ptr, my_pthread_t
+      function my_pthread_join(thread) bind(c, name='my_pthread_join')
+         import :: c_int, c_ptr
          implicit none
-         type(my_pthread_t), intent(in), value :: thread
-         type(c_ptr), intent(in)        :: value_ptr
+         ! type(my_pthread_t), intent(in), value :: thread
+         type(c_ptr), intent(in), value :: thread
          integer(kind=c_int)                  :: my_pthread_join
       end function my_pthread_join
    end interface
@@ -78,19 +80,21 @@ program main
 
    integer            :: rc
    type(my_pthread_t)  :: thread
+   type(c_ptr) :: tid
 
    print '(a)', 'Starting a thread ...'
 
-   rc = my_pthread_create(thread=thread, &
+   tid = my_pthread_create(thread=thread, &
       start_routine=c_funloc(foo), &
       arg=c_null_ptr)
 
-   print *, "my_pthread_create::rc", rc
+   ! print *, "my_pthread_create::rc", rc
+   print *, "my_pthread_create::tid", tid
 
 
    print '(a)', 'Joining a thread ...'
 
-   rc = my_pthread_join(thread, c_null_ptr)
+   rc = my_pthread_join(tid)
    print *, "my_pthread_join::rc", rc
 
 end program main
