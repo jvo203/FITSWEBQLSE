@@ -1,34 +1,11 @@
 module util
    use, intrinsic :: iso_c_binding
-   ! use :: unix_pthread
    implicit none
-
-#if defined (__linux__)
-
-   integer, parameter :: PTHREAD_SIZE = 8    ! 8 Bytes.
-   integer, parameter :: PTHREAD_MUTEX_SIZE = 40   ! 40 Bytes.
-
-#elif defined (__FreeBSD__)
-
-   integer, parameter :: PTHREAD_SIZE = 8    ! 8 Bytes.
-   integer, parameter :: PTHREAD_MUTEX_SIZE = 8    ! 8 Bytes.
-
-#elif defined (__macOS__)
-
-   integer, parameter :: PTHREAD_SIZE = 8176    ! 8176 Bytes.
-   integer, parameter :: PTHREAD_MUTEX_SIZE = 56    ! 56 Bytes.
-
-#endif
-
-   type, bind(c), public :: my_pthread_t
-      private
-      character(kind=c_char) :: hidden(PTHREAD_SIZE)
-   end type my_pthread_t
 
    interface
       ! extern int my_pthread_create(pthread_t *thread, void *(*start_routine)(void *), void *arg)
       function my_pthread_create(start_routine, arg, rc) bind(c, name='my_pthread_create')
-         import :: c_int, c_ptr, c_funptr, my_pthread_t
+         import :: c_int, c_ptr, c_funptr
          implicit none
          type(c_funptr), intent(in), value :: start_routine
          type(c_ptr), intent(in), value :: arg
@@ -78,7 +55,6 @@ program main
    implicit none
 
    integer            :: rc
-   type(my_pthread_t)  :: thread
    type(c_ptr) :: tid
 
    print '(a)', 'Starting a thread ...'
