@@ -28,6 +28,8 @@ extern void resizeLanczos(float *restrict pSrc, int srcWidth, int srcHeight, flo
     else
         flags = kvImageNoFlags;
 
+    printf("resizeLanczos: %p %d %d %p %d %d %d\n", pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, numLobes);
+
     res = vImageScale_PlanarF(&src, &dst, NULL, flags);
 }
 
