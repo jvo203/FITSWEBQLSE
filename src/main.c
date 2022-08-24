@@ -13,6 +13,9 @@
 #include <pwd.h>
 
 #include <pthread.h>
+#include <omp.h>
+
+extern int get_physical_cores();
 
 #ifdef DEBUG
 #include <jemalloc/jemalloc.h>
@@ -220,6 +223,10 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 #endif
+
+    // enable nested OpenMP parallelism
+    // omp_set_nested(1); // this function is deprecated
+    omp_set_max_active_levels(get_physical_cores());
 
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
 
