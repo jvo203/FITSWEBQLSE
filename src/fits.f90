@@ -5373,9 +5373,8 @@ contains
             task%pDest = c_loc(pixels)
             task%dstWidth = img_width
             task%dstHeight = img_height
-            task%numLobes = 3
 
-            ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
+            task%numLobes = 3
          else
             task%pSrc = c_loc(item%pixels)
             task%srcWidth = item%naxes(1)
@@ -5384,9 +5383,8 @@ contains
             task%pDest = c_loc(pixels)
             task%dstWidth = img_width
             task%dstHeight = img_height
-            task%numLobes = 0
 
-            ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+            task%numLobes = 0
          end if
 
          rc = c_pthread_create(thread=pid, &
