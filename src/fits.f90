@@ -233,6 +233,13 @@ module fits
       logical(kind=c_bool) :: valid
    end type image_spectrum_request_t
 
+   type, bind(C) :: resize_task_t
+      integer(c_int) :: srcWidth, srcHeight
+      integer(c_int) :: dstWidth, dstHeight
+      type(C_PTR) :: pSrc, pDest
+      integer(c_int) :: numLobes
+   end type resize_task_t
+
    type dataset
       character(kind=c_char), dimension(:), allocatable :: datasetid
       character(len=:), allocatable :: uri
