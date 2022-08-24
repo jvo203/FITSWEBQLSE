@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 #endif
 
     // enable nested OpenMP parallelism
-    // omp_set_nested(1); // this function is deprecated
+    omp_set_nested(1); // this function is deprecated
     omp_set_max_active_levels(get_physical_cores());
 
     printf("%s %s\n", SERVER_STRING, VERSION_STRING);
