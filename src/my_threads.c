@@ -49,11 +49,3 @@ extern int my_pthread_join(pthread_t *tid)
     free(tid);
     return rc;
 }
-
-extern int my_pthread_detach(pthread_t *tid)
-{
-    // int rc = pthread_detach(thread);
-    int rc = pthread_detach(*tid);
-    printf("pthread_detach rc = %d\n", rc);
-    return rc;
-}
