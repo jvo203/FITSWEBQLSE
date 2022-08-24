@@ -5335,6 +5335,7 @@ contains
       real scale
 
       type(resize_task_t), target :: task
+      type(c_ptr) :: task_pid
 
       ! timing
       real(8) :: t1, t2 ! OpenMP TIME
@@ -5420,34 +5421,15 @@ contains
             ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
          end if
 
-         ! rc = c_pthread_create(thread=pid, &
-         !    attr=c_null_ptr, &
-         !    start_routine=c_funloc(launch_resize_task), &
-         !   arg=c_loc(task))
-         ! print *, 'launch_resize_task', rc
+         task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
+         print *, 'launch_resize_task rc:', rc
 
-         !$omp parallel num_threads(2)
-         !$omp single
-         !$omp task
-         if (scale .gt. 0.2) then
-            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
-         else
-            call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
-         end if
-         !$omp end task
-         !$omp end single
-
-         !$omp single
-         !$omp task
          ! Boolean mask: the naive Nearest-Neighbour method
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
          ! call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, img_width, img_height)
-         !$omp end task
-         !$omp end single
-         !$omp end parallel
 
          ! join a thread
-         ! rc = c_pthread_join(pid, c_null_ptr)
+         rc = my_pthread_join(task_pid)
 
          t2 = omp_get_wtime()
 
