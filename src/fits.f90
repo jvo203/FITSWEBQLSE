@@ -325,8 +325,8 @@ module fits
          implicit none
          type(c_funptr), intent(in), value :: start_routine
          type(c_ptr), intent(in), value :: arg
+         integer(c_int), intent(out) :: rc
          type(c_ptr) :: my_pthread_create
-         integer(c_int) :: rc
       end function my_pthread_create
 
       function my_pthread_join(thread) bind(c, name='my_pthread_join')
