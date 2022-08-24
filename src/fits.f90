@@ -5375,7 +5375,7 @@ contains
             task%dstHeight = img_height
             task%numLobes = 3
 
-            call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
+            ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
          else
             task%pSrc = c_loc(item%pixels)
             task%srcWidth = item%naxes(1)
@@ -5386,24 +5386,20 @@ contains
             task%dstHeight = img_height
             task%numLobes = 0
 
-            call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+            ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
          end if
 
-         !$omp parallel
-         !$omp single
-         !$omp task
+         rc = c_pthread_create(thread=pid, &
+                               attr=c_null_ptr, &
+                               start_routine=c_funloc(launch_resize_task), &
+                               arg=c_loc(task))
 
-         !$omp end task
-         !$omp end single
-
-         !$omp single
-         !$omp task
          ! Boolean mask: the naive Nearest-Neighbour method
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
          ! call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, img_width, img_height)
-         !$omp end task
-         !$omp end single
-         !$omp end parallel
+
+         ! join a thread
+         rc = c_pthread_join(pid, c_null_ptr)
 
          t2 = omp_get_wtime()
 
