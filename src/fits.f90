@@ -5538,29 +5538,19 @@ contains
          s2 = real(height)/real(item%naxes(2))
          scale = 0.5*(s1 + s2)
 
+         task%pSrc = c_loc(item%pixels)
+         task%srcWidth = item%naxes(1)
+         task%srcHeight = item%naxes(2)
+
+         task%pDest = c_loc(pixels)
+         task%dstWidth = width
+         task%dstHeight = height
+
          if (scale .gt. 0.2) then
-            task%pSrc = c_loc(item%pixels)
-            task%srcWidth = item%naxes(1)
-            task%srcHeight = item%naxes(2)
-
-            task%pDest = c_loc(pixels)
-            task%dstWidth = width
-            task%dstHeight = height
-
             task%numLobes = 3
-
             ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
          else
-            task%pSrc = c_loc(item%pixels)
-            task%srcWidth = item%naxes(1)
-            task%srcHeight = item%naxes(2)
-
-            task%pDest = c_loc(pixels)
-            task%dstWidth = width
-            task%dstHeight = height
-
             task%numLobes = 0
-
             ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height)
          end if
 
