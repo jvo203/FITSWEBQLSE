@@ -2584,7 +2584,6 @@ contains
             !   attr=c_null_ptr, &
             !   start_routine=c_funloc(global_statistics), &
             !   arg=c_loc(item))
-
             ! detach a thread
             !if (rc .eq. 0) rc = c_pthread_detach(pid)
 
