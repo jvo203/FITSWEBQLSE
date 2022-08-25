@@ -5267,8 +5267,8 @@ contains
       type(dataset), pointer :: item
 
       type(inner_dims_req_t), target :: inner_dims
-      type(c_pthread_t) :: pid
-      integer :: rc
+      type(c_ptr) :: pid
+      integer(c_int) :: rc
 
       if (.not. c_associated(ptr)) return
 
@@ -5284,16 +5284,13 @@ contains
       inner_dims%height = 0
 
       ! launch a pthread
-      rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_inner_dimensions), &
-         arg=c_loc(inner_dims))
+      pid = my_pthread_create(start_routine=c_funloc(fetch_inner_dimensions), arg=c_loc(inner_dims), rc=rc)
 
       ! get the inner image bounding box (excluding NaNs)
       call inherent_image_dimensions(item, inner_width, inner_height)
 
       ! join a thread
-      rc = c_pthread_join(pid, c_null_ptr)
+      rc = my_pthread_join(pid)
 
       ! synchronise with the cluster
       inner_width = max(inner_width, inner_dims%width)
