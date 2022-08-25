@@ -6677,12 +6677,11 @@ contains
       type(dataset), pointer :: item
 
       type(mad_req_t), target :: req
-      type(c_pthread_t) :: pid
+      type(c_ptr) :: pid
+      integer(c_int) :: rc
 
       real(c_float) :: sumP, sumN
       integer(c_int64_t) :: countP, countN
-
-      integer :: rc
 
       if (.not. c_associated(arg)) return
 
@@ -6701,16 +6700,13 @@ contains
       req%last = item%naxes(3)
 
       ! launch a pthread
-      rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_global_statistics), &
-         arg=c_loc(req))
+      pid = my_pthread_create(start_routine=c_funloc(fetch_global_statistics), arg=c_loc(req), rc=rc)
 
       ! calculate global statistics locally
       call calculate_global_statistics(item, item%dmedian, sumP, countP, sumN, countN, req%first, req%last)
 
       ! join a thread
-      rc = c_pthread_join(pid, c_null_ptr)
+      rc = my_pthread_join(pid)
 
       print *, "cluster statistics... sumP", req%sumP, ", countP", req%countP, ", sumN", req%sumN, ", countN", req%countN
 
