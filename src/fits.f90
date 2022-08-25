@@ -6815,8 +6815,8 @@ contains
       real, parameter :: u = 7.5
 
       type(video_fetch_f), allocatable, target :: fetch_req
-      type(c_pthread_t) :: pid
-      integer :: rc
+      type(c_ptr) :: pid
+      integer(c_int) :: rc
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
