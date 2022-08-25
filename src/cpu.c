@@ -11,7 +11,9 @@ int get_physical_cores()
     cpuid_get_raw_data(&raw);
     cpu_identify(&raw, &data);
 
-    // printf("[C] No. of Physical Core(s) : %d\n", data.num_cores);
+#ifdef DEBUG
+    printf("[C] No. of Physical Core(s) : %d\n", data.num_cores);
+#endif
 
     return data.num_cores;
 }
@@ -44,7 +46,9 @@ int get_physical_cores()
             numCPU = 1;
     }
 
-    // printf("[C] No. of Performance Core(s) : %d\n", numCPU);
+#ifdef DEBUG
+    printf("[C] No. of Performance Core(s) : %d\n", numCPU);
+#endif
 
     return numCPU;
 }
