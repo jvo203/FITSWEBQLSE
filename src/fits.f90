@@ -5947,8 +5947,8 @@ contains
 
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
-      type(c_pthread_t) :: pid
-      integer :: rc
+      type(c_ptr) :: pid
+      integer(c_int) :: rc
 
       ! OpenMP thread-local variables
       real(c_float) :: thread_sumP, thread_sumN
@@ -6084,11 +6084,7 @@ contains
       cluster_req%valid = .false.
 
       ! launch a thread
-      rc = c_pthread_create(thread=pid, &
-         attr=c_null_ptr, &
-         start_routine=c_funloc(fetch_realtime_image_spectrum), &
-         arg=c_loc(cluster_req))
-
+      pid = my_pthread_create(start_routine=c_funloc(fetch_realtime_image_spectrum), arg=c_loc(cluster_req), rc=rc)
       ! end of cluster
 
       ! allocate and zero-out the spectrum
@@ -6146,7 +6142,7 @@ contains
       !$omp END PARALLEL
 
       ! join a thread
-      rc = c_pthread_join(pid, c_null_ptr)
+      rc = my_pthread_join(pid)
 
       ! reduce the pixels/mask locally
       if (req%image) then
