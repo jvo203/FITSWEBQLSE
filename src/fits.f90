@@ -5324,7 +5324,7 @@ contains
 
       type(inner_dims_req_t), target :: inner_dims
       type(image_req_t), target :: image_req
-      type(c_pthread_t) :: pid
+      type(c_ptr) :: pid
       integer(c_int) :: rc
 
       integer inner_width, inner_height
@@ -5358,10 +5358,7 @@ contains
          inner_dims%height = 0
 
          ! launch a pthread
-         rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(fetch_inner_dimensions), &
-            arg=c_loc(inner_dims))
+         pid = my_pthread_create(start_routine=c_funloc(fetch_inner_dimensions), arg=c_loc(inner_dims), rc=rc)
       end if
 
       ! get the inner image bounding box (excluding NaNs)
@@ -5370,7 +5367,7 @@ contains
       ! only for data cubes
       if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
          ! join a thread
-         rc = c_pthread_join(pid, c_null_ptr)
+         rc = my_pthread_join(pid)
 
          ! synchronise with the cluster
          inner_width = max(inner_width, inner_dims%width)
@@ -5444,13 +5441,10 @@ contains
          image_req%height = img_height
 
          ! launch a pthread
-         rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(fetch_image), &
-            arg=c_loc(image_req))
+         pid = my_pthread_create(start_routine=c_funloc(fetch_image), arg=c_loc(image_req), rc=rc)
 
          ! join a thread (wait for the results)
-         rc = c_pthread_join(pid, c_null_ptr)
+         rc = my_pthread_join(pid)
       end if
 
       ! make an image histogram, decide on the flux etc.
