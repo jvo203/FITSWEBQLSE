@@ -7431,24 +7431,30 @@ contains
          allocate (view_pixels(img_width, img_height))
          allocate (view_mask(img_width, img_height))
 
-         !$omp parallel num_threads(2)
-         !$omp single
-         !$omp task
-         if (scale .gt. 0.2) then
-            call resizeLanczos(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height, 3)
-         else
-            call resizeSuper(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height)
-         end if
-         !$omp end task
-         !$omp end single
+         task%pSrc = c_loc(pixels)
+         task%srcWidth = item%naxes(1)
+         task%srcHeight = item%naxes(2)
 
-         !$omp single
-         !$omp task
+         task%pDest = c_loc(view_pixels)
+         task%dstWidth = img_width
+         task%dstHeight = img_height
+
+         if (scale .gt. 0.2) then
+            task%numLobes = 3
+            ! call resizeLanczos(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height, 3)
+         else
+            task%numLobes = 0
+            ! call resizeSuper(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height)
+         end if
+
+         ! launch a pthread to resize pixels
+         task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
+
          call resizeNearest(c_loc(mask), item%naxes(1), item%naxes(2), c_loc(view_mask), img_width, img_height)
          ! call resizeMask(mask, item%naxes(1), item%naxes(2), view_mask, img_width, img_height)
-         !$omp end task
-         !$omp end single
-         !$omp end parallel
+
+         ! join a thread
+         rc = my_pthread_join(task_pid)
       else
          img_width = item%naxes(1)
          img_height = item%naxes(2)
