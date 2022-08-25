@@ -6888,13 +6888,10 @@ contains
          fetch_req%valid = .false.
 
          ! launch a pthread
-         rc = c_pthread_create(thread=pid, &
-            attr=c_null_ptr, &
-            start_routine=c_funloc(fetch_video_frame), &
-            arg=c_loc(fetch_req))
+         pid = my_pthread_create(start_routine=c_funloc(fetch_video_frame),arg=c_loc(fetch_req), rc=rc)
 
          ! join a thread
-         rc = c_pthread_join(pid, c_null_ptr)
+         rc = my_pthread_join(pid)
 
          ! skip invalid frames (not found on other cluster nodes)
          if (.not. fetch_req%valid) then
