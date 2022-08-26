@@ -2564,6 +2564,8 @@ contains
       item%progress = item%progress + progress
       item%elapsed = elapsed
 
+      print *, 'update_progress: ', progress, ' ' , item%progress, ' ', item%elapsed
+
       current = item%progress
       total = item%total
 
