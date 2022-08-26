@@ -2561,10 +2561,12 @@ contains
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%progress_mtx)
 
-      item%progress = item%progress + progress
-      item%elapsed = elapsed
+      if (item%total .gt. 0 .and. item%progress .lt. item%total) then
+         item%progress = item%progress + progress
+         item%elapsed = elapsed
+      end if
 
-      print *, 'update_progress: ', progress, ' ' , item%progress, ' ', item%elapsed
+      ! print *, 'update_progress: ', progress, ' ' , item%progress, ' ', item%elapsed
 
       current = item%progress
       total = item%total
