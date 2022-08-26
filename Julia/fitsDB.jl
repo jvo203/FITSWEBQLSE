@@ -1,9 +1,9 @@
 using LibPQ, Tables;
 
 function connect_db(db_name)
-    user = "jvo"    
-    password = user * String(UInt8.([33]))
-    host = "jvof"
+    host = "jvof"    
+    user = SubString(host, 1, 3)
+    password = user * String(UInt8.([33]))    
 
     url = "postgresql://" * user
 
