@@ -28,10 +28,19 @@ function get_fits_total(conn, threshold)
     return round(data[1][1]/(1024^3))
 end
 
+# conservative assumptions
+utilisation = 0.70 # 70% of the disk space is used
+compression = 3.0 # 3:1 compression ratio
+cache = 3.7 * 1024 # SSD cache size per node in GB
+nodes = 3  # number of nodes in the cluster
+
 conn = connect_db("alma")
 
-threshold = 150
-dataSize = get_fits_total(conn, threshold)
-println("total data size: $(dataSize) GB")
+threshold = 50 # GB
+volume = get_fits_total(conn, threshold)
+println("total volume of datasets > $(threshold) GB: $(volume) GB")
+
+required = round(volume  / compression / nodes)
+println("required disk space per node: $(required) GB, available: $(cache) GB, $(utilisation*100)% cache utilisation available cache: $(round(cache*utilisation)) GB")
 
 close(conn)
