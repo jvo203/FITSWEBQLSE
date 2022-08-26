@@ -57,8 +57,7 @@ end
 function preload_dataset(datasetid)
     local progress, strURL
 
-    strURL = "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=$datasetid"
-    println(strURL)
+    strURL = "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=$datasetid"    
 
     # access the FITSWEBQLSE
     resp = HTTP.get(strURL)    
@@ -79,15 +78,16 @@ function preload_dataset(datasetid)
         end
 
         if progress == 100
-            println("done")
+            println("done                     ")
             break
         end
 
-        println("progress: $progress\r")
-        sleep(1)
+        print("progress: $(round(progress,digits=1))%\r")
+        sleep(5)
     end    
 
     # then wait 30 seconds to allow for the 60s dataset timeout (avoid a RAM overload)
+    # sleep(30) # or not ...
 end
 
 # conservative assumptions
