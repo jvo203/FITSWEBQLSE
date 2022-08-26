@@ -30,7 +30,8 @@ end
 
 conn = connect_db("alma")
 
-dataSize = get_fits_total(conn, 150)
+threshold = 150
+dataSize = get_fits_total(conn, threshold)
 println("total data size: $(dataSize) GB")
 
 close(conn)
