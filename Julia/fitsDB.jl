@@ -30,13 +30,13 @@ end
 
 # conservative assumptions
 utilisation = 0.70 # 70% of the disk space is used
-compression = 3.0 # 3:1 compression ratio
+compression = 3.5 # 3.5:1 compression ratio
 cache = 3.7 * 1024 # SSD cache size per node in GB
 nodes = 3  # number of nodes in the cluster
 
 conn = connect_db("alma")
 
-threshold = 50 # GB
+threshold = 40 # GB
 volume = get_fits_total(conn, threshold)
 println("total volume of datasets > $(threshold) GB: $(volume) GB")
 
