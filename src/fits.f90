@@ -2562,7 +2562,9 @@ contains
       rc = c_pthread_mutex_lock(item%progress_mtx)
 
       if (item%total .gt. 0 .and. item%progress .lt. item%total) then
-         item%progress = item%progress + progress
+         ! for some reason there are duplicate submissions
+         ! so as a countermeasure the progress needs to be capped at 100%
+         item%progress = min(item%total, item%progress + progress)
          item%elapsed = elapsed
       end if
 

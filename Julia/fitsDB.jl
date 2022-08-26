@@ -1,6 +1,7 @@
 using HTTP;
 using JSON;
 using LibPQ, Tables;
+using ProgressBars;
 
 function connect_db(db_name)        
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
@@ -41,8 +42,7 @@ function get_large_datasets(conn, threshold)
 end
 
 function poll_progress(datasetid)
-    strURL = "http://grid80:8080/fitswebql/progress/" * datasetid
-    println(strURL)
+    strURL = "http://grid80:8080/fitswebql/progress/" * datasetid    
 
     resp = HTTP.get(strURL)
     # println(resp)
@@ -55,16 +55,37 @@ function poll_progress(datasetid)
 end
 
 function preload_dataset(datasetid)
+    local progress, strURL
+
     strURL = "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=$datasetid"
     println(strURL)
 
     # access the FITSWEBQLSE
-    resp = HTTP.get(strURL)
-    println(resp)
+    resp = HTTP.get(strURL)    
+
+    # check the HTTP response code
+    if resp.status != 200
+        println(resp)      
+        return
+    end
 
     # wait until an image has been loaded
-    progress = poll_progress(datasetid)
-    println(progress)
+    while true
+        progress = poll_progress(datasetid)
+
+        if progress == nothing
+            println("no progress")
+            break
+        end
+
+        if progress == 100
+            println("done")
+            break
+        end
+
+        println("progress: $progress\r")
+        sleep(1)
+    end    
 
     # then wait 30 seconds to allow for the 60s dataset timeout (avoid a RAM overload)
 end
@@ -89,12 +110,21 @@ datasets = get_large_datasets(conn, threshold)
 ids = datasets[:dataset_id]
 sizes = datasets[:file_size]
 
+count = 1
+
 for (datasetid, filesize) in zip(ids, sizes)
+    global count
+
+    if count > 10
+        break
+    end
+
     println("$datasetid :: $(round(filesize / 1024^3,digits=1)) GB")
-    # preload_dataset(datasetid)
+    preload_dataset(datasetid)
+    count = count + 1
 end
 
 # testing purposes
-preload_dataset("ALMA01084695")
+# preload_dataset("ALMA01084695")
 
 close(conn)
