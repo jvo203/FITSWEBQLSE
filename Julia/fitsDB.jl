@@ -69,8 +69,9 @@ function preload_dataset(datasetid)
     end
 
     # wait until an image has been loaded
-    # p = Progress(0, 100, "Loading dataset " * datasetid)
-    p = Progress(100, 1)
+    p = Progress(100, 1, "Loading dataset " * datasetid)
+    # p = Progress(100, 1)
+
     while true
         progress = poll_progress(datasetid)
 
