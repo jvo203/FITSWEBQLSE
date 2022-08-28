@@ -1,7 +1,7 @@
 using HTTP;
 using JSON;
 using LibPQ, Tables;
-using ProgressBars;
+using ProgressMeter;
 
 function connect_db(db_name)        
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
@@ -69,6 +69,8 @@ function preload_dataset(datasetid)
     end
 
     # wait until an image has been loaded
+    # p = Progress(0, 100, "Loading dataset " * datasetid)
+    p = Progress(100, 1)
     while true
         progress = poll_progress(datasetid)
 
@@ -82,7 +84,8 @@ function preload_dataset(datasetid)
             break
         end
 
-        print("progress: $(round(progress,digits=1))%\r")
+        # print("progress: $(round(progress,digits=1))%\r")
+        update!(p, Int(floor(progress)))
         sleep(5)
     end    
 
