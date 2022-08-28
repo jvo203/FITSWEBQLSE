@@ -2564,7 +2564,8 @@ contains
       if (item%total .gt. 0 .and. item%progress .lt. item%total) then
          ! for some reason there are duplicate submissions
          ! so as a countermeasure the progress needs to be capped at 100%
-         item%progress = min(item%total, item%progress + progress)
+         ! item%progress = min(item%total, item%progress + progress)
+         item%progress = item%progress + progress
          item%elapsed = elapsed
       end if
 
@@ -2884,7 +2885,7 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
-      if (progress .gt. 0) call update_progress(item, progress)
+      ! if (progress .gt. 0) call update_progress(item, progress)
 
       call get_channel_range(item, startindex, endindex, status)
 
