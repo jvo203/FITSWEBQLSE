@@ -1,7 +1,7 @@
-using HTTP;
-using JSON;
-using LibPQ, Tables;
-using ProgressMeter;
+using HTTP
+using JSON
+using LibPQ, Tables
+using ProgressMeter
 
 function connect_db(db_name)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
@@ -54,10 +54,14 @@ function poll_progress(datasetid)
     end
 end
 
+function get_dataset_url(datasetid)    
+    return "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=" * datasetid
+end
+
 function preload_dataset(datasetid)
     local progress, strURL
 
-    strURL = "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=$datasetid"
+    strURL = get_dataset_url(datasetid)
 
     # access the FITSWEBQLSE
     resp = HTTP.get(strURL)
@@ -68,9 +72,8 @@ function preload_dataset(datasetid)
         return
     end
 
-    # wait until an image has been loaded
-    p = Progress(100, 1, "Loading")
-    # p = Progress(100, 1)
+    # wait until an image has been loaded    
+    p = Progress(100, 1)
 
     while true
         progress = poll_progress(datasetid)
@@ -80,14 +83,20 @@ function preload_dataset(datasetid)
             break
         end
 
-        if progress == 100
-            println("done                     ")
-            break
-        end
-
         # print("progress: $(round(progress,digits=1))%\r")
         update!(p, Int(floor(progress)))
-        sleep(1)
+
+        if progress > 100
+            println("\nanomalous progress detected: $(progress)!")
+        end
+
+        if progress == 100
+        #    println("done                     ")
+            break
+        else
+            sleep(1)
+        end
+        
     end
 
     # then wait 30 seconds to allow for the 60s dataset timeout (avoid a RAM overload)
@@ -115,17 +124,51 @@ ids = datasets[:dataset_id]
 sizes = datasets[:file_size]
 
 count = 1
+html = IOBuffer()
+write(html, "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n")
+write(html, "<title>Preloaded datasets</title>\n</head>\n<body>\n")
+
+# HTML h1
+write(html, "<h1>Preloaded datasets</h1>\n")
+
+# append HTML table header
+write(html, "<table><tr><th>Dataset ID</th><th>Size</th><th>Cache Type</th></tr>\n")
 
 for (datasetid, filesize) in zip(ids, sizes)
     global count
+    local cache_type
 
     if count > 10
         break
     end
 
-    println("$datasetid :: $(round(filesize / 1024^3,digits=1)) GB")
+    println("#$count\t$datasetid :: $(round(filesize / 1024^3,digits=1)) GB")
     preload_dataset(datasetid)
     count = count + 1
+
+    # make HTML link
+    link = get_dataset_url(datasetid)
+
+    # set cache type
+    if filesize / 1024^3 > threshold
+        cache_type = "SSD"
+    else
+        cache_type = "HDD"
+    end        
+
+    # append HTML table row
+    write(html, "<tr><td><a href=\"$link\">$datasetid</a></td><td>$(round(filesize / 1024^3,digits=1)) GB</td><td>$cache_type</td></tr>\n")
+end
+
+# end the HTML table
+write(html, "</table>\n")
+
+# end the HTML document
+write(html, "</body>\n</html>\n")
+
+# export the HTML table to a file
+open("fitsDB.html", "w") do f
+    write(f, String(take!(html)))
 end
 
 # testing purposes
