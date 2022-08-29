@@ -83,16 +83,16 @@ function preload_dataset(datasetid)
             println("no progress")
             break
         end
-
-        # print("progress: $(round(progress,digits=1))%\r")
+        
         update!(p, Int(floor(progress)))
 
+        # thow a DomainError if the progress is over 100% (should not happen, I want to catch any logical bugs, network problems, etc.)
         if progress > 100
             println("\nanomalous progress detected: $(progress)!")
+            throw(DomainError(progress, "anomalous progress detected"))
         end
 
-        if progress == 100
-        #    println("done                     ")
+        if progress == 100        
             break
         else
             sleep(1)
