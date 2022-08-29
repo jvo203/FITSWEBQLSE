@@ -72,9 +72,10 @@ function preload_dataset(datasetid)
         return
     end
 
-    # wait until an image has been loaded    
+    # wait until a dataset has been loaded
     p = Progress(100, 1)
 
+    # repeatedly poll for progress
     while true
         progress = poll_progress(datasetid)
 
