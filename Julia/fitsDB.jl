@@ -125,6 +125,8 @@ ids = datasets[:dataset_id]
 sizes = datasets[:file_size]
 
 count = 1
+total_count = length(ids) # number of datasets to preload
+
 html = IOBuffer()
 write(html, "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n")
 write(html, "<title>Preloaded datasets</title>\n</head>\n<body>\n")
@@ -139,11 +141,11 @@ for (datasetid, filesize) in zip(ids, sizes)
     global count
     local cache_type
 
-    if count > 10
-        break
-    end
+    # if count > 10
+    #     break
+    # end
 
-    println("#$count\t$datasetid :: $(round(filesize / 1024^3,digits=1)) GB")
+    println("#$count/$total_count :: $datasetid :: $(round(filesize / 1024^3,digits=1)) GB")
     preload_dataset(datasetid)
     count = count + 1
 
