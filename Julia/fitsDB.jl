@@ -33,7 +33,7 @@ end
 
 function get_large_datasets(conn, threshold)
     # threshold is given in GB
-    strSQL = "select dataset_id, file_size from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"
+    strSQL = "select dataset_id, file_size from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. order by file_size asc;"
 
     res = execute(conn, strSQL)
     data = columntable(res)
