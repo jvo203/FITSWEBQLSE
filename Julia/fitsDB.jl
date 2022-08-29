@@ -141,9 +141,9 @@ for (datasetid, filesize) in zip(ids, sizes)
     global count
     local cache_type
 
-    if count > 1
-        break
-    end
+    # if count > 1
+    #     break
+    # end
 
     println("#$count/$total_count :: $datasetid :: $(round(filesize / 1024^3,digits=1)) GB")
     preload_dataset(datasetid)
