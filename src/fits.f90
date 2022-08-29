@@ -3220,6 +3220,7 @@ contains
       integer(kind=8) firstpix, lastpix
       integer max_threads, tid, frame
       integer(c_int) :: start, end, num_per_node
+      integer :: total_per_node
       integer, dimension(4) :: fpixels, lpixels, incs
       logical test_ignrval
 
@@ -3254,7 +3255,7 @@ contains
       ! OpenMP multi-threading
       integer, dimension(:), allocatable :: thread_units
 
-      integer :: rc
+      integer(c_int) :: rc
 
       if (.not. c_associated(root)) then
          ! needs to be protected with a mutex
@@ -3848,6 +3849,7 @@ contains
          !$omp& REDUCTION(.or.:thread_bSuccess)&
          !$omp& REDUCTION(max:dmax)&
          !$omp& REDUCTION(min:dmin)&
+         !$omp& REDUCTION(+:total_per_node)&
          !$omp& NUM_THREADS(max_threads)
          tid = 1 + OMP_GET_THREAD_NUM()
 
@@ -3867,6 +3869,7 @@ contains
          start = 0
          end = 0
          num_per_node = 0
+         total_per_node = 0
 
          do
             ! update the progress with work done so far
@@ -3907,6 +3910,8 @@ contains
 
                ! a "plain" DO LOOP
                do frame = start, end
+                  total_per_node = total_per_node + 1
+
                   ! starting bounds
                   fpixels = (/1, 1, frame, 1/)
 
@@ -4028,6 +4033,7 @@ contains
          end if
       end if
 
+      print *, "total_per_node", total_per_node
       call print_progress(item)
 
       bSuccess = .true.
