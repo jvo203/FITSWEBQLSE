@@ -3917,6 +3917,11 @@ contains
                do frame = start, end
                   total_per_node = total_per_node + 1
 
+                  ! debugging
+                  call sleep(1)
+                  cycle
+                  ! end of debugging
+
                   ! starting bounds
                   fpixels = (/1, 1, frame, 1/)
 
