@@ -3839,6 +3839,9 @@ contains
          item%frame_max = -1.0E30
          item%frame_median = ieee_value(0.0, ieee_quiet_nan)
 
+         start = 0
+         end = 0
+         num_per_node = 0
          total_per_node = 0
 
          !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
