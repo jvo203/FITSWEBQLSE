@@ -2863,7 +2863,6 @@ contains
       if (idx .lt. 1) return
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       ! no need for a mutex as no other thread will be accessing this array range (unless a dataset is being deleted ...)
@@ -2961,7 +2960,6 @@ contains
       type(dataset), pointer :: item
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       if (progress .gt. 0) call update_progress(item, progress)
@@ -3918,8 +3916,8 @@ contains
                   total_per_node = total_per_node + 1
 
                   ! debugging
-                  call sleep(10)
-                  cycle
+                  ! call sleep(10)
+                  ! cycle
                   ! end of debugging
 
                   ! starting bounds
