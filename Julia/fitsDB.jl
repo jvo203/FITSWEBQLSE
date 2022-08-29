@@ -69,7 +69,7 @@ function preload_dataset(datasetid)
     end
 
     # wait until an image has been loaded
-    # p = Progress(100, 1, "Loading")
+    p = Progress(100, 1, "Loading")
     # p = Progress(100, 1)
 
     while true
@@ -85,9 +85,9 @@ function preload_dataset(datasetid)
             break
         end
 
-        print("progress: $(round(progress,digits=1))%\r")
-        # update!(p, Int(floor(progress)))
-        sleep(5)
+        # print("progress: $(round(progress,digits=1))%\r")
+        update!(p, Int(floor(progress)))
+        sleep(1)
     end
 
     # then wait 30 seconds to allow for the 60s dataset timeout (avoid a RAM overload)
