@@ -54,7 +54,7 @@ function poll_progress(datasetid)
     end
 end
 
-function get_dataset_url(datasetid)    
+function get_dataset_url(datasetid)
     return "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=" * datasetid
 end
 
@@ -79,11 +79,11 @@ function preload_dataset(datasetid)
     while true
         progress = poll_progress(datasetid)
 
-        if progress == nothing
-            println("no progress")
+        if isnothing(progress)
+            println("\nno progress")
             break
         end
-        
+
         update!(p, Int(floor(progress)))
 
         # thow a DomainError if the progress is over 100% (should not happen, I want to catch any logical bugs, network problems, etc.)
@@ -92,12 +92,12 @@ function preload_dataset(datasetid)
             throw(DomainError(progress, "anomalous progress detected"))
         end
 
-        if progress == 100        
+        if progress == 100
             break
         else
             sleep(1)
         end
-        
+
     end
 
     # then wait 30 seconds to allow for the 60s dataset timeout (avoid a RAM overload)
@@ -157,7 +157,7 @@ for (datasetid, filesize) in zip(ids, sizes)
         cache_type = "SSD"
     else
         cache_type = "HDD"
-    end        
+    end
 
     # append HTML table row
     write(html, "<tr><td><a href=\"$link\">$datasetid</a></td><td>$(round(filesize / 1024^3,digits=1)) GB</td><td>$cache_type</td></tr>\n")
