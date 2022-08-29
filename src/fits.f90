@@ -2885,7 +2885,7 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
-      ! if (progress .gt. 0) call update_progress(item, progress)
+      if (progress .gt. 0) call update_progress(item, progress)
 
       call get_channel_range(item, startindex, endindex, status)
 
