@@ -3918,7 +3918,7 @@ contains
                   total_per_node = total_per_node + 1
 
                   ! debugging
-                  call sleep(1)
+                  call sleep(10)
                   cycle
                   ! end of debugging
 
