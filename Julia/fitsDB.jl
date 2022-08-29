@@ -119,7 +119,7 @@ count = 1
 for (datasetid, filesize) in zip(ids, sizes)
     global count
 
-    if count > 1
+    if count > 10
         break
     end
 
