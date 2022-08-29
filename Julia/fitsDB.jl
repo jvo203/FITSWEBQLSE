@@ -3,7 +3,7 @@ using JSON;
 using LibPQ, Tables;
 using ProgressMeter;
 
-function connect_db(db_name)        
+function connect_db(db_name)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
     password = user * String(UInt8.([33]))
     host = "jvof"
@@ -22,27 +22,27 @@ end
 
 function get_fits_total(conn, threshold)
     # threshold is given in GB
-    strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"    
+    strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"
 
     res = execute(conn, strSQL)
-    data = columntable(res)    
+    data = columntable(res)
 
     # convert the result to GB and round
-    return round(data[1][1]/(1024^3))
+    return round(data[1][1] / (1024^3))
 end
 
 function get_large_datasets(conn, threshold)
     # threshold is given in GB
-    strSQL = "select dataset_id, file_size from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"    
+    strSQL = "select dataset_id, file_size from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"
 
     res = execute(conn, strSQL)
-    data = columntable(res)    
+    data = columntable(res)
 
     return data
 end
 
 function poll_progress(datasetid)
-    strURL = "http://grid80:8080/fitswebql/progress/" * datasetid    
+    strURL = "http://grid80:8080/fitswebql/progress/" * datasetid
 
     resp = HTTP.get(strURL)
     # println(resp)
@@ -57,19 +57,19 @@ end
 function preload_dataset(datasetid)
     local progress, strURL
 
-    strURL = "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=$datasetid"    
+    strURL = "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=$datasetid"
 
     # access the FITSWEBQLSE
-    resp = HTTP.get(strURL)    
+    resp = HTTP.get(strURL)
 
     # check the HTTP response code
     if resp.status != 200
-        println(resp)      
+        println(resp)
         return
     end
 
     # wait until an image has been loaded
-    p = Progress(100, 1, "Loading")
+    # p = Progress(100, 1, "Loading")
     # p = Progress(100, 1)
 
     while true
@@ -85,10 +85,10 @@ function preload_dataset(datasetid)
             break
         end
 
-        # print("progress: $(round(progress,digits=1))%\r")
-        update!(p, Int(floor(progress)))
+        print("progress: $(round(progress,digits=1))%\r")
+        # update!(p, Int(floor(progress)))
         sleep(5)
-    end    
+    end
 
     # then wait 30 seconds to allow for the 60s dataset timeout (avoid a RAM overload)
     # sleep(30) # or not ...
@@ -106,7 +106,7 @@ threshold = 40 # GB
 volume = get_fits_total(conn, threshold)
 println("total volume of datasets > $(threshold) GB: $(volume) GB")
 
-required = round(volume  / compression / nodes)
+required = round(volume / compression / nodes)
 println("required SSD cache space per node: $(required) GB, available: $(cache) GB, $(utilisation*100)% cache utilisation available cache: $(round(cache*utilisation)) GB")
 
 datasets = get_large_datasets(conn, threshold)
@@ -119,7 +119,7 @@ count = 1
 for (datasetid, filesize) in zip(ids, sizes)
     global count
 
-    if count > 10
+    if count > 1
         break
     end
 
