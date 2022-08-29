@@ -4035,7 +4035,7 @@ contains
          end if
       end if
 
-      print *, "total_per_node", total_per_node
+      print *, "total_per_node:", total_per_node
       call print_progress(item)
 
       bSuccess = .true.
