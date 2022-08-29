@@ -174,7 +174,4 @@ open("fitsDB.html", "w") do f
     write(f, String(take!(html)))
 end
 
-# testing purposes
-# preload_dataset("ALMA01084695")
-
 close(conn)
