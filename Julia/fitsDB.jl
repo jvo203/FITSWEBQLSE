@@ -135,7 +135,7 @@ write(html, "<title>Preloaded datasets</title>\n</head>\n<body>\n")
 write(html, "<h1>Preloaded datasets</h1>\n")
 
 # append HTML table header
-write(html, "<table><tr><th>Dataset ID</th><th>Size</th><th>Cache Type</th></tr>\n")
+write(html, "<table><tr><th>Index</th><th>Dataset ID</th><th>Size</th><th>Cache Type</th></tr>\n")
 
 for (datasetid, filesize) in zip(ids, sizes)
     global count
@@ -160,7 +160,7 @@ for (datasetid, filesize) in zip(ids, sizes)
     end
 
     # append HTML table row
-    write(html, "<tr><td><a href=\"$link\">$datasetid</a></td><td>$(round(filesize / 1024^3,digits=1)) GB</td><td>$cache_type</td></tr>\n")
+    write(html, "<tr><td>$count</td><td><a href=\"$link\">$datasetid</a></td><td>$(round(filesize / 1024^3,digits=1)) GB</td><td>$cache_type</td></tr>\n")
 end
 
 # end the HTML table
