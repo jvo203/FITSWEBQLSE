@@ -190,7 +190,7 @@ for (datasetid, file_size, path) in zip(ids, sizes, paths)
     global count
     local cache_type
 
-    if count > 1
+    if count > 10
         break
     end
 
