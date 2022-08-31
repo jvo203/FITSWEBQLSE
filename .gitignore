@@ -13,6 +13,9 @@
 /memory_usage.csv 
 /mem_allocated_v5.pdf
 
+# a symbolic link
+htdocs/fitswebql_v5/**
+
 # Config files
 *.ini
 
