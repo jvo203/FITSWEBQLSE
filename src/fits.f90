@@ -260,11 +260,11 @@ module fits
       real(kind=8) :: ignrval
       real(kind=8) :: restfrq = 0.0
       real(kind=8) :: bmaj, bmin, bpa
-      real(kind=8) crval1, cdelt1, crpix1
-      real(kind=8) crval2, cdelt2, crpix2
-      real(kind=8) crval3, cdelt3, crpix3
-      real(kind=8) obsra, obsdec, datamin, datamax
-      real(kind=8) cd1_1, cd1_2, cd2_1, cd2_2
+      real(kind=8) :: crval1, cdelt1, crpix1
+      real(kind=8) :: crval2, cdelt2, crpix2
+      real(kind=8) :: crval3, cdelt3, crpix3
+      real(kind=8) :: obsra, obsdec, datamin, datamax
+      real(kind=8) :: cd1_1, cd1_2, cd2_1, cd2_2
 
       ! extras
       real(kind=8) :: frame_multiplier = 1.0
