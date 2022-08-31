@@ -162,8 +162,7 @@ for (datasetid, filesize, path) in zip(ids, sizes, paths)
 
     println("#$count/$total_count :: $datasetid :: $(round(filesize / 1024^3,digits=1)) GB")
     copy_dataset(datasetid, filesize, path)
-    # preload_dataset(datasetid)
-    count = count + 1
+    # preload_dataset(datasetid)    
 
     # make HTML link
     link = get_dataset_url(datasetid)
@@ -177,6 +176,9 @@ for (datasetid, filesize, path) in zip(ids, sizes, paths)
 
     # append HTML table row
     write(html, "<tr><td>$count</td><td><a href=\"$link\">$datasetid</a></td><td>$(round(filesize / 1024^3,digits=1)) GB</td><td>$cache_type</td></tr>\n")
+
+    # increment the index
+    count = count + 1
 end
 
 # end the HTML table
