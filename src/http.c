@@ -2120,7 +2120,10 @@ static enum MHD_Result on_http_connection(void *cls,
         if (datasetId != NULL)
         {
             if (is_root_rank)
+            {
+                printf("[C] before execute_alma; root: %s\n", root);
                 ret = execute_alma(connection, datasetId, va_count, composite, root);
+            }
             else
                 ret = http_acknowledge(connection);
 
