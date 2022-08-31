@@ -2359,7 +2359,7 @@ void create_root_path(const char *root)
         return;
 
     // create a symbolic link to the "htdocs/fitswebql" directory
-    int stat = symlink(root, "htdocs/fitswebql");
+    int stat = symlink("htdocs/fitswebql", root);
 
     if (stat == -1)
         perror("symlink error");
