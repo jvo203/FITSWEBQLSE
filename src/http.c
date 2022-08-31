@@ -2359,7 +2359,7 @@ void create_root_path(const char *root)
     if (link[strlen(link) - 1] == '/')
         link[strlen(link) - 1] = '\0';
 
-    // check if root is not a symlink
+    // check if <link> is not already a symlink
     struct stat st;
     stat(link, &st);
 
@@ -2577,6 +2577,8 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         if (composite && va_count <= 3)
             g_string_append(html, "data-composite='1' ");
     }
+
+    printf("[C] root: %s\n", root);
 
     if (!options.local)
     {
