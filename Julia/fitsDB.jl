@@ -6,7 +6,8 @@ using ProgressMeter
 function connect_db(db_name)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
     password = user * String(UInt8.([33]))
-    host = "jvof"
+    # host = "jvof"
+    host = "jvox.vo.nao.ac.jp"
 
     url = "postgresql://" * user
 
@@ -33,7 +34,7 @@ end
 
 function get_large_datasets(conn, threshold)
     # threshold is given in GB
-    strSQL = "select dataset_id, file_size from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. order by file_size desc;"
+    strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. order by file_size desc;"
 
     res = execute(conn, strSQL)
     data = columntable(res)
@@ -56,6 +57,19 @@ end
 
 function get_dataset_url(datasetid)
     return "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=" * datasetid
+end
+
+function copy_dataset(datasetid, filesize, path)
+    src = "/home/alma/" * path
+    dst = "/mnt/fits/files/" * datasetid * ".fits"
+
+    println("Copying dataset $(datasetid) with size $(round(filesize / 1024^3,digits=1)) GB from $(src) to $(dst)")
+
+    # check if the dst file already exists
+    if isfile(dst)
+        println("File $(dst) already exists. Skipping.")
+        return
+    end
 end
 
 function preload_dataset(datasetid)
@@ -123,6 +137,7 @@ datasets = get_large_datasets(conn, threshold)
 
 ids = datasets[:dataset_id]
 sizes = datasets[:file_size]
+paths = datasets[:path]
 
 count = 1
 total_count = length(ids) # number of datasets to preload
@@ -137,16 +152,17 @@ write(html, "<h1>Preloaded datasets</h1>\n")
 # append HTML table header
 write(html, "<table><tr><th>Index</th><th>Dataset ID</th><th>Size</th><th>Cache Type</th></tr>\n")
 
-for (datasetid, filesize) in zip(ids, sizes)
+for (datasetid, filesize, path) in zip(ids, sizes, paths)
     global count
     local cache_type
 
-    # if count > 1
-    #     break
-    # end
+    if count > 1
+        break
+    end
 
     println("#$count/$total_count :: $datasetid :: $(round(filesize / 1024^3,digits=1)) GB")
-    preload_dataset(datasetid)
+    copy_dataset(datasetid, filesize, path)
+    # preload_dataset(datasetid)
     count = count + 1
 
     # make HTML link
