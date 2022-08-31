@@ -2434,8 +2434,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/FileSaver.js\"></script>\n");
 
     // WebAssembly
-    g_string_append(html, "<script "
-                          "src=\"client." WASM_VERSION ".js\"></script>\n");
+    // g_string_append(html, "<script src=\"client." WASM_VERSION ".js\"></script>\n");
+    // use the CDN version of the WebAssembly binary
+    g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/client." WASM_VERSION ".js\"></script>\n");
     g_string_append_printf(html, "<script>\n"
                                  "Module.ready\n"
                                  "\t.then(status => console.log(status))\n"
