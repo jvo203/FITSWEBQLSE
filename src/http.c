@@ -122,6 +122,7 @@ inline const char *denull(const char *str)
 struct MHD_Daemon *http_server = NULL;
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
+void create_root_path(const char *root);
 void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
 void *handle_notify_request(void *ptr);
@@ -1904,6 +1905,8 @@ static enum MHD_Result on_http_connection(void *cls,
             char *root = strndup(url, len);
 
             printf("[C] URL root path: %s\n", root);
+
+            create_root_path(root);
         }
 
         // to be forwarded to cluster nodes
@@ -2341,6 +2344,25 @@ void include_file(GString *str, const char *filename)
 
         close(fd);
     };
+}
+
+void create_root_path(const char *root)
+{
+    if (root == NULL)
+        return;
+
+    // check if root is not a symlink
+    struct stat st;
+    stat(root, &st);
+
+    if (S_ISLNK(st.st_mode))
+        return;
+
+    // create a symbolic link to the "htdocs/fitswebql" directory
+    int stat = symlink(root, "htdocs/fitswebql");
+
+    if (stat == -1)
+        perror("symlink error");
 }
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
