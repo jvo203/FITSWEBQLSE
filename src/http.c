@@ -1902,7 +1902,7 @@ static enum MHD_Result on_http_connection(void *cls,
             char *proot = (char *)strstr(url, "FITSWebQL.html");
 
             int len = proot - url;
-            char *root = strndup(url, len);
+            root = strndup(url, len);
 
             printf("[C] URL root path: %s\n", root);
 
@@ -2120,10 +2120,7 @@ static enum MHD_Result on_http_connection(void *cls,
         if (datasetId != NULL)
         {
             if (is_root_rank)
-            {
-                printf("[C] before execute_alma; root: %s\n", root);
                 ret = execute_alma(connection, datasetId, va_count, composite, root);
-            }
             else
                 ret = http_acknowledge(connection);
 
@@ -2580,8 +2577,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         if (composite && va_count <= 3)
             g_string_append(html, "data-composite='1' ");
     }
-
-    printf("[C] root: %s\n", root);
 
     if (!options.local)
     {
