@@ -2352,8 +2352,8 @@ void create_root_path(const char *root)
         return;
 
     // prepend root by "htdocs/"
-    char *link = malloc(strlen(root) + strlen("htdocs/") + 1);
-    sprintf(link, "htdocs/%s", root);
+    char *link = malloc(strlen(root) + strlen("htdocs") + 1);
+    sprintf(link, "htdocs%s", root); // '/' is added by the server
 
     // check if root is not a symlink
     struct stat st;
