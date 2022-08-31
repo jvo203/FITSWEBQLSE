@@ -24,7 +24,7 @@ bool isinf(float tmp)
   return ( (i & 0x7fffffff) == 0x7f800000 ) || ( (i & 0xffffffff) == 0xff800000 ) ;
 }
 
-export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform unsigned int8 data_mask[], uniform float ignrval, uniform float datamin, uniform float datamax,  uniform float cdelt3, uniform float res[], uniform int64 npixels)
+export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform unsigned int8 data_mask[], uniform double ignrval, uniform double datamin, uniform double datamax,  uniform double cdelt3, uniform float res[], uniform int64 npixels)
 {
   uniform float frame_min, frame_max;
   uniform double mean, integrated;
@@ -413,7 +413,7 @@ export void make_video_frameF16_legacy(uniform unsigned int16 src[], uniform int
     } ;  
 } ;
 
-export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform double cdelt3)
 {
     uniform int cn, cm;
 
@@ -494,7 +494,7 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
         return 0.0f ;
 }
 
-export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform double cdelt3)
 {
     uniform int cn, cm;
 
@@ -576,7 +576,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform bool average, uniform float cdelt3, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
+export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform bool average, uniform double cdelt3, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
 {
     uniform int cn, cm;
 
@@ -696,7 +696,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
         return 0.0f ;
 }
 
-export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform float cdelt3)
+export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform float cx, uniform float cy, uniform float r2, uniform bool average, uniform double cdelt3)
 {
     uniform int cn, cm;
 

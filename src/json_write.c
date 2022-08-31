@@ -62,7 +62,18 @@ extern void add_json_long(GString *json, char *key, long val)
     g_string_append_printf(json, "\"%s\" : %zd,", key, val);
 }
 
-extern void add_json_real(GString *json, char *key, float val)
+extern void add_json_float(GString *json, char *key, float val)
+{
+    if (json == NULL)
+        return;
+
+    if (!isnan(val))
+        g_string_append_printf(json, "\"%s\" : %.16g,", key, val);
+    else
+        g_string_append_printf(json, "\"%s\" : null,", key);
+}
+
+extern void add_json_double(GString *json, char *key, double val)
 {
     if (json == NULL)
         return;
