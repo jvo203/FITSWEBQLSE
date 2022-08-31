@@ -2355,6 +2355,10 @@ void create_root_path(const char *root)
     char *link = malloc(strlen(root) + strlen("htdocs") + 1);
     sprintf(link, "htdocs%s", root); // '/' is added by the server
 
+    // remove the last slash
+    if (link[strlen(link) - 1] == '/')
+        link[strlen(link) - 1] = '\0';
+
     // check if root is not a symlink
     struct stat st;
     stat(link, &st);
@@ -2366,7 +2370,7 @@ void create_root_path(const char *root)
     }
 
     // create a symbolic link to the "htdocs/fitswebql" directory
-    int stat = symlink(link, "htdocs/fitswebql");
+    int stat = symlink("htdocs/fitswebql", link);
 
     if (stat == -1)
         perror(link);
