@@ -2351,20 +2351,29 @@ void create_root_path(const char *root)
     if (root == NULL)
         return;
 
+    // prepend root by "htdocs/"
+    char *link = malloc(strlen(root) + strlen("htdocs/") + 1);
+    sprintf(link, "htdocs/%s", root);
+
     // check if root is not a symlink
     struct stat st;
-    stat(root, &st);
+    stat(link, &st);
 
     if (S_ISLNK(st.st_mode))
+    {
+        free(link);
         return;
+    }
 
     // create a symbolic link to the "htdocs/fitswebql" directory
-    int stat = symlink("htdocs/fitswebql", root);
+    int stat = symlink("htdocs/fitswebql", link);
 
     if (stat == -1)
         perror("symlink error");
     else
-        printf("[C] symlink created: %s -> \"htdocs/fitswebql\"\n", root);
+        printf("[C] symlink created: %s -> \"htdocs/fitswebql\"\n", link);
+
+    free(link);
 }
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
