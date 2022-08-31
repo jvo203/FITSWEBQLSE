@@ -2581,7 +2581,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     if (!options.local)
     {
         if (root != NULL)
-            g_string_append_printf(html, "data-root-path='%s/' ", root);
+            g_string_append_printf(html, "data-root-path='%s' ", root);
         else
             g_string_append(html, "data-root-path='/' ");
     }
