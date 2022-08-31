@@ -59,16 +59,50 @@ function get_dataset_url(datasetid)
     return "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=" * datasetid
 end
 
-function copy_dataset(datasetid, filesize, path)
+function copy_dataset(datasetid, file_size, path)
     src = "/home/alma/" * path
     dst = "/mnt/fits/files/" * datasetid * ".fits"
 
-    println("Copying dataset $(datasetid) with size $(round(filesize / 1024^3,digits=1)) GB from $(src) to $(dst)")
+    # check if the src file exists
+    if !isfile(src)
+        println("The source file $(src) does not exist. Skipping.")
+        return
+    end
+
+    # get the src filesize
+    src_filesize = filesize(src)
+
+    if src_filesize != file_size
+        println("The source file $(src) has a different size than the database. Skipping.")
+        return
+    end
+
+    println("Copying dataset $(datasetid) with size $(round(file_size / 1024^3,digits=1)) GB from $(src) to $(dst)")
 
     # check if the dst file already exists
     if isfile(dst)
-        println("File $(dst) already exists. Skipping.")
-        return
+        # first check the file size
+        dst_filesize = filesize(dst)
+
+        if dst_filesize == src_filesize
+            println("The destination file $(dst) already exists. Skipping.")
+            return
+        end
+    end
+
+    # make a 256KB chunk
+    chunk = 256 * 1024
+
+    p = Progress(file_size, 1)   # minimum update interval: 1 second
+
+    # copy the source file in chunks
+    open(src, "r") do src_file
+        open(dst, "w") do dst_file
+            while !eof(src_file)
+                write(dst_file, (read(src_file, chunk)))
+                update!(p, position(src_file))
+            end
+        end
     end
 end
 
@@ -152,7 +186,7 @@ write(html, "<h1>Preloaded datasets</h1>\n")
 # append HTML table header
 write(html, "<table><tr><th>Index</th><th>Dataset ID</th><th>Size</th><th>Cache Type</th></tr>\n")
 
-for (datasetid, filesize, path) in zip(ids, sizes, paths)
+for (datasetid, file_size, path) in zip(ids, sizes, paths)
     global count
     local cache_type
 
@@ -160,22 +194,22 @@ for (datasetid, filesize, path) in zip(ids, sizes, paths)
         break
     end
 
-    println("#$count/$total_count :: $datasetid :: $(round(filesize / 1024^3,digits=1)) GB")
-    copy_dataset(datasetid, filesize, path)
+    println("#$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
+    copy_dataset(datasetid, file_size, path)
     # preload_dataset(datasetid)    
 
     # make HTML link
     link = get_dataset_url(datasetid)
 
     # set cache type
-    if filesize / 1024^3 > threshold
+    if file_size / 1024^3 > threshold
         cache_type = "SSD"
     else
         cache_type = "HDD"
     end
 
     # append HTML table row
-    write(html, "<tr><td>$count</td><td><a href=\"$link\">$datasetid</a></td><td>$(round(filesize / 1024^3,digits=1)) GB</td><td>$cache_type</td></tr>\n")
+    write(html, "<tr><td>$count</td><td><a href=\"$link\">$datasetid</a></td><td>$(round(file_size / 1024^3,digits=1)) GB</td><td>$cache_type</td></tr>\n")
 
     # increment the index
     count = count + 1
