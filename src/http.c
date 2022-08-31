@@ -2369,7 +2369,7 @@ void create_root_path(const char *root)
     int stat = symlink("htdocs/fitswebql", link);
 
     if (stat == -1)
-        perror("symlink error");
+        perror(link);
     else
         printf("[C] symlink created: %s -> \"htdocs/fitswebql\"\n", link);
 
