@@ -1469,18 +1469,6 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
-      ! item%uri
-      if (allocated(item%uri)) then
-         write (unit=fileunit, IOSTAT=ios) len(item%uri)
-         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
-
-         write (unit=fileunit, IOSTAT=ios) item%uri
-         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
-      else
-         write (unit=fileunit, IOSTAT=ios) 0
-         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
-      end if
-
       ! item%filesize
       write (unit=fileunit, IOSTAT=ios) item%filesize
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
@@ -1837,9 +1825,6 @@ contains
       integer :: dims(2)
       character(256) :: iomsg
 
-      ! skip <item%uri>, use a local variable instead
-      character(len=:), allocatable :: uri
-
       bSuccess = .false.
 
       file = cache//'/'//'state'
@@ -1865,17 +1850,6 @@ contains
          if (allocated(item%datasetid)) deallocate (item%datasetid)
          allocate (item%datasetid(N))
          read (unit=fileunit, IOSTAT=ios) item%datasetid(:)
-         if (ios .ne. 0) go to 300
-      end if
-
-      ! item%uri
-      read (unit=fileunit, IOSTAT=ios) N
-      if (ios .ne. 0) go to 300
-
-      if (N .gt. 0) then
-         if (allocated(uri)) deallocate (uri)
-         allocate (character(len=N)::uri)
-         read (unit=fileunit, IOSTAT=ios) uri
          if (ios .ne. 0) go to 300
       end if
 
