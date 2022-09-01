@@ -93,7 +93,7 @@ function copy_dataset(datasetid, file_size, path)
     # make a 256KB chunk
     chunk = 256 * 1024
 
-    p = Progress(file_size, 1)   # minimum update interval: 1 second
+    p = Progress(file_size, 1, "Copying...")   # minimum update interval: 1 second
 
     # copy the source file in chunks
     open(src, "r") do src_file
@@ -121,7 +121,7 @@ function preload_dataset(datasetid)
     end
 
     # wait until a dataset has been loaded
-    p = Progress(100, 1)
+    p = Progress(100, 1, "Loading...")
 
     # repeatedly poll for progress
     while true
