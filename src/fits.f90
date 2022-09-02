@@ -1858,8 +1858,13 @@ contains
       ! check for a mismatch in the magic number
       if (magic .ne. MAGIC_NUMBER) then
          print *, 'error: magic number mismatch in ', trim(file)
+
          ! delete the file
          close (fileunit, status='delete')
+
+         ! remove the (non-empty) cache directory
+         call rmcache(cache//c_null_char)
+
          return
       end if
 
