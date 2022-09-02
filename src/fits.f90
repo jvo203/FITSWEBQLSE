@@ -8,12 +8,16 @@ module fits
 
    implicit none
 
-   integer(kind=4), parameter :: NBINS = 1024
+   ! the number used at the beginning of the binary cache disk file
+   ! when the number change is detected the binary cache gets invalidated and rebuilt
+   integer(kind=4), parameter :: MAGIC_NUMBER = 20220902
 
    integer(c_int), parameter :: ZFP_HIGH_PRECISION = 16
    integer(c_int), parameter :: ZFP_MEDIUM_PRECISION = 11
    integer(c_int), parameter :: ZFP_LOW_PRECISION = 8
    integer(c_int), parameter :: ZFP_MIN_EXP = -1074
+
+   integer(kind=4), parameter :: NBINS = 1024
 
    ! FITS channels are allocated to cluster nodes in blocks
    real, parameter :: GOLDEN_RATIO = (1 + sqrt(5.0))/2
@@ -1457,6 +1461,10 @@ contains
 
       bSuccess = .true.
 
+      ! magic number
+      write (unit=fileunit, IOSTAT=ios) MAGIC_NUMBER
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%datasetid
       if (allocated(item%datasetid)) then
          write (unit=fileunit, IOSTAT=ios) size(item%datasetid)
@@ -1820,6 +1828,7 @@ contains
       logical :: file_exists
 
       integer :: fileunit, N, rc
+      integer(kind=4) :: magic
       integer(kind=c_int) :: ios
       integer(kind=c_size_t) :: array_size
       integer :: dims(2)
@@ -1839,6 +1848,18 @@ contains
 
       if (ios .ne. 0) then
          print *, "error opening a file ", trim(file), ' : ', trim(iomsg)
+         return
+      end if
+
+      ! magic number
+      read (unit=fileunit, IOSTAT=ios) magic
+      if (ios .ne. 0) go to 300
+
+      ! check for a mismatch in the magic number
+      if (magic .ne. MAGIC_NUMBER) then
+         print *, 'error: magic number mismatch in ', trim(file)
+         ! delete the file
+         close (fileunit, status='delete')
          return
       end if
 
