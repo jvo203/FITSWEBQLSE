@@ -4,8 +4,8 @@
 class Fitswebqlse < Formula
   desc "a high-performance FORTRAN & C FITSWEBQL SE (Supercomputer Edition)"
   homepage "https://github.com/jvo203/FITSWEBQLSE"
-  url "https://github.com/jvo203/FITSWEBQLSE/archive/refs/tags/v5.0.6.tar.gz"
-  sha256 "049bf2a1e22060e8493598a32ae75b45285eb0590034eea6d3576042ecd3e1ef"
+  url "https://github.com/jvo203/FITSWEBQLSE/archive/refs/tags/v5.0.7.tar.gz"
+  sha256 "1c9b69d01cd343bb45d94925ec6997ca349841155372e4e2f34a644a9f645966"
   license "MIT"
 
   depends_on "gcc@12" => :build
@@ -19,11 +19,6 @@ class Fitswebqlse < Formula
   depends_on "czmq"
   depends_on "cfitsio"
   depends_on "libpq"
-
-  fails_with :clang do
-    build 211
-    cause "Fails to link the OpenMP runtime"
-  end
 
   def install
     ENV.deparallelize  # if your formula fails when building in parallel
@@ -41,7 +36,7 @@ class Fitswebqlse < Formula
     #
     # The installed folder is not in the path, so use the entire path to any
     # executables being tested: `system "#{bin}/program", "do", "something"`.
-    system "true"
+    # system "false"
     assert_match "FITSWEBQLSE", shell_output("#{bin}/fitswebqlse -h")
   end
 end
