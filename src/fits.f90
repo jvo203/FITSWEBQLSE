@@ -1857,7 +1857,7 @@ contains
 
       ! check for a mismatch in the magic number
       if (magic .ne. MAGIC_NUMBER) then
-         print *, 'error: magic number mismatch in ', trim(file)
+         print *, 'error: magic number mismatch in ', trim(file), ', invalidating cache'
 
          ! delete the file
          close (fileunit, status='delete')
