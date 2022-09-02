@@ -450,7 +450,7 @@ void usage(char *progname, int opt)
 {
     (void)opt;
     fprintf(stderr, USAGE_FMT, progname ? progname : DEFAULT_PROGNAME);
-    exit(EXIT_FAILURE);
+    exit(EXIT_SUCCESS);
     /* NOTREACHED */
 }
 
