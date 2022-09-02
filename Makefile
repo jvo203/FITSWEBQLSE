@@ -1,7 +1,18 @@
 .DEFAULT_GOAL := fitswebqlse
 
 # get the Homebrew installation directory
+# brew --prefix is not available from inside the Homebrew environment
 HOMEBREW_PREFIX := $(shell brew --prefix)
+
+# assume Intel macOS	
+ifeq ($(HOMEBREW_PREFIX),)
+	HOMEBREW_PREFIX := $(shell /usr/local/bin/brew --prefix)
+endif
+
+# if it still cannot be found assume Apple Silicon macOS
+ifeq ($(HOMEBREW_PREFIX),)
+	HOMEBREW_PREFIX := $(shell /opt/homebrew/bin/brew --prefix)
+endif
 
 # the stack should be unlimited to avoid problems
 # with ifort creating on the stack large temporary arrays
