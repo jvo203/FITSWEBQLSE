@@ -20,6 +20,11 @@ class Fitswebqlse < Formula
   depends_on "cfitsio"
   depends_on "libpq"
 
+  fails_with :clang do
+    build 211
+    cause "Fails to link the OpenMP runtime"
+  end
+
   def install
     ENV.deparallelize  # if your formula fails when building in parallel
     system "make"
