@@ -15,12 +15,16 @@ class Fitswebqlse < Formula
   depends_on "libpq"
   depends_on "lz4"
   depends_on "pkg-config"
+  depends_on "wget" => :build
   depends_on "x265"
 
   def install
     ENV.deparallelize
     system "make"
+    system "wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db"
     bin.install "fitswebqlse"
+    share.install Dir["htdocs"]
+    share.install "splatalogue_v3.db"
   end
 
   test do
