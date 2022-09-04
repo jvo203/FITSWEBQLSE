@@ -20,7 +20,7 @@ class Fitswebqlse < Formula
 
   def install
     ENV.deparallelize
-    system "make"
+    system "make SHARE=#{share}"
     system "wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db"
     bin.install "fitswebqlse"
     share.install "htdocs"
