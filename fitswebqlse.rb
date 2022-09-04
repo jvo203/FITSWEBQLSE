@@ -6,6 +6,7 @@ class Fitswebqlse < Formula
   license "MIT"
 
   depends_on "gcc@12" => :build
+  depends_on "wget" => :build
   depends_on "cfitsio"
   depends_on "czmq"
   depends_on "glib"
@@ -15,7 +16,6 @@ class Fitswebqlse < Formula
   depends_on "libpq"
   depends_on "lz4"
   depends_on "pkg-config"
-  depends_on "wget" => :build
   depends_on "x265"
 
   def install
@@ -23,7 +23,7 @@ class Fitswebqlse < Formula
     system "make"
     system "wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db"
     bin.install "fitswebqlse"
-    share.install Dir["htdocs"]
+    share.install "htdocs"
     share.install "splatalogue_v3.db"
   end
 
