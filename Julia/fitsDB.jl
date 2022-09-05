@@ -23,7 +23,12 @@ end
 
 function get_fits_total(conn, threshold)
     # threshold is given in GB
-    strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"
+
+    # above the threshold
+    # strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"
+
+    # below the threshold but over 20GB
+    strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024.;"
 
     res = execute(conn, strSQL)
     data = columntable(res)
@@ -32,9 +37,14 @@ function get_fits_total(conn, threshold)
     return round(data[1][1] / (1024^3))
 end
 
-function get_large_datasets(conn, threshold)
+function get_datasets(conn, threshold)
     # threshold is given in GB
-    strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. order by file_size desc;"
+
+    # above the threshold
+    # strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. order by file_size desc;"
+
+    # below the threshold but over 20GB
+    strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024. order by file_size desc;"
 
     res = execute(conn, strSQL)
     data = columntable(res)
@@ -162,12 +172,12 @@ conn = connect_db("alma")
 
 threshold = 40 # GB
 volume = get_fits_total(conn, threshold)
-println("total volume of datasets > $(threshold) GB: $(volume) GB")
+println("total volume of datasets < $(threshold) GB: $(volume) GB")
 
 required = round(volume / compression / nodes)
 println("required SSD cache space per node: $(required) GB, available: $(cache) GB, $(utilisation*100)% cache utilisation available cache: $(round(cache*utilisation)) GB")
 
-datasets = get_large_datasets(conn, threshold)
+datasets = get_datasets(conn, threshold)
 
 ids = datasets[:dataset_id]
 sizes = datasets[:file_size]
@@ -195,7 +205,7 @@ for (datasetid, file_size, path) in zip(ids, sizes, paths)
     # end
 
     println("#$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
-    copy_dataset(datasetid, file_size, path)
+    # copy_dataset(datasetid, file_size, path)
     preload_dataset(datasetid)
 
     # make HTML link
