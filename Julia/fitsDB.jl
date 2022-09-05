@@ -6,8 +6,8 @@ using ProgressMeter
 function connect_db(db_name)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
     password = user * String(UInt8.([33]))
-    # host = "jvof"
-    host = "jvox.vo.nao.ac.jp"
+    host = "jvof"
+    # host = "jvox.vo.nao.ac.jp"
 
     url = "postgresql://" * user
 
