@@ -142,6 +142,10 @@ MOD =
 # -I/home/chris/zfp/include
 DEF = -DNODEBUG -DNO_MONGOOSE_HTTP_CLIENT
 
+ifneq ($(SHARE),)
+	DEF += -DSHARE='"$(SHARE)"'
+endif
+
 LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` -lsqlite3 `pkg-config --libs libcurl` -lz -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq`
 
 ifneq ($(UNAME_S),Darwin)
