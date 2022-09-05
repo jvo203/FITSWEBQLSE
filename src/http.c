@@ -358,7 +358,11 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
         fd = -1;                    /* Do not allow usage of parent directories. */
     else
     {
+#ifdef SHARE
+        snprintf(path, sizeof(path), SHARE "/htdocs%s", url);
+#else
         snprintf(path, sizeof(path), "htdocs%s", url);
+#endif
         fd = open(path, O_RDONLY);
     }
 
@@ -2351,9 +2355,14 @@ void create_root_path(const char *root)
     if (root == NULL)
         return;
 
-    // prepend root by "htdocs/"
+// prepend root by "htdocs/"
+#ifdef SHARE
+    char *link = malloc(strlen(root) + strlen(SHARE "/htdocs") + 1);
+    sprintf(link, SHARE "/htdocs%s", root); // '/' is added by the server
+#else
     char *link = malloc(strlen(root) + strlen("htdocs") + 1);
     sprintf(link, "htdocs%s", root); // '/' is added by the server
+#endif
 
     // remove the last slash
     if (link[strlen(link) - 1] == '/')
