@@ -1,8 +1,8 @@
 class Fitswebqlse < Formula
   desc "This is a high-performance FORTRAN & C FITSWEBQL SE (Supercomputer Edition)"
   homepage "https://github.com/jvo203/FITSWEBQLSE"
-  url "https://github.com/jvo203/FITSWEBQLSE/archive/refs/tags/v5.0.8.tar.gz"
-  sha256 "47b9131484e1df0349d440f326e2db06569be19f030af63415f5ae0b8c92f453"
+  url "https://github.com/jvo203/FITSWEBQLSE/archive/refs/tags/v5.0.9.tar.gz"
+  sha256 "cad3c2c814ae6d5965cb6f57a698a62b24428580d053b2b61ffb7a63c762ee52"
   license "MIT"
 
   depends_on "gcc@12" => :build
