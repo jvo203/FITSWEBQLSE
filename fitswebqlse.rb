@@ -1,13 +1,17 @@
+# Documentation: https://docs.brew.sh/Formula-Cookbook
+#                https://rubydoc.brew.sh/Formula
+# PLEASE REMOVE ALL GENERATED COMMENTS BEFORE SUBMITTING YOUR PULL REQUEST!
 class Fitswebqlse < Formula
   desc "This is a high-performance FORTRAN & C FITSWEBQL SE (Supercomputer Edition)"
   homepage "https://github.com/jvo203/FITSWEBQLSE"
-  url "https://github.com/jvo203/FITSWEBQLSE/archive/refs/tags/v5.0.7.tar.gz"
-  sha256 "1c9b69d01cd343bb45d94925ec6997ca349841155372e4e2f34a644a9f645966"
+  url "https://github.com/jvo203/FITSWEBQLSE/archive/refs/tags/v5.0.8.tar.gz"
+  sha256 "47b9131484e1df0349d440f326e2db06569be19f030af63415f5ae0b8c92f453"
   license "MIT"
 
   depends_on "gcc@12" => :build
   depends_on "wget" => :build
   depends_on "cfitsio"
+  depends_on "curl"
   depends_on "czmq"
   depends_on "glib"
   depends_on "ispc"
@@ -30,4 +34,5 @@ class Fitswebqlse < Formula
   test do
     assert_match "FITSWEBQLSE", shell_output("#{bin}/fitswebqlse -h")
   end
+
 end
