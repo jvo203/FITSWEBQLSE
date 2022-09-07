@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-08-19.0";
+	return "JS2022-09-06.0";
 }
 
 function uuidv4() {
@@ -8789,6 +8789,46 @@ function swap_viewports() {
 	}
 }
 
+function pv_event(event) {
+	console.log("pv_event");
+
+	try {
+		mouse_click_end = !mouse_click_end;
+	} catch (_) {
+		mouse_click_end = false;
+	}
+
+	if (mouse_click_end) {
+		// finalise the P-V line
+		console.log("mouse_click_end detected");
+
+		x1 = line_x;
+		y1 = line_y;
+
+		var offset = d3.pointer(event);
+		x2 = offset[0]; y2 = offset[1];
+
+		/*if (x2 < x1) { x2 = x1; x1 = offset[0]; };
+		if (y2 < y1) { y2 = y1; y1 = offset[1]; };
+		console.log("dx:", dx, "dy:", dy);*/
+
+		// disable the dashes
+		d3.select("#pvline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1.0).style("stroke-dasharray", (""));
+	} else {
+		// start a new P-V line
+		var offset = d3.pointer(event);
+		line_x = offset[0];
+		line_y = offset[1];
+
+		d3.select("#zoom").attr("opacity", 0.0);
+		d3.select(this).style('cursor', 'crosshair');// .style('cursor', 'crosshair');
+
+		d3.select("#pixel").text("").attr("opacity", 0.0);
+		d3.select("#ra").text("");
+		d3.select("#dec").text("");
+	}
+}
+
 function fits_subregion_start(event) {
 	if (freqdrag) return;
 	if (optical_view) return;
@@ -8796,8 +8836,6 @@ function fits_subregion_start(event) {
 	clearTimeout(idleMouse);
 	moving = true;
 	windowLeft = false;
-
-	console.log("fits_subregion_start");
 
 	d3.select("#" + zoom_location).style("stroke", "transparent");
 	d3.select("#" + zoom_location + "Cross").attr("opacity", 0.0);
@@ -8828,6 +8866,10 @@ function fits_subregion_start(event) {
 	var offset = d3.pointer(event);
 	begin_x = offset[0];
 	begin_y = offset[1];
+
+	// console.log("fits_subregion_start", offset);
+	fits_subregion_drag_event = false;
+
 	mousedown = true;
 	d3.select("#zoom").attr("opacity", 0.0);
 }
@@ -8836,33 +8878,35 @@ function fits_subregion_drag(event) {
 	if (freqdrag) return;
 	if (optical_view) return;
 
-	console.log("fits_subregion_drag");
+	fits_subregion_drag_event = true;
+	// console.log("fits_subregion_drag");
 
 	d3.select("#zoom").attr("opacity", 0.0);
-
-	d3.select(this).style('cursor', 'default');
+	d3.select(this).style('cursor', 'crosshair');
 
 	d3.select("#pixel").text("").attr("opacity", 0.0);
 	d3.select("#ra").text("");
 	d3.select("#dec").text("");
 
-	if (viewport != null) {
-		// Clear the ZOOM Canvas
-		//console.log("clearing the ZOOM Canvas");
-		var gl = viewport.gl;
-		gl.clearColor(0, 0, 0, 0);
-		gl.clear(gl.COLOR_BUFFER_BIT);
-	}
+	try {
+		if (viewport != null) {
+			// Clear the ZOOM Canvas
+			//console.log("clearing the ZOOM Canvas");
+			var gl = viewport.gl;
+			gl.clearColor(0, 0, 0, 0);
+			gl.clear(gl.COLOR_BUFFER_BIT);
+		}
 
-	clear_webgl_viewport();
+		clear_webgl_viewport();
 
-	{
-		var c = document.getElementById("SpectrumCanvas");
-		var ctx = c.getContext("2d");
-		var width = c.width;
-		var height = c.height;
-		ctx.clearRect(0, 0, width, height);
-	}
+		{
+			var c = document.getElementById("SpectrumCanvas");
+			var ctx = c.getContext("2d");
+			var width = c.width;
+			var height = c.height;
+			ctx.clearRect(0, 0, width, height);
+		}
+	} catch (_) { }
 
 	if (mousedown) {
 		x1 = begin_x;
@@ -8877,6 +8921,10 @@ function fits_subregion_drag(event) {
 
 		dx = x2 - x1; dy = y2 - y1;
 
+		// apply a 10-pixel correction to dx and dy
+		if (dx > 10) dx = dx - 10;
+		if (dy > 10) dy = dy - 10;
+
 		d3.select("#region").attr("x", x1).attr("y", y1).attr("width", dx).attr("height", dy).attr("opacity", 1.0);//.5
 	}
 }
@@ -8885,15 +8933,20 @@ function fits_subregion_end(event) {
 	if (freqdrag) return;
 	if (optical_view) return;
 
-	console.log("fits_subregion_end");
-
 	var offset = d3.pointer(event);
 	end_x = offset[0];
 	end_y = offset[1];
 
+	// console.log("fits_subregion_end", offset);
+
 	/*mousedown = false;
 	d3.select("#zoom").attr("opacity", 1.0);*/
 	d3.select("#region").attr("opacity", 0.0);
+
+	if (!fits_subregion_drag_event) {
+		console.log("a click detected, cancelling the subregion selection");
+		return;
+	}
 
 	if (end_x == begin_x || end_y == begin_y) {
 		console.log("an invalid partial download region");
@@ -8910,6 +8963,10 @@ function fits_subregion_end(event) {
 
 	/*var evt = new MouseEvent("mousemove");
 	d3.select('#image_rectangle').node().dispatchEvent(evt);*/
+
+	/*var event = document.createEvent('SVGEvents');
+	event.initEvent('mousemove', true, true);
+	d3.select('#image_rectangle').node().dispatchEvent(event);*/
 }
 
 function get_diagonal_image_position(index, width, height) {
@@ -9744,6 +9801,18 @@ function setup_image_selection() {
 		.style("stroke-width", emStrokeWidth)
 		.attr("opacity", 0.0);
 
+	//pv line selection
+	svg.append("line")
+		.attr("id", "pvline")
+		.attr("x1", 0)
+		.attr("y1", 0)
+		.attr("x2", 0)
+		.attr("y2", 0)
+		.style("stroke", fillColour)
+		.style("stroke-dasharray", ("1, 5, 1"))
+		.style("stroke-width", emStrokeWidth)
+		.attr("opacity", 0.0);
+
 	if (colourmap == "greyscale" || colourmap == "negative")
 		fillColour = "#C4A000";
 
@@ -9872,6 +9941,7 @@ function setup_image_selection() {
 			.on("end", fits_subregion_end)
 		)
 		.call(zoom)
+		.on("click", pv_event)
 		.on("mouseenter", (event) => {
 			hide_navigation_bar();
 
