@@ -8808,12 +8808,9 @@ function pv_event(event) {
 		var offset = d3.pointer(event);
 		x2 = offset[0]; y2 = offset[1];
 
-		/*if (x2 < x1) { x2 = x1; x1 = offset[0]; };
-		if (y2 < y1) { y2 = y1; y1 = offset[1]; };
-		console.log("dx:", dx, "dy:", dy);*/
-
 		// disable the dashes
 		d3.select("#pvline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1.0).style("stroke-dasharray", (""));
+		mousedown = false;
 	} else {
 		// start a new P-V line
 		var offset = d3.pointer(event);
@@ -8821,7 +8818,7 @@ function pv_event(event) {
 		line_y = offset[1];
 
 		d3.select("#zoom").attr("opacity", 0.0);
-		d3.select(this).style('cursor', 'crosshair');// .style('cursor', 'crosshair');
+		d3.select(this).style('cursor', 'crosshair');
 
 		d3.select("#pixel").text("").attr("opacity", 0.0);
 		d3.select("#ra").text("");
