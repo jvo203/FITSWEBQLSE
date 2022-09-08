@@ -3740,6 +3740,35 @@ function y2dms(y) {
 };
 
 function display_scale_info() {
+	// add the markers anyway (they are needed by the P-V diagram)
+	var svg = d3.select("#BackgroundSVG");
+	var width = parseFloat(svg.attr("width"));
+	var defs = svg.append("defs");
+
+	defs.append("marker")
+		.attr("id", "head")
+		.attr("orient", "auto")
+		.attr("markerWidth", (emStrokeWidth))
+		.attr("markerHeight", (0.5 * emFontSize))
+		.attr("refX", 0)
+		.attr("refY", (0.5 * emFontSize / 2))
+		.append("path")
+		.style("stroke-width", 1)
+		.attr("d", "M0,0 V" + 0.5 * emFontSize);
+
+	defs.append("marker")
+		.attr("id", "arrow")
+		.attr("viewBox", "0 -5 10 10")
+		.attr("refX", 5)
+		.attr("refY", 0)
+		.attr("markerWidth", 0.67 * emFontSize)
+		.attr("markerHeight", 0.67 * emFontSize)
+		.attr("orient", "auto")
+		.append("path")
+		.style("stroke-width", 1)
+		.style("fill", "none")
+		.attr("d", "M-5,-5 L5,0 L-5,5");
+
 	let fitsData = fitsContainer[va_count - 1];
 
 	if (fitsData == null)
@@ -3782,36 +3811,6 @@ function display_scale_info() {
 
 		//console.log("Reduced vertical height:", Math.abs(gridScale[1]) * scale);
 	}
-
-	var svg = d3.select("#BackgroundSVG");
-	var width = parseFloat(svg.attr("width"));
-	var height = parseFloat(svg.attr("height"));
-
-	var defs = svg.append("defs");
-
-	defs.append("marker")
-		.attr("id", "head")
-		.attr("orient", "auto")
-		.attr("markerWidth", (emStrokeWidth))
-		.attr("markerHeight", (0.5 * emFontSize))
-		.attr("refX", 0)
-		.attr("refY", (0.5 * emFontSize / 2))
-		.append("path")
-		.style("stroke-width", 1)
-		.attr("d", "M0,0 V" + 0.5 * emFontSize);
-
-	defs.append("marker")
-		.attr("id", "arrow")
-		.attr("viewBox", "0 -5 10 10")
-		.attr("refX", 5)
-		.attr("refY", 0)
-		.attr("markerWidth", 0.67 * emFontSize)
-		.attr("markerHeight", 0.67 * emFontSize)
-		.attr("orient", "auto")
-		.append("path")
-		.style("stroke-width", 1)
-		.style("fill", "none")
-		.attr("d", "M-5,-5 L5,0 L-5,5");
 
 	//vertical scale	
 	var L = Math.abs(gridScale[1]) * scale * img_height;
@@ -9812,6 +9811,8 @@ function setup_image_selection() {
 		.attr("y1", 0)
 		.attr("x2", 0)
 		.attr("y2", 0)
+		.attr("marker-end", "url(#arrow)")
+		.attr("marker-start", "url(#head)")
 		.style("stroke", fillColour)
 		.style("stroke-dasharray", ("1, 5, 1"))
 		.style("stroke-width", emStrokeWidth)
