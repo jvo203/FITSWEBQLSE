@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-06.0";
+	return "JS2022-09-08.0";
 }
 
 function uuidv4() {
@@ -8823,6 +8823,8 @@ function pv_event(event) {
 		d3.select("#pixel").text("").attr("opacity", 0.0);
 		d3.select("#ra").text("");
 		d3.select("#dec").text("");
+
+		d3.select("#pvline").attr("opacity", 1.0);
 	}
 }
 
@@ -10163,6 +10165,32 @@ function setup_image_selection() {
 				node.style.cursor = 'pointer';
 				return;
 			}
+
+			try {
+				// check the opacity attribute of the P-V line
+				if (d3.select("#pvline").attr("opacity") > 0.0 && !mouse_click_end) {
+					// update the P-V line
+
+					x1 = line_x;
+					y1 = line_y;
+
+					let mpos = d3.pointer(event);
+					x2 = mpos[0]; y2 = mpos[1];
+
+					d3.select("#pvline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2);
+					return;
+				}
+
+				if (d3.select("#pvline").attr("opacity") > 0.0 && mouse_click_end) {
+					// reset and hide the P-V line
+					d3.select("#pvline")
+						.attr("x1", 0)
+						.attr("y1", 0)
+						.attr("x2", 0)
+						.attr("y2", 0)
+						.attr("opacity", 0.0);
+				}
+			} catch (_) { }
 
 			// commented out so that the caching 'wait' cursor remains visible
 			//d3.select(this).style('cursor', 'none');
