@@ -7221,7 +7221,7 @@ contains
       type(pv_request_f), pointer :: req
 
       integer :: first, last, length
-      real :: dx, dy
+      real :: dx, dy, dt
       integer(c_int) :: x1, x2, y1, y2
       real(kind=8) :: cdelt3
 
@@ -7260,6 +7260,7 @@ contains
 
       dx = abs(x2 - x1 + 1)
       dy = abs(y2 - y1 + 1)
+      dt = 1.0 / sqrt(dx**2 + dy**2) / 100.0 ! sample the line with a fine granularity
 
       call get_cdelt3(item, cdelt3)
 
