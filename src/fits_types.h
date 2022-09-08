@@ -108,3 +108,25 @@ struct video_request
 
     void *ptr;
 };
+
+struct pv_request
+{
+    // input
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    int width;
+    int height;
+    double frame_start;
+    double frame_end;
+    double ref_freq;
+    double deltaV;
+    bool rest;
+    float timestamp;
+
+    // output (the 'write' end of a Unix pipe)
+    int fd;
+
+    void *ptr;
+};
