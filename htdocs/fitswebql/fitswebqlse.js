@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-08.0";
+	return "JS2022-09-09.0";
 }
 
 function uuidv4() {
@@ -8815,6 +8815,8 @@ function pv_event(event) {
 			.style("stroke-dasharray", (""))
 			.attr("opacity", 1.0);
 
+		d3.select("#pvmid").attr("opacity", 1.0);
+
 		// submit the P-V line to the server
 		if (va_count == 1) {
 			submit_pv_line(va_count, x1, y1, x2, y2);
@@ -8822,6 +8824,7 @@ function pv_event(event) {
 			display_hourglass();
 		} else {
 			d3.select("#pvline").attr("opacity", 0.0);
+			d3.select("#pvmid").attr("opacity", 0.0);
 		}
 	} else {
 		// start a new P-V line
@@ -8838,6 +8841,7 @@ function pv_event(event) {
 
 		// disable the end marker and make the line visible
 		d3.select("#pvline").attr("marker-end", "").attr("opacity", 1.0);
+		d3.select("#pvmid").attr("opacity", 1.0);
 	}
 }
 
@@ -9827,6 +9831,16 @@ function setup_image_selection() {
 		.style("stroke-width", emStrokeWidth)
 		.attr("opacity", 0.0);
 
+	svg.append("line")
+		.attr("id", "pvcentre")
+		.attr("x1", 0)
+		.attr("y1", 0)
+		.attr("x2", 0)
+		.attr("y2", 0)
+		.style("stroke", fillColour)
+		.style("stroke-width", emStrokeWidth)
+		.attr("opacity", 0.0);
+
 	if (colourmap == "greyscale" || colourmap == "negative")
 		fillColour = "#C4A000";
 
@@ -10204,6 +10218,8 @@ function setup_image_selection() {
 						.attr("x2", 0)
 						.attr("y2", 0)
 						.attr("opacity", 0.0);
+
+					d3.select("#pvmid").attr("opacity", 0.0);
 				}
 			} catch (_) { }
 
