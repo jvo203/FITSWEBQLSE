@@ -7253,14 +7253,18 @@ contains
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
 
       ! sanity checks
-      x1 = max(1, req%x1)
-      y1 = max(1, req%y1)
-      x2 = min(item%naxes(1), req%x2)
-      y2 = min(item%naxes(2), req%y2)
+      x1 = max(min(req%x1, item%naxes(1)), 1)
+      y1 = max(min(req%y1, item%naxes(2)), 1)
+      x2 = max(min(req%x2, item%naxes(1)), 1)
+      y2 = max(min(req%y2, item%naxes(2)), 1)
+
+      print *, 'x1:', x1, 'y1:', y1, 'x2:', x2, 'y2:', y2
 
       dx = abs(x2 - x1 + 1)
       dy = abs(y2 - y1 + 1)
       dt = 1.0 / sqrt(dx**2 + dy**2) / 100.0 ! sample the line with a fine granularity
+
+      print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
 
       call get_cdelt3(item, cdelt3)
 
