@@ -8805,11 +8805,15 @@ function pv_event(event) {
 		var offset = d3.pointer(event);
 		x2 = offset[0]; y2 = offset[1];
 
-		// set the markers
-		d3.select("#pvline").attr("marker-end", "url(#head)").attr("marker-start", "url(#head)");
-
-		// disable the dashes
-		d3.select("#pvline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1.0).style("stroke-dasharray", (""));
+		// disable the dashes, set the end marker
+		d3.select("#pvline")
+			.attr("x1", x1)
+			.attr("y1", y1)
+			.attr("x2", x2)
+			.attr("y2", y2)
+			.attr("marker-end", "url(#head)")
+			.style("stroke-dasharray", (""))
+			.attr("opacity", 1.0);
 
 		// submit the P-V line to the server
 		if (va_count == 1) {
