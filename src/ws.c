@@ -1834,6 +1834,44 @@ void *ws_pv_response(void *ptr)
 
     printf("[C] ws_pv_response: session_id: %s, fd: %d\n", resp->session_id, resp->fd);
 
+    ssize_t n = 0;
+    size_t offset = 0;
+    size_t buf_size = 0x40000;
+
+    char *buf = malloc(buf_size);
+
+    if (buf != NULL)
+        while ((n = read(resp->fd, buf + offset, buf_size - offset)) > 0)
+        {
+            offset += n;
+
+            // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+
+            if (offset == buf_size)
+            {
+                printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
+
+                size_t new_size = buf_size << 1;
+                char *tmp = realloc(buf, new_size);
+
+                if (tmp != NULL)
+                {
+                    buf = tmp;
+                    buf_size = new_size;
+                }
+            }
+        }
+
+    if (0 == n)
+        printf("[C] PIPE_END_OF_STREAM\n");
+
+    if (n < 0)
+        printf("[C] PIPE_END_WITH_ERROR\n");
+
+    // release the incoming buffer
+free_pv_mem:
+    free(buf);
+
     // close the read end of the pipe
     close(resp->fd);
 
@@ -1887,7 +1925,7 @@ void *ws_image_spectrum_response(void *ptr)
 
     // <offset> contains the number of valid bytes in <buf>
     if (offset < sizeof(uint32_t))
-        goto free_mem;
+        goto free_image_spectrum_mem;
 
     size_t read_offset = 0; // a 'read' cursor into <buf>
 
@@ -1908,28 +1946,28 @@ void *ws_image_spectrum_response(void *ptr)
     read_offset += sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t);
 
     if (offset < read_offset + sizeof(uint32_t))
-        goto free_mem;
+        goto free_image_spectrum_mem;
 
     // pixels
     memcpy(&pixels_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + pixels_len;
 
     if (offset < read_offset + sizeof(uint32_t))
-        goto free_mem;
+        goto free_image_spectrum_mem;
 
     // mask
     memcpy(&mask_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + mask_len;
 
     if (offset < read_offset + sizeof(uint32_t))
-        goto free_mem;
+        goto free_image_spectrum_mem;
 
     // histogram
     memcpy(&hist_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + hist_len * sizeof(int);
 
     if (offset < read_offset)
-        goto free_mem;
+        goto free_image_spectrum_mem;
 
     int padding = 4 - read_offset % 4;
 
@@ -2000,7 +2038,7 @@ void *ws_image_spectrum_response(void *ptr)
     else
     {
         // all-or-nothing, skip the spectrum if the image message cannot not be created
-        goto free_mem;
+        goto free_image_spectrum_mem;
     }
 
     // original spectrum length
@@ -2008,14 +2046,14 @@ void *ws_image_spectrum_response(void *ptr)
     read_offset += sizeof(uint32_t);
 
     if (offset < read_offset)
-        goto free_mem;
+        goto free_image_spectrum_mem;
 
     // compressed spectrum
     memcpy(&compressed_size, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + compressed_size;
 
     if (offset < read_offset)
-        goto free_mem;
+        goto free_image_spectrum_mem;
 
     printf("[C] offset: %zu, read_offset: %zu\n", offset, read_offset);
     printf("[C] #hist. elements: %u, padding: %d byte(s), orig. spectrum length: %u, compressed_size: %u\n", hist_len, padding, spectrum_len, compressed_size);
@@ -2083,7 +2121,7 @@ void *ws_image_spectrum_response(void *ptr)
         }
 
         if (session == NULL)
-            goto free_mem;
+            goto free_image_spectrum_mem;
 
         // lock the stat mutex
         pthread_mutex_lock(&session->stat_mtx);
@@ -2109,7 +2147,7 @@ void *ws_image_spectrum_response(void *ptr)
     }
 
     // release the incoming buffer
-free_mem:
+free_image_spectrum_mem:
     free(buf);
 
     // close the read end of the pipe
@@ -2492,7 +2530,7 @@ void *video_response(void *ptr)
     }
 
     if (session == NULL)
-        goto free_mem;
+        goto free_video_mem;
 
     // compress the planes with x265 and pass the response (payload) over to mongoose
     size_t plane_size = session->image_width * session->image_height;
@@ -2502,7 +2540,7 @@ void *video_response(void *ptr)
     if (offset != expected)
     {
         printf("[C] video_response::received size mismatch; received %zu, expected %zu bytes.\n", offset, expected);
-        goto free_mem;
+        goto free_video_mem;
     }
 
     memcpy(&elapsed, buf, sizeof(float));
@@ -2515,7 +2553,7 @@ void *video_response(void *ptr)
     if ((session->picture == NULL) || (session->encoder == NULL))
     {
         pthread_mutex_unlock(&session->vid_mtx);
-        goto free_mem;
+        goto free_video_mem;
     }
 
     session->picture->planes[0] = luma;
@@ -2595,7 +2633,7 @@ void *video_response(void *ptr)
     pthread_mutex_unlock(&session->vid_mtx);
 
     // release the incoming buffer
-free_mem:
+free_video_mem:
     free(buf);
 
     // close the read end of the pipe
