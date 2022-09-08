@@ -8790,7 +8790,6 @@ function swap_viewports() {
 }
 
 function pv_event(event) {
-	console.log("pv_event");
 
 	try {
 		mouse_click_end = !mouse_click_end;
@@ -8800,8 +8799,6 @@ function pv_event(event) {
 
 	if (mouse_click_end) {
 		// finalise the P-V line
-		console.log("mouse_click_end detected");
-
 		x1 = line_x;
 		y1 = line_y;
 
@@ -8943,7 +8940,7 @@ function fits_subregion_end(event) {
 	d3.select("#region").attr("opacity", 0.0);
 
 	if (!fits_subregion_drag_event) {
-		console.log("a click detected, cancelling the subregion selection");
+		// console.log("a single click detected, cancelling the subregion selection");
 		return;
 	}
 
