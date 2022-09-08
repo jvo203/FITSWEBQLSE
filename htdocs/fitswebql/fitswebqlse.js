@@ -3497,7 +3497,12 @@ function hide_hourglass() {
 function copy_coordinates(e) {
 	var textToPutOnClipboard = d3.select("#ra").text() + " " + d3.select("#dec").text();
 
-	e.clipboardData.setData('text/plain', textToPutOnClipboard);
+	navigator.clipboard.writeText(textToPutOnClipboard).then(function () {
+		console.log('Async: Copying to clipboard was successful!');
+	}, function (err) {
+		console.error('Async: Could not copy text: ', err);
+	});
+
 	e.preventDefault();
 }
 
