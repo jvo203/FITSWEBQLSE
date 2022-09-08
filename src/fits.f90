@@ -113,6 +113,21 @@ module fits
 
    end type download_request_f
 
+   type, bind(c) :: pv_request_f
+      ! input
+      integer(c_int) :: x1, y1, x2, y2
+      integer(c_int) :: width, height
+      real(c_double) :: frame_start, frame_end, ref_freq, deltaV
+      logical(kind=c_bool) :: rest
+      real(c_float) :: timestamp
+
+      ! output
+      integer(kind=c_int) :: fd
+
+      type(C_PTR) :: ptr
+
+   end type pv_request_f
+
    type, bind(c) :: video_fetch_f
       ! input
       type(c_ptr) :: datasetid
@@ -7192,6 +7207,53 @@ contains
       end if
 
    end subroutine get_video_frame
+
+
+   recursive subroutine ws_pv_request(user) BIND(C, name='ws_pv_request')
+      use omp_lib
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(pv_request_f), pointer :: req
+
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
+      call c_f_pointer(req%ptr, item)
+
+      print *, 'P-V diagram for ', item%datasetid,&
+      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
+      &', width:', req%width, ', height:', req%height, ', frame_start:', req%frame_start,&
+      & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
+      &', rest:', req%rest, ', timestamp:', req%timestamp, ', fd:', req%fd
+
+      if (.not. allocated(item%compressed)) then
+         if (req%fd .ne. -1) call close_pipe(req%fd)
+         nullify (item)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+         return
+      end if
+
+      if (req%fd .ne. -1) then
+         ! send the P-V diagram  via a Unix pipe
+
+         call close_pipe(req%fd)
+         req%fd = -1
+      end if
+
+      nullify (item)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+
+      return
+
+   end subroutine ws_pv_request
 
    recursive subroutine ws_image_spectrum_request(user) BIND(C, name='ws_image_spectrum_request')
       use omp_lib
