@@ -8807,7 +8807,15 @@ function pv_event(event) {
 
 		// disable the dashes
 		d3.select("#pvline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1.0).style("stroke-dasharray", (""));
-		mousedown = false;
+
+		// submit the P-V line to the server
+		if (va_count == 1) {
+			submit_pv_line(va_count, x1, y1, x2, y2);
+
+			display_hourglass();
+		} else {
+			d3.select("#pvline").attr("opacity", 0.0);
+		}
 	} else {
 		// start a new P-V line
 		var offset = d3.pointer(event);
@@ -12118,6 +12126,89 @@ function partial_fits_size() {
 
 	// FITS header/data units come in multiples of 2880 bytes
 	return roundUp(partial_size, 2880);
+}
+
+function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
+	mousedown = false;
+
+	var offsetx = d3.select("#image_rectangle").attr("x");
+	var offsety = d3.select("#image_rectangle").attr("y");
+
+	let fitsData = fitsContainer[va_count - 1];
+	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
+
+	var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 1);
+	var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 1);
+
+	var x1 = image_bounding_dims.x1 + ax * (line_x1 - offsetx);
+	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (line_y1 - offsety);
+
+	var orig_x1 = 1 + x1 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
+	var orig_y1 = 1 + y1 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+
+	var x2 = image_bounding_dims.x1 + ax * (line_x2 - offsetx);
+	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (line_y2 - offsety);
+
+	var orig_x2 = 1 + x2 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
+	var orig_y2 = 1 + y2 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+
+	// console.log("orig_x1:", orig_x1, "orig_y1:", orig_y1, "orig_x2:", orig_x2, "orig_y2:", orig_y2);
+
+	var c = 299792.458;//speed of light [km/s]
+
+	var deltaV = 0.0;
+
+	try {
+		deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
+	}
+	catch (e) {
+		console.log(e);
+		console.log("USER_DELTAV = ", USER_DELTAV);
+	}
+
+	//convert redshift z to V
+	var value = sessionStorage.getItem("redshift");
+
+	if (value == "z") {
+		var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
+
+		deltaV = tmp * c;
+	};
+
+	var checkbox = document.getElementById('restcheckbox');
+	var rest = false;
+
+	try {
+		rest = checkbox.checked;
+	} catch (e) {
+		console.log(e);
+	}
+
+	var rect = document.getElementById('mainDiv').getBoundingClientRect();
+	var width = rect.width - 20;
+	var height = rect.height - 20;
+
+	var request = {
+		type: "pv",
+		x1: Math.round(orig_x1),
+		y1: Math.round(orig_y1),
+		x2: Math.round(orig_x2),
+		y2: Math.round(orig_y2),
+		width: width,
+		height: height,
+		frame_start: data_band_lo,
+		frame_end: data_band_hi,
+		ref_freq: RESTFRQ,
+		deltaV: 1000.0 * deltaV, // [m/s]
+		rest: rest,
+		timestamp: performance.now()
+	};
+
+	//send an [image] request to the server    
+	if (wsConn[index - 1].readyState == 1)
+		wsConn[index - 1].send(JSON.stringify(request));
+
+	setup_window_timeout();
 }
 
 function partial_fits_download() {
