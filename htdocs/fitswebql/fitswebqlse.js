@@ -3740,6 +3740,11 @@ function y2dms(y) {
 };
 
 function display_scale_info() {
+	let fitsData = fitsContainer[va_count - 1];
+
+	if (fitsData == null)
+		return;
+
 	// add the markers anyway (they are needed by the P-V diagram)
 	var svg = d3.select("#BackgroundSVG");
 	var width = parseFloat(svg.attr("width"));
@@ -3768,11 +3773,6 @@ function display_scale_info() {
 		.style("stroke-width", 1)
 		.style("fill", "none")
 		.attr("d", "M-5,-5 L5,0 L-5,5");
-
-	let fitsData = fitsContainer[va_count - 1];
-
-	if (fitsData == null)
-		return;
 
 	if (fitsData.depth > 1)
 		return;
