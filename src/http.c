@@ -2407,7 +2407,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html,
                     "<link href=\"https://fonts.googleapis.com/css?family=Material+Icons\" "
                     "rel=\"stylesheet\"/>\n");
-    g_string_append(html, "<script src=\"https://d3js.org/d3.v6.min.js\"></script>\n");
+    g_string_append(html, "<script src=\"https://d3js.org/d3.v7.min.js\"></script>\n");
     g_string_append(html, "<script "
                           "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                           "fitswebql/reconnecting-websocket.min.js\"></script>\n");
