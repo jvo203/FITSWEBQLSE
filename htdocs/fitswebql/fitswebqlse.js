@@ -3497,11 +3497,7 @@ function hide_hourglass() {
 function copy_coordinates(e) {
 	var textToPutOnClipboard = d3.select("#ra").text() + " " + d3.select("#dec").text();
 
-	if (ie) {
-		window.clipboardData.setData('Text', textToPutOnClipboard);
-	} else {
-		e.clipboardData.setData('text/plain', textToPutOnClipboard);
-	}
+	e.clipboardData.setData('text/plain', textToPutOnClipboard);
 	e.preventDefault();
 }
 
