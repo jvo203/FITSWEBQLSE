@@ -9811,7 +9811,7 @@ function setup_image_selection() {
 		.attr("y1", 0)
 		.attr("x2", 0)
 		.attr("y2", 0)
-		.attr("marker-end", "url(#arrow)")
+		.attr("marker-end", "url(#head)")
 		.attr("marker-start", "url(#head)")
 		.style("stroke", fillColour)
 		.style("stroke-dasharray", ("1, 5, 1"))
