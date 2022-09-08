@@ -1832,6 +1832,8 @@ void *ws_pv_response(void *ptr)
 
     struct websocket_response *resp = (struct websocket_response *)ptr;
 
+    printf("[C] ws_pv_response: session_id: %s, fd: %d\n", resp->session_id, resp->fd);
+
     // close the read end of the pipe
     close(resp->fd);
 
