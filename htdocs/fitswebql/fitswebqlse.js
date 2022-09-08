@@ -12204,7 +12204,7 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
 		timestamp: performance.now()
 	};
 
-	//send an [image] request to the server    
+	//send a P-V diagram request to the server    
 	if (wsConn[index - 1].readyState == 1)
 		wsConn[index - 1].send(JSON.stringify(request));
 
