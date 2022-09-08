@@ -548,6 +548,55 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
                 //  printf("key: %.*s, value: %.*s\n", klen, wm->data.ptr + koff, vlen, wm->data.ptr + voff);
+
+                // 'x1'
+                if (strncmp(wm->data.ptr + koff, "\"x1\"", klen) == 0)
+                    req->x1 = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'y1'
+                if (strncmp(wm->data.ptr + koff, "\"y1\"", klen) == 0)
+                    req->y1 = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'x2'
+                if (strncmp(wm->data.ptr + koff, "\"x2\"", klen) == 0)
+                    req->x2 = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'y2'
+                if (strncmp(wm->data.ptr + koff, "\"y2\"", klen) == 0)
+                    req->y2 = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'width'
+                if (strncmp(wm->data.ptr + koff, "\"width\"", klen) == 0)
+                    req->width = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'height'
+                if (strncmp(wm->data.ptr + koff, "\"height\"", klen) == 0)
+                    req->height = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'frame_start'
+                if (strncmp(wm->data.ptr + koff, "\"frame_start\"", klen) == 0)
+                    req->frame_start = atof2(wm->data.ptr + voff, vlen);
+
+                // 'frame_end'
+                if (strncmp(wm->data.ptr + koff, "\"frame_end\"", klen) == 0)
+                    req->frame_end = atof2(wm->data.ptr + voff, vlen);
+
+                // 'ref_freq'
+                if (strncmp(wm->data.ptr + koff, "\"ref_freq\"", klen) == 0)
+                    req->ref_freq = atof2(wm->data.ptr + voff, vlen);
+
+                // 'deltaV'
+                if (strncmp(wm->data.ptr + koff, "\"deltaV\"", klen) == 0)
+                    req->deltaV = atof2(wm->data.ptr + voff, vlen);
+
+                // 'rest'
+                if (strncmp(wm->data.ptr + koff, "\"rest\"", klen) == 0)
+                    if (strncmp(wm->data.ptr + voff, "true", vlen) == 0)
+                        req->rest = true;
+
+                // 'timestamp'
+                if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
+                    req->timestamp = atof2(wm->data.ptr + voff, vlen);
             }
 
             free(req);
