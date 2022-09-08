@@ -7220,6 +7220,11 @@ contains
       type(dataset), pointer :: item
       type(pv_request_f), pointer :: req
 
+      integer :: first, last, length
+      real :: dx, dy
+      integer(c_int) :: x1, x2, y1, y2
+      real(kind=8) :: cdelt3
+
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
@@ -7239,6 +7244,24 @@ contains
          call free(user) ! release C memory
          return
       end if
+
+      ! get the range of the cube planes
+      call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
+
+      length = last - first + 1
+
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      ! sanity checks
+      x1 = max(1, req%x1)
+      y1 = max(1, req%y1)
+      x2 = min(item%naxes(1), req%x2)
+      y2 = min(item%naxes(2), req%y2)
+
+      dx = abs(x2 - x1 + 1)
+      dy = abs(y2 - y1 + 1)
+
+      call get_cdelt3(item, cdelt3)
 
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
