@@ -545,6 +545,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->fd = -1;
             req->ptr = NULL;
 
+            for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                //  printf("key: %.*s, value: %.*s\n", klen, wm->data.ptr + koff, vlen, wm->data.ptr + voff);
+            }
+
             free(req);
             break;
         }
