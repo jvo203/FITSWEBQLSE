@@ -521,6 +521,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (mjson_get_string(wm->data.ptr, (int)wm->data.len, "$.type", type, sizeof(type)) == -1)
             break;
 
+        // [WS] {"type":"pv","x1":108,"y1":127,"x2":131,"y2":99,"width":1129,"height":801,"frame_start":146830393957.08142,"frame_end":147767129569,"ref_freq":147300000000,"deltaV":0,"rest":false,"timestamp":10713.300000000745}
+        if (strcmp(type, "pv") == 0)
+        {
+            break;
+        }
+
         // [WS] {"type":"image","dx":1462,"width":1541.5999755859375,"height":794,"quality":"medium","intensity":"integrated","frame_start":344401602984.4286,"frame_end":344629439356.3494,"ref_freq":345115000000,"timestamp":8141.999999999999}
         if (strcmp(type, "image") == 0)
         {
