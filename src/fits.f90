@@ -7220,10 +7220,12 @@ contains
       type(dataset), pointer :: item
       type(pv_request_f), pointer :: req
 
-      integer :: first, last, length
-      real :: dx, dy, dt
+      integer :: first, last, length, npoints
+      real :: dx, dy, t, dt
       integer(c_int) :: x1, x2, y1, y2
       real(kind=8) :: cdelt3
+
+      real(kind=c_float), allocatable :: pv(:, :)
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
@@ -7265,6 +7267,17 @@ contains
       dt = 1.0 / sqrt(dx**2 + dy**2) / 100.0 ! sample the line with a fine granularity
 
       print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
+
+      ! first count the number of points in a line
+      npoints = 0
+      t = 0.0
+
+      do while (t .le. 1.0)
+         npoints = npoints + 1
+         t = t + dt
+      end do
+
+      print *, 'npoints:', npoints
 
       call get_cdelt3(item, cdelt3)
 
