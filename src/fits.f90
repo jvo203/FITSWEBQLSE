@@ -7300,11 +7300,28 @@ contains
 
       print *, 'npoints:', npoints
 
-      if (npoints .gt. 0) then
-         ! allocate the pv array
-         allocate(pv(npoints, first:last))
+      ! there will be at least one point
+      ! allocate the pv array
+      allocate(pv(npoints, first:last))
 
-      end if
+      ! now do it all over again, but this time fill the pv array
+      npoints = 0
+      t = 0.0
+      prev_pos = 0
+
+      do while (t .le. 1.0)
+         pos = line(t, x1, y1, x2, y2)
+
+         if(.not. all(pos .eq. prev_pos)) then
+            prev_pos = pos
+            npoints = npoints + 1
+            print *, 'point:', npoints, 'pos:', pos, 't:', t
+
+            ! get the spectrum at the current position
+         end if
+
+         t = t + dt
+      end do
 
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
