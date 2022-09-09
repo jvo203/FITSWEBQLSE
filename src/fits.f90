@@ -7208,6 +7208,17 @@ contains
 
    end subroutine get_video_frame
 
+   ! a parametric line equation
+   pure function line(t, x1, y1, x2, y2)
+      real, intent(in) :: t
+      integer, intent(in) :: x1, y1, x2, y2
+
+      integer, dimension(2) :: line
+
+      ! round the coordinates of points on the line
+      line(1) = nint(x1 + t*(x2 - x1))
+      line(2) = nint(y1 + t*(y2 - y1))
+   end function line
 
    recursive subroutine ws_pv_request(user) BIND(C, name='ws_pv_request')
       use omp_lib
@@ -7223,6 +7234,7 @@ contains
       integer :: first, last, length, npoints
       real :: dx, dy, t, dt
       integer(c_int) :: x1, x2, y1, y2
+      integer, dimension(2) :: pos, prev_pos
       real(kind=8) :: cdelt3
 
       real(kind=c_float), allocatable :: pv(:, :)
@@ -7271,13 +7283,23 @@ contains
       ! first count the number of points in a line
       npoints = 0
       t = 0.0
+      prev_pos = 0
 
       do while (t .le. 1.0)
-         npoints = npoints + 1
+         pos = line(t, x1, y1, x2, y2)
+
+         if(.not. ALL(pos .eq. prev_pos)) then
+            prev_pos = pos
+            npoints = npoints + 1
+         end if
+
          t = t + dt
       end do
 
       print *, 'npoints:', npoints
+
+      ! then allocate the pv array
+      allocate(pv(npoints, first:last))
 
       call get_cdelt3(item, cdelt3)
 
