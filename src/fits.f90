@@ -7353,15 +7353,10 @@ contains
             ! first an inefficient implementation, it decompresses the same fixed blocks over and over again
             ! OpenMP does not really speed up things much, but it is a start
 
-            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, i, pos, cdelt3)&
-            !$omp& PRIVATE(frame)&
-            !$omp& NUM_THREADS(max_threads)
-            !$omp DO
             do frame = first, last
                pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
             end do
-            !$omp END DO
-            !$omp END PARALLEL
+
          end if
 
          t = t + dt
