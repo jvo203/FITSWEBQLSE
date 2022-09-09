@@ -10328,6 +10328,14 @@ function setup_image_selection() {
 			var sel_width = clipSize * scale;
 			var sel_height = clipSize * scale;
 
+			if (!mousedown) {
+				if (zoom_shape == "square")
+					zoom_element.attr("x", mouse_position.x - sel_width).attr("y", mouse_position.y - sel_height).attr("width", 2 * sel_width).attr("height", 2 * sel_height).attr("opacity", 1.0);
+
+				if (zoom_shape == "circle")
+					zoom_element.attr("cx", Math.round(mouse_position.x)).attr("cy", Math.round(mouse_position.y)).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
+			}
+
 			/*var x = image_bounding_dims.x1 + (mouse_position.x - d3.select(this).attr("x")) / (d3.select(this).attr("width") - 1) * (image_bounding_dims.width - 1);
 			var y = image_bounding_dims.y2 + (mouse_position.y - d3.select(this).attr("y")) / (d3.select(this).attr("height") - 1) * (image_bounding_dims.height - 1);*/
 
@@ -10493,12 +10501,6 @@ function setup_image_selection() {
 
 			// update image updates
 			if (!mousedown) {
-				if (zoom_shape == "square")
-					zoom_element.attr("x", mouse_position.x - sel_width).attr("y", mouse_position.y - sel_height).attr("width", 2 * sel_width).attr("height", 2 * sel_height).attr("opacity", 1.0);
-
-				if (zoom_shape == "circle")
-					zoom_element.attr("cx", Math.round(mouse_position.x)).attr("cy", Math.round(mouse_position.y)).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
-
 				var px, py;
 
 				var zoomed_size = Math.round(get_zoomed_size(width, height, img_width, img_height));
