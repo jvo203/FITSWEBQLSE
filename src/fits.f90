@@ -7266,6 +7266,8 @@ contains
 
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
 
+      call get_cdelt3(item, cdelt3)
+
       ! sanity checks
       x1 = max(min(req%x1, item%naxes(1)), 1)
       y1 = max(min(req%y1, item%naxes(2)), 1)
@@ -7298,10 +7300,11 @@ contains
 
       print *, 'npoints:', npoints
 
-      ! then allocate the pv array
-      allocate(pv(npoints, first:last))
+      if (npoints .gt. 0) then
+         ! allocate the pv array
+         allocate(pv(npoints, first:last))
 
-      call get_cdelt3(item, cdelt3)
+      end if
 
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
