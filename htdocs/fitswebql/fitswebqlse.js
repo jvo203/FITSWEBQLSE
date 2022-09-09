@@ -10008,7 +10008,10 @@ function setup_image_selection() {
 				console.log('NON-CRITICAL:', e);
 			}
 
-			zoom_element.attr("opacity", 1.0);
+			if (d3.select("#pvline").attr("opacity") < 1.0) {
+				zoom_element.attr("opacity", 1.0);
+			}
+
 			d3.select("#pixel").text("").attr("opacity", 0.0);
 
 			document.addEventListener('copy', copy_coordinates);
@@ -10123,7 +10126,7 @@ function setup_image_selection() {
 
 			setup_csv_export();
 
-			if (xradec != null) {
+			if (xradec != null && d3.select("#pvline").attr("opacity") < 1.0) {
 				let fitsData = fitsContainer[va_count - 1];
 
 				let raText = 'RA N/A';
