@@ -10336,9 +10336,6 @@ function setup_image_selection() {
 					zoom_element.attr("cx", Math.round(mouse_position.x)).attr("cy", Math.round(mouse_position.y)).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
 			}
 
-			/*var x = image_bounding_dims.x1 + (mouse_position.x - d3.select(this).attr("x")) / (d3.select(this).attr("width") - 1) * (image_bounding_dims.width - 1);
-			var y = image_bounding_dims.y2 + (mouse_position.y - d3.select(this).attr("y")) / (d3.select(this).attr("height") - 1) * (image_bounding_dims.height - 1);*/
-
 			let rect = event.currentTarget;
 
 			var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 1);
@@ -11514,6 +11511,8 @@ function tiles_zoom() {
 }
 
 function zoomed(event) {
+	if (d3.select("#pvline").attr("opacity") > 0.0) return;
+
 	console.log("scale: " + event.transform.k);
 	zoom_scale = event.transform.k;
 
