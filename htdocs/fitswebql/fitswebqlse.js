@@ -1163,7 +1163,7 @@ function webgl_zoom_renderer(gl, height) {
 	// shoud be done in an animation loop
 	function zoom_rendering_loop() {
 		if (viewport_zoom_settings == null) {
-			console.log("webgl_zoom_renderer: null viewport_zoom_settings");
+			// console.log("webgl_zoom_renderer: null viewport_zoom_settings");
 			viewport.loopId = requestAnimationFrame(zoom_rendering_loop);
 			return;
 		}
@@ -8751,6 +8751,7 @@ function setup_viewports() {
 }
 
 function swap_viewports() {
+	// swap the zoomed viewports
 	if (viewport != null) {
 		// Clear the ZOOM Canvas
 		//console.log("clearing the ZOOM Canvas");
