@@ -8815,7 +8815,31 @@ function pv_event(event) {
 			.style("stroke-dasharray", (""))
 			.attr("opacity", 1.0);
 
-		d3.select("#pvmid").attr("opacity", 1.0);
+		let dx = x2 - x1;
+		let dy = y2 - y1;
+
+		if (Math.abs(dy) > 0) {
+			let _m = - dx / dy; // a perpendicular line to the P-V line				
+			let _s = emFontSize / Math.sqrt(1 + _m * _m) / golden_ratio;
+
+			let _mx = _s;
+			let _my = _m * _s;
+
+			let _x = (x1 + x2) / 2; // midpoint of the P-V line
+			let _y = (y1 + y2) / 2; // midpoint of the P-V line
+
+			let _x1 = _x - _mx;
+			let _y1 = _y - _my;
+			let _x2 = _x + _mx;
+			let _y2 = _y + _my;
+
+			d3.select("#pvmid")
+				.attr("x1", _x1)
+				.attr("y1", _y1)
+				.attr("x2", _x2)
+				.attr("y2", _y2)
+				.attr("opacity", 1.0);
+		}
 
 		// submit the P-V line to the server
 		if (va_count == 1) {
@@ -9832,7 +9856,7 @@ function setup_image_selection() {
 		.attr("opacity", 0.0);
 
 	svg.append("line")
-		.attr("id", "pvcentre")
+		.attr("id", "pvmid")
 		.attr("x1", 0)
 		.attr("y1", 0)
 		.attr("x2", 0)
@@ -10206,14 +10230,29 @@ function setup_image_selection() {
 					let mpos = d3.pointer(event);
 					let x2 = mpos[0]; let y2 = mpos[1];
 
+					d3.select("#pvline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2);
+
 					let dx = x2 - x1;
 					let dy = y2 - y1;
 
-					let _m = - dx / dy; // a perpendicular line to the P-V line
-					let _x = (x1 + x2) / 2; // midpoint of the P-V line
-					let _y = (y1 + y2) / 2; // midpoint of the P-V line
+					if (Math.abs(dy) > 0) {
+						let _m = - dx / dy; // a perpendicular line to the P-V line				
+						let _s = emFontSize / Math.sqrt(1 + _m * _m) / golden_ratio;
 
-					d3.select("#pvline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2);
+						let _mx = _s;
+						let _my = _m * _s;
+
+						let _x = (x1 + x2) / 2; // midpoint of the P-V line
+						let _y = (y1 + y2) / 2; // midpoint of the P-V line
+
+						let _x1 = _x - _mx;
+						let _y1 = _y - _my;
+						let _x2 = _x + _mx;
+						let _y2 = _y + _my;
+
+						d3.select("#pvmid").attr("x1", _x1).attr("y1", _y1).attr("x2", _x2).attr("y2", _y2);
+					}
+
 					return;
 				}
 
