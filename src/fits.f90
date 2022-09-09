@@ -7220,6 +7220,28 @@ contains
       line(2) = nint(y1 + t*(y2 - y1))
    end function line
 
+   function get_spectrum(item, x, y, frame, cdelt3) result(spectrum)
+      type(dataset), pointer :: item
+      integer, intent(in) :: x, y, frame
+      real(kind=8), intent(in) :: cdelt3
+      real(c_float) :: spectrum
+
+      integer(c_int) :: width, height
+
+      ! skip frames for which there is no data on this node
+      if (.not. associated(item%compressed(frame)%ptr)) then
+         spectrum = 0.0
+         return
+      end if
+
+      width = item%naxes(1)
+      height = item%naxes(2)
+
+      spectrum = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
+      &width, height, item%frame_min(frame), item%frame_max(frame),&
+      &x - 1, x - 1, y - 1, y - 1, 0, cdelt3)
+   end function get_spectrum
+
    recursive subroutine ws_pv_request(user) BIND(C, name='ws_pv_request')
       use omp_lib
       use :: unix_pthread
@@ -7231,13 +7253,14 @@ contains
       type(dataset), pointer :: item
       type(pv_request_f), pointer :: req
 
-      integer :: frame, first, last, length, npoints, i
+      integer :: frame, first, last, length, npoints, i, max_threads
       real :: dx, dy, t, dt
       integer(c_int) :: x1, x2, y1, y2
       integer, dimension(2) :: pos, prev_pos
       real(kind=8) :: cdelt3
 
       real(kind=c_float), allocatable :: pv(:, :)
+      real(kind=8) :: t1, t2
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
@@ -7267,6 +7290,9 @@ contains
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
 
       call get_cdelt3(item, cdelt3)
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
 
       ! sanity checks
       x1 = max(min(req%x1, item%naxes(1)), 1)
@@ -7303,11 +7329,15 @@ contains
       ! there will be at least one point
       ! allocate the pv array
       allocate(pv(first:last, npoints))
+      pv = 0.0
 
       ! now do it all over again, but this time fill the pv array
       i = 0
       t = 0.0
       prev_pos = 0
+
+      ! start the timer
+      t1 = omp_get_wtime()
 
       do while (t .le. 1.0)
          pos = line(t, x1, y1, x2, y2)
@@ -7317,13 +7347,30 @@ contains
             i = i + 1
             if (i .gt. npoints) exit ! a safeguard
 
-            print *, 'point:', i, 'pos:', pos
+            ! print *, 'point:', i, 'pos:', pos
 
             ! get the spectrum at the current position
+            ! first an inefficient implementation, it decompresses the same fixed blocks over and over again
+            ! OpenMP does not really speed up things much, but it is a start
+
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, i, pos, cdelt3)&
+            !$omp& PRIVATE(frame)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
+            do frame = first, last
+               pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
+            end do
+            !$omp END DO
+            !$omp END PARALLEL
          end if
 
          t = t + dt
       end do
+
+      ! end the timer
+      t2 = omp_get_wtime()
+
+      print *, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
 
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
