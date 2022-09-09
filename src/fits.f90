@@ -7288,7 +7288,7 @@ contains
       do while (t .le. 1.0)
          pos = line(t, x1, y1, x2, y2)
 
-         if(.not. ALL(pos .eq. prev_pos)) then
+         if(.not. all(pos .eq. prev_pos)) then
             prev_pos = pos
             npoints = npoints + 1
          end if
