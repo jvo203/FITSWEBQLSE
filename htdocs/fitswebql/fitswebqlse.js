@@ -9802,8 +9802,8 @@ function hide_cursor() {
 	if (va_count > 1)
 		return;
 
-	d3.select("#image_rectangle")
-		.style('cursor', 'none');
+	/*d3.select("#image_rectangle")
+		.style('cursor', 'none');*/
 }
 
 function setup_image_selection() {
@@ -9982,7 +9982,8 @@ function setup_image_selection() {
 		.attr("y", (height - img_height) / 2)
 		.attr("width", img_width)
 		.attr("height", img_height)
-		.style('cursor', 'none')//'crosshair')//'none' to mask Chrome latency
+		/*.style('cursor', 'none')//'crosshair')//'none' to mask Chrome latency*/
+		.style('cursor', 'crosshair')//'crosshair')//'none' to mask Chrome latency
 		/*.style("fill", "transparent")
 		  .style("stroke", "yellow")
 		  .style("stroke-width", emStrokeWidth)
@@ -10274,7 +10275,7 @@ function setup_image_selection() {
 			} catch (_) { }
 
 			// commented out so that the caching 'wait' cursor remains visible
-			//d3.select(this).style('cursor', 'none');
+			//d3.select(this).style('cursor', 'none');			
 
 			event.preventDefault = true;
 			if (!has_image) return;
