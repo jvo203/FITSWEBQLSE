@@ -8799,11 +8799,11 @@ function pv_event(event) {
 
 	if (mouse_click_end) {
 		// finalise the P-V line
-		x1 = line_x;
-		y1 = line_y;
+		let x1 = line_x;
+		let y1 = line_y;
 
 		var offset = d3.pointer(event);
-		x2 = offset[0]; y2 = offset[1];
+		let x2 = offset[0]; let y2 = offset[1];
 
 		// disable the dashes, set the end marker
 		d3.select("#pvline")
@@ -10200,11 +10200,18 @@ function setup_image_selection() {
 				if (d3.select("#pvline").attr("opacity") > 0.0 && !mouse_click_end) {
 					// update the P-V line
 
-					x1 = line_x;
-					y1 = line_y;
+					let x1 = line_x;
+					let y1 = line_y;
 
 					let mpos = d3.pointer(event);
-					x2 = mpos[0]; y2 = mpos[1];
+					let x2 = mpos[0]; let y2 = mpos[1];
+
+					let dx = x2 - x1;
+					let dy = y2 - y1;
+
+					let _m = - dx / dy; // a perpendicular line to the P-V line
+					let _x = (x1 + x2) / 2; // midpoint of the P-V line
+					let _y = (y1 + y2) / 2; // midpoint of the P-V line
 
 					d3.select("#pvline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2);
 					return;
