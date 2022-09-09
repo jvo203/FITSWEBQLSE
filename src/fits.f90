@@ -7231,7 +7231,7 @@ contains
       type(dataset), pointer :: item
       type(pv_request_f), pointer :: req
 
-      integer :: first, last, length, npoints
+      integer :: frame, first, last, length, npoints, i
       real :: dx, dy, t, dt
       integer(c_int) :: x1, x2, y1, y2
       integer, dimension(2) :: pos, prev_pos
@@ -7302,10 +7302,10 @@ contains
 
       ! there will be at least one point
       ! allocate the pv array
-      allocate(pv(npoints, first:last))
+      allocate(pv(first:last, npoints))
 
       ! now do it all over again, but this time fill the pv array
-      npoints = 0
+      i = 0
       t = 0.0
       prev_pos = 0
 
@@ -7314,8 +7314,10 @@ contains
 
          if(.not. all(pos .eq. prev_pos)) then
             prev_pos = pos
-            npoints = npoints + 1
-            print *, 'point:', npoints, 'pos:', pos, 't:', t
+            i = i + 1
+            if (i .gt. npoints) exit ! a safeguard
+
+            print *, 'point:', i, 'pos:', pos
 
             ! get the spectrum at the current position
          end if
