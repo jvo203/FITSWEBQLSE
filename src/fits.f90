@@ -7280,7 +7280,7 @@ contains
 
       print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
 
-      ! first count the number of points in a line
+      ! first count the number of points along line
       npoints = 0
       t = 0.0
       prev_pos = 0
