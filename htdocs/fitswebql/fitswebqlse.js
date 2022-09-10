@@ -10350,14 +10350,17 @@ function setup_image_selection() {
 			var sel_height = clipSize * scale;
 
 			if (!mousedown) {
+				let mx = mouse_position.x >= 10 ? mouse_position.x - 0 : mouse_position.x;
+				let my = mouse_position.y >= 10 ? mouse_position.y - 0 : mouse_position.y;
+
 				if (zoom_shape == "square")
-					zoom_element.attr("x", mouse_position.x - sel_width).attr("y", mouse_position.y - sel_height).attr("width", 2 * sel_width).attr("height", 2 * sel_height).attr("opacity", 1.0);
+					zoom_element.attr("x", mx - sel_width).attr("y", my - sel_height).attr("width", 2 * sel_width).attr("height", 2 * sel_height).attr("opacity", 1.0);
 
 				if (zoom_shape == "circle")
-					zoom_element.attr("cx", Math.round(mouse_position.x)).attr("cy", Math.round(mouse_position.y)).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
+					zoom_element.attr("cx", mx).attr("cy", my).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
 
 				var crossSize = 1.0 * emFontSize;
-				zoom_cross.attr("x", mouse_position.x - crossSize / 2).attr("y", mouse_position.y - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.5);
+				zoom_cross.attr("x", mx - crossSize / 2).attr("y", my - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.5);
 			}
 
 			let rect = event.currentTarget;
@@ -10368,9 +10371,9 @@ function setup_image_selection() {
 			var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 1);
 			var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect.getAttribute("y"));
 
-			x = Math.round(x);
+			/*x = Math.round(x);
 			y = Math.round(y);
-			clipSize = Math.round(clipSize);
+			clipSize = Math.round(clipSize);*/
 
 			var orig_x = x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
 			var orig_y = y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
@@ -10588,9 +10591,9 @@ function setup_image_selection() {
 				var fitsY = pred_y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);//y or pred_y
 				var fitsSize = clipSize * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
 
-				fitsX = Math.round(fitsX);
+				/*fitsX = Math.round(fitsX);
 				fitsY = Math.round(fitsY);
-				fitsSize = Math.round(fitsSize);
+				fitsSize = Math.round(fitsSize);*/
 
 				//console.log('active', 'x = ', x, 'y = ', y, 'clipSize = ', clipSize, 'fitsX = ', fitsX, 'fitsY = ', fitsY, 'fitsSize = ', fitsSize) ;
 				//let strLog = 'active x = ' + x + ' y = '+ y + ' clipSize = ' + clipSize + ' fitsX = ' + fitsX + ' fitsY = ' + fitsY + ' fitsSize = ' + fitsSize + ' pred_x = ' + pred_x + ' pred_y = ' + pred_y + ' pred_mouse_x = ' + pred_mouse_x + ' pred_mouse_y = ' + pred_mouse_y ;
@@ -11810,9 +11813,9 @@ function imageTimeout() {
 	var sel_width = clipSize * scale;
 	var sel_height = clipSize * scale;
 
-	x = Math.round(x);
+	/*x = Math.round(x);
 	y = Math.round(y);
-	clipSize = Math.round(clipSize);
+	clipSize = Math.round(clipSize);*/
 
 	var fitsX = x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
 	var fitsY = y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
@@ -11827,9 +11830,9 @@ function imageTimeout() {
 
 	//console.log('idle', 'x = ', x, 'y = ', y, 'clipSize = ', clipSize, 'fitsX = ', fitsX, 'fitsY = ', fitsY, 'fitsSize = ', fitsSize, 'image_update:', image_update);
 
-	fitsX = Math.round(fitsX);
+	/*fitsX = Math.round(fitsX);
 	fitsY = Math.round(fitsY);
-	fitsSize = Math.round(fitsSize);
+	fitsSize = Math.round(fitsSize);*/
 
 	//send an image/spectrum request to the server
 	var x1 = Math.round(fitsX - fitsSize);
@@ -11975,14 +11978,17 @@ function imageTimeout() {
 	var zoom_cross = d3.select("#zoomCross");
 
 	//in the meantime repaint the selection element and the zoom canvas
+	let mx = mouse_position.x >= 10 ? mouse_position.x - 0 : mouse_position.x;
+	let my = mouse_position.y >= 10 ? mouse_position.y - 0 : mouse_position.y;
+
 	if (zoom_shape == "square")
-		zoom_element.attr("x", mouse_position.x - sel_width).attr("y", mouse_position.y - sel_height).attr("width", 2 * sel_width).attr("height", 2 * sel_height).attr("opacity", 1.0);
+		zoom_element.attr("x", mx - sel_width).attr("y", my - sel_height).attr("width", 2 * sel_width).attr("height", 2 * sel_height).attr("opacity", 1.0);
 
 	if (zoom_shape == "circle")
-		zoom_element.attr("cx", Math.round(mouse_position.x)).attr("cy", Math.round(mouse_position.y)).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
+		zoom_element.attr("cx", mx).attr("cy", my).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
 
 	var crossSize = 1.0 * emFontSize;
-	zoom_cross.attr("x", mouse_position.x - crossSize / 2).attr("y", mouse_position.y - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.5);
+	zoom_cross.attr("x", mx - crossSize / 2).attr("y", my - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.5);
 
 	var px, py;
 
