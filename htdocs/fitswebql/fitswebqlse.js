@@ -10584,8 +10584,8 @@ function setup_image_selection() {
 				var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 1);
 				var pred_y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (pred_mouse_y - rect.getAttribute("y"));
 
-				pred_x = Math.round(pred_x);
-				pred_y = Math.round(pred_y);
+				/*pred_x = Math.round(pred_x);
+				pred_y = Math.round(pred_y);*/
 
 				var fitsX = pred_x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);//x or pred_x
 				var fitsY = pred_y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);//y or pred_y
