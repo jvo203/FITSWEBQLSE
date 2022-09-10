@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-09.0";
+	return "JS2022-09-10.0";
 }
 
 function uuidv4() {
@@ -9802,8 +9802,8 @@ function hide_cursor() {
 	if (va_count > 1)
 		return;
 
-	/*d3.select("#image_rectangle")
-		.style('cursor', 'none');*/
+	d3.select("#image_rectangle")
+		.style('cursor', 'none');
 }
 
 function setup_image_selection() {
@@ -9982,8 +9982,8 @@ function setup_image_selection() {
 		.attr("y", (height - img_height) / 2)
 		.attr("width", img_width)
 		.attr("height", img_height)
-		/*.style('cursor', 'none')//'crosshair')//'none' to mask Chrome latency*/
-		.style('cursor', 'crosshair')//'crosshair')//'none' to mask Chrome latency
+		.style('cursor', 'none')//'crosshair')//'none' to mask Chrome latency
+		/*.style('cursor', 'crosshair')//'crosshair')*/
 		/*.style("fill", "transparent")
 		  .style("stroke", "yellow")
 		  .style("stroke-width", emStrokeWidth)
