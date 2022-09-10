@@ -8858,6 +8858,7 @@ function pv_event(event) {
 		line_y = offset[1];
 
 		d3.select("#zoom").attr("opacity", 0.0);
+		d3.select("#zoomCross").attr("opacity", 0.0);
 		d3.select(this).style('cursor', 'crosshair');
 
 		d3.select("#pixel").text("").attr("opacity", 0.0);
@@ -8913,6 +8914,7 @@ function fits_subregion_start(event) {
 
 	mousedown = true;
 	d3.select("#zoom").attr("opacity", 0.0);
+	d3.select("#zoomCross").attr("opacity", 0.0);
 }
 
 function fits_subregion_drag(event) {
@@ -8923,6 +8925,7 @@ function fits_subregion_drag(event) {
 	// console.log("fits_subregion_drag");
 
 	d3.select("#zoom").attr("opacity", 0.0);
+	d3.select("#zoomCross").attr("opacity", 0.0);
 	d3.select(this).style('cursor', 'crosshair');
 
 	d3.select("#pixel").text("").attr("opacity", 0.0);
@@ -9444,6 +9447,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 	try {
 		d3.select("#region").remove();
 		d3.select("#zoom").remove();
+		d3.select("#zoomCross").remove();
 		d3.select("#image_rectangle" + index).remove();
 	}
 	catch (e) { };
@@ -9811,6 +9815,7 @@ function setup_image_selection() {
 	try {
 		d3.select("#region").remove();
 		d3.select("#zoom").remove();
+		d3.select("#zoomCross").remove();
 		d3.select("#image_rectangle").remove();
 	}
 	catch (e) { };
@@ -11967,6 +11972,7 @@ function imageTimeout() {
 		return;
 
 	var zoom_element = d3.select("#zoom");
+	var zoom_cross = d3.select("#zoomCross");
 
 	//in the meantime repaint the selection element and the zoom canvas
 	if (zoom_shape == "square")
@@ -11974,6 +11980,9 @@ function imageTimeout() {
 
 	if (zoom_shape == "circle")
 		zoom_element.attr("cx", Math.round(mouse_position.x)).attr("cy", Math.round(mouse_position.y)).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
+
+	var crossSize = 1.0 * emFontSize;
+	zoom_cross.attr("x", mouse_position.x - crossSize / 2).attr("y", mouse_position.y - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.5);
 
 	var px, py;
 
