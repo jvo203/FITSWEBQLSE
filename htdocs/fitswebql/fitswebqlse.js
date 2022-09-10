@@ -10350,8 +10350,8 @@ function setup_image_selection() {
 			var sel_height = clipSize * scale;
 
 			if (!mousedown) {
-				let mx = mouse_position.x >= 10 ? mouse_position.x - 0 : mouse_position.x;
-				let my = mouse_position.y >= 10 ? mouse_position.y - 0 : mouse_position.y;
+				let mx = mouse_position.x;
+				let my = mouse_position.y;
 
 				if (zoom_shape == "square")
 					zoom_element.attr("x", mx - sel_width).attr("y", my - sel_height).attr("width", 2 * sel_width).attr("height", 2 * sel_height).attr("opacity", 1.0);
@@ -11978,8 +11978,8 @@ function imageTimeout() {
 	var zoom_cross = d3.select("#zoomCross");
 
 	//in the meantime repaint the selection element and the zoom canvas
-	let mx = mouse_position.x >= 10 ? mouse_position.x - 0 : mouse_position.x;
-	let my = mouse_position.y >= 10 ? mouse_position.y - 0 : mouse_position.y;
+	let mx = mouse_position.x;
+	let my = mouse_position.y;
 
 	if (zoom_shape == "square")
 		zoom_element.attr("x", mx - sel_width).attr("y", my - sel_height).attr("width", 2 * sel_width).attr("height", 2 * sel_height).attr("opacity", 1.0);
