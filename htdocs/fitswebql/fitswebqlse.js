@@ -8953,17 +8953,17 @@ function fits_subregion_drag(event) {
 	} catch (_) { }
 
 	if (mousedown) {
-		x1 = begin_x;
-		y1 = begin_y;
+		let x1 = begin_x;
+		let y1 = begin_y;
 
 		var offset = d3.pointer(event);
 
-		x2 = offset[0]; y2 = offset[1];
+		let x2 = offset[0]; let y2 = offset[1];
 
 		if (x2 < x1) { x2 = x1; x1 = offset[0]; };
 		if (y2 < y1) { y2 = y1; y1 = offset[1]; };
 
-		dx = x2 - x1; dy = y2 - y1;
+		let dx = x2 - x1; let dy = y2 - y1;
 
 		// apply a 10-pixel correction to dx and dy
 		if (dx > 10) dx = dx - 10;
