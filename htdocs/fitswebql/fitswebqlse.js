@@ -9900,7 +9900,21 @@ function setup_image_selection() {
 			.attr("opacity", 0.0);
 	};
 
+	var crossSize = 1.0 * emFontSize;
+
+	//zoom cross-hair
+	svg.append("svg:image")
+		.attr("id", "zoomCross")
+		.attr("x", 0)
+		.attr("y", 0)
+		//.attr("xlink:href", ROOT_PATH + "plainicon.com-crosshair_white.svg")
+		.attr("xlink:href", "https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/plainicon.com-crosshair_white.svg")
+		.attr("width", crossSize)
+		.attr("height", crossSize)
+		.attr("opacity", 0.0);
+
 	var zoom_element = d3.select("#zoom");
+	var zoom_cross = d3.select("#zoomCross");
 
 	var zoom = d3.zoom()
 		.scaleExtent([10, 200])//was 200
@@ -10011,6 +10025,7 @@ function setup_image_selection() {
 
 			if (d3.select("#pvline").attr("opacity") < 1.0) {
 				zoom_element.attr("opacity", 1.0);
+				zoom_cross.attr("opacity", 0.5);
 			}
 
 			d3.select("#pixel").text("").attr("opacity", 0.0);
@@ -10110,6 +10125,7 @@ function setup_image_selection() {
 			if (!event.shiftKey) {
 				viewport_zoom_settings = null;
 				zoom_element.attr("opacity", 0.0);
+				zoom_cross.attr("opacity", 0.0);
 			};
 
 			d3.select("#" + zoom_location).style("stroke", "transparent");
@@ -10334,6 +10350,9 @@ function setup_image_selection() {
 
 				if (zoom_shape == "circle")
 					zoom_element.attr("cx", Math.round(mouse_position.x)).attr("cy", Math.round(mouse_position.y)).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
+
+				var crossSize = 1.0 * emFontSize;
+				zoom_cross.attr("x", mouse_position.x - crossSize / 2).attr("y", mouse_position.y - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.5);
 			}
 
 			let rect = event.currentTarget;
