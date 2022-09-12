@@ -7342,7 +7342,6 @@ contains
       ! the linked list implementation downloaded from the Internet
       ! contains a logical bug, it needs to be fixed
 
-
       ! start the timer
       t1 = omp_get_wtime()
 
@@ -7361,6 +7360,8 @@ contains
          print *, 'i', i, 'pos:', pos
 
          ! get the spectrum for each frame
+         ! first an inefficient implementation, it decompresses the same fixed blocks over and over again
+         ! OpenMP does not really speed up things much, but it is a start
          do frame = first, last
             pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
          end do
@@ -7370,42 +7371,6 @@ contains
       t2 = omp_get_wtime()
 
       print *, 'processed #points:', i, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
-
-      ! now do it all over again, but this time fill the pv array
-      i = 0
-      t = 0.0
-      prev_pos = 0
-
-      ! start the timer
-      t1 = omp_get_wtime()
-
-      do while (t .le. 1.0)
-         pos = line(t, x1, y1, x2, y2)
-
-         if (.not. all(pos .eq. prev_pos)) then
-            prev_pos = pos
-            i = i + 1
-            if (i .gt. npoints) exit ! a safeguard
-
-            ! print *, 'point:', i, 'pos:', pos
-
-            ! get the spectrum at the current position
-            ! first an inefficient implementation, it decompresses the same fixed blocks over and over again
-            ! OpenMP does not really speed up things much, but it is a start
-
-            do frame = first, last
-               pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
-            end do
-
-         end if
-
-         t = t + dt
-      end do
-
-      ! end the timer
-      t2 = omp_get_wtime()
-
-      print *, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
 
       ! Free the list
       nullify (cursor)
