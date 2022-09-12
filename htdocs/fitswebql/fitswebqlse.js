@@ -1719,8 +1719,8 @@ function webgl_image_renderer(index, gl, width, height) {
 		// Tell WebGL to use our shader program pair
 		gl.useProgram(program);
 
-		let xmin = image.image_bounding_dims.x1 / (image.width - 1);
-		let ymin = image.image_bounding_dims.y1 / (image.height - 1);
+		let xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
+		let ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
 		let _width = image.image_bounding_dims.width / image.width;
 		let _height = image.image_bounding_dims.height / image.height;
 
