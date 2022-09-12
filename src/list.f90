@@ -5,16 +5,12 @@ module list
     private
 
     public :: list_t
-    public :: list_data
     public :: list_init
     public :: list_free
     public :: list_insert
     public :: list_put
     public :: list_get
     public :: list_next
-
-    ! A public variable to use as a MOLD for transfer()
-    integer, dimension(:), allocatable :: list_data
 
     ! Linked list node data type
     type :: list_t
