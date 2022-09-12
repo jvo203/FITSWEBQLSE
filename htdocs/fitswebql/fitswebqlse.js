@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-10.0";
+	return "JS2022-09-12.0";
 }
 
 function uuidv4() {
@@ -10030,7 +10030,7 @@ function setup_image_selection() {
 
 			if (d3.select("#pvline").attr("opacity") < 1.0) {
 				zoom_element.attr("opacity", 1.0);
-				zoom_cross.attr("opacity", 0.5);
+				zoom_cross.attr("opacity", 0.75);
 			}
 
 			d3.select("#pixel").text("").attr("opacity", 0.0);
@@ -10360,23 +10360,19 @@ function setup_image_selection() {
 					zoom_element.attr("cx", mx).attr("cy", my).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
 
 				var crossSize = 1.0 * emFontSize;
-				zoom_cross.attr("x", mx - crossSize / 2).attr("y", my - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.5);
+				zoom_cross.attr("x", mx - crossSize / 2).attr("y", my - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.75);
 			}
 
 			let rect = event.currentTarget;
 
-			var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 1);
+			var ax = (image_bounding_dims.width - 0) / (rect.getAttribute("width") - 0);
 			var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect.getAttribute("x"));
 
-			var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 1);
+			var ay = (image_bounding_dims.height - 0) / (rect.getAttribute("height") - 0);
 			var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect.getAttribute("y"));
 
-			/*x = Math.round(x);
-			y = Math.round(y);
-			clipSize = Math.round(clipSize);*/
-
-			var orig_x = x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-			var orig_y = y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+			var orig_x = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+			var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
 
 			try {
 				let raText = 'RA N/A';
@@ -10578,22 +10574,15 @@ function setup_image_selection() {
 
 				let rect = event.currentTarget;
 
-				var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 1);
+				var ax = (image_bounding_dims.width - 0) / (rect.getAttribute("width") - 0);
 				var pred_x = image_bounding_dims.x1 + ax * (pred_mouse_x - rect.getAttribute("x"));
 
-				var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 1);
+				var ay = (image_bounding_dims.height - 0) / (rect.getAttribute("height") - 0);
 				var pred_y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (pred_mouse_y - rect.getAttribute("y"));
 
-				/*pred_x = Math.round(pred_x);
-				pred_y = Math.round(pred_y);*/
-
-				var fitsX = pred_x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);//x or pred_x
-				var fitsY = pred_y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);//y or pred_y
-				var fitsSize = clipSize * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-
-				/*fitsX = Math.round(fitsX);
-				fitsY = Math.round(fitsY);
-				fitsSize = Math.round(fitsSize);*/
+				var fitsX = pred_x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);//x or pred_x
+				var fitsY = pred_y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);//y or pred_y
+				var fitsSize = clipSize * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
 
 				//console.log('active', 'x = ', x, 'y = ', y, 'clipSize = ', clipSize, 'fitsX = ', fitsX, 'fitsY = ', fitsY, 'fitsSize = ', fitsSize) ;
 				//let strLog = 'active x = ' + x + ' y = '+ y + ' clipSize = ' + clipSize + ' fitsX = ' + fitsX + ' fitsY = ' + fitsY + ' fitsSize = ' + fitsSize + ' pred_x = ' + pred_x + ' pred_y = ' + pred_y + ' pred_mouse_x = ' + pred_mouse_x + ' pred_mouse_y = ' + pred_mouse_y ;
@@ -11800,26 +11789,20 @@ function imageTimeout() {
 	//var _y1 = imageContainer[va_count - 1].height - image_bounding_dims.height - image_bounding_dims.y1;
 
 	var rect_elem = d3.select("#image_rectangle");
-	/*var x = image_bounding_dims.x1 + (mouse_position.x - rect_elem.attr("x")) / (rect_elem.attr("width") - 1) * (image_bounding_dims.width - 1);
-	var y = image_bounding_dims.y2 + (mouse_position.y - rect_elem.attr("y")) / (rect_elem.attr("height") - 1) * (image_bounding_dims.height - 1);*/
 
-	var ax = (image_bounding_dims.width - 1) / (rect_elem.attr("width") - 1);
+	var ax = (image_bounding_dims.width - 0) / (rect_elem.attr("width") - 0);
 	var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect_elem.attr("x"));
 
-	var ay = (image_bounding_dims.height - 1) / (rect_elem.attr("height") - 1);
+	var ay = (image_bounding_dims.height - 0) / (rect_elem.attr("height") - 0);
 	var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect_elem.attr("y"));
 
 	var clipSize = Math.min(image_bounding_dims.width, image_bounding_dims.height) / zoom_scale;
 	var sel_width = clipSize * scale;
 	var sel_height = clipSize * scale;
 
-	/*x = Math.round(x);
-	y = Math.round(y);
-	clipSize = Math.round(clipSize);*/
-
-	var fitsX = x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-	var fitsY = y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
-	var fitsSize = clipSize * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
+	var fitsX = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var fitsY = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
+	var fitsSize = clipSize * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
 
 	var image_update = true;
 
@@ -11829,10 +11812,6 @@ function imageTimeout() {
 		image_update = false;
 
 	//console.log('idle', 'x = ', x, 'y = ', y, 'clipSize = ', clipSize, 'fitsX = ', fitsX, 'fitsY = ', fitsY, 'fitsSize = ', fitsSize, 'image_update:', image_update);
-
-	/*fitsX = Math.round(fitsX);
-	fitsY = Math.round(fitsY);
-	fitsSize = Math.round(fitsSize);*/
 
 	//send an image/spectrum request to the server
 	var x1 = Math.round(fitsX - fitsSize);
@@ -11988,7 +11967,7 @@ function imageTimeout() {
 		zoom_element.attr("cx", mx).attr("cy", my).attr("r", Math.round(sel_width)).attr("opacity", 1.0);
 
 	var crossSize = 1.0 * emFontSize;
-	zoom_cross.attr("x", mx - crossSize / 2).attr("y", my - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.5);
+	zoom_cross.attr("x", mx - crossSize / 2).attr("y", my - crossSize / 2).attr("width", crossSize).attr("height", crossSize).attr("opacity", 0.75);
 
 	var px, py;
 
@@ -12214,20 +12193,20 @@ function partial_fits_size() {
 	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 	//console.log("BITPIX = ", fitsData.BITPIX);
 
-	var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 1);
-	var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 1);
+	var ax = (image_bounding_dims.width - 0) / (d3.select("#image_rectangle").attr("width") - 0);
+	var ay = (image_bounding_dims.height - 0) / (d3.select("#image_rectangle").attr("height") - 0);
 
 	var x1 = image_bounding_dims.x1 + ax * (begin_x - offsetx);
 	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (begin_y - offsety);
 
-	var orig_x1 = x1 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-	var orig_y1 = y1 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+	var orig_x1 = x1 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var orig_y1 = y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
 
 	var x2 = image_bounding_dims.x1 + ax * (end_x - offsetx);
 	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (end_y - offsety);
 
-	var orig_x2 = x2 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-	var orig_y2 = y2 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+	var orig_x2 = x2 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var orig_y2 = y2 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
 
 	let dimx = Math.abs(orig_x2 - orig_x1 + 1);
 	let dimy = Math.abs(orig_y2 - orig_y1 + 1);
@@ -12249,20 +12228,20 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
 	let fitsData = fitsContainer[va_count - 1];
 	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 
-	var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 1);
-	var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 1);
+	var ax = (image_bounding_dims.width - 0) / (d3.select("#image_rectangle").attr("width") - 0);
+	var ay = (image_bounding_dims.height - 0) / (d3.select("#image_rectangle").attr("height") - 0);
 
 	var x1 = image_bounding_dims.x1 + ax * (line_x1 - offsetx);
 	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (line_y1 - offsety);
 
-	var orig_x1 = 1 + x1 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-	var orig_y1 = 1 + y1 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+	var orig_x1 = 1 + x1 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var orig_y1 = 1 + y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
 
 	var x2 = image_bounding_dims.x1 + ax * (line_x2 - offsetx);
 	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (line_y2 - offsety);
 
-	var orig_x2 = 1 + x2 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-	var orig_y2 = 1 + y2 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+	var orig_x2 = 1 + x2 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var orig_y2 = 1 + y2 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
 
 	// console.log("orig_x1:", orig_x1, "orig_y1:", orig_y1, "orig_x2:", orig_x2, "orig_y2:", orig_y2);
 
@@ -12333,22 +12312,20 @@ function partial_fits_download() {
 	let fitsData = fitsContainer[va_count - 1];
 	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 
-	var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 1);
-	var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 1);
+	var ax = (image_bounding_dims.width - 0) / (d3.select("#image_rectangle").attr("width") - 0);
+	var ay = (image_bounding_dims.height - 0) / (d3.select("#image_rectangle").attr("height") - 0);
 
 	var x1 = image_bounding_dims.x1 + ax * (begin_x - offsetx);
-	//var y1 = image_bounding_dims.y1 + ay * (begin_y - offsety);
 	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (begin_y - offsety);
 
-	var orig_x1 = 1 + x1 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-	var orig_y1 = 1 + y1 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+	var orig_x1 = 1 + x1 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var orig_y1 = 1 + y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
 
 	var x2 = image_bounding_dims.x1 + ax * (end_x - offsetx);
-	//var y2 = image_bounding_dims.y1 + ay * (end_y - offsety);
 	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (end_y - offsety);
 
-	var orig_x2 = 1 + x2 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
-	var orig_y2 = 1 + y2 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
+	var orig_x2 = 1 + x2 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var orig_y2 = 1 + y2 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
 
 	var url = "get_fits?";
 
