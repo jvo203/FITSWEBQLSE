@@ -7400,6 +7400,7 @@ contains
         print *, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
 
         ! Free the list
+        nullify (cursor)
         call list_free(ll)
 
         if (req%fd .ne. -1) then

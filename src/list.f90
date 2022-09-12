@@ -1,4 +1,6 @@
-! A generic linked list object
+! A generic linked list object, downloaded from the Internet
+! This is a flawed implementation, in need of an overhaul
+
 module list
     implicit none
 
@@ -14,7 +16,6 @@ module list
 
     ! Linked list node data type
     type :: list_t
-        private
         integer, dimension(:), pointer :: data => null()
         type(list_t), pointer :: next => null()
     end type list_t
