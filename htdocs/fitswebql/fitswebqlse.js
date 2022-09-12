@@ -10014,7 +10014,6 @@ function setup_image_selection() {
 			.on("end", fits_subregion_end)
 		)
 		.call(zoom)
-		.on("click", pv_event)
 		.on("mouseenter", (event) => {
 			hide_navigation_bar();
 
@@ -10640,6 +10639,14 @@ function setup_image_selection() {
 
 			idleMouse = setTimeout(imageTimeout, 250);//was 250ms + latency
 		});
+
+	let fitsData = fitsContainer[va_count - 1];
+
+	if (fitsData != null) {
+		if (fitsData.depth > 1) {
+			rect.on("click", pv_event);
+		}
+	}
 
 	zoom.scaleTo(rect, zoom_scale);
 }
