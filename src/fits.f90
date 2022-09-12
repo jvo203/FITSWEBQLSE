@@ -7323,6 +7323,7 @@ contains
             if (.not. all(pos .eq. prev_pos)) then
                 prev_pos = pos
                 npoints = npoints + 1
+                call list_insert(ll, pos)
             end if
 
             t = t + dt
