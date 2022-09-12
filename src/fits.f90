@@ -7258,6 +7258,7 @@ contains
         real :: dx, dy, t, dt
         integer(c_int) :: x1, x2, y1, y2
         integer, dimension(2) :: pos, prev_pos
+        integer, dimension(:), pointer :: ptr
         real(kind=8) :: cdelt3
 
         type(list_t), pointer :: ll => null()
@@ -7335,6 +7336,26 @@ contains
         ! allocate the pv array
         allocate (pv(first:last, npoints))
         pv = 0.0
+
+        ! get the head node
+        i = 0
+        ptr => list_get(ll)
+        print *, "list head:", ptr
+
+        do while (associated(ptr))
+            pos = ptr(1:2)
+            print *, 'pos:', pos
+
+            ! get the spectrum for each frame
+            do frame = first, last
+                pv(frame, i + 1) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
+            end do
+
+            i = i + 1
+            ptr => list_get(list_next(ll))
+        end do
+
+        print *, 'process #points:', i
 
         ! now do it all over again, but this time fill the pv array
         i = 0
