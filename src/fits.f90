@@ -7262,6 +7262,7 @@ contains
         real(kind=8) :: cdelt3
 
         type(list_t), pointer :: ll => null()
+        type(list_t), pointer :: cursor => null()
         real(kind=c_float), allocatable :: pv(:, :)
         real(kind=8) :: t1, t2
 
@@ -7316,6 +7317,8 @@ contains
         t = 0.0
         prev_pos = 0
 
+        call list_init(ll)
+
         do while (t .le. 1.0)
             pos = line(t, x1, y1, x2, y2)
 
@@ -7323,11 +7326,7 @@ contains
                 prev_pos = pos
                 npoints = npoints + 1
                 print *, 'npoints', npoints, 'pos:', pos
-                if (npoints .eq. 1) then
-                    call list_init(ll, pos)
-                else
-                    call list_insert(ll, pos)
-                end if
+                call list_insert(ll, pos)
             end if
 
             t = t + dt
@@ -7346,12 +7345,11 @@ contains
         ! start with the head node
         i = 0
 
-        if (associated(ll)) ptr => list_get(ll)
-        ll => list_next(ll)
-
-        do while (associated(ptr))
-            if (associated(ll)) ptr => list_get(ll)
-            ll => list_next(ll)
+        cursor => ll
+        do while (associated(cursor))
+            ptr => list_get(cursor)
+            cursor => cursor%next
+            if (.not. associated(ptr)) exit
 
             i = i + 1
             pos = ptr(1:2)
@@ -7361,8 +7359,6 @@ contains
             do frame = first, last
                 pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
             end do
-
-            if (.not. associated(ll)) exit
         end do
 
         print *, 'process #points:', i
