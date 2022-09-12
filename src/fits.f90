@@ -7348,8 +7348,9 @@ contains
         cursor => ll
         do while (associated(cursor))
             ptr => list_get(cursor)
-            cursor => cursor%next
-            if (.not. associated(ptr)) exit
+            cursor => list_next(cursor)
+
+            if (.not. associated(ptr)) cycle
 
             i = i + 1
             pos = ptr(1:2)

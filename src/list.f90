@@ -16,6 +16,7 @@ module list
 
     ! Linked list node data type
     type :: list_t
+        private
         integer, dimension(:), pointer :: data => null()
         type(list_t), pointer :: next => null()
     end type list_t
