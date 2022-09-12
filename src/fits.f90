@@ -7311,8 +7311,6 @@ contains
 
         print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
 
-        call list_init(ll)
-
         ! first count the number of points along line
         npoints = 0
         t = 0.0
@@ -7324,7 +7322,12 @@ contains
             if (.not. all(pos .eq. prev_pos)) then
                 prev_pos = pos
                 npoints = npoints + 1
-                call list_insert(ll, pos)
+                print *, 'npoints', npoints, 'pos:', pos
+                if (npoints .eq. 1) then
+                    call list_init(ll, pos)
+                else
+                    call list_insert(ll, pos)
+                end if
             end if
 
             t = t + dt
@@ -7337,22 +7340,26 @@ contains
         allocate (pv(first:last, npoints))
         pv = 0.0
 
-        ! get the head node
+        ! start with the head node
         i = 0
-        ptr => list_get(ll)
-        print *, "list head:", ptr
+
+        if (associated(ll)) ptr => list_get(ll)
+        ll => list_next(ll)
 
         do while (associated(ptr))
+            if (associated(ll)) ptr => list_get(ll)
+            ll => list_next(ll)
+
+            i = i + 1
             pos = ptr(1:2)
-            print *, 'pos:', pos
+            print *, 'i', i, 'pos:', pos
 
             ! get the spectrum for each frame
             do frame = first, last
-                pv(frame, i + 1) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
+                pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
             end do
 
-            i = i + 1
-            ptr => list_get(list_next(ll))
+            if (.not. associated(ll)) exit
         end do
 
         print *, 'process #points:', i
