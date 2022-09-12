@@ -7340,6 +7340,9 @@ contains
         allocate (pv(first:last, npoints))
         pv = 0.0
 
+        ! the linked list implementation downloaded from the Internet
+        ! contains a logical bug, it needs to be fixed
+
         ! start with the head node
         i = 0
 
