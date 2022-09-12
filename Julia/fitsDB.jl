@@ -159,7 +159,7 @@ function preload_dataset(datasetid)
     end
 
     # then wait 30 seconds to allow for the 60s dataset timeout (avoid a RAM overload)
-    # sleep(30) # or not ...
+    sleep(61) # or not ...
 end
 
 # conservative assumptions
