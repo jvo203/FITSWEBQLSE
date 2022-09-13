@@ -7257,9 +7257,13 @@ contains
       integer :: frame, first, last, length, npoints, i, max_threads
       real :: dx, dy, t, dt
       integer(c_int) :: x1, x2, y1, y2
+      integer :: prev_x, prev_y, cur_x, cur_y
       integer, dimension(2) :: pos, prev_pos
       integer, dimension(:), pointer :: ptr
       real(kind=8) :: cdelt3
+
+      ! a decompression cache
+      real(kind=4), allocatable :: x(:,:,:)
 
       type(list_t), pointer :: ll => null()
       type(list_t), pointer :: cursor => null()
@@ -7295,6 +7299,9 @@ contains
 
       call get_cdelt3(item, cdelt3)
 
+      ! allocate the decompression cache
+      allocate(x(DIM, DIM, first:last))
+
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
 
@@ -7312,7 +7319,7 @@ contains
 
       print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
 
-      ! first count the number of points along line
+      ! first enumerate points along the line
       npoints = 0
       t = 0.0
       prev_pos = 0
@@ -7323,7 +7330,7 @@ contains
          if (.not. all(pos .eq. prev_pos)) then
             prev_pos = pos
             npoints = npoints + 1
-            print *, 'npoints', npoints, 'pos:', pos
+            ! print *, 'npoints', npoints, 'pos:', pos
 
             if(.not. associated(ll)) then
                call list_init(ll, pos)
@@ -7342,8 +7349,8 @@ contains
       allocate (pv(first:last, npoints))
       pv = 0.0
 
-      ! the linked list implementation downloaded from the Internet
-      ! contains a logical bug, it needs to be fixed
+      prev_x = 0
+      prev_y = 0
 
       ! start the timer
       t1 = omp_get_wtime()
@@ -7361,6 +7368,15 @@ contains
          i = i + 1
          pos = ptr(1:2)
          print *, 'i', i, 'pos:', pos
+
+         cur_x = 1 + (pos(1) - 1)/DIM
+         cur_y = 1 + (pos(2) - 1)/DIM
+
+         if (cur_x .ne. prev_x .or. cur_y .ne. prev_y) then
+            print *, 'cur_x:', cur_x, 'cur_y:', cur_y
+            prev_x = cur_x
+            prev_y = cur_y
+         end if
 
          ! get the spectrum for each frame
          ! first an inefficient implementation, it decompresses the same fixed blocks over and over again
