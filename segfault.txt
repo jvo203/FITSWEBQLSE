@@ -1,3 +1,8 @@
+ALMA01018218
+[WS] {"type":"realtime_image_spectrum","dx":1500,"image":false,"quality":"medium","x1":-43,"y1":828,"x2":106,"y2":978,"width":586,"height":586,"beam":"circle","intensity":"integrated","frame_start":93171858567.09592,"frame_end":93181171825.4,"ref_freq":93173400000,"seq_id":2,"timestamp":1955.4000000003725}
+zsh: segmentation fault  ./fitswebqlse
+
+
 [C] FITS filepath:	/mnt/fits/files/ALMA01462082.fits
  image           1 received an http request uri: /mnt/fits/files/ALMA01462082.fits          33
 [C] inserted ALMA01462082 into the hash table
