@@ -7303,7 +7303,7 @@ contains
       call get_cdelt3(item, cdelt3)
 
       ! allocate the decompression cache
-      allocate(x(DIM, DIM, first:last))
+      allocate(x(1:DIM, 1:DIM, first:last))
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
@@ -7327,6 +7327,8 @@ contains
       t = 0.0
       prev_pos = 0
 
+      call list_init(ll)
+
       do while (t .le. 1.0)
          pos = line(t, x1, y1, x2, y2)
 
@@ -7335,11 +7337,7 @@ contains
             npoints = npoints + 1
             ! print *, 'npoints', npoints, 'pos:', pos
 
-            if(.not. associated(ll)) then
-               call list_init(ll, pos)
-            else
-               call list_insert(ll, pos)
-            end if
+            call list_insert(ll, pos)
          end if
 
          t = t + dt
@@ -7366,17 +7364,22 @@ contains
          ptr => list_get(cursor)
          cursor => list_next(cursor)
 
-         if (.not. associated(ptr)) cycle
+         if (.not. associated(ptr)) then
+            ! print *, 'i:', i, 'ptr is not associated'
+            exit
+         end if
 
          i = i + 1
          pos = ptr(1:2)
          ! print *, 'i', i, 'pos:', pos
 
+         if(i .gt. npoints) exit
+
          cur_x = 1 + (pos(1) - 1)/DIM
          cur_y = 1 + (pos(2) - 1)/DIM
 
          if (cur_x .ne. prev_x .or. cur_y .ne. prev_y) then
-            print *, 'cur_x:', cur_x, 'cur_y:', cur_y
+            print *, 'decompressing a fixed block @ cur_x:', cur_x, 'cur_y:', cur_y
             prev_x = cur_x
             prev_y = cur_y
 
@@ -7387,8 +7390,6 @@ contains
 
                max_exp = int(item%compressed(frame)%ptr(cur_x,cur_y)%common_exp)
                x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame)%ptr(cur_x,cur_y)%mantissa, max_exp, significant_bits)
-
-               ! print *, "frame:", frame, "x:", x
             end do
          end if
 
@@ -7403,7 +7404,7 @@ contains
          ! OpenMP does not really speed up things much, but it is a start
          ! do frame = first, last
          !   pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
-         !end do
+         ! end do
       end do
 
       ! end the timer
