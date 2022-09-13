@@ -7317,8 +7317,6 @@ contains
       t = 0.0
       prev_pos = 0
 
-      call list_init(ll)
-
       do while (t .le. 1.0)
          pos = line(t, x1, y1, x2, y2)
 
@@ -7326,7 +7324,12 @@ contains
             prev_pos = pos
             npoints = npoints + 1
             print *, 'npoints', npoints, 'pos:', pos
-            call list_insert(ll, pos)
+
+            if(.not. associated(ll)) then
+               call list_init(ll, pos)
+            else
+               call list_insert(ll, pos)
+            end if
          end if
 
          t = t + dt
