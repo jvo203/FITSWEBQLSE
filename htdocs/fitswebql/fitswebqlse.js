@@ -10368,7 +10368,7 @@ function setup_image_selection() {
 			var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect.getAttribute("x"));
 
 			var ay = (image_bounding_dims.height - 0) / (rect.getAttribute("height") - 0);
-			var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect.getAttribute("y"));
+			var y = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (mouse_position.y - rect.getAttribute("y"));
 
 			var orig_x = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
 			var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
@@ -10577,7 +10577,7 @@ function setup_image_selection() {
 				var pred_x = image_bounding_dims.x1 + ax * (pred_mouse_x - rect.getAttribute("x"));
 
 				var ay = (image_bounding_dims.height - 0) / (rect.getAttribute("height") - 0);
-				var pred_y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (pred_mouse_y - rect.getAttribute("y"));
+				var pred_y = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (pred_mouse_y - rect.getAttribute("y"));
 
 				var fitsX = pred_x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);//x or pred_x
 				var fitsY = pred_y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);//y or pred_y
@@ -11801,7 +11801,7 @@ function imageTimeout() {
 	var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect_elem.attr("x"));
 
 	var ay = (image_bounding_dims.height - 0) / (rect_elem.attr("height") - 0);
-	var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect_elem.attr("y"));
+	var y = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (mouse_position.y - rect_elem.attr("y"));
 
 	var clipSize = Math.min(image_bounding_dims.width, image_bounding_dims.height) / zoom_scale;
 	var sel_width = clipSize * scale;
@@ -12204,7 +12204,7 @@ function partial_fits_size() {
 	var ay = (image_bounding_dims.height - 0) / (d3.select("#image_rectangle").attr("height") - 0);
 
 	var x1 = image_bounding_dims.x1 + ax * (begin_x - offsetx);
-	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (begin_y - offsety);
+	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (begin_y - offsety);
 
 	var orig_x1 = x1 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
 	var orig_y1 = y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
@@ -12239,7 +12239,7 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
 	var ay = (image_bounding_dims.height - 0) / (d3.select("#image_rectangle").attr("height") - 0);
 
 	var x1 = image_bounding_dims.x1 + ax * (line_x1 - offsetx);
-	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (line_y1 - offsety);
+	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (line_y1 - offsety);
 
 	var orig_x1 = 1 + x1 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
 	var orig_y1 = 1 + y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
@@ -12323,7 +12323,7 @@ function partial_fits_download() {
 	var ay = (image_bounding_dims.height - 0) / (d3.select("#image_rectangle").attr("height") - 0);
 
 	var x1 = image_bounding_dims.x1 + ax * (begin_x - offsetx);
-	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (begin_y - offsety);
+	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (begin_y - offsety);
 
 	var orig_x1 = 1 + x1 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
 	var orig_y1 = 1 + y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
