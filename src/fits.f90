@@ -7383,7 +7383,11 @@ contains
             prev_x = cur_x
             prev_y = cur_y
 
-            ! decompress new fixed blocks
+            ! decompress fixed blocks in parallel
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+            !$omp& PRIVATE(frame, max_exp)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
             do frame = first, last
                ! skip frames for which there is no data on this node
                if (.not. associated(item%compressed(frame)%ptr)) cycle
@@ -7391,6 +7395,8 @@ contains
                max_exp = int(item%compressed(frame)%ptr(cur_x,cur_y)%common_exp)
                x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame)%ptr(cur_x,cur_y)%mantissa, max_exp, significant_bits)
             end do
+            !$omp END DO
+            !$omp END PARALLEL
          end if
 
          ! get the spectrum for each frame
