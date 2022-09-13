@@ -7404,21 +7404,21 @@ contains
             ! skip frames for which there is no data on this node
             if (.not. associated(item%compressed(frame)%ptr)) cycle
 
-            pv(frame, i) = x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)
-            !   pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
-         end do
+            ! an inefficient implementation, it decompresses the same fixed blocks over and over again
+            ! pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
 
-         ! first an inefficient implementation, it decompresses the same fixed blocks over and over again
-         ! OpenMP does not really speed up things much, but it is a start
-         ! do frame = first, last
-         !   pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
-         ! end do
+            ! this faster implementation uses a decompression cache
+            pv(frame, i) = x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame) * cdelt3
+         end do
       end do
 
       ! end the timer
       t2 = omp_get_wtime()
 
       print *, 'processed #points:', i, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
+
+      ! free the decompression cache
+      deallocate(x)
 
       ! Free the list
       nullify (cursor)
