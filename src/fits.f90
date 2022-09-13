@@ -7265,6 +7265,9 @@ contains
       ! a decompression cache
       real(kind=4), allocatable :: x(:,:,:)
 
+      ! the maximum exponent
+      integer :: max_exp
+
       type(list_t), pointer :: ll => null()
       type(list_t), pointer :: cursor => null()
       real(kind=c_float), allocatable :: pv(:, :)
@@ -7367,7 +7370,7 @@ contains
 
          i = i + 1
          pos = ptr(1:2)
-         print *, 'i', i, 'pos:', pos
+         ! print *, 'i', i, 'pos:', pos
 
          cur_x = 1 + (pos(1) - 1)/DIM
          cur_y = 1 + (pos(2) - 1)/DIM
@@ -7376,14 +7379,31 @@ contains
             print *, 'cur_x:', cur_x, 'cur_y:', cur_y
             prev_x = cur_x
             prev_y = cur_y
+
+            ! decompress new fixed blocks
+            do frame = first, last
+               ! skip frames for which there is no data on this node
+               if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+               max_exp = int(item%compressed(frame)%ptr(cur_x,cur_y)%common_exp)
+               x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame)%ptr(cur_x,cur_y)%mantissa, max_exp, significant_bits)
+
+               ! print *, "frame:", frame, "x:", x
+            end do
          end if
 
          ! get the spectrum for each frame
+         do frame = first, last
+            ! skip frames for which there is no data on this node
+            if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+         end do
+
          ! first an inefficient implementation, it decompresses the same fixed blocks over and over again
          ! OpenMP does not really speed up things much, but it is a start
-         do frame = first, last
-            pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
-         end do
+         ! do frame = first, last
+         !   pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
+         !end do
       end do
 
       ! end the timer
