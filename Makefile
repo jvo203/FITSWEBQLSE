@@ -177,6 +177,7 @@ ifeq ($(UNAME_S),Darwin)
 	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
 	# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
 	CFLAGS := $(FLAGS) -flax-vector-conversions
+	FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
 
 	# GCC FORTRAN runtime
 	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/12 -lgfortran -lm -framework Accelerate
