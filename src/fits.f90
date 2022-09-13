@@ -7404,6 +7404,8 @@ contains
             ! skip frames for which there is no data on this node
             if (.not. associated(item%compressed(frame)%ptr)) cycle
 
+            pv(frame, i) = x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)
+            !   pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
          end do
 
          ! first an inefficient implementation, it decompresses the same fixed blocks over and over again
