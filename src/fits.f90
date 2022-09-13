@@ -7271,6 +7271,9 @@ contains
       type(list_t), pointer :: ll => null()
       type(list_t), pointer :: cursor => null()
       real(kind=c_float), allocatable :: pv(:, :)
+      real(kind=c_float) :: pmin, pmax
+
+      ! timing
       real(kind=8) :: t1, t2
 
       if (.not. c_associated(user)) return
@@ -7416,6 +7419,19 @@ contains
       t2 = omp_get_wtime()
 
       print *, 'processed #points:', i, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
+
+      ! start the timer
+      t1 = omp_get_wtime()
+
+      pmin = minval(pv)
+      pmax = maxval(pv)
+
+      ! end the timer
+      t2 = omp_get_wtime()
+
+      print *, 'P-V min:', pmin, 'max:', pmax, 'min/max elapsed time: ', 1000*(t2 - t1), '[ms]'
+
+      ! image tone mapping transformation
 
       ! free the decompression cache
       deallocate(x)
