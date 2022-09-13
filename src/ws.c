@@ -485,6 +485,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // Got websocket frame. Received data is wm->data. Echo it back!
         struct mg_ws_message *wm = (struct mg_ws_message *)ev_data;
 
+        // simulate a message that caused a segmentation fault
+        // substitute the wm->data
+        // wm->data = mg_str("{\"type\":\"realtime_image_spectrum\",\"dx\":1500,\"image\":false,\"quality\":\"medium\",\"x1\":-43,\"y1\":828,\"x2\":106,\"y2\":978,\"width\":586,\"height\":586,\"beam\":\"circle\",\"intensity\":\"integrated\",\"frame_start\":93171858567.09592,\"frame_end\":93181171825.4,\"ref_freq\":93173400000,\"seq_id\":2,\"timestamp\":1955.4000000003725}");
+
         // re-cast the binary data as a text message
         struct mg_str msg = mg_str_n(wm->data.ptr, wm->data.len);
 
