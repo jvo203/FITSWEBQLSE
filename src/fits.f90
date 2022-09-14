@@ -7470,7 +7470,7 @@ contains
       ! end the timer
       t2 = omp_get_wtime()
 
-      print *, 'P-V min:', pmin, 'max:', pmax, 'mean:', pmean, 'std:', pstd, 'elapsed time: ', 1000*(t2 - t1), '[ms]'
+      print *, 'P-V ERF  min:', pmin, 'max:', pmax, 'mean:', pmean, 'std:', pstd, 'elapsed time: ', 1000*(t2 - t1), '[ms]'
 
       ! free the decompression cache
       deallocate(x)
