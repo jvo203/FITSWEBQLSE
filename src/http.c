@@ -4082,6 +4082,10 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
         free(compressed_mask);
 }
 
+void write_pv_diagram(int fd, int width, int height, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
+{
+}
+
 void split_wcs(const char *coord, char *key, char *value, const char *null_key)
 {
     char *pos = strchr(coord, ':');
