@@ -7475,6 +7475,7 @@ contains
          req%fd = -1
       end if
 
+      ! free the P-V diagram
       deallocate(pv)
 
       nullify (item)
