@@ -653,7 +653,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
     varying double partial_sumN = 0.0 ;
     varying unsigned int64 partial_countN = 0 ;
 
-    uniform bool do_stat = !isnan(median);
+    varying bool do_stat = !isnan(median);
 
     for(uniform int j=cm_start; j<= cm_end; j++)
       for(uniform int i=cn_start; i <= cn_end; i++)
@@ -701,7 +701,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
             view_pixels[offset] += tmp * cdelt3 ;            
             view_mask[offset] |= isnan ? false : true ;
 
-            if(do_stat) // <do_stat> is a uniform variable
+            cif(do_stat)
             {
               varying float deviation = abs(tmp - median); // absolute deviation from the median
 
