@@ -87,6 +87,32 @@ uniform int64 count = reduce_add(partial_count) ;
   res[3] = (float) integrated;
 } ;
 
+export void  make_array_statistics(uniform float pixels[], uniform float pmin[], uniform float pmax[], uniform float pmean[], uniform int64 npixels)
+{  
+  varying float vmin = pmin[0] ;
+  varying float vmax = pmax[0] ;
+  varying double vsum = 0.0 ;
+
+  foreach(i=0 ... npixels)
+    {      
+      float tmp = pixels[i];
+
+      vmin = min(vmin, tmp) ;
+      vmax = max(vmax, tmp) ;
+      vsum += tmp ;
+    }
+
+  uniform double psum = reduce_add(vsum) ;
+
+  pmin[0] = reduce_min(vmin) ;
+  pmax[0] = reduce_max(vmax) ;
+
+  if(npixels > 0)
+    pmean[0] = (float) (psum / (double) npixels) ;
+  else
+    pmean[0] = 0.0 ;
+}
+
 export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
 {
   float partial_sum = 0.0f ;  
