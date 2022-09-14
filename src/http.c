@@ -168,7 +168,7 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision);
 void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
-void write_pv_diagram(int fd, int width, int height, int npoints, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
+void write_pv_diagram(int fd, int width, int height, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
 
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
