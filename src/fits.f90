@@ -7292,8 +7292,9 @@ contains
 
       type(list_t), pointer :: ll => null()
       type(list_t), pointer :: cursor => null()
-      real(kind=c_float), allocatable :: pv(:, :)
-      real(kind=c_float) :: pmin, pmax
+      real(kind=c_float), allocatable, target :: pv(:, :)
+      integer(kind=8) :: npixels
+      real(kind=c_float) :: pmin, pmax, pmean, pstd
 
       ! timing
       real(kind=8) :: t1, t2
@@ -7375,6 +7376,8 @@ contains
       allocate (pv(first:last, npoints))
       pv = 0.0
 
+      npixels = length * npoints
+
       prev_x = 0
       prev_y = 0
 
@@ -7453,6 +7456,21 @@ contains
 
       print *, 'P-V min:', pmin, 'max:', pmax, 'min/max elapsed time: ', 1000*(t2 - t1), '[ms]'
 
+      ! start the timer
+      t1 = omp_get_wtime()
+
+      pmin = 1.0E30
+      pmax = -1.0E30
+
+      call array_stat(c_loc(pv), pmin, pmax, pmean, npixels)
+      pstd = array_std(c_loc(pv), pmean, npixels)
+
+      ! end the timer
+      t2 = omp_get_wtime()
+
+
+      print *, 'P-V min:', pmin, 'max:', pmax, 'mean:', pmean, 'std:', pstd, 'elapsed time: ', 1000*(t2 - t1), '[ms]'
+
       ! image tone mapping transformation
 
       ! free the decompression cache
@@ -7468,6 +7486,8 @@ contains
          call close_pipe(req%fd)
          req%fd = -1
       end if
+
+      deallocate(pv)
 
       nullify (item)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
