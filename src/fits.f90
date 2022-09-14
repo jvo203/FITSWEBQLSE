@@ -623,6 +623,28 @@ module fits
 
       end subroutine make_image_spectrumF32
 
+      ! export void array_stat(uniform float pixels[], uniform float pmin[], uniform float pmax[], uniform float pmean[], uniform int64 npixels)
+      subroutine array_stat(pixels, pmin, pmax, pmean, npixels) BIND(C, name='array_stat')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: pixels
+         real(c_float), intent(inout) :: pmin, pmax, pmean
+         integer(c_int64_t), value, intent(in) :: npixels
+
+      end subroutine array_stat
+
+      ! export uniform float array_std(uniform float pixels[], uniform float pmean, uniform int64 npixels)
+      real(c_float) function array_std(pixels, pmean, npixels) BIND(C, name='array_std')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: pixels
+         real(c_float), value, intent(in) :: pmean
+         integer(c_int64_t), value, intent(in) :: npixels
+
+      end function array_std
+
       ! export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width,, uniform int height,&
       ! uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform double cdelt3)
       real(c_float) function viewport_spectrum_rect(compressed, width, height, pmin, pmax,&
