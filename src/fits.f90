@@ -7445,16 +7445,7 @@ contains
 
       print *, 'processed #points:', i, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
 
-      ! start the timer
-      t1 = omp_get_wtime()
-
-      pmin = minval(pv)
-      pmax = maxval(pv)
-
-      ! end the timer
-      t2 = omp_get_wtime()
-
-      print *, 'P-V min:', pmin, 'max:', pmax, 'min/max elapsed time: ', 1000*(t2 - t1), '[ms]'
+      ! pixels statistics and  image tone mapping transformation
 
       ! start the timer
       t1 = omp_get_wtime()
@@ -7468,10 +7459,7 @@ contains
       ! end the timer
       t2 = omp_get_wtime()
 
-
       print *, 'P-V min:', pmin, 'max:', pmax, 'mean:', pmean, 'std:', pstd, 'elapsed time: ', 1000*(t2 - t1), '[ms]'
-
-      ! image tone mapping transformation
 
       ! free the decompression cache
       deallocate(x)
