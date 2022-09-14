@@ -964,12 +964,12 @@ module fits
          type(C_PTR), value :: pixels, mask
       end subroutine write_image_spectrum
 
-      ! void write_pv_diagram(int fd, int first, int last, int npoints, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
-      subroutine write_pv_diagram(fd, first, last, npoints, pv, pmean, pstd, pmin, pmax) BIND(C, name='write_pv_diagram')
+      ! void write_pv_diagram(int fd, int width, int height, int npoints, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
+      subroutine write_pv_diagram(fd, width, height, npoints, pv, pmean, pstd, pmin, pmax) BIND(C, name='write_pv_diagram')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
-         integer(c_int), value, intent(in) :: fd, first, last, npoints
+         integer(c_int), value, intent(in) :: fd, width, height, npoints
          real(kind=c_float), value, intent(in) :: pmean, pstd, pmin, pmax
          type(C_PTR), value :: pv
       end subroutine write_pv_diagram
