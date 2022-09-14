@@ -18,6 +18,8 @@ struct fixed_block_t {
 };
 /* END OF FIXED POINT */
 
+extern "C" uniform float erff(uniform float);
+
 bool isinf(float tmp)
 {
   unsigned int i = intbits(tmp) ;
@@ -129,6 +131,22 @@ export uniform float array_std(uniform float pixels[], uniform float pmean, unif
     return (float) sqrt(psum / (uniform double) (npixels - 1)) ;
   else    
     return (float) sqrt(psum / (uniform double) npixels) ;
+}
+
+export void array_erf(uniform float pixels[], uniform float pmean, uniform float pstd, uniform int64 npixels)
+{
+  foreach(i=0 ... npixels)
+    {      
+      varying float x = (pixels[i] - pmean) / pstd / sqrt(2.0f);
+      
+      foreach_active(instance)
+      {      
+        uniform float r = erff(extract(x, instance));
+        x = insert(x, instance, r);
+      }
+
+      pixels[i] = 0.5f * (1.0f + x);
+    }
 }
 
 export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
