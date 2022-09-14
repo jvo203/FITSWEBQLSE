@@ -87,7 +87,7 @@ uniform int64 count = reduce_add(partial_count) ;
   res[3] = (float) integrated;
 } ;
 
-export void  make_array_statistics(uniform float pixels[], uniform float pmin[], uniform float pmax[], uniform float pmean[], uniform int64 npixels)
+export void array_stat(uniform float pixels[], uniform float pmin[], uniform float pmax[], uniform float pmean[], uniform int64 npixels)
 {  
   varying float vmin = pmin[0] ;
   varying float vmax = pmax[0] ;
@@ -108,9 +108,27 @@ export void  make_array_statistics(uniform float pixels[], uniform float pmin[],
   pmax[0] = reduce_max(vmax) ;
 
   if(npixels > 0)
-    pmean[0] = (float) (psum / (double) npixels) ;
+    pmean[0] = (float) (psum / (uniform double) npixels) ;
   else
     pmean[0] = 0.0 ;
+}
+
+export uniform float array_std(uniform float pixels[], uniform float pmean, uniform int64 npixels)
+{
+  varying double vsum = 0.0 ;
+
+  foreach(i=0 ... npixels)
+    {      
+      float tmp = pixels[i];
+      vsum += (tmp - pmean) * (tmp - pmean) ;
+    }
+
+  uniform double psum = reduce_add(vsum) ;
+
+  if(npixels > 2)
+    return (float) sqrt(psum / (uniform double) (npixels - 1)) ;
+  else    
+    return (float) sqrt(psum / (uniform double) npixels) ;
 }
 
 export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
@@ -683,7 +701,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
             view_pixels[offset] += tmp * cdelt3 ;            
             view_mask[offset] |= isnan ? false : true ;
 
-            cif(do_stat)
+            if(do_stat) // <do_stat> is a uniform variable
             {
               varying float deviation = abs(tmp - median); // absolute deviation from the median
 
