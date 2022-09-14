@@ -7456,16 +7456,16 @@ contains
 
       print *, 'processed #points:', i, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
 
-      ! pixels statistics and  image tone mapping transformation
-
       ! start the timer
       t1 = omp_get_wtime()
 
       pmin = 1.0E30
       pmax = -1.0E30
 
+      ! pixels statistics and  image tone mapping transformation
       call array_stat(c_loc(pv), pmin, pmax, pmean, npixels)
       pstd = array_std(c_loc(pv), pmean, npixels)
+      call array_erf(c_loc(pv), pmean, pstd, npixels)
 
       ! end the timer
       t2 = omp_get_wtime()
