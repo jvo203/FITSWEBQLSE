@@ -634,6 +634,17 @@ module fits
 
       end subroutine array_stat
 
+      ! export void array_erf(uniform float pixels[], uniform float pmean, uniform float pstd, uniform int64 npixels)
+      subroutine array_erf(pixels, pmean, pstd, npixels) BIND(C, name='array_erf')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: pixels
+         real(c_float), value, intent(in) :: pmean, pstd
+         integer(c_int64_t), value, intent(in) :: npixels
+
+      end subroutine array_erf
+
       ! export uniform float array_std(uniform float pixels[], uniform float pmean, uniform int64 npixels)
       real(c_float) function array_std(pixels, pmean, npixels) BIND(C, name='array_std')
          use, intrinsic :: ISO_C_BINDING
