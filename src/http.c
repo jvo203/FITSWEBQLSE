@@ -168,7 +168,7 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision);
 void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
-void write_pv_diagram(int fd, int width, int height, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
+void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
 
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
@@ -4082,9 +4082,9 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
         free(compressed_mask);
 }
 
-void write_pv_diagram(int fd, int width, int height, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
+void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
 {
-    uchar *restrict compressed_pixels = NULL;
+    uchar *restrict compressed_pv = NULL;
 
     // ZFP variables
     zfp_type data_type = zfp_type_float;
@@ -4101,6 +4101,56 @@ void write_pv_diagram(int fd, int width, int height, const float *restrict pv, c
 
     if (width <= 0 || height <= 0)
         return;
+
+    printf("[C] fd: %d; width: %d; height: %d, pmean: %f, pstd: %f, pmin: %f, pmax: %f\n", fd, width, height, pmean, pstd, pmin, pmax);
+
+    // compress PV with ZFP
+    field = zfp_field_2d((void *)pv, data_type, nx, ny);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    compressed_pv = (uchar *)malloc(bufsize);
+
+    if (compressed_pv != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)compressed_pv, bufsize);
+
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+            // compress entire array
+            zfpsize = zfp_compress(zfp, field);
+
+            if (zfpsize == 0)
+                printf("[C] ZFP compression failed!\n");
+            else
+                printf("[C] P-V Diagram compressed size: %zu bytes\n", zfpsize);
+
+            bitstream_close(stream);
+
+            // the compressed part is available at compressed_pv[0..zfpsize-1]
+        }
+    }
+    else
+        printf("[C] a NULL compressed_pv buffer!\n");
+
+    // clean up
+    zfp_field_free(field);
+    zfp_stream_close(zfp);
+
+    // free memory
+    free(compressed_pv);
 }
 
 void split_wcs(const char *coord, char *key, char *value, const char *null_key)
