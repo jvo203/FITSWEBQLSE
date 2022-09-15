@@ -4084,7 +4084,6 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
 
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
 {
-    const char id[] = "ZFP";
     uchar *restrict compressed_pv = NULL;
 
     // ZFP variables
@@ -4150,12 +4149,30 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
     zfp_field_free(field);
     zfp_stream_close(zfp);
 
+    const char id[] = "ZFP";
+
+    // pad the id with spaces so that the length is a multiple of 4 (JavaScript needs it ...)
+    int padded_len = 4 * (strlen(id) / 4 + 1);
+
+    // memory for a new padded id
+    char padded_id[padded_len + 1];
+
+    // right-pad the id with spaces
+    rpad(padded_id, id, ' ', padded_len);
+
     // transmit the data
     float tmp;
+    uint32_t id_len = strlen(padded_id);
 
     uint32_t img_width = width;
     uint32_t img_height = height;
     uint32_t pv_len = zfpsize;
+
+    // the id length
+    chunked_write(fd, (const char *)&id_len, sizeof(id_len));
+
+    // id
+    chunked_write(fd, padded_id, id_len);
 
     // pmin
     tmp = pmin;
