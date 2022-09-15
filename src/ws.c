@@ -1872,6 +1872,52 @@ void *ws_pv_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
+    // <offset> contains the number of valid bytes in <buf>
+    if (offset == 0)
+        goto free_pv_mem;
+
+    size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + offset;
+    char *pv_payload = malloc(msg_len);
+
+    if (pv_payload != NULL)
+    {
+        float ts = resp->timestamp;
+        uint32_t id = resp->seq_id;
+        uint32_t msg_type = 7; // P-V diagram
+
+        size_t ws_offset = 0;
+
+        memcpy((char *)pv_payload + ws_offset, &ts, sizeof(float));
+        ws_offset += sizeof(float);
+
+        memcpy((char *)pv_payload + ws_offset, &id, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        memcpy((char *)pv_payload + ws_offset, &msg_type, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        memcpy((char *)pv_payload + ws_offset, buf, offset);
+        ws_offset += offset;
+
+        if (ws_offset != msg_len)
+            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+        // create a UDP message
+        struct websocket_message msg = {strdup(resp->session_id), pv_payload, msg_len};
+
+        // pass the message over to mongoose via a communications channel
+        ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+        if (sent != sizeof(struct websocket_message))
+        {
+            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+            // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+            free(msg.session_id);
+            free(pv_payload);
+        };
+    }
+
     // release the incoming buffer
 free_pv_mem:
     free(buf);
