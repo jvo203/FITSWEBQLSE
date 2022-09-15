@@ -4102,7 +4102,7 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
     if (width <= 0 || height <= 0)
         return;
 
-    printf("[C] fd: %d; width: %d; height: %d, pmean: %f, pstd: %f, pmin: %f, pmax: %f\n", fd, width, height, pmean, pstd, pmin, pmax);
+    printf("[C] fd: %d; width: %d; height: %d, precision: %d, pmean: %f, pstd: %f, pmin: %f, pmax: %f\n", fd, width, height, precision, pmean, pstd, pmin, pmax);
 
     // compress PV with ZFP
     field = zfp_field_2d((void *)pv, data_type, nx, ny);
@@ -4149,7 +4149,39 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
     zfp_field_free(field);
     zfp_stream_close(zfp);
 
-    // free memory
+    // transmit the data
+    float tmp;
+
+    uint32_t img_width = width;
+    uint32_t img_height = height;
+    uint32_t pv_len = zfpsize;
+
+    // pmin
+    tmp = pmin;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // pmax
+    tmp = pmax;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // pmean
+    tmp = pmean;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // pstd
+    tmp = pstd;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // the P-V diagram
+    chunked_write(fd, (const char *)&img_width, sizeof(img_width));
+    chunked_write(fd, (const char *)&img_height, sizeof(img_height));
+
+    // pv (use a chunked version for larger tranfers)
+    chunked_write(fd, (const char *)&pv_len, sizeof(pv_len));
+    if (compressed_pv != NULL)
+        chunked_write(fd, (char *)compressed_pv, pv_len);
+
+    // release the memory
     free(compressed_pv);
 }
 
