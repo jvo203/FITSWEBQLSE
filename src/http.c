@@ -4084,6 +4084,23 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
 
 void write_pv_diagram(int fd, int width, int height, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
 {
+    uchar *restrict compressed_pixels = NULL;
+
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = width;
+    uint ny = height;
+
+    if (pv == NULL)
+        return;
+
+    if (width <= 0 || height <= 0)
+        return;
 }
 
 void split_wcs(const char *coord, char *key, char *value, const char *null_key)
