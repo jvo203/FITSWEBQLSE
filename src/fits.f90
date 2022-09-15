@@ -7491,7 +7491,7 @@ contains
 
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
-         call write_pv_diagram(req%fd, length, npoints, ZFP_MEDIUM_PRECISION, c_loc(pv), pmean, pstd, pmin, pmax)
+         call write_pv_diagram(req%fd, length, npoints, ZFP_LOW_PRECISION, c_loc(pv), pmean, pstd, pmin, pmax)
 
          call close_pipe(req%fd)
          req%fd = -1
