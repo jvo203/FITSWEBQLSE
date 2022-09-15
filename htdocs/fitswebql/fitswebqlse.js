@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-12.0";
+	return "JS2022-09-15.0";
 }
 
 function uuidv4() {
@@ -3163,7 +3163,7 @@ function open_websocket_connection(_datasetId, index) {
 						return;
 					}
 
-					//CSV spectrum
+					// CSV spectrum
 					if (type == 6) {
 						hide_cursor();
 						hide_hourglass();
@@ -3200,6 +3200,29 @@ function open_websocket_connection(_datasetId, index) {
 
 						return;
 					}
+
+					// P-V Diagram
+					if (type == 7) {
+						hide_cursor();
+						hide_hourglass();
+
+						d3.select("#pvline")
+							.attr("x1", 0)
+							.attr("y1", 0)
+							.attr("x2", 0)
+							.attr("y2", 0)
+							.attr("opacity", 0.0);
+
+						d3.select("#pvmid")
+							.attr("x1", 0)
+							.attr("y1", 0)
+							.attr("x2", 0)
+							.attr("y2", 0)
+							.attr("opacity", 0.0);
+
+						return;
+					}
+
 				}
 
 				if (typeof evt.data === "string") {
