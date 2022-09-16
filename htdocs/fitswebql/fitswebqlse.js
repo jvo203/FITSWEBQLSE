@@ -3257,10 +3257,10 @@ function open_websocket_connection(_datasetId, index) {
 						offset += pixels_length;
 
 						if (id == "ZFP") {
-							console.log(frame_pv)
-							// decompress ZFP
-							// var pv = Module.decompressZFPpv(img_width, img_height, frame_pv);
-							// console.log(pv);
+							// decompress ZFP							
+							var res = Module.decompressZFPimage(img_width, img_height, frame_pv);
+							const pv = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+							console.log(pv);
 						}
 
 						return;
