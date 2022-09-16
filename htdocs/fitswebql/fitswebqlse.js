@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-15.0";
+	return "JS2022-09-16.0";
 }
 
 function uuidv4() {
@@ -3219,6 +3219,49 @@ function open_websocket_connection(_datasetId, index) {
 							.attr("x2", 0)
 							.attr("y2", 0)
 							.attr("opacity", 0.0);
+
+						var offset = 12;
+						var str_length = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						let str = new Uint8Array(received_msg, offset, str_length);
+						let id = (new TextDecoder("utf-8").decode(str)).trim();
+						offset += str_length;
+
+						let pmin = dv.getFloat32(offset, endianness);
+						offset += 4;
+
+						let pmax = dv.getFloat32(offset, endianness);
+						offset += 4;
+
+						let pmean = dv.getFloat32(offset, endianness);
+						offset += 4;
+
+						let pstd = dv.getFloat32(offset, endianness);
+						offset += 4;
+
+						console.log("P-V Diagram: ", id, pmin, pmax, pmean, pstd);
+
+						var img_width = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						var img_height = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						var pv_length = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						console.log("P-V Diagram: ", img_width, img_height, pv_length);
+
+						var frame_pv = new Uint8Array(received_msg, offset, pv_length);
+						offset += pixels_length;
+
+						if (id == "ZFP") {
+							console.log(frame_pv)
+							// decompress ZFP
+							// var pv = Module.decompressZFPpv(img_width, img_height, frame_pv);
+							// console.log(pv);
+						}
 
 						return;
 					}
