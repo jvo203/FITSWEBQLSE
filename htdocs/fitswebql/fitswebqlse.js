@@ -3260,6 +3260,16 @@ function open_websocket_connection(_datasetId, index) {
 							var res = Module.decompressPVdiagram(img_width, img_height, frame_pv);
 							const pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
 							console.log(pv);
+
+							var pvData = new ImageData(pv, img_width, img_height);
+
+							let pvCanvas = document.createElement('canvas');
+							pvCanvas.style.visibility = "hidden";
+							var context = pvCanvas.getContext('2d');
+
+							pvCanvas.width = img_width;
+							pvCanvas.height = img_height;
+							context.putImageData(pvData, 0, 0);
 						}
 
 						return;
@@ -8913,6 +8923,16 @@ function pv_event(event) {
 			var div = d3.select("body").append("div")
 				.attr("id", "PVDiagram")
 				.attr("class", "threejs");
+
+			var rect = document.getElementById('mainDiv').getBoundingClientRect();
+			var width = rect.width - 20;
+			var height = rect.height - 20;
+
+			div.append("canvas")
+				.attr("id", "PVCanvas")
+				.attr("width", width)
+				.attr("height", height)
+				.attr('style', 'position: fixed; left: 10px; top: 10px;');
 
 			div.append("span")
 				.attr("id", "closePVDiagram")
