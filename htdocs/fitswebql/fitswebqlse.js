@@ -3258,8 +3258,7 @@ function open_websocket_connection(_datasetId, index) {
 						if (id == "ZFP") {
 							// decompress ZFP							
 							var res = Module.decompressPVdiagram(img_width, img_height, frame_pv);
-							const pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
-							console.log(pv);
+							const pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"							
 
 							var pvData = new ImageData(pv, img_width, img_height);
 
@@ -3270,6 +3269,18 @@ function open_websocket_connection(_datasetId, index) {
 							pvCanvas.width = img_width;
 							pvCanvas.height = img_height;
 							context.putImageData(pvData, 0, 0);
+
+							//place the image onto the PV canvas
+							var c = document.getElementById('PVCanvas');
+							var width = c.width;
+							var height = c.height;
+							var ctx = c.getContext("2d");
+
+							ctx.webkitImageSmoothingEnabled = false;
+							ctx.msImageSmoothingEnabled = false;
+							ctx.imageSmoothingEnabled = false;
+
+							ctx.drawImage(pvCanvas, 0, 0, width, height);
 						}
 
 						return;
