@@ -21,10 +21,13 @@ extern "C"
 }
 
 // Mathematica v10 MatrixPlot colourmap
-static const float math_x[] = {0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0};
-static const float math_r[] = {0.260487, 0.230198, 0.392401, 0.964837, 1.0, 0.95735, 0.913252, 0.860243, 0.42};
-static const float math_g[] = {0.356, 0.499962, 0.658762, 0.982332, 1.0, 0.957281, 0.790646, 0.558831, 1};
-static const float math_b[] = {0.891569, 0.848188, 0.797589, 0.98988, 1.0, 0.896269, 0.462837, 0.00695811, 0.0};
+#define NO_COLOURS 9
+static const float math_x[] = {0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0, 1.0};
+
+// the last colours are duplicated on purpose
+static const float math_r[] = {0.260487, 0.230198, 0.392401, 0.964837, 1.0, 0.95735, 0.913252, 0.860243, 1.0, 1.0};
+static const float math_g[] = {0.356, 0.499962, 0.658762, 0.982332, 1.0, 0.957281, 0.790646, 0.558831, 0.42, 0.42};
+static const float math_b[] = {0.891569, 0.848188, 0.797589, 0.98988, 1.0, 0.896269, 0.462837, 0.00695811, 0.0, 0.0};
 
 static float *pixelBuffer = NULL;
 static size_t pixelLength = 0;
@@ -504,6 +507,35 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
   printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);*/
 
   // convert pixels to RGBA using the ERF colourmap
+  size_t pvOffset = 0;
+
+  for (size_t i = 0; i < img_size; i++)
+  {
+    float value = pixels[i];
+
+    if (value < 0.0f)
+      value = 0.0f;
+    else if (value > 1.0f)
+      value = 1.0f;
+
+    unsigned char r = 0;
+    unsigned char g = 0;
+    unsigned char b = 0;
+    unsigned char a = 255;
+
+    float pos = value * (NO_COLOURS - 1);
+    float frac = pos - floorf(pos);
+    int x0 = floorf(pos);
+
+    r = 0xFF * (math_r[x0] + (math_r[x0 + 1] - math_r[x0]) * frac);
+    g = 0xFF * (math_g[x0] + (math_g[x0 + 1] - math_g[x0]) * frac);
+    b = 0xFF * (math_b[x0] + (math_b[x0 + 1] - math_b[x0]) * frac);
+
+    pvBuffer[pvOffset++] = r;
+    pvBuffer[pvOffset++] = g;
+    pvBuffer[pvOffset++] = b;
+    pvBuffer[pvOffset++] = a;
+  }
 
   free(pixels);
 

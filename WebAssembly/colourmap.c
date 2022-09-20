@@ -42,7 +42,7 @@ void apply_colourmap(unsigned char *canvas, int w, int h, const unsigned char *l
 			canvas[dst_offset++] = r_pixel;
 			canvas[dst_offset++] = g_pixel;
 			canvas[dst_offset++] = b_pixel;
-			canvas[dst_offset++] = 255; //the alpha channel
+			canvas[dst_offset++] = 255; // the alpha channel
 		}
 	}
 }
@@ -83,7 +83,7 @@ void apply_amber(unsigned char *canvas, int w, int h, const unsigned char *luma,
 			canvas[dst_offset++] = pixel;
 			canvas[dst_offset++] = clamp(roundf(pixel * 204.0f / 255.0f), 0.0f, 255.0f);
 			canvas[dst_offset++] = 0;
-			canvas[dst_offset++] = 255; //the alpha channel
+			canvas[dst_offset++] = 255; // the alpha channel
 		}
 	}
 }
@@ -113,7 +113,7 @@ void apply_greyscale(unsigned char *canvas, int w, int h, const unsigned char *l
 			canvas[dst_offset++] = pixel;
 			canvas[dst_offset++] = pixel;
 			canvas[dst_offset++] = pixel;
-			canvas[dst_offset++] = 255; //the alpha channel
+			canvas[dst_offset++] = 255; // the alpha channel
 		}
 	}
 }
@@ -137,7 +137,7 @@ void apply_yuv(unsigned char *canvas, const unsigned char *_y, const unsigned ch
 			unsigned char b = _v[offset];
 			offset++;
 
-			//ITU-R
+			// ITU-R
 			/*float Y = _y[offset];
 		float Cb = _u[offset];
 		float Cr = _v[offset];
@@ -150,7 +150,7 @@ void apply_yuv(unsigned char *canvas, const unsigned char *_y, const unsigned ch
 			canvas[dst_offset++] = r;
 			canvas[dst_offset++] = g;
 			canvas[dst_offset++] = b;
-			canvas[dst_offset++] = alpha[src_offset++]; //the alpha channel
+			canvas[dst_offset++] = alpha[src_offset++]; // the alpha channel
 		}
 	}
 }
