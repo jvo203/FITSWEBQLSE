@@ -3203,8 +3203,7 @@ function open_websocket_connection(_datasetId, index) {
 
 					// P-V Diagram
 					if (type == 7) {
-						hide_cursor();
-						hide_hourglass();
+						d3.select("#hourglassPVDiagram").remove();
 
 						d3.select("#pvline")
 							.attr("x1", 0)
@@ -8913,9 +8912,29 @@ function pv_event(event) {
 
 		// submit the P-V line to the server
 		if (va_count == 1) {
-			submit_pv_line(va_count, x1, y1, x2, y2);
+			// create a new canvas
+			var div = d3.select("body").append("div")
+				.attr("id", "PVDiagram")
+				.attr("class", "threejs");
 
-			display_hourglass();
+			div.append("span")
+				.attr("id", "closePVDiagram")
+				.attr("class", "close myclose")
+				.on("click", function () {
+					d3.select("#PVDiagram").remove();
+				})
+				.text("×");
+
+
+			div.append("img")
+				.attr("id", "hourglassPVDiagram")
+				.attr("class", "hourglass")
+				.attr("src", "https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/loading.gif")
+				.attr("alt", "hourglass")
+				.style("width", 200)
+				.style("height", 200);
+
+			submit_pv_line(va_count, x1, y1, x2, y2);
 		} else {
 			d3.select("#pvline").attr("opacity", 0.0);
 			d3.select("#pvmid").attr("opacity", 0.0);
