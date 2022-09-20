@@ -29,6 +29,9 @@ static size_t alphaLength = 0;
 static float *spectrumBuffer = NULL;
 static size_t spectrumLength = 0;
 
+static unsigned char *pvBuffer = NULL;
+static size_t pvLength = 0;
+
 #include <iostream>
 #include <algorithm>
 #include <cstdint>
@@ -402,6 +405,105 @@ void hevc_destroy_frame(int va_count)
   // return val(typed_memory_view(canvasLength, canvasBuffer));
 }
 
+buffer decompressPVdiagram(int img_width, int img_height, std::string const &bytes)
+{
+  buffer wasmBuffer = {0, 0};
+
+  // std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+
+  size_t img_size = size_t(img_width) * size_t(img_height);
+  float *pixels = (float *)calloc(img_size, sizeof(float));
+
+  if (pixels == NULL)
+  {
+    std::cout << "[decompressPVdiagram] failed to allocate memory for pixels." << std::endl;
+    return wasmBuffer;
+  }
+
+  size_t pv_size = img_size * 4; // RGBA
+
+  if (pvBuffer != NULL && pvLength != pv_size)
+  {
+    free(pvBuffer);
+
+    pvBuffer = NULL;
+    pvLength = 0;
+  }
+
+  if (pvBuffer == NULL)
+  {
+    pvBuffer = (unsigned char *)malloc(pv_size);
+    memset(pvBuffer, 0, pv_size);
+
+    if (pvBuffer != NULL)
+      pvLength = pv_size;
+
+    printf("[decompressPVdiagram] width: %d, height: %d, pvLength = %zu, pvBuffer = %p\n", img_width, img_height, pvLength, pvBuffer);
+  }
+
+  if (pvBuffer == NULL)
+  {
+    pvLength = 0;
+    return wasmBuffer;
+  }
+
+  // ZFP variables
+  zfp_type data_type = zfp_type_float;
+  zfp_field *field = NULL;
+  zfp_stream *zfp = NULL;
+  size_t bufsize = 0;
+  bitstream *stream = NULL;
+  size_t zfpsize = 0;
+  uint nx = img_width;
+  uint ny = img_height;
+
+  // decompress pixels with ZFP
+  field = zfp_field_2d((void *)pixelBuffer, data_type, nx, ny);
+
+  // allocate metadata for a compressed stream
+  zfp = zfp_stream_open(NULL);
+
+  // associate bit stream with allocated buffer
+  bufsize = bytes.size();
+  stream = stream_open((void *)bytes.data(), bufsize);
+
+  if (stream != NULL)
+  {
+    zfp_stream_set_bit_stream(zfp, stream);
+
+    zfp_read_header(zfp, field, ZFP_HEADER_FULL);
+
+    // decompress entire array
+    zfpsize = zfp_decompress(zfp, field);
+
+    if (zfpsize == 0)
+      printf("ZFP decompression failed!\n");
+    /*else
+      printf("decompressed %zu bytes (image pixels).\n", zfpsize);*/
+
+    stream_close(stream);
+
+    // the decompressed part is available at pixels[0..zfpsize-1] (a.k.a. pixels.data())
+  }
+
+  // clean up
+  zfp_field_free(field);
+  zfp_stream_close(zfp);
+
+  /*for (size_t i = 0; i < pixelLength; i++)
+    if (pixelBuffer[i] != 0.0f)
+      printf("%zu:%f|", i, pixelBuffer[i]);
+  printf("\n");
+
+  printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);*/
+
+  free(pixels);
+
+  wasmBuffer.ptr = (unsigned int)pvBuffer;
+  wasmBuffer.size = (unsigned int)pvLength;
+  return wasmBuffer;
+}
+
 EMSCRIPTEN_BINDINGS(Wrapper)
 {
   register_vector<float>("Float");
@@ -412,6 +514,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
   function("decompressZFP", &decompressZFP);
   function("decompressZFPimage", &decompressZFPimage);
   function("decompressZFPspectrum", &decompressZFPspectrum);
+  function("decompressPVdiagram", &decompressPVdiagram);
   function("decompressLZ4", &decompressLZ4);
   function("decompressLZ4mask", &decompressLZ4mask);
   function("hevc_init_frame", &hevc_init_frame);
