@@ -20,6 +20,12 @@ extern "C"
 #include "lz4.h"
 }
 
+// Mathematica v10 MatrixPlot colourmap
+static const float math_x[] = {0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0};
+static const float math_r[] = {0.260487, 0.230198, 0.392401, 0.964837, 1.0, 0.95735, 0.913252, 0.860243, 0.42};
+static const float math_g[] = {0.356, 0.499962, 0.658762, 0.982332, 1.0, 0.957281, 0.790646, 0.558831, 1};
+static const float math_b[] = {0.891569, 0.848188, 0.797589, 0.98988, 1.0, 0.896269, 0.462837, 0.00695811, 0.0};
+
 static float *pixelBuffer = NULL;
 static size_t pixelLength = 0;
 
@@ -496,6 +502,8 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
   printf("\n");
 
   printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);*/
+
+  // convert pixels to RGBA using the ERF colourmap
 
   free(pixels);
 
