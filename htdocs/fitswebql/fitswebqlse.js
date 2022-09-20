@@ -3257,11 +3257,8 @@ function open_websocket_connection(_datasetId, index) {
 
 						if (id == "ZFP") {
 							// decompress ZFP							
-							/*var res = Module.decompressZFPimage(img_width, img_height, frame_pv);
-							const pv = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);*/
-
 							var res = Module.decompressPVdiagram(img_width, img_height, frame_pv);
-							pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
+							const pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
 							console.log(pv);
 						}
 
