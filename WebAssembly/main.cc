@@ -458,7 +458,7 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
   uint ny = img_height;
 
   // decompress pixels with ZFP
-  field = zfp_field_2d((void *)pixelBuffer, data_type, nx, ny);
+  field = zfp_field_2d((void *)pixels, data_type, nx, ny);
 
   // allocate metadata for a compressed stream
   zfp = zfp_stream_open(NULL);
