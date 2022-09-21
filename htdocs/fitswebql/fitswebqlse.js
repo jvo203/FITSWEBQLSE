@@ -196,6 +196,56 @@ function get_image_scale(width, height, img_width, img_height) {
 	}
 }
 
+function get_pv_screen_scale(x) {
+	return Math.floor(0.95 * x);
+}
+
+function get_pv_image_scale_square(width, height, img_width, img_height) {
+	var screen_dimension = get_pv_screen_scale(Math.min(width, height));
+	var image_dimension = Math.max(img_width, img_height);
+
+	return screen_dimension / image_dimension;
+}
+
+function get_pv_image_scale(width, height, img_width, img_height) {
+	if (img_width == img_height)
+		return get_pv_image_scale_square(width, height, img_width, img_height);
+
+	if (img_height < img_width) {
+		var screen_dimension = 0.95 * height;
+		var image_dimension = img_height;
+
+		var scale = screen_dimension / image_dimension;
+
+		var new_image_width = scale * img_width;
+
+		if (new_image_width > 0.95 * width) {
+			screen_dimension = 0.95 * width;
+			image_dimension = img_width;
+			scale = screen_dimension / image_dimension;
+		}
+
+		return scale;
+	}
+
+	if (img_width < img_height) {
+		var screen_dimension = 0.95 * width;
+		var image_dimension = img_width;
+
+		var scale = screen_dimension / image_dimension;
+
+		var new_image_height = scale * img_height;
+
+		if (new_image_height > 0.95 * height) {
+			screen_dimension = 0.95 * height;
+			image_dimension = img_height;
+			scale = screen_dimension / image_dimension;
+		}
+
+		return scale;
+	}
+}
+
 function get_spectrum_direction(fitsData) {
 	var reverse = false;
 
@@ -8982,7 +9032,7 @@ function pv_event(event) {
 				var dst_width = canvas.width / 2;
 				var dst_height = canvas.height;
 
-				var scale = get_image_scale(dst_width, dst_height, src_width, src_height);
+				var scale = get_pv_image_scale(dst_width, dst_height, src_width, src_height);
 				var img_width = scale * src_width;
 				var img_height = scale * src_height;
 
@@ -8991,7 +9041,7 @@ function pv_event(event) {
 				context.msImageSmoothingEnabled = false;
 				context.imageSmoothingEnabled = false;
 
-				context.drawImage(image_canvas, src_x, src_y, src_width, src_height, 0, 0, img_width, img_height);
+				context.drawImage(image_canvas, src_x, src_y, src_width, src_height, (dst_width - img_width) / 2, (dst_height - img_height) / 2, img_width, img_height);
 			}
 
 		} else {
