@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-20.0";
+	return "JS2022-09-21.0";
 }
 
 function uuidv4() {
@@ -1421,7 +1421,7 @@ function init_webgl_image_buffers(index) {
 	}
 
 	if (webgl2) {
-		var ctx = canvas.getContext("webgl2");
+		var ctx = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
 		imageContainer[index - 1].gl = ctx;
 		// console.log("init_webgl is using the WebGL2 context.");
 
@@ -1456,7 +1456,7 @@ function init_webgl_image_buffers(index) {
 			console.log(`created ${i} WebGL contexts`);
 		}, 10000);*/
 	} else if (webgl1) {
-		var ctx = canvas.getContext("webgl");
+		var ctx = canvas.getContext("webgl", { preserveDrawingBuffer: true });
 		imageContainer[index - 1].gl = ctx;
 		// console.log("init_webgl is using the WebGL1 context.");
 
