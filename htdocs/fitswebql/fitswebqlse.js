@@ -3280,7 +3280,7 @@ function open_websocket_connection(_datasetId, index) {
 							ctx.msImageSmoothingEnabled = false;
 							ctx.imageSmoothingEnabled = false;
 
-							ctx.drawImage(pvCanvas, 0, 0, width, height);
+							// ctx.drawImage(pvCanvas, 0, 0, width, height);
 						}
 
 						return;
@@ -8963,6 +8963,37 @@ function pv_event(event) {
 				.style("height", 200);
 
 			submit_pv_line(va_count, x1, y1, x2, y2);
+
+			// copy the image from WebGL to the new canvas
+			var elem = document.getElementById("image_rectangle");
+
+			if (elem != null) {
+				var src_width = parseFloat(elem.getAttribute("width"));
+				var src_height = parseFloat(elem.getAttribute("height"));
+				var src_x = parseFloat(elem.getAttribute("x"));
+				var src_y = parseFloat(elem.getAttribute("y"));
+
+				console.log("SRC IMAGE:", src_x, src_y, src_width, src_height);
+
+				// get the image source canvas
+				var image_canvas = document.getElementById('HTMLCanvas');
+
+				var canvas = document.getElementById('PVCanvas');
+				var dst_width = canvas.width / 2;
+				var dst_height = canvas.height;
+
+				var scale = get_image_scale(dst_width, dst_height, src_width, src_height);
+				var img_width = scale * src_width;
+				var img_height = scale * src_height;
+
+				var context = canvas.getContext('2d');
+				context.webkitImageSmoothingEnabled = false;
+				context.msImageSmoothingEnabled = false;
+				context.imageSmoothingEnabled = false;
+
+				context.drawImage(image_canvas, src_x, src_y, src_width, src_height, 0, 0, img_width, img_height);
+			}
+
 		} else {
 			d3.select("#pvline").attr("opacity", 0.0);
 			d3.select("#pvmid").attr("opacity", 0.0);
