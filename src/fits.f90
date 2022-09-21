@@ -7394,7 +7394,8 @@ contains
 
       ! there will be at least one point
       ! allocate the pv array
-      allocate (pv(first:last, npoints))
+      ! allocate (pv(first:last, npoints))
+      allocate (pv(npoints, first:last)) ! change the orientation of the array
       pv = 0.0
 
       npixels = length * npoints
@@ -7457,7 +7458,7 @@ contains
             ! pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
 
             ! this faster implementation uses a decompression cache
-            pv(frame, i) = x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame) * cdelt3
+            pv(i, frame) = x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame) * cdelt3
          end do
       end do
 
@@ -7491,7 +7492,7 @@ contains
 
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
-         call write_pv_diagram(req%fd, length, npoints, ZFP_LOW_PRECISION, c_loc(pv), pmean, pstd, pmin, pmax)
+         call write_pv_diagram(req%fd, npoints, length, ZFP_LOW_PRECISION, c_loc(pv), pmean, pstd, pmin, pmax)
 
          call close_pipe(req%fd)
          req%fd = -1
