@@ -8999,14 +8999,32 @@ function pv_event(event) {
 				.attr("height", height)
 				.attr('style', 'position: fixed; left: 10px; top: 10px;');
 
-			div.append("span")
+			/*div.append("span")
 				.attr("id", "closePVDiagram")
 				.attr("class", "close myclose")
 				.on("click", function () {
 					d3.select("#PVDiagram").remove();
 				})
-				.text("×");
+				.text("×");*/
 
+			var svg = div.append("svg")
+				.attr("id", "PVSVG")
+				.attr("width", width)
+				.attr("height", height)
+				.attr('style', 'position: fixed; left: 10px; top: 10px; cursor: default');
+
+			svg.append("foreignObject")
+				.attr("x", width - 5 * emFontSize)
+				.attr("y", -emFontSize)
+				.attr("width", 5 * emFontSize)
+				.attr("height", 5 * emFontSize)
+				.on("click", function () {
+					d3.select("#PVDiagram").remove();
+				})
+				.append("xhtml:div")
+				.append("span")
+				.attr("class", "close myclose")
+				.html("×");
 
 			div.append("img")
 				.attr("id", "hourglassPVDiagram")
