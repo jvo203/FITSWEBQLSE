@@ -7393,9 +7393,8 @@ contains
       print *, 'npoints:', npoints
 
       ! there will be at least one point
-      ! allocate the pv array
-      ! allocate (pv(first:last, npoints))
-      allocate (pv(npoints, first:last)) ! change the orientation of the array
+      ! allocate the pv array using an appropriate astronomical orientation convention
+      allocate (pv(npoints, first:last))
       pv = 0.0
 
       npixels = length * npoints
