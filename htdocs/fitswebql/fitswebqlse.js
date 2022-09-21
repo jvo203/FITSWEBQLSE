@@ -3291,46 +3291,50 @@ function open_websocket_connection(_datasetId, index) {
 
 						console.log("P-V Diagram: ", id, pmin, pmax, pmean, pstd);
 
-						var img_width = dv.getUint32(offset, endianness);
+						var pv_width = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						var img_height = dv.getUint32(offset, endianness);
+						var pv_height = dv.getUint32(offset, endianness);
 						offset += 4;
 
 						var pv_length = dv.getUint32(offset, endianness);
 						offset += 4;
 
-						console.log("P-V Diagram: ", img_width, img_height, pv_length);
+						console.log("P-V Diagram: ", pv_width, pv_height, pv_length);
 
 						var frame_pv = new Uint8Array(received_msg, offset, pv_length);
 						offset += pixels_length;
 
 						if (id == "ZFP") {
 							// decompress ZFP							
-							var res = Module.decompressPVdiagram(img_width, img_height, frame_pv);
+							var res = Module.decompressPVdiagram(pv_width, pv_height, frame_pv);
 							const pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"							
 
-							var pvData = new ImageData(pv, img_width, img_height);
+							var pvData = new ImageData(pv, pv_width, pv_height);
 
 							let pvCanvas = document.createElement('canvas');
 							pvCanvas.style.visibility = "hidden";
 							var context = pvCanvas.getContext('2d');
 
-							pvCanvas.width = img_width;
-							pvCanvas.height = img_height;
+							pvCanvas.width = pv_width;
+							pvCanvas.height = pv_height;
 							context.putImageData(pvData, 0, 0);
 
 							//place the image onto the PV canvas
 							var c = document.getElementById('PVCanvas');
-							var width = c.width;
-							var height = c.height;
-							var ctx = c.getContext("2d");
+							var dst_width = c.width / 2;
+							var dst_height = c.height;
 
+							var scale = get_pv_image_scale(dst_width, dst_height, pv_width, pv_height);
+							var img_width = scale * pv_width;
+							var img_height = scale * pv_height;
+
+							var ctx = c.getContext("2d");
 							ctx.webkitImageSmoothingEnabled = false;
 							ctx.msImageSmoothingEnabled = false;
 							ctx.imageSmoothingEnabled = false;
 
-							// ctx.drawImage(pvCanvas, 0, 0, width, height);
+							ctx.drawImage(pvCanvas, 0, 0, pv_width, pv_height, 3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height);
 						}
 
 						return;
@@ -9023,8 +9027,6 @@ function pv_event(event) {
 				var src_x = parseFloat(elem.getAttribute("x"));
 				var src_y = parseFloat(elem.getAttribute("y"));
 
-				console.log("SRC IMAGE:", src_x, src_y, src_width, src_height);
-
 				// get the image source canvas
 				var image_canvas = document.getElementById('HTMLCanvas');
 
@@ -9041,6 +9043,7 @@ function pv_event(event) {
 				context.msImageSmoothingEnabled = false;
 				context.imageSmoothingEnabled = false;
 
+				// place the image on the left-hand side
 				context.drawImage(image_canvas, src_x, src_y, src_width, src_height, (dst_width - img_width) / 2, (dst_height - img_height) / 2, img_width, img_height);
 			}
 
