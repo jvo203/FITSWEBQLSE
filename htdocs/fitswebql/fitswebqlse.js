@@ -9138,6 +9138,7 @@ function fits_subregion_start(event) {
 function fits_subregion_drag(event) {
 	if (freqdrag) return;
 	if (optical_view) return;
+	if (d3.select("#pvline").attr("opacity") > 0.0) return;
 
 	fits_subregion_drag_event = true;
 	// console.log("fits_subregion_drag");
