@@ -9034,7 +9034,8 @@ function pv_event(event) {
 				.style("width", 200)
 				.style("height", 200);
 
-			submit_pv_line(va_count, x1, y1, x2, y2);
+			const res = submit_pv_line(va_count, x1, y1, x2, y2);
+			console.log(res);
 
 			// copy the image from WebGL to the new canvas
 			var elem = document.getElementById("image_rectangle");
@@ -9072,6 +9073,23 @@ function pv_event(event) {
 					.attr("width", img_width)
 					.attr("height", img_height)
 					.attr('style', `position: fixed; left: ${left}px; top: ${top}px; cursor: default`);
+
+				let fillColour = 'white';
+
+				if (theme == 'bright')
+					fillColour = 'black';
+
+				//pv line selection
+				svg.append("line")
+					.attr("id", "pvline2")
+					.attr("x1", res.x1 * img_width)
+					.attr("y1", res.y1 * img_height)
+					.attr("x2", res.x2 * img_width)
+					.attr("y2", res.y2 * img_height)
+					.style("stroke", fillColour)
+					.style("stroke-dasharray", (""))
+					.style("stroke-width", emStrokeWidth)
+					.attr("opacity", 1.0);
 			}
 
 		} else {
@@ -12535,6 +12553,13 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
 		wsConn[index - 1].send(JSON.stringify(request));
 
 	setup_window_timeout();
+
+	return {
+		x1: (line_x1 - offsetx) / d3.select("#image_rectangle").attr("width"),
+		y1: (line_y1 - offsety) / d3.select("#image_rectangle").attr("height"),
+		x2: (line_x2 - offsetx) / d3.select("#image_rectangle").attr("width"),
+		y2: (line_y2 - offsety) / d3.select("#image_rectangle").attr("height")
+	}
 }
 
 function partial_fits_download() {
