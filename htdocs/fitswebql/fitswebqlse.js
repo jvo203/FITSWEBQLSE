@@ -9063,6 +9063,15 @@ function pv_event(event) {
 
 				// place the image on the left-hand side
 				context.drawImage(image_canvas, src_x, src_y, src_width, src_height, (dst_width - img_width) / 2, (dst_height - img_height) / 2, img_width, img_height);
+
+				let left = 10 + (dst_width - img_width) / 2;
+				let top = 10 + (dst_height - img_height) / 2;
+
+				var svg = div.append("svg")
+					.attr("id", "PVSVG")
+					.attr("width", img_width)
+					.attr("height", img_height)
+					.attr('style', `position: fixed; left: ${left}px; top: ${top}px; cursor: default`);
 			}
 
 		} else {
