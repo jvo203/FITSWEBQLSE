@@ -9118,6 +9118,10 @@ function pv_event(event) {
 					.style("stroke-width", emStrokeWidth)
 					.attr("pointer-events", "auto")
 					.style('cursor', 'move')
+					.call(d3.drag()
+						.on("start", dragMid)
+						.on("drag", dragMid)
+						.on("end", dropMid))
 					.attr("opacity", 1.0);
 
 				// add a circle at the end of the line
@@ -9156,6 +9160,23 @@ function pv_event(event) {
 		d3.select("#pvline").attr("marker-end", "").attr("opacity", 1.0);
 		d3.select("#pvmid").attr("opacity", 1.0);
 	}
+}
+
+function dragMid(event) {
+	event.preventDefault = true;
+
+	var offset = d3.pointer(event);
+	let x = offset[0] - 10;// the SVG is offset by 10 pixels
+	let y = offset[1] - 10;
+
+	let cx = parseFloat(d3.select("#pvline2_mid").attr("cx"));
+	let cy = parseFloat(d3.select("#pvline2_mid").attr("cy"));
+	console.log("cx,cy:", cx, cy)
+	console.log("x,y:", x, y);
+}
+
+function dropMid(event) {
+	console.log("dropMid");
 }
 
 function fits_subregion_start(event) {
