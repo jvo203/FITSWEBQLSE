@@ -9086,9 +9086,51 @@ function pv_event(event) {
 					.attr("y1", res.y1 * img_height)
 					.attr("x2", res.x2 * img_width)
 					.attr("y2", res.y2 * img_height)
+					.attr("marker-start", "url(#head)")
+					.attr("marker-end", "url(#head)")
 					.style("stroke", fillColour)
-					.style("stroke-dasharray", (""))
+					.style("stroke-dasharray", ("1, 5, 1"))
 					.style("stroke-width", emStrokeWidth)
+					.attr("pointer-events", "none")
+					.attr("opacity", 1.0);
+
+				// add a circle at the start of the line
+				svg.append("circle")
+					.attr("id", "pvline2_start")
+					.attr("cx", res.x1 * img_width)
+					.attr("cy", res.y1 * img_height)
+					.attr("r", emFontSize / 2)
+					.style("fill", "transparent")
+					.style("stroke", fillColour)
+					.style("stroke-width", emStrokeWidth)
+					.attr("pointer-events", "auto")
+					.style('cursor', 'move')
+					.attr("opacity", 1.0);
+
+				// add a circle in the middle of the line
+				svg.append("circle")
+					.attr("id", "pvline2_mid")
+					.attr("cx", 0.5 * (res.x1 + res.x2) * img_width)
+					.attr("cy", 0.5 * (res.y1 + res.y2) * img_height)
+					.attr("r", emFontSize / 2)
+					.style("fill", "transparent")
+					.style("stroke", fillColour)
+					.style("stroke-width", emStrokeWidth)
+					.attr("pointer-events", "auto")
+					.style('cursor', 'move')
+					.attr("opacity", 1.0);
+
+				// add a circle at the end of the line
+				svg.append("circle")
+					.attr("id", "pvline2_end")
+					.attr("cx", res.x2 * img_width)
+					.attr("cy", res.y2 * img_height)
+					.attr("r", emFontSize / 2)
+					.style("fill", "transparent")
+					.style("stroke", fillColour)
+					.style("stroke-width", emStrokeWidth)
+					.attr("pointer-events", "auto")
+					.style('cursor', 'move')
 					.attr("opacity", 1.0);
 			}
 
