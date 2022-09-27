@@ -12671,9 +12671,9 @@ function send_pv_request(index, x1, y1, x2, y2) {
 		console.log(e);
 	}
 
-	var rect = document.getElementById('mainDiv').getBoundingClientRect();
-	var width = rect.width - 20;
-	var height = rect.height - 20;
+	var c = document.getElementById('PVCanvas');
+	var width = c.width / 2;
+	var height = c.height;
 
 	var request = {
 		type: "pv",
