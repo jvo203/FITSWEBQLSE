@@ -9123,7 +9123,6 @@ function pv_event(event) {
 					.attr("pointer-events", "auto")
 					.style('cursor', 'move')
 					.call(d3.drag()
-						//.on("start", dragMid)
 						.on("drag", dragMid)
 						.on("end", dropMid))
 					.attr("opacity", 1.0);
