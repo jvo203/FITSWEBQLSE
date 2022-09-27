@@ -9272,6 +9272,17 @@ function dragMid(event) {
 
 function dropLine(event) {
 	console.log("dropLine");
+
+	d3.select("#PVDiagram")
+		.append("img")
+		.attr("id", "hourglassPVDiagram")
+		.attr("class", "hourglass")
+		.attr("src", "https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/loading.gif")
+		.attr("alt", "hourglass")
+		.style("width", 200)
+		.style("height", 200);
+
+	resubmit_pv_line(va_count);
 }
 
 function fits_subregion_start(event) {
@@ -12614,7 +12625,7 @@ function partial_fits_size() {
 	var orig_y1 = y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
 
 	var x2 = image_bounding_dims.x1 + ax * (end_x - offsetx);
-	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (end_y - offsety);
+	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (end_y - offsety);
 
 	var orig_x2 = x2 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
 	var orig_y2 = y2 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
@@ -12629,33 +12640,7 @@ function partial_fits_size() {
 	// FITS header/data units come in multiples of 2880 bytes
 	return roundUp(partial_size, 2880);
 }
-
-function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
-	mousedown = false;
-
-	var offsetx = d3.select("#image_rectangle").attr("x");
-	var offsety = d3.select("#image_rectangle").attr("y");
-
-	let fitsData = fitsContainer[va_count - 1];
-	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
-
-	var ax = (image_bounding_dims.width - 0) / (d3.select("#image_rectangle").attr("width") - 0);
-	var ay = (image_bounding_dims.height - 0) / (d3.select("#image_rectangle").attr("height") - 0);
-
-	var x1 = image_bounding_dims.x1 + ax * (line_x1 - offsetx);
-	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (line_y1 - offsety);
-
-	var orig_x1 = 1 + x1 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
-	var orig_y1 = 1 + y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
-
-	var x2 = image_bounding_dims.x1 + ax * (line_x2 - offsetx);
-	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (line_y2 - offsety);
-
-	var orig_x2 = 1 + x2 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
-	var orig_y2 = 1 + y2 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
-
-	// console.log("orig_x1:", orig_x1, "orig_y1:", orig_y1, "orig_x2:", orig_x2, "orig_y2:", orig_y2);
-
+function send_pv_request(index, x1, y1, x2, y2) {
 	var c = 299792.458;//speed of light [km/s]
 
 	var deltaV = 0.0;
@@ -12692,10 +12677,10 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
 
 	var request = {
 		type: "pv",
-		x1: Math.round(orig_x1),
-		y1: Math.round(orig_y1),
-		x2: Math.round(orig_x2),
-		y2: Math.round(orig_y2),
+		x1: Math.round(x1),
+		y1: Math.round(y1),
+		x2: Math.round(x2),
+		y2: Math.round(y2),
 		width: width,
 		height: height,
 		frame_start: data_band_lo,
@@ -12711,6 +12696,35 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
 		wsConn[index - 1].send(JSON.stringify(request));
 
 	setup_window_timeout();
+}
+
+function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
+	mousedown = false;
+
+	var offsetx = d3.select("#image_rectangle").attr("x");
+	var offsety = d3.select("#image_rectangle").attr("y");
+
+	let fitsData = fitsContainer[va_count - 1];
+	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
+
+	var ax = (image_bounding_dims.width - 0) / (d3.select("#image_rectangle").attr("width") - 0);
+	var ay = (image_bounding_dims.height - 0) / (d3.select("#image_rectangle").attr("height") - 0);
+
+	var x1 = image_bounding_dims.x1 + ax * (line_x1 - offsetx);
+	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (line_y1 - offsety);
+
+	var orig_x1 = 1 + x1 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var orig_y1 = 1 + y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
+
+	var x2 = image_bounding_dims.x1 + ax * (line_x2 - offsetx);
+	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (line_y2 - offsety);
+
+	var orig_x2 = 1 + x2 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var orig_y2 = 1 + y2 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
+
+	// console.log("orig_x1:", orig_x1, "orig_y1:", orig_y1, "orig_x2:", orig_x2, "orig_y2:", orig_y2);
+
+	send_pv_request(index, orig_x1, orig_y1, orig_x2, orig_y2);
 
 	return {
 		x1: (line_x1 - offsetx) / d3.select("#image_rectangle").attr("width"),
@@ -12718,6 +12732,33 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
 		x2: (line_x2 - offsetx) / d3.select("#image_rectangle").attr("width"),
 		y2: (line_y2 - offsety) / d3.select("#image_rectangle").attr("height")
 	}
+}
+
+function resubmit_pv_line(index) {
+	var line = d3.select("#pvline2");
+	var line_x1 = parseFloat(line.attr("x1")) / pvsvg_width;
+	var line_y1 = parseFloat(line.attr("y1")) / pvsvg_height;
+	var line_x2 = parseFloat(line.attr("x2")) / pvsvg_width;
+	var line_y2 = parseFloat(line.attr("y2")) / pvsvg_height;
+
+	let fitsData = fitsContainer[va_count - 1];
+	var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
+
+	var x1 = image_bounding_dims.x1 + image_bounding_dims.width * line_x1;
+	var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - image_bounding_dims.height * line_y1;
+
+	var orig_x1 = 1 + x1 * fitsData.width / imageContainer[va_count - 1].width;
+	var orig_y1 = 1 + y1 * fitsData.height / imageContainer[va_count - 1].height;
+
+	var x2 = image_bounding_dims.x1 + image_bounding_dims.width * line_x2;
+	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - image_bounding_dims.height * line_y2;
+
+	var orig_x2 = 1 + x2 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
+	var orig_y2 = 1 + y2 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
+
+	// console.log("orig_x1:", orig_x1, "orig_y1:", orig_y1, "orig_x2:", orig_x2, "orig_y2:", orig_y2);
+
+	send_pv_request(index, orig_x1, orig_y1, orig_x2, orig_y2);
 }
 
 function partial_fits_download() {
@@ -12740,7 +12781,7 @@ function partial_fits_download() {
 	var orig_y1 = 1 + y1 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
 
 	var x2 = image_bounding_dims.x1 + ax * (end_x - offsetx);
-	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (end_y - offsety);
+	var y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 0) - ay * (end_y - offsety);
 
 	var orig_x2 = 1 + x2 * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
 	var orig_y2 = 1 + y2 * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
