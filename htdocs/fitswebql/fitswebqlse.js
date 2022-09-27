@@ -9109,6 +9109,34 @@ function pv_event(event) {
 					.style("stroke-width", emStrokeWidth)
 					.attr("pointer-events", "auto")
 					.style('cursor', 'move')
+					.call(d3.drag()
+						.on("drag", function (event) {
+							event.preventDefault = true;
+
+							var offset = d3.pointer(event);
+							console.log("offset:", offset);
+							let x = offset[0] - pvsvg_left; // the SVG offset
+							let y = offset[1] - pvsvg_top; // the SVG offset
+
+							d3.select("#pvline2_start")
+								.attr("cx", x)
+								.attr("cy", y);
+
+							d3.select("#pvline2")
+								.attr("x1", x)
+								.attr("y1", y);
+
+							var line = d3.select("#pvline2");
+							var x1 = parseFloat(line.attr("x1"));
+							var y1 = parseFloat(line.attr("y1"));
+							var x2 = parseFloat(line.attr("x2"));
+							var y2 = parseFloat(line.attr("y2"));
+
+							// re-centre the mid point
+							d3.select("#pvline2_mid")
+								.attr("cx", (x1 + x2) / 2)
+								.attr("cy", (y1 + y2) / 2);
+						}))
 					.attr("opacity", 1.0);
 
 				// add a circle in the middle of the line
@@ -9138,6 +9166,34 @@ function pv_event(event) {
 					.style("stroke-width", emStrokeWidth)
 					.attr("pointer-events", "auto")
 					.style('cursor', 'move')
+					.call(d3.drag()
+						.on("drag", function (event) {
+							event.preventDefault = true;
+
+							var offset = d3.pointer(event);
+							console.log("offset:", offset);
+							let x = offset[0] - pvsvg_left; // the SVG offset
+							let y = offset[1] - pvsvg_top; // the SVG offset
+
+							d3.select("#pvline2_end")
+								.attr("cx", x)
+								.attr("cy", y);
+
+							d3.select("#pvline2")
+								.attr("x2", x)
+								.attr("y2", y);
+
+							var line = d3.select("#pvline2");
+							var x1 = parseFloat(line.attr("x1"));
+							var y1 = parseFloat(line.attr("y1"));
+							var x2 = parseFloat(line.attr("x2"));
+							var y2 = parseFloat(line.attr("y2"));
+
+							// re-centre the mid point
+							d3.select("#pvline2_mid")
+								.attr("cx", (x1 + x2) / 2)
+								.attr("cy", (y1 + y2) / 2);
+						}))
 					.attr("opacity", 1.0);
 			}
 
