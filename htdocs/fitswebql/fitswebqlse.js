@@ -9090,10 +9090,7 @@ function pv_event(event) {
 					.attr("y1", res.y1 * img_height)
 					.attr("x2", res.x2 * img_width)
 					.attr("y2", res.y2 * img_height)
-					.attr("marker-start", "url(#head)")
-					.attr("marker-end", "url(#head)")
 					.style("stroke", fillColour)
-					.style("stroke-dasharray", ("1, 5, 1"))
 					.style("stroke-width", emStrokeWidth)
 					.attr("pointer-events", "none")
 					.attr("opacity", 1.0);
@@ -9114,7 +9111,6 @@ function pv_event(event) {
 							event.preventDefault = true;
 
 							var offset = d3.pointer(event);
-							console.log("offset:", offset);
 							let x = offset[0] - pvsvg_left; // the SVG offset
 							let y = offset[1] - pvsvg_top; // the SVG offset
 
@@ -9136,7 +9132,8 @@ function pv_event(event) {
 							d3.select("#pvline2_mid")
 								.attr("cx", (x1 + x2) / 2)
 								.attr("cy", (y1 + y2) / 2);
-						}))
+						})
+						.on("end", dropLine))
 					.attr("opacity", 1.0);
 
 				// add a circle in the middle of the line
@@ -9152,7 +9149,7 @@ function pv_event(event) {
 					.style('cursor', 'move')
 					.call(d3.drag()
 						.on("drag", dragMid)
-						.on("end", dropMid))
+						.on("end", dropLine))
 					.attr("opacity", 1.0);
 
 				// add a circle at the end of the line
@@ -9171,7 +9168,6 @@ function pv_event(event) {
 							event.preventDefault = true;
 
 							var offset = d3.pointer(event);
-							console.log("offset:", offset);
 							let x = offset[0] - pvsvg_left; // the SVG offset
 							let y = offset[1] - pvsvg_top; // the SVG offset
 
@@ -9193,7 +9189,8 @@ function pv_event(event) {
 							d3.select("#pvline2_mid")
 								.attr("cx", (x1 + x2) / 2)
 								.attr("cy", (y1 + y2) / 2);
-						}))
+						})
+						.on("end", dropLine))
 					.attr("opacity", 1.0);
 			}
 
@@ -9225,24 +9222,42 @@ function dragMid(event) {
 	event.preventDefault = true;
 
 	var offset = d3.pointer(event);
-	console.log("offset:", offset);
 	let x = offset[0] - pvsvg_left; // the SVG offset
 	let y = offset[1] - pvsvg_top; // the SVG offset
 
 	var mid = d3.select("#pvline2_mid");
 	let cx = parseFloat(mid.attr("cx"));
 	let cy = parseFloat(mid.attr("cy"));
-	console.log("cx,cy:", cx, cy)
-	console.log("x,y:", x, y);
 
 	mid.attr("cx", x);
 	mid.attr("cy", y);
 
+	let dx = x - cx;
+	let dy = y - cy;
+
+	var line = d3.select("#pvline2");
+	var x1 = parseFloat(line.attr("x1"));
+	var y1 = parseFloat(line.attr("y1"));
+	var x2 = parseFloat(line.attr("x2"));
+	var y2 = parseFloat(line.attr("y2"));
+
 	// re-set the PV line ends
+	line.attr("x1", x1 + dx);
+	line.attr("y1", y1 + dy);
+	line.attr("x2", x2 + dx);
+	line.attr("y2", y2 + dy);
+
+	d3.select("#pvline2_start")
+		.attr("cx", x1 + dx)
+		.attr("cy", y1 + dy);
+
+	d3.select("#pvline2_end")
+		.attr("cx", x2 + dx)
+		.attr("cy", y2 + dy);
 }
 
-function dropMid(event) {
-	console.log("dropMid");
+function dropLine(event) {
+	console.log("dropLine");
 }
 
 function fits_subregion_start(event) {
