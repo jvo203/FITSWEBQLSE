@@ -9071,6 +9071,8 @@ function pv_event(event) {
 
 				pvsvg_left = 10 + (dst_width - img_width) / 2;
 				pvsvg_top = 10 + (dst_height - img_height) / 2;
+				pvsvg_width = img_width;
+				pvsvg_height = img_height;
 
 				var svg = div.append("svg")
 					.attr("id", "PVSVG")
@@ -9113,6 +9115,10 @@ function pv_event(event) {
 							var offset = d3.pointer(event);
 							let x = offset[0] - pvsvg_left; // the SVG offset
 							let y = offset[1] - pvsvg_top; // the SVG offset
+
+							// check if the point is within the image							
+							x = Math.min(Math.max(x, 0), pvsvg_width - 1);
+							y = Math.min(Math.max(y, 0), pvsvg_height - 1);
 
 							d3.select("#pvline2_start")
 								.attr("cx", x)
@@ -9171,6 +9177,10 @@ function pv_event(event) {
 							let x = offset[0] - pvsvg_left; // the SVG offset
 							let y = offset[1] - pvsvg_top; // the SVG offset
 
+							// check if the point is within the image							
+							x = Math.min(Math.max(x, 0), pvsvg_width - 1);
+							y = Math.min(Math.max(y, 0), pvsvg_height - 1);
+
 							d3.select("#pvline2_end")
 								.attr("cx", x)
 								.attr("cy", y);
@@ -9224,6 +9234,10 @@ function dragMid(event) {
 	var offset = d3.pointer(event);
 	let x = offset[0] - pvsvg_left; // the SVG offset
 	let y = offset[1] - pvsvg_top; // the SVG offset
+
+	// check if the point is within the image					
+	x = Math.min(Math.max(x, 0), pvsvg_width - 1);
+	y = Math.min(Math.max(y, 0), pvsvg_height - 1);
 
 	var mid = d3.select("#pvline2_mid");
 	let cx = parseFloat(mid.attr("cx"));
