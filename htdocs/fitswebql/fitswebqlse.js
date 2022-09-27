@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-26.0";
+	return "JS2022-09-27.0";
 }
 
 function uuidv4() {
@@ -3334,6 +3334,10 @@ function open_websocket_connection(_datasetId, index) {
 							ctx.msImageSmoothingEnabled = false;
 							ctx.imageSmoothingEnabled = false;
 
+							// clear the ctx canvas
+							ctx.clearRect(c.width / 2, 0, c.width, c.height);
+
+							// then place the new PV diagram onto the ctx canvas
 							ctx.drawImage(pvCanvas, 0, 0, pv_width, pv_height, 3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height);
 						}
 
@@ -9065,14 +9069,14 @@ function pv_event(event) {
 				// place the image on the left-hand side
 				context.drawImage(image_canvas, src_x, src_y, src_width, src_height, (dst_width - img_width) / 2, (dst_height - img_height) / 2, img_width, img_height);
 
-				let left = 10 + (dst_width - img_width) / 2;
-				let top = 10 + (dst_height - img_height) / 2;
+				pvsvg_left = 10 + (dst_width - img_width) / 2;
+				pvsvg_top = 10 + (dst_height - img_height) / 2;
 
 				var svg = div.append("svg")
 					.attr("id", "PVSVG")
 					.attr("width", img_width)
 					.attr("height", img_height)
-					.attr('style', `position: fixed; left: ${left}px; top: ${top}px; cursor: default`);
+					.attr('style', `position: fixed; left: ${pvsvg_left}px; top: ${pvsvg_top}px; cursor: default`);
 
 				let fillColour = 'white';
 
@@ -9119,7 +9123,7 @@ function pv_event(event) {
 					.attr("pointer-events", "auto")
 					.style('cursor', 'move')
 					.call(d3.drag()
-						.on("start", dragMid)
+						//.on("start", dragMid)
 						.on("drag", dragMid)
 						.on("end", dropMid))
 					.attr("opacity", 1.0);
@@ -9166,13 +9170,18 @@ function dragMid(event) {
 	event.preventDefault = true;
 
 	var offset = d3.pointer(event);
-	let x = offset[0] - 10;// the SVG is offset by 10 pixels
-	let y = offset[1] - 10;
+	console.log("offset:", offset);
+	let x = offset[0] - pvsvg_left; // the SVG offset
+	let y = offset[1] - pvsvg_top; // the SVG offset
 
-	let cx = parseFloat(d3.select("#pvline2_mid").attr("cx"));
-	let cy = parseFloat(d3.select("#pvline2_mid").attr("cy"));
+	var mid = d3.select("#pvline2_mid");
+	let cx = parseFloat(mid.attr("cx"));
+	let cy = parseFloat(mid.attr("cy"));
 	console.log("cx,cy:", cx, cy)
 	console.log("x,y:", x, y);
+
+	mid.attr("cx", x);
+	mid.attr("cy", y);
 }
 
 function dropMid(event) {
