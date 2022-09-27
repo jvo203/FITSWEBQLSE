@@ -9237,6 +9237,8 @@ function dragMid(event) {
 
 	mid.attr("cx", x);
 	mid.attr("cy", y);
+
+	// re-set the PV line ends
 }
 
 function dropMid(event) {
