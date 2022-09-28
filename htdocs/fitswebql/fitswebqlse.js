@@ -3334,7 +3334,7 @@ function open_websocket_connection(_datasetId, index) {
 							ctx.msImageSmoothingEnabled = false;
 							ctx.imageSmoothingEnabled = false;
 
-							// clear the ctx canvas
+							// clear the right half of the PV canvas
 							ctx.clearRect(c.width / 2, 0, c.width, c.height);
 
 							// reverse the X axis
