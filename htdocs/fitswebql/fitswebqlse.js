@@ -9133,6 +9133,10 @@ function pv_event(event) {
 							x = Math.min(Math.max(x, 0), pvsvg_width - 1);
 							y = Math.min(Math.max(y, 0), pvsvg_height - 1);
 
+							d3.select("#pvpointA")
+								.attr("x", x)
+								.attr("y", y);
+
 							d3.select("#pvline2_start")
 								.attr("cx", x)
 								.attr("cy", y);
@@ -9206,6 +9210,10 @@ function pv_event(event) {
 							// check if the point is within the image							
 							x = Math.min(Math.max(x, 0), pvsvg_width - 1);
 							y = Math.min(Math.max(y, 0), pvsvg_height - 1);
+
+							d3.select("#pvpointB")
+								.attr("x", x)
+								.attr("y", y);
 
 							d3.select("#pvline2_end")
 								.attr("cx", x)
@@ -9287,9 +9295,17 @@ function dragMid(event) {
 	line.attr("x2", x2 + dx);
 	line.attr("y2", y2 + dy);
 
+	d3.select("#pvpointA")
+		.attr("x", x1 + dx)
+		.attr("y", y1 + dy);
+
 	d3.select("#pvline2_start")
 		.attr("cx", x1 + dx)
 		.attr("cy", y1 + dy);
+
+	d3.select("#pvpointB")
+		.attr("x", x2 + dx)
+		.attr("y", y2 + dy);
 
 	d3.select("#pvline2_end")
 		.attr("cx", x2 + dx)
