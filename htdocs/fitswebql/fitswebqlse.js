@@ -9100,28 +9100,53 @@ function pv_event(event) {
 					.attr("x2", res.x2 * img_width)
 					.attr("y2", res.y2 * img_height)
 					.style("stroke", fillColour)
-					.style("stroke-dasharray", ("1, 5, 1"))
+					.style("stroke-dasharray", ("1, 2"))
 					.style("stroke-width", emStrokeWidth)
 					.attr("pointer-events", "none")
 					.attr("opacity", 0.5);
 
-				let dx = res.x2 - res.x1;
-				let dy = res.y2 - res.y1;
+				const dx = res.x2 - res.x1;
+				const dy = res.y2 - res.y1;
+
+				const _x = 0.5 * (res.x1 + res.x2) * img_width; // midpoint of the P-V line
+				const _y = 0.5 * (res.y1 + res.y2) * img_height; // midpoint of the P-V line
+
+				var _m, _s, _mx, _my, _x1, _x2, _y1, _y2;
+
+				if (Math.abs(dx) > 0) {
+					_m = dy / dx; // a line parallel to the P-V line
+					_s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
+
+					_mx = _s;
+					_my = _m * _s;
+
+					_x1 = _x - _mx;
+					_y1 = _y - _my;
+					_x2 = _x + _mx;
+					_y2 = _y + _my;
+
+					svg.append("line")
+						.attr("id", "pvmid3")
+						.attr("x1", _x1)
+						.attr("y1", _y1)
+						.attr("x2", _x2)
+						.attr("y2", _y2)
+						.style("stroke", fillColour)
+						.style("stroke-width", emStrokeWidth)
+						.attr("opacity", 1.0);
+				}
 
 				if (Math.abs(dy) > 0) {
-					let _m = - dx / dy; // a perpendicular line to the P-V line				
-					let _s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
+					_m = - dx / dy; // a perpendicular line to the P-V line				
+					_s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
 
-					let _mx = _s;
-					let _my = _m * _s;
+					_mx = _s;
+					_my = _m * _s;
 
-					let _x = 0.5 * (res.x1 + res.x2) * img_width; // midpoint of the P-V line
-					let _y = 0.5 * (res.y1 + res.y2) * img_height; // midpoint of the P-V line
-
-					let _x1 = _x - _mx;
-					let _y1 = _y - _my;
-					let _x2 = _x + _mx;
-					let _y2 = _y + _my;
+					_x1 = _x - _mx;
+					_y1 = _y - _my;
+					_x2 = _x + _mx;
+					_y2 = _y + _my;
 
 					svg.append("line")
 						.attr("id", "pvmid2")
@@ -9193,23 +9218,45 @@ function pv_event(event) {
 								.attr("cx", (x1 + x2) / 2)
 								.attr("cy", (y1 + y2) / 2);
 
-							let dx = x2 - x1;
-							let dy = y2 - y1;
+							const dx = x2 - x1;
+							const dy = y2 - y1;
+
+							const _x = (x1 + x2) / 2; // midpoint of the P-V line
+							const _y = (y1 + y2) / 2; // midpoint of the P-V line
+
+							var _m, _s, _mx, _my, _x1, _x2, _y1, _y2;
+
+							if (Math.abs(dx) > 0) {
+								_m = dy / dx; // a line parallel to the P-V line
+								_s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
+
+								_mx = _s;
+								_my = _m * _s;
+
+								_x1 = _x - _mx;
+								_y1 = _y - _my;
+								_x2 = _x + _mx;
+								_y2 = _y + _my;
+
+								d3.select("#pvmid3")
+									.attr("x1", _x1)
+									.attr("y1", _y1)
+									.attr("x2", _x2)
+									.attr("y2", _y2)
+									.attr("opacity", 1.0);
+							}
 
 							if (Math.abs(dy) > 0) {
-								let _m = - dx / dy; // a perpendicular line to the P-V line				
-								let _s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
+								_m = - dx / dy; // a perpendicular line to the P-V line				
+								_s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
 
-								let _mx = _s;
-								let _my = _m * _s;
+								_mx = _s;
+								_my = _m * _s;
 
-								let _x = (x1 + x2) / 2; // midpoint of the P-V line
-								let _y = (y1 + y2) / 2; // midpoint of the P-V line
-
-								let _x1 = _x - _mx;
-								let _y1 = _y - _my;
-								let _x2 = _x + _mx;
-								let _y2 = _y + _my;
+								_x1 = _x - _mx;
+								_y1 = _y - _my;
+								_x2 = _x + _mx;
+								_y2 = _y + _my;
 
 								d3.select("#pvmid2")
 									.attr("x1", _x1)
@@ -9297,23 +9344,45 @@ function pv_event(event) {
 								.attr("cx", (x1 + x2) / 2)
 								.attr("cy", (y1 + y2) / 2);
 
-							let dx = x2 - x1;
-							let dy = y2 - y1;
+							const dx = x2 - x1;
+							const dy = y2 - y1;
+
+							const _x = (x1 + x2) / 2; // midpoint of the P-V line
+							const _y = (y1 + y2) / 2; // midpoint of the P-V line
+
+							var _m, _s, _mx, _my, _x1, _x2, _y1, _y2;
+
+							if (Math.abs(dx) > 0) {
+								_m = dy / dx; // a line parallel to the P-V line
+								_s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
+
+								_mx = _s;
+								_my = _m * _s;
+
+								_x1 = _x - _mx;
+								_y1 = _y - _my;
+								_x2 = _x + _mx;
+								_y2 = _y + _my;
+
+								d3.select("#pvmid3")
+									.attr("x1", _x1)
+									.attr("y1", _y1)
+									.attr("x2", _x2)
+									.attr("y2", _y2)
+									.attr("opacity", 1.0);
+							}
 
 							if (Math.abs(dy) > 0) {
-								let _m = - dx / dy; // a perpendicular line to the P-V line				
-								let _s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
+								_m = - dx / dy; // a perpendicular line to the P-V line				
+								_s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
 
-								let _mx = _s;
-								let _my = _m * _s;
+								_mx = _s;
+								_my = _m * _s;
 
-								let _x = (x1 + x2) / 2; // midpoint of the P-V line
-								let _y = (y1 + y2) / 2; // midpoint of the P-V line
-
-								let _x1 = _x - _mx;
-								let _y1 = _y - _my;
-								let _x2 = _x + _mx;
-								let _y2 = _y + _my;
+								_x1 = _x - _mx;
+								_y1 = _y - _my;
+								_x2 = _x + _mx;
+								_y2 = _y + _my;
 
 								d3.select("#pvmid2")
 									.attr("x1", _x1)
@@ -9403,20 +9472,42 @@ function dragMid(event) {
 	dx = x2 - x1;
 	dy = y2 - y1;
 
+	const _x = (x1 + x2) / 2; // midpoint of the P-V line
+	const _y = (y1 + y2) / 2; // midpoint of the P-V line
+
+	var _m, _s, _mx, _my, _x1, _x2, _y1, _y2;
+
+	if (Math.abs(dx) > 0) {
+		_m = dy / dx; // a line parallel to the P-V line
+		_s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
+
+		_mx = _s;
+		_my = _m * _s;
+
+		_x1 = _x - _mx;
+		_y1 = _y - _my;
+		_x2 = _x + _mx;
+		_y2 = _y + _my;
+
+		d3.select("#pvmid3")
+			.attr("x1", _x1)
+			.attr("y1", _y1)
+			.attr("x2", _x2)
+			.attr("y2", _y2)
+			.attr("opacity", 1.0);
+	}
+
 	if (Math.abs(dy) > 0) {
-		let _m = - dx / dy; // a perpendicular line to the P-V line				
-		let _s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
+		_m = - dx / dy; // a perpendicular line to the P-V line				
+		_s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
 
-		let _mx = _s;
-		let _my = _m * _s;
+		_mx = _s;
+		_my = _m * _s;
 
-		let _x = (x1 + x2) / 2; // midpoint of the P-V line
-		let _y = (y1 + y2) / 2; // midpoint of the P-V line
-
-		let _x1 = _x - _mx;
-		let _y1 = _y - _my;
-		let _x2 = _x + _mx;
-		let _y2 = _y + _my;
+		_x1 = _x - _mx;
+		_y1 = _y - _my;
+		_x2 = _x + _mx;
+		_y2 = _y + _my;
 
 		d3.select("#pvmid2")
 			.attr("x1", _x1)
