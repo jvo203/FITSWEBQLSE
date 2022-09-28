@@ -5270,6 +5270,81 @@ contains
       return
    end function get_image_scale
 
+   function get_pv_screen_scale(x) result(scale)
+      integer, intent(in) :: x
+      real scale
+
+      scale = floor(0.95*real(x))
+
+   end function get_pv_screen_scale
+
+   function get_pv_image_scale_square(width, height, img_width, img_height) result(scale)
+      integer, intent(in) :: width, height
+      integer, intent(in) :: img_width, img_height
+      real scale, screen_dimension, image_dimension
+
+      screen_dimension = get_pv_screen_scale(min(width, height))
+      image_dimension = max(img_width, img_height)
+      scale = screen_dimension/image_dimension
+   end function get_pv_image_scale_square
+
+   function get_pv_image_scale(width, height, img_width, img_height) result(scale)
+      integer, intent(in) :: width, height
+      integer, intent(in) :: img_width, img_height
+      real scale
+
+      if (img_width .eq. img_height) then
+         scale = get_pv_image_scale_square(width, height, img_width, img_height)
+         return
+      end if
+
+      if (img_height .lt. img_width) then
+         block
+            real screen_dimension, image_dimension
+            real new_image_width
+
+            screen_dimension = 0.95*real(height)
+            image_dimension = img_height
+            scale = screen_dimension/image_dimension
+            new_image_width = scale*img_width
+
+            if (new_image_width .gt. 0.95*real(width)) then
+               screen_dimension = 0.95*real(width)
+               image_dimension = img_width
+               scale = screen_dimension/image_dimension
+            end if
+
+         end block
+
+         return
+      end if
+
+      if (img_width .lt. img_height) then
+         block
+            real screen_dimension, image_dimension
+            real new_image_height
+
+            screen_dimension = 0.95*real(width)
+            image_dimension = img_width
+            scale = screen_dimension/image_dimension
+            new_image_height = scale*img_height
+
+            if (new_image_height > 0.95*real(height)) then
+               screen_dimension = 0.95*real(height)
+               image_dimension = img_height
+               scale = screen_dimension/image_dimension
+            end if
+
+         end block
+
+         return
+      end if
+
+      ! default scale
+      scale = 1.0
+      return
+   end function get_pv_image_scale
+
    type(C_PTR) function get_json(item, hist)
       implicit none
 
@@ -7317,6 +7392,11 @@ contains
       integer(kind=8) :: npixels
       real(kind=c_float) :: pmin, pmax, pmean, pstd
 
+      ! image downscaling
+      real :: scale
+      integer :: img_width, img_height
+      real(kind=c_float), allocatable, target :: pixels(:, :)
+
       ! timing
       real(kind=8) :: t1, t2
 
@@ -7465,6 +7545,11 @@ contains
       t2 = omp_get_wtime()
 
       print *, 'processed #points:', i, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
+
+      ! get the downscaled image dimensions
+      scale = get_pv_image_scale(req%width, req%height, npoints, length)
+
+      print *, 'scale:', scale
 
       ! start the timer
       t1 = omp_get_wtime()
