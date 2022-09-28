@@ -9095,7 +9095,20 @@ function pv_event(event) {
 					.style("stroke", fillColour)
 					.style("stroke-width", emStrokeWidth)
 					.attr("pointer-events", "none")
-					.attr("opacity", 1.0);
+					.attr("opacity", 0.75);
+
+				// add a starting point 'A'
+				svg.append("text")
+					.attr("id", "pvpointA")
+					.attr("x", res.x1 * img_width)
+					.attr("y", res.y1 * img_height)
+					.attr("text-anchor", "middle")
+					.attr("dominant-baseline", "central")
+					.attr("font-size", emFontSize)
+					.attr("fill", fillColour)
+					.attr("pointer-events", "none")
+					.attr("opacity", 1.0)
+					.text("A");
 
 				// add a circle at the start of the line
 				svg.append("circle")
@@ -9157,6 +9170,19 @@ function pv_event(event) {
 						.on("drag", dragMid)
 						.on("end", dropLine))
 					.attr("opacity", 1.0);
+
+				// add an ending point 'B'
+				svg.append("text")
+					.attr("id", "pvpointB")
+					.attr("x", res.x2 * img_width)
+					.attr("y", res.y2 * img_height)
+					.attr("text-anchor", "middle")
+					.attr("dominant-baseline", "central")
+					.attr("font-size", emFontSize)
+					.attr("fill", fillColour)
+					.attr("pointer-events", "none")
+					.attr("opacity", 1.0)
+					.text("B");
 
 				// add a circle at the end of the line
 				svg.append("circle")
