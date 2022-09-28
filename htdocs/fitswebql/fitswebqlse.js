@@ -9100,9 +9100,10 @@ function pv_event(event) {
 					.attr("x2", res.x2 * img_width)
 					.attr("y2", res.y2 * img_height)
 					.style("stroke", fillColour)
+					.style("stroke-dasharray", ("1, 5, 1"))
 					.style("stroke-width", emStrokeWidth)
 					.attr("pointer-events", "none")
-					.attr("opacity", 0.75);
+					.attr("opacity", 0.5);
 
 				let dx = res.x2 - res.x1;
 				let dy = res.y2 - res.y1;
@@ -9144,7 +9145,7 @@ function pv_event(event) {
 					.attr("fill", fillColour)
 					.attr("pointer-events", "none")
 					.attr("opacity", 1.0)
-					.text("A");
+					.text("1");
 
 				// add a circle at the start of the line
 				svg.append("circle")
@@ -9248,7 +9249,7 @@ function pv_event(event) {
 					.attr("fill", fillColour)
 					.attr("pointer-events", "none")
 					.attr("opacity", 1.0)
-					.text("B");
+					.text("2");
 
 				// add a circle at the end of the line
 				svg.append("circle")
