@@ -7395,7 +7395,8 @@ contains
       ! image downscaling
       real :: scale
       integer :: img_width, img_height
-      real(kind=c_float), allocatable, target :: pixels(:, :)
+      real(kind=c_float), pointer :: pixels(:, :)
+      logical :: allocated_pixels
 
       ! timing
       real(kind=8) :: t1, t2
@@ -7477,8 +7478,6 @@ contains
       allocate (pv(npoints, first:last))
       pv = 0.0
 
-      npixels = length * npoints
-
       prev_x = 0
       prev_y = 0
 
@@ -7551,6 +7550,25 @@ contains
 
       print *, 'scale:', scale
 
+      if (scale .lt. 1.0) then
+         img_width = nint(scale*npoints)
+         img_height = nint(scale*length)
+
+         allocate (pixels(img_width, img_height))
+         allocated_pixels = .true.
+
+         if (scale .gt. 0.2) then
+            call resizeLanczos(c_loc(pv), npoints, length, c_loc(pixels), img_width, img_height, 3)
+         else
+            call resizeSuper(c_loc(pv), npoints, length, c_loc(pixels), img_width, img_height)
+         end if
+      else
+         img_width = npoints
+         img_height = length
+         pixels => pv
+         allocated_pixels = .false.
+      end if
+
       ! start the timer
       t1 = omp_get_wtime()
 
@@ -7558,9 +7576,10 @@ contains
       pmax = -1.0E30
 
       ! pixels statistics and  image tone mapping transformation
-      call array_stat(c_loc(pv), pmin, pmax, pmean, npixels)
-      pstd = array_std(c_loc(pv), pmean, npixels)
-      call array_erf(c_loc(pv), pmean, pstd, npixels)
+      npixels = img_width * img_height
+      call array_stat(c_loc(pixels), pmin, pmax, pmean, npixels)
+      pstd = array_std(c_loc(pixels), pmean, npixels)
+      call array_erf(c_loc(pixels), pmean, pstd, npixels)
 
       ! end the timer
       t2 = omp_get_wtime()
@@ -7576,7 +7595,7 @@ contains
 
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
-         call write_pv_diagram(req%fd, npoints, length, ZFP_LOW_PRECISION, c_loc(pv), pmean, pstd, pmin, pmax)
+         call write_pv_diagram(req%fd, img_width, img_height, ZFP_LOW_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax)
 
          call close_pipe(req%fd)
          req%fd = -1
@@ -7584,6 +7603,13 @@ contains
 
       ! free the P-V diagram
       deallocate(pv)
+
+      ! free the pixels but only if they were allocated
+      if (allocated_pixels) then
+         deallocate (pixels)
+      else
+         nullify (pixels)
+      end if
 
       nullify (item)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
