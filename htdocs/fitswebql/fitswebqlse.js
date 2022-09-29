@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-27.0";
+	return "JS2022-09-29.0";
 }
 
 function uuidv4() {
@@ -3326,8 +3326,12 @@ function open_websocket_connection(_datasetId, index) {
 							var dst_height = c.height;
 
 							var scale = get_pv_image_scale(dst_width, dst_height, pv_width, pv_height);
-							var img_width = scale * pv_width;
-							var img_height = scale * pv_height;
+							// var img_width = scale * pv_width;
+							// var img_height = scale * pv_height;
+
+							// stretch the image to fill the right half of the canvas (do not preserve the aspect ratio)
+							var img_width = 0.8 * dst_width;
+							var img_height = 0.8 * dst_height;
 
 							var ctx = c.getContext("2d");
 							ctx.webkitImageSmoothingEnabled = false;
