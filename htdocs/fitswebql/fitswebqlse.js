@@ -3325,9 +3325,10 @@ function open_websocket_connection(_datasetId, index) {
 							var dst_width = c.width / 2;
 							var dst_height = c.height;
 
-							var scale = get_pv_image_scale(dst_width, dst_height, pv_width, pv_height);
-							// var img_width = scale * pv_width;
-							// var img_height = scale * pv_height;
+							// scale with preserving the aspect ratio
+							/*var scale = get_pv_image_scale(dst_width, dst_height, pv_width, pv_height);							
+							var img_width = scale * pv_width;
+							var img_height = scale * pv_height;*/
 
 							// stretch the image to fill the right half of the canvas (do not preserve the aspect ratio)
 							var img_width = 0.8 * dst_width;
