@@ -9259,6 +9259,8 @@ function pv_event(event) {
 									.attr("y2", _y2)
 									.attr("opacity", 1.0);
 							}
+
+							// resubmit_pv_line(va_count);
 						})
 						.on("end", dropLine))
 					.attr("opacity", 1.0);
@@ -9385,6 +9387,8 @@ function pv_event(event) {
 									.attr("y2", _y2)
 									.attr("opacity", 1.0);
 							}
+
+							// resubmit_pv_line(va_count);
 						})
 						.on("end", dropLine))
 					.attr("opacity", 1.0);
@@ -9510,6 +9514,8 @@ function dragMid(event) {
 			.attr("y2", _y2)
 			.attr("opacity", 1.0);
 	}
+
+	// resubmit_pv_line(va_count);
 }
 
 function dropLine(event) {
