@@ -1754,11 +1754,9 @@ function webgl_image_renderer(index, gl, width, height) {
 		//WebGL how to convert from clip space to pixels	
 		gl.viewport((width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
 		// console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
-		// set global variables
-		img_src_x = (width - img_width) / 2;
-		img_src_y = (height - img_height) / 2;
-		img_src_width = img_width;
-		img_src_height = img_height;
+		// console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
+		// set the global variable
+		image_gl_viewport = gl.getParameter(gl.VIEWPORT);
 
 		// Clear the canvas
 		gl.clearColor(0, 0, 0, 0);
@@ -9043,18 +9041,15 @@ function pv_event(event) {
 			var elem = document.getElementById("image_rectangle");
 
 			if (elem != null) {
-				var src_width = parseFloat(elem.getAttribute("width"));
+				/*var src_width = parseFloat(elem.getAttribute("width"));
 				var src_height = parseFloat(elem.getAttribute("height"));
 				var src_x = parseFloat(elem.getAttribute("x"));
-				var src_y = parseFloat(elem.getAttribute("y"));
+				var src_y = parseFloat(elem.getAttribute("y"));*/
 
-				/*console.log("type == 7:", src_x, src_y, src_width, src_height);
-				console.log(img_src_x, img_src_y, img_src_width, img_src_height);*/
-
-				/*var src_width = img_src_width + 2;
-				var src_height = img_src_height + 1;
-				var src_x = img_src_x - 1;
-				var src_y = img_src_y;*/
+				var src_x = image_gl_viewport[0];
+				var src_y = image_gl_viewport[1];
+				var src_width = image_gl_viewport[2];
+				var src_height = image_gl_viewport[3];
 
 				// get the image source canvas
 				var image_canvas = document.getElementById('HTMLCanvas');
@@ -9068,9 +9063,9 @@ function pv_event(event) {
 				var img_height = scale * src_height;
 
 				var context = canvas.getContext('2d');
-				context.webkitImageSmoothingEnabled = false;
+				/*context.webkitImageSmoothingEnabled = false;
 				context.msImageSmoothingEnabled = false;
-				context.imageSmoothingEnabled = false;
+				context.imageSmoothingEnabled = false;*/
 
 				// place the image on the left-hand side
 				context.drawImage(image_canvas, src_x, src_y, src_width, src_height, (dst_width - img_width) / 2, (dst_height - img_height) / 2, img_width, img_height);
