@@ -1753,7 +1753,12 @@ function webgl_image_renderer(index, gl, width, height) {
 
 		//WebGL how to convert from clip space to pixels	
 		gl.viewport((width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
-		//console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
+		// console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
+		// set global variables
+		img_src_x = (width - img_width) / 2;
+		img_src_y = (height - img_height) / 2;
+		img_src_width = img_width;
+		img_src_height = img_height;
 
 		// Clear the canvas
 		gl.clearColor(0, 0, 0, 0);
@@ -9023,25 +9028,6 @@ function pv_event(event) {
 				})
 				.text("×");
 
-			/*var svg = div.append("svg")
-				.attr("id", "PVSVG")
-				.attr("width", width)
-				.attr("height", height)
-				.attr('style', 'position: fixed; left: 10px; top: 10px; cursor: default');*/
-
-			/*svg.append("foreignObject")
-				.attr("x", width - 5 * emFontSize)
-				.attr("y", -emFontSize)
-				.attr("width", 5 * emFontSize)
-				.attr("height", 5 * emFontSize)
-				.on("click", function () {
-					d3.select("#PVDiagram").remove();
-				})
-				.append("xhtml:div")
-				.append("span")
-				.attr("class", "close myclose")
-				.html("×");*/
-
 			div.append("img")
 				.attr("id", "hourglassPVDiagram")
 				.attr("class", "hourglass")
@@ -9061,6 +9047,14 @@ function pv_event(event) {
 				var src_height = parseFloat(elem.getAttribute("height"));
 				var src_x = parseFloat(elem.getAttribute("x"));
 				var src_y = parseFloat(elem.getAttribute("y"));
+
+				/*console.log("type == 7:", src_x, src_y, src_width, src_height);
+				console.log(img_src_x, img_src_y, img_src_width, img_src_height);*/
+
+				/*var src_width = img_src_width + 2;
+				var src_height = img_src_height + 1;
+				var src_x = img_src_x - 1;
+				var src_y = img_src_y;*/
 
 				// get the image source canvas
 				var image_canvas = document.getElementById('HTMLCanvas');
