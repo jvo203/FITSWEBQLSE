@@ -10654,6 +10654,10 @@ function setup_image_selection() {
 	//svg image rectangle for zooming-in
 	var rect = svg.append("rect")
 		.attr("id", "image_rectangle")
+		/*.attr("x", Math.floor((width - img_width) / 2))
+		.attr("y", Math.floor((height - img_height) / 2))
+		.attr("width", Math.floor(img_width))
+		.attr("height", Math.floor(img_height))*/
 		.attr("x", (width - img_width) / 2)
 		.attr("y", (height - img_height) / 2)
 		.attr("width", img_width)
