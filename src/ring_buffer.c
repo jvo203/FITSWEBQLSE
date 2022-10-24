@@ -36,11 +36,17 @@ void put(struct ring_buffer *rb, void *item)
     pthread_mutex_unlock(&rb->ring_mtx);
 }
 
-/*void* get(struct ring_buffer *rb)
+void *get(struct ring_buffer *rb)
 {
-    void* item = buf[start];
-    buf[start++] = NULL; // nullify the item after taking it out
-    start %= BUFLEN;
+    // lock the mutex
+    pthread_mutex_lock(&rb->ring_mtx);
+
+    void *item = rb->data[rb->start];
+    rb->data[rb->start++] = NULL; // nullify the item after taking it out
+    rb->start %= RING_BUFFER_SIZE;
+
+    // release the mutex
+    pthread_mutex_unlock(&rb->ring_mtx);
 
     return item;
-}*/
+}
