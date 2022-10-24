@@ -24,15 +24,23 @@ void delete_ring_buffer(struct ring_buffer *rb)
             free(rb->data[i]);
 }
 
-/*void put(int item)
+void put(struct ring_buffer *rb, void *item)
 {
-    buf[end++] = item;
-    end %= BUFLEN;
-}*/
+    // lock the mutex
+    pthread_mutex_lock(&rb->ring_mtx);
 
-/*int get()
+    rb->data[rb->tail++] = item;
+    rb->tail %= RING_BUFFER_SIZE;
+
+    // release the mutex
+    pthread_mutex_unlock(&rb->ring_mtx);
+}
+
+/*void* get(struct ring_buffer *rb)
 {
-    int item = buf[start++];
+    void* item = buf[start];
+    buf[start++] = NULL; // nullify the item after taking it out
     start %= BUFLEN;
+
     return item;
 }*/
