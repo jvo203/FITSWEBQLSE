@@ -4,8 +4,8 @@
 
 void init_ring_buffer(struct ring_buffer *rb)
 {
-    rb->head = 0;
-    rb->tail = 0;
+    rb->start = 0;
+    rb->end = 0;
 
     // init data to NULL
     for (int i = 0; i < RING_BUFFER_SIZE; i++)
@@ -29,8 +29,8 @@ void put(struct ring_buffer *rb, void *item)
     // lock the mutex
     pthread_mutex_lock(&rb->ring_mtx);
 
-    rb->data[rb->tail++] = item;
-    rb->tail %= RING_BUFFER_SIZE;
+    rb->data[rb->end++] = item;
+    rb->end %= RING_BUFFER_SIZE;
 
     // release the mutex
     pthread_mutex_unlock(&rb->ring_mtx);

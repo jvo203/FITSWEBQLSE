@@ -6,8 +6,8 @@
 
 struct ring_buffer
 {
-    int head;
-    int tail;
+    int start;
+    int end;
     void *data[RING_BUFFER_SIZE];
 
     // a mutex to protect read/write
