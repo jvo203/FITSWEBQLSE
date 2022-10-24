@@ -32,7 +32,7 @@ void put(struct ring_buffer *rb, void *item)
     rb->data[rb->end++] = item;
     rb->end %= RING_BUFFER_SIZE;
 
-    // release the mutex
+    // unlock the mutex
     pthread_mutex_unlock(&rb->ring_mtx);
 }
 
@@ -42,10 +42,10 @@ void *get(struct ring_buffer *rb)
     pthread_mutex_lock(&rb->ring_mtx);
 
     void *item = rb->data[rb->start];
-    rb->data[rb->start++] = NULL; // nullify the item after taking it out
+    rb->data[rb->start++] = NULL; // nullify the location after taking out an item
     rb->start %= RING_BUFFER_SIZE;
 
-    // release the mutex
+    // unlock the mutex
     pthread_mutex_unlock(&rb->ring_mtx);
 
     return item;
