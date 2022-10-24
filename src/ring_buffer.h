@@ -9,7 +9,8 @@ struct ring_buffer
 {
     int head;
     int tail;
-    int data[RING_BUFFER_SIZE];
-    // a spin lock
+    void *data[RING_BUFFER_SIZE];
+
+    // a spin lock to protect read/write
     pthread_spinlock_t lock;
 };
