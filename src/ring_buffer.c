@@ -24,13 +24,13 @@ void delete_ring_buffer(struct ring_buffer *rb)
 
     pthread_mutex_lock(&rb->ring_mtx);
 
-    printf("delete_ring_buffer: start=%d, end=%d.\n", rb->start, rb->end);
+    printf("[C] delete_ring_buffer: start=%d, end=%d.\n", rb->start, rb->end);
 
     // free all data
     for (int i = 0; i < RING_BUFFER_SIZE; i++)
         if (rb->data[i] != NULL)
         {
-            printf("freeing ring buffer data at position %d.\n", i);
+            printf("[C] freeing ring buffer data at position %d.\n", i);
             free(rb->data[i]);
         }
 
