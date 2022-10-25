@@ -21,7 +21,10 @@ void delete_ring_buffer(struct ring_buffer *rb)
     // free all data
     for (int i = 0; i < RING_BUFFER_SIZE; i++)
         if (rb->data[i] != NULL)
+        {
+            printf("freeing ring buffer data at position %d.\n", i);
             free(rb->data[i]);
+        }
 
     pthread_mutex_unlock(&rb->ring_mtx);
     pthread_mutex_destroy(&rb->ring_mtx);
