@@ -16,12 +16,15 @@ void init_ring_buffer(struct ring_buffer *rb)
 
 void delete_ring_buffer(struct ring_buffer *rb)
 {
-    pthread_mutex_destroy(&rb->ring_mtx);
+    pthread_mutex_lock(&rb->ring_mtx);
 
     // free all data
     for (int i = 0; i < RING_BUFFER_SIZE; i++)
         if (rb->data[i] != NULL)
             free(rb->data[i]);
+
+    pthread_mutex_unlock(&rb->ring_mtx);
+    pthread_mutex_destroy(&rb->ring_mtx);
 }
 
 void put(struct ring_buffer *rb, void *item)
@@ -29,6 +32,11 @@ void put(struct ring_buffer *rb, void *item)
     // lock the mutex
     pthread_mutex_lock(&rb->ring_mtx);
 
+    // first delete any existing data so that there are no memory leaks
+    if (rb->data[rb->end] != NULL)
+        free(rb->data[rb->end]);
+
+    // put (overwrite) the new data
     rb->data[rb->end++] = item;
     rb->end %= RING_BUFFER_SIZE;
 
