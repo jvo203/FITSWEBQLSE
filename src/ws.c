@@ -140,6 +140,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 pthread_mutex_destroy(&session->stat_mtx);
                 pthread_mutex_unlock(&session->vid_mtx);
                 pthread_mutex_destroy(&session->vid_mtx);
+                pthread_mutex_destroy(&session->pv_mtx);
+
+                if (session->pv_ring != NULL)
+                    delete_ring_buffer(session->pv_ring);
 
                 free(session);
 
@@ -462,6 +466,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->param = NULL;
                 session->encoder = NULL;
                 session->picture = NULL;
+
+                pthread_mutex_init(&session->pv_mtx, NULL);
+                session->pv_ring = NULL;
 
                 c->fn_data = session;
 
