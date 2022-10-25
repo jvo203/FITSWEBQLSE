@@ -13,3 +13,8 @@ struct ring_buffer
     // a mutex to protect read/write
     pthread_mutex_t ring_mtx;
 };
+
+void init_ring_buffer(struct ring_buffer *rb);
+void delete_ring_buffer(struct ring_buffer *rb);
+void put(struct ring_buffer *rb, void *item);
+void *get(struct ring_buffer *rb);
