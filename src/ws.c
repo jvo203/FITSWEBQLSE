@@ -599,6 +599,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (strncmp(wm->data.ptr + voff, "true", vlen) == 0)
                         req->rest = true;
 
+                // 'seq_id'
+                if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
+                    req->seq_id = atoi2(wm->data.ptr + voff, vlen);
+
                 // 'timestamp'
                 if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
                     req->timestamp = atof2(wm->data.ptr + voff, vlen);
