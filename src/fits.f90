@@ -119,6 +119,7 @@ module fits
       integer(c_int) :: width, height
       real(c_double) :: frame_start, frame_end, ref_freq, deltaV
       logical(kind=c_bool) :: rest
+      integer(c_int) :: seq_id
       real(c_float) :: timestamp
 
       ! output
