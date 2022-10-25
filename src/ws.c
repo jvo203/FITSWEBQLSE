@@ -475,7 +475,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->picture = NULL;
 
                 pthread_mutex_init(&session->pv_mtx, NULL);
-                session->pv_ring = NULL;
+                pthread_mutex_lock(&session->pv_mtx);
+
+                session->pv_ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
+
+                if (session->pv_ring != NULL)
+                    init_ring_buffer(session->pv_ring);
+
+                pthread_mutex_unlock(&session->pv_mtx);
 
                 c->fn_data = session;
 
@@ -641,26 +648,19 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // printf("[C] P-V Diagram request: x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, timestamp: %f\n", req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->timestamp);
 
-            // get a ring buffer
-            struct ring_buffer *ring = NULL;
-
-            pthread_mutex_lock(&session->pv_mtx);
-
-            if (session->pv_ring == NULL)
-            {
-                ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
-                init_ring_buffer(ring);
-                session->pv_ring = ring;
-            }
-            else
-            {
-                ring = session->pv_ring;
-            }
-
-            pthread_mutex_unlock(&session->pv_mtx);
-
             // add the request to the circular queue
-            put(ring, req);
+            put(session->pv_ring, req);
+
+            // try to lock pv_mtx
+            if (pthread_mutex_trylock(&session->pv_mtx) == 0)
+            {
+                // launch a thread to process the request(s)
+                // pass the user session to the thread
+                // the thread will unlock the PV mutex when it's done
+
+                // finally unlock the mutex
+                pthread_mutex_unlock(&session->pv_mtx);
+            }
 
             break;
 
