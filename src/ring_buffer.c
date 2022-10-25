@@ -4,6 +4,9 @@
 
 void init_ring_buffer(struct ring_buffer *rb)
 {
+    if (rb == NULL)
+        return;
+
     rb->start = 0;
     rb->end = 0;
 
@@ -16,6 +19,9 @@ void init_ring_buffer(struct ring_buffer *rb)
 
 void delete_ring_buffer(struct ring_buffer *rb)
 {
+    if (rb == NULL)
+        return;
+
     pthread_mutex_lock(&rb->ring_mtx);
 
     printf("delete_ring_buffer: start=%d, end=%d.\n", rb->start, rb->end);
@@ -32,8 +38,11 @@ void delete_ring_buffer(struct ring_buffer *rb)
     pthread_mutex_destroy(&rb->ring_mtx);
 }
 
-void put(struct ring_buffer *rb, void *item)
+void ring_put(struct ring_buffer *rb, void *item)
 {
+    if (rb == NULL)
+        return;
+
     // lock the mutex
     pthread_mutex_lock(&rb->ring_mtx);
 
@@ -49,8 +58,11 @@ void put(struct ring_buffer *rb, void *item)
     pthread_mutex_unlock(&rb->ring_mtx);
 }
 
-void *get(struct ring_buffer *rb)
+void *ring_get(struct ring_buffer *rb)
 {
+    if (rb == NULL)
+        return;
+
     // lock the mutex
     pthread_mutex_lock(&rb->ring_mtx);
 

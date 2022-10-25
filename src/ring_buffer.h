@@ -16,5 +16,5 @@ struct ring_buffer
 
 void init_ring_buffer(struct ring_buffer *rb);
 void delete_ring_buffer(struct ring_buffer *rb);
-void put(struct ring_buffer *rb, void *item);
-void *get(struct ring_buffer *rb);
+void ring_put(struct ring_buffer *rb, void *item);
+void *ring_get(struct ring_buffer *rb);

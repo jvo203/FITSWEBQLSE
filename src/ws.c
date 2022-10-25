@@ -649,7 +649,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // printf("[C] P-V Diagram request: x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, timestamp: %f\n", req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->timestamp);
 
             // add the request to the circular queue
-            put(session->pv_ring, req);
+            ring_put(session->pv_ring, req);
 
             // try to lock pv_mtx
             if (pthread_mutex_trylock(&session->pv_mtx) == 0)
