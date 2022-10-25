@@ -545,6 +545,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->ref_freq = 0.0;
             req->deltaV = 0.0;
             req->rest = false;
+            req->seq_id = 0;
             req->timestamp = 0.0;
             req->fd = -1;
             req->ptr = NULL;

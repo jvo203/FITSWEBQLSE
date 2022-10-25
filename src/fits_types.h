@@ -123,6 +123,7 @@ struct pv_request
     double ref_freq;
     double deltaV;
     bool rest;
+    int seq_id;
     float timestamp;
 
     // output (the 'write' end of a Unix pipe)
