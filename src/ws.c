@@ -634,6 +634,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // printf("[C] P-V Diagram request: x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, timestamp: %f\n", req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->timestamp);
 
+            // add the request to the circular queue
+
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
             if (resp == NULL)
@@ -656,7 +658,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 resp->fps = 0;
                 resp->bitrate = 0;
                 resp->timestamp = req->timestamp;
-                resp->seq_id = 0;
+                resp->seq_id = req->seq_id;
                 resp->fd = pipefd[0];
 
                 // pass the write end of the pipe to a FORTRAN thread
