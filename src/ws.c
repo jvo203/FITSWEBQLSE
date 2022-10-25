@@ -137,13 +137,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     session->picture = NULL;
                 }
 
+                pthread_mutex_lock(&session->pv_mtx);
+
+                if (session->pv_ring != NULL)
+                {
+                    delete_ring_buffer(session->pv_ring);
+                    session->pv_ring = NULL;
+                }
+
+                pthread_mutex_unlock(&session->pv_mtx);
+
                 pthread_mutex_destroy(&session->stat_mtx);
                 pthread_mutex_unlock(&session->vid_mtx);
                 pthread_mutex_destroy(&session->vid_mtx);
                 pthread_mutex_destroy(&session->pv_mtx);
-
-                if (session->pv_ring != NULL)
-                    delete_ring_buffer(session->pv_ring);
 
                 free(session);
 
@@ -634,8 +641,30 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // printf("[C] P-V Diagram request: x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, timestamp: %f\n", req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->timestamp);
 
-            // add the request to the circular queue
+            // get a ring buffer
+            struct ring_buffer *ring = NULL;
 
+            pthread_mutex_lock(&session->pv_mtx);
+
+            if (session->pv_ring == NULL)
+            {
+                ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
+                init_ring_buffer(ring);
+                session->pv_ring = ring;
+            }
+            else
+            {
+                ring = session->pv_ring;
+            }
+
+            pthread_mutex_unlock(&session->pv_mtx);
+
+            // add the request to the circular queue
+            put(ring, req);
+
+            break;
+
+            // the old stuff
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
             if (resp == NULL)
