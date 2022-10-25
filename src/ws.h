@@ -6,6 +6,8 @@
 #include <glib.h>
 #include <x265.h>
 
+#include "ring_buffer.h"
+
 struct websocket_session
 {
     char *datasetid;
@@ -19,6 +21,7 @@ struct websocket_session
     int image_height;
     bool bDownsize;
 
+    // video
     pthread_mutex_t vid_mtx;
     int last_frame_idx;
 
@@ -26,6 +29,11 @@ struct websocket_session
     x265_param *param;
     x265_encoder *encoder;
     x265_picture *picture;
+
+    // PV-Diagram
+    pthread_mutex_t pv_mtx;
+    int last_pv_idx;
+    struct ring_buffer *pv_ring;
 };
 
 struct websocket_response
