@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-09-30.0";
+	return "JS2022-10-25.0";
 }
 
 function uuidv4() {
@@ -12927,6 +12927,8 @@ function send_pv_request(index, x1, y1, x2, y2) {
 	var width = c.width / 2;
 	var height = c.height;
 
+	sent_seq_id++;
+
 	var request = {
 		type: "pv",
 		x1: Math.round(x1),
@@ -12940,6 +12942,7 @@ function send_pv_request(index, x1, y1, x2, y2) {
 		ref_freq: RESTFRQ,
 		deltaV: 1000.0 * deltaV, // [m/s]
 		rest: rest,
+		seq_id: sent_seq_id,
 		timestamp: performance.now()
 	};
 
