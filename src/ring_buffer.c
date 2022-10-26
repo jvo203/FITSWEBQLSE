@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "ring_buffer.h"
 
@@ -61,7 +62,7 @@ void ring_put(struct ring_buffer *rb, void *item)
 void *ring_get(struct ring_buffer *rb)
 {
     if (rb == NULL)
-        return;
+        return NULL;
 
     // lock the mutex
     pthread_mutex_lock(&rb->ring_mtx);
