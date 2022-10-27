@@ -2770,10 +2770,10 @@ void *pv_event_loop(void *arg)
         /* wait on condition variable */
         pthread_cond_wait(&session->pv_cond, &session->cond_mtx);
 
+        printf("[C] pv_event_loop::wakeup.\n");
+
         if (session->pv_exit)
             break;
-
-        printf("[C] pv_event_loop::wakeup.\n");
     }
 
     printf("[C] pv_event_loop terminated.\n");
