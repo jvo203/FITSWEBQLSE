@@ -140,6 +140,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 }
 
                 session->pv_exit = true;
+                pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
                 pthread_join(session->pv_thread, NULL);
 
                 pthread_cond_destroy(&session->pv_cond);
@@ -2768,7 +2769,10 @@ void *pv_event_loop(void *arg)
 
     while (!session->pv_exit)
     {
-        sleep(1);
+        /* wait on condition variable */
+        pthread_cond_wait(&session->pv_cond, &session->cond_mtx);
+
+        printf("[C] pv_event_loop::wakeup.\n");
     }
 
     printf("[C] pv_event_loop terminated.\n");
