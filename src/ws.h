@@ -32,7 +32,8 @@ struct websocket_session
 
     // PV-Diagram
     pthread_mutex_t pv_mtx;
-    int last_pv_idx;
+    volatile sig_atomic_t pv_exit;
+    pthread_t pv_thread;
     struct ring_buffer *pv_ring;
 };
 
