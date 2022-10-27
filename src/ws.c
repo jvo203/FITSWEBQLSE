@@ -158,6 +158,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (session->pv_ring != NULL)
                 {
                     delete_ring_buffer(session->pv_ring);
+                    free(session->pv_ring);
                     session->pv_ring = NULL;
                 }
 
