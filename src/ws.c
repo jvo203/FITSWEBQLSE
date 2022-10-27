@@ -18,6 +18,8 @@ extern sig_atomic_t s_received_signal;
 extern int get_header_status(void *item);
 extern void inherent_image_dimensions_C(void *item, int *width, int *height);
 
+void *pv_event_loop(void *arg);
+
 void init_session_table()
 {
     if (pthread_mutex_init(&sessions_mtx, NULL) != 0)
@@ -486,6 +488,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 pthread_mutex_init(&session->pv_mtx, NULL);
                 pthread_mutex_lock(&session->pv_mtx);
+
+                // launch a pv_thread
+                pthread_create(&session->pv_thread, NULL, pv_event_loop, session);
 
                 session->pv_ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
 
@@ -2748,6 +2753,20 @@ free_video_mem:
     // release the memory
     free(resp->session_id);
     free(resp);
+
+    pthread_exit(NULL);
+}
+
+void *pv_event_loop(void *arg)
+{
+    if (arg == NULL)
+        pthread_exit(NULL);
+
+    struct websocket_session *session = (struct websocket_session *)arg;
+
+    printf("[C] pv_event_loop started.\n");
+
+    printf("[C] pv_event_loop terminated.\n");
 
     pthread_exit(NULL);
 }
