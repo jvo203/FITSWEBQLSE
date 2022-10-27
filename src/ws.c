@@ -140,6 +140,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->pv_exit = true;
                 pthread_join(session->pv_thread, NULL);
 
+                pthread_cond_destroy(&session->pv_cond);
+                pthread_mutex_destroy(&session->cond_mtx);
+
                 pthread_mutex_lock(&session->pv_mtx);
 
                 if (session->pv_ring != NULL)
@@ -478,6 +481,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->picture = NULL;
 
                 session->pv_exit = false;
+                pthread_mutex_init(&session->cond_mtx, NULL);
+                pthread_cond_init(&session->pv_cond, NULL);
+
                 pthread_mutex_init(&session->pv_mtx, NULL);
                 pthread_mutex_lock(&session->pv_mtx);
 
@@ -485,6 +491,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 if (session->pv_ring != NULL)
                     init_ring_buffer(session->pv_ring);
+
+                // launch a thread to PV-Diagram event loop thread
+                // (TO-DO)
 
                 pthread_mutex_unlock(&session->pv_mtx);
 
