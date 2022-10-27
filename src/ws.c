@@ -2765,6 +2765,8 @@ void *pv_event_loop(void *arg)
 
     printf("[C] pv_event_loop started.\n");
 
+    pthread_mutex_lock(&session->cond_mtx);
+
     while (!session->pv_exit)
     {
         /* wait on a condition variable */
@@ -2775,6 +2777,8 @@ void *pv_event_loop(void *arg)
 
         printf("[C] pv_event_loop::wakeup.\n");
     }
+
+    pthread_mutex_unlock(&session->cond_mtx);
 
     printf("[C] pv_event_loop terminated.\n");
 
