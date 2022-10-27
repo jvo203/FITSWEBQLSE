@@ -676,9 +676,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             ring_put(session->pv_ring, req);
 
             if (!session->pv_exit)
-            {
-                // signal the <pv_thread> to start processing
-            }
+                pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
 
             // finally unlock the mutex
             pthread_mutex_unlock(&session->pv_mtx);
