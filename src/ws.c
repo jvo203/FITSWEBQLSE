@@ -2839,18 +2839,18 @@ void *pv_event_loop(void *arg)
                 req->fd = pipefd[1];
                 req->ptr = item;
 
-                pthread_t tid;
+                pthread_t req_tid, resp_tid;
 
                 // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                stat = pthread_create(&tid, NULL, &ws_pv_request, req);
+                stat = pthread_create(&req_tid, NULL, &ws_pv_request, req);
 
                 if (stat == 0)
                 {
                     // launch a pipe read C pthread
-                    stat = pthread_create(&tid, NULL, &ws_pv_response, resp);
+                    stat = pthread_create(&resp_tid, NULL, &ws_pv_response, resp);
 
                     if (stat == 0)
-                        pthread_detach(tid);
+                        pthread_detach(resp_tid);
                     else
                     {
                         // close the read end of the pipe
@@ -2862,7 +2862,7 @@ void *pv_event_loop(void *arg)
                     }
 
                     // finally wait for the request thread to end before handling another one
-                    pthread_join(tid, NULL);
+                    pthread_join(req_tid, NULL);
                 }
                 else
                 {
