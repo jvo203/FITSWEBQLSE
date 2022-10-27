@@ -139,6 +139,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     session->picture = NULL;
                 }
 
+                pthread_mutex_destroy(&session->stat_mtx);
+                pthread_mutex_unlock(&session->vid_mtx);
+                pthread_mutex_destroy(&session->vid_mtx);
+
                 session->pv_exit = true;
                 pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
                 pthread_join(session->pv_thread, NULL);
@@ -156,10 +160,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 pthread_mutex_unlock(&session->pv_mtx);
                 pthread_mutex_destroy(&session->pv_mtx);
-
-                pthread_mutex_destroy(&session->stat_mtx);
-                pthread_mutex_unlock(&session->vid_mtx);
-                pthread_mutex_destroy(&session->vid_mtx);
 
                 free(session);
 
@@ -2769,6 +2769,9 @@ void *pv_event_loop(void *arg)
     {
         /* wait on condition variable */
         pthread_cond_wait(&session->pv_cond, &session->cond_mtx);
+
+        if (session->pv_exit)
+            break;
 
         printf("[C] pv_event_loop::wakeup.\n");
     }
