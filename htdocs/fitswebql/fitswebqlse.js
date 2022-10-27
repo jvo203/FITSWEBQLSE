@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-10-25.0";
+	return "JS2022-10-27.0";
 }
 
 function uuidv4() {
@@ -9260,7 +9260,7 @@ function pv_event(event) {
 									.attr("opacity", 1.0);
 							}
 
-							// resubmit_pv_line(va_count);
+							resubmit_pv_line(va_count);
 						})
 						.on("end", dropLine))
 					.attr("opacity", 1.0);
@@ -9388,7 +9388,7 @@ function pv_event(event) {
 									.attr("opacity", 1.0);
 							}
 
-							// resubmit_pv_line(va_count);
+							resubmit_pv_line(va_count);
 						})
 						.on("end", dropLine))
 					.attr("opacity", 1.0);
@@ -9515,7 +9515,7 @@ function dragMid(event) {
 			.attr("opacity", 1.0);
 	}
 
-	// resubmit_pv_line(va_count);
+	resubmit_pv_line(va_count);
 }
 
 function dropLine(event) {
