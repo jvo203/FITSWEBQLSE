@@ -112,6 +112,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(session->datasetid);
                 session->datasetid = NULL;
 
+                free(session->id);
+                session->id = NULL;
+
                 free(session->flux);
                 session->flux = NULL;
 
@@ -464,6 +467,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (session != NULL)
             {
                 session->datasetid = strdup(datasetId);
+                session->id = strdup(sessionId);
 
                 session->flux = NULL;
                 session->dmin = NAN;
@@ -2776,6 +2780,113 @@ void *pv_event_loop(void *arg)
             break;
 
         printf("[C] pv_event_loop::wakeup.\n");
+
+        struct pv_request *req = NULL;
+        int last_seq_id = -1;
+
+        // get the requests from the ring buffer
+        while ((req = (struct pv_request *)ring_get(session->pv_ring)) != NULL)
+        {
+            printf("[C] pv_event_loop::got a request id %d.\n", req->seq_id);
+
+            if (req->seq_id <= last_seq_id)
+            {
+                printf("[C] pv_event_loop::seq_id mismatch! last_seq_id: %d, req->seq_id: %d\n", last_seq_id, req->seq_id);
+                free(req);
+                continue;
+            }
+            else
+            {
+                last_seq_id = req->seq_id;
+            }
+
+            // get the item
+            void *item = get_dataset(session->datasetid);
+
+            if (item == NULL)
+            {
+                printf("[C] pv_event_loop::get_dataset failed.\n");
+                free(req);
+                continue;
+            }
+
+            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+
+            if (resp == NULL)
+            {
+                free(req);
+                continue;
+            }
+
+            // pass the request to FORTRAN
+            int stat;
+            int pipefd[2];
+
+            // open a Unix pipe
+            stat = pipe(pipefd);
+
+            if (stat == 0)
+            {
+                // pass the read end of the pipe to a C thread
+                resp->session_id = strdup(session->id);
+                resp->fps = 0;
+                resp->bitrate = 0;
+                resp->timestamp = req->timestamp;
+                resp->seq_id = req->seq_id;
+                resp->fd = pipefd[0];
+
+                // pass the write end of the pipe to a FORTRAN thread
+                req->fd = pipefd[1];
+                req->ptr = item;
+
+                pthread_t tid;
+
+                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                stat = pthread_create(&tid, NULL, &ws_pv_request, req);
+
+                if (stat == 0)
+                {
+                    // launch a pipe read C pthread
+                    stat = pthread_create(&tid, NULL, &ws_pv_response, resp);
+
+                    if (stat == 0)
+                        pthread_detach(tid);
+                    else
+                    {
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+
+                        // release the response memory since there is no reader
+                        free(resp->session_id);
+                        free(resp);
+                    }
+
+                    // finally wait for the request thread to end before handling another one
+                    pthread_join(tid, NULL);
+                }
+                else
+                {
+                    free(req);
+
+                    // close the write end of the pipe
+                    close(pipefd[1]);
+
+                    // close the read end of the pipe
+                    close(pipefd[0]);
+
+                    // release the response memory since there is no writer
+                    free(resp->session_id);
+                    free(resp);
+                }
+            }
+            else
+            {
+                printf("[C] pv_event_loop::pipe() failed.\n");
+                free(req);
+                free(resp);
+                continue;
+            }
+        }
     }
 
     pthread_mutex_unlock(&session->cond_mtx);

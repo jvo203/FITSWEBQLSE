@@ -11,6 +11,7 @@
 struct websocket_session
 {
     char *datasetid;
+    char *id;
 
     char *flux;
     float dmin, dmax, dmedian;
