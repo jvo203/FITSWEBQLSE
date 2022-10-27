@@ -145,7 +145,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 session->pv_exit = true;
                 pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
-                pthread_join(session->pv_thread, NULL);
+                pthread_join(session->pv_thread, NULL); // wait for the pv thread to end
 
                 pthread_cond_destroy(&session->pv_cond);
                 pthread_mutex_destroy(&session->cond_mtx);
