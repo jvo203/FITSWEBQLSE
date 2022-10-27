@@ -2766,6 +2766,11 @@ void *pv_event_loop(void *arg)
 
     printf("[C] pv_event_loop started.\n");
 
+    while (!session->pv_exit)
+    {
+        sleep(1);
+    }
+
     printf("[C] pv_event_loop terminated.\n");
 
     pthread_exit(NULL);
