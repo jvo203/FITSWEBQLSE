@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-10-27.0";
+	return "JS2022-10-28.0";
 }
 
 function uuidv4() {
@@ -9521,14 +9521,14 @@ function dragMid(event) {
 function dropLine(event) {
 	console.log("dropLine");
 
-	d3.select("#PVDiagram")
+	/*d3.select("#PVDiagram")
 		.append("img")
 		.attr("id", "hourglassPVDiagram")
 		.attr("class", "hourglass")
 		.attr("src", "https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/loading.gif")
 		.attr("alt", "hourglass")
 		.style("width", 200)
-		.style("height", 200);
+		.style("height", 200);*/
 
 	resubmit_pv_line(va_count);
 }
