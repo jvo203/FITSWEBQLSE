@@ -4167,7 +4167,7 @@ int write_pv_diagram_av1(int fd, int width, int height, int precision, const flo
     encoder->maxThreads = 4; // default: 1, i.e. no multi-threading
     encoder->speed = AVIF_SPEED_FASTEST;
     encoder->minQuantizer = 10;
-    encoder->maxQuantizer = 30;
+    encoder->maxQuantizer = 20;
 
     avifResult addImageResult = avifEncoderAddImage(encoder, image, 1, AVIF_ADD_IMAGE_FLAG_SINGLE);
     if (addImageResult != AVIF_RESULT_OK)
