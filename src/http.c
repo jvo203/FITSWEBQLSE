@@ -4198,7 +4198,7 @@ cleanup:
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
 {
     // try AV1 first (libavif)
-    write_pv_diagram_av1(fd, width, height, precision, pv, pmean, pstd, pmin, pmax);
+    // write_pv_diagram_av1(fd, width, height, precision, pv, pmean, pstd, pmin, pmax); // disabled: too slow (and too big compressed buffer sizes)
 
     uchar *restrict compressed_pv = NULL;
 
