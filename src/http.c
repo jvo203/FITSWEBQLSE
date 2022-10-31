@@ -4194,7 +4194,7 @@ int write_pv_diagram_av1(int fd, int width, int height, int precision, const flo
 
     if (bytesWritten != avifOutput.size)
     {
-        fprintf(stderr, "Failed to write %zu bytes\n", avifOutput.size);
+        fprintf(stderr, "[C] Failed to write %zu bytes\n", avifOutput.size);
         goto cleanup;
     }
 
