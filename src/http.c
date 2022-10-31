@@ -32,7 +32,7 @@
 #include <avif/avif.h>
 
 // JPEG-TURBO header
-#include <turbojpeg.h>
+#include <jpeglib.h>
 
 // Mathematica v10 MatrixPlot colourmap
 #define NO_COLOURS 9
@@ -4146,7 +4146,6 @@ int write_pv_diagram_av1(int fd, int width, int height, int precision, const flo
         unsigned char r = 0;
         unsigned char g = 0;
         unsigned char b = 0;
-        unsigned char a = 255;
 
         float pos = value * (NO_COLOURS - 1);
         float frac = pos - floorf(pos);
@@ -4221,8 +4220,42 @@ void write_pv_diagram_jpeg(int fd, int width, int height, int precision, const f
 {
     printf("[C] write_pv_diagram_jpeg()\n");
 
+    // prepare pixels first
+    size_t img_size = (size_t)width * (size_t)height;
+    unsigned char *pixels = (unsigned char *)malloc(img_size * 3);
+
+    size_t pvOffset = 0;
+
+    for (size_t i = 0; i < img_size; i++)
+    {
+        float value = pv[i];
+
+        if (value < 0.0f)
+            value = 0.0f;
+        else if (value > 1.0f)
+            value = 1.0f;
+
+        unsigned char r = 0;
+        unsigned char g = 0;
+        unsigned char b = 0;
+
+        float pos = value * (NO_COLOURS - 1);
+        float frac = pos - floorf(pos);
+        int x0 = floorf(pos);
+
+        r = 0xFF * (math_r[x0] + (math_r[x0 + 1] - math_r[x0]) * frac);
+        g = 0xFF * (math_g[x0] + (math_g[x0 + 1] - math_g[x0]) * frac);
+        b = 0xFF * (math_b[x0] + (math_b[x0 + 1] - math_b[x0]) * frac);
+
+        pixels[pvOffset++] = r;
+        pixels[pvOffset++] = g;
+        pixels[pvOffset++] = b;
+    }
+
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
+
+    free(pixels);
 }
 
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
