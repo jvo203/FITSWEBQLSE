@@ -4123,6 +4123,7 @@ int write_pv_diagram_av1(int fd, int width, int height, int precision, const flo
     }
 
     encoder = avifEncoderCreate();
+    encoder->maxThreads = 0; // auto-detect
 
     avifResult addImageResult = avifEncoderAddImage(encoder, image, 1, AVIF_ADD_IMAGE_FLAG_SINGLE);
     if (addImageResult != AVIF_RESULT_OK)
