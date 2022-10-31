@@ -172,7 +172,7 @@ void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
-void write_pv_diagram_av1(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
+int write_pv_diagram_av1(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
 
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
@@ -4088,9 +4088,68 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
         free(compressed_mask);
 }
 
-void write_pv_diagram_av1(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
+int write_pv_diagram_av1(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
 {
     printf("[C] write_pv_diagram_av1()\n");
+
+    int returnCode = 1;
+    avifEncoder *encoder = NULL;
+    avifRWData avifOutput = AVIF_DATA_EMPTY;
+    avifRGBImage rgb;
+    memset(&rgb, 0, sizeof(rgb));
+
+    avifImage *image = avifImageCreate(width, height, 8, AVIF_PIXEL_FORMAT_YUV444); // these values dictate what goes into the final AVIF
+    memset(image->alphaPlane, 255, image->alphaRowBytes * image->height);
+    avifRGBImageSetDefaults(&rgb, image);
+
+    rgb.width = width;
+    rgb.height = height;
+    rgb.depth = 8;
+    rgb.format = AVIF_RGB_FORMAT_RGB;
+    rgb.ignoreAlpha = AVIF_TRUE;
+    rgb.rowBytes = rgb.width * 3;
+
+    /*printf("[C] rgb width: %d; height: %d; depth: %d; ignoreAlpha: %d\n", rgb.width, rgb.height, rgb.depth, rgb.ignoreAlpha);
+    printf("[C] rowBytes: %d\n", rgb.rowBytes);*/
+
+    avifRGBImageAllocatePixels(&rgb);
+    memset(rgb.pixels, 255, rgb.rowBytes * rgb.height);
+
+    avifResult convertResult = avifImageRGBToYUV(image, &rgb);
+    if (convertResult != AVIF_RESULT_OK)
+    {
+        fprintf(stderr, "[C] Failed to convert to YUV(A): %s\n", avifResultToString(convertResult));
+        goto cleanup;
+    }
+
+    encoder = avifEncoderCreate();
+
+    avifResult addImageResult = avifEncoderAddImage(encoder, image, 1, AVIF_ADD_IMAGE_FLAG_SINGLE);
+    if (addImageResult != AVIF_RESULT_OK)
+    {
+        fprintf(stderr, "[C] Failed to add image to encoder: %s\n", avifResultToString(addImageResult));
+        goto cleanup;
+    }
+
+    avifResult finishResult = avifEncoderFinish(encoder, &avifOutput);
+    if (finishResult != AVIF_RESULT_OK)
+    {
+        fprintf(stderr, "[C] Failed to finish encode: %s\n", avifResultToString(finishResult));
+        goto cleanup;
+    }
+
+    printf("Encode success: %zu total bytes\n", avifOutput.size);
+
+cleanup:
+    if (image)
+        avifImageDestroy(image);
+    if (encoder)
+        avifEncoderDestroy(encoder);
+
+    avifRWDataFree(&avifOutput);
+    avifRGBImageFreePixels(&rgb); // Only use in conjunction with avifRGBImageAllocatePixels()
+
+    return returnCode;
 }
 
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
