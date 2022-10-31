@@ -4166,8 +4166,8 @@ int write_pv_diagram_av1(int fd, int width, int height, int precision, const flo
     encoder = avifEncoderCreate();
     encoder->maxThreads = 4; // default: 1, i.e. no multi-threading
     encoder->speed = AVIF_SPEED_FASTEST;
-    encoder->minQuantizer = 10;
-    encoder->maxQuantizer = 20;
+    encoder->minQuantizer = 1;
+    encoder->maxQuantizer = 30;
     encoder->autoTiling = AVIF_TRUE;
 
     avifResult addImageResult = avifEncoderAddImage(encoder, image, 1, AVIF_ADD_IMAGE_FLAG_SINGLE);
@@ -4215,7 +4215,7 @@ cleanup:
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
 {
     // try AV1 first (libavif)
-    write_pv_diagram_av1(fd, width, height, precision, pv, pmean, pstd, pmin, pmax); // disabled: too slow (and too big compressed buffer sizes)
+    // write_pv_diagram_av1(fd, width, height, precision, pv, pmean, pstd, pmin, pmax); // disabled: too slow (and too big compressed buffer sizes)
 
     uchar *restrict compressed_pv = NULL;
 
