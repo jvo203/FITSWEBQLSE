@@ -4115,6 +4115,20 @@ int write_pv_diagram_av1(int fd, int width, int height, int precision, const flo
     avifRGBImageAllocatePixels(&rgb);
     memset(rgb.pixels, 255, rgb.rowBytes * rgb.height);
 
+    // convert pixels to RGB using the ERF colourmap
+    size_t img_size = (size_t)width * (size_t)height;
+    size_t pvOffset = 0;
+
+    for (size_t i = 0; i < img_size; i++)
+    {
+        float value = pv[i];
+
+        if (value < 0.0f)
+            value = 0.0f;
+        else if (value > 1.0f)
+            value = 1.0f;
+    }
+
     avifResult convertResult = avifImageRGBToYUV(image, &rgb);
     if (convertResult != AVIF_RESULT_OK)
     {
