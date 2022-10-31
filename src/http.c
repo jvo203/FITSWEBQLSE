@@ -4134,11 +4134,11 @@ int write_pv_diagram_av1(int fd, int width, int height, int precision, const flo
     avifResult finishResult = avifEncoderFinish(encoder, &avifOutput);
     if (finishResult != AVIF_RESULT_OK)
     {
-        fprintf(stderr, "[C] Failed to finish encode: %s\n", avifResultToString(finishResult));
+        fprintf(stderr, "[C] AVIF Failed to finish encode: %s\n", avifResultToString(finishResult));
         goto cleanup;
     }
 
-    printf("Encode success: %zu total bytes\n", avifOutput.size);
+    printf("[C] AVIF Encode success: %zu total bytes\n", avifOutput.size);
 
 cleanup:
     if (image)
