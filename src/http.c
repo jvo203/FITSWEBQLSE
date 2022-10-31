@@ -31,6 +31,9 @@
 // AV1 image compressor
 #include <avif/avif.h>
 
+// JPEG-TURBO header
+#include <turbojpeg.h>
+
 // Mathematica v10 MatrixPlot colourmap
 #define NO_COLOURS 9
 
@@ -4217,6 +4220,9 @@ cleanup:
 void write_pv_diagram_jpeg(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
 {
     printf("[C] write_pv_diagram_jpeg()\n");
+
+    struct jpeg_compress_struct cinfo;
+    struct jpeg_error_mgr jerr;
 }
 
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
