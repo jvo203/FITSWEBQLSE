@@ -29,7 +29,7 @@
 #include <zfp.h>
 
 // AV1 image compressor
-#include "avif/avif.h"
+#include <avif/avif.h>
 
 // NASA CFITSIO
 #include <fitsio.h>
