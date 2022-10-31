@@ -28,6 +28,9 @@
 // ZFP floating-point compressor
 #include <zfp.h>
 
+// AV1 image compressor
+#include "avif/avif.h"
+
 // NASA CFITSIO
 #include <fitsio.h>
 
@@ -4086,6 +4089,8 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
 
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
 {
+    // try AV1 first (libavif)
+
     uchar *restrict compressed_pv = NULL;
 
     // ZFP variables
