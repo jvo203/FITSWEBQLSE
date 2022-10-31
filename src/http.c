@@ -4252,8 +4252,46 @@ void write_pv_diagram_jpeg(int fd, int width, int height, int precision, const f
         pixels[pvOffset++] = b;
     }
 
+    const char *filename = "test.jpeg";
+
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
+
+    FILE *outfile;           /* target file */
+    JSAMPROW row_pointer[1]; /* pointer to JSAMPLE row[s] */
+    int row_stride;          /* physical row width in image buffer */
+
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_compress(&cinfo);
+
+    int quality = 50;
+
+    if ((outfile = fopen(filename, "wb")) == NULL)
+    {
+        fprintf(stderr, "can't open %s\n", filename);
+        exit(1);
+    }
+    jpeg_stdio_dest(&cinfo, outfile);
+
+    cinfo.image_width = width; /* image width and height, in pixels */
+    cinfo.image_height = height;
+    cinfo.input_components = 3;     /* # of color components per pixel */
+    cinfo.in_color_space = JCS_RGB; /* colorspace of input image */
+
+    jpeg_set_defaults(&cinfo);
+    jpeg_set_quality(&cinfo, quality, TRUE /* limit to baseline-JPEG values */);
+
+    jpeg_start_compress(&cinfo, TRUE);
+    row_stride = width * 3; /* JSAMPLEs per row in image_buffer */
+
+    while (cinfo.next_scanline < cinfo.image_height)
+    {
+        row_pointer[0] = &pixels[cinfo.next_scanline * row_stride];
+        (void)jpeg_write_scanlines(&cinfo, row_pointer, 1);
+    }
+
+    jpeg_finish_compress(&cinfo);
+    jpeg_destroy_compress(&cinfo);
 
     free(pixels);
 }
@@ -4261,9 +4299,9 @@ void write_pv_diagram_jpeg(int fd, int width, int height, int precision, const f
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
 {
     // try AV1 first (libavif)
-    // write_pv_diagram_av1(fd, width, height, precision, pv, pmean, pstd, pmin, pmax); // disabled: too slow (and too big compressed buffer sizes)
+    write_pv_diagram_av1(fd, width, height, precision, pv, pmean, pstd, pmin, pmax); // disabled: too slow (and too big compressed buffer sizes)
 
-    // try JPEG
+    // try JPEG too
     write_pv_diagram_jpeg(fd, width, height, precision, pv, pmean, pstd, pmin, pmax);
 
     uchar *restrict compressed_pv = NULL;
