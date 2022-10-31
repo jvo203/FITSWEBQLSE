@@ -4168,6 +4168,7 @@ int write_pv_diagram_av1(int fd, int width, int height, int precision, const flo
     encoder->speed = AVIF_SPEED_FASTEST;
     encoder->minQuantizer = 10;
     encoder->maxQuantizer = 20;
+    encoder->autoTiling = AVIF_TRUE;
 
     avifResult addImageResult = avifEncoderAddImage(encoder, image, 1, AVIF_ADD_IMAGE_FLAG_SINGLE);
     if (addImageResult != AVIF_RESULT_OK)
@@ -4184,6 +4185,20 @@ int write_pv_diagram_av1(int fd, int width, int height, int precision, const flo
     }
 
     printf("[C] AVIF Encode success: %zu total bytes\n", avifOutput.size);
+
+    const char *outputFilename = "test.avif";
+
+    FILE *f = fopen(outputFilename, "wb");
+    size_t bytesWritten = fwrite(avifOutput.data, 1, avifOutput.size, f);
+    fclose(f);
+
+    if (bytesWritten != avifOutput.size)
+    {
+        fprintf(stderr, "Failed to write %zu bytes\n", avifOutput.size);
+        goto cleanup;
+    }
+
+    printf("[C] Wrote: %s\n", outputFilename);
 
 cleanup:
     if (image)
