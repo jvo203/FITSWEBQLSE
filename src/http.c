@@ -4266,12 +4266,17 @@ void write_pv_diagram_jpeg(int fd, int width, int height, int precision, const f
 
     int quality = 30;
 
+    unsigned long jpegSize = 0;
+    unsigned char *jpegBuf = NULL;
+
     if ((outfile = fopen(filename, "wb")) == NULL)
     {
         fprintf(stderr, "can't open %s\n", filename);
         exit(1);
     }
-    jpeg_stdio_dest(&cinfo, outfile);
+
+    jpeg_mem_dest(&cinfo, &jpegBuf, &jpegSize);
+    // jpeg_stdio_dest(&cinfo, outfile);
 
     cinfo.image_width = width; /* image width and height, in pixels */
     cinfo.image_height = height;
@@ -4292,6 +4297,11 @@ void write_pv_diagram_jpeg(int fd, int width, int height, int precision, const f
 
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
+
+    printf("[C] JPEG Encode success: %lu total bytes\n", jpegSize);
+
+    size_t bytesWritten = fwrite(jpegBuf, 1, jpegSize, outfile);
+    fclose(outfile);
 
     free(pixels);
 }
