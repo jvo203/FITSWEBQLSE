@@ -4264,7 +4264,7 @@ void write_pv_diagram_jpeg(int fd, int width, int height, int precision, const f
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
 
-    int quality = 50;
+    int quality = 30;
 
     if ((outfile = fopen(filename, "wb")) == NULL)
     {
