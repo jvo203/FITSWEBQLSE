@@ -3351,10 +3351,17 @@ function open_websocket_connection(_datasetId, index) {
 							// clear the right half of the PV canvas
 							ctx.clearRect(c.width / 2, 0, c.width, c.height);
 
-							// reverse the X axis
 							ctx.save();
-							ctx.translate(c.width, 0);
-							ctx.scale(-1, 1);
+
+							if (vmin < vmax) {
+								// flip the X and Y axes
+								ctx.translate(c.width, c.height);
+								ctx.scale(-1, -1);
+							} else {
+								// reverse the X axis
+								ctx.translate(c.width, 0);
+								ctx.scale(-1, 1);
+							}
 
 							// then place the new PV diagram onto the ctx canvas
 							// ctx.drawImage(pvCanvas, 0, 0, pv_width, pv_height, 3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height); // normal X axis
