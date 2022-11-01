@@ -3354,11 +3354,11 @@ function open_websocket_connection(_datasetId, index) {
 							ctx.save();
 
 							if (vmin < vmax) {
-								// flip the X and Y axes
+								// flip both the X and Y axes
 								ctx.translate(c.width, c.height);
 								ctx.scale(-1, -1);
 							} else {
-								// reverse the X axis
+								// flip the X axis only
 								ctx.translate(c.width, 0);
 								ctx.scale(-1, 1);
 							}
