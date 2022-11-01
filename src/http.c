@@ -176,7 +176,7 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision);
 void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
-void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax);
+void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const double vmin, const double vmax);
 
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
@@ -4092,7 +4092,7 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
         free(compressed_mask);
 }
 
-void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax)
+void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const double vmin, const double vmax)
 {
     uchar *restrict compressed_pv = NULL;
 
@@ -4112,7 +4112,7 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
     if (width <= 0 || height <= 0)
         return;
 
-    printf("[C] fd: %d; width: %d; height: %d, precision: %d, pmean: %f, pstd: %f, pmin: %f, pmax: %f\n", fd, width, height, precision, pmean, pstd, pmin, pmax);
+    printf("[C] fd: %d; width: %d; height: %d, precision: %d, pmean: %f, pstd: %f, pmin: %f, pmax: %f, vmin: %f, vmax: %f\n", fd, width, height, precision, pmean, pstd, pmin, pmax, vmin, vmax);
 
     // compress PV with ZFP
     field = zfp_field_2d((void *)pv, data_type, nx, ny);
@@ -4172,6 +4172,7 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
 
     // transmit the data
     float tmp;
+    double tmp2;
     uint32_t id_len = strlen(padded_id);
 
     uint32_t img_width = width;
@@ -4199,6 +4200,14 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
     // pstd
     tmp = pstd;
     chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // vmin
+    tmp2 = vmin;
+    chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
+
+    // vmax
+    tmp2 = vmax;
+    chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
 
     // the P-V diagram
     chunked_write(fd, (const char *)&img_width, sizeof(img_width));
