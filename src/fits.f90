@@ -7393,6 +7393,7 @@ contains
         real(kind=c_float), allocatable, target :: pv(:, :)
         integer(kind=8) :: npixels
         real(kind=c_float) :: pmin, pmax, pmean, pstd
+        real(kind=8) :: f, v1, v2
 
         ! image downscaling
         real :: scale
@@ -7429,6 +7430,10 @@ contains
         length = last - first + 1
 
         print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+        call get_frame2freq_vel(item, first, req%ref_freq, req%deltaV, req%rest, f, v1)
+        call get_frame2freq_vel(item, last, req%ref_freq, req%deltaV, req%rest, f, v2)
+        print *, 'velocity range: v1:', v1, 'v2:', v2, ' [km/s]'
 
         call get_cdelt3(item, cdelt3)
 
