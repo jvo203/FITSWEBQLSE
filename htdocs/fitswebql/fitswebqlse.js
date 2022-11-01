@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-10-28.0";
+	return "JS2022-11-01.0";
 }
 
 function uuidv4() {
@@ -3292,7 +3292,13 @@ function open_websocket_connection(_datasetId, index) {
 						let pstd = dv.getFloat32(offset, endianness);
 						offset += 4;
 
-						console.log("P-V Diagram: ", id, pmin, pmax, pmean, pstd);
+						let vmin = dv.getFloat64(offset, endianness);
+						offset += 8;
+
+						let vmax = dv.getFloat64(offset, endianness);
+						offset += 8;
+
+						console.log("P-V Diagram: ", id, pmin, pmax, pmean, pstd, vmin, vmax);
 
 						var pv_width = dv.getUint32(offset, endianness);
 						offset += 4;
