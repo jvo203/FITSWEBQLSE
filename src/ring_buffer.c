@@ -55,6 +55,8 @@ void ring_put(struct ring_buffer *rb, void *item)
     rb->data[rb->end++] = item;
     rb->end %= RING_BUFFER_SIZE;
 
+    printf("[C] ring_put: start=%d, end=%d.\n", rb->start, rb->end);
+
     // unlock the mutex
     pthread_mutex_unlock(&rb->ring_mtx);
 }
