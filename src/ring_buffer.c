@@ -71,12 +71,16 @@ void *ring_get(struct ring_buffer *rb)
 
     void *item = rb->data[rb->start];
 
+    printf("[C] ring_get: read from start=%d, item=%p.\n", rb->start, item);
+
     // move the start pointer only if the item is not NULL
     if (item != NULL)
     {
         rb->data[rb->start++] = NULL;
         rb->start %= RING_BUFFER_SIZE;
     }
+
+    printf("[C] ring_get: start=%d, end=%d.\n", rb->start, rb->end);
 
     // unlock the mutex
     pthread_mutex_unlock(&rb->ring_mtx);
