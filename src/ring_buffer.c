@@ -25,7 +25,9 @@ void delete_ring_buffer(struct ring_buffer *rb)
 
     pthread_mutex_lock(&rb->ring_mtx);
 
+#ifdef DEBUG
     printf("[C] delete_ring_buffer: start=%d, end=%d.\n", rb->start, rb->end);
+#endif
 
     // free all data
     for (int i = 0; i < RING_BUFFER_SIZE; i++)
@@ -55,7 +57,9 @@ void ring_put(struct ring_buffer *rb, void *item)
     rb->data[rb->end++] = item;
     rb->end %= RING_BUFFER_SIZE;
 
+#ifdef DEBUG
     printf("[C] ring_put: start=%d, end=%d.\n", rb->start, rb->end);
+#endif
 
     // unlock the mutex
     pthread_mutex_unlock(&rb->ring_mtx);
@@ -71,7 +75,9 @@ void *ring_get(struct ring_buffer *rb)
 
     void *item = rb->data[rb->start];
 
+#ifdef DEBUG
     printf("[C] ring_get: read from start=%d, item=%p.\n", rb->start, item);
+#endif
 
     // move the start pointer only if the item is not NULL
     if (item != NULL)
@@ -80,7 +86,9 @@ void *ring_get(struct ring_buffer *rb)
         rb->start %= RING_BUFFER_SIZE;
     }
 
+#ifdef DEBUG
     printf("[C] ring_get: start=%d, end=%d.\n", rb->start, rb->end);
+#endif
 
     // unlock the mutex
     pthread_mutex_unlock(&rb->ring_mtx);
