@@ -3351,6 +3351,7 @@ function open_websocket_connection(_datasetId, index) {
 							// clear the right half of the PV canvas
 							ctx.clearRect(c.width / 2, 0, c.width, c.height);
 
+							// save the current transformation matrix
 							ctx.save();
 
 							if (vmin < vmax) {
@@ -3366,6 +3367,8 @@ function open_websocket_connection(_datasetId, index) {
 							// then place the new PV diagram onto the ctx canvas
 							// ctx.drawImage(pvCanvas, 0, 0, pv_width, pv_height, 3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height); // normal X axis
 							ctx.drawImage(pvCanvas, 0, 0, pv_width, pv_height, (dst_width - img_width) / 2, (dst_height - img_height) / 2, img_width, img_height); // the X axis has been reversed
+
+							// restore the transformation matrix
 							ctx.restore();
 						}
 
