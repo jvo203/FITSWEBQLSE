@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-11-01.0";
+	return "JS2022-11-02.0";
 }
 
 function uuidv4() {
@@ -828,6 +828,28 @@ function replot_y_axis() {
 	}
 
 	d3.select("#ylabel").text(yLabel + ' ' + fitsData.BTYPE.trim() + " " + bunit);
+}
+
+function pv_axes(left, top, width, height) {
+	if (document.getElementById('PVSVG2') === null) {
+		console.log("pv_axes: PVSVG2 is null, creating a new one.");
+
+		var div = d3.select("#PVDiagram");
+
+		let svg_left = 10 + left;
+		let svg_top = 10 + top;
+
+		let svg_width = width;
+		let svg_height = height;
+
+		div.append("svg")
+			.attr("id", "PVSVG2")
+			.attr("width", svg_width)
+			.attr("height", svg_height)
+			.attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
+	}
+
+	var svg = d3.select("#PVSVG2");
 }
 
 /** ---------------------------------------------------------------------
@@ -3370,6 +3392,8 @@ function open_websocket_connection(_datasetId, index) {
 
 							// restore the transformation matrix
 							ctx.restore();
+
+							pv_axes(3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height);
 						}
 
 						return;
