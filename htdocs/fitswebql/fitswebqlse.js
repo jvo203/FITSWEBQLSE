@@ -862,7 +862,8 @@ function pv_axes(left, top, width, height) {
 	d3.select("#pvxaxis").remove();
 	d3.select("#pvyaxis").remove();
 
-	// var xsvg = d3.select("#pvxaxis");
+	var xsvg = d3.select("#PVSVGX");
+	var ysvg = d3.select("#PVSVGY");
 }
 
 /** ---------------------------------------------------------------------
