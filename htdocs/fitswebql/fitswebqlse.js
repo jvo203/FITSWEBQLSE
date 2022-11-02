@@ -831,16 +831,16 @@ function replot_y_axis() {
 }
 
 function pv_axes(left, top, width, height) {
+	let svg_left = 10 + left;
+	let svg_top = 10 + top;
+
+	let svg_width = width;
+	let svg_height = height;
+
 	if (document.getElementById('PVSVG2') === null) {
 		console.log("pv_axes: PVSVG2 is null, creating a new one.");
 
 		var div = d3.select("#PVDiagram");
-
-		let svg_left = 10 + left;
-		let svg_top = 10 + top;
-
-		let svg_width = width;
-		let svg_height = height;
 
 		div.append("svg")
 			.attr("id", "PVSVG2")
