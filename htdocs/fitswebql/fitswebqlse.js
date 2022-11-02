@@ -845,8 +845,18 @@ function pv_axes(left, top, width, height) {
 		div.append("svg")
 			.attr("id", "PVSVGX")
 			.attr("width", svg_width)
+			.attr("height", 2 * emFontSize)
+			.attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top + svg_height}px; cursor: default`);
+	}
+
+	if (document.getElementById('PVSVGY') === null) {
+		console.log("pv_axes: PVSVGY is null, creating a new one.");
+
+		div.append("svg")
+			.attr("id", "PVSVGY")
+			.attr("width", 2 * emFontSize)
 			.attr("height", svg_height)
-			.attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
+			.attr('style', `position: fixed; left: ${svg_left - 2 * emFontSize}px; top: ${svg_top}px; cursor: default`);
 	}
 
 	d3.select("#pvxaxis").remove();
