@@ -837,19 +837,22 @@ function pv_axes(left, top, width, height) {
 	let svg_width = width;
 	let svg_height = height;
 
-	if (document.getElementById('PVSVG2') === null) {
-		console.log("pv_axes: PVSVG2 is null, creating a new one.");
+	var div = d3.select("#PVDiagram");
 
-		var div = d3.select("#PVDiagram");
+	if (document.getElementById('PVSVGX') === null) {
+		console.log("pv_axes: PVSVGX is null, creating a new one.");
 
 		div.append("svg")
-			.attr("id", "PVSVG2")
+			.attr("id", "PVSVGX")
 			.attr("width", svg_width)
 			.attr("height", svg_height)
 			.attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
 	}
 
-	var svg = d3.select("#PVSVG2");
+	d3.select("#pvxaxis").remove();
+	d3.select("#pvyaxis").remove();
+
+	// var xsvg = d3.select("#pvxaxis");
 }
 
 /** ---------------------------------------------------------------------
