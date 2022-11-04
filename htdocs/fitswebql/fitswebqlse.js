@@ -872,9 +872,8 @@ function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pme
 		.range([0, svg_width - 1])
 		.domain([1, pv_width]);
 
-	var xAxis = d3.axisTop(xR)
-		.tickSizeOuter([3])
-		.ticks(7);
+	var xAxis = d3.axisBottom(xR)
+		.tickSizeOuter([3]);
 
 	// Add the X Axis
 	xsvg.append("g")
@@ -882,7 +881,8 @@ function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pme
 		.attr("id", "pvxaxis")
 		.style("fill", _axisColour)
 		.style("stroke", _axisColour)
-		.attr("transform", "translate(0," + (2 * emFontSize - 1) + ")")
+		//.attr("transform", "translate(0," + (2 * emFontSize - 1) + ")")
+		.attr("transform", "translate(0," + (1) + ")")
 		.call(xAxis);
 
 	var yR = d3.scaleLinear()
@@ -891,7 +891,19 @@ function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pme
 
 	var yAxis = d3.axisLeft(yR)
 		.tickSizeOuter([3])
-		.ticks(7);
+		.tickFormat(function (d) {
+			var number;
+
+			if (Math.abs(d) <= 0.001 || Math.abs(d) >= 10000)
+				number = d.toExponential();
+			else
+				number = d;
+
+			if (Math.abs(d) == 0)
+				number = d;
+
+			return number;
+		});
 
 	// Add the Y Axis
 	ysvg.append("g")
