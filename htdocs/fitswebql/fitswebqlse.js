@@ -854,9 +854,9 @@ function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pme
 
 		div.append("svg")
 			.attr("id", "PVSVGY")
-			.attr("width", 2 * emFontSize)
+			.attr("width", 10 * emFontSize)
 			.attr("height", svg_height)
-			.attr('style', `position: fixed; left: ${svg_left - 2 * emFontSize}px; top: ${svg_top}px; cursor: default`);
+			.attr('style', `position: fixed; left: ${svg_left - 10 * emFontSize}px; top: ${svg_top}px; cursor: default`);
 	}
 
 	d3.select("#pvxaxis").remove();
@@ -882,9 +882,25 @@ function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pme
 		.attr("id", "pvxaxis")
 		.style("fill", _axisColour)
 		.style("stroke", _axisColour)
-		//.style("stroke-width", emStrokeWidth)
 		.attr("transform", "translate(0," + (2 * emFontSize - 1) + ")")
 		.call(xAxis);
+
+	var yR = d3.scaleLinear()
+		.range([svg_height - 1, 0])
+		.domain([vmin, vmax]);
+
+	var yAxis = d3.axisLeft(yR)
+		.tickSizeOuter([3])
+		.ticks(7);
+
+	// Add the Y Axis
+	ysvg.append("g")
+		.attr("class", "axis")
+		.attr("id", "pvyaxis")
+		.style("fill", _axisColour)
+		.style("stroke", _axisColour)
+		.attr("transform", "translate(" + (10 * emFontSize - 1) + ",0)")
+		.call(yAxis);
 }
 
 /** ---------------------------------------------------------------------
