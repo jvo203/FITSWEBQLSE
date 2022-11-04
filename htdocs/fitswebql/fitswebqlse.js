@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-11-02.0";
+	return "JS2022-11-04.0";
 }
 
 function uuidv4() {
@@ -830,7 +830,7 @@ function replot_y_axis() {
 	d3.select("#ylabel").text(yLabel + ' ' + fitsData.BTYPE.trim() + " " + bunit);
 }
 
-function pv_axes(left, top, width, height) {
+function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pmean, pstd) {
 	let svg_left = 10 + left;
 	let svg_top = 10 + top;
 
@@ -864,6 +864,27 @@ function pv_axes(left, top, width, height) {
 
 	var xsvg = d3.select("#PVSVGX");
 	var ysvg = d3.select("#PVSVGY");
+
+	// always use a dark theme for the PV diagram
+	let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
+
+	var xR = d3.scaleLinear()
+		.range([0, svg_width - 1])
+		.domain([1, pv_width]);
+
+	var xAxis = d3.axisTop(xR);
+	//.tickSizeOuter([3])
+	//.ticks(7);
+
+	// Add the X Axis
+	xsvg.append("g")
+		.attr("class", "axis")
+		.attr("id", "pvxaxis")
+		.style("fill", _axisColour)
+		.style("stroke", _axisColour)
+		//.style("stroke-width", emStrokeWidth)
+		.attr("transform", "translate(0," + (2 * emFontSize - 1) + ")")
+		.call(xAxis);
 }
 
 /** ---------------------------------------------------------------------
@@ -3407,7 +3428,7 @@ function open_websocket_connection(_datasetId, index) {
 							// restore the transformation matrix
 							ctx.restore();
 
-							pv_axes(3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height);
+							pv_axes(3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height, pv_width, vmin, vmax, pmin, pmax, pmean, pstd);
 						}
 
 						return;
