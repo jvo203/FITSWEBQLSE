@@ -855,8 +855,8 @@ function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pme
 		div.append("svg")
 			.attr("id", "PVSVGY")
 			.attr("width", 10 * emFontSize)
-			.attr("height", svg_height)
-			.attr('style', `position: fixed; left: ${svg_left - 10 * emFontSize}px; top: ${svg_top}px; cursor: default`);
+			.attr("height", (svg_height + 2 * emFontSize))
+			.attr('style', `position: fixed; left: ${svg_left - 10 * emFontSize}px; top: ${svg_top - emFontSize}px; cursor: default`);
 	}
 
 	d3.select("#pvxaxis").remove();
@@ -881,12 +881,11 @@ function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pme
 		.attr("id", "pvxaxis")
 		.style("fill", _axisColour)
 		.style("stroke", _axisColour)
-		//.attr("transform", "translate(0," + (2 * emFontSize - 1) + ")")
-		.attr("transform", "translate((2 * emFontSize)," + (1) + ")")
+		.attr("transform", "translate(0,1)")
 		.call(xAxis);
 
 	var yR = d3.scaleLinear()
-		.range([svg_height - 1, 0])
+		.range([emFontSize + svg_height - 1, emFontSize])
 		.domain([vmin, vmax]);
 
 	var yAxis = d3.axisLeft(yR)
