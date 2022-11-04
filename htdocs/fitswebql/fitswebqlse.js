@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-11-04.0";
+	return "JS2022-11-04.1";
 }
 
 function uuidv4() {
@@ -830,7 +830,7 @@ function replot_y_axis() {
 	d3.select("#ylabel").text(yLabel + ' ' + fitsData.BTYPE.trim() + " " + bunit);
 }
 
-function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pmean, pstd) {
+function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd) {
 	let svg_left = 10 + left;
 	let svg_top = 10 + top;
 
@@ -870,7 +870,7 @@ function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pme
 
 	var xR = d3.scaleLinear()
 		.range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
-		.domain([1, pv_width]);
+		.domain([xmin, xmax]);
 
 	var xAxis = d3.axisBottom(xR)
 		.tickSizeOuter([3]);
@@ -3376,6 +3376,12 @@ function open_websocket_connection(_datasetId, index) {
 						let pstd = dv.getFloat32(offset, endianness);
 						offset += 4;
 
+						var xmin = dv.getUint32(offset, endianness);
+						offset += 4;
+
+						var xmax = dv.getUint32(offset, endianness);
+						offset += 4;
+
 						let vmin = dv.getFloat64(offset, endianness);
 						offset += 8;
 
@@ -3455,7 +3461,7 @@ function open_websocket_connection(_datasetId, index) {
 							// restore the transformation matrix
 							ctx.restore();
 
-							pv_axes(3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height, pv_width, vmin, vmax, pmin, pmax, pmean, pstd);
+							pv_axes(3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd);
 						}
 
 						return;
