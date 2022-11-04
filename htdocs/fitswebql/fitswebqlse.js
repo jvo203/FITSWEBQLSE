@@ -872,9 +872,9 @@ function pv_axes(left, top, width, height, pv_width, vmin, vmax, pmin, pmax, pme
 		.range([0, svg_width - 1])
 		.domain([1, pv_width]);
 
-	var xAxis = d3.axisTop(xR);
-	//.tickSizeOuter([3])
-	//.ticks(7);
+	var xAxis = d3.axisTop(xR)
+		.tickSizeOuter([3])
+		.ticks(7);
 
 	// Add the X Axis
 	xsvg.append("g")
