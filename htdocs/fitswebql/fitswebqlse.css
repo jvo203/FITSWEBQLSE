@@ -409,6 +409,17 @@ svg {
     opacity: 1;
 }
 
+.pv-label {
+    font: 1.25em Inconsolata;
+    /*sans-serif;*/
+    /*stroke: none;
+    fill: #996699;*/
+    /*font-weight: bold;*/
+    color: lightgray;
+    /*float: right;*/
+    opacity: 1;
+}
+
 .csv-light {
     font: 2.0em Inconsolata;
     /*sans-serif;*/

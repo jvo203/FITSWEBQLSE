@@ -831,6 +831,9 @@ function replot_y_axis() {
 }
 
 function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd) {
+	d3.select("#PVSVGX").remove();
+	d3.select("#PVSVGY").remove();
+
 	let svg_left = 10 + left;
 	let svg_top = 10 + top;
 
@@ -840,17 +843,17 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 	var div = d3.select("#PVDiagram");
 
 	if (document.getElementById('PVSVGX') === null) {
-		console.log("pv_axes: PVSVGX is null, creating a new one.");
+		// console.log("pv_axes: PVSVGX is null, creating a new one.");
 
 		div.append("svg")
 			.attr("id", "PVSVGX")
 			.attr("width", (svg_width + 4 * emFontSize))
-			.attr("height", 2 * emFontSize)
+			.attr("height", 5 * emFontSize)
 			.attr('style', `position: fixed; left: ${svg_left - 2 * emFontSize}px; top: ${svg_top + svg_height}px; cursor: default`);
 	}
 
 	if (document.getElementById('PVSVGY') === null) {
-		console.log("pv_axes: PVSVGY is null, creating a new one.");
+		// console.log("pv_axes: PVSVGY is null, creating a new one.");
 
 		div.append("svg")
 			.attr("id", "PVSVGY")
@@ -859,8 +862,10 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 			.attr('style', `position: fixed; left: ${svg_left - 10 * emFontSize}px; top: ${svg_top - emFontSize}px; cursor: default`);
 	}
 
-	d3.select("#pvxaxis").remove();
+	/*d3.select("#pvxaxis").remove();
 	d3.select("#pvyaxis").remove();
+	d3.select("#pvxlabel").remove();
+	d3.select("#pvylabel").remove();*/
 
 	var xsvg = d3.select("#PVSVGX");
 	var ysvg = d3.select("#PVSVGY");
@@ -912,6 +917,42 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		.style("stroke", _axisColour)
 		.attr("transform", "translate(" + (10 * emFontSize - 1) + ",0)")
 		.call(yAxis);
+
+	// labels
+	let fitsData = fitsContainer[va_count - 1];
+
+
+	xsvg.append("text")
+		.attr("id", "pvxlabel")
+		.attr("x", (svg_width + 4 * emFontSize) / 2)
+		.attr("y", 3.0 * emFontSize)
+		.attr("font-family", "Inconsolata")
+		.attr("font-size", "1.25em")
+		.attr("text-anchor", "middle")
+		.style("fill", "lightgray")
+		.attr("stroke", "none")
+		.text("PV line point index");
+
+	var strYLabel = "";
+
+	if (fitsData.SPECSYS.trim() != "")
+		strYLabel = "<I>V<SUB>" + fitsData.SPECSYS.trim() + "</SUB></I> [km/s]";
+	else
+		strYLabel = "<I>V<SUB>" + 'LSRK' + "</SUB></I> [km/s]";
+
+	ysvg.append("foreignObject")
+		// .attr("x", (2 * emFontSize))
+		.attr("x", 0)
+		// .attr("y", (svg_height + 0.5 * emFontSize))
+		.attr("y", 0)
+		// .attr("transform", "rotate(-90)")
+		.attr("width", 20 * emFontSize)
+		.attr("height", 2 * emFontSize)
+		.append("xhtml:div")
+		.attr("id", "pvylabel")
+		.style("display", "inline-block")
+		.attr("class", "pv-label")
+		.html(strYLabel);
 }
 
 /** ---------------------------------------------------------------------
