@@ -833,6 +833,7 @@ function replot_y_axis() {
 function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd) {
 	d3.select("#PVSVGX").remove();
 	d3.select("#PVSVGY").remove();
+	d3.select("#PVLABELSVG").remove();
 
 	let svg_left = 10 + left;
 	let svg_top = 10 + top;
@@ -862,13 +863,20 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 			.attr('style', `position: fixed; left: ${svg_left - 10 * emFontSize}px; top: ${svg_top - emFontSize}px; cursor: default`);
 	}
 
-	/*d3.select("#pvxaxis").remove();
-	d3.select("#pvyaxis").remove();
-	d3.select("#pvxlabel").remove();
-	d3.select("#pvylabel").remove();*/
+
+	if (document.getElementById('PVLABELSVG') === null) {
+		// console.log("pv_axes: PVLABELSVG is null, creating a new one.");
+
+		div.append("svg")
+			.attr("id", "PVLABELSVG")
+			.attr("width", 20 * emFontSize)
+			.attr("height", (2 * emFontSize))
+			.attr('style', `position: fixed; left: ${svg_left - 5 * emFontSize}px; top: ${svg_top - 1.75 * emFontSize}px; cursor: default`);
+	}
 
 	var xsvg = d3.select("#PVSVGX");
 	var ysvg = d3.select("#PVSVGY");
+	var labelsvg = d3.select("#PVLABELSVG");
 
 	// always use a dark theme for the PV diagram
 	let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
@@ -921,7 +929,6 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 	// labels
 	let fitsData = fitsContainer[va_count - 1];
 
-
 	xsvg.append("text")
 		.attr("id", "pvxlabel")
 		.attr("x", (svg_width + 4 * emFontSize) / 2)
@@ -933,6 +940,28 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		.attr("stroke", "none")
 		.text("PV line point index");
 
+	xsvg.append("text")
+		.attr("id", "pvpoint1")
+		.attr("x", (2 * emFontSize))
+		.attr("y", 3.0 * emFontSize)
+		.attr("font-family", "Inconsolata")
+		.attr("font-size", "1.25em")
+		.attr("text-anchor", "start")
+		.style("fill", "lightgray")
+		.attr("stroke", "none")
+		.text("① ...");
+
+	xsvg.append("text")
+		.attr("id", "pvpoint2")
+		.attr("x", (svg_width + 2 * emFontSize))
+		.attr("y", 3.0 * emFontSize)
+		.attr("font-family", "Inconsolata")
+		.attr("font-size", "1.25em")
+		.attr("text-anchor", "end")
+		.style("fill", "lightgray")
+		.attr("stroke", "none")
+		.text("... ②");
+
 	var strYLabel = "";
 
 	if (fitsData.SPECSYS.trim() != "")
@@ -940,12 +969,9 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 	else
 		strYLabel = "<I>V<SUB>" + 'LSRK' + "</SUB></I> [km/s]";
 
-	ysvg.append("foreignObject")
-		// .attr("x", (2 * emFontSize))
+	labelsvg.append("foreignObject")
 		.attr("x", 0)
-		// .attr("y", (svg_height + 0.5 * emFontSize))
 		.attr("y", 0)
-		// .attr("transform", "rotate(-90)")
 		.attr("width", 20 * emFontSize)
 		.attr("height", 2 * emFontSize)
 		.append("xhtml:div")
