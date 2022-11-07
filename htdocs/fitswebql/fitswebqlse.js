@@ -3490,6 +3490,7 @@ function open_websocket_connection(_datasetId, index) {
 							var c = document.getElementById('PVCanvas');
 							var dst_width = c.width / 2;
 							var dst_height = c.height;
+							var offset = 0.05 * c.height;
 
 							// scale with preserving the aspect ratio
 							/*var scale = get_pv_image_scale(dst_width, dst_height, pv_width, pv_height);							
@@ -3513,11 +3514,11 @@ function open_websocket_connection(_datasetId, index) {
 
 							if (vmin < vmax) {
 								// flip both the X and Y axes
-								ctx.translate(c.width, c.height);
+								ctx.translate(c.width, c.height + offset);
 								ctx.scale(-1, -1);
 							} else {
 								// flip the X axis only
-								ctx.translate(c.width, 0);
+								ctx.translate(c.width, offset);
 								ctx.scale(-1, 1);
 							}
 
@@ -3528,7 +3529,7 @@ function open_websocket_connection(_datasetId, index) {
 							// restore the transformation matrix
 							ctx.restore();
 
-							pv_axes(3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd);
+							pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd);
 						}
 
 						return;
