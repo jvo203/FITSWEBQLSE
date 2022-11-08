@@ -979,6 +979,17 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		.style("display", "inline-block")
 		.attr("class", "pv-label")
 		.html(strYLabel);
+
+	// a colour scale for the PV diagram
+	const math_r = [66, 59, 100, 246, 255, 244, 233, 219, 255];
+	const math_g = [91, 127, 168, 250, 255, 244, 202, 143, 107];
+	const math_b = [227, 216, 203, 252, 255, 229, 118, 2, 0];
+
+	var linear = d3.scaleLinear()
+		.domain([0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0])
+		.range(["rgb(46, 73, 123)", "rgb(71, 187, 94)"]);
+
+	console.log(linear(0.25));
 }
 
 /** ---------------------------------------------------------------------
