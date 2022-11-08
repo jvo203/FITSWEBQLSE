@@ -830,6 +830,36 @@ function replot_y_axis() {
 	d3.select("#ylabel").text(yLabel + ' ' + fitsData.BTYPE.trim() + " " + bunit);
 }
 
+// Error Function
+function erf(x) {
+	// erf(x) = 2/sqrt(pi) * integrate(from=0, to=x, e^-(t^2) ) dt
+	// with using Taylor expansion, 
+	//        = 2/sqrt(pi) * sigma(n=0 to +inf, ((-1)^n * x^(2n+1))/(n! * (2n+1)))
+	// calculationg n=0 to 50 bellow (note that inside sigma equals x when n = 0, and 50 may be enough)
+	var m = 1.00;
+	var s = 1.00;
+	var sum = x * 1.0;
+	for (var i = 1; i < 50; i++) {
+		m *= i;
+		s *= -1;
+		sum += (s * Math.pow(x, 2.0 * i + 1.0)) / (m * (2.0 * i + 1.0));
+	}
+	return 2 * sum / Math.sqrt(3.14159265358979);
+}
+
+// Inverse Error Function
+function erfinv(x) {
+	// maximum relative error = .00013
+	const a = 0.147;
+
+	if (0 == x) { return 0 };
+
+	const b = 2 / (Math.PI * a) + Math.log(1 - x ** 2) / 2;
+	const sqrt1 = Math.sqrt(b ** 2 - Math.log(1 - x ** 2) / a);
+	const sqrt2 = Math.sqrt(sqrt1 - b);
+	return sqrt2 * Math.sign(x);
+}
+
 function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd) {
 	d3.select("#PVSVGX").remove();
 	d3.select("#PVSVGY").remove();
@@ -1011,8 +1041,28 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 	// make an array of RGB colour strings
 	let math_x = [0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0];
 	let math_rgb = [];
+
 	for (let i = 0; i < math_r.length; i++) {
 		math_rgb.push("rgb(" + math_r[i] + "," + math_g[i] + "," + math_b[i] + ")");
+	}
+
+	var wolfram = d3.scaleLinear()
+		.domain(math_x)
+		.range(math_rgb);
+
+	// replace the endings of the colour scale with the actual values
+
+	// invert the ERF scale
+	for (let i = 0; i < math_x.length; i++) {
+		// convert from 0-1 range to the [pmin, pmax] range		
+		// math_x[i] = pmin + math_x[i] * (pmax - pmin);
+
+		console.log("i=", i);
+		console.log(math_x[i]);
+		math_x[i] = 2 * math_x[i] - 1;
+		console.log(math_x[i]);
+		math_x[i] = erfinv(math_x[i]);
+		console.log(math_x[i]);
 	}
 
 	var linear = d3.scaleLinear()
