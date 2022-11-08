@@ -830,23 +830,6 @@ function replot_y_axis() {
 	d3.select("#ylabel").text(yLabel + ' ' + fitsData.BTYPE.trim() + " " + bunit);
 }
 
-// Error Function
-function erf(x) {
-	// erf(x) = 2/sqrt(pi) * integrate(from=0, to=x, e^-(t^2) ) dt
-	// with using Taylor expansion, 
-	//        = 2/sqrt(pi) * sigma(n=0 to +inf, ((-1)^n * x^(2n+1))/(n! * (2n+1)))
-	// calculationg n=0 to 50 bellow (note that inside sigma equals x when n = 0, and 50 may be enough)
-	var m = 1.00;
-	var s = 1.00;
-	var sum = x * 1.0;
-	for (var i = 1; i < 50; i++) {
-		m *= i;
-		s *= -1;
-		sum += (s * Math.pow(x, 2.0 * i + 1.0)) / (m * (2.0 * i + 1.0));
-	}
-	return 2 * sum / Math.sqrt(3.14159265358979);
-}
-
 // Inverse Error Function
 function erfinv(x) {
 	// maximum relative error = .00013
@@ -1052,15 +1035,17 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 
 	// replace the endings of the colour scale with the actual values
 	let p1 = (pmin - pmean) / pstd;
-	p1 = (erf(p1) + 1) / 2;
+	p1 = (math.erf(p1) + 1) / 2;
 	console.log("lower: ", pmin, p1);
+	math_x[0] = p1;
 
 	let p2 = (pmax - pmean) / pstd;
-	p2 = (erf(p2) + 1) / 2;
+	p2 = (math.erf(p2) + 1) / 2;
 	console.log("upper: ", pmax, p2);
+	math_x[math_x.length - 1] = p2;
 
 	// invert the ERF scale
-	for (let i = 0; i < math_x.length; i++) {
+	/*for (let i = 0; i < math_x.length; i++) {
 		// convert from 0-1 range to the [pmin, pmax] range		
 		// math_x[i] = pmin + math_x[i] * (pmax - pmin);
 
@@ -1070,7 +1055,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		console.log(math_x[i]);
 		math_x[i] = erfinv(math_x[i]);
 		console.log(math_x[i]);
-	}
+	}*/
 
 	var linear = d3.scaleLinear()
 		.domain(math_x)
