@@ -1051,6 +1051,13 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		.range(math_rgb);
 
 	// replace the endings of the colour scale with the actual values
+	let p1 = (pmin - pmean) / pstd;
+	p1 = (erf(p1) + 1) / 2;
+	console.log("lower: ", pmin, p1);
+
+	let p2 = (pmax - pmean) / pstd;
+	p2 = (erf(p2) + 1) / 2;
+	console.log("upper: ", pmax, p2);
 
 	// invert the ERF scale
 	for (let i = 0; i < math_x.length; i++) {

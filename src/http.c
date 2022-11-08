@@ -2454,6 +2454,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // d3.js colour scale legend
     g_string_append(html, "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js\" integrity=\"sha512-wNH6xsp2n8CfB91nrBtfc4sfLwYPBMjSWVUwQOp60AYYXH6i8yCwuKFZ4rgK2i6pQek/b+bSyR7b01/922IBzQ==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script>\n");
 
+    // mathjs
+    g_string_append(html, "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.3/math.min.js\" integrity =\"sha512-AZlpUxTyDgo/Ne1TyeXv345mwyAKh646DnZSsEt0GAF7aSFWu94UjCBcgm+yqKyH/6g9boKAzIEMO+wEGc6mJQ==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script>");
+
     // WebAssembly JS+binary
     g_string_append(html, "<script src=\"client." WASM_VERSION ".js\"></script>\n");
     // use the CDN version of the WebAssembly binary
