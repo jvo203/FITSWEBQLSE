@@ -834,6 +834,8 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 	d3.select("#PVSVGX").remove();
 	d3.select("#PVSVGY").remove();
 	d3.select("#PVLABELSVG").remove();
+	d3.select("#PVTITLESVG").remove();
+	d3.select("#PVSCALESVG").remove();
 
 	let svg_left = 10 + left;
 	let svg_top = 10 + top;
@@ -863,7 +865,6 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 			.attr('style', `position: fixed; left: ${svg_left - 10 * emFontSize}px; top: ${svg_top - emFontSize}px; cursor: default`);
 	}
 
-
 	if (document.getElementById('PVLABELSVG') === null) {
 		// console.log("pv_axes: PVLABELSVG is null, creating a new one.");
 
@@ -874,9 +875,31 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 			.attr('style', `position: fixed; left: ${svg_left - 5 * emFontSize}px; top: ${svg_top - 1.75 * emFontSize}px; cursor: default`);
 	}
 
+	if (document.getElementById('PVTITLESVG') === null) {
+		// console.log("pv_axes: PVTITLESVG is null, creating a new one.");
+
+		div.append("svg")
+			.attr("id", "PVTITLESVG")
+			.attr("width", svg_width)
+			.attr("height", (2 * emFontSize))
+			.attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top - 2 * emFontSize}px; cursor: default`);
+	}
+
+	if (document.getElementById('PVSCALESVG') === null) {
+		// console.log("pv_axes: PVSCALESVG is null, creating a new one.");
+
+		div.append("svg")
+			.attr("id", "PVSCALESVG")
+			.attr("width", (svg_width - 4 * emFontSize))
+			.attr("height", 3 * emFontSize)
+			.attr('style', `position: fixed; left: ${svg_left + 2 * emFontSize}px; top: ${svg_top - 4.5 * emFontSize}px; cursor: default`);
+	}
+
 	var xsvg = d3.select("#PVSVGX");
 	var ysvg = d3.select("#PVSVGY");
 	var labelsvg = d3.select("#PVLABELSVG");
+	var titlesvg = d3.select("#PVTITLESVG");
+	var scalesvg = d3.select("#PVSCALESVG");
 
 	// always use a dark theme for the PV diagram
 	let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
@@ -986,14 +1009,49 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 	const math_b = [227, 216, 203, 252, 255, 229, 118, 2, 0];
 
 	// make an array of RGB colour strings
+	let math_x = [0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0];
 	let math_rgb = [];
 	for (let i = 0; i < math_r.length; i++) {
 		math_rgb.push("rgb(" + math_r[i] + "," + math_g[i] + "," + math_b[i] + ")");
 	}
 
 	var linear = d3.scaleLinear()
-		.domain([0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0])
+		.domain(math_x)
 		.range(math_rgb);
+
+	scalesvg.append("g")
+		.attr("class", "legendLinear");
+	//.attr("transform", "translate(20,20)");
+
+	var legendLinear = d3.legendColor()
+		.shapeWidth((svg_width - 5.5 * emFontSize) / 10)
+		.orient('horizontal')
+		.cells(10)
+		.scale(linear);
+
+	scalesvg.select(".legendLinear")
+		.call(legendLinear);
+
+	var bunit = '';
+	if (fitsData.BUNIT != '') {
+		bunit = fitsData.BUNIT.trim();
+
+		if (fitsData.depth > 1 && has_velocity_info)
+			bunit += '•km/s';
+
+		bunit = "pixel intensity [" + bunit + "]";
+	}
+
+	titlesvg.append("text")
+		.attr("id", "pvtitle")
+		.attr("x", (svg_width) / 2)
+		.attr("y", 1.5 * emFontSize)
+		.attr("font-family", "Inconsolata")
+		.attr("font-size", "1.25em")
+		.attr("text-anchor", "middle")
+		.style("fill", "lightgray")
+		.attr("stroke", "none")
+		.text(bunit);
 }
 
 /** ---------------------------------------------------------------------
