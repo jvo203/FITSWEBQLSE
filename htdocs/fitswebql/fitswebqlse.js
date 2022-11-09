@@ -1068,7 +1068,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		math_x[i] = erfinv(math_x[i]);
 		console.log(math_x[i]);
 
-		math_x[i] = math_x[i] * pstd * Math.sqrt(2.0) + pmean;
+		math_x[i] = math_x[i] * pstd + pmean;
 		console.log(math_x[i]);
 	}
 
