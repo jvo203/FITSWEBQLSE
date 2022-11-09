@@ -1,5 +1,5 @@
 function get_js_version() {
-	return "JS2022-11-07.0";
+	return "JS2022-11-09.0";
 }
 
 function uuidv4() {
@@ -1034,7 +1034,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		.range(math_rgb);
 
 	// replace the endings of the colour scale with the actual values
-	let p1 = (pmin - pmean) / pstd;
+	/*let p1 = (pmin - pmean) / pstd;
 	p1 = (math.erf(p1) + 1) / 2;
 	console.log("lower: ", pmin, p1);
 	math_x[0] = p1;
@@ -1042,20 +1042,35 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 	let p2 = (pmax - pmean) / pstd;
 	p2 = (math.erf(p2) + 1) / 2;
 	console.log("upper: ", pmax, p2);
-	math_x[math_x.length - 1] = p2;
+	math_x[math_x.length - 1] = p2;*/
+
+	// adjust the endings of the colour scale to avoid infinities
+	//math_x[0] = (math_x[0] + math_x[1]) / 2;
+	math_x[0] = 0.001;
+	math_rgb[0] = wolfram(math_x[0]);
+	console.log("lower: ", pmin, math_x[0], math_rgb[0]);
+
+	//math_x[math_x.length - 1] = (math_x[math_x.length - 2] + math_x[math_x.length - 1]) / 2;
+	math_x[math_x.length - 1] = 0.999;
+	math_rgb[math_rgb.length - 1] = wolfram(math_x[math_x.length - 1]);
+	console.log("upper: ", pmax, math_x[math_x.length - 1], math_rgb[math_rgb.length - 1]);
 
 	// invert the ERF scale
-	/*for (let i = 0; i < math_x.length; i++) {
-		// convert from 0-1 range to the [pmin, pmax] range		
-		// math_x[i] = pmin + math_x[i] * (pmax - pmin);
+	for (let i = 0; i < math_x.length; i++) {
+		// convert from (0, 1) range to the (pmin, pmax) range		
 
-		console.log("i=", i);
+		//console.log("i=", i);
 		console.log(math_x[i]);
+
 		math_x[i] = 2 * math_x[i] - 1;
 		console.log(math_x[i]);
+
 		math_x[i] = erfinv(math_x[i]);
 		console.log(math_x[i]);
-	}*/
+
+		math_x[i] = math_x[i] * pstd * Math.sqrt(2.0) + pmean;
+		console.log(math_x[i]);
+	}
 
 	var linear = d3.scaleLinear()
 		.domain(math_x)
