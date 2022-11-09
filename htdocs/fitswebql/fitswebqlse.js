@@ -1086,7 +1086,8 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		.shapeWidth((svg_width - 5.5 * emFontSize) / 10)
 		.orient('horizontal')
 		.cells(10)
-		.scale(linear);
+		.scale(linear)
+		.labelFormat(d3.format(".2e")); // .1e or .2f
 
 	scalesvg.select(".legendLinear")
 		.call(legendLinear);
