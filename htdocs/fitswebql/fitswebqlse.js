@@ -1034,12 +1034,12 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		.range(math_rgb);
 
 	// replace the endings of the colour scale with the actual values
-	let p1 = (pmin - pmean) / pstd;
+	let p1 = (pmin - pmean) / (pstd * Math.sqrt(2));
 	p1 = (math.erf(p1) + 1) / 2;
 	console.log("lower: ", pmin, p1);
 	math_x[0] = Math.max(p1, 0.001);
 
-	let p2 = (pmax - pmean) / pstd;
+	let p2 = (pmax - pmean) / (pstd * Math.sqrt(2));
 	p2 = (math.erf(p2) + 1) / 2;
 	console.log("upper: ", pmax, p2);
 	math_x[math_x.length - 1] = Math.min(p2, 0.999);
@@ -1068,7 +1068,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		math_x[i] = erfinv(math_x[i]);
 		// console.log(math_x[i]);
 
-		math_x[i] = math_x[i] * pstd + pmean;
+		math_x[i] = math_x[i] * pstd * Math.sqrt(2) + pmean;
 		// console.log(math_x[i]);
 	}
 

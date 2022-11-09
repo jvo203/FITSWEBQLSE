@@ -137,8 +137,8 @@ export void array_erf(uniform float pixels[], uniform float pmean, uniform float
 {
   foreach(i=0 ... npixels)
     {      
-      // varying float x = (pixels[i] - pmean) / pstd / sqrt(2.0f); // CFD
-      varying float x = (pixels[i] - pmean) / pstd; // non-scaled ERF
+      varying float x = (pixels[i] - pmean) / (pstd * sqrt(2.0f)); // a proper CFD
+      // varying float x = (pixels[i] - pmean) / pstd; // non-scaled ERF
       
       foreach_active(instance)
       {      
