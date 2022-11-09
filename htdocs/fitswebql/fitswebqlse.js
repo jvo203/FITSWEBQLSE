@@ -1034,24 +1034,24 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		.range(math_rgb);
 
 	// replace the endings of the colour scale with the actual values
-	/*let p1 = (pmin - pmean) / pstd;
+	let p1 = (pmin - pmean) / pstd;
 	p1 = (math.erf(p1) + 1) / 2;
 	console.log("lower: ", pmin, p1);
-	math_x[0] = p1;
+	math_x[0] = Math.max(p1, 0.001);
 
 	let p2 = (pmax - pmean) / pstd;
 	p2 = (math.erf(p2) + 1) / 2;
 	console.log("upper: ", pmax, p2);
-	math_x[math_x.length - 1] = p2;*/
+	math_x[math_x.length - 1] = Math.min(p2, 0.999);
 
 	// adjust the endings of the colour scale to avoid infinities
 	//math_x[0] = (math_x[0] + math_x[1]) / 2;
-	math_x[0] = 0.001;
+	//math_x[0] = 0.001;
 	math_rgb[0] = wolfram(math_x[0]);
 	console.log("lower: ", pmin, math_x[0], math_rgb[0]);
 
 	//math_x[math_x.length - 1] = (math_x[math_x.length - 2] + math_x[math_x.length - 1]) / 2;
-	math_x[math_x.length - 1] = 0.999;
+	//math_x[math_x.length - 1] = 0.999;
 	math_rgb[math_rgb.length - 1] = wolfram(math_x[math_x.length - 1]);
 	console.log("upper: ", pmax, math_x[math_x.length - 1], math_rgb[math_rgb.length - 1]);
 
@@ -1060,17 +1060,19 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		// convert from (0, 1) range to the (pmin, pmax) range		
 
 		//console.log("i=", i);
-		console.log(math_x[i]);
+		// console.log(math_x[i]);
 
 		math_x[i] = 2 * math_x[i] - 1;
-		console.log(math_x[i]);
+		// console.log(math_x[i]);
 
 		math_x[i] = erfinv(math_x[i]);
-		console.log(math_x[i]);
+		// console.log(math_x[i]);
 
 		math_x[i] = math_x[i] * pstd + pmean;
-		console.log(math_x[i]);
+		// console.log(math_x[i]);
 	}
+
+	console.log("math_x: ", math_x);
 
 	var linear = d3.scaleLinear()
 		.domain(math_x)
@@ -1096,7 +1098,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		if (fitsData.depth > 1 && has_velocity_info)
 			bunit += '•km/s';
 
-		bunit = "pixel intensity [" + bunit + "]";
+		bunit = "integrated intensity [" + bunit + "]";
 	}
 
 	titlesvg.append("text")
