@@ -1087,7 +1087,12 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 		.orient('horizontal')
 		.cells(10)
 		.scale(linear)
-		.labelFormat(d3.format(".2e")); // .1e or .2f
+		//.labelFormat(d3.format(".2e")); // .1e or .2f
+		.labelFormat(d3.format(".2g")); // .1e or .2f		
+
+	/*console.log(d3.format(".2g")(4.2));
+	console.log(d3.format(".2g")(42000));
+	console.log(d3.format(".2g")(0.0000008767));*/
 
 	scalesvg.select(".legendLinear")
 		.call(legendLinear);
