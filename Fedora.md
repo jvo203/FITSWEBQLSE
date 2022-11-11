@@ -1,3 +1,7 @@
+# 0. Development Tools
+
+	sudo dnf groupinstall "Development Tools"
+
 # 1. Install Intel oneAPI Base + HPC kits (works well on AMD CPUs too, not just Intel's)
 
 # 2. Install dependencies
