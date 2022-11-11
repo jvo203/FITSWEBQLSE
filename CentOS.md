@@ -191,6 +191,8 @@ ulimit -s unlimited
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
 # 14. Open up the Ports via a Firewall
+
+    https://mebee.info/2019/10/17/post-2369/
     
     sudo firewall-cmd --add-port={8080,8081}/tcp --zone=public --permanent
 
