@@ -194,7 +194,7 @@ ulimit -s unlimited
 
     https://mebee.info/2019/10/17/post-2369/
     
-    sudo firewall-cmd --add-port={8080,8081}/tcp --zone=public --permanent
+    sudo firewall-cmd --add-port={8080,8081,50000}/tcp --zone=public --permanent
 
     sudo firewall-cmd --reload
 
