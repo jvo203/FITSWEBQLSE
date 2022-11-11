@@ -26,7 +26,69 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     source /opt/intel/oneapi/setvars.sh
 
-# 2. libmicrohttpd
+# 2. Install dependencies
+
+    sudo dnf install cmake
+
+    sudo dnf install glib2-devel
+
+    sudo dnf install libcurl-devel
+
+    sudo dnf install lz4-devel
+
+    sudo dnf install cfitsio-devel
+
+    sudo dnf install libpq-devel
+
+    sudo dnf install sqlite-devel
+
+    sudo dnf install x265-devel
+
+    sudo dnf install nasm
+
+# 3. NASM
+
+    wget https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.gz
+
+    tar zxvf nasm-2.15.05.tar.gz
+
+    cd nasm-2.15.05
+
+    ./configure
+
+    make
+
+    sudo make install
+
+# 4. x265
+
+    visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
+
+    wget https://anduin.linuxfromscratch.org/BLFS/x265/x265-20220819.tar.xz
+
+    xz -d -v x265-20220819.tar.xz
+
+    tar xvf x265-20220819.tar
+
+    cd x265-20220819
+
+    Apply a manual change in "source/encoder/api.cpp / x265_encoder_open()":
+
+        x265_print_params(param);
+        PARAM_NS::x265_param_free(zoneParam); /* this line needs to be added */
+        return encoder;
+
+    mkdir -p build
+
+    cd build
+
+    cmake ../source
+
+    make -j8
+
+    sudo make install
+
+# 3. libmicrohttpd
 
     wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
 
@@ -54,13 +116,37 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     sudo make install
 
+# 11. CFITSIO
+    wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.1.0.tar.gz
+
+    tar zxvf cfitsio-4.1.0.tar.gz
+
+    cd cfitsio-4.1.0
+
+    ./configure --prefix=/usr/local --enable-reentrant
+
+    make
+
+    sudo make install
+
+# 7. jemalloc    
+    wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
+
+    bunzip2 jemalloc-5.3.0.tar.bz2
+
+    tar xvf jemalloc-5.3.0.tar
+
+    cd jemalloc-5.3.0
+
+    ./configure
+
+    make
+
+    sudo make install
+
 # 4. Intel SPMD C (ispc)
 
     manually add ispc from https://ispc.github.io/downloads.html
-
-# 5. Install dependencies
-
-    sudo dnf install cmake
 
 # 9. Adjust environment variables
 
