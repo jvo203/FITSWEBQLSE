@@ -88,7 +88,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     sudo make install
 
-# 3. libmicrohttpd
+# 5. libmicrohttpd
 
     wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
 
@@ -102,7 +102,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     sudo make install
 
-# 3. libcpuid
+# 6. libcpuid
     
     wget https://github.com/anrieff/libcpuid/releases/download/v0.6.1/libcpuid-0.6.1.tar.gz
 
@@ -116,7 +116,8 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     sudo make install
 
-# 11. CFITSIO
+# 7. CFITSIO
+
     wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.1.0.tar.gz
 
     tar zxvf cfitsio-4.1.0.tar.gz
@@ -129,7 +130,34 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     sudo make install
 
-# 7. jemalloc    
+# 8. ZeroMQ
+
+    wget https://github.com/zeromq/libzmq/archive/refs/tags/v4.3.4.tar.gz
+
+    tar zxvf v4.3.4.tar.gz
+
+    cd libzmq-4.3.4
+
+    ./autogen.sh && ./configure && make
+
+    sudo make install
+
+# 9. CZMQ
+
+    wget https://github.com/zeromq/czmq/archive/refs/tags/v4.2.1.tar.gz
+
+    tar zxvf v4.2.1.tar.gz
+
+    cd czmq-4.2.1
+
+    ./autogen.sh && ./configure && make check
+
+    sudo make install
+
+    sudo ldconfig
+
+# 10. jemalloc
+
     wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
 
     bunzip2 jemalloc-5.3.0.tar.bz2
@@ -144,11 +172,11 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     sudo make install
 
-# 4. Intel SPMD C (ispc)
+# 11. Intel SPMD C (ispc)
 
     manually add ispc from https://ispc.github.io/downloads.html
 
-# 9. Adjust environment variables
+# 12. Adjust environment variables
 
 	Add
 
@@ -158,6 +186,6 @@ ulimit -s unlimited
 
     to .bashrc and re-login
 
-# 10. Splatalogue
+# 13. Splatalogue
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
