@@ -122,7 +122,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     ./configure --prefix=/usr/local --enable-reentrant
 
-    make
+    make -j16
 
     sudo make install
 
