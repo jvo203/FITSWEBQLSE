@@ -38,8 +38,6 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     sudo dnf install lz4-devel
 
-    sudo dnf install cfitsio-devel
-
     sudo dnf install libpq-devel
 
     sudo dnf install sqlite-devel
