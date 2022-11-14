@@ -134,7 +134,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     cd libzmq-4.3.4
 
-    ./autogen.sh && ./configure && make
+    ./autogen.sh && ./configure && make -j16
 
     sudo make install
 
@@ -146,7 +146,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     cd czmq-4.2.1
 
-    ./autogen.sh && ./configure && make check
+    ./autogen.sh && ./configure && make -j16 check
 
     sudo make install
 
