@@ -80,7 +80,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     cmake ../source
 
-    make -j8
+    make -j16
 
     sudo make install
 
