@@ -52,7 +52,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     ./configure
 
-    make
+    make -j16
 
     sudo make install
 
