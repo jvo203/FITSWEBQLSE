@@ -40,11 +40,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     sudo dnf install libpq-devel
 
-    sudo dnf install sqlite-devel
-
-    sudo dnf install x265-devel
-
-    sudo dnf install nasm
+    sudo dnf install sqlite-devel    
 
 # 3. NASM
 
