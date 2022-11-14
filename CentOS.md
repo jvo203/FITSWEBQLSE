@@ -4,6 +4,8 @@
 
 	sudo dnf install gcc-gfortran
 
+    sudo dnf autoremove
+
 # 1. Install Intel oneAPI Base + HPC kits (works well on AMD CPUs too, not just Intel's)
 
 /etc/yum.repos.d/oneAPI.repo
