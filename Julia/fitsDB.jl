@@ -209,6 +209,7 @@ for (datasetid, file_size, path) in zip(ids, sizes, paths)
     println("#$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
 
     if !copy_dataset(datasetid, file_size, path)
+        count = count + 1
         continue
     end
 
