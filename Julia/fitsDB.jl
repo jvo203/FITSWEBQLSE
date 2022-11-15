@@ -6,8 +6,8 @@ using ProgressMeter
 function connect_db(db_name)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
     password = user * String(UInt8.([33]))
-    host = "jvof"
-    # host = "jvox.vo.nao.ac.jp"
+    # host = "jvof"
+    host = "jvox.vo.nao.ac.jp"
 
     url = "postgresql://" * user
 
@@ -76,7 +76,7 @@ function copy_dataset(datasetid, file_size, path)
     # check if the src file exists
     if !isfile(src)
         println("The source file $(src) does not exist. Skipping.")
-        return
+        return false
     end
 
     # get the src filesize
@@ -84,7 +84,7 @@ function copy_dataset(datasetid, file_size, path)
 
     if src_filesize != file_size
         println("The source file $(src) has a different size than the database. Skipping.")
-        return
+        return false
     end
 
     println("Copying dataset $(datasetid) with size $(round(file_size / 1024^3,digits=1)) GB from $(src) to $(dst)")
@@ -96,7 +96,7 @@ function copy_dataset(datasetid, file_size, path)
 
         if dst_filesize == src_filesize
             println("The destination file $(dst) already exists. Skipping.")
-            return
+            return true
         end
     end
 
@@ -114,6 +114,8 @@ function copy_dataset(datasetid, file_size, path)
             end
         end
     end
+
+    return true
 end
 
 function preload_dataset(datasetid)
@@ -166,7 +168,7 @@ end
 utilisation = 0.70 # 70% of the disk space is used
 compression = 3.5 # 3.5:1 compression ratio (really 3.53)
 cache = 3.7 * 1024 # SSD cache size per node in GB
-nodes = 3  # number of nodes in the cluster
+nodes = 5  # number of nodes in the cluster
 
 conn = connect_db("alma")
 
@@ -200,12 +202,16 @@ for (datasetid, file_size, path) in zip(ids, sizes, paths)
     global count
     local cache_type
 
-    # if count > 10
-    #    break
-    # end
+    if count > 2
+        break
+    end
 
     println("#$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
-    copy_dataset(datasetid, file_size, path)
+
+    if !copy_dataset(datasetid, file_size, path)
+        continue
+    end
+
     preload_dataset(datasetid)
 
     # make HTML link
