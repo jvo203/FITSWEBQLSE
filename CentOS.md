@@ -196,3 +196,9 @@ ulimit -s unlimited
 
     sudo firewall-cmd --list-all
     sudo firewall-cmd --list-ports --zone=public
+
+# 15. Install screen
+
+    sudo dnf install epel-release
+
+    sudo dnf install screen
