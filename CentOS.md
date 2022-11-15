@@ -200,5 +200,7 @@ ulimit -s unlimited
 # 15. Install screen
 
     sudo dnf install epel-release
+    
+    sudo dnf update
 
     sudo dnf install screen
