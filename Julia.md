@@ -42,7 +42,6 @@ julia -O3 -p 4 Julia/fitswebqlse.jl > LOGS/out.log 2>&1
 [fitswebql]
 port=9000 ; optional
 local=false ; optional
-production=false ; optional (true --> 'wss://', false --> 'ws://')
 timeout=15 ; [s] , optional (setting 0 disables a timeout)
 home=.cache ; optional, i.e. /mnt/fits/files
 cache=.cache ; optional, can include two caches: /ssd/cache:/data/cache
