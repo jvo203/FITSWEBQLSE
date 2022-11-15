@@ -202,9 +202,9 @@ for (datasetid, file_size, path) in zip(ids, sizes, paths)
     global count
     local cache_type
 
-    if count > 2
-        break
-    end
+    # if count > 2
+    #    break
+    # end
 
     println("#$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
 
