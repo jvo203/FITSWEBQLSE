@@ -55,4 +55,4 @@ port=5433 ; optional
 home=/home
 
 [zeromq]
-port=50000
+port=50000 ; optional (assumes 50000 by default)
