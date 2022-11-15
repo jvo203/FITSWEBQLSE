@@ -25,10 +25,10 @@ function get_fits_total(conn, threshold)
     # threshold is given in GB
 
     # above the threshold
-    # strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"
+    strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"
 
     # below the threshold but over 20GB
-    strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024.;"
+    # strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024.;"
 
     res = execute(conn, strSQL)
     data = columntable(res)
@@ -41,10 +41,10 @@ function get_datasets(conn, threshold)
     # threshold is given in GB
 
     # above the threshold
-    # strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. order by file_size desc;"
+    strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. order by file_size desc;"
 
     # below the threshold but over 20GB
-    strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024. order by file_size desc;"
+    # strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024. order by file_size desc;"
 
     res = execute(conn, strSQL)
     data = columntable(res)
@@ -53,7 +53,7 @@ function get_datasets(conn, threshold)
 end
 
 function poll_progress(datasetid)
-    strURL = "http://grid80:8080/fitswebql/progress/" * datasetid
+    strURL = "http://grid00:8080/fitswebql/progress/" * datasetid
 
     resp = HTTP.get(strURL)
     # println(resp)
@@ -66,7 +66,7 @@ function poll_progress(datasetid)
 end
 
 function get_dataset_url(datasetid)
-    return "http://grid80:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=" * datasetid
+    return "http://grid00:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=" * datasetid
 end
 
 function copy_dataset(datasetid, file_size, path)
@@ -172,7 +172,7 @@ conn = connect_db("alma")
 
 threshold = 40 # GB
 volume = get_fits_total(conn, threshold)
-println("total volume of datasets < $(threshold) GB: $(volume) GB")
+println("total volume of datasets > $(threshold) GB: $(volume) GB")
 
 required = round(volume / compression / nodes)
 println("required SSD cache space per node: $(required) GB, available: $(cache) GB, $(utilisation*100)% cache utilisation available cache: $(round(cache*utilisation)) GB")
@@ -205,14 +205,14 @@ for (datasetid, file_size, path) in zip(ids, sizes, paths)
     # end
 
     println("#$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
-    # copy_dataset(datasetid, file_size, path)
+    copy_dataset(datasetid, file_size, path)
     preload_dataset(datasetid)
 
     # make HTML link
     link = get_dataset_url(datasetid)
 
     # set cache type
-    if file_size / 1024^3 > threshold
+    if file_size / 1024^3 >= threshold
         cache_type = "SSD"
     else
         cache_type = "HDD"
