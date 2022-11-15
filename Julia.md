@@ -44,8 +44,8 @@ port=9000 ; optional
 local=false ; optional
 production=false ; optional (true --> 'wss://', false --> 'ws://')
 timeout=15 ; [s] , optional (setting 0 disables a timeout)
-home=.cache ; optional
-cache=.cache ; optional
+home=.cache ; optional, i.e. /mnt/fits/files
+cache=.cache ; optional, can include two caches: /ssd/cache:/data/cache
 logs=LOGS ; optional
 
 [postgresql]
@@ -54,3 +54,6 @@ password=??? ; optional
 host=p10.vo.nao.ac.jp
 port=5433 ; optional
 home=/home
+
+[zeromq]
+port=50000
