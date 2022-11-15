@@ -320,11 +320,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             char *datasetId = strrchr(tmp, '/');
 
             if (datasetId != NULL)
-                printf("<range> POST request for '%s': progress = %d, idx = %d\n", datasetId + 1, progress, idx);
-
-            if (datasetId != NULL)
             {
                 datasetId++; // skip the slash character
+
+                printf("<range> POST request for '%s': progress = %d, idx = %d\n", datasetId, progress, idx);
 
                 void *item = get_dataset(datasetId);
 
