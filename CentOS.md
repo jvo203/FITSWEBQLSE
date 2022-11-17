@@ -193,8 +193,8 @@ ulimit -s unlimited
     https://mebee.info/2019/10/17/post-2369/
     
     grid6X:
-    sudo firewall-cmd --add-port={8080,8081,70000}/tcp --zone=public --permanent
-    sudo firewall-cmd --add-port=70000/udp --zone=public --permanent
+    sudo firewall-cmd --add-port={8080,8081,55000}/tcp --zone=public --permanent
+    sudo firewall-cmd --add-port=55000/udp --zone=public --permanent
     sudo firewall-cmd --reload
 
     grid0X & grid8X:
