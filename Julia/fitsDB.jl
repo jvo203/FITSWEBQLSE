@@ -200,10 +200,16 @@ write(html, "<table><tr><th>Index</th><th>Dataset ID</th><th>Size</th><th>Cache 
 
 # first copy then preload (somehow it helps even out glusterfs load balancing)
 for (datasetid, file_size, path) in zip(ids, sizes, paths)
+    global count
+
     println("COPY: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
     copy_dataset(datasetid, file_size, path)
+
+    # increment the index
+    count = count + 1
 end
 
+count = 1
 for (datasetid, file_size, path) in zip(ids, sizes, paths)
     global count
     local cache_type
