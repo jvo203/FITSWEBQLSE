@@ -148,8 +148,8 @@ ulimit -s unlimited
     sudo firewall-cmd --list-all
     sudo firewall-cmd --list-ports --zone=public
 
-# 15. Install screen
+# 15. Install screen & htop
 
     sudo dnf install epel-release
     sudo dnf update
-    sudo dnf install screen
+    sudo dnf install screen htop
