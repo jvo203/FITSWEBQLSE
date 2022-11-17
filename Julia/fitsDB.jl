@@ -198,6 +198,12 @@ write(html, "<h1>Preloaded datasets</h1>\n")
 # append HTML table header
 write(html, "<table><tr><th>Index</th><th>Dataset ID</th><th>Size</th><th>Cache Type</th></tr>\n")
 
+# first copy then preload (somehow it helps even out glusterfs load balancing)
+for (datasetid, file_size, path) in zip(ids, sizes, paths)
+    println("COPY: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
+    copy_dataset(datasetid, file_size, path)
+end
+
 for (datasetid, file_size, path) in zip(ids, sizes, paths)
     global count
     local cache_type
@@ -206,12 +212,12 @@ for (datasetid, file_size, path) in zip(ids, sizes, paths)
     #    break
     # end
 
-    println("#$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
+    println("PRELOAD: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
 
-    if !copy_dataset(datasetid, file_size, path)
-        count = count + 1
-        continue
-    end
+    #if !copy_dataset(datasetid, file_size, path)
+    #    count = count + 1
+    #    continue
+    #end
 
     preload_dataset(datasetid)
 
