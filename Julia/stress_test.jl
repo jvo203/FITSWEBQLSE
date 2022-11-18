@@ -1,6 +1,7 @@
 using HTTP
 using JSON
 using LibPQ, Tables
+using ProgressMeter
 
 function connect_db(db_name)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
@@ -35,6 +36,115 @@ function get_datasets(conn, threshold)
     return data
 end
 
+function get_dataset_url(datasetid)
+    return "http://grid60:8080/fitswebql/FITSWebQL.html?db=alma&table=cube&datasetId=" * datasetid
+end
+
+function copy_dataset(datasetid, file_size, path)
+    src = "/home/alma/" * path
+    dst = "/mnt/fits/files/" * datasetid * ".fits"
+
+    # check if the src file exists
+    if !isfile(src)
+        println("The source file $(src) does not exist. Skipping.")
+        return false
+    end
+
+    # get the src filesize
+    src_filesize = filesize(src)
+
+    if src_filesize != file_size
+        println("The source file $(src) has a different size than the database. Skipping.")
+        return false
+    end
+
+    println("Copying dataset $(datasetid) with size $(round(file_size / 1024^3,digits=1)) GB from $(src) to $(dst)")
+
+    # check if the dst file already exists
+    if isfile(dst)
+        # first check the file size
+        dst_filesize = filesize(dst)
+
+        if dst_filesize == src_filesize
+            println("The destination file $(dst) already exists. Skipping.")
+            return true
+        end
+    end
+
+    # make a 256KB chunk
+    chunk = 256 * 1024
+
+    p = Progress(file_size, 1, "Copying...")   # minimum update interval: 1 second
+
+    # copy the source file in chunks
+    open(src, "r") do src_file
+        open(dst, "w") do dst_file
+            while !eof(src_file)
+                write(dst_file, (read(src_file, chunk)))
+                update!(p, position(src_file))
+            end
+        end
+    end
+
+    return true
+end
+
+function poll_progress(datasetid)
+    strURL = "http://grid60:8080/fitswebql/progress/" * datasetid
+
+    resp = HTTP.get(strURL)
+    # println(resp)
+
+    if resp.status == 200
+        return JSON.parse(String(resp.body))["progress"]
+    else
+        return nothing
+    end
+end
+
+function preload_dataset(datasetid)
+    local progress, strURL
+
+    strURL = get_dataset_url(datasetid)
+
+    # access the FITSWEBQLSE
+    resp = HTTP.get(strURL)
+
+    # check the HTTP response code
+    if resp.status != 200
+        println(resp)
+        return
+    end
+
+    # repeatedly poll for progress
+    while true
+        progress = poll_progress(datasetid)
+
+        if isnothing(progress)
+            println("\nno progress")
+            break
+        end
+        
+        println("datasetid: ", datasetid, ", progress: ", Int(floor(progress)), "%")
+
+        # thow a DomainError if the progress is over 100% (should not happen, I want to catch any logical bugs, network problems, etc.)
+        if progress > 100
+            println("\nanomalous progress detected: $(progress)!")
+            throw(DomainError(progress, "anomalous progress detected"))
+        end
+
+        if progress == 100
+            break
+        else
+            sleep(1)
+        end
+
+    end
+
+    # then wait 30 seconds to allow for the 60s dataset timeout (avoid a RAM overload)
+    # sleep(61) # or not ...
+end
+
 conn = connect_db("alma")
 
 threshold = 21 # GB
@@ -47,6 +157,8 @@ sizes = datasets[:file_size][1:count]
 paths = datasets[:path][1:count]
 
 count = 1
+total_count = length(ids) # number of datasets to preload
+
 for (datasetid, file_size, path) in zip(ids, sizes, paths)
     global count
     local cache_type
@@ -56,9 +168,13 @@ for (datasetid, file_size, path) in zip(ids, sizes, paths)
     #end
 
     println("#$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
-
-    # preload_dataset(datasetid)
+    # copy_dataset(datasetid, file_size, path)
 
     # increment the index
     count = count + 1
 end
+
+jobs = [@async preload_dataset(id) for id in ids]
+wait.(jobs)
+
+close(conn)
