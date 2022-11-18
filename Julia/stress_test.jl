@@ -6,8 +6,8 @@ using ProgressMeter
 function connect_db(db_name)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
     password = user * String(UInt8.([33]))
-    # host = "jvof"
-    host = "jvox.vo.nao.ac.jp"
+    # host = "jvof" # on zodiac
+    host = "jvox.vo.nao.ac.jp" # on the cluster
 
     url = "postgresql://" * user
 
@@ -124,7 +124,7 @@ function preload_dataset(datasetid)
             println("\nno progress")
             break
         end
-        
+
         println("datasetid: ", datasetid, ", progress: ", Int(floor(progress)), "%")
 
         # thow a DomainError if the progress is over 100% (should not happen, I want to catch any logical bugs, network problems, etc.)
@@ -168,7 +168,7 @@ for (datasetid, file_size, path) in zip(ids, sizes, paths)
     #end
 
     println("#$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
-    # copy_dataset(datasetid, file_size, path)
+    copy_dataset(datasetid, file_size, path)
 
     # increment the index
     count = count + 1
