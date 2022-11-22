@@ -28,14 +28,6 @@
 // ZFP floating-point compressor
 #include <zfp.h>
 
-// Mathematica v10 MatrixPlot colourmap
-#define NO_COLOURS 9
-
-// the last colours are duplicated on purpose
-static const float math_r[] = {0.260487, 0.230198, 0.392401, 0.964837, 1.0, 0.95735, 0.913252, 0.860243, 1.0, 1.0};
-static const float math_g[] = {0.356, 0.499962, 0.658762, 0.982332, 1.0, 0.957281, 0.790646, 0.558831, 0.42, 0.42};
-static const float math_b[] = {0.891569, 0.848188, 0.797589, 0.98988, 1.0, 0.896269, 0.462837, 0.00695811, 0.0, 0.0};
-
 // NASA CFITSIO
 #include <fitsio.h>
 
