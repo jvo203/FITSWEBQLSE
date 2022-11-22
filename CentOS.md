@@ -153,3 +153,7 @@ ulimit -s unlimited
     sudo dnf install epel-release
     sudo dnf update
     sudo dnf install screen htop
+
+# 16. Launch the processes in parallel on the development cluster
+
+    ssh grid61 "cd /mnt/fits/chris/FITSWEBQLSE; ./fitswebqlse" &
