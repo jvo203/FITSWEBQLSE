@@ -3304,7 +3304,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
 
         struct mg_mgr mgr; // Event manager
 
-        mg_log_set("3");                                    // Set to 0 to disable debug
+        mg_log_set(MG_LL_DEBUG);                            // Set to 0 to disable debug
         mg_mgr_init(&mgr);                                  // Initialise event manager
         mg_http_connect(&mgr, url->str, progress_fn, &req); // Create client connection
         while (!req.done)
