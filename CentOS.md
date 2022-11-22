@@ -157,4 +157,8 @@ ulimit -s unlimited
 
 # 16. Launch the processes in parallel on the development cluster
 
-    ssh grid61 "cd /mnt/fits/chris/FITSWEBQLSE; ./fitswebqlse" &
+    .bashrc:
+    export I_MPI_PORT_RANGE="30000:30000"
+    
+    # AMD
+    mpiexec -silent-abort -machinefile amd.txt -n 4 ./fitswebqlse
