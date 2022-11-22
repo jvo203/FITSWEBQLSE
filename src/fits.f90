@@ -130,6 +130,23 @@ module fits
 
    end type pv_request_f
 
+
+   type, bind(c) :: pv_request_t
+      type(c_ptr) :: datasetid
+      integer(c_int) :: len
+
+      ! input parameters
+      integer(c_int) :: x1, y1, x2, y2
+      integer(c_int) :: width, height
+      real(c_double) :: frame_start, frame_end, ref_freq, deltaV
+      logical(kind=c_bool) :: rest
+
+      ! output
+      type(c_ptr) :: pv
+      logical(kind=c_bool) :: valid
+
+   end type pv_request_t
+
    type, bind(c) :: video_fetch_f
       ! input
       type(c_ptr) :: datasetid
@@ -7381,6 +7398,11 @@ contains
 
       type(dataset), pointer :: item
       type(pv_request_f), pointer :: req
+
+      ! cluster
+      type(pv_request_t), target :: cluster_req
+      type(c_ptr) :: pid
+      integer(c_int) :: rc
 
       integer :: frame, first, last, length, npoints, i, max_threads
       real :: dx, dy, t, dt
