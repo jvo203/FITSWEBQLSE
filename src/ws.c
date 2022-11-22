@@ -1864,8 +1864,9 @@ void start_ws()
     struct mg_mgr mgr; // Event manager
 
     mg_mgr_init(&mgr); // Initialise event manager
-// mg_log_set("3");
+
 #ifdef DEBUG
+    mg_log_set(MG_LL_DEBUG);
     printf("Starting WS listener on %s\n", url);
 #endif
 
