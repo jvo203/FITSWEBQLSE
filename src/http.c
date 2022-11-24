@@ -4847,6 +4847,14 @@ void *fetch_inner_dimensions(void *ptr)
     pthread_exit(NULL);
 }
 
+void *fetch_pv_diagram(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    pthread_exit(NULL);
+}
+
 void *fetch_realtime_image_spectrum(void *ptr)
 {
     if (ptr == NULL)
