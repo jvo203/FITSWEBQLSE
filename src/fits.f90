@@ -7666,6 +7666,7 @@ contains
 
       ! free the P-V diagram
       deallocate (pv)
+      deallocate(cluster_pv)
 
       ! free the pixels but only if they were allocated
       if (allocated_pixels) then
