@@ -179,6 +179,31 @@ struct video_req
     void *ptr;
 };
 
+struct http_pv_diagram_request
+{
+    char *datasetid;
+    int len;
+
+    // inputs
+    // input
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    int width;
+    int height;
+    double frame_start;
+    double frame_end;
+    double ref_freq;
+    double deltaV;
+    bool rest;
+
+    // output
+    float *pv;
+    int npoints;
+    bool valid;
+};
+
 struct http_image_spectrum_request
 {
     char *datasetid;

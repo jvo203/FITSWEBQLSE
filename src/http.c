@@ -4852,6 +4852,26 @@ void *fetch_pv_diagram(void *ptr)
     if (ptr == NULL)
         pthread_exit(NULL);
 
+    struct http_pv_diagram_request *req = (struct http_pv_diagram_request *)ptr;
+    printf("[C] calling fetch_pv_diagram across the cluster for '%.*s'\n", req->len, req->datasetid);
+
+    int i;
+    GSList *iterator = NULL;
+
+    g_mutex_lock(&cluster_mtx);
+
+    int handle_count = g_slist_length(cluster);
+
+    if (handle_count == 0)
+    {
+        printf("[C] aborting fetch_realtime_image_spectrum (no cluster nodes found)\n");
+
+        g_mutex_unlock(&cluster_mtx);
+        pthread_exit(NULL);
+    };
+
+    g_mutex_unlock(&cluster_mtx);
+
     pthread_exit(NULL);
 }
 
