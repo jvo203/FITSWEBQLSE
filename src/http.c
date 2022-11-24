@@ -4864,7 +4864,7 @@ void *fetch_pv_diagram(void *ptr)
 
     if (handle_count == 0)
     {
-        printf("[C] aborting fetch_realtime_image_spectrum (no cluster nodes found)\n");
+        printf("[C] aborting fetch_pv_diagram (no cluster nodes found)\n");
 
         g_mutex_unlock(&cluster_mtx);
         pthread_exit(NULL);
