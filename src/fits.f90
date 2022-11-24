@@ -577,6 +577,13 @@ module fits
          type(c_ptr), intent(in), value :: arg   ! a pointer to type(image_spectrum_request_t)
       end subroutine fetch_realtime_image_spectrum
 
+      recursive subroutine fetch_pv_diagram(arg) BIND(C)
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), intent(in), value :: arg   ! a pointer to type(pv_request_t)
+      end subroutine fetch_pv_diagram
+
       subroutine fetch_channel_range(root, datasetid, len, start, end, status,&
       &frame_min, frame_max, frame_median,&
       &mean_spectrum, integrated_spectrum) BIND(C, name='fetch_channel_range')
@@ -7539,6 +7546,10 @@ contains
       cluster_req%npoints = npoints
       cluster_req%valid = .false.
 
+      ! launch a thread
+      pid = my_pthread_create(start_routine=c_funloc(fetch_pv_diagram), arg=c_loc(cluster_req), rc=rc)
+      ! end of cluster
+
       ! start the timer
       t1 = omp_get_wtime()
 
@@ -7604,6 +7615,16 @@ contains
 
       ! end the timer
       t2 = omp_get_wtime()
+
+      ! join a thread
+      rc = my_pthread_join(pid)
+
+      print *, 'cluster_req%valid:', cluster_req%valid
+      ! merge the cluster results
+      if (cluster_req%valid) then
+         print *, 'merging the cluster results'         
+         pv(:, :) = pv(:, :) + cluster_pv(:, :)
+      end if
 
       print *, 'processed #points:', i, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
 
