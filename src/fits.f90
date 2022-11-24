@@ -137,12 +137,12 @@ module fits
 
       ! input parameters
       integer(c_int) :: x1, y1, x2, y2
-      integer(c_int) :: width, height
       real(c_double) :: frame_start, frame_end, ref_freq, deltaV
       logical(kind=c_bool) :: rest
 
       ! output
       type(c_ptr) :: pv
+      integer(c_int) :: npoints ! for cross-check (an array dimensions consistency check)
       logical(kind=c_bool) :: valid
 
    end type pv_request_t
@@ -7420,7 +7420,7 @@ contains
 
       type(list_t), pointer :: ll => null()
       type(list_t), pointer :: cursor => null()
-      real(kind=c_float), allocatable, target :: pv(:, :)
+      real(kind=c_float), allocatable, target :: pv(:, :), cluster_pv(:, :)
       integer(kind=8) :: npixels
       real(kind=c_float) :: pmin, pmax, pmean, pstd
       real(kind=8) :: f, v1, v2
@@ -7453,27 +7453,6 @@ contains
          call free(user) ! release C memory
          return
       end if
-
-      ! launch a cluster thread (check if the number of cluster nodes is .gt. 0)
-      cluster_req%datasetid = c_loc(item%datasetid)
-      cluster_req%len = size(item%datasetid)
-
-      ! inputs
-      cluster_req%x1 = req%x1
-      cluster_req%y1 = req%y1
-      cluster_req%x2 = req%x2
-      cluster_req%y2 = req%y2
-      cluster_req%width = req%width
-      cluster_req%height = req%height
-      cluster_req%frame_start = req%frame_start
-      cluster_req%frame_end = req%frame_end
-      cluster_req%ref_freq = req%ref_freq
-      cluster_req%deltaV = req%deltaV
-      cluster_req%rest = req%rest
-
-      ! outputs
-      cluster_req%pv = c_null_ptr
-      cluster_req%valid = .false.
 
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
@@ -7536,11 +7515,35 @@ contains
       allocate (pv(npoints, first:last))
       pv = 0.0
 
-      prev_x = 0
-      prev_y = 0
+      ! allocate the cluster pv array
+      allocate (cluster_pv(npoints, first:last))
+      cluster_pv = 0.0
+
+      ! launch a cluster thread (check if the number of cluster nodes is .gt. 0)
+      cluster_req%datasetid = c_loc(item%datasetid)
+      cluster_req%len = size(item%datasetid)
+
+      ! inputs
+      cluster_req%x1 = req%x1
+      cluster_req%y1 = req%y1
+      cluster_req%x2 = req%x2
+      cluster_req%y2 = req%y2      
+      cluster_req%frame_start = req%frame_start
+      cluster_req%frame_end = req%frame_end
+      cluster_req%ref_freq = req%ref_freq
+      cluster_req%deltaV = req%deltaV
+      cluster_req%rest = req%rest
+
+      ! outputs
+      cluster_req%pv = c_loc(cluster_pv)
+      cluster_req%npoints = npoints
+      cluster_req%valid = .false.
 
       ! start the timer
       t1 = omp_get_wtime()
+
+      prev_x = 0
+      prev_y = 0
 
       ! start with a head node
       i = 0
