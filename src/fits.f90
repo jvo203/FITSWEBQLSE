@@ -7618,12 +7618,13 @@ contains
 
       ! join a thread
       rc = my_pthread_join(pid)
-
-      print *, 'cluster_req%valid:', cluster_req%valid
+      
       ! merge the cluster results
       if (cluster_req%valid) then
-         print *, 'merging the cluster results'         
+         print *, 'merging the cluster P-V diagram'
          pv(:, :) = pv(:, :) + cluster_pv(:, :)
+      else
+         print *, 'P-V diagram cluster_req%valid:', cluster_req%valid
       end if
 
       print *, 'processed #points:', i, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
