@@ -138,6 +138,7 @@ void *fetch_video_frame(void *ptr);
 void *fetch_global_statistics(void *ptr);
 void *fetch_image(void *ptr);
 void *fetch_realtime_image_spectrum(void *ptr);
+void *fetch_pv_diagram(void *ptr);
 int submit_progress(char *root, char *datasetid, int len, int progress);
 
 PGconn *jvo_db_connect(char *db);
