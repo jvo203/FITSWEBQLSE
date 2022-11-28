@@ -7530,10 +7530,10 @@ contains
       cluster_req%len = size(item%datasetid)
 
       ! inputs
-      cluster_req%x1 = req%x1
-      cluster_req%y1 = req%y1
-      cluster_req%x2 = req%x2
-      cluster_req%y2 = req%y2
+      cluster_req%x1 = x1
+      cluster_req%y1 = y1
+      cluster_req%x2 = x2
+      cluster_req%y2 = y2
       cluster_req%first = first
       cluster_req%last = last
 
