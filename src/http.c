@@ -4870,7 +4870,68 @@ void *fetch_pv_diagram(void *ptr)
         pthread_exit(NULL);
     };
 
+    CURL *handles[handle_count];
+    struct MemoryStruct chunks[handle_count];
+    CURLM *multi_handle;
+
+    int still_running = 1; /* keep number of running handles */
+
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
+    int msgs_left; /* how many messages are left */
+
+    /* Allocate one CURL handle per transfer */
+    for (i = 0; i < handle_count; i++)
+    {
+        handles[i] = curl_easy_init();
+
+        chunks[i].memory = malloc(1);
+        chunks[i].size = 0;
+        chunks[i].memory[0] = 0;
+    }
+
+    /* init a multi stack */
+    multi_handle = curl_multi_init();
+
+    // html-encode the datasetid
+    char datasetid[2 * req->len];
+    size_t len = html_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+
+    for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
+    {
+        GString *url = g_string_new("http://");
+        g_string_append_printf(url, "%s:", (char *)iterator->data);
+        g_string_append_printf(url, "%" PRIu16 "/pv/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&first=%d&last=%d", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->first, req->last);
+        printf("[C] URL: '%s'\n", url->str);
+
+        // set the individual URL
+        curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
+
+        /* send all data to this function  */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+        /* we pass our 'chunk' struct to the callback function */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEDATA, (void *)&(chunks[i]));
+
+        // add the individual transfer
+        curl_multi_add_handle(multi_handle, handles[i]);
+
+        g_string_free(url, TRUE);
+
+        // move on to the next cluster node
+        i++;
+    }
+
     g_mutex_unlock(&cluster_mtx);
+
+    /* remove the transfers and cleanup the handles */
+    for (i = 0; i < handle_count; i++)
+    {
+        curl_multi_remove_handle(multi_handle, handles[i]);
+        curl_easy_cleanup(handles[i]);
+        free(chunks[i].memory);
+    }
+
+    curl_multi_cleanup(multi_handle);
 
     pthread_exit(NULL);
 }
