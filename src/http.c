@@ -4900,7 +4900,7 @@ void *fetch_pv_diagram(void *ptr)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/pv/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&first=%d&last=%d", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->first, req->last);
+        g_string_append_printf(url, "%" PRIu16 "/pv/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&first=%d&last=%d&npoints=%d", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->first, req->last, req->npoints);
         printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
