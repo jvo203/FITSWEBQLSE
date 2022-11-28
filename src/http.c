@@ -4958,15 +4958,21 @@ void *fetch_pv_diagram(void *ptr)
             // reduce (gather) the PV Diagrams
             if (response_code == 200 && chunks[idx].size > 0)
             {
-                printf("[C] fetch_pv received %zu bytes.\n", chunks[idx].size);
+                // printf("[C] fetch_pv received %zu bytes.\n", chunks[idx].size);
 
                 size_t npixels = req->npoints * (req->last - req->first + 1);
 
-                const float *restrict pv = (float *)&(chunks[idx].memory[0]);
+                // cross-check the size of the received data with the expected size
+                if (npixels == chunks[idx].size / sizeof(float))
+                {
+                    printf("[C] /pv/<diagram>::OK.\n");
 
-                for (size_t i = 0; i < npixels; i++)
-                    req->pv[i] += pv[i];
-                req->valid = true;
+                    const float *restrict pv = (float *)&(chunks[idx].memory[0]);
+                    for (size_t i = 0; i < npixels; i++)
+                        req->pv[i] += pv[i];
+
+                    req->valid = true;
+                }
             }
         }
     }
