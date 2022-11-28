@@ -190,13 +190,8 @@ struct http_pv_diagram_request
     int y1;
     int x2;
     int y2;
-    int width;
-    int height;
-    double frame_start;
-    double frame_end;
-    double ref_freq;
-    double deltaV;
-    bool rest;
+    int first;
+    int last;
 
     // output
     float *pv;
