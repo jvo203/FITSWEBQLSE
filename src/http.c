@@ -4923,6 +4923,54 @@ void *fetch_pv_diagram(void *ptr)
 
     g_mutex_unlock(&cluster_mtx);
 
+    /* Wait for the transfers */
+    while (still_running)
+    {
+        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+        if (still_running)
+            /* wait for activity, timeout or "nothing" */
+            mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+        if (mc)
+            break;
+    }
+
+    /* See how the transfers went */
+    while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
+    {
+        if (msg->msg == CURLMSG_DONE)
+        {
+            int idx;
+            /* Find out which handle this message is about */
+            for (idx = 0; idx < handle_count; idx++)
+            {
+                int found = (msg->easy_handle == handles[idx]);
+                if (found)
+                    break;
+            }
+
+            long response_code = 0;
+            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+            printf("[C] HTTP transfer #%d completed; cURL status %d, HTTP code %ld.\n", idx + 1, msg->data.result, response_code);
+
+            // reduce (gather) the PV Diagrams
+            if (response_code == 200 && chunks[idx].size > 0)
+            {
+                printf("[C] fetch_pv received %zu bytes.\n", chunks[idx].size);
+
+                size_t npixels = req->npoints * (req->last - req->first + 1);
+
+                const float *restrict pv = (float *)&(chunks[idx].memory[0]);
+
+                for (size_t i = 0; i < npixels; i++)
+                    req->pv[i] += pv[i];
+                req->valid = true;
+            }
+        }
+    }
+
     /* remove the transfers and cleanup the handles */
     for (i = 0; i < handle_count; i++)
     {
