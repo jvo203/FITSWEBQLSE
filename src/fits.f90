@@ -137,8 +137,7 @@ module fits
 
       ! input parameters
       integer(c_int) :: x1, y1, x2, y2
-      real(c_double) :: frame_start, frame_end, ref_freq, deltaV
-      logical(kind=c_bool) :: rest
+      integer(c_int) :: first, last
 
       ! output
       type(c_ptr) :: pv
@@ -7534,12 +7533,9 @@ contains
       cluster_req%x1 = req%x1
       cluster_req%y1 = req%y1
       cluster_req%x2 = req%x2
-      cluster_req%y2 = req%y2      
-      cluster_req%frame_start = req%frame_start
-      cluster_req%frame_end = req%frame_end
-      cluster_req%ref_freq = req%ref_freq
-      cluster_req%deltaV = req%deltaV
-      cluster_req%rest = req%rest
+      cluster_req%y2 = req%y2
+      cluster_req%first = first
+      cluster_req%last = last
 
       ! outputs
       cluster_req%pv = c_loc(cluster_pv)
@@ -7618,7 +7614,7 @@ contains
 
       ! join a thread
       rc = my_pthread_join(pid)
-      
+
       ! merge the cluster results
       if (cluster_req%valid) then
          print *, 'merging the cluster P-V diagram'
