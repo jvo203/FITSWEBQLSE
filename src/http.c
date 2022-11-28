@@ -1632,6 +1632,11 @@ static enum MHD_Result on_http_connection(void *cls,
         return ret;
     }
 
+    if (strstr(url, "/pv/") != NULL)
+    {
+        return http_not_implemented(connection);
+    }
+
     if (strstr(url, "/image/") != NULL)
     {
         int width, height;
