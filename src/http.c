@@ -1634,6 +1634,66 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/pv/") != NULL)
     {
+        int x1, y1, x2, y2, first, last, npoints;
+
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
+        char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+        char *x1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x1");
+
+        if (x1str == NULL)
+            return http_bad_request(connection);
+        else
+            x1 = atoi(x1str);
+
+        char *y1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "y1");
+
+        if (y1str == NULL)
+            return http_bad_request(connection);
+        else
+            y1 = atoi(y1str);
+
+        char *x2str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x2");
+
+        if (x2str == NULL)
+            return http_bad_request(connection);
+        else
+            x2 = atoi(x2str);
+
+        char *y2str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "y2");
+
+        if (y2str == NULL)
+            return http_bad_request(connection);
+        else
+            y2 = atoi(y2str);
+
+        char *firststr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "first");
+
+        if (firststr == NULL)
+            return http_bad_request(connection);
+        else
+            first = atoi(firststr);
+
+        char *laststr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "last");
+
+        if (laststr == NULL)
+            return http_bad_request(connection);
+        else
+            last = atoi(laststr);
+
+        char *npointsstr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "npoints");
+
+        if (npointsstr == NULL)
+            return http_bad_request(connection);
+        else
+            npoints = atoi(npointsstr);
+
         return http_not_implemented(connection);
     }
 
