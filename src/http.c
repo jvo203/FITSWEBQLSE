@@ -1640,7 +1640,10 @@ static enum MHD_Result on_http_connection(void *cls,
         int pipefd[2];
         pthread_t tid;
 
-        char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+            datasetId++; // skip the slash character
 
         if (datasetId == NULL)
             return http_bad_request(connection);
@@ -1693,6 +1696,18 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
         else
             npoints = atoi(npointsstr);
+
+        // do we have a dataset?
+        void *item = get_dataset(datasetId);
+
+        if (item == NULL)
+            return http_not_found(connection);
+
+        if (get_error_status(item))
+            return http_internal_server_error(connection);
+
+        if (!get_image_status(item))
+            return http_internal_server_error(connection);
 
         return http_not_implemented(connection);
     }
