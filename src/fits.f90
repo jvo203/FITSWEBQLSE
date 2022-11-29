@@ -6808,7 +6808,19 @@ contains
       type(cluster_pv_request_f), pointer :: req
 
       integer(c_int) :: x1, x2, y1, y2
-      integer :: first, last, length
+      integer :: first, last, length, npoints, i, max_threads
+      real :: dx, dy, t, dt
+
+      integer :: prev_x, prev_y, cur_x, cur_y
+      integer, dimension(2) :: pos, prev_pos
+      integer, dimension(:), pointer :: ptr
+      real(kind=8) :: cdelt3
+
+      ! a decompression cache
+      real(kind=4), allocatable :: x(:, :, :)
+
+      ! the maximum exponent
+      integer :: max_exp
 
       ! timing
       real(kind=8) :: t1, t2
@@ -6827,7 +6839,7 @@ contains
 
       print *, 'cluster P-V diagram for ', item%datasetid,&
       &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
-      &', first:', req%first, ', last:', req%last, ', npoints:', req%npoints', fd:', req%fd
+      &', first:', req%first, ', last:', req%last, ', npoints:', req%npoints, ', fd:', req%fd
 
       if (.not. allocated(item%compressed)) then
          if (req%fd .ne. -1) call close_pipe(req%fd)
