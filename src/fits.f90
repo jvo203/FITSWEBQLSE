@@ -131,6 +131,19 @@ module fits
    end type pv_request_f
 
 
+   type, bind(c) :: cluster_pv_request_f
+      ! input
+      integer(c_int) :: x1, y1, x2, y2, first, last
+      integer(c_int) :: npoints
+
+      ! output
+      integer(kind=c_int) :: fd
+
+      type(C_PTR) :: ptr
+
+   end type cluster_pv_request_f
+
+
    type, bind(c) :: pv_request_t
       type(c_ptr) :: datasetid
       integer(c_int) :: len
@@ -6783,6 +6796,95 @@ contains
       return
 
    end subroutine viewport_request
+
+   recursive subroutine cluster_pv_request(user) BIND(C, name='cluster_pv_request')
+      use omp_lib
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(cluster_pv_request_f), pointer :: req
+
+      integer(c_int) :: x1, x2, y1, y2
+      integer :: first, last, length
+
+      ! timing
+      real(kind=8) :: t1, t2
+
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) then
+         call close_pipe(req%fd)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+         return
+      else
+         call c_f_pointer(req%ptr, item)
+      end if
+
+      print *, 'cluster P-V diagram for ', item%datasetid,&
+      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
+      &', first:', req%first, ', last:', req%last, ', npoints:', req%npoints', fd:', req%fd
+
+      if (.not. allocated(item%compressed)) then
+         if (req%fd .ne. -1) call close_pipe(req%fd)
+         nullify (item)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+         return
+      end if
+
+      first = req%first
+      last = req%last
+      length = last - first + 1
+
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      call get_cdelt3(item, cdelt3)
+
+      ! allocate the decompression cache
+      allocate (x(1:DIM, 1:DIM, first:last))
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+
+      ! sanity checks
+      x1 = max(min(req%x1, item%naxes(1)), 1)
+      y1 = max(min(req%y1, item%naxes(2)), 1)
+      x2 = max(min(req%x2, item%naxes(1)), 1)
+      y2 = max(min(req%y2, item%naxes(2)), 1)
+
+      print *, 'x1:', x1, 'y1:', y1, 'x2:', x2, 'y2:', y2
+
+      dx = abs(x2 - x1 + 1)
+      dy = abs(y2 - y1 + 1)
+      dt = 1.0/sqrt(dx**2 + dy**2)/100.0 ! sample the line with a fine granularity
+
+      print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
+
+      ! (...)
+
+      ! free the decompression cache
+      deallocate (x)
+
+      if (req%fd .ne. -1) then
+         ! send the P-V diagram  via a Unix pipe
+         ! call write_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
+         ! & 1, npoints, v1, v2)
+
+         call close_pipe(req%fd)
+         req%fd = -1
+      end if
+
+      nullify (item)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+
+      return
+   end subroutine cluster_pv_request
 
    recursive subroutine download_request(user) BIND(C, name='download_request')
       use, intrinsic :: iso_c_binding
