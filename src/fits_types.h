@@ -131,3 +131,20 @@ struct pv_request
 
     void *ptr;
 };
+
+struct cluster_pv_request
+{
+    // input
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    int first;
+    int last;
+    int npoints;
+
+    // output (the 'write' end of a Unix pipe)
+    int fd;
+
+    void *ptr;
+};
