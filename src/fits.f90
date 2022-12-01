@@ -6887,6 +6887,8 @@ contains
       ! walk through the points along the line
       npoints = 0
       t = 0.0
+      prev_x = 0
+      prev_y = 0
       prev_pos = 0
 
       do while (t .le. 1.0)
@@ -6896,7 +6898,11 @@ contains
             prev_pos = pos
             npoints = npoints + 1
             ! print *, 'npoints', npoints, 'pos:', pos
+
             if (npoints .gt. req%npoints) exit ! we have more than enough points
+
+            cur_x = 1 + (pos(1) - 1)/DIM
+            cur_y = 1 + (pos(2) - 1)/DIM
          end if
 
          t = t + dt
