@@ -6823,8 +6823,7 @@ contains
       integer :: max_exp
 
       real(kind=c_float), allocatable, target :: pv(:, :)
-      integer(kind=c_int) :: ios
-      integer(kind=c_size_t) :: array_size
+      integer(kind=c_size_t) :: array_size, written
 
       ! timing
       real(kind=8) :: t1, t2
@@ -6954,7 +6953,7 @@ contains
          ! & 1, npoints, v1, v2)
 
          array_size = int(sizeof(pv), kind=c_size_t)
-         ios = write_chunked(req%fd, c_loc(pv), array_size)
+         written = chunked_write(req%fd, c_loc(pv), array_size)
 
          call close_pipe(req%fd)
          req%fd = -1
