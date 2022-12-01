@@ -6886,12 +6886,12 @@ contains
 
       ! walk through the points along the line
       npoints = 0
-      t = 0.0
+      t = 1.0 ! the cluster version starts at the end of the line
       prev_x = 0
       prev_y = 0
       prev_pos = 0
 
-      do while (t .le. 1.0)
+      do while (t .ge. 0.0)
          pos = line(t, x1, y1, x2, y2)
 
          if (.not. all(pos .eq. prev_pos)) then
@@ -6936,7 +6936,7 @@ contains
             end do
          end if
 
-         t = t + dt
+         t = t - dt ! reversed line traversing order (from 1 to 0)
       end do
 
       if (npoints .ne. req%npoints) then
