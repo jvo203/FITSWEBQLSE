@@ -6896,6 +6896,7 @@ contains
             prev_pos = pos
             npoints = npoints + 1
             ! print *, 'npoints', npoints, 'pos:', pos
+            if (npoints .gt. req%npoints) exit ! we have more than enough points
          end if
 
          t = t + dt
