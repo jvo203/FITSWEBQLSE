@@ -6822,6 +6822,8 @@ contains
       ! the maximum exponent
       integer :: max_exp
 
+      real(kind=c_float), allocatable, target :: pv(:, :)
+
       ! timing
       real(kind=8) :: t1, t2
 
@@ -6860,6 +6862,11 @@ contains
       ! allocate the decompression cache
       allocate (x(1:DIM, 1:DIM, first:last))
 
+      ! there will be at least one point
+      ! allocate the pv array using an appropriate astronomical orientation convention
+      allocate (pv(req%npoints, first:last))
+      pv = 0.0
+
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
 
@@ -6877,7 +6884,26 @@ contains
 
       print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
 
-      ! (...)
+      ! walk through the points along the line
+      npoints = 0
+      t = 0.0
+      prev_pos = 0
+
+      do while (t .le. 1.0)
+         pos = line(t, x1, y1, x2, y2)
+
+         if (.not. all(pos .eq. prev_pos)) then
+            prev_pos = pos
+            npoints = npoints + 1
+            ! print *, 'npoints', npoints, 'pos:', pos
+         end if
+
+         t = t + dt
+      end do
+
+      if (npoints .ne. req%npoints) then
+         print *, 'NPOINTS MISMATCH!!! npoints:', npoints, 'req%npoints:', req%npoints
+      end if
 
       ! free the decompression cache
       deallocate (x)
