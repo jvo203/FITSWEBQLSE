@@ -6905,7 +6905,7 @@ contains
             cur_y = 1 + (pos(2) - 1)/DIM
 
             if (cur_x .ne. prev_x .or. cur_y .ne. prev_y) then
-               ! print *, '[cluster_] decompressing a fixed block @ cur_x:', cur_x, 'cur_y:', cur_y
+               print *, '[cluster_] decompressing a fixed block @ cur_x:', cur_x, 'cur_y:', cur_y
                prev_x = cur_x
                prev_y = cur_y
 
@@ -7753,7 +7753,7 @@ contains
          cur_y = 1 + (pos(2) - 1)/DIM
 
          if (cur_x .ne. prev_x .or. cur_y .ne. prev_y) then
-            ! print *, '[ws_] decompressing a fixed block @ cur_x:', cur_x, 'cur_y:', cur_y
+            print *, '[ws_] decompressing a fixed block @ cur_x:', cur_x, 'cur_y:', cur_y
             prev_x = cur_x
             prev_y = cur_y
 
