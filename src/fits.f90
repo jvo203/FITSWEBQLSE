@@ -6823,6 +6823,8 @@ contains
       integer :: max_exp
 
       real(kind=c_float), allocatable, target :: pv(:, :)
+      integer(kind=c_int) :: ios
+      integer(kind=c_size_t) :: array_size
 
       ! timing
       real(kind=8) :: t1, t2
@@ -6950,6 +6952,9 @@ contains
          ! send the P-V diagram  via a Unix pipe
          ! call write_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
          ! & 1, npoints, v1, v2)
+
+         array_size = int(sizeof(pv), kind=c_size_t)
+         ios = write_chunked(req%fd, c_loc(pv), array_size)
 
          call close_pipe(req%fd)
          req%fd = -1
