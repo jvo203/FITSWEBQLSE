@@ -6808,7 +6808,7 @@ contains
       type(cluster_pv_request_f), pointer :: req
 
       integer(c_int) :: x1, x2, y1, y2
-      integer :: first, last, length, npoints, i, max_threads
+      integer :: frame, first, last, length, npoints, max_threads
       real :: dx, dy, t, dt
 
       integer :: prev_x, prev_y, cur_x, cur_y
@@ -6903,6 +6903,37 @@ contains
 
             cur_x = 1 + (pos(1) - 1)/DIM
             cur_y = 1 + (pos(2) - 1)/DIM
+
+            if (cur_x .ne. prev_x .or. cur_y .ne. prev_y) then
+               ! print *, '[cluster_] decompressing a fixed block @ cur_x:', cur_x, 'cur_y:', cur_y
+               prev_x = cur_x
+               prev_y = cur_y
+
+               ! decompress fixed blocks in parallel
+               !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+               !$omp& PRIVATE(frame, max_exp)&
+               !$omp& NUM_THREADS(max_threads)
+               !$omp DO
+               do frame = first, last
+                  ! skip frames for which there is no data on this node
+                  if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+                  max_exp = int(item%compressed(frame)%ptr(cur_x, cur_y)%common_exp)
+                  x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame)%ptr(cur_x, cur_y)%mantissa,&
+                  & max_exp, significant_bits)
+               end do
+               !$omp END DO
+               !$omp END PARALLEL
+            end if
+
+            ! get the spectrum for each frame
+            do frame = first, last
+               ! skip frames for which there is no data on this node
+               if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+               ! this faster implementation uses a decompression cache
+               pv(npoints, frame) = x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)*cdelt3
+            end do
          end if
 
          t = t + dt
@@ -7722,7 +7753,7 @@ contains
          cur_y = 1 + (pos(2) - 1)/DIM
 
          if (cur_x .ne. prev_x .or. cur_y .ne. prev_y) then
-            ! print *, 'decompressing a fixed block @ cur_x:', cur_x, 'cur_y:', cur_y
+            ! print *, '[ws_] decompressing a fixed block @ cur_x:', cur_x, 'cur_y:', cur_y
             prev_x = cur_x
             prev_y = cur_y
 
