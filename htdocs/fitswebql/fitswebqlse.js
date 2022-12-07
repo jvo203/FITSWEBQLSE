@@ -1,5 +1,5 @@
 function get_js_version() {
-  return "JS2022-12-06.0";
+  return "JS2022-12-07.0";
 }
 
 function uuidv4() {
@@ -11259,7 +11259,7 @@ function setup_image_selection() {
             d3.select("#pvmid").attr("x1", _x1).attr("y1", _y1).attr("x2", _x2).attr("y2", _y2);
           }
 
-          // return; // disabled to test zoom-in for the P-V line end point 
+          return; // disabled to test zoom-in for the P-V line end point           
         }
 
         if (d3.select("#pvline").attr("opacity") > 0.0 && mouse_click_end) {
