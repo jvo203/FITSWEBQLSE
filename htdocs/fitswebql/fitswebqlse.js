@@ -9728,8 +9728,10 @@ function pv_event(event) {
     line_x = offset[0];
     line_y = offset[1];
 
+    // disabled in order to show the viewport circle and the zoom cross
     /*d3.select("#zoom").attr("opacity", 0.0);
     d3.select("#zoomCross").attr("opacity", 0.0);*/
+
     d3.select(this).style('cursor', 'crosshair');
 
     d3.select("#pixel").text("").attr("opacity", 0.0);
