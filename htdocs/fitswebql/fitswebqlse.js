@@ -1,5 +1,5 @@
 function get_js_version() {
-  return "JS2022-12-07.0";
+  return "JS2022-12-08.0";
 }
 
 function uuidv4() {
@@ -9264,6 +9264,16 @@ function swap_viewports() {
 }
 
 function pv_event(event) {
+  // console.log("pv_event");
+
+  let fitsData = fitsContainer[va_count - 1];
+
+  if (fitsData != null) {
+    if (fitsData.depth == 1) {
+      console.log("P-V Diagram not available for 2D data");
+      return;
+    }
+  }
 
   try {
     mouse_click_end = !mouse_click_end;
@@ -9718,8 +9728,8 @@ function pv_event(event) {
     line_x = offset[0];
     line_y = offset[1];
 
-    d3.select("#zoom").attr("opacity", 0.0);
-    d3.select("#zoomCross").attr("opacity", 0.0);
+    /*d3.select("#zoom").attr("opacity", 0.0);
+    d3.select("#zoomCross").attr("opacity", 0.0);*/
     d3.select(this).style('cursor', 'crosshair');
 
     d3.select("#pixel").text("").attr("opacity", 0.0);
@@ -9951,6 +9961,8 @@ function fits_subregion_drag(event) {
 }
 
 function fits_subregion_end(event) {
+  console.log("fits_subregion_end");
+
   if (freqdrag) return;
   if (optical_view) return;
 
@@ -9960,8 +9972,8 @@ function fits_subregion_end(event) {
 
   // console.log("fits_subregion_end", offset);
 
-  /*mousedown = false;
-  d3.select("#zoom").attr("opacity", 1.0);*/
+  mousedown = false;
+  d3.select("#zoom").attr("opacity", 1.0);
   d3.select("#region").attr("opacity", 0.0);
 
   if (!fits_subregion_drag_event) {
@@ -11259,7 +11271,7 @@ function setup_image_selection() {
             d3.select("#pvmid").attr("x1", _x1).attr("y1", _y1).attr("x2", _x2).attr("y2", _y2);
           }
 
-          return; // disabled to test zoom-in for the P-V line end point           
+          // return; // disabled to test zoom-in for the P-V line end point           
         }
 
         if (d3.select("#pvline").attr("opacity") > 0.0 && mouse_click_end) {
