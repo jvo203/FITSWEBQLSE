@@ -549,10 +549,10 @@ function getStrokeStyle() {
 }
 
 function plot_spectrum(dataArray) {
-  try {
+  /*try {
     if (d3.select("#pvline").attr("opacity") > 0.0)
       return;
-  } catch (e) { };
+  } catch (e) { };*/
 
   if (mousedown)
     return;
