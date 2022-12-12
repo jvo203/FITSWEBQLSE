@@ -1820,6 +1820,9 @@ function clear_webgl_image_buffers(index) {
   // cancel the animation loop
   var image = imageContainer[index - 1];
 
+  if (image.first)
+    return;
+
   cancelAnimationFrame(image.loopId);
 
   var gl = image.gl;
@@ -2025,9 +2028,13 @@ function webgl_image_renderer(index, gl, width, height) {
 
   var last_image_loop = 0;
   image.refresh = true;
+  image.first = true;
 
   // shoud be done in an animation loop
   function image_rendering_loop() {
+    // set a flag
+    image.first = false;
+
     let now = performance.now();
 
     // limit the FPS
@@ -11212,6 +11219,9 @@ function setup_image_selection() {
       init_webgl_image_buffers(va_count);
     })
     .on("mousemove", (event) => {
+      // cancel the image animation loop
+      clear_webgl_image_buffers(va_count);
+
       if (!autoscale && event.shiftKey) {
         d3.select("#scaling")
           .style('cursor', 'ns-resize')
