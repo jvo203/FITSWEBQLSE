@@ -1,5 +1,5 @@
 function get_js_version() {
-  return "JS2022-12-08.0";
+  return "JS2022-12-12.0";
 }
 
 function uuidv4() {
@@ -9968,8 +9968,6 @@ function fits_subregion_drag(event) {
 }
 
 function fits_subregion_end(event) {
-  console.log("fits_subregion_end");
-
   if (freqdrag) return;
   if (optical_view) return;
 
