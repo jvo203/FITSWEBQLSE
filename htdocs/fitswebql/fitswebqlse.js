@@ -1,5 +1,5 @@
 function get_js_version() {
-  return "JS2022-12-12.0";
+  return "JS2022-12-12.1";
 }
 
 function uuidv4() {
@@ -9370,6 +9370,9 @@ function pv_event(event) {
         .style("width", 200)
         .style("height", 200);
 
+      d3.select("#zoom").attr("opacity", 0.0);
+      d3.select("#zoomCross").attr("opacity", 0.0);
+
       const res = submit_pv_line(va_count, x1, y1, x2, y2);
       console.log(res);
 
@@ -14206,6 +14209,10 @@ function show_welcome() {
       .attr("class", "list-group-item list-group-item-success")
       .html("<h4>Server powered by Julia (distributed computing &amp; networking)</h4>");
   };
+
+  ul.append("li")
+    .attr("class", "list-group-item list-group-item-success")
+    .html('<h4>Realtime Position-Velocity Diagram</h4>');
 
   ul.append("li")
     .attr("class", "list-group-item list-group-item-success")
