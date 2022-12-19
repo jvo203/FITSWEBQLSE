@@ -7578,6 +7578,7 @@ contains
    recursive subroutine ws_pv_request(user) BIND(C, name='ws_pv_request')
       use omp_lib
       use :: unix_pthread
+      use contour
       use list
       use, intrinsic :: iso_c_binding
       implicit none
