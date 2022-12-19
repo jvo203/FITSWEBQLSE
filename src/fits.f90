@@ -7894,6 +7894,7 @@ contains
       print *, "zc:", zc
 
       ! contour the P-V diagram
+      call conrec(pixels,ilb,iub,jlb,jub,xc,yc,nc,zc)
 
       ! end the timer
       t2 = omp_get_wtime()
