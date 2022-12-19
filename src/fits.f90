@@ -7894,7 +7894,7 @@ contains
       call list_init(contours)
 
       ! contour the P-V diagram
-      call conrec(pixels,ilb,iub,jlb,jub,xc,yc,nc,zc)
+      call conrec(pixels,ilb,iub,jlb,jub,xc,yc,nc,zc,contours)
 
       ! end the timer
       t2 = omp_get_wtime()

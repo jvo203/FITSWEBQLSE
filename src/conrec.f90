@@ -18,21 +18,23 @@ contains
 !     Any number of contour levels may be specified but they must be
 !     in order of increasing value.
 
-!     subroutine conrec(d,ilb,iub,jlb,jub,x,y,nc,z)
+!     subroutine conrec(d,ilb,iub,jlb,jub,x,y,nc,z,contours)
 !     real*4 d(ilb:iub,jlb:jub)  ! matrix of data to contour
 !     integer ilb,iub,jlb,jub    ! index bounds of data matrix
 !     real*4 x(ilb:iub)          ! data matrix column coordinates
 !     real*4 y(jlb,jub)          ! data matrix row coordinates
 !     integer nc                 ! number of contour levels
 !     real*4 z(1:nc)             ! contour levels in increasing order
+!     real*4 contours(1:nc,1:4)  ! output list of contour coordinates
 
-   subroutine conrec(d,ilb,iub,jlb,jub,x,y,nc,z)
+   subroutine conrec(d,ilb,iub,jlb,jub,x,y,nc,z,contours)
       real(kind=4) d(ilb:iub,jlb:jub)
       integer ilb,iub,jlb,jub
       real(kind=4) x(ilb:iub)
       real(kind=4) y(jlb:jub)
       integer nc
       real(kind=4) z(1:nc)
+      type(list_t), pointer :: contours
 !
 !     Local declarations
 !
