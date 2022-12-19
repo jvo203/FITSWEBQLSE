@@ -7878,11 +7878,11 @@ contains
       allocate(zc(1:nc))
 
       do i = ilb, iub
-         xc(i) = 1 +real(img_width-1)*real(i - ilb)/real(iub - ilb)
+         xc(i) = 0 + real(img_width-1)*real(i - ilb)/real(iub - ilb) ! was 1 +
       end do
 
       do i = jlb, jub
-         yc(i) = 1 + real(img_height-1)*real(i - jlb)/real(jub - jlb)
+         yc(i) = 0 + real(img_height-1)*real(i - jlb)/real(jub - jlb) ! was 1 +
       end do
 
       do i = 1, nc
