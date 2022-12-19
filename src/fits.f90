@@ -7855,7 +7855,7 @@ contains
       ! end the timer
       t2 = omp_get_wtime()
 
-      print *, 'P-V ERF  min:', pmin, 'max:', pmax, 'mean:', pmean, 'std:', pstd, 'elapsed time: ', 1000*(t2 - t1), '[ms]'
+      print *, 'P-V ERF  min:', pmin, 'max:', pmax, 'mean:', pmean, 'std:', pstd, 'elapsed time:', 1000*(t2 - t1), '[ms]'
 
       ! free the decompression cache
       deallocate (x)
@@ -7897,6 +7897,8 @@ contains
 
       ! end the timer
       t2 = omp_get_wtime()
+
+      print *, 'P-V CONREC NC:', nc, 'elapsed time:', 1000*(t2 - t1), '[ms]'
 
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
