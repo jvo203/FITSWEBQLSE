@@ -7583,6 +7583,9 @@ contains
       use, intrinsic :: iso_c_binding
       implicit none
 
+      ! contouring
+      integer, parameter :: no_contours = 5
+
       type(C_PTR), intent(in), value :: user
 
       type(dataset), pointer :: item
