@@ -221,7 +221,7 @@ contains
       ! call toolbx(MOVETO,nint(x1),nint(y1))
       ! call toolbx(LINETO,nint(x2),nint(y2))
 
-      print *, 'x1,y1,x2,y2,z = ', x1,y1,x2,y2,z
+      ! print *, 'x1,y1,x2,y2,z = ', x1,y1,x2,y2,z
 !
 !***** To here
 !
