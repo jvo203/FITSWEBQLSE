@@ -7856,6 +7856,15 @@ contains
       nullify (cursor)
       call list_free(ll)
 
+      ! start the timer
+      t1 = omp_get_wtime()
+
+      ! contour the P-V diagram
+      ! assume 5 levels
+
+      ! end the timer
+      t2 = omp_get_wtime()
+
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
          call write_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
