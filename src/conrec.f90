@@ -1,5 +1,7 @@
 module contour
    ! implicit none
+   use list
+
    private
    public :: conrec
 

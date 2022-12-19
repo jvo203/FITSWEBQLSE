@@ -7586,10 +7586,8 @@ contains
       ! contouring
       integer, parameter :: nc = 10
       integer ilb,iub,jlb,jub    ! index bounds of data matrix
-      ! real(kind=4) xc(ilb:iub)          ! data matrix column coordinates
-      ! real(kind=4) yc(jlb,jub)          ! data matrix row coordinates
-      ! real(kind=4) zc(1:nc)             ! contour levels in increasing order
       real(kind=4), allocatable, dimension(:) :: xc, yc, zc
+      type(list_t), pointer :: contours => null() ! contour lines
 
       type(C_PTR), intent(in), value :: user
 
@@ -7893,6 +7891,8 @@ contains
       print *, "yc:", yc(jlb), yc(jub)
       print *, "zc:", zc
 
+      call list_init(contours)
+
       ! contour the P-V diagram
       call conrec(pixels,ilb,iub,jlb,jub,xc,yc,nc,zc)
 
@@ -7909,6 +7909,9 @@ contains
          call close_pipe(req%fd)
          req%fd = -1
       end if
+
+      ! free the contours
+      call list_free(contours)
 
       ! free the P-V diagram
       deallocate (pv)
