@@ -7584,7 +7584,12 @@ contains
       implicit none
 
       ! contouring
-      integer, parameter :: no_contours = 5
+      integer, parameter :: nc = 5
+      integer ilb,iub,jlb,jub    ! index bounds of data matrix
+      ! real(kind=4) xc(ilb:iub)          ! data matrix column coordinates
+      ! real(kind=4) yc(jlb,jub)          ! data matrix row coordinates
+      ! real(kind=4) zc(1:nc)             ! contour levels in increasing order
+      real(kind=4), allocatable, dimension(:) :: xc, yc, zc
 
       type(C_PTR), intent(in), value :: user
 
