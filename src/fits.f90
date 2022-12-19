@@ -7877,6 +7877,22 @@ contains
       allocate(yc(jlb:jub))
       allocate(zc(1:nc))
 
+      do i = ilb, iub
+         xc(i) = ilb + real(i - ilb)/real(iub - ilb)
+      end do
+
+      do i = jlb, jub
+         yc(i) = jlb + real(i - jlb)/real(jub - jlb)
+      end do
+
+      do i = 1, nc
+         zc(i) = -1.0 + real(i - 1)/real(nc - 1)
+      end do
+
+      print *, "xc:", xc(ilb), xc(iub)
+      print *, "yc:", yc(jlb), yc(jub)
+      print *, "zc:", zc
+
       ! contour the P-V diagram
 
       ! end the timer
