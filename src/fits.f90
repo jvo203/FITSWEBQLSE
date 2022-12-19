@@ -7867,8 +7867,17 @@ contains
       ! start the timer
       t1 = omp_get_wtime()
 
+      ! get pixels array lower and upper bounds into ilb, iub, jlb, jub
+      ilb = lbound(pixels, 1)
+      iub = ubound(pixels, 1)
+      jlb = lbound(pixels, 2)
+      jub = ubound(pixels, 2)
+
+      allocate(xc(ilb:iub))
+      allocate(yc(jlb:jub))
+      allocate(zc(1:nc))
+
       ! contour the P-V diagram
-      ! assume 5 levels
 
       ! end the timer
       t2 = omp_get_wtime()
