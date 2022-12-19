@@ -7584,7 +7584,7 @@ contains
       implicit none
 
       ! contouring
-      integer, parameter :: nc = 5
+      integer, parameter :: nc = 10
       integer ilb,iub,jlb,jub    ! index bounds of data matrix
       ! real(kind=4) xc(ilb:iub)          ! data matrix column coordinates
       ! real(kind=4) yc(jlb,jub)          ! data matrix row coordinates
@@ -7886,7 +7886,7 @@ contains
       end do
 
       do i = 1, nc
-         zc(i) = -1.0 + real(i - 1)/real(nc - 1)
+         zc(i) = -1.0 + 2.0 * real(i - 1)/real(nc - 1)
       end do
 
       print *, "xc:", xc(ilb), xc(iub)
