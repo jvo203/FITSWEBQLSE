@@ -7,9 +7,9 @@
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
 
-#define SERVER_STRING                                                \
-  "FITSWEBQLSE v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR( \
-      VERSION_SUB)
+#define SERVER_STRING                                                  \
+    "FITSWEBQLSE v" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR( \
+        VERSION_SUB)
 
 #define WASM_VERSION "22.12.12.0"
-#define VERSION_STRING "F/SV2022-12-19.0-BETA"
+#define VERSION_STRING "F/SV2022-12-20.0-BETA"
