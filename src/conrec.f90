@@ -37,6 +37,8 @@ contains
         real(kind=4) z(1:nc)
         type(list_t), pointer :: contours
         integer :: line_count, lines(:, :)
+        integer :: pos(5)
+
         !
         !     Local declarations
         !
@@ -204,6 +206,7 @@ contains
                                         goto 40
 40                                      line_count = line_count + 1
                                         ! lines(1:5, line_count) = (/nint(x1), nint(y1), nint(x2), nint(y2), k/)
+                                        pos = (/nint(x1), nint(y1), nint(x2), nint(y2), k/)
                                         call vecout(x1, y1, x2, y2, k, contours) ! was z(k)
                                     end if
 60                                  continue
