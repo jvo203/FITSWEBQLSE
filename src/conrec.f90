@@ -238,14 +238,14 @@ contains
                                         ! print *, 'x1,y1,x2,y2,z = ', x1,y1,x2,y2,z
 
                                         ! fill-in the contour vector
-                                        pos(1) = nint(x1)
-                                        pos(2) = nint(y1)
-                                        pos(3) = nint(x2)
-                                        pos(4) = nint(y2)
-                                        pos(5) = z
+                                        ! pos(1) = nint(x1)
+                                        ! pos(2) = nint(y1)
+                                        ! pos(3) = nint(x2)
+                                        ! pos(4) = nint(y2)
+                                        ! pos(5) = z
 
                                         ! append the line to the list
-                                        call list_insert(contours, pos)
+                                        ! call list_insert(contours, pos)
                                         !
                                         !***** To here
                                         !
