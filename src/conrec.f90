@@ -197,7 +197,7 @@ contains
                                         x2 = xsect(m1, m2)
                                         y2 = ysect(m1, m2)
                                         goto 40
-40                                      call vecout(x1, y1, x2, y2, z(k))
+40                                      call vecout(x1, y1, x2, y2, k, contours) ! was z(k)
                                     end if
 60                                  continue
                                     end if
@@ -208,9 +208,12 @@ contains
                                     return
                                 end
 
-                                subroutine vecout(x1, y1, x2, y2, z)
+                                subroutine vecout(x1, y1, x2, y2, z, contours)
                                     implicit none
-                                    real(kind=4) x1, y1, x2, y2, z
+                                    real(kind=4) x1, y1, x2, y2
+                                    integer z
+                                    type(list_t), pointer :: contours
+                                    integer :: pos(5)
 !
 !***** Replace from here
 !
@@ -226,7 +229,16 @@ contains
                                     ! call toolbx(LINETO,nint(x2),nint(y2))
 
                                     ! print *, 'x1,y1,x2,y2,z = ', x1,y1,x2,y2,z
-                                    ! call list_insert(ll, pos)
+
+                                    ! fill-in the contour vector
+                                    pos(1) = nint(x1)
+                                    pos(2) = nint(y1)
+                                    pos(3) = nint(x2)
+                                    pos(4) = nint(y2)
+                                    pos(5) = z
+
+                                    ! append the line to the list
+                                    call list_insert(contours, pos)
 !
 !***** To here
 !
