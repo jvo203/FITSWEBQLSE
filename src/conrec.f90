@@ -36,7 +36,7 @@ contains
         integer nc
         real(kind=4) z(1:nc)
         type(list_t), pointer :: contours
-        integer :: line_count, lines(:, :)
+        integer :: line_count, lines(5, (iub - ilb + 1)*(jub - jlb + 1))
         integer :: pos(5)
 
         !
