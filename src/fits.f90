@@ -7587,6 +7587,7 @@ contains
         real(kind=4), allocatable, dimension(:) :: xc, yc, zc
         type(list_t), pointer :: contours => null() ! contour lines
         integer, allocatable :: lines(:, :) ! contour lines
+        integer :: line_count
 
         type(C_PTR), intent(in), value :: user
 
@@ -7892,15 +7893,14 @@ contains
 
         call list_init(contours)
         allocate (lines(5, img_width*img_height)) ! assume the worst-case scenario
-        lines = 0
 
         ! contour the P-V diagram
-        call conrec(pixels, ilb, iub, jlb, jub, xc, yc, nc, zc, contours, lines)
+        line_count = conrec(pixels, ilb, iub, jlb, jub, xc, yc, nc, zc, contours, lines)
 
         ! end the timer
         t2 = omp_get_wtime()
 
-        print *, 'P-V CONREC NC:', nc, 'elapsed time:', 1000*(t2 - t1), '[ms]'
+        print *, 'P-V CONREC NC:', nc, '#LINES:', line_count, 'elapsed time:', 1000*(t2 - t1), '[ms]'
 
         if (req%fd .ne. -1) then
             ! send the P-V diagram  via a Unix pipe
