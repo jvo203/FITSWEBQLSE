@@ -18,7 +18,7 @@ contains
 !     Any number of contour levels may be specified but they must be
 !     in order of increasing value.
 
-!     subroutine conrec(d,ilb,iub,jlb,jub,x,y,nc,z,contours)
+!     subroutine conrec(d,ilb,iub,jlb,jub,x,y,nc,z,contours,lines)
 !     real*4 d(ilb:iub,jlb:jub)  ! matrix of data to contour
 !     integer ilb,iub,jlb,jub    ! index bounds of data matrix
 !     real*4 x(ilb:iub)          ! data matrix column coordinates
@@ -26,8 +26,9 @@ contains
 !     integer nc                 ! number of contour levels
 !     real*4 z(1:nc)             ! contour levels in increasing order
 !     real*4 contours(1:nc,1:4)  ! output list of contour coordinates
+!     real*4 contours(1:nc,1:4)  ! output vector of contour coordinates
 
-    subroutine conrec(d, ilb, iub, jlb, jub, x, y, nc, z, contours)
+    function conrec(d, ilb, iub, jlb, jub, x, y, nc, z, contours, lines) result(line_count)
         real(kind=4) d(ilb:iub, jlb:jub)
         integer ilb, iub, jlb, jub
         real(kind=4) x(ilb:iub)
@@ -35,6 +36,7 @@ contains
         integer nc
         real(kind=4) z(1:nc)
         type(list_t), pointer :: contours
+        integer :: line_count, lines(:, :)
 !
 !     Local declarations
 !
@@ -61,6 +63,9 @@ contains
 !
 !     Scan the arrays, top down, left to right within rows
 !
+
+        line_count = 0
+
 20      do 100 j = jub - 1, jlb, -1
             do 90 i = ilb, iub - 1
                 dmin = min(d(i, j), d(i, j + 1), d(i + 1, j), d(i + 1, j + 1))
@@ -198,6 +203,8 @@ contains
                                         y2 = ysect(m1, m2)
                                         goto 40
 40                                      call vecout(x1, y1, x2, y2, k, contours) ! was z(k)
+                                        line_count = line_count + 1
+                                        lines(1:5, line_count) = (/nint(x1), nint(y1), nint(x2), nint(y2), k/)
                                     end if
 60                                  continue
                                     end if
@@ -206,42 +213,42 @@ contains
 90                                  continue
 100                                 continue
                                     return
-                                end
+                                    end function conrec
 
-                                subroutine vecout(x1, y1, x2, y2, z, contours)
-                                    implicit none
-                                    real(kind=4) x1, y1, x2, y2
-                                    integer z
-                                    type(list_t), pointer :: contours
-                                    integer :: pos(5)
-!
-!***** Replace from here
-!
-!     The following should be ignored since it is specific to
-!     the version of FORTRAN running on the Macintosh microcomputer
-!     on which this particular example was written.
-!
-                                    ! INTEGER LINETO
-                                    ! PARAMETER (LINETO=Z'89109000')
-                                    ! INTEGER MOVETO
-                                    ! PARAMETER (MOVETO=Z'89309000')
-                                    ! call toolbx(MOVETO,nint(x1),nint(y1))
-                                    ! call toolbx(LINETO,nint(x2),nint(y2))
+                                    subroutine vecout(x1, y1, x2, y2, z, contours)
+                                        implicit none
+                                        real(kind=4) x1, y1, x2, y2
+                                        integer z
+                                        type(list_t), pointer :: contours
+                                        integer :: pos(5)
+                                        !
+                                        !***** Replace from here
+                                        !
+                                        !     The following should be ignored since it is specific to
+                                        !     the version of FORTRAN running on the Macintosh microcomputer
+                                        !     on which this particular example was written.
+                                        !
+                                        ! INTEGER LINETO
+                                        ! PARAMETER (LINETO=Z'89109000')
+                                        ! INTEGER MOVETO
+                                        ! PARAMETER (MOVETO=Z'89309000')
+                                        ! call toolbx(MOVETO,nint(x1),nint(y1))
+                                        ! call toolbx(LINETO,nint(x2),nint(y2))
 
-                                    ! print *, 'x1,y1,x2,y2,z = ', x1,y1,x2,y2,z
+                                        ! print *, 'x1,y1,x2,y2,z = ', x1,y1,x2,y2,z
 
-                                    ! fill-in the contour vector
-                                    pos(1) = nint(x1)
-                                    pos(2) = nint(y1)
-                                    pos(3) = nint(x2)
-                                    pos(4) = nint(y2)
-                                    pos(5) = z
+                                        ! fill-in the contour vector
+                                        pos(1) = nint(x1)
+                                        pos(2) = nint(y1)
+                                        pos(3) = nint(x2)
+                                        pos(4) = nint(y2)
+                                        pos(5) = z
 
-                                    ! append the line to the list
-                                    call list_insert(contours, pos)
-!
-!***** To here
-!
-                                    return
-                                end
-                                end module contour
+                                        ! append the line to the list
+                                        call list_insert(contours, pos)
+                                        !
+                                        !***** To here
+                                        !
+                                        return
+                                    end
+                                    end module contour
