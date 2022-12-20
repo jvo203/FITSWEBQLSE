@@ -7582,7 +7582,7 @@ contains
         implicit none
 
         ! contouring
-        integer, parameter :: nc = 10
+        integer, parameter :: nc = 7
         integer ilb, iub, jlb, jub    ! index bounds of data matrix
         real(kind=4), allocatable, dimension(:) :: xc, yc, zc
         type(list_t), pointer :: contours => null() ! contour lines
@@ -7892,7 +7892,11 @@ contains
         print *, "zc:", zc
 
         call list_init(contours)
-        allocate (lines(5, img_width*img_height)) ! assume the worst-case scenario
+        allocate (lines(5, 10*img_width*img_height)) ! assume the worst-case scenario
+        ! print lines bounds
+        print *, 'lines bounds:', lbound(lines, 1), ubound(lines, 1), lbound(lines, 2), ubound(lines, 2)
+        ! print lines dimensions
+        print *, 'lines dimensions:', size(lines, 1), size(lines, 2)
 
         ! contour the P-V diagram
         line_count = conrec(pixels, ilb, iub, jlb, jub, xc, yc, nc, zc, contours, lines)
