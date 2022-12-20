@@ -36,8 +36,7 @@ contains
         integer nc
         real(kind=4) z(1:nc)
         type(list_t), pointer :: contours
-        integer :: line_count, lines(5, (iub - ilb + 1)*(jub - jlb + 1))
-        integer :: pos(5)
+        integer, intent(out) :: lines(5, (iub - ilb + 1)*(jub - jlb + 1))
 
         !
         !     Local declarations
@@ -49,6 +48,7 @@ contains
         integer case
         integer castab(-1:1, -1:1, -1:1)
         integer p1, p2
+        integer :: line_count, pos(5)
         !
         !     Data
         !
@@ -205,9 +205,9 @@ contains
                                         y2 = ysect(m1, m2)
                                         goto 40
 40                                      line_count = line_count + 1
-                                        ! lines(1:5, line_count) = (/nint(x1), nint(y1), nint(x2), nint(y2), k/)
                                         pos = (/nint(x1), nint(y1), nint(x2), nint(y2), k/)
-                                        call vecout(x1, y1, x2, y2, k, contours) ! was z(k)
+                                        lines(1:5, line_count) = pos(1:5)
+                                        ! call vecout(x1, y1, x2, y2, k, contours) ! was z(k)
                                     end if
 60                                  continue
                                     end if
