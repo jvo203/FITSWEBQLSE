@@ -13247,6 +13247,36 @@ function partial_fits_size() {
 
 function pv_contour(pvCanvas) {
     console.log("calling pv_contour with canvas: ", pvCanvas);
+
+    var data = [];
+    let min_value = 255;
+    let max_value = 0;
+    let imageData = pvCanvas.getContext('2d').getImageData(0, 0, pvCanvas.width, pvCanvas.height).data;
+
+    for (var h = pvCanvas.height - 1; h >= 0; h--) {
+        var row = [];
+        var pixel = 4 * (h * pvCanvas.width);
+
+        for (var w = 0; w < pvCanvas.width; w++) {
+            var r = imageData[pixel];
+            var g = imageData[pixel + 1];
+            var b = imageData[pixel + 2];
+            var z = (r + g + b) / 3;
+            pixel += 4;
+
+            if (z < min_value)
+                min_value = z;
+
+            if (z > max_value)
+                max_value = z;
+
+            row.push(z);
+        }
+
+        data.push(row);
+    }
+
+    console.log("min_value = ", min_value, " max_value = ", max_value);
 }
 
 function send_pv_request(index, x1, y1, x2, y2) {
