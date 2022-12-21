@@ -13311,8 +13311,8 @@ function pv_contour(pvCanvas) {
                 .range([height, 1])
                 .domain([0, data.length - 1]);*/
 
-            /*d3.select("#ContourSVG").append("svg")
-                .attr("id", "contourPlot")
+            /*d3.select("#PVContourSVG").append("svg")
+                .attr("id", "PVContourPlot")
                 .attr("x", elem.attr("x"))
                 .attr("y", elem.attr("y"))
                 .attr("width", width)
