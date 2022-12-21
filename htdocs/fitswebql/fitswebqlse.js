@@ -13286,9 +13286,10 @@ function pv_contour(pvCanvas) {
 
     console.log("min_value = ", min_value, " max_value = ", max_value);
 
-    var contours = parseInt(document.getElementById('contour_lines').value) + 1;
-    var step = (max_value - min_value) / contours;
-    var zs = d3.range(min_value + step, max_value, step);
+    // var contours = parseInt(document.getElementById('contour_lines').value) + 1;
+    var contours = 3;
+    var step = (max_value - min_value) / (contours + 0);
+    var zs = d3.range(min_value, max_value + 0.1 * step, step);
     console.log("zs:", zs);
 
     var completed_levels = 0;
@@ -13307,19 +13308,21 @@ function pv_contour(pvCanvas) {
             isoBands.push({ "coords": e.data, "level": i, "val": zs[i] });
 
             //plot the isoBands
-            /*var elem = d3.select("#image_rectangle");
+            var elem = d3.select("#PVContourSVG");
             var width = parseFloat(elem.attr("width"));
             var height = parseFloat(elem.attr("height"));
 
+            console.log("PVContourSVG width = ", width, " height = ", height);
+
             var x = d3.scaleLinear()
-                .range([0, width - 1])
+                .range([width - 1, 0]) // flip the x-axis
                 .domain([0, data[0].length - 1]);
 
             var y = d3.scaleLinear()
                 .range([height, 1])
-                .domain([0, data.length - 1]);*/
+                .domain([0, data.length - 1]);
 
-            /*d3.select("#PVContourSVG").append("svg")
+            d3.select("#PVContourSVG").append("svg")
                 .attr("id", "PVContourPlot")
                 .attr("x", elem.attr("x"))
                 .attr("y", elem.attr("y"))
@@ -13341,7 +13344,7 @@ function pv_contour(pvCanvas) {
                         )(aa) + "Z";
                     });
                     return p;
-                });*/
+                });
 
             if (completed_levels == zs.length - 1)
                 console.log("completed_levels = ", completed_levels, " zs.length = ", zs.length)
