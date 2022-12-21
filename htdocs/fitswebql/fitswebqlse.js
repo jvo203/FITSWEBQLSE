@@ -13277,6 +13277,72 @@ function pv_contour(pvCanvas) {
     }
 
     console.log("min_value = ", min_value, " max_value = ", max_value);
+
+    var contours = parseInt(document.getElementById('contour_lines').value) + 1;
+    var step = (max_value - min_value) / contours;
+    var zs = d3.range(min_value + step, max_value, step);
+    console.log("zs:", zs);
+
+    var completed_levels = 0;
+    //parallel isoBands    
+    for (var i = 1; i < zs.length; i++) {
+        var lowerBand = zs[i - 1];
+        var upperBand = zs[i];
+
+        var CRWORKER = new Worker('contour_worker.js' + '?' + encodeURIComponent(get_js_version()));
+
+        CRWORKER.addEventListener('message', function (e) {
+            //console.log('Worker said: ', e.data);
+            completed_levels++;
+
+            var isoBands = [];
+            isoBands.push({ "coords": e.data, "level": i, "val": zs[i] });
+
+            //plot the isoBands
+            /*var elem = d3.select("#image_rectangle");
+            var width = parseFloat(elem.attr("width"));
+            var height = parseFloat(elem.attr("height"));
+
+            var x = d3.scaleLinear()
+                .range([0, width - 1])
+                .domain([0, data[0].length - 1]);
+
+            var y = d3.scaleLinear()
+                .range([height, 1])
+                .domain([0, data.length - 1]);*/
+
+            /*d3.select("#ContourSVG").append("svg")
+                .attr("id", "contourPlot")
+                .attr("x", elem.attr("x"))
+                .attr("y", elem.attr("y"))
+                .attr("width", width)
+                .attr("height", height)
+                .selectAll("path")
+                .data(isoBands)
+                .enter().append("path")
+                .style("fill", "none")
+                .style("stroke", "black")
+                .attr("opacity", 0.5)
+                .attr("d", function (d) {
+                    var p = "";
+                    d.coords.forEach(function (aa, i) {
+                        p += (d3.line()
+                            .x(function (dat) { return x(dat[0]); })
+                            .y(function (dat) { return ((height - 1) - y(dat[1])); })
+                            .curve(d3.curveLinear)
+                        )(aa) + "Z";
+                    });
+                    return p;
+                });*/
+
+            if (completed_levels == zs.length - 1)
+                console.log("completed_levels = ", completed_levels, " zs.length = ", zs.length)
+        }, false);
+
+        //CRWORKER.postMessage('Hello World'); // Send data to our worker.    
+        CRWORKER.postMessage({ data: data, level: i, lowerBand: lowerBand, upperBand: upperBand });
+        //CRWORKER.postMessage({'cmd':'do some work'}) ;    
+    };
 }
 
 function send_pv_request(index, x1, y1, x2, y2) {
