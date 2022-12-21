@@ -13245,8 +13245,8 @@ function partial_fits_size() {
     return roundUp(partial_size, 2880);
 }
 
-function pv_contour(canvas) {
-    console.log("calling pv_contour with canvas: ", canvas);
+function pv_contour(pvCanvas) {
+    console.log("calling pv_contour with canvas: ", pvCanvas);
 }
 
 function send_pv_request(index, x1, y1, x2, y2) {
