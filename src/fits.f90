@@ -7893,13 +7893,15 @@ contains
 
       call list_init(contours)
       allocate (lines(5, 10*img_width*img_height)) ! assume the worst-case scenario
+      line_count = 0
+
       ! print lines bounds
       print *, 'lines bounds:', lbound(lines, 1), ubound(lines, 1), lbound(lines, 2), ubound(lines, 2)
       ! print lines dimensions
       print *, 'lines dimensions:', size(lines, 1), size(lines, 2)
 
       ! contour the P-V diagram
-      line_count = conrec(pixels, ilb, iub, jlb, jub, xc, yc, nc, zc, contours, lines)
+      ! line_count = conrec(pixels, ilb, iub, jlb, jub, xc, yc, nc, zc, contours, lines)
 
       ! end the timer
       t2 = omp_get_wtime()
