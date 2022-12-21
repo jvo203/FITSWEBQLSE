@@ -849,6 +849,7 @@ function erfinv(x) {
 }
 
 function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd) {
+    d3.select("#PVContourSVG").remove();
     d3.select("#PVSVGX").remove();
     d3.select("#PVSVGY").remove();
     d3.select("#PVLABELSVG").remove();
@@ -862,6 +863,16 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     let svg_height = height;
 
     var div = d3.select("#PVDiagram");
+
+    if (document.getElementById('PVContourSVG') === null) {
+        // console.log("pv_axes: PVContourSVG is null, creating a new one.");
+
+        div.append("svg")
+            .attr("id", "PVContourSVG")
+            .attr("width", svg_width)
+            .attr("height", svg_height)
+            .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
+    }
 
     if (document.getElementById('PVSVGX') === null) {
         // console.log("pv_axes: PVSVGX is null, creating a new one.");
@@ -3636,14 +3647,6 @@ function open_websocket_connection(_datasetId, index) {
                             pvCanvas.height = pv_height;
                             context.putImageData(pvData, 0, 0);
 
-                            /*var pvImage = new Image();
-                            pvImage.src = pvCanvas.toDataURL();*/
-                            window.clearTimeout(idlePV);
-                            idlePV = window.setTimeout(function () {
-                                pv_contour(pvCanvas);
-                            }, 250);
-
-
                             //place the image onto the PV canvas
                             var c = document.getElementById('PVCanvas');
                             var dst_width = c.width / 2;
@@ -3688,6 +3691,11 @@ function open_websocket_connection(_datasetId, index) {
                             ctx.restore();
 
                             pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd);
+
+                            window.clearTimeout(idlePV);
+                            idlePV = window.setTimeout(function () {
+                                pv_contour(pvCanvas);
+                            }, 250);
                         }
 
                         return;
