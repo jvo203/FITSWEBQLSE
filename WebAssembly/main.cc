@@ -552,7 +552,7 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     }
 
     // CONREC variables
-    const int nc = 5;
+    const int nc = 4; // was 5
     float xc[img_height];
     float yc[img_width];
     float zc[nc];
@@ -568,11 +568,16 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     for (int i = 0; i < img_width; i++)
         yc[i] = i;
 
-    zc[0] = 0.0f;
+    /*zc[0] = 0.0f;
     zc[1] = 0.25f;
     zc[2] = 0.5f;
     zc[3] = 0.75f;
-    zc[4] = 1.0f;
+    zc[4] = 1.0f;*/
+
+    zc[0] = 0.0f;
+    zc[1] = 0.1f;
+    zc[2] = 0.9f;
+    zc[3] = 1.0f;
 
     free(pixels);
 

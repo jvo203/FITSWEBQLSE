@@ -50,6 +50,36 @@ void set_pixel(unsigned char *buffer, int width, int height, int x, int y, unsig
     buffer[index + 3] = a;
 }
 
+// downloaded from: https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
+void line(unsigned char *buffer, int width, int height, int x0, int y0, int x1, int y1, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+{
+
+    int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+    int dy = abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+    int err = (dx > dy ? dx : -dy) / 2, e2;
+
+    for (;;)
+    {
+        // setPixel(x0, y0);
+        set_pixel(buffer, width, height, x0, y0, r, g, b, a);
+        if (x0 == x1 && y0 == y1)
+            break;
+        e2 = err;
+        if (e2 > -dx)
+        {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dy)
+        {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
+// this is a simple line drawing algorithm that draws a line between two points
+// downloaded from https://joshbeam.com/articles/simple_line_drawing/
 void draw_line(unsigned char *buffer, int width, int height, float x1, float y1, float x2, float y2, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
     float xdiff = (x2 - x1);
@@ -118,6 +148,8 @@ void draw_line(unsigned char *buffer, int width, int height, float x1, float y1,
     }
 }
 
+// this version of CONREC results in somewhat spurious lines !!!
+// try nncntr.c instead ...
 //=============================================================================
 //
 //     CONREC is a contouring subroutine for rectangularily spaced data.
@@ -357,8 +389,10 @@ int conrec(float **d,
                                 line_count++;
                                 // printf("%f %f %f %f %f\n", x1, y1, x2, y2, z[k]);
                                 // printf("%f %f %f %f %d\n", x1, y1, x2, y2, k);
-                                set_pixel(canvas, img_width, img_height, roundf(x1), roundf(y1), 255, 204, 0, 255);
-                                set_pixel(canvas, img_width, img_height, roundf(x2), roundf(y2), 255, 204, 0, 255);
+                                /*set_pixel(canvas, img_width, img_height, roundf(x1), roundf(y1), 255, 204, 0, 255);
+                                set_pixel(canvas, img_width, img_height, roundf(x2), roundf(y2), 255, 204, 0, 255);*/
+                                // draw_line(canvas, img_width, img_height, x1, y1, x2, y2, 255, 204, 0, 255);
+                                line(canvas, img_width, img_height, roundf(x1), roundf(y1), round(x2), round(y2), 255, 204, 0, 255);
                             }
                         }
                     }
