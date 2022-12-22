@@ -13332,8 +13332,8 @@ function pv_contour(pvCanvas) {
                 .data(isoBands)
                 .enter().append("path")
                 .style("fill", "none")
-                .style("stroke", "black")
-                .attr("opacity", 0.5)
+                .style("stroke", "rgb(255,204,0)") // was "black"                
+                .attr("opacity", 0.8) // or black with 0.25
                 .attr("d", function (d) {
                     var p = "";
                     d.coords.forEach(function (aa, i) {
