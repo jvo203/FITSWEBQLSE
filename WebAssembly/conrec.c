@@ -90,6 +90,7 @@ int conrec(float **d,
             {{0, 0, 8}, {0, 2, 5}, {7, 6, 9}},
             {{0, 3, 4}, {1, 3, 1}, {4, 3, 0}},
             {{9, 6, 7}, {5, 2, 0}, {8, 0, 0}}};
+    int line_count = 0;
     for (j = (jub - 1); j >= jlb; j--)
     {
         for (i = ilb; i <= iub - 1; i++)
@@ -268,7 +269,9 @@ int conrec(float **d,
                                 //=============================================================
                                 // Put your processing code here and comment out the printf
                                 //=============================================================
-                                printf("%f %f %f %f %f\n", x1, y1, x2, y2, z[k]);
+                                line_count++;
+                                // printf("%f %f %f %f %f\n", x1, y1, x2, y2, z[k]);
+                                // printf("%f %f %f %f %d\n", x1, y1, x2, y2, k);
                             }
                         }
                     }
@@ -276,5 +279,6 @@ int conrec(float **d,
             }
         }
     }
+    printf("CONREC #lines: %d\n", line_count);
     return 0;
 }
