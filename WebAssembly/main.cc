@@ -520,6 +520,32 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
         memcpy(d[i], pixels + i * img_width, img_width * sizeof(float));
     }
 
+    // CONREC variables
+    const int nc = 5;
+    float xc[img_width];
+    float yc[img_height];
+    float zc[nc];
+
+    const int ilb = 0;
+    const int iub = img_width - 1;
+    const int jlb = 0;
+    const int jub = img_height - 1;
+
+    for (int i = 0; i < img_width; i++)
+        xc[i] = i;
+
+    for (int i = 0; i < img_height; i++)
+        yc[i] = i;
+
+    zc[0] = 0.0f;
+    zc[1] = 0.25f;
+    zc[2] = 0.5f;
+    zc[3] = 0.75f;
+    zc[4] = 1.0f;
+
+    // CONREC algorithm
+    conrec(d, ilb, iub, jlb, jub, xc, yc, nc, zc);
+
     // convert pixels to RGBA using the ERF colourmap
     size_t pvOffset = 0;
 
