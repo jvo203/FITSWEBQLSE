@@ -62,7 +62,7 @@ int conrec(float **d,
            float *y,
            int nc,
            float *z,
-           unsigned char *pvBuffer,
+           unsigned char *canvas,
            int img_with,
            int img_height)
 // d               ! matrix of data to contour

@@ -420,6 +420,8 @@ void hevc_destroy_frame(int va_count)
     // return val(typed_memory_view(canvasLength, canvasBuffer));
 }
 
+// set_pixel(unsigned char* buffer)
+
 buffer decompressPVdiagram(int img_width, int img_height, std::string const &bytes)
 {
     buffer wasmBuffer = {0, 0};
