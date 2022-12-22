@@ -7,4 +7,7 @@ int conrec(float **d,
            float *x,
            float *y,
            int nc,
-           float *z);
+           float *z,
+           unsigned char *pvBuffer,
+           int img_height,
+           int img_width);

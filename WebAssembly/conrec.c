@@ -61,7 +61,10 @@ int conrec(float **d,
            float *x,
            float *y,
            int nc,
-           float *z)
+           float *z,
+           unsigned char *pvBuffer,
+           int img_height,
+           int img_width)
 // d               ! matrix of data to contour
 // ilb,iub,jlb,jub ! index bounds of data matrix
 // x               ! data matrix column coordinates
