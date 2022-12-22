@@ -1,10 +1,10 @@
 #pragma once
-int conrec(double **d,
+int conrec(float **d,
            int ilb,
            int iub,
            int jlb,
            int jub,
-           double *x,
-           double *y,
+           float *x,
+           float *y,
            int nc,
-           double *z);
+           float *z);
