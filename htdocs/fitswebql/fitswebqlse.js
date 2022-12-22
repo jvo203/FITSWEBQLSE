@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2022-12-22.0";
+    return "JS2022-12-22.1";
 }
 
 function uuidv4() {
@@ -15685,7 +15685,7 @@ function contour_surface_marching_squares() {
         .domain([0, data[0].length - 1]);
 
     var y = d3.scaleLinear()
-        .range([height, 1])
+        .range([height - 1, 0])
         .domain([0, data.length - 1]);
 
     var colours = d3.scaleLinear()
@@ -15831,7 +15831,7 @@ function contour_surface_webworker() {
                 .domain([0, data[0].length - 1]);
 
             var y = d3.scaleLinear()
-                .range([height, 1])
+                .range([height - 1, 0])
                 .domain([0, data.length - 1]);
 
             d3.select("#ContourSVG").append("svg")
