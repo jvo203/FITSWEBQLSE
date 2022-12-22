@@ -9,5 +9,5 @@ int conrec(float **d,
            int nc,
            float *z,
            unsigned char *pvBuffer,
-           int img_height,
-           int img_width);
+           int img_width,
+           int img_height);
