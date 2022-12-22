@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2022-12-12.1";
+    return "JS2022-12-22.0";
 }
 
 function uuidv4() {
@@ -13319,7 +13319,7 @@ function pv_contour(pvCanvas) {
                 .domain([0, data[0].length - 1]);
 
             var y = d3.scaleLinear()
-                .range([height, 1])
+                .range([height - 1, 0])
                 .domain([0, data.length - 1]);
 
             d3.select("#PVContourSVG").append("svg")

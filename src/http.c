@@ -2589,9 +2589,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.3/math.min.js\" integrity =\"sha512-AZlpUxTyDgo/Ne1TyeXv345mwyAKh646DnZSsEt0GAF7aSFWu94UjCBcgm+yqKyH/6g9boKAzIEMO+wEGc6mJQ==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script>");
 
     // WebAssembly JS+binary
-    // g_string_append(html, "<script src=\"client." WASM_VERSION ".js\"></script>\n");
+    g_string_append(html, "<script src=\"client." WASM_VERSION ".js\"></script>\n");
     // use the CDN version of the WebAssembly binary
-    g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/client." WASM_VERSION ".js\"></script>\n");
+    // g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/client." WASM_VERSION ".js\"></script>\n");
 
     // WebAssembly JavaScript initialisation
     g_string_append_printf(html, "<script>\n"
