@@ -50,6 +50,74 @@ void set_pixel(unsigned char *buffer, int width, int height, int x, int y, unsig
     buffer[index + 3] = a;
 }
 
+void draw_line(unsigned char *buffer, int width, int height, float x1, float y1, float x2, float y2, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+{
+    float xdiff = (x2 - x1);
+    float ydiff = (y2 - y1);
+
+    if (xdiff == 0.0f && ydiff == 0.0f)
+    {
+        // SetPixel(x1, y1, color1);
+        set_pixel(buffer, width, height, roundf(x1), roundf(y1), r, g, b, a);
+        return;
+    }
+
+    if (fabs(xdiff) > fabs(ydiff))
+    {
+        float xmin, xmax;
+
+        // set xmin to the lower x value given
+        // and xmax to the higher value
+        if (x1 < x2)
+        {
+            xmin = x1;
+            xmax = x2;
+        }
+        else
+        {
+            xmin = x2;
+            xmax = x1;
+        }
+
+        // draw line in terms of y slope
+        float slope = ydiff / xdiff;
+        for (float x = xmin; x <= xmax; x += 1.0f)
+        {
+            float y = y1 + ((x - x1) * slope);
+            /*Color color = color1 + ((color2 - color1) * ((x - x1) / xdiff));
+            SetPixel(x, y, color);*/
+            set_pixel(buffer, width, height, roundf(x), roundf(y), r, g, b, a);
+        }
+    }
+    else
+    {
+        float ymin, ymax;
+
+        // set ymin to the lower y value given
+        // and ymax to the higher value
+        if (y1 < y2)
+        {
+            ymin = y1;
+            ymax = y2;
+        }
+        else
+        {
+            ymin = y2;
+            ymax = y1;
+        }
+
+        // draw line in terms of x slope
+        float slope = xdiff / ydiff;
+        for (float y = ymin; y <= ymax; y += 1.0f)
+        {
+            float x = x1 + ((y - y1) * slope);
+            /*Color color = color1 + ((color2 - color1) * ((y - y1) / ydiff));
+            SetPixel(x, y, color);*/
+            set_pixel(buffer, width, height, roundf(x), roundf(y), r, g, b, a);
+        }
+    }
+}
+
 //=============================================================================
 //
 //     CONREC is a contouring subroutine for rectangularily spaced data.
