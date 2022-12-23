@@ -289,5 +289,8 @@ mutexL:
 
 #-corray-config-file=./config
 
+contour:
+	g++ -Ofast tests/test_contouring.cpp
+
 clean:
 	rm -f $(ZFP)/src/*.o $(ZFP)/src/*.d src/*.mod src/*.o src/*.d src/*.optrpt *.mod *.o *.d *.optrpt $(TARGET) testWavelets
