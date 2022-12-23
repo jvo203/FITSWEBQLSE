@@ -15,7 +15,10 @@ using namespace std;
 void set_pixel(unsigned char *buffer, int width, int height, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
     if (x < 0 || x >= width || y < 0 || y >= height)
+    {
+        printf("set_pixel: out of bounds: %d, %d\n", x, y);
         return;
+    }
 
     int index = (y * width + x) * 1; // was * 4
 
@@ -340,7 +343,7 @@ int main()
     // zero-out the canvas
     memset(canvas, 0, img_size);
 
-    // make a copy of data (re-arrange row by row) for the CONREC algorithm
+    // make a copy of data (re-arrange) for the CONREC algorithm
     float **d = (float **)calloc(height, sizeof(float *));
     for (int i = 0; i < height; i++)
     {
