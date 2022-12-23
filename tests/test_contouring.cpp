@@ -350,6 +350,28 @@ int main()
             d[i][j] = array[i * width + j];
     }
 
+    // CONREC variables
+    const int nc = 4;
+    float xc[height];
+    float yc[width];
+    float zc[nc];
+
+    const int ilb = 0;
+    const int iub = height - 1;
+    const int jlb = 0;
+    const int jub = width - 1;
+
+    for (int i = 0; i < height; i++)
+        xc[i] = i;
+
+    for (int i = 0; i < width; i++)
+        yc[i] = i;
+
+    zc[0] = 0.0f;
+    zc[1] = 100.0f;
+    zc[2] = 200.0f;
+    zc[3] = 300.0f;
+
     // apply the contouring
 
     {
