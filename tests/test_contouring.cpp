@@ -12,7 +12,7 @@ using namespace std;
 #define max(x, y) (x > y ? x : y)
 
 // set a single pixel on an RGBA canvas
-void set_pixel(unsigned char *buffer, int width, int height, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+void set_pixel(unsigned char *buffer, int width, int height, int y, int x, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
     if (x < 0 || x >= width || y < 0 || y >= height)
     {
