@@ -17,12 +17,12 @@ void set_pixel(unsigned char *buffer, int width, int height, int x, int y, unsig
     if (x < 0 || x >= width || y < 0 || y >= height)
         return;
 
-    int index = (y * width + x) * 4;
+    int index = (y * width + x) * 1; // was * 4
 
-    buffer[index + 0] = r;
-    buffer[index + 1] = g;
+    buffer[index + 0] = 255;
+    /*buffer[index + 1] = g;
     buffer[index + 2] = b;
-    buffer[index + 3] = a;
+    buffer[index + 3] = a;*/
 }
 
 // downloaded from: https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
@@ -294,7 +294,7 @@ int conrec(float **d,
                                 // printf("%f %f %f %f %d\n", x1, y1, x2, y2, k);
                                 /*set_pixel(canvas, img_width, img_height, roundf(x1), roundf(y1), 255, 204, 0, 255);
                                 set_pixel(canvas, img_width, img_height, roundf(x2), roundf(y2), 255, 204, 0, 255);*/
-                                // line(canvas, img_width, img_height, roundf(x1), roundf(y1), round(x2), round(y2), 0, 0, 0, 128);
+                                line(canvas, img_width, img_height, roundf(x1), roundf(y1), round(x2), round(y2), 0, 0, 0, 128);
                             }
                         }
                     }
@@ -373,6 +373,7 @@ int main()
     zc[3] = 300.0f;
 
     // apply the contouring
+    conrec(d, ilb, iub, jlb, jub, xc, yc, nc, zc, canvas, width, height);
 
     {
         // export the contour canvas to a PGM file for a cross-check
