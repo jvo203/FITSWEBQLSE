@@ -574,10 +574,10 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     zc[3] = 0.75f;
     zc[4] = 1.0f;*/
 
-    zc[0] = 0.0f;
-    zc[1] = 0.1f;
-    zc[2] = 0.9f;
-    zc[3] = 1.0f;
+    zc[0] = 0.1f;
+    zc[1] = 0.3f;
+    zc[2] = 0.7f;
+    zc[3] = 0.9f;
 
     free(pixels);
 
