@@ -3673,10 +3673,13 @@ function open_websocket_connection(_datasetId, index) {
                             // save the current transformation matrix
                             ctx.save();
 
+                            var flipY = false;
+
                             if (vmin < vmax) {
-                                // flip both the X and Y axes
+                                // flip both the X and Y axes                                
                                 ctx.translate(c.width, c.height + offset);
                                 ctx.scale(-1, -1);
+                                flipY = true;
                             } else {
                                 // flip the X axis only
                                 ctx.translate(c.width, offset);
@@ -3694,8 +3697,8 @@ function open_websocket_connection(_datasetId, index) {
 
                             window.clearTimeout(idlePV);
                             idlePV = window.setTimeout(function () {
-                                pv_contour(pvCanvas);
-                            }, 500);
+                                pv_contour(pvCanvas, flipY);
+                            }, 250);
                         }
 
                         return;
@@ -13253,8 +13256,8 @@ function partial_fits_size() {
     return roundUp(partial_size, 2880);
 }
 
-function pv_contour(pvCanvas) {
-    console.log("calling pv_contour with canvas: ", pvCanvas);
+function pv_contour(pvCanvas, flipY) {
+    console.log("calling pv_contour with canvas: ", pvCanvas, "flipY: ", flipY);
 
     var data = [];
     let min_value = 255;
@@ -13318,9 +13321,15 @@ function pv_contour(pvCanvas) {
                 .range([width - 1, 0]) // flip the x-axis
                 .domain([0, data[0].length - 1]);
 
-            var y = d3.scaleLinear()
-                .range([height - 1, 0])
-                .domain([0, data.length - 1]);
+            if (flipY) {
+                var y = d3.scaleLinear()
+                    .range([height - 1, 0])
+                    .domain([0, data.length - 1]);
+            } else {
+                var y = d3.scaleLinear()
+                    .range([0, height - 1])
+                    .domain([0, data.length - 1]);
+            }
 
             d3.select("#PVContourSVG").append("svg")
                 .attr("id", "PVContourPlot")
@@ -13332,8 +13341,9 @@ function pv_contour(pvCanvas) {
                 .data(isoBands)
                 .enter().append("path")
                 .style("fill", "none")
-                .style("stroke", "rgb(255,204,0)") // was "black"                
-                .attr("opacity", 0.8) // or black with 0.25
+                // .style("stroke", "rgb(255,204,0)") // was "black"
+                .style("stroke", "black")
+                .attr("opacity", 0.25) // or black with 0.25
                 .attr("d", function (d) {
                     var p = "";
                     d.coords.forEach(function (aa, i) {
