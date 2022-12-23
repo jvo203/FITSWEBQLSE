@@ -37,10 +37,14 @@ MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 // set a single pixel on an RGBA canvas
-void set_pixel(unsigned char *buffer, int width, int height, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+// was int x, int y but changed to int y, int x (CONREC uses a reversed order? FORTRAN?)
+void set_pixel(unsigned char *buffer, int width, int height, int y, int x, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
     if (x < 0 || x >= width || y < 0 || y >= height)
+    {
+        printf("set_pixel: out of bounds: %d, %d\n", x, y);
         return;
+    }
 
     int index = (y * width + x) * 4;
 

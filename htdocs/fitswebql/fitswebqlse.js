@@ -13257,6 +13257,7 @@ function partial_fits_size() {
 }
 
 function pv_contour(pvCanvas, flipY) {
+    return;
     console.log("calling pv_contour with canvas: ", pvCanvas, "flipY: ", flipY);
 
     var data = [];
