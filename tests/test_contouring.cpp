@@ -340,7 +340,17 @@ int main()
     // zero-out the canvas
     memset(canvas, 0, img_size);
 
-    // contouring
+    // make a copy of data (re-arrange row by row) for the CONREC algorithm
+    float **d = (float **)calloc(height, sizeof(float *));
+    for (int i = 0; i < height; i++)
+    {
+        d[i] = (float *)calloc(width, sizeof(float));
+
+        for (int j = 0; j < width; j++)
+            d[i][j] = array[i * width + j];
+    }
+
+    // apply the contouring
 
     {
         // export the contour canvas to a PGM file for a cross-check
@@ -352,4 +362,10 @@ int main()
         pgm_file.write((const char *)canvas, img_size);
         pgm_file.close();
     }
+
+    // free d
+    for (int i = 0; i < height; i++)
+        free(d[i]);
+
+    free(d);
 }
