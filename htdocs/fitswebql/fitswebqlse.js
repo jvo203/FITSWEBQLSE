@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2022-12-22.1";
+    return "JS2022-12-23.0";
 }
 
 function uuidv4() {
@@ -3695,7 +3695,7 @@ function open_websocket_connection(_datasetId, index) {
                             window.clearTimeout(idlePV);
                             idlePV = window.setTimeout(function () {
                                 pv_contour(pvCanvas);
-                            }, 250);
+                            }, 500);
                         }
 
                         return;
