@@ -529,13 +529,13 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
         unsigned char b = 0;
         unsigned char a = 255;
 
-        float pos = value * (NO_COLOURS - 1);
+        /*float pos = value * (NO_COLOURS - 1);
         float frac = pos - floorf(pos);
         int x0 = floorf(pos);
 
         r = 0xFF * (math_r[x0] + (math_r[x0 + 1] - math_r[x0]) * frac);
         g = 0xFF * (math_g[x0] + (math_g[x0 + 1] - math_g[x0]) * frac);
-        b = 0xFF * (math_b[x0] + (math_b[x0 + 1] - math_b[x0]) * frac);
+        b = 0xFF * (math_b[x0] + (math_b[x0 + 1] - math_b[x0]) * frac);*/
 
         pvBuffer[pvOffset++] = r;
         pvBuffer[pvOffset++] = g;
@@ -582,7 +582,7 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     free(pixels);
 
     // CONREC algorithm
-    conrec(d, ilb, iub, jlb, jub, xc, yc, nc, zc, pvBuffer, img_width, img_height);
+    conrec(d, ilb, iub, jlb, jub, xc, yc, nc, zc, pvBuffer, img_height, img_width);
 
     // free d
     for (int i = 0; i < img_width; i++)
