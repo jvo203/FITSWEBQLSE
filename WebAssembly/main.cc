@@ -544,28 +544,28 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     }
 
     // make a copy of pixels (re-arrange) for the CONREC algorithm
-    float **d = (float **)calloc(img_height, sizeof(float *));
-    for (int i = 0; i < img_height; i++)
+    float **d = (float **)calloc(img_width, sizeof(float *));
+    for (int i = 0; i < img_width; i++)
     {
-        d[i] = (float *)calloc(img_width, sizeof(float));
-        memcpy(d[i], pixels + i * img_width, img_width * sizeof(float));
+        d[i] = (float *)calloc(img_height, sizeof(float));
+        memcpy(d[i], pixels + i * img_height, img_height * sizeof(float));
     }
 
     // CONREC variables
     const int nc = 4; // was 5
-    float xc[img_height];
-    float yc[img_width];
+    float xc[img_width];
+    float yc[img_height];
     float zc[nc];
 
     const int ilb = 0;
-    const int iub = img_height - 1;
+    const int iub = img_width - 1;
     const int jlb = 0;
-    const int jub = img_width - 1;
-
-    for (int i = 0; i < img_height; i++)
-        xc[i] = i;
+    const int jub = img_height - 1;
 
     for (int i = 0; i < img_width; i++)
+        xc[i] = i;
+
+    for (int i = 0; i < img_height; i++)
         yc[i] = i;
 
     /*zc[0] = 0.0f;
@@ -585,7 +585,7 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     // conrec(d, ilb, iub, jlb, jub, xc, yc, nc, zc, pvBuffer, img_height, img_width);
 
     // free d
-    for (int i = 0; i < img_height; i++)
+    for (int i = 0; i < img_width; i++)
         free(d[i]);
 
     free(d);
