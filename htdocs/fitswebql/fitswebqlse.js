@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2022-12-23.0";
+    return "JS2022-12-26.0";
 }
 
 function uuidv4() {
@@ -863,16 +863,6 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     let svg_height = height;
 
     var div = d3.select("#PVDiagram");
-
-    if (document.getElementById('PVContourSVG') === null) {
-        // console.log("pv_axes: PVContourSVG is null, creating a new one.");
-
-        div.append("svg")
-            .attr("id", "PVContourSVG")
-            .attr("width", svg_width)
-            .attr("height", svg_height)
-            .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
-    }
 
     if (document.getElementById('PVSVGX') === null) {
         // console.log("pv_axes: PVSVGX is null, creating a new one.");
@@ -3695,9 +3685,10 @@ function open_websocket_connection(_datasetId, index) {
 
                             pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd);
 
+                            // cancel idlePV timer and set a new one
                             window.clearTimeout(idlePV);
                             idlePV = window.setTimeout(function () {
-                                pv_contour(pvCanvas, flipY);
+                                pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY);
                             }, 250);
                         }
 
@@ -13256,9 +13247,28 @@ function partial_fits_size() {
     return roundUp(partial_size, 2880);
 }
 
-function pv_contour(pvCanvas, flipY) {
-    return;
+function pv_contour(left, top, width, height, pvCanvas, flipY) {
     console.log("calling pv_contour with canvas: ", pvCanvas, "flipY: ", flipY);
+
+    d3.select("#PVContourSVG").remove();
+
+    let svg_left = 10 + left;
+    let svg_top = 10 + top;
+
+    let svg_width = width;
+    let svg_height = height;
+
+    var div = d3.select("#PVDiagram");
+
+    if (document.getElementById('PVContourSVG') === null) {
+        // console.log("pv_axes: PVContourSVG is null, creating a new one.");
+
+        div.append("svg")
+            .attr("id", "PVContourSVG")
+            .attr("width", svg_width)
+            .attr("height", svg_height)
+            .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
+    }
 
     var data = [];
     let min_value = 255;
@@ -13368,9 +13378,6 @@ function pv_contour(pvCanvas, flipY) {
 }
 
 function send_pv_request(index, x1, y1, x2, y2) {
-    // cancel idlePV
-    window.clearTimeout(idlePV);
-
     var c = 299792.458;//speed of light [km/s]
 
     var deltaV = 0.0;
