@@ -586,7 +586,7 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     free(pixels);
 
     // CONREC algorithm
-    conrec(d, ilb, iub, jlb, jub, xc, yc, nc, zc, pvBuffer, img_width, img_height);
+    // conrec(d, ilb, iub, jlb, jub, xc, yc, nc, zc, pvBuffer, img_width, img_height);
 
     // free d
     for (int i = 0; i < img_height; i++)
