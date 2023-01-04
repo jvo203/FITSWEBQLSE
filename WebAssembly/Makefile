@@ -26,6 +26,8 @@ LDFLAGS=-lz --llvm-lto 1
 EMFLAGS=--bind
 EMFLAGS+=-s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=4GB
 #EMFLAGS+=-pthread -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=4
+# Math.min(4, window.navigator.hardwareConcurrency)
+
 #EMFLAGS+=-s WASM_MEM_MAX=4GB
 EMFLAGS+=-s NO_EXIT_RUNTIME=1
 EMFLAGS+=-s NO_FILESYSTEM=1
