@@ -3466,8 +3466,14 @@ function open_websocket_connection(_datasetId, index) {
                                 var data;
 
                                 try {
+                                    // contouring
+                                    var contours = 0;
+
+                                    if (displayContours)
+                                        contours = parseInt(document.getElementById('contour_lines').value) + 1;
+
                                     //HEVC
-                                    var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, colourmap, fill);
+                                    var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, colourmap, fill, contours);
                                     data = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
                                 } catch (e) {
                                     //console.log(e);
@@ -3483,7 +3489,7 @@ function open_websocket_connection(_datasetId, index) {
                             else {
                                 try {
                                     //HEVC, ignore the decompressed output, just purge the HEVC buffers
-                                    Module.hevc_decode_frame(0, 0, frame, index - 1, 'greyscale', fill);
+                                    Module.hevc_decode_frame(0, 0, frame, index - 1, 'greyscale', fill, 0);
                                 } catch (e) {
                                     // console.log(e);
                                 };
