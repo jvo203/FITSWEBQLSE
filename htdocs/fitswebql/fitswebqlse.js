@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2022-12-26.0";
+    return "JS2023-01-04.0";
 }
 
 function uuidv4() {
@@ -8525,6 +8525,10 @@ function x_axis_mouseenter(offset) {
 
     d3.select("#lower").attr("pointer-events", "none");
 
+    // hide the contour plot
+    if (displayContours)
+        document.getElementById("ContourSVG").style.display = "none";
+
     //clear the VideoCanvas
     requestAnimationFrame(function () {
         var c = document.getElementById('VideoCanvas');
@@ -8709,6 +8713,14 @@ function x_axis_mouseleave() {
     }
 
     d3.select("#fps").text("");
+
+    // show the contour plot
+    if (displayContours) {
+        document.getElementById("ContourSVG").style.display = "block";
+
+        if (!has_contours)
+            update_contours();
+    }
 
     //send an end_video command via WebSockets
     var request = {
