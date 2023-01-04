@@ -406,11 +406,11 @@ void hevc_destroy_frame(int va_count)
     size_t len = _w * _h * 4;
 
     if (canvasBuffer != NULL && canvasLength == len)
-        hevc_decode_nal_unit(index, (unsigned char *)bytes.data(), bytes.size(), canvasBuffer, _w, _h, colourmap.c_str(), fill);
+        hevc_decode_nal_unit(index, (unsigned char *)bytes.data(), bytes.size(), canvasBuffer, _w, _h, colourmap.c_str(), fill, contours);
     else
     {
         printf("canvasBuffer(%p) == NULL and/or canvasLength(%zu) does not match len(%zu)\n", canvasBuffer, canvasLength, len);
-        hevc_decode_nal_unit(index, (unsigned char *)bytes.data(), bytes.size(), NULL, _w, _h, colourmap.c_str(), fill);
+        hevc_decode_nal_unit(index, (unsigned char *)bytes.data(), bytes.size(), NULL, _w, _h, colourmap.c_str(), fill, 0);
     }
 
     wasmBuffer.ptr = (unsigned int)canvasBuffer;

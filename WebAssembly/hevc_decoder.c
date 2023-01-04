@@ -7,8 +7,11 @@
 
 #include "hevc_decoder.h"
 
-//colourmaps
+// colourmaps
 #include "colourmap.h"
+
+// CONREC
+#include "conrec.h"
 
 static AVCodec *codec;
 static AVCodecContext **avctx = NULL;
@@ -19,7 +22,7 @@ extern AVCodec ff_hevc_decoder;
 
 void hevc_init(int va_count)
 {
-    //the "standard" way
+    // the "standard" way
     codec = &ff_hevc_decoder;
 
     if (avctx == NULL)
@@ -106,7 +109,7 @@ void hevc_destroy(int va_count)
     }
 }
 
-double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_len, unsigned char *canvas, unsigned int _w, unsigned int _h, const char *colourmap, unsigned char fill)
+double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_len, unsigned char *canvas, unsigned int _w, unsigned int _h, const char *colourmap, unsigned char fill, int nc)
 {
     if (avctx == NULL || avpkt == NULL || avframe == NULL)
         return 0.0;
@@ -117,7 +120,7 @@ double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_le
     double start = emscripten_get_now();
     double stop = 0.0;
 
-    printf("HEVC: decoding a NAL unit of length %zu bytes\n", data_len);
+    printf("HEVC: decoding a NAL unit of length %zu bytes, nc = %d\n", data_len, nc);
 
     uint8_t *buf = malloc(data_len + AV_INPUT_BUFFER_PADDING_SIZE);
     memcpy(buf, data, data_len);
@@ -155,7 +158,7 @@ double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_le
         {
             printf("processing a YUV444P format\n");
 
-            //apply a colourmap etc.
+            // apply a colourmap etc.
             int w = avframe[index]->width;
             int h = avframe[index]->height;
 
@@ -169,7 +172,7 @@ double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_le
 
             if (w == _w && h == _h && canvas != NULL)
             {
-                //apply a colourmap
+                // apply a colourmap
                 if (strcmp(colourmap, "red") == 0)
                 {
                     apply_colourmap(canvas, w, h, luma, stride_luma, alpha, stride_alpha, false, ocean_g, ocean_r, ocean_b, fill);
@@ -228,7 +231,7 @@ double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_le
                 }
                 else
                 {
-                    //no colour by default
+                    // no colour by default
                     apply_greyscale(canvas, w, h, luma, stride_luma, alpha, stride_alpha, false, fill);
                 };
             }
