@@ -3807,6 +3807,10 @@ function open_websocket_connection(_datasetId, index) {
                             } catch (e) {
                                 //console.log(e);
                             };
+
+                            // hide the contour plot
+                            if (displayContours)
+                                document.getElementById("ContourSVG").style.display = "none";
                         }
 
                         return;
@@ -8524,10 +8528,6 @@ function x_axis_mouseenter(offset) {
     }
 
     d3.select("#lower").attr("pointer-events", "none");
-
-    // hide the contour plot
-    if (displayContours)
-        document.getElementById("ContourSVG").style.display = "none";
 
     //clear the VideoCanvas
     requestAnimationFrame(function () {
