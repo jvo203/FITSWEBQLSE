@@ -20,7 +20,7 @@ static AVPacket **avpkt = NULL;
 
 extern AVCodec ff_hevc_decoder;
 
-void apply_contour(unsigned char *canvas, unsigned int w, unsigned int h, unsigned char *luma, unsigned int stride_luma, unsigned char *alpha, unsigned int stride_alpha, int nc);
+void apply_contour(unsigned char *canvas, unsigned int w, unsigned int h, const unsigned char *luma, unsigned int stride_luma, const unsigned char *alpha, unsigned int stride_alpha, int nc);
 
 void hevc_init(int va_count)
 {
@@ -258,6 +258,36 @@ double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_le
     return elapsed;
 }
 
-void apply_contour(unsigned char *canvas, unsigned int w, unsigned int h, unsigned char *luma, unsigned int stride_luma, unsigned char *alpha, unsigned int stride_alpha, int nc)
+void apply_contour(unsigned char *canvas, unsigned int w, unsigned int h, const unsigned char *luma, unsigned int stride_luma, const unsigned char *alpha, unsigned int stride_alpha, int nc)
 {
+    if (canvas == NULL || luma == NULL || alpha == NULL)
+        return;
+
+    size_t luma_offset = 0;
+    size_t alpha_offset = 0;
+
+    // make a copy of pixels (re-arrange) for the CONREC algorithm
+    float **d = (float **)calloc(h, sizeof(float *));
+    for (int i = 0; i < h; i++)
+    {
+        // Y-mirror-flip the image
+        size_t luma_offset = (h - 1 - i) * stride_luma;
+        size_t alpha_offset = (h - 1 - i) * stride_alpha;
+
+        d[i] = (float *)calloc(w, sizeof(float));
+        for (int j = 0; j < w; j++)
+        {
+            unsigned char pixel = luma[luma_offset++];
+            unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;
+            pixel = (mask == 0) ? 0 : pixel;
+
+            d[i][j] = (float)pixel;
+        }
+    }
+
+    // free d
+    for (int i = 0; i < h; i++)
+        free(d[i]);
+
+    free(d);
 }
