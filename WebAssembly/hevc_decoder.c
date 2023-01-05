@@ -285,6 +285,29 @@ void apply_contour(unsigned char *canvas, unsigned int w, unsigned int h, const 
         }
     }
 
+    // CONREC variables
+    float xc[h];
+    float yc[w];
+    float zc[nc];
+
+    const int ilb = 0;
+    const int iub = h - 1;
+    const int jlb = 0;
+    const int jub = w - 1;
+
+    for (int i = 0; i < h; i++)
+        xc[i] = i;
+
+    for (int i = 0; i < w; i++)
+        yc[i] = i;
+
+    // contour levels between 0 and 255
+    for (int i = 0; i < nc; i++)
+        zc[i] = (float)(i + 1) * 255.0f / (float)nc;
+
+    // CONREC algorithm
+    conrec(d, ilb, iub, jlb, jub, xc, yc, nc, zc, canvas, w, h);
+
     // free d
     for (int i = 0; i < h; i++)
         free(d[i]);
