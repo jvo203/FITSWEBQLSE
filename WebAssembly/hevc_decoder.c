@@ -20,6 +20,8 @@ static AVPacket **avpkt = NULL;
 
 extern AVCodec ff_hevc_decoder;
 
+void apply_contour(unsigned char *canvas, unsigned int w, unsigned int h, unsigned char *luma, unsigned int stride_luma, unsigned char *alpha, unsigned int stride_alpha, int nc);
+
 void hevc_init(int va_count)
 {
     // the "standard" way
@@ -234,6 +236,10 @@ double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_le
                     // no colour by default
                     apply_greyscale(canvas, w, h, luma, stride_luma, alpha, stride_alpha, false, fill);
                 };
+
+                // apply contouring (optional)
+                if (nc > 0)
+                    apply_contour(canvas, w, h, luma, stride_luma, alpha, stride_alpha, nc);
             }
             else
                 printf("[wasm hevc] canvas image dimensions %d x %d do not match the decoded image size, doing nothing\n", _w, _h);
@@ -250,4 +256,8 @@ double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_le
         free(buf);
 
     return elapsed;
+}
+
+void apply_contour(unsigned char *canvas, unsigned int w, unsigned int h, unsigned char *luma, unsigned int stride_luma, unsigned char *alpha, unsigned int stride_alpha, int nc)
+{
 }
