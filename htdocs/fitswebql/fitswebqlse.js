@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-01-04.0";
+    return "JS2023-01-10.0";
 }
 
 function uuidv4() {
@@ -3295,6 +3295,9 @@ function open_websocket_connection(_datasetId, index) {
                             process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
                             display_legend();
+
+                            if (displayContours)
+                                update_contours();
                         }
 
                         let padding = 4 - offset % 4;
