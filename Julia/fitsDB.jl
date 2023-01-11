@@ -25,10 +25,10 @@ function get_fits_total(conn, threshold)
     # threshold is given in GB
 
     # above the threshold
-    # strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"
+    strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024.;"
 
     # below the threshold but over 20GB
-    strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024.;"
+    # strSQL = "select sum(file_size) from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024.;"
 
     res = execute(conn, strSQL)
     data = columntable(res)
@@ -41,10 +41,10 @@ function get_datasets(conn, threshold)
     # threshold is given in GB
 
     # above the threshold
-    # strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. order by file_size desc;"
+    strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. order by file_size desc;"
 
     # below the threshold but over 20GB
-    strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024. order by file_size desc;"
+    # strSQL = "select dataset_id, file_size, path from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size<$(threshold)*1024*1024*1024. and file_size>=20*1024*1024*1024. order by file_size desc;"
 
     res = execute(conn, strSQL)
     data = columntable(res)
@@ -161,7 +161,7 @@ function preload_dataset(datasetid)
     end
 
     # then wait 30 seconds to allow for the 60s dataset timeout (avoid a RAM overload)
-    # sleep(61) # or not ...
+    sleep(61) # or not ...
 end
 
 # conservative assumptions
@@ -198,14 +198,14 @@ write(html, "<h1>Preloaded datasets</h1>\n")
 # append HTML table header
 write(html, "<table><tr><th>Index</th><th>Dataset ID</th><th>Size</th><th>Cache Type</th></tr>\n")
 
-# first copy then preload (somehow it helps even out glusterfs load balancing)
+# first copy then preload (somehow it helps to even out glusterfs load balancing)
 for (datasetid, file_size, path) in zip(ids, sizes, paths)
     global count
 
     # copy should be enabled for large datasets only
     # otherwise we will run out of disk space
     # println("COPY: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
-    # copy_dataset(datasetid, file_size, path)
+    copy_dataset(datasetid, file_size, path)
 
     # increment the index
     count = count + 1
