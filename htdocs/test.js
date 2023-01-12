@@ -107,8 +107,8 @@ function view_almb() {
         alert("no datasetId found !");
 }
 
-function view_url() {
-    var fits_url = document.getElementById("url").value.trim();
+function view_url(index) {
+    var fits_url = document.getElementById("url" + index.toString()).value.trim();
 
     if (fits_url != "") {
         var url = null;
