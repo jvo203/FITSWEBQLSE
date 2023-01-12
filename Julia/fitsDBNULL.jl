@@ -30,3 +30,43 @@ function get_datasets(conn, threshold)
 
     return data
 end
+
+function check_dataset(datasetid, path)
+    src = "/home/alma/" * path
+
+    if !isfile(src)
+        # append to the error file
+        open("error.txt", "a") do f
+            write(f, "$(datasetid) :: $(src)\n")
+        end
+    end
+end
+
+conn = connect_db("alma")
+datasets = get_datasets(conn, 0)
+
+ids = datasets[:dataset_id]
+paths = datasets[:path]
+
+count = 1
+total_count = length(ids) # number of datasets to check
+
+println("Checking $(total_count) datasets")
+
+p = Progress(total_count, 1, "Checking...")
+
+for (datasetid, path) in zip(ids, paths)
+    global p, count
+
+    # println("Checking dataset $(count) of $(total_count)")
+
+    # check if the dataset exists
+    check_dataset(datasetid, path)
+
+    update!(p, count)
+
+    # increment the index
+    count = count + 1
+end
+
+close(conn)
