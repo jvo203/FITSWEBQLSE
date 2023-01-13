@@ -646,6 +646,13 @@ static enum MHD_Result send_progress(struct MHD_Connection *connection, float pr
     return ret;
 }
 
+// cURL file-saving download handler
+static size_t download2file(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+    size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+    return written;
+}
+
 static enum MHD_Result on_http_connection(void *cls,
                                           struct MHD_Connection *connection,
                                           const char *url,
@@ -2241,6 +2248,46 @@ static enum MHD_Result on_http_connection(void *cls,
                     snprintf(download, sizeof(download) - 1, "%s.tmp", filepath);
 
                     printf("[C] '%s' cannot be accessed for reading, attempting a download next.\n", filepath);
+
+                    // download the file to the temporary location with cURL
+                    CURL *curl;
+                    CURLcode res;
+                    FILE *downloadfile;
+
+                    curl = curl_easy_init();
+                    if (curl)
+                    {
+                        curl_easy_setopt(curl, CURLOPT_URL, url);
+                        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+                        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, download2file);
+
+                        /* disable progress meter, set to 0L to enable it */
+                        /* enable progress meter, set to 1L to disable it */
+                        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+
+                        /* open the file */
+                        downloadfile = fopen(download, "wb");
+                        if (downloadfile)
+                        {
+                            curl_easy_setopt(curl, CURLOPT_WRITEDATA, downloadfile);
+
+                            res = curl_easy_perform(curl);
+
+                            fclose(downloadfile);
+
+                            if (res != CURLE_OK)
+                            {
+                                fprintf(stderr, "curl_easy_perform() failed: %s : %s\n", url, curl_easy_strerror(res));
+                            }
+                            else
+                            {
+                                // rename the file to the final location
+                                rename(download, filepath);
+                            }
+                        }
+
+                        curl_easy_cleanup(curl);
+                    }
                 }
             }
         }
