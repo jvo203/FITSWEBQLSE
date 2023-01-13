@@ -2226,6 +2226,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 printf("[C] url: %s\n", url);
 
+                directory = options.fits_home;
+
                 // find the last '/'
                 char *fname = strrchr(url, '/');
                 if (fname != NULL)
@@ -2233,7 +2235,21 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 printf("[C] filename: %s\n", fname);
 
-                snprintf(filepath, sizeof(filepath) - 1, "%s/%s", options.fits_home, fname);
+                // find the last '.'
+                char *ext = strrchr(fname, '.');
+                if (ext != NULL)
+                {
+                    *ext = '\0'; // terminate the fname string
+                    ext++;       // skip the dot character
+                    extension = ext;
+                }
+
+                // snprintf(filepath, sizeof(filepath) - 1, "%s/%s", options.fits_home, fname);
+
+                if (extension == NULL)
+                    snprintf(filepath, sizeof(filepath), "%s/%s.fits", options.fits_home, fname);
+                else
+                    snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, fname, extension);
 
                 // if the file does not exist download it
                 if (access(filepath, R_OK) == -1)
@@ -2297,12 +2313,12 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 // allocate datasetId
                 datasetId = (char **)malloc(sizeof(char *));
-                datasetId[0] = strndup(filepath, sizeof(filepath) - 1);
+                datasetId[0] = strdup(fname);
 
                 char enc[256];
                 size_t len;
 
-                GString *value = g_string_new(filepath);
+                GString *value = g_string_new(fname);
 
                 len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
                 enc[len] = '\0';
