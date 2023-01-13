@@ -2210,13 +2210,16 @@ static enum MHD_Result on_http_connection(void *cls,
             }
         }
 
-        // there are no datasets found by this point, check if an external URL has been passed
+        // no datasets have been found by this point, check if an external URL has been passed
         if (va_count == 0)
         {
             char *url = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "url");
 
             if (url != NULL)
             {
+                char filepath[1024];
+                memset(filepath, '\0', sizeof(filepath));
+
                 printf("[C] url: %s\n", url);
 
                 // find the last '/'
@@ -2225,6 +2228,20 @@ static enum MHD_Result on_http_connection(void *cls,
                     fname++; // skip the slash character
 
                 printf("[C] filename: %s\n", fname);
+
+                snprintf(filepath, sizeof(filepath) - 1, "%s/%s", options.fits_home, fname);
+
+                // if the file does not exist download it
+                if (access(filepath, R_OK) == -1)
+                {
+                    char download[1024];
+                    memset(download, '\0', sizeof(download));
+
+                    // append ".tmp" to the filename
+                    snprintf(download, sizeof(download) - 1, "%s.tmp", filepath);
+
+                    printf("[C] '%s' cannot be accessed for reading, attempting a download next.\n", filepath);
+                }
             }
         }
 
