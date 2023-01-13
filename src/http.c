@@ -2072,6 +2072,9 @@ static enum MHD_Result on_http_connection(void *cls,
         char *directory = NULL; // only needed by <options.local>
         char *extension = NULL; // only needed by <options.local>
 
+        char fname[1024]; // only needed by the URL part
+        memset(fname, '\0', sizeof(fname));
+
         if (va_count == 0) // if (options.local)
         {
             directory = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dir");
@@ -2223,9 +2226,6 @@ static enum MHD_Result on_http_connection(void *cls,
             {
                 char filepath[1024];
                 memset(filepath, '\0', sizeof(filepath));
-
-                char fname[1024];
-                memset(fname, '\0', sizeof(fname));
 
                 printf("[C] url: %s\n", url);
 
