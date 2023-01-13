@@ -2136,8 +2136,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     g_string_free(value, TRUE);
                 }
-
-                printf("[C] number of arguments: %d\n", va_count);
             }
             else
             {
@@ -2193,8 +2191,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     g_string_free(value, TRUE);
                 }
-
-                printf("[C] number of arguments: %d\n", va_count);
             }
             else
             {
