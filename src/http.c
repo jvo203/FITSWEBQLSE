@@ -2326,6 +2326,12 @@ static enum MHD_Result on_http_connection(void *cls,
                 g_string_append_printf(uri, "filename=%s&", enc);
 
                 g_string_free(value, TRUE);
+
+                if (directory != NULL)
+                    g_string_append_printf(uri, "dir=%s&", directory);
+
+                if (extension != NULL)
+                    g_string_append_printf(uri, "ext=%s&", extension);
             }
         }
 
