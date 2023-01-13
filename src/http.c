@@ -2224,14 +2224,20 @@ static enum MHD_Result on_http_connection(void *cls,
                 char filepath[1024];
                 memset(filepath, '\0', sizeof(filepath));
 
+                char fname[1024];
+                memset(fname, '\0', sizeof(fname));
+
                 printf("[C] url: %s\n", url);
 
                 directory = options.fits_home;
 
                 // find the last '/'
-                char *fname = strrchr(url, '/');
-                if (fname != NULL)
-                    fname++; // skip the slash character
+                char *last_slash = strrchr(url, '/');
+
+                if (last_slash != NULL)
+                    strncpy(fname, last_slash + 1, sizeof(fname) - 1); // skip the slash character
+                else
+                    strncpy(fname, url, sizeof(fname) - 1);
 
                 printf("[C] filename: %s\n", fname);
 
