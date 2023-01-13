@@ -2216,7 +2216,16 @@ static enum MHD_Result on_http_connection(void *cls,
             char *url = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "url");
 
             if (url != NULL)
-                printf("[C] URL: %s\n", url);
+            {
+                printf("[C] url: %s\n", url);
+
+                // find the last '/'
+                char *fname = strrchr(url, '/');
+                if (fname != NULL)
+                    fname++; // skip the slash character
+
+                printf("[C] filename: %s\n", fname);
+            }
         }
 
         char *view = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "view");
