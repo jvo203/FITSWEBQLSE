@@ -2294,6 +2294,8 @@ static enum MHD_Result on_http_connection(void *cls,
                         curl_easy_cleanup(curl);
                     }
                 }
+
+                // hopefully the file exists now, if not the successive steps will return an error
             }
         }
 
