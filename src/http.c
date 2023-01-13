@@ -2210,6 +2210,15 @@ static enum MHD_Result on_http_connection(void *cls,
             }
         }
 
+        // there are no datasets found by this point, check if an external URL has been passed
+        if (va_count == 0)
+        {
+            char *url = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "url");
+
+            if (url != NULL)
+                printf("[C] URL: %s\n", url);
+        }
+
         char *view = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "view");
         char *flux = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "flux");
         char *db = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "db");
