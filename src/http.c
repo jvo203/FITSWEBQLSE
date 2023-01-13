@@ -2296,6 +2296,23 @@ static enum MHD_Result on_http_connection(void *cls,
                 }
 
                 // hopefully the file exists now, if not the successive steps will return an error
+                va_count = 1;
+
+                // allocate datasetId
+                datasetId = (char **)malloc(sizeof(char *));
+                datasetId[0] = strndup(filepath, sizeof(filepath) - 1);
+
+                char enc[256];
+                size_t len;
+
+                GString *value = g_string_new(filepath);
+
+                len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                enc[len] = '\0';
+
+                g_string_append_printf(uri, "filename=%s&", enc);
+
+                g_string_free(value, TRUE);
             }
         }
 
