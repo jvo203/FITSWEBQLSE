@@ -2255,6 +2255,7 @@ static enum MHD_Result on_http_connection(void *cls,
                     FILE *downloadfile;
 
                     curl = curl_easy_init();
+
                     if (curl)
                     {
                         curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -2267,6 +2268,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                         /* open the file */
                         downloadfile = fopen(download, "wb");
+
                         if (downloadfile)
                         {
                             curl_easy_setopt(curl, CURLOPT_WRITEDATA, downloadfile);
@@ -2278,10 +2280,13 @@ static enum MHD_Result on_http_connection(void *cls,
                             if (res != CURLE_OK)
                             {
                                 fprintf(stderr, "curl_easy_perform() failed: %s : %s\n", url, curl_easy_strerror(res));
+
+                                // remove the download file
+                                remove(download);
                             }
                             else
                             {
-                                // rename the file to the final location
+                                // rename the download file
                                 rename(download, filepath);
                             }
                         }
