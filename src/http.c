@@ -2072,7 +2072,7 @@ static enum MHD_Result on_http_connection(void *cls,
         char *directory = NULL; // only needed by <options.local>
         char *extension = NULL; // only needed by <options.local>
 
-        if (options.local)
+        if (va_count == 0) // if (options.local)
         {
             directory = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dir");
             extension = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ext");
@@ -2122,7 +2122,7 @@ static enum MHD_Result on_http_connection(void *cls,
                     sprintf(str_key, "filename%d", va_count + 1);
 
                     datasetId = (char **)realloc(datasetId, va_count * sizeof(char *));
-                    datasetId[va_count - 1] = tmp;
+                    datasetId[va_count - 1] = strdup(tmp);
 
                     char enc[256];
                     size_t len;
@@ -2145,7 +2145,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 // allocate datasetId
                 datasetId = (char **)malloc(sizeof(char *));
-                datasetId[0] = tmp;
+                datasetId[0] = strdup(tmp);
 
                 char enc[256];
                 size_t len;
@@ -2160,7 +2160,8 @@ static enum MHD_Result on_http_connection(void *cls,
                 g_string_free(value, TRUE);
             }
         }
-        else
+
+        if (va_count == 0)
         {
             char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
 
@@ -2178,7 +2179,7 @@ static enum MHD_Result on_http_connection(void *cls,
                     sprintf(str_key, "datasetId%d", va_count + 1);
 
                     datasetId = (char **)realloc(datasetId, va_count * sizeof(char *));
-                    datasetId[va_count - 1] = tmp;
+                    datasetId[va_count - 1] = strdup(tmp);
 
                     char enc[256];
                     size_t len;
@@ -2201,7 +2202,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 // allocate datasetId
                 datasetId = (char **)malloc(sizeof(char *));
-                datasetId[0] = tmp;
+                datasetId[0] = strdup(tmp);
 
                 char enc[256];
                 size_t len;
@@ -2434,7 +2435,6 @@ static enum MHD_Result on_http_connection(void *cls,
                 }
                 else
                 { // options.local == false
-
                     // try the <FITS_HOME> first
                     if (extension == NULL)
                         snprintf(filepath, sizeof(filepath) - 1, "%s/%s.fits", options.fits_home, datasetId[i]);
@@ -2541,6 +2541,9 @@ static enum MHD_Result on_http_connection(void *cls,
             ret = http_not_found(connection);
 
         // deallocate datasetId
+        for (int i = 0; i < va_count; i++)
+            free(datasetId[i]);
+
         free(datasetId);
 
         // deallocate the root path
