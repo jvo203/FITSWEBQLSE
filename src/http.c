@@ -2581,7 +2581,14 @@ static enum MHD_Result on_http_connection(void *cls,
             // directory/extension should not be freed (libmicrohttpd does that)
         }
         else
+        {
+            if (url != NULL)
+            {
+                printf("[C] external URL download: '%s'\n", url);
+            }
+
             ret = http_not_found(connection);
+        }
 
         // deallocate datasetId
         for (int i = 0; i < va_count; i++)
