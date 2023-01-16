@@ -2592,12 +2592,19 @@ static enum MHD_Result on_http_connection(void *cls,
                 datasetId = (char **)malloc(sizeof(char *));
                 datasetId[0] = strdup(fname);
 
+                // the URL download is supposed to be a single-server operation, running on the root node only
                 if (is_root_rank)
                     ret = execute_alma(connection, datasetId, va_count, composite, root);
                 else
                     ret = http_acknowledge(connection);
 
                 // pass the URL to FORTRAN (single-server only)
+
+                // try to insert a NULL dataset, launch a download thread if the dataset does not exist yet
+                if (!insert_if_not_exists(datasetId[0], NULL))
+                {
+                    printf("[C] '%s' is not in the database, launching a download thread.\n", datasetId[0]);
+                }
             }
             else
                 ret = http_not_found(connection);
