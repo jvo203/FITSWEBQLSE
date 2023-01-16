@@ -2394,7 +2394,7 @@ static enum MHD_Result on_http_connection(void *cls,
             is_root_rank = false;
 
         // broadcast the FITS request across the cluster
-        if (is_root_rank)
+        if (is_root_rank && va_count > 0)
         {
             pthread_t tid;
 
