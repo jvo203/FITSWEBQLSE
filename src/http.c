@@ -2224,7 +2224,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
             if (url != NULL)
             {
-                char filepath[1024];
+                char filepath[1024 + 6];
                 memset(filepath, '\0', sizeof(filepath));
 
                 printf("[C] url: %s\n", url);
@@ -2260,7 +2260,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 // if the file does not exist download it
                 if (access(filepath, R_OK) == -1)
                 {
-                    char download[1024];
+                    char download[sizeof(filepath) + 5];
                     memset(download, '\0', sizeof(download));
 
                     // append ".tmp" to the filename
