@@ -2723,10 +2723,15 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     // create and detach a cURL download thread
                     pthread_t tid;
-                    int stat = pthread_create(&tid, NULL, &handle_url_download, strdup(url));
+
+                    char *arg = strdup(url);
+                    int stat = pthread_create(&tid, NULL, &handle_url_download, arg);
 
                     if (stat != 0)
+                    {
                         printf("[C] failed to create a cURL download thread.\n");
+                        free(arg);
+                    }
                     else
                         pthread_detach(tid);
                 }
