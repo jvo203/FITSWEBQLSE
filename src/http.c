@@ -702,7 +702,7 @@ static void *handle_url_download(void *arg)
         // append ".tmp" to the filename
         snprintf(download, sizeof(download) - 1, "%s.tmp", filepath);
 
-        printf("[C] '%s' cannot be accessed for reading, attempting a download next.\n", filepath);
+        printf("[C] '%s' does not exist, attempting a download.\n", filepath);
 
         // download the file to the temporary location with cURL
         CURL *curl;
