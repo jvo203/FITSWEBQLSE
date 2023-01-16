@@ -2585,9 +2585,22 @@ static enum MHD_Result on_http_connection(void *cls,
             if (url != NULL)
             {
                 printf("[C] external URL download: '%s'\n", url);
-            }
 
-            ret = http_not_found(connection);
+                va_count = 1;
+
+                // allocate datasetId
+                datasetId = (char **)malloc(sizeof(char *));
+                datasetId[0] = strdup(fname);
+
+                if (is_root_rank)
+                    ret = execute_alma(connection, datasetId, va_count, composite, root);
+                else
+                    ret = http_acknowledge(connection);
+
+                // pass the URL to FORTRAN (single-server only)
+            }
+            else
+                ret = http_not_found(connection);
         }
 
         // deallocate datasetId
