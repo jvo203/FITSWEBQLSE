@@ -2069,10 +2069,11 @@ static enum MHD_Result on_http_connection(void *cls,
         char **datasetId = NULL;
         int va_count = 0;
 
-        char *directory = NULL; // only needed by <options.local>
-        char *extension = NULL; // only needed by <options.local>
+        char *directory = NULL;
+        char *extension = NULL;
 
-        char fname[1024]; // only needed by the URL part
+        char *url = NULL;
+        char fname[1024]; // needed by the URL part
         memset(fname, '\0', sizeof(fname));
 
         if (va_count == 0) // if (options.local)
@@ -2220,7 +2221,7 @@ static enum MHD_Result on_http_connection(void *cls,
         // no datasets have been found by this point, check if an external URL has been passed
         if (va_count == 0)
         {
-            char *url = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "url");
+            url = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "url");
 
             if (url != NULL)
             {
