@@ -661,8 +661,111 @@ static void *handle_url_download(void *arg)
 
     char *url = (char *)arg;
 
-    free(arg);
+    char fname[1024]; // needed by the URL part
+    memset(fname, '\0', sizeof(fname));
 
+    char filepath[1024 + 6];
+    memset(filepath, '\0', sizeof(filepath));
+
+    char *extension = NULL;
+
+    // find the last '/'
+    char *last_slash = strrchr(url, '/');
+
+    if (last_slash != NULL)
+        strncpy(fname, last_slash + 1, sizeof(fname) - 1); // skip the slash character
+    else
+        strncpy(fname, url, sizeof(fname) - 1);
+
+    printf("[C] filename: %s\n", fname);
+
+    // find the last '.'
+    char *ext = strrchr(fname, '.');
+    if (ext != NULL)
+    {
+        *ext = '\0'; // terminate the fname string
+        ext++;       // skip the dot character
+        extension = ext;
+    }
+
+    if (extension == NULL)
+        snprintf(filepath, sizeof(filepath), "%s/%s.fits", options.fits_home, fname);
+    else
+        snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, fname, extension);
+
+    // if the file does not exist download it
+    if (access(filepath, R_OK) == -1)
+    {
+        char download[sizeof(filepath) + 5];
+        memset(download, '\0', sizeof(download));
+
+        // append ".tmp" to the filename
+        snprintf(download, sizeof(download) - 1, "%s.tmp", filepath);
+
+        printf("[C] '%s' cannot be accessed for reading, attempting a download next.\n", filepath);
+
+        // download the file to the temporary location with cURL
+        CURL *curl;
+        CURLcode res;
+        FILE *downloadfile;
+
+        curl = curl_easy_init();
+
+        if (curl)
+        {
+            curl_easy_setopt(curl, CURLOPT_URL, url);
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, download2file);
+
+            /* disable progress meter, set to 0L to enable it */
+            /* enable progress meter, set to 1L to disable it */
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+
+            /* open the file */
+            downloadfile = fopen(download, "wb");
+
+            if (downloadfile)
+            {
+                curl_easy_setopt(curl, CURLOPT_WRITEDATA, downloadfile);
+
+                res = curl_easy_perform(curl);
+
+                fclose(downloadfile);
+
+                if (res != CURLE_OK)
+                {
+                    fprintf(stderr, "curl_easy_perform() failed: %s : %s\n", url, curl_easy_strerror(res));
+
+                    // remove the download file
+                    remove(download);
+                }
+                else
+                {
+                    // get the cURL HTTP response code
+                    long http_code = 0;
+                    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+                    printf("[C] HTTP transfer completed; HTTP code %ld.\n", http_code);
+
+                    if (http_code == 200)
+                    {
+                        // rename the download file
+                        rename(download, filepath);
+                    }
+                    else
+                    {
+                        // remove the download file
+                        remove(download);
+                    }
+                }
+            }
+
+            curl_easy_cleanup(curl);
+        }
+    }
+
+    // release memory, exit the thread
+    free(arg);
     pthread_exit(NULL);
 }
 
