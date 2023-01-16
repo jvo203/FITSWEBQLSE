@@ -2330,29 +2330,32 @@ static enum MHD_Result on_http_connection(void *cls,
                 }
 
                 // hopefully the file exists now, if not the successive steps will return an error
-                va_count = 1;
+                if (access(filepath, R_OK) == 0)
+                {
+                    va_count = 1;
 
-                // allocate datasetId
-                datasetId = (char **)malloc(sizeof(char *));
-                datasetId[0] = strdup(fname);
+                    // allocate datasetId
+                    datasetId = (char **)malloc(sizeof(char *));
+                    datasetId[0] = strdup(fname);
 
-                char enc[256];
-                size_t len;
+                    char enc[256];
+                    size_t len;
 
-                GString *value = g_string_new(fname);
+                    GString *value = g_string_new(fname);
 
-                len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
-                enc[len] = '\0';
+                    len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                    enc[len] = '\0';
 
-                g_string_append_printf(uri, "filename=%s&", enc);
+                    g_string_append_printf(uri, "filename=%s&", enc);
 
-                g_string_free(value, TRUE);
+                    g_string_free(value, TRUE);
 
-                if (directory != NULL)
-                    g_string_append_printf(uri, "dir=%s&", directory);
+                    if (directory != NULL)
+                        g_string_append_printf(uri, "dir=%s&", directory);
 
-                if (extension != NULL)
-                    g_string_append_printf(uri, "ext=%s&", extension);
+                    if (extension != NULL)
+                        g_string_append_printf(uri, "ext=%s&", extension);
+                }
             }
         }
 
