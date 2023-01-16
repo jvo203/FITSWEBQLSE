@@ -653,6 +653,19 @@ static size_t download2file(void *ptr, size_t size, size_t nmemb, void *stream)
     return written;
 }
 
+// handle_url_download pthread handler
+static void *handle_url_download(void *arg)
+{
+    if (arg == NULL)
+        pthread_exit(NULL);
+
+    char *url = (char *)arg;
+
+    free(arg);
+
+    pthread_exit(NULL);
+}
+
 static enum MHD_Result on_http_connection(void *cls,
                                           struct MHD_Connection *connection,
                                           const char *url,
@@ -2604,6 +2617,15 @@ static enum MHD_Result on_http_connection(void *cls,
                 if (!insert_if_not_exists(datasetId[0], NULL))
                 {
                     printf("[C] '%s' is not in the database, launching a download thread.\n", datasetId[0]);
+
+                    // create and detach a cURL download thread
+                    pthread_t tid;
+                    int stat = pthread_create(&tid, NULL, &handle_url_download, strdup(url));
+
+                    if (stat != 0)
+                        printf("[C] failed to create a cURL download thread.\n");
+                    else
+                        pthread_detach(tid);
                 }
             }
             else
