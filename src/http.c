@@ -727,7 +727,7 @@ static void *handle_url_download(void *arg)
             if (downloadfile)
             {
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, downloadfile);
-                curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 2880); // FITS_CHUNK_LENGTH
+                // curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 2880); // FITS_CHUNK_LENGTH
 
                 res = curl_easy_perform(curl);
 
