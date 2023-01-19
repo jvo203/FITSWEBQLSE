@@ -1259,7 +1259,10 @@ contains
          call system_clock(finish)
          elapsed = real(finish - item%timestamp)/real(item%crate)
 
-         if (elapsed .gt. 60) dataset_timeout = 1
+         if (elapsed .gt. 60) then
+            print *, item%datasetid, ': dataset has been in error state for more than 60 seconds. Removing it.'
+            dataset_timeout = 1
+         end if
 
          ! unlock the mutex
          rc = c_pthread_mutex_unlock(item%timestamp_mtx)
@@ -1280,7 +1283,10 @@ contains
       call system_clock(finish)
       elapsed = real(finish - item%timestamp)/real(item%crate)
 
-      if (elapsed .gt. timeout) dataset_timeout = 1
+      if (elapsed .gt. timeout) then
+         print *, item%datasetid, ': dataset has been in cache for more than ', timeout, ' seconds. Removing it.'
+         dataset_timeout = 1
+      end if
 
       ! unlock the mutex
       rc = c_pthread_mutex_unlock(item%timestamp_mtx)
