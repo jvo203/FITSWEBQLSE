@@ -3802,6 +3802,7 @@ contains
       if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
          ! client nodes can skip 2D images
          if (c_associated(root)) then
+            bSuccess = .true. ! setting this to .true. prevents the error from getting set further on
             return
          end if
 
