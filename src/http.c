@@ -2376,8 +2376,8 @@ static enum MHD_Result on_http_connection(void *cls,
                     snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, fname, extension);
 
                 // if the file does not exist download it
-                if (access(filepath, R_OK) == -1)
-                // if (false) // to be moved to a new thread
+                // if (access(filepath, R_OK) == -1)
+                if (false) // to be moved to a new thread
                 {
                     char download[sizeof(filepath) + 5];
                     memset(download, '\0', sizeof(download));
