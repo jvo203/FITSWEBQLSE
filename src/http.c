@@ -667,6 +667,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     realsize = written;
 
     // only process <realsize> bytes
+    stream->total_size += realsize;
 
     return realsize;
 }
@@ -756,6 +757,7 @@ static void *handle_url_download(void *arg)
                 stream.buffer_size = 0;
 
             stream.running_size = 0;
+            stream.total_size = 0;
 
             stream.hdrEnd = false;
             stream.bitpix = 0;
@@ -791,8 +793,17 @@ static void *handle_url_download(void *arg)
 
                     if (http_code == 200)
                     {
-                        // rename the download file
-                        // rename(download, filepath);// disabled for now (during development)
+                        // remove the file if the processed size was less than FITS_CHUNK_LENGTH
+                        if (stream.total_size < FITS_CHUNK_LENGTH)
+                        {
+                            // remove the download file
+                            remove(download);
+                        }
+                        else
+                        {
+                            // rename the download file
+                            // rename(download, filepath); // disabled for now (during development)
+                        }
                     }
                     else
                     {
