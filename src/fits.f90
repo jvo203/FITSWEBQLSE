@@ -1331,7 +1331,7 @@ contains
 
       ! check if the dataset can be cached in the first place
       if (.not. item%cache) then
-         print *, item%datasetid, ': dataset is not cacheable.'
+         print *, item%datasetid, ': dataset is not cacheable, destroying it.'
 
          ! destroy mutexes
          rc = c_pthread_mutex_destroy(item%header_mtx)
@@ -1355,6 +1355,7 @@ contains
             deallocate (item%compressed)
          end if
 
+         deallocate (item)
          return
       end if
 
