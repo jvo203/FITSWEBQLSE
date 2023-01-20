@@ -653,6 +653,15 @@ static size_t download2file(void *ptr, size_t size, size_t nmemb, void *stream)
     return written;
 }
 
+// cURL FITS-parsing download handler
+static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+    struct FITSDownloadStream *download = (struct FITSDownloadStream *)stream;
+
+    size_t written = fwrite(ptr, size, nmemb, download->fp);
+    return written;
+}
+
 // handle_url_download pthread handler
 static void *handle_url_download(void *arg)
 {
@@ -707,7 +716,6 @@ static void *handle_url_download(void *arg)
         // download the file to the temporary location with cURL
         CURL *curl;
         CURLcode res;
-        FILE *downloadfile;
 
         curl = curl_easy_init();
 
@@ -715,18 +723,42 @@ static void *handle_url_download(void *arg)
         {
             curl_easy_setopt(curl, CURLOPT_URL, url);
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, download2file);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, parse2file);
 
             /* disable progress meter, set to 0L to enable it */
             /* enable progress meter, set to 1L to disable it */
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
+            // a download file
+            FILE *downloadfile;
+
+            // a download structure
+            struct FITSDownloadStream stream;
+
             /* open the file */
             downloadfile = fopen(download, "wb");
 
+            stream.fp = downloadfile;
+            stream.buffer = (char *)malloc(CURL_MAX_WRITE_SIZE + FITS_CHUNK_LENGTH);
+
+            if (stream.buffer != NULL)
+                stream.buffer_size = CURL_MAX_WRITE_SIZE + FITS_CHUNK_LENGTH;
+            else
+                stream.buffer_size = 0;
+
+            stream.running_size = 0;
+
+            stream.hdrEnd = false;
+            stream.bitpix = 0;
+            stream.naxis = 0;
+            stream.naxes[0] = 0;
+            stream.naxes[1] = 0;
+            stream.naxes[2] = 1;
+            stream.naxes[3] = 1;
+
             if (downloadfile)
             {
-                curl_easy_setopt(curl, CURLOPT_WRITEDATA, downloadfile);
+                curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
                 curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH);
 
                 res = curl_easy_perform(curl);
@@ -760,6 +792,8 @@ static void *handle_url_download(void *arg)
                     }
                 }
             }
+
+            free(stream.buffer);
 
             curl_easy_cleanup(curl);
         }
