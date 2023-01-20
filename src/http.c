@@ -656,10 +656,19 @@ static size_t download2file(void *ptr, size_t size, size_t nmemb, void *user)
 // cURL FITS-parsing download handler
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
+    size_t realsize = size * nmemb;
+
+    if (user == NULL) // do nothing in particular
+        return realsize;
+
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
 
     size_t written = fwrite(ptr, size, nmemb, stream->fp);
-    return written;
+    realsize = written;
+
+    // only process <realsize> bytes
+
+    return realsize;
 }
 
 // handle_url_download pthread handler
