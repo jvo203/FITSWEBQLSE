@@ -1,5 +1,24 @@
 #pragma once
 
+#include <stdio.h>
+
+#define FITS_CHUNK_LENGTH 2880
+#define FITS_LINE_LENGTH 80
+
+struct FITSDownloadStream
+{
+    FILE *fp;
+    char *buffer;
+    size_t buffer_size;
+    size_t running_size;
+
+    // a minimal FITS header
+    bool hdrEnd;
+    int bitpix;
+    int naxis;
+    int naxes[4];
+};
+
 enum zoom_shape
 {
     circle,

@@ -31,9 +31,6 @@
 // NASA CFITSIO
 #include <fitsio.h>
 
-#define FITS_CHUNK_LENGTH 2880
-#define FITS_LINE_LENGTH 80
-
 // PostgreSQL
 #include <libpq-fe.h>
 
@@ -730,7 +727,7 @@ static void *handle_url_download(void *arg)
             if (downloadfile)
             {
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, downloadfile);
-                // curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH);
+                curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH);
 
                 res = curl_easy_perform(curl);
 
