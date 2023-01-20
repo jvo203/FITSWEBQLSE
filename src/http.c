@@ -669,6 +669,25 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     // only process <realsize> bytes
     stream->total_size += realsize;
 
+    if (stream->buffer == NULL)
+        return realsize;
+
+    size_t new_size = stream->running_size + realsize;
+
+    // resize the buffer if needed
+    if (new_size > stream->buffer_size)
+    {
+        stream->buffer_size *= 2;
+        stream->buffer = realloc(stream->buffer, stream->buffer_size);
+    };
+
+    if (stream->buffer == NULL)
+        return realsize;
+
+    // append the data to the buffer
+    memcpy(stream->buffer + stream->running_size, ptr, realsize);
+    stream->running_size += realsize;
+
     return realsize;
 }
 
@@ -793,6 +812,9 @@ static void *handle_url_download(void *arg)
 
                     if (http_code == 200)
                     {
+                        // report buffer_size, running_size & total_size
+                        printf("[C] buffer_size: %zu, running_size: %zu, total_size: %zu bytes.\n", stream.buffer_size, stream.running_size, stream.total_size);
+
                         // remove the file if the processed size was less than FITS_CHUNK_LENGTH
                         if (stream.total_size < FITS_CHUNK_LENGTH)
                         {
