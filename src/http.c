@@ -653,11 +653,63 @@ static size_t download2file(void *ptr, size_t size, size_t nmemb, void *user)
     return written;
 }
 
+int hdr_get_int_value(char *hdr)
+{
+    // printf("VALUE(%s)\n", hdr);
+    return atoi(hdr);
+};
+
 bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, size_t size)
 {
-    printf("scan_fits_header:\tsize = %zu\n", size);
+    printf("[C] scan_fits_header:\tsize = %zu\n", size);
 
+    char hdrLine[FITS_LINE_LENGTH + 1];
     bool end = false;
+
+    // scan the FITS header as much as we can in <FITS_LINE_LENGTH> chunks
+    char *buffer = stream->buffer + stream->cursor;
+    size_t buffer_size = stream->running_size - stream->cursor;
+
+    hdrLine[sizeof(hdrLine) - 1] = '\0';
+
+    int no_lines = 0;
+
+    // process in FITS_LINE_LENGTH blocks
+    for (size_t offset = 0; offset < buffer_size; offset += FITS_LINE_LENGTH)
+    {
+        strncpy(hdrLine, buffer + offset, FITS_LINE_LENGTH);
+        // printf("%s\n", hdrLine);
+        no_lines++;
+
+        if (strncmp(hdrLine, "END       ", 10) == 0)
+        {
+            end = true;
+            printf("[C] FITS HEADER END DETECTED.\n");
+        };
+
+        if (strncmp(hdrLine, "BITPIX  = ", 10) == 0)
+            stream->bitpix = hdr_get_int_value(hdrLine + 10);
+
+        if (strncmp(hdrLine, "NAXIS   = ", 10) == 0)
+            stream->naxis = hdr_get_int_value(hdrLine + 10);
+
+        if (strncmp(hdrLine, "NAXIS1  = ", 10) == 0)
+            stream->naxes[0] = hdr_get_int_value(hdrLine + 10);
+
+        if (strncmp(hdrLine, "NAXIS2  = ", 10) == 0)
+            stream->naxes[1] = hdr_get_int_value(hdrLine + 10);
+
+        if (strncmp(hdrLine, "NAXIS3  = ", 10) == 0)
+            stream->naxes[2] = hdr_get_int_value(hdrLine + 10);
+
+        if (strncmp(hdrLine, "NAXIS4  = ", 10) == 0)
+            stream->naxes[3] = hdr_get_int_value(hdrLine + 10);
+    }
+
+    printf("[C] scan_fits_header:\tlines = %d\n", no_lines);
+
+    // move the cursor forward
+    stream->cursor += FITS_LINE_LENGTH * no_lines;
 
     return end;
 }
@@ -700,7 +752,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     // parse the header
     if (!stream->hdrEnd)
     {
-        if (stream->running_size >= FITS_CHUNK_LENGTH)
+        if ((stream->running_size - stream->cursor) >= FITS_CHUNK_LENGTH)
         {
             bool end = scan_fits_header(stream, (char *)ptr, realsize);
 
@@ -839,8 +891,11 @@ static void *handle_url_download(void *arg)
 
                     if (http_code == 200)
                     {
-                        // report buffer_size, running_size & total_size
-                        printf("[C] FITSDownloadStream buffer_size: %zu, running_size: %zu, total_size: %zu bytes.\n", stream.buffer_size, stream.running_size, stream.total_size);
+                        // report buffer_size, running_size, total_size & cursor
+                        printf("[C] FITSDownloadStream buffer_size: %zu, running_size: %zu, total_size: %zu bytes, cursor at %zu.\n", stream.buffer_size, stream.running_size, stream.total_size, stream.cursor);
+
+                        // report the FITS header (hdrEnd, bitpix, naxis, naxes)
+                        printf("[C] FITSDownloadStream hdrEnd: %d, bitpix: %d, naxis: %d, naxes: %d, %d, %d, %d.\n", stream.hdrEnd, stream.bitpix, stream.naxis, stream.naxes[0], stream.naxes[1], stream.naxes[2], stream.naxes[3]);
 
                         // remove the file if the processed size was less than FITS_CHUNK_LENGTH
                         if (stream.total_size < FITS_CHUNK_LENGTH)
