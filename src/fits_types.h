@@ -11,6 +11,7 @@ struct FITSDownloadStream
     char *buffer;
     size_t buffer_size;
     size_t running_size;
+    size_t cursor;
     size_t total_size;
 
     // a bare-bones FITS header

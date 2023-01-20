@@ -653,6 +653,15 @@ static size_t download2file(void *ptr, size_t size, size_t nmemb, void *user)
     return written;
 }
 
+bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, size_t size)
+{
+    printf("scan_fits_header:\tsize = %zu\n", size);
+
+    bool end = false;
+
+    return end;
+}
+
 // cURL FITS-parsing download handler
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
@@ -678,7 +687,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     if (new_size > stream->buffer_size)
     {
         stream->buffer_size *= 2;
-        stream->buffer = realloc(stream->buffer, stream->buffer_size);
+        stream->buffer = (char *)realloc(stream->buffer, stream->buffer_size);
     };
 
     if (stream->buffer == NULL)
@@ -687,6 +696,21 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     // append the data to the buffer
     memcpy(stream->buffer + stream->running_size, ptr, realsize);
     stream->running_size += realsize;
+
+    // parse the header
+    if (!stream->hdrEnd)
+    {
+        if (stream->running_size >= FITS_CHUNK_LENGTH)
+        {
+            bool end = scan_fits_header(stream, (char *)ptr, realsize);
+
+            if (end && stream->naxis > 0)
+            {
+                stream->hdrEnd = true;
+                // stream->dataStart = stream->running_size;
+            }
+        }
+    }
 
     return realsize;
 }
@@ -776,6 +800,7 @@ static void *handle_url_download(void *arg)
                 stream.buffer_size = 0;
 
             stream.running_size = 0;
+            stream.cursor = 0;
             stream.total_size = 0;
 
             stream.hdrEnd = false;
