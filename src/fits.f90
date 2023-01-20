@@ -355,6 +355,8 @@ module fits
       real(kind=c_float), allocatable :: mean_spectrum(:)
       real(kind=c_float), allocatable :: integrated_spectrum(:)
 
+      ! datasets opened from a URL will not be cached
+      logical :: cache = .true.
    contains
       final :: close_fits_file
    end type dataset
@@ -1326,6 +1328,35 @@ contains
       cache_threshold = threshold*(1024**3)! [GiB]
 
       call c_f_pointer(ptr, item)
+
+      ! check if the dataset can be cached in the first place
+      if (.not. item%cache) then
+         print *, item%datasetid, ': dataset is not cacheable.'
+
+         ! destroy mutexes
+         rc = c_pthread_mutex_destroy(item%header_mtx)
+         rc = c_pthread_mutex_destroy(item%error_mtx)
+         rc = c_pthread_mutex_destroy(item%ok_mtx)
+         rc = c_pthread_mutex_destroy(item%progress_mtx)
+         rc = c_pthread_mutex_destroy(item%image_mtx)
+         rc = c_pthread_mutex_destroy(item%video_mtx)
+         rc = c_pthread_mutex_destroy(item%timestamp_mtx)
+
+         ! deallocate compressed memory regions
+         if (allocated(item%compressed)) then
+            do i = 1, size(item%compressed)
+
+               if (associated(item%compressed(i)%ptr)) then
+                  deallocate (item%compressed(i)%ptr)
+                  nullify (item%compressed(i)%ptr)
+               end if
+            end do
+
+            deallocate (item%compressed)
+         end if
+
+         return
+      end if
 
       allocate (character(len + 1 + size(item%datasetid))::cache)
 
