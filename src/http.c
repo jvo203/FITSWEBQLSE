@@ -647,18 +647,18 @@ static enum MHD_Result send_progress(struct MHD_Connection *connection, float pr
 }
 
 // cURL file-saving download handler
-static size_t download2file(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t download2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
-    size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
+    size_t written = fwrite(ptr, size, nmemb, (FILE *)user);
     return written;
 }
 
 // cURL FITS-parsing download handler
-static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
-    struct FITSDownloadStream *download = (struct FITSDownloadStream *)stream;
+    struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
 
-    size_t written = fwrite(ptr, size, nmemb, download->fp);
+    size_t written = fwrite(ptr, size, nmemb, stream->fp);
     return written;
 }
 
