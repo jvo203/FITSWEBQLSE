@@ -674,10 +674,10 @@ bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, s
 
     int no_lines = 0;
 
-    // process in whole FITS_CHUNK_LENGTH multiples
+    // process in multiples of <FITS_CHUNK_LENGTH>
     size_t work_size = buffer_size - (buffer_size % FITS_CHUNK_LENGTH);
 
-    // process in FITS_LINE_LENGTH blocks
+    // process one line at a time
     for (size_t offset = 0; offset < work_size; offset += FITS_LINE_LENGTH)
     {
         strncpy(hdrLine, buffer + offset, FITS_LINE_LENGTH);
