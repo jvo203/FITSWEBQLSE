@@ -813,7 +813,7 @@ static void *handle_url_download(void *arg)
                     if (http_code == 200)
                     {
                         // report buffer_size, running_size & total_size
-                        printf("[C] buffer_size: %zu, running_size: %zu, total_size: %zu bytes.\n", stream.buffer_size, stream.running_size, stream.total_size);
+                        printf("[C] FITSDownloadStream buffer_size: %zu, running_size: %zu, total_size: %zu bytes.\n", stream.buffer_size, stream.running_size, stream.total_size);
 
                         // remove the file if the processed size was less than FITS_CHUNK_LENGTH
                         if (stream.total_size < FITS_CHUNK_LENGTH)
