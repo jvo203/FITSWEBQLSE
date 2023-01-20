@@ -1329,18 +1329,18 @@ contains
 
       call c_f_pointer(ptr, item)
 
+      ! destroy mutexes
+      rc = c_pthread_mutex_destroy(item%header_mtx)
+      rc = c_pthread_mutex_destroy(item%error_mtx)
+      rc = c_pthread_mutex_destroy(item%ok_mtx)
+      rc = c_pthread_mutex_destroy(item%progress_mtx)
+      rc = c_pthread_mutex_destroy(item%image_mtx)
+      rc = c_pthread_mutex_destroy(item%video_mtx)
+      rc = c_pthread_mutex_destroy(item%timestamp_mtx)
+
       ! check if the dataset can be cached in the first place
       if (.not. item%cache) then
          print *, item%datasetid, ': dataset is not cacheable, destroying it.'
-
-         ! destroy mutexes
-         rc = c_pthread_mutex_destroy(item%header_mtx)
-         rc = c_pthread_mutex_destroy(item%error_mtx)
-         rc = c_pthread_mutex_destroy(item%ok_mtx)
-         rc = c_pthread_mutex_destroy(item%progress_mtx)
-         rc = c_pthread_mutex_destroy(item%image_mtx)
-         rc = c_pthread_mutex_destroy(item%video_mtx)
-         rc = c_pthread_mutex_destroy(item%timestamp_mtx)
 
          ! deallocate compressed memory regions
          if (allocated(item%compressed)) then
@@ -1359,6 +1359,7 @@ contains
          return
       end if
 
+      ! proceed with caching the dataset
       allocate (character(len + 1 + size(item%datasetid))::cache)
 
       num_cache_entries = count_cache_levels(dir, len)
@@ -1474,14 +1475,6 @@ contains
       print *, 'deleting ', item%datasetid, '; cache dir: ', cache(1:cache_len), ', status', status, ', bSuccess', bSuccess
 
       ! write the dataset to a cache file so as to speed up subsequent loading
-
-      rc = c_pthread_mutex_destroy(item%header_mtx)
-      rc = c_pthread_mutex_destroy(item%error_mtx)
-      rc = c_pthread_mutex_destroy(item%ok_mtx)
-      rc = c_pthread_mutex_destroy(item%progress_mtx)
-      rc = c_pthread_mutex_destroy(item%image_mtx)
-      rc = c_pthread_mutex_destroy(item%video_mtx)
-      rc = c_pthread_mutex_destroy(item%timestamp_mtx)
 
       index_unit = -1
       data_unit = -1
