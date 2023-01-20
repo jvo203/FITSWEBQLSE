@@ -783,7 +783,7 @@ static void *handle_url_download(void *arg)
                     if (http_code == 200)
                     {
                         // rename the download file
-                        rename(download, filepath);
+                        // rename(download, filepath);// disabled for now (during development)
                     }
                     else
                     {
