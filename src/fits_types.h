@@ -12,7 +12,7 @@ struct FITSDownloadStream
     size_t buffer_size;
     size_t running_size;
 
-    // a minimal FITS header
+    // a bare-bones FITS header
     bool hdrEnd;
     int bitpix;
     int naxis;
