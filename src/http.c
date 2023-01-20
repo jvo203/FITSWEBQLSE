@@ -707,7 +707,9 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             if (end && stream->naxis > 0)
             {
                 stream->hdrEnd = true;
-                // stream->dataStart = stream->running_size;
+
+                // pass the header to FORTRAN
+                // ...
             }
         }
     }
