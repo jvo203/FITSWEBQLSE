@@ -8,6 +8,8 @@
 struct FITSDownloadStream
 {
     FILE *fp;
+    char *url;
+    char *fname;
     char *buffer;
     size_t buffer_size;
     size_t running_size;

@@ -882,6 +882,9 @@ static void *handle_url_download(void *arg)
             // a download structure
             struct FITSDownloadStream stream;
 
+            stream.url = url;
+            stream.fname = fname;
+
             /* open the file */
             downloadfile = fopen(download, "wb");
 
