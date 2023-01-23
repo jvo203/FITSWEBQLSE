@@ -3204,7 +3204,7 @@ contains
 
       ! FITS header
       character :: record*80, key*10, value*70, comment*70
-      integer naxis, bitpix, nkeys, nspace, hdutype
+      integer naxis, bitpix
       integer naxes(4)
 
       integer :: i, status
