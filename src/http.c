@@ -785,7 +785,8 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
                 // open an in-memory FITS file from the buffer
                 status = 0;
-                if (fits_open_file(&fptr, stream->fname, READONLY, &status))
+                // if (fits_open_file(&fptr, stream->fname, READONLY, &status))
+                if (fits_open_memfile(&fptr, stream->fname, READONLY, (void **)&stream->buffer, &stream->cursor, 0, NULL, &status))
                 {
                     printf("[C] fits_open_file failed(%s) with status %d.\n", stream->fname, status);
                     printerror(status);
