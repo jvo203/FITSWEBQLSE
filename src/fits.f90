@@ -3202,7 +3202,12 @@ contains
 
       type(dataset), pointer :: item
 
-      integer :: i, rc
+      ! FITS header
+      character :: record*80, key*10, value*70, comment*70
+      integer naxis, bitpix, nkeys, nspace, hdutype
+
+      integer :: i
+      integer(c_int) :: rc
       logical :: bSuccess
 
       print *, "[load_fits_header] datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
@@ -3236,6 +3241,17 @@ contains
       item%cache = .false. ! disable caching of this dataset
 
       call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
+
+      ! needs to be protected with a mutex
+      rc = c_pthread_mutex_lock(logger_mtx)
+
+      if (rc .eq. 0) then
+         ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
+         call logger%info('load_fits_header', 'parsing '//strFilename//'; FLUX: '//strFlux)
+
+         ! unlock the mutex
+         rc = c_pthread_mutex_unlock(logger_mtx)
+      end if
 
       bSuccess = .false.
 
