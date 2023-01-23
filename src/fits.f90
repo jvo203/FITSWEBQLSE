@@ -3205,6 +3205,7 @@ contains
       ! FITS header
       integer naxis, bitpix
       integer naxes(4)
+      integer(kind=8) :: npixels
 
       integer :: i, status
       integer(c_int) :: rc
@@ -3316,12 +3317,17 @@ contains
       ! reset the progress
       ! progress is being handled differently for URL-based datasets
       ! the total is now given by the number of pixels in the FITS file
+      npixels = naxes(1)*naxes(2)
+
       if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
+         ! do nothing
          call set_progress(item, 0, naxes(1)*naxes(2))
       else
+         npixels = npixels * naxes(3)
          call set_progress(item, 0, naxes(1)*naxes(2)*naxes(3))
       end if
 
+      ! call set_progress(item, 0, npixels)
       call set_header_status(item, .true.)
 
       bSuccess = .true.
