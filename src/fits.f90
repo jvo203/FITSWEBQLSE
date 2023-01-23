@@ -3203,7 +3203,6 @@ contains
       type(dataset), pointer :: item
 
       ! FITS header
-      character :: record*80, key*10, value*70, comment*70
       integer naxis, bitpix
       integer naxes(4)
 
@@ -3258,11 +3257,6 @@ contains
       naxes = (/0, 0, 0, 0/)
       bSuccess = .false.
 
-      record = ''
-      key = ''
-      value = ''
-      comment = ''
-
       ! reset the strings
       item%frameid = ''
       item%object = ''
@@ -3298,8 +3292,36 @@ contains
       ! reset the FITS header
       if (allocated(item%hdr)) deallocate (item%hdr)
 
-      ! The STATUS parameter must always be initialized.
-      status = 0
+      ! read the FITS header
+      call parse_fits_header(item, unit, naxis, naxes, bitpix)
+
+
+      !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
+      if (naxis .lt. 2) then
+         print *, 'READIMAGE failed to read the NAXISn keywords.'
+         call set_error_status(item, .true.)
+         return
+      end if
+
+      ! detect the FITS header types and units (frequency, velocity)
+      call frame_reference_type(item)
+      call frame_reference_unit(item)
+
+      item%bitpix = bitpix
+      item%naxis = naxis
+      item%naxes = naxes
+
+      ! start the timer
+      call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
+
+      ! reset the progress
+      if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
+         call set_progress(item, 0, 1)
+      else
+         call set_progress(item, 0, naxes(3))
+      end if
+
+      call set_header_status(item, .true.)
 
    end subroutine load_fits_header
 
@@ -3463,7 +3485,7 @@ contains
       integer, intent(inout) :: naxis, bitpix
       integer, intent(inout) :: naxes(4)
 
-      integer :: j, status
+      integer :: i, j, status, nkeys, nspace, hdutype
       character :: record*80, key*10, value*70, comment*70
 
       status = 0
@@ -3477,154 +3499,6 @@ contains
       bitpix = 0
       naxis = 0
       naxes = (/0, 0, 0, 0/)
-
-   end subroutine parse_fits_header
-
-   subroutine read_fits_file(item, filename, flux, root, bSuccess)
-      use omp_lib
-      implicit none
-
-      type(dataset), pointer, intent(inout) :: item
-      character(len=*), intent(in) :: filename, flux
-      ! the pointer will be passed back to C when requesting FITS file ranges
-      ! from the root node and submitting results to the cluster root
-      type(c_ptr), intent(in) :: root
-      logical, intent(out) ::  bSuccess
-
-      integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i
-      integer naxis, bitpix
-      integer cn, cm
-      integer(kind=8) :: npixels, j
-      integer naxes(4)
-      integer(kind=8) firstpix, lastpix
-      integer max_threads, tid, frame
-      integer(c_int) :: start, end, num_per_node
-      integer :: total_per_node
-      integer, dimension(4) :: fpixels, lpixels, incs
-      logical test_ignrval
-
-      real :: nullval, tmp
-      character :: record*80, key*10, value*70, comment*70
-      logical :: anynull
-
-      ! local buffers
-      real(kind=4), allocatable :: local_buffer(:)
-      logical(kind=1), allocatable :: local_mask(:)
-
-      ! shared variables
-      real(kind=4), allocatable :: pixels(:)
-      logical(kind=1), allocatable :: mask(:)
-
-      ! thread-local variables
-      real(kind=c_float), allocatable, target :: thread_buffer(:)
-      real(kind=c_float), allocatable, target :: thread_pixels(:)
-      logical(kind=c_bool), allocatable, target :: thread_mask(:)
-      real(kind=c_float), allocatable :: thread_arr(:, :)
-      real(kind=c_float), allocatable :: thread_data(:)
-      logical(kind=c_bool), allocatable, target :: data_mask(:)
-      real(kind=c_float), target :: res(4)
-      logical thread_bSuccess
-
-      real mean_spec_val, int_spec_val
-      real(kind=8) :: cdelt3
-      real frame_min, frame_max, frame_median
-
-      ! local statistics
-      real(kind=4) :: dmin, dmax
-
-      ! OpenMP multi-threading
-      integer, dimension(:), allocatable :: thread_units
-
-      integer(c_int) :: rc
-
-      if (.not. c_associated(root)) then
-         ! needs to be protected with a mutex
-         rc = c_pthread_mutex_lock(logger_mtx)
-
-         if (rc .eq. 0) then
-            ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-            call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
-
-            ! unlock the mutex
-            rc = c_pthread_mutex_unlock(logger_mtx)
-         end if
-      end if
-
-      ! print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
-
-      naxis = 0
-      naxes = (/0, 0, 0, 0/)
-      bSuccess = .false.
-
-      record = ''
-      key = ''
-      value = ''
-      comment = ''
-
-      ! reset the strings
-      item%frameid = ''
-      item%object = ''
-      item%line = ''
-      item%filter = ''
-      item%date_obs = ''
-      item%btype = ''
-      item%bunit = ''
-      item%specsys = ''
-      item%timesys = ''
-
-      ! special handling for the flux
-      ! test the first character for 'N' ('NULL')
-      if (allocated(item%flux)) deallocate (item%flux)
-      if (flux(1:1) .ne. 'N') allocate (item%flux, source=flux)
-
-      item%cunit1 = ''
-      item%cunit2 = ''
-      item%cunit3 = ''
-
-      item%ctype1 = ''
-      item%ctype2 = ''
-      item%ctype3 = ''
-
-      item%dmin = ieee_value(0.0, ieee_quiet_nan)
-      item%dmax = ieee_value(0.0, ieee_quiet_nan)
-      item%dmedian = ieee_value(0.0, ieee_quiet_nan)
-
-      item%dmad = ieee_value(0.0, ieee_quiet_nan)
-      item%dmadN = ieee_value(0.0, ieee_quiet_nan)
-      item%dmadP = ieee_value(0.0, ieee_quiet_nan)
-
-      ! reset the FITS header
-      if (allocated(item%hdr)) deallocate (item%hdr)
-
-      ! The STATUS parameter must always be initialized.
-      status = 0
-
-      rc = c_pthread_mutex_lock(file_unit_mtx)
-
-      ! Get an unused Logical Unit Number to use to open the FITS file.
-      call ftgiou(unit, status)
-
-      if (status .ne. 0) then
-         rc = c_pthread_mutex_unlock(file_unit_mtx)
-         return
-      end if
-
-      item%unit = unit
-
-      ! open the FITS file, with read - only access.The returned BLOCKSIZE
-      ! parameter is obsolete and should be ignored.
-      readwrite = 0
-      call ftopen(unit, filename, readwrite, blocksize, status)
-
-      rc = c_pthread_mutex_unlock(file_unit_mtx)
-
-      if (status .ne. 0) then
-         return
-      end if
-
-      ! obtain file size
-      inquire (FILE=filename, SIZE=item%filesize)
-      print *, 'filename: ', filename, ', filesize:', item%filesize
 
       j = 0
 100   continue
@@ -3903,10 +3777,160 @@ contains
          end if
       end if
 
+   end subroutine parse_fits_header
+
+   subroutine read_fits_file(item, filename, flux, root, bSuccess)
+      use omp_lib
+      implicit none
+
+      type(dataset), pointer, intent(inout) :: item
+      character(len=*), intent(in) :: filename, flux
+      ! the pointer will be passed back to C when requesting FITS file ranges
+      ! from the root node and submitting results to the cluster root
+      type(c_ptr), intent(in) :: root
+      logical, intent(out) ::  bSuccess
+
+      integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i
+      integer naxis, bitpix
+      integer cn, cm
+      integer(kind=8) :: npixels, j
+      integer naxes(4)
+      integer(kind=8) firstpix, lastpix
+      integer max_threads, tid, frame
+      integer(c_int) :: start, end, num_per_node
+      integer :: total_per_node
+      integer, dimension(4) :: fpixels, lpixels, incs
+      logical test_ignrval
+
+      real :: nullval, tmp
+      character :: record*80, key*10, value*70, comment*70
+      logical :: anynull
+
+      ! local buffers
+      real(kind=4), allocatable :: local_buffer(:)
+      logical(kind=1), allocatable :: local_mask(:)
+
+      ! shared variables
+      real(kind=4), allocatable :: pixels(:)
+      logical(kind=1), allocatable :: mask(:)
+
+      ! thread-local variables
+      real(kind=c_float), allocatable, target :: thread_buffer(:)
+      real(kind=c_float), allocatable, target :: thread_pixels(:)
+      logical(kind=c_bool), allocatable, target :: thread_mask(:)
+      real(kind=c_float), allocatable :: thread_arr(:, :)
+      real(kind=c_float), allocatable :: thread_data(:)
+      logical(kind=c_bool), allocatable, target :: data_mask(:)
+      real(kind=c_float), target :: res(4)
+      logical thread_bSuccess
+
+      real mean_spec_val, int_spec_val
+      real(kind=8) :: cdelt3
+      real frame_min, frame_max, frame_median
+
+      ! local statistics
+      real(kind=4) :: dmin, dmax
+
+      ! OpenMP multi-threading
+      integer, dimension(:), allocatable :: thread_units
+
+      integer(c_int) :: rc
+
+      if (.not. c_associated(root)) then
+         ! needs to be protected with a mutex
+         rc = c_pthread_mutex_lock(logger_mtx)
+
+         if (rc .eq. 0) then
+            ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
+            call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
+
+            ! unlock the mutex
+            rc = c_pthread_mutex_unlock(logger_mtx)
+         end if
+      end if
+
+      ! print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
+
+      naxis = 0
+      naxes = (/0, 0, 0, 0/)
+      bSuccess = .false.
+
+      record = ''
+      key = ''
+      value = ''
+      comment = ''
+
+      ! reset the strings
+      item%frameid = ''
+      item%object = ''
+      item%line = ''
+      item%filter = ''
+      item%date_obs = ''
+      item%btype = ''
+      item%bunit = ''
+      item%specsys = ''
+      item%timesys = ''
+
+      ! special handling for the flux
+      ! test the first character for 'N' ('NULL')
+      if (allocated(item%flux)) deallocate (item%flux)
+      if (flux(1:1) .ne. 'N') allocate (item%flux, source=flux)
+
+      item%cunit1 = ''
+      item%cunit2 = ''
+      item%cunit3 = ''
+
+      item%ctype1 = ''
+      item%ctype2 = ''
+      item%ctype3 = ''
+
+      item%dmin = ieee_value(0.0, ieee_quiet_nan)
+      item%dmax = ieee_value(0.0, ieee_quiet_nan)
+      item%dmedian = ieee_value(0.0, ieee_quiet_nan)
+
+      item%dmad = ieee_value(0.0, ieee_quiet_nan)
+      item%dmadN = ieee_value(0.0, ieee_quiet_nan)
+      item%dmadP = ieee_value(0.0, ieee_quiet_nan)
+
+      ! reset the FITS header
+      if (allocated(item%hdr)) deallocate (item%hdr)
+
+      ! The STATUS parameter must always be initialized.
+      status = 0
+
+      rc = c_pthread_mutex_lock(file_unit_mtx)
+
+      ! Get an unused Logical Unit Number to use to open the FITS file.
+      call ftgiou(unit, status)
+
+      if (status .ne. 0) then
+         rc = c_pthread_mutex_unlock(file_unit_mtx)
+         return
+      end if
+
+      item%unit = unit
+
+      ! open the FITS file, with read - only access.The returned BLOCKSIZE
+      ! parameter is obsolete and should be ignored.
+      readwrite = 0
+      call ftopen(unit, filename, readwrite, blocksize, status)
+
+      rc = c_pthread_mutex_unlock(file_unit_mtx)
+
+      if (status .ne. 0) then
+         return
+      end if
+
+      ! obtain file size
+      inquire (FILE=filename, SIZE=item%filesize)
+      print *, 'filename: ', filename, ', filesize:', item%filesize
+
+      ! read the FITS header
+      call parse_fits_header(item, unit, naxis, naxes, bitpix)
+
       !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
       if (naxis .lt. 2) then
          print *, 'READIMAGE failed to read the NAXISn keywords.'
-
          go to 200
       end if
 
