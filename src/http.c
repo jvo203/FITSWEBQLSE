@@ -798,9 +798,10 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 unit = CFITS2Unit(fptr);
                 printf("[C] FITS FORTRAN unit number = %d\n", unit);
 
+                // pass the header to FORTRAN for full parsing
                 if (unit != 0)
                 {
-                    // pass the header to FORTRAN for full parsing
+                    static const char flux[] = "NULL";
                     // ...
                 }
 
@@ -893,6 +894,7 @@ static void *handle_url_download(void *arg)
             // a download structure
             struct FITSDownloadStream stream;
 
+            stream.datasetid = fname;
             stream.url = url;
             stream.fname = download;
 
