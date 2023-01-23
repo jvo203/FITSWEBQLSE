@@ -3314,6 +3314,8 @@ contains
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
       ! reset the progress
+      ! progress is being handled differently for URL-based datasets
+      ! the total is now given by the number of pixels in the FITS file
       if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
          call set_progress(item, 0, naxes(1)*naxes(2))
       else
