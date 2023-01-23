@@ -3315,9 +3315,9 @@ contains
 
       ! reset the progress
       if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
-         call set_progress(item, 0, 1)
+         call set_progress(item, 0, naxes(1)*naxes(2))
       else
-         call set_progress(item, 0, naxes(3))
+         call set_progress(item, 0, naxes(1)*naxes(2)*naxes(3))
       end if
 
       call set_header_status(item, .true.)
