@@ -778,7 +778,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 stream->hdrEnd = true;
 
                 // print the header string from 0 to cursor, passing the string length to printf
-                printf("[C] FITS HEADER:\n%.*s\n", stream->cursor, stream->buffer);
+                // printf("[C] FITS HEADER:\n%.*s\n", stream->cursor, stream->buffer);
 
                 fitsfile *fptr; /* pointer to the FITS file, defined in fitsio.h */
                 int status = 0;
