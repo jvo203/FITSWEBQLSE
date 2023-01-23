@@ -3187,6 +3187,18 @@ contains
 
    end function count_cache_levels
 
+   subroutine load_fits_header(datasetid, datasetid_len, unit, filepath, filepath_len, flux, flux_len) bind(C)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      integer(kind=c_size_t), intent(in), value :: datasetid_len, filepath_len, flux_len
+      character(kind=c_char), dimension(datasetid_len), intent(in) :: datasetid
+      character(kind=c_char), dimension(filepath_len), intent(in) :: filepath
+      character(kind=c_char), dimension(flux_len), intent(in) :: flux
+      integer(kind=c_int), intent(in), value :: unit
+
+   end subroutine load_fits_header
+
    subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, root, dir, dir_len) bind(C)
       use, intrinsic :: iso_c_binding
       implicit none
