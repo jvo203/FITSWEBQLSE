@@ -725,11 +725,8 @@ void printerror(int status)
     /*****************************************************/
 
     if (status)
-    {
         fits_report_error(stderr, status); /* print error report */
 
-        exit(status); /* terminate the program, returning error status */
-    }
     return;
 }
 
@@ -785,16 +782,19 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 fitsfile *fptr; /* pointer to the FITS file, defined in fitsio.h */
                 int status;
 
-                status = 0;
-
                 // open an in-memory FITS file from the buffer
+                status = 0;
                 if (fits_open_file(&fptr, stream->fname, READONLY, &status))
+                {
+                    printf("[C] fits_open_file failed(%s) with status %d.\n", stream->fname, status);
                     printerror(status);
+                }
 
                 // pass the header to FORTRAN for full parsing
                 // ...
 
                 // finally close the file
+                status = 0;
                 if (fits_close_file(fptr, &status))
                     printerror(status);
 
@@ -883,7 +883,7 @@ static void *handle_url_download(void *arg)
             struct FITSDownloadStream stream;
 
             stream.url = url;
-            stream.fname = fname;
+            stream.fname = download;
 
             /* open the file */
             downloadfile = fopen(download, "wb");
