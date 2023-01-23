@@ -3197,6 +3197,48 @@ contains
       character(kind=c_char), dimension(flux_len), intent(in) :: flux
       integer(kind=c_int), intent(in), value :: unit
 
+      character(len=filepath_len) :: strFilename
+      character(len=flux_len) :: strFlux
+
+      type(dataset), pointer :: item
+
+      integer :: i, rc
+      logical :: bSuccess
+
+      print *, "[load_fits_header] datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
+
+      do i = 1, int(filepath_len, kind=4)
+         strFilename(i:i) = filepath(i)
+      end do
+
+      do i = 1, int(flux_len, kind=4)
+         strFlux(i:i) = flux(i)
+      end do
+
+      allocate (item)
+
+      ! init mutexes
+      rc = c_pthread_mutex_init(item%header_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%error_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%ok_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%progress_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%image_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%video_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%timestamp_mtx, c_null_ptr)
+
+      item%datasetid = datasetid
+      item%progress = 0
+      item%elapsed = 0
+      allocate (item%uri, source=strFilename) ! is it needed ?
+      call set_ok_status(item, .false.)
+      call set_error_status(item, .false.)
+      call set_header_status(item, .false.)
+      item%cache = .false. ! disable caching of this dataset
+
+      call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
+
+      bSuccess = .false.
+
    end subroutine load_fits_header
 
    subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, root, dir, dir_len) bind(C)
