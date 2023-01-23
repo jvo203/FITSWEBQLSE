@@ -3205,8 +3205,9 @@ contains
       ! FITS header
       character :: record*80, key*10, value*70, comment*70
       integer naxis, bitpix, nkeys, nspace, hdutype
+      integer naxes(4)
 
-      integer :: i
+      integer :: i, status
       integer(c_int) :: rc
       logical :: bSuccess
 
@@ -3253,7 +3254,52 @@ contains
          rc = c_pthread_mutex_unlock(logger_mtx)
       end if
 
+      naxis = 0
+      naxes = (/0, 0, 0, 0/)
       bSuccess = .false.
+
+      record = ''
+      key = ''
+      value = ''
+      comment = ''
+
+      ! reset the strings
+      item%frameid = ''
+      item%object = ''
+      item%line = ''
+      item%filter = ''
+      item%date_obs = ''
+      item%btype = ''
+      item%bunit = ''
+      item%specsys = ''
+      item%timesys = ''
+
+      ! special handling for the flux
+      ! test the first character for 'N' ('NULL')
+      if (allocated(item%flux)) deallocate (item%flux)
+      if (strFlux(1:1) .ne. 'N') allocate (item%flux, source=strFlux)
+
+      item%cunit1 = ''
+      item%cunit2 = ''
+      item%cunit3 = ''
+
+      item%ctype1 = ''
+      item%ctype2 = ''
+      item%ctype3 = ''
+
+      item%dmin = ieee_value(0.0, ieee_quiet_nan)
+      item%dmax = ieee_value(0.0, ieee_quiet_nan)
+      item%dmedian = ieee_value(0.0, ieee_quiet_nan)
+
+      item%dmad = ieee_value(0.0, ieee_quiet_nan)
+      item%dmadN = ieee_value(0.0, ieee_quiet_nan)
+      item%dmadP = ieee_value(0.0, ieee_quiet_nan)
+
+      ! reset the FITS header
+      if (allocated(item%hdr)) deallocate (item%hdr)
+
+      ! The STATUS parameter must always be initialized.
+      status = 0
 
    end subroutine load_fits_header
 
