@@ -781,11 +781,9 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 printf("[C] FITS HEADER:\n%.*s\n", stream->cursor, stream->buffer);
 
                 fitsfile *fptr; /* pointer to the FITS file, defined in fitsio.h */
-                int status, nkeys, keypos, hdutype, ii, jj;
-                char card[FLEN_CARD]; /* standard string lengths defined in fitsioc.h */
-                int unit = 0;         // FORTRAN unit number
+                int status = 0;
+                int unit = 0; // FORTRAN unit number
 
-                status = 0;
                 // if (fits_open_file(&fptr, stream->fname, READONLY, &status))
 
                 // open an in-memory FITS file from the buffer
