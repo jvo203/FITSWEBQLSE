@@ -3295,7 +3295,6 @@ contains
       ! read the FITS header
       call parse_fits_header(item, unit, naxis, naxes, bitpix)
 
-
       !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
       if (naxis .lt. 2) then
          print *, 'READIMAGE failed to read the NAXISn keywords.'
@@ -3322,6 +3321,9 @@ contains
       end if
 
       call set_header_status(item, .true.)
+
+      bSuccess = .true.
+      print *, 'load_fits_header bSuccess:', bSuccess
 
    end subroutine load_fits_header
 
