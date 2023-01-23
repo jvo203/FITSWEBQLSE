@@ -780,7 +780,8 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 printf("[C] FITS HEADER:\n%.*s\n", stream->cursor, stream->buffer);
 
                 fitsfile *fptr; /* pointer to the FITS file, defined in fitsio.h */
-                int status;
+                int status, nkeys, keypos, hdutype, ii, jj;
+                char card[FLEN_CARD]; /* standard string lengths defined in fitsioc.h */
 
                 // open an in-memory FITS file from the buffer
                 status = 0;
@@ -790,11 +791,33 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                     printerror(status);
                 }
 
+                /* attempt to move to next HDU, until we get an EOF error */
+                for (ii = 1; !(fits_movabs_hdu(fptr, ii, &hdutype, &status)); ii++)
+                {
+                    /* get no. of keywords */
+                    if (fits_get_hdrpos(fptr, &nkeys, &keypos, &status))
+                        printerror(status);
+
+                    printf("Header listing for HDU #%d:\n", ii);
+                    for (jj = 1; jj <= nkeys; jj++)
+                    {
+                        if (fits_read_record(fptr, jj, card, &status))
+                            printerror(status);
+
+                        printf("%s\n", card); /* print the keyword card */
+                    }
+                    printf("END\n\n"); /* terminate listing with END */
+                }
+
+                if (status == END_OF_FILE) /* status values are defined in fitsioc.h */
+                    status = 0;            /* got the expected EOF error; reset = 0  */
+                else
+                    printerror(status); /* got an unexpected error                */
+
                 // pass the header to FORTRAN for full parsing
                 // ...
 
                 // finally close the file
-                status = 0;
                 if (fits_close_file(fptr, &status))
                     printerror(status);
 
