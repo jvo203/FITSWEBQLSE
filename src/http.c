@@ -782,43 +782,30 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 fitsfile *fptr; /* pointer to the FITS file, defined in fitsio.h */
                 int status, nkeys, keypos, hdutype, ii, jj;
                 char card[FLEN_CARD]; /* standard string lengths defined in fitsioc.h */
+                int unit = 0;         // FORTRAN unit number
 
-                // open an in-memory FITS file from the buffer
                 status = 0;
                 // if (fits_open_file(&fptr, stream->fname, READONLY, &status))
+
+                // open an in-memory FITS file from the buffer
                 if (fits_open_memfile(&fptr, stream->fname, READONLY, (void **)&stream->buffer, &stream->cursor, 0, NULL, &status))
                 {
                     printf("[C] fits_open_file failed(%s) with status %d.\n", stream->fname, status);
                     printerror(status);
                 }
 
-                /* attempt to move to next HDU, until we get an EOF error */
-                for (ii = 1; !(fits_movabs_hdu(fptr, ii, &hdutype, &status)); ii++)
+                // get the FORTRAN unit number
+                unit = CFITS2Unit(fptr);
+                printf("[C] FITS FORTRAN unit number = %d\n", unit);
+
+                if (unit != 0)
                 {
-                    /* get no. of keywords */
-                    if (fits_get_hdrpos(fptr, &nkeys, &keypos, &status))
-                        printerror(status);
-
-                    printf("Header listing for HDU #%d:\n", ii);
-                    for (jj = 1; jj <= nkeys; jj++)
-                    {
-                        if (fits_read_record(fptr, jj, card, &status))
-                            printerror(status);
-
-                        printf("%s\n", card); /* print the keyword card */
-                    }
-                    printf("END\n\n"); /* terminate listing with END */
+                    // pass the header to FORTRAN for full parsing
+                    // ...
                 }
 
-                if (status == END_OF_FILE) /* status values are defined in fitsioc.h */
-                    status = 0;            /* got the expected EOF error; reset = 0  */
-                else
-                    printerror(status); /* got an unexpected error                */
-
-                // pass the header to FORTRAN for full parsing
-                // ...
-
                 // finally close the file
+                status = 0;
                 if (fits_close_file(fptr, &status))
                     printerror(status);
 
