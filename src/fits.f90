@@ -3455,6 +3455,31 @@ contains
 
    end subroutine load_fits_file
 
+   subroutine parse_fits_header(item, unit, naxis, naxes, bitpix)
+      implicit none
+
+      type(dataset), pointer, intent(inout) :: item
+      integer, intent(in) :: unit
+      integer, intent(inout) :: naxis, bitpix
+      integer, intent(inout) :: naxes(4)
+
+      integer :: j, status
+      character :: record*80, key*10, value*70, comment*70
+
+      status = 0
+      j = 0
+
+      record = ''
+      key = ''
+      value = ''
+      comment = ''
+
+      bitpix = 0
+      naxis = 0
+      naxes = (/0, 0, 0, 0/)
+
+   end subroutine parse_fits_header
+
    subroutine read_fits_file(item, filename, flux, root, bSuccess)
       use omp_lib
       implicit none
