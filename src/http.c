@@ -717,6 +717,22 @@ bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, s
     return end;
 }
 
+/*---------------------   NASA CFITSIO printerror() taken from cookbook.c    -----------------------------*/
+void printerror(int status)
+{
+    /*****************************************************/
+    /* Print out cfitsio error messages and exit program */
+    /*****************************************************/
+
+    if (status)
+    {
+        fits_report_error(stderr, status); /* print error report */
+
+        exit(status); /* terminate the program, returning error status */
+    }
+    return;
+}
+
 // cURL FITS-parsing download handler
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
@@ -766,8 +782,21 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 // print the header string from 0 to cursor, passing the string length to printf
                 printf("[C] FITS HEADER:\n%.*s\n", stream->cursor, stream->buffer);
 
+                fitsfile *fptr; /* pointer to the FITS file, defined in fitsio.h */
+                int status;
+
+                status = 0;
+
+                // open an in-memory FITS file from the buffer
+                if (fits_open_file(&fptr, stream->fname, READONLY, &status))
+                    printerror(status);
+
                 // pass the header to FORTRAN for full parsing
                 // ...
+
+                // finally close the file
+                if (fits_close_file(fptr, &status))
+                    printerror(status);
 
                 // and then move remove the stream->cursor bytes from the head of the buffer
                 memmove(stream->buffer, stream->buffer + stream->cursor, stream->running_size - stream->cursor);
