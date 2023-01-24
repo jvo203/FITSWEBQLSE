@@ -722,7 +722,7 @@ bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, s
 void printerror(int status)
 {
     /*****************************************************/
-    /* Print out cfitsio error messages and exit program */
+    /* Print out cfitsio error messages */
     /*****************************************************/
 
     if (status)
