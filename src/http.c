@@ -796,6 +796,11 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
                 printf("[C] FITS TOTAL SIZE:\t%zu bytes\n", total_size);
 
+                stream->pixels_per_frame = stream->naxes[0] * stream->naxes[1];
+                stream->pixels = (float *)calloc(stream->pixels_per_frame, sizeof(float));
+                stream->mask = (bool *)calloc(stream->pixels_per_frame, sizeof(bool));
+                stream->frame = 0;
+
                 fitsfile *fptr; /* pointer to the FITS file, defined in fitsio.h */
                 int status = 0;
                 int unit = 0; // FORTRAN unit number
