@@ -817,9 +817,11 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             }
         }
     }
-    else
+
+    // parse the data
+    if (stream->hdrEnd)
     {
-        // parse the data
+        // scan_fits_data(stream, (char *)ptr, realsize);
     }
 
     return realsize;
