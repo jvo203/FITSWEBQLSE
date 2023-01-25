@@ -5607,14 +5607,14 @@ contains
       integer(kind=8) :: headersize, filesize
 
       ! make headersize a multiple of 2880
-      headersize = 2880*(size(item%hdr, kind=8)/2880 + 1)
+      headersize = 2880*((size(item%hdr, kind=8)-1)/2880 + 1)
 
       ! calculate the FITS file size
       filesize = nint(real(headersize) + real(item%naxes(1))*real(item%naxes(2))&
       &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
 
       ! make filesize a multiple of 2880
-      filesize = 2880*(filesize/2880 + 1)
+      filesize = 2880*((filesize-1)/2880 + 1)
 
       json = begin_json()
 
