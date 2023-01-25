@@ -970,6 +970,7 @@ static void *handle_url_download(void *arg)
             stream.pixels = NULL;
             stream.mask = NULL;
             stream.pixels_per_frame = 0;
+            stream.processed = 0;
             stream.frame = 0;
             stream.frame_min = 1.0E30f;
             stream.frame_max = -1.0E30f;
