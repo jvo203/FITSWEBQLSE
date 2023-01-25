@@ -832,7 +832,6 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 stream->pixels_per_frame = stream->naxes[0] * stream->naxes[1];
                 stream->pixels = (float *)calloc(stream->pixels_per_frame, sizeof(float));
                 stream->mask = (bool *)calloc(stream->pixels_per_frame, sizeof(bool));
-                stream->frame = 0;
             }
         }
     }
