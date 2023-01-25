@@ -788,7 +788,8 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 total_size *= abs(stream->bitpix) / 8;
 
                 // make total_size a multiple of FITS_CHUNK_LENGTH
-                total_size += FITS_CHUNK_LENGTH - (total_size % FITS_CHUNK_LENGTH);
+                if (total_size > 0)
+                    total_size = FITS_CHUNK_LENGTH * ((total_size - 1) / FITS_CHUNK_LENGTH + 1);
 
                 // finally add the header size
                 total_size += stream->cursor;
