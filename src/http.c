@@ -145,7 +145,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress);
 PGconn *jvo_db_connect(char *db);
 char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id);
 
-extern void load_fits_header(char *datasetid, size_t datasetid_len, int unit, char *filepath, size_t filepath_len, char *flux, size_t flux_len);
+extern void load_fits_header(char *datasetid, size_t datasetid_len, int unit, char *filepath, size_t filepath_len, char *flux, size_t flux_len, size_t filesize);
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, size_t len);
 extern void notify_root(void *item, char *root);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
@@ -799,8 +799,6 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 int status = 0;
                 int unit = 0; // FORTRAN unit number
 
-                // if (fits_open_file(&fptr, stream->fname, READONLY, &status))
-
                 // open an in-memory FITS file from the buffer
                 if (fits_open_memfile(&fptr, stream->fname, READONLY, (void **)&stream->buffer, &stream->cursor, 0, NULL, &status))
                 {
@@ -817,7 +815,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 {
                     char flux[] = "NULL";
 
-                    load_fits_header(stream->datasetid, strlen(stream->datasetid), unit, stream->fname, strlen(stream->fname), flux, strlen(flux));
+                    load_fits_header(stream->datasetid, strlen(stream->datasetid), unit, stream->fname, strlen(stream->fname), flux, strlen(flux), total_size);
                 }
 
                 // finally close the file
