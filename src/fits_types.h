@@ -22,6 +22,13 @@ struct FITSDownloadStream
     int bitpix;
     int naxis;
     int naxes[4];
+
+    // data
+    float *pixels;
+    bool *mask;
+    size_t pixels_per_frame;
+    int frame;
+    float frame_min, frame_max;
 };
 
 enum zoom_shape
