@@ -817,6 +817,10 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             }
         }
     }
+    else
+    {
+        // parse the data
+    }
 
     return realsize;
 }
