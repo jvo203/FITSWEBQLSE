@@ -833,7 +833,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     }
 
     // parse the data
-    if (stream->hdrEnd)
+    if (stream->hdrEnd && (stream->frame < stream->naxes[3]))
     {
         // scan_fits_data(stream, (char *)ptr, realsize);
     }
