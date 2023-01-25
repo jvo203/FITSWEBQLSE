@@ -733,9 +733,9 @@ void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, siz
     size_t buffer_size = stream->running_size - stream->cursor;
 
     // process in multiples of <bytes_per_pixel>
-    size_t work_size = buffer_size / bytes_per_pixel;
+    size_t available = buffer_size / bytes_per_pixel;
 
-    printf("[C] scan_fits_data:\tunprocessed #pixels = %zu\n", work_size);
+    printf("[C] scan_fits_data:\tavailable #pixels = %zu\n", available);
 }
 
 /*---------------------   NASA CFITSIO printerror() taken from cookbook.c    -----------------------------*/
