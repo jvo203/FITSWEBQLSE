@@ -730,8 +730,11 @@ void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, siz
     char *buffer = stream->buffer + stream->cursor;
     size_t buffer_size = stream->running_size - stream->cursor;
 
-    // process in multiples of <abs(stream->bitpix)>
-    size_t work_size = buffer_size - (buffer_size % abs(stream->bitpix));
+    // process in multiples of <abs(stream->bitpix) / 8>
+    // size_t work_size = buffer_size - (buffer_size % abs(stream->bitpix));
+    size_t work_size = buffer_size / abs(stream->bitpix) * 8;
+
+    printf("[C] scan_fits_data:\tavailable #elements = %zu\n", work_size);
 }
 
 /*---------------------   NASA CFITSIO printerror() taken from cookbook.c    -----------------------------*/
