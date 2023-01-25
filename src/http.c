@@ -722,9 +722,16 @@ void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, siz
 {
     printf("[C] scan_fits_data:\tsize = %zu\n", size);
 
+    // works with bitpix == -32 for the time being (32-bit float)
+    if (stream->bitpix != -32)
+        return;
+
     // scan as much FITS data as we can within a current 2D frame boundary
     char *buffer = stream->buffer + stream->cursor;
     size_t buffer_size = stream->running_size - stream->cursor;
+
+    // process in multiples of <abs(stream->bitpix)>
+    size_t work_size = buffer_size - (buffer_size % abs(stream->bitpix));
 }
 
 /*---------------------   NASA CFITSIO printerror() taken from cookbook.c    -----------------------------*/
