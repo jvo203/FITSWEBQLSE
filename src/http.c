@@ -919,6 +919,7 @@ static void *handle_url_download(void *arg)
             stream.cursor = 0;
             stream.total_size = 0;
 
+            // header
             stream.hdrEnd = false;
             stream.bitpix = 0;
             stream.naxis = 0;
@@ -926,6 +927,14 @@ static void *handle_url_download(void *arg)
             stream.naxes[1] = 0;
             stream.naxes[2] = 1;
             stream.naxes[3] = 1;
+
+            // data
+            stream.pixels = NULL;
+            stream.mask = NULL;
+            stream.pixels_per_frame = 0;
+            stream.frame = 0;
+            stream.frame_min = 1.0E30f;
+            stream.frame_max = -1.0E30f;
 
             if (downloadfile)
             {
@@ -980,6 +989,8 @@ static void *handle_url_download(void *arg)
             }
 
             free(stream.buffer);
+            free(stream.pixels);
+            free(stream.mask);
 
             curl_easy_cleanup(curl);
         }
