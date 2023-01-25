@@ -780,6 +780,21 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 // print the header string from 0 to cursor, passing the string length to printf
                 // printf("[C] FITS HEADER:\n%.*s\n", stream->cursor, stream->buffer);
 
+                size_t total_size = 1;
+
+                for (int ii = 0; ii < stream->naxis; ii++)
+                    total_size *= stream->naxes[ii];
+
+                total_size *= abs(stream->bitpix) / 8;
+
+                // make total_size a multiple of FITS_CHUNK_LENGTH
+                total_size += FITS_CHUNK_LENGTH - (total_size % FITS_CHUNK_LENGTH);
+
+                // finally add the header size
+                total_size += stream->cursor;
+
+                printf("[C] FITS TOTAL SIZE:\t%zu bytes\n", total_size);
+
                 fitsfile *fptr; /* pointer to the FITS file, defined in fitsio.h */
                 int status = 0;
                 int unit = 0; // FORTRAN unit number
