@@ -667,7 +667,7 @@ bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, s
     char hdrLine[FITS_LINE_LENGTH + 1];
     bool end = false;
 
-    // scan the FITS header as much as we can in
+    // scan the FITS header as much as we can
     char *buffer = stream->buffer + stream->cursor;
     size_t buffer_size = stream->running_size - stream->cursor;
 
@@ -721,6 +721,10 @@ bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, s
 void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, size_t size)
 {
     printf("[C] scan_fits_data:\tsize = %zu\n", size);
+
+    // scan as much FITS data as we can within a current 2D frame boundary
+    char *buffer = stream->buffer + stream->cursor;
+    size_t buffer_size = stream->running_size - stream->cursor;
 }
 
 /*---------------------   NASA CFITSIO printerror() taken from cookbook.c    -----------------------------*/
