@@ -726,12 +726,14 @@ void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, siz
     if (stream->bitpix != -32)
         return;
 
+    int bytes_per_pixel = abs(stream->bitpix) / 8;
+
     // scan as much FITS data as we can within a current 2D frame boundary
     char *buffer = stream->buffer + stream->cursor;
     size_t buffer_size = stream->running_size - stream->cursor;
 
-    // process in multiples of <abs(stream->bitpix) / 8>
-    size_t work_size = buffer_size / abs(stream->bitpix) * 8;
+    // process in multiples of <bytes_per_pixel>
+    size_t work_size = buffer_size / bytes_per_pixel;
 
     printf("[C] scan_fits_data:\tunprocessed #pixels = %zu\n", work_size);
 }
