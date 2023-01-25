@@ -5604,11 +5604,17 @@ contains
       type(dataset), pointer, intent(in) :: item
       integer, allocatable, target, intent(in) :: hist(:)
       type(C_PTR) :: json
-      integer(kind=8) :: filesize
+      integer(kind=8) :: headersize, filesize
+
+      ! make headersize a multiple of 2880
+      headersize = 2880*(size(item%hdr, kind=8)/2880 + 1)
 
       ! calculate the FITS file size
-      filesize = nint(real(size(item%hdr)) + real(item%naxes(1))*real(item%naxes(2))&
+      filesize = nint(real(headersize) + real(item%naxes(1))*real(item%naxes(2))&
       &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
+
+      ! make filesize a multiple of 2880
+      filesize = 2880*(filesize/2880 + 1)
 
       json = begin_json()
 
