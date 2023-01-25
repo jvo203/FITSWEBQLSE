@@ -718,6 +718,11 @@ bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, s
     return end;
 }
 
+void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, size_t size)
+{
+    printf("[C] scan_fits_data:\tsize = %zu\n", size);
+}
+
 /*---------------------   NASA CFITSIO printerror() taken from cookbook.c    -----------------------------*/
 void printerror(int status)
 {
@@ -839,7 +844,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     // parse the data
     if (stream->hdrEnd && (stream->frame < stream->naxes[3]))
     {
-        // scan_fits_data(stream, (char *)ptr, realsize);
+        scan_fits_data(stream, (char *)ptr, realsize);
     }
 
     return realsize;
