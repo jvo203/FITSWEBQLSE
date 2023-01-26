@@ -720,6 +720,12 @@ bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, s
 
 void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, size_t size)
 {
+    if (stream->frame == stream->naxes[3])
+    {
+        printf("[C] scan_fits_data:\tend of the stream.\n");
+        return; // there is no more work to do
+    }
+
     printf("[C] scan_fits_data:\tsize = %zu\n", size);
 
     // works with bitpix == -32 for the time being (32-bit float)
@@ -739,6 +745,12 @@ void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, siz
 
     size_t remaining = stream->pixels_per_frame - stream->processed;
     size_t work_size = available > remaining ? remaining : available;
+
+    if (work_size == 0)
+    {
+        printf("[C] scan_fits_data:\twork_size == 0.\n");
+        return;
+    }
 
     // call ispc to process the data
     // ...
@@ -761,6 +773,12 @@ void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, siz
     memmove(stream->buffer, stream->buffer + stream->cursor, stream->running_size - stream->cursor);
     stream->running_size -= stream->cursor;
     stream->cursor = 0;
+
+    // notify FORTRAN of the progress made in this step
+    int progress = work_size; // yes, size_t gets downcasted to int
+
+    // call itself again to process any leftovers
+    return scan_fits_data(stream, contents, size);
 }
 
 /*---------------------   NASA CFITSIO printerror() taken from cookbook.c    -----------------------------*/
@@ -883,9 +901,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
     // parse the data
     if (stream->hdrEnd && (stream->frame < stream->naxes[3]))
-    {
         scan_fits_data(stream, (char *)ptr, realsize);
-    }
 
     return realsize;
 }
