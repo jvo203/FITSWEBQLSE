@@ -736,6 +736,31 @@ void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, siz
     size_t available = buffer_size / bytes_per_pixel;
 
     printf("[C] scan_fits_data:\tavailable #pixels = %zu\n", available);
+
+    size_t remaining = stream->pixels_per_frame - stream->processed;
+    size_t work_size = available > remaining ? remaining : available;
+
+    // call ispc to process the data
+    // ...
+    stream->processed += work_size;
+
+    if (stream->processed == stream->pixels_per_frame)
+    {
+        stream->frame++;
+        printf("[C] scan_fits_data:\tframe %d complete.\n", stream->frame);
+        stream->processed = 0;
+
+        // pass the frame to FORTRAN
+        // ...
+    }
+
+    // move the cursor forward
+    stream->cursor += work_size * bytes_per_pixel;
+
+    // and then move remove the stream->cursor bytes from the head of the buffer
+    memmove(stream->buffer, stream->buffer + stream->cursor, stream->running_size - stream->cursor);
+    stream->running_size -= stream->cursor;
+    stream->cursor = 0;
 }
 
 /*---------------------   NASA CFITSIO printerror() taken from cookbook.c    -----------------------------*/
