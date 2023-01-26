@@ -740,7 +740,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     if (available == 0)
         return;
 
-    printf("[C] scan_fits_data:\tavailable #pixels = %zu.\n", available);
+    // printf("[C] scan_fits_data:\tavailable #pixels = %zu.\n", available);
 
     size_t remaining = stream->pixels_per_frame - stream->processed;
     size_t work_size = available > remaining ? remaining : available;
@@ -1039,7 +1039,7 @@ static void *handle_url_download(void *arg)
                     if (http_code == 200)
                     {
                         // report buffer_size, running_size, total_size & cursor
-                        printf("[C] FITSDownloadStream buffer_size: %zu, running_size: %zu, total_size: %zu bytes, cursor at %zu.\n", stream.buffer_size, stream.running_size, stream.total_size, stream.cursor);
+                        printf("[C] FITSDownloadStream buffer_size: %zu, running_size: %zu, total_size: %zu bytes, frame: %d, cursor is at %zu.\n", stream.buffer_size, stream.running_size, stream.total_size, stream.frame, stream.cursor);
 
                         // report the FITS header (hdrEnd, bitpix, naxis, naxes)
                         printf("[C] FITSDownloadStream hdrEnd: %d, bitpix: %d, naxis: %d, naxes: %d, %d, %d, %d.\n", stream.hdrEnd, stream.bitpix, stream.naxis, stream.naxes[0], stream.naxes[1], stream.naxes[2], stream.naxes[3]);
