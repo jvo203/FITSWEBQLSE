@@ -660,10 +660,8 @@ int hdr_get_int_value(char *hdr)
     return atoi(hdr);
 };
 
-bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, size_t size)
+bool scan_fits_header(struct FITSDownloadStream *stream)
 {
-    printf("[C] scan_fits_header:\tsize = %zu\n", size);
-
     char hdrLine[FITS_LINE_LENGTH + 1];
     bool end = false;
 
@@ -718,15 +716,13 @@ bool scan_fits_header(struct FITSDownloadStream *stream, const char *contents, s
     return end;
 }
 
-void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, size_t size)
+void scan_fits_data(struct FITSDownloadStream *stream)
 {
     if (stream->frame == stream->naxes[3])
     {
         printf("[C] scan_fits_data:\tend of the stream.\n");
         return; // there is no more work to do
     }
-
-    printf("[C] scan_fits_data:\tsize = %zu\n", size);
 
     // works with bitpix == -32 for the time being (32-bit float)
     if (stream->bitpix != -32)
@@ -741,7 +737,7 @@ void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, siz
     // process in multiples of <bytes_per_pixel>
     size_t available = buffer_size / bytes_per_pixel;
 
-    printf("[C] scan_fits_data:\tavailable #pixels = %zu\n", available);
+    printf("[C] scan_fits_data:\tavailable #pixels = %zu.\n", available);
 
     size_t remaining = stream->pixels_per_frame - stream->processed;
     size_t work_size = available > remaining ? remaining : available;
@@ -778,7 +774,7 @@ void scan_fits_data(struct FITSDownloadStream *stream, const char *contents, siz
     int progress = work_size; // yes, size_t gets downcasted to int
 
     // call itself again to process any leftovers
-    return scan_fits_data(stream, contents, size);
+    return scan_fits_data(stream);
 }
 
 /*---------------------   NASA CFITSIO printerror() taken from cookbook.c    -----------------------------*/
@@ -834,7 +830,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     {
         if ((stream->running_size - stream->cursor) >= FITS_CHUNK_LENGTH)
         {
-            bool end = scan_fits_header(stream, (char *)ptr, realsize);
+            bool end = scan_fits_header(stream);
 
             if (end && stream->naxis > 0)
             {
@@ -901,7 +897,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
     // parse the data
     if (stream->hdrEnd && (stream->frame < stream->naxes[3]))
-        scan_fits_data(stream, (char *)ptr, realsize);
+        scan_fits_data(stream);
 
     return realsize;
 }
