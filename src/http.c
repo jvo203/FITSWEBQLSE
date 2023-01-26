@@ -889,8 +889,16 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 stream->cursor = 0;
 
                 stream->pixels_per_frame = stream->naxes[0] * stream->naxes[1];
+                stream->data = (float *)calloc(stream->pixels_per_frame, sizeof(float));
                 stream->pixels = (float *)calloc(stream->pixels_per_frame, sizeof(float));
                 stream->mask = (bool *)calloc(stream->pixels_per_frame, sizeof(bool));
+
+                for (size_t ii = 0; ii < stream->pixels_per_frame; ii++)
+                {
+                    stream->data[ii] = NAN;
+                    stream->pixels[ii] = 0.0;
+                    stream->mask[ii] = false;
+                }
             }
         }
     }
@@ -1004,13 +1012,14 @@ static void *handle_url_download(void *arg)
             stream.naxes[3] = 1;
 
             // data
+            stream.data = NULL;
             stream.pixels = NULL;
             stream.mask = NULL;
             stream.pixels_per_frame = 0;
             stream.processed = 0;
             stream.frame = 0;
-            stream.frame_min = 1.0E30f;
-            stream.frame_max = -1.0E30f;
+            /*stream.frame_min = 1.0E30f;
+            stream.frame_max = -1.0E30f;*/
 
             if (downloadfile)
             {
@@ -1064,6 +1073,7 @@ static void *handle_url_download(void *arg)
                 }
             }
 
+            free(stream.data);
             free(stream.buffer);
             free(stream.pixels);
             free(stream.mask);
