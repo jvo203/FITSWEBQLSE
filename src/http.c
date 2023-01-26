@@ -718,7 +718,7 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
 
 void scan_fits_data(struct FITSDownloadStream *stream)
 {
-    if (stream->frame == stream->naxes[3])
+    if (stream->frame == stream->naxes[2])
     {
         printf("[C] scan_fits_data:\tend of the stream.\n");
         return; // there is no more work to do
@@ -896,7 +896,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     }
 
     // parse the data
-    if (stream->hdrEnd && (stream->frame < stream->naxes[3]))
+    if (stream->hdrEnd && (stream->frame < stream->naxes[2]))
         scan_fits_data(stream);
 
     return realsize;
