@@ -930,7 +930,7 @@ static void *handle_url_download(void *arg)
 
             /* disable progress meter, set to 0L to enable it */
             /* enable progress meter, set to 1L to disable it */
-            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
             // a download file
             FILE *downloadfile;
