@@ -2691,7 +2691,8 @@ contains
       integer(8) finish
       real elapsed
 
-      integer :: current, total, rc
+      integer(kind=8) :: current, total
+      integer :: rc
       type(c_pthread_t) :: pid
 
       ! take a time measurement
