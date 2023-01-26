@@ -737,16 +737,13 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     // process in multiples of <bytes_per_pixel>
     size_t available = buffer_size / bytes_per_pixel;
 
+    if (available == 0)
+        return;
+
     printf("[C] scan_fits_data:\tavailable #pixels = %zu.\n", available);
 
     size_t remaining = stream->pixels_per_frame - stream->processed;
     size_t work_size = available > remaining ? remaining : available;
-
-    if (work_size == 0)
-    {
-        printf("[C] scan_fits_data:\twork_size == 0.\n");
-        return;
-    }
 
     // call ispc to process the data
     // ...
@@ -771,7 +768,10 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     stream->cursor = 0;
 
     // notify FORTRAN of the progress made in this step
-    int progress = work_size; // yes, size_t gets downcasted to int
+    void *item = get_dataset(stream->datasetid);
+
+    if (item != NULL)
+        update_progress_C(item, (int)work_size); // <size_t> gets downcasted to int
 
     // call itself again to process any leftovers
     return scan_fits_data(stream);
