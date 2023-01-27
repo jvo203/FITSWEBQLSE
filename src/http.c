@@ -747,8 +747,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     unsigned int work_size = available > remaining ? remaining : available;
 
     // call ispc to process the data
-    // extern void fits2float(int32_t * src, float * dest, uint32_t size);
-    fits2float(uniform int32 src[], uniform float dest[], uniform unsigned int size);
+    fits2float((int32_t *)buffer, stream->data + stream->processed, work_size);
     stream->processed += work_size;
 
     if (stream->processed == stream->pixels_per_frame)
