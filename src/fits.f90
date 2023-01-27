@@ -4475,7 +4475,7 @@ contains
       ! print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
       ! & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
 
-      ! a 2D image only, ignore the spectrum
+      ! a 2D image only
       if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
          item%dmin = frame_min
          item%dmax = frame_max
@@ -4487,7 +4487,7 @@ contains
          return
       end if
 
-      ! we've got a 3D image, process the spectrum, get the median too
+      ! a data cube
 
    end subroutine process_frame
 
