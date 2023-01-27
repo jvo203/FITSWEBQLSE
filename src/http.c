@@ -148,6 +148,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id);
 
 extern void load_fits_header(char *datasetid, size_t datasetid_len, int unit, char *filepath, size_t filepath_len, char *flux, size_t flux_len, size_t filesize);
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, size_t len);
+extern void process_frame(void *item, int frame, float *data, float *pixels, bool *mask, int64_t npixels);
 extern void notify_root(void *item, char *root);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
 extern void image_request(void *item, int width, int height, int fd);
@@ -746,7 +747,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     size_t remaining = stream->pixels_per_frame - stream->processed;
     unsigned int work_size = available > remaining ? remaining : available;
 
-    // call ispc to process the data
+    // call ispc to convert the data from BIG ENDIAN to LITTLE ENDIAN
     fits2float((int32_t *)buffer, stream->data + stream->processed, work_size);
     stream->processed += work_size;
 
@@ -756,7 +757,10 @@ void scan_fits_data(struct FITSDownloadStream *stream)
         printf("[C] scan_fits_data:\tframe %d complete.\n", stream->frame);
 
         // pass the frame to FORTRAN
-        // ...
+        void *item = get_dataset(stream->datasetid);
+
+        if (item != NULL)
+            process_frame(item, stream->frame, stream->data, stream->pixels, stream->mask, (int64_t)stream->pixels_per_frame);
 
         // reset the frame data
         for (int i = 0; i < stream->pixels_per_frame; i++)
