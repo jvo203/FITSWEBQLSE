@@ -754,10 +754,15 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     {
         stream->frame++;
         printf("[C] scan_fits_data:\tframe %d complete.\n", stream->frame);
-        stream->processed = 0;
 
         // pass the frame to FORTRAN
         // ...
+
+        // reset the frame data
+        for (int i = 0; i < stream->pixels_per_frame; i++)
+            stream->data[i] = NAN;
+
+        stream->processed = 0;
     }
 
     // move the cursor forward
