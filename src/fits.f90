@@ -4437,6 +4437,10 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
+      print *, item%datasetid, "::process_frame:", frame, npixels
+      ! print out some data
+      print *, "data:", data(1:10)
+
    end subroutine process_frame
 
    elemental subroutine lower_case(word)
