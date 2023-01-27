@@ -2721,8 +2721,8 @@ contains
       if ((current .eq. total) .and. (total .gt. 0)) then
          call set_ok_status(item, .true.)
 
-         if (item%naxes(3) .gt. 1 .and. (.not. item%video)) then
-            ! if ((total .gt. 1) .and. (.not. item%video)) then
+         ! only for data cubes
+         if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1 .and. (.not. item%video)) then
             if (allocated(item%frame_min)) item%dmin = minval(item%frame_min)
             if (allocated(item%frame_max)) item%dmax = maxval(item%frame_max)
             if (allocated(item%frame_median)) item%dmedian = &
