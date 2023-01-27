@@ -3209,7 +3209,7 @@ contains
       integer naxes(4)
       integer(kind=8) :: npixels
 
-      integer :: i, status
+      integer :: i, status, start, end
       integer(c_int) :: rc
       logical :: bSuccess
 
@@ -3315,7 +3315,6 @@ contains
       item%naxis = naxis
       item%naxes = naxes
 
-
       if (isnan(item%ignrval)) then
          item%ignrval = -1.0E30
       end if
@@ -3336,6 +3335,44 @@ contains
 
       call set_progress(item, int(0, kind=8), npixels)
       call set_header_status(item, .true.)
+
+      ! only for data cubes
+      if (naxis .gt. 2 .and. naxes(3) .gt. 1) then
+         ! the whole range
+         start = 1
+         end = naxes(3)
+
+         if (allocated(item%compressed)) deallocate (item%compressed)
+         allocate (item%compressed(start:end))
+
+         do i = start, end
+            nullify (item%compressed(i)%ptr)
+         end do
+
+         if (allocated(item%frame_min)) deallocate (item%frame_min)
+         allocate (item%frame_min(start:end))
+
+         if (allocated(item%frame_max)) deallocate (item%frame_max)
+         allocate (item%frame_max(start:end))
+
+         if (allocated(item%frame_median)) deallocate (item%frame_median)
+         allocate (item%frame_median(start:end))
+
+         ! spectra
+         if (allocated(item%mean_spectrum)) deallocate (item%mean_spectrum)
+         allocate (item%mean_spectrum(naxes(3)))
+
+         if (allocated(item%integrated_spectrum)) deallocate (item%integrated_spectrum)
+         allocate (item%integrated_spectrum(naxes(3)))
+
+         ! zero-out the spectra
+         item%mean_spectrum = 0.0
+         item%integrated_spectrum = 0.0
+
+         item%frame_min = 1.0E30
+         item%frame_max = -1.0E30
+         item%frame_median = ieee_value(0.0, ieee_quiet_nan)
+      end if
 
       bSuccess = .true.
       print *, 'load_fits_header bSuccess:', bSuccess
@@ -4488,6 +4525,32 @@ contains
       end if
 
       ! a data cube
+
+      item%frame_min(frame) = frame_min
+      item%frame_max(frame) = frame_max
+      item%frame_median(frame) = hist_median(pack(data, data_mask), frame_min, frame_max)
+
+      item%mean_spectrum(frame) = mean_spec_val
+      item%integrated_spectrum(frame) = int_spec_val
+
+      ! compress the pixels
+      if (allocated(item%compressed) ) then
+         block
+            real :: ignrval, datamin, datamax
+
+            if (isnan(item%ignrval)) then
+               ignrval = -1.0E30
+            else
+               ignrval = item%ignrval
+            end if
+
+            datamin = item%datamin
+            datamax = item%datamax
+
+            item%compressed(frame)%ptr => to_fixed(reshape(data, item%naxes(1:2)),&
+            & frame_min, frame_max, ignrval, datamin, datamax)
+         end block
+      end if
 
    end subroutine process_frame
 
