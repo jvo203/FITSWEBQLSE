@@ -4428,9 +4428,17 @@ contains
       type(C_PTR), intent(in), value :: ptr
       integer(kind=c_int), intent(in), value :: frame
       integer(kind=c_int64_t), intent(in), value :: npixels
-      real(kind=c_float), intent(in) :: data(npixels)
-      real(kind=c_float), intent(inout) :: cpixels(npixels)
-      logical(kind=c_bool), intent(inout) :: cmask(npixels)
+      real(kind=c_float), intent(in), target :: data(npixels)
+      real(kind=c_float), intent(inout), target :: cpixels(npixels)
+      logical(kind=c_bool), intent(inout), target :: cmask(npixels)
+
+      ! auxiliary arrays
+      logical(kind=c_bool), target :: data_mask(npixels)
+      real(kind=c_float), target :: res(4)
+
+      real mean_spec_val, int_spec_val
+      real(kind=8) :: cdelt3
+      real frame_min, frame_max, frame_median
 
       type(dataset), pointer :: item
 
@@ -4441,8 +4449,26 @@ contains
       if (get_header_status(ptr) .ne. 1) return
 
       print *, item%datasetid, "::process_frame:", frame, npixels
-      ! print out some data
-      print *, "data:", data(1:10)
+
+      ! first process the frame irrespective whether or not it is 2D or 3D
+
+      call get_cdelt3(item, cdelt3)
+
+      frame_min = 1.0E30
+      frame_max = -1.0E30
+
+      res = (/frame_min, frame_max, 0.0, 0.0/)
+
+      call make_image_spectrumF32(c_loc(data), c_loc(cpixels), c_loc(cmask), &
+      &c_loc(data_mask), item%ignrval, item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
+
+      frame_min = res(1)
+      frame_max = res(2)
+      mean_spec_val = res(3)
+      int_spec_val = res(4)
+
+      print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
+      & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
 
    end subroutine process_frame
 
