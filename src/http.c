@@ -1070,7 +1070,7 @@ static void *handle_url_download(void *arg)
                         else
                         {
                             // rename the download file
-                            // rename(download, filepath); // disabled for now (during development)
+                            rename(download, filepath); // disabled for now (during development)
                         }
                     }
                     else
