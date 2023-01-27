@@ -3315,6 +3315,11 @@ contains
       item%naxis = naxis
       item%naxes = naxes
 
+
+      if (isnan(item%ignrval)) then
+         item%ignrval = -1.0E30
+      end if
+
       ! start the timer
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
@@ -4467,8 +4472,20 @@ contains
       mean_spec_val = res(3)
       int_spec_val = res(4)
 
-      print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
-      & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
+      ! print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
+      ! & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
+
+      ! a 2D image only, ignore the spectrum
+      if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+         item%dmin = frame_min
+         item%dmax = frame_max
+
+         item%pixels = reshape(cpixels, item%naxes(1:2))
+         item%mask = reshape(cmask, item%naxes(1:2))
+
+         call set_image_status(item, .true.)
+         return
+      end if
 
    end subroutine process_frame
 
