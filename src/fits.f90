@@ -4424,8 +4424,13 @@ contains
    end subroutine printerror
 
    ! extern void process_frame(void *item, int frame, float *data, float *pixels, bool *mask, int64_t npixels);
-   subroutine process_frame(ptr) BIND(C, name='process_frame')
+   subroutine process_frame(ptr, frame, data, cpixels, cmask, npixels) BIND(C, name='process_frame')
       type(C_PTR), intent(in), value :: ptr
+      integer(kind=c_int), intent(in), value :: frame
+      integer(kind=c_int64_t), intent(in), value :: npixels
+      real(kind=c_float), intent(in) :: data(npixels)
+      real(kind=c_float), intent(inout) :: cpixels(npixels)
+      logical(kind=c_bool), intent(inout) :: cmask(npixels)
 
       type(dataset), pointer :: item
 
