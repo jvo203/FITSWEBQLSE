@@ -20,6 +20,21 @@ struct fixed_block_t {
 
 extern "C" uniform float erff(uniform float);
 
+uint16_t bswap16(uint16_t u)
+{
+  return ((u&0xFF)<<8) | (((u>>8)&0xFF)<<0);
+}
+
+uint32_t bswap32(uint32_t u)
+{
+  return ((u&0xFF)<<24) | (((u>>8)&0xFF)<<16) | (((u>>16)&0xFF)<<8) | (((u>>24)&0xFF)<<0);
+}
+
+uint64_t bswap64(uint64_t u)
+{
+  return ((u&0xFF)<<56) | (((u>>8)&0xFF)<<48) | (((u>>16)&0xFF)<<40) | (((u>>24)&0xFF)<<32) | (((u>>32)&0xFF)<<24) | (((u>>40)&0xFF)<<16) | (((u>>48)&0xFF)<<8) | (((u>>56)&0xFF)<<0);
+}
+
 bool isinf(float tmp)
 {
   unsigned int i = intbits(tmp) ;
@@ -1524,3 +1539,12 @@ export void resizeNearestSIMD(uniform unsigned int8 src[], uniform int srcWidth,
     dst[i * dstWidth + j] = src[y2 * srcWidth + x2];
   }
 }
+
+export void fits2float(uniform int32 src[], uniform float dest[], uniform unsigned int size)
+{
+  foreach(i=0 ... size)
+    {
+      //endian conversion
+      dest[i] = floatbits(bswap32(src[i])) ;      
+    } ;
+} ;
