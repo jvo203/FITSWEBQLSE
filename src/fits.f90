@@ -4437,6 +4437,9 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
+      ! return if there is no header
+      if (get_header_status(ptr) .ne. 1) return
+
       print *, item%datasetid, "::process_frame:", frame, npixels
       ! print out some data
       print *, "data:", data(1:10)
