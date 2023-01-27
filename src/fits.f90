@@ -4487,6 +4487,8 @@ contains
          return
       end if
 
+      ! we've got a 3D image, process the spectrum, get the median too
+
    end subroutine process_frame
 
    elemental subroutine lower_case(word)
