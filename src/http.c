@@ -39,6 +39,7 @@
 #include "mjson.h"
 
 #include "cluster.h"
+#include "webql.h"
 
 extern GSList *cluster;
 extern GMutex cluster_mtx;
@@ -743,10 +744,11 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     // printf("[C] scan_fits_data:\tavailable #pixels = %zu.\n", available);
 
     size_t remaining = stream->pixels_per_frame - stream->processed;
-    size_t work_size = available > remaining ? remaining : available;
+    unsigned int work_size = available > remaining ? remaining : available;
 
     // call ispc to process the data
-    // ...
+    // extern void fits2float(int32_t * src, float * dest, uint32_t size);
+    fits2float(uniform int32 src[], uniform float dest[], uniform unsigned int size);
     stream->processed += work_size;
 
     if (stream->processed == stream->pixels_per_frame)
@@ -771,7 +773,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     void *item = get_dataset(stream->datasetid);
 
     if (item != NULL)
-        update_progress_C(item, (int)work_size); // <size_t> gets downcasted to int
+        update_progress_C(item, (int)work_size); // <size_t> used to get downcasted to int
 
     // call itself again to process any leftovers
     return scan_fits_data(stream);
