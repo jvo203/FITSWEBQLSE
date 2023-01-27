@@ -4423,6 +4423,17 @@ contains
       end do
    end subroutine printerror
 
+   ! extern void process_frame(void *item, int frame, float *data, float *pixels, bool *mask, int64_t npixels);
+   subroutine process_frame(ptr) BIND(C, name='process_frame')
+      type(C_PTR), intent(in), value :: ptr
+
+      type(dataset), pointer :: item
+
+      if (.not. c_associated(ptr)) return
+      call c_f_pointer(ptr, item)
+
+   end subroutine process_frame
+
    elemental subroutine lower_case(word)
       ! convert a word to lower case
       character(len=*), intent(in out) :: word
