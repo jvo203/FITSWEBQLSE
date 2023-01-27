@@ -749,7 +749,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
 
     // call ispc to convert the data from BIG ENDIAN to LITTLE ENDIAN
     fits2float((int32_t *)buffer, stream->data + stream->processed, work_size);
-    stream->processed += work_size;
+    stream->processed += (size_t)work_size;
 
     if (stream->processed == stream->pixels_per_frame)
     {
@@ -770,7 +770,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     }
 
     // move the cursor forward
-    stream->cursor += work_size * bytes_per_pixel;
+    stream->cursor += (size_t)work_size * (size_t)bytes_per_pixel;
 
     // and then move remove the stream->cursor bytes from the head of the buffer
     memmove(stream->buffer, stream->buffer + stream->cursor, stream->running_size - stream->cursor);
