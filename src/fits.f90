@@ -4552,6 +4552,14 @@ contains
          end block
       end if
 
+      ! check if it's the last frame
+      if (frame .eq. item%naxes(3)) then
+         item%pixels = reshape(cpixels, item%naxes(1:2))
+         item%mask = reshape(cmask, item%naxes(1:2))
+
+         call set_image_status(item, .true.)
+      end if
+
    end subroutine process_frame
 
    elemental subroutine lower_case(word)
