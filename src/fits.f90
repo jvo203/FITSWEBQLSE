@@ -3833,6 +3833,17 @@ contains
 
    end subroutine parse_fits_header
 
+   subroutine read_fits_header(ptr) BIND(C, name='read_fits_header')
+      type(C_PTR), intent(in), value :: ptr
+
+
+      type(dataset), pointer :: item
+
+      if (.not. c_associated(ptr)) return
+      call c_f_pointer(ptr, item)
+
+   end subroutine read_fits_header
+
    subroutine read_fits_file(item, filename, flux, root, bSuccess)
       use omp_lib
       implicit none
