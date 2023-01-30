@@ -146,7 +146,8 @@ int submit_progress(char *root, char *datasetid, int len, int progress);
 PGconn *jvo_db_connect(char *db);
 char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id);
 
-extern void load_fits_header(char *datasetid, size_t datasetid_len, int unit, char *filepath, size_t filepath_len, char *flux, size_t flux_len, size_t filesize);
+extern void load_fits_header(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len);
+extern void read_fits_header(void *item, int unit, size_t filesize);
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, size_t len);
 extern void process_frame(void *item, int frame, float *data, float *pixels, bool *mask, int64_t npixels);
 extern void notify_root(void *item, char *root);
@@ -883,9 +884,8 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 // pass the header to FORTRAN for full parsing
                 if (unit != 0)
                 {
-                    char flux[] = "NULL";
-
-                    load_fits_header(stream->datasetid, strlen(stream->datasetid), unit, stream->fname, strlen(stream->fname), flux, strlen(flux), total_size);
+                    // char flux[] = "NULL";
+                    // load_fits_header(stream->datasetid, strlen(stream->datasetid), unit, stream->fname, strlen(stream->fname), flux, strlen(flux), total_size);
                 }
 
                 // finally close the file
@@ -1028,6 +1028,10 @@ static void *handle_url_download(void *arg)
             stream.pixels_per_frame = 0;
             stream.processed = 0;
             stream.frame = 0;
+
+            // create a new FITS dataset
+            char flux[] = "NULL";
+            load_fits_header(stream.datasetid, strlen(stream.datasetid), stream.fname, strlen(stream.fname), flux, strlen(flux));
 
             if (downloadfile)
             {
