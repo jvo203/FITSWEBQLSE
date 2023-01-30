@@ -4505,7 +4505,10 @@ contains
       call c_f_pointer(ptr, item)
 
       ! return if there is no header
-      if (get_header_status(ptr) .ne. 1) return
+      if (get_header_status(ptr) .ne. 1) then
+         call set_error_status(item, .true.)
+         return
+      end if
 
       print *, item%datasetid, "::process_frame:", frame, npixels
 
