@@ -3833,9 +3833,12 @@ contains
 
    end subroutine parse_fits_header
 
-   subroutine read_fits_header(ptr) BIND(C, name='read_fits_header')
-      type(C_PTR), intent(in), value :: ptr
+   subroutine read_fits_header(ptr, unit) BIND(C, name='read_fits_header')
+      use, intrinsic :: iso_c_binding
+      implicit none
 
+      type(C_PTR), intent(in), value :: ptr
+      integer(kind=c_int), intent(in), value :: unit
 
       type(dataset), pointer :: item
 
