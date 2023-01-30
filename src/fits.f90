@@ -3189,11 +3189,11 @@ contains
 
    end function count_cache_levels
 
-   subroutine load_fits_header(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, filesize) bind(C)
+   subroutine load_fits_header(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len) bind(C)
       use, intrinsic :: iso_c_binding
       implicit none
 
-      integer(kind=c_size_t), intent(in), value :: datasetid_len, filepath_len, flux_len, filesize
+      integer(kind=c_size_t), intent(in), value :: datasetid_len, filepath_len, flux_len
       character(kind=c_char), dimension(datasetid_len), intent(in) :: datasetid
       character(kind=c_char), dimension(filepath_len), intent(in) :: filepath
       character(kind=c_char), dimension(flux_len), intent(in) :: flux
@@ -3279,8 +3279,6 @@ contains
       item%dmad = ieee_value(0.0, ieee_quiet_nan)
       item%dmadN = ieee_value(0.0, ieee_quiet_nan)
       item%dmadP = ieee_value(0.0, ieee_quiet_nan)
-
-      item%filesize = filesize
 
       ! the rest will be handled in the 'read_fits_header' subroutine, which is called from the main C thread
 
@@ -3740,12 +3738,13 @@ contains
 
    end subroutine parse_fits_header
 
-   subroutine read_fits_header(ptr, unit) BIND(C, name='read_fits_header')
+   subroutine read_fits_header(ptr, unit, filesize) BIND(C, name='read_fits_header')
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(C_PTR), intent(in), value :: ptr
       integer(kind=c_int), intent(in), value :: unit
+      integer(kind=c_size_t), intent(in), value :: filesize
 
       ! FITS header
       integer naxis, bitpix
@@ -3802,6 +3801,8 @@ contains
       else
          npixels = npixels*naxes(3)
       end if
+
+      item%filesize = filesize
 
       call set_progress(item, int(0, kind=8), npixels)
       call set_header_status(item, .true.)
