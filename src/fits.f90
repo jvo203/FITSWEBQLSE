@@ -2596,8 +2596,8 @@ contains
    end subroutine set_error_status
 
    subroutine set_error_status_C(ptr, val) BIND(C, name='set_error_status_C')
-      type(c_ptr), value, intent(in) :: ptr
-      logical(kind=c_bool), intent(in) :: val
+      type(c_ptr), intent(in), value :: ptr
+      logical(kind=c_bool), intent(in), value :: val
 
       type(dataset), pointer :: item
       logical :: error
