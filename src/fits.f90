@@ -3189,7 +3189,7 @@ contains
 
    end function count_cache_levels
 
-   subroutine load_fits_header(datasetid, datasetid_len, unit, filepath, filepath_len, flux, flux_len, filesize) bind(C)
+   subroutine load_fits_header(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, filesize) bind(C)
       use, intrinsic :: iso_c_binding
       implicit none
 
@@ -3197,21 +3197,13 @@ contains
       character(kind=c_char), dimension(datasetid_len), intent(in) :: datasetid
       character(kind=c_char), dimension(filepath_len), intent(in) :: filepath
       character(kind=c_char), dimension(flux_len), intent(in) :: flux
-      integer(kind=c_int), intent(in), value :: unit
 
       character(len=filepath_len) :: strFilename
       character(len=flux_len) :: strFlux
 
       type(dataset), pointer :: item
-
-      ! FITS header
-      integer naxis, bitpix
-      integer naxes(4)
-      integer(kind=8) :: npixels
-
-      integer :: i, status, start, end
+      integer :: i
       integer(c_int) :: rc
-      logical :: bSuccess
 
       print *, "[load_fits_header] datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
 
@@ -3256,10 +3248,6 @@ contains
          rc = c_pthread_mutex_unlock(logger_mtx)
       end if
 
-      naxis = 0
-      naxes = (/0, 0, 0, 0/)
-      bSuccess = .false.
-
       ! reset the strings
       item%frameid = ''
       item%object = ''
@@ -3293,89 +3281,6 @@ contains
       item%dmadP = ieee_value(0.0, ieee_quiet_nan)
 
       item%filesize = filesize
-
-      ! reset the FITS header
-      if (allocated(item%hdr)) deallocate (item%hdr)
-
-      ! read the FITS header
-      call parse_fits_header(item, unit, naxis, naxes, bitpix)
-
-      !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
-      if (naxis .lt. 2) then
-         print *, 'READIMAGE failed to read the NAXISn keywords.'
-         call set_error_status(item, .true.)
-         return
-      end if
-
-      ! detect the FITS header types and units (frequency, velocity)
-      call frame_reference_type(item)
-      call frame_reference_unit(item)
-
-      item%bitpix = bitpix
-      item%naxis = naxis
-      item%naxes = naxes
-
-      if (isnan(item%ignrval)) then
-         item%ignrval = -1.0E30
-      end if
-
-      ! start the timer
-      call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
-
-      ! reset the progress
-      ! progress is being handled differently for URL-based datasets
-      ! the total is now given by the number of pixels in the FITS file
-      npixels = naxes(1)*naxes(2)
-
-      if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
-         ! do nothing
-      else
-         npixels = npixels*naxes(3)
-      end if
-
-      call set_progress(item, int(0, kind=8), npixels)
-      call set_header_status(item, .true.)
-
-      ! only for data cubes
-      if (naxis .gt. 2 .and. naxes(3) .gt. 1) then
-         ! the whole range
-         start = 1
-         end = naxes(3)
-
-         if (allocated(item%compressed)) deallocate (item%compressed)
-         allocate (item%compressed(start:end))
-
-         do i = start, end
-            nullify (item%compressed(i)%ptr)
-         end do
-
-         if (allocated(item%frame_min)) deallocate (item%frame_min)
-         allocate (item%frame_min(start:end))
-
-         if (allocated(item%frame_max)) deallocate (item%frame_max)
-         allocate (item%frame_max(start:end))
-
-         if (allocated(item%frame_median)) deallocate (item%frame_median)
-         allocate (item%frame_median(start:end))
-
-         ! spectra
-         if (allocated(item%mean_spectrum)) deallocate (item%mean_spectrum)
-         allocate (item%mean_spectrum(naxes(3)))
-
-         if (allocated(item%integrated_spectrum)) deallocate (item%integrated_spectrum)
-         allocate (item%integrated_spectrum(naxes(3)))
-
-         ! zero-out the spectra
-         item%mean_spectrum = 0.0
-         item%integrated_spectrum = 0.0
-
-         item%frame_min = 1.0E30
-         item%frame_max = -1.0E30
-         item%frame_median = ieee_value(0.0, ieee_quiet_nan)
-      end if
-
-      bSuccess = .true.
-      print *, 'load_fits_header bSuccess:', bSuccess
 
    end subroutine load_fits_header
 
@@ -3840,10 +3745,105 @@ contains
       type(C_PTR), intent(in), value :: ptr
       integer(kind=c_int), intent(in), value :: unit
 
+      ! FITS header
+      integer naxis, bitpix
+      integer naxes(4)
+      integer(kind=8) :: npixels
+
+      integer :: i, status, start, end
+      logical :: bSuccess
+
       type(dataset), pointer :: item
 
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
+
+      naxis = 0
+      naxes = (/0, 0, 0, 0/)
+      bSuccess = .false.
+
+      ! reset the FITS header
+      if (allocated(item%hdr)) deallocate (item%hdr)
+
+      ! read the FITS header
+      call parse_fits_header(item, unit, naxis, naxes, bitpix)
+
+      !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
+      if (naxis .lt. 2) then
+         print *, 'READIMAGE failed to read the NAXISn keywords.'
+         call set_error_status(item, .true.)
+         return
+      end if
+
+      ! detect the FITS header types and units (frequency, velocity)
+      call frame_reference_type(item)
+      call frame_reference_unit(item)
+
+      item%bitpix = bitpix
+      item%naxis = naxis
+      item%naxes = naxes
+
+      if (isnan(item%ignrval)) then
+         item%ignrval = -1.0E30
+      end if
+
+      ! start the timer
+      call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
+
+      ! reset the progress
+      ! progress is being handled differently for URL-based datasets
+      ! the total is now given by the number of pixels in the FITS file
+      npixels = naxes(1)*naxes(2)
+
+      if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
+         ! do nothing
+      else
+         npixels = npixels*naxes(3)
+      end if
+
+      call set_progress(item, int(0, kind=8), npixels)
+      call set_header_status(item, .true.)
+
+      ! only for data cubes
+      if (naxis .gt. 2 .and. naxes(3) .gt. 1) then
+         ! the whole range
+         start = 1
+         end = naxes(3)
+
+         if (allocated(item%compressed)) deallocate (item%compressed)
+         allocate (item%compressed(start:end))
+
+         do i = start, end
+            nullify (item%compressed(i)%ptr)
+         end do
+
+         if (allocated(item%frame_min)) deallocate (item%frame_min)
+         allocate (item%frame_min(start:end))
+
+         if (allocated(item%frame_max)) deallocate (item%frame_max)
+         allocate (item%frame_max(start:end))
+
+         if (allocated(item%frame_median)) deallocate (item%frame_median)
+         allocate (item%frame_median(start:end))
+
+         ! spectra
+         if (allocated(item%mean_spectrum)) deallocate (item%mean_spectrum)
+         allocate (item%mean_spectrum(naxes(3)))
+
+         if (allocated(item%integrated_spectrum)) deallocate (item%integrated_spectrum)
+         allocate (item%integrated_spectrum(naxes(3)))
+
+         ! zero-out the spectra
+         item%mean_spectrum = 0.0
+         item%integrated_spectrum = 0.0
+
+         item%frame_min = 1.0E30
+         item%frame_max = -1.0E30
+         item%frame_median = ieee_value(0.0, ieee_quiet_nan)
+      end if
+
+      bSuccess = .true.
+      print *, 'read_fits_header bSuccess:', bSuccess
 
    end subroutine read_fits_header
 
