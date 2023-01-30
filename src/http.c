@@ -885,8 +885,10 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 // pass the header to FORTRAN for full parsing
                 if (unit != 0)
                 {
-                    // char flux[] = "NULL";
-                    // load_fits_header(stream->datasetid, strlen(stream->datasetid), unit, stream->fname, strlen(stream->fname), flux, strlen(flux), total_size);
+                    void *item = get_dataset(stream->datasetid);
+
+                    if (item != NULL)
+                        read_fits_header(item, unit, total_size);
                 }
 
                 // finally close the file
