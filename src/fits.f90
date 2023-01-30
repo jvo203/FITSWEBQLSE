@@ -3282,6 +3282,8 @@ contains
 
       item%filesize = filesize
 
+      ! the rest will be handled in the 'read_fits_header' subroutine, which is called from the main C thread
+
    end subroutine load_fits_header
 
    subroutine load_fits_file(datasetid, datasetid_len, filepath, filepath_len, flux, flux_len, root, dir, dir_len) bind(C)
