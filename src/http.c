@@ -151,6 +151,7 @@ extern void read_fits_header(void *item, int unit, size_t filesize);
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, size_t len);
 extern void process_frame(void *item, int frame, float *data, float *pixels, bool *mask, int64_t npixels);
 extern void notify_root(void *item, char *root);
+extern void set_error_status_C(void *item, bool status);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
 extern void image_request(void *item, int width, int height, int fd);
 extern int get_error_status(void *item);
@@ -1089,9 +1090,8 @@ static void *handle_url_download(void *arg)
 
             if (item != NULL)
             {
-                // call set_error_status_C(item, true);
                 if (!get_header_status(item))
-                    ;
+                    set_error_status_C(item, true);
             }
 
             free(stream.data);
