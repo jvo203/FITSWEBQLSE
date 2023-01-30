@@ -1085,6 +1085,15 @@ static void *handle_url_download(void *arg)
                 }
             }
 
+            void *item = get_dataset(stream.datasetid);
+
+            if (item != NULL)
+            {
+                // call set_error_status_C(item, true);
+                if (!get_header_status(item))
+                    ;
+            }
+
             free(stream.data);
             free(stream.buffer);
             free(stream.pixels);
