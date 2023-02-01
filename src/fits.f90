@@ -5781,13 +5781,19 @@ contains
       integer, allocatable, target, intent(in) :: hist(:)
       type(C_PTR) :: json
       integer(kind=8) :: headersize, filesize
+      integer :: i
 
       ! make headersize a multiple of 2880
       headersize = 2880*((size(item%hdr, kind=8)-1)/2880 + 1)
 
+      filesize = 1
+      ! iterate over naxes
+      do i = 1, item%naxis
+         filesize = filesize * item%naxes(i)
+      end do
+
       ! calculate the FITS file size
-      filesize = nint(real(headersize) + real(item%naxes(1))*real(item%naxes(2))&
-      &*real(item%naxes(3))*real(item%naxes(4))*real(abs(item%bitpix)/8), kind=8)
+      filesize = nint(real(headersize) + real(filesize)*real(abs(item%bitpix)/8), kind=8)
 
       ! make filesize a multiple of 2880
       filesize = 2880*((filesize-1)/2880 + 1)
