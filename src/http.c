@@ -1448,6 +1448,7 @@ static enum MHD_Result on_http_connection(void *cls,
         pthread_t tid;
 
         char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+        char *_filename = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "filename");
 
         if (datasetId == NULL)
             return http_bad_request(connection);
@@ -1522,7 +1523,10 @@ static enum MHD_Result on_http_connection(void *cls,
         char filename[1024];
 
         // suggest a filename for saving the downloaded file
-        snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId);
+        if (_filename != NULL)
+            snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s", _filename);
+        else
+            snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId);
 
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
