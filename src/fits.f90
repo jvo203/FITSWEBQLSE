@@ -7400,7 +7400,9 @@ contains
       ! reset the filter
       filter = ''
 
-      if ((x1 .lt. 1) .or. (x2 .lt. 1) .or. (y1 .lt. 1) .or. (y2 .lt. 1)) full_download = .true.
+      if ((x1 .eq. -1) .or. (x2 .eq. -1) .or. (y1 .eq. -1) .or. (y2 .eq. -1)) then
+         full_download = .true.
+      end if
 
       if(.not. full_download) then
 
