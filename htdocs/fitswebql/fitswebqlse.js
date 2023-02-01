@@ -13745,15 +13745,6 @@ function display_menu() {
             .attr("target", "_blank")
             .attr('download', '')
             .html('full FITS download <span class="fas fa-save"></span>');
-
-        /*fitsDropdown.append("li")
-            .append("a")
-            .attr("id", "FITS")
-            .attr("disabled", "disabled")
-            .style("display", "none")
-            .style("font-style", "italic")
-            .style('cursor', 'not-allowed')
-            .html('full FITS download (disabled)');*/
     }
 
     //IMAGE
