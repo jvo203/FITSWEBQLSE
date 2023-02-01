@@ -7400,6 +7400,8 @@ contains
       ! reset the filter
       filter = ''
 
+      if ((x1 .lt. 1) .or. (x2 .lt. 1) .or. (y1 .lt. 1) .or. (y2 .lt. 1)) full_download = .true.
+
       if(.not. full_download) then
 
          ! get the range of the cube planes
