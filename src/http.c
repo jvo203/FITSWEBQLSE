@@ -1456,49 +1456,49 @@ static enum MHD_Result on_http_connection(void *cls,
         char *x1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x1");
 
         if (x1str == NULL)
-            return http_bad_request(connection);
+            x1 = -1;
         else
             x1 = atoi(x1str);
 
         char *y1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "y1");
 
         if (y1str == NULL)
-            return http_bad_request(connection);
+            y1 = -1;
         else
             y1 = atoi(y1str);
 
         char *x2str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x2");
 
         if (x2str == NULL)
-            return http_bad_request(connection);
+            x2 = -1;
         else
             x2 = atoi(x2str);
 
         char *y2str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "y2");
 
         if (y2str == NULL)
-            return http_bad_request(connection);
+            y2 = -1;
         else
             y2 = atoi(y2str);
 
         char *frame_start_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame_start");
 
         if (frame_start_str == NULL)
-            return http_bad_request(connection);
+            frame_start = 0.0;
         else
             frame_start = atof(frame_start_str);
 
         char *frame_end_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame_end");
 
         if (frame_end_str == NULL)
-            return http_bad_request(connection);
+            frame_end = 0.0;
         else
             frame_end = atof(frame_end_str);
 
         char *ref_freq_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ref_freq");
 
         if (ref_freq_str == NULL)
-            return http_bad_request(connection);
+            ref_freq = 0.0;
         else
             ref_freq = atof(ref_freq_str);
 
