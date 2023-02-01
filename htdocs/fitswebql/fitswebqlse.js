@@ -13734,14 +13734,26 @@ function display_menu() {
             .html('full FITS download <span class="fas fa-save"></span>');
     }
     else {
+        let filename = datasetId + ".fits";
+        let _url = "get_fits?datasetId=" + encodeURIComponent(datasetId);
+        _url += "&filename=" + encodeURIComponent(filename);
+
         fitsDropdown.append("li")
+            .append("a")
+            .attr("id", "FITS")
+            .attr("href", _url)
+            .attr("target", "_blank")
+            .attr('download', '')
+            .html('full FITS download <span class="fas fa-save"></span>');
+
+        /*fitsDropdown.append("li")
             .append("a")
             .attr("id", "FITS")
             .attr("disabled", "disabled")
             .style("display", "none")
             .style("font-style", "italic")
             .style('cursor', 'not-allowed')
-            .html('full FITS download (disabled)');
+            .html('full FITS download (disabled)');*/
     }
 
     //IMAGE
