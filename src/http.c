@@ -2534,6 +2534,7 @@ static enum MHD_Result on_http_connection(void *cls,
         char *extension = NULL;
 
         char *url = NULL;
+        char *fallback = NULL;
         char fname[1024]; // needed by the URL part
         memset(fname, '\0', sizeof(fname));
 
@@ -2908,6 +2909,13 @@ static enum MHD_Result on_http_connection(void *cls,
                             // disabled as FITSIO handling of downloads is inefficient
                             // TO-DO: a manual cluster-aware implementation is needed
                             // snprintf(filepath, sizeof(filepath) - 1, "%s://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_protocol, options.url_host, options.url_port, db, dataid);
+
+                            // fill-in the fallback URL;
+                            size_t url_size = strlen(options.url_protocol) + strlen(options.url_host) + 32 + strlen(db) + strlen(dataid) + 1;
+                            url_size += 64; // for the rest of the URL
+
+                            fallback = (char *)malloc(url_size);
+                            snprintf(fallback, url_size, "%s://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_protocol, options.url_host, options.url_port, db, dataid);
                         }
 
                         free(path);
@@ -2917,51 +2925,61 @@ static enum MHD_Result on_http_connection(void *cls,
                 printf("[C] FITS filepath: '%s'\n", filepath);
 
                 // C -> FORTRAN
-                fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
 
-                if (req != NULL)
+                if (fallback != NULL)
                 {
-                    req->datasetid = strdup(datasetId[i]);
-                    req->filepath = strndup(filepath, sizeof(filepath));
+                    printf("[C] falling back onto the URL: '%s'\n", fallback);
 
-                    if (flux != NULL)
-                        req->flux = strdup(flux);
-                    else
-                        req->flux = strdup("NULL");
+                    free(fallback);
+                }
+                else
+                {
+                    fits_req_t *req = (fits_req_t *)malloc(sizeof(fits_req_t));
 
-                    if (db != NULL)
-                        if (strstr(db, "hsc") != NULL)
-                        {
-                            free(req->flux);
-                            req->flux = strdup("ratio");
-                        }
-
-                    if (table != NULL)
-                        if (strstr(table, "fugin") != NULL)
-                        {
-                            free(req->flux);
-                            req->flux = strdup("logistic");
-                        }
-
-                    if (root_ip != NULL)
-                        req->root = strdup(root_ip);
-                    else
-                        req->root = NULL;
-
-                    pthread_t tid;
-                    int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
-
-                    if (stat != 0)
+                    if (req != NULL)
                     {
-                        // release memory
-                        free(req->datasetid);
-                        free(req->filepath);
-                        free(req->flux);
-                        free(req->root);
-                        free(req);
+                        req->datasetid = strdup(datasetId[i]);
+                        req->filepath = strndup(filepath, sizeof(filepath));
+
+                        if (flux != NULL)
+                            req->flux = strdup(flux);
+                        else
+                            req->flux = strdup("NULL");
+
+                        if (db != NULL)
+                            if (strstr(db, "hsc") != NULL)
+                            {
+                                free(req->flux);
+                                req->flux = strdup("ratio");
+                            }
+
+                        if (table != NULL)
+                            if (strstr(table, "fugin") != NULL)
+                            {
+                                free(req->flux);
+                                req->flux = strdup("logistic");
+                            }
+
+                        if (root_ip != NULL)
+                            req->root = strdup(root_ip);
+                        else
+                            req->root = NULL;
+
+                        pthread_t tid;
+                        int stat = pthread_create(&tid, NULL, &handle_fitswebql_request, req);
+
+                        if (stat != 0)
+                        {
+                            // release memory
+                            free(req->datasetid);
+                            free(req->filepath);
+                            free(req->flux);
+                            free(req->root);
+                            free(req);
+                        }
+                        else
+                            pthread_detach(tid);
                     }
-                    else
-                        pthread_detach(tid);
                 }
             }
 
