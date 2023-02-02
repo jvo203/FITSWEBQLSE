@@ -959,10 +959,15 @@ static void *handle_url_download(void *arg)
         extension = ext;
     }
 
-    if (extension == NULL)
-        snprintf(filepath, sizeof(filepath), "%s/%s.fits", options.fits_home, fname);
+    if (req->datasetid == NULL)
+    {
+        if (extension == NULL)
+            snprintf(filepath, sizeof(filepath), "%s/%s.fits", options.fits_home, fname);
+        else
+            snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, fname, extension);
+    }
     else
-        snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, fname, extension);
+        snprintf(filepath, sizeof(filepath) - 1, "%s/%s.fits", options.fits_home, req->datasetid);
 
     // if the file does not exist download it
     if (access(filepath, R_OK) == -1)
@@ -997,7 +1002,11 @@ static void *handle_url_download(void *arg)
             // a download structure
             struct FITSDownloadStream stream;
 
-            stream.datasetid = fname;
+            if (req->datasetid == NULL)
+                stream.datasetid = fname;
+            else
+                stream.datasetid = req->datasetid;
+
             stream.url = url;
             stream.fname = filepath;
 
