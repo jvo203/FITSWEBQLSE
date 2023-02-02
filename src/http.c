@@ -923,7 +923,6 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     return realsize;
 }
 
-// handle_url_download pthread handler
 static void *handle_url_download(void *arg)
 {
     if (arg == NULL)
