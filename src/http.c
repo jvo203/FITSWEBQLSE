@@ -2930,7 +2930,18 @@ static enum MHD_Result on_http_connection(void *cls,
                 {
                     printf("[C] falling back onto the URL: '%s'\n", fallback);
 
-                    free(fallback);
+                    // create and detach a cURL download thread
+                    pthread_t tid;
+
+                    int stat = pthread_create(&tid, NULL, &handle_url_download, fallback);
+
+                    if (stat != 0)
+                    {
+                        printf("[C] failed to create a cURL download thread.\n");
+                        free(fallback);
+                    }
+                    else
+                        pthread_detach(tid);
                 }
                 else
                 {
