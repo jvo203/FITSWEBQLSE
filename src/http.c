@@ -967,7 +967,7 @@ static void *handle_url_download(void *arg)
             snprintf(filepath, sizeof(filepath), "%s/%s.%s", options.fits_home, fname, extension);
     }
     else
-        snprintf(filepath, sizeof(filepath) - 1, "%s/%s.fits", options.fits_home, req->datasetid);
+        snprintf(filepath, sizeof(filepath), "%s/%s.fits", options.fits_home, req->datasetid);
 
     // if the file does not exist download it
     if (access(filepath, R_OK) == -1)
