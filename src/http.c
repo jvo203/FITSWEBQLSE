@@ -2924,8 +2924,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 printf("[C] FITS filepath: '%s'\n", filepath);
 
                 // C -> FORTRAN
-
-                if (fallback != NULL)
+                if (fallback != NULL && is_root_rank) // use the download functionality only on the root node
                 {
                     printf("[C] falling back onto the URL: '%s'\n", fallback);
 
