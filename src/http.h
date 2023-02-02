@@ -80,6 +80,12 @@ typedef struct
     char *root;
 } fits_req_t;
 
+typedef struct
+{
+    char *datasetid;
+    char *url;
+} url_req_t;
+
 struct MemoryStruct
 {
     char *memory;
