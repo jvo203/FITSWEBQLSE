@@ -928,7 +928,9 @@ static void *handle_url_download(void *arg)
     if (arg == NULL)
         pthread_exit(NULL);
 
-    char *url = (char *)arg;
+    url_req_t *req = (url_req_t *)arg;
+
+    char *url = req->url;
 
     char fname[1024]; // needed by the URL part
     memset(fname, '\0', sizeof(fname));
@@ -1105,7 +1107,10 @@ static void *handle_url_download(void *arg)
     }
 
     // release memory, exit the thread
-    free(arg);
+    free(req->datasetid);
+    free(req->url);
+    free(req);
+
     pthread_exit(NULL);
 }
 
@@ -2928,18 +2933,33 @@ static enum MHD_Result on_http_connection(void *cls,
                 {
                     printf("[C] falling back onto the URL: '%s'\n", fallback);
 
-                    // create and detach a cURL download thread
-                    pthread_t tid;
+                    url_req_t *req = (url_req_t *)malloc(sizeof(url_req_t));
 
-                    int stat = pthread_create(&tid, NULL, &handle_url_download, fallback);
-
-                    if (stat != 0)
+                    if (req != NULL)
                     {
-                        printf("[C] failed to create a cURL download thread.\n");
-                        free(fallback);
+                        req->datasetid = strdup(datasetId[i]);
+                        req->url = fallback;
+
+                        // create and detach a cURL download thread
+                        pthread_t tid;
+
+                        int stat = pthread_create(&tid, NULL, &handle_url_download, req);
+
+                        if (stat != 0)
+                        {
+                            printf("[C] failed to create a cURL download thread.\n");
+
+                            free(req->datasetid);
+                            free(req->url);
+                            free(req);
+                        }
+                        else
+                            pthread_detach(tid);
                     }
                     else
-                        pthread_detach(tid);
+                    {
+                        free(fallback);
+                    }
                 }
                 else
                 {
@@ -3019,19 +3039,29 @@ static enum MHD_Result on_http_connection(void *cls,
                 {
                     printf("[C] '%s' is not in the database, launching a download thread.\n", datasetId[0]);
 
-                    // create and detach a cURL download thread
-                    pthread_t tid;
+                    url_req_t *req = (url_req_t *)malloc(sizeof(url_req_t));
 
-                    char *arg = strdup(url);
-                    int stat = pthread_create(&tid, NULL, &handle_url_download, arg);
-
-                    if (stat != 0)
+                    if (req != NULL)
                     {
-                        printf("[C] failed to create a cURL download thread.\n");
-                        free(arg);
+                        req->datasetid = NULL;
+                        req->url = strdup(url);
+
+                        // create and detach a cURL download thread
+                        pthread_t tid;
+
+                        int stat = pthread_create(&tid, NULL, &handle_url_download, req);
+
+                        if (stat != 0)
+                        {
+                            printf("[C] failed to create a cURL download thread.\n");
+
+                            free(req->datasetid);
+                            free(req->url);
+                            free(req);
+                        }
+                        else
+                            pthread_detach(tid);
                     }
-                    else
-                        pthread_detach(tid);
                 }
             }
             else
