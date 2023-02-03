@@ -2702,7 +2702,7 @@ contains
 
     subroutine update_progress(item, progress)
         type(dataset), pointer, intent(inout) :: item
-        integer, intent(in) :: progress
+        integer, intent(in), value :: progress
         integer(8) finish
         real elapsed
 
