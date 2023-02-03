@@ -679,10 +679,6 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
 
     // process in multiples of <FITS_CHUNK_LENGTH>
     size_t work_size = buffer_size - (buffer_size % FITS_CHUNK_LENGTH);
-    // size_t work_size = FITS_CHUNK_LENGTH * ((buffer_size - 1) / FITS_CHUNK_LENGTH + 1);
-
-    // print buffer_size and work_size
-    printf("[C] buffer_size=%zu, work_size=%zu.\n", buffer_size, work_size);
 
     // process one line at a time
     for (size_t offset = 0; offset < work_size; offset += FITS_LINE_LENGTH)
@@ -811,7 +807,7 @@ void printerror(int status)
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
     size_t realsize = size * nmemb;
-    // printf("[C] parse2file(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
+    printf("[C] parse2file(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
 
     if (user == NULL) // do nothing in particular
     {
