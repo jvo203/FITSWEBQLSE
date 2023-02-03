@@ -684,7 +684,7 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
     for (size_t offset = 0; offset < work_size; offset += FITS_LINE_LENGTH)
     {
         strncpy(hdrLine, buffer + offset, FITS_LINE_LENGTH);
-        printf("%s\n", hdrLine);
+        // printf("%s\n", hdrLine);
         no_lines++;
 
         if (strncmp(hdrLine, "END       ", 10) == 0)
