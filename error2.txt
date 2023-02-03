@@ -1,2 +1,0 @@
-<range> POST request for 'member.uid___A001_X2fb_Xcdc.NGC346-ring-b6_sci.spw29.cube.I.pbcor': progress = 4, idx = 1007
- current:           2683886400 total:           2683886400
