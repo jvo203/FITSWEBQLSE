@@ -807,7 +807,7 @@ void printerror(int status)
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
     size_t realsize = size * nmemb;
-    printf("[C] parse2file(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
+    // printf("[C] parse2file(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
 
     if (user == NULL) // do nothing in particular
     {
