@@ -4248,10 +4248,11 @@ contains
             !$omp& NUM_THREADS(max_threads)
             tid = 1 + OMP_GET_THREAD_NUM()
 
-            ! reset the initial counters
+            ! reset the private variables
             start = 0
             end = 0
             num_per_node = 0
+            total_per_node = 0
 
             ! allocate thread buffers
             allocate (thread_buffer(npixels))
@@ -4264,12 +4265,6 @@ contains
 
             thread_pixels = 0.0
             thread_mask = .false.
-
-            ! reset the initial counter
-            start = 0
-            end = 0
-            num_per_node = 0
-            total_per_node = 0
 
             do
                 ! update the progress with work done so far
