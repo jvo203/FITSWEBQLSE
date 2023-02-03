@@ -651,13 +651,6 @@ static enum MHD_Result send_progress(struct MHD_Connection *connection, float pr
     return ret;
 }
 
-// cURL file-saving download handler
-static size_t download2file(void *ptr, size_t size, size_t nmemb, void *user)
-{
-    size_t written = fwrite(ptr, size, nmemb, (FILE *)user);
-    return written;
-}
-
 int hdr_get_int_value(char *hdr)
 {
     // printf("VALUE(%s)\n", hdr);
@@ -766,7 +759,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
             process_frame(item, stream->frame, stream->data, stream->pixels, stream->mask, (int64_t)stream->pixels_per_frame);
 
         // reset the frame data
-        for (int i = 0; i < stream->pixels_per_frame; i++)
+        for (size_t i = 0; i < stream->pixels_per_frame; i++)
             stream->data[i] = NAN;
 
         stream->processed = 0;
