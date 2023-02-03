@@ -679,12 +679,16 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
 
     // process in multiples of <FITS_CHUNK_LENGTH>
     size_t work_size = buffer_size - (buffer_size % FITS_CHUNK_LENGTH);
+    // size_t work_size = FITS_CHUNK_LENGTH * ((buffer_size - 1) / FITS_CHUNK_LENGTH + 1);
+
+    // print buffer_size and work_size
+    printf("[C] buffer_size=%zu, work_size=%zu.\n", buffer_size, work_size);
 
     // process one line at a time
     for (size_t offset = 0; offset < work_size; offset += FITS_LINE_LENGTH)
     {
         strncpy(hdrLine, buffer + offset, FITS_LINE_LENGTH);
-        // printf("%s\n", hdrLine);
+        printf("%s\n", hdrLine);
         no_lines++;
 
         if (strncmp(hdrLine, "END       ", 10) == 0)
@@ -732,7 +736,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     if (stream->bitpix != -32)
         return;
 
-    int bytes_per_pixel = abs(stream->bitpix) / 8;
+    size_t bytes_per_pixel = (size_t)abs(stream->bitpix) / 8;
 
     // scan as much FITS data as we can within a current 2D frame boundary
     char *buffer = stream->buffer + stream->cursor;
@@ -744,14 +748,15 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     if (available == 0)
         return;
 
-    // printf("[C] scan_fits_data:\tavailable #pixels = %zu.\n", available);
-
     size_t remaining = stream->pixels_per_frame - stream->processed;
-    unsigned int work_size = available > remaining ? remaining : available;
+    size_t work_size = available > remaining ? remaining : available;
+    // printf("[C] scan_fits_data:\tavailable #pixels = %zu, remaining: %zu, work_size = %zu.\n", available, remaining, work_size);
 
     // call ispc to convert the data from BIG ENDIAN to LITTLE ENDIAN
-    fits2float((int32_t *)buffer, stream->data + stream->processed, work_size);
-    stream->processed += (size_t)work_size;
+    fits2float((int32_t *)buffer, stream->data + stream->processed, (uint32_t)work_size);
+    stream->processed += work_size;
+
+    // printf("[C] scan_fits_data:\tstream->frame: %d, processed #pixels = %zu.\n", (stream->frame + 1), stream->processed);
 
     if (stream->processed == stream->pixels_per_frame)
     {
@@ -806,6 +811,7 @@ void printerror(int status)
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
     size_t realsize = size * nmemb;
+    // printf("[C] parse2file(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
 
     if (user == NULL) // do nothing in particular
     {
@@ -907,6 +913,8 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                     printerror(status);
 
                 // and then move remove the stream->cursor bytes from the head of the buffer
+                // printf stream->cursor and stream->running_size
+                printf("[C] stream->cursor = %zu, stream->running_size = %zu\n", stream->cursor, stream->running_size);
                 memmove(stream->buffer, stream->buffer + stream->cursor, stream->running_size - stream->cursor);
                 stream->running_size -= stream->cursor;
                 stream->cursor = 0;
@@ -1005,7 +1013,7 @@ static void *handle_url_download(void *arg)
 
             /* disable progress meter, set to 0L to enable it */
             /* enable progress meter, set to 1L to disable it */
-            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
             // a download file
             FILE *downloadfile;
@@ -1060,7 +1068,7 @@ static void *handle_url_download(void *arg)
             if (downloadfile)
             {
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
-                // curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH); // disabled as problems were encountered during downloads from jvox
+                curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH); // disabled as problems were encountered during downloads from jvox
 
                 res = curl_easy_perform(curl);
 
