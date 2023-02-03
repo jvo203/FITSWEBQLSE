@@ -2748,23 +2748,30 @@ static enum MHD_Result on_http_connection(void *cls,
                     datasetId = (char **)malloc(sizeof(char *));
                     datasetId[0] = strdup(fname);
 
-                    char enc[256];
-                    size_t len;
+                    // check if the item already exists in the hash table
+                    // if so do not forward the requests across the cluster
+                    void *item = get_dataset(datasetId[0]);
 
-                    GString *value = g_string_new(fname);
+                    if (item == NULL)
+                    {
+                        char enc[256];
+                        size_t len;
 
-                    len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
-                    enc[len] = '\0';
+                        GString *value = g_string_new(fname);
 
-                    g_string_append_printf(uri, "filename=%s&", enc);
+                        len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                        enc[len] = '\0';
 
-                    g_string_free(value, TRUE);
+                        g_string_append_printf(uri, "filename=%s&", enc);
 
-                    if (directory != NULL)
-                        g_string_append_printf(uri, "dir=%s&", directory);
+                        g_string_free(value, TRUE);
 
-                    if (extension != NULL)
-                        g_string_append_printf(uri, "ext=%s&", extension);
+                        if (directory != NULL)
+                            g_string_append_printf(uri, "dir=%s&", directory);
+
+                        if (extension != NULL)
+                            g_string_append_printf(uri, "ext=%s&", extension);
+                    }
                 }
             }
         }
