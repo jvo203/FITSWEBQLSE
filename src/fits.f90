@@ -2721,7 +2721,7 @@ contains
             ! for some reason there are duplicate submissions
             ! so as a countermeasure the progress needs to be capped at 100%
             ! item%progress = min(item%total, item%progress + progress)
-            item%progress = item%progress + progress
+            item%progress = item%progress + int(progress, kind=8)
             item%elapsed = elapsed
         end if
 
