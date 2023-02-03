@@ -808,18 +808,25 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     size_t realsize = size * nmemb;
 
     if (user == NULL) // do nothing in particular
+    {
+        printf("[C] user == NULL; parse2file returns %zu bytes.\n", realsize);
         return realsize;
+    }
 
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
 
     size_t written = fwrite(ptr, size, nmemb, stream->fp);
+    // printf("[C] fwrite(): written %zu versus requested %zu bytes.\n", written, realsize);
     realsize = written;
 
     // only process <realsize> bytes
     stream->total_size += realsize;
 
     if (stream->buffer == NULL)
+    {
+        printf("[C] stream->buffer == NULL; parse2file returns %zu bytes.\n", realsize);
         return realsize;
+    }
 
     size_t new_size = stream->running_size + realsize;
 
@@ -831,7 +838,10 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     };
 
     if (stream->buffer == NULL)
+    {
+        printf("[C] parse2file returns %zu bytes.\n", realsize);
         return realsize;
+    }
 
     // append the data to the buffer
     memcpy(stream->buffer + stream->running_size, ptr, realsize);
@@ -920,6 +930,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     if (stream->hdrEnd && (stream->frame < stream->naxes[2]))
         scan_fits_data(stream);
 
+    // printf("[C] parse2file returns %zu bytes.\n", realsize);
     return realsize;
 }
 
@@ -994,7 +1005,7 @@ static void *handle_url_download(void *arg)
 
             /* disable progress meter, set to 0L to enable it */
             /* enable progress meter, set to 1L to disable it */
-            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
             // a download file
             FILE *downloadfile;
@@ -1049,7 +1060,7 @@ static void *handle_url_download(void *arg)
             if (downloadfile)
             {
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
-                curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH);
+                // curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH); // disabled as problems were encountered during downloads from jvox
 
                 res = curl_easy_perform(curl);
 
