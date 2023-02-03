@@ -4232,9 +4232,6 @@ contains
             item%frame_max = -1.0E30
             item%frame_median = ieee_value(0.0, ieee_quiet_nan)
 
-            start = 0
-            end = 0
-            num_per_node = 0
             total_per_node = 0
 
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
@@ -4250,6 +4247,11 @@ contains
             !$omp& REDUCTION(+:total_per_node)&
             !$omp& NUM_THREADS(max_threads)
             tid = 1 + OMP_GET_THREAD_NUM()
+
+            ! reset the initial counters
+            start = 0
+            end = 0
+            num_per_node = 0
 
             ! allocate thread buffers
             allocate (thread_buffer(npixels))
