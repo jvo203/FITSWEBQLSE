@@ -1322,19 +1322,15 @@ contains
 
       if (.not. c_associated(ptr)) return
 
-      print *, item%datasetid, ': waiting for a loading mutex...'
+      call c_f_pointer(ptr, item)
 
       ! lock the loading mutex
       rc = c_pthread_mutex_lock(item%loading_mtx)
-
-      print *, item%datasetid, ': got a lock on the loading mutex.'
 
       file = ''
 
       ! files over this threshold will be put into the fast cache preferentially
       cache_threshold = threshold*(1024**3)! [GiB]
-
-      call c_f_pointer(ptr, item)
 
       ! destroy mutexes
       rc = c_pthread_mutex_destroy(item%header_mtx)
