@@ -1,0 +1,15 @@
+ls -l /home/alma/fits_archive/2023/01/14/jvor_230114b/2018.1.01205.L/A001_X1354_X22a/ALMA01627054_00_00_00.fits
+lrwxrwxrwx. 1 7001 7001 17  1月 14 08:41 /home/alma/fits_archive/2023/01/14/jvor_230114b/2018.1.01205.L/A001_X1354_X22a/ALMA01627054_00_00_00.fits -> ALMA01627054.fits
+
+[C] received a timeout request for ALMA01627054.
+ cache directory: /ssd/cache
+ trying a cache file: /ssd/cache/ALMA01627054
+ cache directory: /data/cache
+ trying a cache file: /data/cache/ALMA01627054
+[C] (non-empty?) directory '/data/cache/ALMA01627054' deleted successfully.
+ deleting ALMA01627054; cache dir: /data/cache/ALMA01627054, status          -1 , bSuccess F
+ error creating an index file /data/cache/ALMA01627054/index : Cannot open file '/data/cache/ALMA01627054/index': そのようなファイルやディレクトリはありません
+ error creating a data file /data/cache/ALMA01627054/data
+ ALMA01627054: closing the FITS file unit:          53
+Segmentation fault (コアダンプ)
+
