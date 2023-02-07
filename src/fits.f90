@@ -1321,7 +1321,6 @@ contains
       character(256) :: iomsg
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       ! lock the loading mutex
@@ -3006,7 +3005,6 @@ contains
       integer :: rc
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       ! lock the mutex
@@ -4743,7 +4741,6 @@ contains
       type(dataset), pointer :: item
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       call get_spectrum_range(item, frame_start, frame_end, ref_freq, first, last)
@@ -4894,7 +4891,6 @@ contains
       real(kind=8) :: f1, f2, v1, v2
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       if (item%has_velocity) then
@@ -5604,7 +5600,6 @@ contains
       type(dataset), pointer :: item
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       call calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last)
@@ -5928,7 +5923,6 @@ contains
       integer(c_int) :: rc
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       fits_width = item%naxes(1)
@@ -5995,7 +5989,6 @@ contains
       real(8) :: t1, t2 ! OpenMP TIME
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       print *, '"', item%datasetId, '", width', width, ', height', height, ', precision', precision,&
@@ -6168,7 +6161,6 @@ contains
       integer(kind=c_size_t) :: written
 
       if (.not. c_associated(ptr)) return
-
       call c_f_pointer(ptr, item)
 
       if (.not. allocated(item%pixels)) return
@@ -7522,7 +7514,6 @@ contains
       integer(c_int64_t) :: countP, countN
 
       if (.not. c_associated(arg)) return
-
       call c_f_pointer(arg, item)
 
       print *, 'calculating "all-data" global statistics'
