@@ -242,4 +242,4 @@ struct http_image_spectrum_request
 
 void start_http();
 void stop_http();
-void *http_update_timestamp(void *arg);
+void *http_propagate_timeout(void *arg);

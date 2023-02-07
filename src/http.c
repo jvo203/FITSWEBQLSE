@@ -6131,7 +6131,7 @@ void *fetch_image(void *ptr)
     pthread_exit(NULL);
 }
 
-void *http_update_timestamp(void *arg)
+void *http_propagate_timeout(void *arg)
 {
     if (arg == NULL)
         pthread_exit(NULL);
@@ -6145,7 +6145,7 @@ void *http_update_timestamp(void *arg)
 
     if (handle_count == 0)
     {
-        printf("[C] aborting http_update_timestamp (no cluster nodes found)\n");
+        printf("[C] aborting http_propagate_timeout (no cluster nodes found)\n");
 
         g_mutex_unlock(&cluster_mtx);
 
