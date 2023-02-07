@@ -3271,6 +3271,9 @@ contains
       call set_header_status(item, .false.)
       item%cache = .false. ! disable caching of this dataset
 
+      ! start the timer
+      call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
+
       call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
 
       ! needs to be protected with a mutex
