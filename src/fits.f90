@@ -1322,8 +1322,12 @@ contains
 
       if (.not. c_associated(ptr)) return
 
-      ! lock the mutex
+      print *, item%datasetid, ': waiting for a loading mutex...'
+
+      ! lock the loading mutex
       rc = c_pthread_mutex_lock(item%loading_mtx)
+
+      print *, item%datasetid, ': got a lock on the loading mutex.'
 
       file = ''
 
@@ -2613,11 +2617,17 @@ contains
       type(dataset), pointer :: item
       logical :: error
 
+      print *, 'set_error_status_C: ', val, ', #1.'
+
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
+      print *, 'set_error_status_C: ', val, ', #2.'
+
       error = val
       call set_error_status(item, error)
+
+      print *, 'set_error_status_C: ', val, ', done.'
 
    end subroutine set_error_status_C
 
