@@ -3274,6 +3274,9 @@ contains
       ! start the timer
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
+      ! re-set the timeout timer
+      call system_clock(item%timestamp)
+
       call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
 
       ! needs to be protected with a mutex
