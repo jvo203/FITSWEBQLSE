@@ -1087,11 +1087,12 @@ static void *handle_url_download(void *arg)
 
                 do
                 {
+                    /* Perform the request, res will get the return code */
                     res = curl_easy_perform(curl);
 
                     if (res != CURLE_OK)
                     {
-                        fprintf(stderr, "curl_easy_perform() failed: %s : %s, retrying after 1s...\n", url, curl_easy_strerror(res));
+                        fprintf(stderr, "[C] handle_url_download: curl_easy_perform() failed: %s : %s, retrying after 1s...\n", url, curl_easy_strerror(res));
                         sleep(1);
                     }
                 } while (res != CURLE_OK && retry++ < 3);
@@ -1100,7 +1101,7 @@ static void *handle_url_download(void *arg)
 
                 if (res != CURLE_OK)
                 {
-                    fprintf(stderr, "curl_easy_perform() failed: %s : %s\n", url, curl_easy_strerror(res));
+                    fprintf(stderr, "[C] handle_url_download: curl_easy_perform() failed: %s : %s\n", url, curl_easy_strerror(res));
 
                     // remove the download file
                     remove(download);
@@ -4080,8 +4081,19 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
             /* the actual POST data */
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_buffer);
 
-            /* Perform the request, res will get the return code */
-            res = curl_easy_perform(curl);
+            int retry = 0;
+
+            do
+            {
+                /* Perform the request, res will get the return code */
+                res = curl_easy_perform(curl);
+
+                if (res != CURLE_OK)
+                {
+                    fprintf(stderr, "[C] fetch_channel_range: curl_easy_perform() failed: %s : %s, retrying after 1s...\n", url, curl_easy_strerror(res));
+                    sleep(1);
+                }
+            } while (res != CURLE_OK && retry++ < 5);
 
             /* Check for errors */
             if (res != CURLE_OK)
