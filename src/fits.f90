@@ -1341,8 +1341,8 @@ contains
       rc = c_pthread_mutex_destroy(item%timestamp_mtx)
 
       ! check if the dataset can be cached in the first place
-      if (.not. item%cache) then
-         print *, item%datasetid, ': dataset is not cacheable, destroying it.'
+      if (.not. item%cache .or. item%error) then
+         print *, item%datasetid, ': dataset cannot be cached, destroying it.'
 
          ! deallocate compressed memory regions
          if (allocated(item%compressed)) then
