@@ -4,7 +4,7 @@
 
 #include <glib.h>
 
-struct timeout_t
+struct timeout_arg
 {
     void *ptr;
     int error;

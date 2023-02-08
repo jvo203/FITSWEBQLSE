@@ -138,6 +138,9 @@ void *delete_hash_data(void *arg)
                 {
                     // launch a 'delete' pthread in a detached state with the stolen_key
                     // stolen_key will be freeded inside the thread
+
+                    struct timeout_arg *arg = (struct timeout_arg *)malloc(sizeof(struct timeout_arg));
+
                     rc = pthread_create(&tid, &attr, http_propagate_timeout, stolen_key);
 
                     if (rc != 0)
