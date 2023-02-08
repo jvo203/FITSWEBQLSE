@@ -12027,10 +12027,19 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 202) {
+            if (dataset_timeout != -1) {
+                window.clearTimeout(dataset_timeout);
+                dataset_timeout = -1;
+            }
+
             console.log("Server not ready, long-polling image again after 500ms.");
             setTimeout(function () {
                 fetch_image_spectrum(_datasetId, index, fetch_data, false);
             }, 500);
+        }
+
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 204) {
+            console.log("Server not ready / No Content.");
 
             if (dataset_timeout == -1) {
                 dataset_timeout = setTimeout(function () {
