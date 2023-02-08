@@ -1860,7 +1860,7 @@ static enum MHD_Result on_http_connection(void *cls,
             pthread_attr_t attr; // thread's attribute
             int rc;              // return code
 
-            printf("[C] received a timeout request for %s, error: %d.\n", datasetId, error);
+            printf("[C] received a timeout request for %s, error status: %d.\n", datasetId, error);
 
             rc = pthread_attr_init(&attr);
 
