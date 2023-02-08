@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-02-01.0";
+    return "JS2023-02-08.0";
 }
 
 function uuidv4() {
@@ -11984,22 +11984,42 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
 
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 404) {
+            if (dataset_timeout != -1) {
+                window.clearTimeout(dataset_timeout);
+                dataset_timeout = -1;
+            }
+
             hide_hourglass();
             show_not_found();
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 415) {
+            if (dataset_timeout != -1) {
+                window.clearTimeout(dataset_timeout);
+                dataset_timeout = -1;
+            }
+
             hide_hourglass();
             show_unsupported_media_type();
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 500) {
+            if (dataset_timeout != -1) {
+                window.clearTimeout(dataset_timeout);
+                dataset_timeout = -1;
+            }
+
             hide_hourglass();
             //show_critical_error();
             show_not_found();
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 502) {
+            if (dataset_timeout != -1) {
+                window.clearTimeout(dataset_timeout);
+                dataset_timeout = -1;
+            }
+
             console.log("Connection error, re-fetching image after 1 second.");
             setTimeout(function () {
                 fetch_image_spectrum(_datasetId, index, fetch_data, true);
@@ -12011,9 +12031,20 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
             setTimeout(function () {
                 fetch_image_spectrum(_datasetId, index, fetch_data, false);
             }, 500);
+
+            if (dataset_timeout == -1) {
+                dataset_timeout = setTimeout(function () {
+                    hide_hourglass();
+                    show_not_found();
+                }, 10000);
+            }
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            if (dataset_timeout != -1) {
+                window.clearTimeout(dataset_timeout);
+                dataset_timeout = -1;
+            }
 
             setup_window_timeout();
 
@@ -16557,6 +16588,8 @@ async*/ function mainRenderer() {
 
         poll_heartbeat();
         poll_cluster();
+
+        dataset_timeout = -1;
 
         if (va_count == 1) {
             poll_progress(datasetId, 1);
