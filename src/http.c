@@ -6182,7 +6182,7 @@ void *http_propagate_timeout(void *user)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/timeout/%.*s", options.http_port, (int)len, datasetid);
+        g_string_append_printf(url, "%" PRIu16 "/timeout/%.*s?error=%d", options.http_port, (int)len, datasetid, arg->error);
         // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
