@@ -4090,7 +4090,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
                 if (res != CURLE_OK)
                 {
-                    fprintf(stderr, "[C] fetch_channel_range: curl_easy_perform() failed: %s : %s, retrying after 1s...\n", url, curl_easy_strerror(res));
+                    fprintf(stderr, "[C] fetch_channel_range: curl_easy_perform() failed: %s, retrying after 1s...\n", curl_easy_strerror(res));
                     sleep(1);
                 }
             } while (res != CURLE_OK && retry++ < 5);
