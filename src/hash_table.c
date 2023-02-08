@@ -141,9 +141,22 @@ void *delete_hash_data(void *arg)
 
                     struct timeout_arg *arg = (struct timeout_arg *)malloc(sizeof(struct timeout_arg));
 
-                    rc = pthread_create(&tid, &attr, http_propagate_timeout, stolen_key);
+                    if (arg != NULL)
+                    {
+                        arg->ptr = stolen_key;
+                        arg->error = error;
 
-                    if (rc != 0)
+                        rc = pthread_create(&tid, &attr, http_propagate_timeout, arg);
+
+                        if (rc != 0)
+                        {
+                            arg->ptr = NULL;
+                            free(arg);
+
+                            free(stolen_key);
+                        }
+                    }
+                    else
                         free(stolen_key);
                 }
                 else
