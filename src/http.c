@@ -6131,10 +6131,12 @@ void *fetch_image(void *ptr)
     pthread_exit(NULL);
 }
 
-void *http_propagate_timeout(void *arg)
+void *http_propagate_timeout(void *user)
 {
-    if (arg == NULL)
+    if (user == NULL)
         pthread_exit(NULL);
+
+    struct timeout_arg *arg = (struct timeout_arg *)user;
 
     int i;
     GSList *iterator = NULL;
@@ -6149,11 +6151,12 @@ void *http_propagate_timeout(void *arg)
 
         g_mutex_unlock(&cluster_mtx);
 
+        free(arg->ptr);
         free(arg);
         pthread_exit(NULL);
     };
 
-    char *id = (char *)arg;
+    char *id = (char *)arg->ptr;
     size_t idlen = strlen(id);
 
     // html-encode the datasetid
@@ -6233,6 +6236,7 @@ void *http_propagate_timeout(void *arg)
 
     curl_multi_cleanup(multi_handle);
 
+    free(arg->ptr);
     free(arg);
 
     pthread_exit(NULL);
