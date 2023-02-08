@@ -4,6 +4,12 @@
 
 #include <glib.h>
 
+struct timeout_t
+{
+    void *ptr;
+    int error;
+};
+
 void init_hash_table();
 void delete_hash_table();
 void garbage_collect();
