@@ -1842,6 +1842,18 @@ static enum MHD_Result on_http_connection(void *cls,
         if (datasetId == NULL)
             return http_bad_request(connection);
 
+        int error = 0;
+
+        char *error_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "error");
+
+        if (error_str != NULL)
+            error = atoi(error_str);
+
+        void *item = get_dataset(datasetId);
+
+        if (item != NULL && error)
+            set_error_status_C(item, true);
+
         // launch a delete thread
         {
             pthread_t tid;
