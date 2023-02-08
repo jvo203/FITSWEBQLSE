@@ -1083,7 +1083,18 @@ static void *handle_url_download(void *arg)
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
                 curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH); // disabled as problems were encountered during downloads from jvox
 
-                res = curl_easy_perform(curl);
+                int retry = 0;
+
+                do
+                {
+                    res = curl_easy_perform(curl);
+
+                    if (res != CURLE_OK)
+                    {
+                        fprintf(stderr, "curl_easy_perform() failed: %s : %s, retrying after 1s...\n", url, curl_easy_strerror(res));
+                        sleep(1);
+                    }
+                } while (res != CURLE_OK && retry++ < 3);
 
                 fclose(downloadfile);
 
