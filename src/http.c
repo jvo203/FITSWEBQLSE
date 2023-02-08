@@ -4191,8 +4191,19 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
             /* the actual POST data */
             curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)&progress);
 
-            /* Perform the request, res will get the return code */
-            res = curl_easy_perform(curl);
+            int retry = 0;
+
+            do
+            {
+                /* Perform the request, res will get the return code */
+                res = curl_easy_perform(curl);
+
+                if (res != CURLE_OK)
+                {
+                    fprintf(stderr, "[C] submit_progress: curl_easy_perform() failed: %s, retrying after 1s...\n", curl_easy_strerror(res));
+                    sleep(1);
+                }
+            } while (res != CURLE_OK && retry++ < 5);
 
             /* Check for errors */
             if (res != CURLE_OK)
