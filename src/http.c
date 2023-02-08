@@ -278,6 +278,30 @@ static enum MHD_Result http_accepted(struct MHD_Connection *connection)
         return MHD_NO;
 };
 
+static enum MHD_Result http_no_content(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *errorstr =
+        "204 No Content";
+
+    response =
+        MHD_create_response_from_buffer(strlen(errorstr),
+                                        (void *)errorstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_NO_CONTENT,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
 static enum MHD_Result http_acknowledge(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
@@ -1761,7 +1785,7 @@ static enum MHD_Result on_http_connection(void *cls,
         void *item = get_dataset(datasetId);
 
         if (item == NULL)
-            return http_accepted(connection);
+            return http_no_content(connection);
 
         if (get_error_status(item))
             return http_internal_server_error(connection);
