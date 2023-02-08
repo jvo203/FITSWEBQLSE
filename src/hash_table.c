@@ -16,6 +16,7 @@ extern options_t options; // <options> is defined in main.c
 // FILE_CHUNK 256KB
 #define FILE_CHUNK 262144
 
+extern int get_error_status(void *item);
 extern size_t chunked_write_with_chunk(int fd, const char *src, size_t n, size_t chunk); // defined in http.c
 extern size_t chunked_read_with_chunk(int fd, const char *src, size_t n, size_t chunk);  // defined in http.c
 
@@ -97,6 +98,7 @@ void *delete_hash_data(void *arg)
     gpointer stolen_key = NULL;
     gpointer stolen_value = NULL;
     int timeout = 0;
+    int error = 0;
 
     // lock the hash table
     if (pthread_mutex_lock(&datasets_mtx) == 0)
@@ -108,6 +110,7 @@ void *delete_hash_data(void *arg)
         {
             // re-confirm the timeout
             timeout = dataset_timeout(item, options.timeout);
+            error = get_error_status(item);
 
             // remove (steal) the item from the hash table
             if (timeout)
