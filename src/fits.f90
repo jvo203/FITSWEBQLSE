@@ -3067,10 +3067,8 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
-      print *, "notify_root called."
-
       ! try to obtain a lock on the loading mutex
-      rc = c_pthread_mutex_lock(item%loading_mtx)
+      rc = c_pthread_mutex_trylock(item%loading_mtx)
 
       if(rc .ne. 0) then
          print *, "notify_root: failed to lock the loading mutex (loading is already under way?), rc =", rc
