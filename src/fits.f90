@@ -3071,7 +3071,7 @@ contains
       rc = c_pthread_mutex_trylock(item%loading_mtx)
 
       if(rc .ne. 0) then
-         print *, "notify_root: failed to lock the loading mutex / loading is already under way?), rc:", rc
+         print *, "notify_root: failed to lock the loading mutex / another loading is in progress, rc:", rc
          return
       end if
 
