@@ -375,7 +375,7 @@ module fits
          implicit none
          type(c_funptr), intent(in), value :: start_routine
          type(c_ptr), intent(in), value :: arg
-         integer(c_int), intent(out) :: rc
+         integer(kind=c_int), intent(out) :: rc
          type(c_ptr) :: my_pthread_create
       end function my_pthread_create
 
@@ -2593,7 +2593,7 @@ contains
       type(dataset), pointer, intent(inout) :: item
       logical, intent(in) :: error
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%error_mtx)
@@ -2624,7 +2624,7 @@ contains
       type(dataset), pointer, intent(inout) :: item
       logical, intent(in) :: ok
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%ok_mtx)
@@ -2651,7 +2651,7 @@ contains
       type(dataset), pointer, intent(inout) :: item
       logical, intent(in) :: image
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%image_mtx)
@@ -2667,7 +2667,7 @@ contains
       type(dataset), pointer, intent(inout) :: item
       logical, intent(in) :: video
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%video_mtx)
@@ -2698,7 +2698,7 @@ contains
    subroutine reset_clock(item)
       type(dataset), pointer, intent(inout) :: item
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%progress_mtx)
@@ -2717,7 +2717,7 @@ contains
       real elapsed
 
       integer(kind=8) :: current, total
-      integer :: rc
+      integer(kind=c_int) :: rc
       type(c_pthread_t) :: pid
 
       ! take a time measurement
@@ -2728,10 +2728,9 @@ contains
       rc = c_pthread_mutex_lock(item%progress_mtx)
 
       if (item%total .gt. 0 .and. item%progress .lt. item%total) then
-         ! for some reason there are duplicate submissions
-         ! so as a countermeasure the progress needs to be capped at 100%
-         ! item%progress = min(item%total, item%progress + progress)
-         item%progress = item%progress + int(progress, kind=8)
+         ! cap the progress at 100% to prevent extra progress updates from <submit_progress_counter>
+         ! from going over the <total>
+         item%progress = min(item%total, item%progress + int(progress, kind=8))
          item%elapsed = elapsed
       end if
 
@@ -2774,7 +2773,7 @@ contains
 
    subroutine print_progress(item)
       type(dataset), pointer, intent(inout) :: item
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%progress_mtx)
@@ -2792,7 +2791,7 @@ contains
       integer(8) finish
       real elapsed
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       ! take a time measurement
       call system_clock(finish)
@@ -2814,7 +2813,7 @@ contains
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       if (.not. c_associated(ptr)) then
          get_error_status = 1
@@ -2842,7 +2841,7 @@ contains
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       if (.not. c_associated(ptr)) then
          get_ok_status = 0
@@ -2870,7 +2869,7 @@ contains
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       if (.not. c_associated(ptr)) then
          get_image_status = 0
@@ -2898,7 +2897,7 @@ contains
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       if (.not. c_associated(ptr)) then
          get_video_status = 0
@@ -2954,7 +2953,7 @@ contains
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       if (get_header_status(ptr) .ne. 1) then
          get_progress = 0.0
@@ -2980,7 +2979,7 @@ contains
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       if (get_header_status(ptr) .ne. 1) then
          get_elapsed = 0.0
@@ -3002,7 +3001,7 @@ contains
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
@@ -3063,19 +3062,34 @@ contains
 
       type(dataset), pointer :: item
       integer :: i
-      integer(c_int) :: counter
+      integer(kind=c_int) :: counter, rc
 
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
+      ! lock the loading mutex
+      rc = c_pthread_mutex_lock(item%loading_mtx)
+
       ! applicable to *FITS DATA CUBES* only
-      if (item%naxes(3) .le. 1) return
+      if (item%naxes(3) .le. 1) then
+         ! unlock the loading mutex
+         rc = c_pthread_mutex_unlock(item%loading_mtx)
+         return
+      end if
 
       ! there is no point in sending anything if the root itself is NULL
-      if (.not. c_associated(root)) return
+      if (.not. c_associated(root)) then
+         ! unlock the loading mutex
+         rc = c_pthread_mutex_unlock(item%loading_mtx)
+         return
+      end if
 
       ! if no planes have been allocated do nothing
-      if (.not. allocated(item%compressed)) return
+      if (.not. allocated(item%compressed)) then
+         ! unlock the loading mutex
+         rc = c_pthread_mutex_unlock(item%loading_mtx)
+         return
+      end if
 
       ! count the number of valid 2D planes (associated pointers)
       counter = 0
@@ -3086,6 +3100,9 @@ contains
 
       ! submit a progress report to the root node
       call submit_progress_counter(item, counter, root)
+
+      ! unlock the loading mutex
+      rc = c_pthread_mutex_unlock(item%loading_mtx)
 
    end subroutine notify_root
 
@@ -3138,7 +3155,7 @@ contains
       type(dataset), pointer, intent(inout) :: item
       integer, intent(out) :: status, startindex, endindex
 
-      integer :: rc
+      integer(kind=c_int) :: rc
 
       ! lock the mutex
       rc = c_pthread_mutex_lock(item%error_mtx)
@@ -3229,7 +3246,7 @@ contains
 
       type(dataset), pointer :: item
       integer :: i
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       print *, "[load_fits_header] datasetid: '", datasetid, "', flux: '", flux, "', filepath: '", filepath, "'"
 
@@ -3966,7 +3983,7 @@ contains
       ! OpenMP multi-threading
       integer, dimension(:), allocatable :: thread_units
 
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       if (.not. c_associated(root)) then
          ! needs to be protected with a mutex
@@ -5926,7 +5943,7 @@ contains
 
       type(inner_dims_req_t), target :: inner_dims
       type(c_ptr) :: pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
@@ -5982,7 +5999,7 @@ contains
       type(inner_dims_req_t), target :: inner_dims
       type(image_req_t), target :: image_req
       type(c_ptr) :: pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       integer inner_width, inner_height
       integer img_width, img_height
@@ -6161,7 +6178,7 @@ contains
 
       type(resize_task_t), target :: task
       type(c_ptr) :: task_pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       real :: scale, s1, s2
       integer(kind=c_size_t) :: written
@@ -6383,7 +6400,7 @@ contains
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
       type(c_ptr) :: pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
@@ -6601,7 +6618,7 @@ contains
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
       type(c_ptr) :: pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       ! OpenMP thread-local variables
       real(c_float) :: thread_sumP, thread_sumN
@@ -6923,7 +6940,7 @@ contains
 
       type(resize_task_t), target :: task
       type(c_ptr) :: task_pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       real(kind=c_float), allocatable, target :: pixels(:, :), view_pixels(:, :)
       logical(kind=c_bool), allocatable, target :: mask(:, :), view_mask(:, :)
@@ -7514,7 +7531,7 @@ contains
 
       type(mad_req_t), target :: req
       type(c_ptr) :: pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       real(c_float) :: sumP, sumN
       integer(c_int64_t) :: countP, countN
@@ -7651,7 +7668,7 @@ contains
 
       type(video_fetch_f), allocatable, target :: fetch_req
       type(c_ptr) :: pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
@@ -8057,7 +8074,7 @@ contains
       ! cluster
       type(pv_request_t), target :: cluster_req
       type(c_ptr) :: pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       integer :: frame, first, last, length, npoints, i, max_threads
       real :: dx, dy, t, dt
@@ -8454,7 +8471,7 @@ contains
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
       type(c_ptr) :: pid
-      integer(c_int) :: rc
+      integer(kind=c_int) :: rc
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
