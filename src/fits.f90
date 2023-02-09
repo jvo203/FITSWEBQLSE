@@ -356,7 +356,7 @@ module fits
       real(kind=c_float), allocatable :: integrated_spectrum(:)
 
       ! datasets opened from a URL will not be cached
-      logical :: cache = .true. ! if true, the dataset will be cached
+      logical :: cache = .false. ! if true, the dataset will be cached
    contains
       final :: close_fits_file
    end type dataset
