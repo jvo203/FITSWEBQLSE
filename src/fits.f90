@@ -3067,6 +3067,7 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
+      ! this should be re-done with 'trylock' and return if the mutex is locked (another loading is in progress)
       ! lock the loading mutex
       rc = c_pthread_mutex_lock(item%loading_mtx)
 
