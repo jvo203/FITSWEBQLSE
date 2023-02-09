@@ -323,7 +323,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             {
                 datasetId++; // skip the slash character
 
+#ifdef DEBUG
                 printf("<range> POST request for '%s': progress = %d, idx = %d\n", datasetId, progress, idx);
+#endif
 
                 void *item = get_dataset(datasetId);
 

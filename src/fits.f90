@@ -4345,7 +4345,7 @@ contains
             ! process the block
             if ((start .gt. 0) .and. (end .gt. 0)) then
                num_per_node = end - start + 1
-               print *, "TID", tid, 'START', start, 'END', end, 'NUM_PER_NODE', num_per_node
+               ! print *, "TID", tid, 'START', start, 'END', end, 'NUM_PER_NODE', num_per_node
 
                ! get a current OpenMP thread (starting from 0 as in C)
                tid = 1 + OMP_GET_THREAD_NUM()
