@@ -6,8 +6,8 @@ using ProgressMeter
 function connect_db(db_name)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
     password = user * String(UInt8.([33]))
-    host = "jvof" # on zodiac
-    # host = "jvox.vo.nao.ac.jp" # on the cluster
+    # host = "jvof" # on zodiac
+    host = "jvox.vo.nao.ac.jp" # on the cluster
 
     url = "postgresql://" * user
 
@@ -146,10 +146,16 @@ end
 
 conn = connect_db("alma")
 
-
 threshold = 20 #GB
 large_threshold = 40 #GB
 start_date = "2023-02-01"
+
+# get the start_date from the command line argument (if there is one)
+if length(ARGS) > 0
+    start_date = ARGS[1]
+end
+
+println("Starting date: $(start_date)")
 
 res = get_datasets(conn, threshold, start_date)
 
@@ -158,17 +164,16 @@ sizes = res[:file_size]
 paths = res[:path]
 dates = res[:regist_date]
 
-count = 1
 total_count = length(ids) # number of datasets to preload
 
 println("Total number of datasets to preload: $(total_count)")
 
-
 # first copy then preload (somehow it helps to even out glusterfs load balancing)
+count = 1
 for (datasetid, file_size, path, date) in zip(ids, sizes, paths, dates)
     global count
 
-    println("\nprocessing: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB, registration date: $date")
+    println("\n<1st pass> #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB, registration date: $date")
 
     # only copy for file_size >= large_threshold
     if file_size >= large_threshold * 1024^3
@@ -177,6 +182,23 @@ for (datasetid, file_size, path, date) in zip(ids, sizes, paths, dates)
         println("\tCOPY: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
         copy_dataset(datasetid, file_size, path)
     else
+        # preload
+        println("\tPRELOAD: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
+        preload_dataset(datasetid)
+    end
+
+    # increment the index
+    count = count + 1
+end
+
+# another pass, this time preloading large datasets only (hopefully the glusterfs should be ready)
+count = 1
+for (datasetid, file_size, path, date) in zip(ids, sizes, paths, dates)
+    global count
+
+    println("\n<2nd pass> #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB, registration date: $date")
+
+    if file_size >= large_threshold * 1024^3
         # preload
         println("\tPRELOAD: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
         preload_dataset(datasetid)
