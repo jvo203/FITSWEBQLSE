@@ -191,6 +191,10 @@ for (datasetid, file_size, path, date) in zip(ids, sizes, paths, dates)
     count = count + 1
 end
 
+# sleep for 5 minutes to allow for the glusterfs to settle down
+println("Sleeping for 5 minutes to allow for the glusterfs to settle down...")
+sleep(5 * 60)
+
 # another pass, this time preloading large datasets only (hopefully the glusterfs should be ready)
 count = 1
 for (datasetid, file_size, path, date) in zip(ids, sizes, paths, dates)
