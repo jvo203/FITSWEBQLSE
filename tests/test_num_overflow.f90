@@ -32,7 +32,7 @@ C  Get an unused Logical Unit Number to use to open the FITS file.
          call ftgiou(unit,status)
 
 C     name of FITS file
-         filename='ATESTFILEZ.FITS'
+         filename='image_float32.fits'
 
 C     open the FITS file, with read-only access.  The returned BLOCKSIZE
 C     parameter is obsolete and should be ignored.
@@ -109,7 +109,7 @@ C  Get an unused Logical Unit Number to use to open the FITS file.
          call ftgiou(unit,status)
 
 C  Open the FITS file known to contain values of type REAL(8) outside of range of REAL(4)
-         filename='ATESTFILEZ.FITS'
+         filename='image_float32.fits'
          readwrite=0
          call ftopen(unit,filename,readwrite,blocksize,status)
 
