@@ -32,7 +32,7 @@ subroutine readheader
    call ftgiou(unit,status)
 
 !     name of FITS file
-   filename='image_float32.fits'
+   filename='image_float64_num_overflow.fits'
 
 !     open the FITS file, with read-only access.  The returned BLOCKSIZE
 !     parameter is obsolete and should be ignored.
@@ -109,7 +109,7 @@ subroutine readimage
    call ftgiou(unit,status)
 
 !  Open the FITS file known to contain values of type REAL(8) outside of range of REAL(4)
-   filename='image_float32.fits'
+   filename='image_float64_num_overflow.fits'
    readwrite=0
    call ftopen(unit,filename,readwrite,blocksize,status)
 
