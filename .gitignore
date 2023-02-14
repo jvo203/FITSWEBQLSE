@@ -8,6 +8,7 @@
 /zfp_encode
 /test_fixed_array
 /*.dSYM
+/tests/num_overflow
 
 # Memory Logging
 /memory_usage.csv 
