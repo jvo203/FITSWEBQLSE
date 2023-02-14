@@ -134,7 +134,10 @@ subroutine readimage
 !         read up to 100 pixels at a time
       nbuffer=min(100,npixels)
 
+      status = 0
       call ftgpve(unit,group,firstpix,nbuffer,nullval,buffer,anynull,status)
+
+      if(status .ne. 0) print *,'ftgpve error status = ', status
 
 !         find the min and max values
       do i=1,nbuffer
@@ -146,6 +149,8 @@ subroutine readimage
       npixels=npixels-nbuffer
       firstpix=firstpix+nbuffer
    end do
+
+   print *, "buffer:", buffer
 
    print *
    print *,'Min and max image pixels = ',datamin,datamax
