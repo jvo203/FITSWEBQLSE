@@ -4,8 +4,8 @@ using ImageTransformations
 
 println("CFITSIO version: ", libcfitsio_version())
 
-src = homedir() * "/Downloads/numbers.fits"
-dst = homedir() * "/Downloads/numbers_upsampled.fits"
+src = homedir() * "/NAO/FITS/cube_uint8.fits"
+dst = homedir() * "/NAO/FITS/cube_uint8+.fits"
 
 f = fits_open_diskfile(src)
 
@@ -21,8 +21,8 @@ bitpix, = fits_read_keyword(f, "BITPIX")
 println("BITPIX = ", bitpix)
 bitpix = parse(Int64, bitpix)
 
-if bitpix != -32
-    println("bitpix must be == -32")
+if bitpix != 8
+    println("bitpix must be == 8")
     close(f)
     exit()
 end
@@ -37,12 +37,6 @@ depth = parse(Int64, depth)
 
 println("width: $(width), height: $(height), depth: $(depth)")
 
-# new dimensions
-new_width = 10 * width
-new_height = 10 * height
-
-println("new width: $new_width, new_height: $new_height")
-
 keysexist, morekeys = fits_get_hdrspace(f)
 
 out = fits_clobber_file(dst)
@@ -53,16 +47,6 @@ for i = 1:keysexist
 
     # println(rec)
     # println(name, "|", value, "|", comment)
-
-    if name == "NAXIS1"
-        fits_write_key(out, "NAXIS1", new_width, "")
-        continue
-    end
-
-    if name == "NAXIS2"
-        fits_write_key(out, "NAXIS2", new_height, "")
-        continue
-    end
 
     fits_write_record(out, rec)
 end
@@ -106,11 +90,9 @@ fits_write_record(out, rec)
 
 println("FITS image dimensions: ", fits_get_img_size(f))
 
-data = Array{Float32}(undef, width, height)
-new_data = Array{Float32}(undef, new_width, new_height)
+data = Array{UInt8}(undef, width, height)
 
 nelements = width * height
-new_nelements = new_width * new_height
 
 for frame = 1:depth
     global new_data
@@ -122,21 +104,12 @@ for frame = 1:depth
     integrated_intensity = sum(data)
     mean_intensity = integrated_intensity / nelements
 
-    new_data = Float32.(imresize(data, (new_width, new_height)))
-
-    # calculate the mean and sum of new_data
-    new_integrated_intensity = sum(new_data)
-    new_mean_intensity = new_integrated_intensity / new_nelements
-
-    println("HDU $(frame): ", size(data), "-->", size(new_data))
+    println("HDU $(frame): ", size(data))
     println("intensity: int.: $(integrated_intensity), mean: $(mean_intensity)")
-    println("new intensity: int.: $(new_integrated_intensity), mean: $(new_mean_intensity)")
 
-    fits_write_pix(out, fpixel, new_width * new_height, new_data)
+    fits_write_pix(out, fpixel, width * height, data)
     println("")
 end
-
-println("upsampled size:", size(new_data))
 
 fits_close_file(f)
 fits_close_file(out)
