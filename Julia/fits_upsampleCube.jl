@@ -8,7 +8,7 @@ bpx = [8, 16, 32, 64, -32, -64, -64]
 suffix = ["uint8", "int16", "int32", "int64", "float32", "float64", "float64_num_overflow"]
 
 for (idx, sfx) in zip(bpx, suffix)
-    println("processing BITPIX = ", idx)
+    println("processing BITPIX = ", idx, " (", sfx, ")")
 
     src = homedir() * "/NAO/FITS/cube_" * sfx * ".fits"
     dst = homedir() * "/NAO/FITS/cube_" * sfx * "+.fits"
