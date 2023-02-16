@@ -19,3 +19,50 @@ closing a websocket connection for ALMA01643375/089559da-4782-4062-a881-868ebd28
 [C] removed 089559da-4782-4062-a881-868ebd28c396 from the hash table
 [C] pv_event_loop terminated.
 WEBSOCKET CONNECTION CLOSED.
+
+ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          27
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          28
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          29
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          30
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          31
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          32
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          33
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          34
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          35
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          36
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          37
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          38
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          39
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          40
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          41
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          42
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          43
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          44
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          45
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          46
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          47
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          48
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          49
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          50
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          51
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          52
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          53
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          54
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          55
+[C] received a timeout request for ALMA01084695, error status: 0.
+ cache directory: /ssd/cache
+ trying a cache file: /ssd/cache/ALMA01084695
+ cache directory: /data/cache
+ trying a cache file: /data/cache/ALMA01084695
+ deleting ALMA01084695; cache dir: /data/cache/ALMA01084695, status           0 , bSuccess T
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          56
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          57
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          58
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          59
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          60
+ ALMA01643375::'submit_progress' failed, counter =          380 , #repeats:          61
+[C] received a timeout request for ALMA01643375, error status: 1.
+ ALMA01643375:: breaking the final 'submit_progress' loop, counter =          380
+ finished loading ALMA01643375, bSuccess:  T , elapsed time:    61.1593590      [s]
+ ALMA01643375: dataset cannot be cached, destroying it.
+
