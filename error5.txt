@@ -1,0 +1,12 @@
+[C] FITSDownloadStream hdrEnd: 0, bitpix: 0, naxis: 0, naxes: 0, 0, 1, 1.
+ACCEPTED WEBSOCKET URI: /fitswebql/websocket/ALMA01643375/089559da-4782-4062-a881-868ebd28c396
+[C] WEBSOCKET OPEN; URI:        /fitswebql/websocket/ALMA01643375/089559da-4782-4062-a881-868ebd28c396
+[C] WEBSOCKET SESSIONID: '089559da-4782-4062-a881-868ebd28c396'
+[C] WEBSOCKET DATASETID: 'ALMA01643375'
+[C] inserted 089559da-4782-4062-a881-868ebd28c396 into the hash table
+[C] pv_event_loop started.
+closing a websocket connection for ALMA01643375/089559da-4782-4062-a881-868ebd28c396
+[C] removed 089559da-4782-4062-a881-868ebd28c396 from the hash table
+[C] pv_event_loop terminated.
+WEBSOCKET CONNECTION CLOSED.
+
