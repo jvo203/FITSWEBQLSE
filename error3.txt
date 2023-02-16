@@ -1,0 +1,36 @@
+[WS] {"type":"realtime_image_spectrum","dx":1804,"image":false,"quality":"medium","x1":225,"y1":395,"x2":262,"y2":432,"width":705,"height":705,"beam":"circle","intensity":"integrated","frame_start":240214879435,"frame_end":240449111205.3851,"ref_freq":240335000000,"seq_id":167,"timestamp":725540}
+ realtime_image_spectrum for ALMA01084695, dx:        1804 , image: F , quality:           1 , x1:         225 , y1:         395 , x2:         262 , y2:         432 , width:         705 , height         705 , beam:           0 , intensity:           1 , frame_start:   240214879435.00000      , frame_end:   240449111205.38510      , ref_freq:   240335000000.00000      , seq_id:         167 , timestamp:   725540.000     , fd:          29
+ first:           1 last:        3838 length:        3838 depth:        3838
+[C] pthread_create rc = 0
+[C] calling fetch_realtime_image_spectrum across the cluster for 'ALMA01084695'
+[C] aborting fetch_realtime_image_spectrum (no cluster nodes found)
+[C] pthread_join rc = 0
+ downsizing spectrum with Largest-Triangle-Three-Buckets
+[C] spectrum compressed size: 1376 bytes
+[C] float array size: 3608, compressed: 1376 bytes
+[C] PIPE_END_OF_STREAM
+[C] spectrum length: 902, elapsed: 4.948733 [ms], compressed_size: 1376, msg_len: 1396 bytes.
+ realtime_image_spectrum elapsed time:   4.94873285     [ms]
+[WS] {"type":"realtime_image_spectrum","dx":1804,"image":false,"quality":"medium","x1":237,"y1":478,"x2":274,"y2":515,"width":705,"height":705,"beam":"circle","intensity":"integrated","frame_start":240214879435,"frame_end":240449111205.3851,"ref_freq":240335000000,"seq_id":168,"timestamp":725597}
+ realtime_image_spectrum for ALMA01084695, dx:        1804 , image: F , quality:           1 , x1:         237 , y1:         478 , x2:         274 , y2:         515 , width:         705 , height         705 , beam:           0 , intensity:           1 , frame_start:   240214879435.00000      , frame_end:   240449111205.38510      , ref_freq:   240335000000.00000      , seq_id:         168 , timestamp:   725597.000     , fd:          29
+ first:           1 last:        3838 length:        3838 depth:        3838
+[C] pthread_create rc = 0
+[C] calling fetch_realtime_image_spectrum across the cluster for 'ALMA01084695'
+[C] aborting fetch_realtime_image_spectrum (no cluster nodes found)
+[C] pthread_join rc = 0
+ downsizing spectrum with Largest-Triangle-Three-Buckets
+[C] spectrum compressed size: 1384 bytes
+[C] float array size: 3608, compressed: 1384 bytes
+[C] PIPE_END_OF_STREAM
+[C] spectrum length: 902, elapsed: 8.023878 [ms], compressed_size: 1384, msg_len: 1404 bytes.
+ realtime_image_spectrum elapsed time:   8.02387810     [ms]
+[WS] {"type":"kalman_reset","seq_id":169}
+[C] URL root path: /fitswebql_v5/
+htdocs/fitswebql_v5: File exists
+[C] 'ALMA01643330' does not exist.
+[C] forwarding '/fitswebql_v5/FITSWebQL.html?datasetId=ALMA01643330' across the cluster.
+[C] aborting forward_fitswebql_request (no cluster nodes found)
+[C] insert_if_not_exists(ALMA01643330,(nil))
+[C] '.cache/ALMA01643330.fits' cannot be accessed for reading, trying a JVO path next.
+Segmentation fault (コアダンプ)
+
