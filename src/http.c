@@ -690,8 +690,6 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
     char *buffer = stream->buffer + stream->cursor;
     size_t buffer_size = stream->running_size - stream->cursor;
 
-    printf("[C] buffer_size=%zu, cursor=%zu, running_size=%zu\n", buffer_size, stream->cursor, stream->running_size);
-
     hdrLine[sizeof(hdrLine) - 1] = '\0';
 
     int no_lines = 0;
@@ -699,7 +697,7 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
     // process in multiples of <FITS_CHUNK_LENGTH>
     size_t work_size = buffer_size - (buffer_size % FITS_CHUNK_LENGTH);
 
-    printf("[C] work_size=%zu, buffer_size=%zu, cursor=%zu\n", work_size, buffer_size, stream->cursor);
+    // printf("[C] work_size=%zu, buffer_size=%zu, cursor=%zu\n", work_size, buffer_size, stream->cursor);
 
     // process one line at a time
     for (size_t offset = 0; offset < work_size; offset += FITS_LINE_LENGTH)
@@ -739,11 +737,15 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
     // actual number of processed lines
     size_t actual = no_lines * FITS_LINE_LENGTH;
 
+    // make actual a multiple of FITS_CHUNK_LENGTH
+    if (actual > 0)
+        actual = FITS_CHUNK_LENGTH * ((actual - 1) / FITS_CHUNK_LENGTH + 1);
+
     // round up to the next FITS_CHUNK_LENGTH
-    size_t rounded = actual + (FITS_CHUNK_LENGTH - (actual % FITS_CHUNK_LENGTH));
+    // size_t rounded = actual + (FITS_CHUNK_LENGTH - (actual % FITS_CHUNK_LENGTH));
 
     // move the cursor forward
-    stream->cursor += rounded;
+    stream->cursor += actual;
 
     return end;
 }
@@ -835,7 +837,7 @@ void printerror(int status)
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
     size_t realsize = size * nmemb;
-    printf("[C] parse2file(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
+    // printf("[C] parse2file(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
 
     if (user == NULL) // do nothing in particular
     {
