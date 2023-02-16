@@ -750,17 +750,17 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
     return end;
 }
 
-void scan_fits_data(struct FITSDownloadStream *stream)
+bool scan_fits_data(struct FITSDownloadStream *stream)
 {
     if (stream->frame == stream->naxes[2])
     {
         printf("[C] scan_fits_data:\tend of the stream.\n");
-        return; // there is no more work to do
+        return true; // there is no more work to do
     }
 
     // works with bitpix == -32 for the time being (32-bit float)
     if (stream->bitpix != -32)
-        return;
+        return false;
 
     size_t bytes_per_pixel = (size_t)abs(stream->bitpix) / 8;
 
@@ -772,7 +772,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     size_t available = buffer_size / bytes_per_pixel;
 
     if (available == 0)
-        return;
+        return true;
 
     size_t remaining = stream->pixels_per_frame - stream->processed;
     size_t work_size = available > remaining ? remaining : available;
@@ -962,7 +962,17 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
     // parse the data
     if (stream->hdrEnd && (stream->frame < stream->naxes[2]))
-        scan_fits_data(stream);
+    {
+        bool error = !scan_fits_data(stream);
+
+        if (error)
+        {
+            void *item = get_dataset(stream->datasetid);
+
+            if (item != NULL)
+                set_error_status_C(item, true);
+        }
+    }
 
     // printf("[C] parse2file returns %zu bytes.\n", realsize);
     return realsize;
