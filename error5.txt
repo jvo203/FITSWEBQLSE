@@ -1,3 +1,13 @@
+C] PostgreSQL connection successful.
+[C] FITS filepath: '/home/alma/fits_archive/2023/02/16/jvop_230216/2021.1.01366.S/A001_X1590_X936/ALMA01643375_00_00_00.fits'
+[C] falling back onto the URL: 'http://jvox.vo.nao.ac.jp:8060/skynode/getDataForALMA.do?db=alma&table=cube&data_id=ALMA01643375_00_00_00'
+[C] filename: getDataForALMA.do?db=alma&table=cube&data_id=ALMA01643375_00_00_00
+[C] '/mnt/fits/files/ALMA01643375.fits' does not exist, attempting a download.
+ [load_fits_header] datasetid: 'ALMA01643375', flux: 'NULL', filepath: '/mnt/fits/files/ALMA01643375.fits'
+[C] inserted ALMA01643375 into the hash table
+[Feb 17 2023 08:29:28][load_fits_header] <info> parsing /mnt/fits/files/ALMA01643375.fits; FLUX: NULL
+[C] HTTP transfer completed; HTTP code 200.
+[C] FITSDownloadStream buffer_size: 19264, running_size: 524, total_size: 524 bytes, frame: 0, cursor is at 0.
 [C] FITSDownloadStream hdrEnd: 0, bitpix: 0, naxis: 0, naxes: 0, 0, 1, 1.
 ACCEPTED WEBSOCKET URI: /fitswebql/websocket/ALMA01643375/089559da-4782-4062-a881-868ebd28c396
 [C] WEBSOCKET OPEN; URI:        /fitswebql/websocket/ALMA01643375/089559da-4782-4062-a881-868ebd28c396
@@ -9,4 +19,3 @@ closing a websocket connection for ALMA01643375/089559da-4782-4062-a881-868ebd28
 [C] removed 089559da-4782-4062-a881-868ebd28c396 from the hash table
 [C] pv_event_loop terminated.
 WEBSOCKET CONNECTION CLOSED.
-
