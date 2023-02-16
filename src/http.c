@@ -734,7 +734,7 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
 
     printf("[C] scan_fits_header:\tlines = %d\n", no_lines);
 
-    // actual number of processed lines
+    // actual number of processed bytes
     size_t actual = no_lines * FITS_LINE_LENGTH;
 
     // make actual a multiple of FITS_CHUNK_LENGTH
@@ -1094,7 +1094,7 @@ static void *handle_url_download(void *arg)
             if (downloadfile)
             {
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
-                // curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH); // disabled as problems were encountered during downloads from jvox
+                // curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH); // no longer needed, the code can hadle larger chunks
 
                 int retry = 0;
 
