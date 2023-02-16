@@ -1,0 +1,20 @@
+[C] inserted c1e7ff0e-c0d2-4136-996f-0aa8b1ac50ef into the hash table
+[C] pv_event_loop started.
+[C] parse2file(): size = 1, nmemb = 4872, realsize = 4872.
+[C] work_size=2880, buffer_size=4872, cursor=0
+[C] scan_fits_header:	lines = 36
+[C] parse2file(): size = 1, nmemb = 6440, realsize = 6440.
+[C] work_size=2880, buffer_size=5552, cursor=5760
+[C] scan_fits_header:	lines = 36
+[C] parse2file(): size = 1, nmemb = 1288, realsize = 1288.
+[C] parse2file(): size = 1, nmemb = 3864, realsize = 3864.
+[C] work_size=2880, buffer_size=4944, cursor=11520
+[C] scan_fits_header:	lines = 36
+[C] parse2file(): size = 1, nmemb = 2576, realsize = 2576.
+[C] parse2file(): size = 1, nmemb = 2576, realsize = 2576.
+[C] work_size=2880, buffer_size=4336, cursor=17280
+[C] scan_fits_header:	lines = 36
+[C] parse2file(): size = 1, nmemb = 1288, realsize = 1288.
+[C] work_size=18446744073709549440, buffer_size=18446744073709551480, cursor=23040
+zsh: segmentation fault  ./fitswebqlse
+

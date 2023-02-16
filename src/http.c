@@ -690,12 +690,16 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
     char *buffer = stream->buffer + stream->cursor;
     size_t buffer_size = stream->running_size - stream->cursor;
 
+    printf("[C] buffer_size=%zu, cursor=%zu, running_size=%zu\n", buffer_size, stream->cursor, stream->running_size);
+
     hdrLine[sizeof(hdrLine) - 1] = '\0';
 
     int no_lines = 0;
 
     // process in multiples of <FITS_CHUNK_LENGTH>
     size_t work_size = buffer_size - (buffer_size % FITS_CHUNK_LENGTH);
+
+    printf("[C] work_size=%zu, buffer_size=%zu, cursor=%zu\n", work_size, buffer_size, stream->cursor);
 
     // process one line at a time
     for (size_t offset = 0; offset < work_size; offset += FITS_LINE_LENGTH)
@@ -708,6 +712,7 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
         {
             end = true;
             printf("[C] FITS HEADER END DETECTED.\n");
+            break; // end the loop early to prevent overrunning into the data part
         };
 
         if (strncmp(hdrLine, "BITPIX  = ", 10) == 0)
@@ -731,8 +736,14 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
 
     printf("[C] scan_fits_header:\tlines = %d\n", no_lines);
 
+    // actual number of processed lines
+    size_t actual = no_lines * FITS_LINE_LENGTH;
+
+    // round up to the next FITS_CHUNK_LENGTH
+    size_t rounded = actual + (FITS_CHUNK_LENGTH - (actual % FITS_CHUNK_LENGTH));
+
     // move the cursor forward
-    stream->cursor += FITS_LINE_LENGTH * no_lines;
+    stream->cursor += rounded;
 
     return end;
 }
@@ -824,7 +835,7 @@ void printerror(int status)
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
     size_t realsize = size * nmemb;
-    // printf("[C] parse2file(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
+    printf("[C] parse2file(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
 
     if (user == NULL) // do nothing in particular
     {
@@ -878,7 +889,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 stream->hdrEnd = true;
 
                 // print the header string from 0 to cursor, passing the string length to printf
-                // printf("[C] FITS HEADER:\n%.*s\n", stream->cursor, stream->buffer);
+                printf("[C] FITS HEADER:\n%.*s\n", stream->cursor, stream->buffer);
 
                 size_t total_size = 1;
 
@@ -1081,7 +1092,7 @@ static void *handle_url_download(void *arg)
             if (downloadfile)
             {
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
-                curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH); // disabled as problems were encountered during downloads from jvox
+                // curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH); // disabled as problems were encountered during downloads from jvox
 
                 int retry = 0;
 
