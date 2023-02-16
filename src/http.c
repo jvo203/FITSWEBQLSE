@@ -2987,11 +2987,24 @@ static enum MHD_Result on_http_connection(void *cls,
                             // snprintf(filepath, sizeof(filepath) - 1, "%s://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_protocol, options.url_host, options.url_port, db, dataid);
 
                             // fill-in the fallback URL;
-                            size_t url_size = strlen(options.url_protocol) + strlen(options.url_host) + 32 + strlen(db) + strlen(dataid) + 1;
+                            size_t url_size = strlen(options.url_protocol) + strlen(options.url_host) + 32 + strlen(dataid) + 1;
+
+                            if (db != NULL)
+                                url_size += strlen(db);
+                            else
+                                url_size += 4; // alma
+
                             url_size += 64; // for the rest of the URL
 
                             fallback = (char *)malloc(url_size);
-                            snprintf(fallback, url_size, "%s://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_protocol, options.url_host, options.url_port, db, dataid);
+
+                            if (fallback != NULL)
+                            {
+                                if (db != NULL)
+                                    snprintf(fallback, url_size, "%s://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=%s&table=cube&data_id=%s", options.url_protocol, options.url_host, options.url_port, db, dataid);
+                                else
+                                    snprintf(fallback, url_size, "%s://%s:%" PRIu32 "/skynode/getDataForALMA.do?db=alma&table=cube&data_id=%s", options.url_protocol, options.url_host, options.url_port, dataid);
+                            }
                         }
 
                         free(path);
