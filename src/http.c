@@ -2967,6 +2967,11 @@ static enum MHD_Result on_http_connection(void *cls,
 
                             jvo_db = jvo_db_connect(db);
                         }
+                        else
+                        {
+                            // assume db == "alma"
+                            snprintf(dataid, sizeof(dataid) - 1, "%s_00_00_00", datasetId[i]);
+                        }
 
                         if (jvo_db != NULL && table != NULL)
                         {
