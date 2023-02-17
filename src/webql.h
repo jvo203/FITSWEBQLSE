@@ -51,6 +51,7 @@ extern "C" {
     extern float calculate_square_viewport_spectrumF16(int16_t * cubeData, uint32_t cubeStride, float * pixels, bool * mask, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, bool average, float cdelt3);
     extern void fits2float32(int32_t * src, float * dest, uint32_t size);
     extern void fits2int16(int16_t * src, float * dest, uint32_t size);
+    extern void fits2int32(int32_t * src, float * dest, uint32_t size);
     extern void fits2uint8(uint8_t * src, float * dest, uint32_t size);
     extern void make_global_statistics(struct fixed_block_t * compressed, int32_t width, int32_t height, float median, float * sumP, int64_t * countP, float * sumN, int64_t * countN);
     extern void make_image_spectrumF32(float * src, float * pixels, uint8_t * mask, uint8_t * data_mask, double ignrval, double datamin, double datamax, double cdelt3, float * res, int64_t npixels);
