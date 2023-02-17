@@ -1584,3 +1584,15 @@ export void fits2float32(uniform int32 src[], uniform float dest[], uniform unsi
       dest[i] = floatbits(bswap32(src[i])) ;      
     } ;
 } ;
+
+export void fits2float64(uniform int64 src[], uniform float dest[], uniform unsigned int size)
+{
+  foreach(i=0 ... size)
+    {
+      //endian conversion
+      double tmp = doublebits(bswap64(src[i])) ;
+
+      // the range should be checked here in the first place (coercing double -> float)
+      dest[i] = (float)tmp;
+    } ;
+} ;
