@@ -758,7 +758,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
         return; // there is no more work to do
     }
 
-    // works with bitpix == -32 for the time being (32-bit float)
+    // check the bitpix value
     if (!(stream->bitpix == 8 || stream->bitpix == 16 || stream->bitpix == 32 || stream->bitpix == 64 || stream->bitpix == -32 || stream->bitpix == -64))
     {
         void *item = get_dataset(stream->datasetid);
