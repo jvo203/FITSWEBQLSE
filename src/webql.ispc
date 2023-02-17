@@ -1549,6 +1549,15 @@ export void fits2uint8(uniform unsigned int8 src[], uniform float dest[], unifor
     } ;
 } ;
 
+export void fits2int16(uniform int16 src[], uniform float dest[], uniform unsigned int size)
+{
+  foreach(i=0 ... size)
+    {
+      //endian conversion
+      dest[i] = (float)((int16)(bswap16(src[i]))) ;
+    } ;
+} ;
+
 export void fits2float32(uniform int32 src[], uniform float dest[], uniform unsigned int size)
 {
   foreach(i=0 ... size)
