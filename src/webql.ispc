@@ -1597,12 +1597,22 @@ export uniform bool fits2float64(uniform int64 src[], uniform float dest[], unif
       //endian conversion
       double tmp = doublebits(bswap64(src[i])) ;
 
-      // the range should be checked here in the first place (coercing double -> float)
-        if(tmp > FLT_MAX || tmp < -FLT_MAX)
+        // the range should be checked here in the first place (coercing double -> float)
+        if(tmp > FLT_MAX)
         {
+            unsigned int inf = 0x7f800000; // +Infinity
+
             error = true ;
-            dest[i] = 0.0f ;
+            dest[i] = floatbits(inf);
         } else
+        if(tmp < -FLT_MAX)
+        {
+            unsigned int inf = 0xff800000; // -Infinity
+
+            error = true ;
+            dest[i] = floatbits(inf);
+        }
+        else
         {    
             dest[i] = (float)tmp;
         }
