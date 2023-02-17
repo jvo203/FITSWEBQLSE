@@ -1540,7 +1540,16 @@ export void resizeNearestSIMD(uniform unsigned int8 src[], uniform int srcWidth,
   }
 }
 
-export void fits2float(uniform int32 src[], uniform float dest[], uniform unsigned int size)
+export void fits2uint8(uniform unsigned int8 src[], uniform float dest[], uniform unsigned int size)
+{
+  foreach(i=0 ... size)
+    {
+      // no endian conversion
+      dest[i] = (float)(src[i]) ;      
+    } ;
+} ;
+
+export void fits2float32(uniform int32 src[], uniform float dest[], uniform unsigned int size)
 {
   foreach(i=0 ... size)
     {
