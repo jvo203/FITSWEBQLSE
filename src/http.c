@@ -785,7 +785,9 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     size_t work_size = available > remaining ? remaining : available;
     // printf("[C] scan_fits_data:\tavailable #pixels = %zu, remaining: %zu, work_size = %zu.\n", available, remaining, work_size);
 
-    // call ispc to convert the data from BIG ENDIAN to LITTLE ENDIAN
+    // call ispc to convert the data from BIG ENDIAN to LITTLE ENDIAN  and coerce into <float>
+    bool floatError = false;
+
     switch (stream->bitpix)
     {
     case 8:
@@ -808,6 +810,14 @@ void scan_fits_data(struct FITSDownloadStream *stream)
         break;
     default:
         break;
+    }
+
+    if (floatError)
+    {
+        void *item = get_dataset(stream->datasetid);
+
+        if (item != NULL)
+            set_error_status_C(item, true);
     }
 
     stream->processed += work_size;
