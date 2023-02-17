@@ -759,7 +759,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     }
 
     // works with bitpix == -32 for the time being (32-bit float)
-    if (!(stream->bitpix == 8 || stream->bitpix == 16 || stream->bitpix == -32))
+    if (!(stream->bitpix == 8 || stream->bitpix == 16 || stream->bitpix == 32 || stream->bitpix == -32))
     {
         void *item = get_dataset(stream->datasetid);
 
@@ -793,6 +793,9 @@ void scan_fits_data(struct FITSDownloadStream *stream)
         break;
     case 16:
         fits2int16((int16_t *)buffer, stream->data + stream->processed, (uint32_t)work_size);
+        break;
+    case 32:
+        fits2int32((int32_t *)buffer, stream->data + stream->processed, (uint32_t)work_size);
         break;
     case -32:
         fits2float32((int32_t *)buffer, stream->data + stream->processed, (uint32_t)work_size);
