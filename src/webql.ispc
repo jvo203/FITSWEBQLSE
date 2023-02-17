@@ -1601,14 +1601,12 @@ export uniform bool fits2float64(uniform int64 src[], uniform float dest[], unif
         if(tmp > FLT_MAX)
         {
             unsigned int inf = 0x7f800000; // +Infinity
-
             error = true ;
             dest[i] = floatbits(inf);
         } else
         if(tmp < -FLT_MAX)
         {
             unsigned int inf = 0xff800000; // -Infinity
-
             error = true ;
             dest[i] = floatbits(inf);
         }
