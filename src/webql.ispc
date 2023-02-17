@@ -5,6 +5,9 @@ typedef unsigned int16 uint16_t;
 typedef unsigned int32 uint32_t;
 typedef unsigned int64 uint64_t;
 
+#define FLT_MIN 1.175494351e-38F
+#define FLT_MAX 3.402823466e+38F
+
 /* FIXED-POINT COMPRESSION */
 #define BASE 4
 #define DIM 16
@@ -1595,7 +1598,14 @@ export uniform bool fits2float64(uniform int64 src[], uniform float dest[], unif
       double tmp = doublebits(bswap64(src[i])) ;
 
       // the range should be checked here in the first place (coercing double -> float)
-      dest[i] = (float)tmp;
+        if(tmp > FLT_MAX || tmp < -FLT_MAX)
+        {
+            error = true ;
+            dest[i] = 0.0f ;
+        } else
+        {    
+            dest[i] = (float)tmp;
+        }
     } ;
 
     return any(error) ;
