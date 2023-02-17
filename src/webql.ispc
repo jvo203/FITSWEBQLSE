@@ -1585,8 +1585,10 @@ export void fits2float32(uniform int32 src[], uniform float dest[], uniform unsi
     } ;
 } ;
 
-export void fits2float64(uniform int64 src[], uniform float dest[], uniform unsigned int size)
+export uniform bool fits2float64(uniform int64 src[], uniform float dest[], uniform unsigned int size)
 {
+    varying bool error = false ;
+
   foreach(i=0 ... size)
     {
       //endian conversion
@@ -1595,4 +1597,6 @@ export void fits2float64(uniform int64 src[], uniform float dest[], uniform unsi
       // the range should be checked here in the first place (coercing double -> float)
       dest[i] = (float)tmp;
     } ;
+
+    return any(error) ;
 } ;

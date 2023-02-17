@@ -50,7 +50,7 @@ extern "C" {
     extern float calculate_square_spectrumF16(int16_t * cubeData, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, bool average, float cdelt3);
     extern float calculate_square_viewport_spectrumF16(int16_t * cubeData, uint32_t cubeStride, float * pixels, bool * mask, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, bool average, float cdelt3);
     extern void fits2float32(int32_t * src, float * dest, uint32_t size);
-    extern void fits2float64(int64_t * src, float * dest, uint32_t size);
+    extern bool fits2float64(int64_t * src, float * dest, uint32_t size);
     extern void fits2int16(int16_t * src, float * dest, uint32_t size);
     extern void fits2int32(int32_t * src, float * dest, uint32_t size);
     extern void fits2int64(int64_t * src, float * dest, uint32_t size);

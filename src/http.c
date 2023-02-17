@@ -806,7 +806,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
         fits2float32((int32_t *)buffer, stream->data + stream->processed, (uint32_t)work_size);
         break;
     case -64:
-        fits2float64((int64_t *)buffer, stream->data + stream->processed, (uint32_t)work_size);
+        floatError = fits2float64((int64_t *)buffer, stream->data + stream->processed, (uint32_t)work_size);
         break;
     default:
         break;
