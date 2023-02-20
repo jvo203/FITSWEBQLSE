@@ -327,7 +327,7 @@ module fits
       real(kind=c_float), allocatable :: pixels(:, :)
       logical(kind=c_bool), allocatable :: mask(:, :)
 
-      ! an array holding pointers to half-float 2D channel images
+      ! an array holding pointers to fixed-point 2D channel images
       type(array_ptr), dimension(:), allocatable :: compressed
 
       logical :: is_optical = .true.
