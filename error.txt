@@ -1,0 +1,10 @@
+video_request_simd for ALMA01043408; keyframe: T frame:          46 fd:          30
+ making a video frame with flux 'logistic'
+ calling make_video_frame_fixed_logistic
+[C] PIPE_END_OF_STREAM
+ video_request elapsed time:  0.528676987     [ms]
+[C] x265_encode::ret = 1, #frames = 1
+[C] video_response elapsed: 0.528677 [ms], msg_len: 1550 bytes.
+[WS] {"type":"image","dx":1345,"width":1416,"height":776,"quality":"medium","intensity":"integrated","frame_start":492152492244.90186,"frame_end":492152921886.7385,"ref_freq":492160700000,"timestamp":10705.800000000745}
+ ws_image_spectrum for ALMA01043408, dx:        1345 , quality:           1 , width:        1416 , height         776 , beam:           1 , intensity:           1 , frame_start:   492152492244.90186      , frame_end:   492152921886.73853      , ref_freq:   492160700000.00000      , timestamp:   10705.7998     , fd:          30
+Segmentation fault (コアダンプ)
