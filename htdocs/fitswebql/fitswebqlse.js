@@ -3697,7 +3697,8 @@ function open_websocket_connection(_datasetId, index) {
                             // cancel idlePV timer and set a new one
                             window.clearTimeout(idlePV);
                             idlePV = window.setTimeout(function () {
-                                pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY);
+                                return; // disabled for now, the contour levels need to be fixed (adjusted)
+                                // pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY);
                             }, 250);
                         }
 
@@ -13312,7 +13313,6 @@ function partial_fits_size() {
 }
 
 function pv_contour(left, top, width, height, pvCanvas, flipY) {
-    return; // disabled for now, the contour levels need to be fixed (adjusted)
     console.log("calling pv_contour with canvas: ", pvCanvas, "flipY: ", flipY);
 
     d3.select("#PVContourSVG").remove();
