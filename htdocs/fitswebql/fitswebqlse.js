@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-02-21.0";
+    return "JS2023-02-21.1";
 }
 
 function uuidv4() {
@@ -11140,6 +11140,24 @@ function setup_image_selection() {
 
             setup_window_timeout();
 
+            // cancel the P-V line & re-set the mouse click flag
+            d3.select("#pvline")
+                .attr("x1", 0)
+                .attr("y1", 0)
+                .attr("x2", 0)
+                .attr("y2", 0)
+                .style("stroke-dasharray", ("1, 5, 1"))
+                .attr("opacity", 0.0);
+
+            d3.select("#pvmid")
+                .attr("x1", 0)
+                .attr("y1", 0)
+                .attr("x2", 0)
+                .attr("y2", 0)
+                .attr("opacity", 0.0);
+
+            mouse_click_end = true;
+
             // clear the ViewportCanvas in WebGL
             if (viewport != null) {
                 // Clear the Viewport Canvas
@@ -11298,7 +11316,12 @@ function setup_image_selection() {
                     let mpos = d3.pointer(event);
                     let x2 = mpos[0]; let y2 = mpos[1];
 
-                    d3.select("#pvline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2);
+                    d3.select("#pvline")
+                        .style("stroke-dasharray", ("1, 5, 1"))
+                        .attr("x1", x1)
+                        .attr("y1", y1)
+                        .attr("x2", x2)
+                        .attr("y2", y2);
 
                     let dx = x2 - x1;
                     let dy = y2 - y1;
