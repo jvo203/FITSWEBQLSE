@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-02-08.0";
+    return "JS2023-02-21.0";
 }
 
 function uuidv4() {
@@ -13312,6 +13312,7 @@ function partial_fits_size() {
 }
 
 function pv_contour(left, top, width, height, pvCanvas, flipY) {
+    return; // disabled for now, the contour levels need to be fixed (adjusted)
     console.log("calling pv_contour with canvas: ", pvCanvas, "flipY: ", flipY);
 
     d3.select("#PVContourSVG").remove();
