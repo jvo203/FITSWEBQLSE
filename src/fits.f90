@@ -5470,6 +5470,11 @@ contains
          return
       end if
 
+      if(N .eq. 1) then
+         median = X(1)
+         return
+      end if
+
       if (present(PASSES)) then
          PCOUNT = PASSES
       else
