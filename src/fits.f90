@@ -5514,6 +5514,11 @@ contains
          return
       end if
 
+      if(N .eq. 1) then
+         median = X(1)
+         return
+      end if
+
       ! start the timer
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 

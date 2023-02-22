@@ -3290,7 +3290,7 @@ function open_websocket_connection(_datasetId, index) {
 
                             let elapsed = Math.round(performance.now() - start);
 
-                            //console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+                            // console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
                             process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
@@ -6060,6 +6060,7 @@ function cube_refresh(index) {
     //send an [image] request to the server    
     if (wsConn[index - 1].readyState == 1)
         wsConn[index - 1].send(JSON.stringify(request));
+
 
     setup_window_timeout();
 }
