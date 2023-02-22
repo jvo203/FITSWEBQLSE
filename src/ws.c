@@ -95,13 +95,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (c->fn_data != NULL)
             {
                 struct websocket_session *session = (struct websocket_session *)c->fn_data;
-                printf("closing a websocket connection for %s/%s\n", session->datasetid, c->label);
+                printf("closing a websocket connection for %s/%s\n", session->datasetid, c->data);
 
                 // remove a session pointer from the hash table
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
                 {
-                    if (g_hash_table_remove(sessions, (gpointer)c->label))
-                        printf("[C] removed %s from the hash table\n", c->label);
+                    if (g_hash_table_remove(sessions, (gpointer)c->data))
+                        printf("[C] removed %s from the hash table\n", c->data);
                     pthread_mutex_unlock(&sessions_mtx);
                 }
                 else
@@ -445,7 +445,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             printf("[C] WEBSOCKET SESSIONID: '%s'\n", sessionId);
 
             // copy the session id into the connection custom label
-            strncpy(c->label, sessionId, sizeof(c->label) - 1); // leave enough space for the string termination character
+            strncpy(c->data, sessionId, sizeof(c->data) - 1); // leave enough space for the string termination character
         }
 
         char *datasetId = strrchr(uri, '/');
@@ -514,10 +514,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 // add a session pointer to the hash table
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
                 {
-                    g_hash_table_replace(sessions, (gpointer)strdup(c->label), session);
+                    g_hash_table_replace(sessions, (gpointer)strdup(c->data), session);
                     pthread_mutex_unlock(&sessions_mtx);
 
-                    printf("[C] inserted %s into the hash table\n", c->label);
+                    printf("[C] inserted %s into the hash table\n", c->data);
                 }
                 else
                     printf("[C] cannot lock sessions_mtx!\n");
@@ -708,7 +708,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
-                resp->session_id = strdup(c->label);
+                resp->session_id = strdup(c->data);
                 resp->fps = 0;
                 resp->bitrate = 0;
                 resp->timestamp = req->timestamp;
@@ -894,7 +894,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (stat == 0)
                 {
                     // pass the read end of the pipe to a C thread
-                    resp->session_id = strdup(c->label);
+                    resp->session_id = strdup(c->data);
                     resp->fps = 0;
                     resp->bitrate = 0;
                     resp->timestamp = req->timestamp;
@@ -1103,7 +1103,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (stat == 0)
                 {
                     // pass the read end of the pipe to a C thread
-                    resp->session_id = strdup(c->label);
+                    resp->session_id = strdup(c->data);
                     resp->fps = 0;
                     resp->bitrate = 0;
                     resp->timestamp = req->timestamp;
@@ -1335,7 +1335,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (stat == 0)
                 {
                     // pass the read end of the pipe to a C thread
-                    resp->session_id = strdup(c->label);
+                    resp->session_id = strdup(c->data);
                     resp->fps = 0;
                     resp->bitrate = 0;
                     resp->timestamp = req->timestamp;
@@ -1742,7 +1742,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
-                resp->session_id = strdup(c->label);
+                resp->session_id = strdup(c->data);
                 resp->fps = fps;
                 resp->bitrate = bitrate;
                 resp->timestamp = timestamp;
@@ -1838,7 +1838,7 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
             for (t = c->mgr->conns; t != NULL; t = t->next)
             {
                 // do not bother comparing strings for non-WebSocket connections
-                if (t->is_websocket && (strcmp(t->label, msg->session_id) == 0))
+                if (t->is_websocket && (strcmp(t->data, msg->session_id) == 0))
                 {
                     // printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
                     mg_ws_send(t, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
