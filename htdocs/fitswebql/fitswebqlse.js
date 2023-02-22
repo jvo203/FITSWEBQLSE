@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-02-21.1";
+    return "JS2023-02-22.0";
 }
 
 function uuidv4() {
@@ -558,12 +558,14 @@ function plot_spectrum(dataArray) {
         return;
 
     let len = dataArray.length;
+
     if (len < 1)
         return;
 
     let fitsData = fitsContainer[len - 1];
-    if (fitsData.depth <= 1 || optical_view)
+    if (fitsData.depth <= 1 || optical_view) {
         return;
+    }
 
     var elem = document.getElementById("SpectrumCanvas");
     if (displaySpectrum) {
@@ -11395,7 +11397,9 @@ function setup_image_selection() {
                 }
             }
             catch (e) {
-                console.log(e);
+                // return if for example <mouse_position> is undefined
+                // hide the beam (just in case it gets displayed)
+                d3.select("#" + zoom_location + "Beam").attr("opacity", 0.0);
                 return;
             }
 
