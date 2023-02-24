@@ -46,3 +46,59 @@ WEBSOCKET CONNECTION CLOSED.
 [C] HTTP transfer completed; cURL status 0, HTTP code 200.
 [C] HTTP transfer completed; cURL status 0, HTTP code 200.
 [C] HTTP transfer completed; cURL status 0, HTTP code 200.
+
+[C] 'ALMA01157161' does not exist.
+[C] forwarding '/fitswebql_v5_cluster/FITSWebQL.html?datasetId=ALMA01157161&db=alma&table=cube' across the cluster.
+[C] insert_if_not_exists(ALMA01157161,(nil))
+[C] '/mnt/fits/files/ALMA01157161.fits' cannot be accessed for reading, trying a JVO path next.
+:: dnnl -- latest
+:: dpcpp-ct -- latest
+[C] '/mnt/fits/files/ALMA01157161.fits' cannot be accessed for reading, trying a JVO path next.
+[C] PostgreSQL connection successful.
+[C] FITS filepath: '/home/alma/fits_archive/2018/10/16/jvon_181016/2016.1.01530.S/0/ALMA01157161_00_00_00.fits'
+[C] datasetid: 'ALMA01157161', flux: 'NULL', filepath: '/home/alma/fits_archive/2018/10/16/jvon_181016/2016.1.01530.S/0/ALMA01157161_00_00_00.fits'; over to FORTRAN
+ [load_fits_file] datasetid: 'ALMA01157161', flux: 'NULL', filepath: '/home/alma/fits_archive/2018/10/16/jvon_181016/2016.1.01530.S/0/ALMA01157161_00_00_00.fits'
+ [load_fits_file] :: ROOT NODE
+[C] inserted ALMA01157161 into the hash table
+ cache directory: /ssd/cache
+ trying a cache file: /ssd/cache/ALMA01157161
+ cache directory: /data/cache
+ trying a cache file: /data/cache/ALMA01157161
+[Feb 24 2023 14:24:26][load_dataset] <info> restored pixels/mask from /data/cache/ALMA01157161/state
+ max_threads:          10 depth:        1918
+ [load_cube] #frames:         388
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[Feb 24 2023 14:24:26][load_cube] <info> restored cube data from /data/cache/ALMA01157161
+ finished loading ALMA01157161, bSuccess:  T , elapsed time:    7.56589547E-02  [s]
+ current:                 1918 total:                 1918
+ datasetid:ALMA01157161, FRAMEID:ALMA01157161, BTYPE: Intensity, BUNIT: Jy/beam, IGNRVAL:  -1.0000000150474662E+030
+ LINE: , FILTER: , SPECSYS: LSRK, TIMESYS: UTC, OBJECT: , DATE-OBS: 2017-08-27T02:09:23.663999
+ RESTFRQ:    345795990000.00000      BMAJ:    2.4554576430960001E-005 , BMIN:    1.7500958237949999E-005 , BPA:   -80.534431792990006
+ OBSRA:    259.58270833329999      OBSDEC:   -32.456166666670001      , DATAMIN:   -1.0000000000000000E+030 , DATAMAX:    1.0000000000000000E+030
+ CRVAL1:    259.58270833329999      , CDELT1:   -2.7222222222220000E-006 , CRPIX1:    946.00000000000000
+ CRVAL2:   -32.456166666670001      , CDELT2:    2.7222222222220000E-006 , CRPIX2:    946.00000000000000
+ CRVAL3:    346012255598.90002      , CDELT3:   -244198.83978270000      , CRPIX3:    1.0000000000000000
+ CUNIT1: deg, CTYPE1: RA---SIN
+ CUNIT2: deg, CTYPE2: DEC--SIN
+ CUNIT3: Hz, CTYPE3: FREQ
+ CD1_1:                        NaN CD1_2:                        NaN
+ CD2_1:                        NaN CD2_2:                        NaN
+ IS_OPTICAL:  F , IS_XRAY:  F , FLUX:
+ has_frequency: T , has_velocity: F , frame_multiplier =    1.0000000000000000
+ dmin:  -9.26980376E-02 dmax:  0.106736884     dmedian:  -1.52857683E-06
+ dmad:   5.24339452E-03 dmadP:   5.18664485E-03 dmadN:   5.30069042E-03 video: T
+ ALMA01157161: dataset has been in cache for more than           60  seconds. Removing it.
+[C] marking ALMA01157161 for garbage collection.
+ ALMA01157161: dataset has been in cache for more than           60  seconds. Removing it.
+ cache directory: /ssd/cache
+ trying a cache file: /ssd/cache/ALMA01157161
+ cache directory: /data/cache
+ trying a cache file: /data/cache/ALMA01157161
+ deleting ALMA01157161; cache dir: /data/cache/ALMA01157161, status           0 , bSuccess T
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
