@@ -142,7 +142,7 @@ endif
 
 MOD =
 # -I/home/chris/zfp/include
-DEF = -DNODEBUG -DNO_MONGOOSE_HTTP_CLIENT
+DEF = -DNODEBUG -DNO_MONGOOSE_HTTP_CLIENT -DMG_DATA_SIZE=50
 
 ifneq ($(SHARE),)
 	DEF += -DSHARE='"$(SHARE)"'
