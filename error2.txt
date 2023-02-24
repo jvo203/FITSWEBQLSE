@@ -1,0 +1,48 @@
+P-V diagram for ALMA01157161, x1:        1610 , y1:         968 , x2:        1828 , y2:         767 , width:         621 , height:        1021 , frame_start:   345544126423.03656      , frame_end:   346012255598.90002      , ref_freq:   345796000000.00000      , deltaV:   0.0000000000000000      , rest: F , timestamp:   439811.000     , fd:          27
+ first:           1 last:        1918 length:        1918 depth:        1918
+ velocity range: v1:  -187.42704652098044      v2:   218.44467958879665       [km/s]
+[C] ws_pv_response: session_id: 9a0d68e6-bcc7-4fd3-afde-302c5badc17f, fd: 26
+ x1:        1610 y1:         968 x2:        1828 y2:         767
+ dx:   219.000000     dy:   200.000000     dt:   3.37174679E-05
+ npoints:         420
+[C] pthread_create rc = 0
+[C] calling fetch_pv_diagram across the cluster for 'ALMA01157161'
+[C] HTTP transfer #3 completed; cURL status 0, HTTP code 200.
+[C] /pv/<diagram>::OK.
+[C] HTTP transfer #4 completed; cURL status 0, HTTP code 200.
+[C] /pv/<diagram>::OK.
+[C] HTTP transfer #2 completed; cURL status 0, HTTP code 200.
+[C] /pv/<diagram>::OK.
+[C] HTTP transfer #1 completed; cURL status 0, HTTP code 200.
+[C] /pv/<diagram>::OK.
+[C] pthread_join rc = 0
+ merging the cluster P-V diagram
+ processed #points:         420 P-V diagram elapsed time:    3.1944479851517826      [ms]
+ scale:  0.505709052
+tileLanczos32f_C1R::num_threads = 1
+ P-V ERF  min:  -2.92633548E-02 max:   2.62848791E-02 mean:  -1.06550804E-04 std:   6.06996566E-03 elapsed time:   1.0169869929086417      [ms]
+ xc:   1.00000000       212.000000
+ yc:   1.00000000       970.000000
+ zc:  -1.00000000     -0.666666627     -0.333333313       0.00000000      0.333333373      0.666666746       1.00000000
+ lines bounds:           1           5           1     2056400
+ lines dimensions:           5     2056400
+ P-V CONREC NC:           7 #LINES:           0 elapsed time:   1.5335011994466186E-002 [ms]
+[C] fd: 27; width: 212; height: 970, precision: 6, pmean: -0.000107, pstd: 0.006070, pmin: -0.029263, pmax: 0.026285, xmin: 1, xmax: 420, vmin: -187.427047, vmax: 218.444680
+[C] P-V Diagram compressed size: 86192 bytes
+[C] PIPE_END_OF_STREAM
+closing a websocket connection for ALMA01157161/9a0d68e6-bcc7-4fd3-afde-302c5ba
+[C] removed 9a0d68e6-bcc7-4fd3-afde-302c5ba from the hash table
+[C] pv_event_loop terminated.
+WEBSOCKET CONNECTION CLOSED.
+ ALMA01157161: dataset has been in cache for more than           60  seconds. Removing it.
+[C] marking ALMA01157161 for garbage collection.
+ ALMA01157161: dataset has been in cache for more than           60  seconds. Removing it.
+ cache directory: /ssd/cache
+ trying a cache file: /ssd/cache/ALMA01157161
+ cache directory: /data/cache
+ trying a cache file: /data/cache/ALMA01157161
+ deleting ALMA01157161; cache dir: /data/cache/ALMA01157161, status           0 , bSuccess T
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
+[C] HTTP transfer completed; cURL status 0, HTTP code 200.
