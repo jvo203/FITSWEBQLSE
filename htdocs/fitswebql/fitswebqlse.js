@@ -14449,11 +14449,23 @@ function show_welcome() {
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<h4>Realtime Position-Velocity Diagram (see <i>Help / User Guide / P-V Diagram</i>)</h4>');
+        .html('<h4>Realtime Position-Velocity Diagram (see <a id="pv_help" href="#"><i>Help / User Guide / P-V Diagram</i></a>)</h4>');
+
+    $('#pv_help').click(function () {
+        $('#welcomeScreen').modal('hide');
+        show_help();
+        return false;
+    });
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<h4>CSV spectrum export (see <i>Help / User Guide / Spectrum Export</i>)</h4>');
+        .html('<h4>CSV spectrum export (see <a id="csv_help" href="#"><i>Help / User Guide / Spectrum Export</i></a>)</h4>');
+
+    $('#csv_help').click(function () {
+        $('#welcomeScreen').modal('hide');
+        show_help();
+        return false;
+    });
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
@@ -14553,7 +14565,7 @@ function setup_help() {
     bodyDiv.append("hr");
 
     bodyDiv.append("h3")
-        .attr("id", "h3")
+        .attr("id", "csv_h3")
         .text("Spectrum Export");
 
     bodyDiv.append("p")
@@ -14590,7 +14602,7 @@ function setup_help() {
     bodyDiv.append("hr");
 
     bodyDiv.append("h3")
-        .attr("id", "h3")
+        .attr("id", "realtime_h3")
         .text("Realtime Spectrum Updates");
 
     bodyDiv.append("p")
