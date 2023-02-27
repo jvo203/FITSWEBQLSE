@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-02-27.0";
+    return "JS2023-02-27.1";
 }
 
 function uuidv4() {
@@ -14561,6 +14561,14 @@ function setup_help() {
 
     bodyDiv.append("p")
         .html("In the <b>P-V Diagram view</b> ①, ② and the middle point can be dragged freely to change the <i>P-V line</i>. The <i>P-V diagram</i> will be updated automatically.");
+
+    var pv = bodyDiv.append("video")
+        .attr("width", "100%")
+        .attr("controls", "")
+        .attr("preload", "metadata");
+
+    pv.append("source")
+        .attr("src", "https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/pv_diagram.mp4");
 
     bodyDiv.append("hr");
 
