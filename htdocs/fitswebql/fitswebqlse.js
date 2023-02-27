@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-02-22.0";
+    return "JS2023-02-27.0";
 }
 
 function uuidv4() {
@@ -14449,11 +14449,11 @@ function show_welcome() {
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<h4>Realtime Position-Velocity Diagram</h4>');
+        .html('<h4>Realtime Position-Velocity Diagram (see <i>Help / User Guide / P-V Diagram</i>)</h4>');
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<h4>CSV spectrum export</h4>');
+        .html('<h4>CSV spectrum export (see <i>Help / User Guide / Spectrum Export</i>)</h4>');
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
