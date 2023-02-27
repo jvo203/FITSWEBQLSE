@@ -14539,6 +14539,21 @@ function setup_help() {
 
     bodyDiv.append("h3")
         .attr("id", "h3")
+        .text("P-V Diagram");
+
+    bodyDiv.append("p")
+        .html("An interactive <b>Position-Velocity Diagram</b> can be displayed for the current image. First left-click on the image to select a starting position.");
+
+    bodyDiv.append("p")
+        .html("Then move a mouse around and left-click again to complete the <i>P-V line</i> selection. The <i>P-V diagram</i> will display shortly.");
+
+    bodyDiv.append("p")
+        .html("In the <b>P-V Diagram view</b> ①, ② and the middle point can be dragged freely to change the <i>P-V line</i>. The <i>P-V diagram</i> will be updated automatically.");
+
+    bodyDiv.append("hr");
+
+    bodyDiv.append("h3")
+        .attr("id", "h3")
         .text("Spectrum Export");
 
     bodyDiv.append("p")
