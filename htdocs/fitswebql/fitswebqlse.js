@@ -14250,12 +14250,12 @@ function display_menu() {
         .append("a")
         .style('cursor', 'pointer')
         .on("click", show_help)
-        .html('user guide <span class="fas fa-wrench"></span>');
+        .html('<span class="fas fa-wrench"></span> user guide');
 
     helpDropdown.append("li")
         .append("a")
         .attr("href", "mailto:help_desk@jvo.nao.ac.jp?subject=" + votable.getAttribute('data-server-string') + " feedback [" + votable.getAttribute('data-server-version') + "/" + get_js_version() + "]")
-        .html('send feedback');
+        .html('<span class="fas fa-comment-dots"></span> send feedback');
 
     helpDropdown.append("li")
         .append("a")
