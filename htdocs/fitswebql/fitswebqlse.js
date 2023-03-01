@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-01.0";
+    return "JS2023-03-01.1";
 }
 
 function uuidv4() {
@@ -3237,7 +3237,7 @@ function open_websocket_connection(_datasetId, index) {
                             tone_mapping.white = tone_mapping.max;
                         }
 
-                        //console.log(tone_mapping);
+                        console.log(tone_mapping);
 
                         if (imageContainer[index - 1] != null) {
                             // re-set the existing tone mapping settings
