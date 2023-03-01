@@ -3595,9 +3595,19 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "</script>\n");
 
     // FITSWebQL main JavaScript + CSS
-    g_string_append(html, "<script src=\"fitswebqlse.js?" VERSION_STRING "\"></script>\n");
-    g_string_append(html, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING
-                          "\"/>\n");
+    if (options.local)
+    {
+        g_string_append(html, "<script src=\"fitswebqlse.js?" VERSION_STRING "\"></script>\n");
+        g_string_append(html, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING
+                              "\"/>\n");
+    }
+    else
+    {
+        // use the CDN in the server version
+        g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/fitswebqlse.js?" VERSION_STRING "\"></script>\n");
+        g_string_append(html, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/fitswebqlse.css?" VERSION_STRING
+                              "\"/>\n");
+    }
 
     // HTML content
     g_string_append(html, "<title>FITSWEBQLSE</title></head><body>\n");
