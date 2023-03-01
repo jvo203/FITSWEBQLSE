@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-02-27.1";
+    return "JS2023-03-01.0";
 }
 
 function uuidv4() {
@@ -6236,7 +6236,7 @@ function change_ui_theme() {
     if (theme == 'bright')
         colourmap = "haxby";
     else
-        colourmap = "amber";
+        colourmap = "green";
 
     localStorage.setItem("v5_colourmap", colourmap);
 
@@ -16153,7 +16153,7 @@ async*/ function mainRenderer() {
             colourmap = "haxby" ;*/
 
             theme = "dark";
-            colourmap = "amber";
+            colourmap = "green";
             axisColour = "rgba(255,204,0,0.8)";
         }
         /*else
@@ -16201,7 +16201,7 @@ async*/ function mainRenderer() {
         if (theme == 'bright')
             colourmap = "haxby";
         else
-            colourmap = "amber";
+            colourmap = "green";
 
         localStorage.setItem("v5_colourmap", colourmap);
     }
@@ -16209,7 +16209,7 @@ async*/ function mainRenderer() {
         colourmap = localStorage.getItem("v5_colourmap");
 
     if (colourmap === null)
-        colourmap = "amber";
+        colourmap = "green";
 
     //add a colourmap URL override
     let pos = window.location.search.indexOf('colourmap=');
