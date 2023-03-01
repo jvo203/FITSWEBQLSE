@@ -6135,6 +6135,12 @@ contains
          rc = my_pthread_join(pid)
       end if
 
+      if (allocated(item%flux)) then
+         print *, "image_spectrum_request::flux", item%flux
+      else
+         print *, "image_spectrum_request::flux is not allocated"
+      end if
+
       ! make an image histogram, decide on the flux etc.
       call make_image_statistics(item, img_width, img_height, pixels, mask, hist, tone)
 
@@ -8703,6 +8709,12 @@ contains
       end if
 
       if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
+
+      if (allocated(item%flux)) then
+         print *, "ws_image_spectrum_request::flux", item%flux
+      else
+         print *, "ws_image_spectrum_request::flux is not allocated"
+      end if
 
       call make_image_statistics(item, img_width, img_height, view_pixels, view_mask, hist, tone)
 
