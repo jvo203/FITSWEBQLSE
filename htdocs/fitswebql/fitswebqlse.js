@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-01.1";
+    return "JS2023-03-02.0";
 }
 
 function uuidv4() {
@@ -3237,7 +3237,13 @@ function open_websocket_connection(_datasetId, index) {
                             tone_mapping.white = tone_mapping.max;
                         }
 
-                        console.log(tone_mapping);
+                        // console.log(tone_mapping);
+
+                        let currentFlux = document.getElementById('flux' + index).value;
+
+                        if (currentFlux != tone_mapping.flux) {
+                            document.getElementById('flux' + index).value = tone_mapping.flux;
+                        }
 
                         if (imageContainer[index - 1] != null) {
                             // re-set the existing tone mapping settings
@@ -3317,6 +3323,9 @@ function open_websocket_connection(_datasetId, index) {
 
                         //refresh the histogram
                         redraw_histogram(index);
+
+                        // refresh tone mapping
+                        change_tone_mapping(index, true);
 
                         return;
 
