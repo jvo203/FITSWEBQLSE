@@ -16416,7 +16416,8 @@ async*/ function mainRenderer() {
 
             try {
                 for (let i = 0; i < document.styleSheets.length; i++) {
-                    console.log(document.styleSheets[i].href);
+                    console.log("styleSheet: ", document.styleSheets[i].href);
+
                     if (document.styleSheets[i].href != null)
                         if ((document.styleSheets[i].href.indexOf('fitswebqlse.css') > 0) || (document.styleSheets[i].href.indexOf('fitswebqlse.min.css') > 0)) {
                             let stylesheet = document.styleSheets[i];
