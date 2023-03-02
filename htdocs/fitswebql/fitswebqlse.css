@@ -107,7 +107,7 @@ body {
     ;
 }
 
-.modal-content {
+/*.modal-content {
     background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, 0.5);
 }
@@ -116,7 +116,7 @@ body {
     background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, 0.9);
     color: inherit;
-}
+}*/
 
 .modal-backdrop {
     background-color: gray;
