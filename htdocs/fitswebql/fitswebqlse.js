@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-02.0";
+    return "JS2023-03-02.1";
 }
 
 function uuidv4() {
@@ -2849,6 +2849,9 @@ function poll_heartbeat() {
 
     xmlhttp.onreadystatechange = function () {
         var RRT = 0;
+
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 404) { };
+
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var data = xmlhttp.response;
 
@@ -2920,6 +2923,9 @@ function poll_cluster() {
 
     xmlhttp.onreadystatechange = function () {
         var RRT = 0;
+
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 404) { };
+
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var data = xmlhttp.response;
 
@@ -2971,6 +2977,8 @@ function poll_progress(datasetId, index) {
     var url = 'progress/' + encodeURIComponent(datasetId);
 
     xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 404) { };
+
         if (xmlhttp.readyState == 4 && xmlhttp.status == 202) {
             console.log("Server not ready, long-polling progress again after 250 ms.");
             setTimeout(function () {
@@ -11941,6 +11949,10 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
     var url = 'get_splatalogue?datasetId=' + encodeURIComponent(datasetId) + '&freq_start=' + freq_start + '&freq_end=' + freq_end + '&' + encodeURIComponent(get_js_version());
 
     xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 404) {
+            console.log("No spectral lines found.");
+        }
+
         if (xmlhttp.readyState == 4 && xmlhttp.status == 502) {
             console.log("Connection error, re-fetching molecules after 1 second.");
             setTimeout(function () {
@@ -16152,6 +16164,8 @@ async*/ function mainRenderer() {
 
     isLocal = (votable.getAttribute('data-server-mode').indexOf("LOCAL") > -1) ? true : false;
 
+    console.log("isLocal=" + isLocal);
+
     endianness = getEndianness();
     console.log('endianness: ', endianness);
 
@@ -16258,6 +16272,8 @@ async*/ function mainRenderer() {
     //console.log("composite view:", composite_view);
 
     optical_view = false;
+
+    console.log("firstTime:", firstTime);
 
     if (firstTime) {
         fps = 30;//target fps; 60 is OK in Chrome but a bit laggish in Firefox
@@ -16386,6 +16402,8 @@ async*/ function mainRenderer() {
         var height = Math.round(rect.height);
         document.getElementById('mainDiv').setAttribute("style", "width:" + width.toString() + "px");
         document.getElementById('mainDiv').setAttribute("style", "height:" + height.toString() + "px");
+
+        console.log("theme: " + theme);
 
         if (theme == 'bright') {
             d3.select("body")
