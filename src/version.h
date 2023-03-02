@@ -2,7 +2,7 @@
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 0
-#define VERSION_SUB 22
+#define VERSION_SUB 23
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
