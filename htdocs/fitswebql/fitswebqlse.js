@@ -16414,7 +16414,7 @@ async*/ function mainRenderer() {
                 .style('background-color', 'white')
                 .style('color', 'black');
 
-            try {
+            /*try {
                 for (let i = 0; i < document.styleSheets.length; i++) {
                     if (document.styleSheets[i].href != null) {
                         if ((document.styleSheets[i].href.indexOf('fitswebqlse.css') > 0) || (document.styleSheets[i].href.indexOf('fitswebqlse.min.css') > 0)) {
@@ -16438,7 +16438,18 @@ async*/ function mainRenderer() {
             }
             catch (e) {
                 console.log('safely ignoring error:', e);
-            }
+            }*/
+        } else {
+            // add the dark theme
+            var head = document.head;
+            var link = document.createElement("link");
+
+            link.type = "text/css";
+            link.rel = "stylesheet";
+            // link.href = "dark.css";
+            link.href = "https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/htdocs/fitswebql/dark.min.css"
+
+            head.appendChild(link);
         }
 
         votable = document.getElementById('votable');
