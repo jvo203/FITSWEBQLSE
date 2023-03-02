@@ -16120,6 +16120,36 @@ function enable_3d_view() {
         console.log("WebGL not supported by your browser");
 }
 
+function addStylesheetRules(rules) {
+    var styleEl = document.createElement('style');
+
+    // Append <style> element to <head>
+    document.head.appendChild(styleEl);
+
+    // Grab style element's sheet
+    var styleSheet = styleEl.sheet;
+
+    for (var i = 0; i < rules.length; i++) {
+        var j = 1,
+            rule = rules[i],
+            selector = rule[0],
+            propStr = '';
+        // If the second argument of a rule is an array of arrays, correct our variables.
+        if (Array.isArray(rule[1][0])) {
+            rule = rule[1];
+            j = 0;
+        }
+
+        for (var pl = rule.length; j < pl; j++) {
+            var prop = rule[j];
+            propStr += prop[0] + ': ' + prop[1] + (prop[2] ? ' !important' : '') + ';\n';
+        }
+
+        // Insert CSS Rule
+        styleSheet.insertRule(selector + '{' + propStr + '}', styleSheet.cssRules.length);
+    }
+}
+
 /*function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -16163,8 +16193,6 @@ async*/ function mainRenderer() {
     console.log("ROOT_PATH=" + ROOT_PATH);
 
     isLocal = (votable.getAttribute('data-server-mode').indexOf("LOCAL") > -1) ? true : false;
-
-    console.log("isLocal:", isLocal);
 
     endianness = getEndianness();
     console.log('endianness: ', endianness);
@@ -16272,8 +16300,6 @@ async*/ function mainRenderer() {
     //console.log("composite view:", composite_view);
 
     optical_view = false;
-
-    console.log("firstTime:", firstTime);
 
     if (firstTime) {
         fps = 30;//target fps; 60 is OK in Chrome but a bit laggish in Firefox
@@ -16413,43 +16439,19 @@ async*/ function mainRenderer() {
             d3.select("html")
                 .style('background-color', 'white')
                 .style('color', 'black');
-
-            /*try {
-                for (let i = 0; i < document.styleSheets.length; i++) {
-                    if (document.styleSheets[i].href != null) {
-                        if ((document.styleSheets[i].href.indexOf('fitswebqlse.css') > 0) || (document.styleSheets[i].href.indexOf('fitswebqlse.min.css') > 0)) {
-                            let stylesheet = document.styleSheets[i];
-                            //console.log(document.styleSheets[i]);
-
-                            if (stylesheet.cssRules) {
-                                for (let j = 0; j < stylesheet.cssRules.length; j++)
-                                    if (stylesheet.cssRules[j].selectorText === '.modal-content')
-                                        stylesheet.deleteRule(j);
-
-                                for (let j = 0; j < stylesheet.cssRules.length; j++)
-                                    if (stylesheet.cssRules[j].selectorText === '.list-group-item')
-                                        stylesheet.deleteRule(j);
-                            }
-
-                            //console.log(document.styleSheets[i]);
-                        }
-                    }
-                }
-            }
-            catch (e) {
-                console.log('safely ignoring error:', e);
-            }*/
         } else {
-            // add the dark theme
-            var head = document.head;
-            var link = document.createElement("link");
-
-            link.type = "text/css";
-            link.rel = "stylesheet";
-            // link.href = "dark.css";
-            link.href = "https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/htdocs/fitswebql/dark.min.css"
-
-            head.appendChild(link);
+            // dynamically add the dark theme rules
+            addStylesheetRules([
+                ['.modal-content',
+                    ['background-color', 'rgb(0, 0, 0)'],
+                    ['background-color', 'rgba(0, 0, 0, 0.5)']
+                ],
+                ['.list-group-item',
+                    ['background-color', 'rgb(0, 0, 0)'],
+                    ['background-color', 'rgba(0, 0, 0, 0.5)'],
+                    ['color', 'inherit']
+                ]
+            ]);
         }
 
         votable = document.getElementById('votable');
