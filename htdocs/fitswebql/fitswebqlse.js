@@ -16164,7 +16164,7 @@ async*/ function mainRenderer() {
 
     isLocal = (votable.getAttribute('data-server-mode').indexOf("LOCAL") > -1) ? true : false;
 
-    console.log("isLocal=" + isLocal);
+    console.log("isLocal:", isLocal);
 
     endianness = getEndianness();
     console.log('endianness: ', endianness);
@@ -16403,7 +16403,7 @@ async*/ function mainRenderer() {
         document.getElementById('mainDiv').setAttribute("style", "width:" + width.toString() + "px");
         document.getElementById('mainDiv').setAttribute("style", "height:" + height.toString() + "px");
 
-        console.log("theme: " + theme);
+        console.log("theme:", theme);
 
         if (theme == 'bright') {
             d3.select("body")
