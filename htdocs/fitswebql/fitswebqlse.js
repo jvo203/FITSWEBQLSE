@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-02.1";
+    return "JS2023-03-03.0";
 }
 
 function uuidv4() {
@@ -3716,8 +3716,8 @@ function open_websocket_connection(_datasetId, index) {
                             // cancel idlePV timer and set a new one
                             window.clearTimeout(idlePV);
                             idlePV = window.setTimeout(function () {
-                                return; // disabled for now, the contour levels need to be fixed (adjusted)
-                                // pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY);
+                                // return; // disabled for now, the contour levels need to be fixed (adjusted)
+                                pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY);
                             }, 250);
                         }
 
