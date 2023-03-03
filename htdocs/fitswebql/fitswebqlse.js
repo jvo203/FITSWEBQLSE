@@ -3717,7 +3717,7 @@ function open_websocket_connection(_datasetId, index) {
                             window.clearTimeout(idlePV);
                             idlePV = window.setTimeout(function () {
                                 // return; // disabled for now, the contour levels need to be fixed (adjusted)
-                                pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY);
+                                pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY, pv_width, pv_height, frame_pv);
                             }, 250);
                         }
 
@@ -13361,7 +13361,7 @@ function partial_fits_size() {
     return roundUp(partial_size, 2880);
 }
 
-function pv_contour(left, top, width, height, pvCanvas, flipY) {
+function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_height, frame_pv) {
     console.log("calling pv_contour with canvas: ", pvCanvas, "flipY: ", flipY);
 
     d3.select("#PVContourSVG").remove();
@@ -13384,7 +13384,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY) {
             .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
     }
 
-    var data = [];
+    /*var data = [];
     let min_value = 255;
     let max_value = 0;
     let imageData = pvCanvas.getContext('2d').getImageData(0, 0, pvCanvas.width, pvCanvas.height).data;
@@ -13399,6 +13399,42 @@ function pv_contour(left, top, width, height, pvCanvas, flipY) {
             var b = imageData[pixel + 2];
             var z = (r + g + b) / 3;
             pixel += 4;
+
+            if (z < min_value)
+                min_value = z;
+
+            if (z > max_value)
+                max_value = z;
+
+            row.push(z);
+        }
+
+        data.push(row);
+    }
+
+    console.log("min_value = ", min_value, " max_value = ", max_value);*/
+
+    var pv_pixels = Module.decompressZFP(pv_width, pv_height, frame_pv);
+
+    var data = [];
+
+    // get minimum and maximum floating point value
+    let min_value = Number.MAX_VALUE
+    let max_value = -Number.MAX_VALUE;
+
+    for (var h = pv_height - 1; h >= 0; h--) {
+        var row = [];
+        var pixel = h * pv_width;
+
+        for (var w = 0; w < pv_width; w++) {
+            var z = pv_pixels.get(pixel);
+            pixel += 1;
+
+            if (z < 0.0)
+                z = 0.0;
+
+            if (z > 1.0)
+                z = 1.0;
 
             if (z < min_value)
                 min_value = z;
