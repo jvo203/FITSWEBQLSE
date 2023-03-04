@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-03.0";
+    return "JS2023-03-04.0";
 }
 
 function uuidv4() {
@@ -14524,13 +14524,18 @@ function show_welcome() {
         return false;
     });
 
-    ul.append("li")
+    /*ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<h4>HDR image rendering with WebGL</h4>');
+        .html('<h4>HDR image rendering with WebGL</h4>');*/
 
     /*ul.append("li")
       .attr("class", "list-group-item list-group-item-success")
       .html('<h4>32-bit floating-point High Dynamic Range images compressed with <a href="https://en.wikipedia.org/wiki/OpenEXR"><em>OpenEXR</em></a></h4>');*/
+
+    ul.append("li")
+        .attr("class", "list-group-item list-group-item-success")
+        .html('<iframe id="github-iframe" src="" style="height:20%;width:100%;" title="Releases"></iframe>');
+    //.html('<iframe src="https://api.github.com/repos/jvo203/FITSWEBQLSE/releases" style="height:20%;width:100%;" title="Releases"></iframe>');
 
     if (!isLocal) {
         ul.append("li")
