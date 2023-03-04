@@ -14534,8 +14534,27 @@ function show_welcome() {
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<iframe id="github-iframe" src="" style="height:20%;width:100%;" title="Releases"></iframe>');
+        .html('<iframe id="github-iframe" src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/README.md" style="height:20%;width:100%;border:none;" title="Releases"></iframe>');
     //.html('<iframe src="https://api.github.com/repos/jvo203/FITSWEBQLSE/releases" style="height:20%;width:100%;" title="Releases"></iframe>');
+
+    var script = document.createElement("script");
+
+    /*script.innerHTML = "fetch('https://physworx.com', {mode:'no-cors' })\
+    .then((response) => {\
+        if (!response.ok) {throw new Error(`HTTP error! Status: ${response.status}`);};\
+        return response.json();})\
+    .then((data) => { console.log(data['content']);});";*/
+
+    //    /*var iframe = document.getElementById('github-iframe'); \
+    //iframe.src = 'data:text/html;base64,' + encodeURIComponent(data['content']);*/ });";
+
+    /*script.innerHTML = "var xmlhttp = new XMLHttpRequest();\
+    var url = 'https://physworx.com';\
+    xmlhttp.open('GET', url, true);\
+    xmlhttp.timeout = 0; \
+    xmlhttp.send(); ";
+
+    document.head.appendChild(script);*/
 
     if (!isLocal) {
         ul.append("li")
