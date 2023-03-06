@@ -3371,11 +3371,12 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // WebAssembly JS+binary
     if (options.local)
     {
+        // local version
         g_string_append(html, "<script src=\"client." WASM_VERSION ".js\"></script>\n");
     }
     else
     {
-        // use the CDN version of the WebAssembly binary
+        // server version: use the CDN version of WASM files
         g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".min.js\"></script>\n");
     }
 
