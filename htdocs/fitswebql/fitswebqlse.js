@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-06.0";
+    return "JS2023-03-06.1";
 }
 
 function uuidv4() {
@@ -13430,12 +13430,6 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
             var z = pv_pixels.get(pixel);
             pixel += 1;
 
-            if (z < 0.0)
-                z = 0.0;
-
-            if (z > 1.0)
-                z = 1.0;
-
             if (z < min_value)
                 min_value = z;
 
@@ -13450,8 +13444,8 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
 
     console.log("min_value = ", min_value, " max_value = ", max_value);
 
-    // var contours = parseInt(document.getElementById('contour_lines').value) + 1;
-    var contours = 3;
+    var contours = parseInt(document.getElementById('contour_lines').value) + 1;
+    // var contours = 3;
     var step = (max_value - min_value) / (contours + 0);
     var zs = d3.range(min_value, max_value + 0.1 * step, step);
     console.log("zs:", zs);
