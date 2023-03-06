@@ -16466,6 +16466,7 @@ async*/ function mainRenderer() {
         last_spectrum = null;
 
         displayContours = false;
+        displayPVContours = localStorage_read_boolean("displayPVContours", true);
         displayLegend = localStorage_read_boolean("displayLegend", true);
         displayMolecules = localStorage_read_boolean("displayMolecules", true);
         displaySpectrum = localStorage_read_boolean("displaySpectrum", true);
