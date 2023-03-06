@@ -8394,9 +8394,9 @@ contains
       line_count = 0
 
       ! print lines bounds
-      print *, 'lines bounds:', lbound(lines, 1), ubound(lines, 1), lbound(lines, 2), ubound(lines, 2)
+      ! print *, 'lines bounds:', lbound(lines, 1), ubound(lines, 1), lbound(lines, 2), ubound(lines, 2)
       ! print lines dimensions
-      print *, 'lines dimensions:', size(lines, 1), size(lines, 2)
+      ! print *, 'lines dimensions:', size(lines, 1), size(lines, 2)
 
       ! contour the P-V diagram
       ! line_count = conrec(pixels, ilb, iub, jlb, jub, xc, yc, nc, zc, contours, lines)
@@ -8404,7 +8404,7 @@ contains
       ! end the timer
       t2 = omp_get_wtime()
 
-      print *, 'P-V CONREC NC:', nc, '#LINES:', line_count, 'elapsed time:', 1000*(t2 - t1), '[ms]'
+      ! print *, 'P-V CONREC NC:', nc, '#LINES:', line_count, 'elapsed time:', 1000*(t2 - t1), '[ms]'
 
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
