@@ -517,12 +517,15 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
 
     for (size_t i = 0; i < img_size; i++)
     {
-        float value = pixels[i];
+        /*float value = pixels[i];
 
         if (value < 0.0f)
             value = 0.0f;
         else if (value > 1.0f)
-            value = 1.0f;
+            value = 1.0f;*/
+
+        float value = erff(pixels[i] / sqrt(2.0f));
+        value = (value + 1.0f) / 2.0f;
 
         unsigned char r = 0;
         unsigned char g = 0;
