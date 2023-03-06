@@ -1067,7 +1067,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     for (let i = 0; i < math_x.length; i++) {
         // convert from (0, 1) range to the (pmin, pmax) range		
 
-        //console.log("i=", i);
+        // console.log("i=", i);
         // console.log(math_x[i]);
 
         math_x[i] = 2 * math_x[i] - 1;
@@ -9414,6 +9414,29 @@ function pv_event(event) {
                 })
                 .text("×");
 
+            var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> contour lines' : '<span class="far fa-square"></span> contour lines';
+
+            div.append("span")
+                .attr("id", "displayPVContours")
+                .attr("class", "pv-label")
+                .attr('style', 'position: fixed; left: 10px; top: 10px;')
+                .style('cursor', 'pointer')
+                .on("click", function () {
+                    displayPVContours = !displayPVContours;
+                    localStorage_write_boolean("displayPVContours", displayPVContours);
+                    var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> contour lines' : '<span class="far fa-square"></span> contour lines';
+                    d3.select(this).html(htmlStr);
+
+                    if (displayPVContours) {
+                        resubmit_pv_line(va_count);
+                    } else {
+                        try {
+                            d3.select("#PVContourSVG").remove();
+                        } catch (_) { }
+                    }
+                })
+                .html(htmlStr);
+
             div.append("img")
                 .attr("id", "hourglassPVDiagram")
                 .attr("class", "hourglass")
@@ -13383,6 +13406,8 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
             .attr("height", svg_height)
             .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
     }
+
+    if (!displayPVContours) return;
 
     /*var data = [];
     let min_value = 255;
