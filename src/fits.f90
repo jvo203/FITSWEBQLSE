@@ -8385,9 +8385,9 @@ contains
          zc(i) = -1.0 + 2.0*real(i - 1)/real(nc - 1)
       end do
 
-      print *, "xc:", xc(ilb), xc(iub)
-      print *, "yc:", yc(jlb), yc(jub)
-      print *, "zc:", zc
+      ! print *, "xc:", xc(ilb), xc(iub)
+      ! print *, "yc:", yc(jlb), yc(jub)
+      ! print *, "zc:", zc
 
       call list_init(contours)
       allocate (lines(5, 10*img_width*img_height)) ! assume the worst-case scenario
