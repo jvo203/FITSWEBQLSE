@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-04.0";
+    return "JS2023-03-06.0";
 }
 
 function uuidv4() {
@@ -14532,13 +14532,13 @@ function show_welcome() {
       .attr("class", "list-group-item list-group-item-success")
       .html('<h4>32-bit floating-point High Dynamic Range images compressed with <a href="https://en.wikipedia.org/wiki/OpenEXR"><em>OpenEXR</em></a></h4>');*/
 
-    ul.append("li")
+    /*ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<iframe id="github-iframe" src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/README.md" style="height:20%;width:100%;border:none;" title="Changelog"></iframe>');
+        .html('<iframe id="github-iframe" src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/README.md" style="height:20%;width:100%;border:none;" title="Changelog"></iframe>');*/
     //.html('<iframe id="github-iframe" src="https://github.com/jvo203/FITSWEBQLSE" style="height:20%;width:100%;border:none;" title="Releases"></iframe>');
     //.html('<iframe src="https://api.github.com/repos/jvo203/FITSWEBQLSE/releases" style="height:20%;width:100%;" title="Releases"></iframe>');
 
-    var script = document.createElement("script");
+    // var script = document.createElement("script");
 
     /*script.innerHTML = "fetch('https://physworx.com', {mode:'no-cors' })\
     .then((response) => {\
