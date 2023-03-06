@@ -13446,8 +13446,9 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
 
     var contours = parseInt(document.getElementById('contour_lines').value) + 1;
     // var contours = 3;
-    var step = (max_value - min_value) / (contours + 0);
-    var zs = d3.range(min_value, max_value + 0.1 * step, step);
+    var step = (max_value - min_value) / contours;
+    // var zs = d3.range(min_value, max_value + 0.1 * step, step);
+    var zs = d3.range(min_value + step, max_value, step);
     console.log("zs:", zs);
 
     var completed_levels = 0;
