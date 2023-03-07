@@ -9525,6 +9525,9 @@ function pv_event(event) {
                 .attr("class", "pv-label")
                 .html("&nbsp;linear&nbsp; ");
 
+            // set the default scaling to linear
+            d3.select("#pv_linear").property("checked", true);
+
             pvContourLines.append("input")
                 .attr("id", "pv_sqrt")
                 .attr("type", "radio")
@@ -9546,6 +9549,11 @@ function pv_event(event) {
                 .attr("for", "pv_log")
                 .attr("class", "pv-label")
                 .html("&nbsp;logarithmic&nbsp; ");
+
+            // set the onchange handler
+            d3.selectAll("input[name='pv_scaling']").on("change", function () {
+                resubmit_pv_line(va_count);
+            });
 
             div.append("img")
                 .attr("id", "hourglassPVDiagram")
@@ -13557,6 +13565,10 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
     let min_value = Number.MAX_VALUE
     let max_value = -Number.MAX_VALUE;
 
+    var pv_linear = document.getElementById('pv_linear');
+    var pv_sqrt = document.getElementById('pv_sqrt');
+    var pv_log = document.getElementById('pv_log');
+
     for (var h = pv_height - 1; h >= 0; h--) {
         var row = [];
         var pixel = h * pv_width;
@@ -13564,6 +13576,12 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
         for (var w = 0; w < pv_width; w++) {
             var z = pv_pixels.get(pixel);
             pixel += 1;
+
+            if (pv_linear.checked);//pass-through
+
+            if (pv_sqrt.checked) {
+                z = Math.sqrt(z); // this is not quite right but it's a start (z should be offset by the <min_value>)
+            }
 
             if (z < min_value)
                 min_value = z;
