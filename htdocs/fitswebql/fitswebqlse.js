@@ -5960,6 +5960,29 @@ function validate_contour_lines() {
     }
 }
 
+function validate_pv_contour_lines() {
+    var value = document.getElementById('pv_contour_lines').valueAsNumber;
+
+    if (isNaN(value))
+        document.getElementById('pv_contour_lines').value = previous_pv_contour_lines;
+
+    if (value < 2)
+        document.getElementById('pv_contour_lines').value = 2;
+
+    if (value > 10)
+        document.getElementById('pv_contour_lines').value = 10;
+
+    value = document.getElementById('pv_contour_lines').valueAsNumber;
+
+    if (value != previous_pv_contour_lines) {
+        previous_pv_contour_lines = value;
+
+        if (displayPVContours) {
+            resubmit_pv_line(va_count);
+        }
+    }
+}
+
 function set_user_restfrq() {
     RESTFRQ = USER_SELFRQ;
 
@@ -9430,6 +9453,13 @@ function pv_event(event) {
                     d3.select(this).html(htmlStr);
 
                     if (displayPVContours) {
+                        d3.select('#pv_contour_control').style("display", "inline-block");
+                    }
+                    else {
+                        d3.select('#pv_contour_control').style("display", "none");
+                    }
+
+                    if (displayPVContours) {
                         resubmit_pv_line(va_count);
                     } else {
                         try {
@@ -9438,6 +9468,48 @@ function pv_event(event) {
                     }
                 })
                 .html(htmlStr);
+
+            var pvContourLines = pvDiv.append("span")
+                .attr("id", "pv_contour_control")
+                .style("class", "form-group")
+                .attr("class", "form-horizontal");
+
+            pvContourLines.append("label")
+                .attr("for", "pv_contour_lines")
+                .attr("class", "pv-label")
+                .html("&nbsp;&nbsp;#contour levels:&nbsp; ");
+
+            previous_pv_contour_lines = 5;
+
+            pvContourLines.append("input")
+                .attr("id", "pv_contour_lines")
+                .attr("type", "number")
+                .style("width", "3em")
+                .attr("min", 2)
+                .attr("step", 1)
+                .attr("value", previous_pv_contour_lines);
+
+
+            var elem = document.getElementById('pv_contour_lines');
+            elem.onblur = validate_pv_contour_lines;
+            elem.onmouseleave = validate_pv_contour_lines;
+            elem.onkeyup = function (e) {
+                var event = e || window.event;
+                var charCode = event.which || event.keyCode;
+
+                if (charCode == '13') {
+                    // Enter pressed
+                    validate_pv_contour_lines();
+                    return false;
+                }
+            }
+
+            if (displayPVContours) {
+                d3.select('#pv_contour_control').style("display", "inline-block");
+            }
+            else {
+                d3.select('#pv_contour_control').style("display", "none");
+            }
 
             div.append("img")
                 .attr("id", "hourglassPVDiagram")
@@ -13471,8 +13543,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
 
     console.log("min_value = ", min_value, " max_value = ", max_value);
 
-    var contours = parseInt(document.getElementById('contour_lines').value) + 1;
-    // var contours = 3;
+    var contours = parseInt(document.getElementById('pv_contour_lines').value) + 1;
     var step = (max_value - min_value) / contours;
     // var zs = d3.range(min_value, max_value + 0.1 * step, step);
     var zs = d3.range(min_value + step, max_value, step);
