@@ -14515,7 +14515,7 @@ function show_welcome() {
     if (sv.charAt(0) == 'F') {
         ul.append("li")
             .attr("class", "list-group-item list-group-item-success")
-            .html("<h4>Server: FORTRAN (computing) &amp; C (networking)</h4>");
+            .html("<h4>FORTRAN (computing) &amp; C (networking)</h4>");
     };
 
     if (sv.charAt(0) == 'J') {
