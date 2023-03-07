@@ -9414,12 +9414,14 @@ function pv_event(event) {
                 })
                 .text("×");
 
+            var pvDiv = div.append("div")
+                .attr('style', 'position: fixed; left: 10px; top: 10px;');
+
             var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> contour lines' : '<span class="far fa-square"></span> contour lines';
 
-            div.append("span")
+            pvDiv.append("span")
                 .attr("id", "displayPVContours")
                 .attr("class", "pv-label")
-                .attr('style', 'position: fixed; left: 10px; top: 10px;')
                 .style('cursor', 'pointer')
                 .on("click", function () {
                     displayPVContours = !displayPVContours;
