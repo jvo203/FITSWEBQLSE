@@ -13614,9 +13614,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
                 console.log("completed_levels = ", completed_levels, " zs.length = ", zs.length)
         }, false);
 
-        //CRWORKER.postMessage('Hello World'); // Send data to our worker.    
         CRWORKER.postMessage({ data: data, level: i, lowerBand: lowerBand, upperBand: upperBand });
-        //CRWORKER.postMessage({'cmd':'do some work'}) ;    
     };
 }
 
@@ -16188,9 +16186,7 @@ function contour_surface_webworker() {
                 hide_hourglass();
         }, false);
 
-        //CRWORKER.postMessage('Hello World'); // Send data to our worker.    
         CRWORKER.postMessage({ data: data, level: i, lowerBand: lowerBand, upperBand: upperBand });
-        //CRWORKER.postMessage({'cmd':'do some work'}) ;    
     };
 
     has_contours = true;
