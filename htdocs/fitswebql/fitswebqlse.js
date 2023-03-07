@@ -9489,7 +9489,6 @@ function pv_event(event) {
                 .attr("step", 1)
                 .attr("value", previous_pv_contour_lines);
 
-
             var elem = document.getElementById('pv_contour_lines');
             elem.onblur = validate_pv_contour_lines;
             elem.onmouseleave = validate_pv_contour_lines;
@@ -9510,6 +9509,43 @@ function pv_event(event) {
             else {
                 d3.select('#pv_contour_control').style("display", "none");
             }
+
+            pvContourLines.append("label")
+                .attr("class", "pv-label")
+                .html("&nbsp;&nbsp;scaling:&nbsp; ");
+
+            pvContourLines.append("input")
+                .attr("id", "pv_linear")
+                .attr("type", "radio")
+                .attr("name", "pv_scaling")
+                .attr("value", "linear");
+
+            pvContourLines.append("label")
+                .attr("for", "pv_linear")
+                .attr("class", "pv-label")
+                .html("&nbsp;linear&nbsp; ");
+
+            pvContourLines.append("input")
+                .attr("id", "pv_sqrt")
+                .attr("type", "radio")
+                .attr("name", "pv_scaling")
+                .attr("value", "sqrt");
+
+            pvContourLines.append("label")
+                .attr("for", "pv_sqrt")
+                .attr("class", "pv-label")
+                .html("&nbsp;sqrt&nbsp; ");
+
+            pvContourLines.append("input")
+                .attr("id", "pv_log")
+                .attr("type", "radio")
+                .attr("name", "pv_scaling")
+                .attr("value", "log");
+
+            pvContourLines.append("label")
+                .attr("for", "pv_log")
+                .attr("class", "pv-label")
+                .html("&nbsp;logarithmic&nbsp; ");
 
             div.append("img")
                 .attr("id", "hourglassPVDiagram")
