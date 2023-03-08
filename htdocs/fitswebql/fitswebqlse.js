@@ -5949,7 +5949,13 @@ function submit_corrections() {
 function validate_contour_lines() {
     var value = document.getElementById('contour_lines').valueAsNumber;
 
-    if (isNaN(value) || value <= 0)
+    if (isNaN(value))
+        document.getElementById('contour_lines').value = previous_contour_lines;
+
+    if (value < 2)
+        document.getElementById('contour_lines').value = 2;
+
+    if (value > 10)
         document.getElementById('contour_lines').value = 10;
 
     value = document.getElementById('contour_lines').valueAsNumber;
@@ -13586,6 +13592,9 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
         data.push(row);
     }
 
+    let pmin = min_value;
+    let pmax = max_value;
+
     console.log("MIN_VALUE:", Number.MIN_VALUE, " log(MIN_VALUE):", Math.log(Number.MIN_VALUE));
     console.log("min_value = ", min_value, " max_value = ", max_value);
 
@@ -13593,10 +13602,37 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
     var pv_sqrt = document.getElementById('pv_sqrt');
     var pv_log = document.getElementById('pv_log');
 
-    var contours = parseInt(document.getElementById('pv_contour_lines').value) + 1;
-    var step = (max_value - min_value) / contours;
-    // var zs = d3.range(min_value, max_value + 0.1 * step, step);
-    var zs = d3.range(min_value + step, max_value, step);
+    var contours = parseInt(document.getElementById('pv_contour_lines').value);
+    var zs = new Array(contours);
+
+    if (pv_linear.checked) {
+        var step = (max_value - min_value) / (contours + 1);
+
+        for (var i = 0; i < contours; i++)
+            zs[i] = min_value + (i + 1) * step;
+    } else if (pv_sqrt.checked) {
+        min_value = 0.0;
+        max_value = Math.sqrt(pmax - pmin);
+        var step = (max_value - min_value) / (contours + 1);
+
+        for (var i = 0; i < contours; i++) {
+            zs[i] = min_value + (i + 1) * step;
+            zs[i] = zs[i] * zs[i] + pmin;
+        }
+    } else if (pv_log.checked) {
+        min_value = Math.log(Math.E);
+        max_value = Math.log(pmax - pmin + Math.E);
+        var step = (max_value - min_value) / (contours + 1);
+
+        for (var i = 0; i < contours; i++) {
+            zs[i] = min_value + (i + 1) * step;
+            zs[i] = Math.exp(zs[i]) + pmin - Math.E;
+        }
+    } else {
+        console.log("pv_contour: unknown contour type.");
+        return;
+    }
+
     console.log("zs:", zs);
 
     var completed_levels = 0;
