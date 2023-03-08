@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-07.0";
+    return "JS2023-03-08.0";
 }
 
 function uuidv4() {
@@ -13559,29 +13559,20 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
 
     var pv_pixels = Module.decompressZFP(pv_width, pv_height, frame_pv);
 
-    var data = [];
-
     // get minimum and maximum floating point value
     let min_value = Number.MAX_VALUE
     let max_value = -Number.MAX_VALUE;
 
-    var pv_linear = document.getElementById('pv_linear');
-    var pv_sqrt = document.getElementById('pv_sqrt');
-    var pv_log = document.getElementById('pv_log');
+    var data = [];
+    var z;
 
     for (var h = pv_height - 1; h >= 0; h--) {
         var row = [];
         var pixel = h * pv_width;
 
         for (var w = 0; w < pv_width; w++) {
-            var z = pv_pixels.get(pixel);
+            z = pv_pixels.get(pixel);
             pixel += 1;
-
-            if (pv_linear.checked);//pass-through
-
-            if (pv_sqrt.checked) {
-                z = Math.sqrt(z); // this is not quite right but it's a start (z should be offset by the <min_value>)
-            }
 
             if (z < min_value)
                 min_value = z;
@@ -13595,7 +13586,12 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
         data.push(row);
     }
 
+    console.log("MIN_VALUE:", Number.MIN_VALUE, " log(MIN_VALUE):", Math.log(Number.MIN_VALUE));
     console.log("min_value = ", min_value, " max_value = ", max_value);
+
+    var pv_linear = document.getElementById('pv_linear');
+    var pv_sqrt = document.getElementById('pv_sqrt');
+    var pv_log = document.getElementById('pv_log');
 
     var contours = parseInt(document.getElementById('pv_contour_lines').value) + 1;
     var step = (max_value - min_value) / contours;
