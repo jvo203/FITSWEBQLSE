@@ -14708,29 +14708,26 @@ function show_welcome() {
       .attr("class", "list-group-item list-group-item-success")
       .html('<h4>32-bit floating-point High Dynamic Range images compressed with <a href="https://en.wikipedia.org/wiki/OpenEXR"><em>OpenEXR</em></a></h4>');*/
 
-    ul.append("li")
+    /*ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<iframe id="github-iframe" src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/CHANGELOG.md" style="height:20%;width:100%;border:none;" title="Changelog"></iframe>');
+        .html('<iframe id="github-iframe" src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/CHANGELOG.md" style="height:20%;width:100%;border:none;color:inherit;" title="Changelog"></iframe>');
     //.html('<iframe id="github-iframe" src="https://github.com/jvo203/FITSWEBQLSE" style="height:20%;width:100%;border:none;" title="Releases"></iframe>');
     //.html('<iframe src="https://api.github.com/repos/jvo203/FITSWEBQLSE/releases" style="height:20%;width:100%;border:none;" title="Changelog"></iframe>');
 
-    // var script = document.createElement("script");
-
-    /*script.innerHTML = "fetch('https://physworx.com', {mode:'no-cors' })\
-    .then((response) => {\
-        if (!response.ok) {throw new Error(`HTTP error! Status: ${response.status}`);};\
-        return response.json();})\
-    .then((data) => { console.log(data['content']);});";*/
-
-    //    /*var iframe = document.getElementById('github-iframe'); \
-    //iframe.src = 'data:text/html;base64,' + encodeURIComponent(data['content']);*/ });";
-
-    /*script.innerHTML = "var xmlhttp = new XMLHttpRequest();\
-    var url = 'https://physworx.com';\
-    xmlhttp.open('GET', url, true);\
+    var script = document.createElement("script");
+    script.innerHTML = "var xmlhttp = new XMLHttpRequest();\
+    var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/CHANGELOG.md';\
+    xmlhttp.onreadystatechange = function () {\
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {\
+            var data = xmlhttp.response;\
+            console.log(data);\
+            var iframe = document.getElementById('github-iframe');\
+            iframe.src = 'data:text/html;base64,' + btoa(data);\
+        }; \
+    }; \
+    xmlhttp.open('GET', url, true); \
     xmlhttp.timeout = 0; \
     xmlhttp.send(); ";
-
     document.head.appendChild(script);*/
 
     if (!isLocal) {
