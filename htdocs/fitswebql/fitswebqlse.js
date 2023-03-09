@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-08.0";
+    return "JS2023-03-09.0";
 }
 
 function uuidv4() {
@@ -9446,7 +9446,7 @@ function pv_event(event) {
             var pvDiv = div.append("div")
                 .attr('style', 'position: fixed; left: 10px; top: 10px;');
 
-            var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> contour lines' : '<span class="far fa-square"></span> contour lines';
+            var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> show contours' : '<span class="far fa-square"></span> show contours';
 
             pvDiv.append("span")
                 .attr("id", "displayPVContours")
@@ -9455,7 +9455,7 @@ function pv_event(event) {
                 .on("click", function () {
                     displayPVContours = !displayPVContours;
                     localStorage_write_boolean("displayPVContours", displayPVContours);
-                    var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> contour lines' : '<span class="far fa-square"></span> contour lines';
+                    var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> show contours' : '<span class="far fa-square"></span> show contours';
                     d3.select(this).html(htmlStr);
 
                     if (displayPVContours) {
