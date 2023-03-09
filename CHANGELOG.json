@@ -1,0 +1,171 @@
+{
+    "repositoryName": "FITSWEBQLSE",
+    "provider": "github.com",
+    "owner": "jvo203",
+    "repoUrl": "https://github.com/jvo203/FITSWEBQLSE",
+    "totalTags": 26,
+    "data": [
+        {
+            "tagName": "Unreleased",
+            "description": "",
+            "createdAt": "",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.25...HEAD"
+        },
+        {
+            "tagName": "5.0.25",
+            "description": "Added the ability to change the number of contour level as well as a choice of three contour-level scaling functions to the P-V Diagram:\n* _linear_ (default)\n* _sqrt_\n* _logarithmic_",
+            "createdAt": "2023-03-08",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.24...5.0.25"
+        },
+        {
+            "tagName": "5.0.24",
+            "description": "* added contouring (a _linear_ scale only at the moment) to the P-V Diagram with a corresponding checkbox to enable/disable contouring\n* improved serving the WASM files via the CDN (added the release numbers for better version control)",
+            "createdAt": "2023-03-06",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.23...5.0.24"
+        },
+        {
+            "tagName": "5.0.23",
+            "description": "* fixes the problem with cross-origin reading of CSS rules when the CSS file is being served via the global Content Delivery Network (CDN)\n* this problem prevented proper styling of the UI themes\n* instead of reading / removing CSS rules (prohibited by CORS), the rules needed by the dark theme are now being added dynamically from within JavaScript",
+            "createdAt": "2023-03-02",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.22...5.0.23"
+        },
+        {
+            "tagName": "5.0.22",
+            "description": "* Upon a sub-region selection, if a tone mapping function has changed the image would not have been displayed correctly. This has been fixed by refreshing the tone mapping from within the client-side JavaScript.",
+            "createdAt": "2023-03-02",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.21...5.0.22"
+        },
+        {
+            "tagName": "5.0.21",
+            "description": "* Forces the GitHub release package to contain the latest ```fitswebqlse.js``` version.",
+            "createdAt": "2023-03-01",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.20...5.0.21"
+        },
+        {
+            "tagName": "5.0.20",
+            "description": "* Changed the default colourmap from \"amber\" back to \"green\". \"green\" (default in v4) has been in constant use since ALMAWebQL v2. Users are free to change at any time the colourmap persistent setting from the menu.\n* Serving of fitswebqlse.js and fitswebqlse.css files has been switched over to the global CDN.",
+            "createdAt": "2023-02-27",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.19...5.0.20"
+        },
+        {
+            "tagName": "5.0.19",
+            "description": "* web browser welcome screen: added links to \"User Guide\" sections on the P-V Diagram as well as CSV Export functionality\n* added a short video to the \"User Guide\" showing how to use the new interactive P-V Diagram",
+            "createdAt": "2023-02-27",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.18...5.0.19"
+        },
+        {
+            "tagName": "5.0.18",
+            "description": "* Set the value of ```MG_DATA_SIZE``` to 50 bytes (the original value used by mongoose v7.8) in the Makefile (```MG_DATA_SIZE``` is used internally by the recently upgraded C mongoose library v7.9). This fixes the issue with the P-V Diagram not displaying in the web browser.",
+            "createdAt": "2023-02-24",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.17...5.0.18"
+        },
+        {
+            "tagName": "5.0.17",
+            "description": "* upgraded the internal mongoose C networking library from v7.8 to v7.9\n* client-side P-V Diagram: made it easy to cancel the P-V diagram line selection by moving the mouse outside of the main FITS image\n* server-side: fixed a segmentation fault when the two different FORTRAN median estimation subroutines were given one-element arrays\n* small client-side JavaScript adjustments (the P-V Diagram contouring has been disabled for now until an improved version is created)",
+            "createdAt": "2023-02-22",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.16...5.0.17"
+        },
+        {
+            "tagName": "5.0.16",
+            "description": "* Added support for opening / downloading FITS files with all BITPIX values, with one caveat: ```float64``` values that cannot be coerced into the ```float32``` range will result in an error. The full-range ```float64``` support will be enabled later on with the internal pixel handling switched from ```float32``` to a hybrid ```float32/64``` one\n* Improved parsing of FITS headers during external URL downloads\n* A minor bug fix in handling of incomplete datasetid URLs at JVO",
+            "createdAt": "2023-02-17",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.15...5.0.16"
+        },
+        {
+            "tagName": "5.0.15",
+            "description": "* improved handling of NFS mount failures across the cluster (introduced the ```loading_mtx``` to FITS ```read / load / delete``` subroutines)\n* added ```sleep(1)``` / retries to deal with failed ```curl_easy_perform()``` calls under heavy network load\n* added a ```try lock()``` on the ```loading_mtx``` in the ```notify_root``` FORTRAN subroutine",
+            "createdAt": "2023-02-09",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.14...5.0.15"
+        },
+        {
+            "tagName": "5.0.14",
+            "description": "Re-done opening FITS files from external URLs. The new code parses / processes the FITS files on the fly whilst they are being downloaded, just as the previous FITSWebQL v3 (C/C++) and v4 (Rust) versions used to do.",
+            "createdAt": "2023-02-03",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.13...5.0.14"
+        },
+        {
+            "tagName": "5.0.13",
+            "description": "* fixes premature timeouts for 2D (image-only) FITS datasets when opened in a cluster environment",
+            "createdAt": "2023-01-19",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.12...5.0.13"
+        },
+        {
+            "tagName": "5.0.12",
+            "description": "* added a preliminary cluster-aware external URL support for loading FITS files (a more efficient solution is being worked on)\n* a small bug fix (uninitialized variable)",
+            "createdAt": "2023-01-16",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/5.0.11...5.0.12"
+        },
+        {
+            "tagName": "5.0.11",
+            "description": "* real-time contouring in streaming video frames (when the \"contours\" checkbox is ON)\n* contouring of the P-V Diagram\n* upgraded Google Analytics to version 4",
+            "createdAt": "2023-01-11",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.10...5.0.11"
+        },
+        {
+            "tagName": "v5.0.10",
+            "description": "* a new feature: realtime P-V Diagram",
+            "createdAt": "2022-12-12",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.9...v5.0.10"
+        },
+        {
+            "tagName": "v5.0.9",
+            "description": "Probably (hopefully) the last adjustment targeting macOS Homebrew.",
+            "createdAt": "2022-09-06",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.8...v5.0.9"
+        },
+        {
+            "tagName": "v5.0.8",
+            "description": "More adjustments to accommodate Homebrew: this time passing the location of the Splatalogue SQLite file and the \"htdocs\" directory.",
+            "createdAt": "2022-09-05",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.7...v5.0.8"
+        },
+        {
+            "tagName": "v5.0.7",
+            "description": "* macOS: adjusted the gcc/gfortran compiler path so that a Homebrew formula uses gcc/gfortran from the Homebrew repository instead of Apple's clang, which that does not contain OpenMP support.",
+            "createdAt": "2022-09-02",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.6...v5.0.7"
+        },
+        {
+            "tagName": "v5.0.6",
+            "description": "* macOS: adjusted the Makefile in order to improve setting the Homebrew prefix (a fix needed when compiling from within a Homebrew formulae) \n* added a ```MAGIC_NUMBER``` to the binary cache file in order to handle automatically any cache file format changes (the cache directory content will now get invalidated automatically)",
+            "createdAt": "2022-09-02",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.5...v5.0.6"
+        },
+        {
+            "tagName": "v5.0.5",
+            "description": "* Another binary cache disk format change: removed the redundant ```item%uri``` field from ```{save, load}_dataset()```. ```item%uri``` is set to a new value each time upon opening a FITS file.\n* Added a staging step ```NFS-->glusterfs``` to the preload fitsDB.jl Julia program. ",
+            "createdAt": "2022-09-01",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.4...v5.0.5"
+        },
+        {
+            "tagName": "v5.0.4",
+            "description": "* Switched over to the Content Delivery Network (CDN) for the WASM files.\n* Added the missed ```create_root_path()``` functionality for the server edition.\n* The binary cache disk format has changed: the storage switched from ```real(kind=4)``` to ```real(kind=8)``` for the floating-point fields read from the FITS header. This was done in order to improve the precision of frequency/velocity calculations.",
+            "createdAt": "2022-08-31",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.3...v5.0.4"
+        },
+        {
+            "tagName": "v5.0.3",
+            "description": "* recompiled WebAssembly with the latest emscripten\n* switched to proper versioning with specific dates instead of XX.X\n* a minor bug fix",
+            "createdAt": "2022-08-30",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.2...v5.0.3"
+        },
+        {
+            "tagName": "v5.0.2",
+            "description": "* replaced fortran-unix pthread bindings by custom FORTRAN bindings (via a custom C bridge) to POSIX threads that work properly on macOS as well as Linux\n* added multi-threaded \"tileLanczos\" and \"tileSuper\" image downsizing functions using Intel IPP (Linux only, macOS uses Apple Accelerate instead)",
+            "createdAt": "2022-08-25",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.1...v5.0.2"
+        },
+        {
+            "tagName": "v5.0.1",
+            "description": "* Speed improvements in image downsizing.\n* Switched to Apple Accelerate vImage on Intel macOS too (not just on Apple Silicon).\n* Improved support for large-resolution FITS images / cubes (for example ```width = 30000, height = 20000```).",
+            "createdAt": "2022-08-24",
+            "compareUrl": "https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.0...v5.0.1"
+        },
+        {
+            "tagName": "v5.0.0",
+            "description": "* optimised native Apple Silicon support (using macOS Accelerate vImage for downsizing images)\n* for now only a single-dataset view is supported",
+            "createdAt": "2022-08-17",
+            "compareUrl": null
+        }
+    ]
+}
