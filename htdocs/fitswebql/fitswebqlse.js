@@ -13595,7 +13595,6 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
     let pmin = min_value;
     let pmax = max_value;
 
-    console.log("MIN_VALUE:", Number.MIN_VALUE, " log(MIN_VALUE):", Math.log(Number.MIN_VALUE));
     console.log("min_value = ", min_value, " max_value = ", max_value);
 
     var pv_linear = document.getElementById('pv_linear');
