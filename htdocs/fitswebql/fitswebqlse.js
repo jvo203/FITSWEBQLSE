@@ -14728,7 +14728,16 @@ function show_welcome() {
     xmlhttp.open('GET', url, true); \
     xmlhttp.timeout = 0; \
     xmlhttp.send(); ";
-    document.head.appendChild(script);*/
+    document.head.appendChild(script);* /
+
+    /*iframe.style.background = 'white';
+    iframe.contentWindow.document.body.style.backgroundColor = 'white';
+    function updateIframeBackground(iframeId) {
+    var x = document.getElementById(iframeId);
+    var y = (x.contentWindow || x.contentDocument);
+    if (y.document) y = y.document;
+    y.body.style.backgroundColor = "#2D2D2D";
+    }*/
 
     if (!isLocal) {
         ul.append("li")
