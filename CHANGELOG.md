@@ -131,30 +131,3 @@ More adjustments to accommodate Homebrew: this time passing the location of the 
 
 * optimised native Apple Silicon support (using macOS Accelerate vImage for downsizing images)
 * for now only a single-dataset view is supported
-
-[Unreleased]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.25...HEAD
-[5.0.25]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.24...5.0.25
-[5.0.24]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.23...5.0.24
-[5.0.23]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.22...5.0.23
-[5.0.22]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.21...5.0.22
-[5.0.21]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.20...5.0.21
-[5.0.20]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.19...5.0.20
-[5.0.19]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.18...5.0.19
-[5.0.18]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.17...5.0.18
-[5.0.17]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.16...5.0.17
-[5.0.16]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.15...5.0.16
-[5.0.15]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.14...5.0.15
-[5.0.14]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.13...5.0.14
-[5.0.13]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.12...5.0.13
-[5.0.12]: https://github.com/jvo203/FITSWEBQLSE/compare/5.0.11...5.0.12
-[5.0.11]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.10...5.0.11
-[v5.0.10]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.9...v5.0.10
-[v5.0.9]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.8...v5.0.9
-[v5.0.8]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.7...v5.0.8
-[v5.0.7]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.6...v5.0.7
-[v5.0.6]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.5...v5.0.6
-[v5.0.5]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.4...v5.0.5
-[v5.0.4]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.3...v5.0.4
-[v5.0.3]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.2...v5.0.3
-[v5.0.2]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.1...v5.0.2
-[v5.0.1]: https://github.com/jvo203/FITSWEBQLSE/compare/v5.0.0...v5.0.1
