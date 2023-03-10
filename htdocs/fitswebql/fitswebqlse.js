@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-10.0";
+    return "JS2023-03-10.1";
 }
 
 function uuidv4() {
@@ -14726,8 +14726,8 @@ function show_welcome() {
 
     // a fallback message in case the changelog cannot be loaded
     html += '<script type="text/markdown"># **The** [CHANGELOG](https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md) could not be loaded.</script>';
-
     html += '</zero-md></body></html>';
+
     var iframe = document.getElementById('github-iframe');
     iframe.src = 'data:text/html;base64,' + window.btoa(html);
 
