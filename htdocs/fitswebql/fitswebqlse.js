@@ -14741,8 +14741,6 @@ function show_welcome() {
     bodyDiv.append("p")
         .html('For optimum performance we recommend  <a href="https://www.apple.com/safari/" style="color:' + textColour + '"><b>Apple Safari</b></a> or <a href="https://www.google.com/chrome/index.html" style="color:' + textColour + '"><b>Google Chrome</b></a>.');
 
-    //bodyDiv.append("hr");    
-
     var footer = contentDiv.append("div")
         .attr("class", "modal-footer d-flex justify-content-around");
 
