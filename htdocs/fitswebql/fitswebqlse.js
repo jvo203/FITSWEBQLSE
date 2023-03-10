@@ -14714,7 +14714,7 @@ function show_welcome() {
 
     let html = '<!DOCTYPE html><html>';
     html += '<head><script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script></head>';
-    html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/CHANGELOG.md">';
+    html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md">';
 
     if (theme == 'bright') {
         html += '<template><style>* { color: gray; font-size: small;}</style></template>';
