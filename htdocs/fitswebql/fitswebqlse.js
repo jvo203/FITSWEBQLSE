@@ -14710,14 +14710,18 @@ function show_welcome() {
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<iframe id="github-iframe" src="" style="height:20%;width:100%;border:none;color:inherit;" title="Changelog"></iframe>');
+        .html('<iframe id="github-iframe" src="" style="height:15%;width:100%;border:none;color:inherit;" title="Changelog"></iframe>');
 
     let html = '<!DOCTYPE html><html>';
     html += '<head><script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script></head>';
     html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/CHANGELOG.md">';
 
+    if (theme == 'bright') {
+        html += '<template><style>* { color: gray; font-size: small;}</style></template>';
+    }
+
     if (theme == 'dark') {
-        html += '<template><style>* { color: lightgray; }</style></template>';
+        html += '<template><style>* { color: lightgray; font-size: small;}</style></template>';
     }
 
     html += '</zero-md></body></html>';
