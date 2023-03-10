@@ -14710,11 +14710,11 @@ function show_welcome() {
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<iframe id="github-iframe" src="" style="width:100%;height:10vh;border:none;color:inherit;" title="Changelog"></iframe>');
+        .html('<iframe id="github-iframe" src="" style="width:100%;height:15vh;border:none;color:inherit;" title="Changelog"></iframe>');
 
     let html = '<!DOCTYPE html><html>';
     html += '<head><script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script></head>';
-    html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md">';
+    html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/CHANGELOG.md">';
 
     if (theme == 'bright') {
         html += '<template><style>* { color: gray; font-size: small;}</style></template>';
