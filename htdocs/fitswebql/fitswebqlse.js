@@ -14721,7 +14721,7 @@ function show_welcome() {
     }
 
     if (theme == 'dark') {
-        html += '<template><style>* { color: lightgray;font-size:small;font-family:Helvetica;}</style></template>';
+        html += '<template><style>* { color:lightgray;font-size:small;font-family:Helvetica;}</style></template>';
     }
 
     // a fallback message in case the changelog cannot be loaded
