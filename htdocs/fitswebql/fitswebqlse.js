@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-10.1";
+    return "JS2023-03-10.2";
 }
 
 function uuidv4() {
@@ -14717,11 +14717,11 @@ function show_welcome() {
     html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md">';
 
     if (theme == 'bright') {
-        html += '<template><style>* { color: gray; font-size: small;}</style></template>';
+        html += '<template><style>* { color:gray;font-size:small;font-family: Helvetica;}</style></template>';
     }
 
     if (theme == 'dark') {
-        html += '<template><style>* { color: lightgray; font-size: small;}</style></template>';
+        html += '<template><style>* { color: lightgray;font-size:small;font-family:Helvetica;}</style></template>';
     }
 
     // a fallback message in case the changelog cannot be loaded
