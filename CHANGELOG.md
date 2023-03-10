@@ -1,3 +1,7 @@
+## [5.0.27] - 2023-03-10
+
+* adjusted the font family used in the welcome screen _CHANGELOG_
+
 ## [5.0.26] - 2023-03-10
 
 * added a _CHANGELOG_ to the web browser welcome screen
