@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-09.1";
+    return "JS2023-03-10.0";
 }
 
 function uuidv4() {
@@ -14708,36 +14708,15 @@ function show_welcome() {
       .attr("class", "list-group-item list-group-item-success")
       .html('<h4>32-bit floating-point High Dynamic Range images compressed with <a href="https://en.wikipedia.org/wiki/OpenEXR"><em>OpenEXR</em></a></h4>');*/
 
-    /*ul.append("li")
+    ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
-        .html('<iframe id="github-iframe" src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/CHANGELOG.md" style="height:20%;width:100%;border:none;color:inherit;" title="Changelog"></iframe>');
-    //.html('<iframe id="github-iframe" src="https://github.com/jvo203/FITSWEBQLSE" style="height:20%;width:100%;border:none;" title="Releases"></iframe>');
-    //.html('<iframe src="https://api.github.com/repos/jvo203/FITSWEBQLSE/releases" style="height:20%;width:100%;border:none;" title="Changelog"></iframe>');
+        .html('<iframe id="github-iframe" src="" style="height:20%;width:100%;border:none;color:inherit;" title="Changelog"></iframe>');
 
-    var script = document.createElement("script");
-    script.innerHTML = "var xmlhttp = new XMLHttpRequest();\
-    var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/CHANGELOG.md';\
-    xmlhttp.onreadystatechange = function () {\
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {\
-            var data = xmlhttp.response;\
-            console.log(data);\
-            var iframe = document.getElementById('github-iframe');\
-            iframe.src = 'data:text/html;base64,' + btoa(data);\
-        }; \
-    }; \
-    xmlhttp.open('GET', url, true); \
-    xmlhttp.timeout = 0; \
-    xmlhttp.send(); ";
-    document.head.appendChild(script);* /
-
-    /*iframe.style.background = 'white';
-    iframe.contentWindow.document.body.style.backgroundColor = 'white';
-    function updateIframeBackground(iframeId) {
-    var x = document.getElementById(iframeId);
-    var y = (x.contentWindow || x.contentDocument);
-    if (y.document) y = y.document;
-    y.body.style.backgroundColor = "#2D2D2D";
-    }*/
+    let html = '<!DOCTYPE html><html>';
+    html += '<head><script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script></head>';
+    html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/CHANGELOG.md"></zero-md></body></html>';
+    var iframe = document.getElementById('github-iframe');
+    iframe.src = 'data:text/html;base64,' + window.btoa(html);
 
     if (!isLocal) {
         ul.append("li")
