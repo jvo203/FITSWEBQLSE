@@ -1,3 +1,7 @@
+## [5.0.26] - 2023-03-10
+
+* added a _CHANGELOG_ to the web browser welcome screen
+
 ## [5.0.25] - 2023-03-08
 
 Added the ability to change the number of contour level as well as a choice of three contour-level scaling functions to the P-V Diagram:
