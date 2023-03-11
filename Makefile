@@ -20,9 +20,11 @@ endif
 
 # detect the OS
 UNAME_S := $(shell uname -s)
+# UNAME_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 
 # detect the CPU architecture (ARM64 or x86-64)
 UNAME_M := $(shell uname -m)
+# UNAME_M := $(shell sh -c 'uname -m 2>/dev/null || echo not')
 
 # the macOS Darwin target is handled further down the line
 ifeq ($(UNAME_S),Linux)
