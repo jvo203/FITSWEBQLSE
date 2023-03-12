@@ -226,7 +226,11 @@ ifeq ($(CC),gcc)
 	endif
 
 	# GCC FORTRAN runtime
-	LIBS += -lgfortran -lm
+	LIBS +=  -lgfortran -lm
+
+	# try the zig compiler
+	# CC = zig cc	
+	# LIBS += -L/usr/lib64 -lomp
 endif
 
 # include dependencies (all .d files)
