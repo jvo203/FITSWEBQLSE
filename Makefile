@@ -230,7 +230,7 @@ ifeq ($(CC),gcc)
 
 	# try the zig compiler
 	# CC = zig cc	
-	# LIBS += -L/usr/lib64 -lomp
+	# LIBS += -lomp
 endif
 
 # include dependencies (all .d files)
