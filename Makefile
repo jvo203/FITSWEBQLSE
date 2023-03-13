@@ -199,7 +199,7 @@ ifeq ($(UNAME_S),Darwin)
 
 	# try clang for a change
 	CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
-	CFLAGS := -Xpreprocessor -Ofast -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions
+	CFLAGS := -Xpreprocessor -Ofast -fopenmp=libomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions
 	INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
 	LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp		
 
