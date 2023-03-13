@@ -7982,7 +7982,7 @@ contains
          end if
 
          ! downsize {pixels, mask} into {dst_pixels, dst_mask}
-         !$omp parallel num_threads(2)
+         !$omp parallel default(shared) num_threads(2)
          !$omp single
          !$omp task
          call resizeNearest(c_loc(pixels), width, height,&
