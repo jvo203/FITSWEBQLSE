@@ -178,7 +178,7 @@ ifeq ($(UNAME_S),Darwin)
 
 	# CC = zig cc
 	# INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
-	# LIBS += -L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp
+	# LIBS += -L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp	
 
 	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-12
 	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-12
@@ -196,6 +196,12 @@ ifeq ($(UNAME_S),Darwin)
 	IPP =
 	MKL =
 	#endif
+
+	# try clang for a change
+	# CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
+	# CFLAGS := -Xpreprocessor -Ofast -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize
+	# INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
+	# LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp		
 
 	# try Intel compilers for a change! ... linking problems ...
 	# CC = icc
