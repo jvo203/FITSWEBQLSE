@@ -60,14 +60,24 @@ extern void resizeSuper(float *restrict pSrc, int srcWidth, int srcHeight, float
 {
     int num_threads, max_threads;
 
+    printf("resizeNearest: srcWidth = %d, srcHeight = %d, dstWidth = %d, dstHeight = %d\n", srcWidth, srcHeight, dstWidth, dstHeight);
+
     const int x_ratio = (int)((srcWidth << 16) / dstWidth) + 1;
     const int y_ratio = (int)((srcHeight << 16) / dstHeight) + 1;
+
+    printf("resizeNearest: x_ratio = %d, y_ratio = %d\n", x_ratio, y_ratio);
 
     max_threads = get_physical_cores();
 
     // restrict the number of threads
     // take into account the fact that there are other parallel 'resizeNearest' calls
     num_threads = (max_threads >= 4) ? 2 : 1;
+
+    printf("resizeNearest: num_threads = %d, max_threads = %d\n", num_threads, max_threads);
+
+    const size_t srcSize = srcWidth * srcHeight;
+    const size_t dstSize = dstWidth * dstHeight;
+    printf("resizeNearest: srcSize = %zu, dstSize = %zu\n", srcSize, dstSize);
 
 #pragma omp parallel for shared(x_ratio, y_ratio) num_threads(num_threads)
     for (int i = 0; i < dstHeight; i++)
@@ -84,6 +94,12 @@ extern void resizeSuper(float *restrict pSrc, int srcWidth, int srcHeight, float
         {
             int x2 = jdx >> 16;
             jdx += x_ratio;
+
+            if (offset_src + x2 >= srcSize)
+                printf("resizeNearest: offset_src + x2 = %zu >= srcSize = %zu\n", offset_src + x2, srcSize);
+
+            if (offset_dst + j >= dstSize)
+                printf("resizeNearest: offset_dst + j = %zu >= dstSize = %zu\n", offset_dst + j, dstSize);
 
             pDest[offset_dst + j] = pSrc[offset_src + x2];
         }
