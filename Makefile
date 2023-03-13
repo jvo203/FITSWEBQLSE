@@ -185,7 +185,7 @@ ifeq ($(UNAME_S),Darwin)
 	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
 	# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
-	CFLAGS := $(FLAGS) -flax-vector-conversions		
+	CFLAGS := $(FLAGS) -flax-vector-conversions
 	FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
 
 	# GCC FORTRAN runtime
@@ -198,10 +198,10 @@ ifeq ($(UNAME_S),Darwin)
 	#endif
 
 	# try clang for a change
-	# CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
-	# CFLAGS := -Xpreprocessor -Ofast -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize
-	# INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
-	# LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp		
+	CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
+	CFLAGS := -Xpreprocessor -Ofast -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions
+	INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
+	LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp		
 
 	# try Intel compilers for a change! ... linking problems ...
 	# CC = icc
