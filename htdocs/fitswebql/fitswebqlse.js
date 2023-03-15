@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-15.2";
+    return "JS2023-03-15.3";
 }
 
 function uuidv4() {
@@ -9562,6 +9562,7 @@ function pv_event(event) {
             d3.select("#zoom").attr("opacity", 0.0);
             d3.select("#zoomCross").attr("opacity", 0.0);
 
+            pv_loop = -1;
             const res = submit_pv_line(va_count, x1, y1, x2, y2);
             console.log(res);
 
@@ -9706,6 +9707,12 @@ function pv_event(event) {
                     .attr("pointer-events", "auto")
                     .style('cursor', 'move')
                     .call(d3.drag()
+                        .on("start", function (event) {
+                            event.preventDefault = true;
+
+                            // start the pv event loop
+                            pv_loop = setTimeout(loop_pv_line, pv_latency, va_count);
+                        })
                         .on("drag", function (event) {
                             event.preventDefault = true;
 
@@ -9787,10 +9794,13 @@ function pv_event(event) {
                                     .attr("y2", _y2)
                                     .attr("opacity", 1.0);
                             }
-
-                            resubmit_pv_line(va_count);
                         })
-                        .on("end", dropLine))
+                        .on("end", function (event) {
+                            event.preventDefault = true;
+
+                            clearTimeout(pv_loop);
+                            resubmit_pv_line(va_count);
+                        }))
                     .attr("opacity", 1.0);
 
                 // add a circle in the middle of the line
@@ -9805,8 +9815,19 @@ function pv_event(event) {
                     .attr("pointer-events", "auto")
                     .style('cursor', 'move')
                     .call(d3.drag()
+                        .on("start", function (event) {
+                            event.preventDefault = true;
+
+                            // start the pv event loop
+                            pv_loop = setTimeout(loop_pv_line, pv_latency, va_count);
+                        })
                         .on("drag", dragMid)
-                        .on("end", dropLine))
+                        .on("end", function (event) {
+                            event.preventDefault = true;
+
+                            clearTimeout(pv_loop);
+                            resubmit_pv_line(va_count);
+                        }))
                     .attr("opacity", 1.0);
 
                 // add an ending point 'B'
@@ -9834,6 +9855,12 @@ function pv_event(event) {
                     .attr("pointer-events", "auto")
                     .style('cursor', 'move')
                     .call(d3.drag()
+                        .on("start", function (event) {
+                            event.preventDefault = true;
+
+                            // start the pv event loop
+                            pv_loop = setTimeout(loop_pv_line, pv_latency, va_count);
+                        })
                         .on("drag", function (event) {
                             event.preventDefault = true;
 
@@ -9915,10 +9942,13 @@ function pv_event(event) {
                                     .attr("y2", _y2)
                                     .attr("opacity", 1.0);
                             }
-
-                            resubmit_pv_line(va_count);
                         })
-                        .on("end", dropLine))
+                        .on("end", function (event) {
+                            event.preventDefault = true;
+
+                            clearTimeout(pv_loop);
+                            resubmit_pv_line(va_count);
+                        }))
                     .attr("opacity", 1.0);
             }
 
@@ -10044,23 +10074,6 @@ function dragMid(event) {
             .attr("y2", _y2)
             .attr("opacity", 1.0);
     }
-
-    resubmit_pv_line(va_count);
-}
-
-function dropLine(event) {
-    console.log("dropLine");
-
-    /*d3.select("#PVDiagram")
-      .append("img")
-      .attr("id", "hourglassPVDiagram")
-      .attr("class", "hourglass")
-      .attr("src", "https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/loading.gif")
-      .attr("alt", "hourglass")
-      .style("width", 200)
-      .style("height", 200);*/
-
-    resubmit_pv_line(va_count);
 }
 
 function fits_subregion_start(event) {
@@ -13788,6 +13801,11 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
         x2: (line_x2 - offsetx) / d3.select("#image_rectangle").attr("width"),
         y2: (line_y2 - offsety) / d3.select("#image_rectangle").attr("height")
     }
+}
+
+function loop_pv_line(index) {
+    resubmit_pv_line(index);
+    pv_loop = setTimeout(loop_pv_line, pv_latency, va_count);
 }
 
 function resubmit_pv_line(index) {
