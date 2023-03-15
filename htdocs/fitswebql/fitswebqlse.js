@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-15.0";
+    return "JS2023-03-15.1";
 }
 
 function uuidv4() {
@@ -9478,6 +9478,7 @@ function pv_event(event) {
                 .attr("id", "pv_contour_lines")
                 .attr("type", "number")
                 .style("width", "3em")
+                .style("color", "black")
                 .attr("min", 2)
                 .attr("step", 1)
                 .attr("value", previous_pv_contour_lines);
