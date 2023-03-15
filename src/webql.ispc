@@ -151,7 +151,7 @@ export uniform float array_std(uniform float pixels[], uniform float pmean, unif
     return (float) sqrt(psum / (uniform double) npixels) ;
 }
 
-export void array_erf(uniform float pixels[], uniform float pmean, uniform float pstd, uniform int64 npixels)
+export void standardise_array(uniform float pixels[], uniform float pmean, uniform float pstd, uniform int64 npixels)
 {
   foreach(i=0 ... npixels)
     {      
@@ -165,7 +165,8 @@ export void array_erf(uniform float pixels[], uniform float pmean, uniform float
 
       pixels[i] = 0.5f * (1.0f + x);*/
 
-      pixels[i] = (pixels[i] - pmean) / pstd; // non-scaled ERF      
+    // standardised normal distribution
+      pixels[i] = (pixels[i] - pmean) / pstd;
     }
 }
 

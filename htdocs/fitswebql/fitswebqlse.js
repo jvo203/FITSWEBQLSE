@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-10.2";
+    return "JS2023-03-15.0";
 }
 
 function uuidv4() {
@@ -1042,42 +1042,29 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .range(math_rgb);
 
     // replace the endings of the colour scale with the actual values
-    let p1 = (pmin - pmean) / (pstd * Math.sqrt(2));
-    p1 = (math.erf(p1) + 1) / 2;
-    console.log("lower: ", pmin, p1);
-    math_x[0] = Math.max(p1, 0.001);
+    let p1 = (pmin - pmean) / pstd;
+    p1 = p1 / 6.0 + 0.5;
+    console.log("lower (pmin,p1): ", pmin, p1);
+    math_x[0] = Math.max(p1, 0.0);
 
-    let p2 = (pmax - pmean) / (pstd * Math.sqrt(2));
-    p2 = (math.erf(p2) + 1) / 2;
-    console.log("upper: ", pmax, p2);
-    math_x[math_x.length - 1] = Math.min(p2, 0.999);
+    let p2 = (pmax - pmean) / pstd;
+    p2 = p2 / 6.0 + 0.5;
+    console.log("upper (pmax,p2): ", pmax, p2);
+    math_x[math_x.length - 1] = Math.min(p2, 1.0);
 
-    // adjust the endings of the colour scale to avoid infinities
-    //math_x[0] = (math_x[0] + math_x[1]) / 2;
-    //math_x[0] = 0.001;
+    // adjust the endings of the colour scale to avoid infinities    
     math_rgb[0] = wolfram(math_x[0]);
-    console.log("lower: ", pmin, math_x[0], math_rgb[0]);
+    console.log("lower (Wolfram RGB): ", pmin, math_x[0], math_rgb[0]);
 
-    //math_x[math_x.length - 1] = (math_x[math_x.length - 2] + math_x[math_x.length - 1]) / 2;
-    //math_x[math_x.length - 1] = 0.999;
     math_rgb[math_rgb.length - 1] = wolfram(math_x[math_x.length - 1]);
-    console.log("upper: ", pmax, math_x[math_x.length - 1], math_rgb[math_rgb.length - 1]);
+    console.log("upper (Wolfram RGB): ", pmax, math_x[math_x.length - 1], math_rgb[math_rgb.length - 1]);
 
-    // invert the ERF scale
+    // invert the scale
+    console.log("math_x: ", math_x);
     for (let i = 0; i < math_x.length; i++) {
-        // convert from (0, 1) range to the (pmin, pmax) range		
-
-        // console.log("i=", i);
-        // console.log(math_x[i]);
-
-        math_x[i] = 2 * math_x[i] - 1;
-        // console.log(math_x[i]);
-
-        math_x[i] = erfinv(math_x[i]);
-        // console.log(math_x[i]);
-
-        math_x[i] = math_x[i] * pstd * Math.sqrt(2) + pmean;
-        // console.log(math_x[i]);
+        // convert from (0, 1) range to the underlying (truncated) range (pmin, pmax)
+        math_x[i] = 6.0 * (math_x[i] - 0.5);
+        math_x[i] = math_x[i] * pstd + pmean;
     }
 
     console.log("math_x: ", math_x);

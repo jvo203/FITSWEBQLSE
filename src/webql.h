@@ -41,7 +41,6 @@ struct fixed_block_t {
 #if defined(__cplusplus) && (! defined(__ISPC_NO_EXTERN_C) || !__ISPC_NO_EXTERN_C )
 extern "C" {
 #endif // __cplusplus
-    extern void array_erf(float * pixels, float pmean, float pstd, int64_t npixels);
     extern void array_stat(float * pixels, float * pmin, float * pmax, float * pmean, int64_t npixels);
     extern float array_std(float * pixels, float pmean, int64_t npixels);
     extern float brightness_ratio(float * pixels, float black, float sensitivity, int32_t offset, int32_t total_size);
@@ -73,6 +72,7 @@ extern "C" {
     extern void make_video_frame_fixed_square(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float black, float sensitivity);
     extern void make_video_frame_fixed_square_threaded(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float black, float sensitivity, int32_t start, int32_t work_size);
     extern void resizeNearestSIMD(uint8_t * src, int32_t srcWidth, int32_t srcHeight, uint8_t * dst, int32_t dstWidth, int32_t dstHeight);
+    extern void standardise_array(float * pixels, float pmean, float pstd, int64_t npixels);
     extern float viewport_image_spectrum_circle(struct fixed_block_t * compressed, int32_t width, int32_t height, float pmin, float pmax, float * view_pixels, bool * view_mask, int32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, int32_t horizontal, int32_t vertical, float cx, float cy, float r2, bool average, double cdelt3);
     extern float viewport_image_spectrum_rect(struct fixed_block_t * compressed, int32_t width, int32_t height, float pmin, float pmax, float * view_pixels, bool * view_mask, int32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, int32_t horizontal, int32_t vertical, bool average, double cdelt3, float median, float * sumP, int64_t * countP, float * sumN, int64_t * countN);
     extern float viewport_spectrum_circle(struct fixed_block_t * compressed, int32_t width, int32_t height, float pmin, float pmax, int32_t x1, int32_t x2, int32_t y1, int32_t y2, float cx, float cy, float r2, bool average, double cdelt3);

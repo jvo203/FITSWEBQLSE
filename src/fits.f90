@@ -672,8 +672,8 @@ module fits
 
       end subroutine array_stat
 
-      ! export void array_erf(uniform float pixels[], uniform float pmean, uniform float pstd, uniform int64 npixels)
-      subroutine array_erf(pixels, pmean, pstd, npixels) BIND(C, name='array_erf')
+      ! export void standardise_array(uniform float pixels[], uniform float pmean, uniform float pstd, uniform int64 npixels)
+      subroutine standardise_array(pixels, pmean, pstd, npixels) BIND(C, name='standardise_array')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -681,7 +681,7 @@ module fits
          real(c_float), value, intent(in) :: pmean, pstd
          integer(c_int64_t), value, intent(in) :: npixels
 
-      end subroutine array_erf
+      end subroutine standardise_array
 
       ! export uniform float array_std(uniform float pixels[], uniform float pmean, uniform int64 npixels)
       real(c_float) function array_std(pixels, pmean, npixels) BIND(C, name='array_std')
@@ -8346,12 +8346,12 @@ contains
       npixels = img_width*img_height
       call array_stat(c_loc(pixels), pmin, pmax, pmean, npixels)
       pstd = array_std(c_loc(pixels), pmean, npixels)
-      call array_erf(c_loc(pixels), pmean, pstd, npixels)
+      call standardise_array(c_loc(pixels), pmean, pstd, npixels)
 
       ! end the timer
       t2 = omp_get_wtime()
 
-      print *, 'P-V ERF  min:', pmin, 'max:', pmax, 'mean:', pmean, 'std:', pstd, 'elapsed time:', 1000*(t2 - t1), '[ms]'
+      print *, 'P-V min:', pmin, 'max:', pmax, 'mean:', pmean, 'std:', pstd, 'elapsed time:', 1000*(t2 - t1), '[ms]'
 
       ! free the decompression cache
       deallocate (x)

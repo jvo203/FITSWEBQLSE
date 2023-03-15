@@ -1,3 +1,8 @@
+## [5.0.28] - 2023-03-15
+
+* improved the colourmap in the P-V Diagram (removed the _erf()_ scaling step)
+* pixel values are now simply standardised / capped to the range [-3,3] prior to scaling to [0,1] for the colourmap
+
 ## [5.0.27] - 2023-03-10
 
 * adjusted the font family used in the welcome screen _CHANGELOG_
