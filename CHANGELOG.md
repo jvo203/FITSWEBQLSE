@@ -2,6 +2,7 @@
 
 * improved the colourmap in the P-V Diagram (removed the _erf()_ scaling step)
 * pixel values are now simply standardised / capped to the range [-3,3] prior to scaling to [0,1] for the colourmap
+* adjusted the font colour in the P-V Diagram _#contour levels_ input field
 
 ## [5.0.27] - 2023-03-10
 
