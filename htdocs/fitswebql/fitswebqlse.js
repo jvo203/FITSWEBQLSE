@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-15.1";
+    return "JS2023-03-15.2";
 }
 
 function uuidv4() {
@@ -3096,7 +3096,7 @@ function open_websocket_connection(_datasetId, index) {
                     var dv = new DataView(received_msg);
 
                     latency = performance.now() - dv.getFloat32(0, endianness);
-                    //console.log("[ws] latency = " + latency.toFixed(1) + " [ms]") ;					
+                    // console.log("[ws] latency = " + latency.toFixed(1) + " [ms]");
                     recv_seq_id = dv.getUint32(4, endianness);
                     var type = dv.getUint32(8, endianness);
 
@@ -3588,6 +3588,8 @@ function open_websocket_connection(_datasetId, index) {
                             .attr("x2", 0)
                             .attr("y2", 0)
                             .attr("opacity", 0.0);
+
+                        pv_latency = latency;
 
                         var offset = 12;
                         var str_length = dv.getUint32(offset, endianness);
