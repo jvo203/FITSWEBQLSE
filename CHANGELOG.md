@@ -1,3 +1,7 @@
+## [5.0.29] - 2023-03-15
+
+* re-worked the client-side JavaScript P-V Diagram event loop to reduce the load on the server
+
 ## [5.0.28] - 2023-03-15
 
 * improved the colourmap in the P-V Diagram (removed the _erf()_ scaling step)
