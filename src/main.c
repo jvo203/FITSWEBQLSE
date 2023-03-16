@@ -39,7 +39,7 @@ static void *jemalloc_daemon(void *arg);
 
 #if !defined(__APPLE__) || !defined(__MACH__)
 #include <ipp.h>
-//#include <ippcore_tl.h>
+// #include <ippcore_tl.h>
 #endif
 
 #include <curl/curl.h>
@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
     signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
 
-    start_http(options.http_port);
+    start_http();
 
     // a blocking mongoose websocket server
     start_ws();
