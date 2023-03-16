@@ -5926,7 +5926,7 @@ void *fetch_pv_diagram(void *ptr)
                     printf("[C] /pv/<diagram>::OK.\n");
 
                     const float *restrict pv = (float *)&(chunks[idx].memory[0]);
-#pragma simd
+#pragma GCC ivdep
                     for (size_t i = 0; i < npixels; i++)
                         req->pv[i] += pv[i];
 
@@ -6078,7 +6078,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
 
                     const float *restrict spectrum = (float *)&(chunks[idx].memory[offset]);
 
-#pragma simd
+#pragma GCC ivdep
                     for (int i = 0; i < req->length; i++)
                         req->spectrum[i] += spectrum[i];
 
@@ -6098,7 +6098,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
                     offset += mask_size;
 
                     // gather pixels / mask
-#pragma simd
+#pragma GCC ivdep
                     for (size_t i = 0; i < plane_size; i++)
                     {
                         req->pixels[i] += pixels[i];
@@ -6269,7 +6269,7 @@ void *fetch_image(void *ptr)
                     const bool *mask = (bool *)&(chunks[idx].memory[sizeof(float) * plane_size]);
 
                     // gather pixels / mask
-#pragma simd
+#pragma GCC ivdep
                     for (size_t i = 0; i < plane_size; i++)
                     {
                         req->pixels[i] += pixels[i];
