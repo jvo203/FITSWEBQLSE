@@ -1109,6 +1109,7 @@ static void *handle_url_download(void *arg)
             stream.running_size = 0;
             stream.cursor = 0;
             stream.total_size = 0;
+            stream.compression = fits_compression_unknown;
 
             // header
             stream.hdrEnd = false;

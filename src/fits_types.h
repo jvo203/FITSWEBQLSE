@@ -5,6 +5,17 @@
 #define FITS_CHUNK_LENGTH 2880
 #define FITS_LINE_LENGTH 80
 
+// FITS compression file types enum
+enum fits_compression
+{
+    fits_compression_none,
+    fits_compression_compress,
+    fits_compression_zip,
+    fits_compression_gzip,
+    fits_compression_bzip2,
+    fits_compression_unknown
+};
+
 struct FITSDownloadStream
 {
     FILE *fp;
@@ -16,6 +27,7 @@ struct FITSDownloadStream
     size_t running_size;
     size_t cursor;
     size_t total_size;
+    enum fits_compression compression;
 
     // a bare-bones FITS header
     bool hdrEnd;
