@@ -176,10 +176,6 @@ ifeq ($(UNAME_S),Darwin)
 	INC += -I${HOMEBREW_PREFIX}/opt/libpq/include
 	LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib
 
-	# CC = zig cc
-	# INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
-	# LIBS += -L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp	
-
 	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-12
 	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-12
 	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
@@ -202,6 +198,10 @@ ifeq ($(UNAME_S),Darwin)
 	#CFLAGS := -Xpreprocessor -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions
 	## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
 	## LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp	
+
+	# CC = zig cc
+	# INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
+	# LIBS += -L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp	
 
 	# try Intel compilers for a change! ... linking problems ...
 	# CC = icc
