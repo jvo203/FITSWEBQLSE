@@ -919,19 +919,17 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     memcpy(stream->buffer + stream->running_size, ptr, realsize);
     stream->running_size += realsize;
 
-    // check the compression type
+    // infer the compression type
     if ((stream->compression == fits_compression_unknown) && ((stream->running_size - stream->cursor) >= 10))
     {
-        char *header = stream->buffer + stream->cursor;
-
-        // infer the compression type
+        unsigned char *header = stream->buffer + stream->cursor;
 
         // test the PLAIN FITS (.fits)
         if (strncmp(header, "SIMPLE", 6) == 0)
             stream->compression = fits_compression_none;
 
         // test compress (.Z)
-        if (header[0] == 0x1f && header[1] == 0x9d && header[2] == 0x90 && header[3] == 0xa)
+        if (header[0] == 0x1f && header[1] == 0x9d)
             stream->compression = fits_compression_compress;
 
         // test gzip (.gz)
