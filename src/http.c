@@ -926,23 +926,23 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
         // infer the compression type
 
-        // test the PLAIN FITS
+        // test the PLAIN FITS (.fits)
         if (strncmp(header, "SIMPLE", 6) == 0)
             stream->compression = fits_compression_none;
 
-        // test compress
+        // test compress (.Z)
         if (header[0] == 0x1f && header[1] == 0x9d && header[2] == 0x90 && header[3] == 0xa)
             stream->compression = fits_compression_compress;
 
-        // test gzip
+        // test gzip (.gz)
         if (header[0] == 0x1f && header[1] == 0x8b && header[2] == 0x08)
             stream->compression = fits_compression_gzip;
 
-        // test zip
+        // test zip (.zip)
         if (header[0] == 'P' && header[1] == 'K' && header[2] == 0x03 && header[3] == 0x04)
             stream->compression = fits_compression_zip;
 
-        // test bzip2
+        // test bzip2 (.bz2)
         if (header[0] == 'B' && header[1] == 'Z' && header[2] == 'h')
             stream->compression = fits_compression_bzip2;
 
