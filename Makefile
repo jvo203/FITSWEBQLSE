@@ -234,9 +234,10 @@ ifeq ($(CC),gcc)
 	# GCC FORTRAN runtime
 	LIBS +=  -lgfortran -lm
 
-	# try the zig compiler
-	# CC = zig cc	
-	# LIBS += -lomp
+	# try the zig compiler	
+	# CFLAGS := -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions
+	# CC = zig cc
+	## LIBS += -lomp
 endif
 
 # include dependencies (all .d files)
