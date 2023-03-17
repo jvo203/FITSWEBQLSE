@@ -1080,6 +1080,19 @@ static void *handle_url_download(void *arg)
     {
         *ext = '\0'; // terminate the fname string
         ext++;       // skip the dot character
+
+        // strip the supported compression extensions
+        if (strcmp(ext, "gz") == 0 || strcmp(ext, "bz2") == 0 || strcmp(ext, "zip") == 0 || strcmp(ext, "Z") == 0)
+        {
+            // skip the compression extension
+            ext = strrchr(fname, '.');
+            if (ext != NULL)
+            {
+                *ext = '\0'; // terminate the fname string
+                ext++;       // skip the dot character
+            }
+        };
+
         extension = ext;
     }
 
@@ -2872,6 +2885,19 @@ static enum MHD_Result on_http_connection(void *cls,
                 {
                     *ext = '\0'; // terminate the fname string
                     ext++;       // skip the dot character
+
+                    // strip the supported compression extensions
+                    if (strcmp(ext, "gz") == 0 || strcmp(ext, "bz2") == 0 || strcmp(ext, "zip") == 0 || strcmp(ext, "Z") == 0)
+                    {
+                        // skip the compression extension
+                        ext = strrchr(fname, '.');
+                        if (ext != NULL)
+                        {
+                            *ext = '\0'; // terminate the fname string
+                            ext++;       // skip the dot character
+                        }
+                    };
+
                     extension = ext;
                 }
 
