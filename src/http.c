@@ -923,14 +923,19 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     if ((stream->compression == fits_compression_unknown) && ((stream->running_size - stream->cursor) >= 10))
     {
         // infer the compression type
+        if (strncmp(stream->buffer + stream->cursor, "SIMPLE", 6) == 0)
+            stream->compression = fits_compression_none;
 
-        // end the download prematurely if the file is not a FITS file
-        void *item = get_dataset(stream->datasetid);
+        if (stream->compression == fits_compression_unknown)
+        {
+            // end the download prematurely if the file is not a plain and / or compressed FITS file
+            void *item = get_dataset(stream->datasetid);
 
-        if (item != NULL)
-            set_error_status_C(item, true);
+            if (item != NULL)
+                set_error_status_C(item, true);
 
-        return 0;
+            return 0;
+        }
     }
 
     // parse the header
