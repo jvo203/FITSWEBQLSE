@@ -919,6 +919,20 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     memcpy(stream->buffer + stream->running_size, ptr, realsize);
     stream->running_size += realsize;
 
+    // check the compression type
+    if ((stream->compression == fits_compression_unknown) && ((stream->running_size - stream->cursor) >= 10))
+    {
+        // infer the compression type
+
+        // end the download prematurely if the file is not a FITS file
+        void *item = get_dataset(stream->datasetid);
+
+        if (item != NULL)
+            set_error_status_C(item, true);
+
+        return 0;
+    }
+
     // parse the header
     if (!stream->hdrEnd)
     {
