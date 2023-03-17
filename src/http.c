@@ -922,12 +922,34 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     // check the compression type
     if ((stream->compression == fits_compression_unknown) && ((stream->running_size - stream->cursor) >= 10))
     {
+        char *header = stream->buffer + stream->cursor;
+
         // infer the compression type
-        if (strncmp(stream->buffer + stream->cursor, "SIMPLE", 6) == 0)
+
+        // test the PLAIN FITS
+        if (strncmp(header, "SIMPLE", 6) == 0)
             stream->compression = fits_compression_none;
+
+        // test compress
+        if (header[0] == 0x1f && header[1] == 0x9d && header[2] == 0x90 && header[3] == 0xa)
+            stream->compression = fits_compression_compress;
+
+        // test gzip
+        if (header[0] == 0x1f && header[1] == 0x8b && header[2] == 0x08)
+            stream->compression = fits_compression_gzip;
+
+        // test zip
+        if (header[0] == 'P' && header[1] == 'K' && header[2] == 0x03 && header[3] == 0x04)
+            stream->compression = fits_compression_zip;
+
+        // test bzip2
+        if (header[0] == 'B' && header[1] == 'Z' && header[2] == 'h')
+            stream->compression = fits_compression_bzip2;
 
         if (stream->compression == fits_compression_unknown)
         {
+            printf("[C] parse2file(): unknown compression type, aborting the download.\n");
+
             // end the download prematurely if the file is not a plain and / or compressed FITS file
             void *item = get_dataset(stream->datasetid);
 
