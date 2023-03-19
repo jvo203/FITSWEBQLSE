@@ -922,10 +922,10 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
     // infer the compression type
     if ((stream->compression == fits_compression_unknown) && ((stream->running_size - stream->cursor) >= 10))
     {
-        unsigned char *header = stream->buffer + stream->cursor;
+        unsigned char *header = (unsigned char *)stream->buffer + stream->cursor;
 
         // test the PLAIN FITS (.fits)
-        if (strncmp(header, "SIMPLE", 6) == 0)
+        if (strncmp((char *)header, "SIMPLE", 6) == 0)
             stream->compression = fits_compression_none;
 
         // test compress (.Z)
