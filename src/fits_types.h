@@ -27,7 +27,10 @@ struct FITSDownloadStream
     size_t running_size;
     size_t cursor;
     size_t total_size;
+
     enum fits_compression compression;
+    int compress_in[2];
+    int compress_out[2];
 
     // a bare-bones FITS header
     bool hdrEnd;
