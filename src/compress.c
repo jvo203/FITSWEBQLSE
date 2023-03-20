@@ -267,14 +267,6 @@ int nomagic = 0;    /* Use a 3-byte magic number header,			*/
                     /* unless old file 								*/
 int maxbits = BITS; /* user settable max # bits/code 				*/
 int zcat_flg = 0;   /* Write output on stdout, suppress messages 	*/
-int recursive = 0;  /* compress directories 						*/
-int exit_code = -1; /* Exitcode of compress (-1 no file compressed)	*/
-
-struct stat infstat;   /* Input file status							*/
-char *ifname;          /* Input filename								*/
-int remove_ofname = 0; /* Remove output file on a error				*/
-char *ofname = NULL;   /* Output filename								*/
-int fgnd_flag = 0;     /* Running in background (SIGINT=SIGIGN)		*/
 
 long bytes_in;  /* Total number of byte from input				*/
 long bytes_out; /* Total number of byte to output				*/
@@ -416,8 +408,7 @@ void decompress(int fdin, int fdout)
         if (insize > 0)
         {
             fprintf(stderr, "%s: not in compressed format\n",
-                    (ifname[0] != '\0' ? ifname : "stdin"));
-            exit_code = 1;
+                    ("in"));
         }
 
         return;
@@ -430,8 +421,7 @@ void decompress(int fdin, int fdout)
     {
         fprintf(stderr,
                 "%s: compressed with %d bits, can only handle %d bits\n",
-                (*ifname != '\0' ? ifname : "stdin"), maxbits, BITS);
-        exit_code = 4;
+                ("in"), maxbits, BITS);
         return;
     }
 
@@ -608,22 +598,19 @@ void decompress(int fdin, int fdout)
 void read_error(void)
 {
     fprintf(stderr, "\nread error on");
-    perror((ifname[0] != '\0') ? ifname : "stdin");
+    perror("in");
     abort_compress();
 }
 
 void write_error(void)
 {
     fprintf(stderr, "\nwrite error on");
-    perror(ofname ? ofname : "stdout");
+    perror("out");
     abort_compress();
 }
 
 void abort_compress(void)
 {
-    if (remove_ofname)
-        unlink(ofname);
-
     exit(1);
 }
 
