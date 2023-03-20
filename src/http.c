@@ -878,6 +878,8 @@ void printerror(int status)
 // cURL FITS-parsing entry handler
 static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
 {
+    size_t realsize = size * nmemb;
+
     if (user == NULL) // do nothing in particular
     {
         printf("[C] parse2stream::user == NULL; terminating the download.\n");
@@ -890,17 +892,21 @@ static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
     switch (stream->compression)
     {
     case fits_compression_unknown:
-        goto default_handler;
+        goto default_download_handler;
         break;
     case fits_compression_none:
-        goto default_handler;
+        goto default_download_handler;
         break;
     default:
-        // TO-DO: pass the data to the compression queue
+        // TO-DO:
+        // pass the data to the compressior input queue
+
+        // read the decompressed data from the compressor output queue
+        // and pass it to the FITS parser
         break;
     }
 
-default_handler:
+default_download_handler:
     return parse2file(ptr, size, nmemb, user);
 }
 
