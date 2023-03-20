@@ -128,7 +128,8 @@ void *forward_fitswebql_request(void *ptr);
 void *handle_fitswebql_request(void *ptr);
 void *handle_notify_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
-void *handle_image_request(void *args);
+void *handle_image_request(void *ptr);
+void *decompress_Z(void *user);
 extern void *video_request(void *req);
 extern void *download_request(void *req);   // a FORTRAN subroutine
 extern void *viewport_request(void *req);   // a FORTRAN subroutine
@@ -1028,6 +1029,32 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
                 return 0;
             }
+
+            // create and detach the decompression thread
+            pthread_t tid;
+
+            int stat = pthread_create(&tid, NULL, decompress_Z, (void *)stream);
+
+            if (stat != 0)
+            {
+                printf("[C] parse2file(): error creating the decompression thread, aborting the download.\n");
+
+                // close the pipes
+                close(stream->comp_in[0]);  // close the read end
+                close(stream->comp_in[1]);  // close the write end
+                close(stream->comp_out[0]); // close the read end
+                close(stream->comp_out[1]); // close the write end
+
+                // end the download prematurely
+                void *item = get_dataset(stream->datasetid);
+
+                if (item != NULL)
+                    set_error_status_C(item, true);
+
+                return 0;
+            }
+            else
+                pthread_detach(tid);
         }
     }
 
@@ -6637,4 +6664,17 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
         PQclear(res);
 
     return strndup(path, sizeof(path) - 1);
+}
+
+void *decompress_Z(void *user)
+{
+    if (user == NULL)
+        pthread_exit(NULL);
+
+    struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
+
+    printf("[C] Decompressing Z for %s::start.\n", stream->datasetid);
+
+    printf("[C] Decompressing Z for %s::end.\n", stream->datasetid);
+    pthread_exit(NULL);
 }
