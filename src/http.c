@@ -162,6 +162,8 @@ extern float get_progress(void *item);
 extern float get_elapsed(void *item);
 extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
 
+static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user);
+static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user);
 size_t chunked_write(int fd, const char *src, size_t n);
 size_t chunked_write_with_chunk(int fd, const char *src, size_t n, size_t chunk);
 void write_json(int fd, GString *json);
@@ -873,6 +875,23 @@ void printerror(int status)
     return;
 }
 
+// cURL FITS-parsing entry handler
+static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
+{
+    if (user == NULL) // do nothing in particular
+    {
+        printf("[C] parse2stream::user == NULL; terminating the download.\n");
+        return 0;
+    }
+
+    struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
+
+    size_t realsize = size * nmemb;
+
+    // default:
+    return parse2file(ptr, size, nmemb, user);
+}
+
 // cURL FITS-parsing download handler
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 {
@@ -881,8 +900,8 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
     if (user == NULL) // do nothing in particular
     {
-        printf("[C] user == NULL; parse2file returns %zu bytes.\n", realsize);
-        return realsize;
+        printf("[C] parse2file::user == NULL; terminating the download.\n");
+        return 0;
     }
 
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
@@ -1127,7 +1146,7 @@ static void *handle_url_download(void *arg)
         {
             curl_easy_setopt(curl, CURLOPT_URL, url);
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, parse2file);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, parse2stream);
 
             /* disable progress meter, set to 0L to enable it */
             /* enable progress meter, set to 1L to disable it */
