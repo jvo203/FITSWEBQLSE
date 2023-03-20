@@ -131,6 +131,7 @@ void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *ptr);
 extern void decompress(int fdin, int fdout);
 void *decompress_Z(void *user);
+void *decompress_read(void *user);
 extern void *video_request(void *req);
 extern void *download_request(void *req);   // a FORTRAN subroutine
 extern void *viewport_request(void *req);   // a FORTRAN subroutine
@@ -880,6 +881,7 @@ void printerror(int status)
 // cURL FITS-parsing entry handler
 static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
 {
+    size_t written;
     size_t realsize = size * nmemb;
 
     if (user == NULL) // do nothing in particular
@@ -901,7 +903,18 @@ static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
         break;
     default:
         // TO-DO:
-        // pass the data to the compressior input queue
+        // pass the data to the compressor input queue
+        written = chunked_write_with_chunk(stream->comp_in[0], (const char *)ptr, realsize, 1024);
+
+        if (written != realsize)
+        {
+            printf("[C] parse2stream::chunked_write() failed; terminating the download.\n");
+            return 0;
+        }
+        else
+        {
+            printf("[C] parse2stream::chunked_write() succeeded; %zu bytes written.\n", written);
+        }
 
         // read the decompressed data from the compressor output queue
         // and pass it to the FITS parser
@@ -926,9 +939,13 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
 
-    size_t written = fwrite(ptr, size, nmemb, stream->fp);
-    // printf("[C] fwrite(): written %zu versus requested %zu bytes.\n", written, realsize);
-    realsize = written;
+    // only pass-through uncompressed streams to the disk file
+    if (stream->compression == fits_compression_none)
+    {
+        size_t written = fwrite(ptr, size, nmemb, stream->fp);
+        // printf("[C] fwrite(): written %zu versus requested %zu bytes.\n", written, realsize);
+        realsize = written;
+    }
 
     // only process <realsize> bytes
     stream->total_size += realsize;
@@ -1030,6 +1047,11 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
                 return 0;
             }
+
+            // make stream->comp_out[0] non-blocking
+            /*int flags = fcntl(stream->comp_out[0], F_GETFL, 0);
+            int ret = fcntl(stream->comp_out[0], F_SETFL, flags | O_NONBLOCK);
+            printf("[C] ret from fcntl: %d\n", ret);*/
 
             // create and detach the decompression thread
             pthread_t tid;
@@ -6667,16 +6689,30 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
     return strndup(path, sizeof(path) - 1);
 }
 
+void *decompress_read(void *user)
+{
+    if (user == NULL)
+        pthread_exit(NULL);
+
+    struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
+    printf("[C] Read-Decompression for %s::start.\n", stream->datasetid);
+
+    // a read loop from the decompression queue until there is no data left
+
+    printf("[C] Read-Decompression for %s::end.\n", stream->datasetid);
+    pthread_exit(NULL);
+}
+
 void *decompress_Z(void *user)
 {
     if (user == NULL)
         pthread_exit(NULL);
 
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
-    printf("[C] Decompressing Z for %s::start.\n", stream->datasetid);
+    printf("[C] Z-Decompression for %s::start.\n", stream->datasetid);
 
     decompress(stream->comp_in[0], stream->comp_out[1]);
 
-    printf("[C] Decompressing Z for %s::end.\n", stream->datasetid);
+    printf("[C] Z-Decompression for %s::end.\n", stream->datasetid);
     pthread_exit(NULL);
 }
