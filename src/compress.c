@@ -408,6 +408,7 @@ void decompress(int fdin, int fdout)
         {
             fprintf(stderr, "%s: not in compressed format\n",
                     ("in"));
+            abort_compress(fdin, fdout);
         }
 
         return;
@@ -421,6 +422,8 @@ void decompress(int fdin, int fdout)
         fprintf(stderr,
                 "%s: compressed with %d bits, can only handle %d bits\n",
                 ("in"), maxbits, BITS);
+        abort_compress(fdin, fdout);
+
         return;
     }
 
