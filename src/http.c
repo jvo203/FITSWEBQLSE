@@ -1053,14 +1053,38 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             int ret = fcntl(stream->comp_out[0], F_SETFL, flags | O_NONBLOCK);
             printf("[C] ret from fcntl: %d\n", ret);*/
 
-            // create and detach the decompression thread
+            // create and detach the decompression read/write threads
             pthread_t tid;
+            int stat;
 
-            int stat = pthread_create(&tid, NULL, decompress_Z, (void *)stream);
+            stat = pthread_create(&tid, NULL, decompress_read, (void *)stream);
 
             if (stat != 0)
             {
-                printf("[C] parse2file(): error creating the decompression thread, aborting the download.\n");
+                printf("[C] parse2file(): error creating the decompress_read thread, aborting the download.\n");
+
+                // close the pipes
+                close(stream->comp_in[0]);  // close the read end
+                close(stream->comp_in[1]);  // close the write end
+                close(stream->comp_out[0]); // close the read end
+                close(stream->comp_out[1]); // close the write end
+
+                // end the download prematurely
+                void *item = get_dataset(stream->datasetid);
+
+                if (item != NULL)
+                    set_error_status_C(item, true);
+
+                return 0;
+            }
+            else
+                pthread_detach(tid);
+
+            stat = pthread_create(&tid, NULL, decompress_Z, (void *)stream);
+
+            if (stat != 0)
+            {
+                printf("[C] parse2file(): error creating the decompress_Z thread, aborting the download.\n");
 
                 // close the pipes
                 close(stream->comp_in[0]);  // close the read end
@@ -6697,7 +6721,7 @@ void *decompress_read(void *user)
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
     printf("[C] Read-Decompression for %s::start.\n", stream->datasetid);
 
-    // a read loop from the decompression queue until there is no data left
+    // a blocking read loop from the decompression queue until there is no data left
 
     printf("[C] Read-Decompression for %s::end.\n", stream->datasetid);
     pthread_exit(NULL);
