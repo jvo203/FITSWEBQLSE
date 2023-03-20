@@ -902,9 +902,8 @@ static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
         goto default_download_handler;
         break;
     default:
-        // TO-DO:
         // pass the data to the compressor input queue
-        written = chunked_write_with_chunk(stream->comp_in[0], (const char *)ptr, realsize, 1024);
+        written = chunked_write_with_chunk(stream->comp_in[1], (const char *)ptr, realsize, 1024);
 
         if (written != realsize)
         {
@@ -916,8 +915,6 @@ static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
             printf("[C] parse2stream::chunked_write() succeeded; %zu bytes written.\n", written);
         }
 
-        // read the decompressed data from the compressor output queue
-        // and pass it to the FITS parser
         break;
     }
 
@@ -6713,8 +6710,13 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
     return strndup(path, sizeof(path) - 1);
 }
 
+// read the decompressed data from the compressor output queue
+// and pass it to the FITS parser
 void *decompress_read(void *user)
 {
+    char buf[FITS_CHUNK_LENGTH];
+    ssize_t n = 0;
+
     if (user == NULL)
         pthread_exit(NULL);
 
@@ -6722,6 +6724,20 @@ void *decompress_read(void *user)
     printf("[C] Read-Decompression for %s::start.\n", stream->datasetid);
 
     // a blocking read loop from the decompression queue until there is no data left
+    // numRead = read(pipe_fd[0], buf, BUF_SIZE);
+    while ((n = read(stream->comp_out[0], buf, FITS_CHUNK_LENGTH)) > 0)
+    {
+        printf("[C] PIPE_RECV %zd BYTES.\n", n);
+
+        // fwrite();
+        // parse2file();
+    }
+
+    if (0 == n)
+        printf("[C] PIPE_END_OF_STREAM\n");
+
+    if (n < 0)
+        printf("[C] PIPE_END_WITH_ERROR\n");
 
     printf("[C] Read-Decompression for %s::end.\n", stream->datasetid);
     pthread_exit(NULL);
