@@ -993,6 +993,42 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
             return 0;
         }
+
+        if (stream->compression != fits_compression_none)
+        {
+            int status_in, status_out;
+
+            // create the decompression pipes (in-out queues)
+            status_in = pipe(stream->comp_in);
+            status_out = pipe(stream->comp_out);
+
+            // handle errors
+            if (status_in != 0 || status_out != 0)
+            {
+                printf("[C] parse2file(): error creating the decompression pipes, aborting the download.\n");
+
+                // close the pipes if they were created
+                if (status_in == 0)
+                {
+                    close(stream->comp_in[0]); // close the read end
+                    close(stream->comp_in[1]); // close the write end
+                }
+
+                if (status_out == 0)
+                {
+                    close(stream->comp_out[0]); // close the read end
+                    close(stream->comp_out[1]); // close the write end
+                }
+
+                // end the download prematurely
+                void *item = get_dataset(stream->datasetid);
+
+                if (item != NULL)
+                    set_error_status_C(item, true);
+
+                return 0;
+            }
+        }
     }
 
     // parse the header
