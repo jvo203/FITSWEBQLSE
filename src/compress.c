@@ -318,10 +318,9 @@ static const int primetab[256] = /* Special secudary hash table.		*/
 #endif
 
 void decompress(int, int);
-void read_error(void);
-void write_error(void);
-void abort_compress(void);
-void about(void);
+void read_error(int fdin, int fdout);
+void write_error(int fdin, int fdout);
+void abort_compress(int fdin, int fdout);
 
 /*****************************************************************
  * TAG( main )
@@ -403,7 +402,7 @@ void decompress(int fdin, int fdout)
     if (insize < 3 || inbuf[0] != MAGIC_1 || inbuf[1] != MAGIC_2)
     {
         if (rsize < 0)
-            read_error();
+            read_error(fdin, fdout);
 
         if (insize > 0)
         {
@@ -463,7 +462,7 @@ void decompress(int fdin, int fdout)
         if (insize < sizeof(inbuf) - IBUFSIZ)
         {
             if ((rsize = read(fdin, inbuf + insize, IBUFSIZ)) < 0)
-                read_error();
+                read_error(fdin, fdout);
 
             insize += rsize;
         }
@@ -495,7 +494,7 @@ void decompress(int fdin, int fdout)
                 {
                     fprintf(stderr, "oldcode:-1 code:%i\n", (int)(code));
                     fprintf(stderr, "uncompress: corrupt input\n");
-                    abort_compress();
+                    abort_compress(fdin, fdout);
                 }
                 outbuf[outpos++] = (char_type)(finchar = (int)(oldcode = code));
                 continue;
@@ -528,7 +527,7 @@ void decompress(int fdin, int fdout)
                     fprintf(stderr, "insize:%d posbits:%d inbuf:%02X %02X %02X %02X %02X (%d)\n", insize, posbits,
                             p[-1], p[0], p[1], p[2], p[3], (posbits & 07));
                     fprintf(stderr, "uncompress: corrupt input\n");
-                    abort_compress();
+                    abort_compress(fdin, fdout);
                 }
 
                 *--stackp = (char_type)finchar;
@@ -564,7 +563,7 @@ void decompress(int fdin, int fdout)
                         if (outpos >= OBUFSIZ)
                         {
                             if (write(fdout, outbuf, outpos) != outpos)
-                                write_error();
+                                write_error(fdin, fdout);
 
                             outpos = 0;
                         }
@@ -592,64 +591,26 @@ void decompress(int fdin, int fdout)
     } while (rsize > 0);
 
     if (outpos > 0 && write(fdout, outbuf, outpos) != outpos)
-        write_error();
+        write_error(fdin, fdout);
 }
 
-void read_error(void)
+void read_error(int fdin, int fdout)
 {
     fprintf(stderr, "\nread error on");
     perror("in");
-    abort_compress();
+    abort_compress(fdin, fdout);
 }
 
-void write_error(void)
+void write_error(int fdin, int fdout)
 {
     fprintf(stderr, "\nwrite error on");
     perror("out");
-    abort_compress();
+    abort_compress(fdin, fdout);
 }
 
-void abort_compress(void)
+void abort_compress(int fdin, int fdout)
 {
-    exit(1);
-}
-
-void about(void)
-{
-    printf("Compress version: %s\n", version_id);
-    printf("Compile options:\n        ");
-#ifdef FAST
-    printf("FAST, ");
-#endif
-#ifdef SIGNED_COMPARE_SLOW
-    printf("SIGNED_COMPARE_SLOW, ");
-#endif
-#ifdef DOS
-    printf("DOS, ");
-#endif
-#ifdef DEBUG
-    printf("DEBUG, ");
-#endif
-#ifdef LSTAT
-    printf("LSTAT, ");
-#endif
-    printf("\n        IBUFSIZ=%d, OBUFSIZ=%d, BITS=%d\n",
-           IBUFSIZ, OBUFSIZ, BITS);
-
-    printf("\n\
-Author version 5.x (Modernization):\n\
-Author version 4.2.4.x (Maintenance):\n\
-     Mike Frysinger  (vapier@gmail.com)\n\
-\n\
-Author version 4.2 (Speed improvement & source cleanup):\n\
-     Peter Jannesen  (peter@ncs.nl)\n\
-\n\
-Author version 4.1 (Added recursive directory compress):\n\
-     Dave Mack  (csu@alembic.acs.com)\n\
-\n\
-Authors version 4.0 (World release in 1985):\n\
-     Spencer W. Thomas, Jim McKie, Steve Davies,\n\
-     Ken Turkowski, James A. Woods, Joe Orost\n");
-
-    exit(0);
+    // close the file descriptors (Unix pipes)
+    close(fdin);
+    close(fdout);
 }
