@@ -129,6 +129,7 @@ void *handle_fitswebql_request(void *ptr);
 void *handle_notify_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *ptr);
+extern void decompress(int fdin, int fdout);
 void *decompress_Z(void *user);
 extern void *video_request(void *req);
 extern void *download_request(void *req);   // a FORTRAN subroutine
@@ -6672,8 +6673,9 @@ void *decompress_Z(void *user)
         pthread_exit(NULL);
 
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
-
     printf("[C] Decompressing Z for %s::start.\n", stream->datasetid);
+
+    decompress(stream->comp_in[0], stream->comp_out[1]);
 
     printf("[C] Decompressing Z for %s::end.\n", stream->datasetid);
     pthread_exit(NULL);
