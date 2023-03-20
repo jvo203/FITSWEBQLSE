@@ -913,6 +913,7 @@ static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
         else
         {
             printf("[C] parse2stream::chunked_write() succeeded; %zu bytes written.\n", written);
+            return realsize;
         }
 
         break;
@@ -1099,6 +1100,40 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             }
             else
                 pthread_detach(tid);
+
+            // pass the whole data to the decompression thread
+            char *buffer = stream->buffer + stream->cursor;
+            size_t buffer_size = stream->running_size - stream->cursor;
+            size_t written = chunked_write_with_chunk(stream->comp_in[1], (const char *)buffer, buffer_size, 1024);
+
+            if (written != buffer_size)
+            {
+                printf("[C] parse2file(): error writing to the decompression pipe, aborting the download.\n");
+
+                // close the pipes
+                close(stream->comp_in[0]);  // close the read end
+                close(stream->comp_in[1]);  // close the write end
+                close(stream->comp_out[0]); // close the read end
+                close(stream->comp_out[1]); // close the write end
+
+                // end the download prematurely
+                void *item = get_dataset(stream->datasetid);
+
+                if (item != NULL)
+                    set_error_status_C(item, true);
+
+                return 0;
+            }
+
+            // move the cursor forward
+            stream->cursor += written;
+
+            // and then move remove the stream->cursor bytes from the head of the buffer
+            memmove(stream->buffer, stream->buffer + stream->cursor, stream->running_size - stream->cursor);
+            stream->running_size -= stream->cursor;
+            stream->cursor = 0;
+
+            return written;
         }
     }
 
@@ -6724,13 +6759,18 @@ void *decompress_read(void *user)
     printf("[C] Read-Decompression for %s::start.\n", stream->datasetid);
 
     // a blocking read loop from the decompression queue until there is no data left
-    // numRead = read(pipe_fd[0], buf, BUF_SIZE);
     while ((n = read(stream->comp_out[0], buf, FITS_CHUNK_LENGTH)) > 0)
     {
         printf("[C] PIPE_RECV %zd BYTES.\n", n);
 
-        // fwrite();
-        // parse2file();
+        size_t written = fwrite(buf, 1, (size_t)n, stream->fp);
+        printf("[C] FILE_WRITE %zu BYTES.\n", written);
+
+        if (written != (size_t)n)
+            perror("[C] FILE_WRITE_ERROR");
+
+        size_t processed = parse2file(buf, 1, (size_t)n, stream);
+        printf("[C] FITS_PARSE %zu BYTES.\n", processed);
     }
 
     if (0 == n)
