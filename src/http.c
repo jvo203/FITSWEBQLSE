@@ -886,9 +886,21 @@ static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
 
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
 
-    size_t realsize = size * nmemb;
+    // switch compression type
+    switch (stream->compression)
+    {
+    case fits_compression_unknown:
+        goto default_handler;
+        break;
+    case fits_compression_none:
+        goto default_handler;
+        break;
+    default:
+        // TO-DO: pass the data to the compression queue
+        break;
+    }
 
-    // default:
+default_handler:
     return parse2file(ptr, size, nmemb, user);
 }
 
