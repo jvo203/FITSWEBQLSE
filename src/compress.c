@@ -602,14 +602,14 @@ void decompress(int fdin, int fdout)
 
 void read_error(int fdin, int fdout)
 {
-    fprintf(stderr, "\nread error on");
+    fprintf(stderr, "\nread error on ");
     perror("in");
     abort_compress(fdin, fdout);
 }
 
 void write_error(int fdin, int fdout)
 {
-    fprintf(stderr, "\nwrite error on");
+    fprintf(stderr, "\nwrite error on ");
     perror("out");
     abort_compress(fdin, fdout);
 }
