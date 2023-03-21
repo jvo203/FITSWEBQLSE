@@ -595,6 +595,9 @@ void decompress(int fdin, int fdout)
 
     if (outpos > 0 && write(fdout, outbuf, outpos) != outpos)
         write_error(fdin, fdout);
+
+    // close the write pipe
+    close(fdout);
 }
 
 void read_error(int fdin, int fdout)
