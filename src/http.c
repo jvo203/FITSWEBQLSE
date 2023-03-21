@@ -1448,6 +1448,11 @@ static void *handle_url_download(void *arg)
             free(stream.pixels);
             free(stream.mask);
 
+            close(stream.comp_in[0]);
+            close(stream.comp_in[1]);
+            close(stream.comp_out[0]);
+            close(stream.comp_out[1]);
+
             curl_easy_cleanup(curl);
         }
     }
