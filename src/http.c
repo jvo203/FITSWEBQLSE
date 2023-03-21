@@ -1386,6 +1386,10 @@ static void *handle_url_download(void *arg)
                     }
                 } while (res != CURLE_OK && retry++ < 3);
 
+                // close the write pipe
+                close(stream.comp_in[1]);
+
+                // close the file
                 fclose(downloadfile);
 
                 if (res != CURLE_OK)
