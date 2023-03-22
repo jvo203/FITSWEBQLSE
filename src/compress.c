@@ -320,38 +320,9 @@ void write_error(int fdin, int fdout);
 void abort_compress(int fdin, int fdout);
 
 /*****************************************************************
- * TAG( main )
  *
  * Algorithm from "A Technique for High Performance Data Compression",
  * Terry A. Welch, IEEE Computer Vol 17, No 6 (June 1984), pp 8-19.
- *
- * Usage: compress [-dfvc] [-b bits] [file ...]
- * Inputs:
- *   -d:     If given, decompression is done instead.
- *
- *   -c:     Write output on stdout, don't remove original.
- *
- *   -b:     Parameter limits the max number of bits/code.
- *
- *   -f:     Forces output file to be generated, even if one already
- *           exists, and even if no space is saved by compressing.
- *           If -f is not used, the user will be prompted if stdin is
- *           a tty, otherwise, the output file will not be overwritten.
- *
- *   -v:     Write compression statistics
- *
- *   -r:     Recursive. If a filename is a directory, descend
- *           into it and compress everything in it.
- *
- * file ...:
- *           Files to be compressed.  If none specified, stdin is used.
- * Outputs:
- *   file.Z:     Compressed form of file with same mode, owner, and utimes
- *   or stdout   (if stdin used as input)
- *
- * Assumptions:
- *   When filenames are given, replaces with the compressed version
- *   (.Z suffix) only if the file decreases in size.
  *
  * Algorithm:
  *   Modified Lempel-Ziv method (LZW).  Basically finds common
