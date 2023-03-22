@@ -1483,6 +1483,14 @@ static void *handle_url_download(void *arg)
                     remove(filepath);
                 }
             }
+            else
+            {
+                // remove the download file
+                remove(download);
+
+                // remove the target download file
+                remove(filepath);
+            }
 
             free(stream.data);
             free(stream.buffer);
