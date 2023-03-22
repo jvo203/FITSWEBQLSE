@@ -1463,6 +1463,12 @@ static void *handle_url_download(void *arg)
             {
                 if (!get_header_status(item) || !get_ok_status(item))
                     set_error_status_C(item, true);
+
+                if (get_error_status(item))
+                {
+                    // remove the target file
+                    remove(filepath);
+                }
             }
 
             free(stream.data);
