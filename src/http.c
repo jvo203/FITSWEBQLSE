@@ -1465,8 +1465,7 @@ static void *handle_url_download(void *arg)
 
                 if (get_error_status(item))
                     error = true;
-
-                if (!get_header_status(item) || !get_ok_status(item))
+                else if (!get_header_status(item) || !get_ok_status(item))
                 {
                     set_error_status_C(item, true);
                     error = true;
