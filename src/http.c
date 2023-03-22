@@ -1428,6 +1428,7 @@ static void *handle_url_download(void *arg)
                         {
                             void *item = get_dataset(stream.datasetid);
 
+                            // check the error status first
                             if (item != NULL)
                             {
                                 if (get_error_status(item))
