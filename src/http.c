@@ -1457,8 +1457,8 @@ static void *handle_url_download(void *arg)
                 }
             }
 
-            void *item = get_dataset(stream.datasetid);
             bool error = false;
+            void *item = get_dataset(stream.datasetid);
 
             if (item != NULL)
             {
