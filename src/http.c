@@ -6779,7 +6779,14 @@ void *decompress_read(void *user)
         // printf("[C] FILE_WRITE %zu BYTES.\n", written);
 
         if (written != (size_t)n)
+        {
             perror("[C] FILE_WRITE_ERROR");
+
+            void *item = get_dataset(stream->datasetid);
+
+            if (item != NULL)
+                set_error_status_C(item, true);
+        }
 
         size_t processed = parse2file(buf, 1, (size_t)n, stream);
         // printf("[C] FITS_PARSE %zu BYTES.\n", processed);
