@@ -1458,11 +1458,10 @@ static void *handle_url_download(void *arg)
             }
 
             void *item = get_dataset(stream.datasetid);
+            bool error = false;
 
             if (item != NULL)
             {
-                bool error = false;
-
                 if (get_error_status(item))
                     error = true;
                 else if (!get_header_status(item) || !get_ok_status(item))
@@ -1470,19 +1469,11 @@ static void *handle_url_download(void *arg)
                     set_error_status_C(item, true);
                     error = true;
                 }
-
-                // check the error status via an extra <error> variable
-                // (to be on the safe side, to make sure the item has not been deallocated in the meantime)
-                if (error)
-                {
-                    // remove the download file
-                    remove(download);
-
-                    // remove the target download file
-                    remove(filepath);
-                }
             }
             else
+                error = true;
+
+            if (error)
             {
                 // remove the download file
                 remove(download);
