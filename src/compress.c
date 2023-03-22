@@ -86,9 +86,6 @@ static inline int access(const char *pathname, int mode)
 }
 #endif
 
-static char ident[] = "@(#)(N)compress 5.1";
-#define version_id (ident + 4)
-
 #undef min
 #define min(a, b) ((a > b) ? b : a)
 
