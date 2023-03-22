@@ -1428,7 +1428,7 @@ static void *handle_url_download(void *arg)
                         {
                             void *item = get_dataset(stream.datasetid);
 
-                            // check the error status first
+                            // check the error status
                             if (item != NULL)
                             {
                                 if (get_error_status(item))
@@ -1461,12 +1461,24 @@ static void *handle_url_download(void *arg)
 
             if (item != NULL)
             {
-                if (!get_header_status(item) || !get_ok_status(item))
-                    set_error_status_C(item, true);
-
+                // check the error status
                 if (get_error_status(item))
                 {
-                    // remove the target file
+                    // remove the download file
+                    remove(download);
+
+                    // remove the target download file
+                    remove(filepath);
+                }
+
+                if (!get_header_status(item) || !get_ok_status(item))
+                {
+                    set_error_status_C(item, true);
+
+                    // remove the download file
+                    remove(download);
+
+                    // remove the target download file
                     remove(filepath);
                 }
             }
