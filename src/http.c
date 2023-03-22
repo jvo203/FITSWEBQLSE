@@ -6795,7 +6795,7 @@ void *decompress_read(void *user)
         pthread_exit(NULL);
 
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
-    printf("[C] Read-Decompression for %s::start.\n", stream->datasetid);
+    printf("[C] R-Decompress/%s::start.\n", stream->datasetid);
 
     // a blocking read loop from the decompression queue until there is no data left
     while ((n = read(stream->comp_out[0], buf, FITS_CHUNK_LENGTH)) > 0)
@@ -6827,7 +6827,7 @@ void *decompress_read(void *user)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    printf("[C] Read-Decompression for %s::end.\n", stream->datasetid);
+    printf("[C] R-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
 }
 
@@ -6837,10 +6837,10 @@ void *decompress_Z(void *user)
         pthread_exit(NULL);
 
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
-    printf("[C] Z-Decompression for %s::start.\n", stream->datasetid);
+    printf("[C] Z-Decompress/%s::start.\n", stream->datasetid);
 
     decompress(stream->comp_in[0], stream->comp_out[1]);
 
-    printf("[C] Z-Decompression for %s::end.\n", stream->datasetid);
+    printf("[C] Z-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
 }
