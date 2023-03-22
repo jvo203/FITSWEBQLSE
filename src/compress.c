@@ -332,7 +332,7 @@ void abort_compress(int fdin, int fdout);
  */
 
 /*
- * Decompress stdin to stdout.  This routine adapts to the codes in the
+ * Decompress fdin to fdout.  This routine adapts to the codes in the
  * file building the "string" table on-the-fly; requiring no table to
  * be stored in the compressed file.  The tables used herein are shared
  * with those of the compress() routine.  See the definitions above.
