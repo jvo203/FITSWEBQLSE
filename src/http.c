@@ -1461,11 +1461,17 @@ static void *handle_url_download(void *arg)
 
             if (item != NULL)
             {
-                if (!get_header_status(item) || !get_ok_status(item))
-                    set_error_status_C(item, true);
+                bool error = false;
 
-                // check the error status (it's OK, the dataset will be removed after 60s of being in an error state)
-                if (get_error_status(item))
+                if (!get_header_status(item) || !get_ok_status(item))
+                {
+                    set_error_status_C(item, true);
+                    error = true;
+                }
+
+                // check the error status via an extra <error> variable
+                // (to be on the safe side, to make sure the item has not been deallocated in the meantime)
+                if (error)
                 {
                     // remove the download file
                     remove(download);
