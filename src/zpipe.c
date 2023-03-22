@@ -19,13 +19,13 @@
 
 #define CHUNK 16384
 
-/* Decompress from file source to file dest until stream ends or EOF.
+/* Decompress from pipe source to pipe dest until stream ends or EOF.
    inf() returns Z_OK on success, Z_MEM_ERROR if memory could not be
    allocated for processing, Z_DATA_ERROR if the deflate data is
    invalid or incomplete, Z_VERSION_ERROR if the version of zlib.h and
    the version of the library linked do not match, or Z_ERRNO if there
    is an error reading or writing the files. */
-int inf(FILE *source, FILE *dest)
+int inf(int source, int dest)
 {
     int ret;
     unsigned have;
@@ -39,21 +39,27 @@ int inf(FILE *source, FILE *dest)
     strm.opaque = Z_NULL;
     strm.avail_in = 0;
     strm.next_in = Z_NULL;
+
     ret = inflateInit(&strm);
     if (ret != Z_OK)
         return ret;
 
-    /* decompress until deflate stream ends or end of file */
+    /* decompress until deflate stream ends or end of pipe */
     do
     {
-        strm.avail_in = fread(in, 1, CHUNK, source);
-        if (ferror(source))
+        strm.avail_in = read(source, in, CHUNK);
+
+        if (strm.avail_in < 0)
         {
             (void)inflateEnd(&strm);
+            close(source);
+            close(dest);
             return Z_ERRNO;
         }
+
         if (strm.avail_in == 0)
             break;
+
         strm.next_in = in;
 
         /* run inflate() on input until output buffer not full */
@@ -63,6 +69,7 @@ int inf(FILE *source, FILE *dest)
             strm.next_out = out;
             ret = inflate(&strm, Z_NO_FLUSH);
             assert(ret != Z_STREAM_ERROR); /* state not clobbered */
+
             switch (ret)
             {
             case Z_NEED_DICT:
@@ -72,16 +79,23 @@ int inf(FILE *source, FILE *dest)
                 (void)inflateEnd(&strm);
                 return ret;
             }
+
             have = CHUNK - strm.avail_out;
-            if (fwrite(out, 1, have, dest) != have || ferror(dest))
+
+            if (write(dest, out, have) != have)
             {
                 (void)inflateEnd(&strm);
+                close(source);
+                close(dest);
                 return Z_ERRNO;
             }
         } while (strm.avail_out == 0);
 
         /* done when inflate() says it's done */
     } while (ret != Z_STREAM_END);
+
+    // close the write end of the pipe
+    close(dest);
 
     /* clean up and return */
     (void)inflateEnd(&strm);
@@ -91,7 +105,7 @@ int inf(FILE *source, FILE *dest)
 /* report a zlib or i/o error */
 void zerr(int ret)
 {
-    fputs("zpipe: ", stderr);
+    fputs("[C] zpipe: ", stderr);
     switch (ret)
     {
     case Z_ERRNO:
