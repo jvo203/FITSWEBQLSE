@@ -28,6 +28,7 @@
 // ZFP floating-point compressor
 #include <zfp.h>
 
+// GZIP
 #include <zlib.h>
 
 // NASA CFITSIO
