@@ -31,6 +31,7 @@ struct FITSDownloadStream
     enum fits_compression compression;
     int comp_in[2];
     int comp_out[2];
+    pthread_t tid;
 
     // a bare-bones FITS header
     bool hdrEnd;

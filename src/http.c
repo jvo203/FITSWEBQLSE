@@ -1055,7 +1055,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             pthread_t tid;
             int stat;
 
-            stat = pthread_create(&tid, NULL, decompress_read, (void *)stream);
+            stat = pthread_create(&(stream->tid), NULL, decompress_read, (void *)stream);
 
             if (stat != 0)
             {
@@ -1388,6 +1388,9 @@ static void *handle_url_download(void *arg)
 
                 // close the write pipe
                 close(stream.comp_in[1]);
+
+                // join the decompression read thread
+                pthread_join(stream.tid, NULL);
 
                 // close the file
                 fclose(downloadfile);
@@ -6773,13 +6776,13 @@ void *decompress_read(void *user)
         printf("[C] PIPE_RECV %zd BYTES.\n", n);
 
         size_t written = fwrite(buf, 1, (size_t)n, stream->fp);
-        printf("[C] FILE_WRITE %zu BYTES.\n", written);
+        // printf("[C] FILE_WRITE %zu BYTES.\n", written);
 
         if (written != (size_t)n)
             perror("[C] FILE_WRITE_ERROR");
 
         size_t processed = parse2file(buf, 1, (size_t)n, stream);
-        printf("[C] FITS_PARSE %zu BYTES.\n", processed);
+        // printf("[C] FITS_PARSE %zu BYTES.\n", processed);
     }
 
     if (0 == n)
