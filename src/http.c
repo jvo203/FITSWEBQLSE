@@ -6773,7 +6773,7 @@ void *decompress_read(void *user)
     // a blocking read loop from the decompression queue until there is no data left
     while ((n = read(stream->comp_out[0], buf, FITS_CHUNK_LENGTH)) > 0)
     {
-        printf("[C] PIPE_RECV %zd BYTES.\n", n);
+        // printf("[C] PIPE_RECV %zd BYTES.\n", n);
 
         size_t written = fwrite(buf, 1, (size_t)n, stream->fp);
         // printf("[C] FILE_WRITE %zu BYTES.\n", written);
