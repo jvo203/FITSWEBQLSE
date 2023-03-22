@@ -28,6 +28,8 @@
 // ZFP floating-point compressor
 #include <zfp.h>
 
+#include <zlib.h>
+
 // NASA CFITSIO
 #include <fitsio.h>
 
@@ -129,7 +131,8 @@ void *handle_fitswebql_request(void *ptr);
 void *handle_notify_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *ptr);
-extern void decompress(int fdin, int fdout);
+extern void decompress(int fdin, int fdout); // Z decompression
+extern int inf(int source, int dest);        // GZIP decompression
 void *decompress_Z(void *user);
 void *decompress_read(void *user);
 extern void *video_request(void *req);
