@@ -1451,10 +1451,18 @@ static void *handle_url_download(void *arg)
             free(stream.pixels);
             free(stream.mask);
 
-            close(stream.comp_in[0]);
-            close(stream.comp_in[1]);
-            close(stream.comp_out[0]);
-            close(stream.comp_out[1]);
+            // close all the Unix pipes (just to be on the safe side)
+            if (stream.comp_in[0] != -1)
+                close(stream.comp_in[0]);
+
+            if (stream.comp_in[1] != -1)
+                close(stream.comp_in[1]);
+
+            if (stream.comp_out[0] != -1)
+                close(stream.comp_out[0]);
+
+            if (stream.comp_out[1] != -1)
+                close(stream.comp_out[1]);
 
             curl_easy_cleanup(curl);
         }
