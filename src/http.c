@@ -1426,8 +1426,26 @@ static void *handle_url_download(void *arg)
                         }
                         else
                         {
-                            // rename the download file
-                            rename(download, filepath); // disabled for now (during development)
+                            void *item = get_dataset(stream.datasetid);
+
+                            if (item != NULL)
+                            {
+                                if (get_error_status(item))
+                                {
+                                    // remove the download file
+                                    remove(download);
+                                }
+                                else
+                                {
+                                    // rename the download file
+                                    rename(download, filepath);
+                                }
+                            }
+                            else
+                            {
+                                // remove the download file
+                                remove(download);
+                            }
                         }
                     }
                     else
@@ -6795,9 +6813,11 @@ void *decompress_read(void *user)
             if (item != NULL)
                 set_error_status_C(item, true);
         }
-
-        size_t processed = parse2file(buf, 1, (size_t)n, stream);
-        // printf("[C] FITS_PARSE %zu BYTES.\n", processed);
+        else
+        {
+            size_t processed = parse2file(buf, 1, (size_t)n, stream);
+            // printf("[C] FITS_PARSE %zu BYTES.\n", processed);
+        }
     }
 
     if (0 == n)
