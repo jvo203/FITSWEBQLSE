@@ -411,6 +411,9 @@ void decompress(int fdin, int fdout)
             abort_compress(fdin, fdout);
         }
 
+        // close the write pipe
+        close(fdout);
+
         return;
     }
 
@@ -422,9 +425,8 @@ void decompress(int fdin, int fdout)
         fprintf(stderr,
                 "%s: compressed with %d bits, can only handle %d bits\n",
                 ("in"), maxbits, BITS);
-        abort_compress(fdin, fdout);
 
-        return;
+        return abort_compress(fdin, fdout);
     }
 
     maxmaxcode = MAXCODE(maxbits);

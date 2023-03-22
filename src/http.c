@@ -902,7 +902,7 @@ static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
         goto default_download_handler;
         break;
     default:
-        // pass the data to the compressor input queue
+        // write the data to the compressor input queue
         written = chunked_write_with_chunk(stream->comp_in[1], (const char *)ptr, realsize, 1024);
 
         if (written != realsize)
