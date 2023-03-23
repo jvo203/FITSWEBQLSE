@@ -24,11 +24,11 @@ int bunzip2(int fdin, int fdout)
     b = BZ2_bzReadOpen(&bzerror, f, 0, 0, NULL, 0);
     if (bzerror != BZ_OK)
     {
+        printf("[C] BZ2_bzReadOpen failed with error %d.\n", bzerror);
         BZ2_bzReadClose(&bzerror, b);
         /* handle error */
-        printf("[C] BZ2_bzReadOpen failed with error %d.\n", bzerror);
         fclose(f);
-        return bzerror;
+        return BZ_IO_ERROR;
     }
 
     bzerror = BZ_OK;
@@ -37,17 +37,17 @@ int bunzip2(int fdin, int fdout)
         nBuf = BZ2_bzRead(&bzerror, b, buf, CHUNK);
         if (bzerror == BZ_OK || bzerror == BZ_STREAM_END)
         {
-            /* do something with buf[0 .. nBuf-1] */
             if (nBuf <= 0)
                 continue;
 
+            /* do something with buf[0 .. nBuf-1] */
             if (write(fdout, buf, (size_t)nBuf) != (size_t)nBuf)
             {
                 BZ2_bzReadClose(&bzerror, b);
                 /* handle error */
-                printf("[C] writing %d to fdout failed.\n", nBuf);
+                printf("[C] writing %d bytes to fdout failed.\n", nBuf);
                 fclose(f);
-                return bzerror;
+                return BZ_IO_ERROR;
             }
         }
     }
@@ -56,9 +56,9 @@ int bunzip2(int fdin, int fdout)
     {
         BZ2_bzReadClose(&bzerror, b);
         /* handle error */
-        printf("[C] BZ_STREAM_END not found with error %d.\n", bzerror);
+        printf("[C] BZ_STREAM_END not found.\n");
         fclose(f);
-        return bzerror;
+        return BZ_MEM_ERROR;
     }
     else
     {
