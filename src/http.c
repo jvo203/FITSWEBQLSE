@@ -135,6 +135,7 @@ void *handle_image_request(void *ptr);
 extern void decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);        // GZIP decompression
 void *decompress_Z(void *user);
+void *decompress_GZ(void *user);
 void *decompress_read(void *user);
 extern void *video_request(void *req);
 extern void *download_request(void *req);   // a FORTRAN subroutine
@@ -1082,11 +1083,15 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             else
                 pthread_detach(tid);
 
-            stat = pthread_create(&tid, NULL, decompress_Z, (void *)stream);
+            if (stream->compression == fits_compression_compress)
+                stat = pthread_create(&tid, NULL, decompress_Z, (void *)stream);
+
+            if (stream->compression == fits_compression_gzip || stream->compression == fits_compression_zip)
+                stat = pthread_create(&tid, NULL, decompress_GZ, (void *)stream);
 
             if (stat != 0)
             {
-                printf("[C] parse2file(): error creating the decompress_Z thread, aborting the download.\n");
+                printf("[C] parse2file(): error creating the decompress_write thread, aborting the download.\n");
 
                 // close the pipes
                 close(stream->comp_in[0]);  // close the read end
