@@ -8489,7 +8489,7 @@ contains
 
         ! regenerate the video tone mapping global statistics
         real(c_float) :: dmin, dmax, dmedian
-        real(c_float) :: dmadP, dmadN
+        real(c_float) :: dmad, dmadP, dmadN
 
         ! accumulators, counters
         real(c_float) :: sumP, sumN
@@ -8667,8 +8667,23 @@ contains
 
         print *, "final statistics... sumP", sumP, ", countP", countP, ", sumN", sumN, ", countN", countN
 
-        if (countP .gt. 0) dmadP = sumP/countP
-        if (countN .gt. 0) dmadN = sumN/countN
+        if (countP + countN .gt. 0) then
+            dmad = (sumP + sumN)/(countP + countN)
+        else
+            dmad = ieee_value(0.0, ieee_quiet_nan)
+        end if
+
+        if (countP .gt. 0) then
+            dmadP = sumP/countP
+        else
+            dmadP = dmad
+        end if
+
+        if (countN .gt. 0) then
+            dmadN = sumN/countN
+        else
+            dmadN = dmad
+        end if
 
         ! combine the spectra from other cluster nodes (if any)
         if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
