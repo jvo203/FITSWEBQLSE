@@ -135,9 +135,11 @@ void *handle_image_request(void *ptr);
 extern void decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);        // GZIP decompression
 extern void zerr(int ret);                   // GZIP error reporting
+extern int bunzip2(int source, int dest);    // BZIP2 decompression
 void *decompress_Z(void *user);
 void *decompress_GZ(void *user);
 void *decompress_ZIP(void *user);
+void *decompress_BZIP2(void *user);
 void *decompress_read(void *user);
 extern void *video_request(void *req);
 extern void *download_request(void *req);   // a FORTRAN subroutine
@@ -1100,7 +1102,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 break;
 
             case fits_compression_bzip2:
-                stat = pthread_create(&tid, NULL, decompress_ZIP, (void *)stream);
+                stat = pthread_create(&tid, NULL, decompress_BZIP2, (void *)stream);
                 break;
 
             default:
@@ -6937,5 +6939,19 @@ void *decompress_ZIP(void *user)
     close(stream->comp_out[1]);
 
     printf("[C] ZIP-Decompress/%s::end.\n", stream->datasetid);
+    pthread_exit(NULL);
+}
+
+void *decompress_BZIP2(void *user)
+{
+    if (user == NULL)
+        pthread_exit(NULL);
+
+    struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
+    printf("[C] BZIP2-Decompress/%s::start.\n", stream->datasetid);
+
+    bunzip2(stream->comp_in[0], stream->comp_out[1]);
+
+    printf("[C] BZIP2-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
 }
