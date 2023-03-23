@@ -1087,7 +1087,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             if (stream->compression == fits_compression_compress)
                 stat = pthread_create(&tid, NULL, decompress_Z, (void *)stream);
 
-            if (stream->compression == fits_compression_gzip || stream->compression == fits_compression_zip)
+            if (stream->compression == fits_compression_gzip)
                 stat = pthread_create(&tid, NULL, decompress_GZ, (void *)stream);
 
             if (stat != 0)
