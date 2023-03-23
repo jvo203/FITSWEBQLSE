@@ -68,7 +68,7 @@ int inf(int source, int dest)
     strm.avail_in = 0;
     strm.next_in = Z_NULL;
 
-    // ret = inflateInit(&strm);
+    // enforce gzip encoding
     ret = inflateInit2(&strm, _windowBits | GZIP_ENCODING);
     if (ret != Z_OK)
         return ret;
