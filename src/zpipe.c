@@ -18,6 +18,8 @@
 #include <zlib.h>
 
 #define CHUNK 16384
+#define _windowBits 15
+#define GZIP_ENCODING 16
 
 /* report a zlib or i/o error */
 void zerr(int ret)
@@ -66,7 +68,8 @@ int inf(int source, int dest)
     strm.avail_in = 0;
     strm.next_in = Z_NULL;
 
-    ret = inflateInit(&strm);
+    // ret = inflateInit(&strm);
+    ret = inflateInit2(&strm, _windowBits | GZIP_ENCODING);
     if (ret != Z_OK)
         return ret;
 
