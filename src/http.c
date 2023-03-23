@@ -134,6 +134,7 @@ void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *ptr);
 extern void decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);        // GZIP decompression
+extern void zerr(int ret);                   // GZIP error reporting
 void *decompress_Z(void *user);
 void *decompress_GZ(void *user);
 void *decompress_read(void *user);
@@ -6884,6 +6885,7 @@ void *decompress_GZ(void *user)
     if (ret != Z_OK)
     {
         printf("[C] GZ-Decompress/%s::error.\n", stream->datasetid);
+        zerr(ret);
 
         close(stream->comp_in[0]);
         close(stream->comp_out[1]);

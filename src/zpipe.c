@@ -101,3 +101,29 @@ int inf(int source, int dest)
     (void)inflateEnd(&strm);
     return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
 }
+
+/* report a zlib or i/o error */
+void zerr(int ret)
+{
+    fputs("zpipe: ", stderr);
+    switch (ret)
+    {
+    case Z_ERRNO:
+        if (ferror(stdin))
+            fputs("error reading stdin\n", stderr);
+        if (ferror(stdout))
+            fputs("error writing stdout\n", stderr);
+        break;
+    case Z_STREAM_ERROR:
+        fputs("invalid compression level\n", stderr);
+        break;
+    case Z_DATA_ERROR:
+        fputs("invalid or incomplete deflate data\n", stderr);
+        break;
+    case Z_MEM_ERROR:
+        fputs("out of memory\n", stderr);
+        break;
+    case Z_VERSION_ERROR:
+        fputs("zlib version mismatch!\n", stderr);
+    }
+}
