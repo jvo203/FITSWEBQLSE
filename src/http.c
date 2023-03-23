@@ -135,7 +135,7 @@ void *handle_image_request(void *ptr);
 extern void decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);        // GZIP decompression
 extern void zerr(int ret);                   // GZIP error reporting
-extern int bunzip2(int source, int dest);    // BZIP2 decompression
+extern void bunzip2(int fdin, int fdout);    // BZIP2 decompression
 void *decompress_Z(void *user);
 void *decompress_GZ(void *user);
 void *decompress_ZIP(void *user);
