@@ -1108,6 +1108,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 printf("[C] parse2file(): unknown compression type, aborting the download.\n");
                 close(stream->comp_in[0]);
                 close(stream->comp_out[1]);
+                return 0;
                 break;
             }
 
@@ -1165,6 +1166,12 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             stream->cursor = 0;
 
             return written;
+        }
+        else
+        {
+            size_t written = fwrite(ptr, size, nmemb, stream->fp);
+            // printf("[C] fwrite(): written %zu versus requested %zu bytes.\n", written, realsize);
+            realsize = written;
         }
     }
 
