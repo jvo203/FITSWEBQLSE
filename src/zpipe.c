@@ -19,6 +19,32 @@
 
 #define CHUNK 16384
 
+/* report a zlib or i/o error */
+void zerr(int ret)
+{
+    fputs("[C] zpipe: ", stderr);
+    switch (ret)
+    {
+    case Z_ERRNO:
+        if (ferror(stdin))
+            fputs("error reading stdin\n", stderr);
+        if (ferror(stdout))
+            fputs("error writing stdout\n", stderr);
+        break;
+    case Z_STREAM_ERROR:
+        fputs("invalid compression level\n", stderr);
+        break;
+    case Z_DATA_ERROR:
+        fputs("invalid or incomplete deflate data\n", stderr);
+        break;
+    case Z_MEM_ERROR:
+        fputs("out of memory\n", stderr);
+        break;
+    case Z_VERSION_ERROR:
+        fputs("zlib version mismatch!\n", stderr);
+    }
+}
+
 /* Decompress from pipe source to pipe dest until stream ends or EOF.
    inf() returns Z_OK on success, Z_MEM_ERROR if memory could not be
    allocated for processing, Z_DATA_ERROR if the deflate data is
@@ -52,8 +78,6 @@ int inf(int source, int dest)
         if (strm.avail_in < 0)
         {
             (void)inflateEnd(&strm);
-            close(source);
-            close(dest);
             return Z_ERRNO;
         }
 
@@ -85,8 +109,6 @@ int inf(int source, int dest)
             if (write(dest, out, have) != have)
             {
                 (void)inflateEnd(&strm);
-                close(source);
-                close(dest);
                 return Z_ERRNO;
             }
         } while (strm.avail_out == 0);
@@ -97,33 +119,10 @@ int inf(int source, int dest)
     // close the write end of the pipe
     close(dest);
 
+    if (ret != Z_OK)
+        zerr(ret);
+
     /* clean up and return */
     (void)inflateEnd(&strm);
     return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
-}
-
-/* report a zlib or i/o error */
-void zerr(int ret)
-{
-    fputs("zpipe: ", stderr);
-    switch (ret)
-    {
-    case Z_ERRNO:
-        if (ferror(stdin))
-            fputs("error reading stdin\n", stderr);
-        if (ferror(stdout))
-            fputs("error writing stdout\n", stderr);
-        break;
-    case Z_STREAM_ERROR:
-        fputs("invalid compression level\n", stderr);
-        break;
-    case Z_DATA_ERROR:
-        fputs("invalid or incomplete deflate data\n", stderr);
-        break;
-    case Z_MEM_ERROR:
-        fputs("out of memory\n", stderr);
-        break;
-    case Z_VERSION_ERROR:
-        fputs("zlib version mismatch!\n", stderr);
-    }
 }
