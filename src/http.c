@@ -1105,6 +1105,9 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
             default:
                 printf("[C] parse2file(): unknown compression type, aborting the download.\n");
+                close(stream->comp_in[0]);
+                close(stream->comp_out[1]);
+                break;
             }
 
             // end the download prematurely if the file is not a plain and / or compressed FITS file
