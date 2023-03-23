@@ -6870,3 +6870,17 @@ void *decompress_Z(void *user)
     printf("[C] Z-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
 }
+
+void *decompress_GZ(void *user)
+{
+    if (user == NULL)
+        pthread_exit(NULL);
+
+    struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
+    printf("[C] GZ-Decompress/%s::start.\n", stream->datasetid);
+
+    inf(stream->comp_in[0], stream->comp_out[1]);
+
+    printf("[C] GZ-Decompress/%s::end.\n", stream->datasetid);
+    pthread_exit(NULL);
+}
