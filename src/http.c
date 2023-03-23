@@ -6879,7 +6879,15 @@ void *decompress_GZ(void *user)
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
     printf("[C] GZ-Decompress/%s::start.\n", stream->datasetid);
 
-    inf(stream->comp_in[0], stream->comp_out[1]);
+    int ret = inf(stream->comp_in[0], stream->comp_out[1]);
+
+    if (ret != Z_OK)
+    {
+        printf("[C] GZ-Decompress/%s::error.\n", stream->datasetid);
+
+        close(stream->comp_in[0]);
+        close(stream->comp_out[1]);
+    }
 
     printf("[C] GZ-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
