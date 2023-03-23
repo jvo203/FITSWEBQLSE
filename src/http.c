@@ -6930,6 +6930,9 @@ void *decompress_ZIP(void *user)
 
     // unzip(stream->comp_in[0], stream->comp_out[1]);
 
+    close(stream->comp_in[0]);
+    close(stream->comp_out[1]);
+
     printf("[C] ZIP-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
 }
