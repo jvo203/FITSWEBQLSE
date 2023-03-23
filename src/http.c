@@ -137,6 +137,7 @@ extern int inf(int source, int dest);        // GZIP decompression
 extern void zerr(int ret);                   // GZIP error reporting
 void *decompress_Z(void *user);
 void *decompress_GZ(void *user);
+void *decompress_ZIP(void *user);
 void *decompress_read(void *user);
 extern void *video_request(void *req);
 extern void *download_request(void *req);   // a FORTRAN subroutine
@@ -1084,11 +1085,35 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             else
                 pthread_detach(tid);
 
-            if (stream->compression == fits_compression_compress)
+            switch (stream->compression)
+            {
+            case fits_compression_compress:
                 stat = pthread_create(&tid, NULL, decompress_Z, (void *)stream);
+                break;
 
-            if (stream->compression == fits_compression_gzip)
+            case fits_compression_gzip:
                 stat = pthread_create(&tid, NULL, decompress_GZ, (void *)stream);
+                break;
+
+            case fits_compression_zip:
+                stat = pthread_create(&tid, NULL, decompress_ZIP, (void *)stream);
+                break;
+
+            case fits_compression_bzip2:
+                stat = pthread_create(&tid, NULL, decompress_ZIP, (void *)stream);
+                break;
+
+            default:
+                printf("[C] parse2file(): unknown compression type, aborting the download.\n");
+            }
+
+            // end the download prematurely if the file is not a plain and / or compressed FITS file
+            void *item = get_dataset(stream->datasetid);
+
+            if (item != NULL)
+                set_error_status_C(item, true);
+
+            return 0;
 
             if (stat != 0)
             {
@@ -6892,5 +6917,19 @@ void *decompress_GZ(void *user)
     }
 
     printf("[C] GZ-Decompress/%s::end.\n", stream->datasetid);
+    pthread_exit(NULL);
+}
+
+void *decompress_ZIP(void *user)
+{
+    if (user == NULL)
+        pthread_exit(NULL);
+
+    struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
+    printf("[C] ZIP-Decompress/%s::start.\n", stream->datasetid);
+
+    // unzip(stream->comp_in[0], stream->comp_out[1]);
+
+    printf("[C] ZIP-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
 }
