@@ -173,8 +173,8 @@ ifeq ($(UNAME_S),Darwin)
 	# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
 	#MOD += `pkg-config --cflags json-fortran`
 
-	INC += -I${HOMEBREW_PREFIX}/opt/libpq/include
-	LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib
+	INC += -I${HOMEBREW_PREFIX}/opt/libpq/include -I${HOMEBREW_PREFIX}/opt/bzip2/include
+	LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib
 
 	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-12
 	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-12
