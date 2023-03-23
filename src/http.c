@@ -31,6 +31,9 @@
 // GZIP
 #include <zlib.h>
 
+// BZIP2
+#include <bzlib.h>
+
 // NASA CFITSIO
 #include <fitsio.h>
 
@@ -135,7 +138,7 @@ void *handle_image_request(void *ptr);
 extern void decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);        // GZIP decompression
 extern void zerr(int ret);                   // GZIP error reporting
-extern void bunzip2(int fdin, int fdout);    // BZIP2 decompression
+extern int bunzip2(int fdin, int fdout);     // BZIP2 decompression
 void *decompress_Z(void *user);
 void *decompress_GZ(void *user);
 void *decompress_ZIP(void *user);
@@ -6950,7 +6953,15 @@ void *decompress_BZIP2(void *user)
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
     printf("[C] BZIP2-Decompress/%s::start.\n", stream->datasetid);
 
-    bunzip2(stream->comp_in[0], stream->comp_out[1]);
+    int ret = bunzip2(stream->comp_in[0], stream->comp_out[1]);
+
+    if (ret != BZ_OK)
+    {
+        printf("[C] BZIP2-Decompress/%s::error.\n", stream->datasetid);
+
+        close(stream->comp_in[0]);
+        close(stream->comp_out[1]);
+    }
 
     printf("[C] BZIP2-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);

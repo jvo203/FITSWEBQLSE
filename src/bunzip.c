@@ -16,6 +16,7 @@ int bunzip2(int fdin, int fdout)
     if (!f)
     {
         /* handle error */
+        return BZ_IO_ERROR;
     }
 
     b = BZ2_bzReadOpen(&bzerror, f, 0, 0, NULL, 0);
@@ -23,6 +24,8 @@ int bunzip2(int fdin, int fdout)
     {
         BZ2_bzReadClose(&bzerror, b);
         /* handle error */
+        fclose(f);
+        return bzerror;
     }
 
     bzerror = BZ_OK;
@@ -36,6 +39,8 @@ int bunzip2(int fdin, int fdout)
             {
                 BZ2_bzReadClose(&bzerror, b);
                 /* handle error */
+                fclose(f);
+                return bzerror;
             }
         }
     }
@@ -44,6 +49,8 @@ int bunzip2(int fdin, int fdout)
     {
         BZ2_bzReadClose(&bzerror, b);
         /* handle error */
+        fclose(f);
+        return bzerror;
     }
     else
     {
