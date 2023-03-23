@@ -895,6 +895,7 @@ static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
 {
     size_t written;
     size_t realsize = size * nmemb;
+    // printf("[C] parse2stream(): size = %zu, nmemb = %zu, realsize = %zu.\n", size, nmemb, realsize);
 
     if (user == NULL) // do nothing in particular
     {
@@ -1058,11 +1059,6 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 return 0;
             }
 
-            // make stream->comp_out[0] non-blocking
-            /*int flags = fcntl(stream->comp_out[0], F_GETFL, 0);
-            int ret = fcntl(stream->comp_out[0], F_SETFL, flags | O_NONBLOCK);
-            printf("[C] ret from fcntl: %d\n", ret);*/
-
             // create and detach the decompression read/write threads
             pthread_t tid;
             int stat;
@@ -1114,14 +1110,6 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 close(stream->comp_out[1]);
                 break;
             }
-
-            // end the download prematurely if the file is not a plain and / or compressed FITS file
-            void *item = get_dataset(stream->datasetid);
-
-            if (item != NULL)
-                set_error_status_C(item, true);
-
-            return 0;
 
             if (stat != 0)
             {
@@ -1415,11 +1403,17 @@ static void *handle_url_download(void *arg)
                 curl_easy_setopt(curl, CURLOPT_WRITEDATA, &stream);
                 // curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, FITS_CHUNK_LENGTH); // no longer needed, the code can hadle larger chunks
 
-                int retry = 0;
+                /* Perform the request, res will get the return code */
+                res = curl_easy_perform(curl);
+
+                if (res != CURLE_OK)
+                    fprintf(stderr, "[C] handle_url_download: curl_easy_perform() failed: %s : %s\n", url, curl_easy_strerror(res));
+
+                /*int retry = 0;
 
                 do
                 {
-                    /* Perform the request, res will get the return code */
+                    // Perform the request, res will get the return code
                     res = curl_easy_perform(curl);
 
                     if (res != CURLE_OK)
@@ -1427,7 +1421,7 @@ static void *handle_url_download(void *arg)
                         fprintf(stderr, "[C] handle_url_download: curl_easy_perform() failed: %s : %s, retrying after 1s...\n", url, curl_easy_strerror(res));
                         sleep(1);
                     }
-                } while (res != CURLE_OK && retry++ < 3);
+                } while (res != CURLE_OK && retry++ < 3);*/
 
                 // close the write pipe
                 close(stream.comp_in[1]);
@@ -1464,6 +1458,7 @@ static void *handle_url_download(void *arg)
                         // remove the file if the processed size was less than FITS_CHUNK_LENGTH
                         if (stream.total_size < FITS_CHUNK_LENGTH)
                         {
+                            printf("[C] '%s' is less than %d bytes, removing the file.\n", filepath, FITS_CHUNK_LENGTH);
                             // remove the download file
                             remove(download);
                         }
