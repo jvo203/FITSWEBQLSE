@@ -56,7 +56,7 @@ void zerr(int ret)
 int inf(int source, int dest)
 {
     int ret;
-    unsigned have;
+    unsigned int have;
     z_stream strm;
     unsigned char in[CHUNK];
     unsigned char out[CHUNK];
@@ -109,7 +109,7 @@ int inf(int source, int dest)
 
             have = CHUNK - strm.avail_out;
 
-            if (write(dest, out, have) != have)
+            if (write(dest, out, (size_t)have) != (size_t)have)
             {
                 (void)inflateEnd(&strm);
                 return Z_ERRNO;

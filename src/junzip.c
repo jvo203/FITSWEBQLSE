@@ -6,8 +6,6 @@
 
 #include "junzip.h"
 
-#define CHUNK 16384
-
 // Read local ZIP file header. Silent on errors so optimistic reading possible.
 int jzReadLocalFileHeaderRaw(JZFile *zip, JZLocalFileHeader *header,
                              char *filename, int len)
@@ -74,13 +72,11 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
 {
     unsigned char jzBuffer[JZ_BUFFER_SIZE]; // limits maximum zip descriptor size
 
-#ifdef HAVE_ZLIB
-    unsigned char bytes[CHUNK];
-    unsigned have;
+    unsigned char bytes[JZ_BUFFER_SIZE];
+    unsigned int have;
     long compressedLeft, uncompressedLeft;
     int ret;
     z_stream strm;
-#endif
 
     if (header->compressionMethod == 0)
     { // Store - just read it
@@ -95,8 +91,9 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
             free(buffer);
             return Z_ERRNO;
         }
-#ifdef HAVE_ZLIB
+
         write(fdout, buffer, header->uncompressedSize);
+        close(fdout);
         free(buffer);
     }
     else if (header->compressionMethod == 8)
@@ -129,7 +126,7 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
             }
 
             strm.next_in = jzBuffer;
-            strm.avail_out = CHUNK;
+            strm.avail_out = JZ_BUFFER_SIZE;
             strm.next_out = bytes;
 
             compressedLeft -= strm.avail_in; // inflate will change avail_in
@@ -149,9 +146,9 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
                 return ret;
             }
 
-            have = CHUNK - strm.avail_out;
+            have = JZ_BUFFER_SIZE - strm.avail_out;
 
-            if (write(fdout, bytes, have) != have)
+            if (write(fdout, bytes, (size_t)have) != (size_t)have)
             {
                 (void)inflateEnd(&strm);
                 return Z_ERRNO;
@@ -163,28 +160,9 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
         // close the write end of the pipe
         close(fdout);
 
+        printf("[C] inflateEnd(&strm); [jzReadData()]\n");
+
         inflateEnd(&strm);
-#else
-#ifdef HAVE_PUFF
-        write(fdout, buffer, header->uncompressedSize);
-        free(buffer);
-    }
-    else if (header->compressionMethod == 8)
-    { // Deflate - using puff()
-        unsigned long destlen = header->uncompressedSize,
-                      sourcelen = header->compressedSize;
-        unsigned char *comp = (unsigned char *)malloc(sourcelen);
-        if (comp == NULL)
-            return Z_ERRNO; // couldn't allocate
-        unsigned long read = zip->read(zip, comp, sourcelen);
-        if (read != sourcelen)
-            return Z_ERRNO; // TODO: more robust read loop
-        int ret = puff((unsigned char *)buffer, &destlen, comp, &sourcelen);
-        free(comp);
-        if (ret)
-            return Z_ERRNO; // something went wrong
-#endif // HAVE_PUFF
-#endif
     }
     else
     {
