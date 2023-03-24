@@ -6939,10 +6939,15 @@ void *decompress_ZIP(void *user)
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
     printf("[C] ZIP-Decompress/%s::start.\n", stream->datasetid);
 
-    // unzip(stream->comp_in[0], stream->comp_out[1]);
+    int ret = unzip(stream->comp_in[0], stream->comp_out[1]);
 
-    close(stream->comp_in[0]);
-    close(stream->comp_out[1]);
+    if (ret != 0)
+    {
+        printf("[C] ZIP-Decompress/%s::error.\n", stream->datasetid);
+
+        close(stream->comp_in[0]);
+        close(stream->comp_out[1]);
+    }
 
     printf("[C] ZIP-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);

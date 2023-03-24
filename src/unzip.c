@@ -6,5 +6,5 @@
 
 int unzip(int fdin, int fdout)
 {
-    return 0;
+    return -1;
 }
