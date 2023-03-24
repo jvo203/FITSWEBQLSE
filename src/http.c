@@ -1299,7 +1299,7 @@ static void *handle_url_download(void *arg)
         ext++;       // skip the dot character
 
         // strip the supported compression extensions
-        if (strcmp(ext, "gz") == 0 || strcmp(ext, "bz2") == 0 || strcmp(ext, "zip") == 0 || strcmp(ext, "Z") == 0)
+        if (strcmp(ext, "gz") == 0 || strcmp(ext, "bz2") == 0 || strcmp(ext, "zip") == 0 || strcmp(ext, "Z") == 0 || strcmp(ext, "GZ") == 0 || strcmp(ext, "BZ2") == 0 || strcmp(ext, "ZIP") == 0)
         {
             // skip the compression extension
             ext = strrchr(fname, '.');
@@ -3171,7 +3171,7 @@ static enum MHD_Result on_http_connection(void *cls,
                     ext++;       // skip the dot character
 
                     // strip the supported compression extensions
-                    if (strcmp(ext, "gz") == 0 || strcmp(ext, "bz2") == 0 || strcmp(ext, "zip") == 0 || strcmp(ext, "Z") == 0)
+                    if (strcmp(ext, "gz") == 0 || strcmp(ext, "bz2") == 0 || strcmp(ext, "zip") == 0 || strcmp(ext, "Z") == 0 || strcmp(ext, "GZ") == 0 || strcmp(ext, "BZ2") == 0 || strcmp(ext, "ZIP") == 0)
                     {
                         // skip the compression extension
                         ext = strrchr(fname, '.');
