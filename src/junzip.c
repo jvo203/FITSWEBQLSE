@@ -6,128 +6,6 @@
 
 #include "junzip.h"
 
-unsigned char jzBuffer[JZ_BUFFER_SIZE]; // limits maximum zip descriptor size
-
-// Read ZIP file end record. Will move within file.
-int jzReadEndRecord(JZFile *zip, JZEndRecord *endRecord)
-{
-    long fileSize, readBytes, i;
-    JZEndRecord *er;
-
-    if (zip->seek(zip, 0, SEEK_END))
-    {
-        fprintf(stderr, "Couldn't go to end of zip file!");
-        return Z_ERRNO;
-    }
-
-    if ((fileSize = zip->tell(zip)) <= sizeof(JZEndRecord))
-    {
-        fprintf(stderr, "Too small file to be a zip!");
-        return Z_ERRNO;
-    }
-
-    readBytes = (fileSize < sizeof(jzBuffer)) ? fileSize : sizeof(jzBuffer);
-
-    if (zip->seek(zip, fileSize - readBytes, SEEK_SET))
-    {
-        fprintf(stderr, "Cannot seek in zip file!");
-        return Z_ERRNO;
-    }
-
-    if (zip->read(zip, jzBuffer, readBytes) < readBytes)
-    {
-        fprintf(stderr, "Couldn't read end of zip file!");
-        return Z_ERRNO;
-    }
-
-    // Naively assume signature can only be found in one place...
-    for (i = readBytes - sizeof(JZEndRecord); i >= 0; i--)
-    {
-        er = (JZEndRecord *)(jzBuffer + i);
-        if (er->signature == 0x06054B50)
-            break;
-    }
-
-    if (i < 0)
-    {
-        fprintf(stderr, "End record signature not found in zip!");
-        return Z_ERRNO;
-    }
-
-    memcpy(endRecord, er, sizeof(JZEndRecord));
-
-    if (endRecord->diskNumber || endRecord->centralDirectoryDiskNumber ||
-        endRecord->numEntries != endRecord->numEntriesThisDisk)
-    {
-        fprintf(stderr, "Multifile zips not supported!");
-        return Z_ERRNO;
-    }
-
-    return Z_OK;
-}
-
-// Read ZIP file global directory. Will move within file.
-int jzReadCentralDirectory(JZFile *zip, JZEndRecord *endRecord,
-                           JZRecordCallback callback, void *user_data)
-{
-    JZGlobalFileHeader fileHeader;
-    JZFileHeader header;
-    int i;
-
-    if (zip->seek(zip, endRecord->centralDirectoryOffset, SEEK_SET))
-    {
-        fprintf(stderr, "Cannot seek in zip file!");
-        return Z_ERRNO;
-    }
-
-    for (i = 0; i < endRecord->numEntries; i++)
-    {
-        if (zip->read(zip, &fileHeader, sizeof(JZGlobalFileHeader)) <
-            sizeof(JZGlobalFileHeader))
-        {
-            fprintf(stderr, "Couldn't read file header %d!", i);
-            return Z_ERRNO;
-        }
-
-        if (fileHeader.signature != 0x02014B50)
-        {
-            fprintf(stderr, "Invalid file header signature %d!", i);
-            return Z_ERRNO;
-        }
-
-        if (fileHeader.fileNameLength + 1 >= JZ_BUFFER_SIZE)
-        {
-            fprintf(stderr, "Too long file name %d!", i);
-            return Z_ERRNO;
-        }
-
-        if (zip->read(zip, jzBuffer, fileHeader.fileNameLength) <
-            fileHeader.fileNameLength)
-        {
-            fprintf(stderr, "Couldn't read filename %d!", i);
-            return Z_ERRNO;
-        }
-
-        jzBuffer[fileHeader.fileNameLength] = '\0'; // NULL terminate
-
-        if (zip->seek(zip, fileHeader.extraFieldLength, SEEK_CUR) ||
-            zip->seek(zip, fileHeader.fileCommentLength, SEEK_CUR))
-        {
-            fprintf(stderr, "Couldn't skip extra field or file comment %d", i);
-            return Z_ERRNO;
-        }
-
-        // Construct JZFileHeader from global file header
-        memcpy(&header, &fileHeader.compressionMethod, sizeof(header));
-        header.offset = fileHeader.relativeOffsetOflocalHeader;
-
-        if (!callback(zip, i, &header, (char *)jzBuffer, user_data))
-            break; // end if callback returns zero
-    }
-
-    return Z_OK;
-}
-
 // Read local ZIP file header. Silent on errors so optimistic reading possible.
 int jzReadLocalFileHeaderRaw(JZFile *zip, JZLocalFileHeader *header,
                              char *filename, int len)
@@ -204,6 +82,8 @@ int jzReadLocalFileHeader(JZFile *zip, JZFileHeader *header,
 // Read data from file stream, described by header, to preallocated buffer
 int jzReadData(JZFile *zip, JZFileHeader *header, void *buffer)
 {
+    unsigned char jzBuffer[JZ_BUFFER_SIZE]; // limits maximum zip descriptor size
+
 #ifdef HAVE_ZLIB
     unsigned char *bytes = (unsigned char *)buffer; // cast
     long compressedLeft, uncompressedLeft;
