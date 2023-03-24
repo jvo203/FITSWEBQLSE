@@ -139,7 +139,7 @@ extern void decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);        // GZIP decompression
 extern void zerr(int ret);                   // GZIP error reporting
 extern int bunzip2(int fdin, int fdout);     // BZIP2 decompression
-extern int unzip(int fdin, int fdout);       // ZIP decompression
+extern int unzip(int in, int out);           // ZIP decompression
 void *decompress_Z(void *user);
 void *decompress_GZ(void *user);
 void *decompress_ZIP(void *user);
