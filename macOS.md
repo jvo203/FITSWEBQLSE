@@ -133,43 +133,21 @@ ld: symbol(s) not found for architecture arm64
 # 10. BZIP2
     brew install bzip2
 
-# 11. GZIP
-    (the homebrew version does not contain development files)
-
-    wget https://ftp.gnu.org/gnu/gzip/gzip-1.12.tar.gz
-    tar zxvf gzip-1.12.tar.gz
-    cd gzip-1.12
-    ./configure --prefix=/usr/local
-    make -j16
-    
-    manually copy necessary header files to /usr/local/include
-    cp lib/config.h /usr/local/include
-    cp lib/intprops.h /usr/local/include
-    cp lib/timespec.h /usr/local/include
-    cp lib/arg-nonnull.h /usr/local/include
-    cp lib/dirname.h /usr/local/include
-    cp lib/filename.h /usr/local/include
-    cp lib/basename-lgpl.h /usr/local/include
-    cp lib/dosname.h /usr/local/include
-
-    manually copy necessary library files to /usr/local/lib
-    cp lib/libgzip.a /usr/local/lib
-
-# 12. x265
+# 11. x265
     brew install x265
 
-# 13. jemalloc
+# 12. jemalloc
     brew install jemalloc
 
-# 14. CZMQ
+# 13. CZMQ
     brew install czmq
 
-# 15. NASA CFITSIO
+# 14. NASA CFITSIO
     brew install cfitsio
 
-# 16. PostgreSQL (needed by JVO)
+# 15. PostgreSQL (needed by JVO)
     brew install libpq
 
-# 17. FORTRAN formatting in Visual Studio Code
+# 16. FORTRAN formatting in Visual Studio Code
     brew install fortran-language-server
     brew install findent
