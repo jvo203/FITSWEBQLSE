@@ -71,8 +71,7 @@ int jzReadLocalFileHeader(JZFile *zip, JZFileHeader *header,
 int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
 {
     unsigned char jzBuffer[JZ_BUFFER_SIZE]; // limits maximum zip descriptor size
-
-    unsigned char bytes[JZ_BUFFER_SIZE];
+    unsigned char out[JZ_BUFFER_SIZE];
     unsigned int have;
     long compressedLeft, uncompressedLeft;
     int ret;
@@ -109,60 +108,58 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
         if ((ret = inflateInit2(&strm, -MAX_WBITS)) != Z_OK)
             return ret; // Zlib errors are negative
 
-        // Inflate compressed data
-        for (compressedLeft = header->compressedSize,
-            uncompressedLeft = header->uncompressedSize;
-             compressedLeft && uncompressedLeft && ret != Z_STREAM_END;
-             compressedLeft -= strm.avail_in)
+        /* decompress until deflate stream ends or end of pipe */
+        do
         {
-            // Read next chunk
-            strm.avail_in = zip->read(zip, jzBuffer,
-                                      (sizeof(jzBuffer) < compressedLeft) ? sizeof(jzBuffer) : compressedLeft);
+            strm.avail_in = zip->read(zip, jzBuffer, JZ_BUFFER_SIZE);
 
-            if (strm.avail_in == 0 || zip->error(zip))
+            if (strm.avail_in < 0)
             {
-                inflateEnd(&strm);
+                (void)inflateEnd(&strm);
                 return Z_ERRNO;
             }
+
+            if (strm.avail_in == 0)
+                break;
 
             strm.next_in = jzBuffer;
-            strm.avail_out = JZ_BUFFER_SIZE;
-            strm.next_out = bytes;
 
-            compressedLeft -= strm.avail_in; // inflate will change avail_in
-
-            ret = inflate(&strm, Z_NO_FLUSH);
-
-            if (ret == Z_STREAM_ERROR)
-                return ret; // shouldn't happen
-
-            switch (ret)
+            /* run inflate() on input until output buffer not full */
+            do
             {
-            case Z_NEED_DICT:
-                ret = Z_DATA_ERROR; /* and fall through */
-            case Z_DATA_ERROR:
-            case Z_MEM_ERROR:
-                (void)inflateEnd(&strm);
-                return ret;
-            }
+                strm.avail_out = JZ_BUFFER_SIZE;
+                strm.next_out = out;
+                ret = inflate(&strm, Z_NO_FLUSH);
+                if (ret == Z_STREAM_ERROR)
+                    return ret; // shouldn't happen
 
-            have = JZ_BUFFER_SIZE - strm.avail_out;
+                switch (ret)
+                {
+                case Z_NEED_DICT:
+                    ret = Z_DATA_ERROR; /* and fall through */
+                case Z_DATA_ERROR:
+                case Z_MEM_ERROR:
+                    (void)inflateEnd(&strm);
+                    return ret;
+                }
 
-            if (write(fdout, bytes, (size_t)have) != (size_t)have)
-            {
-                (void)inflateEnd(&strm);
-                return Z_ERRNO;
-            }
+                have = JZ_BUFFER_SIZE - strm.avail_out;
 
-            uncompressedLeft = strm.avail_out;
-        }
+                if (write(fdout, out, (size_t)have) != (size_t)have)
+                {
+                    (void)inflateEnd(&strm);
+                    return Z_ERRNO;
+                }
+            } while (strm.avail_out == 0);
+
+            /* done when inflate() says it's done */
+        } while (ret != Z_STREAM_END);
 
         // close the write end of the pipe
         close(fdout);
 
-        printf("[C] inflateEnd(&strm); [jzReadData()]\n");
-
-        inflateEnd(&strm);
+        /* clean up and return */
+        (void)inflateEnd(&strm);
     }
     else
     {
