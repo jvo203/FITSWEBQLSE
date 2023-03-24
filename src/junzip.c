@@ -10,18 +10,12 @@
 int jzReadLocalFileHeaderRaw(JZFile *zip, JZLocalFileHeader *header,
                              char *filename, int len)
 {
-    printf("got here 0\n");
-
     if (zip->read(zip, header, sizeof(JZLocalFileHeader)) <
         sizeof(JZLocalFileHeader))
         return Z_ERRNO;
 
-    printf("got here 1\n");
-
     if (header->signature != 0x04034B50)
         return Z_ERRNO;
-
-    printf("got here 2\n");
 
     if (len)
     { // read filename
@@ -36,31 +30,25 @@ int jzReadLocalFileHeaderRaw(JZFile *zip, JZLocalFileHeader *header,
     }
     else
     { // skip filename
-        if (zip->seek(zip, header->fileNameLength, SEEK_CUR))
-            return Z_ERRNO;
+        return Z_ERRNO;
     }
-
-    printf("got here 3\n");
 
     if (header->extraFieldLength)
     {
-        if (zip->seek(zip, header->extraFieldLength, SEEK_CUR))
-            return Z_ERRNO;
-    }
+        char extraField[header->extraFieldLength];
 
-    printf("got here 4\n");
+        if (zip->read(zip, extraField, header->extraFieldLength) <
+            header->extraFieldLength)
+            return Z_ERRNO; // read fail
+    }
 
     // For now, silently ignore bit flags and hope ZLIB can uncompress
     // if(header->generalPurposeBitFlag)
     //     return Z_ERRNO; // Flags not supported
 
-    printf("got here 5\n");
-
     if (header->compressionMethod == 0 &&
         (header->compressedSize != header->uncompressedSize))
         return Z_ERRNO; // Method is "store" but sizes indicate otherwise, abort
-
-    printf("got here 6\n");
 
     return Z_OK;
 }
