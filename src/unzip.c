@@ -1,6 +1,6 @@
 /* unzip.c -- decompress files in gzip or pkzip format.
 
-   Copyright (C) 1997-1999, 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-1999, 2009-2022 Free Software Foundation, Inc.
    Copyright (C) 1992-1993 Jean-loup Gailly
 
    This program is free software; you can redistribute it and/or modify
@@ -50,6 +50,8 @@
 
 /* Globals */
 
+ulg unzip_crc; /* CRC found by 'unzip'.  */
+
 static int decrypt;        /* flag to turn on decryption */
 static int pkzip = 0;      /* set for a pkzip file */
 static int ext_header = 0; /* set if extended local header */
@@ -58,8 +60,8 @@ static int ext_header = 0; /* set if extended local header */
  * Check zip file and advance inptr to the start of the compressed data.
  * Get ofname from the local header if necessary.
  */
-int check_zipfile(in)
-int in; /* input file descriptors */
+int check_zipfile(int in)
+// int in;   /* input file descriptors */
 {
     uch *h = inbuf + inptr; /* first local header */
 
@@ -98,7 +100,7 @@ int in; /* input file descriptors */
     ext_header = (h[LOCFLG] & EXTFLG) != 0;
     pkzip = 1;
 
-    /* Get ofname and time stamp from local header (to be done) */
+    /* Get ofname and timestamp from local header (to be done) */
     return OK;
 }
 
@@ -109,8 +111,8 @@ int in; /* input file descriptors */
  *   the compressed data, from offsets inptr to insize-1 included.
  *   The magic header has already been checked. The output buffer is cleared.
  */
-int unzip(in, out)
-int in, out; /* input and output file descriptors */
+int unzip(int in, int out)
+// int in, out; /* input and output file descriptors */
 {
     ulg orig_crc = 0; /* original crc */
     ulg orig_len = 0; /* original uncompressed length */
@@ -133,7 +135,11 @@ int in, out; /* input and output file descriptors */
     if (method == DEFLATED)
     {
 
+#ifdef IBM_Z_DFLTCC
+        int res = dfltcc_inflate();
+#else
         int res = inflate();
+#endif
 
         if (res == 3)
         {
@@ -152,7 +158,7 @@ int in, out; /* input and output file descriptors */
         if (n != LG(inbuf + LOCSIZ) - (decrypt ? RAND_HEAD_LEN : 0))
         {
 
-            fprintf(stderr, "len %ld, siz %ld\n", n, LG(inbuf + LOCSIZ));
+            fprintf(stderr, "len %lu, siz %lu\n", n, LG(inbuf + LOCSIZ));
             gzip_error("invalid compressed data--length mismatch");
         }
         while (n--)
@@ -228,6 +234,7 @@ int in, out; /* input and output file descriptors */
         }
     }
     ext_header = pkzip = 0; /* for next file */
+    unzip_crc = orig_crc;
     if (err == OK)
         return OK;
     exit_code = ERROR;

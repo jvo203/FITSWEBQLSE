@@ -142,8 +142,15 @@ ld: symbol(s) not found for architecture arm64
     ./configure --prefix=/usr/local
     make -j16
     
-    manually cp lib/config.h /usr/local/include
+    manually copy necessary header files to /usr/local/include
     cp lib/config.h /usr/local/include
+    cp lib/intprops.h /usr/local/include
+    cp lib/timespec.h /usr/local/include
+    cp lib/arg-nonnull.h /usr/local/include
+    cp lib/dirname.h /usr/local/include
+    cp lib/filename.h /usr/local/include
+    cp lib/basename-lgpl.h /usr/local/include
+    cp lib/dosname.h /usr/local/include
 
 # 12. x265
     brew install x265
