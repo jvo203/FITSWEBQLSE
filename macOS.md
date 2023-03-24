@@ -133,21 +133,32 @@ ld: symbol(s) not found for architecture arm64
 # 10. BZIP2
     brew install bzip2
 
-# 11. x265
+# 11. GZIP
+    (the homebrew version does not contain development files)
+
+    wget https://ftp.gnu.org/gnu/gzip/gzip-1.12.tar.gz
+    tar zxvf gzip-1.12.tar.gz
+    cd gzip-1.12
+    ./configure --prefix=/usr/local
+    make -j16
+    
+    manually cp lib/config.h /usr/local/include
+
+# 12. x265
     brew install x265
 
-# 12. jemalloc
+# 13. jemalloc
     brew install jemalloc
 
-# 13. CZMQ
+# 14. CZMQ
     brew install czmq
 
-# 14. NASA CFITSIO
+# 15. NASA CFITSIO
     brew install cfitsio
 
-# 15. PostgreSQL (needed by JVO)
+# 16. PostgreSQL (needed by JVO)
     brew install libpq
 
-# 16. FORTRAN formatting in Visual Studio Code
+# 17. FORTRAN formatting in Visual Studio Code
     brew install fortran-language-server
     brew install findent
