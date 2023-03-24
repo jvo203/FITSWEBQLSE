@@ -133,21 +133,24 @@ ld: symbol(s) not found for architecture arm64
 # 10. BZIP2
     brew install bzip2
 
-# 11. x265
+# 11. GZIP
+    brew install gzip
+
+# 12. x265
     brew install x265
 
-# 12. jemalloc
+# 13. jemalloc
     brew install jemalloc
 
-# 13. CZMQ
+# 14. CZMQ
     brew install czmq
 
-# 14. NASA CFITSIO
+# 15. NASA CFITSIO
     brew install cfitsio
 
-# 15. PostgreSQL (needed by JVO)
+# 16. PostgreSQL (needed by JVO)
     brew install libpq
 
-# 16. FORTRAN formatting in Visual Studio Code
+# 17. FORTRAN formatting in Visual Studio Code
     brew install fortran-language-server
     brew install findent
