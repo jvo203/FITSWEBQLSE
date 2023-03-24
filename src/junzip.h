@@ -13,18 +13,8 @@ extern "C"
 
 #include <stdint.h>
 
-// Enable compiling without Zlib as well
-// (no compression support, only "store")
-#ifdef HAVE_ZLIB
+// this C code requires Zlib
 #include <zlib.h>
-#else
-#define Z_OK 0
-#define Z_ERRNO -1
-#endif
-
-#ifdef HAVE_PUFF
-#include "puff.h"
-#endif
 
     // If you don't have stdint.h, the following two lines should work for most 32/64 bit systems
     // typedef unsigned int uint32_t;
