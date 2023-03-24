@@ -1,10 +1,19 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <unistd.h>
 
 #include "junzip.h"
 
 int unzip(int fdin, int fdout)
 {
-    return -1;
+    FILE *f;
+    JZFile *zip;
+
+    f = fdopen(fdin, "rb");
+    if (!f)
+        return -1;
+
+    fclose(f);
+    close(fdout);
+
+    return 0;
 }
