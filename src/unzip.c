@@ -12,22 +12,22 @@ int processFile(JZFile *zip, int fdout)
 
     if (jzReadLocalFileHeader(zip, &header, filename, sizeof(filename)))
     {
-        printf("Couldn't read local file header!");
+        printf("[C] Couldn't read local file header!");
         return -1;
     }
 
     if ((data = (unsigned char *)malloc(header.uncompressedSize)) == NULL)
     {
-        printf("Couldn't allocate memory!");
+        printf("[C] Couldn't allocate memory!");
         return -1;
     }
 
-    printf("%s, %d / %d bytes at offset %08X\n", filename,
+    printf("[C] %s, %d / %d bytes at offset %08X\n", filename,
            header.compressedSize, header.uncompressedSize, header.offset);
 
     if (jzReadData(zip, &header, data) != Z_OK)
     {
-        printf("Couldn't read file data!");
+        printf("[C] Couldn't read file data!");
         free(data);
         return -1;
     }
