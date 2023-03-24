@@ -152,6 +152,9 @@ ld: symbol(s) not found for architecture arm64
     cp lib/basename-lgpl.h /usr/local/include
     cp lib/dosname.h /usr/local/include
 
+    manually copy necessary library files to /usr/local/lib
+    cp lib/libgzip.a /usr/local/lib
+
 # 12. x265
     brew install x265
 
