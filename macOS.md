@@ -143,6 +143,7 @@ ld: symbol(s) not found for architecture arm64
     make -j16
     
     manually cp lib/config.h /usr/local/include
+    cp lib/config.h /usr/local/include
 
 # 12. x265
     brew install x265
