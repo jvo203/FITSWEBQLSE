@@ -68,7 +68,7 @@ int jzReadLocalFileHeader(JZFile *zip, JZFileHeader *header,
 }
 
 // Read data from file stream, described by header, to preallocated buffer
-int jzReadData(JZFile *zip, JZFileHeader *header, void *buffer)
+int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
 {
     unsigned char jzBuffer[JZ_BUFFER_SIZE]; // limits maximum zip descriptor size
 
@@ -81,11 +81,20 @@ int jzReadData(JZFile *zip, JZFileHeader *header, void *buffer)
 
     if (header->compressionMethod == 0)
     { // Store - just read it
+        unsigned char *buffer = (unsigned char *)malloc(header->uncompressedSize);
+        if (buffer == NULL)
+            return Z_ERRNO;
+
         if (zip->read(zip, buffer, header->uncompressedSize) <
                 header->uncompressedSize ||
             zip->error(zip))
+        {
+            free(buffer);
             return Z_ERRNO;
+        }
 #ifdef HAVE_ZLIB
+        write(fdout, buffer, header->uncompressedSize);
+        free(buffer);
     }
     else if (header->compressionMethod == 8)
     { // Deflate - using zlib
@@ -144,6 +153,8 @@ int jzReadData(JZFile *zip, JZFileHeader *header, void *buffer)
         inflateEnd(&strm);
 #else
 #ifdef HAVE_PUFF
+        write(fdout, buffer, header->uncompressedSize);
+        free(buffer);
     }
     else if (header->compressionMethod == 8)
     { // Deflate - using puff()

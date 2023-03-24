@@ -133,7 +133,7 @@ extern "C"
 
     // Read data from file stream, described by header, to preallocated buffer
     // Return value is zlib coded, e.g. Z_OK, or error code
-    int jzReadData(JZFile *zip, JZFileHeader *header, void *buffer);
+    int jzReadData(JZFile *zip, JZFileHeader *header, int fdout);
 
 #ifdef __cplusplus
 };
