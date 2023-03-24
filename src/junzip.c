@@ -6,6 +6,8 @@
 
 #include "junzip.h"
 
+#define CHUNK 16384
+
 // Read local ZIP file header. Silent on errors so optimistic reading possible.
 int jzReadLocalFileHeaderRaw(JZFile *zip, JZLocalFileHeader *header,
                              char *filename, int len)
@@ -73,7 +75,8 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
     unsigned char jzBuffer[JZ_BUFFER_SIZE]; // limits maximum zip descriptor size
 
 #ifdef HAVE_ZLIB
-    unsigned char *bytes = (unsigned char *)buffer; // cast
+    unsigned char bytes[CHUNK];
+    unsigned have;
     long compressedLeft, uncompressedLeft;
     int ret;
     z_stream strm;
@@ -126,7 +129,7 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
             }
 
             strm.next_in = jzBuffer;
-            strm.avail_out = uncompressedLeft;
+            strm.avail_out = CHUNK;
             strm.next_out = bytes;
 
             compressedLeft -= strm.avail_in; // inflate will change avail_in
@@ -146,9 +149,19 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
                 return ret;
             }
 
-            bytes += uncompressedLeft - strm.avail_out; // bytes uncompressed
+            have = CHUNK - strm.avail_out;
+
+            if (write(fdout, bytes, have) != have)
+            {
+                (void)inflateEnd(&strm);
+                return Z_ERRNO;
+            }
+
             uncompressedLeft = strm.avail_out;
         }
+
+        // close the write end of the pipe
+        close(fdout);
 
         inflateEnd(&strm);
 #else
