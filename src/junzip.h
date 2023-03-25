@@ -108,7 +108,8 @@ extern "C"
     typedef int (*JZRecordCallback)(JZFile *zip, int index, JZFileHeader *header,
                                     char *filename, void *user_data);
 
-#define JZ_BUFFER_SIZE 65536
+// #define JZ_BUFFER_SIZE 65536
+#define JZ_BUFFER_SIZE 16384
 
     // Read ZIP file end record. Will move within file.
     int jzReadEndRecord(JZFile *zip, JZEndRecord *endRecord);
