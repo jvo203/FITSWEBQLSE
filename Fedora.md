@@ -22,6 +22,8 @@
 
 	sudo dnf install lz4-devel
 
+    sudo dnf install zlib-devel
+
     sudo dnf install bzip2-devel
 
 	sudo dnf install zfp-devel
