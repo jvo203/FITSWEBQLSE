@@ -28,16 +28,19 @@
 # 10. lz4
     sudo apt install liblz4-dev
 
-# 11. cpuid
+# 11. bzip2
+    sudo apt install libbz2-dev
+
+# 12. cpuid
     sudo apt install libcpuid-dev
 
-# 12. libcURL
+# 13. libcURL
     sudo apt install libcurl4-openssl-dev
 
-# 13. CFITSIO
+# 14. CFITSIO
     sudo apt install libcfitsio-dev
 
-# 14. x265
+# 15. x265
     sudo apt install libx265-dev
 
     or compile from source:
@@ -70,7 +73,7 @@
 
     sudo make install
 
-# 15. Adjust the environment variables in the .bashrc
+# 16. Adjust the environment variables in the .bashrc
 
     Add
 
@@ -79,11 +82,11 @@
 
     to .bashrc and re-login
 
-# 16. Intel SPMD C (ispc)
+# 17. Intel SPMD C (ispc)
 
     manually add ispc from https://ispc.github.io/downloads.html
 
-# 17. Intel oneAPI
+# 18. Intel oneAPI
 
     cd /tmp
     wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
@@ -102,10 +105,10 @@
 
     to .bashrc and re-login
 
-# 18. Splatalogue 
+# 19. Splatalogue 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
-# 19. TCMalloc
+# 20. TCMalloc
     sudo apt install libgoogle-perftools-dev
 
 
