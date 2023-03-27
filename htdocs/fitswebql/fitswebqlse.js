@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-27.1";
+    return "JS2023-03-27.2";
 }
 
 function uuidv4() {
@@ -8337,7 +8337,7 @@ function setup_axes() {
             .attr("font-family", "Inconsolata")
             .attr("font-size", "1.25em")
             .attr("text-anchor", "start")
-            .style("fill", "darkgray")
+            .style("fill", "dimgray")
             //.style("opacity", 0.7)
             .attr("stroke", "none")
             .attr("transform", "rotate(-90)")
