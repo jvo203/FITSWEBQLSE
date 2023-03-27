@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-27.2";
+    return "JS2023-03-27.3";
 }
 
 function uuidv4() {
@@ -8337,7 +8337,7 @@ function setup_axes() {
             .attr("font-family", "Inconsolata")
             .attr("font-size", "1.25em")
             .attr("text-anchor", "start")
-            .style("fill", "dimgray")
+            .style("fill", "darkgray")
             //.style("opacity", 0.7)
             .attr("stroke", "none")
             .attr("transform", "rotate(-90)")
@@ -9480,7 +9480,7 @@ function pv_event(event) {
                 .attr("id", "pv_contour_lines")
                 .attr("type", "number")
                 .style("width", "3em")
-                .style("color", "darkgray")
+                .style("color", "#383838")
                 .attr("min", 2)
                 .attr("step", 1)
                 .attr("value", previous_pv_contour_lines);
