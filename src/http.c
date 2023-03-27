@@ -6879,7 +6879,7 @@ void *decompress_read(void *user)
         }
         else
         {
-            size_t processed = parse2file(buf, 1, (size_t)n, stream);
+            /*size_t processed =*/parse2file(buf, 1, (size_t)n, stream);
             // printf("[C] FITS_PARSE %zu BYTES.\n", processed);
         }
     }
