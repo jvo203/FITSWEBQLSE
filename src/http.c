@@ -1085,7 +1085,7 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 return 0;
             }
             else
-                pthread_detach(tid);
+                stream->tid_created = true;
 
             switch (stream->compression)
             {
@@ -1385,6 +1385,8 @@ static void *handle_url_download(void *arg)
             stream.comp_out[0] = -1;
             stream.comp_out[1] = -1;
 
+            stream.tid_created = false;
+
             // header
             stream.hdrEnd = false;
             stream.bitpix = 0;
@@ -1433,7 +1435,8 @@ static void *handle_url_download(void *arg)
                     close(stream.comp_in[1]);
 
                 // join the decompression read thread
-                pthread_join(stream.tid, NULL);
+                if (stream.tid_created)
+                    pthread_join(stream.tid, NULL);
 
                 // close the file
                 fclose(downloadfile);

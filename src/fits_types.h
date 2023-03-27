@@ -32,6 +32,7 @@ struct FITSDownloadStream
     int comp_in[2];
     int comp_out[2];
     pthread_t tid;
+    bool tid_created;
 
     // a bare-bones FITS header
     bool hdrEnd;
