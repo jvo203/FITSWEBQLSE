@@ -1414,9 +1414,6 @@ static void *handle_url_download(void *arg)
                 /* Perform the request, res will get the return code */
                 res = curl_easy_perform(curl);
 
-                if (res != CURLE_OK)
-                    fprintf(stderr, "[C] handle_url_download: curl_easy_perform() failed: %s : %s\n", url, curl_easy_strerror(res));
-
                 /*int retry = 0;
 
                 do
@@ -1432,7 +1429,8 @@ static void *handle_url_download(void *arg)
                 } while (res != CURLE_OK && retry++ < 3);*/
 
                 // close the write pipe
-                close(stream.comp_in[1]);
+                if (stream.comp_in[1] != -1)
+                    close(stream.comp_in[1]);
 
                 // join the decompression read thread
                 pthread_join(stream.tid, NULL);
