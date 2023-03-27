@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-16.0";
+    return "JS2023-03-27.0";
 }
 
 function uuidv4() {
@@ -14742,7 +14742,7 @@ function show_welcome() {
     if (!isLocal) {
         ul.append("li")
             .attr("class", "list-group-item list-group-item-success")
-            .html('<h4>FITSWEBQLSE source code on GitHub: <a href="https://github.com/jvo203/FITSWEBQLSE"><em>https://github.com/jvo203/FITSWEBQLSE</em></a></h4>');
+            .html('<h4>source code: <a href="https://github.com/jvo203/FITSWEBQLSE"><em>https://github.com/jvo203/FITSWEBQLSE</em></a></h4>');
     }
 
     bodyDiv.append("h3")
