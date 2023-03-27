@@ -27,7 +27,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 2. Install dependencies
 
-    sudo dnf install cmake glib2-devel libcurl-devel lz4-devel libpq-devel sqlite-devel
+    sudo dnf install cmake glib2-devel libcurl-devel lz4-devel bzip2-devel zlib-devel libpq-devel sqlite-devel
 
 # 3. NASM
 
