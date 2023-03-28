@@ -1042,13 +1042,19 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 if (status_in == 0)
                 {
                     close(stream->comp_in[0]); // close the read end
+                    stream->comp_in[0] = -1;
+
                     close(stream->comp_in[1]); // close the write end
+                    stream->comp_in[1] = -1;
                 }
 
                 if (status_out == 0)
                 {
                     close(stream->comp_out[0]); // close the read end
+                    stream->comp_out[0] = -1;
+
                     close(stream->comp_out[1]); // close the write end
+                    stream->comp_out[1] = -1;
                 }
 
                 // end the download prematurely
@@ -1071,10 +1077,17 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 printf("[C] parse2file(): error creating the decompress_read thread, aborting the download.\n");
 
                 // close the pipes
-                close(stream->comp_in[0]);  // close the read end
-                close(stream->comp_in[1]);  // close the write end
+                close(stream->comp_in[0]); // close the read end
+                stream->comp_in[0] = -1;
+
+                close(stream->comp_in[1]); // close the write end
+                stream->comp_in[1] = -1;
+
                 close(stream->comp_out[0]); // close the read end
+                stream->comp_out[0] = -1;
+
                 close(stream->comp_out[1]); // close the write end
+                stream->comp_out[1] = -1;
 
                 // end the download prematurely
                 void *item = get_dataset(stream->datasetid);
@@ -1108,7 +1121,9 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
             default:
                 printf("[C] parse2file(): unknown compression type, aborting the download.\n");
                 close(stream->comp_in[0]);
+                stream->comp_in[0] = -1;
                 close(stream->comp_out[1]);
+                stream->comp_out[1] = -1;
                 return 0;
                 break;
             }
@@ -1118,10 +1133,17 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 printf("[C] parse2file(): error creating the decompress_write thread, aborting the download.\n");
 
                 // close the pipes
-                close(stream->comp_in[0]);  // close the read end
-                close(stream->comp_in[1]);  // close the write end
+                close(stream->comp_in[0]); // close the read end
+                stream->comp_in[0] = -1;
+
+                close(stream->comp_in[1]); // close the write end
+                stream->comp_in[1] = -1;
+
                 close(stream->comp_out[0]); // close the read end
+                stream->comp_out[0] = -1;
+
                 close(stream->comp_out[1]); // close the write end
+                stream->comp_out[1] = -1;
 
                 // end the download prematurely
                 void *item = get_dataset(stream->datasetid);
@@ -1144,10 +1166,17 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
                 printf("[C] parse2file(): error writing to the decompression pipe, aborting the download.\n");
 
                 // close the pipes
-                close(stream->comp_in[0]);  // close the read end
-                close(stream->comp_in[1]);  // close the write end
+                close(stream->comp_in[0]); // close the read end
+                stream->comp_in[0] = -1;
+
+                close(stream->comp_in[1]); // close the write end
+                stream->comp_in[1] = -1;
+
                 close(stream->comp_out[0]); // close the read end
+                stream->comp_out[0] = -1;
+
                 close(stream->comp_out[1]); // close the write end
+                stream->comp_out[1] = -1;
 
                 // end the download prematurely
                 void *item = get_dataset(stream->datasetid);
@@ -1432,7 +1461,10 @@ static void *handle_url_download(void *arg)
 
                 // close the write pipe
                 if (stream.comp_in[1] != -1)
+                {
                     close(stream.comp_in[1]);
+                    stream.comp_in[1] = -1;
+                }
 
                 // join the decompression read thread
                 if (stream.tid_created)
@@ -1534,7 +1566,7 @@ static void *handle_url_download(void *arg)
             free(stream.pixels);
             free(stream.mask);
 
-            // close all the Unix pipes (just to be on the safe side)
+            // close all the remaining Unix pipes (just to be on the safe side)
             if (stream.comp_in[0] != -1)
                 close(stream.comp_in[0]);
 
@@ -6925,7 +6957,10 @@ void *decompress_GZ(void *user)
         zerr(ret);
 
         close(stream->comp_in[0]);
+        stream->comp_in[0] = -1;
+
         close(stream->comp_out[1]);
+        stream->comp_out[1] = -1;
     }
 
     printf("[C] GZ-Decompress/%s::end.\n", stream->datasetid);
@@ -6946,8 +6981,11 @@ void *decompress_ZIP(void *user)
     {
         printf("[C] ZIP-Decompress/%s::error.\n", stream->datasetid);
 
-        close(stream->comp_out[1]);
         close(stream->comp_in[0]);
+        stream->comp_in[0] = -1;
+
+        close(stream->comp_out[1]);
+        stream->comp_out[1] = -1;
     }
 
     printf("[C] ZIP-Decompress/%s::end.\n", stream->datasetid);
@@ -6969,7 +7007,10 @@ void *decompress_BZIP2(void *user)
         printf("[C] BZIP2-Decompress/%s::error.\n", stream->datasetid);
 
         close(stream->comp_in[0]);
+        stream->comp_in[0] = -1;
+
         close(stream->comp_out[1]);
+        stream->comp_out[1] = -1;
     }
 
     printf("[C] BZIP2-Decompress/%s::end.\n", stream->datasetid);
