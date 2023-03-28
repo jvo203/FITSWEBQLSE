@@ -47,16 +47,15 @@ int unzip(int fdin, int fdout)
     if (zip == NULL)
     {
         printf("[C] jzfile_from_stdio_file failed.\n");
-        goto endClose;
+        fclose(fp);
+        close(fdout);
+        return -1;
     }
 
     retval = processFile(zip, fdout);
 
-endClose:
-    if (zip != NULL)
-        zip->close(zip);
-
-    fclose(fp);
+    // fp will be closed by zip->close(zip), in "stdio_read_file_handle_close()"
+    zip->close(zip);
     close(fdout);
 
     return retval;
