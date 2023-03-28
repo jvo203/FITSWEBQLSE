@@ -55,30 +55,6 @@ static void signal_handler(int sig_num)
     s_received_signal = sig_num;
 }
 
-static void
-sigpipe_catcher(int sig)
-{
-    printf("[C] SIGPIPE caught.\n");
-}
-
-static void
-ignore_sigpipe()
-{
-    struct sigaction oldsig;
-    struct sigaction sig;
-
-    sig.sa_handler = &sigpipe_catcher;
-    sigemptyset(&sig.sa_mask);
-#ifdef SA_INTERRUPT
-    sig.sa_flags = SA_INTERRUPT; /* SunOS */
-#else
-    sig.sa_flags = SA_RESTART;
-#endif
-    if (0 != sigaction(SIGPIPE, &sig, &oldsig))
-        fprintf(stderr,
-                "[C] Failed to install SIGPIPE handler: %s\n", strerror(errno));
-}
-
 /* ZeroMQ node auto-discovery */
 #define BEACON_PORT 50000
 
@@ -393,9 +369,6 @@ int main(int argc, char *argv[])
 
     printf("Browser URL: http://localhost:%" PRIu16 "\n", options.http_port);
     printf("*** To quit FITSWEBQLSE press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
-
-    // ignore SIGPIPE
-    ignore_sigpipe();
 
     // Ctrl-C signal handler
     signal(SIGTERM, signal_handler);
