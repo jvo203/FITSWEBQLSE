@@ -30,8 +30,8 @@ struct FITSDownloadStream
     size_t total_size;
 
     enum fits_compression compression;
-    _Atomic int comp_in[2];
-    _Atomic int comp_out[2];
+    atomic_int comp_in[2];
+    atomic_int comp_out[2];
     pthread_t tid;
     volatile bool tid_created;
 
