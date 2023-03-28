@@ -46,9 +46,9 @@ int unzip(int fdin, int fdout)
     zip = jzfile_from_stdio_file(fp);
     if (zip == NULL)
     {
+        /* handle error */
         printf("[C] jzfile_from_stdio_file failed.\n");
         fclose(fp);
-        close(fdout);
         return -1;
     }
 
