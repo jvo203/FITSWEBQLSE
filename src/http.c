@@ -6946,8 +6946,8 @@ void *decompress_ZIP(void *user)
     {
         printf("[C] ZIP-Decompress/%s::error.\n", stream->datasetid);
 
-        close(stream->comp_in[0]);
         close(stream->comp_out[1]);
+        close(stream->comp_in[0]);
     }
 
     printf("[C] ZIP-Decompress/%s::end.\n", stream->datasetid);
