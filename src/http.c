@@ -1027,11 +1027,25 @@ static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user)
 
         if (stream->compression != fits_compression_none)
         {
+            int pipefd[2];
             int status_in, status_out;
 
             // create the decompression pipes (in-out queues)
-            status_in = pipe(stream->comp_in);
-            status_out = pipe(stream->comp_out);
+            status_in = pipe(pipefd);
+
+            if (status_in == 0)
+            {
+                stream->comp_in[0] = pipefd[0];
+                stream->comp_in[1] = pipefd[1];
+            }
+
+            status_out = pipe(pipefd);
+
+            if (status_out == 0)
+            {
+                stream->comp_out[0] = pipefd[0];
+                stream->comp_out[1] = pipefd[1];
+            }
 
             // handle errors
             if (status_in != 0 || status_out != 0)

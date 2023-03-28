@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdatomic.h>
 
 #define FITS_CHUNK_LENGTH 2880
 #define FITS_LINE_LENGTH 80
@@ -29,8 +30,8 @@ struct FITSDownloadStream
     size_t total_size;
 
     enum fits_compression compression;
-    int comp_in[2];
-    int comp_out[2];
+    _Atomic int comp_in[2];
+    _Atomic int comp_out[2];
     pthread_t tid;
     volatile bool tid_created;
 
