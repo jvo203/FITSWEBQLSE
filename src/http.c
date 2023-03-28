@@ -926,7 +926,7 @@ static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user)
         }
         else
         {
-            printf("[C] parse2stream::chunked_write() succeeded; %zu bytes written.\n", written);
+            // printf("[C] parse2stream::chunked_write() succeeded; %zu bytes written.\n", written);
             return realsize;
         }
 
