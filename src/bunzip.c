@@ -11,7 +11,6 @@ int bunzip2(int fdin, int fdout)
     int nBuf;
     char buf[CHUNK];
     int bzerror;
-    int nWritten;
 
     f = fdopen(fdin, "rb");
     if (!f)
@@ -41,7 +40,7 @@ int bunzip2(int fdin, int fdout)
                 continue;
 
             /* do something with buf[0 .. nBuf-1] */
-            if (write(fdout, buf, (size_t)nBuf) != (size_t)nBuf)
+            if (write(fdout, buf, (size_t)nBuf) != nBuf)
             {
                 BZ2_bzReadClose(&bzerror, b);
                 /* handle error */
