@@ -36,18 +36,16 @@ int bunzip2(int fdin, int fdout)
         nBuf = BZ2_bzRead(&bzerror, b, buf, CHUNK);
         if (bzerror == BZ_OK || bzerror == BZ_STREAM_END)
         {
-            if (nBuf <= 0)
-                continue;
-
             /* do something with buf[0 .. nBuf-1] */
-            if (write(fdout, buf, (size_t)nBuf) != nBuf)
-            {
-                BZ2_bzReadClose(&bzerror, b);
-                /* handle error */
-                printf("[C] writing %d bytes to fdout failed.\n", nBuf);
-                fclose(f);
-                return BZ_IO_ERROR;
-            }
+            if (nBuf > 0)
+                if (write(fdout, buf, (size_t)nBuf) != nBuf)
+                {
+                    BZ2_bzReadClose(&bzerror, b);
+                    /* handle error */
+                    printf("[C] writing %d bytes to fdout failed.\n", nBuf);
+                    fclose(f);
+                    return BZ_IO_ERROR;
+                }
         }
     }
 
