@@ -1,3 +1,8 @@
+## [5.0.30] - 2023-03-29
+
+* added compressed FITS files support to the external URL file downloads (_*.fits.Z_, _*.fits.gz_, _*.fits.zip_, _*.fits.bz2_)
+* cosmetic changes in the client-side JavaScript (font colour adjustment in the P-V Diagram _#contour levels_ input field)
+
 ## [5.0.29] - 2023-03-15
 
 * re-worked the client-side JavaScript P-V Diagram event loop to reduce the load on the server
