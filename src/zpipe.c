@@ -119,9 +119,6 @@ int inf(int source, int dest)
         /* done when inflate() says it's done */
     } while (ret != Z_STREAM_END);
 
-    // close the write end of the pipe
-    close(dest);
-
     /* clean up and return */
     (void)inflateEnd(&strm);
     return ret == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
