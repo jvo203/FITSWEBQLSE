@@ -6958,10 +6958,10 @@ void *decompress_Z(void *user)
 
         close(stream->comp_in[0]);
         stream->comp_in[0] = -1;
-
-        close(stream->comp_out[1]);
-        stream->comp_out[1] = -1;
     }
+
+    close(stream->comp_out[1]);
+    stream->comp_out[1] = -1;
 
     printf("[C] Z-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
@@ -6984,10 +6984,10 @@ void *decompress_GZ(void *user)
 
         close(stream->comp_in[0]);
         stream->comp_in[0] = -1;
-
-        close(stream->comp_out[1]);
-        stream->comp_out[1] = -1;
     }
+
+    close(stream->comp_out[1]);
+    stream->comp_out[1] = -1;
 
     printf("[C] GZ-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
@@ -7009,10 +7009,10 @@ void *decompress_ZIP(void *user)
 
         close(stream->comp_in[0]);
         stream->comp_in[0] = -1;
-
-        close(stream->comp_out[1]);
-        stream->comp_out[1] = -1;
     }
+
+    close(stream->comp_out[1]);
+    stream->comp_out[1] = -1;
 
     printf("[C] ZIP-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
@@ -7034,10 +7034,10 @@ void *decompress_BZIP2(void *user)
 
         close(stream->comp_in[0]);
         stream->comp_in[0] = -1;
-
-        close(stream->comp_out[1]);
-        stream->comp_out[1] = -1;
     }
+
+    close(stream->comp_out[1]);
+    stream->comp_out[1] = -1;
 
     printf("[C] BZIP2-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
