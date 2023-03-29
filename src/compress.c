@@ -371,7 +371,10 @@ int decompress(int fdin, int fdout)
     if (insize < 3 || inbuf[0] != MAGIC_1 || inbuf[1] != MAGIC_2)
     {
         if (rsize < 0)
+        {
             read_error();
+            return -1;
+        }
 
         if (insize > 0)
         {
