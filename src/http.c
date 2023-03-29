@@ -135,11 +135,11 @@ void *handle_fitswebql_request(void *ptr);
 void *handle_notify_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *ptr);
-extern void decompress(int fdin, int fdout); // Z decompression
-extern int inf(int source, int dest);        // GZIP decompression
-extern void zerr(int ret);                   // GZIP error reporting
-extern int bunzip2(int fdin, int fdout);     // BZIP2 decompression
-extern int unzip(int fdin, int fdout);       // ZIP decompression
+extern int decompress(int fdin, int fdout); // Z decompression
+extern int inf(int source, int dest);       // GZIP decompression
+extern void zerr(int ret);                  // GZIP error reporting
+extern int bunzip2(int fdin, int fdout);    // BZIP2 decompression
+extern int unzip(int fdin, int fdout);      // ZIP decompression
 void *decompress_Z(void *user);
 void *decompress_GZ(void *user);
 void *decompress_ZIP(void *user);
@@ -6949,7 +6949,19 @@ void *decompress_Z(void *user)
     struct FITSDownloadStream *stream = (struct FITSDownloadStream *)user;
     printf("[C] Z-Decompress/%s::start.\n", stream->datasetid);
 
-    decompress(stream->comp_in[0], stream->comp_out[1]);
+    int ret = decompress(stream->comp_in[0], stream->comp_out[1]);
+
+    if (ret != Z_OK)
+    {
+        printf("[C] Z-Decompress/%s::error.\n", stream->datasetid);
+        zerr(ret);
+
+        close(stream->comp_in[0]);
+        stream->comp_in[0] = -1;
+
+        close(stream->comp_out[1]);
+        stream->comp_out[1] = -1;
+    }
 
     printf("[C] Z-Decompress/%s::end.\n", stream->datasetid);
     pthread_exit(NULL);
