@@ -432,7 +432,7 @@ int decompress(int fdin, int fdout)
             posbits = 0;
         }
 
-        if (insize < sizeof(inbuf) - IBUFSIZ)
+        if ((size_t)insize < sizeof(inbuf) - IBUFSIZ)
         {
             if ((rsize = read(fdin, inbuf + insize, IBUFSIZ)) < 0)
             {
