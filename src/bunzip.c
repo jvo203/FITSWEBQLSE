@@ -66,7 +66,6 @@ int bunzip2(int fdin, int fdout)
     }
 
     fclose(f);
-    close(fdout);
 
     return BZ_OK;
 }
