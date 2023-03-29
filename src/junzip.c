@@ -92,7 +92,6 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
         }
 
         write(fdout, buffer, header->uncompressedSize);
-        close(fdout);
         free(buffer);
     }
     else if (header->compressionMethod == 8)
@@ -154,9 +153,6 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
 
             /* done when inflate() says it's done */
         } while (ret != Z_STREAM_END);
-
-        // close the write end of the pipe
-        close(fdout);
 
         /* clean up and return */
         (void)inflateEnd(&strm);

@@ -21,7 +21,6 @@ int processFile(JZFile *zip, int fdout)
     if (jzReadData(zip, &header, fdout) != Z_OK)
     {
         printf("[C] Couldn't read file data!\n");
-        close(fdout);
         return -1;
     }
 
@@ -56,7 +55,6 @@ int unzip(int fdin, int fdout)
 
     // fp will be closed by zip->close(zip), in "stdio_read_file_handle_close()"
     zip->close(zip);
-    close(fdout);
 
     return retval;
 }
