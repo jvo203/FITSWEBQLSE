@@ -76,13 +76,15 @@ int inf(int source, int dest)
     /* decompress until deflate stream ends or end of pipe */
     do
     {
-        strm.avail_in = read(source, in, CHUNK);
+        int avail_in = read(source, in, CHUNK);
 
-        if (strm.avail_in < 0)
+        if (avail_in < 0)
         {
             (void)inflateEnd(&strm);
             return Z_ERRNO;
         }
+
+        strm.avail_in = avail_in;
 
         if (strm.avail_in == 0)
             break;
@@ -109,7 +111,7 @@ int inf(int source, int dest)
 
             have = CHUNK - strm.avail_out;
 
-            if (write(dest, out, (size_t)have) != (size_t)have)
+            if (write(dest, out, (size_t)have) != (ssize_t)have)
             {
                 (void)inflateEnd(&strm);
                 return Z_ERRNO;

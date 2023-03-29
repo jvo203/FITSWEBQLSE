@@ -73,7 +73,6 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
     unsigned char jzBuffer[JZ_BUFFER_SIZE]; // limits maximum zip descriptor size
     unsigned char out[JZ_BUFFER_SIZE];
     unsigned int have;
-    long compressedLeft, uncompressedLeft;
     int ret;
     z_stream strm;
 
@@ -110,13 +109,15 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
         /* decompress until deflate stream ends or end of pipe */
         do
         {
-            strm.avail_in = zip->read(zip, jzBuffer, JZ_BUFFER_SIZE);
+            int avail_in = zip->read(zip, jzBuffer, JZ_BUFFER_SIZE);
 
-            if (strm.avail_in < 0)
+            if (avail_in < 0)
             {
                 (void)inflateEnd(&strm);
                 return Z_ERRNO;
             }
+
+            strm.avail_in = avail_in;
 
             if (strm.avail_in == 0)
                 break;
@@ -144,7 +145,7 @@ int jzReadData(JZFile *zip, JZFileHeader *header, int fdout)
 
                 have = JZ_BUFFER_SIZE - strm.avail_out;
 
-                if (write(fdout, out, (size_t)have) != (size_t)have)
+                if (write(fdout, out, (size_t)have) != (ssize_t)have)
                 {
                     (void)inflateEnd(&strm);
                     return Z_ERRNO;
