@@ -314,7 +314,7 @@ static const int primetab[256] = /* Special secudary hash table.		*/
         18919, -19031, 19121, -19211, 19273, -19381, 19429, -19477};
 #endif
 
-void decompress(int, int);
+int decompress(int, int);
 void read_error(int fdin, int fdout);
 void write_error(int fdin, int fdout);
 void abort_compress(int fdin, int fdout);
@@ -338,7 +338,7 @@ void abort_compress(int fdin, int fdout);
  * with those of the compress() routine.  See the definitions above.
  */
 
-void decompress(int fdin, int fdout)
+int decompress(int fdin, int fdout)
 {
     char_type *stackp;
     code_int code;

@@ -6951,10 +6951,9 @@ void *decompress_Z(void *user)
 
     int ret = decompress(stream->comp_in[0], stream->comp_out[1]);
 
-    if (ret != Z_OK)
+    if (ret != 0)
     {
         printf("[C] Z-Decompress/%s::error.\n", stream->datasetid);
-        zerr(ret);
 
         close(stream->comp_in[0]);
         stream->comp_in[0] = -1;
