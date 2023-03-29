@@ -315,9 +315,8 @@ static const int primetab[256] = /* Special secudary hash table.		*/
 #endif
 
 int decompress(int, int);
-void read_error(int fdin, int fdout);
-void write_error(int fdin, int fdout);
-void abort_compress(int fdin, int fdout);
+void read_error();
+void write_error();
 
 /*****************************************************************
  *
@@ -337,6 +336,8 @@ void abort_compress(int fdin, int fdout);
  * be stored in the compressed file.  The tables used herein are shared
  * with those of the compress() routine.  See the definitions above.
  */
+
+#define Z_OK 0
 
 int decompress(int fdin, int fdout)
 {
@@ -370,19 +371,15 @@ int decompress(int fdin, int fdout)
     if (insize < 3 || inbuf[0] != MAGIC_1 || inbuf[1] != MAGIC_2)
     {
         if (rsize < 0)
-            read_error(fdin, fdout);
+            read_error();
 
         if (insize > 0)
         {
             fprintf(stderr, "%s: not in compressed format\n",
                     ("in"));
-            abort_compress(fdin, fdout);
         }
 
-        // close the write pipe
-        close(fdout);
-
-        return;
+        return -1;
     }
 
     maxbits = inbuf[2] & BIT_MASK;
@@ -394,7 +391,7 @@ int decompress(int fdin, int fdout)
                 "%s: compressed with %d bits, can only handle %d bits\n",
                 ("in"), maxbits, BITS);
 
-        return abort_compress(fdin, fdout);
+        return -1;
     }
 
     maxmaxcode = MAXCODE(maxbits);
@@ -435,7 +432,10 @@ int decompress(int fdin, int fdout)
         if (insize < sizeof(inbuf) - IBUFSIZ)
         {
             if ((rsize = read(fdin, inbuf + insize, IBUFSIZ)) < 0)
-                read_error(fdin, fdout);
+            {
+                read_error();
+                return -1;
+            }
 
             insize += rsize;
         }
@@ -467,7 +467,7 @@ int decompress(int fdin, int fdout)
                 {
                     fprintf(stderr, "oldcode:-1 code:%i\n", (int)(code));
                     fprintf(stderr, "uncompress: corrupt input\n");
-                    abort_compress(fdin, fdout);
+                    return -1;
                 }
                 outbuf[outpos++] = (char_type)(finchar = (int)(oldcode = code));
                 continue;
@@ -500,7 +500,7 @@ int decompress(int fdin, int fdout)
                     fprintf(stderr, "insize:%d posbits:%d inbuf:%02X %02X %02X %02X %02X (%d)\n", insize, posbits,
                             p[-1], p[0], p[1], p[2], p[3], (posbits & 07));
                     fprintf(stderr, "uncompress: corrupt input\n");
-                    abort_compress(fdin, fdout);
+                    return -1;
                 }
 
                 *--stackp = (char_type)finchar;
@@ -536,7 +536,10 @@ int decompress(int fdin, int fdout)
                         if (outpos >= OBUFSIZ)
                         {
                             if (write(fdout, outbuf, outpos) != outpos)
-                                write_error(fdin, fdout);
+                            {
+                                write_error();
+                                return -1;
+                            }
 
                             outpos = 0;
                         }
@@ -564,29 +567,22 @@ int decompress(int fdin, int fdout)
     } while (rsize > 0);
 
     if (outpos > 0 && write(fdout, outbuf, outpos) != outpos)
-        write_error(fdin, fdout);
+    {
+        write_error();
+        return -1;
+    }
 
-    // close the write pipe
-    close(fdout);
+    return Z_OK;
 }
 
-void read_error(int fdin, int fdout)
+void read_error()
 {
     fprintf(stderr, "\nread error on ");
     perror("in");
-    abort_compress(fdin, fdout);
 }
 
-void write_error(int fdin, int fdout)
+void write_error()
 {
     fprintf(stderr, "\nwrite error on ");
     perror("out");
-    abort_compress(fdin, fdout);
-}
-
-void abort_compress(int fdin, int fdout)
-{
-    // close the file descriptors (Unix pipes)
-    close(fdin);
-    close(fdout);
 }
