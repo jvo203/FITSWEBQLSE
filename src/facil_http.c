@@ -31,8 +31,13 @@ void start_facil()
         splat_db = NULL;
     }
 
-    // listen on port 8080 and any available network binding (NULL == 0.0.0.0)
-    if (http_listen("8080", NULL, .on_request = on_request, .log = 1) == -1)
+    char port_s[32];
+
+    // convert options.http_port to a string
+    sprintf(port_s, "%" PRIu16 "", options.http_port);
+
+    // listen on port <options.http_port> and any available network binding (NULL == 0.0.0.0)
+    if (http_listen(port_s, NULL, .on_request = on_request, .log = 1) == -1)
     {
         perror("ERROR: facil.io couldn't initialize HTTP service (already running?)");
         exit(1);

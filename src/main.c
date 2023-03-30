@@ -373,6 +373,7 @@ int main(int argc, char *argv[])
 
     // start a blocking web server (HTTP/WebSockets)
     start_facil();
+    signal_handler(SIGTERM);
 
     // Ctrl-C signal handler
     /*signal(SIGTERM, signal_handler);
