@@ -100,6 +100,13 @@ void http_serve_file(http_s *h, const char *url)
         fd = open(path, O_RDONLY);
     }
 
+    if (-1 == fd)
+        return http_not_found(h);
+    else
+    {
+        // ...
+    }
+
     http_not_implemented(h);
 }
 
