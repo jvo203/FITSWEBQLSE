@@ -64,10 +64,64 @@ void http_not_found(http_s *h)
     http_send_error(h, 404);
 }
 
+void http_internal_server_error(http_s *h)
+{
+    http_send_error(h, 500);
+}
+
+void http_not_implemented(http_s *h)
+{
+    http_send_error(h, 501);
+}
+
+void http_serve_file(http_s *h, const char *url)
+{
+    int fd = -1;
+    struct stat buf;
+    char path[1024];
+    char last_modified[255];
+    char last_etag[255];
+
+    /* check for NULL strings */
+    if (NULL == url)
+        return http_not_found(h);
+
+    printf("[C] http_serve_file(%s)\n", url);
+
+    if (NULL != strstr(url, "../")) /* Very simplified check! */
+        fd = -1;                    /* Do not allow usage of parent directories. */
+    else
+    {
+#ifdef SHARE
+        snprintf(path, sizeof(path), SHARE "/htdocs%s", url);
+#else
+        snprintf(path, sizeof(path), "htdocs%s", url);
+#endif
+        fd = open(path, O_RDONLY);
+    }
+
+    http_not_implemented(h);
+}
+
 // the main HTTP connection handler (called for each request)
 void on_request(http_s *h)
 {
+    // get the request's URL
+    struct fio_str_info_s path = fiobj_obj2cstr(h->path);
+    const char *url = path.data;
+
     // static resources
+    if (url[strlen(url) - 1] != '/')
+        return http_serve_file(h, url);
+    else
+    {
+        // root document
+
+        if (options.local)
+            return http_serve_file(h, "/local.html");
+        else
+            return http_serve_file(h, "/test.html");
+    }
 
     http_not_found(h);
 }
