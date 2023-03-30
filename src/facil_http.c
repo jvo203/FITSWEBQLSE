@@ -233,8 +233,6 @@ void get_directory(http_s *h, char *dir)
 
     fiobj_free(mime);
     g_free(json);
-
-    return http_not_implemented(h);
 }
 
 void get_home_directory(http_s *h)
