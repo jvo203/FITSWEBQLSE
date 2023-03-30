@@ -91,6 +91,9 @@ IPP += -lippi -lippdc -lipps -lippcore
 MKL += -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
 # -liomp5
 
+FACIL = facil
+FACIL_SRC := $(wildcard $(FACIL)/src/*.c)
+
 ZFP = zfp
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 
@@ -101,7 +104,7 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 # src/wavelet.f90
 # src/lz4.f90
 # src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/json_write.c src/m_mrgrnk.f90 src/mod_sort.f90 src/wavelet.f90 src/fixed_array.f90 src/fixed_array2.f90 src/zfp_array.f90 src/histogram.c src/classifier.f90 src/fits_omp.f90 src/net.f90 src/main.f90
-SRC = $(ZFP_SRC) src/webql.ispc src/compress.c src/bunzip.c src/zpipe.c src/junzip.c src/unzip.c src/my_threads.c src/cpu.c src/json.c src/ini.c src/mongoose.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/cluster.c src/http.c src/ws.c src/ring_buffer.c src/linked_list.f90 src/conrec.f90 src/face.f90 src/logging.f90 src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/fits.f90 src/main.c
+SRC = $(FACIL_SRC) $(ZFP_SRC) src/webql.ispc src/compress.c src/bunzip.c src/zpipe.c src/junzip.c src/unzip.c src/my_threads.c src/cpu.c src/json.c src/ini.c src/mongoose.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/cluster.c src/http.c src/ws.c src/ring_buffer.c src/linked_list.f90 src/conrec.f90 src/face.f90 src/logging.f90 src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/fits.f90 src/main.c
 # src/UStorage.f90 src/List.f90 # does not compile
 
 # macOS Accelerate vImage is actually rather slow
@@ -131,7 +134,7 @@ ifeq ($(CC),icc)
 endif
 
 # `pkg-config --cflags libavif` `pkg-config --cflags libjpeg`
-INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags x265` `pkg-config --cflags jemalloc` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src 
+INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags x265` `pkg-config --cflags jemalloc` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(FACIL)/include -I./$(ZFP)/include -I./$(ZFP)/src 
 
 ifneq ($(UNAME_S),Darwin)
 	INC += `pkg-config --cflags libcpuid`
