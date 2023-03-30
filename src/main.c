@@ -28,6 +28,7 @@ static void *jemalloc_daemon(void *arg);
 #include "ini.h"
 #include "http.h"
 #include "ws.h"
+#include "facil_http.h"
 
 #include "mongoose.h"
 #include "mjson.h"
@@ -370,8 +371,11 @@ int main(int argc, char *argv[])
     printf("Browser URL: http://localhost:%" PRIu16 "\n", options.http_port);
     printf("*** To quit FITSWEBQLSE press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
 
+    // start a blocking web server (HTTP/WebSockets)
+    start_facil();
+
     // Ctrl-C signal handler
-    signal(SIGTERM, signal_handler);
+    /*signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
 
     start_http();
@@ -380,6 +384,7 @@ int main(int argc, char *argv[])
     start_ws();
 
     stop_http();
+    */
 
     // clean-up ZeroMQ
     if (speaker != NULL)
