@@ -5,6 +5,17 @@
 #include "facil_http.h"
 #include "http.h"
 
+#include "json.h"
+#include "mjson.h"
+
+#include "cluster.h"
+#include "webql.h"
+
+extern GSList *cluster;
+extern GMutex cluster_mtx;
+
+#include "hash_table.h"
+
 #include "version.h"
 
 #include <sqlite3.h>
@@ -59,6 +70,12 @@ void start_facil()
     }
 }
 
+void http_ok(http_s *h)
+{
+    h->status = 200;
+    http_finish(h);
+}
+
 void http_not_found(http_s *h)
 {
     http_send_error(h, 404);
@@ -107,6 +124,23 @@ void on_request(http_s *h)
     // get the request's URL
     struct fio_str_info_s path = fiobj_obj2cstr(h->path);
     const char *url = path.data;
+
+    if (0 == strcmp(url, "/exit"))
+    {
+        // distributed exit
+        distributed_exit();
+
+        // raise SIGINT
+        int ret = raise(SIGINT);
+
+        if (ret != 0)
+        {
+            printf("[C] Error: unable to raise SIGINT signal.\n");
+            return http_not_found(h);
+        }
+        else
+            return http_ok(h);
+    }
 
     if (0 == strcmp(url, "/get_directory"))
     {
