@@ -222,6 +222,16 @@ void get_directory(http_s *h, char *dir)
     free(namelist);
     free(dir);
 
+    FIOBJ mime = http_mimetype_find("json", 4);
+
+    h->status = 200;
+
+    if (mime != FIOBJ_INVALID)
+        http_set_header(h, HTTP_HEADER_CONTENT_TYPE, mime);
+
+    http_send_body(h, json->str, json->len);
+
+    fiobj_free(mime);
     g_free(json);
 
     return http_not_implemented(h);
