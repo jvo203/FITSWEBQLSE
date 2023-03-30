@@ -118,6 +118,16 @@ void http_serve_file(http_s *h, const char *url)
         return;
 }
 
+const char *get_filename_ext2(const char *filename)
+{
+    const char *dot = strrchr(filename, '.');
+
+    if (!dot || dot == filename)
+        return "";
+
+    return dot + 1;
+}
+
 void get_directory(http_s *h, char *dir)
 {
     if (NULL == dir)
@@ -125,7 +135,92 @@ void get_directory(http_s *h, char *dir)
 
     printf("[C] get_directory(%s)\n", dir);
 
+    GString *json = g_string_sized_new(1024);
+
+    if (NULL == json)
+    {
+        free(dir);
+        return http_internal_server_error(h);
+    }
+
+    struct dirent **namelist = NULL;
+    int i, n;
+
+    n = scandir(dir, &namelist, 0, alphasort);
+
+    char *encoded = json_encode_string(dir);
+
+    g_string_printf(json, "{\"location\" : %s, \"contents\" : [", encoded);
+
+    free(encoded);
+
+    int has_contents = 0;
+
+    if (n < 0)
+    {
+        perror("scandir");
+        g_string_append(json, "]}");
+    }
+    else
+    {
+        for (i = 0; i < n; i++)
+        {
+            char pathname[1024];
+
+            snprintf(pathname, sizeof(pathname), "%s/%s", dir, namelist[i]->d_name);
+
+            struct stat sbuf;
+
+            int err = stat(pathname, &sbuf);
+
+            if (err == 0)
+            {
+                char last_modified[255];
+
+                struct tm lm;
+                localtime_r(&sbuf.st_mtime, &lm);
+                strftime(last_modified, sizeof(last_modified) - 1, "%a, %d %b %Y %H:%M:%S %Z", &lm);
+
+                size_t filesize = sbuf.st_size;
+
+                if (S_ISDIR(sbuf.st_mode) && namelist[i]->d_name[0] != '.')
+                {
+                    char *encoded = json_encode_string(namelist[i]->d_name);
+
+                    g_string_append_printf(json, "{\"type\" : \"dir\", \"name\" : %s, \"last_modified\" : \"%s\"},", encoded, last_modified);
+                    has_contents = 1;
+
+                    free(encoded);
+                }
+
+                if (S_ISREG(sbuf.st_mode))
+                    if (!strcasecmp(get_filename_ext2(namelist[i]->d_name), "fits"))
+                    {
+                        char *encoded = json_encode_string(namelist[i]->d_name);
+
+                        g_string_append_printf(json, "{\"type\" : \"file\", \"name\" : %s, \"size\" : %zu, \"last_modified\" : \"%s\"},", encoded, filesize, last_modified);
+                        has_contents = 1;
+
+                        free(encoded);
+                    };
+            }
+            else
+                perror("stat64");
+
+            free(namelist[i]);
+        };
+
+        // overwrite the the last ',' with a list closing character
+        if (has_contents)
+            g_string_truncate(json, json->len - 1);
+
+        g_string_append(json, "]}");
+    };
+
+    free(namelist);
     free(dir);
+
+    g_free(json);
 
     return http_not_implemented(h);
 }
