@@ -144,6 +144,23 @@ void on_request(http_s *h)
 
     if (0 == strcmp(url, "/get_directory"))
     {
+        FIOBJ params = h->params;
+        FIOBJ value = FIOBJ_INVALID;
+
+        if (FIOBJ_TYPE_IS(params, FIOBJ_T_HASH))
+        {
+            FIOBJ key = fiobj_str_new("dir", 3);
+            value = fiobj_hash_get(params, key);
+            fiobj_free(key);
+        }
+        else
+            printf("[C] /get_directory : no query parameters found.\n");
+
+        /*if (value != FIOBJ_INVALID)
+            return get_directory(h, dir);
+        else
+            return get_home_directory(h);*/
+
         return http_not_implemented(h);
     }
 
@@ -153,7 +170,6 @@ void on_request(http_s *h)
     else
     {
         // root document
-
         if (options.local)
             return http_serve_file(h, "/local.html");
         else
