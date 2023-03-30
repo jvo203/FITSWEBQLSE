@@ -50,7 +50,7 @@ void start_facil()
     }
 
     // start the server
-    fio_start(.workers = -2, .threads = -2);
+    fio_start(.workers = -4, .threads = -2);
 
     if (splat_db != NULL)
     {
