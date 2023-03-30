@@ -270,9 +270,8 @@ void on_request(http_s *h)
 
         if (FIOBJ_TYPE_IS(params, FIOBJ_T_HASH))
         {
-            FIOBJ key = fiobj_str_new("dir", 3);
-            value = fiobj_hash_get(params, key);
-            fiobj_free(key);
+            uint64_t dir_hash = fiobj_hash_string("dir", 3);
+            value = fiobj_hash_get2(params, dir_hash);
         }
 
         if (value != FIOBJ_INVALID)
