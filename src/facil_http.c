@@ -76,11 +76,7 @@ void http_not_implemented(http_s *h)
 
 void http_serve_file(http_s *h, const char *url)
 {
-    int fd = -1;
-    struct stat buf;
     char path[1024];
-    char last_modified[255];
-    char last_etag[255];
 
     /* check for NULL strings */
     if (NULL == url)
@@ -89,30 +85,20 @@ void http_serve_file(http_s *h, const char *url)
     printf("[C] http_serve_file(%s)\n", url);
 
     if (NULL != strstr(url, "../")) /* Very simplified check! */
-        fd = -1;                    /* Do not allow usage of parent directories. */
-    else
-    {
+        return http_not_found(h);   /* Do not allow usage of parent directories. */
+
 #ifdef SHARE
-        snprintf(path, sizeof(path), SHARE "/htdocs%s", url);
+    snprintf(path, sizeof(path), SHARE "/htdocs%s", url);
 #else
-        snprintf(path, sizeof(path), "htdocs%s", url);
+    snprintf(path, sizeof(path), "htdocs%s", url);
 #endif
-        fd = open(path, O_RDONLY);
-    }
 
-    if (-1 == fd)
-        return http_not_found(h);
+    int ret = http_sendfile2(h, path, strlen(path), NULL, 0);
+
+    if (ret == -1)
+        return http_internal_server_error(h);
     else
-    {
-        close(fd);
-
-        int ret = http_sendfile2(h, path, strlen(path), NULL, 0);
-
-        if (ret == -1)
-            return http_internal_server_error(h);
-        else
-            return;
-    }
+        return;
 }
 
 // the main HTTP connection handler (called for each request)
