@@ -150,6 +150,9 @@ void on_request(http_s *h)
 
     if (0 == strcmp(url, "/get_directory"))
     {
+        http_parse_body(h);
+        http_parse_query(h);
+
         FIOBJ params = h->params;
         FIOBJ value = FIOBJ_INVALID;
 
