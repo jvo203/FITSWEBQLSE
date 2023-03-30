@@ -108,6 +108,11 @@ void on_request(http_s *h)
     struct fio_str_info_s path = fiobj_obj2cstr(h->path);
     const char *url = path.data;
 
+    if (0 == strcmp(url, "/get_directory"))
+    {
+        return http_not_implemented(h);
+    }
+
     // static resources
     if (url[strlen(url) - 1] != '/')
         return http_serve_file(h, url);
