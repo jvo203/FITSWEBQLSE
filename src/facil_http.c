@@ -125,6 +125,12 @@ void on_request(http_s *h)
     struct fio_str_info_s path = fiobj_obj2cstr(h->path);
     const char *url = path.data;
 
+    struct fio_str_info_s query = fiobj_obj2cstr(h->query);
+    const char *query_s = query.data;
+
+    if (h->query != FIOBJ_INVALID)
+        printf("[C] on_request(%s?%s)\n", url, query_s);
+
     if (0 == strcmp(url, "/exit"))
     {
         // distributed exit
