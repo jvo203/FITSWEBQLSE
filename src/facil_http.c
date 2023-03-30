@@ -227,11 +227,10 @@ void get_directory(http_s *h, char *dir)
     h->status = 200;
 
     if (mime != FIOBJ_INVALID)
-        http_set_header(h, HTTP_HEADER_CONTENT_TYPE, mime);
+        http_set_header(h, HTTP_HEADER_CONTENT_TYPE, mime); // mime is now owned by the header
 
     http_send_body(h, json->str, json->len);
 
-    fiobj_free(mime);
     g_free(json);
 }
 
