@@ -59,8 +59,15 @@ void start_facil()
     }
 }
 
-// Easy HTTP handling
-void on_request(http_s *request)
+void http_not_found(http_s *h)
 {
-    http_send_body(request, "Hello World!\r\n", 14);
+    http_send_error(h, 404);
+}
+
+// the main HTTP connection handler (called for each request)
+void on_request(http_s *h)
+{
+    // static resources
+
+    http_not_found(h);
 }
