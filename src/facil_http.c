@@ -133,6 +133,8 @@ void get_directory(http_s *h, char *dir)
     if (NULL == dir)
         return http_not_found(h);
 
+    http_decode_url(dir, dir, strlen(dir));
+
     printf("[C] get_directory(%s)\n", dir);
 
     GString *json = g_string_sized_new(1024);
@@ -278,7 +280,14 @@ void on_request(http_s *h)
         {
             struct fio_str_info_s dir = fiobj_obj2cstr(value);
             const char *dir_s = query.data;
-            return get_directory(h, strdup(dir_s));
+
+            size_t len = strlen(dir_s);
+
+            // skip the initial "dir="
+            if (len > 4)
+                return get_directory(h, strdup(dir_s + 4));
+            else
+                return get_directory(h, strdup(dir_s));
         }
         else
             return get_home_directory(h);
