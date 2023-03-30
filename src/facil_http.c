@@ -118,6 +118,23 @@ void http_serve_file(http_s *h, const char *url)
         return;
 }
 
+void get_directory(http_s *h, char *dir)
+{
+    if (NULL == dir)
+        return http_not_found(h);
+
+    printf("[C] get_directory(%s)\n", dir);
+
+    free(dir);
+
+    return http_not_implemented(h);
+}
+
+void get_home_directory(http_s *h)
+{
+    return get_directory(h, strdup(options.home_dir));
+}
+
 // the main HTTP connection handler (called for each request)
 void on_request(http_s *h)
 {
@@ -163,10 +180,14 @@ void on_request(http_s *h)
             fiobj_free(key);
         }
 
-        /*if (value != FIOBJ_INVALID)
-            return get_directory(h, dir);
+        if (value != FIOBJ_INVALID)
+        {
+            struct fio_str_info_s dir = fiobj_obj2cstr(value);
+            const char *dir_s = query.data;
+            return get_directory(h, strdup(dir_s));
+        }
         else
-            return get_home_directory(h);*/
+            return get_home_directory(h);
 
         return http_not_implemented(h);
     }
