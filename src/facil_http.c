@@ -162,8 +162,6 @@ void on_request(http_s *h)
             value = fiobj_hash_get(params, key);
             fiobj_free(key);
         }
-        else
-            printf("[C] /get_directory : no query parameters found.\n");
 
         /*if (value != FIOBJ_INVALID)
             return get_directory(h, dir);
