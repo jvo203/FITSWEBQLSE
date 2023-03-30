@@ -104,10 +104,15 @@ void http_serve_file(http_s *h, const char *url)
         return http_not_found(h);
     else
     {
-        // ...
-    }
+        close(fd);
 
-    http_not_implemented(h);
+        int ret = http_sendfile2(h, path, strlen(path), NULL, 0);
+
+        if (ret == -1)
+            return http_internal_server_error(h);
+        else
+            return;
+    }
 }
 
 // the main HTTP connection handler (called for each request)
