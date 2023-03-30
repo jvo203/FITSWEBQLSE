@@ -1,3 +1,5 @@
+/* include the core library, without any extensions */
+#include <fio.h>
 #include "../facil/include/http.h"
 
 #include "facil_http.h"
@@ -11,6 +13,8 @@ extern options_t options; // <options> is defined in main.c
 
 // These will contain pre-allocated values that we will use often
 FIOBJ HTTP_X_DATA;
+
+void on_request(http_s *request);
 
 void start_facil()
 {
@@ -28,10 +32,14 @@ void start_facil()
     }
 
     // listen on port 8080 and any available network binding (NULL == 0.0.0.0)
-    http_listen("8080", NULL, .on_request = on_request, .log = 1);
+    if (http_listen("8080", NULL, .on_request = on_request, .log = 1) == -1)
+    {
+        perror("ERROR: facil.io couldn't initialize HTTP service (already running?)");
+        exit(1);
+    }
 
     // start the server
-    facil_run(.threads = 1, .port = options.http_port);
+    fio_start(.threads = 1);
 
     if (splat_db != NULL)
     {
