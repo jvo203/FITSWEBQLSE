@@ -281,11 +281,11 @@ void on_request(http_s *h)
             struct fio_str_info_s dir = fiobj_obj2cstr(value);
             const char *dir_s = query.data;
 
-            size_t len = strlen(dir_s);
-
             // skip the initial "dir="
-            if (len > 4)
-                return get_directory(h, strdup(dir_s + 4));
+            char *pos = strstr(dir_s, "=");
+
+            if (pos != NULL)
+                return get_directory(h, strdup(pos + 1));
             else
                 return get_directory(h, strdup(dir_s));
         }
