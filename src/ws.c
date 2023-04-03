@@ -8,6 +8,7 @@
 #include "ws.h"
 #include "mjson.h"
 
+#include <curl/curl.h>
 #include "cluster.h"
 
 extern GSList *cluster;
@@ -2956,8 +2957,64 @@ void *send_cluster_heartbeat(void *arg)
         pthread_exit(NULL);
     };
 
-    // URL: cluster_ip:ws_port/heartbeat/id
+    CURL *handles[handle_count];
+    CURLM *multi_handle;
 
+    int still_running = 1; /* keep number of running handles */
+
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
+    int msgs_left; /* how many messages are left */
+
+    /* Allocate one CURL handle per transfer */
+    for (i = 0; i < handle_count; i++)
+        handles[i] = curl_easy_init();
+
+    /* init a multi stack */
+    multi_handle = curl_multi_init();
+
+    for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
+    {
+        // URL: cluster_ip:ws_port/heartbeat/id
+    }
+
+    g_mutex_unlock(&cluster_mtx);
+
+    // release memory
     free(datasetId);
+
+    /* Wait for the transfers */
+    while (still_running)
+    {
+        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+        if (still_running)
+            /* wait for activity, timeout or "nothing" */
+            mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+        if (mc)
+            break;
+    }
+
+    /* See how the transfers went */
+    while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
+    {
+        if (msg->msg == CURLMSG_DONE)
+        {
+            long response_code = 0;
+            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+            printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+        }
+    }
+
+    /* remove the transfers and cleanup the handles */
+    for (i = 0; i < handle_count; i++)
+    {
+        curl_multi_remove_handle(multi_handle, handles[i]);
+        curl_easy_cleanup(handles[i]);
+    }
+
+    curl_multi_cleanup(multi_handle);
+
     pthread_exit(NULL);
 }
