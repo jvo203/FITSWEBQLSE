@@ -2972,6 +2972,10 @@ void *send_cluster_heartbeat(void *arg)
     /* init a multi stack */
     multi_handle = curl_multi_init();
 
+    // html-encode the datasetId
+    char datasetid[2 * strlen(datasetId)];
+    size_t len = mg_url_encode(datasetId, strlen(datasetId), datasetid, sizeof(datasetid) - 1);
+
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
         // URL: cluster_ip:ws_port/heartbeat/id
