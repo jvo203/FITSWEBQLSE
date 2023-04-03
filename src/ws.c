@@ -19,6 +19,7 @@ extern int get_header_status(void *item);
 extern void inherent_image_dimensions_C(void *item, int *width, int *height);
 
 void *pv_event_loop(void *arg);
+void *send_cluster_heartbeat(void *arg);
 
 void init_session_table()
 {
@@ -572,6 +573,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                         update_timestamp(item);
 
                         // trigger updates across the cluster too
+                        // create and detach a thread to send a message to the cluster
+                        pthread_t thread;
+                        int stat = pthread_create(&thread, NULL, send_cluster_heartbeat, (void *)strdup(token));
+
+                        if (stat != 0)
+                            printf("[C] cannot create a thread to send a message to the cluster!\n");
+                        else
+                            pthread_detach(thread);
                     }
                 }
 
@@ -2915,5 +2924,18 @@ void *pv_event_loop(void *arg)
 
     printf("[C] pv_event_loop terminated.\n");
 
+    pthread_exit(NULL);
+}
+
+void *send_cluster_heartbeat(void *arg)
+{
+    if (arg == NULL)
+        pthread_exit(NULL);
+
+    char *datasetId = (char *)arg;
+
+    // ...
+
+    free(datasetId);
     pthread_exit(NULL);
 }
