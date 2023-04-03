@@ -2978,7 +2978,7 @@ void *send_cluster_heartbeat(void *arg)
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
-        // URL: cluster_ip:ws_port/heartbeat/id
+        // URL: http://cluster_ip:ws_port/heartbeat/id
     }
 
     g_mutex_unlock(&cluster_mtx);
