@@ -581,10 +581,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                         // trigger updates across the cluster too
                         // create and detach a thread to send a message to the cluster
                         pthread_t thread;
-                        int stat = pthread_create(&thread, NULL, send_cluster_heartbeat, (void *)strdup(token));
+
+                        char *_token = strdup(token);
+                        int stat = pthread_create(&thread, NULL, send_cluster_heartbeat, (void *)_token);
 
                         if (stat != 0)
-                            printf("[C] cannot create a thread to send a message to the cluster!\n");
+                        {
+                            printf("[C] cannot create a 'send_cluster_heartbeat' thread!\n");
+                            free(_token);
+                        }
                         else
                             pthread_detach(thread);
                     }
