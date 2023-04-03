@@ -454,7 +454,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         printf("[C] WEBSOCKET DATASETID: '%s'\n", datasetId);
 
-        char *orig = strdup(datasetId);
+        char *orig = NULL;
+        if (datasetId != NULL)
+            orig = strdup(datasetId);
 
         // split the string by ';', get the leading datasetId
         char *ptr = strchr(datasetId, ';');
@@ -527,7 +529,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         }
 
         free(orig);
-
         break;
     }
     case MG_EV_WS_MSG:
