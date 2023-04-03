@@ -112,6 +112,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(session->datasetid);
                 session->datasetid = NULL;
 
+                free(session->multi);
+                session->multi = NULL;
+
                 free(session->id);
                 session->id = NULL;
 
@@ -473,6 +476,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (session != NULL)
             {
                 session->datasetid = strdup(datasetId);
+                session->multi = strdup(orig);
                 session->id = strdup(sessionId);
 
                 session->flux = NULL;
