@@ -10,7 +10,8 @@
 
 struct websocket_session
 {
-    char *datasetid;
+    char *datasetid; // a single id
+    char *multi;     // multiple ids are separated by a semicolon
     char *id;
 
     char *flux;
