@@ -8,6 +8,11 @@
 #include "ws.h"
 #include "mjson.h"
 
+#include "cluster.h"
+
+extern GSList *cluster;
+extern GMutex cluster_mtx;
+
 #include "hash_table.h"
 
 static GHashTable *sessions;
@@ -2933,6 +2938,23 @@ void *send_cluster_heartbeat(void *arg)
         pthread_exit(NULL);
 
     char *datasetId = (char *)arg;
+
+    int i;
+    GSList *iterator = NULL;
+
+    g_mutex_lock(&cluster_mtx);
+
+    int handle_count = g_slist_length(cluster);
+
+    if (handle_count == 0)
+    {
+        // printf("[C] aborting send_cluster_heartbeat (no cluster nodes found)\n");
+        g_mutex_unlock(&cluster_mtx);
+
+        // release memory
+        free(datasetId);
+        pthread_exit(NULL);
+    };
 
     // URL: cluster_ip:ws_port/heartbeat/id
 
