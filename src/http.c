@@ -565,10 +565,10 @@ const char *get_filename_ext(const char *filename)
 
 static enum MHD_Result get_directory(struct MHD_Connection *connection, char *dir)
 {
-    printf("[C] get_directory(%s)\n", dir);
-
     if (NULL == dir)
         return http_not_found(connection);
+
+    printf("[C] get_directory(%s)\n", dir);
 
     GString *json = g_string_sized_new(1024);
 
