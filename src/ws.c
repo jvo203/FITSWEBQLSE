@@ -2934,7 +2934,7 @@ void *send_cluster_heartbeat(void *arg)
 
     char *datasetId = (char *)arg;
 
-    // ...
+    // URL: cluster_ip:ws_port/heartbeat/id
 
     free(datasetId);
     pthread_exit(NULL);
