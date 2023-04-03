@@ -557,15 +557,25 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             struct websocket_session *session = (struct websocket_session *)c->fn_data;
 
             if (session != NULL)
-                datasetId = session->datasetid;
-
-            void *item = get_dataset(datasetId);
-
-            if (item != NULL)
             {
-                update_timestamp(item);
+                // tokenize session->multi
+                datasetId = strdup(session->multi);
+                char *token = datasetId;
+                char *rest = token;
 
-                // trigger updates across the cluster too
+                while ((token = strtok_r(rest, ";", &rest)) != NULL)
+                {
+                    void *item = get_dataset(token);
+
+                    if (item != NULL)
+                    {
+                        update_timestamp(item);
+
+                        // trigger updates across the cluster too
+                    }
+                }
+
+                free(datasetId);
             }
 
             break;
