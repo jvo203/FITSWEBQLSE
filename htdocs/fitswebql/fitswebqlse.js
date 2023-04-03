@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-03-27.3";
+    return "JS2023-04-03.0";
 }
 
 function uuidv4() {
@@ -11834,10 +11834,6 @@ function setup_image_selection() {
                     sent_seq_id++;
 
                     for (let index = 0; index < va_count; index++) {
-                        var dataId = datasetId;
-                        if (va_count > 1)
-                            dataId = datasetId[index];
-
                         // a real-time websocket request
                         var range = get_axes_range(width, height);
                         var dx = range.xMax - range.xMin;
@@ -13203,10 +13199,6 @@ function imageTimeout() {
     }
 
     for (let index = 0; index < va_count; index++) {
-        var dataId = datasetId;
-        if (va_count > 1)
-            dataId = datasetId[index];
-
         // a real-time websocket request
         var range = get_axes_range(width, height);
         var dx = range.xMax - range.xMin;
