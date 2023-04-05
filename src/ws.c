@@ -267,6 +267,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             break;
         }
 
+        if (mg_strstr(hm->uri, mg_str("/heartbeat")) != NULL)
+        {
+            mg_http_reply(c, 200, NULL, "OK");
+            break;
+        }
+
         // a FITS channel range combined PUT/GET request
         if (mg_strstr(hm->uri, mg_str("/range")) != NULL)
         {
