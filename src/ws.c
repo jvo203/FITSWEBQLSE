@@ -280,10 +280,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 void *item = get_dataset(datasetId);
 
                 if (item != NULL)
+                {
                     update_timestamp(item);
+                    mg_http_reply(c, 200, NULL, "OK");
+                }
+                else
+                    mg_http_reply(c, 404, "", "Not Found");
             }
-
-            mg_http_reply(c, 200, NULL, "OK");
+            else
+                mg_http_reply(c, 404, "", "Not Found");
 
             free(tmp);
             break;
