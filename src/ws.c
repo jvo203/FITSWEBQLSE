@@ -215,15 +215,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (hm->body.len == sizeof(progress))
                 memcpy(&progress, hm->body.ptr, sizeof(progress));
 
-            char *tmp = strndup(hm->uri.ptr, hm->uri.len);
-            char *datasetId = strrchr(tmp, '/');
+            char uri[hm->uri.len + 1]; // leave extra space for the string termination character
 
-            /*if (datasetId != NULL)
-                printf("<progress> POST request for '%s': progress = %d\n", datasetId + 1, progress);*/
+            // decode the URI
+            mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len + 1, 0);
+
+            char *datasetId = strrchr(uri, '/');
 
             if (datasetId != NULL)
             {
                 datasetId++; // skip the slash character
+
+#ifdef DEBUG
+                printf("<progress> POST request for '%s': progress = %d\n", datasetId, progress);
+#endif
 
                 void *item = get_dataset(datasetId);
 
@@ -232,14 +237,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
                     {
                         mg_http_reply(c, 202, NULL, "Accepted");
-                        free(tmp);
                         break;
                     }
                     else
                     {
                         // signal a catastrophic error
                         mg_http_reply(c, 500, NULL, "Internal Server Error");
-                        free(tmp);
                         break;
                     }
                 }
@@ -249,7 +252,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (!get_header_status(item))
                     {
                         mg_http_reply(c, 202, NULL, "Accepted");
-                        free(tmp);
                         break;
                     }
                 }
@@ -263,14 +265,17 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             else
                 mg_http_reply(c, 400, NULL, "Bad Request");
 
-            free(tmp);
             break;
         }
 
         if (mg_strstr(hm->uri, mg_str("/heartbeat")) != NULL)
         {
-            char *tmp = strndup(hm->uri.ptr, hm->uri.len);
-            char *datasetId = strrchr(tmp, '/');
+            char uri[hm->uri.len + 1]; // leave extra space for the string termination character
+
+            // decode the URI
+            mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len + 1, 0);
+
+            char *datasetId = strrchr(uri, '/');
 
             if (datasetId != NULL)
             {
@@ -293,7 +298,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             else
                 mg_http_reply(c, 404, "", "Not Found");
 
-            free(tmp);
             break;
         }
 
@@ -356,8 +360,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 offset += progress * sizeof(float);
             }
 
-            char *tmp = strndup(hm->uri.ptr, hm->uri.len);
-            char *datasetId = strrchr(tmp, '/');
+            char uri[hm->uri.len + 1]; // leave extra space for the string termination character
+
+            // decode the URI
+            mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len + 1, 0);
+
+            char *datasetId = strrchr(uri, '/');
 
             if (datasetId != NULL)
             {
@@ -374,8 +382,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
                     {
                         mg_http_reply(c, 202, NULL, "Accepted");
-
-                        free(tmp);
                         break;
                     }
                     else
@@ -384,8 +390,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                         // printf("[C] a catastrophic error: cannot find '%s'.\n", datasetId);
                         // mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{\"startindex\":0,\"endindex\":0,\"status\":-2}");
                         mg_http_reply(c, 202, NULL, "Accepted");
-
-                        free(tmp);
                         break;
                     }
                 }
@@ -408,15 +412,18 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             else
                 mg_http_reply(c, 400, NULL, "Bad Request");
 
-            free(tmp);
             break;
         }
 
         // inner dimensions
         if (mg_strstr(hm->uri, mg_str("/inner")) != NULL)
         {
-            char *tmp = strndup(hm->uri.ptr, hm->uri.len);
-            char *datasetId = strrchr(tmp, '/');
+            char uri[hm->uri.len + 1]; // leave extra space for the string termination character
+
+            // decode the URI
+            mg_url_decode(hm->uri.ptr, hm->uri.len, uri, hm->uri.len + 1, 0);
+
+            char *datasetId = strrchr(uri, '/');
 
             if (datasetId != NULL)
             {
@@ -446,7 +453,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             else
                 mg_http_reply(c, 400, NULL, "Bad Request");
 
-            free(tmp);
             break;
         }
 
@@ -468,7 +474,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         printf("[C] WEBSOCKET OPEN; URI:\t%.*s\n", (int)hm->uri.len, hm->uri.ptr);
 
         // extract / validate the datasetid (check if a dataset is in the hash table)
-        // use <mg_url_decode()>
         char uri[hm->uri.len + 1]; // leave extra space for the string termination character
 
         // decode the URI
