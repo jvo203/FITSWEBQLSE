@@ -189,7 +189,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
 
-        // MG_INFO(("New request to: [%.*s], body size: %lu", (int)hm->uri.len, hm->uri.ptr, (unsigned long)hm->body.len));
+        MG_INFO(("New request to: [%.*s], body size: %lu", (int)hm->uri.len, hm->uri.ptr, (unsigned long)hm->body.len));
 
         // open a WebSocket request
         if (mg_strstr(hm->uri, mg_str("/websocket")) != NULL)
@@ -269,7 +269,22 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         if (mg_strstr(hm->uri, mg_str("/heartbeat")) != NULL)
         {
+            char *tmp = strndup(hm->uri.ptr, hm->uri.len);
+            char *datasetId = strrchr(tmp, '/');
+
+            if (datasetId != NULL)
+            {
+                datasetId++; // skip the slash character
+
+                void *item = get_dataset(datasetId);
+
+                if (item != NULL)
+                    update_timestamp(item);
+            }
+
             mg_http_reply(c, 200, NULL, "OK");
+
+            free(tmp);
             break;
         }
 
