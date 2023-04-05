@@ -4261,7 +4261,7 @@ void *forward_fitswebql_request(void *ptr)
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "%s&root=%s", options.http_port, _uri, options.root);
-        // printf("[C] URL: '%s'\n", url->str);
+        printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
