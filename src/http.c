@@ -4252,11 +4252,15 @@ void *forward_fitswebql_request(void *ptr)
     /* init a multi stack */
     multi_handle = curl_multi_init();
 
+    // html-encode the uri
+    char _uri[2 * strlen(uri)];
+    html_encode(uri, strlen(uri), _uri, sizeof(_uri) - 1);
+
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "%s&root=%s", options.http_port, uri, options.root);
+        g_string_append_printf(url, "%" PRIu16 "%s&root=%s", options.http_port, _uri, options.root);
         // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
