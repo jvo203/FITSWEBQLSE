@@ -58,9 +58,9 @@ extern GMutex cluster_mtx;
 static sqlite3 *splat_db = NULL;
 extern options_t options; // <options> is defined in main.c
 
-#ifdef MONGOOSE_HTTP_CLIENT
-#include "mongoose.h"
+#include "mongoose.h" // mg_url_encode
 
+#ifdef MONGOOSE_HTTP_CLIENT
 typedef struct
 {
     char *url;
@@ -197,8 +197,6 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
 
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
-
-size_t html_encode(char *source, size_t len, char *dest, size_t max);
 
 static enum MHD_Result http_ok(struct MHD_Connection *connection)
 {
@@ -3058,7 +3056,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 GString *value = g_string_new(directory);
 
-                len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
                 enc[len] = '\0';
 
                 g_string_append_printf(uri, "dir=%s&", enc);
@@ -3073,7 +3071,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 GString *value = g_string_new(extension);
 
-                len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
                 enc[len] = '\0';
 
                 g_string_append_printf(uri, "ext=%s&", enc);
@@ -3102,7 +3100,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     GString *value = g_string_new(tmp);
 
-                    len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                    len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
                     enc[len] = '\0';
 
                     g_string_append_printf(uri, "filename%d=%s&", va_count, enc);
@@ -3123,7 +3121,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 GString *value = g_string_new(tmp);
 
-                len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
                 enc[len] = '\0';
 
                 g_string_append_printf(uri, "filename=%s&", enc);
@@ -3157,7 +3155,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     GString *value = g_string_new(tmp);
 
-                    len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                    len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
                     enc[len] = '\0';
 
                     g_string_append_printf(uri, "datasetId%d=%s&", va_count, enc);
@@ -3178,7 +3176,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 GString *value = g_string_new(tmp);
 
-                len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
                 enc[len] = '\0';
 
                 g_string_append_printf(uri, "datasetId=%s&", enc);
@@ -3258,7 +3256,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                         GString *value = g_string_new(fname);
 
-                        len = html_encode(value->str, value->len, enc, sizeof(enc) - 1);
+                        len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
                         enc[len] = '\0';
 
                         g_string_append_printf(uri, "filename=%s&", enc);
@@ -4165,50 +4163,6 @@ void stop_http()
     }
 };
 
-size_t html_encode(char *source, size_t len, char *dest, size_t max)
-{
-    unsigned int pos = 0;
-
-    if (source == NULL)
-        return -1;
-
-    for (unsigned int i = 0; i < len; i++)
-    {
-        char c = source[i];
-        switch (c)
-        {
-        case '&':
-            strcat(dest, "&amp;");
-            pos += 5;
-            break;
-        case '\"':
-            strcat(dest, "&quot;");
-            pos += 6;
-            break;
-        case '\'':
-            strcat(dest, "&apos;");
-            pos += 6;
-            break;
-        case '<':
-            strcat(dest, "&lt;");
-            pos += 4;
-            break;
-        case '>':
-            strcat(dest, "&gt;");
-            pos += 4;
-            break;
-        default:
-            dest[pos++] = c;
-            break;
-        }
-
-        if (pos >= max)
-            break;
-    };
-
-    return pos;
-}
-
 void *forward_fitswebql_request(void *ptr)
 {
     if (ptr == NULL)
@@ -4474,7 +4428,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
     // html-encode the datasetid
     char _id[2 * len];
-    size_t _len = html_encode(datasetid, len, _id, sizeof(_id) - 1);
+    size_t _len = mg_url_encode(datasetid, len, _id, sizeof(_id) - 1);
 
     // a POST buffer
     char *post_buffer = NULL;
@@ -4623,7 +4577,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
 
     // html-encode the datasetid
     char _id[2 * len];
-    size_t _len = html_encode(datasetid, len, _id, sizeof(_id) - 1);
+    size_t _len = mg_url_encode(datasetid, len, _id, sizeof(_id) - 1);
 
     int counter = 0; // by default return 0, i.e. no progress could be submitted to the cluster root
 
@@ -5812,7 +5766,7 @@ void *fetch_global_statistics(void *ptr)
 
     // html-encode the datasetid
     char datasetid[2 * req->len];
-    size_t len = html_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+    size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
@@ -5957,7 +5911,7 @@ void *fetch_video_frame(void *ptr)
 
     // html-encode the datasetid
     char datasetid[2 * req->len];
-    size_t len = html_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+    size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
@@ -6104,7 +6058,7 @@ void *fetch_inner_dimensions(void *ptr)
 
     // html-encode the datasetid
     char datasetid[2 * req->len];
-    size_t len = html_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+    size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
@@ -6250,7 +6204,7 @@ void *fetch_pv_diagram(void *ptr)
 
     // html-encode the datasetid
     char datasetid[2 * req->len];
-    size_t len = html_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+    size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
@@ -6394,7 +6348,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
 
     // html-encode the datasetid
     char datasetid[2 * req->len];
-    size_t len = html_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+    size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
@@ -6591,7 +6545,7 @@ void *fetch_image(void *ptr)
 
     // html-encode the datasetid
     char datasetid[2 * req->len];
-    size_t len = html_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+    size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
@@ -6721,7 +6675,7 @@ void *http_propagate_timeout(void *user)
 
     // html-encode the datasetid
     char datasetid[2 * idlen];
-    size_t len = html_encode(id, idlen, datasetid, sizeof(datasetid) - 1);
+    size_t len = mg_url_encode(id, idlen, datasetid, sizeof(datasetid) - 1);
 
     CURL *handles[handle_count];
     CURLM *multi_handle;
