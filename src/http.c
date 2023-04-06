@@ -3052,12 +3052,10 @@ static enum MHD_Result on_http_connection(void *cls,
             if (directory != NULL)
             {
                 char enc[256];
-                size_t len;
 
                 GString *value = g_string_new(directory);
 
-                len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
-                enc[len] = '\0';
+                mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
 
                 g_string_append_printf(uri, "dir=%s&", enc);
 
@@ -3067,12 +3065,10 @@ static enum MHD_Result on_http_connection(void *cls,
             if (extension != NULL)
             {
                 char enc[256];
-                size_t len;
 
                 GString *value = g_string_new(extension);
 
-                len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
-                enc[len] = '\0';
+                mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
 
                 g_string_append_printf(uri, "ext=%s&", enc);
 
@@ -3096,12 +3092,10 @@ static enum MHD_Result on_http_connection(void *cls,
                     datasetId[va_count - 1] = strdup(tmp);
 
                     char enc[256];
-                    size_t len;
 
                     GString *value = g_string_new(tmp);
 
-                    len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
-                    enc[len] = '\0';
+                    mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
 
                     g_string_append_printf(uri, "filename%d=%s&", va_count, enc);
 
@@ -3117,12 +3111,10 @@ static enum MHD_Result on_http_connection(void *cls,
                 datasetId[0] = strdup(tmp);
 
                 char enc[256];
-                size_t len;
 
                 GString *value = g_string_new(tmp);
 
-                len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
-                enc[len] = '\0';
+                mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
 
                 g_string_append_printf(uri, "filename=%s&", enc);
 
@@ -3151,12 +3143,10 @@ static enum MHD_Result on_http_connection(void *cls,
                     datasetId[va_count - 1] = strdup(tmp);
 
                     char enc[256];
-                    size_t len;
 
                     GString *value = g_string_new(tmp);
 
-                    len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
-                    enc[len] = '\0';
+                    mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
 
                     g_string_append_printf(uri, "datasetId%d=%s&", va_count, enc);
 
@@ -3172,12 +3162,10 @@ static enum MHD_Result on_http_connection(void *cls,
                 datasetId[0] = strdup(tmp);
 
                 char enc[256];
-                size_t len;
 
                 GString *value = g_string_new(tmp);
 
-                len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
-                enc[len] = '\0';
+                mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
 
                 g_string_append_printf(uri, "datasetId=%s&", enc);
 
@@ -3252,12 +3240,10 @@ static enum MHD_Result on_http_connection(void *cls,
                     if (item == NULL)
                     {
                         char enc[256];
-                        size_t len;
 
                         GString *value = g_string_new(fname);
 
-                        len = mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
-                        enc[len] = '\0';
+                        mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
 
                         g_string_append_printf(uri, "filename=%s&", enc);
 
