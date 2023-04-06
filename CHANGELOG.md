@@ -2,7 +2,7 @@
 
 * replaced the ```html_encode()``` C function with a more robust ```mg_url_encode()```
 * added initial support for loading multiple (composite) FITS files from the NOBEYAMA FUGIN project across the cluster
-* added support for multiple (composite) FITS files to the WebSockets user session C structure
+* added support for multiple (composite) FITS files to the WebSocket user session C structure
 * propagating WebSocket heartbeats across the cluster using HTTP messages 
 
 ## [5.0.30] - 2023-03-29
