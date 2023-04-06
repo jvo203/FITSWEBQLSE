@@ -1,4 +1,4 @@
-## [5.0.31] - 2023-04-??
+## [5.0.31] - 2023-04-06
 
 * replaced the ```html_encode()``` C function with a more robust ```mg_url_encode()```
 * added initial support for loading multiple (composite) FITS files from the NOBEYAMA FUGIN project across the cluster
