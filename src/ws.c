@@ -102,7 +102,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (c->fn_data != NULL)
             {
                 struct websocket_session *session = (struct websocket_session *)c->fn_data;
-                printf("closing a websocket connection for %s/%s\n", session->datasetid, c->data);
+                printf("[C] closing a websocket connection for %s/%s\n", session->datasetid, c->data);
 
                 // remove a session pointer from the hash table
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
@@ -497,7 +497,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (datasetId != NULL)
             datasetId++; // skip the slash character
 
-        printf("[C] WEBSOCKET DATASETID: '%s'\n", datasetId);
+        if (datasetId != NULL)
+            printf("[C] WEBSOCKET DATASETID: '%s'\n", datasetId);
 
         char *orig = NULL;
         if (datasetId != NULL)
@@ -3065,7 +3066,9 @@ void *send_cluster_heartbeat(void *arg)
             long response_code = 0;
             curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
 
+#ifdef DEBUG
             printf("[C] HTTP transfer completed; cURL status %d, HTTP code %ld.\n", msg->data.result, response_code);
+#endif
         }
     }
 
