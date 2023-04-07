@@ -1850,16 +1850,15 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     console.log("process_hdr_image: #" + index);
     let image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
     var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
-    //console.log(image_bounding_dims, pixel_range);
+    // console.log(image_bounding_dims, pixel_range);
 
     // combine pixels with a mask
-    let len = pixels.length | 0; // Float32Array    
+    let len = pixels.length | 0;
     var texture = new Float32Array(2 * len);
     let offset = 0 | 0;
 
     for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
-        texture[offset] = pixels[i]; // Float32Array
-        // texture[offset] = pixels.get(i); // Float()
+        texture[offset] = pixels[i];
         offset = (offset + 1) | 0;
 
         texture[offset] = (alpha[i] > 0) ? 1.0 : 0.0;
@@ -1894,9 +1893,19 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         hide_hourglass();
     } else {
         if (composite_view) {
-            // add a channel to the RGBA composite image texture
+            // create a composite image texture
             if (compositeTexture == null) {
-                compositeTexture = new Float32Array(4 * len).fill(0.0);
+                compositeTexture = new Float32Array(4 * len).fill(0.0); // RGBA
+            }
+
+            // add a single channel to the RGBA composite image texture
+            let channel = index - 1;
+            let offset = 0 | 0;
+
+            for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
+                compositeTexture[offset + channel] = pixels[i]; // RGB channels           
+                compositeTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel                
+                offset = (offset + 4) | 0;
             }
         }
     };
@@ -1904,6 +1913,9 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     image_count++;
 
     if (image_count == va_count) {
+        compositeImage = { width: img_width, height: img_height, texture: compositeTexture };
+        console.log("process_hdr_image: all images loaded", compositeImage);
+
         //display the composite image
         if (composite_view) {
             init_webgl_image_buffers(va_count);
