@@ -1767,28 +1767,6 @@ function init_webgl_image_buffers(index) {
 
         // call the common WebGL renderer
         webgl_image_renderer(index, ctx, width, height);
-
-        // simulate losing and restoring WebGL context
-        /*setTimeout(function () {
-          ctx.getExtension('WEBGL_lose_context').loseContext();
-        }, 10000);*/
-
-        /*function makeCanvas() {
-          const canvas = document.createElement("canvas");
-          canvas.addEventListener('webglcontextlost', (e) => {
-            e.preventDefault();
-            console.log('lost');
-          });
-          document.body.appendChild(canvas);
-          const gl = canvas.getContext('webgl');
-        }
-    
-        setTimeout(function () {
-          var i;
-          for (i = 0; i < 20; i++)
-            makeCanvas();
-          console.log(`created ${i} WebGL contexts`);
-        }, 10000);*/
     } else if (webgl1) {
         var ctx = canvas.getContext("webgl", { preserveDrawingBuffer: true });
         imageContainer[index - 1].gl = ctx;
@@ -1869,6 +1847,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
+    console.log("process_hdr_image: #" + index);
     let image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
     var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
     //console.log(image_bounding_dims, pixel_range);
@@ -1899,7 +1878,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
     //next display the image
     if (va_count == 1) {
-        init_webgl_image_buffers(index);
+        init_webgl_image_buffers(va_count);
 
         setup_image_selection();
 
