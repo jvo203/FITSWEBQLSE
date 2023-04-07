@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-03.0";
+    return "JS2023-04-07.0";
 }
 
 function uuidv4() {
@@ -1914,6 +1914,30 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         setup_viewports();
 
         hide_hourglass();
+    }
+
+    image_count++;
+
+    if (image_count == va_count) {
+        //display the composite image
+        if (composite_view) {
+            init_webgl_image_buffers(va_count);
+
+            setup_image_selection();
+
+            try {
+                display_scale_info();
+            }
+            catch (err) {
+            };
+
+            has_image = true;
+
+            setup_viewports();
+
+            hide_hourglass();
+
+        }
     }
 
     try {
