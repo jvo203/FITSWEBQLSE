@@ -2146,6 +2146,9 @@ function webgl_composite_image_renderer(gl, width, height) {
 
         // image tone mapping
         var locationOfParams = gl.getUniformLocation(program, "params");
+        var locationOfParamsR = gl.getUniformLocation(program, "params_r");
+        var locationOfParamsG = gl.getUniformLocation(program, "params_g");
+        var locationOfParamsB = gl.getUniformLocation(program, "params_b");
 
         // drawRegion (execute the GLSL program)
         // Tell WebGL to use our shader program pair
