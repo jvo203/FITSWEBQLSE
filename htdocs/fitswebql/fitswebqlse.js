@@ -1853,8 +1853,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     //console.log(image_bounding_dims, pixel_range);
 
     // combine pixels with a mask
-    let len = pixels.length | 0; // Float32Array
-    // let len = pixels.size() | 0; // Float()
+    let len = pixels.length | 0; // Float32Array    
     var texture = new Float32Array(2 * len);
     let offset = 0 | 0;
 
@@ -1893,7 +1892,14 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         setup_viewports();
 
         hide_hourglass();
-    }
+    } else {
+        if (composite_view) {
+            // add a channel to the RGBA composite image texture
+            if (compositeTexture == null) {
+                compositeTexture = new Float32Array(4 * len).fill(0.0);
+            }
+        }
+    };
 
     image_count++;
 
@@ -16897,10 +16903,13 @@ async*/ function mainRenderer() {
         if (!isLocal && va_count == 1)
             fetch_binned_image(datasetId + '_00_00_00');
 
-        compositeCanvas = null;
+        // RGB composite image variables
+        compositeImage = null;
+        compositeTexture = null;
+        /*compositeCanvas = null;
         compositeImageData = null;
         compositeViewportCanvas = null;
-        compositeViewportImageData = null;
+        compositeViewportImageData = null;*/
 
         fitsContainer = new Array(va_count);
         imageContainer = new Array(va_count);
