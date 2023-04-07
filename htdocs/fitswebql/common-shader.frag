@@ -2223,3 +2223,8 @@ void main() {
         colour = vec4(0.0, 0.0, 0.0, 0.0);
 
     float x = colour.r;
+
+    // RGB composite
+    float x_r = colour.r;
+    float x_g = colour.g;
+    float x_b = colour.b;
