@@ -3,7 +3,13 @@ precision mediump float;
 varying vec4 v_texcoord;
 uniform sampler2D u_texture;
 
+// single tone mapping
 uniform vec4 params;
+
+// RGB composite tone mappings
+uniform vec4 params_r;
+uniform vec4 params_g;
+uniform vec4 params_b;
 
 //IDL green, red, purple
       
