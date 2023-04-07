@@ -1731,6 +1731,59 @@ function clear_webgl_viewport() {
     }
 }
 
+function init_webgl_composite_image_buffers() {
+    //place the image onto the main canvas
+    var canvas = document.getElementById('HTMLCanvas');
+    canvas.style.display = "block";// a hack needed by Apple Safari
+    var width = canvas.width;
+    var height = canvas.height;
+
+    if (webgl1 || webgl2) {
+        canvas.addEventListener("webglcontextlost", function (event) {
+            event.preventDefault();
+
+            var image = compositeImage;
+            cancelAnimationFrame(image.loopId);
+            console.error("HTMLCanvas: webglcontextlost");
+        }, false);
+
+        canvas.addEventListener(
+            "webglcontextrestored", function () {
+                console.log("HTMLCanvas: webglcontextrestored");
+                init_webgl_image_buffers(index);
+            }, false);
+    }
+
+    if (webgl2) {
+        var ctx = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
+        compositeImage.gl = ctx;
+        // console.log("init_webgl is using the WebGL2 context.");
+
+        // enable floating-point textures filtering			
+        ctx.getExtension('OES_texture_float_linear');
+
+        // needed by gl.checkFramebufferStatus
+        ctx.getExtension('EXT_color_buffer_float');
+
+        // call the common WebGL renderer
+        webgl_composite_image_renderer(ctx, width, height);
+    } else if (webgl1) {
+        var ctx = canvas.getContext("webgl", { preserveDrawingBuffer: true });
+        compositeImage.gl = ctx;
+        // console.log("init_webgl is using the WebGL1 context.");
+
+        // enable floating-point textures
+        ctx.getExtension('OES_texture_float');
+        ctx.getExtension('OES_texture_float_linear');
+
+        // call the common WebGL renderer
+        webgl_composite_image_renderer(ctx, width, height);
+    } else {
+        console.log("WebGL not supported by your browser, falling back onto HTML 2D Canvas (not implemented yet).");
+        return;
+    }
+}
+
 function init_webgl_image_buffers(index) {
     //place the image onto the main canvas
     var canvas = document.getElementById('HTMLCanvas');
@@ -1918,7 +1971,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
         //display the composite image
         if (composite_view) {
-            init_webgl_image_buffers(va_count);
+            init_webgl_composite_image_buffers();
 
             setup_image_selection();
 
