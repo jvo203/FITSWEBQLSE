@@ -1992,7 +1992,10 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
             height: Math.abs(_y2 - _y1) + 1
         };
 
-        compositeImage = { width: img_width, height: img_height, texture: compositeTexture, image_bounding_dims: new_image_bounding_dims };
+        // borrow the tone mapping flux from the first image
+        var new_tone_mapping = { flux: imageContainer[0].tone_mapping.flux };
+
+        compositeImage = { width: img_width, height: img_height, texture: compositeTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
         console.log("process_hdr_image: all images loaded", compositeImage);
 
         //display the composite image
@@ -2035,6 +2038,7 @@ function webgl_composite_image_renderer(gl, width, height) {
     var vertexShaderCode = document.getElementById("vertex-shader").text;
     try {
         var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById(image.tone_mapping.flux + "-shader").text;
+        console.log("webgl_composite_image_renderer: using tone mapping", image.tone_mapping.flux);
     } catch (_) {
         // this will be triggered only for datasets where the tone mapping has not been set (i.e. the mask is null etc...)
         var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById("legacy-shader").text;
