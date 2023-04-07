@@ -12577,8 +12577,9 @@ function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
                                         //display an RGB legend in place of REF FRQ			
                                         display_composite_legend();
 
-                                        if (composite_view)
-                                            display_rgb_legend();
+                                        // TO-DO
+                                        /*if (composite_view)
+                                            display_rgb_legend();*/
 
                                         setup_axes();
 
