@@ -1901,9 +1901,9 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
     console.log("process_hdr_image: #" + index);
-    let image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
+    var image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
     var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
-    // console.log(image_bounding_dims, pixel_range);
+    console.log(image_bounding_dims, pixel_range);
 
     // combine pixels with a mask
     let len = pixels.length | 0;
@@ -1966,7 +1966,33 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     image_count++;
 
     if (image_count == va_count) {
-        compositeImage = { width: img_width, height: img_height, texture: compositeTexture };
+        // find the common bounding box for all images
+        // start with the first image
+        let _x1 = imageContainer[0].image_bounding_dims.x1;
+        let _y1 = imageContainer[0].image_bounding_dims.y1;
+        let _x2 = imageContainer[0].image_bounding_dims.x2;
+        let _y2 = imageContainer[0].image_bounding_dims.y2;
+
+        // iterate through the remaining images
+        for (let i = 1; i < va_count; i = (i + 1)) {
+            let image_bounding_dims = imageContainer[i].image_bounding_dims;
+            _x1 = Math.min(_x1, image_bounding_dims.x1);
+            _y1 = Math.min(_y1, image_bounding_dims.y1);
+            _x2 = Math.max(_x2, image_bounding_dims.x2);
+            _y2 = Math.max(_y2, image_bounding_dims.y2);
+        }
+
+        // make the new bounding box
+        var new_image_bounding_dims = {
+            x1: _x1,
+            y1: _y1,
+            x2: _x2,
+            y2: _y2,
+            width: Math.abs(_x2 - _x1) + 1,
+            height: Math.abs(_y2 - _y1) + 1
+        };
+
+        compositeImage = { width: img_width, height: img_height, texture: compositeTexture, image_bounding_dims: new_image_bounding_dims };
         console.log("process_hdr_image: all images loaded", compositeImage);
 
         //display the composite image
@@ -1995,6 +2021,173 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         element.parentNode.removeChild(element);
     }
     catch (e) { }
+}
+
+function webgl_composite_image_renderer(gl, width, height) {
+    var image = compositeImage;
+
+    var scale = get_image_scale(width, height, image.image_bounding_dims.width, image.image_bounding_dims.height);
+    var img_width = scale * image.image_bounding_dims.width;
+    var img_height = scale * image.image_bounding_dims.height;
+    //console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
+
+    // setup GLSL program
+    var vertexShaderCode = document.getElementById("vertex-shader").text;
+    try {
+        var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById(image.tone_mapping.flux + "-shader").text;
+    } catch (_) {
+        // this will be triggered only for datasets where the tone mapping has not been set (i.e. the mask is null etc...)
+        var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById("legacy-shader").text;
+    }
+
+    if (webgl2)
+        fragmentShaderCode = fragmentShaderCode + "\ncolour.a = colour.g;\n";
+
+    fragmentShaderCode += document.getElementById(colourmap + "-shader").text;
+
+    // WebGL2 accept WebGL1 shaders so there is no need to update the code	
+    if (webgl2) {
+        var prefix = "#version 300 es\n";
+        vertexShaderCode = prefix + vertexShaderCode;
+        fragmentShaderCode = prefix + fragmentShaderCode;
+
+        // attribute -> in
+        vertexShaderCode = vertexShaderCode.replace(/attribute/g, "in");
+        fragmentShaderCode = fragmentShaderCode.replace(/attribute/g, "in");
+
+        // varying -> out
+        vertexShaderCode = vertexShaderCode.replace(/varying/g, "out");
+
+        // varying -> in
+        fragmentShaderCode = fragmentShaderCode.replace(/varying/g, "in");
+
+        // texture2D -> texture
+        fragmentShaderCode = fragmentShaderCode.replace(/texture2D/g, "texture");
+
+        // replace gl_FragColor with a custom variable, i.e. texColour
+        fragmentShaderCode = fragmentShaderCode.replace(/gl_FragColor/g, "texColour");
+
+        // add the definition of texColour
+        var pos = fragmentShaderCode.indexOf("void main()");
+        fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
+    }
+
+    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
+    image.program = program;
+
+    // look up where the vertex data needs to go.
+    var positionLocation = gl.getAttribLocation(program, "a_position");
+
+    // Create a position buffer
+    var positionBuffer = gl.createBuffer();
+    image.positionBuffer = positionBuffer;
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    // Put a unit quad in the buffer
+    var positions = [
+        -1, -1,
+        -1, 1,
+        1, -1,
+        1, -1,
+        -1, 1,
+        1, 1,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    // load a texture
+    var tex = gl.createTexture();
+    image.tex = tex;
+
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    /*gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);*/
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    if (webgl2)
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+    else
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+
+    var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (status != gl.FRAMEBUFFER_COMPLETE) {
+        console.error(status);
+    }
+
+    image.refresh = true;
+    image.first = true;
+
+    // shoud be done in an animation loop
+    function image_rendering_loop() {
+        // set a flag
+        image.first = false;
+
+        if (!image.refresh) {
+            image.loopId = requestAnimationFrame(image_rendering_loop);
+            return;
+        } else
+            image.refresh = false;
+
+        //WebGL how to convert from clip space to pixels	
+        gl.viewport((width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
+        // console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
+        // console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
+        // set the global variable
+        image_gl_viewport = gl.getParameter(gl.VIEWPORT);
+
+        // Clear the canvas
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        // the image bounding box
+        var locationOfBox = gl.getUniformLocation(program, "box");
+
+        // image tone mapping
+        var locationOfParams = gl.getUniformLocation(program, "params");
+
+        // drawRegion (execute the GLSL program)
+        // Tell WebGL to use our shader program pair
+        gl.useProgram(program);
+
+        let xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
+        let ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
+        let _width = image.image_bounding_dims.width / image.width;
+        let _height = image.image_bounding_dims.height / image.height;
+
+        //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
+        gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
+
+        // get the multiplier
+        var noise_sensitivity = document.getElementById('sensitivity' + index).value;
+        var multiplier = get_noise_sensitivity(noise_sensitivity);
+
+        if (image.tone_mapping.flux == "legacy") {
+            var params = [image.tone_mapping.black, image.tone_mapping.white, image.tone_mapping.lmin, image.tone_mapping.lmax];
+            gl.uniform4fv(locationOfParams, params);
+        } else {
+            if (image.tone_mapping.flux == "ratio")
+                var params = [image.tone_mapping.median, multiplier * image.tone_mapping.ratio_sensitivity, image.tone_mapping.black, image.tone_mapping.white];
+            else
+                var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, image.tone_mapping.black, image.tone_mapping.white];
+
+            gl.uniform4fv(locationOfParams, params);
+        }
+
+        // Setup the attributes to pull data from our buffers
+        gl.enableVertexAttribArray(positionLocation);
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+        // execute the GLSL program
+        // draw the quad (2 triangles, 6 vertices)
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        image.loopId = requestAnimationFrame(image_rendering_loop);
+    };
+
+    image.loopId = requestAnimationFrame(image_rendering_loop);
 }
 
 function webgl_image_renderer(index, gl, width, height) {
@@ -3791,6 +3984,7 @@ function true_image_dimensions(alpha, width, height) {
     return {
         x1: x1,
         y1: y1,
+        x2: x2,
         y2: ((height - 1) - y2), // was 'y1', with WebGL swap y1 with y2 due to a vertical mirror flip
         width: Math.abs(x2 - x1) + 1,
         height: Math.abs(y2 - y1) + 1
