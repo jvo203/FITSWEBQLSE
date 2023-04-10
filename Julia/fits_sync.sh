@@ -10,7 +10,7 @@ DATE=$(date -d "$DATE - 7 days" +%Y-%m-%d)
 echo "Starting sync for $DATE"
 
 # make a sync command (run julia fits_sync $DATE)
-CMD="julia /home/chris/Julia/fits_sync.jl $DATE"
+CMD="/home/chris/julia-1.8.5/bin/julia /home/chris/Julia/fits_sync.jl $DATE"
 
 # print the command
 echo $CMD
