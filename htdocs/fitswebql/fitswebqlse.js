@@ -11464,7 +11464,12 @@ function setup_image_selection() {
                 }
             }
 
-            init_webgl_image_buffers(va_count);
+            if (va_count == 1) {
+                init_webgl_image_buffers(va_count);
+            } else {
+                if (composite_view)
+                    init_webgl_composite_image_buffers();
+            }
         })
         .on("mousemove", (event) => {
             // cancel the image animation loop
