@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-07.0";
+    return "JS2023-04-11.0";
 }
 
 function uuidv4() {
@@ -2037,11 +2037,11 @@ function webgl_composite_image_renderer(gl, width, height) {
     // setup GLSL program
     var vertexShaderCode = document.getElementById("vertex-shader").text;
     try {
-        var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById(image.tone_mapping.flux + "-shader").text;
+        var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById(image.tone_mapping.flux + "-composite-shader").text;
         console.log("webgl_composite_image_renderer: using a common tone mapping", image.tone_mapping.flux);
     } catch (_) {
         // this will be triggered only for datasets where the tone mapping has not been set (i.e. the mask is null etc...)
-        var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById("legacy-shader").text;
+        var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById("legacy-composite-shader").text;
     }
 
     if (webgl2)
