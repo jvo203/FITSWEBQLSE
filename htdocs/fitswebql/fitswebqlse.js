@@ -1957,7 +1957,8 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
             for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
                 compositeTexture[offset + channel] = pixels[i]; // RGB channels           
-                compositeTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel                
+                compositeTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel            
+                compositeTexture[offset + 3] = 1.0; // alpha channel
                 offset = (offset + 4) | 0;
             }
         }
