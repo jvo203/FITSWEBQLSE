@@ -1948,18 +1948,20 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         if (composite_view) {
             // create a composite image texture
             if (compositeTexture == null) {
-                compositeTexture = new Float32Array(4 * len).fill(0.0); // RGBA
+                compositeTexture = new Float32Array(3 * len).fill(0.0); // RGB
             }
 
-            // add a single channel to the RGBA composite image texture
-            let channel = index - 1;
+            // add a single channel to the RGB composite image texture
+            let channel = (index - 1) | 0;
             let offset = 0 | 0;
 
+            console.log("channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
+
             for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
-                compositeTexture[offset + channel] = pixels[i]; // RGB channels           
-                compositeTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel            
-                compositeTexture[offset + 3] = 1.0; // alpha channel
-                offset = (offset + 4) | 0;
+                compositeTexture[(offset + channel) | 0] = pixels[i]; // RGB channels           
+                //compositeTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel            
+                //compositeTexture[(offset + 3) | 0] = 1.0; // alpha channel
+                offset = (offset + 3) | 0;
             }
         }
     };
@@ -2110,9 +2112,9 @@ function webgl_composite_image_renderer(gl, width, height) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
     if (webgl2)
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB32F, image.width, image.height, 0, gl.RGB, gl.FLOAT, image.texture);
     else
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, image.width, image.height, 0, gl.RGB, gl.FLOAT, image.texture);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
