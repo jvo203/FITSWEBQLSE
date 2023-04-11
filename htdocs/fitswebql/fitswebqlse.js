@@ -1970,26 +1970,24 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         // start with the first image
         let _x1 = imageContainer[0].image_bounding_dims.x1;
         let _y1 = imageContainer[0].image_bounding_dims.y1;
-        let _x2 = imageContainer[0].image_bounding_dims.x2;
-        let _y2 = imageContainer[0].image_bounding_dims.y2;
+        let _width = imageContainer[0].image_bounding_dims.width;
+        let _height = imageContainer[0].image_bounding_dims.height;
 
         // iterate through the remaining images
         for (let i = 1; i < va_count; i = (i + 1)) {
             let image_bounding_dims = imageContainer[i].image_bounding_dims;
             _x1 = Math.min(_x1, image_bounding_dims.x1);
             _y1 = Math.min(_y1, image_bounding_dims.y1);
-            _x2 = Math.max(_x2, image_bounding_dims.x2);
-            _y2 = Math.max(_y2, image_bounding_dims.y2);
+            _width = Math.max(_width, image_bounding_dims.width);
+            _height = Math.max(_height, image_bounding_dims.height);
         }
 
         // make the new bounding box
         var new_image_bounding_dims = {
             x1: _x1,
             y1: _y1,
-            x2: _x2,
-            y2: _y2,
-            width: Math.abs(_x2 - _x1) + 1,
-            height: Math.abs(_y2 - _y1) + 1
+            width: _width,
+            height: _height
         };
 
         // borrow the tone mapping flux from the first image
@@ -2149,10 +2147,12 @@ function webgl_composite_image_renderer(gl, width, height) {
         var locationOfBox = gl.getUniformLocation(program, "box");
 
         // image tone mapping
-        var locationOfParams = gl.getUniformLocation(program, "params");
         var locationOfParamsR = gl.getUniformLocation(program, "params_r");
         var locationOfParamsG = gl.getUniformLocation(program, "params_g");
         var locationOfParamsB = gl.getUniformLocation(program, "params_b");
+
+        // create an array with parameter locations
+        var locationOfParams = [locationOfParamsR, locationOfParamsG, locationOfParamsB];
 
         // drawRegion (execute the GLSL program)
         // Tell WebGL to use our shader program pair
@@ -2163,23 +2163,27 @@ function webgl_composite_image_renderer(gl, width, height) {
         let _width = image.image_bounding_dims.width / image.width;
         let _height = image.image_bounding_dims.height / image.height;
 
-        //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
+        // console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
-        // get the multiplier
-        var noise_sensitivity = document.getElementById('sensitivity' + index).value;
-        var multiplier = get_noise_sensitivity(noise_sensitivity);
+        for (index = 1; index <= va_count; index++) {
+            let tone_mapping = imageContainer[index - 1].tone_mapping;
 
-        if (image.tone_mapping.flux == "legacy") {
-            var params = [image.tone_mapping.black, image.tone_mapping.white, image.tone_mapping.lmin, image.tone_mapping.lmax];
-            gl.uniform4fv(locationOfParams, params);
-        } else {
-            if (image.tone_mapping.flux == "ratio")
-                var params = [image.tone_mapping.median, multiplier * image.tone_mapping.ratio_sensitivity, image.tone_mapping.black, image.tone_mapping.white];
-            else
-                var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, image.tone_mapping.black, image.tone_mapping.white];
+            // get the multiplier
+            let noise_sensitivity = document.getElementById('sensitivity' + index).value;
+            let multiplier = get_noise_sensitivity(noise_sensitivity);
 
-            gl.uniform4fv(locationOfParams, params);
+            if (tone_mapping.flux == "legacy") {
+                let params = [tone_mapping.black, tone_mapping.white, tone_mapping.lmin, tone_mapping.lmax];
+                gl.uniform4fv(locationOfParams[index - 1], params);
+            } else if (tone_mapping.flux == "ratio") {
+                let params = [tone_mapping.median, multiplier * tone_mapping.ratio_sensitivity, tone_mapping.black, tone_mapping.white];
+                gl.uniform4fv(locationOfParams[index - 1], params);
+            }
+            else {
+                let params = [tone_mapping.median, multiplier * tone_mapping.sensitivity, tone_mapping.black, tone_mapping.white];
+                gl.uniform4fv(locationOfParams[index - 1], params);
+            }
         }
 
         // Setup the attributes to pull data from our buffers
