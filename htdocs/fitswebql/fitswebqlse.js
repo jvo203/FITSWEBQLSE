@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-12.0";
+    return "JS2023-04-12.1";
 }
 
 function uuidv4() {
@@ -6522,6 +6522,10 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
         var multiplier = get_noise_sensitivity(noise_sensitivity);
         var path = get_flux_path(width, height, document.getElementById('flux' + index).value, black, white, median, multiplier, index);
         flux_elem.attr("d", path);
+
+        if (composite_view) {
+            image = compositeImage;
+        }
 
         image.refresh = true;
 
@@ -13503,6 +13507,10 @@ function change_noise_sensitivity(index) {
         let p = get_slope_from_multiplier(multiplier);
         image.tone_mapping.lmin = Math.log(p);
         image.tone_mapping.lmax = Math.log(p + 1.0);
+    }
+
+    if (composite_view) {
+        image = compositeImage;
     }
 
     image.refresh = true;
