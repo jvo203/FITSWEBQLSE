@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-12.2";
+    return "JS2023-04-12.4";
 }
 
 function uuidv4() {
@@ -2135,6 +2135,10 @@ function webgl_composite_image_renderer(gl, width, height) {
         // set a flag
         image.first = false;
 
+        if (image.gl == null) {
+            return;
+        }
+
         if (!image.refresh) {
             image.loopId = requestAnimationFrame(image_rendering_loop);
             return;
@@ -2310,6 +2314,10 @@ function webgl_image_renderer(index, gl, width, height) {
     function image_rendering_loop() {
         // set a flag
         image.first = false;
+
+        if (image.gl == null) {
+            return;
+        }
 
         if (!image.refresh) {
             image.loopId = requestAnimationFrame(image_rendering_loop);
@@ -6068,7 +6076,7 @@ function change_tone_mapping(index, recursive) {
 
         image.tone_mapping.flux = document.getElementById('flux' + index).value;
 
-        if (composite_view && recursive) {
+        if (composite_view) {
             compositeImage.tone_mapping.flux = image.tone_mapping.flux;
         }
 
@@ -6082,7 +6090,7 @@ function change_tone_mapping(index, recursive) {
             image.tone_mapping.white = image.tone_mapping.max;
         }
 
-        if (composite_view && recursive) {
+        if (composite_view) {
             clear_webgl_composite_image_buffers();
         } else {
             clear_webgl_image_buffers(index);
@@ -6090,7 +6098,13 @@ function change_tone_mapping(index, recursive) {
 
     }
 
-    update_legend();
+    if (va_count == 1) {
+        update_legend();
+    }
+
+    if (!composite_view) {
+        init_webgl_image_buffers(index);
+    }
 
     //change other datasets too
     if (va_count > 1 && recursive) {
@@ -6103,8 +6117,6 @@ function change_tone_mapping(index, recursive) {
         // refresh an image
         if (composite_view) {
             init_webgl_composite_image_buffers();
-        } else {
-            init_webgl_image_buffers(index);
         }
     }
 }
