@@ -1750,7 +1750,7 @@ function init_webgl_composite_image_buffers() {
         canvas.addEventListener(
             "webglcontextrestored", function () {
                 console.log("HTMLCanvas: webglcontextrestored");
-                init_webgl_image_buffers(index);
+                init_webgl_composite_image_buffers();
             }, false);
     }
 
