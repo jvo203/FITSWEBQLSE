@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-12.1";
+    return "JS2023-04-12.2";
 }
 
 function uuidv4() {
@@ -6068,6 +6068,10 @@ function change_tone_mapping(index, recursive) {
 
         image.tone_mapping.flux = document.getElementById('flux' + index).value;
 
+        if (composite_view && recursive) {
+            compositeImage.tone_mapping.flux = image.tone_mapping.flux;
+        }
+
         // reset the legacy settings
         let p = 0.5;
         image.tone_mapping.lmin = Math.log(p);
@@ -6078,19 +6082,12 @@ function change_tone_mapping(index, recursive) {
             image.tone_mapping.white = image.tone_mapping.max;
         }
 
-        if (composite_view) {
+        if (composite_view && recursive) {
             clear_webgl_composite_image_buffers();
         } else {
             clear_webgl_image_buffers(index);
         }
 
-    }
-
-    // refresh an image
-    if (composite_view) {
-        init_webgl_composite_image_buffers();
-    } else {
-        init_webgl_image_buffers(index);
     }
 
     update_legend();
@@ -6102,6 +6099,13 @@ function change_tone_mapping(index, recursive) {
                 document.getElementById('flux' + i).value = document.getElementById('flux' + index).value
                 change_tone_mapping(i, false);
             }
+
+        // refresh an image
+        if (composite_view) {
+            init_webgl_composite_image_buffers();
+        } else {
+            init_webgl_image_buffers(index);
+        }
     }
 }
 
