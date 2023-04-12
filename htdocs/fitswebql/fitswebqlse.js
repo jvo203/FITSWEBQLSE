@@ -1837,13 +1837,19 @@ function init_webgl_image_buffers(index) {
     }
 }
 
-function clear_webgl_image_buffers(index) {
-    // cancel the animation loop
-    var image = imageContainer[index - 1];
+function clear_webgl_composite_image_buffers() {
+    clear_webgl_internal_buffers(compositeImage);
+}
 
+function clear_webgl_image_buffers(index) {
+    clear_webgl_internal_buffers(imageContainer[index - 1]);
+}
+
+function clear_webgl_internal_buffers(image) {
     if (image.first)
         return;
 
+    // cancel the animation loop
     cancelAnimationFrame(image.loopId);
 
     var gl = image.gl;
@@ -6072,11 +6078,20 @@ function change_tone_mapping(index, recursive) {
             image.tone_mapping.white = image.tone_mapping.max;
         }
 
-        clear_webgl_image_buffers(index);
+        if (composite_view) {
+            clear_webgl_composite_image_buffers();
+        } else {
+            clear_webgl_image_buffers(index);
+        }
+
     }
 
     // refresh an image
-    init_webgl_image_buffers(index);
+    if (composite_view) {
+        init_webgl_composite_image_buffers();
+    } else {
+        init_webgl_image_buffers(index);
+    }
 
     update_legend();
 
