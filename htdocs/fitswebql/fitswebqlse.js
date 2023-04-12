@@ -2003,7 +2003,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         var new_tone_mapping = { flux: imageContainer[0].tone_mapping.flux };
 
         compositeImage = { width: img_width, height: img_height, texture: compositeTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
-        console.log("process_hdr_image: all images loaded", compositeImage);
+        console.log("process_hdr_image: all images loaded", compositeImage, "composite_view:", composite_view);
 
         //display the composite image
         if (composite_view) {
@@ -16574,7 +16574,7 @@ async*/ function mainRenderer() {
         video_fps_control = localStorage.getItem("video_fps_control");
 
     composite_view = (parseInt(votable.getAttribute('data-composite')) == 1) ? true : false;
-    //console.log("composite view:", composite_view);
+    console.log("composite view:", composite_view);
 
     optical_view = false;
 
