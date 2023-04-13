@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-13.1";
+    return "JS2023-04-13.2";
 }
 
 function uuidv4() {
@@ -2135,7 +2135,7 @@ function webgl_composite_image_renderer(gl, width, height) {
     image.first = true;
 
     // shoud be done in an animation loop
-    function image_rendering_loop() {
+    function composite_image_rendering_loop() {
         // set a flag
         image.first = false;
 
@@ -2144,7 +2144,7 @@ function webgl_composite_image_renderer(gl, width, height) {
         }
 
         if (!image.refresh) {
-            image.loopId = requestAnimationFrame(image_rendering_loop);
+            image.loopId = requestAnimationFrame(composite_image_rendering_loop);
             return;
         } else
             image.refresh = false;
@@ -2212,10 +2212,10 @@ function webgl_composite_image_renderer(gl, width, height) {
         // draw the quad (2 triangles, 6 vertices)
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-        image.loopId = requestAnimationFrame(image_rendering_loop);
+        image.loopId = requestAnimationFrame(composite_image_rendering_loop);
     };
 
-    image.loopId = requestAnimationFrame(image_rendering_loop);
+    image.loopId = requestAnimationFrame(composite_image_rendering_loop);
 }
 
 function webgl_image_renderer(index, gl, width, height) {
