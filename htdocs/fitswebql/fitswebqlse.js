@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-13.3";
+    return "JS2023-04-13.4";
 }
 
 function uuidv4() {
@@ -1647,7 +1647,7 @@ function clear_webgl_zoom_buffers() {
 
     var gl = viewport.gl;
 
-    if (gl == null)
+    if (gl === undefined || gl == null)
         return;
 
     // position buffer
@@ -15887,7 +15887,7 @@ function clear_webgl_legend_buffers(index) {
     var image = imageContainer[index - 1];
     var gl = image.legend_gl;
 
-    if (gl == null)
+    if (gl === undefined || gl == null)
         return;
 
     // position buffer	
