@@ -6080,10 +6080,6 @@ function change_tone_mapping(index, recursive) {
 
         image.tone_mapping.flux = document.getElementById('flux' + index).value;
 
-        if (composite_view) {
-            compositeImage.tone_mapping.flux = image.tone_mapping.flux;
-        }
-
         // reset the legacy settings
         let p = 0.5;
         image.tone_mapping.lmin = Math.log(p);
@@ -6120,6 +6116,7 @@ function change_tone_mapping(index, recursive) {
 
         // refresh an image
         if (composite_view) {
+            compositeImage.tone_mapping.flux = document.getElementById('flux' + index).value;
             init_webgl_composite_image_buffers();
         }
     }
@@ -11506,10 +11503,13 @@ function setup_image_selection() {
             }
 
             if (va_count == 1) {
+                clear_webgl_image_buffers(va_count);
                 init_webgl_image_buffers(va_count);
             } else {
-                if (composite_view)
+                if (composite_view) {
+                    clear_webgl_composite_image_buffers();
                     init_webgl_composite_image_buffers();
+                }
             }
         })
         .on("mousemove", (event) => {
