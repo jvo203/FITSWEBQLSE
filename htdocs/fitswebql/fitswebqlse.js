@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-13.0";
+    return "JS2023-04-13.1";
 }
 
 function uuidv4() {
@@ -6076,7 +6076,7 @@ function change_tone_mapping(index, recursive) {
 
     // set a new tone mapping function 
     if (imageContainer[index - 1] != null) {
-        var image = imageContainer[index - 1];
+        let image = imageContainer[index - 1];
 
         image.tone_mapping.flux = document.getElementById('flux' + index).value;
 
@@ -6514,7 +6514,7 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
         };
 
         // set image tone mapping
-        var image = imageContainer[index - 1];
+        let image = imageContainer[index - 1];
 
         if (document.getElementById('flux' + index).value == "linear") {
             image.tone_mapping.black = black;
@@ -6549,7 +6549,9 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
 
         image.refresh = true;
 
-        update_legend();
+        if (va_count == 1) {
+            update_legend();
+        }
     }
 
     var group = g.data(d).append("g")
