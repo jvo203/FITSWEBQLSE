@@ -1,3 +1,7 @@
+## [5.0.32] - 2023-04-13
+
+* client-side JavaScript: improved WebGL reliability
+
 ## [5.0.31] - 2023-04-06
 
 * replaced the ```html_encode()``` C function with a more robust ```mg_url_encode()```
