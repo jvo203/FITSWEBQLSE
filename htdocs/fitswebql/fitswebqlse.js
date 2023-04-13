@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-12.4";
+    return "JS2023-04-13.0";
 }
 
 function uuidv4() {
@@ -1513,6 +1513,10 @@ function webgl_zoom_renderer(gl, height) {
             last_viewport_loop = now;
         }
 
+        if (viewport.gl === undefined || viewport.gl == null) {
+            return;
+        }
+
         if (!viewport.refresh) {
             viewport.loopId = requestAnimationFrame(zoom_rendering_loop);
             return;
@@ -2135,7 +2139,7 @@ function webgl_composite_image_renderer(gl, width, height) {
         // set a flag
         image.first = false;
 
-        if (image.gl == null) {
+        if (image.gl === undefined || image.gl == null) {
             return;
         }
 
@@ -2315,7 +2319,7 @@ function webgl_image_renderer(index, gl, width, height) {
         // set a flag
         image.first = false;
 
-        if (image.gl == null) {
+        if (image.gl === undefined || image.gl == null) {
             return;
         }
 
