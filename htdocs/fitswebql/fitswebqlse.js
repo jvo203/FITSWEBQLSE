@@ -11403,7 +11403,7 @@ function setup_image_selection() {
                 //console.log("clearing the Viewport Canvas");
                 var gl = viewport.gl;
 
-                if (gl != undefined) {
+                if (gl !== undefined && gl != null) {
                     gl.clearColor(0, 0, 0, 0);
                     gl.clear(gl.COLOR_BUFFER_BIT);
                 };
