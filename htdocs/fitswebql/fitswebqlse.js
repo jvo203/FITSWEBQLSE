@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-13.4";
+    return "JS2023-04-14.0";
 }
 
 function uuidv4() {
@@ -11291,7 +11291,13 @@ function setup_image_selection() {
             hide_navigation_bar();
 
             // cancel the image animation loop
-            clear_webgl_image_buffers(va_count);
+            if (va_count == 1) {
+                clear_webgl_image_buffers(va_count);
+            } else {
+                if (composite_view) {
+                    clear_webgl_composite_image_buffers();
+                }
+            }
 
             try {
                 zoom_beam();
@@ -11514,7 +11520,13 @@ function setup_image_selection() {
         })
         .on("mousemove", (event) => {
             // cancel the image animation loop
-            clear_webgl_image_buffers(va_count);
+            if (va_count == 1) {
+                clear_webgl_image_buffers(va_count);
+            } else {
+                if (composite_view) {
+                    clear_webgl_composite_image_buffers();
+                }
+            }
 
             if (!autoscale && event.shiftKey) {
                 d3.select("#scaling")
