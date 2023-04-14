@@ -2057,9 +2057,6 @@ function webgl_composite_image_renderer(gl, width, height) {
         var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById("legacy-composite-shader").text;
     }
 
-    if (webgl2)
-        fragmentShaderCode = fragmentShaderCode + "\ncolour.a = colour.g;\n";
-
     fragmentShaderCode += document.getElementById("composite-shader").text;
 
     // WebGL2 accept WebGL1 shaders so there is no need to update the code	
@@ -9376,8 +9373,12 @@ function swap_viewports() {
         // Clear the ZOOM Canvas
         //console.log("clearing the ZOOM Canvas");
         var gl = viewport.gl;
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        if (gl !== undefined && gl != null) {
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+
         viewport.refresh = true;
     }
 
@@ -10161,8 +10162,11 @@ function fits_subregion_start(event) {
         // Clear the ZOOM Canvas
         //console.log("clearing the ZOOM Canvas");
         var gl = viewport.gl;
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        if (gl !== undefined && gl != null) {
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
     }
 
     clear_webgl_viewport();
@@ -10208,8 +10212,11 @@ function fits_subregion_drag(event) {
             // Clear the ZOOM Canvas
             //console.log("clearing the ZOOM Canvas");
             var gl = viewport.gl;
-            gl.clearColor(0, 0, 0, 0);
-            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            if (gl !== undefined && gl != null) {
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+            }
         }
 
         clear_webgl_viewport();
