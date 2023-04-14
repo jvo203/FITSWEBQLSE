@@ -1900,8 +1900,11 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
         // Clear the ZOOM Canvas
         //console.log("clearing the ZOOM Canvas");
         var gl = viewport.gl;
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        if (gl !== undefined && gl != null) {
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
     }
 
     //next project the viewport
@@ -11348,7 +11351,13 @@ function setup_image_selection() {
 
             resetKalman();
 
-            init_webgl_zoom_buffers();
+            if (va_count == 1) {
+                init_webgl_zoom_buffers();
+            } else {
+                if (composite_view) {
+                    // init_webgl_composite_zoom_buffers();
+                }
+            }
 
             // send a "Kalman Filter reset" WebSocket message in order to reset the server-side Kalman Filter
             var msg = {
