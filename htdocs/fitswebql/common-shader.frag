@@ -2225,6 +2225,7 @@ void main() {
     float x = colour.r;
 
     // RGB composite
-    float x_r = colour.r;
-    float x_g = colour.g;
-    float x_b = colour.b;
+    float x_r = colour.r; // RED
+    float x_g = colour.g; // GREEN
+    float x_b = colour.b; // BLUE
+    float alpha = colour.a; // ALPHA
