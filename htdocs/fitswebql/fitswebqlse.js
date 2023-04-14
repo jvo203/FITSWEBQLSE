@@ -1388,7 +1388,7 @@ function webgl_viewport_renderer(gl, container, height) {
 }
 
 function webgl_zoom_renderer(gl, height) {
-    var image = imageContainer[va_count - 1];
+    let image = imageContainer[va_count - 1];
 
     if (image == null) {
         console.log("webgl_zoom_renderer: null image");
