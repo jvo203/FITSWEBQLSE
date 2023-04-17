@@ -2120,26 +2120,23 @@ function clear_webgl_internal_buffers(image) {
     image.gl = null;
 }
 
-function process_hdr_viewport(img_width, img_height, pixels, alpha) {
+function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
+    console.log("process_hdr_viewport: #" + index);
     if (streaming || moving || windowLeft)
         return;
 
     // combine pixels with a mask	
-    let len = pixels.length | 0; // Float32Array
-    // let len = pixels.size() | 0; // Float()
+    let len = pixels.length | 0;
     var texture = new Float32Array(2 * len);
     let offset = 0 | 0;
 
     for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
-        texture[offset] = pixels[i]; // Float32Array
-        // texture[offset] = pixels.get(i); // Float()
+        texture[offset] = pixels[i];
         offset = (offset + 1) | 0;
 
         texture[offset] = (alpha[i] > 0) ? 1.0 : 0.0;
         offset = (offset + 1) | 0;
     }
-
-    var viewportContainer = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture };
 
     if (viewport != null) {
         // Clear the ZOOM Canvas
@@ -2153,8 +2150,16 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha) {
     }
 
     //next project the viewport
-    if (va_count == 1)
+    if (va_count == 1) {
+        var viewportContainer = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture };
         init_webgl_viewport_buffers(viewportContainer);
+    } else {
+        if (composite_view) {
+            // create a composite viewport texture
+        }
+    }
+
+    viewport_count++;
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
@@ -3469,7 +3474,7 @@ function open_websocket_connection(_datasetId, index) {
 
                             //console.log("viewport width: ", view_width, "height: ", view_height, "elapsed: ", elapsed, "[ms]");
 
-                            process_hdr_viewport(view_width, view_height, pixels, alpha);
+                            process_hdr_viewport(view_width, view_height, pixels, alpha, index);
                         }
                         /*})
                         .catch(e => console.error(e));*/
