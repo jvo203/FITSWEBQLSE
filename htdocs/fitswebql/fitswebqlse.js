@@ -1212,7 +1212,7 @@ function createProgram(gl, vertexShaderCode, fragmentShaderCode) {
 };
 
 function webgl_viewport_renderer(gl, container, height) {
-    var image = imageContainer[va_count - 1];
+    let image = imageContainer[va_count - 1];
 
     if (image == null) {
         console.log("webgl_zoom_renderer: null image");
@@ -2151,15 +2151,41 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
 
     //next project the viewport
     if (va_count == 1) {
-        var viewportContainer = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture };
+        let viewportContainer = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture };
         init_webgl_viewport_buffers(viewportContainer);
     } else {
         if (composite_view) {
             // create a composite viewport texture
+            if (compositeViewportTexture == null) {
+                compositeViewportTexture = new Float32Array(4 * len).fill(0.0); // RGBA
+            }
+
+            // add a single channel to the RGBA composite viewport texture
+            let channel = (index - 1) | 0;
+            let offset = 0 | 0;
+
+            console.log("viewport channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
+
+            for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
+                compositeViewportTexture[(offset + channel) | 0] = pixels[i]; // RGB channels    
+                compositeViewportTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel                
+                offset = (offset + 4) | 0;
+            }
+
         }
     }
 
     viewport_count++;
+
+    if (viewport_count == va_count) {
+        let viewportContainer = { width: img_width, height: img_height, texture: compositeViewportTexture };
+        console.log("process_hdr_viewport: all viewports loaded", viewportContainer, "composite_view:", composite_view);
+
+        //display the composite viewport
+        if (composite_view) {
+            init_webgl_composite_viewport_buffers(viewportContainer);
+        }
+    }
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
@@ -2218,7 +2244,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
             let channel = (index - 1) | 0;
             let offset = 0 | 0;
 
-            console.log("channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
+            console.log("image channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
 
             for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
                 compositeImageTexture[(offset + channel) | 0] = pixels[i]; // RGB channels    
@@ -13469,7 +13495,6 @@ function imageTimeout() {
     if (moving || streaming)
         return;
 
-    compositeViewport = null;
     compositeViewportTexture = null;
     viewport_count = 0;
 
@@ -17266,7 +17291,6 @@ async*/ function mainRenderer() {
         // RGB composite image variables
         compositeImage = null;
         compositeImageTexture = null;
-        compositeViewport = null;
         compositeViewportTexture = null;
 
         fitsContainer = new Array(va_count);
