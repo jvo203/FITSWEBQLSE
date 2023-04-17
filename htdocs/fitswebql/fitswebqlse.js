@@ -2177,14 +2177,12 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
 
     viewport_count++;
 
-    if (viewport_count == va_count) {
+    if (viewport_count == va_count && composite_view) {
         let viewportContainer = { width: img_width, height: img_height, texture: compositeViewportTexture };
-        console.log("process_hdr_viewport: all viewports loaded", viewportContainer, "composite_view:", composite_view);
+        console.log("process_hdr_viewport: all viewports loaded", viewportContainer);
 
-        //display the composite viewport
-        if (composite_view) {
-            init_webgl_composite_viewport_buffers(viewportContainer);
-        }
+        //display the composite viewport        
+        init_webgl_composite_viewport_buffers(viewportContainer);
     }
 }
 
