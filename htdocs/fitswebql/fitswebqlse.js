@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-14.1";
+    return "JS2023-04-17.0";
 }
 
 function uuidv4() {
@@ -2205,8 +2205,8 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     } else {
         if (composite_view) {
             // create a composite image texture
-            if (compositeTexture == null) {
-                compositeTexture = new Float32Array(4 * len).fill(0.0); // RGBA
+            if (compositeImageTexture == null) {
+                compositeImageTexture = new Float32Array(4 * len).fill(0.0); // RGBA
             }
 
             // add a single channel to the RGBA composite image texture
@@ -2216,8 +2216,8 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
             console.log("channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
 
             for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
-                compositeTexture[(offset + channel) | 0] = pixels[i]; // RGB channels    
-                compositeTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel                
+                compositeImageTexture[(offset + channel) | 0] = pixels[i]; // RGB channels    
+                compositeImageTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel                
                 offset = (offset + 4) | 0;
             }
         }
@@ -2253,7 +2253,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         // borrow the tone mapping flux from the first image
         var new_tone_mapping = { flux: imageContainer[0].tone_mapping.flux };
 
-        compositeImage = { width: img_width, height: img_height, texture: compositeTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
+        compositeImage = { width: img_width, height: img_height, texture: compositeImageTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
         console.log("process_hdr_image: all images loaded", compositeImage, "composite_view:", composite_view);
 
         //display the composite image
@@ -13464,8 +13464,8 @@ function imageTimeout() {
     if (moving || streaming)
         return;
 
-    compositeViewportCanvas = null;
-    compositeViewportImageData = null;
+    compositeViewport = null;
+    compositeViewportTexture = null;
     viewport_count = 0;
 
     sent_seq_id++;
@@ -16485,12 +16485,17 @@ function contour_surface_webworker() {
     var data = [];
 
     var imageFrame = imageContainer[va_count - 1];
-    var image_bounding_dims = imageFrame.image_bounding_dims;
 
     if (composite_view) {
+        imageFrame = compositeImage;
+    }
+
+    var image_bounding_dims = imageFrame.image_bounding_dims;
+
+    /*if (composite_view) {
         imageCanvas = compositeCanvas;
         imageDataCopy = compositeImageData.data;
-    }
+    }*/
 
     let min_value = imageFrame.pixel_range.min_pixel;
     let max_value = imageFrame.pixel_range.max_pixel;
@@ -17255,11 +17260,9 @@ async*/ function mainRenderer() {
 
         // RGB composite image variables
         compositeImage = null;
-        compositeTexture = null;
-        /*compositeCanvas = null;
-        compositeImageData = null;
-        compositeViewportCanvas = null;
-        compositeViewportImageData = null;*/
+        compositeImageTexture = null;
+        compositeViewport = null;
+        compositeViewportTexture = null;
 
         fitsContainer = new Array(va_count);
         imageContainer = new Array(va_count);
