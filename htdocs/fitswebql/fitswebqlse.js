@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-17.0";
+    return "JS2023-04-17.1";
 }
 
 function uuidv4() {
@@ -8254,7 +8254,6 @@ function Einstein_relative_velocity(f, f0) {
         deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
     }
     catch (e) {
-        console.log(e);
         console.log("USER_DELTAV = ", USER_DELTAV);
     }
 
@@ -16733,36 +16732,34 @@ function contour_surface_webworker() {
     catch (e) { };
 
     var data = [];
-
-    var imageFrame = imageContainer[va_count - 1];
+    var imageFrame = null;
+    var imageData = null;
 
     if (composite_view) {
         imageFrame = compositeImage;
+        imageData = compositeImageTexture;
+    } else {
+        imageFrame = imageContainer[va_count - 1];
     }
 
     var image_bounding_dims = imageFrame.image_bounding_dims;
 
-    /*if (composite_view) {
-        imageCanvas = compositeCanvas;
-        imageDataCopy = compositeImageData.data;
-    }*/
-
-    let min_value = imageFrame.pixel_range.min_pixel;
-    let max_value = imageFrame.pixel_range.max_pixel;
+    var min_value = Number.MAX_VALUE;
+    var max_value = -Number.MAX_VALUE;
 
     if (composite_view)
-        for (var h = image_bounding_dims.height - 1; h >= 0; h--) {
-            var row = [];
+        for (let h = image_bounding_dims.height - 1; h >= 0; h--) {
+            let row = [];
 
-            var xcoord = image_bounding_dims.x1;
-            var ycoord = image_bounding_dims.y1 + h;
-            var pixel = 4 * (ycoord * imageCanvas.width + xcoord);
+            let xcoord = image_bounding_dims.x1;
+            let ycoord = image_bounding_dims.y1 + h;
+            let pixel = 4 * (ycoord * imageFrame.width + xcoord);
 
-            for (var w = 0; w < image_bounding_dims.width; w++) {
-                var r = imageDataCopy[pixel];
-                var g = imageDataCopy[pixel + 1];
-                var b = imageDataCopy[pixel + 2];
-                var z = (r + g + b) / 3;
+            for (let w = 0; w < image_bounding_dims.width; w++) {
+                let r = imageData[pixel];
+                let g = imageData[pixel + 1];
+                let b = imageData[pixel + 2];
+                let z = (r + g + b) / 3;
                 pixel += 4;
 
                 if (z < min_value)
@@ -16778,15 +16775,18 @@ function contour_surface_webworker() {
         }
     else //use imageFrame
     {
-        for (var h = image_bounding_dims.height - 1; h >= 0; h--) {
-            var row = [];
+        min_value = imageFrame.pixel_range.min_pixel;
+        max_value = imageFrame.pixel_range.max_pixel;
 
-            var xcoord = image_bounding_dims.x1;
-            var ycoord = image_bounding_dims.y1 + h;
-            var pixel = ycoord * imageFrame.width + xcoord;
+        for (let h = image_bounding_dims.height - 1; h >= 0; h--) {
+            let row = [];
 
-            for (var w = 0; w < image_bounding_dims.width; w++) {
-                var z = imageFrame.pixels[pixel];
+            let xcoord = image_bounding_dims.x1;
+            let ycoord = image_bounding_dims.y1 + h;
+            let pixel = ycoord * imageFrame.width + xcoord;
+
+            for (let w = 0; w < image_bounding_dims.width; w++) {
+                let z = imageFrame.pixels[pixel];
                 pixel += 1;
 
                 row.push(z);
@@ -16796,8 +16796,8 @@ function contour_surface_webworker() {
         };
     }
 
-    //console.log(data);
-    //console.log("min_value:", min_value, "max_value:", max_value);
+    // console.log(data);
+    // console.log("min_value:", min_value, "max_value:", max_value);
 
     var contours = parseInt(document.getElementById('contour_lines').value) + 1;
     var step = (max_value - min_value) / contours;
