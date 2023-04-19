@@ -54,12 +54,12 @@ ifeq ($(UNAME_S),Linux)
 				FORT := gfortran
 			else
 				# Intel oneAPI icc / ifort 
-				# CC := icc
-				# FORT := ifort
+				# CC := icx
+				# FORT := ifx
 
 				# not so fast, ifort is buggy!!!
-				CC := gcc
-				FORT := gfortran
+				CC := gcc-12
+				FORT := gfortran-12
 			endif
 		endif
 
