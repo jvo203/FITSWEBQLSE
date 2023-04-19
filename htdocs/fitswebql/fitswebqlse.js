@@ -7135,22 +7135,16 @@ function get_tone_mapping(value, flux, black, white, median, multiplier, index) 
     switch (flux) {
         case 'linear':
             return get_tone_mapping_linear(value, black, white);
-            break;
         case 'legacy':
             return get_tone_mapping_legacy(value, black, white, lmin, lmax);
-            break;
         case 'logistic':
             return get_tone_mapping_logistic(value, median, sensitivity);
-            break;
         case 'ratio':
             return get_tone_mapping_value_ratio(value, black, ratio_sensitivity);
-            break;
         case 'square':
             return get_tone_mapping_value_square(value, black, sensitivity);
-            break;
         default:
             return NaN;
-            break;
     }
 }
 
