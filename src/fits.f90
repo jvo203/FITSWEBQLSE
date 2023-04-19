@@ -3112,13 +3112,9 @@ contains
    end subroutine notify_root
 
    subroutine submit_progress_counter(item, counter, root)
-      ! USE IFPORT
-      use ifposix
       type(dataset), pointer, intent(in) :: item
       integer(c_int), intent(inout) :: counter
       type(C_PTR), intent(in), value :: root
-
-      integer :: iseconds, isecleft, ierror
 
       integer :: repeat
 
@@ -3135,7 +3131,6 @@ contains
             repeat = repeat + 1
             print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
             ! call sleep(1) ! 1 sec.
-            call pxfsleep (1,isecleft,ierror)
          end if
 
          ! break the loop after 60s
