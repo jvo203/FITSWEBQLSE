@@ -53,9 +53,9 @@ ifeq ($(UNAME_S),Linux)
 				CC := gcc
 				FORT := gfortran
 			else
-				# Intel oneAPI icx / ifx
-				CC := icx
-				FORT := ifx
+				# Intel oneAPI icc/ifort or icx/ifx (fixed_array.f90 does not compile with ifx)
+				CC := icc
+				FORT := ifort
 
 				# not so fast, ifort is buggy!!!
 				# CC := gcc
@@ -117,7 +117,7 @@ OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
-ifeq ($(CC),icx)
+ifeq ($(CC),icc)
 	FLAGS = -g -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel
 # -parallel
 #-mcmodel=medium
@@ -163,7 +163,7 @@ endif
 # -lmpifort not needed when using mpiifort
 # -L/home/chris/zfp/build/lib64
 
-ifeq ($(CC),icx)
+ifeq ($(CC),icc)
 	# Intel FORTRAN runtime
 	LIBS += -lifcore -limf
 endif
