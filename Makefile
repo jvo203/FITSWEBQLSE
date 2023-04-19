@@ -58,8 +58,8 @@ ifeq ($(UNAME_S),Linux)
 				FORT := ifort
 
 				# not so fast, ifort is buggy!!!
-				# CC := gcc
-				# FORT := gfortran
+				CC := gcc
+				FORT := gfortran
 			endif
 		endif
 
