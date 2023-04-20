@@ -111,9 +111,9 @@ function colourFunction(x, y) {
         let aspect = image_bounding_dims.height / image_bounding_dims.width;
         let xcoord = Math.round(image_bounding_dims.x1 + ((1 - x) - 0.5) * (image_bounding_dims.width - 1));
         let ycoord = Math.round(image_bounding_dims.y1 + ((- y) / aspect + 0.5) * (image_bounding_dims.height - 1));
-        let pixel = 2 * (ycoord * imageFrame.width + xcoord); // the texture is 2 x length
+        let pixel = ycoord * imageFrame.width + xcoord;
 
-        let raw = imageFrame.texture[pixel];
+        let raw = imageFrame.pixels[pixel];
         pixel = Math.round(get_tone_mapping(raw, flux, black, white, median, multiplier, va_count));
         rgb = [pixel, pixel, pixel];
     }
