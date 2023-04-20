@@ -4073,6 +4073,10 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     g_string_append(html, " data-server-version='" VERSION_STRING "' data-server-string='" SERVER_STRING);
 
+    g_string_append_printf(html, " data-version-major='%d' ", VERSION_MAJOR);
+    g_string_append_printf(html, " data-version-minor='%d' ", VERSION_MINOR);
+    g_string_append_printf(html, " data-version-sub='%d' ", VERSION_SUB);
+
     if (options.local)
         g_string_append(html, "' data-server-mode='LOCAL");
     else
