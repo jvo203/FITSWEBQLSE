@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-20.0";
+    return "JS2023-04-20.1";
 }
 
 function uuidv4() {
@@ -2476,7 +2476,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
     image_count++;
 
-    if (image_count == va_count) {
+    if (image_count == va_count && composite_view) {
         // find the common bounding box for all images
         // start with the first image
         let _x1 = imageContainer[0].image_bounding_dims.x1;
@@ -2505,27 +2505,25 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         var new_tone_mapping = { flux: imageContainer[0].tone_mapping.flux };
 
         compositeImage = { width: img_width, height: img_height, texture: compositeImageTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
-        console.log("process_hdr_image: all images loaded", compositeImage, "composite_view:", composite_view);
+        console.log("process_hdr_image: all images loaded", compositeImage);
 
-        //display the composite image
-        if (composite_view) {
-            init_webgl_composite_image_buffers();
+        //display the composite image        
+        init_webgl_composite_image_buffers();
 
-            setup_image_selection();
+        setup_image_selection();
 
-            try {
-                display_scale_info();
-            }
-            catch (err) {
-            };
-
-            has_image = true;
-
-            setup_viewports();
-
-            hide_hourglass();
-
+        try {
+            display_scale_info();
         }
+        catch (err) {
+        };
+
+        has_image = true;
+
+        setup_viewports();
+
+        hide_hourglass();
+
     }
 
     try {
@@ -16900,8 +16898,6 @@ function enable_3d_view() {
     has_webgl = false;
 
     if (test_webgl_support()) {
-        console.log("WebGL supported");
-
         (function () {
             var po = document.createElement('script'); po.type = 'text/javascript'; po.async = false;
             po.src = 'https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/three.min.js';
@@ -16946,9 +16942,10 @@ function enable_3d_view() {
         })();
 
         has_webgl = true;
+        console.log("WebGL supported.");
     }
     else
-        console.log("WebGL not supported by your browser");
+        console.log("WebGL not supported by your browser.");
 }
 
 function addStylesheetRules(rules) {
@@ -16981,11 +16978,25 @@ function addStylesheetRules(rules) {
     }
 }
 
-/*function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async*/ function mainRenderer() {
+async function open_3d_view() {
+    // await sleep(2000);
+
+    try {
+        enable_3d_view();
+    }
+    catch (e) {
+        has_webgl = false;
+        console.log('WebGL disabled', e);
+    }
+}
+
+async function mainRenderer() {
+    votable = document.getElementById('votable');
+
     webgl1 = test_webgl1();
     webgl2 = test_webgl2();
 
@@ -16995,13 +17006,7 @@ async*/ function mainRenderer() {
         webgl2 = true;
     }
 
-    try {
-        enable_3d_view();
-    }
-    catch (e) {
-        has_webgl = false;
-        console.log('WebGL disabled', e);
-    }
+    var res3d = open_3d_view();
 
     //intercept print events
     if (window.matchMedia) {
@@ -17286,7 +17291,6 @@ async*/ function mainRenderer() {
             ]);
         }
 
-        votable = document.getElementById('votable');
         va_count = parseInt(votable.getAttribute('data-va_count'));
         datasetId = votable.getAttribute('data-datasetId');//make it a global variable	
 
@@ -17491,7 +17495,7 @@ async*/ function mainRenderer() {
 
         display_range_validation();
 
-        display_menu();
+        await res3d; display_menu();
 
         setup_help();
 
