@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-17.1";
+    return "JS2023-04-20.0";
 }
 
 function uuidv4() {
@@ -14227,6 +14227,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
         var upperBand = zs[i];
 
         var CRWORKER = new Worker('contour_worker.js' + '?' + encodeURIComponent(get_js_version()));
+        // var CRWORKER = new Worker('https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/contour_worker.min.js');
 
         CRWORKER.addEventListener('message', function (e) {
             //console.log('Worker said: ', e.data);
@@ -16813,6 +16814,7 @@ function contour_surface_webworker() {
         var upperBand = zs[i];
 
         var CRWORKER = new Worker('contour_worker.js' + '?' + encodeURIComponent(get_js_version()));
+        // var CRWORKER = new Worker('https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/contour_worker.min.js');
 
         CRWORKER.addEventListener('message', function (e) {
             //console.log('Worker said: ', e.data);
@@ -16938,7 +16940,8 @@ function enable_3d_view() {
 
         (function () {
             var po = document.createElement('script'); po.type = 'text/javascript'; po.async = false;
-            po.src = 'surface.js' + '?' + encodeURIComponent(get_js_version());
+            // po.src = 'surface.js' + '?' + encodeURIComponent(get_js_version());
+            po.src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/surface.min.js';
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
         })();
 
