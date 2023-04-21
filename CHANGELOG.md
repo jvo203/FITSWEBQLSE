@@ -1,3 +1,10 @@
+## [5.0.33] - 2023-04-21
+
+* speeded up initial web page loading by using _*async*_ / _*await*_ within JavaScript
+* switched loading of the 3D surface script from the local server over to the global CDN (Content Delivery Network)
+* speeded up loading of contour lines _*new Worker(...)*_ scripts
+* on-going work on the NOBEYAMA FUGIN composite RGB support
+
 ## [5.0.32] - 2023-04-13
 
 * client-side JavaScript: improved WebGL reliability
