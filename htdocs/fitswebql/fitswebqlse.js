@@ -1,10 +1,20 @@
 function get_js_version() {
-    return "JS2023-04-21.0";
+    return "JS2023-04-21.2";
 }
 
 function uuidv4() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
+}
+
+function get_worker_script() {
+    return `self.addEventListener('message', function (e) {        
+        importScripts('https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/marchingsquares-isobands.min.js');        
+        importScripts('https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/marchingsquares-isocontours.min.js');        
+        var band = MarchingSquaresJS.isoBands(e.data.data, e.data.lowerBand, e.data.upperBand - e.data.lowerBand);
+        self.postMessage(band);
+        self.close();
+    }, false);`
 }
 
 const wasm_supported = (() => {
@@ -14224,8 +14234,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
         var lowerBand = zs[i - 1];
         var upperBand = zs[i];
 
-        var CRWORKER = new Worker('contour_worker.js' + '?' + encodeURIComponent(get_js_version()));
-        // var CRWORKER = new Worker('https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/contour_worker.min.js');
+        var CRWORKER = new Worker('data:text/html;base64,' + window.btoa(get_worker_script()));
 
         CRWORKER.addEventListener('message', function (e) {
             //console.log('Worker said: ', e.data);
@@ -16813,8 +16822,7 @@ function contour_surface_webworker() {
         var lowerBand = zs[i - 1];
         var upperBand = zs[i];
 
-        var CRWORKER = new Worker('contour_worker.js' + '?' + encodeURIComponent(get_js_version()));
-        // var CRWORKER = new Worker('https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/contour_worker.min.js');
+        var CRWORKER = new Worker('data:text/html;base64,' + window.btoa(get_worker_script()));
 
         CRWORKER.addEventListener('message', function (e) {
             //console.log('Worker said: ', e.data);
