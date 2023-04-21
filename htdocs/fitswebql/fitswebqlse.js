@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-20.1";
+    return "JS2023-04-21.0";
 }
 
 function uuidv4() {
@@ -2343,7 +2343,7 @@ function clear_webgl_internal_buffers(image) {
 }
 
 function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
-    console.log("process_hdr_viewport: #" + index);
+    // console.log("process_hdr_viewport: #" + index);
     if (streaming || moving || windowLeft)
         return;
 
@@ -2386,7 +2386,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
             let channel = (index - 1) | 0;
             let offset = 0 | 0;
 
-            console.log("viewport channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
+            // console.log("viewport channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
 
             for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
                 compositeViewportTexture[(offset + channel) | 0] = pixels[i]; // RGB channels    
@@ -2401,7 +2401,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
 
     if (viewport_count == va_count && composite_view) {
         let viewportContainer = { width: img_width, height: img_height, texture: compositeViewportTexture };
-        console.log("process_hdr_viewport: all viewports loaded", viewportContainer);
+        // console.log("process_hdr_viewport: all viewports loaded", viewportContainer);
 
         //display the composite viewport        
         init_webgl_composite_viewport_buffers(viewportContainer);
@@ -2409,7 +2409,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
-    console.log("process_hdr_image: #" + index);
+    // console.log("process_hdr_image: #" + index);
     var image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
     var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
     console.log(image_bounding_dims, pixel_range);
@@ -2464,7 +2464,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
             let channel = (index - 1) | 0;
             let offset = 0 | 0;
 
-            console.log("image channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
+            // console.log("image channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
 
             for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
                 compositeImageTexture[(offset + channel) | 0] = pixels[i]; // RGB channels    
@@ -2505,7 +2505,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         var new_tone_mapping = { flux: imageContainer[0].tone_mapping.flux };
 
         compositeImage = { width: img_width, height: img_height, texture: compositeImageTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
-        console.log("process_hdr_image: all images loaded", compositeImage);
+        // console.log("process_hdr_image: all images loaded", compositeImage);
 
         //display the composite image        
         init_webgl_composite_image_buffers();
@@ -3494,7 +3494,7 @@ function poll_cluster() {
     xmlhttp.send();
 }
 
-function poll_progress(datasetId, index) {
+async function poll_progress(datasetId, index) {
     var xmlhttp = new XMLHttpRequest();
     var url = 'progress/' + encodeURIComponent(datasetId);
 
@@ -3560,7 +3560,7 @@ function close_websocket_connections() {
     }
 }
 
-function open_websocket_connection(_datasetId, index) {
+async function open_websocket_connection(_datasetId, index) {
     if ("WebSocket" in window) {
         // make a unique session id
         var session_id = uuidv4();
@@ -12673,7 +12673,7 @@ function display_molecules() {
         elem.attr("opacity", 0);
 }
 
-function fetch_spectral_lines(datasetId, freq_start, freq_end) {
+async function fetch_spectral_lines(datasetId, freq_start, freq_end) {
     var xmlhttp = new XMLHttpRequest();
 
     //freq_start, freq_end [Hz]
@@ -12746,7 +12746,7 @@ function fetch_spectral_lines(datasetId, freq_start, freq_end) {
     xmlhttp.send();
 };
 
-function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
+async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
     var rect = document.getElementById('mainDiv').getBoundingClientRect();
     var width = rect.width - 20;
     var height = rect.height - 20;
@@ -14565,8 +14565,10 @@ function change_intensity_threshold(refresh) {
 }
 
 function hide_navigation_bar() {
-    document.getElementById('menu').style.display = "none";
-    d3.select("#menu_activation_area").attr("opacity", 0.1);//was 0.7
+    try {
+        document.getElementById('menu').style.display = "none";
+        d3.select("#menu_activation_area").attr("opacity", 0.1);//was 0.7
+    } catch (e) { }
 }
 
 function display_menu() {
@@ -16983,7 +16985,7 @@ function sleep(ms) {
 }
 
 async function open_3d_view() {
-    // await sleep(2000);
+    // await sleep(5000);
 
     try {
         enable_3d_view();
@@ -17545,21 +17547,16 @@ async function mainRenderer() {
         dataset_timeout = -1;
 
         if (va_count == 1) {
-            poll_progress(datasetId, 1);
             open_websocket_connection(datasetId, 1);
-
             fetch_image_spectrum(datasetId, 1, true, false);
-
             fetch_spectral_lines(datasetId, 0, 0);
+            poll_progress(datasetId, 1);
         }
         else {
             for (let index = 1; index <= va_count; index++) {
-                //console.log(index, datasetId.rotate(index - 1));
-
-                poll_progress(datasetId.rotate(index - 1)[0], index);
                 open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
-
                 fetch_image_spectrum(datasetId[index - 1], index, true, false);
+                poll_progress(datasetId.rotate(index - 1)[0], index);
             }
         }
 
