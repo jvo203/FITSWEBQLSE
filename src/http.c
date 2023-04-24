@@ -650,8 +650,8 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     free(namelist);
     free(dir);
 
-    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
-    g_string_free(json, FALSE);
+    gchar *json_str = g_string_free(json, FALSE);
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
 
     MHD_add_response_header(response, "Cache-Control", "no-cache");
     MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -676,8 +676,8 @@ static enum MHD_Result send_progress(struct MHD_Connection *connection, float pr
 
     g_string_printf(json, "{\"progress\" : %f, \"elapsed\" : %f}", progress, elapsed);
 
-    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
-    g_string_free(json, FALSE);
+    gchar *json_str = g_string_free(json, FALSE);
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
 
     MHD_add_response_header(response, "Cache-Control", "no-cache");
     MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -1603,9 +1603,9 @@ static void *handle_url_download(void *arg)
     pthread_exit(NULL);
 }
 
-int on_client_connect(void *cls,
-                      const struct sockaddr *addr,
-                      socklen_t addrlen)
+static enum MHD_Result on_client_connect(void *cls,
+                                         const struct sockaddr *addr,
+                                         socklen_t addrlen)
 {
     (void)cls; // silence gcc warnings
 
@@ -1818,8 +1818,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
             // printf("[C] %s\n", json->str);
 
-            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
-            g_string_free(json, FALSE);
+            gchar *json_str = g_string_free(json, FALSE);
+            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
 
             if (NULL != response)
             {
@@ -1911,8 +1911,8 @@ static enum MHD_Result on_http_connection(void *cls,
                     // signal a catastrophic error
                     GString *json = g_string_new("{\"startindex\":0,\"endindex\":0,\"status\":-2}");
 
-                    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
-                    g_string_free(json, FALSE);
+                    gchar *json_str = g_string_free(json, FALSE);
+                    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
 
                     MHD_add_response_header(response, "Cache-Control", "no-cache");
                     MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -1936,8 +1936,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
             g_string_printf(json, "{\"startindex\":%d,\"endindex\":%d,\"status\":%d}", start, end, status);
 
-            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json->str, g_free);
-            g_string_free(json, FALSE);
+            gchar *json_str = g_string_free(json, FALSE);
+            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
 
             MHD_add_response_header(response, "Cache-Control", "no-cache");
             MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -3341,11 +3341,15 @@ static enum MHD_Result on_http_connection(void *cls,
             localtime_r(&ltime, &result);
             strftime(stime, sizeof(stime) - 1, "%a, %d %b %Y %H:%M:%S %Z", &result);
 
+            FILE *accesslog = NULL;
             GString *log_file = g_string_new(options.logs);
-            g_string_append(log_file, "/fitswebqlse.log");
 
-            FILE *accesslog = fopen(log_file->str, "a");
-            g_string_free(log_file, TRUE);
+            if (log_file != NULL)
+            {
+                g_string_append(log_file, "/fitswebqlse.log");
+                accesslog = fopen(log_file->str, "a");
+                g_string_free(log_file, TRUE);
+            }
 
             if (accesslog != NULL)
             {
@@ -4178,9 +4182,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     g_string_append(html, "</body></html>");
 
-    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html->len, (void *)html->str, g_free);
+    gchar *html_str = g_string_free(html, FALSE);
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html->len, (void *)html_str, g_free);
     // deallocate the html content after libmicrohttpd has taken ownership of the string
-    g_string_free(html, FALSE);
 
     MHD_add_response_header(response, "Cache-Control", "no-cache");
     MHD_add_response_header(response, "Cache-Control", "no-store");
