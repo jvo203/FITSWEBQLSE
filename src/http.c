@@ -1603,6 +1603,31 @@ static void *handle_url_download(void *arg)
     pthread_exit(NULL);
 }
 
+int on_client_connect(void *cls,
+                      const struct sockaddr *addr,
+                      socklen_t addrlen)
+{
+    (void)cls; // silence gcc warnings
+
+    char clienthost[NI_MAXHOST] = ""; // The clienthost will hold the IP address.
+    char clientservice[NI_MAXSERV] = "";
+
+    int theErrorCode = getnameinfo(addr, sizeof(*addr), clienthost, sizeof(clienthost), clientservice, sizeof(clientservice), NI_NUMERICHOST | NI_NUMERICSERV);
+
+    if (theErrorCode != 0)
+    {
+        // There was an error.
+        perror("getnameinfo");
+    }
+    else
+    {
+        // Print the info.
+        printf("[C] client IP address %s, client service %s\n", clienthost, clientservice);
+    }
+
+    return MHD_YES;
+};
+
 static enum MHD_Result on_http_connection(void *cls,
                                           struct MHD_Connection *connection,
                                           const char *url,
@@ -1636,8 +1661,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
     *ptr = NULL; /* clear context pointer */
 
-    // const char *user_agent = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
-    // const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
+    const char *user_agent = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
+    const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
     // MHD_get_connection_values(connection, MHD_HEADER_KIND, (MHD_KeyValueIterator)&print_out_key, NULL);
 
@@ -4152,7 +4177,7 @@ void start_http()
     // http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
     http_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
                                    options.http_port,
-                                   NULL,
+                                   &on_client_connect,
                                    NULL,
                                    &on_http_connection,
                                    PAGE,
