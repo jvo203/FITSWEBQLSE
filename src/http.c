@@ -3353,7 +3353,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
             if (accesslog != NULL)
             {
-                fprintf(accesslog, "%s\t%s\t%s\t%s\t%s\t%s\t", denull(stime), (forwarded_for != NULL) ? forwarded_for : "N/A", denull(user_agent), denull(method), (url != NULL) ? url : "N/A", denull(version));
+                fprintf(accesslog, "%s\t%s\t%s\t%s\t%s\t%s\t", denull(stime), (forwarded_for != NULL) ? forwarded_for : "(IP)", denull(user_agent), denull(method), (url != NULL) ? url : "(URL)", denull(version));
 
                 for (int i = 0; i < va_count; i++)
                     fprintf(accesslog, "%s\t", denull(datasetId[i]));
