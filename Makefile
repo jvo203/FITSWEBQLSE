@@ -58,8 +58,8 @@ ifeq ($(UNAME_S),Linux)
 				FORT := ifort
 
 				# not so fast, ifort is buggy!!!
-				CC := gcc
-				FORT := gfortran
+				# CC := gcc
+				# FORT := gfortran
 			endif
 		endif
 
@@ -118,7 +118,7 @@ OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
 ifeq ($(CC),icc)
-	FLAGS = -g -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel
+	FLAGS = -g -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel -stand f18
 # -parallel
 #-mcmodel=medium
 #-ipo -parallel -fast
