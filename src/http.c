@@ -1612,16 +1612,14 @@ int on_client_connect(void *cls,
     char clienthost[NI_MAXHOST] = ""; // The clienthost will hold the IP address.
     char clientservice[NI_MAXSERV] = "";
 
-    int theErrorCode = getnameinfo(addr, sizeof(*addr), clienthost, sizeof(clienthost), clientservice, sizeof(clientservice), NI_NUMERICHOST | NI_NUMERICSERV);
+    int stat = getnameinfo(addr, sizeof(*addr), clienthost, sizeof(clienthost), clientservice, sizeof(clientservice), NI_NUMERICHOST | NI_NUMERICSERV);
 
-    if (theErrorCode != 0)
+    if (stat != 0)
     {
-        // There was an error.
         perror("getnameinfo");
     }
     else
     {
-        // Print the info.
         printf("[C] client IP address %s, client service %s\n", clienthost, clientservice);
     }
 
