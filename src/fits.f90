@@ -1276,7 +1276,7 @@ contains
       integer :: cache_idx, cache_len, num_cache_entries
       integer(kind=8) :: cache_threshold
 
-      character(len=1024) :: file
+      character(len=:), allocatable :: file
       logical :: file_exists, bSuccess
 
       integer :: i, rc, status
@@ -1542,8 +1542,7 @@ contains
       type(dataset), pointer, intent(in) :: item
       character(len=*), intent(in) :: cache
 
-      ! character(len=:), allocatable :: file
-      character(len=1024), allocatable :: file
+      character(len=:), allocatable :: file
       logical :: file_exists, bSuccess
 
       integer :: fileunit
@@ -1551,7 +1550,7 @@ contains
       integer(kind=c_size_t) :: array_size
       character(256) :: iomsg
 
-      file = cache//'/'//'state'
+      file = trim(cache)//'/'//'state'
 
       INQUIRE (FILE=trim(file), EXIST=file_exists)
 
@@ -1930,7 +1929,6 @@ contains
       logical, intent(out) ::  bSuccess
 
       character(len=:), allocatable :: file
-      ! character(len=1024), allocatable :: file
       logical :: file_exists
 
       integer :: fileunit, N, rc
@@ -1942,10 +1940,7 @@ contains
 
       bSuccess = .false.
 
-      print *, "load_dataset::cache = ", trim(cache)
-      print *, "load_dataset::cache+state = ", trim(cache)//'/'//'state'
       file = trim(cache)//'/'//'state'
-      print *, "load_dataset::file = ", trim(file)
 
       INQUIRE (FILE=trim(file), EXIST=file_exists)
 
@@ -2341,8 +2336,7 @@ contains
       type(c_ptr), intent(in), value :: root
       logical, intent(out) ::  bSuccess
 
-      ! character(len=:), allocatable :: file
-      character(len=1024) :: file
+      character(len=:), allocatable :: file
 
       integer :: fileunit, ios
       integer :: index_unit
@@ -2396,7 +2390,7 @@ contains
       index_unit = -1
 
       ! open an index file
-      file = cache//'/index'
+      file = trim(cache)//'/index'
 
       ! read the file size
       INQUIRE (FILE=file, SIZE=n)  ! return -1 if cannot determine file size_t
