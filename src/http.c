@@ -650,8 +650,10 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     free(namelist);
     free(dir);
 
+    size_t json_len = json->len;
     gchar *json_str = g_string_free(json, FALSE);
-    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
+
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
 
     MHD_add_response_header(response, "Cache-Control", "no-cache");
     MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -676,8 +678,10 @@ static enum MHD_Result send_progress(struct MHD_Connection *connection, float pr
 
     g_string_printf(json, "{\"progress\" : %f, \"elapsed\" : %f}", progress, elapsed);
 
+    size_t json_len = json->len;
     gchar *json_str = g_string_free(json, FALSE);
-    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
+
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
 
     MHD_add_response_header(response, "Cache-Control", "no-cache");
     MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -1819,8 +1823,10 @@ static enum MHD_Result on_http_connection(void *cls,
 
             // printf("[C] %s\n", json->str);
 
+            size_t json_len = json->len;
             gchar *json_str = g_string_free(json, FALSE);
-            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
+
+            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
 
             if (NULL != response)
             {
@@ -1912,8 +1918,10 @@ static enum MHD_Result on_http_connection(void *cls,
                     // signal a catastrophic error
                     GString *json = g_string_new("{\"startindex\":0,\"endindex\":0,\"status\":-2}");
 
+                    size_t json_len = json->len;
                     gchar *json_str = g_string_free(json, FALSE);
-                    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
+
+                    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
 
                     MHD_add_response_header(response, "Cache-Control", "no-cache");
                     MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -1937,8 +1945,10 @@ static enum MHD_Result on_http_connection(void *cls,
 
             g_string_printf(json, "{\"startindex\":%d,\"endindex\":%d,\"status\":%d}", start, end, status);
 
+            size_t json_len = json->len;
             gchar *json_str = g_string_free(json, FALSE);
-            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json->len, (void *)json_str, g_free);
+
+            struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
 
             MHD_add_response_header(response, "Cache-Control", "no-cache");
             MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -4183,8 +4193,10 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     g_string_append(html, "</body></html>");
 
+    size_t html_len = html->len;
     gchar *html_str = g_string_free(html, FALSE);
-    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html->len, (void *)html_str, g_free);
+
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html_len, (void *)html_str, g_free);
     // deallocate the html content after libmicrohttpd has taken ownership of the string
 
     MHD_add_response_header(response, "Cache-Control", "no-cache");
