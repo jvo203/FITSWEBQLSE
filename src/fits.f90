@@ -3078,7 +3078,7 @@ contains
          if (counter .gt. 0) then
             repeat = repeat + 1
             print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
-            call sleep(1) ! 1 sec.
+            ! call sleep(1) ! 1 sec.
          end if
 
          ! break the loop after 60s
