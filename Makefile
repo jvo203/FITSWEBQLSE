@@ -126,7 +126,8 @@ ifeq ($(CC),icc)
 # -fast causes static linking problems
 
 	CFLAGS := $(FLAGS)
-	FLAGS += -heap-arrays 32 -align array64byte -stand f18 -fpp -D__$(OS)__
+	FLAGS += -heap-arrays 32 -align array64byte -fpp -D__$(OS)__
+	# -stand f18
 #-mt_mpi
 endif
 
