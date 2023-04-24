@@ -1636,7 +1636,6 @@ static enum MHD_Result on_http_connection(void *cls,
                                           void **ptr)
 {
     (void)cls;         // silence gcc warnings
-    (void)version;     // silence gcc warnings
     (void)upload_data; // silence gcc warnings
 
     static int dummy;
@@ -3332,6 +3331,33 @@ static enum MHD_Result on_http_connection(void *cls,
             else
                 pthread_detach(tid);
         };
+
+        // logging
+        if (is_root_rank && datasetId != NULL)
+        {
+            char stime[32] = "";
+            struct tm result;
+            time_t ltime = time(NULL);
+            localtime_r(&ltime, &result);
+            strftime(stime, sizeof(stime) - 1, "%a, %d %b %Y %H:%M:%S %Z", &result);
+
+            GString *log_file = g_string_new(options.logs);
+            g_string_append(log_file, "/fitswebqlse.log");
+
+            FILE *accesslog = fopen(log_file->str, "a");
+            g_string_free(log_file, TRUE);
+
+            if (accesslog != NULL)
+            {
+                fprintf(accesslog, "%s\t%s\t%s\t%s\t%s\t%s\t", denull(stime), (forwarded_for != NULL) ? forwarded_for : "N/A", denull(user_agent), denull(method), denull(url), denull(version));
+
+                for (int i = 0; i < va_count; i++)
+                    fprintf(accesslog, "%s\t", denull(datasetId[i]));
+
+                fprintf(accesslog, "\n");
+                fclose(accesslog);
+            }
+        }
 
         if (datasetId != NULL)
         {
