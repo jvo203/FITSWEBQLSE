@@ -118,7 +118,7 @@ OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
 ifeq ($(CC),icc)
-	FLAGS = -g -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel -stand f18
+	FLAGS = -g -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel
 # -parallel
 #-mcmodel=medium
 #-ipo -parallel -fast
@@ -126,7 +126,7 @@ ifeq ($(CC),icc)
 # -fast causes static linking problems
 
 	CFLAGS := $(FLAGS)
-	FLAGS += -heap-arrays 32 -align array64byte -fpp -D__$(OS)__
+	FLAGS += -heap-arrays 32 -align array64byte -stand f18 -fpp -D__$(OS)__
 #-mt_mpi
 endif
 
