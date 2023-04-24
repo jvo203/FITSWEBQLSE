@@ -70,7 +70,6 @@ static pthread_t garbage_collection_t;
 
 static void *autodiscovery_daemon(void *);
 static void *garbage_collection_daemon(void *);
-extern void init_fortran_logging(char *log_file, size_t len);
 extern void init_fortran();
 extern void cleanup_fortran();
 
@@ -311,13 +310,15 @@ int main(int argc, char *argv[])
 
     printf("Cache Directory: '%s'. Please clean it periodically to prevent excessive disk usage.\n", options.cache);
 
-    // fortran logging
+    // fortran
     {
         init_fortran();
 
         mkcache(options.logs);
 
-        GString *log_file = g_string_new(options.logs);
+        printf("Log Directory: '%s'.\n", options.logs);
+
+        /*GString *log_file = g_string_new(options.logs);
 
         g_string_append(log_file, "/fortran.log");
 
@@ -326,9 +327,7 @@ int main(int argc, char *argv[])
         if (fp != NULL)
             fclose(fp);
 
-        init_fortran_logging(log_file->str, log_file->len);
-
-        g_string_free(log_file, TRUE);
+        g_string_free(log_file, TRUE);*/
     }
 
     // a manual port override
