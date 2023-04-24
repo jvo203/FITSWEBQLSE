@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-21.2";
+    return "JS2023-04-24.0";
 }
 
 function uuidv4() {
@@ -15352,7 +15352,7 @@ function show_welcome() {
     }
 
     bodyDiv.append("p")
-        .html('For optimum performance we recommend  <a href="https://www.apple.com/safari/" style="color:' + textColour + '"><b>Apple Safari</b></a> or <a href="https://www.google.com/chrome/index.html" style="color:' + textColour + '"><b>Google Chrome</b></a>.');
+        .html('For optimum experience we recommend  <a href="https://www.apple.com/safari/" style="color:' + textColour + '"><b>Apple Safari</b></a> or <a href="https://www.google.com/chrome/index.html" style="color:' + textColour + '"><b>Google Chrome</b></a>.');
 
     var footer = contentDiv.append("div")
         .attr("class", "modal-footer d-flex justify-content-around");
