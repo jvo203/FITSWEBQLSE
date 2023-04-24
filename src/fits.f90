@@ -1942,7 +1942,9 @@ contains
 
       bSuccess = .false.
 
+      print *, "load_dataset::cache = ", trim(cache)
       file = cache//'/'//'state'
+      print *, "load_dataset::file = ", trim(file)
 
       INQUIRE (FILE=trim(file), EXIST=file_exists)
 
