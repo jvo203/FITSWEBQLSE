@@ -1607,7 +1607,8 @@ static enum MHD_Result on_client_connect(void *cls,
                                          const struct sockaddr *addr,
                                          socklen_t addrlen)
 {
-    (void)cls; // silence gcc warnings
+    (void)cls;     // silence gcc warnings
+    (void)addrlen; // silence gcc warnings
 
     char clienthost[NI_MAXHOST] = ""; // The clienthost will hold the IP address.
     char clientservice[NI_MAXSERV] = "";
