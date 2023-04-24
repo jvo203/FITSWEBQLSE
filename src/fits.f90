@@ -3075,7 +3075,7 @@ contains
          if (counter .gt. 0) then
             repeat = repeat + 1
             print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
-            ! call sleep(1) ! 1 sec.
+            call sleep(1) ! 1 sec.
          end if
 
          ! break the loop after 60s
@@ -4302,11 +4302,6 @@ contains
                ! a "plain" DO LOOP
                do frame = start, end
                   total_per_node = total_per_node + 1
-
-                  ! debugging
-                  ! call sleep(10)
-                  ! cycle
-                  ! end of debugging
 
                   ! starting bounds
                   fpixels = (/1, 1, frame, 1/)
