@@ -1929,8 +1929,8 @@ contains
       type(c_ptr), intent(in), value :: root
       logical, intent(out) ::  bSuccess
 
-      ! character(len=:), allocatable :: file
-      character(len=1024), allocatable :: file
+      character(len=:), allocatable :: file
+      ! character(len=1024), allocatable :: file
       logical :: file_exists
 
       integer :: fileunit, N, rc
