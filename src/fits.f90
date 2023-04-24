@@ -3,7 +3,6 @@ module fits
    use, intrinsic :: ieee_arithmetic
    use fixed_array
    use lz4
-   use logger_mod, only: logger_init, logger => master_logger
    use :: unix_pthread
 
    implicit none
@@ -24,7 +23,6 @@ module fits
    real, parameter :: GOLDEN_RATIO = (1 + sqrt(5.0))/2
    integer, parameter :: MAX_CHANNEL_BLOCK = 4 ! 32 ! 16 ! 64 ! 128
 
-   type(c_pthread_mutex_t), save :: logger_mtx
    type(c_pthread_mutex_t), save :: file_unit_mtx
 
    enum, bind(C)
@@ -1181,7 +1179,6 @@ contains
 
       integer rc
 
-      rc = c_pthread_mutex_init(logger_mtx, c_null_ptr)
       rc = c_pthread_mutex_init(file_unit_mtx, c_null_ptr)
    end subroutine init_fortran
 
@@ -1191,39 +1188,8 @@ contains
 
       integer rc
 
-      rc = c_pthread_mutex_destroy(logger_mtx)
       rc = c_pthread_mutex_destroy(file_unit_mtx)
    end subroutine cleanup_fortran
-
-   subroutine init_fortran_logging(log_file, len) BIND(C, name='init_fortran_logging')
-      use, intrinsic :: iso_c_binding
-      implicit none
-
-      integer(kind=c_size_t), intent(in), value :: len
-      character(kind=c_char), dimension(len), intent(in) :: log_file
-
-      character(len=len) :: filename
-      logical :: file_exists
-      integer :: i
-
-      do i = 1, int(len, kind=4)
-         filename(i:i) = log_file(i)
-      end do
-
-      print *, "FORTRAN LOG FILE: '", filename, "'."
-
-      INQUIRE (FILE=filename, EXIST=file_exists)
-
-      ! Initialise the logger prior to use
-      if (file_exists) then
-         call logger_init(filename)
-      else
-         ! redirect logging to /dev/null
-         print *, filename, " does not exist. Redirecting logging to '/dev/null'."
-         call logger_init('/dev/null')
-      end if
-
-   end subroutine init_fortran_logging
 
    !   "Convert an integer to string."
    character(len=16) pure function str(k)
@@ -2354,16 +2320,7 @@ contains
       bSuccess = .true.
 
       if (.not. c_associated(root)) then
-         ! needs to be protected with a mutex
-         rc = c_pthread_mutex_lock(logger_mtx)
-
-         if (rc .eq. 0) then
-            ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-            call logger%info('load_dataset', 'restored pixels/mask from '//trim(file))
-
-            ! unlock the mutex
-            rc = c_pthread_mutex_unlock(logger_mtx)
-         end if
+         print *, '[INFO] load_dataset: restored pixels/mask from '//trim(file)
       end if
 
 300   close (fileunit)
@@ -2538,16 +2495,7 @@ contains
       if (data_unit .ge. 0) call closefd(data_unit)
 
       if (.not. c_associated(root) .and. bSuccess) then
-         ! needs to be protected with a mutex
-         rc = c_pthread_mutex_lock(logger_mtx)
-
-         if (rc .eq. 0) then
-            ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-            call logger%info('load_cube', 'restored cube data from '//cache)
-
-            ! unlock the mutex
-            rc = c_pthread_mutex_unlock(logger_mtx)
-         end if
+         print *, '[INFO] load_cube: restored cube data from '//cache
       end if
 
       return
@@ -3295,16 +3243,7 @@ contains
 
       call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
 
-      ! needs to be protected with a mutex
-      rc = c_pthread_mutex_lock(logger_mtx)
-
-      if (rc .eq. 0) then
-         ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-         call logger%info('load_fits_header', 'parsing '//strFilename//'; FLUX: '//strFlux)
-
-         ! unlock the mutex
-         rc = c_pthread_mutex_unlock(logger_mtx)
-      end if
+      print *, '[INFO] load_fits_header: parsing '//strFilename//'; FLUX: '//strFlux
 
       ! reset the strings
       item%frameid = ''
@@ -3991,16 +3930,7 @@ contains
       integer(kind=c_int) :: rc
 
       if (.not. c_associated(root)) then
-         ! needs to be protected with a mutex
-         rc = c_pthread_mutex_lock(logger_mtx)
-
-         if (rc .eq. 0) then
-            ! Intel ifort: forrtl: severe (32): invalid logical unit number, unit -129, file unknown !?
-            call logger%info('read_fits_file', 'opening '//filename//'; FLUX: '//flux)
-
-            ! unlock the mutex
-            rc = c_pthread_mutex_unlock(logger_mtx)
-         end if
+         print *, '[INFO] read_fits_file: opening '//filename//'; FLUX: '//flux
       end if
 
       ! print *, "[read_fits_file]::'", filename, "'", ", flux:'", flux, "'"
