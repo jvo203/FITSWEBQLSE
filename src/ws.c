@@ -640,7 +640,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             printf("[WS] %.*s\n", (int)wm->data.len, wm->data.ptr);
 
         // get the JSON message type
-        char type[32];
+        char type[32] = "";
         int koff, klen, voff, vlen, vtype, off;
 
         if (mjson_get_string(wm->data.ptr, (int)wm->data.len, "$.type", type, sizeof(type)) == -1)
