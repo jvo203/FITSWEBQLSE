@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-25.0";
+    return "JS2023-04-25.1";
 }
 
 function uuidv4() {
@@ -2529,6 +2529,9 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
         compositeImage = { width: img_width, height: img_height, texture: compositeImageTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
         // console.log("process_hdr_image: all images loaded", compositeImage);
+
+        // clear the composite image buffers
+        clear_webgl_composite_image_buffers();
 
         //display the composite image        
         init_webgl_composite_image_buffers();
