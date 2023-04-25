@@ -1,3 +1,9 @@
+## [5.0.34] - 2023-04-25
+
+* overhauled the server logging functionality (moved from FORTRAN to C)
+* ensured compatibility with the new gcc / gfortran v13
+* updated _*http.c*_ so that it compiles cleanly with the latest glib _*g_string_free(..., FALSE)*_ function
+
 ## [5.0.33] - 2023-04-21
 
 * speeded up initial web page loading by using _*async*_ / _*await*_ within JavaScript
