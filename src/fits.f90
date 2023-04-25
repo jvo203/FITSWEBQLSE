@@ -1293,6 +1293,7 @@ contains
       rc = c_pthread_mutex_lock(item%loading_mtx)
 
       file = ''
+      cache_len = 0
 
       ! files over this threshold will be put into the fast cache preferentially
       cache_threshold = threshold*(1024**3)! [GiB]
