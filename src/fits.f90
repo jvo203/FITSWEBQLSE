@@ -3881,12 +3881,11 @@ contains
       type(c_ptr), intent(in) :: root
       logical, intent(out) ::  bSuccess
 
-      integer status, group, unit, readwrite, blocksize, nkeys, nspace, hdutype, i
+      integer status, group, unit, readwrite, blocksize, i
       integer naxis, bitpix
       integer cn, cm
       integer(kind=8) :: npixels, j
       integer naxes(4)
-      integer(kind=8) firstpix, lastpix
       integer max_threads, tid, frame
       integer(c_int) :: start, end, num_per_node
       integer :: total_per_node
