@@ -3365,6 +3365,8 @@ contains
       allocate (character(dir_len + 1 + datasetid_len)::cache)
 
       cache_idx = 1
+      cache_len = 0
+
       do while (cache_idx .lt. dir_len)
          ! try each successive cache
          cache_len = 0
