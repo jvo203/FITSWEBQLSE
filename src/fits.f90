@@ -4499,7 +4499,7 @@ contains
 
       real mean_spec_val, int_spec_val
       real(kind=8) :: cdelt3
-      real frame_min, frame_max, frame_median
+      real frame_min, frame_max
 
       type(dataset), pointer :: item
       integer(kind=c_int) :: rc
@@ -7232,9 +7232,6 @@ contains
       real(kind=c_float), allocatable, target :: pv(:, :)
       integer(kind=c_size_t) :: array_size, written
 
-      ! timing
-      real(kind=8) :: t1, t2
-
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
@@ -7382,7 +7379,7 @@ contains
       type(dataset), pointer :: item
       type(download_request_f), pointer :: req
 
-      integer :: first, last, length, frame
+      integer :: first, last, length
       integer :: x1, x2, y1, y2, tmp
 
       character(len=256) :: filter
@@ -8396,7 +8393,7 @@ contains
       real(kind=c_float), allocatable, target :: thread_pixels(:, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
-      integer :: dimx, dimy, native_size, viewport_size
+      integer :: dimx, dimy
       integer :: inner_width, inner_height
       integer :: img_width, img_height
       integer(c_int) :: precision
