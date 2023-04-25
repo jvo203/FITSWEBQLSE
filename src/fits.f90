@@ -1400,7 +1400,7 @@ contains
             cache(i:i) = dir(i)
          end do
 
-         cache_len = len
+         cache_len = int(len, kind=4)
 
          INQUIRE (FILE=cache(1:cache_len), EXIST=file_exists)
 
@@ -2338,6 +2338,7 @@ contains
       logical, intent(out) ::  bSuccess
 
       character(len=:), allocatable :: file
+      integer(kind=8) :: filesize
 
       integer :: ios
       integer :: index_unit
@@ -2395,10 +2396,10 @@ contains
       file = trim(cache)//'/index'
 
       ! read the file size
-      INQUIRE (FILE=file, SIZE=n)  ! return -1 if cannot determine file size_t
-      if (n .eq. -1) goto 7000
+      INQUIRE (FILE=file, SIZE=filesize)  ! return -1 if cannot determine file size
+      if (filesize .eq. -1) goto 7000
 
-      n = n*(FILE_STORAGE_SIZE/8)/sizeof(frame)
+      n = int(filesize*(FILE_STORAGE_SIZE/8)/sizeof(frame), kind=4)
       allocate (indices(n))
 
       ! try to open the file for reading
