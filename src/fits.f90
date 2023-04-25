@@ -4374,7 +4374,7 @@ contains
                         if (isnan(item%ignrval)) then
                            ignrval = -1.0E30
                         else
-                           ignrval = item%ignrval
+                           ignrval = real(item%ignrval, kind=4)
                         end if
 
                         datamin = real(item%datamin, kind=4)
@@ -4574,7 +4574,7 @@ contains
             if (isnan(item%ignrval)) then
                ignrval = -1.0E30
             else
-               ignrval = item%ignrval
+               ignrval = real(item%ignrval, kind=4)
             end if
 
             datamin = real(item%datamin, kind=4)
@@ -7338,7 +7338,7 @@ contains
                if (.not. associated(item%compressed(frame)%ptr)) cycle
 
                ! this faster implementation uses a decompression cache
-               pv(npoints, frame) = x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)*cdelt3
+               pv(npoints, frame) = real(x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)*cdelt3, kind=4)
             end do
          end if
 
@@ -8224,7 +8224,7 @@ contains
             ! pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
 
             ! this faster implementation uses a decompression cache
-            pv(i, frame) = x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)*cdelt3
+            pv(i, frame) = real(x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)*cdelt3, kind=4)
          end do
       end do
 
