@@ -2911,7 +2911,7 @@ contains
       rc = c_pthread_mutex_unlock(item%progress_mtx)
 
       if (item%total .gt. 0) then
-         get_progress = 100.0*item%progress/item%total
+         get_progress = 100.0*real(item%progress/item%total)
       else
          get_progress = 0.0
       end if
@@ -7516,16 +7516,16 @@ contains
 
       print *, "final statistics... sumP", sumP, ", countP", countP, ", sumN", sumN, ", countN", countN
 
-      if (countP + countN .gt. 0) item%dmad = (sumP + sumN)/(countP + countN)
+      if (countP + countN .gt. 0) item%dmad = (sumP + sumN)/real(countP + countN)
 
       if (countP .gt. 0) then
-         item%dmadP = sumP/countP
+         item%dmadP = sumP/real(countP)
       else
          item%dmadP = item%dmad
       end if
 
       if (countN .gt. 0) then
-         item%dmadN = sumN/countN
+         item%dmadN = sumN/real(countN)
       else
          item%dmadN = item%dmad
       end if
@@ -8592,19 +8592,19 @@ contains
       print *, "final statistics... sumP", sumP, ", countP", countP, ", sumN", sumN, ", countN", countN
 
       if (countP + countN .gt. 0) then
-         dmad = (sumP + sumN)/(countP + countN)
+         dmad = (sumP + sumN)/real(countP + countN)
       else
          dmad = ieee_value(0.0, ieee_quiet_nan)
       end if
 
       if (countP .gt. 0) then
-         dmadP = sumP/countP
+         dmadP = sumP/real(countP)
       else
          dmadP = dmad
       end if
 
       if (countN .gt. 0) then
-         dmadN = sumN/countN
+         dmadN = sumN/real(countN)
       else
          dmadN = dmad
       end if
