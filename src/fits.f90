@@ -2389,6 +2389,7 @@ contains
 
       counter = 0
       index_unit = -1
+      data_unit = -1
 
       ! open an index file
       file = trim(cache)//'/index'
@@ -2417,8 +2418,6 @@ contains
       end if
 
       print *, "[load_cube] #frames:", n ! , "indices:", indices
-
-      data_unit = -1
 
       ! open a data file
       file = cache//'/data'
