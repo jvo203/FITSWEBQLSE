@@ -4377,8 +4377,8 @@ contains
                            ignrval = item%ignrval
                         end if
 
-                        datamin = item%datamin
-                        datamax = item%datamax
+                        datamin = real(item%datamin, kind=4)
+                        datamax = real(item%datamax, kind=4)
 
                         thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
                         item%compressed(frame)%ptr => to_fixed(thread_arr(:, :),&
@@ -4577,8 +4577,8 @@ contains
                ignrval = item%ignrval
             end if
 
-            datamin = item%datamin
-            datamax = item%datamax
+            datamin = real(item%datamin, kind=4)
+            datamax = real(item%datamax, kind=4)
 
             item%compressed(frame)%ptr => to_fixed(reshape(data, item%naxes(1:2)),&
             & frame_min, frame_max, ignrval, datamin, datamax)
