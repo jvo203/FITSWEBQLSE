@@ -1280,7 +1280,7 @@ contains
       logical :: file_exists, bSuccess
 
       integer :: i, rc, status
-      integer :: fileunit, ios
+      integer :: ios
       integer :: index_unit
       integer(kind=c_int) :: data_unit
       integer(kind=c_size_t) :: array_size
@@ -1932,7 +1932,7 @@ contains
       character(len=:), allocatable :: file
       logical :: file_exists
 
-      integer :: fileunit, N, rc
+      integer :: fileunit, N
       integer(kind=4) :: magic
       integer(kind=c_int) :: ios
       integer(kind=c_size_t) :: array_size
@@ -2339,12 +2339,12 @@ contains
 
       character(len=:), allocatable :: file
 
-      integer :: fileunit, ios
+      integer :: ios
       integer :: index_unit
       integer(kind=c_int) :: data_unit
       character(256) :: iomsg
 
-      integer :: tid, i, rc, depth, frame
+      integer :: tid, i, depth, frame
       integer, allocatable :: indices(:)
 
       ! OpenMP
@@ -2663,7 +2663,6 @@ contains
 
       integer(kind=8) :: current, total
       integer(kind=c_int) :: rc
-      type(c_pthread_t) :: pid
 
       ! take a time measurement
       call system_clock(finish)
@@ -3762,7 +3761,7 @@ contains
       integer naxes(4)
       integer(kind=8) :: npixels
 
-      integer :: i, status, start, end
+      integer :: i, start, end
       integer(kind=c_int) :: rc
       logical :: bSuccess
 
@@ -7220,7 +7219,6 @@ contains
 
       integer :: prev_x, prev_y, cur_x, cur_y
       integer, dimension(2) :: pos, prev_pos
-      integer, dimension(:), pointer :: ptr
       real(kind=8) :: cdelt3
 
       ! a decompression cache
