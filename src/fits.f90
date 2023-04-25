@@ -5959,6 +5959,9 @@ contains
 
       if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
 
+      ! init pid to null
+      pid = c_null_ptr
+
       ! only for data cubes
       if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1) then
          ! fill-in the inner_dims
