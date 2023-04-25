@@ -633,7 +633,7 @@ module fits
          implicit none
 
          type(c_ptr), value :: ptr
-      end Subroutine
+      end subroutine free
 
       ! export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
       real(c_float) function brightness_ratio(pixels, black, sensitivity, offset, total_size)&
