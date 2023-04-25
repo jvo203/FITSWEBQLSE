@@ -1625,7 +1625,9 @@ static enum MHD_Result on_client_connect(void *cls,
     }
     else
     {
+#ifdef DEBUG
         printf("[C] client IP address %s, client service %s\n", clienthost, clientservice);
+#endif
     }
 
     return MHD_YES;
