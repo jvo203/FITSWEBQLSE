@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-24.0";
+    return "JS2023-04-25.0";
 }
 
 function uuidv4() {
@@ -2370,20 +2370,22 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
         offset = (offset + 1) | 0;
     }
 
-    if (viewport != null) {
-        // Clear the ZOOM Canvas
-        //console.log("clearing the ZOOM Canvas");
-        var gl = viewport.gl;
-
-        if (gl !== undefined && gl != null) {
-            gl.clearColor(0, 0, 0, 0);
-            gl.clear(gl.COLOR_BUFFER_BIT);
-        }
-    }
-
     //next project the viewport
     if (va_count == 1) {
+
         let viewportContainer = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture };
+
+        if (viewport != null) {
+            // Clear the ZOOM Canvas
+            //console.log("clearing the ZOOM Canvas");
+            var gl = viewport.gl;
+
+            if (gl !== undefined && gl != null) {
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+            }
+        }
+
         init_webgl_viewport_buffers(viewportContainer);
     } else {
         if (composite_view) {
@@ -2412,6 +2414,17 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     if (viewport_count == va_count && composite_view) {
         let viewportContainer = { width: img_width, height: img_height, texture: compositeViewportTexture };
         // console.log("process_hdr_viewport: all viewports loaded", viewportContainer);
+
+        if (viewport != null) {
+            // Clear the ZOOM Canvas
+            //console.log("clearing the ZOOM Canvas");
+            var gl = viewport.gl;
+
+            if (gl !== undefined && gl != null) {
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+            }
+        }
 
         //display the composite viewport        
         init_webgl_composite_viewport_buffers(viewportContainer);
