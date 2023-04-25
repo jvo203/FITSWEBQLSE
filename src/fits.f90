@@ -3394,7 +3394,7 @@ contains
             cache(cache_len + i:cache_len + i) = datasetid(i)
          end do
 
-         cache_len = cache_len + datasetid_len
+         cache_len = cache_len + int(datasetid_len, kind=4)
 
          print *, 'trying a cache file: ', cache(1:cache_len)
 
