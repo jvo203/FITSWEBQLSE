@@ -41,11 +41,11 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 # 4. x265
 
     visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
-
-    wget https://anduin.linuxfromscratch.org/BLFS/x265/x265-20220819.tar.xz
-    xz -d -v x265-20220819.tar.xz
-    tar xvf x265-20220819.tar
-    cd x265-20220819
+    
+    wget https://anduin.linuxfromscratch.org/BLFS/x265/x265-20230215.tar.xz
+    xz -d -v x265-20230215.tar.xz
+    tar xvf x265-20230215.tar
+    cd x265-20230215
 
     Apply a manual change in "source/encoder/api.cpp / x265_encoder_open()":
 
