@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-25.1";
+    return "JS2023-04-26.0";
 }
 
 function uuidv4() {
@@ -9212,8 +9212,6 @@ function x_axis_mouseenter(offset) {
                 wsConn[0].send(JSON.stringify(request));
             video_stack[0] = [];
         } else for (let index = 0; index < va_count; index++) {
-            var image_bounding_dims = imageContainer[index].image_bounding_dims;
-
             var request = {
                 type: "init_video",
                 frame: freq,
