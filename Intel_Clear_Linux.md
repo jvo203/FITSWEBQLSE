@@ -131,11 +131,8 @@
     visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
 
     wget https://anduin.linuxfromscratch.org/BLFS/x265/x265-20220219.tar.xz
-
     xz -d -v x265-20220219.tar.xz
-
     tar xvf x265-20220219.tar
-
     cd x265-20220219
 
     Apply a manual change in "source/encoder/api.cpp / x265_encoder_open()":
