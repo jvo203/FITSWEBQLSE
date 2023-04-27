@@ -1614,6 +1614,7 @@ static enum MHD_Result on_client_connect(void *cls,
     (void)cls;     // silence gcc warnings
     (void)addrlen; // silence gcc warnings
 
+#ifdef DEBUG
     char clienthost[NI_MAXHOST] = ""; // The clienthost will hold the IP address.
     char clientservice[NI_MAXSERV] = "";
 
@@ -1625,10 +1626,12 @@ static enum MHD_Result on_client_connect(void *cls,
     }
     else
     {
-#ifdef DEBUG
+
         printf("[C] client IP address %s, client service %s\n", clienthost, clientservice);
-#endif
     }
+#else
+    (void)addr; // silence gcc warnings
+#endif
 
     return MHD_YES;
 };
