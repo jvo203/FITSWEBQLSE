@@ -1711,6 +1711,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             int fps = 30;
             int bitrate = 1000;
             req->keyframe = false; // is it a keyframe?
+            req->fill = 0;
             int seq_id = -1;
 
             req->frame = 0;
@@ -1749,6 +1750,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 // 'bitrate'
                 if (strncmp(wm->data.ptr + koff, "\"bitrate\"", klen) == 0)
                     bitrate = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'fill'
+                if (strncmp(wm->data.ptr + koff, "\"fill\"", klen) == 0)
+                    req->fill = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'seq_id'
                 if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)

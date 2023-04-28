@@ -84,6 +84,7 @@ module fits
       ! input
       logical(kind=c_bool) :: keyframe
       integer(c_int) :: frame
+      integer(c_int) :: fill
 
       ! needed by tone mapping
       type(C_PTR) :: flux
@@ -7641,7 +7642,8 @@ contains
       if (.not. c_associated(req%flux)) return
       call c_f_pointer(req%flux, flux, [req%len])
 
-      print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', req%frame, 'fd:', req%fd
+      print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', &
+      &req%frame, 'fill:', req%fill, 'fd:', req%fd
 
       if (.not. allocated(item%compressed)) then
          call close_pipe(req%fd)
