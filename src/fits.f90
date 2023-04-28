@@ -785,9 +785,9 @@ module fits
 
       end subroutine make_global_statistics
 
-      ! export void make_video_frame_fixed_linear(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope)
+      ! export void make_video_frame_fixed_linear(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope, uniform int fill)
       subroutine make_video_frame_fixed_linear(compressed, width, height,&
-      &dst_luma, dst_mask, stride, black, slope) BIND(C, name="make_video_frame_fixed_linear")
+      &dst_luma, dst_mask, stride, black, slope, fill) BIND(C, name="make_video_frame_fixed_linear")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -796,12 +796,13 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: black, slope
+         integer(c_int), value, intent(in) :: fill
 
       end subroutine make_video_frame_fixed_linear
 
-      ! export void make_video_frame_fixed_linear_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope, uniform int start, uniform int work_size)
+      ! export void make_video_frame_fixed_linear_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope, uniform int fill, uniform int start, uniform int work_size)
       subroutine make_video_frame_fixed_linear_threaded(compressed, width, height,&
-      &dst_luma, dst_mask, stride, black, slope, start, work_size) BIND(C, name="make_video_frame_fixed_linear_threaded")
+      &dst_luma, dst_mask, stride, black, slope, fill, start, work_size) BIND(C, name="make_video_frame_fixed_linear_threaded")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -810,13 +811,14 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: black, slope
+         integer(c_int), value, intent(in) :: fill
          integer(c_int), value, intent(in) :: start, work_size
 
       end subroutine make_video_frame_fixed_linear_threaded
 
-      ! export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity)
+      ! export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity, uniform int fill)
       subroutine make_video_frame_fixed_logistic(compressed, width, height,&
-      &dst_luma, dst_mask, stride, median, sensitivity) BIND(C, name="make_video_frame_fixed_logistic")
+      &dst_luma, dst_mask, stride, median, sensitivity, fill) BIND(C, name="make_video_frame_fixed_logistic")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -825,12 +827,14 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: median, sensitivity
+         integer(c_int), value, intent(in) :: fill
 
       end subroutine make_video_frame_fixed_logistic
 
-      ! export void make_video_frame_fixed_logistic_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity, uniform int start, uniform int work_size)
+      ! export void make_video_frame_fixed_logistic_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity, uniform int fill, uniform int start, uniform int work_size)
       subroutine make_video_frame_fixed_logistic_threaded(compressed, width, height,&
-      &dst_luma, dst_mask, stride, median, sensitivity, start, work_size) BIND(C, name="make_video_frame_fixed_logistic_threaded")
+      &dst_luma, dst_mask, stride, median, sensitivity, fill, start, work_size)&
+      & BIND(C, name="make_video_frame_fixed_logistic_threaded")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -839,13 +843,14 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: median, sensitivity
+         integer(c_int), value, intent(in) :: fill
          integer(c_int), value, intent(in) :: start, work_size
 
       end subroutine make_video_frame_fixed_logistic_threaded
 
-      ! export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity)
+      ! export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int fill)
       subroutine make_video_frame_fixed_ratio(compressed, width, height,&
-      &dst_luma, dst_mask, stride, black, sensitivity) BIND(C, name="make_video_frame_fixed_ratio")
+      &dst_luma, dst_mask, stride, black, sensitivity, fill) BIND(C, name="make_video_frame_fixed_ratio")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -854,12 +859,13 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: black, sensitivity
+         integer(c_int), value, intent(in) :: fill
 
       end subroutine make_video_frame_fixed_ratio
 
-      ! export void make_video_frame_fixed_ratio_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int start, uniform int work_size)
+      ! export void make_video_frame_fixed_ratio_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int fill, uniform int start, uniform int work_size)
       subroutine make_video_frame_fixed_ratio_threaded(compressed, width, height,&
-      &dst_luma, dst_mask, stride, black, sensitivity, start, work_size) BIND(C, name="make_video_frame_fixed_ratio_threaded")
+      &dst_luma, dst_mask, stride, black, sensitivity, fill, start, work_size) BIND(C, name="make_video_frame_fixed_ratio_threaded")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -868,13 +874,14 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: black, sensitivity
+         integer(c_int), value, intent(in) :: fill
          integer(c_int), value, intent(in) :: start, work_size
 
       end subroutine make_video_frame_fixed_ratio_threaded
 
-      ! export void make_video_frame_fixed_square(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity)
+      ! export void make_video_frame_fixed_square(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int fill)
       subroutine make_video_frame_fixed_square(compressed, width, height,&
-      &dst_luma, dst_mask, stride, black, sensitivity) BIND(C, name="make_video_frame_fixed_square")
+      &dst_luma, dst_mask, stride, black, sensitivity, fill) BIND(C, name="make_video_frame_fixed_square")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -883,12 +890,14 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: black, sensitivity
+         integer(c_int), value, intent(in) :: fill
 
       end subroutine make_video_frame_fixed_square
 
-      ! export void make_video_frame_fixed_square_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform float lmin, uniform float lmax)
+      ! export void make_video_frame_fixed_square_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int fill, uniform int start, uniform int work_size)
       subroutine make_video_frame_fixed_square_threaded(compressed, width, height,&
-      &dst_luma, dst_mask, stride, black, sensitivity, start, work_size) BIND(C, name="make_video_frame_fixed_square_threaded")
+      &dst_luma, dst_mask, stride, black, sensitivity, fill, start, work_size)&
+      & BIND(C, name="make_video_frame_fixed_square_threaded")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -897,13 +906,14 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: black, sensitivity
+         integer(c_int), value, intent(in) :: fill
          integer(c_int), value, intent(in) :: start, work_size
 
       end subroutine make_video_frame_fixed_square_threaded
 
-      ! export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax)
+      ! export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax, uniform int fill)
       subroutine make_video_frame_fixed_legacy(compressed, width, height,&
-      &dst_luma, dst_mask, stride, dmin, dmax, lmin, lmax) BIND(C, name="make_video_frame_fixed_legacy")
+      &dst_luma, dst_mask, stride, dmin, dmax, lmin, lmax, fill) BIND(C, name="make_video_frame_fixed_legacy")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -912,12 +922,13 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: dmin, dmax, lmin, lmax
+         integer(c_int), value, intent(in) :: fill
 
       end subroutine make_video_frame_fixed_legacy
 
-      ! export void make_video_frame_fixed_legacy_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax, uniform int start, uniform int work_size)
+      ! export void make_video_frame_fixed_legacy_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax, uniform int fill, uniform int start, uniform int work_size)
       subroutine make_video_frame_fixed_legacy_threaded(compressed, width, height,&
-      &dst_luma, dst_mask, stride, dmin, dmax, lmin, lmax, start, work_size)&
+      &dst_luma, dst_mask, stride, dmin, dmax, lmin, lmax, fill, start, work_size)&
       & BIND(C, name="make_video_frame_fixed_legacy_threaded")
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -927,6 +938,7 @@ module fits
          type(C_PTR), value, intent(in) :: dst_luma, dst_mask
          integer(c_int), value, intent(in) :: stride
          real(c_float), value, intent(in) :: dmin, dmax, lmin, lmax
+         integer(c_int), value, intent(in) :: fill
          integer(c_int), value, intent(in) :: start, work_size
 
       end subroutine make_video_frame_fixed_legacy_threaded
@@ -7820,7 +7832,7 @@ contains
 
                if (work_size .gt. 0) then
                   call make_video_frame_fixed_linear_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
-                  &c_loc(pixels), c_loc(mask), width, tone%black, tone%slope, start, work_size)
+                  &c_loc(pixels), c_loc(mask), width, tone%black, tone%slope, fill, start, work_size)
                end if
             end do
             !$omp END DO
@@ -7842,7 +7854,7 @@ contains
 
                if (work_size .gt. 0) then
                   call make_video_frame_fixed_logistic_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
-                  &c_loc(pixels), c_loc(mask), width, tone%dmedian, tone%sensitivity, start, work_size)
+                  &c_loc(pixels), c_loc(mask), width, tone%dmedian, tone%sensitivity, fill, start, work_size)
                end if
             end do
             !$omp END DO
@@ -7864,7 +7876,7 @@ contains
 
                if (work_size .gt. 0) then
                   call make_video_frame_fixed_ratio_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
-                  &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity, start, work_size)
+                  &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity, fill, start, work_size)
                end if
             end do
             !$omp END DO
@@ -7886,7 +7898,7 @@ contains
 
                if (work_size .gt. 0) then
                   call make_video_frame_fixed_square_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
-                  &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity, start, work_size)
+                  &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity, fill, start, work_size)
                end if
             end do
             !$omp END DO
@@ -7913,7 +7925,7 @@ contains
 
                if (work_size .gt. 0) then
                   call make_video_frame_fixed_legacy_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
-                  &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax, start, work_size)
+                  &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax, fill, start, work_size)
                end if
             end do
             !$omp END DO
@@ -7943,25 +7955,25 @@ contains
          if (tone%flux .eq. "linear") then
             print *, "calling make_video_frame_fixed_linear"
             call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
-            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%slope)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%slope, fill)
          end if
 
          if (tone%flux .eq. "logistic") then
             print *, "calling make_video_frame_fixed_logistic"
             call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
-            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmedian, tone%sensitivity)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmedian, tone%sensitivity, fill)
          end if
 
          if (tone%flux .eq. "ratio") then
             print *, "calling make_video_frame_fixed_ratio"
             call make_video_frame_fixed_ratio(c_loc(item%compressed(frame)%ptr), width, height,&
-            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity, fill)
          end if
 
          if (tone%flux .eq. "square") then
             print *, "calling make_video_frame_fixed_square"
             call make_video_frame_fixed_square(c_loc(item%compressed(frame)%ptr), width, height,&
-            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity, fill)
          end if
 
          if (tone%flux .eq. "legacy") then
@@ -7970,7 +7982,7 @@ contains
 
             print *, "calling make_video_frame_fixed_legacy"
             call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
-            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmin, tone%dmax, lmin, lmax)
+            &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmin, tone%dmax, lmin, lmax, fill)
          end if
       end if
 
