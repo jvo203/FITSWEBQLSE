@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-26.0";
+    return "JS2023-04-28.0";
 }
 
 function uuidv4() {
@@ -4043,7 +4043,15 @@ async function open_websocket_connection(_datasetId, index) {
                                         contours = parseInt(document.getElementById('contour_lines').value) + 1;
 
                                     //HEVC
-                                    var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, colourmap, fill, contours);
+                                    var _colourmap;
+
+                                    if (va_count > 1 && composite_view) {
+                                        _colourmap = 'composite';
+                                    } else {
+                                        _colourmap = colourmap;
+                                    }
+
+                                    var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, _colourmap, fill, contours);
                                     data = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
                                 } catch (e) {
                                     //console.log(e);
