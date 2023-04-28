@@ -171,6 +171,7 @@ struct video_req
 {
     bool keyframe;
     int frame;
+    int fill;
 
     char *flux;
     int len;

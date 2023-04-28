@@ -2873,7 +2873,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/video/") != NULL)
     {
-        int frame, width, height;
+        int frame, fill, width, height;
         bool downsize, keyframe;
         char *flux;
         float dmin, dmax, dmedian;
@@ -2895,6 +2895,12 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
 
         frame = atoi(frameStr);
+
+        char *fillStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "fill");
+        if (fillStr == NULL)
+            return http_bad_request(connection);
+
+        fill = atoi(fillStr);
 
         char *keyframeStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "keyframe");
         if (keyframeStr == NULL)
@@ -3010,6 +3016,7 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             req->keyframe = keyframe;
             req->frame = frame;
+            req->fill = fill;
             req->flux = strdup(flux);
             req->len = strlen(req->flux);
 

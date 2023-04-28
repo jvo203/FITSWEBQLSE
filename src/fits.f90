@@ -184,6 +184,7 @@ module fits
       ! input
       logical(kind=c_bool) :: keyframe
       integer(c_int) :: frame
+      integer(c_int) :: fill
 
       ! tone mapping
       type(C_PTR) :: flux
@@ -7586,7 +7587,7 @@ contains
       allocate (pixels(req%width, req%height))
       allocate (mask(req%width, req%height))
 
-      call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
+      call get_video_frame(item, req%frame, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
 
       if (req%fd .ne. -1) then
          ! send pixels
@@ -7710,7 +7711,7 @@ contains
             goto 5000
          end if
       else
-         call get_video_frame(item, req%frame, tone, pixels, mask, req%width, req%height, req%downsize)
+         call get_video_frame(item, req%frame, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
       end if
 
       ! end the timer
@@ -7761,13 +7762,13 @@ contains
       return
    end subroutine fill_global_statistics
 
-   subroutine get_video_frame(item, frame, tone, dst_pixels, dst_mask, dst_width, dst_height, downsize)
+   subroutine get_video_frame(item, frame, fill, tone, dst_pixels, dst_mask, dst_width, dst_height, downsize)
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(dataset), intent(in), pointer :: item
       type(video_tone_mapping), intent(in) :: tone
-      integer, intent(in) :: frame, dst_width, dst_height
+      integer, intent(in) :: frame, fill, dst_width, dst_height
       logical(kind=c_bool) :: downsize
       integer(kind=1), intent(out), target :: dst_pixels(dst_width, dst_height)
       integer(kind=1), intent(out), target :: dst_mask(dst_width, dst_height)
