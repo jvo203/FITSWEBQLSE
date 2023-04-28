@@ -6027,7 +6027,7 @@ void *fetch_video_frame(void *ptr)
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "/video/%.*s", options.http_port, (int)len, datasetid);
-        g_string_append_printf(url, "?frame=%d&keyframe=%d&width=%d&height=%d&downsize=%d", req->frame, req->keyframe, req->width, req->height, req->downsize);
+        g_string_append_printf(url, "?frame=%d&fill=%d&keyframe=%d&width=%d&height=%d&downsize=%d", req->frame, req->fill, req->keyframe, req->width, req->height, req->downsize);
         g_string_append_printf(url, "&flux=%s&dmin=%f&dmax=%f&dmedian=%f", req->flux, req->dmin, req->dmax, req->dmedian);
         g_string_append_printf(url, "&sensitivity=%f&slope=%f", req->sensitivity, req->slope);
         g_string_append_printf(url, "&white=%f&black=%f", req->white, req->black);

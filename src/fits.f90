@@ -162,6 +162,7 @@ module fits
       integer(c_int) :: len
       logical(kind=c_bool) :: keyframe
       integer(c_int) :: frame
+      integer(c_int) :: fill
 
       ! tone mapping
       type(C_PTR) :: flux
@@ -7678,6 +7679,7 @@ contains
 
          fetch_req%keyframe = req%keyframe
          fetch_req%frame = req%frame
+         fetch_req%fill = req%fill
 
          fetch_req%flux = req%flux
          fetch_req%dmin = tone%dmin

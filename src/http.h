@@ -151,6 +151,7 @@ struct video_fetch
     int len;
     bool keyframe;
     int frame;
+    int fill;
 
     char *flux;
     float dmin, dmax, dmedian;
