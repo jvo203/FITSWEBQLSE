@@ -7785,15 +7785,17 @@ contains
       height = item%naxes(2)
 
       ! a blank canvas by default
-      dst_pixels = int(fill, kind=1)
-      dst_mask = 0
+      ! the initialisation will be done inside SPMD C
+      ! dst_pixels = int(fill, kind=1)
+      ! dst_mask = 0
 
       if (downsize) then
          allocate (pixels(width, height))
          allocate (mask(width, height))
 
-         pixels = int(fill, kind=1)
-         mask = 0
+         ! the initialisation will be done inside SPMD C
+         ! pixels = int(fill, kind=1)
+         ! mask = 0
 
          max_threads = get_max_threads()
 
