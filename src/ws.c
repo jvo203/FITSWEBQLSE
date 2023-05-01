@@ -1897,6 +1897,60 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             const char *flux = common_session->flux;
             int width = common_session->image_width;
             int height = common_session->image_height;
+            bool downsize = common_session->bDownsize;
+
+            // parse the JSON message common for all datasets
+            int fps = 30;
+            int bitrate = 1000;
+            bool keyframe = false;
+            int fill = 0;
+            double frame = 0.0;
+            double ref_freq = 0.0;
+            int seq_id = -1;
+            float timestamp = 0.0;
+
+            for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // 'fps'
+                if (strncmp(wm->data.ptr + koff, "\"fps\"", klen) == 0)
+                    fps = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'bitrate'
+                if (strncmp(wm->data.ptr + koff, "\"bitrate\"", klen) == 0)
+                    bitrate = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'fill'
+                if (strncmp(wm->data.ptr + koff, "\"fill\"", klen) == 0)
+                    fill = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'seq_id'
+                if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
+                    seq_id = atoi2(wm->data.ptr + voff, vlen);
+
+                // 'key'
+                if (strncmp(wm->data.ptr + koff, "\"key\"", klen) == 0)
+                {
+                    // false
+                    if (strncmp(wm->data.ptr + voff, "false", vlen) == 0)
+                        keyframe = false;
+
+                    // true
+                    if (strncmp(wm->data.ptr + voff, "true", vlen) == 0)
+                        keyframe = true;
+                }
+
+                // 'frame'
+                if (strncmp(wm->data.ptr + koff, "\"frame\"", klen) == 0)
+                    frame = atof2(wm->data.ptr + voff, vlen);
+
+                // 'ref_freq'
+                if (strncmp(wm->data.ptr + koff, "\"ref_freq\"", klen) == 0)
+                    ref_freq = atof2(wm->data.ptr + voff, vlen);
+
+                // 'timestamp'
+                if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
+                    timestamp = atof2(wm->data.ptr + voff, vlen);
+            }
 
             break;
         }
