@@ -6648,7 +6648,7 @@ contains
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
       length = last - first + 1
-      ! print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+      ! print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3) ! ifort
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1 + 1)
@@ -6855,7 +6855,7 @@ contains
             viewport_size = req%width*req%height
             scale = real(req%width)/real(dimx)
 
-            print *, 'native:', native_size, 'viewport:', viewport_size, 'scale:', scale
+            ! print *, 'native:', native_size, 'viewport:', viewport_size, 'scale:', scale ! ifort
 
             if (native_size .gt. viewport_size) then
                ! downsize the pixels/mask from {dimx,dimy} to {req%width,req%height}
@@ -6902,7 +6902,7 @@ contains
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
-      print *, 'realtime_image_spectrum elapsed time:', elapsed, '[ms]'
+      ! print *, 'realtime_image_spectrum elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine realtime_image_spectrum_request_simd
 
