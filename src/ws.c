@@ -1980,16 +1980,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                     while (g_hash_table_iter_next(&iter, &key, &value))
                     {
-                        struct websocket_session *s = (struct websocket_session *)value;
+                        struct websocket_session *_session = (struct websocket_session *)value;
 
-                        if (strcmp(s->datasetid, token) == 0)
+                        if (strcmp(_session->datasetid, token) == 0)
                         {
-                            session = s;
+                            session = _session;
                             break;
                         }
                     }
 
-                    // session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
                     pthread_mutex_unlock(&sessions_mtx);
                 }
 
