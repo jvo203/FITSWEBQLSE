@@ -6237,7 +6237,7 @@ contains
       integer i, sampledIndex, a, nextA, dataLength
       real maxAreaPoint, maxArea, area, every
 
-      print *, 'downsizing spectrum with Largest-Triangle-Three-Buckets'
+      ! print *, 'downsizing spectrum with Largest-Triangle-Three-Buckets'
 
       dataLength = size(data)
       allocate (spectrum(threshold))
@@ -6620,7 +6620,7 @@ contains
       if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
 
-      ! this is causing a segmentation fault when using the Intel compiler ifort ('for_write_seq_lis_xmit' recursion limit???)
+      ! ifort
       ! print *, 'realtime_image_spectrum for ', item%datasetid,&
       ! &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
       ! &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
@@ -6902,7 +6902,7 @@ contains
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
-      ! print *, 'realtime_image_spectrum elapsed time:', elapsed, '[ms]' ! ifort
+      print *, 'realtime_image_spectrum elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine realtime_image_spectrum_request_simd
 
