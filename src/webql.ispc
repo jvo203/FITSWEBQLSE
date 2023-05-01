@@ -952,7 +952,7 @@ export void make_global_statistics(uniform struct fixed_block_t compressed[], un
   // print("median: %, sumP: %, sumN: %, countP: %, countN: %, max_value: %\n", median, sumP[0], sumN[0], countP[0], countN[0], reduce_max(max_value));
 }
 
-export void make_video_frame_fixed_linear(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope)
+export void make_video_frame_fixed_linear(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope, uniform int fill)
 {
   uniform int cn, cm;
 
@@ -995,16 +995,15 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
           // destination index
           varying int offset = pixel_y*stride + pixel_x;
 
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
-
           // apply tone mapping
-          cif(valid)
-          {
+          cif((pixel_x < width) && (pixel_y < height))
+          {            
             varying float x = scale * (float)compressed[src_idx].mantissa[k];
             varying float pixel = 255.0f / ( 1.0f + exp(-6.0f * (x - black) * slope) ) ;
 
-            dst_luma[offset] = (int) clamp(pixel, 0.0f, 255.0f) ;
-            dst_mask[offset] = 255 ;      
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (int) clamp(pixel, 0.0f, 255.0f) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1013,7 +1012,7 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
 
 }
 
-export void make_video_frame_fixed_linear_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope, uniform int start, uniform int work_size)
+export void make_video_frame_fixed_linear_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float slope, uniform int fill, uniform int start, uniform int work_size)
 {
   uniform int cn = width / DIM;  
 
@@ -1048,18 +1047,17 @@ export void make_video_frame_fixed_linear_threaded(uniform struct fixed_block_t 
           varying int pixel_y = src_y + idx; // iy = idx;
 
           // destination index
-          varying int offset = pixel_y*stride + pixel_x;
-
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+          varying int offset = pixel_y*stride + pixel_x;          
 
           // apply tone mapping
-          cif(valid)
-          {
+          cif((pixel_x < width) && (pixel_y < height))
+          {            
             varying float x = scale * (float)compressed[src_idx].mantissa[k];
             varying float pixel = 255.0f / ( 1.0f + exp(-6.0f * (x - black) * slope) ) ;
 
-            dst_luma[offset] = (int) clamp(pixel, 0.0f, 255.0f) ;
-            dst_mask[offset] = 255 ;      
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (int) clamp(pixel, 0.0f, 255.0f) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1068,7 +1066,7 @@ export void make_video_frame_fixed_linear_threaded(uniform struct fixed_block_t 
 
 }
 
-export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity)
+export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity, uniform int fill)
 {
   uniform int cn, cm;
 
@@ -1109,18 +1107,17 @@ export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compres
           varying int pixel_y = src_y + idx; // iy = idx;
 
           // destination index
-          varying int offset = pixel_y*stride + pixel_x;
-
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+          varying int offset = pixel_y*stride + pixel_x;          
 
           // apply tone mapping
-          cif(valid)
+          cif((pixel_x < width) && (pixel_y < height))
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];            
             varying float pixel = 255.0f / ( 1.0f + exp(-6.0f * (x - median) * sensitivity) ) ;
 
-            dst_luma[offset] = (int) clamp(pixel, 0.0f, 255.0f) ;
-            dst_mask[offset] = 255 ;      
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (int) clamp(pixel, 0.0f, 255.0f) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1129,7 +1126,7 @@ export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compres
     
 }
 
-export void make_video_frame_fixed_logistic_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity, uniform int start, uniform int work_size)
+export void make_video_frame_fixed_logistic_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float median, uniform float sensitivity, uniform int fill, uniform int start, uniform int work_size)
 {
   uniform int cn = width / DIM;  
 
@@ -1164,18 +1161,17 @@ export void make_video_frame_fixed_logistic_threaded(uniform struct fixed_block_
           varying int pixel_y = src_y + idx; // iy = idx;
 
           // destination index
-          varying int offset = pixel_y*stride + pixel_x;
-
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+          varying int offset = pixel_y*stride + pixel_x;          
 
           // apply tone mapping
-          cif(valid)
+          cif((pixel_x < width) && (pixel_y < height))
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];            
             varying float pixel = 255.0f / ( 1.0f + exp(-6.0f * (x - median) * sensitivity) ) ;
 
-            dst_luma[offset] = (int) clamp(pixel, 0.0f, 255.0f) ;
-            dst_mask[offset] = 255 ;      
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (int) clamp(pixel, 0.0f, 255.0f) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1184,7 +1180,7 @@ export void make_video_frame_fixed_logistic_threaded(uniform struct fixed_block_
     
 }
 
-export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity)
+export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int fill)
 {
   uniform int cn, cm;
 
@@ -1225,18 +1221,17 @@ export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed
           varying int pixel_y = src_y + idx; // iy = idx;
 
           // destination index
-          varying int offset = pixel_y*stride + pixel_x;
-
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+          varying int offset = pixel_y*stride + pixel_x;          
 
           // apply tone mapping
-          cif(valid)
+          cif((pixel_x < width) && (pixel_y < height))
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];            
             varying float pixel = 5.0f * (x - black) * sensitivity ;
 
-            dst_luma[offset] = pixel > 0.0f ? (int) clamp( 255.0f*pixel/(1.0f + pixel), 0.0f, 255.0f) : 0 ;
-            dst_mask[offset] = 255 ;      
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f*pixel/(1.0f + pixel), 0.0f, 255.0f) : 0) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1245,7 +1240,7 @@ export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed
     
 }
 
-export void make_video_frame_fixed_ratio_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int start, uniform int work_size)
+export void make_video_frame_fixed_ratio_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int fill, uniform int start, uniform int work_size)
 {  
   uniform int cn = width / DIM;
 
@@ -1280,19 +1275,18 @@ export void make_video_frame_fixed_ratio_threaded(uniform struct fixed_block_t c
           varying int pixel_y = src_y + idx; // iy = idx;
 
           // destination index
-          varying int offset = pixel_y*stride + pixel_x;
-
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+          varying int offset = pixel_y*stride + pixel_x;          
 
           // apply tone mapping
-          cif(valid)
+          cif((pixel_x < width) && (pixel_y < height))
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];            
             varying float pixel = 5.0f * (x - black) * sensitivity ;
 
-            dst_luma[offset] = pixel > 0.0f ? (int) clamp( 255.0f*pixel/(1.0f + pixel), 0.0f, 255.0f) : 0 ;
-            dst_mask[offset] = 255 ;      
-          }          
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f*pixel/(1.0f + pixel), 0.0f, 255.0f) : 0) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
+          }
 
         }
 
@@ -1300,7 +1294,7 @@ export void make_video_frame_fixed_ratio_threaded(uniform struct fixed_block_t c
     
 }
 
-export void make_video_frame_fixed_square(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity)
+export void make_video_frame_fixed_square(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int fill)
 {
   uniform int cn, cm;
 
@@ -1341,18 +1335,17 @@ export void make_video_frame_fixed_square(uniform struct fixed_block_t compresse
           varying int pixel_y = src_y + idx; // iy = idx;
 
           // destination index
-          varying int offset = pixel_y*stride + pixel_x;
-
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+          varying int offset = pixel_y*stride + pixel_x;          
 
           // apply tone mapping
-          cif(valid)
+          cif((pixel_x < width) && (pixel_y < height))
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];
             varying float pixel = (x - black) * sensitivity ;
             
-            dst_luma[offset] = pixel > 0.0f ? (int) clamp( 255.0f*pixel*pixel, 0.0f, 255.0f) : 0 ;            
-            dst_mask[offset] = 255 ;    
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f*pixel*pixel, 0.0f, 255.0f) : 0) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1361,7 +1354,7 @@ export void make_video_frame_fixed_square(uniform struct fixed_block_t compresse
     
 }
 
-export void make_video_frame_fixed_square_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int start, uniform int work_size)
+export void make_video_frame_fixed_square_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float black, uniform float sensitivity, uniform int fill, uniform int start, uniform int work_size)
 {
   uniform int cn = width / DIM;
 
@@ -1396,18 +1389,17 @@ export void make_video_frame_fixed_square_threaded(uniform struct fixed_block_t 
           varying int pixel_y = src_y + idx; // iy = idx;
 
           // destination index
-          varying int offset = pixel_y*stride + pixel_x;
-
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+          varying int offset = pixel_y*stride + pixel_x;          
 
           // apply tone mapping
-          cif(valid)
+          cif((pixel_x < width) && (pixel_y < height))
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];
             varying float pixel = (x - black) * sensitivity ;
             
-            dst_luma[offset] = pixel > 0.0f ? (int) clamp( 255.0f*pixel*pixel, 0.0f, 255.0f) : 0 ;            
-            dst_mask[offset] = 255 ;    
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f*pixel*pixel, 0.0f, 255.0f) : 0) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1416,7 +1408,7 @@ export void make_video_frame_fixed_square_threaded(uniform struct fixed_block_t 
     
 }
 
-export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax)
+export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax, uniform int fill)
 {
   uniform int cn, cm;
 
@@ -1457,18 +1449,17 @@ export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compresse
           varying int pixel_y = src_y + idx; // iy = idx;
 
           // destination index
-          varying int offset = pixel_y*stride + pixel_x;
-
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+          varying int offset = pixel_y*stride + pixel_x;          
 
           // apply tone mapping
-          cif(valid)
+          cif((pixel_x < width) && (pixel_y < height))
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];
             varying float pixel = 0.5f + (x - dmin) / (dmax - dmin) ;
         
-            dst_luma[offset] = pixel > 0.0f ? (int) clamp( 255.0f * (log(pixel) - lmin) / (lmax - lmin), 0.0f, 255.0f) : 0 ;        
-            dst_mask[offset] = 255 ;
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f * (log(pixel) - lmin) / (lmax - lmin), 0.0f, 255.0f) : 0) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1477,7 +1468,7 @@ export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compresse
     
 }
 
-export void make_video_frame_fixed_legacy_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax, uniform int start, uniform int work_size)
+export void make_video_frame_fixed_legacy_threaded(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int stride, uniform float dmin, uniform float dmax, uniform float lmin, uniform float lmax, uniform int fill, uniform int start, uniform int work_size)
 {
   uniform int cn = width / DIM;
 
@@ -1512,18 +1503,17 @@ export void make_video_frame_fixed_legacy_threaded(uniform struct fixed_block_t 
           varying int pixel_y = src_y + idx; // iy = idx;
 
           // destination index
-          varying int offset = pixel_y*stride + pixel_x;
-
-          varying bool valid = !isnan && (pixel_x < width) && (pixel_y < height);
+          varying int offset = pixel_y*stride + pixel_x;          
 
           // apply tone mapping
-          cif(valid)
+          cif((pixel_x < width) && (pixel_y < height))
           {
             varying float x = scale * (float)compressed[src_idx].mantissa[k];
             varying float pixel = 0.5f + (x - dmin) / (dmax - dmin) ;
         
-            dst_luma[offset] = pixel > 0.0f ? (int) clamp( 255.0f * (log(pixel) - lmin) / (lmax - lmin), 0.0f, 255.0f) : 0 ;        
-            dst_mask[offset] = 255 ;
+            varying bool valid = !isnan;
+            dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f * (log(pixel) - lmin) / (lmax - lmin), 0.0f, 255.0f) : 0) : fill ;
+            dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
