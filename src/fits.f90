@@ -6902,7 +6902,7 @@ contains
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
-      print *, 'realtime_image_spectrum elapsed time:', elapsed, '[ms]' ! ifort
+      ! print *, 'realtime_image_spectrum elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine realtime_image_spectrum_request_simd
 
