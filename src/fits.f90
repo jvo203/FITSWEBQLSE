@@ -370,6 +370,14 @@ module fits
 
       end function get_physical_cores
 
+      ! POSIX usleep
+      ! int usleep(useconds_t useconds)
+      function c_usleep(useconds) bind(c, name='usleep')
+         import :: c_int, c_int32_t
+         integer(kind=c_int32_t), value :: useconds
+         integer(kind=c_int)            :: c_usleep
+      end function c_usleep
+
       ! custom bindings to POSIX threads
       function my_pthread_create(start_routine, arg, rc) bind(c, name='my_pthread_create')
          import :: c_int, c_ptr, c_funptr
@@ -3076,7 +3084,7 @@ contains
       integer(c_int), intent(inout) :: counter
       type(C_PTR), intent(in), value :: root
 
-      integer :: repeat
+      integer :: repeat, rc
 
       ! there is no point in sending anything if the root itself is NULL
       if (.not. c_associated(root)) return
@@ -3090,7 +3098,8 @@ contains
          if (counter .gt. 0) then
             repeat = repeat + 1
             print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
-            call sleep(1) ! 1 sec.
+            ! call sleep(1) ! 1 sec.
+            rc = c_usleep(1000000) ! 1 sec.
          end if
 
          ! break the loop after 60s
