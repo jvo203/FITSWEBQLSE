@@ -1214,6 +1214,16 @@ contains
       rc = c_pthread_mutex_destroy(file_unit_mtx)
    end subroutine cleanup_fortran
 
+   subroutine sleep(millisec)
+      integer, intent(in) :: millisec
+      integer(c_int) :: ierr
+
+      !! Linux, Unix, MacOS, MSYS2, ...
+      ierr = c_usleep(int(millisec * 1000, c_int))
+      if (ierr/=0) print *, 'problem with usleep() system call'
+
+   end subroutine sleep
+
    !   "Convert an integer to string."
    character(len=16) pure function str(k)
       integer, intent(in) :: k
@@ -3098,8 +3108,8 @@ contains
          if (counter .gt. 0) then
             repeat = repeat + 1
             print *, item%datasetid, "::'submit_progress' failed, counter = ", counter, ", #repeats:", repeat
-            ! call sleep(1) ! 1 sec.
-            rc = c_usleep(1000000) ! 1 sec.
+            call sleep(1) ! 1 sec.
+            call sleep(1000) ! 1 sec.
          end if
 
          ! break the loop after 60s
