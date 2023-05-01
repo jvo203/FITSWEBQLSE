@@ -7675,8 +7675,9 @@ contains
       if (.not. c_associated(req%flux)) return
       call c_f_pointer(req%flux, flux, [req%len])
 
-      print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', &
-      &req%frame, 'fill:', req%fill, 'fd:', req%fd
+      ! ifort
+      ! print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', &
+      ! &req%frame, 'fill:', req%fill, 'fd:', req%fd
 
       if (.not. allocated(item%compressed)) then
          call close_pipe(req%fd)
@@ -7766,7 +7767,7 @@ contains
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
-      print *, 'video_request elapsed time:', elapsed, '[ms]'
+      ! print *, 'video_request elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine video_request_simd
 
@@ -7836,13 +7837,13 @@ contains
 
          num_threads = max_threads
 
-         print *, "max_threads:", max_threads, "cm:", cm
+         ! print *, "max_threads:", max_threads, "cm:", cm
 
          ! call SIMD on {pixels, mask}
-         print *, "making a video frame with flux '", tone%flux, "' and downsizing"
+         ! print *, "making a video frame with flux '", tone%flux, "' and downsizing" ! ifort
 
          if (tone%flux .eq. "linear") then
-            print *, "calling make_video_frame_fixed_linear_threaded"
+            ! print *, "calling make_video_frame_fixed_linear_threaded"
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
             !$omp& PRIVATE(tid, work_size, start)&
             !$omp& NUM_THREADS(max_threads)
@@ -7864,7 +7865,7 @@ contains
          end if
 
          if (tone%flux .eq. "logistic") then
-            print *, "calling make_video_frame_fixed_logistic_threaded"
+            ! print *, "calling make_video_frame_fixed_logistic_threaded"
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
             !$omp& PRIVATE(tid, work_size, start)&
             !$omp& NUM_THREADS(max_threads)
@@ -7886,7 +7887,7 @@ contains
          end if
 
          if (tone%flux .eq. "ratio") then
-            print *, "calling make_video_frame_fixed_ratio_threaded"
+            ! print *, "calling make_video_frame_fixed_ratio_threaded"
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
             !$omp& PRIVATE(tid, work_size, start)&
             !$omp& NUM_THREADS(max_threads)
@@ -7908,7 +7909,7 @@ contains
          end if
 
          if (tone%flux .eq. "square") then
-            print *, "calling make_video_frame_fixed_square_threaded"
+            ! print *, "calling make_video_frame_fixed_square_threaded"
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
             !$omp& PRIVATE(tid, work_size, start)&
             !$omp& NUM_THREADS(max_threads)
@@ -7933,7 +7934,7 @@ contains
             lmin = log(0.5)
             lmax = log(1.5)
 
-            print *, "calling make_video_frame_fixed_legacy_threaded"
+            ! print *, "calling make_video_frame_fixed_legacy_threaded"
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
             !$omp& PRIVATE(tid, work_size, start)&
             !$omp& NUM_THREADS(max_threads)
@@ -7944,8 +7945,6 @@ contains
 
                ! handle the last thread
                if (tid .eq. num_threads) work_size = cm - start
-
-               ! print *, "calling make_video_frame_legacy, tid:", tid, "start:", start, "work_size:", work_size
 
                if (work_size .gt. 0) then
                   call make_video_frame_fixed_legacy_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
@@ -7974,28 +7973,28 @@ contains
          !$omp end parallel
       else
          ! call SIMD on {dst_pixels, dst_mask}
-         print *, "making a video frame with flux '", tone%flux, "'"
+         ! print *, "making a video frame with flux '", tone%flux, "'" ! ifort
 
          if (tone%flux .eq. "linear") then
-            print *, "calling make_video_frame_fixed_linear"
+            ! print *, "calling make_video_frame_fixed_linear"
             call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%slope, fill)
          end if
 
          if (tone%flux .eq. "logistic") then
-            print *, "calling make_video_frame_fixed_logistic"
+            ! print *, "calling make_video_frame_fixed_logistic"
             call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmedian, tone%sensitivity, fill)
          end if
 
          if (tone%flux .eq. "ratio") then
-            print *, "calling make_video_frame_fixed_ratio"
+            ! print *, "calling make_video_frame_fixed_ratio"
             call make_video_frame_fixed_ratio(c_loc(item%compressed(frame)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity, fill)
          end if
 
          if (tone%flux .eq. "square") then
-            print *, "calling make_video_frame_fixed_square"
+            ! print *, "calling make_video_frame_fixed_square"
             call make_video_frame_fixed_square(c_loc(item%compressed(frame)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity, fill)
          end if
@@ -8004,7 +8003,7 @@ contains
             lmin = log(0.5)
             lmax = log(1.5)
 
-            print *, "calling make_video_frame_fixed_legacy"
+            ! print *, "calling make_video_frame_fixed_legacy"
             call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmin, tone%dmax, lmin, lmax, fill)
          end if
