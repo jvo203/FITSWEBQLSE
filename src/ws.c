@@ -1952,6 +1952,56 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     timestamp = atof2(wm->data.ptr + voff, vlen);
             }
 
+            // next iterate through the multiple datasets launching individual channel threads
+            // tokenize session->multi
+            char *datasetId = strdup(common_session->multi);
+            char *token = datasetId;
+            char *rest = token;
+
+            while ((token = strtok_r(rest, ";", &rest)) != NULL)
+            {
+                void *item = get_dataset(token);
+
+                if (item == NULL)
+                    continue;
+
+                update_timestamp(item);
+
+                struct websocket_session *session = NULL;
+
+                // get the session
+                if (pthread_mutex_lock(&sessions_mtx) == 0)
+                {
+                    // iterate through the sessions, find the one with the matching dataset
+                    GHashTableIter iter;
+                    gpointer key, value;
+
+                    g_hash_table_iter_init(&iter, sessions);
+
+                    while (g_hash_table_iter_next(&iter, &key, &value))
+                    {
+                        struct websocket_session *s = (struct websocket_session *)value;
+
+                        if (strcmp(s->datasetid, token) == 0)
+                        {
+                            session = s;
+                            break;
+                        }
+                    }
+
+                    // session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+                    pthread_mutex_unlock(&sessions_mtx);
+                }
+
+                if (session == NULL)
+                    continue;
+
+                // we have the dataset item and the session, prepare the video request
+                printf("[C] mg_websocket_callback: preparing video request for dataset '%s'.\n", token);
+            }
+
+            free(datasetId);
+
             break;
         }
 
