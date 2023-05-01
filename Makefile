@@ -186,7 +186,7 @@ ifeq ($(UNAME_S),Darwin)
 	FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
 
 	# GCC FORTRAN runtime
-	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/12 -lgfortran -lm -framework Accelerate
+	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/13 -lgfortran -lm -framework Accelerate
 
 	# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
 	#ifeq ($(UNAME_M),arm64)
