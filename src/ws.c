@@ -1879,6 +1879,26 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(req);
                 free(resp);
             }
+
+            break;
+        }
+
+        if (strcmp(type, "composite_video") == 0)
+        {
+            struct websocket_session *common_session = (struct websocket_session *)c->fn_data;
+
+            if (common_session == NULL)
+                break;
+
+            if (common_session->flux == NULL)
+                break;
+
+            // copy common variables from the session
+            const char *flux = common_session->flux;
+            int width = common_session->image_width;
+            int height = common_session->image_height;
+
+            break;
         }
 
         break;
