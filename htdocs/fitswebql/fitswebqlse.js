@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-04-28.1";
+    return "JS2023-05-01.0";
 }
 
 function uuidv4() {
@@ -9609,11 +9609,10 @@ function x_axis_move(offset) {
 
                 if (composite_view) {
                     var request = {
-                        type: "video",
+                        type: "composite_video",
                         frame: freq,
                         key: false,
                         fill: fill,
-                        view: "composite",
                         ref_freq: RESTFRQ,
                         fps: vidFPS,
                         seq_id: sent_vid_id,
@@ -9629,7 +9628,6 @@ function x_axis_move(offset) {
                         frame: freq,
                         key: false,
                         fill: fill,
-                        view: "tile",
                         ref_freq: RESTFRQ,
                         fps: vidFPS,
                         seq_id: sent_vid_id,
@@ -13537,11 +13535,10 @@ function videoTimeout(freq) {
 
     if (composite_view) {
         var request = {
-            type: "video",
+            type: "composite_video",
             frame: freq,
             key: true,
             fill: fill,
-            view: "composite",
             ref_freq: RESTFRQ,
             fps: vidFPS,
             seq_id: sent_vid_id,
@@ -13557,7 +13554,6 @@ function videoTimeout(freq) {
             frame: freq,
             key: true,
             fill: fill,
-            view: "tile",
             ref_freq: RESTFRQ,
             fps: vidFPS,
             seq_id: sent_vid_id,
