@@ -157,7 +157,43 @@ struct video_request
     bool downsize;
     int fd;
 
-    void *ptr;
+    void *ptr; // item
+};
+
+struct composite_video_request
+{
+    // input
+    int va_count;
+    bool keyframe;
+    int fill;
+
+    // the flux is common across the RGB channels
+    char *flux;
+    int len;
+
+    // R
+    void *ptrR; // item
+    int frameR;
+    float dminR, dmaxR, dmedianR;
+    float dmadNR, dmadPR;
+
+    // G
+    void *ptrG; // item
+    int frameG;
+    float dminG, dmaxG, dmedianG;
+    float dmadNG, dmadPG;
+
+    // B
+    void *ptrB; // item
+    int frameB;
+    float dminB, dmaxB, dmedianB;
+    float dmadNB, dmadPB;
+
+    // output (the 'write' end of a Unix pipe)
+    int width;
+    int height;
+    bool downsize;
+    int fd;
 };
 
 struct pv_request
