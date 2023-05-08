@@ -238,7 +238,7 @@ endif
 # detect the NVIDIA Compiler under Linux
 ifeq ($(CC),nvc)
 	CFLAGS = -pg -fast -mp
-	FLAGS := $(CFLAGS)
+	FLAGS := $(CFLAGS) -cpp -D__$(OS)__
 endif
 
 # detect the GNU Compiler under Linux
