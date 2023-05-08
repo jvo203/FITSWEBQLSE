@@ -2690,6 +2690,7 @@ contains
    end subroutine reset_clock
 
    subroutine update_progress(item, progress)
+      use, intrinsic :: ieee_arithmetic
       type(dataset), pointer, intent(inout) :: item
       integer, intent(in), value :: progress
       integer(8) finish
@@ -2730,7 +2731,7 @@ contains
             if (allocated(item%frame_min)) item%dmin = minval(item%frame_min)
             if (allocated(item%frame_max)) item%dmax = maxval(item%frame_max)
             if (allocated(item%frame_median)) item%dmedian = &
-            &median(pack(item%frame_median,.not. isnan(item%frame_median))) ! extract non-NaN values
+            &median(pack(item%frame_median,.not. ieee_is_nan(item%frame_median))) ! extract non-NaN values
 
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
             ! rc = c_pthread_create(thread=pid, &
@@ -3836,7 +3837,7 @@ contains
       item%naxis = naxis
       item%naxes = naxes
 
-      if (isnan(item%ignrval)) then
+      if (ieee_is_nan(item%ignrval)) then
          item%ignrval = -1.0E30
       end if
 
