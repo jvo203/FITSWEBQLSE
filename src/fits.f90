@@ -4098,7 +4098,7 @@ contains
       end if
 
       ! should we be checking values against ignrval ?
-      if (isnan(item%ignrval)) then
+      if (ieee_is_nan(item%ignrval)) then
          test_ignrval = .false.
          item%ignrval = -1.0E30
       else
@@ -4142,7 +4142,7 @@ contains
 
             tmp = local_buffer(j)
 
-            if ((.not. isnan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
+            if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
                if (test_ignrval) then
                   if (abs(tmp - item%ignrval) .le. epsilon(tmp)) then
                      ! skip the IGNRVAL pixels
@@ -4406,7 +4406,7 @@ contains
                      block
                         real :: ignrval, datamin, datamax
 
-                        if (isnan(item%ignrval)) then
+                        if (ieee_is_nan(item%ignrval)) then
                            ignrval = -1.0E30
                         else
                            ignrval = real(item%ignrval, kind=4)
@@ -4606,7 +4606,7 @@ contains
          block
             real :: ignrval, datamin, datamax
 
-            if (isnan(item%ignrval)) then
+            if (ieee_is_nan(item%ignrval)) then
                ignrval = -1.0E30
             else
                ignrval = real(item%ignrval, kind=4)
@@ -8501,7 +8501,7 @@ contains
       dmin = minval(item%frame_min(first:last))
       dmax = maxval(item%frame_max(first:last))
       dmedian = &
-      &median(pack(item%frame_median(first:last),.not. isnan(item%frame_median(first:last)))) ! extract non-NaN values
+      &median(pack(item%frame_median(first:last),.not. ieee_is_nan(item%frame_median(first:last)))) ! extract non-NaN values
 
       length = last - first + 1
       print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
