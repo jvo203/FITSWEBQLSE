@@ -3094,7 +3094,7 @@ contains
       integer(c_int), intent(inout) :: counter
       type(C_PTR), intent(in), value :: root
 
-      integer :: repeat, rc
+      integer :: repeat
 
       ! there is no point in sending anything if the root itself is NULL
       if (.not. c_associated(root)) return
