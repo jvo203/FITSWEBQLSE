@@ -71,7 +71,7 @@ ifeq ($(UNAME_S),Linux)
 			CC := gcc
 			FORT := gfortran
 		else
-			# NVIDIA c / fortran
+			# NVIDIA C / Fortran
 			CC := nvc
 			FORT := nvfortran
 		endif
