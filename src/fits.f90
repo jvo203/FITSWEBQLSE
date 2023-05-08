@@ -2690,7 +2690,6 @@ contains
    end subroutine reset_clock
 
    subroutine update_progress(item, progress)
-      use, intrinsic :: ieee_arithmetic
       type(dataset), pointer, intent(inout) :: item
       integer, intent(in), value :: progress
       integer(8) finish
