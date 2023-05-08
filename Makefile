@@ -66,15 +66,15 @@ ifeq ($(UNAME_S),Linux)
 			endif
 		endif
 
-		ifndef NVFORTRAN
-			# GNU gcc / gfortran
-			CC := gcc
-			FORT := gfortran
-		else
-			# NVIDIA C / Fortran
-			CC := nvc
-			FORT := nvfortran
-		endif
+		#ifndef NVFORTRAN
+		#	# GNU gcc / gfortran
+		#	CC := gcc
+		#	FORT := gfortran
+		#else
+		#	# NVIDIA C / Fortran
+		#	CC := nvc
+		#	FORT := nvfortran
+		#endif
 
 	endif
 
