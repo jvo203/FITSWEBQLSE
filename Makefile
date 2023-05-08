@@ -20,7 +20,10 @@ endif
 
 # detect the OS
 UNAME_S := $(shell uname -s)
-# UNAME_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+
+# detect NVIDIA HPC SDK
+NVFORTRAN := $(shell command -v nvfortran -v 2> /dev/null)
+NVC := $(shell command -v nvc -v 2> /dev/null)
 
 # detect the CPU architecture (ARM64 or x86-64)
 UNAME_M := $(shell uname -m)
@@ -61,6 +64,16 @@ ifeq ($(UNAME_S),Linux)
 				CC := gcc
 				FORT := gfortran
 			endif
+		endif
+
+		ifndef NVFORTRAN
+			# GNU gcc / gfortran
+			CC := gcc
+			FORT := gfortran
+		else
+			# NVIDIA c / fortran
+			CC := nvc
+			FORT := nvfortran
 		endif
 
 	endif
@@ -220,6 +233,12 @@ ifeq ($(UNAME_S),Darwin)
 	else
 		FLAGS += -cpp -D__$(OS)__ -fallow-invalid-boz -fmax-stack-var-size=32768
 	endif
+endif
+
+# detect the NVIDIA Compiler under Linux
+ifeq ($(CC),nvc)
+	CFLAGS = -pg -fast -mp -Mpfi
+	FLAGS := $(CFLAGS)
 endif
 
 # detect the GNU Compiler under Linux
