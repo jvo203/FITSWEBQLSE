@@ -55,11 +55,11 @@ contains
             ! by default there are no valid values
             input = ieee_value(0.0, ieee_quiet_nan)
 
-            x1 = 1 + lshift(i - 1, BASE)
-            x2 = min(n, lshift(i, BASE))
+            x1 = 1 + shiftl(i - 1, BASE)
+            x2 = min(n, shiftl(i, BASE))
 
-            y1 = 1 + lshift(j - 1, BASE)
-            y2 = min(m, lshift(j, BASE))
+            y1 = 1 + shiftl(j - 1, BASE)
+            y2 = min(m, shiftl(j, BASE))
 
             input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
