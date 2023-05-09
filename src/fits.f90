@@ -7813,6 +7813,28 @@ contains
 
       type(composite_video_request_f), pointer :: req
 
+      ! timing
+      integer(8) :: start_t, finish_t, crate, cmax
+      real(c_float) :: elapsed
+
+      ! start the timer
+      call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, req)
+
+      ! if (.not. allocated(item%compressed)) then
+      !   call close_pipe(req%fd)
+      !   goto 9000
+      !end if
+
+      call close_pipe(req%fd)
+
+      ! nullify (item)
+9000  call free(req%flux)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+
    end subroutine composite_video_request_simd
 
    subroutine fill_global_statistics(ptr, dmin, dmax, dmedian, dmadN, dmadP) BIND(C, name='fill_global_statistics')
