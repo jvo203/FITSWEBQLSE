@@ -2956,6 +2956,23 @@ void *realtime_image_spectrum_response(void *ptr)
     pthread_exit(NULL);
 }
 
+void *composite_video_response(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct websocket_response *resp = (struct websocket_response *)ptr;
+
+    // close the read end of the pipe
+    close(resp->fd);
+
+    // release the memory
+    free(resp->session_id);
+    free(resp);
+
+    pthread_exit(NULL);
+}
+
 void *video_response(void *ptr)
 {
     if (ptr == NULL)
