@@ -101,6 +101,39 @@ module fits
       type(C_PTR) :: ptr
    end type video_request_f
 
+   type, bind(c) :: composite_video_request_f
+      ! input
+      integer(c_int) :: va_count
+      logical(kind=c_bool) :: keyframe
+      integer(c_int) :: frame
+      integer(c_int) :: fill
+
+      ! needed by tone mapping
+      type(C_PTR) :: flux
+      integer(kind=c_int) :: len
+
+      ! R
+      type(C_PTR) :: ptrR
+      real(kind=c_float) dminR, dmaxR, dmedianR
+      real(kind=c_float) dmadNR, dmadPR
+
+      ! G
+      type(C_PTR) :: ptrG
+      real(kind=c_float) dminG, dmaxG, dmedianG
+      real(kind=c_float) dmadNG, dmadPG
+
+      ! B
+      type(C_PTR) :: ptrB
+      real(kind=c_float) dminB, dmaxB, dmedianB
+      real(kind=c_float) dmadNB, dmadPB
+
+      ! output
+      integer(kind=c_int) :: width
+      integer(kind=c_int) :: height
+      logical(kind=c_bool) :: downsize
+      integer(kind=c_int) :: fd
+   end type composite_video_request_f
+
    type, bind(c) :: download_request_f
       ! input
       integer(c_int) :: x1, y1, x2, y2
