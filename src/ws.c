@@ -1957,6 +1957,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (req == NULL)
                 break;
 
+            req->va_count = 0;
             req->flux = strdup(flux);
             req->len = strlen(req->flux);
             req->width = width;
@@ -2010,6 +2011,16 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 // we have the dataset item and the session, prepare the video request
                 printf("[C] mg_websocket_callback: preparing video request for dataset '%s'.\n", token);
+
+                // check if the session video tone mapping has been filled already
+                // if not, fetch the global data statistics from FORTRAN
+                if (isnan(session->dmin) || isnan(session->dmax) || isnan(session->dmedian) || isnan(session->dmadN) || isnan(session->dmadP))
+                {
+                    printf("[C] calling 'fill_global_statistics(...)'\n");
+                    fill_global_statistics(item, &(session->dmin), &(session->dmax), &(session->dmedian), &(session->dmadN), &(session->dmadP));
+                }
+
+                req->va_count++;
             }
 
             free(datasetId);
