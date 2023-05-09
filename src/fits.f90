@@ -105,7 +105,6 @@ module fits
       ! input
       integer(c_int) :: va_count
       logical(kind=c_bool) :: keyframe
-      integer(c_int) :: frame
       integer(c_int) :: fill
 
       ! needed by tone mapping
@@ -114,16 +113,19 @@ module fits
 
       ! R
       type(C_PTR) :: ptrR
+      integer(c_int) :: frameR
       real(kind=c_float) dminR, dmaxR, dmedianR
       real(kind=c_float) dmadNR, dmadPR
 
       ! G
       type(C_PTR) :: ptrG
+      integer(c_int) :: frameG
       real(kind=c_float) dminG, dmaxG, dmedianG
       real(kind=c_float) dmadNG, dmadPG
 
       ! B
       type(C_PTR) :: ptrB
+      integer(c_int) :: frameB
       real(kind=c_float) dminB, dmaxB, dmedianB
       real(kind=c_float) dmadNB, dmadPB
 
@@ -7822,6 +7824,9 @@ contains
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
+
+      ! ifort
+      print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'fd:', req%fd
 
       ! if (.not. allocated(item%compressed)) then
       !   call close_pipe(req%fd)
