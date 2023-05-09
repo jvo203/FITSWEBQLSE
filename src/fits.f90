@@ -7833,12 +7833,18 @@ contains
       !   goto 9000
       !end if
 
+      ! end the timer
+      call system_clock(finish_t)
+      elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
       call close_pipe(req%fd)
 
       ! nullify (item)
 9000  call free(req%flux)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
+
+      print *, 'composite_video_request_simd elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine composite_video_request_simd
 
