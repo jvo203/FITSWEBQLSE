@@ -2092,6 +2092,72 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 break;
             }
 
+            int stat;
+            int pipefd[2];
+
+            if (stat == 0)
+            {
+                // pass the read end of the pipe to a C thread
+                resp->session_id = strdup(c->data);
+                resp->fps = fps;
+                resp->bitrate = bitrate;
+                resp->timestamp = timestamp;
+                resp->seq_id = seq_id;
+                resp->fd = pipefd[0];
+
+                // pass the write end of the pipe to a FORTRAN thread
+                req->fd = pipefd[1];
+
+                pthread_t tid;
+
+                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                stat = pthread_create(&tid, NULL, &composite_video_request_simd, req);
+
+                if (stat == 0)
+                {
+                    pthread_detach(tid);
+
+                    // launch a pipe read C pthread
+                    stat = pthread_create(&tid, NULL, &composite_video_response, resp);
+
+                    if (stat == 0)
+                        pthread_detach(tid);
+                    else
+                    {
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+
+                        // release the response memory since there is no reader
+                        free(resp->session_id);
+                        free(resp);
+                    }
+                }
+                else
+                {
+                    free(req->flux);
+                    free(req);
+
+                    // close the write end of the pipe
+                    close(pipefd[1]);
+
+                    // close the read end of the pipe
+                    close(pipefd[0]);
+
+                    // release the response memory since there is no writer
+                    free(resp->session_id);
+                    free(resp);
+                }
+            }
+            else
+            {
+                free(req->flux); // req->flux is *NOT* NULL at this point
+                free(req);
+                free(resp);
+            }
+
+            // open a Unix pipe
+            stat = pipe(pipefd);
+
             break;
         }
 
