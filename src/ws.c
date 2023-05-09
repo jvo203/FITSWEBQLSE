@@ -1952,6 +1952,19 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     timestamp = atof2(wm->data.ptr + voff, vlen);
             }
 
+            struct composite_video_request *req = (struct composite_video_request *)malloc(sizeof(struct composite_video_request));
+
+            if (req == NULL)
+                break;
+
+            req->flux = strdup(flux);
+            req->len = strlen(req->flux);
+            req->width = width;
+            req->height = height;
+            req->downsize = downsize;
+            req->keyframe = keyframe;
+            req->fill = fill;
+
             // next iterate through the multiple datasets launching individual channel threads
             // tokenize session->multi
             char *datasetId = strdup(common_session->multi);
@@ -2000,7 +2013,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             }
 
             free(datasetId);
-
             break;
         }
 
