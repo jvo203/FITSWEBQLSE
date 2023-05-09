@@ -7804,6 +7804,17 @@ contains
 
    end subroutine video_request_simd
 
+   recursive subroutine composite_video_request_simd(user) BIND(C, name='composite_video_request_simd')
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      type(composite_video_request_f), pointer :: req
+
+   end subroutine composite_video_request_simd
+
    subroutine fill_global_statistics(ptr, dmin, dmax, dmedian, dmadN, dmadP) BIND(C, name='fill_global_statistics')
       use, intrinsic :: iso_c_binding
       implicit none
