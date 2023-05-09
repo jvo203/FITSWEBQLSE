@@ -1971,6 +1971,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             char *datasetId = strdup(common_session->multi);
             char *token = datasetId;
             char *rest = token;
+            bool skip_frame = false;
 
             while ((token = strtok_r(rest, ";", &rest)) != NULL)
             {
@@ -2024,6 +2025,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 int frame_idx;
                 get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
 
+                // skip repeated frames
+                if (frame_idx == session->last_frame_idx && !req->keyframe)
+                {
+                    printf("[C] skipping a repeat video frame #%d\n", frame_idx);
+                    skip_frame = true;
+                }
+                else
+                    session->last_frame_idx = frame_idx;
+
                 req->va_count++;
 
                 // R
@@ -2064,6 +2074,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             }
 
             free(datasetId);
+
+            if (skip_frame)
+            {
+                free(req->flux); // req->flux is *NOT* NULL at this point
+                free(req);
+                break;
+            }
 
             // next prepare the respose
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
