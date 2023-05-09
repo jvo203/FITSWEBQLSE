@@ -2095,6 +2095,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             int stat;
             int pipefd[2];
 
+            // open a Unix pipe
+            stat = pipe(pipefd);
+
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
