@@ -7798,6 +7798,7 @@ contains
       end if
 
 5000  nullify (item)
+      nullify(flux)
       call free(req%flux)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
@@ -7814,6 +7815,7 @@ contains
       type(C_PTR), intent(in), value :: user
 
       type(composite_video_request_f), pointer :: req
+      character(kind=c_char), pointer :: flux(:)
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
@@ -7824,6 +7826,9 @@ contains
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%flux)) return
+      call c_f_pointer(req%flux, flux, [req%len])
 
       ! ifort
       print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'fd:', req%fd
@@ -7840,7 +7845,8 @@ contains
       call close_pipe(req%fd)
 
       ! nullify (item)
-9000  call free(req%flux)
+9000  nullify(flux)
+      call free(req%flux)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
