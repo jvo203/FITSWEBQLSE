@@ -2979,7 +2979,7 @@ contains
         rc = c_pthread_mutex_unlock(item%progress_mtx)
 
         if (item%total .gt. 0) then
-            get_progress = 100.0*real(item%progress/item%total)
+            get_progress = 100.0*real(item%progress)/real(item%total)
         else
             get_progress = 0.0
         end if
