@@ -7824,7 +7824,10 @@ contains
       if (.not. c_associated(req%flux)) return
       call c_f_pointer(req%flux, flux, [req%len])
 
-      if(req%va_count .le. 0) goto 9000
+      if(req%va_count .le. 0) then
+         if (req%fd .ne. -1) call close_pipe(req%fd)
+         goto 9000
+      end if
 
       ! ifort
       print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
@@ -7869,10 +7872,9 @@ contains
             if (.not. associated(item%compressed(req%frame(tid))%ptr)) then
                pixels(:,:,tid) = int(req%fill, kind=1)
                cycle
+            else
+               call get_composite_video_frame(item, req%frame(tid), req%fill, tone, pixels(:,:,tid), req%width, req%height, req%downsize)
             end if
-
-            ! temporary code
-            pixels(:,:,tid) = int(req%fill, kind=1)
 
             nullify(item)
          end block
