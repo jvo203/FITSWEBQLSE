@@ -2034,43 +2034,16 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 else
                     session->last_frame_idx = frame_idx;
 
+                // RGB
+                req->ptr[req->va_count] = item;
+                req->frame[req->va_count] = frame_idx;
+                req->dmin[req->va_count] = session->dmin;
+                req->dmax[req->va_count] = session->dmax;
+                req->dmedian[req->va_count] = session->dmedian;
+                req->dmadN[req->va_count] = session->dmadN;
+                req->dmadP[req->va_count] = session->dmadP;
+
                 req->va_count++;
-
-                // R
-                if (req->va_count == 1)
-                {
-                    req->ptrR = item;
-                    req->frameR = frame_idx;
-                    req->dminR = session->dmin;
-                    req->dmaxR = session->dmax;
-                    req->dmedianR = session->dmedian;
-                    req->dmadNR = session->dmadN;
-                    req->dmadPR = session->dmadP;
-                }
-
-                // G
-                if (req->va_count == 2)
-                {
-                    req->ptrG = item;
-                    req->frameG = frame_idx;
-                    req->dminG = session->dmin;
-                    req->dmaxG = session->dmax;
-                    req->dmedianG = session->dmedian;
-                    req->dmadNG = session->dmadN;
-                    req->dmadPG = session->dmadP;
-                }
-
-                // B
-                if (req->va_count == 3)
-                {
-                    req->ptrB = item;
-                    req->frameB = frame_idx;
-                    req->dminB = session->dmin;
-                    req->dmaxB = session->dmax;
-                    req->dmedianB = session->dmedian;
-                    req->dmadNB = session->dmadN;
-                    req->dmadPB = session->dmadP;
-                }
             }
 
             free(datasetId);

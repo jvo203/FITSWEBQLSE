@@ -171,23 +171,11 @@ struct composite_video_request
     char *flux;
     int len;
 
-    // R
-    void *ptrR; // item
-    int frameR;
-    float dminR, dmaxR, dmedianR;
-    float dmadNR, dmadPR;
-
-    // G
-    void *ptrG; // item
-    int frameG;
-    float dminG, dmaxG, dmedianG;
-    float dmadNG, dmadPG;
-
-    // B
-    void *ptrB; // item
-    int frameB;
-    float dminB, dmaxB, dmedianB;
-    float dmadNB, dmadPB;
+    // RGB channels (up to three)
+    void *ptr[3]; // item
+    int frame[3];
+    float dmin[3], dmax[3], dmedian[3];
+    float dmadN[3], dmadP[3];
 
     // output (the 'write' end of a Unix pipe)
     int width;
