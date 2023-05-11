@@ -7819,7 +7819,8 @@ contains
       call c_f_pointer(req%flux, flux, [req%len])
 
       ! ifort
-      print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'fd:', req%fd
+      print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
+      &req%va_count, 'fd:', req%fd
 
       ! if (.not. allocated(item%compressed)) then
       !   call close_pipe(req%fd)
