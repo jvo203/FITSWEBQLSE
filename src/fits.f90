@@ -8141,6 +8141,206 @@ contains
 
    end subroutine get_video_frame
 
+   subroutine get_composite_video_frame(item, frame, fill, tone, dst_pixels, dst_width, dst_height, downsize)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(dataset), intent(in), pointer :: item
+      type(video_tone_mapping), intent(in) :: tone
+      integer, intent(in) :: frame, fill, dst_width, dst_height
+      logical(kind=c_bool) :: downsize
+      integer(kind=1), intent(out), target :: dst_pixels(dst_width, dst_height)
+
+      integer(kind=1), allocatable, target :: pixels(:, :)
+      integer(c_int) :: width, height, cm, start, work_size
+      integer :: max_threads, num_threads, tid
+
+      real(kind=c_float) :: lmin, lmax
+
+      width = item%naxes(1)
+      height = item%naxes(2)
+
+      ! a blank canvas by default
+      ! the initialisation will be done inside SPMD C
+      ! dst_pixels = int(fill, kind=1)
+
+      if (downsize) then
+         allocate (pixels(width, height))
+
+         ! the initialisation will be done inside SPMD C
+         ! pixels = int(fill, kind=1)
+
+         max_threads = get_max_threads()
+
+         ! by default compressed is dimension(n/DIM, m/DIM)
+         cm = height/DIM
+
+         ! but the input dimensions might not be divisible by <DIM>
+         if (mod(height, DIM) .ne. 0) cm = cm + 1
+
+         num_threads = max_threads
+
+         ! print *, "max_threads:", max_threads, "cm:", cm
+
+         ! call SIMD on pixels
+         ! print *, "making a video frame with flux '", tone%flux, "' and downsizing" ! ifort
+
+         if (tone%flux .eq. "linear") then
+            ! print *, "calling make_video_frame_fixed_linear_threaded"
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
+            !$omp& PRIVATE(tid, work_size, start)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
+            do tid = 1, num_threads
+               work_size = cm/num_threads
+               start = (tid - 1)*work_size ! C-style array 0-start
+
+               ! handle the last thread
+               if (tid .eq. num_threads) work_size = cm - start
+
+               if (work_size .gt. 0) then
+                  call make_video_frame_fixed_linear_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  &c_loc(pixels), c_null_ptr, width, tone%black, tone%slope, fill, start, work_size)
+               end if
+            end do
+            !$omp END DO
+            !$omp END PARALLEL
+         end if
+
+         if (tone%flux .eq. "logistic") then
+            ! print *, "calling make_video_frame_fixed_logistic_threaded"
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
+            !$omp& PRIVATE(tid, work_size, start)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
+            do tid = 1, num_threads
+               work_size = cm/num_threads
+               start = (tid - 1)*work_size ! C-style array 0-start
+
+               ! handle the last thread
+               if (tid .eq. num_threads) work_size = cm - start
+
+               if (work_size .gt. 0) then
+                  call make_video_frame_fixed_logistic_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  &c_loc(pixels), c_null_ptr, width, tone%dmedian, tone%sensitivity, fill, start, work_size)
+               end if
+            end do
+            !$omp END DO
+            !$omp END PARALLEL
+         end if
+
+         if (tone%flux .eq. "ratio") then
+            ! print *, "calling make_video_frame_fixed_ratio_threaded"
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
+            !$omp& PRIVATE(tid, work_size, start)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
+            do tid = 1, num_threads
+               work_size = cm/num_threads
+               start = (tid - 1)*work_size ! C-style array 0-start
+
+               ! handle the last thread
+               if (tid .eq. num_threads) work_size = cm - start
+
+               if (work_size .gt. 0) then
+                  call make_video_frame_fixed_ratio_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  &c_loc(pixels), c_null_ptr, width, tone%black, tone%sensitivity, fill, start, work_size)
+               end if
+            end do
+            !$omp END DO
+            !$omp END PARALLEL
+         end if
+
+         if (tone%flux .eq. "square") then
+            ! print *, "calling make_video_frame_fixed_square_threaded"
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
+            !$omp& PRIVATE(tid, work_size, start)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
+            do tid = 1, num_threads
+               work_size = cm/num_threads
+               start = (tid - 1)*work_size ! C-style array 0-start
+
+               ! handle the last thread
+               if (tid .eq. num_threads) work_size = cm - start
+
+               if (work_size .gt. 0) then
+                  call make_video_frame_fixed_square_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  &c_loc(pixels), c_null_ptr, width, tone%black, tone%sensitivity, fill, start, work_size)
+               end if
+            end do
+            !$omp END DO
+            !$omp END PARALLEL
+         end if
+
+         if (tone%flux .eq. "legacy") then
+            lmin = log(0.5)
+            lmax = log(1.5)
+
+            ! print *, "calling make_video_frame_fixed_legacy_threaded"
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item, num_threads, cm)&
+            !$omp& PRIVATE(tid, work_size, start)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
+            do tid = 1, num_threads
+               work_size = cm/num_threads
+               start = (tid - 1)*work_size ! C-style array 0-start
+
+               ! handle the last thread
+               if (tid .eq. num_threads) work_size = cm - start
+
+               if (work_size .gt. 0) then
+                  call make_video_frame_fixed_legacy_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  &c_loc(pixels), c_null_ptr, width, tone%dmin, tone%dmax, lmin, lmax, fill, start, work_size)
+               end if
+            end do
+            !$omp END DO
+            !$omp END PARALLEL
+         end if
+
+         ! downsize pixels into dst_pixels
+         call resizeNearest(c_loc(pixels), width, height,&
+         & c_loc(dst_pixels), dst_width, dst_height)
+      else
+         ! call SIMD on dst_pixels
+         ! print *, "making a video frame with flux '", tone%flux, "'" ! ifort
+
+         if (tone%flux .eq. "linear") then
+            ! print *, "calling make_video_frame_fixed_linear"
+            call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
+            &c_loc(dst_pixels), c_null_ptr, width, tone%black, tone%slope, fill)
+         end if
+
+         if (tone%flux .eq. "logistic") then
+            ! print *, "calling make_video_frame_fixed_logistic"
+            call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
+            &c_loc(dst_pixels), c_null_ptr, width, tone%dmedian, tone%sensitivity, fill)
+         end if
+
+         if (tone%flux .eq. "ratio") then
+            ! print *, "calling make_video_frame_fixed_ratio"
+            call make_video_frame_fixed_ratio(c_loc(item%compressed(frame)%ptr), width, height,&
+            &c_loc(dst_pixels), c_null_ptr, width, tone%black, tone%sensitivity, fill)
+         end if
+
+         if (tone%flux .eq. "square") then
+            ! print *, "calling make_video_frame_fixed_square"
+            call make_video_frame_fixed_square(c_loc(item%compressed(frame)%ptr), width, height,&
+            &c_loc(dst_pixels), c_null_ptr, width, tone%black, tone%sensitivity, fill)
+         end if
+
+         if (tone%flux .eq. "legacy") then
+            lmin = log(0.5)
+            lmax = log(1.5)
+
+            ! print *, "calling make_video_frame_fixed_legacy"
+            call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
+            &c_loc(dst_pixels), c_null_ptr, width, tone%dmin, tone%dmax, lmin, lmax, fill)
+         end if
+      end if
+
+   end subroutine get_composite_video_frame
+
    ! a parametric line equation
    pure function line(t, x1, y1, x2, y2)
       real, intent(in) :: t
