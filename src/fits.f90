@@ -7873,7 +7873,8 @@ contains
                pixels(:,:,tid) = int(req%fill, kind=1)
                cycle
             else
-               call get_composite_video_frame(item, req%frame(tid), req%fill, tone, pixels(:,:,tid), req%width, req%height, req%downsize)
+               call get_composite_video_frame(item, req%frame(tid), req%fill, tone, pixels(:,:,tid),&
+               &req%width, req%height, req%downsize)
             end if
 
             nullify(item)
