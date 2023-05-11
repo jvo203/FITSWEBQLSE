@@ -2042,8 +2042,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 req->dmedian[req->va_count] = session->dmedian;
                 req->dmadN[req->va_count] = session->dmadN;
                 req->dmadP[req->va_count] = session->dmadP;
-
-                req->va_count++;
+                req->va_count++; // increment the channel count
             }
 
             free(datasetId);
