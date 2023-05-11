@@ -7835,7 +7835,7 @@ contains
 
             if (.not. allocated(item%compressed)) cycle
 
-            print *, 'composite_video_request_simd; datasetid: ', item%datasetid, ', frame:', req%frame(i)
+            print *, 'composite_video_request_simd [', item%datasetid, ']::frame:', req%frame(i)
 
             nullify(item)
          end block
