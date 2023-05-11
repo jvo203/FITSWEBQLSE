@@ -111,7 +111,8 @@ module fits
       type(C_PTR) :: flux
       integer(kind=c_int) :: len
 
-      ! RGB
+      ! RGB channels (up to three)
+      type(C_PTR) :: ptr(3)
       integer(c_int) :: frame(3)
       real(kind=c_float) dmin(3), dmax(3), dmedian(3)
       real(kind=c_float) dmadN(3), dmadP(3)
@@ -121,8 +122,6 @@ module fits
       integer(kind=c_int) :: height
       logical(kind=c_bool) :: downsize
       integer(kind=c_int) :: fd
-
-      type(C_PTR) :: ptr(3)
    end type composite_video_request_f
 
    type, bind(c) :: download_request_f
