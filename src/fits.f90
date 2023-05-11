@@ -7805,8 +7805,9 @@ contains
       type(composite_video_request_f), pointer :: req
       character(kind=c_char), pointer :: flux(:)
 
-      ! RGB loop counter
-      integer :: i
+      ! RGB
+      integer(kind=1), allocatable, target :: pixels(:, :, :)
+      integer :: i ! loop counter
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
@@ -7821,6 +7822,11 @@ contains
       if (.not. c_associated(req%flux)) return
       call c_f_pointer(req%flux, flux, [req%len])
 
+      if(req%va_count .le. 0) goto 9000
+
+      ! allocate the composite pixels
+      allocate (pixels(req%va_count, req%width, req%height))
+
       ! ifort
       print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
       &req%va_count, 'fd:', req%fd
@@ -7829,6 +7835,7 @@ contains
       do i = 1, req%va_count
          block
             type(dataset), pointer :: item
+            type(video_tone_mapping) :: tone
 
             if (.not. c_associated(req%ptr(i))) cycle
             call c_f_pointer(req%ptr(i), item)
