@@ -8170,7 +8170,8 @@ contains
          ! the initialisation will be done inside SPMD C
          ! pixels = int(fill, kind=1)
 
-         max_threads = get_max_threads()
+         ! reduce the number of threads by half to avoid oversubscription (all three RGB channels are done in parallel)
+         max_threads = max(1, get_max_threads()/2)
 
          ! by default compressed is dimension(n/DIM, m/DIM)
          cm = height/DIM
