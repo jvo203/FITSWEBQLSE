@@ -7802,12 +7802,14 @@ contains
 
       type(C_PTR), intent(in), value :: user
 
+      real, parameter :: u = 7.5
+
       type(composite_video_request_f), pointer :: req
       character(kind=c_char), pointer :: flux(:)
 
       ! RGB
       integer(kind=1), allocatable, target :: pixels(:, :, :)
-      integer :: i ! loop counter
+      integer :: tid ! loop counter
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
@@ -7832,21 +7834,51 @@ contains
       allocate (pixels(req%width, req%height, req%va_count))
 
       ! loop over the va_count
-      do i = 1, req%va_count
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(req, pixels)&
+      !$omp& PRIVATE(tid)
+      !$omp DO
+      do tid = 1, req%va_count
          block
             type(dataset), pointer :: item
             type(video_tone_mapping) :: tone
+            integer :: i
 
-            if (.not. c_associated(req%ptr(i))) cycle
-            call c_f_pointer(req%ptr(i), item)
+            if (.not. c_associated(req%ptr(tid))) cycle
+            call c_f_pointer(req%ptr(tid), item)
 
             if (.not. allocated(item%compressed)) cycle
 
-            print *, 'composite_video_request_simd [', item%datasetid, ']::frame:', req%frame(i)
+            ! set the video tone mapping
+            allocate (character(len=req%len)::tone%flux)
+
+            do i = 1, req%len
+               tone%flux(i:i) = flux(i)
+            end do
+
+            tone%dmin = req%dmin(tid)
+            tone%dmax = req%dmax(tid)
+            tone%dmedian = req%dmedian(tid)
+            tone%black = max(req%dmin(tid), req%dmedian(tid) - u*req%dmadN(tid))
+            tone%white = min(req%dmax(tid), req%dmedian(tid) + u*req%dmadP(tid))
+            tone%sensitivity = 1.0/(tone%white - tone%black)
+            tone%slope = tone%sensitivity
+
+            ! ifort
+            ! print *, 'composite_video_request_simd [', item%datasetid, ']::frame:', req%frame(tid)
+
+            if (.not. associated(item%compressed(req%frame(tid))%ptr)) then
+               pixels(:,:,tid) = int(req%fill, kind=1)
+               cycle
+            end if
+
+            ! temporary code
+            pixels(:,:,tid) = int(req%fill, kind=1)
 
             nullify(item)
          end block
       end do
+      !$omp END DO
+      !$omp END PARALLEL
 
       ! end the timer
       call system_clock(finish_t)
