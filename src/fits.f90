@@ -7807,8 +7807,8 @@ contains
       type(composite_video_request_f), pointer :: req
       character(kind=c_char), pointer :: flux(:)
 
-      ! RGB
-      integer(kind=1), allocatable, target :: pixels(:, :, :)
+      ! RGB channels
+      integer(kind=1), allocatable, target :: pixels(:, :, :) ! (width, height, va_count)
       integer :: tid ! loop counter
 
       ! timing
@@ -7830,8 +7830,8 @@ contains
       end if
 
       ! ifort
-      print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
-      &req%va_count, 'fd:', req%fd
+      ! print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
+      ! &req%va_count, 'fd:', req%fd
 
       ! allocate the composite pixels
       allocate (pixels(req%width, req%height, req%va_count))
@@ -7891,7 +7891,6 @@ contains
          call close_pipe(req%fd)
       end if
 
-      ! nullify (item)
 9000  nullify (flux)
       call free(req%flux)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
