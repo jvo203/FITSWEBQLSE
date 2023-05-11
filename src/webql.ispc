@@ -966,6 +966,8 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
   if (height % DIM != 0)
     cm = cm + 1;
 
+    varying bool has_mask = dst_mask ? true : false ;
+
   // go through the entire plane
   for(uniform int j=0; j<cm; j++)
     for(uniform int i=0; i <cn; i++)
@@ -1003,7 +1005,9 @@ export void make_video_frame_fixed_linear(uniform struct fixed_block_t compresse
 
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (int) clamp(pixel, 0.0f, 255.0f) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;            
           }          
 
         }
@@ -1019,6 +1023,8 @@ export void make_video_frame_fixed_linear_threaded(uniform struct fixed_block_t 
   // the input dimensions might not be divisible by <DIM>
   if (width % DIM != 0)
     cn = cn + 1;
+
+    varying bool has_mask = dst_mask ? true : false ;
 
   // go through the entire plane
   for(uniform int j=start; j<start+work_size; j++)
@@ -1057,7 +1063,9 @@ export void make_video_frame_fixed_linear_threaded(uniform struct fixed_block_t 
 
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (int) clamp(pixel, 0.0f, 255.0f) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1080,6 +1088,8 @@ export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compres
   if (height % DIM != 0)
     cm = cm + 1;
 
+    varying bool has_mask = dst_mask ? true : false ;
+
   // go through the entire plane
   for(uniform int j=0; j<cm; j++)
     for(uniform int i=0; i <cn; i++)
@@ -1117,7 +1127,9 @@ export void make_video_frame_fixed_logistic(uniform struct fixed_block_t compres
 
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (int) clamp(pixel, 0.0f, 255.0f) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1133,6 +1145,8 @@ export void make_video_frame_fixed_logistic_threaded(uniform struct fixed_block_
   // the input dimensions might not be divisible by <DIM>
   if (width % DIM != 0)
     cn = cn + 1;
+
+    varying bool has_mask = dst_mask ? true : false ;
 
   // go through the entire plane
   for(uniform int j=start; j<start+work_size; j++)
@@ -1171,7 +1185,9 @@ export void make_video_frame_fixed_logistic_threaded(uniform struct fixed_block_
 
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (int) clamp(pixel, 0.0f, 255.0f) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1194,6 +1210,8 @@ export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed
   if (height % DIM != 0)
     cm = cm + 1;
 
+    varying bool has_mask = dst_mask ? true : false ;
+
     // go through the entire plane
   for(uniform int j=0; j<cm; j++)
     for(uniform int i=0; i <cn; i++)
@@ -1231,7 +1249,9 @@ export void make_video_frame_fixed_ratio(uniform struct fixed_block_t compressed
 
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f*pixel/(1.0f + pixel), 0.0f, 255.0f) : 0) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1247,6 +1267,8 @@ export void make_video_frame_fixed_ratio_threaded(uniform struct fixed_block_t c
   // the input dimensions might not be divisible by <DIM>
   if (width % DIM != 0)
     cn = cn + 1;
+
+    varying bool has_mask = dst_mask ? true : false ;
 
   // go through the entire plane
   for(uniform int j=start; j<start+work_size; j++)
@@ -1285,7 +1307,9 @@ export void make_video_frame_fixed_ratio_threaded(uniform struct fixed_block_t c
 
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f*pixel/(1.0f + pixel), 0.0f, 255.0f) : 0) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;
           }
 
         }
@@ -1308,6 +1332,8 @@ export void make_video_frame_fixed_square(uniform struct fixed_block_t compresse
   if (height % DIM != 0)
     cm = cm + 1;
 
+    varying bool has_mask = dst_mask ? true : false ;
+
     // go through the entire plane
   for(uniform int j=0; j<cm; j++)
     for(uniform int i=0; i <cn; i++)
@@ -1345,7 +1371,9 @@ export void make_video_frame_fixed_square(uniform struct fixed_block_t compresse
             
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f*pixel*pixel, 0.0f, 255.0f) : 0) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1361,6 +1389,8 @@ export void make_video_frame_fixed_square_threaded(uniform struct fixed_block_t 
   // the input dimensions might not be divisible by <DIM>
   if (width % DIM != 0)
     cn = cn + 1;
+
+    varying bool has_mask = dst_mask ? true : false ;
 
   // go through the entire plane
   for(uniform int j=start; j<start+work_size; j++)
@@ -1399,7 +1429,9 @@ export void make_video_frame_fixed_square_threaded(uniform struct fixed_block_t 
             
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f*pixel*pixel, 0.0f, 255.0f) : 0) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1421,6 +1453,8 @@ export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compresse
 
   if (height % DIM != 0)
     cm = cm + 1;
+
+    varying bool has_mask = dst_mask ? true : false ;
 
   // go through the entire plane
   for(uniform int j=0; j<cm; j++)
@@ -1459,7 +1493,9 @@ export void make_video_frame_fixed_legacy(uniform struct fixed_block_t compresse
         
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f * (log(pixel) - lmin) / (lmax - lmin), 0.0f, 255.0f) : 0) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
@@ -1475,6 +1511,8 @@ export void make_video_frame_fixed_legacy_threaded(uniform struct fixed_block_t 
   // the input dimensions might not be divisible by <DIM>
   if (width % DIM != 0)
     cn = cn + 1;
+
+    varying bool has_mask = dst_mask ? true : false ;
 
   // go through the entire plane
   for(uniform int j=start; j<start+work_size; j++)
@@ -1513,7 +1551,9 @@ export void make_video_frame_fixed_legacy_threaded(uniform struct fixed_block_t 
         
             varying bool valid = !isnan;
             dst_luma[offset] = valid ? (pixel > 0.0f ? (int) clamp( 255.0f * (log(pixel) - lmin) / (lmax - lmin), 0.0f, 255.0f) : 0) : fill ;
-            dst_mask[offset] = valid ? 255 : 0 ;
+
+            cif(has_mask)
+                dst_mask[offset] = valid ? 255 : 0 ;
           }          
 
         }
