@@ -7805,6 +7805,9 @@ contains
       type(composite_video_request_f), pointer :: req
       character(kind=c_char), pointer :: flux(:)
 
+      ! RGB loop counter
+      integer :: i
+
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
       real(c_float) :: elapsed
@@ -7822,16 +7825,29 @@ contains
       print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
       &req%va_count, 'fd:', req%fd
 
-      ! if (.not. allocated(item%compressed)) then
-      !   call close_pipe(req%fd)
-      !   goto 9000
-      !end if
+      ! loop over the va_count
+      do i = 1, req%va_count
+         block
+            type(dataset), pointer :: item
+
+            if (.not. c_associated(req%ptr(i))) cycle
+            call c_f_pointer(req%ptr(i), item)
+
+            if (.not. allocated(item%compressed)) cycle
+
+            print *, 'composite_video_request_simd; datasetid: ', item%datasetid, ', frame:', req%frame(i)
+
+            nullify(item)
+         end block
+      end do
 
       ! end the timer
       call system_clock(finish_t)
       elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-      call close_pipe(req%fd)
+      if (req%fd .ne. -1) then
+         call close_pipe(req%fd)
+      end if
 
       ! nullify (item)
 9000  nullify (flux)
