@@ -7811,6 +7811,7 @@ contains
       ! RGB channels
       integer(kind=1), allocatable, target :: pixels(:, :, :) ! (width, height, va_count)
       integer :: tid ! loop counter
+      integer(kind=c_size_t) :: written
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
@@ -7889,6 +7890,11 @@ contains
       elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
       if (req%fd .ne. -1) then
+         call write_elapsed(req%fd, elapsed)
+
+         ! send pixels
+         written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+
          call close_pipe(req%fd)
       end if
 
