@@ -7874,7 +7874,7 @@ contains
                cycle
             else
                call get_composite_video_frame(item, req%frame(tid), req%fill, tone, pixels(:,:,tid),&
-               &req%width, req%height, req%downsize)
+               &req%width, req%height, req%downsize, req%va_count)
             end if
 
             nullify(item)
@@ -8140,7 +8140,7 @@ contains
 
    end subroutine get_video_frame
 
-   subroutine get_composite_video_frame(item, frame, fill, tone, dst_pixels, dst_width, dst_height, downsize)
+   subroutine get_composite_video_frame(item, frame, fill, tone, dst_pixels, dst_width, dst_height, downsize, va_count)
       use, intrinsic :: iso_c_binding
       implicit none
 
@@ -8148,6 +8148,7 @@ contains
       type(video_tone_mapping), intent(in) :: tone
       integer, intent(in) :: frame, fill, dst_width, dst_height
       logical(kind=c_bool) :: downsize
+      integer, intent(in) :: va_count
       integer(kind=1), intent(out), target :: dst_pixels(dst_width, dst_height)
 
       integer(kind=1), allocatable, target :: pixels(:, :)
@@ -8170,7 +8171,7 @@ contains
          ! pixels = int(fill, kind=1)
 
          ! reduce the number of threads by half to avoid oversubscription (all three RGB channels are done in parallel)
-         max_threads = max(1, get_max_threads()/2)
+         max_threads = max(1, get_max_threads()/va_count)
 
          ! by default compressed is dimension(n/DIM, m/DIM)
          cm = height/DIM
