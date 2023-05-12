@@ -7851,7 +7851,10 @@ contains
             if (.not. c_associated(req%ptr(tid))) cycle
             call c_f_pointer(req%ptr(tid), item)
 
-            if (.not. allocated(item%compressed)) cycle
+            if (.not. allocated(item%compressed)) then
+               nullify(item)
+               cycle
+            end if
 
             ! set the video tone mapping
             allocate (character(len=req%len)::tone%flux)
@@ -7873,7 +7876,6 @@ contains
 
             if (.not. associated(item%compressed(req%frame(tid))%ptr)) then
                pixels(:,:,tid) = int(req%fill, kind=1)
-               cycle
             else
                call get_composite_video_frame(item, req%frame(tid), req%fill, tone, pixels(:,:,tid),&
                &req%width, req%height, req%downsize, req%va_count)
