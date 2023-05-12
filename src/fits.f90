@@ -7903,7 +7903,7 @@ contains
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
-      print *, 'composite_video_request_simd elapsed time:', elapsed, '[ms]' ! ifort
+      ! print *, 'composite_video_request_simd elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine composite_video_request_simd
 
