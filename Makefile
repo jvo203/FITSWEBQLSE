@@ -192,7 +192,7 @@ ifeq ($(UNAME_S),Darwin)
 
 	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-13
 	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-13
-	FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
+	FLAGS = -march=native -Ofast -flto -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
 	# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
 	CFLAGS := $(FLAGS) -flax-vector-conversions
@@ -209,7 +209,7 @@ ifeq ($(UNAME_S),Darwin)
 
 	# try clang for a change; force the use of libgomp instead of libomp (FORTRAN has been compiled with gfortran, flang is immature at the moment)
 	# CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
-	# CFLAGS := -Xpreprocessor -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions
+	# CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions
 	## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
 	## LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp	
 
