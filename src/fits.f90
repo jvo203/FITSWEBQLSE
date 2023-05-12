@@ -1324,7 +1324,8 @@ contains
       type(C_PTR), intent(in), value :: ptr
       type(dataset), pointer :: item
 
-      integer(kind=c_size_t), intent(in), value :: len, threshold
+      integer(kind=c_size_t), intent(in), value :: len
+      integer(kind=c_int), intent(in), value :: threshold
       character(kind=c_char), dimension(len), intent(in) :: dir
 
       ! handle hierarchical cache
