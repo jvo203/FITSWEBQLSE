@@ -5088,7 +5088,7 @@ contains
       real(kind=c_float), dimension(width, height), intent(in) :: pixels
       logical(kind=c_bool), dimension(width, height), intent(in) :: mask
       integer, allocatable, intent(out) :: hist(:)
-      type(image_tone_mapping), intent(out) :: tone
+      type(image_tone_mapping), intent(inout) :: tone ! this needs to be *INOUT* (tone%flux!!!)
 
       real, dimension(:), allocatable :: data
       real pmin, pmax, pmedian
