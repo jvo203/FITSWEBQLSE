@@ -9040,7 +9040,7 @@ contains
       if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
 
       if (allocated(item%flux)) then
-         print *, "ws_image_spectrum_request::flux", item%flux
+         print *, "ws_image_spectrum_request::flux=", item%flux
       else
          print *, "ws_image_spectrum_request::flux is not allocated"
       end if

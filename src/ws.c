@@ -511,12 +511,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         /*actually do not reject the connections, accept all 'as-is' */
         // reject connections without an entry in a hash table
-        /*if (!dataset_exists(datasetId))
+        if (!dataset_exists(datasetId))
         {
             printf("[C] rejecting the connection for '%s'.\n", datasetId);
             c->is_closing = 1; // Tell mongoose to close this connection
         }
-        else*/
+        else
         {
             struct websocket_session *session = (struct websocket_session *)malloc(sizeof(struct websocket_session));
 

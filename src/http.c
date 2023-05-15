@@ -2291,7 +2291,10 @@ static enum MHD_Result on_http_connection(void *cls,
         status = pipe(pipefd);
 
         if (0 != status)
+        {
+            printf("[C] pipe() failed: %s\n", strerror(errno));
             return http_internal_server_error(connection);
+        }
 
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
