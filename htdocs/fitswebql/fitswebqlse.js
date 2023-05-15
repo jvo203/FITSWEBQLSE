@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-05-15.0";
+    return "JS2023-05-15.1";
 }
 
 function uuidv4() {
@@ -12823,7 +12823,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
             show_unsupported_media_type();
         }
 
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 500) {
+        /*if (xmlhttp.readyState == 4 && xmlhttp.status == 500) {
             if (dataset_timeout != -1) {
                 window.clearTimeout(dataset_timeout);
                 dataset_timeout = -1;
@@ -12832,15 +12832,15 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
             hide_hourglass();
             //show_critical_error();
             show_not_found();
-        }
+        }*/
 
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 502) {
+        if (xmlhttp.readyState == 4 && (xmlhttp.status == 500 || xmlhttp.status == 502)) {
             if (dataset_timeout != -1) {
                 window.clearTimeout(dataset_timeout);
                 dataset_timeout = -1;
             }
 
-            console.log("Connection error, re-fetching image after 1 second.");
+            console.log("Connection error:", xmlhttp.status, ", re - fetching image after 1 second.");
             setTimeout(function () {
                 fetch_image_spectrum(_datasetId, index, fetch_data, true);
             }, 1000);

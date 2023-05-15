@@ -6120,7 +6120,7 @@ contains
       end if
 
       if (allocated(item%flux)) then
-         print *, "image_spectrum_request::flux", item%flux
+         print *, "image_spectrum_request::flux=", item%flux
       else
          print *, "image_spectrum_request::flux is not allocated"
       end if
