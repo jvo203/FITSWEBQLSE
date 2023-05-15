@@ -509,13 +509,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (ptr != NULL)
             *ptr = '\0';
 
+        /*actually do not reject the connections, accept all 'as-is' */
         // reject connections without an entry in a hash table
-        if (!dataset_exists(datasetId))
+        /*if (!dataset_exists(datasetId))
         {
             printf("[C] rejecting the connection for '%s'.\n", datasetId);
             c->is_closing = 1; // Tell mongoose to close this connection
         }
-        else
+        else*/
         {
             struct websocket_session *session = (struct websocket_session *)malloc(sizeof(struct websocket_session));
 
@@ -1617,7 +1618,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             uint8_t *B_buf = (uint8_t *)malloc(frame_size);
 
             if (B_buf != NULL)
-                memset(B_buf, 128, frame_size);
+                memset(B_buf, 0, frame_size); // actually use 0 instead of 128 so that the composite RGB case is handled correctly for va_count == 2
 
             picture->planes[0] = NULL;
             picture->planes[1] = NULL;
