@@ -2938,6 +2938,44 @@ void *composite_video_response(void *ptr)
 
     struct websocket_response *resp = (struct websocket_response *)ptr;
 
+    ssize_t n = 0;
+    size_t offset = 0;
+    size_t buf_size = 0x40000;
+
+    char *buf = malloc(buf_size);
+
+    if (buf != NULL)
+        while ((n = read(resp->fd, buf + offset, buf_size - offset)) > 0)
+        {
+            offset += n;
+
+            // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+
+            if (offset == buf_size)
+            {
+                printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
+
+                size_t new_size = buf_size << 1;
+                char *tmp = realloc(buf, new_size);
+
+                if (tmp != NULL)
+                {
+                    buf = tmp;
+                    buf_size = new_size;
+                }
+            }
+        }
+
+    if (0 == n)
+        printf("[C] PIPE_END_OF_STREAM\n");
+
+    if (n < 0)
+        printf("[C] PIPE_END_WITH_ERROR\n");
+
+    // release the incoming buffer
+free_composite_video_mem:
+    free(buf);
+
     // close the read end of the pipe
     close(resp->fd);
 
