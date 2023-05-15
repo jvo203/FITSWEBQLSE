@@ -2999,6 +2999,96 @@ void *composite_video_response(void *ptr)
     memcpy(&elapsed, buf, sizeof(float));
     printf("[C] elapsed: %f [ms]\n", elapsed);
 
+    // x265 encoding
+    pthread_mutex_lock(&session->vid_mtx);
+
+    if ((session->picture == NULL) || (session->encoder == NULL))
+    {
+        pthread_mutex_unlock(&session->vid_mtx);
+        goto free_composite_video_mem;
+    }
+
+    size_t plane_offset = sizeof(float);
+    for (int i = 0; i < va_count; i++)
+    {
+        if (session->picture->planes[i] != NULL)
+            free(session->picture->planes[i]);
+
+        session->picture->planes[i] = (uint8_t *)(buf + plane_offset);
+        session->picture->stride[i] = session->image_width;
+        plane_offset += plane_size;
+    }
+
+    // RGB-encode
+    x265_nal *pNals = NULL;
+    uint32_t iNal = 0;
+
+    int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL);
+    printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
+
+    for (unsigned int i = 0; i < iNal; i++)
+    {
+        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + pNals[i].sizeBytes;
+
+        printf("[C] video_response elapsed: %f [ms], msg_len: %zu bytes.\n", elapsed, msg_len);
+
+        char *payload = malloc(msg_len);
+
+        if (payload != NULL)
+        {
+            float ts = resp->timestamp;
+            uint32_t id = resp->seq_id;
+            uint32_t msg_type = 5;
+            // 0 - spectrum, 1 - viewport,
+            // 2 - image, 3 - full, spectrum,  refresh,
+            // 4 - histogram, 5 - video frame
+
+            size_t ws_offset = 0;
+
+            memcpy((char *)payload + ws_offset, &ts, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, pNals[i].payload, pNals[i].sizeBytes);
+            ws_offset += pNals[i].sizeBytes;
+
+            if (ws_offset != msg_len)
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+            // create a UDP message
+            struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+
+            // pass the message over to mongoose via a communications channel
+            ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+            if (sent != sizeof(struct websocket_message))
+            {
+                printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+                // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                free(msg.session_id);
+                free(payload);
+            };
+        }
+    }
+
+    // done with the planes
+    for (int i = 0; i < va_count; i++)
+    {
+        session->picture->planes[i] = NULL;
+        session->picture->stride[i] = 0;
+    }
+
+    pthread_mutex_unlock(&session->vid_mtx);
+
     // release the incoming buffer
 free_composite_video_mem:
     free(buf);
