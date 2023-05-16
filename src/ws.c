@@ -2076,7 +2076,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (stat == 0)
             {
-                printf("[C] composite video pipes: %d:%d.\n", pipefd[0], pipefd[1]);
+                printf("[C] mg_websocket_callback: composite video pipes: %d:%d\n", pipefd[0], pipefd[1]);
 
                 // pass the read end of the pipe to a C thread
                 resp->session_id = strdup(c->data);
