@@ -2274,6 +2274,9 @@ void *ws_pv_response(void *ptr)
             }
         }
 
+    // close the read end of the pipe
+    close(resp->fd);
+
     if (0 == n)
         printf("[C] PIPE_END_OF_STREAM\n");
 
@@ -2330,9 +2333,6 @@ void *ws_pv_response(void *ptr)
 free_pv_mem:
     free(buf);
 
-    // close the read end of the pipe
-    close(resp->fd);
-
     // release the memory
     free(resp->session_id);
     free(resp);
@@ -2374,6 +2374,9 @@ void *ws_image_spectrum_response(void *ptr)
                 }
             }
         }
+
+    // close the read end of the pipe
+    close(resp->fd);
 
     if (0 == n)
         printf("[C] PIPE_END_OF_STREAM\n");
@@ -2608,9 +2611,6 @@ void *ws_image_spectrum_response(void *ptr)
 free_image_spectrum_mem:
     free(buf);
 
-    // close the read end of the pipe
-    close(resp->fd);
-
     // release the memory
     free(resp->session_id);
     free(resp);
@@ -2652,6 +2652,9 @@ void *spectrum_response(void *ptr)
                 }
             }
         }
+
+    // close the read end of the pipe
+    close(resp->fd);
 
     if (0 == n)
         printf("[C] PIPE_END_OF_STREAM\n");
@@ -2736,9 +2739,6 @@ void *spectrum_response(void *ptr)
     // release the incoming buffer
     free(buf);
 
-    // close the read end of the pipe
-    close(resp->fd);
-
     // release the memory
     free(resp->session_id);
     free(resp);
@@ -2780,6 +2780,9 @@ void *realtime_image_spectrum_response(void *ptr)
                 }
             }
         }
+
+    // close the read end of the pipe
+    close(resp->fd);
 
     if (0 == n)
         printf("[C] PIPE_END_OF_STREAM\n");
@@ -2927,9 +2930,6 @@ void *realtime_image_spectrum_response(void *ptr)
     // release the incoming buffer
     free(buf);
 
-    // close the read end of the pipe
-    close(resp->fd);
-
     // release the memory
     free(resp->session_id);
     free(resp);
@@ -2971,6 +2971,9 @@ void *composite_video_response(void *ptr)
                 }
             }
         }
+
+    // close the read end of the pipe
+    close(resp->fd);
 
     if (0 == n)
         printf("[C] PIPE_END_OF_STREAM\n");
@@ -3099,9 +3102,6 @@ void *composite_video_response(void *ptr)
 free_composite_video_mem:
     free(buf);
 
-    // close the read end of the pipe
-    close(resp->fd);
-
     // release the memory
     free(resp->session_id);
     free(resp);
@@ -3143,6 +3143,9 @@ void *video_response(void *ptr)
                 }
             }
         }
+
+    // close the read end of the pipe
+    close(resp->fd);
 
     if (0 == n)
         printf("[C] PIPE_END_OF_STREAM\n");
@@ -3265,9 +3268,6 @@ void *video_response(void *ptr)
     // release the incoming buffer
 free_video_mem:
     free(buf);
-
-    // close the read end of the pipe
-    close(resp->fd);
 
     // release the memory
     free(resp->session_id);
