@@ -7671,6 +7671,10 @@ contains
       type(dataset), pointer :: item
       type(video_request_f), pointer :: req
 
+      type(video_fetch_f), allocatable, target :: fetch_req
+      type(c_ptr) :: pid
+      integer(kind=c_int) :: rc
+
       type(video_tone_mapping) :: tone
       integer(kind=1), allocatable, target :: pixels(:, :), mask(:, :)
       integer :: i
@@ -7678,10 +7682,6 @@ contains
       character(kind=c_char), pointer :: flux(:)
 
       real, parameter :: u = 7.5
-
-      type(video_fetch_f), allocatable, target :: fetch_req
-      type(c_ptr) :: pid
-      integer(kind=c_int) :: rc
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
@@ -7727,7 +7727,7 @@ contains
       allocate (pixels(req%width, req%height))
       allocate (mask(req%width, req%height))
 
-      ! if a frame has not been found it needs to be fetched from the cluster (TO-DO)
+      ! if a frame has not been found it needs to be fetched from the cluster
       if (.not. associated(item%compressed(req%frame)%ptr)) then
          allocate (fetch_req)
 
@@ -7848,6 +7848,10 @@ contains
             type(video_tone_mapping) :: tone
             integer :: i
 
+            type(video_fetch_f), allocatable, target :: fetch_req
+            type(c_ptr) :: pid
+            integer(kind=c_int) :: rc
+
             if (.not. c_associated(req%ptr(tid))) cycle
             call c_f_pointer(req%ptr(tid), item)
 
@@ -7874,8 +7878,44 @@ contains
             ! ifort
             ! print *, 'composite_video_request_simd [', item%datasetid, ']::frame:', req%frame(tid)
 
+            ! if a frame has not been found it needs to be fetched from the cluster
             if (.not. associated(item%compressed(req%frame(tid))%ptr)) then
-               pixels(:,:,tid) = int(req%fill, kind=1)
+               allocate (fetch_req)
+
+               fetch_req%datasetid = c_loc(item%datasetid)
+               fetch_req%len = size(item%datasetid)
+
+               fetch_req%keyframe = req%keyframe
+               fetch_req%frame = req%frame(tid)
+               fetch_req%fill = req%fill
+
+               fetch_req%flux = req%flux
+               fetch_req%dmin = tone%dmin
+               fetch_req%dmax = tone%dmax
+               fetch_req%dmedian = tone%dmedian
+               fetch_req%sensitivity = tone%sensitivity
+               fetch_req%slope = tone%slope
+               fetch_req%white = tone%white
+               fetch_req%black = tone%black
+
+               fetch_req%width = req%width
+               fetch_req%height = req%height
+               fetch_req%downsize = req%downsize
+
+               fetch_req%pixels = c_loc(pixels(:,:,tid))
+               fetch_req%mask = c_null_ptr
+               fetch_req%valid = .false.
+
+               ! launch a pthread
+               pid = my_pthread_create(start_routine=c_funloc(fetch_video_frame), arg=c_loc(fetch_req), rc=rc)
+
+               ! join a thread
+               rc = my_pthread_join(pid)
+
+               ! skip invalid frames (not found on other cluster nodes)
+               if (.not. fetch_req%valid) then
+                  pixels(:,:,tid) = int(req%fill, kind=1)
+               end if
             else
                call get_composite_video_frame(item, req%frame(tid), req%fill, tone, pixels(:,:,tid),&
                &req%width, req%height, req%downsize, req%va_count)

@@ -6108,8 +6108,12 @@ void *fetch_video_frame(void *ptr)
                     const uint8_t *pixels = (uint8_t *)&(chunks[idx].memory[0]);
                     const uint8_t *mask = (uint8_t *)&(chunks[idx].memory[sizeof(uint8_t) * plane_size]);
 
-                    memcpy(req->pixels, pixels, plane_size);
-                    memcpy(req->mask, mask, plane_size);
+                    if (req->pixels != NULL)
+                        memcpy(req->pixels, pixels, plane_size);
+
+                    if (req->mask != NULL)
+                        memcpy(req->mask, mask, plane_size);
+
                     req->valid = true;
                 }
             }
