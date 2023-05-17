@@ -2791,7 +2791,7 @@ void *realtime_image_spectrum_response(void *ptr)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
     uint32_t length, view_width, view_height;
-    uint32_t compressed_size;
+    uint32_t compressed_size = 0;
     size_t msg_len, view_size;
     float elapsed;
 
