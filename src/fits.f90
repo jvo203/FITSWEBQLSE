@@ -96,7 +96,6 @@ module fits
       integer(kind=c_int) :: width
       integer(kind=c_int) :: height
       logical(kind=c_bool) :: downsize
-      logical(kind=c_bool) :: mask
       integer(kind=c_int) :: fd
 
       type(C_PTR) :: ptr
@@ -221,6 +220,7 @@ module fits
       integer(kind=c_int) :: width
       integer(kind=c_int) :: height
       logical(kind=c_bool) :: downsize
+      logical(kind=c_bool) :: mask
       integer(kind=c_int) :: fd
       type(C_PTR) :: ptr
 
@@ -7639,18 +7639,25 @@ contains
       tone%sensitivity = req%sensitivity
       tone%slope = tone%slope
 
-      ! allocate the pixels/mask
+      ! always allocate the pixels
       allocate (pixels(req%width, req%height))
-      allocate (mask(req%width, req%height))
 
-      call get_video_frame(item, req%frame, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
+      if (req%mask) then
+         ! allocate the optional mask
+         allocate (mask(req%width, req%height))
+         call get_video_frame(item, req%frame, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
+      else
+         call get_composite_video_frame(item, req%frame, req%fill, tone, pixels, req%width, req%height, req%downsize, 1)
+      end if
 
       if (req%fd .ne. -1) then
-         ! send pixels
+         ! always send pixels
          written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
 
-         ! send mask
-         written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+         if (req%mask) then
+            ! send the optional mask
+            written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+         end if
       end if
 
       ! clean up
