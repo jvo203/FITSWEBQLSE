@@ -6038,6 +6038,7 @@ void *fetch_video_frame(void *ptr)
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "/video/%.*s", options.http_port, (int)len, datasetid);
         g_string_append_printf(url, "?frame=%d&fill=%d&keyframe=%d&width=%d&height=%d&downsize=%d", req->frame, req->fill, req->keyframe, req->width, req->height, req->downsize);
+        g_string_append_printf(url, "&mask=%d", (req->mask != NULL ? 1 : 0));
         g_string_append_printf(url, "&flux=%s&dmin=%f&dmax=%f&dmedian=%f", req->flux, req->dmin, req->dmax, req->dmedian);
         g_string_append_printf(url, "&sensitivity=%f&slope=%f", req->sensitivity, req->slope);
         g_string_append_printf(url, "&white=%f&black=%f", req->white, req->black);
@@ -6098,21 +6099,24 @@ void *fetch_video_frame(void *ptr)
             if (response_code == 200)
             {
                 size_t plane_size = req->width * req->height;
-                size_t expected = 2 * sizeof(uint8_t) * plane_size;
+                size_t expected = (req->mask != NULL) ? 2 * sizeof(uint8_t) * plane_size : sizeof(uint8_t) * plane_size;
                 size_t received = chunks[idx].size;
 
                 printf("[C] pixels/mask received: %zu, expected: %zu bytes.\n", received, expected);
 
                 if (received == expected)
                 {
-                    const uint8_t *pixels = (uint8_t *)&(chunks[idx].memory[0]);
-                    const uint8_t *mask = (uint8_t *)&(chunks[idx].memory[sizeof(uint8_t) * plane_size]);
-
                     if (req->pixels != NULL)
+                    {
+                        const uint8_t *pixels = (uint8_t *)&(chunks[idx].memory[0]);
                         memcpy(req->pixels, pixels, plane_size);
+                    }
 
                     if (req->mask != NULL)
+                    {
+                        const uint8_t *mask = (uint8_t *)&(chunks[idx].memory[sizeof(uint8_t) * plane_size]);
                         memcpy(req->mask, mask, plane_size);
+                    }
 
                     req->valid = true;
                 }
