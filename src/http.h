@@ -182,6 +182,7 @@ struct video_req
     int width;
     int height;
     bool downsize;
+    bool mask;
 
     int fd;
     void *ptr;

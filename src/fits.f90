@@ -96,6 +96,7 @@ module fits
       integer(kind=c_int) :: width
       integer(kind=c_int) :: height
       logical(kind=c_bool) :: downsize
+      logical(kind=c_bool) :: mask
       integer(kind=c_int) :: fd
 
       type(C_PTR) :: ptr
