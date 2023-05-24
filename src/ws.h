@@ -2,6 +2,8 @@
 
 #include "mongoose.h"
 #include "fits_types.h"
+#include "mongoose.h"
+
 #include <pthread.h>
 #include <glib.h>
 #include <x265.h>
@@ -41,6 +43,9 @@ struct websocket_session
 
     pthread_t pv_thread;
     struct ring_buffer *pv_ring;
+
+    struct mg_queue queue; // Worker -> Connection queue
+    char *buf;             // Buffer for messages
 };
 
 struct websocket_response
