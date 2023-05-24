@@ -12624,9 +12624,6 @@ function display_molecules() {
     if (num > displayLimit) {
         console.log("Too many spectral lines to display:", num, ", applying a hard limit of", displayLimit, ". Please refine your search.");
 
-        // display an alert in JavaScript
-        // alert("Too many spectral lines to display: " + num + ", applying a hard limit of " + displayLimit + ". Please refine your search.");
-
         // randomly select a subset of the molecules
         mol_list = mol_list.sort(() => Math.random() - Math.random()).slice(0, displayLimit);
         num = mol_list.length;
