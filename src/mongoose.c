@@ -1463,7 +1463,9 @@ int mg_http_parse(const char *s, size_t len, struct mg_http_message *hm) {
   mg_http_parse_headers(s, end, hm->headers,
                         sizeof(hm->headers) / sizeof(hm->headers[0]));
   if ((cl = mg_http_get_header(hm, "Content-Length")) != NULL) {
-    hm->body.len = (size_t) mg_to64(*cl);
+    int64_t content_len = mg_to64(*cl);
+    if(content_len < 0) return -1;
+    hm->body.len = (size_t) content_len;
     hm->message.len = (size_t) req_len + hm->body.len;
   }
 
@@ -4552,8 +4554,7 @@ bool mg_open_listener(struct mg_connection *c, const char *url) {
                                 (char *) &on, sizeof(on))) != 0) {
       // "Using SO_REUSEADDR and SO_EXCLUSIVEADDRUSE"
       MG_ERROR(("setsockopt(SO_EXCLUSIVEADDRUSE): %d %d", on, MG_SOCK_ERR(rc)));
-#endif
-#if defined(SO_REUSEADDR) && (!defined(LWIP_SOCKET) || SO_REUSE)
+#elif defined(SO_REUSEADDR) && (!defined(LWIP_SOCKET) || SO_REUSE)
     } else if ((rc = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *) &on,
                                 sizeof(on))) != 0) {
       // 1. SO_REUSEADDR semantics on UNIX and Windows is different.  On
