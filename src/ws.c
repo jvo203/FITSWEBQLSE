@@ -2232,6 +2232,10 @@ extern void close_pipe(int fd)
 {
     int status;
 
+#ifdef DEBUG
+    printf("[C] closing pipe %d.\n", fd);
+#endif
+
     // close a pipe (to be called from Fortran)
     status = close(fd);
 
