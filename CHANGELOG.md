@@ -1,3 +1,8 @@
+## [5.0.35] - 2023-05-24
+
+* Introduced a hard limit of 500 Splatalogue spectral lines that can be displayed simultaneously in the website. This has been done in order to prevent an information overload and a website slowdown. The 500 lines that are displayed will be chosen as a random subset of the larger than 500 original number of lines. Please refine your search criteria to avoid a hard limit. If the hard limit has been reached information will be displayed in the web browser JavaScript console (press F12 to view it in most browsers).
+* On-going work on NOBEYAMA FUGIN
+
 ## [5.0.34] - 2023-04-25
 
 * overhauled the server logging functionality (moved from FORTRAN to C)
