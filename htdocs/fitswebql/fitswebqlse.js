@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-05-15.2";
+    return "JS2023-05-24.0";
 }
 
 function uuidv4() {
@@ -12523,7 +12523,7 @@ function screen_molecule(molecule, search) {
             return false;
     }
 
-    var intensity = parseFloat(molecule.cdms_intensity);
+    var intensity = parseFloat(molecule.cdms);
 
     if (intensity < displayIntensity)
         return false;
