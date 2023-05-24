@@ -2219,7 +2219,7 @@ void start_ws()
     mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);     // Create HTTP listener
 
     while (s_received_signal == 0)
-        mg_mgr_poll(&mgr, 1000); // Infinite event loop
+        mg_mgr_poll(&mgr, 10); // Event loop. Use 10ms poll interval
 
     mg_mgr_free(&mgr);
 
