@@ -2896,6 +2896,27 @@ void *realtime_image_spectrum_response(void *ptr)
                 if (ws_offset != msg_len)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+                // get a session based on resp->session_id
+                struct websocket_session *session = NULL;
+
+                if (pthread_mutex_lock(&sessions_mtx) == 0)
+                {
+                    session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+                    pthread_mutex_unlock(&sessions_mtx);
+                }
+
+                if (session != NULL)
+                {
+                    // lock the stat mutex
+                    pthread_mutex_lock(&session->stat_mtx);
+
+                    // enqueue the message
+
+                    // unlock the stat mutex
+                    pthread_mutex_unlock(&session->stat_mtx);
+                }
+
+                /*
                 // create a UDP message
                 struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
@@ -2909,7 +2930,7 @@ void *realtime_image_spectrum_response(void *ptr)
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(msg.session_id);
                     free(payload);
-                };
+                };*/
             }
         }
     }
