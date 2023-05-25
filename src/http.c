@@ -2066,6 +2066,7 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_add_response_header(response, "Cache-Control", "no-cache");
         MHD_add_response_header(response, "Cache-Control", "no-store");
         MHD_add_response_header(response, "Pragma", "no-cache");
+        MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
         MHD_add_response_header(response, "Content-Type", "application/force-download");
         MHD_add_response_header(response, "Content-Disposition", filename);
@@ -2182,12 +2183,9 @@ static enum MHD_Result on_http_connection(void *cls,
             struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
 
             // add headers
-            /*MHD_add_response_header(response, "Cache-Control", "no-cache");
-            MHD_add_response_header(response, "Cache-Control", "no-store");
-            MHD_add_response_header(response, "Pragma", "no-cache");*/
-
             MHD_add_response_header(response, "Cache-Control", "public, max-age=86400");
             MHD_add_response_header(response, "Content-Type", "application/json");
+            MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
             if (compress)
                 MHD_add_response_header(response, "Content-Encoding", "gzip");
@@ -2304,6 +2302,7 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_add_response_header(response, "Cache-Control", "no-store");
         MHD_add_response_header(response, "Pragma", "no-cache");
         MHD_add_response_header(response, "Content-Type", "application/octet-stream");
+        MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
