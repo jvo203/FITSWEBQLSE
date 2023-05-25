@@ -472,6 +472,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         break;
     }
+    case MG_EV_POLL:
+    {
+        // Poll event. Delivered to us every mg_mgr_poll interval or faster
+
+        if (c->is_websocket)
+            printf("[C] WEBSOCKET POLL EVENT.\n");
+
+        break;
+    }
     case MG_EV_WS_OPEN:
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
