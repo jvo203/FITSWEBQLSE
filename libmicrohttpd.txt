@@ -1,0 +1,22 @@
+Error accepting connection: Too many open files
+Hit process or system resource limit at 2 connections, temporarily suspending accept(). Consider setting a lower MHD_OPTION_CONNECTION_LIMIT.
+
+[C] pipe() failed: Too many open files
+
+MHD_OPTION_CONNECTION_LIMIT
+Maximum number of concurrent connections to accept (followed by an unsigned int). The default is FD_SETSIZE - 4 (the maximum number of file descriptors supported by select minus four for stdin, stdout, stderr and the server socket). In other words, the default is as large as possible.
+
+If the connection limit is reached, MHD’s behavior depends a bit on other options. If MHD_USE_ITC was given, MHD will stop accepting connections on the listen socket. This will cause the operating system to queue connections (up to the listen() limit) above the connection limit. Those connections will be held until MHD is done processing at least one of the active connections. If MHD_USE_ITC is not set, then MHD will continue to accept() and immediately close() these connections.
+
+Note that if you set a low connection limit, you can easily get into trouble with browsers doing request pipelining. For example, if your connection limit is “1”, a browser may open a first connection to access your “index.html” file, keep it open but use a second connection to retrieve CSS files, images and the like. In fact, modern browsers are typically by default configured for up to 15 parallel connections to a single server. If this happens, MHD will refuse to even accept the second connection until the first connection is closed — which does not happen until timeout. As a result, the browser will fail to render the page and seem to hang. If you expect your server to operate close to the connection limit, you should first consider using a lower timeout value and also possibly add a “Connection: close” header to your response to ensure that request pipelining is not used and connections are closed immediately after the request has completed:
+
+MHD_add_response_header (response,
+                         MHD_HTTP_HEADER_CONNECTION,
+                         "close");
+MHD_OPTION_CONNECTION_TIMEOUT
+After how many seconds of inactivity should a connection automatically be timed out? (followed by an unsigned int; use zero for no timeout). The default is zero (no timeout).
+
+MHD_USE_TURBO
+Enable optimizations to aggressively improve performance.
+
+Currently, the optimizations this option enables are based on opportunistic reads and writes. Basically, MHD will simply try to read or write or accept on a socket before checking that the socket is ready for IO using the event loop mechanism. As the sockets are non-blocking, this may fail (at a loss of performance), but generally MHD does this in situations where the operation is likely to succeed, in which case performance is improved. Setting the flag should generally be safe (even though the code is slightly more experimental). You may want to benchmark your application to see if this makes any difference for you.

@@ -1,5 +1,0 @@
-Error accepting connection: Too many open files
-Hit process or system resource limit at 2 connections, temporarily suspending accept(). Consider setting a lower MHD_OPTION_CONNECTION_LIMIT.
-
-[C] pipe() failed: Too many open files
-
