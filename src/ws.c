@@ -2351,6 +2351,21 @@ void *ws_pv_response(void *ptr)
     if (offset == 0)
         goto free_pv_mem;
 
+    // get a session based on resp->session_id
+    struct websocket_session *session = NULL;
+
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        pthread_mutex_unlock(&sessions_mtx);
+    }
+
+    if (session == NULL)
+    {
+        printf("[C] ws_pv_response session %s not found.\n", resp->session_id);
+        goto free_pv_mem;
+    }
+
     size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + offset;
     char *pv_payload = malloc(msg_len);
 
@@ -2377,20 +2392,31 @@ void *ws_pv_response(void *ptr)
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-        // create a UDP message
+        // create a queue message
         struct websocket_message msg = {strdup(resp->session_id), pv_payload, msg_len};
 
-        // pass the message over to mongoose via a communications channel
-        ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+        char *msg_buf;
+        size_t _len = sizeof(struct websocket_message);
 
-        if (sent != sizeof(struct websocket_message))
+        // reserve space for the binary message
+        size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+#ifdef DEBUG
+        printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
+#endif
+
+        // pass the message over to mongoose via a communications queue
+        if (queue_len >= _len)
         {
-            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
-
-            // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+            memcpy(msg_buf, &msg, _len);
+            mg_queue_add(&session->queue, _len);
+        }
+        else
+        {
+            printf("[C] mg_queue_book failed, freeing memory.\n");
             free(msg.session_id);
             free(pv_payload);
-        };
+        }
     }
 
     // release the incoming buffer
