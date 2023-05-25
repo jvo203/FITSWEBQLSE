@@ -497,15 +497,26 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         char *buf;
 
         // Check if we have a message from the worker
-        if ((len = mg_queue_next(&session->queue, &buf)) > 0)
+        while ((len = mg_queue_next(&session->queue, &buf)) > 0)
         {
-            // Got message from worker. Send a response and cleanup
+            if (len == sizeof(struct websocket_message))
+            {
+                struct websocket_message *msg = (struct websocket_message *)buf;
+
+                // Got message from worker. Send a response and cleanup
 #ifdef DEBUG
-            printf("[C] found a WebSocket connection, sending %zu bytes.\n", len);
+                printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
 #endif
 
-            mg_ws_send(c, buf, len, WEBSOCKET_OP_BINARY);
-            mg_queue_del(&session->queue, len); // Delete message
+                if (msg->len > 0)
+                    mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
+
+                // release memory
+                free(msg->session_id);
+                free(msg->buf);
+
+                mg_queue_del(&session->queue, len); // Delete message
+            }
         }
 
         break;
@@ -2924,7 +2935,11 @@ void *realtime_image_spectrum_response(void *ptr)
                 size_t _len = sizeof(struct websocket_message);
 
                 // pass the message over to mongoose via a communications queue
-                if (mg_queue_book(&session->queue, (char **)&msg, _len) >= _len)
+                size_t queue_len = mg_queue_book(&session->queue, (char **)&msg, _len);
+
+                printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
+
+                if (queue_len >= _len)
                     mg_queue_add(&session->queue, _len);
                 else
                 {
@@ -3010,11 +3025,11 @@ void *realtime_image_spectrum_response(void *ptr)
     free(resp->session_id);
     free(resp);
 
-    // Wait until connection reads our message, then it is safe to free the payload
-    while (session->queue.tail != session->queue.head)
+    // Wait until connection reads our message, then it is safe to exit the thread
+    /*while (session->queue.tail != session->queue.head)
         usleep(1000);
 
-    MG_INFO(("realtime_image_spectrum_response done."));
+    MG_INFO(("realtime_image_spectrum_response done."));*/
 
     pthread_exit(NULL);
 }
