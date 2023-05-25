@@ -70,6 +70,7 @@ struct websocket_message
 
 void init_session_table();
 void delete_session_table();
+void delete_session(struct websocket_session *session);
 
 void start_ws();
 extern void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);

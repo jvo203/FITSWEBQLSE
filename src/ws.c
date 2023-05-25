@@ -49,6 +49,101 @@ void delete_session_table()
     pthread_mutex_destroy(&sessions_mtx);
 }
 
+void delete_session(struct websocket_session *session)
+{
+    if (session == NULL)
+        return;
+
+    printf("[C] deleting a sesion for %s/%s\n", session->datasetid, session->id);
+
+    pthread_mutex_lock(&session->vid_mtx);
+
+    free(session->datasetid);
+    session->datasetid = NULL;
+
+    free(session->multi);
+    session->multi = NULL;
+
+    free(session->id);
+    session->id = NULL;
+
+    free(session->buf);
+    session->buf = NULL;
+    session->buf_len = 0;
+
+    free(session->flux);
+    session->flux = NULL;
+
+    if (session->encoder != NULL)
+    {
+        x265_encoder_close(session->encoder);
+        session->encoder = NULL;
+    }
+
+    if (session->param != NULL)
+    {
+        x265_param_free(session->param);
+        session->param = NULL;
+    }
+
+    if (session->picture != NULL)
+    {
+        // deallocate RGB planes
+        for (int i = 0; i < 3; i++)
+            if (session->picture->planes[i] != NULL)
+                free(session->picture->planes[i]);
+
+        // finally free the picture
+        x265_picture_free(session->picture);
+        session->picture = NULL;
+    }
+
+    pthread_mutex_destroy(&session->stat_mtx);
+    pthread_mutex_unlock(&session->vid_mtx);
+    pthread_mutex_destroy(&session->vid_mtx);
+
+    session->pv_exit = true;
+    pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
+    pthread_join(session->pv_thread, NULL); // wait for the pv thread to end
+
+    pthread_cond_destroy(&session->pv_cond);
+    pthread_mutex_destroy(&session->cond_mtx);
+
+    pthread_mutex_lock(&session->pv_mtx);
+
+    if (session->pv_ring != NULL)
+    {
+        delete_ring_buffer(session->pv_ring);
+        free(session->pv_ring);
+        session->pv_ring = NULL;
+    }
+
+    pthread_mutex_unlock(&session->pv_mtx);
+    pthread_mutex_destroy(&session->pv_mtx);
+
+    // drain the message queue
+    size_t len;
+    char *buf;
+
+    while ((len = mg_queue_next(&session->queue, &buf)) > 0)
+    {
+        if (len == sizeof(struct websocket_message))
+        {
+            struct websocket_message *msg = (struct websocket_message *)buf;
+
+#ifdef DEBUG
+            printf("[C] found a message %zu-bytes long, releasing the memory.\n", msg->len);
+#endif
+
+            // release memory
+            free(msg->session_id);
+            free(msg->buf);
+        }
+    }
+
+    free(session);
+}
+
 char *append_null(const char *chars, const int size)
 {
     char *tmp = (char *)malloc(size + 1);
@@ -111,72 +206,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 else
                     printf("[C] cannot lock sessions_mtx!\n");
 
-                pthread_mutex_lock(&session->vid_mtx);
-
-                free(session->datasetid);
-                session->datasetid = NULL;
-
-                free(session->multi);
-                session->multi = NULL;
-
-                free(session->id);
-                session->id = NULL;
-
-                free(session->buf);
-                session->buf = NULL;
-                session->buf_len = 0;
-
-                free(session->flux);
-                session->flux = NULL;
-
-                if (session->encoder != NULL)
-                {
-                    x265_encoder_close(session->encoder);
-                    session->encoder = NULL;
-                }
-
-                if (session->param != NULL)
-                {
-                    x265_param_free(session->param);
-                    session->param = NULL;
-                }
-
-                if (session->picture != NULL)
-                {
-                    // deallocate RGB planes
-                    for (int i = 0; i < 3; i++)
-                        if (session->picture->planes[i] != NULL)
-                            free(session->picture->planes[i]);
-
-                    // finally free the picture
-                    x265_picture_free(session->picture);
-                    session->picture = NULL;
-                }
-
-                pthread_mutex_destroy(&session->stat_mtx);
-                pthread_mutex_unlock(&session->vid_mtx);
-                pthread_mutex_destroy(&session->vid_mtx);
-
-                session->pv_exit = true;
-                pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
-                pthread_join(session->pv_thread, NULL); // wait for the pv thread to end
-
-                pthread_cond_destroy(&session->pv_cond);
-                pthread_mutex_destroy(&session->cond_mtx);
-
-                pthread_mutex_lock(&session->pv_mtx);
-
-                if (session->pv_ring != NULL)
-                {
-                    delete_ring_buffer(session->pv_ring);
-                    free(session->pv_ring);
-                    session->pv_ring = NULL;
-                }
-
-                pthread_mutex_unlock(&session->pv_mtx);
-                pthread_mutex_destroy(&session->pv_mtx);
-
-                free(session);
+                delete_session(session);
 
                 c->fn_data = NULL;
             }
