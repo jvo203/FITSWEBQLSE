@@ -476,8 +476,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     {
         // Poll event. Delivered to us every mg_mgr_poll interval or faster
 
-        if (c->is_websocket)
-            printf("[C] WEBSOCKET POLL EVENT.\n");
+        // only WebSocket sessions allocate memory for user data
+        if (!c->is_websocket)
+            break;
+
+        // check if a session structure has been allocated
+        if (c->fn_data == NULL)
+            break;
+
+        struct websocket_session *session = (struct websocket_session *)c->fn_data;
+
+        if (session == NULL)
+            break;
+
+        printf("[C] checking a message queue for a websocket connection for %s/%s\n", session->datasetid, c->data);
 
         break;
     }
