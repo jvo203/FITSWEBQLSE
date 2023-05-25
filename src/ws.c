@@ -490,14 +490,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             break;
 
 #ifdef DEBUG
-        printf("[C] polling a message queue for %s/%s\n", session->datasetid, c->data);
+            // printf("[C] polling a message queue for %s/%s\n", session->datasetid, c->data);
 #endif
 
         size_t len;
         char *buf;
 
         // Check if we have a message from the worker
-        while ((len = mg_queue_next(&session->queue, &buf)) > 0)
+        if ((len = mg_queue_next(&session->queue, &buf)) > 0)
         {
             // Got message from worker. Send a response and cleanup
 #ifdef DEBUG
@@ -568,8 +568,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->multi = strdup(orig);
                 session->id = strdup(sessionId);
 
-                // allocate a 3MB message buffer
-                session->buf_len = 3 * 1024 * 1024;
+                // allocate a message buffer
+                session->buf_len = 1024 * sizeof(struct websocket_message);
                 session->buf = (char *)malloc(session->buf_len);
                 mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue
 
@@ -2848,6 +2848,29 @@ void *realtime_image_spectrum_response(void *ptr)
     size_t msg_len, view_size;
     float elapsed;
 
+    // get a session based on resp->session_id
+    struct websocket_session *session = NULL;
+
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        pthread_mutex_unlock(&sessions_mtx);
+    }
+
+    if (session == NULL)
+    {
+        printf("[C] realtime_image_spectrum_response session %s not found.\n", resp->session_id);
+
+        // release the incoming buffer
+        free(buf);
+
+        // release the memory
+        free(resp->session_id);
+        free(resp);
+
+        pthread_exit(NULL);
+    }
+
     // process the received data, prepare WebSocket response(s)
     if (offset >= 2 * sizeof(uint32_t) + sizeof(float))
     {
@@ -2896,41 +2919,19 @@ void *realtime_image_spectrum_response(void *ptr)
                 if (ws_offset != msg_len)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-                // get a session based on resp->session_id
-                struct websocket_session *session = NULL;
-
-                if (pthread_mutex_lock(&sessions_mtx) == 0)
-                {
-                    session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
-                    pthread_mutex_unlock(&sessions_mtx);
-                }
-
-                if (session != NULL)
-                {
-                    // lock the stat mutex
-                    pthread_mutex_lock(&session->stat_mtx);
-
-                    // enqueue the message
-
-                    // unlock the stat mutex
-                    pthread_mutex_unlock(&session->stat_mtx);
-                }
-
-                /*
-                // create a UDP message
+                // create a queue message
                 struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+                size_t _len = sizeof(struct websocket_message);
 
-                // pass the message over to mongoose via a communications channel
-                ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
-
-                if (sent != sizeof(struct websocket_message))
+                // pass the message over to mongoose via a communications queue
+                if (mg_queue_book(&session->queue, (char **)&msg, _len) >= _len)
+                    mg_queue_add(&session->queue, _len);
+                else
                 {
-                    printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
-
-                    // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                    printf("[C] mg_queue_book failed, freeing memory.\n");
                     free(msg.session_id);
                     free(payload);
-                };*/
+                }
             }
         }
     }
@@ -2983,6 +2984,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 if (ws_offset != msg_len)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+                /*
                 // create a UDP message
                 struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
@@ -2996,7 +2998,7 @@ void *realtime_image_spectrum_response(void *ptr)
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(msg.session_id);
                     free(payload);
-                };
+                };*/
             }
         }
     }
@@ -3007,6 +3009,12 @@ void *realtime_image_spectrum_response(void *ptr)
     // release the memory
     free(resp->session_id);
     free(resp);
+
+    // Wait until connection reads our message, then it is safe to free the payload
+    while (session->queue.tail != session->queue.head)
+        usleep(1000);
+
+    MG_INFO(("realtime_image_spectrum_response done."));
 
     pthread_exit(NULL);
 }
