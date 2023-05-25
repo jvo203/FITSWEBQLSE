@@ -2932,15 +2932,23 @@ void *realtime_image_spectrum_response(void *ptr)
 
                 // create a queue message
                 struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+
+                char *msg_buf;
                 size_t _len = sizeof(struct websocket_message);
 
-                // pass the message over to mongoose via a communications queue
-                size_t queue_len = mg_queue_book(&session->queue, (char **)&msg, _len);
+                // reserve space for the binary message
+                size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
+#ifdef DEBUG
                 printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
+#endif
 
+                // pass the message over to mongoose via a communications queue
                 if (queue_len >= _len)
+                {
+                    memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
+                }
                 else
                 {
                     printf("[C] mg_queue_book failed, freeing memory.\n");
@@ -3024,12 +3032,6 @@ void *realtime_image_spectrum_response(void *ptr)
     // release the memory
     free(resp->session_id);
     free(resp);
-
-    // Wait until connection reads our message, then it is safe to exit the thread
-    /*while (session->queue.tail != session->queue.head)
-        usleep(1000);
-
-    MG_INFO(("realtime_image_spectrum_response done."));*/
 
     pthread_exit(NULL);
 }
