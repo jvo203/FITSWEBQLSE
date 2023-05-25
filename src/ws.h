@@ -16,6 +16,10 @@ struct websocket_session
     char *multi;     // multiple ids are separated by a semicolon
     char *id;
 
+    struct mg_queue queue; // Worker -> Connection queue
+    char *buf;             // Buffer for messages
+    size_t buf_len;        // Buffer length
+
     char *flux;
     float dmin, dmax, dmedian;
     float dmadN, dmadP;
@@ -43,9 +47,6 @@ struct websocket_session
 
     pthread_t pv_thread;
     struct ring_buffer *pv_ring;
-
-    struct mg_queue queue; // Worker -> Connection queue
-    char *buf;             // Buffer for messages
 };
 
 struct websocket_response

@@ -125,6 +125,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(session->id);
                 session->id = NULL;
 
+                free(session->buf);
+                session->buf = NULL;
+                session->buf_len = 0;
+
                 free(session->flux);
                 session->flux = NULL;
 
@@ -525,6 +529,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->datasetid = strdup(datasetId);
                 session->multi = strdup(orig);
                 session->id = strdup(sessionId);
+
+                // allocate a 3MB message buffer
+                session->buf_len = 3 * 1024 * 1024;
+                session->buf = (char *)malloc(session->buf_len);
+                mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue
 
                 session->flux = NULL;
                 session->dmin = NAN;
