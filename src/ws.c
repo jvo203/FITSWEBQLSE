@@ -81,9 +81,6 @@ double atof2(const char *chars, const int size)
     return result;
 }
 
-// needs to be global so that various connection handlers can get access to it
-static int channel = -1; // Used to wake up event manager
-
 static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     switch (ev)
@@ -2211,54 +2208,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     (void)fn_data;
 }
 
-// Pipe event handler
-static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
-{
-    if (ev == MG_EV_READ)
-    {
-        int i, n;
-        size_t offset;
-
-        n = c->recv.len / sizeof(struct websocket_message);
-        // printf("[C] mg_pipe_callback: received %d binary message(s).\n", n);
-
-        for (offset = 0, i = 0; i < n; i++)
-        {
-            struct websocket_message *msg = (struct websocket_message *)(c->recv.buf + offset);
-            offset += sizeof(struct websocket_message);
-
-            if (msg->len == 0)
-            {
-                printf("[C] mg_pipe_callback::continue (an empty message buffer)!\n");
-                free(msg->session_id);
-                free(msg->buf);
-                continue;
-            }
-
-            struct mg_connection *t;
-            for (t = c->mgr->conns; t != NULL; t = t->next)
-            {
-                // do not bother comparing strings for non-WebSocket connections
-                if (t->is_websocket && (strcmp(t->data, msg->session_id) == 0))
-                {
-                    // printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
-                    mg_ws_send(t, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
-                    break;
-                }
-            }
-
-            // release memory
-            free(msg->session_id);
-            free(msg->buf);
-        }
-
-        c->recv.len = 0; // Tell Mongoose we've consumed data
-    }
-
-    (void)ev_data;
-    (void)fn_data;
-}
-
 void start_ws()
 {
     char url[256] = "";
@@ -2273,17 +2222,12 @@ void start_ws()
     printf("Starting WS listener on %s\n", url);
 #endif
 
-    channel = mg_mkpipe(&mgr, mg_pipe_callback, NULL, false); // Create pipe
-    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL);     // Create HTTP listener
+    mg_http_listen(&mgr, url, mg_http_ws_callback, NULL); // Create HTTP listener
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 10); // Event loop. Use 10ms poll interval
 
     mg_mgr_free(&mgr);
-
-    // close the commucation channel
-    if (channel != -1)
-        close(channel);
 }
 
 extern void close_pipe(int fd)
