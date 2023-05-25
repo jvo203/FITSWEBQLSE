@@ -54,7 +54,7 @@ void delete_session(struct websocket_session *session)
     if (session == NULL)
         return;
 
-    printf("[C] deleting a sesion for %s/%s\n", session->datasetid, session->id);
+    printf("[C] deleting a session for %s/%s\n", session->datasetid, session->id);
 
     pthread_mutex_lock(&session->vid_mtx);
 
