@@ -2478,6 +2478,18 @@ void *ws_image_spectrum_response(void *ptr)
     if (offset < sizeof(uint32_t))
         goto free_image_spectrum_mem;
 
+    struct websocket_session *session = NULL;
+
+    // get the session
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        pthread_mutex_unlock(&sessions_mtx);
+    }
+
+    if (session == NULL)
+        goto free_image_spectrum_mem;
+
     size_t read_offset = 0; // a 'read' cursor into <buf>
 
     size_t msg_len = 0;
@@ -2571,20 +2583,31 @@ void *ws_image_spectrum_response(void *ptr)
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-        // create a UDP message
+        // create a queue message
         struct websocket_message msg = {strdup(resp->session_id), image_payload, msg_len};
 
-        // pass the message over to mongoose via a communications channel
-        ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+        char *msg_buf;
+        size_t _len = sizeof(struct websocket_message);
 
-        if (sent != sizeof(struct websocket_message))
+        // reserve space for the binary message
+        size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+#ifdef DEBUG
+        printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
+#endif
+
+        // pass the message over to mongoose via a communications queue
+        if (queue_len >= _len)
         {
-            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
-
-            // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+            memcpy(msg_buf, &msg, _len);
+            mg_queue_add(&session->queue, _len);
+        }
+        else
+        {
+            printf("[C] mg_queue_book failed, freeing memory.\n");
             free(msg.session_id);
             free(image_payload);
-        };
+        }
     }
     else
     {
@@ -2642,20 +2665,31 @@ void *ws_image_spectrum_response(void *ptr)
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-        // create a UDP message
+        // create a queue message
         struct websocket_message msg = {strdup(resp->session_id), spectrum_payload, msg_len};
 
-        // pass the message over to mongoose via a communications channel
-        ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+        char *msg_buf;
+        size_t _len = sizeof(struct websocket_message);
 
-        if (sent != sizeof(struct websocket_message))
+        // reserve space for the binary message
+        size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+#ifdef DEBUG
+        printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
+#endif
+
+        // pass the message over to mongoose via a communications queue
+        if (queue_len >= _len)
         {
-            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
-
-            // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+            memcpy(msg_buf, &msg, _len);
+            mg_queue_add(&session->queue, _len);
+        }
+        else
+        {
+            printf("[C] mg_queue_book failed, freeing memory.\n");
             free(msg.session_id);
             free(spectrum_payload);
-        };
+        }
     }
 
     if (offset == read_offset + 5 * sizeof(float))
@@ -2752,6 +2786,29 @@ void *spectrum_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
+    // get a session based on resp->session_id
+    struct websocket_session *session = NULL;
+
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        pthread_mutex_unlock(&sessions_mtx);
+    }
+
+    if (session == NULL)
+    {
+        printf("[C] realtime_image_spectrum_response session %s not found.\n", resp->session_id);
+
+        // release the incoming buffer
+        free(buf);
+
+        // release the memory
+        free(resp->session_id);
+        free(resp);
+
+        pthread_exit(NULL);
+    }
+
     // process the received data, prepare a WebSocket response
     if (offset > 0)
     {
@@ -2805,20 +2862,31 @@ void *spectrum_response(void *ptr)
                     if (ws_offset != msg_len)
                         printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-                    // create a UDP message
+                    // create a queue message
                     struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
-                    // pass the message over to mongoose via a communications channel
-                    ssize_t sent = send(channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+                    char *msg_buf;
+                    size_t _len = sizeof(struct websocket_message);
 
-                    if (sent != sizeof(struct websocket_message))
+                    // reserve space for the binary message
+                    size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+#ifdef DEBUG
+                    printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
+#endif
+
+                    // pass the message over to mongoose via a communications queue
+                    if (queue_len >= _len)
                     {
-                        printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
-
-                        // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                        memcpy(msg_buf, &msg, _len);
+                        mg_queue_add(&session->queue, _len);
+                    }
+                    else
+                    {
+                        printf("[C] mg_queue_book failed, freeing memory.\n");
                         free(msg.session_id);
                         free(payload);
-                    };
+                    }
                 }
             }
 
