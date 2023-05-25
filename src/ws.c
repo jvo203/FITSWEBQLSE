@@ -500,13 +500,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         while ((len = mg_queue_next(&session->queue, &buf)) > 0)
         {
             // Got message from worker. Send a response and cleanup
-            struct websocket_message *msg = (struct websocket_message *)buf;
-
 #ifdef DEBUG
-            printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+            printf("[C] found a WebSocket connection, sending %zu bytes.\n", len);
 #endif
 
-            mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
+            mg_ws_send(c, buf, len, WEBSOCKET_OP_BINARY);
             mg_queue_del(&session->queue, len); // Delete message
         }
 
