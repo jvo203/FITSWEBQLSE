@@ -2066,7 +2066,6 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_add_response_header(response, "Cache-Control", "no-cache");
         MHD_add_response_header(response, "Cache-Control", "no-store");
         MHD_add_response_header(response, "Pragma", "no-cache");
-        MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
         MHD_add_response_header(response, "Content-Type", "application/force-download");
         MHD_add_response_header(response, "Content-Disposition", filename);
@@ -2185,7 +2184,6 @@ static enum MHD_Result on_http_connection(void *cls,
             // add headers
             MHD_add_response_header(response, "Cache-Control", "public, max-age=86400");
             MHD_add_response_header(response, "Content-Type", "application/json");
-            MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
             if (compress)
                 MHD_add_response_header(response, "Content-Encoding", "gzip");
@@ -2302,7 +2300,6 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_add_response_header(response, "Cache-Control", "no-store");
         MHD_add_response_header(response, "Pragma", "no-cache");
         MHD_add_response_header(response, "Content-Type", "application/octet-stream");
-        MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
@@ -4246,11 +4243,6 @@ void start_http()
                                    NULL,
                                    &on_http_connection,
                                    PAGE,
-#if !defined(__APPLE__) || !defined(__MACH__)
-                                   MHD_OPTION_CONNECTION_LIMIT, (unsigned int)FD_SETSIZE - 4,
-#else
-                                   MHD_OPTION_CONNECTION_LIMIT, (unsigned int)MIN(128, FD_SETSIZE - 4),
-#endif
                                    MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
                                    MHD_OPTION_END);
 

@@ -24,3 +24,9 @@ Currently, the optimizations this option enables are based on opportunistic read
 macOS:
 .zshrc
 limit descriptors 1024
+
+#if !defined(__APPLE__) || !defined(__MACH__)
+                                   MHD_OPTION_CONNECTION_LIMIT, (unsigned int)FD_SETSIZE - 4,
+#else
+                                   MHD_OPTION_CONNECTION_LIMIT, (unsigned int)MIN(128, FD_SETSIZE - 4),
+#endif
