@@ -2143,20 +2143,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 break;
             }
 
-            // try to lock common_session->vid_mtx
-            /*if (pthread_mutex_trylock(&common_session->vid_mtx) != 0)
-            {
-                printf("[C] mg_websocket_callback: cannot lock common_session->vid_mtx, skipping frame.\n");
-                free(req->flux); // req->flux is *NOT* NULL at this point
-                free(req);
-                break;
-            }
-            else
-            {
-                // unlock the session
-                pthread_mutex_unlock(&common_session->vid_mtx);
-            }*/
-
             // next prepare the respose
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
