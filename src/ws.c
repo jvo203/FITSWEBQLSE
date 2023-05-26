@@ -3153,16 +3153,10 @@ void *composite_video_response(void *ptr)
     close_pipe(resp->fd);
 
     if (0 == n)
-    {
         printf("[C] PIPE_END_OF_STREAM\n");
-        goto free_composite_video_mem;
-    }
 
     if (n < 0)
-    {
         printf("[C] PIPE_END_WITH_ERROR\n");
-        goto free_composite_video_mem;
-    }
 
     struct websocket_session *session = NULL;
 
@@ -3179,11 +3173,12 @@ void *composite_video_response(void *ptr)
     // compress the planes with x265 and pass the response (payload) over to mongoose
     size_t plane_size = session->image_width * session->image_height;
     // size_t expected = sizeof(float) + va_count * sizeof(uint8_t) * plane_size;
-    int va_count;
+    int va_count = 0;
     float elapsed;
 
     va_count = (offset - sizeof(float)) / plane_size;
-    printf("[C] va_count: %d\n", va_count);
+    if (va_count > 0)
+        printf("[C] va_count: %d\n", va_count);
 
     if (va_count < 1 || va_count > 3)
         goto free_composite_video_mem;
