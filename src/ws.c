@@ -2161,9 +2161,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (stat == 0)
             {
-#ifdef DEBUG
+                // #ifdef DEBUG
                 printf("[C] mg_websocket_callback: composite video pipes: %d:%d\n", pipefd[0], pipefd[1]);
-#endif
+                // #endif
 
                 // pass the read end of the pipe to a C thread
                 resp->session_id = strdup(c->data);
@@ -2260,13 +2260,13 @@ void start_ws()
     mg_mgr_free(&mgr);
 }
 
-extern void close_pipe(int fd)
+void close_pipe(int fd)
 {
     int status;
 
-#ifdef DEBUG
+    // #ifdef DEBUG
     printf("[C] closing pipe %d.\n", fd);
-#endif
+    // #endif
 
     // close a pipe (to be called from Fortran)
     status = close(fd);
@@ -3150,13 +3150,19 @@ void *composite_video_response(void *ptr)
         }
 
     // close the read end of the pipe
-    close(resp->fd);
+    close_pipe(resp->fd);
 
     if (0 == n)
+    {
         printf("[C] PIPE_END_OF_STREAM\n");
+        goto free_composite_video_mem;
+    }
 
     if (n < 0)
+    {
         printf("[C] PIPE_END_WITH_ERROR\n");
+        goto free_composite_video_mem;
+    }
 
     struct websocket_session *session = NULL;
 

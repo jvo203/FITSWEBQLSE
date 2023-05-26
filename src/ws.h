@@ -73,6 +73,8 @@ void delete_session_table();
 void delete_session(struct websocket_session *session);
 
 void start_ws();
+void close_pipe(int fd);
+
 extern void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 extern void *realtime_image_spectrum_request(void *req);
 extern void *realtime_image_spectrum_request_simd(void *req);

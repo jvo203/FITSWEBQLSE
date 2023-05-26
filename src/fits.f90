@@ -7834,10 +7834,10 @@ contains
       if (.not. c_associated(req%flux)) return
       call c_f_pointer(req%flux, flux, [req%len])
 
-      if(req%va_count .le. 0) then
-         if (req%fd .ne. -1) call close_pipe(req%fd)
-         goto 9000
-      end if
+      !if(req%va_count .le. 0) then
+      if (req%fd .ne. -1) call close_pipe(req%fd)
+      goto 9000
+      !end if
 
       ! ifort
       ! print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
