@@ -4249,7 +4249,7 @@ void start_http()
 #if !defined(__APPLE__) || !defined(__MACH__)
                                    MHD_OPTION_CONNECTION_LIMIT, (unsigned int)FD_SETSIZE - 4,
 #else
-                                   MHD_OPTION_CONNECTION_LIMIT, (unsigned int)128,
+                                   MHD_OPTION_CONNECTION_LIMIT, (unsigned int)MIN(128, FD_SETSIZE - 4),
 #endif
                                    MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
                                    MHD_OPTION_END);
