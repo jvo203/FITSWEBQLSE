@@ -7835,8 +7835,8 @@ contains
       call c_f_pointer(req%flux, flux, [req%len])
 
       ! ifort
-      print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
-      &req%va_count, 'fd:', req%fd
+      ! print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
+      ! &req%va_count, 'fd:', req%fd
 
       if(req%va_count .le. 0) then
          if (req%fd .ne. -1) call close_pipe(req%fd)

@@ -2144,7 +2144,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             }
 
             // try to lock common_session->vid_mtx
-            if (pthread_mutex_trylock(&common_session->vid_mtx) != 0)
+            /*if (pthread_mutex_trylock(&common_session->vid_mtx) != 0)
             {
                 printf("[C] mg_websocket_callback: cannot lock common_session->vid_mtx, skipping frame.\n");
                 free(req->flux); // req->flux is *NOT* NULL at this point
@@ -2155,7 +2155,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             {
                 // unlock the session
                 pthread_mutex_unlock(&common_session->vid_mtx);
-            }
+            }*/
 
             // next prepare the respose
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
@@ -2175,9 +2175,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (stat == 0)
             {
-                // #ifdef DEBUG
+#ifdef DEBUG
                 printf("[C] mg_websocket_callback: composite video pipes: %d:%d\n", pipefd[0], pipefd[1]);
-                // #endif
+#endif
 
                 // pass the read end of the pipe to a C thread
                 resp->session_id = strdup(c->data);
@@ -2237,9 +2237,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(resp);
             }
 
-            // open a Unix pipe
-            stat = pipe(pipefd);
-
             break;
         }
 
@@ -2278,9 +2275,9 @@ void close_pipe(int fd)
 {
     int status;
 
-    // #ifdef DEBUG
+#ifdef DEBUG
     printf("[C] closing pipe %d.\n", fd);
-    // #endif
+#endif
 
     // close a pipe (to be called from Fortran)
     status = close(fd);
@@ -3164,7 +3161,7 @@ void *composite_video_response(void *ptr)
         }
 
     // close the read end of the pipe
-    close_pipe(resp->fd);
+    close(resp->fd);
 
     if (0 == n)
         printf("[C] PIPE_END_OF_STREAM\n");
