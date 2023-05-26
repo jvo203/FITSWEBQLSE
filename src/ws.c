@@ -1069,20 +1069,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     req->fd = pipefd[1];
                     req->ptr = item;
 
-                    pthread_t tid;
+                    pthread_t tid_req, tid_resp;
 
                     // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                    stat = pthread_create(&tid, NULL, &ws_image_spectrum_request, req);
+                    stat = pthread_create(&tid_req, NULL, &ws_image_spectrum_request, req);
 
                     if (stat == 0)
                     {
-                        pthread_detach(tid);
+                        pthread_detach(tid_req);
 
                         // launch a pipe read C pthread
-                        stat = pthread_create(&tid, NULL, &ws_image_spectrum_response, resp);
+                        stat = pthread_create(&tid_resp, NULL, &ws_image_spectrum_response, resp);
 
                         if (stat == 0)
-                            pthread_detach(tid);
+                            pthread_detach(tid_resp);
                         else
                         {
                             // close the read end of the pipe
@@ -1278,20 +1278,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     req->fd = pipefd[1];
                     req->ptr = item;
 
-                    pthread_t tid;
+                    pthread_t tid_req, tid_resp;
 
                     // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                    stat = pthread_create(&tid, NULL, &spectrum_request_simd, req);
+                    stat = pthread_create(&tid_req, NULL, &spectrum_request_simd, req);
 
                     if (stat == 0)
                     {
-                        pthread_detach(tid);
+                        pthread_detach(tid_req);
 
                         // launch a pipe read C pthread
-                        stat = pthread_create(&tid, NULL, &spectrum_response, resp);
+                        stat = pthread_create(&tid_resp, NULL, &spectrum_response, resp);
 
                         if (stat == 0)
-                            pthread_detach(tid);
+                            pthread_detach(tid_resp);
                         else
                         {
                             // close the read end of the pipe
@@ -1922,20 +1922,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 req->fd = pipefd[1];
                 req->ptr = item;
 
-                pthread_t tid;
+                pthread_t tid_req, tid_resp;
 
                 // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                stat = pthread_create(&tid, NULL, &video_request_simd, req);
+                stat = pthread_create(&tid_req, NULL, &video_request_simd, req);
 
                 if (stat == 0)
                 {
-                    pthread_detach(tid);
+                    pthread_detach(tid_req);
 
                     // launch a pipe read C pthread
-                    stat = pthread_create(&tid, NULL, &video_response, resp);
+                    stat = pthread_create(&tid_resp, NULL, &video_response, resp);
 
                     if (stat == 0)
-                        pthread_detach(tid);
+                        pthread_detach(tid_resp);
                     else
                     {
                         // close the read end of the pipe
@@ -3569,18 +3569,18 @@ void *pv_event_loop(void *arg)
                 req->fd = pipefd[1];
                 req->ptr = item;
 
-                pthread_t req_tid, resp_tid;
+                pthread_t tid_req, tid_resp;
 
                 // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                stat = pthread_create(&req_tid, NULL, &ws_pv_request, req);
+                stat = pthread_create(&tid_req, NULL, &ws_pv_request, req);
 
                 if (stat == 0)
                 {
                     // launch a pipe read C pthread
-                    stat = pthread_create(&resp_tid, NULL, &ws_pv_response, resp);
+                    stat = pthread_create(&tid_resp, NULL, &ws_pv_response, resp);
 
                     if (stat == 0)
-                        pthread_detach(resp_tid);
+                        pthread_detach(tid_resp);
                     else
                     {
                         // close the read end of the pipe
@@ -3592,7 +3592,7 @@ void *pv_event_loop(void *arg)
                     }
 
                     // finally wait for the request thread to end before handling another one
-                    pthread_join(req_tid, NULL);
+                    pthread_join(tid_req, NULL);
                 }
                 else
                 {
