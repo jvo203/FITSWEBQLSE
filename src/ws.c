@@ -200,15 +200,22 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
                 {
                     if (g_hash_table_remove(sessions, (gpointer)c->data))
+                    {
                         printf("[C] removed %s from the hash table\n", c->data);
+                        g_atomic_rc_box_release(session);
+                    }
+                    else
+                        printf("[C] cannot remove %s from the hash table\n", c->data);
+
                     pthread_mutex_unlock(&sessions_mtx);
                 }
                 else
                     printf("[C] cannot lock sessions_mtx!\n");
 
-                delete_session(session);
-
+                g_atomic_rc_box_release(c->fn_data);
                 c->fn_data = NULL;
+
+                g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
             }
 
             printf("WEBSOCKET CONNECTION CLOSED.\n");
@@ -598,7 +605,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         }
         else
         {
-            websocket_session *session = (websocket_session *)malloc(sizeof(websocket_session));
+            websocket_session *session = new_session();
 
             if (session != NULL)
             {
@@ -649,12 +656,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 pthread_mutex_unlock(&session->pv_mtx);
 
-                c->fn_data = session;
+                c->fn_data = g_atomic_rc_box_acquire(session);
 
                 // add a session pointer to the hash table
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
                 {
-                    g_hash_table_replace(sessions, (gpointer)strdup(c->data), session);
+                    g_hash_table_replace(sessions, (gpointer)strdup(c->data), g_atomic_rc_box_acquire(session));
                     pthread_mutex_unlock(&sessions_mtx);
 
                     printf("[C] inserted %s into the hash table\n", c->data);
