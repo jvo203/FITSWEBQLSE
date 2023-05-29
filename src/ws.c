@@ -2983,6 +2983,8 @@ void *realtime_image_spectrum_response(void *ptr)
         pthread_exit(NULL);
     }
 
+    sleep(1);
+
     // process the received data, prepare WebSocket response(s)
     if (offset >= 2 * sizeof(uint32_t) + sizeof(float))
     {
