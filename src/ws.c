@@ -2350,7 +2350,10 @@ void *ws_pv_response(void *ptr)
 
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        if (session != NULL)
+            g_atomic_rc_box_acquire(session);
+
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -2480,7 +2483,10 @@ void *ws_image_spectrum_response(void *ptr)
     // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        if (session != NULL)
+            g_atomic_rc_box_acquire(session);
+
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -2780,7 +2786,10 @@ void *spectrum_response(void *ptr)
 
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        if (session != NULL)
+            g_atomic_rc_box_acquire(session);
+
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -2950,7 +2959,10 @@ void *realtime_image_spectrum_response(void *ptr)
 
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        if (session != NULL)
+            g_atomic_rc_box_acquire(session);
+
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -3184,7 +3196,10 @@ void *composite_video_response(void *ptr)
     // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        if (session != NULL)
+            g_atomic_rc_box_acquire(session);
+
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -3372,7 +3387,10 @@ void *video_response(void *ptr)
     // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        if (session != NULL)
+            g_atomic_rc_box_acquire(session);
+
         pthread_mutex_unlock(&sessions_mtx);
     }
 
