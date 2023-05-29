@@ -79,7 +79,7 @@ static void release_session(websocket_session *session)
     g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
 };
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC(websocket_session, release_session);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(websocket_session, release_session)
 
 void start_ws();
 void close_pipe(int fd);
