@@ -202,7 +202,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (g_hash_table_remove(sessions, (gpointer)c->data))
                     {
                         printf("[C] removed %s from the hash table\n", c->data);
-                        g_atomic_rc_box_release(session);
+                        g_atomic_rc_box_release(c->fn_data);
                     }
                     else
                         printf("[C] cannot remove %s from the hash table\n", c->data);
@@ -644,19 +644,17 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 pthread_mutex_lock(&session->pv_mtx);
 
                 // launch a pv_thread
-                pthread_create(&session->pv_thread, NULL, pv_event_loop, session);
+                int stat = pthread_create(&session->pv_thread, NULL, pv_event_loop, session);
+
+                if (stat != 0)
+                    printf("[C] cannot create a pv_thread!\n");
 
                 session->pv_ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
 
                 if (session->pv_ring != NULL)
                     init_ring_buffer(session->pv_ring);
 
-                // launch a thread to PV-Diagram event loop thread
-                // (TO-DO)
-
                 pthread_mutex_unlock(&session->pv_mtx);
-
-                c->fn_data = g_atomic_rc_box_acquire(session);
 
                 // add a session pointer to the hash table
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
@@ -667,7 +665,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     printf("[C] inserted %s into the hash table\n", c->data);
                 }
                 else
+                {
                     printf("[C] cannot lock sessions_mtx!\n");
+                    g_atomic_rc_box_release(session);
+                }
+
+                c->fn_data = g_atomic_rc_box_acquire(session);
             }
         }
 
