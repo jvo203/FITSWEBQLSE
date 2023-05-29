@@ -141,7 +141,9 @@ void delete_session(websocket_session *session)
         }
     }
 
-    // free(session); // commented out, this *IS* interfering with glib reference counting release mechanism
+    // free() has been commented out on purpose
+    // it was interfering with glib reference counting release mechanism (a double free)
+    // free(session);
 }
 
 char *append_null(const char *chars, const int size)
@@ -202,12 +204,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     if (g_hash_table_remove(sessions, (gpointer)c->data))
                     {
                         printf("[C] removed %s from the hash table\n", c->data);
-                        g_atomic_rc_box_release(c->fn_data);
                     }
                     else
                         printf("[C] cannot remove %s from the hash table\n", c->data);
 
                     pthread_mutex_unlock(&sessions_mtx);
+
+                    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
                 }
                 else
                     printf("[C] cannot lock sessions_mtx!\n");
@@ -215,6 +218,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 c->fn_data = NULL;
 
                 g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+                session = NULL;
             }
 
             printf("WEBSOCKET CONNECTION CLOSED.\n");
@@ -668,7 +672,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 else
                 {
                     printf("[C] cannot lock sessions_mtx!\n");
-                    g_atomic_rc_box_release(session);
                 }
 
                 session = NULL;
@@ -2401,7 +2404,7 @@ void *ws_pv_response(void *ptr)
         }
     }
 
-    g_atomic_rc_box_release(session);
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
     session = NULL;
 
     // release the incoming buffer
@@ -2704,7 +2707,7 @@ void *ws_image_spectrum_response(void *ptr)
         pthread_mutex_unlock(&session->stat_mtx);
     }
 
-    g_atomic_rc_box_release(session);
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
     session = NULL;
 
     // release the incoming buffer
@@ -2870,7 +2873,7 @@ void *spectrum_response(void *ptr)
         }
     }
 
-    g_atomic_rc_box_release(session);
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
     session = NULL;
 
     // release the incoming buffer
@@ -3109,7 +3112,7 @@ void *realtime_image_spectrum_response(void *ptr)
         }
     }
 
-    g_atomic_rc_box_release(session);
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
     session = NULL;
 
     // release the incoming buffer
@@ -3189,7 +3192,11 @@ void *composite_video_response(void *ptr)
         printf("[C] va_count: %d\n", va_count);
 
     if (va_count < 1 || va_count > 3)
+    {
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+        session = NULL;
         goto free_composite_video_mem;
+    }
 
     memcpy(&elapsed, buf, sizeof(float));
     printf("[C] elapsed: %f [ms]\n", elapsed);
@@ -3295,7 +3302,7 @@ void *composite_video_response(void *ptr)
 
     pthread_mutex_unlock(&session->vid_mtx);
 
-    g_atomic_rc_box_release(session);
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
     session = NULL;
 
     // release the incoming buffer
@@ -3476,7 +3483,7 @@ void *video_response(void *ptr)
 
     pthread_mutex_unlock(&session->vid_mtx);
 
-    g_atomic_rc_box_release(session);
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
     session = NULL;
 
     // release the incoming buffer
