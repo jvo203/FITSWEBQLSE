@@ -2497,28 +2497,28 @@ void *ws_image_spectrum_response(void *ptr)
     read_offset += sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t);
 
     if (offset < read_offset + sizeof(uint32_t))
-        goto free_image_spectrum_mem;
+        goto free_image_spectrum_session;
 
     // pixels
     memcpy(&pixels_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + pixels_len;
 
     if (offset < read_offset + sizeof(uint32_t))
-        goto free_image_spectrum_mem;
+        goto free_image_spectrum_session;
 
     // mask
     memcpy(&mask_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + mask_len;
 
     if (offset < read_offset + sizeof(uint32_t))
-        goto free_image_spectrum_mem;
+        goto free_image_spectrum_session;
 
     // histogram
     memcpy(&hist_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + hist_len * sizeof(int);
 
     if (offset < read_offset)
-        goto free_image_spectrum_mem;
+        goto free_image_spectrum_session;
 
     int padding = 4 - read_offset % 4;
 
@@ -2600,7 +2600,7 @@ void *ws_image_spectrum_response(void *ptr)
     else
     {
         // all-or-nothing, skip the spectrum if the image message cannot not be created
-        goto free_image_spectrum_mem;
+        goto free_image_spectrum_session;
     }
 
     // original spectrum length
@@ -2608,14 +2608,14 @@ void *ws_image_spectrum_response(void *ptr)
     read_offset += sizeof(uint32_t);
 
     if (offset < read_offset)
-        goto free_image_spectrum_mem;
+        goto free_image_spectrum_session;
 
     // compressed spectrum
     memcpy(&compressed_size, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + compressed_size;
 
     if (offset < read_offset)
-        goto free_image_spectrum_mem;
+        goto free_image_spectrum_session;
 
     printf("[C] offset: %zu, read_offset: %zu\n", offset, read_offset);
     printf("[C] #hist. elements: %u, padding: %d byte(s), orig. spectrum length: %u, compressed_size: %u\n", hist_len, padding, spectrum_len, compressed_size);
@@ -2707,6 +2707,7 @@ void *ws_image_spectrum_response(void *ptr)
         pthread_mutex_unlock(&session->stat_mtx);
     }
 
+free_image_spectrum_session:
     g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
     session = NULL;
 
