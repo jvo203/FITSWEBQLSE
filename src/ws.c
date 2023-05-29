@@ -49,7 +49,7 @@ void delete_session_table()
     pthread_mutex_destroy(&sessions_mtx);
 }
 
-void delete_session(struct websocket_session *session)
+void delete_session(websocket_session *session)
 {
     if (session == NULL)
         return;
@@ -193,7 +193,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (c->fn_data != NULL)
             {
-                struct websocket_session *session = (struct websocket_session *)c->fn_data;
+                websocket_session *session = (websocket_session *)c->fn_data;
                 printf("[C] closing a websocket connection for %s/%s\n", session->datasetid, c->data);
 
                 // remove a session pointer from the hash table
@@ -511,7 +511,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         if (c->fn_data == NULL)
             break;
 
-        struct websocket_session *session = (struct websocket_session *)c->fn_data;
+        websocket_session *session = (websocket_session *)c->fn_data;
 
         if (session == NULL)
             break;
@@ -598,7 +598,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         }
         else
         {
-            struct websocket_session *session = (struct websocket_session *)malloc(sizeof(struct websocket_session));
+            websocket_session *session = (websocket_session *)malloc(sizeof(websocket_session));
 
             if (session != NULL)
             {
@@ -686,7 +686,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // get the dataset and update its timestamp
             char *datasetId = NULL;
 
-            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+            websocket_session *session = (websocket_session *)c->fn_data;
 
             if (session != NULL)
             {
@@ -738,7 +738,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // [WS] {"type":"pv","x1":108,"y1":127,"x2":131,"y2":99,"width":1129,"height":801,"frame_start":146830393957.08142,"frame_end":147767129569,"ref_freq":147300000000,"deltaV":0,"rest":false,"timestamp":10713.300000000745}
         if (strcmp(type, "pv") == 0)
         {
-            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+            websocket_session *session = (websocket_session *)c->fn_data;
 
             if (session == NULL)
                 break;
@@ -1038,7 +1038,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // pass the request to FORTRAN
             char *datasetId = NULL;
 
-            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+            websocket_session *session = (websocket_session *)c->fn_data;
 
             if (session != NULL)
                 datasetId = session->datasetid;
@@ -1247,7 +1247,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // pass the request to FORTRAN
             char *datasetId = NULL;
 
-            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+            websocket_session *session = (websocket_session *)c->fn_data;
 
             if (session != NULL)
                 datasetId = session->datasetid;
@@ -1479,7 +1479,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             // pass the request to FORTRAN
             char *datasetId = NULL;
 
-            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+            websocket_session *session = (websocket_session *)c->fn_data;
 
             if (session != NULL)
                 datasetId = session->datasetid;
@@ -1568,7 +1568,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // init_video
         if (strcmp(type, "init_video") == 0)
         {
-            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+            websocket_session *session = (websocket_session *)c->fn_data;
 
             if (session == NULL)
                 break;
@@ -1723,7 +1723,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // end_video
         if (strcmp(type, "end_video") == 0)
         {
-            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+            websocket_session *session = (websocket_session *)c->fn_data;
 
             if (session == NULL)
                 break;
@@ -1765,7 +1765,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // encode and stream video
         if (strcmp(type, "video") == 0)
         {
-            struct websocket_session *session = (struct websocket_session *)c->fn_data;
+            websocket_session *session = (websocket_session *)c->fn_data;
 
             if (session == NULL)
                 break;
@@ -1974,7 +1974,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         if (strcmp(type, "composite_video") == 0)
         {
-            struct websocket_session *common_session = (struct websocket_session *)c->fn_data;
+            websocket_session *common_session = (websocket_session *)c->fn_data;
 
             if (common_session == NULL)
                 break;
@@ -2071,7 +2071,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 update_timestamp(item);
 
-                struct websocket_session *session = NULL;
+                websocket_session *session = NULL;
 
                 // get the session
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
@@ -2084,7 +2084,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                     while (g_hash_table_iter_next(&iter, &key, &value))
                     {
-                        struct websocket_session *_session = (struct websocket_session *)value;
+                        websocket_session *_session = (websocket_session *)value;
 
                         if (strcmp(_session->datasetid, token) == 0)
                         {
@@ -2323,11 +2323,11 @@ void *ws_pv_response(void *ptr)
         goto free_pv_mem;
 
     // get a session based on resp->session_id
-    struct websocket_session *session = NULL;
+    websocket_session *session = NULL;
 
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -2449,12 +2449,12 @@ void *ws_image_spectrum_response(void *ptr)
     if (offset < sizeof(uint32_t))
         goto free_image_spectrum_mem;
 
-    struct websocket_session *session = NULL;
+    websocket_session *session = NULL;
 
     // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -2667,12 +2667,12 @@ void *ws_image_spectrum_response(void *ptr)
     {
         printf("[C] extra video tone mapping information detected.\n");
 
-        struct websocket_session *session = NULL;
+        websocket_session *session = NULL;
 
         // get the session
         if (pthread_mutex_lock(&sessions_mtx) == 0)
         {
-            session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+            session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
             pthread_mutex_unlock(&sessions_mtx);
         }
 
@@ -2758,11 +2758,11 @@ void *spectrum_response(void *ptr)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
     // get a session based on resp->session_id
-    struct websocket_session *session = NULL;
+    websocket_session *session = NULL;
 
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -2925,11 +2925,11 @@ void *realtime_image_spectrum_response(void *ptr)
     float elapsed;
 
     // get a session based on resp->session_id
-    struct websocket_session *session = NULL;
+    websocket_session *session = NULL;
 
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -3155,12 +3155,12 @@ void *composite_video_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    struct websocket_session *session = NULL;
+    websocket_session *session = NULL;
 
     // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -3339,12 +3339,12 @@ void *video_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    struct websocket_session *session = NULL;
+    websocket_session *session = NULL;
 
     // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (struct websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -3478,7 +3478,7 @@ void *pv_event_loop(void *arg)
     if (arg == NULL)
         pthread_exit(NULL);
 
-    struct websocket_session *session = (struct websocket_session *)arg;
+    websocket_session *session = (websocket_session *)arg;
 
     printf("[C] pv_event_loop started.\n");
 

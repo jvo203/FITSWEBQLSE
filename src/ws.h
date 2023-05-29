@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glib.h>
+
 #include "mongoose.h"
 #include "fits_types.h"
 #include "mongoose.h"
@@ -10,7 +12,7 @@
 
 #include "ring_buffer.h"
 
-struct websocket_session
+typedef struct
 {
     char *datasetid; // a single id
     char *multi;     // multiple ids are separated by a semicolon
@@ -47,7 +49,7 @@ struct websocket_session
 
     pthread_t pv_thread;
     struct ring_buffer *pv_ring;
-};
+} websocket_session;
 
 struct websocket_response
 {
@@ -70,7 +72,14 @@ struct websocket_message
 
 void init_session_table();
 void delete_session_table();
-void delete_session(struct websocket_session *session);
+void delete_session(websocket_session *session);
+
+static void release_session(websocket_session *session)
+{
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+};
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC(websocket_session, release_session);
 
 void start_ws();
 void close_pipe(int fd);
