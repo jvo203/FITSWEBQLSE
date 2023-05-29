@@ -49,6 +49,11 @@ void delete_session_table()
     pthread_mutex_destroy(&sessions_mtx);
 }
 
+websocket_session *new_session(void)
+{
+    return g_atomic_rc_box_new(websocket_session);
+}
+
 void delete_session(websocket_session *session)
 {
     if (session == NULL)
