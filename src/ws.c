@@ -63,20 +63,25 @@ void delete_session(websocket_session *session)
 
     pthread_mutex_lock(&session->vid_mtx);
 
-    free(session->datasetid);
+    if (session->datasetid != NULL)
+        free(session->datasetid);
     session->datasetid = NULL;
 
-    free(session->multi);
+    if (session->multi != NULL)
+        free(session->multi);
     session->multi = NULL;
 
-    free(session->id);
+    if (session->id != NULL)
+        free(session->id);
     session->id = NULL;
 
-    free(session->buf);
+    if (session->buf != NULL)
+        free(session->buf);
     session->buf = NULL;
     session->buf_len = 0;
 
-    free(session->flux);
+    if (session->flux != NULL)
+        free(session->flux);
     session->flux = NULL;
 
     if (session->encoder != NULL)
@@ -2934,9 +2939,6 @@ void *realtime_image_spectrum_response(void *ptr)
 
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
-
-    // simulate a delay
-    sleep(1);
 
     uint32_t length, view_width, view_height;
     uint32_t compressed_size = 0;
