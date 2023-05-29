@@ -208,8 +208,8 @@ ifeq ($(UNAME_S),Darwin)
 	#endif
 
 	# try clang for a change; force the use of libgomp instead of libomp (FORTRAN has been compiled with gfortran, flang is immature at the moment)
-	# CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
-	# CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
+	CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
+	CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
 	## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
 	## LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp	
 
