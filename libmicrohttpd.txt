@@ -30,3 +30,5 @@ limit descriptors 1024
 #else
                                    MHD_OPTION_CONNECTION_LIMIT, (unsigned int)MIN(128, FD_SETSIZE - 4),
 #endif
+
+// MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
