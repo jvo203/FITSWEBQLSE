@@ -75,11 +75,6 @@ void delete_session(websocket_session *session)
         free(session->id);
     session->id = NULL;
 
-    if (session->buf != NULL)
-        free(session->buf);
-    session->buf = NULL;
-    session->buf_len = 0;
-
     if (session->flux != NULL)
         free(session->flux);
     session->flux = NULL;
@@ -150,6 +145,12 @@ void delete_session(websocket_session *session)
             free(msg->buf);
         }
     }
+
+    // finally release the message queue buffer
+    if (session->buf != NULL)
+        free(session->buf);
+    session->buf = NULL;
+    session->buf_len = 0;
 
     // free() has been commented out on purpose
     // it was interfering with glib reference counting release mechanism (a double free)
