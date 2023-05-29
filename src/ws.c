@@ -132,15 +132,15 @@ void delete_session(websocket_session *session)
 
     while ((len = mg_queue_next(&session->queue, &buf)) > 0)
     {
+        mg_queue_del(&session->queue, len); // Remove message from the queue
+
         if (len == sizeof(struct websocket_message))
         {
             struct websocket_message *msg = (struct websocket_message *)buf;
 
-            // #ifdef DEBUG
+#ifdef DEBUG
             printf("[C] found a message %zu-bytes long, releasing the memory.\n", msg->len);
-            // #endif
-
-            mg_queue_del(&session->queue, len); // Delete message
+#endif
 
             // release memory
             free(msg->session_id);
@@ -548,6 +548,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // Check if we have a message from the worker
         while ((len = mg_queue_next(&session->queue, &buf)) > 0)
         {
+            mg_queue_del(&session->queue, len); // Remove message from the queue
+
             if (len == sizeof(struct websocket_message))
             {
                 struct websocket_message *msg = (struct websocket_message *)buf;
@@ -559,8 +561,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 if (msg->len > 0)
                     mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
-
-                mg_queue_del(&session->queue, len); // Delete message
 
                 // release memory
                 free(msg->session_id);
@@ -2982,8 +2982,6 @@ void *realtime_image_spectrum_response(void *ptr)
 
         pthread_exit(NULL);
     }
-
-    sleep(1);
 
     // process the received data, prepare WebSocket response(s)
     if (offset >= 2 * sizeof(uint32_t) + sizeof(float))
