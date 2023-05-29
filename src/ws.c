@@ -3193,11 +3193,7 @@ void *composite_video_response(void *ptr)
         printf("[C] va_count: %d\n", va_count);
 
     if (va_count < 1 || va_count > 3)
-    {
-        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
-        session = NULL;
-        goto free_composite_video_mem;
-    }
+        goto free_composite_video_session;
 
     memcpy(&elapsed, buf, sizeof(float));
     printf("[C] elapsed: %f [ms]\n", elapsed);
@@ -3208,7 +3204,7 @@ void *composite_video_response(void *ptr)
     if ((session->picture == NULL) || (session->encoder == NULL))
     {
         pthread_mutex_unlock(&session->vid_mtx);
-        goto free_composite_video_mem;
+        goto free_composite_video_session;
     }
 
     size_t plane_offset = sizeof(float);
@@ -3303,6 +3299,7 @@ void *composite_video_response(void *ptr)
 
     pthread_mutex_unlock(&session->vid_mtx);
 
+free_composite_video_session:
     g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
     session = NULL;
 
@@ -3381,7 +3378,7 @@ void *video_response(void *ptr)
     if (offset != expected)
     {
         printf("[C] video_response::received size mismatch; received %zu, expected %zu bytes.\n", offset, expected);
-        goto free_video_mem;
+        goto free_video_session;
     }
 
     memcpy(&elapsed, buf, sizeof(float));
@@ -3394,7 +3391,7 @@ void *video_response(void *ptr)
     if ((session->picture == NULL) || (session->encoder == NULL))
     {
         pthread_mutex_unlock(&session->vid_mtx);
-        goto free_video_mem;
+        goto free_video_session;
     }
 
     session->picture->planes[0] = luma;
@@ -3484,6 +3481,7 @@ void *video_response(void *ptr)
 
     pthread_mutex_unlock(&session->vid_mtx);
 
+free_video_session:
     g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
     session = NULL;
 
