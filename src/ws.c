@@ -215,10 +215,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 else
                     printf("[C] cannot lock sessions_mtx!\n");
 
-                c->fn_data = NULL;
-
                 g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
                 session = NULL;
+                c->fn_data = NULL;
             }
 
             printf("WEBSOCKET CONNECTION CLOSED.\n");
