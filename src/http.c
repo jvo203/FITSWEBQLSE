@@ -4243,7 +4243,6 @@ void start_http()
                                    NULL,
                                    &on_http_connection,
                                    PAGE,
-                                   // MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
                                    MHD_OPTION_END);
 
     if (http_server == NULL)
