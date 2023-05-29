@@ -141,7 +141,7 @@ void delete_session(websocket_session *session)
         }
     }
 
-    free(session);
+    // free(session); // commented out, this *IS* interfering with glib reference counting release mechanism
 }
 
 char *append_null(const char *chars, const int size)
@@ -212,7 +212,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 else
                     printf("[C] cannot lock sessions_mtx!\n");
 
-                g_atomic_rc_box_release(c->fn_data);
                 c->fn_data = NULL;
 
                 g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
@@ -656,6 +655,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 pthread_mutex_unlock(&session->pv_mtx);
 
+                c->fn_data = session;
+
                 // add a session pointer to the hash table
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
                 {
@@ -670,7 +671,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     g_atomic_rc_box_release(session);
                 }
 
-                c->fn_data = g_atomic_rc_box_acquire(session);
+                session = NULL;
             }
         }
 
@@ -2337,7 +2338,7 @@ void *ws_pv_response(void *ptr)
 
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -2399,6 +2400,9 @@ void *ws_pv_response(void *ptr)
             free(pv_payload);
         }
     }
+
+    g_atomic_rc_box_release(session);
+    session = NULL;
 
     // release the incoming buffer
 free_pv_mem:
@@ -2464,7 +2468,7 @@ void *ws_image_spectrum_response(void *ptr)
     // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -2677,18 +2681,6 @@ void *ws_image_spectrum_response(void *ptr)
     {
         printf("[C] extra video tone mapping information detected.\n");
 
-        websocket_session *session = NULL;
-
-        // get the session
-        if (pthread_mutex_lock(&sessions_mtx) == 0)
-        {
-            session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
-            pthread_mutex_unlock(&sessions_mtx);
-        }
-
-        if (session == NULL)
-            goto free_image_spectrum_mem;
-
         // lock the stat mutex
         pthread_mutex_lock(&session->stat_mtx);
 
@@ -2711,6 +2703,9 @@ void *ws_image_spectrum_response(void *ptr)
         // unlock the stat mutex
         pthread_mutex_unlock(&session->stat_mtx);
     }
+
+    g_atomic_rc_box_release(session);
+    session = NULL;
 
     // release the incoming buffer
 free_image_spectrum_mem:
@@ -2772,7 +2767,7 @@ void *spectrum_response(void *ptr)
 
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -2875,6 +2870,9 @@ void *spectrum_response(void *ptr)
         }
     }
 
+    g_atomic_rc_box_release(session);
+    session = NULL;
+
     // release the incoming buffer
     free(buf);
 
@@ -2939,7 +2937,7 @@ void *realtime_image_spectrum_response(void *ptr)
 
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -3111,6 +3109,9 @@ void *realtime_image_spectrum_response(void *ptr)
         }
     }
 
+    g_atomic_rc_box_release(session);
+    session = NULL;
+
     // release the incoming buffer
     free(buf);
 
@@ -3170,7 +3171,7 @@ void *composite_video_response(void *ptr)
     // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -3294,6 +3295,9 @@ void *composite_video_response(void *ptr)
 
     pthread_mutex_unlock(&session->vid_mtx);
 
+    g_atomic_rc_box_release(session);
+    session = NULL;
+
     // release the incoming buffer
 free_composite_video_mem:
     free(buf);
@@ -3354,7 +3358,7 @@ void *video_response(void *ptr)
     // get the session
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
-        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        session = (websocket_session *)g_atomic_rc_box_acquire(g_hash_table_lookup(sessions, (gconstpointer)resp->session_id));
         pthread_mutex_unlock(&sessions_mtx);
     }
 
@@ -3471,6 +3475,9 @@ void *video_response(void *ptr)
     session->picture->stride[1] = 0;
 
     pthread_mutex_unlock(&session->vid_mtx);
+
+    g_atomic_rc_box_release(session);
+    session = NULL;
 
     // release the incoming buffer
 free_video_mem:
@@ -3613,6 +3620,8 @@ void *pv_event_loop(void *arg)
     }
 
     pthread_mutex_unlock(&session->cond_mtx);
+
+    session = NULL;
 
     printf("[C] pv_event_loop terminated.\n");
 
