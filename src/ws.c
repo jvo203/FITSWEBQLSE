@@ -132,8 +132,6 @@ void delete_session(websocket_session *session)
 
     while ((len = mg_queue_next(&session->queue, &buf)) > 0)
     {
-        mg_queue_del(&session->queue, len); // Remove message from the queue
-
         if (len == sizeof(struct websocket_message))
         {
             struct websocket_message *msg = (struct websocket_message *)buf;
@@ -146,6 +144,8 @@ void delete_session(websocket_session *session)
             free(msg->session_id);
             free(msg->buf);
         }
+
+        mg_queue_del(&session->queue, len); // Remove message from the queue
     }
 
     // finally release the message queue buffer
@@ -548,8 +548,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // Check if we have a message from the worker
         while ((len = mg_queue_next(&session->queue, &buf)) > 0)
         {
-            mg_queue_del(&session->queue, len); // Remove message from the queue
-
             if (len == sizeof(struct websocket_message))
             {
                 struct websocket_message *msg = (struct websocket_message *)buf;
@@ -566,6 +564,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(msg->session_id);
                 free(msg->buf);
             }
+
+            mg_queue_del(&session->queue, len); // Remove message from the queue
         }
 
         break;
