@@ -2935,6 +2935,9 @@ void *realtime_image_spectrum_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
+    // simulate a delay
+    sleep(1);
+
     uint32_t length, view_width, view_height;
     uint32_t compressed_size = 0;
     size_t msg_len, view_size;
