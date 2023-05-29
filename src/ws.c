@@ -136,9 +136,11 @@ void delete_session(websocket_session *session)
         {
             struct websocket_message *msg = (struct websocket_message *)buf;
 
-#ifdef DEBUG
+            // #ifdef DEBUG
             printf("[C] found a message %zu-bytes long, releasing the memory.\n", msg->len);
-#endif
+            // #endif
+
+            mg_queue_del(&session->queue, len); // Delete message
 
             // release memory
             free(msg->session_id);
@@ -558,11 +560,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (msg->len > 0)
                     mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
 
+                mg_queue_del(&session->queue, len); // Delete message
+
                 // release memory
                 free(msg->session_id);
                 free(msg->buf);
-
-                mg_queue_del(&session->queue, len); // Delete message
             }
         }
 
