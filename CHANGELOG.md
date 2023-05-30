@@ -1,3 +1,9 @@
+## [5.0.36] - 2023-05-30
+
+* updated the mongoose C networking library to v7.10
+* re-worked internal messaging to take advantage of the new mongoose v7.10 lock-free message queue (_*improved performance*_)
+* applied glib atomic reference counting to the user session C structure (_*improved reliability*_)
+
 ## [5.0.35] - 2023-05-24
 
 * Introduced a hard limit of 500 Splatalogue spectral lines that can be displayed simultaneously in the website. This has been done in order to prevent an information overload and a website slowdown. The 500 lines that are displayed will be chosen as a random subset of the larger than 500 original number of lines. Please refine your search criteria to avoid a hard limit. If the hard limit has been reached information will be displayed in the web browser JavaScript console (press F12 to view it in most browsers).
