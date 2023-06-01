@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-06-01.0";
+    return "JS2023-06-01.1";
 }
 
 function uuidv4() {
@@ -14379,7 +14379,7 @@ function send_pv_request(x1, y1, x2, y2) {
     sent_seq_id++;
 
     var request = {
-        type: "pv",
+        type: composite_view ? "composite_pv" : "pv",
         x1: Math.round(x1),
         y1: Math.round(y1),
         x2: Math.round(x2),
