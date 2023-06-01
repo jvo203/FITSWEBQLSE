@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-05-24.1";
+    return "JS2023-06-01.0";
 }
 
 function uuidv4() {
@@ -6543,7 +6543,7 @@ function validate_pv_contour_lines() {
         previous_pv_contour_lines = value;
 
         if (displayPVContours) {
-            resubmit_pv_line(va_count);
+            resubmit_pv_line();
         }
     }
 }
@@ -10000,7 +10000,7 @@ function pv_event(event) {
         }
 
         // submit the P-V line to the server
-        if (va_count == 1) {
+        if (va_count == 1 || composite_view) {
             // create a new canvas
             var div = d3.select("body").append("div")
                 .attr("id", "PVDiagram")
@@ -10047,7 +10047,7 @@ function pv_event(event) {
                     }
 
                     if (displayPVContours) {
-                        resubmit_pv_line(va_count);
+                        resubmit_pv_line();
                     } else {
                         try {
                             d3.select("#PVContourSVG").remove();
@@ -10140,7 +10140,7 @@ function pv_event(event) {
 
             // set the onchange handler
             d3.selectAll("input[name='pv_scaling']").on("change", function () {
-                resubmit_pv_line(va_count);
+                resubmit_pv_line();
             });
 
             div.append("img")
@@ -10155,7 +10155,7 @@ function pv_event(event) {
             d3.select("#zoomCross").attr("opacity", 0.0);
 
             pv_loop = -1;
-            const res = submit_pv_line(va_count, x1, y1, x2, y2);
+            const res = submit_pv_line(x1, y1, x2, y2);
             console.log(res);
 
             // copy the image from WebGL to the new canvas
@@ -10303,7 +10303,7 @@ function pv_event(event) {
                             event.preventDefault = true;
 
                             // start the pv event loop
-                            pv_loop = setTimeout(loop_pv_line, pv_latency, va_count);
+                            pv_loop = setTimeout(loop_pv_line, pv_latency);
                         })
                         .on("drag", function (event) {
                             event.preventDefault = true;
@@ -10391,7 +10391,7 @@ function pv_event(event) {
                             event.preventDefault = true;
 
                             clearTimeout(pv_loop);
-                            resubmit_pv_line(va_count);
+                            resubmit_pv_line();
                         }))
                     .attr("opacity", 1.0);
 
@@ -10411,14 +10411,14 @@ function pv_event(event) {
                             event.preventDefault = true;
 
                             // start the pv event loop
-                            pv_loop = setTimeout(loop_pv_line, pv_latency, va_count);
+                            pv_loop = setTimeout(loop_pv_line, pv_latency);
                         })
                         .on("drag", dragMid)
                         .on("end", function (event) {
                             event.preventDefault = true;
 
                             clearTimeout(pv_loop);
-                            resubmit_pv_line(va_count);
+                            resubmit_pv_line();
                         }))
                     .attr("opacity", 1.0);
 
@@ -10451,7 +10451,7 @@ function pv_event(event) {
                             event.preventDefault = true;
 
                             // start the pv event loop
-                            pv_loop = setTimeout(loop_pv_line, pv_latency, va_count);
+                            pv_loop = setTimeout(loop_pv_line, pv_latency);
                         })
                         .on("drag", function (event) {
                             event.preventDefault = true;
@@ -10539,7 +10539,7 @@ function pv_event(event) {
                             event.preventDefault = true;
 
                             clearTimeout(pv_loop);
-                            resubmit_pv_line(va_count);
+                            resubmit_pv_line();
                         }))
                     .attr("opacity", 1.0);
             }
@@ -14341,7 +14341,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
     };
 }
 
-function send_pv_request(index, x1, y1, x2, y2) {
+function send_pv_request(x1, y1, x2, y2) {
     var c = 299792.458;//speed of light [km/s]
 
     var deltaV = 0.0;
@@ -14396,13 +14396,13 @@ function send_pv_request(index, x1, y1, x2, y2) {
     };
 
     //send a P-V diagram request to the server    
-    if (wsConn[index - 1].readyState == 1)
-        wsConn[index - 1].send(JSON.stringify(request));
+    if (wsConn[0].readyState == 1)
+        wsConn[0].send(JSON.stringify(request));
 
     setup_window_timeout();
 }
 
-function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
+function submit_pv_line(line_x1, line_y1, line_x2, line_y2) {
     mousedown = false;
 
     var offsetx = d3.select("#image_rectangle").attr("x");
@@ -14428,7 +14428,7 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
 
     // console.log("orig_x1:", orig_x1, "orig_y1:", orig_y1, "orig_x2:", orig_x2, "orig_y2:", orig_y2);
 
-    send_pv_request(index, orig_x1, orig_y1, orig_x2, orig_y2);
+    send_pv_request(orig_x1, orig_y1, orig_x2, orig_y2);
 
     return {
         x1: (line_x1 - offsetx) / d3.select("#image_rectangle").attr("width"),
@@ -14438,12 +14438,12 @@ function submit_pv_line(index, line_x1, line_y1, line_x2, line_y2) {
     }
 }
 
-function loop_pv_line(index) {
-    resubmit_pv_line(index);
-    pv_loop = setTimeout(loop_pv_line, pv_latency, va_count);
+function loop_pv_line() {
+    resubmit_pv_line();
+    pv_loop = setTimeout(loop_pv_line, pv_latency);
 }
 
-function resubmit_pv_line(index) {
+function resubmit_pv_line() {
     var line = d3.select("#pvline2");
     var line_x1 = parseFloat(line.attr("x1")) / pvsvg_width;
     var line_y1 = parseFloat(line.attr("y1")) / pvsvg_height;
@@ -14467,7 +14467,7 @@ function resubmit_pv_line(index) {
 
     // console.log("orig_x1:", orig_x1, "orig_y1:", orig_y1, "orig_x2:", orig_x2, "orig_y2:", orig_y2);
 
-    send_pv_request(index, orig_x1, orig_y1, orig_x2, orig_y2);
+    send_pv_request(orig_x1, orig_y1, orig_x2, orig_y2);
 }
 
 function partial_fits_download() {
