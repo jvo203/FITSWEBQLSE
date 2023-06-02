@@ -152,6 +152,23 @@ module fits
 
    end type pv_request_f
 
+   type, bind(c) :: composite_pv_request_f
+      ! input
+      integer(c_int) :: x1, y1, x2, y2
+      integer(c_int) :: width, height
+      real(c_double) :: frame_start, frame_end, ref_freq, deltaV
+      logical(kind=c_bool) :: rest
+      integer(c_int) :: seq_id
+      real(c_float) :: timestamp
+
+      ! RGB channels (up to three)
+      type(C_PTR) :: ptr(3)
+
+      ! output
+      integer(kind=c_int) :: fd
+
+   end type composite_pv_request_f
+
    type, bind(c) :: cluster_pv_request_f
       ! input
       integer(c_int) :: x1, y1, x2, y2, first, last
