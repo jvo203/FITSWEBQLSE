@@ -17420,12 +17420,6 @@ async function mainRenderer() {
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 49');
 
-        d3.select("#mainDiv").append("canvas")
-            .attr("id", "CompositeCanvas")
-            .attr("width", width)
-            .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 50');
-
         d3.select("#mainDiv").append("svg")
             .attr("id", "ContourSVG")
             .attr("width", width)
