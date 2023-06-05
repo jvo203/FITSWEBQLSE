@@ -15817,12 +15817,14 @@ function display_FITS_header(index) {
         var headerText = document.getElementById('headerText#' + index);
         headerText.innerHTML = fitsHeader.trim().replace(/(.{80})/g, "$1<br>");
 
-        var headerTag = document.getElementById('headerTag#' + index);
+        if (va_count > 1) {
+            var headerTag = document.getElementById('headerTag#' + index);
 
-        let line = fitsData.LINE.trim();
+            let line = fitsData.LINE.trim();
 
-        if (line != "")
-            headerTag.innerHTML = plain2chem(line, true);
+            if (line != "")
+                headerTag.innerHTML = plain2chem(line, true);
+        }
     }
     catch (e) {
         console.log(e);
