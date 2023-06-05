@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-06-01.1";
+    return "JS2023-06-05.0";
 }
 
 function uuidv4() {
@@ -17292,7 +17292,6 @@ async function mainRenderer() {
 
         realtime_spectrum = localStorage_read_boolean("realtime_spectrum", true);
         realtime_video = localStorage_read_boolean("realtime_video", true);
-        experimental = localStorage_read_boolean("experimental", false);
         displayDownloadConfirmation = localStorage_read_boolean("displayDownloadConfirmation", true);
         welcome = localStorage_read_boolean("welcome_v5_alpha", true);
 
