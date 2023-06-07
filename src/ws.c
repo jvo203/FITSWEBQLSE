@@ -771,19 +771,27 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (common_session->pv_exit)
                 break;
 
-            int x1 = -1;
-            int y1 = -1;
-            int x2 = -1;
-            int y2 = -1;
-            int width = 0;
-            int height = 0;
-            double frame_start = 0.0;
-            double frame_end = 0.0;
-            double ref_freq = 0.0;
-            double deltaV = 0.0;
-            bool rest = false;
-            int seq_id = 0;
-            float timestamp = 0.0;
+            // parse the JSON request
+            struct composite_pv_request *req = (struct composite_pv_request *)malloc(sizeof(struct composite_pv_request));
+
+            if (req == NULL)
+                break;
+
+            req->va_count = 0;
+            req->x1 = -1;
+            req->y1 = -1;
+            req->x2 = -1;
+            req->y2 = -1;
+            req->width = 0;
+            req->height = 0;
+            req->frame_start = 0.0;
+            req->frame_end = 0.0;
+            req->ref_freq = 0.0;
+            req->deltaV = 0.0;
+            req->rest = false;
+            req->seq_id = 0;
+            req->timestamp = 0.0;
+            req->fd = -1;
 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
@@ -791,56 +799,56 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 // 'x1'
                 if (strncmp(wm->data.ptr + koff, "\"x1\"", klen) == 0)
-                    x1 = atoi2(wm->data.ptr + voff, vlen);
+                    req->x1 = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'y1'
                 if (strncmp(wm->data.ptr + koff, "\"y1\"", klen) == 0)
-                    y1 = atoi2(wm->data.ptr + voff, vlen);
+                    req->y1 = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'x2'
                 if (strncmp(wm->data.ptr + koff, "\"x2\"", klen) == 0)
-                    x2 = atoi2(wm->data.ptr + voff, vlen);
+                    req->x2 = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'y2'
                 if (strncmp(wm->data.ptr + koff, "\"y2\"", klen) == 0)
-                    y2 = atoi2(wm->data.ptr + voff, vlen);
+                    req->y2 = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'width'
                 if (strncmp(wm->data.ptr + koff, "\"width\"", klen) == 0)
-                    width = atoi2(wm->data.ptr + voff, vlen);
+                    req->width = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'height'
                 if (strncmp(wm->data.ptr + koff, "\"height\"", klen) == 0)
-                    height = atoi2(wm->data.ptr + voff, vlen);
+                    req->height = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'frame_start'
                 if (strncmp(wm->data.ptr + koff, "\"frame_start\"", klen) == 0)
-                    frame_start = atof2(wm->data.ptr + voff, vlen);
+                    req->frame_start = atof2(wm->data.ptr + voff, vlen);
 
                 // 'frame_end'
                 if (strncmp(wm->data.ptr + koff, "\"frame_end\"", klen) == 0)
-                    frame_end = atof2(wm->data.ptr + voff, vlen);
+                    req->frame_end = atof2(wm->data.ptr + voff, vlen);
 
                 // 'ref_freq'
                 if (strncmp(wm->data.ptr + koff, "\"ref_freq\"", klen) == 0)
-                    ref_freq = atof2(wm->data.ptr + voff, vlen);
+                    req->ref_freq = atof2(wm->data.ptr + voff, vlen);
 
                 // 'deltaV'
                 if (strncmp(wm->data.ptr + koff, "\"deltaV\"", klen) == 0)
-                    deltaV = atof2(wm->data.ptr + voff, vlen);
+                    req->deltaV = atof2(wm->data.ptr + voff, vlen);
 
                 // 'rest'
                 if (strncmp(wm->data.ptr + koff, "\"rest\"", klen) == 0)
                     if (strncmp(wm->data.ptr + voff, "true", vlen) == 0)
-                        rest = true;
+                        req->rest = true;
 
                 // 'seq_id'
                 if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
-                    seq_id = atoi2(wm->data.ptr + voff, vlen);
+                    req->seq_id = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'timestamp'
                 if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
-                    timestamp = atof2(wm->data.ptr + voff, vlen);
+                    req->timestamp = atof2(wm->data.ptr + voff, vlen);
             }
 
             break;

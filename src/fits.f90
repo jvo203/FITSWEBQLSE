@@ -162,6 +162,7 @@ module fits
       real(c_float) :: timestamp
 
       ! RGB channels (up to three)
+      integer(c_int) :: va_count
       type(C_PTR) :: ptr(3)
 
       ! output

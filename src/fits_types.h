@@ -225,6 +225,7 @@ struct composite_pv_request
     float timestamp;
 
     // RGB channels (up to three)
+    int va_count;
     void *ptr[3]; // item
 
     // output (the 'write' end of a Unix pipe)
