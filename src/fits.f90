@@ -145,13 +145,12 @@ module fits
       integer(c_int) :: seq_id
       real(c_float) :: timestamp
 
-      ! output
-      integer(kind=c_int) :: fd
-
       ! RGB channels (up to three)
       integer(c_int) :: va_count
       type(C_PTR) :: ptr(3)
 
+      ! output
+      integer(kind=c_int) :: fd
    end type pv_request_f
 
    type, bind(c) :: cluster_pv_request_f

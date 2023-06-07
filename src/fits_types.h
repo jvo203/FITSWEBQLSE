@@ -201,12 +201,12 @@ struct pv_request
     int seq_id;
     float timestamp;
 
-    // output (the 'write' end of a Unix pipe)
-    int fd;
-
     // RGB channels (up to three)
     int va_count;
     void *ptr[3]; // item
+
+    // output (the 'write' end of a Unix pipe)
+    int fd;
 };
 
 struct cluster_pv_request
