@@ -772,12 +772,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 break;
 
             // parse the JSON request
-            struct composite_pv_request *req = (struct composite_pv_request *)malloc(sizeof(struct composite_pv_request));
+            struct pv_request *req = (struct pv_request *)malloc(sizeof(struct pv_request));
 
             if (req == NULL)
                 break;
 
-            req->va_count = 0;
             req->x1 = -1;
             req->y1 = -1;
             req->x2 = -1;
@@ -792,6 +791,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->seq_id = 0;
             req->timestamp = 0.0;
             req->fd = -1;
+            req->va_count = 0;
+            req->ptr[0] = NULL;
+            req->ptr[1] = NULL;
+            req->ptr[2] = NULL;
 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
@@ -874,8 +877,16 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             free(datasetId);
 
-            // remember to free the request or pass it to FORTRAN
-            free(req);
+            pthread_mutex_lock(&session->pv_mtx);
+
+            // add the request to the circular queue
+            ring_put(session->pv_ring, req);
+
+            if (!session->pv_exit)
+                pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
+
+            // finally unlock the mutex
+            pthread_mutex_unlock(&session->pv_mtx);
 
             break;
         }
@@ -923,7 +934,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->seq_id = 0;
             req->timestamp = 0.0;
             req->fd = -1;
-            req->ptr = NULL;
+            req->va_count = 1;
+            req->ptr[0] = item;
 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
@@ -3608,16 +3620,6 @@ void *pv_event_loop(void *arg)
                 last_seq_id = req->seq_id;
             }
 
-            // get the item
-            void *item = get_dataset(session->datasetid);
-
-            if (item == NULL)
-            {
-                printf("[C] pv_event_loop::get_dataset failed.\n");
-                free(req);
-                continue;
-            }
-
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
             if (resp == NULL)
@@ -3645,7 +3647,6 @@ void *pv_event_loop(void *arg)
 
                 // pass the write end of the pipe to a FORTRAN thread
                 req->fd = pipefd[1];
-                req->ptr = item;
 
                 pthread_t tid_req, tid_resp;
 
