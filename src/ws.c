@@ -2357,91 +2357,6 @@ void close_pipe(int fd)
         printf("[C] close_pipe status: %d\n", status);
 }
 
-void *ws_composite_pv_response(void *ptr)
-{
-    if (ptr == NULL)
-        pthread_exit(NULL);
-
-    struct websocket_response *resp = (struct websocket_response *)ptr;
-
-    printf("[C] ws_composite_pv_response: session_id: %s, fd: %d\n", resp->session_id, resp->fd);
-
-    ssize_t n = 0;
-    size_t offset = 0;
-    size_t buf_size = 0x40000;
-
-    char *buf = malloc(buf_size);
-
-    if (buf != NULL)
-        while ((n = read(resp->fd, buf + offset, buf_size - offset)) > 0)
-        {
-            offset += n;
-
-            // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
-
-            if (offset == buf_size)
-            {
-                printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
-
-                size_t new_size = buf_size << 1;
-                char *tmp = realloc(buf, new_size);
-
-                if (tmp != NULL)
-                {
-                    buf = tmp;
-                    buf_size = new_size;
-                }
-            }
-        }
-
-    // close the read end of the pipe
-    close(resp->fd);
-
-    if (0 == n)
-        printf("[C] PIPE_END_OF_STREAM\n");
-
-    if (n < 0)
-        printf("[C] PIPE_END_WITH_ERROR\n");
-
-    // <offset> contains the number of valid bytes in <buf>
-    if (offset == 0)
-        goto free_composite_pv_mem;
-
-    // get a session based on resp->session_id
-    websocket_session *session = NULL;
-
-    if (pthread_mutex_lock(&sessions_mtx) == 0)
-    {
-        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
-        if (session != NULL)
-            g_atomic_rc_box_acquire(session);
-
-        pthread_mutex_unlock(&sessions_mtx);
-    }
-
-    if (session == NULL)
-    {
-        printf("[C] ws_composite_pv_response session %s not found.\n", resp->session_id);
-        goto free_composite_pv_mem;
-    }
-
-    // TO-DO
-    // ...
-
-    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
-    session = NULL;
-
-    // release the incoming buffer
-free_composite_pv_mem:
-    free(buf);
-
-    // release the memory
-    free(resp->session_id);
-    free(resp);
-
-    pthread_exit(NULL);
-}
-
 void *ws_pv_response(void *ptr)
 {
     if (ptr == NULL)
@@ -3746,10 +3661,7 @@ void *pv_event_loop(void *arg)
                 if (stat == 0)
                 {
                     // launch a pipe read C pthread
-                    if (req->va_count == 1)
-                        stat = pthread_create(&tid_resp, NULL, &ws_pv_response, resp);
-                    else
-                        stat = pthread_create(&tid_resp, NULL, &ws_composite_pv_response, resp);
+                    stat = pthread_create(&tid_resp, NULL, &ws_pv_response, resp);
 
                     if (stat == 0)
                         pthread_detach(tid_resp);
