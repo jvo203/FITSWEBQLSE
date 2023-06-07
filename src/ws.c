@@ -2407,6 +2407,30 @@ void *ws_composite_pv_response(void *ptr)
     if (offset == 0)
         goto free_composite_pv_mem;
 
+    // get a session based on resp->session_id
+    websocket_session *session = NULL;
+
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
+        if (session != NULL)
+            g_atomic_rc_box_acquire(session);
+
+        pthread_mutex_unlock(&sessions_mtx);
+    }
+
+    if (session == NULL)
+    {
+        printf("[C] ws_composite_pv_response session %s not found.\n", resp->session_id);
+        goto free_composite_pv_mem;
+    }
+
+    // TO-DO
+    // ...
+
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+    session = NULL;
+
     // release the incoming buffer
 free_composite_pv_mem:
     free(buf);
