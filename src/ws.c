@@ -763,12 +763,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         if (strcmp(type, "composite_pv") == 0)
         {
-            websocket_session *common_session = (websocket_session *)c->fn_data;
+            websocket_session *session = (websocket_session *)c->fn_data;
 
-            if (common_session == NULL)
+            if (session == NULL)
                 break;
 
-            if (common_session->pv_exit)
+            if (session->pv_exit)
                 break;
 
             // parse the JSON request
@@ -850,6 +850,32 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
                     req->timestamp = atof2(wm->data.ptr + voff, vlen);
             }
+
+            // next iterate through the multiple datasets launching individual channel threads
+            // tokenize session->multi
+            char *datasetId = strdup(session->multi);
+            char *token = datasetId;
+            char *rest = token;
+            bool skip_frame = false;
+
+            while ((token = strtok_r(rest, ";", &rest)) != NULL)
+            {
+                void *item = get_dataset(token);
+
+                if (item == NULL)
+                    continue;
+
+                update_timestamp(item);
+
+                // RGB
+                req->ptr[req->va_count] = item;
+                req->va_count++; // increment the channel count
+            }
+
+            free(datasetId);
+
+            // remember to free the request or pass it to FORTRAN
+            free(req);
 
             break;
         }
