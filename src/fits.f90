@@ -8800,6 +8800,372 @@ contains
 
    end subroutine ws_pv_request
 
+   recursive subroutine ws_composite_pv_request(user) BIND(C, name='ws_composite_pv_request')
+      use omp_lib
+      use :: unix_pthread
+      use contour
+      use list
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      ! contouring
+      integer, parameter :: nc = 7
+      integer ilb, iub, jlb, jub    ! index bounds of data matrix
+      real(kind=4), allocatable, dimension(:) :: xc, yc, zc
+      type(list_t), pointer :: contours => null() ! contour lines
+      integer, allocatable :: lines(:, :) ! contour lines
+      integer :: line_count
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(pv_request_f), pointer :: req
+
+      ! cluster
+      type(pv_request_t), target :: cluster_req
+      type(c_ptr) :: pid
+      integer(kind=c_int) :: rc
+
+      integer :: frame, first, last, length, npoints, i, max_threads
+      real :: dx, dy, t, dt
+      integer(c_int) :: x1, x2, y1, y2
+      integer :: prev_x, prev_y, cur_x, cur_y
+      integer, dimension(2) :: pos, prev_pos
+      integer, dimension(:), pointer :: ptr
+      real(kind=8) :: cdelt3
+
+      ! a decompression cache
+      real(kind=4), allocatable :: x(:, :, :)
+
+      ! the maximum exponent
+      integer :: max_exp
+
+      type(list_t), pointer :: ll => null()
+      type(list_t), pointer :: cursor => null()
+      real(kind=c_float), allocatable, target :: pv(:, :), cluster_pv(:, :)
+      integer(kind=8) :: npixels
+      real(kind=c_float) :: pmin, pmax, pmean, pstd
+      real(kind=8) :: f, v1, v2
+
+      ! image downscaling
+      real :: scale
+      integer :: img_width, img_height
+      real(kind=c_float), pointer :: pixels(:, :)
+      logical :: allocated_pixels
+
+      ! timing
+      real(kind=8) :: t1, t2
+
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr(1))) return
+      call c_f_pointer(req%ptr(1), item)
+
+      print *, 'P-V diagram for ', item%datasetid,&
+      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
+      &', width:', req%width, ', height:', req%height, ', frame_start:', req%frame_start,&
+      & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
+      &', rest:', req%rest, ', timestamp:', req%timestamp, ', fd:', req%fd
+
+      if (.not. allocated(item%compressed)) then
+         if (req%fd .ne. -1) call close_pipe(req%fd)
+         nullify (item)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+         return
+      end if
+
+      ! get the range of the cube planes
+      call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
+
+      length = last - first + 1
+
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      call get_frame2freq_vel(item, first, req%ref_freq, req%deltaV, req%rest, f, v1)
+      call get_frame2freq_vel(item, last, req%ref_freq, req%deltaV, req%rest, f, v2)
+      print *, 'velocity range: v1:', v1, 'v2:', v2, ' [km/s]'
+
+      call get_cdelt3(item, cdelt3)
+
+      ! allocate the decompression cache
+      allocate (x(1:DIM, 1:DIM, first:last))
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+
+      ! sanity checks
+      x1 = max(min(req%x1, item%naxes(1)), 1)
+      y1 = max(min(req%y1, item%naxes(2)), 1)
+      x2 = max(min(req%x2, item%naxes(1)), 1)
+      y2 = max(min(req%y2, item%naxes(2)), 1)
+
+      print *, 'x1:', x1, 'y1:', y1, 'x2:', x2, 'y2:', y2
+
+      dx = abs(x2 - x1 + 1)
+      dy = abs(y2 - y1 + 1)
+      dt = 1.0/sqrt(dx**2 + dy**2)/100.0 ! sample the line with a fine granularity
+
+      print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
+
+      ! first enumerate points along the line
+      npoints = 0
+      t = 0.0
+      prev_pos = 0
+
+      call list_init(ll)
+
+      do while (t .le. 1.0)
+         pos = line(t, x1, y1, x2, y2)
+
+         if (.not. all(pos .eq. prev_pos)) then
+            prev_pos = pos
+            npoints = npoints + 1
+            ! print *, 'npoints', npoints, 'pos:', pos
+
+            call list_insert(ll, pos)
+         end if
+
+         t = t + dt
+      end do
+
+      print *, 'npoints:', npoints
+
+      ! there will be at least one point
+      ! allocate the pv array using an appropriate astronomical orientation convention
+      allocate (pv(npoints, first:last))
+      pv = 0.0
+
+      ! allocate the cluster pv array
+      allocate (cluster_pv(npoints, first:last))
+      cluster_pv = 0.0
+
+      ! launch a cluster thread (check if the number of cluster nodes is .gt. 0)
+      cluster_req%datasetid = c_loc(item%datasetid)
+      cluster_req%len = size(item%datasetid)
+
+      ! inputs
+      cluster_req%x1 = x1
+      cluster_req%y1 = y1
+      cluster_req%x2 = x2
+      cluster_req%y2 = y2
+      cluster_req%first = first
+      cluster_req%last = last
+
+      ! outputs
+      cluster_req%pv = c_loc(cluster_pv)
+      cluster_req%npoints = npoints
+      cluster_req%valid = .false.
+
+      ! launch a thread
+      pid = my_pthread_create(start_routine=c_funloc(fetch_pv_diagram), arg=c_loc(cluster_req), rc=rc)
+      ! end of cluster
+
+      ! start the timer
+      t1 = omp_get_wtime()
+
+      prev_x = 0
+      prev_y = 0
+
+      ! start with a head node
+      i = 0
+      cursor => ll
+
+      do while (associated(cursor))
+         ptr => list_get(cursor)
+         cursor => list_next(cursor)
+
+         if (.not. associated(ptr)) then
+            ! print *, 'i:', i, 'ptr is not associated'
+            exit
+         end if
+
+         i = i + 1
+         pos = ptr(1:2)
+         ! print *, 'i', i, 'pos:', pos
+
+         if (i .gt. npoints) exit
+
+         cur_x = 1 + (pos(1) - 1)/DIM
+         cur_y = 1 + (pos(2) - 1)/DIM
+
+         if (cur_x .ne. prev_x .or. cur_y .ne. prev_y) then
+            ! print *, '[ws_] decompressing a fixed block @ cur_x:', cur_x, 'cur_y:', cur_y
+            prev_x = cur_x
+            prev_y = cur_y
+
+            ! decompress fixed blocks in parallel
+            !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
+            !$omp& PRIVATE(frame, max_exp)&
+            !$omp& NUM_THREADS(max_threads)
+            !$omp DO
+            do frame = first, last
+               ! skip frames for which there is no data on this node
+               if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+               max_exp = int(item%compressed(frame)%ptr(cur_x, cur_y)%common_exp)
+               x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame)%ptr(cur_x, cur_y)%mantissa,&
+               & max_exp, significant_bits)
+            end do
+            !$omp END DO
+            !$omp END PARALLEL
+         end if
+
+         ! get the spectrum for each frame
+         do frame = first, last
+            ! skip frames for which there is no data on this node
+            if (.not. associated(item%compressed(frame)%ptr)) cycle
+
+            ! an inefficient implementation, it decompresses the same fixed blocks over and over again
+            ! pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
+
+            ! this faster implementation uses a decompression cache
+            pv(i, frame) = real(x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)*cdelt3, kind=4)
+         end do
+      end do
+
+      ! end the timer
+      t2 = omp_get_wtime()
+
+      ! join a thread
+      rc = my_pthread_join(pid)
+
+      ! merge the cluster results
+      if (cluster_req%valid) then
+         print *, 'merging the cluster P-V diagram'
+         pv(:, :) = pv(:, :) + cluster_pv(:, :)
+      else
+         print *, 'P-V diagram cluster_req%valid:', cluster_req%valid
+      end if
+
+      print *, 'processed #points:', i, 'P-V diagram elapsed time: ', 1000*(t2 - t1), '[ms]'
+
+      ! get the downscaled image dimensions
+      scale = get_pv_image_scale(req%width, req%height, npoints, length)
+
+      print *, 'scale:', scale
+
+      if (scale .lt. 1.0) then
+         img_width = nint(scale*npoints)
+         img_height = nint(scale*length)
+
+         allocate (pixels(img_width, img_height))
+         allocated_pixels = .true.
+
+         if (scale .gt. 0.2) then
+            call resizeLanczos(c_loc(pv), npoints, length, c_loc(pixels), img_width, img_height, 3)
+         else
+            call resizeSuper(c_loc(pv), npoints, length, c_loc(pixels), img_width, img_height)
+         end if
+      else
+         img_width = npoints
+         img_height = length
+         pixels => pv
+         allocated_pixels = .false.
+      end if
+
+      ! start the timer
+      t1 = omp_get_wtime()
+
+      pmin = 1.0E30
+      pmax = -1.0E30
+
+      ! pixels statistics and  image tone mapping transformation
+      npixels = img_width*img_height
+      call array_stat(c_loc(pixels), pmin, pmax, pmean, npixels)
+      pstd = array_std(c_loc(pixels), pmean, npixels)
+      call standardise_array(c_loc(pixels), pmean, pstd, npixels)
+
+      ! end the timer
+      t2 = omp_get_wtime()
+
+      print *, 'P-V min:', pmin, 'max:', pmax, 'mean:', pmean, 'std:', pstd, 'elapsed time:', 1000*(t2 - t1), '[ms]'
+
+      ! free the decompression cache
+      deallocate (x)
+
+      ! Free the list
+      nullify (cursor)
+      call list_free(ll)
+
+      ! start the timer
+      t1 = omp_get_wtime()
+
+      ! get pixels array lower and upper bounds into ilb, iub, jlb, jub
+      ilb = lbound(pixels, 1)
+      iub = ubound(pixels, 1)
+      jlb = lbound(pixels, 2)
+      jub = ubound(pixels, 2)
+
+      allocate (xc(ilb:iub))
+      allocate (yc(jlb:jub))
+      allocate (zc(1:nc))
+
+      do i = ilb, iub
+         xc(i) = 1 + real(img_width - 1)*real(i - ilb)/real(iub - ilb)
+      end do
+
+      do i = jlb, jub
+         yc(i) = 1 + real(img_height - 1)*real(i - jlb)/real(jub - jlb)
+      end do
+
+      do i = 1, nc
+         zc(i) = -1.0 + 2.0*real(i - 1)/real(nc - 1)
+      end do
+
+      ! print *, "xc:", xc(ilb), xc(iub)
+      ! print *, "yc:", yc(jlb), yc(jub)
+      ! print *, "zc:", zc
+
+      call list_init(contours)
+      allocate (lines(5, 10*img_width*img_height)) ! assume the worst-case scenario
+      line_count = 0
+
+      ! print lines bounds
+      ! print *, 'lines bounds:', lbound(lines, 1), ubound(lines, 1), lbound(lines, 2), ubound(lines, 2)
+      ! print lines dimensions
+      ! print *, 'lines dimensions:', size(lines, 1), size(lines, 2)
+
+      ! contour the P-V diagram
+      ! line_count = conrec(pixels, ilb, iub, jlb, jub, xc, yc, nc, zc, contours, lines)
+
+      ! end the timer
+      t2 = omp_get_wtime()
+
+      ! print *, 'P-V CONREC NC:', nc, '#LINES:', line_count, 'elapsed time:', 1000*(t2 - t1), '[ms]'
+
+      if (req%fd .ne. -1) then
+         ! send the P-V diagram  via a Unix pipe
+         call write_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
+         & 1, npoints, v1, v2)
+
+         call close_pipe(req%fd)
+         req%fd = -1
+      end if
+
+      ! free the contours
+      call list_free(contours)
+
+      ! free the P-V diagram
+      deallocate (pv)
+      deallocate (cluster_pv)
+
+      ! free the pixels but only if they were allocated
+      if (allocated_pixels) then
+         deallocate (pixels)
+      else
+         nullify (pixels)
+      end if
+
+      nullify (item)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+
+      return
+
+   end subroutine ws_composite_pv_request
+
    recursive subroutine ws_image_spectrum_request(user) BIND(C, name='ws_image_spectrum_request')
       use omp_lib
       use :: unix_pthread
