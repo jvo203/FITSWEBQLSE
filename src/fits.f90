@@ -8807,11 +8807,6 @@ contains
       use, intrinsic :: iso_c_binding
       implicit none
 
-      ! contouring
-      integer, parameter :: nc = 7
-      integer ilb, iub, jlb, jub    ! index bounds of data matrix
-      real(kind=4), allocatable, dimension(:) :: xc, yc, zc
-
       type(C_PTR), intent(in), value :: user
 
       type(dataset), pointer :: item
