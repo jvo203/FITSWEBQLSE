@@ -3656,7 +3656,10 @@ void *pv_event_loop(void *arg)
                 pthread_t tid_req, tid_resp;
 
                 // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                stat = pthread_create(&tid_req, NULL, &ws_pv_request, req);
+                if (req->va_count == 1)
+                    stat = pthread_create(&tid_req, NULL, &ws_pv_request, req);
+                else
+                    stat = pthread_create(&tid_req, NULL, &ws_composite_pv_request, req);
 
                 if (stat == 0)
                 {

@@ -91,6 +91,7 @@ extern void *realtime_image_spectrum_request_simd(void *req);
 extern void *spectrum_request_simd(void *req);
 extern void *ws_image_spectrum_request(void *req);
 extern void *ws_pv_request(void *req);
+extern void *ws_composite_pv_request(void *req);
 extern void *video_request_simd(void *req);
 extern void *composite_video_request_simd(void *req);
 void *spectrum_response(void *ptr);
