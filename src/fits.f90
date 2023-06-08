@@ -8228,7 +8228,7 @@ contains
          ! the initialisation will be done inside SPMD C
          ! pixels = int(fill, kind=1)
 
-         ! reduce the number of threads by half to avoid oversubscription (all three RGB channels are done in parallel)
+         ! reduce the number of threads to avoid oversubscription (all three RGB channels are done in parallel)
          max_threads = max(1, get_max_threads()/va_count)
 
          ! by default compressed is dimension(n/DIM, m/DIM)
@@ -8907,8 +8907,8 @@ contains
             ! allocate the decompression cache
             allocate (x(1:DIM, 1:DIM, first:last))
 
-            ! get #physical cores (ignore HT)
-            max_threads = get_max_threads()
+            ! reduce the number of threads to avoid oversubscription (all three RGB channels are done in parallel)
+            max_threads = max(1, get_max_threads()/req%va_count)
 
             ! sanity checks
             x1 = max(min(req%x1, item%naxes(1)), 1)
