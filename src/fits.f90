@@ -8803,7 +8803,6 @@ contains
    recursive subroutine ws_composite_pv_request(user) BIND(C, name='ws_composite_pv_request')
       use omp_lib
       use :: unix_pthread
-      use contour
       use list
       use, intrinsic :: iso_c_binding
       implicit none
@@ -8812,9 +8811,6 @@ contains
       integer, parameter :: nc = 7
       integer ilb, iub, jlb, jub    ! index bounds of data matrix
       real(kind=4), allocatable, dimension(:) :: xc, yc, zc
-      type(list_t), pointer :: contours => null() ! contour lines
-      integer, allocatable :: lines(:, :) ! contour lines
-      integer :: line_count
 
       type(C_PTR), intent(in), value :: user
 
@@ -8859,14 +8855,21 @@ contains
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
-      if (.not. c_associated(req%ptr(1))) return
-      call c_f_pointer(req%ptr(1), item)
+      if(req%va_count .le. 0) then
+         if (req%fd .ne. -1) call close_pipe(req%fd)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+         return
+      end if
 
-      print *, 'P-V diagram for ', item%datasetid,&
+      print *, 'Composite P-V diagram va_count: ', req%va_count,&
       &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
       &', width:', req%width, ', height:', req%height, ', frame_start:', req%frame_start,&
       & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
       &', rest:', req%rest, ', timestamp:', req%timestamp, ', fd:', req%fd
+
+      if (.not. c_associated(req%ptr(1))) return
+      call c_f_pointer(req%ptr(1), item)
 
       if (.not. allocated(item%compressed)) then
          if (req%fd .ne. -1) call close_pipe(req%fd)
@@ -9089,63 +9092,14 @@ contains
       nullify (cursor)
       call list_free(ll)
 
-      ! start the timer
-      t1 = omp_get_wtime()
-
-      ! get pixels array lower and upper bounds into ilb, iub, jlb, jub
-      ilb = lbound(pixels, 1)
-      iub = ubound(pixels, 1)
-      jlb = lbound(pixels, 2)
-      jub = ubound(pixels, 2)
-
-      allocate (xc(ilb:iub))
-      allocate (yc(jlb:jub))
-      allocate (zc(1:nc))
-
-      do i = ilb, iub
-         xc(i) = 1 + real(img_width - 1)*real(i - ilb)/real(iub - ilb)
-      end do
-
-      do i = jlb, jub
-         yc(i) = 1 + real(img_height - 1)*real(i - jlb)/real(jub - jlb)
-      end do
-
-      do i = 1, nc
-         zc(i) = -1.0 + 2.0*real(i - 1)/real(nc - 1)
-      end do
-
-      ! print *, "xc:", xc(ilb), xc(iub)
-      ! print *, "yc:", yc(jlb), yc(jub)
-      ! print *, "zc:", zc
-
-      call list_init(contours)
-      allocate (lines(5, 10*img_width*img_height)) ! assume the worst-case scenario
-      line_count = 0
-
-      ! print lines bounds
-      ! print *, 'lines bounds:', lbound(lines, 1), ubound(lines, 1), lbound(lines, 2), ubound(lines, 2)
-      ! print lines dimensions
-      ! print *, 'lines dimensions:', size(lines, 1), size(lines, 2)
-
-      ! contour the P-V diagram
-      ! line_count = conrec(pixels, ilb, iub, jlb, jub, xc, yc, nc, zc, contours, lines)
-
-      ! end the timer
-      t2 = omp_get_wtime()
-
-      ! print *, 'P-V CONREC NC:', nc, '#LINES:', line_count, 'elapsed time:', 1000*(t2 - t1), '[ms]'
-
       if (req%fd .ne. -1) then
          ! send the P-V diagram  via a Unix pipe
-         call write_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
-         & 1, npoints, v1, v2)
+         ! call write_composite_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
+         ! & 1, npoints, v1, v2)
 
          call close_pipe(req%fd)
          req%fd = -1
       end if
-
-      ! free the contours
-      call list_free(contours)
 
       ! free the P-V diagram
       deallocate (pv)
