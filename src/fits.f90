@@ -8461,7 +8461,7 @@ contains
       integer(kind=c_int) :: rc
 
       integer :: frame, first, last, length, npoints, i, max_threads
-      real :: dx, dy, t, dt
+      real :: dx, dy, dp, t, dt
       integer(c_int) :: x1, x2, y1, y2
       integer :: prev_x, prev_y, cur_x, cur_y
       integer, dimension(2) :: pos, prev_pos
@@ -8539,9 +8539,10 @@ contains
 
       dx = abs(x2 - x1 + 1)
       dy = abs(y2 - y1 + 1)
-      dt = 1.0/sqrt(dx**2 + dy**2)/100.0 ! sample the line with a fine granularity
+      dp = sqrt(dx**2 + dy**2)
+      dt = 1.0/dp/100.0 ! sample the line with a fine granularity
 
-      print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
+      print *, 'dx:', dx, 'dy:', dy, 'dp:', dp, 'dt:', dt
 
       ! first enumerate points along the line
       npoints = 0
