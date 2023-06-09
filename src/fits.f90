@@ -8800,7 +8800,7 @@ contains
 
    end subroutine ws_pv_request
 
-   subroutine get_pv_diagram(item, pixels, width, height, pmin, pmax, pmean, pstd)
+   subroutine get_pv_diagram(item, req, pixels, width, height, pmin, pmax, pmean, pstd)
       use omp_lib
       use :: unix_pthread
       use list
@@ -8808,6 +8808,7 @@ contains
       implicit none
 
       type(dataset), pointer, intent(inout) :: item
+      type(pv_request_f), pointer, intent(in) :: req
       real(kind=c_float), allocatable, target, intent(out) :: pixels(:, :)
       integer, intent(out) :: width, height
       real(kind=c_float), intent(out) :: pmin, pmax, pmean, pstd
@@ -9036,7 +9037,7 @@ contains
       ! pixels statistics and  image tone mapping transformation
       npixels = width*height
       call array_stat(c_loc(pixels), pmin, pmax, pmean, npixels)
-      pstd(tid) = array_std(c_loc(pixels), pmean, npixels)
+      pstd = array_std(c_loc(pixels), pmean, npixels)
       call standardise_array(c_loc(pixels), pmean, pstd, npixels)
 
       ! end the timer
@@ -9111,7 +9112,7 @@ contains
                cycle
             end if
 
-            call get_pv_diagram(item, pixels, img_width, img_height, pmin(tid), pmax(tid), pmean(tid), pstd(tid))
+            call get_pv_diagram(item, req, pixels, img_width, img_height, pmin(tid), pmax(tid), pmean(tid), pstd(tid))
 
             nullify(item)
          end block
