@@ -8705,7 +8705,7 @@ contains
       pmin = 1.0E30
       pmax = -1.0E30
 
-      ! pixels statistics and  image tone mapping transformation
+      ! pixels statistics and image tone mapping transformation
       npixels = img_width*img_height
       call array_stat(c_loc(pixels), pmin, pmax, pmean, npixels)
       pstd = array_std(c_loc(pixels), pmean, npixels)
@@ -9034,7 +9034,7 @@ contains
       pmin = 1.0E30
       pmax = -1.0E30
 
-      ! pixels statistics and  image tone mapping transformation
+      ! pixels statistics and image tone mapping transformation
       npixels = width*height
       call array_stat(c_loc(pixels), pmin, pmax, pmean, npixels)
       pstd = array_std(c_loc(pixels), pmean, npixels)
