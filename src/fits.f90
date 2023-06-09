@@ -7415,10 +7415,7 @@ contains
       deallocate (x)
 
       if (req%fd .ne. -1) then
-         ! send the P-V diagram  via a Unix pipe
-         ! call write_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
-         ! & 1, npoints, v1, v2)
-
+         ! send the P-V diagram via a Unix pipe
          array_size = int(sizeof(pv), kind=c_size_t)
          written = chunked_write(req%fd, c_loc(pv), array_size)
 
@@ -8705,7 +8702,7 @@ contains
       deallocate (points)
 
       if (req%fd .ne. -1) then
-         ! send the P-V diagram  via a Unix pipe
+         ! send the P-V diagram via a Unix pipe
          call write_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
          & 1, npoints, v1, v2)
 
@@ -8732,7 +8729,7 @@ contains
 
    end subroutine ws_pv_request
 
-   subroutine get_pv_diagram(item, req, pixels, width, height, pmin, pmax, pmean, pstd)
+   subroutine get_pv_diagram(item, req, pixels, width, height, pmin, pmax, pmean, pstd, npoints, v1, v2)
       use omp_lib
       use :: unix_pthread
       use, intrinsic :: iso_c_binding
@@ -8743,13 +8740,15 @@ contains
       real(kind=c_float), allocatable, target, intent(out) :: pixels(:, :)
       integer, intent(out) :: width, height
       real(kind=c_float), intent(out) :: pmin, pmax, pmean, pstd
+      integer, intent(out) :: npoints
+      real(kind=8), intent(out) :: v1, v2
 
       ! cluster
       type(pv_request_t), target :: cluster_req
       type(c_ptr) :: pid
       integer(kind=c_int) :: rc
 
-      integer :: frame, first, last, length, npoints, i, j, max_threads
+      integer :: frame, first, last, length, i, j, max_threads
       real :: dx, dy, dp, t, dt
       integer(c_int) :: x1, x2, y1, y2
       integer :: prev_x, prev_y, cur_x, cur_y
@@ -8765,7 +8764,7 @@ contains
 
       real(kind=c_float), allocatable, target :: pv(:, :), cluster_pv(:, :)
       integer(kind=8) :: npixels
-      real(kind=8) :: f, v1, v2
+      real(kind=8) :: f
 
       ! image downscaling
       real :: scale
@@ -8987,7 +8986,8 @@ contains
 
       ! RGB channels
       integer :: tid ! loop counter
-      integer :: composite_width, composite_height
+      integer :: composite_width, composite_height, composite_npoints
+      real(kind=8) :: composite_v1, composite_v2
       real(kind=c_float), allocatable :: composite_pixels(:, :, :)
       real(kind=c_float), allocatable :: pmin(:), pmax(:), pmean(:), pstd(:)
 
@@ -9014,6 +9014,7 @@ contains
 
       ! loop over the va_count
       !$omp PARALLEL DEFAULT(SHARED) SHARED(req, pmin, pmax, pmean, pstd, composite_pixels, composite_width, composite_height)&
+      !$omp& SHARED(composite_npoints, composite_v1, composite_v2)&
       !$omp& PRIVATE(tid)
       !$omp DO
       do tid = 1, req%va_count
@@ -9021,6 +9022,8 @@ contains
             type(dataset), pointer :: item
             real(kind=c_float), allocatable, target :: pixels(:, :)
             integer :: img_width, img_height
+            integer :: npoints
+            real(kind=8) :: v1, v2
 
 
             if (.not. c_associated(req%ptr(tid))) cycle
@@ -9031,7 +9034,8 @@ contains
                cycle
             end if
 
-            call get_pv_diagram(item, req, pixels, img_width, img_height, pmin(tid), pmax(tid), pmean(tid), pstd(tid))
+            call get_pv_diagram(item, req, pixels, img_width, img_height, pmin(tid), pmax(tid), pmean(tid), pstd(tid),&
+            & npoints, v1, v2)
 
             nullify(item)
          end block
@@ -9040,9 +9044,9 @@ contains
       !$omp END PARALLEL
 
       if (req%fd .ne. -1) then
-         ! send the P-V diagram  via a Unix pipe
-         ! call write_composite_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
-         ! & 1, npoints, v1, v2)
+         ! send the composite P-V diagram via a Unix pipe
+         ! call write_composite_pv_diagram(req%fd, composite_width, composite_height, ZFP_PV_PRECISION, c_loc(composite_pixels),&
+         ! & c_loc(pmean), c_loc(pstd), c_loc(pmin), c_loc(pmax), 1, composite_npoints, composite_v1, composite_v2, req%va_count)
 
          call close_pipe(req%fd)
          req%fd = -1
