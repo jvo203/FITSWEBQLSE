@@ -8735,7 +8735,6 @@ contains
    subroutine get_pv_diagram(item, req, pixels, width, height, pmin, pmax, pmean, pstd)
       use omp_lib
       use :: unix_pthread
-      use list
       use, intrinsic :: iso_c_binding
       implicit none
 
@@ -8750,12 +8749,12 @@ contains
       type(c_ptr) :: pid
       integer(kind=c_int) :: rc
 
-      integer :: frame, first, last, length, npoints, i, max_threads
-      real :: dx, dy, t, dt
+      integer :: frame, first, last, length, npoints, i, j, max_threads
+      real :: dx, dy, dp, t, dt
       integer(c_int) :: x1, x2, y1, y2
       integer :: prev_x, prev_y, cur_x, cur_y
       integer, dimension(2) :: pos, prev_pos
-      integer, dimension(:), pointer :: ptr
+      integer, allocatable :: points(:,:)
       real(kind=8) :: cdelt3
 
       ! a decompression cache
@@ -8764,8 +8763,6 @@ contains
       ! the maximum exponent
       integer :: max_exp
 
-      type(list_t), pointer :: ll => null()
-      type(list_t), pointer :: cursor => null()
       real(kind=c_float), allocatable, target :: pv(:, :), cluster_pv(:, :)
       integer(kind=8) :: npixels
       real(kind=8) :: f, v1, v2
@@ -8805,16 +8802,19 @@ contains
 
       dx = abs(x2 - x1 + 1)
       dy = abs(y2 - y1 + 1)
-      dt = 1.0/sqrt(dx**2 + dy**2)/100.0 ! sample the line with a fine granularity
+      dp = sqrt(dx**2 + dy**2)
+      dt = 1.0/dp/100.0 ! sample the line with a fine granularity
 
-      print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
+      print *, 'dx:', dx, 'dy:', dy, 'dp:', dp, 'dt:', dt
+
+      ! over-allocate the points array
+      npoints = ceiling(2*dp)
+      allocate (points(2,npoints))
 
       ! first enumerate points along the line
       npoints = 0
       t = 0.0
       prev_pos = 0
-
-      call list_init(ll)
 
       do while (t .le. 1.0)
          pos = line(t, x1, y1, x2, y2)
@@ -8822,9 +8822,8 @@ contains
          if (.not. all(pos .eq. prev_pos)) then
             prev_pos = pos
             npoints = npoints + 1
+            points(:, npoints) = pos(:)
             ! print *, 'npoints', npoints, 'pos:', pos
-
-            call list_insert(ll, pos)
          end if
 
          t = t + dt
@@ -8870,19 +8869,11 @@ contains
 
       ! start with a head node
       i = 0
-      cursor => ll
 
-      do while (associated(cursor))
-         ptr => list_get(cursor)
-         cursor => list_next(cursor)
-
-         if (.not. associated(ptr)) then
-            ! print *, 'i:', i, 'ptr is not associated'
-            exit
-         end if
-
+      ! traverse the array backwards for better cache locality
+      do j=npoints,1,-1
          i = i + 1
-         pos = ptr(1:2)
+         pos(:) = points(:,j)
          ! print *, 'i', i, 'pos:', pos
 
          if (i .gt. npoints) exit
@@ -8980,16 +8971,14 @@ contains
       ! free the decompression cache
       deallocate (x)
 
-      ! Free the list
-      nullify (cursor)
-      call list_free(ll)
+      ! free the points
+      deallocate (points)
 
    end subroutine get_pv_diagram
 
    recursive subroutine ws_composite_pv_request(user) BIND(C, name='ws_composite_pv_request')
       use omp_lib
       use :: unix_pthread
-      use list
       use, intrinsic :: iso_c_binding
       implicit none
 
