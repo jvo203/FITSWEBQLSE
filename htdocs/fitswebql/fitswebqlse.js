@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-06-05.0";
+    return "JS2023-06-09.0";
 }
 
 function uuidv4() {
@@ -4254,12 +4254,12 @@ async function open_websocket_connection(_datasetId, index) {
                             if (vmin < vmax) {
                                 // flip both the X and Y axes                                
                                 ctx.translate(c.width, c.height + offset);
-                                ctx.scale(-1, -1);
+                                ctx.scale(1, -1); // X was -1
                                 flipY = true;
                             } else {
                                 // flip the X axis only
                                 ctx.translate(c.width, offset);
-                                ctx.scale(-1, 1);
+                                ctx.scale(1, 1); // X was -1
                             }
 
                             // then place the new PV diagram onto the ctx canvas
