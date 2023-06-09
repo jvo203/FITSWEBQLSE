@@ -8988,8 +8988,8 @@ contains
       integer :: tid ! loop counter
       integer :: composite_width, composite_height, composite_npoints
       real(kind=8) :: composite_v1, composite_v2
-      real(kind=c_float), allocatable :: composite_pixels(:, :, :)
-      real(kind=c_float), allocatable :: pmin(:), pmax(:), pmean(:), pstd(:)
+      real(kind=c_float), allocatable, target :: composite_pixels(:, :, :)
+      real(kind=c_float), allocatable, target :: pmin(:), pmax(:), pmean(:), pstd(:)
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
@@ -9037,6 +9037,18 @@ contains
             call get_pv_diagram(item, req, pixels, img_width, img_height, pmin(tid), pmax(tid), pmean(tid), pstd(tid),&
             & npoints, v1, v2)
 
+            !$omp critical
+            if (.not. allocated(composite_pixels)) then
+               composite_width = img_width
+               composite_height = img_height
+               composite_npoints = npoints
+               composite_v1 = v1
+               composite_v2 = v2
+               allocate (composite_pixels(composite_width, composite_height, req%va_count))
+            end if
+            !$omp end critical
+
+            composite_pixels(:, :, tid) = pixels(:, :)
             nullify(item)
          end block
       end do
@@ -9045,8 +9057,10 @@ contains
 
       if (req%fd .ne. -1) then
          ! send the composite P-V diagram via a Unix pipe
-         ! call write_composite_pv_diagram(req%fd, composite_width, composite_height, ZFP_PV_PRECISION, c_loc(composite_pixels),&
-         ! & c_loc(pmean), c_loc(pstd), c_loc(pmin), c_loc(pmax), 1, composite_npoints, composite_v1, composite_v2, req%va_count)
+         if(allocated(composite_pixels)) then
+            ! call write_composite_pv_diagram(req%fd, composite_width, composite_height, ZFP_PV_PRECISION, c_loc(composite_pixels),&
+            ! & c_loc(pmean), c_loc(pstd), c_loc(pmin), c_loc(pmax), 1, composite_npoints, composite_v1, composite_v2, req%va_count)
+         end if
 
          call close_pipe(req%fd)
          req%fd = -1
