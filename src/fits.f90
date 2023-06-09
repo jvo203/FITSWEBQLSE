@@ -9094,7 +9094,7 @@ contains
       allocate (pstd(req%va_count))
 
       ! loop over the va_count
-      !$omp PARALLEL DEFAULT(SHARED) SHARED(req, pmin, pmax, pmean, pstd)&
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(req, pmin, pmax, pmean, pstd, composite_pixels, composite_width, composite_height)&
       !$omp& PRIVATE(tid)
       !$omp DO
       do tid = 1, req%va_count
