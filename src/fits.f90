@@ -8800,6 +8800,20 @@ contains
 
    end subroutine ws_pv_request
 
+   subroutine get_pv_diagram(item, pixels, width, height, pmin, pmax, pmean, pstd)
+      use omp_lib
+      use :: unix_pthread
+      use list
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(dataset), pointer, intent(inout) :: item
+      real(kind=c_float), allocatable, intent(out) :: pixels(:, :)
+      integer, intent(out) :: width, height
+      real(kind=c_float), intent(in) :: pmin, pmax, pmean, pstd
+
+   end subroutine get_pv_diagram
+
    recursive subroutine ws_composite_pv_request(user) BIND(C, name='ws_composite_pv_request')
       use omp_lib
       use :: unix_pthread
@@ -8849,7 +8863,6 @@ contains
       do tid = 1, req%va_count
          block
             type(dataset), pointer :: item
-
             real(kind=c_float), allocatable, target :: pixels(:, :)
 
             ! cluster
