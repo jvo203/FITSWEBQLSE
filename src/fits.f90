@@ -8985,11 +8985,9 @@ contains
       type(C_PTR), intent(in), value :: user
       type(pv_request_f), pointer :: req
 
-      ! image downscaling
-      integer :: composite_width, composite_height
-
       ! RGB channels
       integer :: tid ! loop counter
+      integer :: composite_width, composite_height
       real(kind=c_float), allocatable :: composite_pixels(:, :, :)
       real(kind=c_float), allocatable :: pmin(:), pmax(:), pmean(:), pstd(:)
 
