@@ -5747,8 +5747,7 @@ void write_composite_pv_diagram(int fd, int width, int height, int precision, co
     rpad(padded_id, id, ' ', padded_len);
 
     // transmit the data
-    float tmp;
-    double tmp2;
+    double tmp;
     uint32_t xlen;
 
     uint32_t id_len = strlen(padded_id);
@@ -5784,12 +5783,12 @@ void write_composite_pv_diagram(int fd, int width, int height, int precision, co
     chunked_write(fd, (const char *)&xlen, sizeof(xlen));
 
     // vmin
-    tmp2 = vmin;
-    chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
+    tmp = vmin;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
 
     // vmax
-    tmp2 = vmax;
-    chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
+    tmp = vmax;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
 
     // the P-V diagram
     chunked_write(fd, (const char *)&img_width, sizeof(img_width));
