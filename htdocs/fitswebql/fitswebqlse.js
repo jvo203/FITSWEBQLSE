@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-06-12.0";
+    return "JS2023-06-12.1";
 }
 
 function uuidv4() {
@@ -4282,9 +4282,7 @@ async function open_websocket_connection(_datasetId, index) {
                             // cancel idlePV timer and set a new one
                             window.clearTimeout(idlePV);
                             idlePV = window.setTimeout(function () {
-                                if (va_count == 1) {
-                                    pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY, pv_width, pv_height, frame_pv);
-                                }
+                                pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY, pv_width, pv_height, frame_pv);
                             }, 250);
                         }
 
@@ -14180,63 +14178,67 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
 
     if (!displayPVContours) return;
 
-    /*var data = [];
-    let min_value = 255;
-    let max_value = 0;
-    let imageData = pvCanvas.getContext('2d').getImageData(0, 0, pvCanvas.width, pvCanvas.height).data;
+    if (va_count == 1) {
+        var pv_pixels = Module.decompressZFP2D(pv_width, pv_height, frame_pv);
 
-    for (var h = pvCanvas.height - 1; h >= 0; h--) {
-        var row = [];
-        var pixel = 4 * (h * pvCanvas.width);
+        // get minimum and maximum floating point value
+        var min_value = Number.MAX_VALUE
+        var max_value = -Number.MAX_VALUE;
 
-        for (var w = 0; w < pvCanvas.width; w++) {
-            var r = imageData[pixel];
-            var g = imageData[pixel + 1];
-            var b = imageData[pixel + 2];
-            var z = (r + g + b) / 3;
-            pixel += 4;
+        var data = [];
+        var z;
 
-            if (z < min_value)
-                min_value = z;
+        for (let h = pv_height - 1; h >= 0; h--) {
+            let row = [];
+            let pixel = h * pv_width;
 
-            if (z > max_value)
-                max_value = z;
+            for (let w = 0; w < pv_width; w++) {
+                z = pv_pixels.get(pixel);
+                pixel += 1;
 
-            row.push(z);
+                if (z < min_value)
+                    min_value = z;
+
+                if (z > max_value)
+                    max_value = z;
+
+                row.push(z);
+            }
+
+            data.push(row);
+        }
+    } else {
+        let imageData = pvCanvas.getContext('2d').getImageData(0, 0, pvCanvas.width, pvCanvas.height).data;
+
+        var min_value = 255;
+        var max_value = 0;
+
+        var data = [];
+        var r, g, b, z;
+
+        for (let h = pvCanvas.height - 1; h >= 0; h--) {
+            let row = [];
+            let pixel = 4 * (h * pvCanvas.width);
+
+            for (let w = 0; w < pvCanvas.width; w++) {
+                r = imageData[pixel];
+                g = imageData[pixel + 1];
+                b = imageData[pixel + 2];
+                z = (r + g + b) / va_count;
+                pixel += 4;
+
+                if (z < min_value)
+                    min_value = z;
+
+                if (z > max_value)
+                    max_value = z;
+
+                row.push(z);
+            }
+
+            data.push(row);
         }
 
-        data.push(row);
-    }
-
-    console.log("min_value = ", min_value, " max_value = ", max_value);*/
-
-    var pv_pixels = Module.decompressZFP2D(pv_width, pv_height, frame_pv);
-
-    // get minimum and maximum floating point value
-    let min_value = Number.MAX_VALUE
-    let max_value = -Number.MAX_VALUE;
-
-    var data = [];
-    var z;
-
-    for (var h = pv_height - 1; h >= 0; h--) {
-        var row = [];
-        var pixel = h * pv_width;
-
-        for (var w = 0; w < pv_width; w++) {
-            z = pv_pixels.get(pixel);
-            pixel += 1;
-
-            if (z < min_value)
-                min_value = z;
-
-            if (z > max_value)
-                max_value = z;
-
-            row.push(z);
-        }
-
-        data.push(row);
     }
 
     let pmin = min_value;
