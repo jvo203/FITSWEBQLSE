@@ -600,6 +600,138 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     return wasmBuffer;
 }
 
+buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count, std::string const &bytes)
+{
+    buffer wasmBuffer = {0, 0};
+
+    // std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+
+    size_t img_size = size_t(img_width) * size_t(img_height);
+    float *pixels = (float *)calloc(img_size * size_t(va_count), sizeof(float));
+
+    if (pixels == NULL)
+    {
+        std::cout << "[decompressCompositePVdiagram] failed to allocate memory for pixels." << std::endl;
+        return wasmBuffer;
+    }
+
+    size_t pv_size = img_size * 4; // RGBA
+
+    if (pvBuffer != NULL && pvLength != pv_size)
+    {
+        free(pvBuffer);
+
+        pvBuffer = NULL;
+        pvLength = 0;
+    }
+
+    if (pvBuffer == NULL)
+    {
+        pvBuffer = (unsigned char *)malloc(pv_size);
+        memset(pvBuffer, 0, pv_size);
+
+        if (pvBuffer != NULL)
+            pvLength = pv_size;
+
+        printf("[decompressCompositePVdiagram] width: %d, height: %d, pvLength = %zu, pvBuffer = %p\n", img_width, img_height, pvLength, pvBuffer);
+    }
+
+    if (pvBuffer == NULL)
+    {
+        pvLength = 0;
+        return wasmBuffer;
+    }
+
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = img_width;
+    uint ny = img_height;
+    uint nz = va_count;
+
+    // decompress pixels with ZFP
+    field = zfp_field_3d((void *)pixels, data_type, nx, ny, nz);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // associate bit stream with allocated buffer
+    bufsize = bytes.size();
+    stream = stream_open((void *)bytes.data(), bufsize);
+
+    if (stream != NULL)
+    {
+        zfp_stream_set_bit_stream(zfp, stream);
+
+        zfp_read_header(zfp, field, ZFP_HEADER_FULL);
+
+        // decompress entire array
+        zfpsize = zfp_decompress(zfp, field);
+
+        if (zfpsize == 0)
+            printf("ZFP decompression failed!\n");
+        /*else
+          printf("decompressed %zu bytes (image pixels).\n", zfpsize);*/
+
+        stream_close(stream);
+
+        // the decompressed part is available at pixels[0..zfpsize-1] (a.k.a. pixels.data())
+    }
+
+    // clean up
+    zfp_field_free(field);
+    zfp_stream_close(zfp);
+
+    /*for (size_t i = 0; i < pixelLength; i++)
+      if (pixelBuffer[i] != 0.0f)
+        printf("%zu:%f|", i, pixelBuffer[i]);
+    printf("\n");
+
+    printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);*/
+
+    // convert pixels to RGBA using the ERF colourmap
+    size_t pvOffset = 0;
+
+    for (size_t i = 0; i < img_size; i++)
+    {
+        float value = pixels[i] / 6.0f + 0.5f; // linearly transform [-3,3] to [0,1]
+
+        // cap <value> to [0,1]
+        if (value < 0.0f)
+            value = 0.0f;
+        else if (value > 1.0f)
+            value = 1.0f;
+
+        unsigned char r = 0;
+        unsigned char g = 0;
+        unsigned char b = 0;
+        unsigned char a = 255;
+
+        float pos = value * (NO_COLOURS - 1);
+        float frac = pos - floorf(pos);
+        int x0 = floorf(pos);
+
+        r = 0xFF * (math_r[x0] + (math_r[x0 + 1] - math_r[x0]) * frac);
+        g = 0xFF * (math_g[x0] + (math_g[x0 + 1] - math_g[x0]) * frac);
+        b = 0xFF * (math_b[x0] + (math_b[x0 + 1] - math_b[x0]) * frac);
+
+        pvBuffer[pvOffset++] = r;
+        pvBuffer[pvOffset++] = g;
+        pvBuffer[pvOffset++] = b;
+        pvBuffer[pvOffset++] = a;
+    }
+
+    free(pixels);
+
+    wasmBuffer.ptr = (unsigned int)pvBuffer;
+    wasmBuffer.size = (unsigned int)pvLength;
+    return wasmBuffer;
+}
+
 EMSCRIPTEN_BINDINGS(Wrapper)
 {
     register_vector<float>("Float");
@@ -611,6 +743,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("decompressZFPimage", &decompressZFPimage);
     function("decompressZFPspectrum", &decompressZFPspectrum);
     function("decompressPVdiagram", &decompressPVdiagram);
+    function("decompressCompositePVdiagram", &decompressCompositePVdiagram);
     function("decompressLZ4", &decompressLZ4);
     function("decompressLZ4mask", &decompressLZ4mask);
     function("hevc_init_frame", &hevc_init_frame);
