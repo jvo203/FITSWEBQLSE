@@ -4210,7 +4210,12 @@ async function open_websocket_connection(_datasetId, index) {
 
                         if (id == "ZFP") {
                             // decompress ZFP							
-                            var res = Module.decompressPVdiagram(pv_width, pv_height, frame_pv);
+                            if (va_count == 1) {
+                                var res = Module.decompressPVdiagram(pv_width, pv_height, frame_pv);
+                            } else {
+                                var res = Module.decompressCompositePVdiagram(pv_width, pv_height, va_count, frame_pv);
+                            }
+
                             const pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"							
 
                             var pvData = new ImageData(pv, pv_width, pv_height);
