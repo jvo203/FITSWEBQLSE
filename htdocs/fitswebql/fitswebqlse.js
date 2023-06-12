@@ -4168,22 +4168,22 @@ async function open_websocket_connection(_datasetId, index) {
                         let id = (new TextDecoder("utf-8").decode(str)).trim();
                         offset += str_length;
 
-                        let pmin = dv.getFloat32(offset, endianness);
+                        let pmin = new Float32Array(received_msg, offset, va_count);
+                        offset += 4 * va_count;
+
+                        let pmax = new Float32Array(received_msg, offset, va_count);
+                        offset += 4 * va_count;
+
+                        let pmean = new Float32Array(received_msg, offset, va_count);
+                        offset += 4 * va_count;
+
+                        let pstd = new Float32Array(received_msg, offset, va_count);
+                        offset += 4 * va_count;
+
+                        let xmin = dv.getUint32(offset, endianness);
                         offset += 4;
 
-                        let pmax = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        let pmean = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        let pstd = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        var xmin = dv.getUint32(offset, endianness);
-                        offset += 4;
-
-                        var xmax = dv.getUint32(offset, endianness);
+                        let xmax = dv.getUint32(offset, endianness);
                         offset += 4;
 
                         let vmin = dv.getFloat64(offset, endianness);
@@ -4269,7 +4269,8 @@ async function open_websocket_connection(_datasetId, index) {
                             // restore the transformation matrix
                             ctx.restore();
 
-                            pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd);
+                            if (va_count == 1)
+                                pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin[0], pmax[0], pmean[0], pstd[0]);
 
                             // cancel idlePV timer and set a new one
                             window.clearTimeout(idlePV);
