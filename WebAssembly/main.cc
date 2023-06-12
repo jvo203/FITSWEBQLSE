@@ -70,7 +70,7 @@ struct buffer
 {
     buffer wasmBuffer = {0, 0};
 
-    // std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+    // std::cout << "[decompressZFP2D] " << bytes.size() << " bytes." << std::endl;
 
     size_t img_size = size_t(img_width) * size_t(img_height);
 
@@ -162,7 +162,7 @@ struct buffer
 {
     buffer wasmBuffer = {0, 0};
 
-    // std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+    // std::cout << "[decompressZFP1D] " << bytes.size() << " bytes." << std::endl;
 
     if (spectrumBuffer != NULL && spectrumLength != length)
     {
@@ -237,9 +237,9 @@ struct buffer
     // return val(typed_memory_view(spectrumLength, spectrumBuffer));
 }
 
-std::vector<float> decompressZFP(int img_width, int img_height, std::string const &bytes)
+std::vector<float> decompressZFP2D(int img_width, int img_height, std::string const &bytes)
 {
-    std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+    std::cout << "[decompressZFP2D] " << bytes.size() << " bytes." << std::endl;
 
     size_t img_size = size_t(img_width) * size_t(img_height);
 
@@ -277,7 +277,64 @@ std::vector<float> decompressZFP(int img_width, int img_height, std::string cons
         if (zfpsize == 0)
             printf("ZFP decompression failed!\n");
         else
-            printf("decompressed %zu image pixels.\n", zfpsize);
+            printf("decompressed %zu values.\n", zfpsize);
+
+        stream_close(stream);
+
+        // the decompressed part is available at pixels[0..zfpsize-1] (a.k.a. pixels.data())
+    }
+    else
+        return std::vector<float>();
+
+    // clean up
+    zfp_field_free(field);
+    zfp_stream_close(zfp);
+
+    return pixels;
+}
+
+std::vector<float> decompressZFP3D(int img_width, int img_height, int va_count, std::string const &bytes)
+{
+    std::cout << "[decompressZFP3D] " << bytes.size() << " bytes." << std::endl;
+
+    size_t img_size = size_t(img_width) * size_t(img_height) * size_t(va_count);
+
+    std::vector<float> pixels(img_size);
+
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = img_width;
+    uint ny = img_height;
+    uint nz = va_count;
+
+    // decompress pixels with ZFP
+    field = zfp_field_3d((void *)pixels.data(), data_type, nx, ny, nz);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // associate bit stream with allocated buffer
+    bufsize = bytes.size();
+    stream = stream_open((void *)bytes.data(), bufsize);
+
+    if (stream != NULL)
+    {
+        zfp_stream_set_bit_stream(zfp, stream);
+
+        zfp_read_header(zfp, field, ZFP_HEADER_FULL);
+
+        // decompress entire array
+        zfpsize = zfp_decompress(zfp, field);
+
+        if (zfpsize == 0)
+            printf("ZFP decompression failed!\n");
+        else
+            printf("decompressed %zu values.\n", zfpsize);
 
         stream_close(stream);
 
@@ -426,7 +483,7 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
 {
     buffer wasmBuffer = {0, 0};
 
-    // std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+    // std::cout << "[decompressZFP2D] " << bytes.size() << " bytes." << std::endl;
 
     size_t img_size = size_t(img_width) * size_t(img_height);
     float *pixels = (float *)calloc(img_size, sizeof(float));
@@ -608,7 +665,7 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
 {
     buffer wasmBuffer = {0, 0};
 
-    std::cout << "[decompressZFP] " << bytes.size() << " bytes, va_count = " << va_count << std::endl;
+    std::cout << "[decompressZFP3D] " << bytes.size() << " bytes, va_count = " << va_count << std::endl;
 
     size_t img_size = size_t(img_width) * size_t(img_height);
     float *pixels = (float *)calloc(img_size * size_t(va_count), sizeof(float));
@@ -766,7 +823,8 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     value_array<buffer>("buffer")
         .element(&buffer::ptr)
         .element(&buffer::size);
-    function("decompressZFP", &decompressZFP);
+    function("decompressZFP2D", &decompressZFP2D);
+    function("decompressZFP3D", &decompressZFP3D);
     function("decompressZFPimage", &decompressZFPimage);
     function("decompressZFPspectrum", &decompressZFPspectrum);
     function("decompressPVdiagram", &decompressPVdiagram);
