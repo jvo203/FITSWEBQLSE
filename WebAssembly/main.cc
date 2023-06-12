@@ -498,7 +498,7 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
         if (zfpsize == 0)
             printf("ZFP decompression failed!\n");
         /*else
-          printf("decompressed %zu bytes (image pixels).\n", zfpsize);*/
+          printf("decompressed %zu bytes (P-V Diagram).\n", zfpsize);*/
 
         stream_close(stream);
 
@@ -695,7 +695,7 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
         if (zfpsize == 0)
             printf("ZFP decompression failed!\n");
         else
-            printf("decompressed %zu bytes (image pixels).\n", zfpsize);
+            printf("decompressed %zu bytes (P-V Diagram).\n", zfpsize);
 
         stream_close(stream);
 
