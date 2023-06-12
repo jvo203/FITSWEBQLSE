@@ -371,10 +371,12 @@ void hevc_init_frame(int va_count, int width, int height)
     if (canvasBuffer == NULL)
     {
         canvasBuffer = (unsigned char *)malloc(len);
-        memset(canvasBuffer, 0, len);
 
         if (canvasBuffer != NULL)
+        {
+            memset(canvasBuffer, 0, len);
             canvasLength = len;
+        }
 
         printf("[hevc_init_frame] width: %d, height: %d, canvasLength = %zu, canvasBuffer = %p\n", width, height, canvasLength, canvasBuffer);
     }
@@ -440,7 +442,6 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     if (pvBuffer != NULL && pvLength != pv_size)
     {
         free(pvBuffer);
-
         pvBuffer = NULL;
         pvLength = 0;
     }
@@ -448,16 +449,19 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
     if (pvBuffer == NULL)
     {
         pvBuffer = (unsigned char *)malloc(pv_size);
-        memset(pvBuffer, 0, pv_size);
 
         if (pvBuffer != NULL)
+        {
+            memset(pvBuffer, 0, pv_size);
             pvLength = pv_size;
+        }
 
         printf("[decompressPVdiagram] width: %d, height: %d, pvLength = %zu, pvBuffer = %p\n", img_width, img_height, pvLength, pvBuffer);
     }
 
     if (pvBuffer == NULL)
     {
+        free(pixels);
         pvLength = 0;
         return wasmBuffer;
     }
@@ -620,7 +624,6 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     if (pvBuffer != NULL && pvLength != pv_size)
     {
         free(pvBuffer);
-
         pvBuffer = NULL;
         pvLength = 0;
     }
@@ -628,16 +631,20 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     if (pvBuffer == NULL)
     {
         pvBuffer = (unsigned char *)malloc(pv_size);
-        memset(pvBuffer, 0, pv_size);
 
         if (pvBuffer != NULL)
+        {
+            memset(pvBuffer, 0, pv_size);
             pvLength = pv_size;
+        }
 
         printf("[decompressCompositePVdiagram] width: %d, height: %d, pvLength = %zu, pvBuffer = %p\n", img_width, img_height, pvLength, pvBuffer);
     }
 
     if (pvBuffer == NULL)
     {
+        free(pixels);
+        printf("[decompressCompositePVdiagram] failed to allocate memory for pvBuffer.\n");
         pvLength = 0;
         return wasmBuffer;
     }
@@ -706,12 +713,12 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     zfp_field_free(field);
     zfp_stream_close(zfp);
 
-    /*for (size_t i = 0; i < pixelLength; i++)
-      if (pixelBuffer[i] != 0.0f)
-        printf("%zu:%f|", i, pixelBuffer[i]);
-    printf("\n");
+    /*for (size_t i = 0; i < pvLength; i++)
+      if (pvBuffer[i] != 0.0f)
+        printf("%zu:%f|", i, pvBuffer[i]);
+    printf("\n");*/
 
-    printf("pixelLength: %zu, buffer:%p\n", pixelLength, pixelBuffer);*/
+    printf("pixelLength: %zu, buffer:%p\n", pvLength, pvBuffer);
 
     // convert pixels to RGBA using the ERF colourmap
     size_t pvOffset = 0;
