@@ -24,7 +24,7 @@ LDFLAGS=-lz --llvm-lto 1
 .PHONY=clean
 
 EMFLAGS=--bind
-EMFLAGS+=-s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=512MB -s MAXIMUM_MEMORY=4GB
+EMFLAGS+=-s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=128MB -s MAXIMUM_MEMORY=4GB
 # SharedArrayBuffer, needed by WASM PTHREADS, is not yet widely supported in web browsers
 #EMFLAGS+=-pthread -s PTHREAD_POOL_SIZE=4
 # Math.min(4, window.navigator.hardwareConcurrency)

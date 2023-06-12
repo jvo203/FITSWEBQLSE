@@ -773,40 +773,34 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     /*for (size_t i = 0; i < pvLength; i++)
       if (pvBuffer[i] != 0.0f)
         printf("%zu:%f|", i, pvBuffer[i]);
-    printf("\n");*/
+    printf("\n");
 
-    printf("pixelLength: %zu, buffer:%p\n", pvLength, pvBuffer);
+    printf("pixelLength: %zu, buffer:%p\n", pvLength, pvBuffer);*/
 
-    // convert pixels to RGBA using the ERF colourmap
-    size_t pvOffset = 0;
-
-    for (size_t i = 0; i < img_size; i++)
+    // fill-in the RGBA pixels, one plane at a time
+    size_t srcOffset = 0;
+    for (int k = 0; k < va_count; k++)
     {
-        float value = pixels[i] / 6.0f + 0.5f; // linearly transform [-3,3] to [0,1]
+        size_t pvOffset = 0;
+        for (size_t i = 0; i < img_size; i++)
+        {
+            float value = 0xFF * (pixels[srcOffset + i] / 6.0f + 0.5f); // linearly transform [-3,3] --> [0,1] --> [0,255]
 
-        // cap <value> to [0,1]
-        if (value < 0.0f)
-            value = 0.0f;
-        else if (value > 1.0f)
-            value = 1.0f;
+            // cap <value> to [0,255]
+            if (value < 0.0f)
+                value = 0.0f;
+            else if (value > 255.0f)
+                value = 255.0f;
 
-        unsigned char r = 0;
-        unsigned char g = 0;
-        unsigned char b = 0;
-        unsigned char a = 255;
+            unsigned char pixel = value;
+            unsigned char alpha = 255;
 
-        float pos = value * (NO_COLOURS - 1);
-        float frac = pos - floorf(pos);
-        int x0 = floorf(pos);
+            pvBuffer[pvOffset + k] = pixel;
+            pvBuffer[pvOffset + 3] = alpha;
+            pvOffset += 4;
+        }
 
-        r = 0xFF * (math_r[x0] + (math_r[x0 + 1] - math_r[x0]) * frac);
-        g = 0xFF * (math_g[x0] + (math_g[x0 + 1] - math_g[x0]) * frac);
-        b = 0xFF * (math_b[x0] + (math_b[x0 + 1] - math_b[x0]) * frac);
-
-        pvBuffer[pvOffset++] = r;
-        pvBuffer[pvOffset++] = g;
-        pvBuffer[pvOffset++] = b;
-        pvBuffer[pvOffset++] = a;
+        srcOffset += img_size;
     }
 
     free(pixels);
