@@ -4208,6 +4208,8 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame_pv = new Uint8Array(received_msg, offset, pv_length);
                         offset += pixels_length;
 
+                        console.log("P-V Diagram: frame_pv.length = ", frame_pv.length);
+
                         if (id == "ZFP") {
                             // decompress ZFP							
                             if (va_count == 1) {
