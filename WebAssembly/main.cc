@@ -784,7 +784,8 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
         size_t pvOffset = 0;
         for (size_t i = 0; i < img_size; i++)
         {
-            float value = 0xFF * (pixels[srcOffset + i] / 6.0f + 0.5f); // linearly transform [-3,3] --> [0,1] --> [0,255]
+            // linearly transform [-3,3] --> [0,1] --> [0,255]
+            float value = 0xFF * (pixels[srcOffset + i] / 6.0f + 0.5f);
 
             // cap <value> to [0,255]
             if (value < 0.0f)
