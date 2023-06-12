@@ -604,7 +604,7 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
 {
     buffer wasmBuffer = {0, 0};
 
-    // std::cout << "[decompressZFP] " << bytes.size() << " bytes." << std::endl;
+    std::cout << "[decompressZFP] " << bytes.size() << " bytes, va_count = " << va_count << std::endl;
 
     size_t img_size = size_t(img_width) * size_t(img_height);
     float *pixels = (float *)calloc(img_size * size_t(va_count), sizeof(float));
@@ -656,8 +656,21 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     // decompress pixels with ZFP
     field = zfp_field_3d((void *)pixels, data_type, nx, ny, nz);
 
+    if (field == NULL)
+    {
+        printf("[decompressCompositePVdiagram] zfp_field_3d failed!\n");
+        return wasmBuffer;
+    }
+
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
+
+    if (zfp == NULL)
+    {
+        zfp_field_free(field);
+        printf("[decompressCompositePVdiagram] zfp_stream_open failed!\n");
+        return wasmBuffer;
+    }
 
     // associate bit stream with allocated buffer
     bufsize = bytes.size();
@@ -674,12 +687,19 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
 
         if (zfpsize == 0)
             printf("ZFP decompression failed!\n");
-        /*else
-          printf("decompressed %zu bytes (image pixels).\n", zfpsize);*/
+        else
+            printf("decompressed %zu bytes (image pixels).\n", zfpsize);
 
         stream_close(stream);
 
         // the decompressed part is available at pixels[0..zfpsize-1] (a.k.a. pixels.data())
+    }
+    else
+    {
+        printf("[decompressCompositePVdiagram] stream_open failed!\n");
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+        return wasmBuffer;
     }
 
     // clean up
