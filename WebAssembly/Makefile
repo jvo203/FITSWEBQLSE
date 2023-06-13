@@ -1,22 +1,17 @@
 .DEFAULT_GOAL := wasm
-VERSION = 23.06.12.0
+VERSION = 23.06.13.0
 
-ZFP = zfp
+ZFP = zfp-1.0.0
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 
 LZ4 = lz4
 LZ4_SRC := $(wildcard $(LZ4)/*.c)
 
-FPZIP = fpzip
-FPZIP_SRC := $(wildcard $(FPZIP)/src/*.cpp)
-
 SRC := $(ZFP_SRC) $(LZ4_SRC)
-# $(FPZIP_SRC)
 OBJ := $(SRC:.cpp=.o)
 OBJ := $(OBJ:.c=.o)
 
 INCLUDE = -I./ -I./$(ZFP)/include -I./$(ZFP)/src -I./$(LZ4)
-# -I./$(FPZIP)/include -I./$(FPZIP)/src
 LIBRARY=
 CXXFLAGS=-std=c++11 -O3
 LDFLAGS=-lz --llvm-lto 1
