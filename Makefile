@@ -104,7 +104,7 @@ IPP += -lippi -lippdc -lipps -lippcore
 MKL += -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
 # -liomp5
 
-ZFP = zfp
+ZFP = zfp-1.0.0
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 
 # src/zforp.f90 src/zfp.f90
