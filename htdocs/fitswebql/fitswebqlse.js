@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-06-12.1";
+    return "JS2023-06-13.0";
 }
 
 function uuidv4() {
@@ -1101,6 +1101,274 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 
     scalesvg.select(".legendLinear")
         .call(legendLinear);
+
+    var bunit = '';
+    if (fitsData.BUNIT != '') {
+        bunit = fitsData.BUNIT.trim();
+
+        if (fitsData.depth > 1 && has_velocity_info)
+            bunit += '•km/s';
+
+        bunit = "integrated intensity [" + bunit + "]";
+    }
+
+    titlesvg.append("text")
+        .attr("id", "pvtitle")
+        .attr("x", (svg_width) / 2)
+        .attr("y", 1.5 * emFontSize)
+        .attr("font-family", "Inconsolata")
+        .attr("font-size", "1.25em")
+        .attr("text-anchor", "middle")
+        .style("fill", "lightgray")
+        .attr("stroke", "none")
+        .text(bunit);
+}
+
+function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd) {
+    d3.select("#PVContourSVG").remove();
+    d3.select("#PVSVGX").remove();
+    d3.select("#PVSVGY").remove();
+    d3.select("#PVLABELSVG").remove();
+    d3.select("#PVTITLESVG").remove();
+    d3.select("#PVSCALESVG").remove();
+
+    let svg_left = 10 + left;
+    let svg_top = 10 + top;
+
+    let svg_width = width;
+    let svg_height = height;
+
+    var div = d3.select("#PVDiagram");
+
+    if (document.getElementById('PVSVGX') === null) {
+        // console.log("pv_axes: PVSVGX is null, creating a new one.");
+
+        div.append("svg")
+            .attr("id", "PVSVGX")
+            .attr("width", (svg_width + 4 * emFontSize))
+            .attr("height", 5 * emFontSize)
+            .attr('style', `position: fixed; left: ${svg_left - 2 * emFontSize}px; top: ${svg_top + svg_height}px; cursor: default`);
+    }
+
+    if (document.getElementById('PVSVGY') === null) {
+        // console.log("pv_axes: PVSVGY is null, creating a new one.");
+
+        div.append("svg")
+            .attr("id", "PVSVGY")
+            .attr("width", 10 * emFontSize)
+            .attr("height", (svg_height + 2 * emFontSize))
+            .attr('style', `position: fixed; left: ${svg_left - 10 * emFontSize}px; top: ${svg_top - emFontSize}px; cursor: default`);
+    }
+
+    if (document.getElementById('PVLABELSVG') === null) {
+        // console.log("pv_axes: PVLABELSVG is null, creating a new one.");
+
+        div.append("svg")
+            .attr("id", "PVLABELSVG")
+            .attr("width", 20 * emFontSize)
+            .attr("height", (2 * emFontSize))
+            .attr('style', `position: fixed; left: ${svg_left - 5 * emFontSize}px; top: ${svg_top - 1.75 * emFontSize}px; cursor: default`);
+    }
+
+    if (document.getElementById('PVTITLESVG') === null) {
+        // console.log("pv_axes: PVTITLESVG is null, creating a new one.");
+
+        div.append("svg")
+            .attr("id", "PVTITLESVG")
+            .attr("width", svg_width)
+            .attr("height", (2 * emFontSize))
+            .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top - 2 * emFontSize}px; cursor: default`);
+    }
+
+    if (document.getElementById('PVSCALESVG') === null) {
+        // console.log("pv_axes: PVSCALESVG is null, creating a new one.");
+
+        div.append("svg")
+            .attr("id", "PVSCALESVG")
+            .attr("width", (svg_width - 4 * emFontSize))
+            .attr("height", 3 * emFontSize * va_count)
+            .attr('style', `position: fixed; left: ${svg_left + 2 * emFontSize}px; top: ${svg_top - (1.0 + 3 * va_count) * emFontSize}px; cursor: default`);
+    }
+
+    var xsvg = d3.select("#PVSVGX");
+    var ysvg = d3.select("#PVSVGY");
+    var labelsvg = d3.select("#PVLABELSVG");
+    var titlesvg = d3.select("#PVTITLESVG");
+    var scalesvg = d3.select("#PVSCALESVG");
+
+    // always use a dark theme for the PV diagram
+    let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
+
+    var xR = d3.scaleLinear()
+        .range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
+        .domain([xmin, xmax]);
+
+    var xAxis = d3.axisBottom(xR)
+        .tickSizeOuter([3]);
+
+    // Add the X Axis
+    xsvg.append("g")
+        .attr("class", "axis")
+        .attr("id", "pvxaxis")
+        .style("fill", _axisColour)
+        .style("stroke", _axisColour)
+        .attr("transform", "translate(0,1)")
+        .call(xAxis);
+
+    var yR = d3.scaleLinear()
+        .range([emFontSize + svg_height - 1, emFontSize])
+        .domain([vmin, vmax]);
+
+    var yAxis = d3.axisLeft(yR)
+        .tickSizeOuter([3])
+        .tickFormat(function (d) {
+            var number;
+
+            if (Math.abs(d) <= 0.001 || Math.abs(d) >= 10000)
+                number = d.toExponential();
+            else
+                number = d;
+
+            if (Math.abs(d) == 0)
+                number = d;
+
+            return number;
+        });
+
+    // Add the Y Axis
+    ysvg.append("g")
+        .attr("class", "axis")
+        .attr("id", "pvyaxis")
+        .style("fill", _axisColour)
+        .style("stroke", _axisColour)
+        .attr("transform", "translate(" + (10 * emFontSize - 1) + ",0)")
+        .call(yAxis);
+
+    // labels
+    let fitsData = fitsContainer[va_count - 1];
+
+    xsvg.append("text")
+        .attr("id", "pvxlabel")
+        .attr("x", (svg_width + 4 * emFontSize) / 2)
+        .attr("y", 3.0 * emFontSize)
+        .attr("font-family", "Inconsolata")
+        .attr("font-size", "1.25em")
+        .attr("text-anchor", "middle")
+        .style("fill", "lightgray")
+        .attr("stroke", "none")
+        .text("PV line point index");
+
+    xsvg.append("text")
+        .attr("id", "pvpoint1")
+        .attr("x", (2 * emFontSize))
+        .attr("y", 3.0 * emFontSize)
+        .attr("font-family", "Inconsolata")
+        .attr("font-size", "1.25em")
+        .attr("text-anchor", "start")
+        .style("fill", "lightgray")
+        .attr("stroke", "none")
+        .text("① ...");
+
+    xsvg.append("text")
+        .attr("id", "pvpoint2")
+        .attr("x", (svg_width + 2 * emFontSize))
+        .attr("y", 3.0 * emFontSize)
+        .attr("font-family", "Inconsolata")
+        .attr("font-size", "1.25em")
+        .attr("text-anchor", "end")
+        .style("fill", "lightgray")
+        .attr("stroke", "none")
+        .text("... ②");
+
+    var strYLabel = "";
+
+    if (fitsData.SPECSYS.trim() != "")
+        strYLabel = "<I>V<SUB>" + fitsData.SPECSYS.trim() + "</SUB></I> [km/s]";
+    else
+        strYLabel = "<I>V<SUB>" + 'LSRK' + "</SUB></I> [km/s]";
+
+    labelsvg.append("foreignObject")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", 20 * emFontSize)
+        .attr("height", 2 * emFontSize)
+        .append("xhtml:div")
+        .attr("id", "pvylabel")
+        .style("display", "inline-block")
+        .attr("class", "pv-label")
+        .html(strYLabel);
+
+    for (let channel = 0; channel < va_count; channel++) {
+        // make an array of RGB colour strings
+        let math_x = [0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0];
+        let math_rgb = [];
+
+        for (let i = 0; i < math_x.length; i++) {
+            // R
+            if (channel == 0)
+                math_rgb.push("rgb(" + Math.round(255 * math_x[i]) + ",0,0)");
+
+            // G
+            if (channel == 1)
+                math_rgb.push("rgb(0," + Math.round(255 * math_x[i]) + ",0)");
+
+            // B
+            if (channel == 2)
+                math_rgb.push("rgb(0,0," + Math.round(255 * math_x[i]) + ")");
+        }
+
+        var wolfram = d3.scaleLinear()
+            .domain(math_x)
+            .range(math_rgb);
+
+        // replace the endings of the colour scale with the actual values
+        let p1 = (pmin[channel] - pmean[channel]) / pstd[channel];
+        p1 = p1 / 6.0 + 0.5;
+        console.log("lower (pmin,p1): ", pmin[channel], p1);
+        math_x[0] = Math.max(p1, 0.0);
+
+        let p2 = (pmax[channel] - pmean[channel]) / pstd[channel];
+        p2 = p2 / 6.0 + 0.5;
+        console.log("upper (pmax,p2): ", pmax[channel], p2);
+        math_x[math_x.length - 1] = Math.min(p2, 1.0);
+
+        // adjust the endings of the colour scale to avoid infinities    
+        math_rgb[0] = wolfram(math_x[0]);
+        console.log("lower (Wolfram RGB): ", pmin[channel], math_x[0], math_rgb[0]);
+
+        math_rgb[math_rgb.length - 1] = wolfram(math_x[math_x.length - 1]);
+        console.log("upper (Wolfram RGB): ", pmax[channel], math_x[math_x.length - 1], math_rgb[math_rgb.length - 1]);
+
+        // invert the scale
+        console.log("math_x: ", math_x);
+        for (let i = 0; i < math_x.length; i++) {
+            // convert from (0, 1) range to the underlying (truncated) range (pmin, pmax)
+            math_x[i] = 6.0 * (math_x[i] - 0.5);
+            math_x[i] = math_x[i] * pstd[channel] + pmean[channel];
+        }
+
+        console.log("math_x: ", math_x);
+
+        let linear = d3.scaleLinear()
+            .domain(math_x)
+            .range(math_rgb);
+
+        scalesvg.append("g")
+            .attr("class", "legendLinear")
+            .attr("id", "legendLinear" + channel)
+            .attr("transform", "translate(0," + 3.0 * emFontSize * channel + ")");
+
+        let legendLinear = d3.legendColor()
+            .shapeWidth((svg_width - 5.5 * emFontSize) / 10)
+            .shapeHeight(0.75 * emFontSize)
+            .orient('horizontal')
+            .cells(10)
+            .scale(linear)
+            .labelFormat(d3.format(".2g")); // .1e or .2f		        
+
+        scalesvg.select("#legendLinear" + channel)
+            .call(legendLinear);
+    }
 
     var bunit = '';
     if (fitsData.BUNIT != '') {
@@ -4276,8 +4544,11 @@ async function open_websocket_connection(_datasetId, index) {
                             // restore the transformation matrix
                             ctx.restore();
 
-                            if (va_count == 1)
+                            if (va_count == 1) {
                                 pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin[0], pmax[0], pmean[0], pstd[0]);
+                            } else {
+                                composite_pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd);
+                            }
 
                             // cancel idlePV timer and set a new one
                             window.clearTimeout(idlePV);
@@ -14319,6 +14590,17 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
                     .domain([0, data.length - 1]);
             }
 
+            if (va_count == 1) {
+                var strokeColour = "black";
+            } else {
+                //var strokeColour = "rgb(255,204,0)";
+                if (va_count == 2) {
+                    var strokeColour = "blue";
+                } else {
+                    var strokeColour = "Lightgreen";
+                }
+            }
+
             d3.select("#PVContourSVG").append("svg")
                 .attr("id", "PVContourPlot")
                 .attr("x", elem.attr("x"))
@@ -14329,8 +14611,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
                 .data(isoBands)
                 .enter().append("path")
                 .style("fill", "none")
-                // .style("stroke", "rgb(255,204,0)") // was "black"
-                .style("stroke", "black")
+                .style("stroke", strokeColour)
                 .attr("opacity", 0.25) // or black with 0.25
                 .attr("d", function (d) {
                     var p = "";
