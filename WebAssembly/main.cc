@@ -819,7 +819,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
         .element(&buffer::ptr)
         .element(&buffer::size);
     function("decompressZFP2D", &decompressZFP2D);
-    function("decompressZFP3D", &decompressZFP3D);
+    /*function("decompressZFP3D", &decompressZFP3D);*/
     function("decompressZFPimage", &decompressZFPimage);
     function("decompressZFPspectrum", &decompressZFPspectrum);
     function("decompressPVdiagram", &decompressPVdiagram);
