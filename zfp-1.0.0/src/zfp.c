@@ -705,7 +705,7 @@ zfp_stream_params(const zfp_stream* zfp, uint* minbits, uint* maxbits, uint* max
 size_t
 zfp_stream_compressed_size(const zfp_stream* zfp)
 {
-  return stream_size(zfp->stream);
+  return bit_stream_size(zfp->stream);
 }
 
 size_t
@@ -875,7 +875,7 @@ zfp_stream_set_params(zfp_stream* zfp, uint minbits, uint maxbits, uint maxprec,
 size_t
 zfp_stream_flush(zfp_stream* zfp)
 {
-  return stream_flush(zfp->stream);
+  return bitstream_flush(zfp->stream);
 }
 
 size_t
@@ -1114,9 +1114,9 @@ zfp_compress(zfp_stream* zfp, const zfp_field* field)
 
   /* compress field and align bit stream on word boundary */
   compress(zfp, field);
-  stream_flush(zfp->stream);
+  bitstream_flush(zfp->stream);
 
-  return stream_size(zfp->stream);
+  return bit_stream_size(zfp->stream);
 }
 
 size_t
@@ -1176,7 +1176,7 @@ zfp_decompress(zfp_stream* zfp, zfp_field* field)
   decompress(zfp, field);
   stream_align(zfp->stream);
 
-  return stream_size(zfp->stream);
+  return bit_stream_size(zfp->stream);
 }
 
 size_t

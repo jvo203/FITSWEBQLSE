@@ -185,7 +185,7 @@ stream_data(const bitstream* s)
 
 /* current byte size of stream (if flushed) */
 inline_ size_t
-stream_size(const bitstream* s)
+bit_stream_size(const bitstream* s)
 {
   return (size_t)(s->ptr - s->begin) * sizeof(bitstream_word);
 }
@@ -400,7 +400,7 @@ stream_align(bitstream* s)
 
 /* write any remaining buffered bits and align stream on next word boundary */
 inline_ bitstream_count
-stream_flush(bitstream* s)
+bitstream_flush(bitstream* s)
 {
   bitstream_count bits = (wsize - s->bits) % wsize;
   if (bits)

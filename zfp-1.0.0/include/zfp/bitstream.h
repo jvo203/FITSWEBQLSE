@@ -40,7 +40,7 @@ bitstream_count stream_alignment();
 void* stream_data(const bitstream* stream);
 
 /* current byte size of stream (if flushed) */
-size_t stream_size(const bitstream* stream);
+size_t bit_stream_size(const bitstream* stream);
 
 /* byte capacity of stream */
 size_t stream_capacity(const bitstream* stream);
@@ -88,7 +88,7 @@ void stream_pad(bitstream* stream, bitstream_size n);
 bitstream_count stream_align(bitstream* stream);
 
 /* flush out any remaining buffered bits */
-bitstream_count stream_flush(bitstream* stream);
+bitstream_count bitstream_flush(bitstream* stream);
 
 /* copy n bits from one bit stream to another */
 void stream_copy(bitstream* dst, bitstream* src, bitstream_size n);
