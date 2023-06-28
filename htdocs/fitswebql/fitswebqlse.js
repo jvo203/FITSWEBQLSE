@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-06-13.0";
+    return "JS2023-06-28.0";
 }
 
 function uuidv4() {
@@ -17677,8 +17677,8 @@ async function mainRenderer() {
         document.body.style.fontSize = emFontSize + "px";
         //console.log("emFontSize : ", emFontSize.toFixed(2), "emStrokeWidth : ", emStrokeWidth.toFixed(2));
 
-        var width = rect.width - 20;
-        var height = rect.height - 20;
+        var width = Math.round(rect.width - 20);
+        var height = Math.round(rect.height - 20);
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "ClusterSVG")
