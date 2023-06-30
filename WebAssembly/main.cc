@@ -794,7 +794,7 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
                 value = 255.0f;
 
             unsigned char pixel = value;
-            unsigned char alpha = 255;
+            unsigned char alpha = 64; // reduce alpha to 25% (64/255)
 
             pvBuffer[pvOffset + k] = pixel;
             pvBuffer[pvOffset + 3] = alpha;
