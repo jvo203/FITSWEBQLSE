@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-07-05.0";
+    return "JS2023-07-06.0";
 }
 
 function uuidv4() {
@@ -6940,8 +6940,8 @@ function cube_refresh(index) {
     var dx = range.xMax - range.xMin;
 
     var rect = document.getElementById('mainDiv').getBoundingClientRect();
-    var width = rect.width - 20;
-    var height = rect.height - 20;
+    var width = Math.round(rect.width - 20);
+    var height = Math.round(rect.height - 20);
 
     var request = {
         type: "image",
@@ -9474,8 +9474,8 @@ function x_axis_mouseenter(offset) {
         sent_vid_id++;
 
         var rect = document.getElementById('mainDiv').getBoundingClientRect();
-        var width = rect.width - 20;
-        var height = rect.height - 20;
+        var width = Math.round(rect.width - 20);
+        var height = Math.round(rect.height - 20);
 
         let ui = '&width=' + width + '&height=' + height;
 
@@ -10285,8 +10285,8 @@ function pv_event(event) {
                 .attr("class", "threejs");
 
             var rect = document.getElementById('mainDiv').getBoundingClientRect();
-            var width = rect.width - 20;
-            var height = rect.height - 20;
+            var width = Math.round(rect.width - 20);
+            var height = Math.round(rect.height - 20);
 
             div.append("canvas")
                 .attr("id", "PVCanvas")
@@ -13073,8 +13073,8 @@ async function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 
 async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
     var rect = document.getElementById('mainDiv').getBoundingClientRect();
-    var width = rect.width - 20;
-    var height = rect.height - 20;
+    var width = Math.round(rect.width - 20);
+    var height = Math.round(rect.height - 20);
 
     var xmlhttp = new XMLHttpRequest();
 
