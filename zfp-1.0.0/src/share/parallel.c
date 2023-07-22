@@ -56,7 +56,7 @@ compress_init_par(zfp_stream *stream, const zfp_field *field, size_t chunks, siz
   for (chunk = 0; chunk < chunks; chunk++)
   {
     size_t block = chunk_offset(blocks, chunks, chunk);
-    void *buffer = copy ? malloc(size) : (uchar *)stream_data(stream->stream) + stream_size(stream->stream) + block * (stream->maxbits / CHAR_BIT);
+    void *buffer = copy ? malloc(size) : (uchar *)stream_data(stream->stream) + bit_stream_size(stream->stream) + block * (stream->maxbits / CHAR_BIT);
     if (!buffer)
       break;
     bs[chunk] = bitstream_open(buffer, size);
