@@ -57,12 +57,12 @@ ifeq ($(UNAME_S),Linux)
 				FORT := gfortran
 			else
 				# Intel oneAPI icc/ifort or icx/ifx (fixed_array.f90 does not compile with ifx)
-				CC := icc
-				FORT := ifort
+				CC := icx
+				FORT := ifx
 
 				# not so fast, the icc / ifort combo is buggy (unstable?) !!! an answer :> recursive I/O seg. faults
-				CC := gcc
-				FORT := gfortran
+				#CC := gcc
+				#FORT := gfortran
 			endif
 		endif
 
