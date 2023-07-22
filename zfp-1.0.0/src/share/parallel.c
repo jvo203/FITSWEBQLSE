@@ -91,7 +91,7 @@ compress_finish_par(zfp_stream *stream, bitstream **src, size_t chunks)
   {
     bitstream_size bits = stream_wtell(src[chunk]);
     offset += bits;
-    stream_flush(src[chunk]);
+    bitstream_flush(src[chunk]);
     /* concatenate streams if they are not already contiguous */
     if (copy)
     {
