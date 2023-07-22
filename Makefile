@@ -56,7 +56,8 @@ ifeq ($(UNAME_S),Linux)
 				CC := gcc
 				FORT := gfortran
 			else
-				# Intel oneAPI icc/ifort or icx/ifx (fixed_array.f90 does not compile with ifx)
+				# Intel oneAPI icc/ifort are buggy
+				# since 2023.2.0 the icx/ifx combo seems to be OK
 				CC := icx
 				FORT := ifx
 
