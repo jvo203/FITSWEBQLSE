@@ -130,7 +130,7 @@ OBJ := $(OBJ:.c=.o)
 OBJ := $(OBJ:.ispc=.o)
 DEP = $(OBJ:%.o=%.d)
 
-ifeq ($(CC),icc)
+ifeq ($(CC),icx)
 	FLAGS = -g -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel
 # -parallel
 #-mcmodel=medium
@@ -177,7 +177,7 @@ endif
 # -lmpifort not needed when using mpiifort
 # -L/home/chris/zfp/build/lib64
 
-ifeq ($(CC),icc)
+ifeq ($(CC),icx)
 	# Intel FORTRAN runtime
 	LIBS += -lifcore -limf
 endif
