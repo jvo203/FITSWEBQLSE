@@ -7087,6 +7087,8 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
         {
             snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
 
+            bool is_fugin = strncmp(table, "fugin", 5) == 0 ? true : false;
+
             // convert a part of table to uppercase and append it to the path
             int i = 0;
             char ch;
@@ -7095,7 +7097,8 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
 
             while (table + i != pos)
             {
-                ch = (char)toupper(table[i]);
+                // if the table contains "fugin" use upper case else lower case
+                ch = is_fugin ? (char)toupper(table[i]) : (char)tolower(table[i]);
                 memcpy(dst + (i++), &ch, 1);
             }
 
