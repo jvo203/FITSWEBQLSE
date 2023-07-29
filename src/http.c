@@ -7089,7 +7089,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
 
             bool is_fugin = strncmp(table, "fugin", 5) == 0 ? true : false;
 
-            // convert a part of table to uppercase and append it to the path
+            // case-convert a part of table and append it to the path
             int i = 0;
             char ch;
 
