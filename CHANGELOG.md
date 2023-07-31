@@ -1,3 +1,9 @@
+## [5.0.37] - 2023-07-31
+
+* updated the client/server ZFP compression library to v1.0.0
+* on Intel CPUs running Linux switched the compilers from gcc/gfortran to Intel icx/ifx (after Intel fixed the last _*show-stopper*_ bug in their new Fortran compiler)
+* added support for new _*NRO45M*_ datasets
+
 ## [5.0.36] - 2023-05-30
 
 * updated the mongoose C networking library to v7.10
