@@ -2,7 +2,6 @@
 
 * updated the client/server ZFP compression library to v1.0.0
 * started loading the client-side JavaScript library _*d3.js*_ from the global Content Delivery Network (CDN)
-* on Intel CPUs running Linux switched the compilers from gcc/gfortran to Intel icx/ifx (after Intel fixed the last remaining _*show-stopper*_ bug in their new Fortran compiler)
 * added support for new _*NRO45M*_ datasets
 * recompiled WebAssembly with the latest _*emscripten*_ compiler
 * on-going work on the NOBEYAMA FUGIN composite RGB support
