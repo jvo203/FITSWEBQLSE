@@ -57,13 +57,13 @@ ifeq ($(UNAME_S),Linux)
 				FORT := gfortran
 			else
 				# Intel oneAPI icc/ifort are buggy
-				# since 2023.2.0 the icx/ifx combo seems to be OK
-				CC := icx
-				FORT := ifx
+				# since 2023.2.0 the icx/ifx combo seems to be OK (not so fast, there seems to be a bug in the OpenMP runtime)
+				# CC := icx
+				# FORT := ifx
 
 				# not so fast, the icc / ifort combo is buggy (unstable?) !!! an answer :> recursive I/O seg. faults
-				#CC := gcc
-				#FORT := gfortran
+				CC := gcc
+				FORT := gfortran
 			endif
 		endif
 
