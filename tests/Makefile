@@ -5,7 +5,7 @@ FORT = gfortran
 FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 
 # Intel FORTRAN
-IFORT = ifort
+IFORT = ifx # ifort or ifx
 IFLAGS = -g -Ofast -xHost -axAVX -qopt-report=2 -qopenmp
 
 gcc:
