@@ -7088,6 +7088,8 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
             snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
 
             bool is_fugin = strncmp(table, "fugin", 5) == 0 ? true : false;
+            bool is_coming = strncmp(table, "coming", 6) == 0 ? true : false;
+            bool is_sfp = strncmp(table, "sfp", 3) == 0 ? true : false;
 
             // case-convert a part of table and append it to the path
             int i = 0;
@@ -7097,8 +7099,8 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
 
             while (table + i != pos)
             {
-                // if the table contains "fugin" use upper case else lower case
-                ch = is_fugin ? (char)toupper(table[i]) : (char)tolower(table[i]);
+                // if the table contains {"fugin","coming","sfp"} use upper case else lower case
+                ch = is_fugin || is_coming || is_sfp ? (char)toupper(table[i]) : (char)tolower(table[i]);
                 memcpy(dst + (i++), &ch, 1);
             }
 
