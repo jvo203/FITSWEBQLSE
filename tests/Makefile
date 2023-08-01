@@ -34,4 +34,4 @@ FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftre
 TARGET = intel
 
 intel:
-	$(FORT) $(FLAGS) -o $(TARGET) intel_fixed_array.f90 $(LIBS)
+	$(FORT) $(FLAGS) -o intel_fixed_array intel_fixed_array.f90 $(LIBS)
