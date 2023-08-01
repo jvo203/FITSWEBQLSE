@@ -12,6 +12,9 @@
 /tests/num_overflow
 /tests/*.dSYM
 
+# optimization reports
+*.yaml
+
 # Memory Logging
 /memory_usage.csv 
 /mem_allocated_v5.pdf
