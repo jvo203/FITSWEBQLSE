@@ -24,24 +24,28 @@
 Segmentation fault (コアダンプ)
 
 ==========================================
+OMP: Info #255: KMP_AFFINITY: pid 6688 tid 6702 thread 3 bound to OS proc set 3
+ BITPIX:         -32 NAXIS:           4 NAXES:         420         420
+        1908           1
+ #no. pixels:      176400
+ max_threads:           4
+
 Thread 13 "MHD-single" received signal SIGSEGV, Segmentation fault.
-[Switching to Thread 0x7fffe01fe840 (LWP 24638)]
-0x00007fffeb887b83 in __kmp_fork_barrier (gtid=-512164416, tid=-342298832) at ../../src/kmp_barrier.cpp:2540
+[Switching to Thread 0x7fffe03fe840 (LWP 6702)]
+0x00007fffeb887b83 in __kmp_fork_barrier (gtid=-510132800, tid=-342298832) at ../../src/kmp_barrier.cpp:2540
 2540	../../src/kmp_barrier.cpp: そのようなファイルやディレクトリはありません.
 (gdb) bt
-#0  0x00007fffeb887b83 in __kmp_fork_barrier (gtid=-512164416, tid=-342298832) at ../../src/kmp_barrier.cpp:2540
-#1  0x00007fffeb8d2778 in __kmp_fork_call (loc=0x7fffe178fdc0, gtid=-342298832, call_context=(unknown: 0xe178fe40), argc=0, microtask=0x0, invoker=0x0, ap=0x7fffe01fbca0)
+#0  0x00007fffeb887b83 in __kmp_fork_barrier (gtid=-510132800, tid=-342298832) at ../../src/kmp_barrier.cpp:2540
+#1  0x00007fffeb8d2778 in __kmp_fork_call (loc=0x7fffe197fdc0, gtid=-342298832, call_context=(unknown: 0xe197fe40), argc=0, microtask=0x0, invoker=0x0, ap=0x7fffe03fbca0)
     at ../../src/kmp_runtime.cpp:2649
-#2  0x00007fffeb88a033 in __kmpc_fork_teams (loc=0x7fffe178fdc0, argc=-342298832, microtask=0x7fffe178fe40) at ../../src/kmp_csupport.cpp:499
-#3  0x0000000000614963 in fixed_array::to_fixed (compressed=<error reading variable: value requires 211410 bytes, which is more than max-value-size>,
+#2  0x00007fffeb88a033 in __kmpc_fork_teams (loc=0x7fffe197fdc0, argc=-342298832, microtask=0x7fffe197fe40) at ../../src/kmp_csupport.cpp:499
+#3  0x0000000000614a23 in fixed_array::to_fixed (compressed=<error reading variable: value requires 211410 bytes, which is more than max-value-size>,
     x=<error reading variable: value requires 705600 bytes, which is more than max-value-size>, pmin=<optimized out>, pmax=-0.281975746, ignrval=-1.00000002e+30, datamin=-0.281975746,
-    datamax=-4.6048409e+19) at src/fixed_array.f90:50
-#4  0x000000000065553d in fits_mp_read_fits_file_.DIR.OMP.PARALLEL.2.split7647 () at src/fits.f90:4457
-#5  0x00007fffeb963493 in __kmp_invoke_microtask () from /opt/intel/oneapi/compiler/2023.2.0/linux/compiler/lib/intel64_lin/libiomp5.so
-#6  0x00007fffeb8d1533 in __kmp_invoke_task_func (gtid=-512164416) at ../../src/kmp_runtime.cpp:8273
-#7  0x00007fffeb8d0470 in __kmp_launch_thread (this_thr=0x7fffe178fdc0) at ../../src/kmp_runtime.cpp:6648
-#8  0x00007fffeb9641ff in _INTERNAL1ebb3278::__kmp_launch_worker (thr=0x7fffe178fdc0) at ../../src/z_Linux_util.cpp:559
+    datamax=-5.5271781e+19) at src/fixed_array.f90:50
+#4  0x00000000006555fd in fits_mp_read_fits_file_.DIR.OMP.PARALLEL.2.split7647 () at src/fits.f90:4457
+#5  0x00007fffeb963493 in __kmp_invoke_microtask () from /opt/intel/oneapi/compiler/2023.2.1/linux/compiler/lib/intel64_lin/libiomp5.so
+#6  0x00007fffeb8d1533 in __kmp_invoke_task_func (gtid=-510132800) at ../../src/kmp_runtime.cpp:8273
+#7  0x00007fffeb8d0470 in __kmp_launch_thread (this_thr=0x7fffe197fdc0) at ../../src/kmp_runtime.cpp:6648
+#8  0x00007fffeb9641ff in _INTERNAL1ebb3278::__kmp_launch_worker (thr=0x7fffe197fdc0) at ../../src/z_Linux_util.cpp:559
 #9  0x00007fffeb690c64 in start_thread () from /usr/lib64/libc.so.6
 #10 0x00007fffeb718550 in clone3 () from /usr/lib64/libc.so.6
-(gdb) q
-==========================================
