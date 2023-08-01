@@ -47,13 +47,16 @@ program main
    ! allocate the compressed array
    allocate (compressed_data(1:nz))
 
-   ! convert the data cube to fixed-point
+   !$omp PARALLEL DO DEFAULT(SHARED) SHARED(data, compressed_data)&
+   !$omp& PRIVATE(k)
    do k = 1, nz
+      ! convert the data cube to fixed-point
       compressed_data(k)%ptr => to_fixed(data(:, :, k), 0.0, 1.0)
    end do
+   !$omp END PARALLEL DO
 
    ! print some compressed blocks
-   do k = 1, nz
+   do k = nz/2, nz/2+1
       print *, 'block', k
       call print_fixed_block(compressed_data(k)%ptr(1,1))
    end do
