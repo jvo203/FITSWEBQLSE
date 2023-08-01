@@ -29,9 +29,9 @@ LIBS = `pkg-config --libs cfitsio`
 LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/13 -lgfortran -lm -framework Accelerate
 
 FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-13
-FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize
+FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 
 TARGET = intel
 
 intel:
-	$(FORT) $(FLAGS) -o intel_fixed_array intel_fixed_array.f90 $(LIBS)
+	$(FORT) $(FLAGS) -o intel_fixed_array intel_fixed_array.f90
