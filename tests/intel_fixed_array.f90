@@ -90,7 +90,6 @@ contains
 
       allocate (compressed(cn, cm))
 
-      ! do concurrent(j=1:m/DIM, i=1:n/DIM)
       do concurrent(j=1:cm, i=1:cn)
          block
             real(kind=4), dimension(DIM, DIM) :: input
