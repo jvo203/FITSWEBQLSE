@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := overflow
+.DEFAULT_GOAL := intel
 
 # get the Homebrew installation directory
 # brew --prefix is not available from inside the Homebrew environment
@@ -26,12 +26,12 @@ UNAME_M := $(shell uname -m)
 
 LIBS = `pkg-config --libs cfitsio`
 # GCC FORTRAN runtime
-LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/12 -lgfortran -lm -framework Accelerate
+LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/13 -lgfortran -lm -framework Accelerate
 
-FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-12
+FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-13
 FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize
 
-TARGET = num_overflow
+TARGET = intel
 
-overflow:
-	$(FORT) $(FLAGS) -o $(TARGET) test_num_overflow.f90 $(LIBS)
+intel:
+	$(FORT) $(FLAGS) -o $(TARGET) intel_fixed_array.f90 $(LIBS)
