@@ -1,3 +1,5 @@
+DO CONCURRENT segmentation fault with ifx (IFX) 2023.2.0 20230721
+
 This problem is related to a recently fixed issue https://community.intel.com/t5/Intel-Fortran-Compiler/ifx-OpenMP-compilation-segmentation-fault/m-p/1478761#M166155
 
 The above fix corrected the compilation segmentation fault. So now that the code compiles, there is a new segmentation fault at runtime that only occurs with the OpenMP compiler flag switched on. With the OpenMP flag on, the following executable either hangs indefinitely or causes a segmentation fault.
