@@ -33,7 +33,7 @@ program main
 
    integer :: k
 
-   print *, "NEW INTEL FORTRAN (IFX) TEST"
+   print *, "INTEL FORTRAN COMPILER TEST"
 
    ! dynamically allocate the data
    allocate(data(nx,ny,nz))
