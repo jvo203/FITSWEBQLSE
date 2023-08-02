@@ -6,7 +6,7 @@ FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftre
 
 # Intel FORTRAN
 IFORT = ifx # ifort or ifx
-IFLAGS = -g -Ofast -xHost -axAVX -qopt-report=2 -qopenmp -mcmodel=large
+IFLAGS = -g -Ofast -xHost -axAVX -qopt-report=2 -qopenmp -mcmodel=large -heap-arrays 1024
 
 gcc:
 	$(FORT) $(FLAGS) -o intel_fixed_array intel_fixed_array.f90
