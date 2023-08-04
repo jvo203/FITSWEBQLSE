@@ -24,7 +24,7 @@ program main
 
    ! 3D data cube dimensions
    ! integer, parameter :: nx = 420, ny = 420, nz = 1908
-   integer, parameter :: nx = 20, ny = 20, nz = 30
+   integer, parameter :: nx = 20, ny = 20, nz = 8
 
    ! 3D data cube
    real(kind=4), dimension(:,:,:), allocatable :: data
