@@ -89,29 +89,29 @@ contains
 
       allocate (compressed(cn, cm))
 
-      ! do concurrent(j=1:cm, i=1:cn)
-      do j = 1, cm
-         do i = 1, cn
-            ! a block of <DIM> x <DIM> elements
-            block
-               real(kind=4), dimension(DIM, DIM) :: input
-               integer :: x1, x2, y1, y2
+      do concurrent(j=1:cm, i=1:cn)
+         !do j = 1, cm
+         !   do i = 1, cn
+         ! a block of <DIM> x <DIM> elements
+         block
+            real(kind=4), dimension(DIM, DIM) :: input
+            integer :: x1, x2, y1, y2
 
-               ! by default there are no valid values
-               input = ieee_value(0.0, ieee_quiet_nan)
+            ! by default there are no valid values
+            input = ieee_value(0.0, ieee_quiet_nan)
 
-               x1 = 1 + shiftl(i - 1, BASE)
-               x2 = min(n, shiftl(i, BASE))
+            x1 = 1 + shiftl(i - 1, BASE)
+            x2 = min(n, shiftl(i, BASE))
 
-               y1 = 1 + shiftl(j - 1, BASE)
-               y2 = min(m, shiftl(j, BASE))
+            y1 = 1 + shiftl(j - 1, BASE)
+            y2 = min(m, shiftl(j, BASE))
 
-               input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
+            input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
-               call to_fixed_block(input, compressed(i, j), datamin, datamax)
-            end block
-         end do
+            call to_fixed_block(input, compressed(i, j), datamin, datamax)
+         end block
       end do
+      !end do
 
    end function to_fixed
 
