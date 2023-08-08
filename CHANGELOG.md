@@ -1,3 +1,7 @@
+## [5.0.38] - 2023-08-08
+
+* corrected the auto-detection of radio FITS files (the previous version would incorrectly detect them as optical) for the newly added NRO45M datasets, based on the FITS header telescope keyword
+
 ## [5.0.37] - 2023-07-31
 
 * updated the client/server ZFP compression library to v1.0.0
