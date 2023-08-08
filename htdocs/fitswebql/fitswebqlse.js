@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-01.0";
+    return "JS2023-08-08.0";
 }
 
 function uuidv4() {
@@ -3011,7 +3011,7 @@ function webgl_image_renderer(index, gl, width, height) {
     var scale = get_image_scale(width, height, image.image_bounding_dims.width, image.image_bounding_dims.height);
     var img_width = scale * image.image_bounding_dims.width;
     var img_height = scale * image.image_bounding_dims.height;
-    //console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
+    // console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
 
     // setup GLSL program
     var vertexShaderCode = document.getElementById("vertex-shader").text;
@@ -6865,7 +6865,7 @@ function change_spectrum_scale(index) {
 function change_tone_mapping(index, recursive) {
     var display;
 
-    if (document.getElementById('flux' + index).value == 'linear' || document.getElementById('flux' + index).value == 'log' || document.getElementById('flux' + index).value == 'square')
+    if (document.getElementById('flux' + index).value == 'linear' || document.getElementById('flux' + index).value == 'square')
         display = "none";
     else
         display = "block";

@@ -3763,6 +3763,9 @@ contains
             pos = index(value, 'ska')
             if (pos .ne. 0) item%is_optical = .false.
 
+            pos = index(value, 'nro')
+            if (pos .ne. 0) item%is_optical = .false.
+
             pos = index(value, 'nro45')
             if (pos .ne. 0) then
                item%is_optical = .false.
