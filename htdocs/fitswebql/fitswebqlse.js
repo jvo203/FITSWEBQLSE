@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-08.0";
+    return "JS2023-08-09.0";
 }
 
 function uuidv4() {
@@ -867,6 +867,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     d3.select("#PVLABELSVG").remove();
     d3.select("#PVTITLESVG").remove();
     d3.select("#PVSCALESVG").remove();
+    d3.select("#velocityline").remove();
 
     let svg_left = 10 + left;
     let svg_top = 10 + top;
@@ -931,6 +932,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     var labelsvg = d3.select("#PVLABELSVG");
     var titlesvg = d3.select("#PVTITLESVG");
     var scalesvg = d3.select("#PVSCALESVG");
+    var svg = d3.select("#PVSVG");
 
     // always use a dark theme for the PV diagram
     let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
@@ -979,6 +981,35 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .style("stroke", _axisColour)
         .attr("transform", "translate(" + (10 * emFontSize - 1) + ",0)")
         .call(yAxis);
+
+    // the horizontal velocity line
+    var velocity, position;
+
+    // check if there is a zero value between vmin and vmax
+    if (vmin <= 0 && vmax >= 0) {
+        velocity = 0;
+    }
+    else {
+        velocity = (vmin + vmax) / 2;
+    }
+
+    // invert yR to get the position
+    position = yR(velocity);
+
+    console.log("velocity:", velocity, "position:", position);
+    console.log(xmin, xmax);
+
+    // add a horizontal "velocityline"
+    //.range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
+    svg.append("line")
+        .attr("id", "velocityline")
+        .attr("x1", 2 * emFontSize)
+        .attr("y1", position)
+        .attr("x2", (2 * emFontSize + svg_width - 1))
+        .attr("y2", position)
+        .attr("stroke-width", emStrokeWidth)
+        .attr("stroke", _axisColour)
+        .attr("stroke-dasharray", "5, 3");
 
     // labels
     let fitsData = fitsContainer[va_count - 1];
