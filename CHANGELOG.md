@@ -1,3 +1,8 @@
+## [5.0.39] - 2023-08-21
+
+* corrected a velocity axis direction in the P-V Diagram for datasets with a reversed frequency / velocity axis
+* added a user-moveable horizontal velocity reference line at _*v=0*_ (mid-velocity if there is no zero) to the P-V Diagram
+
 ## [5.0.38] - 2023-08-08
 
 * corrected the auto-detection of radio FITS files (the previous version would incorrectly detect them as optical) for the newly added NRO45M datasets, based on the FITS header telescope keyword
