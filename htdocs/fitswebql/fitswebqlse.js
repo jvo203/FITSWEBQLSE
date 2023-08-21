@@ -994,29 +994,32 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .call(yAxis);
 
     // the horizontal velocity line
-    var velocity, position;
 
-    // check if there is a zero value between vmin and vmax
-    if (vmin <= 0 && vmax >= 0) {
-        velocity = 0;
+    if (velocityline_position == -1) {
+        var velocity;
+
+        // check if there is a zero value between vmin and vmax
+        if (vmin <= 0 && vmax >= 0) {
+            velocity = 0;
+        }
+        else {
+            velocity = (vmin + vmax) / 2;
+        }
+
+        // invert yR to get the position
+        velocityline_position = yR(velocity) - emFontSize;
     }
-    else {
-        velocity = (vmin + vmax) / 2;
-    }
 
-    // invert yR to get the position
-    position = yR(velocity) - emFontSize;
-
-    console.log("velocity:", velocity, "position:", position);
+    console.log("velocity:", velocity, "position:", velocityline_position);
     console.log(xmin, xmax);
 
     // add a horizontal "velocityline"    
     axissvg.append("line")
         .attr("id", "velocityline")
         .attr("x1", 0)
-        .attr("y1", position)
+        .attr("y1", velocityline_position)
         .attr("x2", svg_width)
-        .attr("y2", position)
+        .attr("y2", velocityline_position)
         .attr("stroke-width", 2 * emStrokeWidth)
         .attr("opacity", 0.5)
         .attr("stroke", "red")
@@ -1032,7 +1035,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     axissvg.append("circle")
         .attr("id", "velocitycircle")
         .attr("cx", svg_width / 2)
-        .attr("cy", position)
+        .attr("cy", velocityline_position)
         .attr("r", emFontSize / 2)
         .style("fill", "red")
         .style("stroke", "red")
@@ -1487,6 +1490,8 @@ function drag_velocity_line(event) {
 
     d3.select("#velocitycircle")
         .attr("cy", y);
+
+    velocityline_position = y;
 }
 
 /** ---------------------------------------------------------------------
@@ -10529,6 +10534,7 @@ function pv_event(event) {
             d3.select("#zoom").attr("opacity", 0.0);
             d3.select("#zoomCross").attr("opacity", 0.0);
 
+            velocityline_position = -1;
             pv_loop = -1;
             const res = submit_pv_line(x1, y1, x2, y2);
             console.log(res);
@@ -17630,6 +17636,7 @@ async function mainRenderer() {
         computed = 0;
         processed = 0;
         cpuTime = 0;
+        velocityline_position = -1;
 
         //image
         recv_seq_id = 0;
