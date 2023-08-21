@@ -998,6 +998,8 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     if (velocityline_position == -1) {
         var velocity;
 
+        console.log("vmin:", vmin, "vmax:", vmax);
+
         // check if there is a zero value between vmin and vmax
         if (vmin <= 0 && vmax >= 0) {
             velocity = 0;
@@ -1008,10 +1010,9 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 
         // invert yR to get the position
         velocityline_position = yR(velocity) - emFontSize;
-    }
 
-    console.log("velocity:", velocity, "position:", velocityline_position);
-    console.log(xmin, xmax);
+        console.log("velocity:", velocity, "position:", velocityline_position);
+    }
 
     // add a horizontal "velocityline"    
     axissvg.append("line")
@@ -4709,6 +4710,11 @@ async function open_websocket_connection(_datasetId, index) {
                                 // flip the X axis only
                                 ctx.translate(c.width, offset);
                                 ctx.scale(-1, 1); // X was -1
+
+                                // swap vmin and vmax
+                                let tmp = vmin;
+                                vmin = vmax;
+                                vmax = tmp;
                             }
 
                             // then place the new PV diagram onto the ctx canvas
