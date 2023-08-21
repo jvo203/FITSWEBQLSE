@@ -935,6 +935,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
             .attr("id", "PVAXISLINE")
             .attr("width", svg_width)
             .attr("height", svg_height)
+            .attr("top", svg_top)
             .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
     }
 
@@ -994,7 +995,6 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .call(yAxis);
 
     // the horizontal velocity line
-
     if (velocityline_position == -1) {
         var velocity;
 
@@ -1200,6 +1200,8 @@ function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmi
     d3.select("#PVLABELSVG").remove();
     d3.select("#PVTITLESVG").remove();
     d3.select("#PVSCALESVG").remove();
+    d3.select("#PVAXISLINE").remove();
+    d3.select("#velocityline").remove();
 
     let svg_left = 10 + left;
     let svg_top = 10 + top;
@@ -1259,11 +1261,23 @@ function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmi
             .attr('style', `position: fixed; left: ${svg_left + 2 * emFontSize}px; top: ${svg_top - (1.0 + 3 * va_count) * emFontSize}px; cursor: default`);
     }
 
+    if (document.getElementById('PVAXISLINE') === null) {
+        // console.log("pv_axes: PVAXISLINE is null, creating a new one.");
+
+        div.append("svg")
+            .attr("id", "PVAXISLINE")
+            .attr("width", svg_width)
+            .attr("height", svg_height)
+            .attr("top", svg_top)
+            .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
+    }
+
     var xsvg = d3.select("#PVSVGX");
     var ysvg = d3.select("#PVSVGY");
     var labelsvg = d3.select("#PVLABELSVG");
     var titlesvg = d3.select("#PVTITLESVG");
     var scalesvg = d3.select("#PVSCALESVG");
+    var axissvg = d3.select("#PVAXISLINE");
 
     // always use a dark theme for the PV diagram
     let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
@@ -1312,6 +1326,61 @@ function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmi
         .style("stroke", _axisColour)
         .attr("transform", "translate(" + (10 * emFontSize - 1) + ",0)")
         .call(yAxis);
+
+    // the horizontal velocity line
+    if (velocityline_position == -1) {
+        var velocity;
+
+        // check if there is a zero value between vmin and vmax
+        if (vmin <= 0 && vmax >= 0) {
+            velocity = 0;
+        }
+        else {
+            velocity = (vmin + vmax) / 2;
+        }
+
+        // invert yR to get the position
+        velocityline_position = yR(velocity) - emFontSize;
+    }
+
+    console.log("velocity:", velocity, "position:", velocityline_position);
+    console.log(xmin, xmax);
+
+    // add a horizontal "velocityline"    
+    axissvg.append("line")
+        .attr("id", "velocityline")
+        .attr("x1", 0)
+        .attr("y1", velocityline_position)
+        .attr("x2", svg_width)
+        .attr("y2", velocityline_position)
+        .attr("stroke-width", 2 * emStrokeWidth)
+        .attr("opacity", 0.5)
+        .attr("stroke", "red")
+        .attr("stroke-dasharray", "5, 3")
+        .attr("pointer-events", "auto")
+        .style('cursor', 'row-resize')
+        .call(d3.drag()
+            .on("start", start_velocity_line)
+            .on("drag", drag_velocity_line)
+            .on("end", end_velocity_line)
+        );
+
+    axissvg.append("circle")
+        .attr("id", "velocitycircle")
+        .attr("cx", svg_width / 2)
+        .attr("cy", velocityline_position)
+        .attr("r", emFontSize / 2)
+        .style("fill", "red")
+        .style("stroke", "red")
+        .style("stroke-width", 2 * emStrokeWidth)
+        .attr("opacity", 0.5)
+        .attr("pointer-events", "auto")
+        .style('cursor', 'row-resize')
+        .call(d3.drag()
+            .on("start", start_velocity_line)
+            .on("drag", drag_velocity_line)
+            .on("end", end_velocity_line)
+        );
 
     // labels
     let fitsData = fitsContainer[va_count - 1];
@@ -1474,11 +1543,14 @@ function end_velocity_line(event) {
 function drag_velocity_line(event) {
     event.preventDefault = true;
 
-    var offset = d3.pointer(event);
-    let y = offset[1] - pvsvg_top; // the SVG offset    
-
     // get the dimensions of the SVG "PVAXISLINE"    
+    let _svg_top = d3.select("#PVAXISLINE").attr("top");
     let _svg_height = d3.select("#PVAXISLINE").attr("height");
+
+    var offset = d3.pointer(event);
+
+    // get the y coordinate of the mouse pointer with respect to the PVAXISLINE
+    let y = offset[1] - _svg_top; // the SVG offset    
 
     // make sure the line lies within the SVG
     y = Math.min(Math.max(y, 1), _svg_height - 1);
