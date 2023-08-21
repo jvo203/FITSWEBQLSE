@@ -1018,23 +1018,15 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .attr("x2", svg_width)
         .attr("y2", position)
         .attr("stroke-width", 2 * emStrokeWidth)
-        .attr("stroke", _axisColour)
+        .attr("opacity", 0.5)
+        .attr("stroke", "red")
         .attr("stroke-dasharray", "5, 3")
         .attr("pointer-events", "auto")
-        .style('cursor', 'move')
+        .style('cursor', 'row-resize')
         .call(d3.drag()
-            .on("start", function (event) {
-                event.preventDefault = true;
-                console.log("velocity line drag start");
-            })
-            .on("drag", function (event) {
-                event.preventDefault = true;
-                console.log("velocity line drag");
-            })
-            .on("end", function (event) {
-                event.preventDefault = true;
-                console.log("velocity line drag end");
-            })
+            .on("start", start_velocity_line)
+            .on("drag", drag_velocity_line)
+            .on("end", end_velocity_line)
         );
 
     axissvg.append("circle")
@@ -1042,25 +1034,16 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .attr("cx", svg_width / 2)
         .attr("cy", position)
         .attr("r", emFontSize / 2)
-        .style("fill", _axisColour)
-        .style("stroke", _axisColour)
+        .style("fill", "red")
+        .style("stroke", "red")
         .style("stroke-width", 2 * emStrokeWidth)
         .attr("opacity", 0.5)
         .attr("pointer-events", "auto")
-        .style('cursor', 'move')
+        .style('cursor', 'row-resize')
         .call(d3.drag()
-            .on("start", function (event) {
-                event.preventDefault = true;
-                console.log("velocity line drag start");
-            })
-            .on("drag", function (event) {
-                event.preventDefault = true;
-                console.log("velocity line drag");
-            })
-            .on("end", function (event) {
-                event.preventDefault = true;
-                console.log("velocity line drag end");
-            })
+            .on("start", start_velocity_line)
+            .on("drag", drag_velocity_line)
+            .on("end", end_velocity_line)
         );
 
     // labels
@@ -1473,6 +1456,37 @@ function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmi
         .style("fill", "lightgray")
         .attr("stroke", "none")
         .text(bunit);
+}
+
+function start_velocity_line(event) {
+    // set the mouse cursor to a "row-resize" cursor
+    d3.select("#PVAXISLINE").style('cursor', 'row-resize');
+}
+
+function end_velocity_line(event) {
+    // reset the mouse cursor
+    d3.select("#PVAXISLINE").style('cursor', 'default');
+}
+
+function drag_velocity_line(event) {
+    event.preventDefault = true;
+
+    var offset = d3.pointer(event);
+    let y = offset[1] - pvsvg_top; // the SVG offset    
+
+    // get the dimensions of the SVG "PVAXISLINE"    
+    let _svg_height = d3.select("#PVAXISLINE").attr("height");
+
+    // make sure the line lies within the SVG
+    y = Math.min(Math.max(y, 1), _svg_height - 1);
+
+    // move the line and circle
+    d3.select("#velocityline")
+        .attr("y1", y)
+        .attr("y2", y);
+
+    d3.select("#velocitycircle")
+        .attr("cy", y);
 }
 
 /** ---------------------------------------------------------------------
