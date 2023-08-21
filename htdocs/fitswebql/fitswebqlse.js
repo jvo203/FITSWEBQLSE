@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-09.0";
+    return "JS2023-08-21.0";
 }
 
 function uuidv4() {
@@ -867,6 +867,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     d3.select("#PVLABELSVG").remove();
     d3.select("#PVTITLESVG").remove();
     d3.select("#PVSCALESVG").remove();
+    d3.select("#PVAXISLINE").remove();
     d3.select("#velocityline").remove();
 
     let svg_left = 10 + left;
@@ -927,12 +928,22 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
             .attr('style', `position: fixed; left: ${svg_left + 2 * emFontSize}px; top: ${svg_top - 4.5 * emFontSize}px; cursor: default`);
     }
 
+    if (document.getElementById('PVAXISLINE') === null) {
+        // console.log("pv_axes: PVAXISLINE is null, creating a new one.");
+
+        div.append("svg")
+            .attr("id", "PVAXISLINE")
+            .attr("width", svg_width)
+            .attr("height", svg_height)
+            .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
+    }
+
     var xsvg = d3.select("#PVSVGX");
     var ysvg = d3.select("#PVSVGY");
     var labelsvg = d3.select("#PVLABELSVG");
     var titlesvg = d3.select("#PVTITLESVG");
     var scalesvg = d3.select("#PVSCALESVG");
-    var svg = d3.select("#PVSVG");
+    var axissvg = d3.select("#PVAXISLINE");
 
     // always use a dark theme for the PV diagram
     let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
@@ -994,22 +1005,63 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     }
 
     // invert yR to get the position
-    position = yR(velocity);
+    position = yR(velocity) - emFontSize;
 
     console.log("velocity:", velocity, "position:", position);
     console.log(xmin, xmax);
 
-    // add a horizontal "velocityline"
-    //.range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
-    svg.append("line")
+    // add a horizontal "velocityline"    
+    axissvg.append("line")
         .attr("id", "velocityline")
-        .attr("x1", 2 * emFontSize)
+        .attr("x1", 0)
         .attr("y1", position)
-        .attr("x2", (2 * emFontSize + svg_width - 1))
+        .attr("x2", svg_width)
         .attr("y2", position)
-        .attr("stroke-width", emStrokeWidth)
+        .attr("stroke-width", 2 * emStrokeWidth)
         .attr("stroke", _axisColour)
-        .attr("stroke-dasharray", "5, 3");
+        .attr("stroke-dasharray", "5, 3")
+        .attr("pointer-events", "auto")
+        .style('cursor', 'move')
+        .call(d3.drag()
+            .on("start", function (event) {
+                event.preventDefault = true;
+                console.log("velocity line drag start");
+            })
+            .on("drag", function (event) {
+                event.preventDefault = true;
+                console.log("velocity line drag");
+            })
+            .on("end", function (event) {
+                event.preventDefault = true;
+                console.log("velocity line drag end");
+            })
+        );
+
+    axissvg.append("circle")
+        .attr("id", "velocitycircle")
+        .attr("cx", svg_width / 2)
+        .attr("cy", position)
+        .attr("r", emFontSize / 2)
+        .style("fill", _axisColour)
+        .style("stroke", _axisColour)
+        .style("stroke-width", 2 * emStrokeWidth)
+        .attr("opacity", 0.5)
+        .attr("pointer-events", "auto")
+        .style('cursor', 'move')
+        .call(d3.drag()
+            .on("start", function (event) {
+                event.preventDefault = true;
+                console.log("velocity line drag start");
+            })
+            .on("drag", function (event) {
+                event.preventDefault = true;
+                console.log("velocity line drag");
+            })
+            .on("end", function (event) {
+                event.preventDefault = true;
+                console.log("velocity line drag end");
+            })
+        );
 
     // labels
     let fitsData = fitsContainer[va_count - 1];
@@ -14476,6 +14528,8 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
             .attr("width", svg_width)
             .attr("height", svg_height)
             .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
+
+        d3.select("#PVAXISLINE").moveToFront();
     }
 
     if (!displayPVContours) return;
@@ -14662,6 +14716,8 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
 
         CRWORKER.postMessage({ data: data, level: i, lowerBand: lowerBand, upperBand: upperBand });
     };
+
+    d3.select("#velocityline").moveToFront();
 }
 
 function send_pv_request(x1, y1, x2, y2) {
