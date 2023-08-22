@@ -107,6 +107,7 @@ contains
       allocate (compressed(cn, cm))
 
       do concurrent(j=1:cm, i=1:cn)
+         ! a block of <DIM> x <DIM> elements
          block
             real(kind=4), dimension(DIM, DIM) :: input
             integer :: x1, x2, y1, y2
