@@ -4656,7 +4656,7 @@ contains
             datamin = real(item%datamin, kind=4)
             datamax = real(item%datamax, kind=4)
 
-            item%compressed(frame)%ptr => to_fixed(reshape(data, item%naxes(1:2)),&
+            item%compressed(frame)%ptr => to_fixed_concurrent(reshape(data, item%naxes(1:2)),&
             & frame_min, frame_max, ignrval, datamin, datamax)
          end block
       end if

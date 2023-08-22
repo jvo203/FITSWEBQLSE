@@ -46,7 +46,66 @@ contains
 
       allocate (compressed(cn, cm))
 
-      ! do concurrent(j=1:m/DIM, i=1:n/DIM)
+      ! replaced the 'do concurrent' with two 'do' loops in order to avoid nested parallelism
+      do j = 1, cm
+         do i = 1, cn
+            ! a block of <DIM> x <DIM> elements
+            block
+               real(kind=4), dimension(DIM, DIM) :: input
+               integer :: x1, x2, y1, y2
+
+               ! by default there are no valid values
+               input = ieee_value(0.0, ieee_quiet_nan)
+
+               x1 = 1 + shiftl(i - 1, BASE)
+               x2 = min(n, shiftl(i, BASE))
+
+               y1 = 1 + shiftl(j - 1, BASE)
+               y2 = min(m, shiftl(j, BASE))
+
+               input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
+
+               ! pre-condition the input array
+               ! or not
+               ! input = log(0.5 + (input - pmin)/(pmax - pmin))
+
+               call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
+            end block
+         end do
+      end do
+
+   end function to_fixed
+
+   function to_fixed_concurrent(x, pmin, pmax, ignrval, datamin, datamax) result(compressed)
+      use, intrinsic :: ieee_arithmetic
+      implicit none
+
+      integer(kind=4) :: n, m ! input dimensions
+      real(kind=4), dimension(:, :), intent(in) :: x
+      real, intent(in) :: pmin, pmax
+      real, intent(in) :: ignrval, datamin, datamax
+
+      integer(kind=4) :: i, j
+
+      ! compressed output dimensions
+      integer(kind=4) :: cn, cm
+
+      ! the result
+      type(fixed_block), dimension(:, :), pointer :: compressed
+
+      n = size(x, 1)
+      m = size(x, 2)
+
+      ! by default compressed is dimension(n/DIM, m/DIM)
+      cn = n/DIM
+      cm = m/DIM
+
+      ! but the input dimensions might not be divisible by <DIM>
+      if (mod(n, DIM) .ne. 0) cn = cn + 1
+      if (mod(m, DIM) .ne. 0) cm = cm + 1
+
+      allocate (compressed(cn, cm))
+
       do concurrent(j=1:cm, i=1:cn)
          block
             real(kind=4), dimension(DIM, DIM) :: input
@@ -71,7 +130,7 @@ contains
          end block
       end do
 
-   end function to_fixed
+   end function to_fixed_concurrent
 
    pure subroutine to_fixed_block(x, compressed, ignrval, datamin, datamax)
       use, intrinsic :: ieee_arithmetic
