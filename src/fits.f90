@@ -2456,7 +2456,7 @@ contains
 
       print *, "max_threads:", max_threads, "depth:", depth
 
-      do concurrent(i=1:depth)
+      do i = 1, depth ! was do concurrent
          nullify (item%compressed(i)%ptr)
       end do
 
@@ -3575,7 +3575,7 @@ contains
 
             ! copy the characters one by one
             ! Fortran string operations are frustrating
-            do concurrent(pos=1:80)
+            do pos = 1, 80
                item%hdr(pos + (i - 1)*80) = record(pos:pos)
             end do
 
