@@ -967,6 +967,11 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .tickFormat(function (d) {
             var number;
 
+            // d goes from -1 to +1
+            // the mid point is at d = 0
+            // the left point is at d = -1
+            // the right point is at d = +1
+            // the x and y should be corrected
             let x = x1 + d * (x2 - x1);
             let y = y1 + d * (y2 - y1);
             let ra = x2rad(x);
@@ -5256,14 +5261,28 @@ function inverse_CD_matrix(arcx, arcy) {
     return gridScale;
 }
 
+function AngularDistance(p1lng, p1lat, p2lng, p2lat) {
+    var dl = p1lng - p2lng;
+    var f = ((Math.sin(p1lat) * Math.sin(p2lat) + Math.cos(p1lat) * Math.cos(p2lat) * Math.cos(dl)));
+
+    console.log("f = ", f);
+
+    return Math.acos(f);
+}
+
 function HaversineDistance(ra1, dec1, ra2, dec2) {
     var dRA = ra2 - ra1;
     var dDEC = dec2 - dec1;
 
+    console.log("dRA=", dRA, "dDEC=", dDEC);
+
     var a = Math.sin(dDEC / 2) * Math.sin(dDEC / 2) + Math.cos(dec1) * Math.cos(dec2) * Math.sin(dRA / 2) * Math.sin(dRA / 2);
+    var b = Math.asin(Math.sqrt(a));
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return c;
+    console.log("a=", a, "b=", b, "c=", c);
+
+    return b;
 }
 
 function CD_matrix(X, Y) {
