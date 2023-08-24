@@ -972,8 +972,9 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
             // the left point is at d = -1
             // the right point is at d = +1
             // the x and y should be corrected
-            let x = x1 + d * (x2 - x1);
-            let y = y1 + d * (y2 - y1);
+            let x = midx + d * (x2 - x1) / 2;
+            let y = midy + d * (y2 - y1) / 2;
+
             let ra = x2rad(x);
             let dec = y2rad(y);
             console.log("x:", x, "y:", y, "ra:", ra, "dec:", dec);
