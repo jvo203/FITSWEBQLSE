@@ -860,7 +860,7 @@ function erfinv(x) {
     return sqrt2 * Math.sign(x);
 }
 
-function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd) {
+function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
     d3.select("#PVContourSVG").remove();
     d3.select("#PVSVGX").remove();
     d3.select("#PVSVGY").remove();
@@ -951,10 +951,48 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
 
     var xR = d3.scaleLinear()
         .range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
-        .domain([xmin, xmax]);
+        .domain([-1, 1]);
+    //.domain([xmin, xmax]);
+
+    var midx = (x1 + x2) / 2;
+    var midy = (y1 + y2) / 2;
+
+    // find the radec for the mid point
+    var midra = x2rad(midx);
+    var middec = y2rad(midy);
+    console.log("midx:", midx, "midy:", midy, "midra:", midra, "middec:", middec);
 
     var xAxis = d3.axisBottom(xR)
-        .tickSizeOuter([3]);
+        .tickSizeOuter([3])
+        .tickFormat(function (d) {
+            var number;
+
+            let x = x1 + d * (x2 - x1);
+            let y = y1 + d * (y2 - y1);
+            let ra = x2rad(x);
+            let dec = y2rad(y);
+            console.log("x:", x, "y:", y, "ra:", ra, "dec:", dec);
+
+            // find the Haversine distance between the mid point and the current point
+            let dist = HaversineDistance(midra, middec, ra, dec);
+
+            // convert dist from radians to arcsec
+            let arcsec = dist * 206264.80624709635516;
+            let arcmin = arcsec / 60.0;
+
+            console.log("d:", d, "Haversine dist:", dist, "arcsec:", arcsec, "arcmin:", arcmin);
+
+            if (Math.abs(dist) <= 0.001 || Math.abs(dist) >= 10000)
+                number = dist.toExponential();
+            else
+                number = dist;
+
+            if (Math.abs(d) == 0)
+                number = d;
+
+            number = arcsec.toFixed(2);
+            return number;
+        });
 
     // Add the X Axis
     xsvg.append("g")
@@ -1062,7 +1100,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .attr("text-anchor", "middle")
         .style("fill", "lightgray")
         .attr("stroke", "none")
-        .text("PV line point index");
+        .text("offset [arcsec]");
 
     xsvg.append("text")
         .attr("id", "pvpoint1")
@@ -1194,7 +1232,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .text(bunit);
 }
 
-function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd) {
+function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
     d3.select("#PVContourSVG").remove();
     d3.select("#PVSVGX").remove();
     d3.select("#PVSVGY").remove();
@@ -4737,9 +4775,9 @@ async function open_websocket_connection(_datasetId, index) {
                             ctx.restore();
 
                             if (va_count == 1) {
-                                pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin[0], pmax[0], pmean[0], pstd[0]);
+                                pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin[0], pmax[0], pmean[0], pstd[0], pvx1, pvy1, pvx2, pvy2);
                             } else {
-                                composite_pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd);
+                                composite_pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd, pvx1, pvy1, pvx2, pvy2);
                             }
 
                             // cancel idlePV timer and set a new one
@@ -5266,45 +5304,45 @@ function CD_matrix(X, Y) {
 
     var newradec = new Array(ra, dec);
 
-    //console.log(RadiansPrintHMS(ra), RadiansPrintDMS(dec)) ;
+    // console.log(RadiansPrintHMS(ra), RadiansPrintDMS(dec));
 
     return newradec;
 }
 
-function x2hms(x) {
+function x2rad(x) {
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData == null)
-        return "";
+        return;
 
     if (fitsData.CDELT1 != null)
-        return RadiansPrintHMS((fitsData.CRVAL1 + (x - fitsData.CRPIX1) * fitsData.CDELT1) / toDegrees);
+        return (fitsData.CRVAL1 + (x - fitsData.CRPIX1) * fitsData.CDELT1) / toDegrees;
     else
         throw "CDELT1 is not available";
+}
+
+function x2hms(x) {
+    return RadiansPrintHMS(x2rad(x));
 };
 
 function x2dms(x) {
-    let fitsData = fitsContainer[va_count - 1];
-
-    if (fitsData == null)
-        return "";
-
-    if (fitsData.CDELT1 != null)
-        return RadiansPrintDMS((fitsData.CRVAL1 + (x - fitsData.CRPIX1) * fitsData.CDELT1) / toDegrees);
-    else
-        throw "CDELT1 is not available";
+    return RadiansPrintDMS(x2rad(x));
 };
 
-function y2dms(y) {
+function y2rad(y) {
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData == null)
-        return "";
+        return;
 
     if (fitsData.CDELT2 != null)
-        return RadiansPrintDMS((fitsData.CRVAL2 + (fitsData.height - y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees);
+        return (fitsData.CRVAL2 + (fitsData.height - y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
     else
         throw "CDELT2 is not available";
+}
+
+function y2dms(y) {
+    return RadiansPrintDMS(y2rad(y));
 };
 
 function display_scale_info() {
