@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-21.0";
+    return "JS2023-08-24.0";
 }
 
 function uuidv4() {
@@ -5204,6 +5204,16 @@ function inverse_CD_matrix(arcx, arcy) {
     var gridScale = new Array(DX / fitsData.width, Math.sign(CD2_2) * Math.abs(DY) / fitsData.height, theta);
 
     return gridScale;
+}
+
+function HaversineDistance(ra1, dec1, ra2, dec2) {
+    var dRA = ra2 - ra1;
+    var dDEC = dec2 - dec1;
+
+    var a = Math.sin(dDEC / 2) * Math.sin(dDEC / 2) + Math.cos(dec1) * Math.cos(dec2) * Math.sin(dRA / 2) * Math.sin(dRA / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return c;
 }
 
 function CD_matrix(X, Y) {
