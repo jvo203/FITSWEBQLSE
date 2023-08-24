@@ -5608,7 +5608,7 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
     // transmit the data
     float tmp;
     double tmp2;
-    uint32_t xlen;
+    uint32_t xlen, ylen;
 
     uint32_t id_len = strlen(padded_id);
 
@@ -5653,6 +5653,22 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
     // vmax
     tmp2 = vmax;
     chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
+
+    // x1
+    xlen = x1;
+    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
+
+    // y1
+    ylen = y1;
+    chunked_write(fd, (const char *)&ylen, sizeof(ylen));
+
+    // x2
+    xlen = x2;
+    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
+
+    // y2
+    ylen = y2;
+    chunked_write(fd, (const char *)&ylen, sizeof(ylen));
 
     // the P-V diagram
     chunked_write(fd, (const char *)&img_width, sizeof(img_width));
