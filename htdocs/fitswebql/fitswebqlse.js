@@ -4635,7 +4635,19 @@ async function open_websocket_connection(_datasetId, index) {
                         let vmax = dv.getFloat64(offset, endianness);
                         offset += 8;
 
-                        console.log("P-V Diagram: ", id, pmin, pmax, pmean, pstd, vmin, vmax);
+                        let pvx1 = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        let pvy1 = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        let pvx2 = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        let pvy2 = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        console.log("P-V Diagram: ", id, pmin, pmax, pmean, pstd, vmin, vmax, pvx1, pvy1, pvx2, pvy2);
 
                         var pv_width = dv.getUint32(offset, endianness);
                         offset += 4;
