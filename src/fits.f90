@@ -1048,9 +1048,9 @@ module fits
          type(C_PTR), value :: pixels, mask
       end subroutine write_image_spectrum
 
-      ! void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax);
-      subroutine write_pv_diagram(fd, width, height, precision, pv, pmean, pstd, pmin, pmax, xmin, xmax, vmin, vmax)&
-      & BIND(C, name='write_pv_diagram')
+      ! void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
+      subroutine write_pv_diagram(fd, width, height, precision, pv, pmean, pstd, pmin, pmax, xmin, xmax, vmin, vmax,&
+      & x1, y1, x2, y2) BIND(C, name='write_pv_diagram')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -1058,6 +1058,7 @@ module fits
          real(kind=c_float), value, intent(in) :: pmean, pstd, pmin, pmax
          integer(kind=c_int), value, intent(in) :: xmin, xmax
          real(kind=c_double), value, intent(in) :: vmin, vmax
+         integer(kind=c_int), value, intent(in) :: x1, y1, x2, y2
          type(C_PTR), value :: pv
       end subroutine write_pv_diagram
 
@@ -8720,7 +8721,7 @@ contains
       if (req%fd .ne. -1) then
          ! send the P-V diagram via a Unix pipe
          call write_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
-         & 1, npoints, v1, v2)
+         & 1, npoints, v1, v2, x1, y1, x2, y2)
 
          call close_pipe(req%fd)
          req%fd = -1
