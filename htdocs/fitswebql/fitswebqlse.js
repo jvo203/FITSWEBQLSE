@@ -4656,16 +4656,16 @@ async function open_websocket_connection(_datasetId, index) {
                         let vmax = dv.getFloat64(offset, endianness);
                         offset += 8;
 
-                        let pvx1 = dv.getUint32(offset, endianness);
+                        let pvx1 = dv.getUint32(offset, endianness) - 1; // -1 to convert from 1-based to 0-based
                         offset += 4;
 
-                        let pvy1 = dv.getUint32(offset, endianness);
+                        let pvy1 = dv.getUint32(offset, endianness) - 1; // -1 to convert from 1-based to 0-based
                         offset += 4;
 
-                        let pvx2 = dv.getUint32(offset, endianness);
+                        let pvx2 = dv.getUint32(offset, endianness) - 1; // -1 to convert from 1-based to 0-based
                         offset += 4;
 
-                        let pvy2 = dv.getUint32(offset, endianness);
+                        let pvy2 = dv.getUint32(offset, endianness) - 1; // -1 to convert from 1-based to 0-based
                         offset += 4;
 
                         console.log("P-V Diagram: ", id, pmin, pmax, pmean, pstd, vmin, vmax, pvx1, pvy1, pvx2, pvy2);
