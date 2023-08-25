@@ -860,7 +860,7 @@ function erfinv(x) {
     return sqrt2 * Math.sign(x);
 }
 
-function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
+function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
     d3.select("#PVContourSVG").remove();
     d3.select("#PVSVGX").remove();
     d3.select("#PVSVGY").remove();
@@ -1018,8 +1018,6 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     // the horizontal velocity line
     if (velocityline_position == -1) {
         var velocity;
-
-        console.log("vmin:", vmin, "vmax:", vmax);
 
         // check if there is a zero value between vmin and vmax
         if (vmin <= 0 && vmax >= 0) {
@@ -1215,7 +1213,7 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
         .text(bunit);
 }
 
-function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
+function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
     d3.select("#PVContourSVG").remove();
     d3.select("#PVSVGX").remove();
     d3.select("#PVSVGY").remove();
@@ -1304,9 +1302,30 @@ function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmi
     // always use a dark theme for the PV diagram
     let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
 
+    var midx = (x1 + x2) / 2;
+    var midy = (y1 + y2) / 2;
+
+    // find the radec for the mid point
+    let midra = x2rad(midx);
+    let middec = y2rad(midy);
+    console.log("midx:", midx, "midy:", midy, "midra:", midra, "middec:", middec);
+
+    // find the dmin and dmax
+    let ra1 = x2rad(x1);
+    let dec1 = y2rad(y1);
+    let ra2 = x2rad(x2);
+    let dec2 = y2rad(y2);
+
+    let dmin = HaversineDistance(midra, middec, ra1, dec1);
+    let dmax = HaversineDistance(midra, middec, ra2, dec2);
+
+    // convert dmin and dmax from radians to arcsec
+    dmin *= 206264.80624709635516;
+    dmax *= 206264.80624709635516;
+
     var xR = d3.scaleLinear()
         .range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
-        .domain([xmin, xmax]);
+        .domain([-Math.abs(dmin), Math.abs(dmax)]);
 
     var xAxis = d3.axisBottom(xR)
         .tickSizeOuter([3]);
@@ -1363,10 +1382,9 @@ function composite_pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmi
 
         // invert yR to get the position
         velocityline_position = yR(velocity) - emFontSize;
-    }
 
-    console.log("velocity:", velocity, "position:", velocityline_position);
-    console.log(xmin, xmax);
+        console.log("velocity:", velocity, "position:", velocityline_position);
+    }
 
     // add a horizontal "velocityline"    
     axissvg.append("line")
@@ -4758,9 +4776,9 @@ async function open_websocket_connection(_datasetId, index) {
                             ctx.restore();
 
                             if (va_count == 1) {
-                                pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin[0], pmax[0], pmean[0], pstd[0], pvx1, pvy1, pvx2, pvy2);
+                                pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, vmin, vmax, pmin[0], pmax[0], pmean[0], pstd[0], pvx1, pvy1, pvx2, pvy2);
                             } else {
-                                composite_pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, xmin, xmax, vmin, vmax, pmin, pmax, pmean, pstd, pvx1, pvy1, pvx2, pvy2);
+                                composite_pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, vmin, vmax, pmin, pmax, pmean, pstd, pvx1, pvy1, pvx2, pvy2);
                             }
 
                             // cancel idlePV timer and set a new one
