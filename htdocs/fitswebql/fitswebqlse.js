@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-25.2";
+    return "JS2023-08-25.3";
 }
 
 function uuidv4() {
@@ -17881,6 +17881,12 @@ async function mainRenderer() {
         displayToyaMA = localStorage_read_boolean("displayToyaMA", false);
         displayOSU = localStorage_read_boolean("displayOSU", false);
         displayIntensity = localStorage_read_number("displayIntensity", -1);
+
+        // check if displayIntensity is a valid number
+        if (isNaN(displayIntensity)) {
+            displayIntensity = -1;
+        }
+
         displayLimit = localStorage_read_number("displayLimit", 500);
 
         realtime_spectrum = localStorage_read_boolean("realtime_spectrum", true);
