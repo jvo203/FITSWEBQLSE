@@ -5295,7 +5295,7 @@ function HaversineDistance(ra1, dec1, ra2, dec2) {
     console.log("dRA=", dRA, "dDEC=", dDEC);
 
     var a = Math.sin(dDEC / 2) * Math.sin(dDEC / 2) + Math.cos(dec1) * Math.cos(dec2) * Math.sin(dRA / 2) * Math.sin(dRA / 2);
-    var b = 2 * Math.asin(Math.sqrt(a)); // works better for small angles (where a is near 0)
+    var b = 2 * Math.asin(Math.sqrt(a)); // works well for small angles (where a is near 0)
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); // suggested by the GitHub Copilot
 
     console.log("a=", a, "b=", b, "c=", c);
