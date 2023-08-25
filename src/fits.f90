@@ -1062,9 +1062,9 @@ module fits
          type(C_PTR), value :: pv
       end subroutine write_pv_diagram
 
-      ! void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, int va_count);
+      ! void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
       subroutine write_composite_pv_diagram(fd, width, height, precision, pv, pmean, pstd, pmin, pmax, xmin, xmax, vmin, vmax,&
-      & va_count) BIND(C, name='write_composite_pv_diagram')
+      & x1, y1, x2, y2, va_count) BIND(C, name='write_composite_pv_diagram')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -1072,6 +1072,7 @@ module fits
          type(C_PTR), value :: pmean, pstd, pmin, pmax
          integer(kind=c_int), value, intent(in) :: xmin, xmax
          real(kind=c_double), value, intent(in) :: vmin, vmax
+         integer(kind=c_int), value, intent(in) :: x1, y1, x2, y2
          type(C_PTR), value :: pv
       end subroutine write_composite_pv_diagram
 
@@ -9076,7 +9077,8 @@ contains
          ! send the composite P-V diagram via a Unix pipe
          if(allocated(composite_pixels)) then
             call write_composite_pv_diagram(req%fd, composite_width, composite_height, ZFP_PV_PRECISION, c_loc(composite_pixels),&
-            & c_loc(pmean), c_loc(pstd), c_loc(pmin), c_loc(pmax), 1, composite_npoints, composite_v1, composite_v2, req%va_count)
+            & c_loc(pmean), c_loc(pstd), c_loc(pmin), c_loc(pmax), 1, composite_npoints, composite_v1, composite_v2,&
+            & req%x1, req%y1, req%x2, req%y2, req%va_count)
          end if
 
          call close_pipe(req%fd)

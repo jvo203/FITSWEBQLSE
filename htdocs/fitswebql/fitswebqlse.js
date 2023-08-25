@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-25.0";
+    return "JS2023-08-25.1";
 }
 
 function uuidv4() {
@@ -970,12 +970,27 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
     dmin *= 206264.80624709635516;
     dmax *= 206264.80624709635516;
 
+    console.log("P-V Line offset [arcsec] dmin:", -Math.abs(dmin), "dmax:", Math.abs(dmax));
+
     var xR = d3.scaleLinear()
         .range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
         .domain([-Math.abs(dmin), Math.abs(dmax)]);
 
     var xAxis = d3.axisBottom(xR)
-        .tickSizeOuter([3]);
+        .tickSizeOuter([3])
+        .tickFormat(function (d) {
+            var number;
+
+            if (Math.abs(d) <= 0.001 || Math.abs(d) >= 10000)
+                number = d.toExponential();
+            else
+                number = d;
+
+            if (Math.abs(d) == 0)
+                number = d;
+
+            return number;
+        });
 
     // Add the X Axis
     xsvg.append("g")
@@ -1328,7 +1343,20 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
         .domain([-Math.abs(dmin), Math.abs(dmax)]);
 
     var xAxis = d3.axisBottom(xR)
-        .tickSizeOuter([3]);
+        .tickSizeOuter([3])
+        .tickFormat(function (d) {
+            var number;
+
+            if (Math.abs(d) <= 0.001 || Math.abs(d) >= 10000)
+                number = d.toExponential();
+            else
+                number = d;
+
+            if (Math.abs(d) == 0)
+                number = d;
+
+            return number;
+        });
 
     // Add the X Axis
     xsvg.append("g")
@@ -1434,7 +1462,7 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
         .attr("text-anchor", "middle")
         .style("fill", "lightgray")
         .attr("stroke", "none")
-        .text("PV line point index");
+        .text("offset [arcsec]");
 
     xsvg.append("text")
         .attr("id", "pvpoint1")
@@ -4661,12 +4689,6 @@ async function open_websocket_connection(_datasetId, index) {
 
                         let pstd = new Float32Array(received_msg, offset, va_count);
                         offset += 4 * va_count;
-
-                        let xmin = dv.getUint32(offset, endianness);
-                        offset += 4;
-
-                        let xmax = dv.getUint32(offset, endianness);
-                        offset += 4;
 
                         let vmin = dv.getFloat64(offset, endianness);
                         offset += 8;

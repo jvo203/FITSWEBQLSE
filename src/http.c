@@ -194,7 +194,7 @@ void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
-void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, int va_count);
+void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
 
 void *stream_molecules(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
@@ -5638,14 +5638,6 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
     tmp = pstd;
     chunked_write(fd, (const char *)&tmp, sizeof(tmp));
 
-    // xmin
-    xlen = xmin;
-    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
-
-    // xmax
-    xlen = xmax;
-    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
-
     // vmin
     tmp2 = vmin;
     chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
@@ -5683,7 +5675,7 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
     free(compressed_pv);
 }
 
-void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, int va_count)
+void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count)
 {
     uchar *restrict compressed_pv = NULL;
 
@@ -5764,7 +5756,7 @@ void write_composite_pv_diagram(int fd, int width, int height, int precision, co
 
     // transmit the data
     double tmp;
-    uint32_t xlen;
+    uint32_t xlen, ylen;
 
     uint32_t id_len = strlen(padded_id);
 
@@ -5790,14 +5782,6 @@ void write_composite_pv_diagram(int fd, int width, int height, int precision, co
     // pstd
     chunked_write(fd, (const char *)pstd, va_count * sizeof(float));
 
-    // xmin
-    xlen = xmin;
-    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
-
-    // xmax
-    xlen = xmax;
-    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
-
     // vmin
     tmp = vmin;
     chunked_write(fd, (const char *)&tmp, sizeof(tmp));
@@ -5805,6 +5789,22 @@ void write_composite_pv_diagram(int fd, int width, int height, int precision, co
     // vmax
     tmp = vmax;
     chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // x1
+    xlen = x1;
+    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
+
+    // y1
+    ylen = y1;
+    chunked_write(fd, (const char *)&ylen, sizeof(ylen));
+
+    // x2
+    xlen = x2;
+    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
+
+    // y2
+    ylen = y2;
+    chunked_write(fd, (const char *)&ylen, sizeof(ylen));
 
     // the P-V diagram
     chunked_write(fd, (const char *)&img_width, sizeof(img_width));
