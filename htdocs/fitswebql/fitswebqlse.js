@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-24.0";
+    return "JS2023-08-25.0";
 }
 
 function uuidv4() {
@@ -947,58 +947,35 @@ function pv_axes(left, top, width, height, xmin, xmax, vmin, vmax, pmin, pmax, p
     var axissvg = d3.select("#PVAXISLINE");
 
     // always use a dark theme for the PV diagram
-    let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
-
-    var xR = d3.scaleLinear()
-        .range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
-        .domain([-1, 1]);
-    //.domain([xmin, xmax]);
+    let _axisColour = "rgba(255,204,0,0.8)"; // axisColour    
 
     var midx = (x1 + x2) / 2;
     var midy = (y1 + y2) / 2;
 
     // find the radec for the mid point
-    var midra = x2rad(midx);
-    var middec = y2rad(midy);
+    let midra = x2rad(midx);
+    let middec = y2rad(midy);
     console.log("midx:", midx, "midy:", midy, "midra:", midra, "middec:", middec);
 
+    // find the dmin and dmax
+    let ra1 = x2rad(x1);
+    let dec1 = y2rad(y1);
+    let ra2 = x2rad(x2);
+    let dec2 = y2rad(y2);
+
+    let dmin = HaversineDistance(midra, middec, ra1, dec1);
+    let dmax = HaversineDistance(midra, middec, ra2, dec2);
+
+    // convert dmin and dmax from radians to arcsec
+    dmin *= 206264.80624709635516;
+    dmax *= 206264.80624709635516;
+
+    var xR = d3.scaleLinear()
+        .range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
+        .domain([-Math.abs(dmin), Math.abs(dmax)]);
+
     var xAxis = d3.axisBottom(xR)
-        .tickSizeOuter([3])
-        .tickFormat(function (d) {
-            var number;
-
-            // d goes from -1 to +1
-            // the mid point is at d = 0
-            // the left point is at d = -1
-            // the right point is at d = +1
-            // the x and y should be corrected
-            let x = midx + d * (x2 - x1) / 2;
-            let y = midy + d * (y2 - y1) / 2;
-
-            let ra = x2rad(x);
-            let dec = y2rad(y);
-            console.log("x:", x, "y:", y, "ra:", ra, "dec:", dec);
-
-            // find the Haversine distance between the mid point and the current point
-            let dist = HaversineDistance(midra, middec, ra, dec);
-
-            // convert dist from radians to arcsec
-            let arcsec = dist * 206264.80624709635516;
-            let arcmin = arcsec / 60.0;
-
-            console.log("d:", d, "Haversine dist:", dist, "arcsec:", arcsec, "arcmin:", arcmin);
-
-            if (Math.abs(dist) <= 0.001 || Math.abs(dist) >= 10000)
-                number = dist.toExponential();
-            else
-                number = dist;
-
-            if (Math.abs(d) == 0)
-                number = d;
-
-            number = arcsec.toFixed(2);
-            return number;
-        });
+        .tickSizeOuter([3]);
 
     // Add the X Axis
     xsvg.append("g")
