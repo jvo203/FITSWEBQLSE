@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-25.3";
+    return "JS2023-08-28.0";
 }
 
 function uuidv4() {
@@ -5279,13 +5279,50 @@ function inverse_CD_matrix(arcx, arcy) {
     return gridScale;
 }
 
+function spoint_vector3d(lng, lat) {
+    var x = Math.cos(lat) * Math.cos(lng);
+    var y = Math.cos(lat) * Math.sin(lng);
+    var z = Math.sin(lat);
+
+    //return new Array(x, y, z);
+    return { x: x, y: y, z: z };
+}
+
+function vector3d_cross(v1, v2) {
+    var x = v1.y * v2.z - v1.z * v2.y;
+    var y = v1.z * v2.x - v1.x * v2.z;
+    var z = v1.x * v2.y - v1.y * v2.x;
+
+    //return new Array(x, y, z);
+    return { x: x, y: y, z: z };
+}
+
+function vector3d_length(v) {
+    return Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+function FPeq(a, b) {
+    return Math.abs(a - b) < 1e-6;
+}
+
 function AngularDistance(p1lng, p1lat, p2lng, p2lat) {
     var dl = p1lng - p2lng;
     var f = ((Math.sin(p1lat) * Math.sin(p2lat) + Math.cos(p1lat) * Math.cos(p2lat) * Math.cos(dl)));
-
     console.log("f = ", f);
 
-    return Math.acos(f);
+    if (FPeq(f, 1.0)) {
+        // for small distances
+        console.log("small angular distance");
+        v1 = spoint_vector3d(p1lng, p1lat);
+        v2 = spoint_vector3d(p2lng, p2lat);
+        v3 = vector3d_cross(v1, v2);
+        return vector3d_length(v3);
+    }
+    else {
+        // for normal distances
+        console.log("normal angular distance");
+        return Math.acos(f);
+    }
 }
 
 function HaversineDistance(ra1, dec1, ra2, dec2) {
@@ -5298,9 +5335,11 @@ function HaversineDistance(ra1, dec1, ra2, dec2) {
     var b = 2 * Math.asin(Math.sqrt(a)); // works well for small angles (where a is near 0)
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); // suggested by the GitHub Copilot
 
-    console.log("a=", a, "b=", b, "c=", c);
+    var d = AngularDistance(ra1, dec1, ra2, dec2);
 
-    return c;
+    console.log("a=", a, "b=", b, "c=", c, "d=", d);
+
+    return d;
 }
 
 function CD_matrix(X, Y) {
