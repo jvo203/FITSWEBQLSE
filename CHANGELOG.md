@@ -1,3 +1,7 @@
+## [5.0.40] - 2023-08-28
+
+* an improved P-V Diagram: changed the X-axis to display an angular distance (in _*arcseconds*_) instead of a P-V line pixel number
+
 ## [5.0.39] - 2023-08-21
 
 * corrected a velocity axis direction in the P-V Diagram for datasets with a reversed frequency / velocity axis
