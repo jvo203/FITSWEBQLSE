@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-28.0";
+    return "JS2023-08-29.0";
 }
 
 function uuidv4() {
@@ -13801,9 +13801,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         //display an RGB legend in place of REF FRQ			
                                         display_composite_legend();
 
-                                        // TO-DO
-                                        /*if (composite_view)
-                                            display_rgb_legend();*/
+                                        if (composite_view)
+                                            display_rgb_legend();
 
                                         setup_axes();
 
