@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-29.0";
+    return "JS2023-08-31.0";
 }
 
 function uuidv4() {
@@ -16679,9 +16679,16 @@ function display_rgb_legend() {
             //.attr('fill', function(d, i) { return pixel2rgba(1.0*d, index-1, 0.8);});
             .attr('fill', function (d, i) { return interpolate_colourmap(d, rgb[index - 1], 0.8); });
 
+        var upper_range;
+
+        if (flux == "ratio")
+            upper_range = 0.999;
+        else
+            upper_range = 1.0;
+
         var colourScale = d3.scaleLinear()
             .range([0.8 * height, 0])
-            .domain([0, 1]);
+            .domain([0, upper_range]);
 
         var colourAxis = d3.axisRight(colourScale)
             .tickSizeOuter([0])
@@ -16695,8 +16702,7 @@ function display_rgb_legend() {
                 if (d == 1)
                     prefix = "≥";
 
-                var pixel = min_pixel + d * (max_pixel - min_pixel);
-                var pixelVal = get_pixel_flux(pixel, index);
+                var pixelVal = get_pixel_flux(d, index);
 
                 var number;
 
