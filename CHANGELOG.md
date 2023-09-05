@@ -1,3 +1,8 @@
+## [5.0.41] - 2023-09-05
+
+* re-worked the client-side image legend WebGL display to get around a bug (a slightly shifted legend position) for some combinations of Safari / macOS versions
+* removed _*Google Analytics*_
+
 ## [5.0.40] - 2023-08-28
 
 * an improved P-V Diagram: changed the X-axis to display an angular distance (in _*arcseconds*_) instead of a P-V line pixel number
