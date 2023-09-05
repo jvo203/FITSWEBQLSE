@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-08-31.0";
+    return "JS2023-09-05.0";
 }
 
 function uuidv4() {
@@ -16854,21 +16854,7 @@ function display_legend() {
         .attr("id", "legend")
         .attr("opacity", 1.0);
 
-    // append a WebGL legend div
-    group.append("foreignObject")
-        .attr("id", "legendObject")
-        .attr("x", x)
-        .attr("y", 0.1 * height)
-        .attr("width", rectWidth)
-        .attr("height", legendHeight)
-        .append("xhtml:div")
-        .attr("id", "legendDiv")
-        .append("canvas")
-        .attr("id", "legendCanvas")
-        .attr("width", rectWidth)
-        .attr("height", legendHeight);
-
-    init_webgl_legend_buffers(va_count);
+    init_webgl_legend_buffers(x, Math.round(0.1 * height), Math.round(rectWidth), Math.round(legendHeight), va_count);
     clear_webgl_legend_buffers(va_count);
 
     var upper_range;
@@ -17038,23 +17024,21 @@ function update_legend() {
         .call(colourAxis);
 }
 
-function init_webgl_legend_buffers(index) {
+function init_webgl_legend_buffers(x, y, width, height, index) {
     //place the image onto the main canvas
-    var canvas = document.getElementById('legendCanvas');
-    canvas.style.display = "block";// a hack needed by Apple Safari
-    var width = canvas.width;
-    var height = canvas.height;
+    var canvas = document.getElementById('LegendCanvas');
+    canvas.style.display = "block";// a hack needed by Apple Safari    
 
     if (webgl1 || webgl2) {
         canvas.addEventListener("webglcontextlost", function (event) {
             event.preventDefault();
-            console.error("legendCanvas: webglcontextlost");
+            console.error("LegendCanvas: webglcontextlost");
         }, false);
 
         canvas.addEventListener(
             "webglcontextrestored", function () {
-                console.log("legendCanvas: webglcontextrestored");
-                init_webgl_legend_buffers(index);
+                console.log("LegendCanvas: webglcontextrestored");
+                init_webgl_legend_buffers(x, y, width, height, index);
             }, false);
     }
 
@@ -17070,7 +17054,7 @@ function init_webgl_legend_buffers(index) {
         ctx.getExtension('EXT_color_buffer_float');
 
         // call the common WebGL renderer
-        webgl_legend_renderer(index, ctx, width, height);
+        webgl_legend_renderer(index, ctx, x, y, width, height);
     } else if (webgl1) {
         var ctx = canvas.getContext("webgl");
         imageContainer[index - 1].legend_gl = ctx;
@@ -17081,7 +17065,7 @@ function init_webgl_legend_buffers(index) {
         ctx.getExtension('OES_texture_float_linear');
 
         // call the common WebGL renderer
-        webgl_legend_renderer(index, ctx, width, height);
+        webgl_legend_renderer(index, ctx, x, y, width, height);
     } else {
         console.log("WebGL not supported by your browser, falling back onto HTML 2D Canvas (not implemented yet).");
         return;
@@ -17106,7 +17090,7 @@ function clear_webgl_legend_buffers(index) {
     //image.legend_gl = null;
 }
 
-function webgl_legend_renderer(index, gl, width, height) {
+function webgl_legend_renderer(index, gl, x, y, width, height) {
     var image = imageContainer[index - 1];
 
     // setup GLSL program
@@ -17168,7 +17152,7 @@ function webgl_legend_renderer(index, gl, width, height) {
 
     // no need for an animation loop, just handle the lost context
     //WebGL how to convert from clip space to pixels	
-    gl.viewport(0, 0, width, height);
+    gl.viewport(x, y, width, height);
 
     // Clear the canvas
     gl.clearColor(0, 0, 0, 0);
@@ -18056,6 +18040,12 @@ async function mainRenderer() {
             .attr("width", width)
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: ' + (va_count + 1));
+
+        d3.select("#mainDiv").append("canvas")
+            .attr("id", "LegendCanvas")
+            .attr("width", width)
+            .attr("height", height)
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: ' + (va_count + 2));
 
         d3.select("#mainDiv").append("canvas")
             .attr("id", "VideoCanvas")
