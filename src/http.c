@@ -4200,19 +4200,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "window.onbeforeunload = close_websocket_connections;"
               "mainRenderer(); </script>\n");
 
-    // Google Analytics
-    if (!options.local)
-        g_string_append(html,
-                        "<!-- Global site tag (gtag.js) - Google Analytics -->"
-                        "<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-YM4BZGDN25\"></script>"
-                        "<script>"
-                        "window.dataLayer = window.dataLayer || [];"
-                        "function gtag(){"
-                        "dataLayer.push(arguments);}"
-                        "gtag('js', new Date());"
-                        "gtag('config', 'G-YM4BZGDN25');"
-                        "</script>\n");
-
     g_string_append(html, "</body></html>");
 
     size_t html_len = html->len;
