@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-06.0";
+    return "JS2023-09-06.1";
 }
 
 function uuidv4() {
@@ -16666,15 +16666,19 @@ function display_rgb_legend() {
             .data(newData)
             .enter()
             .append('rect')
-            .attr("x", x)
+            .attr("x", (x + rectWidth / 2))
             .attr("y", function (d, i) { return (0.9 * height - (i + 1) * rectHeight); })
             .attr("height", (rectHeight + 1))
-            .attr("width", rectWidth)
+            .attr("width", rectWidth / 2)
             //.attr("stroke", strokeColour)
             //.attr("stroke-width", 0.1)
             .attr("stroke", "none")
             //.attr('fill', function(d, i) { return pixel2rgba(1.0*d, index-1, 0.8);});
-            .attr('fill', function (d, i) { return interpolate_colourmap(d, rgb[index - 1], 0.8); });
+            .attr('fill', function (d, i) {
+                let raw = get_tone_mapping(d, flux, black, white, median, multiplier, index);
+                let colour = interpolate_colourmap(raw, rgb[index - 1], 0.8);
+                return colour;
+            });
 
         var upper_range;
 
