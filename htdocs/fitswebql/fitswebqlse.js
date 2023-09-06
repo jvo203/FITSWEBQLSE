@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-05.0";
+    return "JS2023-09-06.0";
 }
 
 function uuidv4() {
@@ -13801,9 +13801,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         //display an RGB legend in place of REF FRQ			
                                         display_composite_legend();
 
-                                        if (composite_view)
-                                            display_rgb_legend();
-
                                         setup_axes();
 
                                         if (intensity_mode == "mean")
@@ -13819,11 +13816,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                             }
                             else {
                                 spectrum_count++;
-
-                                if (spectrum_count == va_count) {
-                                    if (composite_view)
-                                        display_rgb_legend();
-                                }
                             }
                         }
 
@@ -13831,7 +13823,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                         /*Module.ready
                           .then(_ => {*/
                         {
-                            //console.log("processing an HDR image");
+                            // console.log("processing an HDR image");
                             let start = performance.now();
 
                             // decompressZFP returns std::vector<float>
@@ -13861,7 +13853,12 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 display_beam();
                             }
 
-                            display_legend();
+                            if (composite_view) {
+                                if (spectrum_count == va_count)
+                                    display_rgb_legend();
+                            } else {
+                                display_legend();
+                            }
                         }
                         /*})
                         .catch(e => console.error(e));*/
@@ -16570,7 +16567,7 @@ function download_confirmation(partialSize) {
 }
 
 function display_rgb_legend() {
-    //console.log("display_rgb_legend()");
+    console.log("display_rgb_legend()");
 
     if (va_count > 3)
         return;
