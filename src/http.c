@@ -3830,7 +3830,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // HTML5 FileSaver
     g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/FileSaver.min.js\"></script>\n");
 
-    // client-side colourmaps
+    // client-side colourmaps (used by the composite legend)
     g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/colourmaps.min.js\"></script>\n");
 
     // d3.js colour scale legend
