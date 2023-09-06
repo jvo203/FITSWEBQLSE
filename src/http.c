@@ -3830,6 +3830,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // HTML5 FileSaver
     g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/FileSaver.min.js\"></script>\n");
 
+    // client-side colourmaps
+    g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/colourmaps.min.js\"></script>\n");
+
     // d3.js colour scale legend
     g_string_append(html, "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js\" integrity=\"sha512-wNH6xsp2n8CfB91nrBtfc4sfLwYPBMjSWVUwQOp60AYYXH6i8yCwuKFZ4rgK2i6pQek/b+bSyR7b01/922IBzQ==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script>\n");
 
