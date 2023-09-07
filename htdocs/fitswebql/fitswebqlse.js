@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-06.1";
+    return "JS2023-09-07.0";
 }
 
 function uuidv4() {
@@ -4368,8 +4368,6 @@ async function open_websocket_connection(_datasetId, index) {
 
                             process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
-                            display_legend();
-
                             if (displayContours)
                                 update_contours();
                         }
@@ -4392,6 +4390,13 @@ async function open_websocket_connection(_datasetId, index) {
 
                         // refresh tone mapping
                         change_tone_mapping(index, true);
+
+                        if (composite_view) {
+                            if (image_count == va_count)
+                                display_rgb_legend();
+                        } else {
+                            display_legend();
+                        }
 
                         return;
 
