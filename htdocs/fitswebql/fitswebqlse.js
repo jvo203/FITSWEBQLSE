@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-08.0";
+    return "JS2023-09-08.1";
 }
 
 function uuidv4() {
@@ -15183,6 +15183,8 @@ function show_scaling_help() {
 }
 
 function show_fits_header() {
+    hide_navigation_bar();
+
     $("#fitsHeader").modal("show");
 
     var modal = document.getElementById('fitsHeader');
@@ -15232,10 +15234,10 @@ function change_intensity_threshold(refresh) {
 }
 
 function hide_navigation_bar() {
-    /*try {
+    try {
         // d3 select all elements with class "dropdown-menu" and set their display to "none"
         d3.selectAll(".dropdown-menu").style("display", "none");
-    } catch (e) { }*/
+    } catch (e) { }
 
     try {
         document.getElementById('menu').style.display = "none";
@@ -15247,7 +15249,6 @@ function display_menu() {
     var div = d3.select("body").append("div")
         .attr("id", "menu")
         .attr("class", "menu");
-    //.on("mouseleave", hide_navigation_bar);
 
     var nav = div.append("nav").attr("class", "navbar navbar-inverse navbar-fixed-top fixed-top navbar-expand-sm navbar-dark");
 
@@ -15255,6 +15256,10 @@ function display_menu() {
         .attr("class", "container-fluid");
 
     var header = main.append("div")
+        .on("mouseenter", function () {
+            // d3 select all elements with class "dropdown-menu" and set their display to "none"
+            d3.selectAll(".dropdown-menu").style("display", "none");
+        })
         .attr("class", "navbar-header");
 
     header.append("a")
@@ -15277,9 +15282,15 @@ function display_menu() {
         .attr("class", "dropdown-toggle")
         .attr("data-toggle", "dropdown")
         .style('cursor', 'pointer')
+        .on("mouseenter", function () {
+            // d3 select all elements with class "dropdown-menu" and set their display to "none"
+            d3.selectAll(".dropdown-menu").style("display", "none");
+            d3.select('#fitsDropdown').style("display", "block");
+        })
         .html('FITS <span class="fas fa-folder-open"></span> <span class="caret"></span>');
 
     var fitsDropdown = fitsMenu.append("ul")
+        .attr("id", "fitsDropdown")
         .attr("class", "dropdown-menu");
 
     fitsDropdown.append("li")
@@ -15340,6 +15351,11 @@ function display_menu() {
         .attr("class", "dropdown-toggle")
         .attr("data-toggle", "dropdown")
         .style('cursor', 'pointer')
+        .on("mouseenter", function () {
+            // d3 select all elements with class "dropdown-menu" and set their display to "none"
+            d3.selectAll(".dropdown-menu").style("display", "none");
+            d3.select('#imageDropdown').style("display", "block");
+        })
         .html('Image <span class="caret"></span>');
 
     var imageDropdown = imageMenu.append("ul")
@@ -15355,6 +15371,11 @@ function display_menu() {
         .attr("class", "dropdown-toggle")
         .attr("data-toggle", "dropdown")
         .style('cursor', 'pointer')
+        .on("mouseenter", function () {
+            // d3 select all elements with class "dropdown-menu" and set their display to "none"
+            d3.selectAll(".dropdown-menu").style("display", "none");
+            d3.select('#prefDropdown').style("display", "block");
+        })
         .html('Preferences <span class="caret"></span>');
 
     var prefDropdown = prefMenu.append("ul")
@@ -15371,9 +15392,15 @@ function display_menu() {
             .attr("class", "dropdown-toggle")
             .attr("data-toggle", "dropdown")
             .style('cursor', 'pointer')
+            .on("mouseenter", function () {
+                // d3 select all elements with class "dropdown-menu" and set their display to "none"
+                d3.selectAll(".dropdown-menu").style("display", "none");
+                d3.select('#splatDropdown').style("display", "block");
+            })
             .html('Splatalogue <span class="caret"></span>');
 
         var splatDropdown = splatMenu.append("ul")
+            .attr("id", "splatDropdown")
             .attr("class", "dropdown-menu");
 
         splatDropdown.append("li")
@@ -15524,9 +15551,15 @@ function display_menu() {
         .attr("class", "dropdown-toggle")
         .attr("data-toggle", "dropdown")
         .style('cursor', 'pointer')
+        .on("mouseenter", function () {
+            // d3 select all elements with class "dropdown-menu" and set their display to "none"
+            d3.selectAll(".dropdown-menu").style("display", "none");
+            d3.select('#viewDropdown').style("display", "block");
+        })
         .html('View <span class="caret"></span>');
 
     var viewDropdown = viewMenu.append("ul")
+        .attr("id", "viewDropdown")
         .attr("class", "dropdown-menu");
 
     if (has_webgl) {
@@ -15536,6 +15569,7 @@ function display_menu() {
                 .append("a")
                 .style('cursor', 'pointer')
                 .on("click", function () {
+                    hide_navigation_bar();
                     init_surface();
 
                 })
@@ -15758,9 +15792,15 @@ function display_menu() {
         .attr("class", "dropdown-toggle")
         .attr("data-toggle", "dropdown")
         .style('cursor', 'pointer')
+        .on("mouseenter", function () {
+            // d3 select all elements with class "dropdown-menu" and set their display to "none"
+            d3.selectAll(".dropdown-menu").style("display", "none");
+            d3.select('#helpDropdown').style("display", "block");
+        })
         .html('<span class="fas fa-question-circle"></span> Help <span class="caret"></span>');
 
     var helpDropdown = helpMenu.append("ul")
+        .attr("id", "helpDropdown")
         .attr("class", "dropdown-menu");
 
     helpDropdown.append("li")
@@ -15781,6 +15821,7 @@ function display_menu() {
 }
 
 function show_help() {
+    hide_navigation_bar();
     $("#help").modal("show");
 
     var modal = document.getElementById('help');
@@ -17951,6 +17992,23 @@ async function mainRenderer() {
 
         has_contours = false;
         has_preferences = false;
+
+        document.body.addEventListener('mousemove', function (event) {
+            let pointX = event.clientX;
+            let pointY = event.clientY;
+
+            // console.log("document::mousemove", pointX, pointY);
+
+            if (pointX < 10 || pointY < 10) {
+                // console.log("document::out");
+                hide_navigation_bar();
+            }
+
+            if (pointX > window.innerWidth - 10 || pointY > window.innerHeight - 10) {
+                // console.log("document::out");
+                hide_navigation_bar();
+            }
+        }, false);
 
         d3.select("body").append("div")
             .attr("id", "mainDiv")
