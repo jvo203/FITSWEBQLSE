@@ -15232,10 +15232,10 @@ function change_intensity_threshold(refresh) {
 }
 
 function hide_navigation_bar() {
-    try {
+    /*try {
         // d3 select all elements with class "dropdown-menu" and set their display to "none"
         d3.selectAll(".dropdown-menu").style("display", "none");
-    } catch (e) { }
+    } catch (e) { }*/
 
     try {
         document.getElementById('menu').style.display = "none";
