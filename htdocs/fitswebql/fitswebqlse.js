@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-07.0";
+    return "JS2023-09-08.0";
 }
 
 function uuidv4() {
@@ -15233,6 +15233,11 @@ function change_intensity_threshold(refresh) {
 
 function hide_navigation_bar() {
     try {
+        // d3 select all elements with class "dropdown-menu" and set their display to "none"
+        d3.selectAll(".dropdown-menu").style("display", "none");
+    } catch (e) { }
+
+    try {
         document.getElementById('menu').style.display = "none";
         d3.select("#menu_activation_area").attr("opacity", 0.1);//was 0.7
     } catch (e) { }
@@ -15648,10 +15653,14 @@ function display_menu() {
                 if (va_count == 1) {
                     var elem = d3.select("#legend");
 
-                    if (displayLegend)
+                    if (displayLegend) {
                         elem.attr("opacity", 1);
-                    else
+                        document.getElementById('LegendCanvas').style.display = "block";
+                    }
+                    else {
                         elem.attr("opacity", 0);
+                        document.getElementById('LegendCanvas').style.display = "none";
+                    }
                 }
                 else {
                     for (let index = 1; index <= va_count; index++) {
