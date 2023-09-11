@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-08.1";
+    return "JS2023-09-11.0";
 }
 
 function uuidv4() {
@@ -16351,7 +16351,7 @@ function setup_help() {
         .text("browser support:");
 
     bodyDiv.append("p")
-        .text("Chrome ◯, Firefox △, Safari ◯, MS Edge △, IE11 ×");
+        .text("Chrome ◯, Firefox ◯, Safari ◯, MS Edge ◯, IE11 ×");
 
     var footer = contentDiv.append("div")
         .attr("class", "modal-footer");
