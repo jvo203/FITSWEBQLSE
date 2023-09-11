@@ -1,3 +1,7 @@
+## [5.0.42] - 2023-09-11
+
+* fixed a long-standing "_*disappearing menu*_" issue in Firefox (worked around a Firefox CSS hover bug)
+
 ## [5.0.41] - 2023-09-05
 
 * re-worked the client-side image legend WebGL display to get around a bug (a slightly shifted legend position) for some combinations of Safari / macOS versions
