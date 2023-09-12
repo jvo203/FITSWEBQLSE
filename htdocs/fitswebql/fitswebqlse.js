@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-12.0";
+    return "JS2023-09-12.1";
 }
 
 function uuidv4() {
@@ -8547,7 +8547,7 @@ function display_preferences(index) {
     tmpA.append("select")
         .attr("id", "binning")
         .attr("onchange", "javascript:change_binning();")
-        .html("<option value='1'>1:1</option><option value='2'>1:2</option><option value='5'>1:5</option><option value='10'>1:10</option><option value='20'>1:20</option>");
+        .html("<option value='1'>1:1</option><option value='2'>1:2</option><option value='4'>1:4</option><option value='8'>1:8</option><option value='16'>1:16</option>");
 
     document.getElementById('binning').value = binning.toString();
 
