@@ -1,3 +1,7 @@
+## [5.0.43] - 2023-09-13
+
+* added a new spectrum binning functionality (see a menu setting _*Preferences*_ / _*spectrum binning*_)
+
 ## [5.0.42] - 2023-09-11
 
 * fixed a long-standing "_*disappearing menu*_" issue in Firefox (worked around a Firefox CSS hover bug)
