@@ -1,3 +1,7 @@
+## [5.0.44] - 2023-09-14
+
+* spectrum binning: replaced the _*Largest Triangle Three Buckets*_ downsampling with true binning (averaging adjacent values)
+
 ## [5.0.43] - 2023-09-13
 
 * added a new spectrum binning functionality (see a menu setting _*Preferences*_ / _*spectrum binning*_)
