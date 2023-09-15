@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-15.1";
+    return "JS2023-09-15.2";
 }
 
 function uuidv4() {
@@ -971,6 +971,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
             .attr("height", svg_height)
             .attr("top", svg_top)
             .attr("left", svg_left)
+            .attr("opacity", 1.0)
             .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
     }
 
@@ -1148,6 +1149,19 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
             })
             .on("end", end_angular_velocity_line)
         );
+
+    if (displayPVCrosshair) {
+        d3.select('#PVAXISLINE').attr("opacity", 1.0);
+        d3.select('#velocityline').attr("pointer-events", "auto");
+        d3.select('#angularline').attr("pointer-events", "auto");
+        d3.select('#velocitycircle').attr("pointer-events", "auto");
+    }
+    else {
+        d3.select('#PVAXISLINE').attr("opacity", 0.0);
+        d3.select('#velocityline').attr("pointer-events", "none");
+        d3.select('#angularline').attr("pointer-events", "none");
+        d3.select('#velocitycircle').attr("pointer-events", "none");
+    }
 
     // labels
     let fitsData = fitsContainer[va_count - 1];
@@ -10784,8 +10798,37 @@ function pv_event(event) {
             var pvDiv = div.append("div")
                 .attr('style', 'position: fixed; left: 10px; top: 10px;');
 
-            var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> show contours' : '<span class="far fa-square"></span> show contours';
+            pvDiv.append("span")
+                .attr("class", "pv-label")
+                .html("show:&nbsp;");
 
+            var htmlStr = displayPVCrosshair ? '<span class="fas fa-check-square"></span> crosshair&nbsp;' : '<span class="far fa-square"></span> crosshair&nbsp;';
+            pvDiv.append("span")
+                .attr("id", "displayPVCrosshair")
+                .attr("class", "pv-label")
+                .style('cursor', 'pointer')
+                .on("click", function () {
+                    displayPVCrosshair = !displayPVCrosshair;
+                    localStorage_write_boolean("displayPVCrosshair", displayPVCrosshair);
+                    var htmlStr = displayPVCrosshair ? '<span class="fas fa-check-square"></span> crosshair&nbsp;' : '<span class="far fa-square"></span> crosshair&nbsp;';
+                    d3.select(this).html(htmlStr);
+
+                    if (displayPVCrosshair) {
+                        d3.select('#PVAXISLINE').attr("opacity", 1.0);
+                        d3.select('#velocityline').attr("pointer-events", "auto");
+                        d3.select('#angularline').attr("pointer-events", "auto");
+                        d3.select('#velocitycircle').attr("pointer-events", "auto");
+                    }
+                    else {
+                        d3.select('#PVAXISLINE').attr("opacity", 0.0);
+                        d3.select('#velocityline').attr("pointer-events", "none");
+                        d3.select('#angularline').attr("pointer-events", "none");
+                        d3.select('#velocitycircle').attr("pointer-events", "none");
+                    }
+                })
+                .html(htmlStr);
+
+            htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> contours' : '<span class="far fa-square"></span> contours';
             pvDiv.append("span")
                 .attr("id", "displayPVContours")
                 .attr("class", "pv-label")
@@ -10793,7 +10836,7 @@ function pv_event(event) {
                 .on("click", function () {
                     displayPVContours = !displayPVContours;
                     localStorage_write_boolean("displayPVContours", displayPVContours);
-                    var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> show contours' : '<span class="far fa-square"></span> show contours';
+                    var htmlStr = displayPVContours ? '<span class="fas fa-check-square"></span> contours' : '<span class="far fa-square"></span> contours';
                     d3.select(this).html(htmlStr);
 
                     if (displayPVContours) {
@@ -18147,7 +18190,7 @@ async function mainRenderer() {
         last_spectrum = null;
 
         displayContours = false;
-        displayCrosshair = localStorage_read_boolean("displayCrosshair", true);
+        displayPVCrosshair = localStorage_read_boolean("displayPVCrosshair", true);
         displayPVContours = localStorage_read_boolean("displayPVContours", true);
         displayLegend = localStorage_read_boolean("displayLegend", true);
         displayMolecules = localStorage_read_boolean("displayMolecules", true);
