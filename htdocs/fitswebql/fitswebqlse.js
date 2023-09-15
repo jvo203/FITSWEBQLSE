@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-14.0";
+    return "JS2023-09-15.0";
 }
 
 function uuidv4() {
@@ -13191,7 +13191,8 @@ function setup_image_selection() {
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData != null) {
-        if (fitsData.depth > 1) {
+        // the P-V Diagram has been disabled in the composite mode
+        if ((fitsData.depth > 1) && (va_count == 1)) {
             rect.on("click", pv_event);
         }
     }
