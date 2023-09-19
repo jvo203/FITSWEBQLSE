@@ -1143,6 +1143,8 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .style('cursor', 'move')
         .call(d3.drag()
             .on("start", function (event) {
+                event.preventDefault = true;
+
                 d3.select("#angularline").style('cursor', 'move');
                 d3.select("#velocityline").style('cursor', 'move');
                 start_angular_velocity_line(event);
