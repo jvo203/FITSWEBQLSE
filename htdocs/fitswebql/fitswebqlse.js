@@ -1158,6 +1158,9 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
             })
         );
 
+    // move "circle" to the top
+    d3.select("#velocitycircle").moveToFront();
+
     if (displayPVCrosshair) {
         d3.select('#PVAXISLINE').attr("opacity", 1.0);
         d3.select('#velocityline').attr("pointer-events", "auto");
