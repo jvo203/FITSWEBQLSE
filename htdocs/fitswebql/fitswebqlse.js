@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-19.1";
+    return "JS2023-09-19.2";
 }
 
 function uuidv4() {
@@ -1014,6 +1014,15 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
 
     pvxR = xR;
 
+    div.append("div")
+        .attr("id", "pvtooltip")
+        .style("position", "absolute")
+        .style("z-index", "10")
+        .style("visibility", "hidden")
+        .style("background", "#000")
+        .style("color", "white")
+        .html("<span id='angulartooltip'></span>,&nbsp;<span id='velocitytooltip'></span>");
+
     var xAxis = d3.axisBottom(xR)
         .tickSizeOuter([3])
         .tickFormat(function (d) {
@@ -1042,6 +1051,8 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
     var yR = d3.scaleLinear()
         .range([emFontSize + svg_height - 1, emFontSize])
         .domain([vmin, vmax]);
+
+    pvyR = yR;
 
     var yAxis = d3.axisLeft(yR)
         .tickSizeOuter([3])
@@ -1727,9 +1738,19 @@ function drag_angular_line(event) {
     // make sure the line lies within the SVG
     x = Math.min(Math.max(x, 1), _svg_width - 1);
 
-    // given x, invert pvxR to get the angular position
+    // given x, invert pvxR to get the angular offset
     let angular = pvxR.invert(2 * emFontSize + x);
-    console.log("current angular offset:" + angular.toString() + " arcsec");
+
+    // update the pvtooltip
+    d3.select("#pvtooltip")
+        .style("left", (offset[0] + 10) + "px")
+        .style("top", (offset[1] + 10) + "px")
+        .style("opacity", 0.7)
+        .style("visibility", "visible");
+
+    // update the angulartooltip html
+    d3.select("#angulartooltip")
+        .html(angular.toFixed(2) + " arcsec");
 
     // move the line and circle
     d3.select("#angularline")
@@ -1756,6 +1777,20 @@ function drag_velocity_line(event) {
 
     // make sure the line lies within the SVG
     y = Math.min(Math.max(y, 1), _svg_height - 1);
+
+    // given y, invert pvyR to get the velocity
+    let velocity = pvyR.invert(emFontSize + y);
+
+    // update the pvtooltip
+    d3.select("#pvtooltip")
+        .style("left", (offset[0] + 10) + "px")
+        .style("top", (offset[1] + 10) + "px")
+        .style("opacity", 0.7)
+        .style("visibility", "visible");
+
+    // update the velocitytooltip html
+    d3.select("#velocitytooltip")
+        .html(velocity.toFixed(2) + " km/s");
 
     // move the line and circle
     d3.select("#velocityline")
@@ -10837,12 +10872,14 @@ function pv_event(event) {
                         d3.select('#velocityline').attr("pointer-events", "auto");
                         d3.select('#angularline').attr("pointer-events", "auto");
                         d3.select('#velocitycircle').attr("pointer-events", "auto");
+                        d3.select("#pvtooltip").style("visibility", "visible");
                     }
                     else {
                         d3.select('#PVAXISLINE').attr("opacity", 0.0);
                         d3.select('#velocityline').attr("pointer-events", "none");
                         d3.select('#angularline').attr("pointer-events", "none");
                         d3.select('#velocitycircle').attr("pointer-events", "none");
+                        d3.select("#pvtooltip").style("visibility", "hidden");
                     }
                 })
                 .html(htmlStr);
