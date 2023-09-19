@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-15.2";
+    return "JS2023-09-19.0";
 }
 
 function uuidv4() {
@@ -1142,12 +1142,20 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("pointer-events", "auto")
         .style('cursor', 'move')
         .call(d3.drag()
-            .on("start", start_angular_velocity_line)
+            .on("start", function (event) {
+                d3.select("#angularline").style('cursor', 'move');
+                d3.select("#velocityline").style('cursor', 'move');
+                start_angular_velocity_line(event);
+            })
             .on("drag", function (event) {
                 drag_angular_line(event);
                 drag_velocity_line(event);
             })
-            .on("end", end_angular_velocity_line)
+            .on("end", function (event) {
+                d3.select("#angularline").style('cursor', 'col-resize');
+                d3.select("#velocityline").style('cursor', 'row-resize');
+                end_angular_velocity_line(event);
+            })
         );
 
     if (displayPVCrosshair) {
