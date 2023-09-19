@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-19.0";
+    return "JS2023-09-19.1";
 }
 
 function uuidv4() {
@@ -1012,6 +1012,8 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
         .domain([-Math.abs(dmin), Math.abs(dmax)]);
 
+    pvxR = xR;
+
     var xAxis = d3.axisBottom(xR)
         .tickSizeOuter([3])
         .tickFormat(function (d) {
@@ -1724,6 +1726,10 @@ function drag_angular_line(event) {
 
     // make sure the line lies within the SVG
     x = Math.min(Math.max(x, 1), _svg_width - 1);
+
+    // given x, invert pvxR to get the angular position
+    let angular = pvxR.invert(2 * emFontSize + x);
+    console.log("current angular offset:" + angular.toString() + " arcsec");
 
     // move the line and circle
     d3.select("#angularline")
