@@ -1021,7 +1021,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .style("visibility", "hidden")
         .style("background", "#000")
         .style("color", "white")
-        .html("<span id='angulartooltip'></span>,&nbsp;<span id='velocitytooltip'></span>");
+        .html("&nbsp;<span id='angulartooltip'></span>&nbsp;<br/>&nbsp;<span id='velocitytooltip'></span>&nbsp;"); // '<br/>' or ',&nbsp;'
 
     var xAxis = d3.axisBottom(xR)
         .tickSizeOuter([3])
