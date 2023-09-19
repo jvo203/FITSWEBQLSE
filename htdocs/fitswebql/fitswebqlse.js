@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-19.2";
+    return "JS2023-09-19.3";
 }
 
 function uuidv4() {
@@ -1147,7 +1147,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("id", "velocitycircle")
         .attr("cx", angularline_position)
         .attr("cy", velocityline_position)
-        .attr("r", emFontSize / 2)
+        .attr("r", 1.5 * emFontSize / 2)
         .style("fill", "red")
         .style("stroke", "red")
         .style("stroke-width", 2 * emStrokeWidth)
