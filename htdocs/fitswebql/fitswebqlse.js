@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-19.3";
+    return "JS2023-09-20.0";
 }
 
 function uuidv4() {
@@ -1727,24 +1727,33 @@ function drag_angular_line(event) {
     event.preventDefault = true;
 
     // get the dimensions of the SVG "PVAXISLINE"    
-    let _svg_left = d3.select("#PVAXISLINE").attr("left");
-    let _svg_width = d3.select("#PVAXISLINE").attr("width");
+    let _svg_top = parseFloat(d3.select("#PVAXISLINE").attr("top"));
+    let _svg_left = parseFloat(d3.select("#PVAXISLINE").attr("left"));
+    let _svg_width = parseFloat(d3.select("#PVAXISLINE").attr("width"));
+    let _svg_height = parseFloat(d3.select("#PVAXISLINE").attr("height"));
 
     var offset = d3.pointer(event);
 
-    // get the y coordinate of the mouse pointer with respect to the PVAXISLINE
-    let x = offset[0] - _svg_left; // the SVG offset    
+    // get the x,y coordinates of the mouse pointer with respect to the PVAXISLINE
+    let x = offset[0] - _svg_left; // the SVG offset
+    let y = offset[1] - _svg_top; // the SVG offset
 
     // make sure the line lies within the SVG
     x = Math.min(Math.max(x, 1), _svg_width - 1);
+    y = Math.min(Math.max(y, 1), _svg_height - 1);
+
+    let tooltipX = x + _svg_left;
+    let tooltipY = y + _svg_top;
 
     // given x, invert pvxR to get the angular offset
     let angular = pvxR.invert(2 * emFontSize + x);
 
     // update the pvtooltip
     d3.select("#pvtooltip")
-        .style("left", (offset[0] + 10) + "px")
-        .style("top", (offset[1] + 10) + "px")
+        /*.style("left", (offset[0] + 10) + "px")
+        .style("top", (offset[1] + 10) + "px")*/
+        .style("left", (tooltipX + 10) + "px")
+        .style("top", (tooltipY + 10) + "px")
         .style("opacity", 0.7)
         .style("visibility", "visible");
 
@@ -1767,24 +1776,33 @@ function drag_velocity_line(event) {
     event.preventDefault = true;
 
     // get the dimensions of the SVG "PVAXISLINE"    
-    let _svg_top = d3.select("#PVAXISLINE").attr("top");
-    let _svg_height = d3.select("#PVAXISLINE").attr("height");
+    let _svg_top = parseFloat(d3.select("#PVAXISLINE").attr("top"));
+    let _svg_left = parseFloat(d3.select("#PVAXISLINE").attr("left"));
+    let _svg_width = parseFloat(d3.select("#PVAXISLINE").attr("width"));
+    let _svg_height = parseFloat(d3.select("#PVAXISLINE").attr("height"));
 
     var offset = d3.pointer(event);
 
-    // get the y coordinate of the mouse pointer with respect to the PVAXISLINE
-    let y = offset[1] - _svg_top; // the SVG offset    
+    // get the x,y coordinates of the mouse pointer with respect to the PVAXISLINE
+    let x = offset[0] - _svg_left; // the SVG offset
+    let y = offset[1] - _svg_top; // the SVG offset
 
     // make sure the line lies within the SVG
+    x = Math.min(Math.max(x, 1), _svg_width - 1);
     y = Math.min(Math.max(y, 1), _svg_height - 1);
+
+    let tooltipX = x + _svg_left;
+    let tooltipY = y + _svg_top;
 
     // given y, invert pvyR to get the velocity
     let velocity = pvyR.invert(emFontSize + y);
 
     // update the pvtooltip
     d3.select("#pvtooltip")
-        .style("left", (offset[0] + 10) + "px")
-        .style("top", (offset[1] + 10) + "px")
+        /*.style("left", (offset[0] + 10) + "px")
+        .style("top", (offset[1] + 10) + "px")*/
+        .style("left", (tooltipX + 10) + "px")
+        .style("top", (tooltipY + 10) + "px")
         .style("opacity", 0.7)
         .style("visibility", "visible");
 
