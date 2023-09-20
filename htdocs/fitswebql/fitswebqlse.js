@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-20.0";
+    return "JS2023-09-20.1";
 }
 
 function uuidv4() {
@@ -1750,8 +1750,6 @@ function drag_angular_line(event) {
 
     // update the pvtooltip
     d3.select("#pvtooltip")
-        /*.style("left", (offset[0] + 10) + "px")
-        .style("top", (offset[1] + 10) + "px")*/
         .style("left", (tooltipX + 10) + "px")
         .style("top", (tooltipY + 10) + "px")
         .style("opacity", 0.7)
@@ -1799,8 +1797,6 @@ function drag_velocity_line(event) {
 
     // update the pvtooltip
     d3.select("#pvtooltip")
-        /*.style("left", (offset[0] + 10) + "px")
-        .style("top", (offset[1] + 10) + "px")*/
         .style("left", (tooltipX + 10) + "px")
         .style("top", (tooltipY + 10) + "px")
         .style("opacity", 0.7)
