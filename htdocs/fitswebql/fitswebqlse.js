@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-22.1";
+    return "JS2023-09-22.2";
 }
 
 function uuidv4() {
@@ -1752,8 +1752,11 @@ function drag_angular_line(event) {
     x = Math.min(Math.max(x, 1), _svg_width - 1);
     y = Math.min(Math.max(y, 1), _svg_height - 1);
 
-    let tooltipX = x + _svg_left;
-    let tooltipY = y + _svg_top;
+    // let tooltipX = x + _svg_left;
+    // let tooltipY = y + _svg_top;
+
+    let tooltipX = parseFloat(d3.select("#velocitycircle").attr("cx")) + _svg_left;
+    let tooltipY = parseFloat(d3.select("#velocitycircle").attr("cy")) + _svg_top;
 
     // given x, invert pvxR to get the angular offset
     let angular = pvxR.invert(2 * emFontSize + x);
@@ -1799,8 +1802,11 @@ function drag_velocity_line(event) {
     x = Math.min(Math.max(x, 1), _svg_width - 1);
     y = Math.min(Math.max(y, 1), _svg_height - 1);
 
-    let tooltipX = x + _svg_left;
-    let tooltipY = y + _svg_top;
+    // let tooltipX = x + _svg_left;
+    // let tooltipY = y + _svg_top;
+
+    let tooltipX = parseFloat(d3.select("#velocitycircle").attr("cx")) + _svg_left;
+    let tooltipY = parseFloat(d3.select("#velocitycircle").attr("cy")) + _svg_top;
 
     // given y, invert pvyR to get the velocity
     let velocity = pvyR.invert(emFontSize + y);
