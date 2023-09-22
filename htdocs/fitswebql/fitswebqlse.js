@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-22.2";
+    return "JS2023-09-22.3";
 }
 
 function uuidv4() {
@@ -1021,7 +1021,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .style("visibility", "hidden")
         .style("background", "#000")
         .style("color", "white")
-        .html("&nbsp;X:&nbsp;<span id='angulartooltip'></span>&nbsp;<br/>&nbsp;Y:&nbsp;<span id='velocitytooltip'></span>&nbsp;"); // '<br/>' or ',&nbsp;'
+        .html("&nbsp;<span id='angulartooltip'></span>&nbsp;<br/>&nbsp;<span id='velocitytooltip'></span>&nbsp;"); // '<br/>' or ',&nbsp;'
 
     var xAxis = d3.axisBottom(xR)
         .tickSizeOuter([3])
@@ -1743,6 +1743,11 @@ function drag_angular_line(event) {
     let _svg_height = parseFloat(d3.select("#PVAXISLINE").attr("height"));
 
     var offset = d3.pointer(event);
+
+    // get the 'PVCanvas'
+    let canvas = document.getElementById("PVCanvas");
+    let pixel = canvas.getContext('2d').getImageData(offset[0], offset[1], 1, 1).data;
+    console.log("P-V pixel:", pixel);
 
     // get the x,y coordinates of the mouse pointer with respect to the PVAXISLINE
     let x = offset[0] - _svg_left; // the SVG offset
