@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-20.1";
+    return "JS2023-09-22.1";
 }
 
 function uuidv4() {
@@ -1021,7 +1021,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .style("visibility", "hidden")
         .style("background", "#000")
         .style("color", "white")
-        .html("&nbsp;<span id='angulartooltip'></span>&nbsp;<br/>&nbsp;<span id='velocitytooltip'></span>&nbsp;"); // '<br/>' or ',&nbsp;'
+        .html("&nbsp;X:&nbsp;<span id='angulartooltip'></span>&nbsp;<br/>&nbsp;Y:&nbsp;<span id='velocitytooltip'></span>&nbsp;"); // '<br/>' or ',&nbsp;'
 
     var xAxis = d3.axisBottom(xR)
         .tickSizeOuter([3])
@@ -1094,13 +1094,23 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         // invert yR to get the position
         velocityline_position = yR(velocity) - emFontSize;
 
+        // update the velocitytooltip html
+        d3.select("#velocitytooltip")
+            .html(velocity.toFixed(2) + " km/s");
+
         console.log("velocity:", velocity, "position:", velocityline_position);
     }
 
     // the vertical angular line
     if (angularline_position == -1) {
         // invert xR to get the position
-        angularline_position = xR(0) - 2 * emFontSize;
+        let angular = 0.0;
+
+        angularline_position = xR(angular) - 2 * emFontSize;
+
+        // update the angulartooltip html
+        d3.select("#angulartooltip")
+            .html(angular.toFixed(2) + " arcsec");
 
         console.log("angular position:", angularline_position);
     }
