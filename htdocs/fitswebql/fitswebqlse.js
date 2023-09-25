@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-22.3";
+    return "JS2023-09-25.0";
 }
 
 function uuidv4() {
@@ -1744,11 +1744,6 @@ function drag_angular_line(event) {
 
     var offset = d3.pointer(event);
 
-    // get the 'PVCanvas'
-    let canvas = document.getElementById("PVCanvas");
-    let pixel = canvas.getContext('2d').getImageData(offset[0], offset[1], 1, 1).data;
-    console.log("P-V pixel:", pixel);
-
     // get the x,y coordinates of the mouse pointer with respect to the PVAXISLINE
     let x = offset[0] - _svg_left; // the SVG offset
     let y = offset[1] - _svg_top; // the SVG offset
@@ -1756,6 +1751,16 @@ function drag_angular_line(event) {
     // make sure the line lies within the SVG
     x = Math.min(Math.max(x, 1), _svg_width - 1);
     y = Math.min(Math.max(y, 1), _svg_height - 1);
+
+    // move the line and circle
+    d3.select("#angularline")
+        .attr("x1", x)
+        .attr("x2", x);
+
+    d3.select("#velocitycircle")
+        .attr("cx", x);
+
+    angularline_position = x;
 
     // let tooltipX = x + _svg_left;
     // let tooltipY = y + _svg_top;
@@ -1777,15 +1782,21 @@ function drag_angular_line(event) {
     d3.select("#angulartooltip")
         .html(angular.toFixed(2) + " arcsec");
 
-    // move the line and circle
-    d3.select("#angularline")
-        .attr("x1", x)
-        .attr("x2", x);
+    // get the 'PVCanvas'
+    let canvas = document.getElementById("PVCanvas");
 
-    d3.select("#velocitycircle")
-        .attr("cx", x);
+    // apply a 10-pixel correction to x and y
+    let pixel = canvas.getContext('2d').getImageData(tooltipX - 10, tooltipY - 10, 1, 1).data;
+    console.log("P-V pixel:", pixel);
 
-    angularline_position = x;
+    // get the RGB from the pixel
+    let r = pixel[0];
+    let g = pixel[1];
+    let b = pixel[2];
+
+    // set the background of "pvtooltip" to r,g,b
+    d3.select("#pvtooltip")
+        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
 }
 
 function drag_velocity_line(event) {
@@ -1807,6 +1818,16 @@ function drag_velocity_line(event) {
     x = Math.min(Math.max(x, 1), _svg_width - 1);
     y = Math.min(Math.max(y, 1), _svg_height - 1);
 
+    // move the line and circle
+    d3.select("#velocityline")
+        .attr("y1", y)
+        .attr("y2", y);
+
+    d3.select("#velocitycircle")
+        .attr("cy", y);
+
+    velocityline_position = y;
+
     // let tooltipX = x + _svg_left;
     // let tooltipY = y + _svg_top;
 
@@ -1827,15 +1848,21 @@ function drag_velocity_line(event) {
     d3.select("#velocitytooltip")
         .html(velocity.toFixed(2) + " km/s");
 
-    // move the line and circle
-    d3.select("#velocityline")
-        .attr("y1", y)
-        .attr("y2", y);
+    // get the 'PVCanvas'
+    let canvas = document.getElementById("PVCanvas");
 
-    d3.select("#velocitycircle")
-        .attr("cy", y);
+    // apply a 10-pixel correction to x and y
+    let pixel = canvas.getContext('2d').getImageData(tooltipX - 10, tooltipY - 10, 1, 1).data;
+    console.log("P-V pixel:", pixel);
 
-    velocityline_position = y;
+    // get the RGB from the pixel
+    let r = pixel[0];
+    let g = pixel[1];
+    let b = pixel[2];
+
+    // set the background of "pvtooltip" to r,g,b
+    d3.select("#pvtooltip")
+        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
 }
 
 /** ---------------------------------------------------------------------
