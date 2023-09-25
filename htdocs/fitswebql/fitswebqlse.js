@@ -1795,8 +1795,8 @@ function drag_angular_line(event) {
     let b = pixel[2];
 
     // set the background of "pvtooltip" to r,g,b
-    d3.select("#pvtooltip")
-        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
+    /*d3.select("#pvtooltip")
+        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");*/
 }
 
 function drag_velocity_line(event) {
@@ -1861,8 +1861,8 @@ function drag_velocity_line(event) {
     let b = pixel[2];
 
     // set the background of "pvtooltip" to r,g,b
-    d3.select("#pvtooltip")
-        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
+    /*d3.select("#pvtooltip")
+        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");*/
 }
 
 /** ---------------------------------------------------------------------
