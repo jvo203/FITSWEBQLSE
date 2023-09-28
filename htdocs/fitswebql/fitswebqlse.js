@@ -3,9 +3,11 @@ function get_js_version() {
 }
 
 dot = (a, b) => a.map((_, i) => a[i] * b[i]).reduce((m, n) => m + n);
+sqnorm = (a, b) => (dot(a, a) + dot(b, b) - 2 * dot(a, b));
 
 function rbf_kernel(x, y, gamma) {
-    return Math.exp(-gamma * dot(x, y));
+    let z = sqnorm(x, y);
+    return Math.exp(-gamma * z);
 }
 
 const rbf_centres = [[0.7347623819488442, 0.6061895877151557, 0.3804986679499154],
@@ -1970,10 +1972,11 @@ function drag_velocity_line(event) {
     let b = pixel[2];
 
     // set the background of "pvtooltip" to r,g,b
-    /*d3.select("#pvtooltip")
-        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");*/
+    d3.select("#pvtooltip")
+        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
 
     const inputs = [r / 255, g / 255, b / 255];
+    console.log("inputs:", inputs);
 
     let hh = rbf_centres.map(function (centre) {
         return rbf_kernel(inputs, centre, 1.0);
@@ -1982,10 +1985,11 @@ function drag_velocity_line(event) {
     // prepend a 1.0 to the array
     hh.unshift(1.0);
 
-    console.log("hh:", hh);
+    // console.log("hh:", hh);
 
     // clamp intensity to [0, 1]
-    let intensity = clamp(dot(hh, rbf_wts), 0.0, 1.0);
+    // let intensity = clamp(dot(hh, rbf_wts), 0.0, 1.0);
+    let intensity = dot(hh, rbf_wts);
 
     console.log("inverted pixel intensity:", intensity);
 }
