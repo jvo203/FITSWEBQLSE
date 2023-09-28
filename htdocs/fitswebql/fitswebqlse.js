@@ -1,5 +1,13 @@
+const { dot } = require('node:test/reporters');
+
 function get_js_version() {
-    return "JS2023-09-28.0";
+    return "JS2023-09-29.0";
+}
+
+dot = (a, b) => a.map((x, i) => a[i] * b[i]).reduce((m, n) => m + n);
+
+function rbf_kernel(x, y, gamma) {
+    return Math.exp(-gamma * dot(x, y));
 }
 
 const rbf_centres = [[0.7347623819488442, 0.6061895877151557, 0.3804986679499154],
@@ -1966,6 +1974,22 @@ function drag_velocity_line(event) {
     // set the background of "pvtooltip" to r,g,b
     /*d3.select("#pvtooltip")
         .style("background-color", "rgb(" + r + "," + g + "," + b + ")");*/
+
+    const inputs = [r / 255, g / 255, b / 255];
+
+    let hh = rbf_centres.map(function (centre) {
+        return rbf_kernel(inputs, centre, 1.0);
+    });
+
+    // prepend a 1.0 to the array
+    hh.unshift(1.0);
+
+    console.log("hh:", hh);
+
+    // clamp intensity to [0, 1]
+    let intensity = clamp(dot(hh, rbf_weights), 0.0, 1.0);
+
+    console.log("inverted pixel intensity:", intensity);
 }
 
 /** ---------------------------------------------------------------------
