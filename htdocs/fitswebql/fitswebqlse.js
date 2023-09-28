@@ -1,10 +1,8 @@
-const { dot } = require('node:test/reporters');
-
 function get_js_version() {
     return "JS2023-09-29.0";
 }
 
-dot = (a, b) => a.map((x, i) => a[i] * b[i]).reduce((m, n) => m + n);
+dot = (a, b) => a.map((_, i) => a[i] * b[i]).reduce((m, n) => m + n);
 
 function rbf_kernel(x, y, gamma) {
     return Math.exp(-gamma * dot(x, y));
@@ -1987,7 +1985,7 @@ function drag_velocity_line(event) {
     console.log("hh:", hh);
 
     // clamp intensity to [0, 1]
-    let intensity = clamp(dot(hh, rbf_weights), 0.0, 1.0);
+    let intensity = clamp(dot(hh, rbf_wts), 0.0, 1.0);
 
     console.log("inverted pixel intensity:", intensity);
 }
