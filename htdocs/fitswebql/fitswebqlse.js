@@ -1236,7 +1236,8 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("stroke-width", emStrokeWidth)
         .attr("opacity", 0.5)
         .attr("stroke", "red")
-        .attr("stroke-dasharray", "5, 3");
+        .attr("stroke-dasharray", "5, 3")
+        .attr("pointer-events", "none");
     /*.attr("pointer-events", "auto")
     .style('cursor', 'row-resize')
     .call(d3.drag()
@@ -1255,7 +1256,8 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("stroke-width", emStrokeWidth)
         .attr("opacity", 0.5)
         .attr("stroke", "red")
-        .attr("stroke-dasharray", "5, 3");
+        .attr("stroke-dasharray", "5, 3")
+        .attr("pointer-events", "none");
     /*.attr("pointer-events", "auto")
     .style('cursor', 'col-resize')
     .call(d3.drag()
@@ -1299,15 +1301,15 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
 
     if (displayPVCrosshair) {
         d3.select('#PVAXISLINE').attr("opacity", 1.0);
-        d3.select('#velocityline').attr("pointer-events", "auto");
+        /*d3.select('#velocityline').attr("pointer-events", "auto");
         d3.select('#angularline').attr("pointer-events", "auto");
-        d3.select('#velocitycircle').attr("pointer-events", "auto");
+        d3.select('#velocitycircle').attr("pointer-events", "auto");*/
     }
     else {
         d3.select('#PVAXISLINE').attr("opacity", 0.0);
-        d3.select('#velocityline').attr("pointer-events", "none");
+        /*d3.select('#velocityline').attr("pointer-events", "none");
         d3.select('#angularline').attr("pointer-events", "none");
-        d3.select('#velocitycircle').attr("pointer-events", "none");
+        d3.select('#velocitycircle').attr("pointer-events", "none");*/
     }
 
     // labels
@@ -11060,16 +11062,16 @@ function pv_event(event) {
 
                     if (displayPVCrosshair) {
                         d3.select('#PVAXISLINE').attr("opacity", 1.0);
-                        d3.select('#velocityline').attr("pointer-events", "auto");
+                        /*d3.select('#velocityline').attr("pointer-events", "auto");
                         d3.select('#angularline').attr("pointer-events", "auto");
-                        d3.select('#velocitycircle').attr("pointer-events", "auto");
+                        d3.select('#velocitycircle').attr("pointer-events", "auto");*/
                         d3.select("#pvtooltip").style("visibility", "visible");
                     }
                     else {
                         d3.select('#PVAXISLINE').attr("opacity", 0.0);
-                        d3.select('#velocityline').attr("pointer-events", "none");
+                        /*d3.select('#velocityline').attr("pointer-events", "none");
                         d3.select('#angularline').attr("pointer-events", "none");
-                        d3.select('#velocitycircle').attr("pointer-events", "none");
+                        d3.select('#velocitycircle').attr("pointer-events", "none");*/
                         d3.select("#pvtooltip").style("visibility", "hidden");
                     }
                 })
