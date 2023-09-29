@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-29.0";
+    return "JS2023-09-29.1";
 }
 
 dot = (a, b) => a.map((_, i) => a[i] * b[i]).reduce((m, n) => m + n);
@@ -1233,17 +1233,17 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("y1", velocityline_position)
         .attr("x2", svg_width)
         .attr("y2", velocityline_position)
-        .attr("stroke-width", 2 * emStrokeWidth)
+        .attr("stroke-width", emStrokeWidth)
         .attr("opacity", 0.5)
         .attr("stroke", "red")
-        .attr("stroke-dasharray", "5, 3")
-        .attr("pointer-events", "auto")
-        .style('cursor', 'row-resize')
-        .call(d3.drag()
-            .on("start", start_velocity_line)
-            .on("drag", drag_velocity_line)
-            .on("end", end_angular_velocity_line)
-        );
+        .attr("stroke-dasharray", "5, 3");
+    /*.attr("pointer-events", "auto")
+    .style('cursor', 'row-resize')
+    .call(d3.drag()
+        .on("start", start_velocity_line)
+        .on("drag", drag_velocity_line)
+        .on("end", end_angular_velocity_line)
+    );*/
 
     // add a vertical "angularline" at the mid-point
     axissvg.append("line")
@@ -1252,19 +1252,19 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("y1", 0)
         .attr("x2", angularline_position)
         .attr("y2", svg_height)
-        .attr("stroke-width", 2 * emStrokeWidth)
+        .attr("stroke-width", emStrokeWidth)
         .attr("opacity", 0.5)
         .attr("stroke", "red")
-        .attr("stroke-dasharray", "5, 3")
-        .attr("pointer-events", "auto")
-        .style('cursor', 'col-resize')
-        .call(d3.drag()
-            .on("start", start_angular_line)
-            .on("drag", drag_angular_line)
-            .on("end", end_angular_velocity_line)
-        );
+        .attr("stroke-dasharray", "5, 3");
+    /*.attr("pointer-events", "auto")
+    .style('cursor', 'col-resize')
+    .call(d3.drag()
+        .on("start", start_angular_line)
+        .on("drag", drag_angular_line)
+        .on("end", end_angular_velocity_line)
+    );*/
 
-    axissvg.append("circle")
+    /*axissvg.append("circle")
         .attr("id", "velocitycircle")
         .attr("cx", angularline_position)
         .attr("cy", velocityline_position)
@@ -1295,7 +1295,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         );
 
     // move "circle" to the top
-    d3.select("#velocitycircle").moveToFront();
+    d3.select("#velocitycircle").moveToFront();*/
 
     if (displayPVCrosshair) {
         d3.select('#PVAXISLINE').attr("opacity", 1.0);
