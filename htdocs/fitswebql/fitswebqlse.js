@@ -1312,6 +1312,21 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         d3.select('#velocitycircle').attr("pointer-events", "none");*/
     }
 
+    // svg pv rectangle for moving the crosshair
+    axissvg.append("rect")
+        .attr("id", "pv_rectangle")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", svg_width)
+        .attr("height", svg_height)
+        .attr("opacity", 0.0)
+        .attr("pointer-events", "auto")
+        .style('cursor', 'move')
+        .style("fill", "transparent")
+        .style("stroke", "transparent");
+
+    d3.select("#pv_rectangle").moveToFront();
+
     // labels
     let fitsData = fitsContainer[va_count - 1];
 
