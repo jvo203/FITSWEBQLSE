@@ -1971,6 +1971,28 @@ function crosshair_move(event) {
     // update the velocitytooltip html
     d3.select("#velocitytooltip")
         .html(velocity.toFixed(2) + " km/s");
+
+    // get the 'PVCanvas'
+    let canvas = document.getElementById("PVCanvas");
+
+    // apply a 10-pixel correction to x and y
+    let pixel = canvas.getContext('2d').getImageData(tooltipX - 10, tooltipY - 10, 1, 1).data;
+    console.log("P-V pixel:", pixel);
+
+    // get the RGB from the pixel
+    let r = pixel[0];
+    let g = pixel[1];
+    let b = pixel[2];
+
+    // set the background of "pvtooltip" to r,g,b
+    d3.select("#pvtooltip")
+        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
+
+    const inputs = [r / 255, g / 255, b / 255];
+    console.log("inputs:", inputs);
+
+    let intensity = rbf_compute(inputs);
+    console.log("inverted pixel intensity:", intensity);
 }
 
 /** ---------------------------------------------------------------------
