@@ -9,6 +9,20 @@ function rbf_kernel(x, y, γ)
     return exp(-γ * sqnorm(x, y))
 end
 
+function rbf_compute(x)
+    # map the input to the hidden layer
+    hh = [rbf_kernel(x, c, 1.0) for c in centres]
+
+    # prepend a 1.0 to the hidden layer
+    # and store it in a new array
+    hout = [1.0; hh]
+
+    # calculate the output of the network
+    # and clamp it to between 0.0 and 1.0
+    # return dot(hout, wts)
+    return clamp(dot(hout, wts), 0.0, 1.0)
+end
+
 function read_dat_vector(filename::String)
     values = Float64[]
 
@@ -57,22 +71,13 @@ close(f)
 
 # go through each element in testdata
 for entry in testdata
+    local x, out
+
     x = entry[1:3]
     target = entry[end]
 
     println("x = $x, target = $target")
-
-    # map the input to the hidden layer
-    hh = [rbf_kernel(x, c, 1.0) for c in centres]
-
-    # prepend a 1.0 to the hidden layer
-    # and store it in a new array
-    hout = [1.0; hh]
-
-    # calculate the output of the network
-    # and clamp it to between 0.0 and 1.0
-    out = clamp(dot(hout, wts), 0.0, 1.0)
-
+    out = rbf_compute(x)
     println("out: $out")
 
     #=
@@ -93,3 +98,11 @@ end
 open("centres.json", "w") do f
     JSON.print(f, centres)
 end
+
+rgb = [255.0, 107.0, 0.0]
+x = rgb / 255.0
+
+println("rgb: $rgb, x: $x")
+
+out = rbf_compute(x)
+println("out: $out")
