@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-02.1";
+    return "JS2023-10-02.2";
 }
 
 const rbf_centres = [[0.35689510301491456, 0.4086939419921549, 0.9022950986410274], [0.21410045188640492, 0.8186926004705914, 0.6933284136579181], [0.939172248311561, 0.5269533721324422, 0.08202095095410722], [0.7432988087335808, 0.3672640323381551, 0.8254148426087289], [0.3644430534073717, 0.5739856070419134, 0.04652431705431659], [0.6271690952276159, 0.5154507975000622, 0.528503612966249], [0.07840628226536794, 0.5671427396817397, 0.2330740081812095], [0.4937246371327044, 0.14841422226401746, 0.8989454445881315], [0.6329646416082859, 0.8695719125981671, 0.8642016958790251], [0.5531941906420856, 0.28958795171283946, 0.4055057453181583], [0.7933489424995919, 0.9716982200265287, 0.531686122323582], [0.11559810417642358, 0.6454628656546846, 0.5521811733979436], [0.5549456779680082, 0.0650666656609209, 0.04155006504823655], [0.024438961689331018, 0.40447765215646037, 0.23195616842913025], [0.0725316039156696, 0.4747325320162108, 0.9190382783755979], [0.36254367016221245, 0.26099840509774475, 0.004264658079508932], [0.5805431145018483, 0.8687860256457296, 0.08291516962846801], [0.8255985645269526, 0.9115231117313853, 0.42507921720794606], [0.9725519104049538, 0.06263512182838449, 0.6475597878330093], [0.7915652265482607, 0.3161539345866524, 0.13308971029787742], [0.1309732738045859, 0.4849078903486508, 0.9693714982855077], [0.07347390170089652, 0.5888233794510052, 0.7321184436383525], [0.5365149807889751, 0.3171709816215069, 0.3434706323916321], [0.7642269726599875, 0.08155434407681739, 0.9721447664354954], [0.8949832235934401, 0.7906699681656459, 0.15151227541170953], [0.3115255223747406, 0.2765698222433648, 0.913154061987214], [0.540451921831139, 0.08779278928132839, 0.30730170868840734], [0.9418433571811331, 0.7979886815593018, 0.5321681996384597], [0.42027704010086375, 0.3658432735563171, 0.03548902448323843], [0.03859853625659326, 0.20914094984604503, 0.2885728389590525]];
@@ -1153,13 +1153,6 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("stroke", "red")
         .attr("stroke-dasharray", "5, 3")
         .attr("pointer-events", "none");
-    /*.attr("pointer-events", "auto")
-    .style('cursor', 'row-resize')
-    .call(d3.drag()
-        .on("start", start_velocity_line)
-        .on("drag", drag_velocity_line)
-        .on("end", end_angular_velocity_line)
-    );*/
 
     // add a vertical "angularline" at the mid-point
     axissvg.append("line")
@@ -1173,46 +1166,6 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("stroke", "red")
         .attr("stroke-dasharray", "5, 3")
         .attr("pointer-events", "none");
-    /*.attr("pointer-events", "auto")
-    .style('cursor', 'col-resize')
-    .call(d3.drag()
-        .on("start", start_angular_line)
-        .on("drag", drag_angular_line)
-        .on("end", end_angular_velocity_line)
-    );*/
-
-    /*axissvg.append("circle")
-        .attr("id", "velocitycircle")
-        .attr("cx", angularline_position)
-        .attr("cy", velocityline_position)
-        .attr("r", 1.5 * emFontSize / 2)
-        .style("fill", "red")
-        .style("stroke", "red")
-        .style("stroke-width", 2 * emStrokeWidth)
-        .attr("opacity", 0.5)
-        .attr("pointer-events", "auto")
-        .style('cursor', 'move')
-        .call(d3.drag()
-            .on("start", function (event) {
-                event.preventDefault = true;
-
-                d3.select("#angularline").style('cursor', 'move');
-                d3.select("#velocityline").style('cursor', 'move');
-                start_angular_velocity_line(event);
-            })
-            .on("drag", function (event) {
-                drag_angular_line(event);
-                drag_velocity_line(event);
-            })
-            .on("end", function (event) {
-                d3.select("#angularline").style('cursor', 'col-resize');
-                d3.select("#velocityline").style('cursor', 'row-resize');
-                end_angular_velocity_line(event);
-            })
-        );
-
-    // move "circle" to the top
-    d3.select("#velocitycircle").moveToFront();*/
 
     // svg pv rectangle for moving the crosshair
     axissvg.append("rect")
@@ -1250,6 +1203,12 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
 
     // labels
     let fitsData = fitsContainer[va_count - 1];
+
+    // attach the statistics to the fitsData object
+    fitsData.pvmin = pmin;
+    fitsData.pvmax = pmax;
+    fitsData.pvmean = pmean;
+    fitsData.pvstd = pstd;
 
     xsvg.append("text")
         .attr("id", "pvxlabel")
@@ -1588,31 +1547,7 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
         .attr("stroke-width", 2 * emStrokeWidth)
         .attr("opacity", 0.5)
         .attr("stroke", "red")
-        .attr("stroke-dasharray", "5, 3")
-        .attr("pointer-events", "auto")
-        .style('cursor', 'row-resize')
-        .call(d3.drag()
-            .on("start", start_velocity_line)
-            .on("drag", drag_velocity_line)
-            .on("end", end_velocity_line)
-        );
-
-    axissvg.append("circle")
-        .attr("id", "velocitycircle")
-        .attr("cx", svg_width / 2)
-        .attr("cy", velocityline_position)
-        .attr("r", emFontSize / 2)
-        .style("fill", "red")
-        .style("stroke", "red")
-        .style("stroke-width", 2 * emStrokeWidth)
-        .attr("opacity", 0.5)
-        .attr("pointer-events", "auto")
-        .style('cursor', 'row-resize')
-        .call(d3.drag()
-            .on("start", start_velocity_line)
-            .on("drag", drag_velocity_line)
-            .on("end", end_velocity_line)
-        );
+        .attr("stroke-dasharray", "5, 3");
 
     // labels
     let fitsData = fitsContainer[va_count - 1];
@@ -1762,164 +1697,6 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
         .text(bunit);
 }
 
-function start_angular_line(event) {
-    // set the mouse cursor to a "row-resize" cursor
-    d3.select("#PVAXISLINE").style('cursor', 'col-resize');
-}
-
-function start_velocity_line(event) {
-    // set the mouse cursor to a "row-resize" cursor
-    d3.select("#PVAXISLINE").style('cursor', 'row-resize');
-}
-
-function start_angular_velocity_line(event) {
-    // set the mouse cursor to a "row-resize" cursor
-    d3.select("#PVAXISLINE").style('cursor', 'move');
-}
-
-function end_angular_velocity_line(event) {
-    // reset the mouse cursor
-    d3.select("#PVAXISLINE").style('cursor', 'default');
-}
-
-function drag_angular_line(event) {
-    event.preventDefault = true;
-
-    // get the dimensions of the SVG "PVAXISLINE"    
-    let _svg_top = parseFloat(d3.select("#PVAXISLINE").attr("top"));
-    let _svg_left = parseFloat(d3.select("#PVAXISLINE").attr("left"));
-    let _svg_width = parseFloat(d3.select("#PVAXISLINE").attr("width"));
-    let _svg_height = parseFloat(d3.select("#PVAXISLINE").attr("height"));
-
-    var offset = d3.pointer(event);
-
-    // get the x,y coordinates of the mouse pointer with respect to the PVAXISLINE
-    let x = offset[0] - _svg_left; // the SVG offset
-    let y = offset[1] - _svg_top; // the SVG offset
-
-    // make sure the line lies within the SVG
-    x = Math.min(Math.max(x, 1), _svg_width - 1);
-    y = Math.min(Math.max(y, 1), _svg_height - 1);
-
-    // move the line and circle
-    d3.select("#angularline")
-        .attr("x1", x)
-        .attr("x2", x);
-
-    d3.select("#velocitycircle")
-        .attr("cx", x);
-
-    angularline_position = x;
-
-    // let tooltipX = x + _svg_left;
-    // let tooltipY = y + _svg_top;
-
-    let tooltipX = parseFloat(d3.select("#velocitycircle").attr("cx")) + _svg_left;
-    let tooltipY = parseFloat(d3.select("#velocitycircle").attr("cy")) + _svg_top;
-
-    // given x, invert pvxR to get the angular offset
-    let angular = pvxR.invert(2 * emFontSize + x);
-
-    // update the pvtooltip
-    d3.select("#pvtooltip")
-        .style("left", (tooltipX + 10) + "px")
-        .style("top", (tooltipY + 10) + "px")
-        .style("opacity", 0.7)
-        .style("visibility", "visible");
-
-    // update the angulartooltip html
-    d3.select("#angulartooltip")
-        .html(angular.toFixed(2) + " arcsec");
-
-    // get the 'PVCanvas'
-    let canvas = document.getElementById("PVCanvas");
-
-    // apply a 10-pixel correction to x and y
-    let pixel = canvas.getContext('2d').getImageData(tooltipX - 10, tooltipY - 10, 1, 1).data;
-    console.log("P-V pixel:", pixel);
-
-    // get the RGB from the pixel
-    let r = pixel[0];
-    let g = pixel[1];
-    let b = pixel[2];
-
-    // set the background of "pvtooltip" to r,g,b
-    /*d3.select("#pvtooltip")
-        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");*/
-}
-
-function drag_velocity_line(event) {
-    event.preventDefault = true;
-
-    // get the dimensions of the SVG "PVAXISLINE"    
-    let _svg_top = parseFloat(d3.select("#PVAXISLINE").attr("top"));
-    let _svg_left = parseFloat(d3.select("#PVAXISLINE").attr("left"));
-    let _svg_width = parseFloat(d3.select("#PVAXISLINE").attr("width"));
-    let _svg_height = parseFloat(d3.select("#PVAXISLINE").attr("height"));
-
-    var offset = d3.pointer(event);
-
-    // get the x,y coordinates of the mouse pointer with respect to the PVAXISLINE
-    let x = offset[0] - _svg_left; // the SVG offset
-    let y = offset[1] - _svg_top; // the SVG offset
-
-    // make sure the line lies within the SVG
-    x = Math.min(Math.max(x, 1), _svg_width - 1);
-    y = Math.min(Math.max(y, 1), _svg_height - 1);
-
-    // move the line and circle
-    d3.select("#velocityline")
-        .attr("y1", y)
-        .attr("y2", y);
-
-    d3.select("#velocitycircle")
-        .attr("cy", y);
-
-    velocityline_position = y;
-
-    // let tooltipX = x + _svg_left;
-    // let tooltipY = y + _svg_top;
-
-    let tooltipX = parseFloat(d3.select("#velocitycircle").attr("cx")) + _svg_left;
-    let tooltipY = parseFloat(d3.select("#velocitycircle").attr("cy")) + _svg_top;
-
-    // given y, invert pvyR to get the velocity
-    let velocity = pvyR.invert(emFontSize + y);
-
-    // update the pvtooltip
-    d3.select("#pvtooltip")
-        .style("left", (tooltipX + 10) + "px")
-        .style("top", (tooltipY + 10) + "px")
-        .style("opacity", 0.7)
-        .style("visibility", "visible");
-
-    // update the velocitytooltip html
-    d3.select("#velocitytooltip")
-        .html(velocity.toFixed(2) + " km/s");
-
-    // get the 'PVCanvas'
-    let canvas = document.getElementById("PVCanvas");
-
-    // apply a 10-pixel correction to x and y
-    let pixel = canvas.getContext('2d').getImageData(tooltipX - 10, tooltipY - 10, 1, 1).data;
-    console.log("P-V pixel:", pixel);
-
-    // get the RGB from the pixel
-    let r = pixel[0];
-    let g = pixel[1];
-    let b = pixel[2];
-
-    // set the background of "pvtooltip" to r,g,b
-    d3.select("#pvtooltip")
-        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
-
-    const inputs = [r / 255, g / 255, b / 255];
-    console.log("inputs:", inputs);
-
-    let intensity = rbf_compute(inputs);
-    console.log("inverted pixel intensity:", intensity);
-}
-
 function crosshair_move(event) {
     event.preventDefault = true;
 
@@ -1985,7 +1762,15 @@ function crosshair_move(event) {
     let raw_intensity = rbf_compute(inputs);
     let elapsed = Math.round(performance.now() - start);
 
-    // console.log("inverted raw pixel intensity:", raw_intensity, "elapsed: ", elapsed, "[ms]");
+    let fitsData = fitsContainer[va_count - 1];
+
+    let intensity = 6.0 * (raw_intensity - 0.5);
+    intensity = intensity * fitsData.pvstd + fitsData.pvmean;
+
+    // clamp the intensity to pvmin and pvmax (replace the endings of the colour scale with the actual values)
+    intensity = clamp(intensity, fitsData.pvmin, fitsData.pvmax);
+
+    // console.log("inverted raw pixel intensity:", raw_intensity, "elapsed: ", elapsed, "[ms]");    
 
     // update the angulartooltip html
     d3.select("#angulartooltip")
@@ -1995,9 +1780,17 @@ function crosshair_move(event) {
     d3.select("#velocitytooltip")
         .html(velocity.toFixed(2) + " km/s");
 
+    var bunit = '';
+    if (fitsData.BUNIT != '') {
+        bunit = fitsData.BUNIT.trim();
+
+        if (fitsData.depth > 1 && has_velocity_info)
+            bunit += '•km/s';
+    }
+
     // update the intensitytooltip html
     d3.select("#intensitytooltip")
-        .html(raw_intensity.toFixed(2));
+        .html(intensity.toFixed(2) + " " + bunit);
 }
 
 /** ---------------------------------------------------------------------
