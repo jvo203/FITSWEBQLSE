@@ -1047,7 +1047,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .style("visibility", "hidden")
         .style("background", "#000")
         .style("color", "white")
-        .html("&nbsp;<span id='angulartooltip'></span>&nbsp;<br/>&nbsp;<span id='velocitytooltip'></span>&nbsp;"); // '<br/>' or ',&nbsp;'
+        .html("&nbsp;<span id='angulartooltip'></span>&nbsp;<br/>&nbsp;<span id='velocitytooltip'></span>&nbsp;<br/>&nbsp;<span id='intensitytooltip'></span>&nbsp;"); // '<br/>' or ',&nbsp;'
 
     var xAxis = d3.axisBottom(xR)
         .tickSizeOuter([3])
@@ -1964,6 +1964,29 @@ function crosshair_move(event) {
     // given y, invert pvyR to get the velocity
     let velocity = pvyR.invert(emFontSize + y);
 
+    // get the 'PVCanvas'
+    let canvas = document.getElementById("PVCanvas");
+
+    // apply a 10-pixel correction to x and y
+    let pixel = canvas.getContext('2d').getImageData(tooltipX - 10, tooltipY - 10, 1, 1).data;
+
+    // get the RGB from the pixel
+    let r = pixel[0];
+    let g = pixel[1];
+    let b = pixel[2];
+
+    // set the background of "pvtooltip" to r,g,b
+    /*d3.select("#pvtooltip")
+        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");*/
+
+    const inputs = [r / 255, g / 255, b / 255];
+
+    let start = performance.now();
+    let raw_intensity = rbf_compute(inputs);
+    let elapsed = Math.round(performance.now() - start);
+
+    // console.log("inverted raw pixel intensity:", raw_intensity, "elapsed: ", elapsed, "[ms]");
+
     // update the angulartooltip html
     d3.select("#angulartooltip")
         .html(angular.toFixed(2) + " arcsec");
@@ -1972,27 +1995,9 @@ function crosshair_move(event) {
     d3.select("#velocitytooltip")
         .html(velocity.toFixed(2) + " km/s");
 
-    // get the 'PVCanvas'
-    let canvas = document.getElementById("PVCanvas");
-
-    // apply a 10-pixel correction to x and y
-    let pixel = canvas.getContext('2d').getImageData(tooltipX - 10, tooltipY - 10, 1, 1).data;
-    console.log("P-V pixel:", pixel);
-
-    // get the RGB from the pixel
-    let r = pixel[0];
-    let g = pixel[1];
-    let b = pixel[2];
-
-    // set the background of "pvtooltip" to r,g,b
-    d3.select("#pvtooltip")
-        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
-
-    const inputs = [r / 255, g / 255, b / 255];
-    console.log("inputs:", inputs);
-
-    let intensity = rbf_compute(inputs);
-    console.log("inverted pixel intensity:", intensity);
+    // update the intensitytooltip html
+    d3.select("#intensitytooltip")
+        .html(raw_intensity.toFixed(2));
 }
 
 /** ---------------------------------------------------------------------
