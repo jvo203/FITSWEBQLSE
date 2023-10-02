@@ -1,3 +1,11 @@
+function sqnorm(a, b)
+    return dot(a, a) + dot(b, b) - 2 * dot(a, b)
+end
+
+function rbf_kernel(x, y, γ)
+    return exp(-γ * sqnorm(x, y))
+end
+
 # read all Float64 values from a text file wts.dat
 # and store them in a vector
 
@@ -32,3 +40,4 @@ close(f)
 
 # print the array
 println(centres)
+
