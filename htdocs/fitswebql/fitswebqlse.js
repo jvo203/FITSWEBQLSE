@@ -1229,14 +1229,16 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
             if (displayPVCrosshair) {
                 crosshair_move(event); // first move the crosshair into place
                 d3.select('#PVAXISLINE').attr("opacity", 1.0);
-                d3.select("#pv_rectangle").style('cursor', 'move');
+                d3.select("#pv_rectangle").style('cursor', 'none'); // was 'move'
             } else {
                 d3.select("#pv_rectangle").style('cursor', 'default');
+                d3.select("#pvtooltip").style("visibility", "hidden");
             }
         })
         .on("mouseleave", function (event) {
             d3.select("#pv_rectangle").style('cursor', 'default');
             d3.select('#PVAXISLINE').attr("opacity", 0.0);
+            d3.select("#pvtooltip").style("visibility", "hidden");
         })
         .on("mousemove", function (event) {
             if (displayPVCrosshair) {
@@ -1920,6 +1922,55 @@ function drag_velocity_line(event) {
 
 function crosshair_move(event) {
     event.preventDefault = true;
+
+    // get the dimensions of the SVG "PVAXISLINE"    
+    let _svg_top = parseFloat(d3.select("#PVAXISLINE").attr("top"));
+    let _svg_left = parseFloat(d3.select("#PVAXISLINE").attr("left"));
+    let _svg_width = parseFloat(d3.select("#PVAXISLINE").attr("width"));
+    let _svg_height = parseFloat(d3.select("#PVAXISLINE").attr("height"));
+
+    var offset = d3.pointer(event);
+
+    // get the x,y coordinates of the mouse pointer within the PV region
+    let x = offset[0];
+    let y = offset[1];
+
+    // make sure the line lies within the SVG
+    x = Math.min(Math.max(x, 1), _svg_width - 1);
+    y = Math.min(Math.max(y, 1), _svg_height - 1);
+
+    // move the crosshair lines
+    d3.select("#angularline")
+        .attr("x1", x)
+        .attr("x2", x);
+
+    d3.select("#velocityline")
+        .attr("y1", y)
+        .attr("y2", y);
+
+    let tooltipX = x + _svg_left;
+    let tooltipY = y + _svg_top;
+
+    // update the pvtooltip
+    d3.select("#pvtooltip")
+        .style("left", (tooltipX + 10) + "px")
+        .style("top", (tooltipY + 10) + "px")
+        .style("opacity", 0.7)
+        .style("visibility", "visible");
+
+    // given x, invert pvxR to get the angular offset
+    let angular = pvxR.invert(2 * emFontSize + x);
+
+    // given y, invert pvyR to get the velocity
+    let velocity = pvyR.invert(emFontSize + y);
+
+    // update the angulartooltip html
+    d3.select("#angulartooltip")
+        .html(angular.toFixed(2) + " arcsec");
+
+    // update the velocitytooltip html
+    d3.select("#velocitytooltip")
+        .html(velocity.toFixed(2) + " km/s");
 }
 
 /** ---------------------------------------------------------------------
