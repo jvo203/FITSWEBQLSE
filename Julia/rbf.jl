@@ -1,3 +1,4 @@
+using JSON
 using LinearAlgebra
 
 function sqnorm(a, b)
@@ -82,4 +83,13 @@ for entry in testdata
         out += kernel * wts[j]
     end
     =#
+end
+
+# export wts and centres to JSON
+open("wts.json", "w") do f
+    JSON.print(f, wts)
+end
+
+open("centres.json", "w") do f
+    JSON.print(f, centres)
 end
