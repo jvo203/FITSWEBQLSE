@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-09-29.1";
+    return "JS2023-10-01.0";
 }
 
 dot = (a, b) => a.map((_, i) => a[i] * b[i]).reduce((m, n) => m + n);
@@ -1999,7 +1999,7 @@ function drag_velocity_line(event) {
         return rbf_kernel(inputs, centre, 1.0);
     });
 
-    // prepend a 1.0 to the array
+    // prepend 1.0 to the array
     hh.unshift(1.0);
 
     // console.log("hh:", hh);
