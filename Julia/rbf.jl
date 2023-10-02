@@ -77,9 +77,9 @@ for entry in testdata
     #=
     for j in 1:length(centres)
         # calculate the rbf kernel
-        kernel = rbf_kernel(testdata[i], centres[j], 0.1)
+        kernel = rbf_kernel(x, centres[j], 1.0)
         # multiply the kernel by the weight
-        testout[i] += kernel * wts[j]
+        out += kernel * wts[j]
     end
     =#
 end
