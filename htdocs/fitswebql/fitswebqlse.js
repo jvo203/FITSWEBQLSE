@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-01.0";
+    return "JS2023-10-02.0";
 }
 
 dot = (a, b) => a.map((_, i) => a[i] * b[i]).reduce((m, n) => m + n);
@@ -982,7 +982,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
             .attr("height", svg_height)
             .attr("top", svg_top)
             .attr("left", svg_left)
-            .attr("opacity", 1.0)
+            .attr("opacity", 0.0)
             .attr('style', `position: fixed; left: ${svg_left}px; top: ${svg_top}px; cursor: default`);
     }
 
@@ -1199,19 +1199,6 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
     // move "circle" to the top
     d3.select("#velocitycircle").moveToFront();*/
 
-    if (displayPVCrosshair) {
-        d3.select('#PVAXISLINE').attr("opacity", 1.0);
-        /*d3.select('#velocityline').attr("pointer-events", "auto");
-        d3.select('#angularline').attr("pointer-events", "auto");
-        d3.select('#velocitycircle').attr("pointer-events", "auto");*/
-    }
-    else {
-        d3.select('#PVAXISLINE').attr("opacity", 0.0);
-        /*d3.select('#velocityline').attr("pointer-events", "none");
-        d3.select('#angularline').attr("pointer-events", "none");
-        d3.select('#velocitycircle').attr("pointer-events", "none");*/
-    }
-
     // svg pv rectangle for moving the crosshair
     axissvg.append("rect")
         .attr("id", "pv_rectangle")
@@ -1221,9 +1208,20 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("height", svg_height)
         .attr("opacity", 0.0)
         .attr("pointer-events", "auto")
-        .style('cursor', 'move')
         .style("fill", "transparent")
-        .style("stroke", "transparent");
+        .style("stroke", "transparent")
+        .on("mouseenter", function (event) {
+            if (displayPVCrosshair) {
+                d3.select("#pv_rectangle").style('cursor', 'move');
+                d3.select('#PVAXISLINE').attr("opacity", 1.0);
+            } else {
+                d3.select("#pv_rectangle").style('cursor', 'default');
+            }
+        })
+        .on("mouseleave", function (event) {
+            d3.select("#pv_rectangle").style('cursor', 'default');
+            d3.select('#PVAXISLINE').attr("opacity", 0.0);
+        });
 
     d3.select("#pv_rectangle").moveToFront();
 
@@ -10974,21 +10972,6 @@ function pv_event(event) {
                     localStorage_write_boolean("displayPVCrosshair", displayPVCrosshair);
                     var htmlStr = displayPVCrosshair ? '<span class="fas fa-check-square"></span> crosshair&nbsp;' : '<span class="far fa-square"></span> crosshair&nbsp;';
                     d3.select(this).html(htmlStr);
-
-                    if (displayPVCrosshair) {
-                        d3.select('#PVAXISLINE').attr("opacity", 1.0);
-                        /*d3.select('#velocityline').attr("pointer-events", "auto");
-                        d3.select('#angularline').attr("pointer-events", "auto");
-                        d3.select('#velocitycircle').attr("pointer-events", "auto");*/
-                        d3.select("#pvtooltip").style("visibility", "visible");
-                    }
-                    else {
-                        d3.select('#PVAXISLINE').attr("opacity", 0.0);
-                        /*d3.select('#velocityline').attr("pointer-events", "none");
-                        d3.select('#angularline').attr("pointer-events", "none");
-                        d3.select('#velocitycircle').attr("pointer-events", "none");*/
-                        d3.select("#pvtooltip").style("visibility", "hidden");
-                    }
                 })
                 .html(htmlStr);
 
