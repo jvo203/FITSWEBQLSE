@@ -1755,8 +1755,8 @@ function crosshair_move(event) {
     let a = pixel[3];
 
     // set the background of "pvtooltip" to r,g,b
-    /*d3.select("#pvtooltip")
-        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");*/
+    d3.select("#pvtooltip")
+        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
 
     const inputs = [r / 255, g / 255, b / 255];
 
@@ -1766,13 +1766,17 @@ function crosshair_move(event) {
 
     let fitsData = fitsContainer[va_count - 1];
 
-    let intensity = 6.0 * (raw_intensity - 0.5);
+    let intensity = 6.0 * (raw_intensity - 0.5); // [0, 1]-- > [-3, 3]
     intensity = intensity * fitsData.pvstd + fitsData.pvmean;
 
     // clamp the intensity to pvmin and pvmax (replace the endings of the colour scale with the actual values)
     intensity = clamp(intensity, fitsData.pvmin, fitsData.pvmax);
 
-    // console.log("inverted raw pixel intensity:", raw_intensity, "elapsed: ", elapsed, "[ms]");    
+    let intensity2 = 6.0 * (a / 255 - 0.5); // [0, 1]-- > [-3, 3]
+    intensity2 = intensity2 * fitsData.pvstd + fitsData.pvmean;
+    intensity2 = clamp(intensity2, fitsData.pvmin, fitsData.pvmax);
+
+    console.log("inverted intensity:", intensity, "alpha intensity:", a, "-->", intensity2, "elapsed: ", elapsed, "[ms]");
 
     // update the angulartooltip html
     d3.select("#angulartooltip")
@@ -1792,7 +1796,7 @@ function crosshair_move(event) {
 
     // update the intensitytooltip html
     d3.select("#intensitytooltip")
-        .html(intensity.toFixed(2) + " " + bunit);
+        .html(intensity.toFixed(2) + "/" + intensity2.toFixed(2) + " " + bunit);
 }
 
 /** ---------------------------------------------------------------------
@@ -4927,7 +4931,7 @@ async function open_websocket_connection(_datasetId, index) {
                             var img_width = 0.8 * dst_width;
                             var img_height = 0.8 * dst_height;
 
-                            var ctx = c.getContext("2d");
+                            var ctx = c.getContext("2d", { alpha: false });
                             ctx.webkitImageSmoothingEnabled = false;
                             ctx.msImageSmoothingEnabled = false;
                             ctx.imageSmoothingEnabled = false;
