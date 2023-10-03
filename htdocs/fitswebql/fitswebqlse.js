@@ -1019,7 +1019,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .style("position", "absolute")
         .style("z-index", "10")
         .style("visibility", "hidden")
-        .style("background", "#000")
+        .style("background", "rgba(0,0,0,0.7)")
         .style("color", "white")
         .html("&nbsp;<span id='angulartooltip'></span>&nbsp;<br/>&nbsp;<span id='velocitytooltip'></span>&nbsp;<br/>&nbsp;<span id='intensitytooltip'></span>&nbsp;"); // '<br/>' or ',&nbsp;'
 
@@ -1732,8 +1732,8 @@ function crosshair_move(event) {
     let b = pixel2[2];
 
     // set the background of "pvtooltip" to r,g,b
-    d3.select("#pvtooltip")
-        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
+    /*d3.select("#pvtooltip")
+        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");*/
 
     let fitsData = fitsContainer[va_count - 1];
 
