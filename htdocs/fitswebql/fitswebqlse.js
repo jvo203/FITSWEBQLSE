@@ -1,31 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-03.2";
-}
-
-const rbf_centres = [[0.35689510301491456, 0.4086939419921549, 0.9022950986410274], [0.21410045188640492, 0.8186926004705914, 0.6933284136579181], [0.939172248311561, 0.5269533721324422, 0.08202095095410722], [0.7432988087335808, 0.3672640323381551, 0.8254148426087289], [0.3644430534073717, 0.5739856070419134, 0.04652431705431659], [0.6271690952276159, 0.5154507975000622, 0.528503612966249], [0.07840628226536794, 0.5671427396817397, 0.2330740081812095], [0.4937246371327044, 0.14841422226401746, 0.8989454445881315], [0.6329646416082859, 0.8695719125981671, 0.8642016958790251], [0.5531941906420856, 0.28958795171283946, 0.4055057453181583], [0.7933489424995919, 0.9716982200265287, 0.531686122323582], [0.11559810417642358, 0.6454628656546846, 0.5521811733979436], [0.5549456779680082, 0.0650666656609209, 0.04155006504823655], [0.024438961689331018, 0.40447765215646037, 0.23195616842913025], [0.0725316039156696, 0.4747325320162108, 0.9190382783755979], [0.36254367016221245, 0.26099840509774475, 0.004264658079508932], [0.5805431145018483, 0.8687860256457296, 0.08291516962846801], [0.8255985645269526, 0.9115231117313853, 0.42507921720794606], [0.9725519104049538, 0.06263512182838449, 0.6475597878330093], [0.7915652265482607, 0.3161539345866524, 0.13308971029787742], [0.1309732738045859, 0.4849078903486508, 0.9693714982855077], [0.07347390170089652, 0.5888233794510052, 0.7321184436383525], [0.5365149807889751, 0.3171709816215069, 0.3434706323916321], [0.7642269726599875, 0.08155434407681739, 0.9721447664354954], [0.8949832235934401, 0.7906699681656459, 0.15151227541170953], [0.3115255223747406, 0.2765698222433648, 0.913154061987214], [0.540451921831139, 0.08779278928132839, 0.30730170868840734], [0.9418433571811331, 0.7979886815593018, 0.5321681996384597], [0.42027704010086375, 0.3658432735563171, 0.03548902448323843], [0.03859853625659326, 0.20914094984604503, 0.2885728389590525]];
-const rbf_wts = [-116.24897510694107, -294341.9756107483, 32128.84472962006, -125862.03973077345, -68216.92728485257, -54264.36238674522, 188849.27364119526, 163756.68671348266, -493340.7841942372, -12922.43170743871, 724007.7308123747, 110620.39460223977, -312763.43891254556, 57804.06344840819, -73481.15562747489, -557679.047024829, -236362.87269266316, -19216.31968347307, -204717.2107598445, -38022.57899076642, 65050.308411405764, 300863.5631868165, 385181.1898128437, -875955.2567287887, 185906.50009233115, 146065.4826721665, 627690.3255576347, 27623.792056300877, 15042.867542512357, 302305.04052150686, 38750.89530678402];
-
-dot = (a, b) => a.map((_, i) => a[i] * b[i]).reduce((m, n) => m + n);
-sqnorm = (a, b) => (dot(a, a) + dot(b, b) - 2 * dot(a, b));
-
-function rbf_kernel(x, y, gamma) {
-    let z = sqnorm(x, y);
-    return Math.exp(-gamma * z);
-}
-
-function rbf_compute(x) {
-    let hh = rbf_centres.map(function (centre) {
-        return rbf_kernel(x, centre, 1.0);
-    });
-
-    // prepend 1.0 to the array
-    hh.unshift(1.0);
-
-    // console.log("hh:", hh);
-
-    // clamp the output to [0, 1]
-    return clamp(dot(hh, rbf_wts), 0.0, 1.0);
-    // return dot(hh, rbf_wts);
+    return "JS2023-10-03.4";
 }
 
 function uuidv4() {
@@ -1743,10 +1717,14 @@ function crosshair_move(event) {
 
     // get the 'PVCanvas'
     let canvas = document.getElementById("PVCanvas");
+    let canvas2 = document.getElementById("PVCanvas2");
 
     // apply a 10-pixel correction to x and y
-    let pixel = canvas.getContext('2d').getImageData(tooltipX - 10, tooltipY - 10, 1, 1).data;
-    console.log("P-V pixel:", pixel);
+    let coordX = tooltipX - 10;
+    let coordY = tooltipY - 10;
+    let pixel = canvas.getContext('2d').getImageData(coordX, coordY, 1, 1).data;
+    let pixel2 = canvas2.getContext('2d').getImageData(coordX, coordY, 1, 1).data;
+    console.log("P-V pixel:", pixel, "P-V pixel2:", pixel2);
 
     // get the RGB from the pixel
     let r = pixel[0];
@@ -1758,25 +1736,17 @@ function crosshair_move(event) {
     d3.select("#pvtooltip")
         .style("background-color", "rgb(" + r + "," + g + "," + b + ")");
 
-    const inputs = [r / 255, g / 255, b / 255];
-
-    let start = performance.now();
-    let raw_intensity = rbf_compute(inputs);
-    let elapsed = Math.round(performance.now() - start);
-
     let fitsData = fitsContainer[va_count - 1];
 
-    let intensity = 6.0 * (raw_intensity - 0.5); // [0, 1]-- > [-3, 3]
+    let intensity = 6.0 * (pixel[3] / 255 - 0.5); // [0, 1]-- > [-3, 3]
     intensity = intensity * fitsData.pvstd + fitsData.pvmean;
 
     // clamp the intensity to pvmin and pvmax (replace the endings of the colour scale with the actual values)
     intensity = clamp(intensity, fitsData.pvmin, fitsData.pvmax);
 
-    let intensity2 = 6.0 * (a / 255 - 0.5); // [0, 1]-- > [-3, 3]
+    let intensity2 = 6.0 * (pixel2[3] / 255 - 0.5); // [0, 1]-- > [-3, 3]
     intensity2 = intensity2 * fitsData.pvstd + fitsData.pvmean;
     intensity2 = clamp(intensity2, fitsData.pvmin, fitsData.pvmax);
-
-    console.log("inverted intensity:", intensity, "alpha intensity:", a, "-->", intensity2, "elapsed: ", elapsed, "[ms]");
 
     // update the angulartooltip html
     d3.select("#angulartooltip")
@@ -4918,6 +4888,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                             //place the image onto the PV canvas
                             var c = document.getElementById('PVCanvas');
+                            var c2 = document.getElementById('PVCanvas2');
                             var dst_width = c.width / 2;
                             var dst_height = c.height;
                             var offset = 0.05 * c.height;
@@ -4931,16 +4902,23 @@ async function open_websocket_connection(_datasetId, index) {
                             var img_width = 0.8 * dst_width;
                             var img_height = 0.8 * dst_height;
 
-                            var ctx = c.getContext("2d", { alpha: false });
+                            var ctx = c.getContext("2d");
                             ctx.webkitImageSmoothingEnabled = false;
                             ctx.msImageSmoothingEnabled = false;
                             ctx.imageSmoothingEnabled = false;
 
+                            var ctx2 = c2.getContext("2d");
+                            ctx2.webkitImageSmoothingEnabled = false;
+                            ctx2.msImageSmoothingEnabled = false;
+                            ctx2.imageSmoothingEnabled = false;
+
                             // clear the right half of the PV canvas
                             ctx.clearRect(c.width / 2, 0, c.width, c.height);
+                            ctx2.clearRect(c.width / 2, 0, c.width, c.height);
 
                             // save the current transformation matrix
                             ctx.save();
+                            ctx2.save();
 
                             var flipY = false;
 
@@ -4948,11 +4926,18 @@ async function open_websocket_connection(_datasetId, index) {
                                 // flip both the X and Y axes                                
                                 ctx.translate(c.width, c.height + offset);
                                 ctx.scale(-1, -1); // X was -1
+
+                                ctx2.translate(c.width, c.height + offset);
+                                ctx2.scale(-1, -1); // X was -1
+
                                 flipY = true;
                             } else {
                                 // flip the X axis only
                                 ctx.translate(c.width, offset);
                                 ctx.scale(-1, 1); // X was -1
+
+                                ctx2.translate(c.width, offset);
+                                ctx2.scale(-1, 1); // X was -1
 
                                 // swap vmin and vmax
                                 let tmp = vmin;
@@ -4962,10 +4947,23 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // then place the new PV diagram onto the ctx canvas
                             // ctx.drawImage(pvCanvas, 0, 0, pv_width, pv_height, 3 * dst_width / 2 - img_width / 2, (dst_height - img_height) / 2, img_width, img_height); // normal X axis
+                            ctx2.drawImage(pvCanvas, 0, 0, pv_width, pv_height, (dst_width - img_width) / 2, (dst_height - img_height) / 2, img_width, img_height); // the X axis has been reversed
+
+                            // set the alpha channel to 255 for pvData
+                            var data = pvData.data;
+
+                            for (var i = 0; i < data.length; i += 4) {
+                                data[i + 3] = 255;
+                            }
+
+                            context.putImageData(pvData, 0, 0);
+
+                            // finally draw the PV diagram onto the visible PVCanvas
                             ctx.drawImage(pvCanvas, 0, 0, pv_width, pv_height, (dst_width - img_width) / 2, (dst_height - img_height) / 2, img_width, img_height); // the X axis has been reversed
 
                             // restore the transformation matrix
                             ctx.restore();
+                            ctx2.restore();
 
                             if (va_count == 1) {
                                 pv_axes(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, vmin, vmax, pmin[0], pmax[0], pmean[0], pstd[0], pvx1, pvy1, pvx2, pvy2);
@@ -10835,6 +10833,13 @@ function pv_event(event) {
                 .attr("id", "PVCanvas")
                 .attr("width", width)
                 .attr("height", height)
+                .attr('style', 'position: fixed; left: 10px; top: 10px;');
+
+            div.append("canvas")
+                .attr("id", "PVCanvas2")
+                .attr("width", width)
+                .attr("height", height)
+                .style("visibility", "hidden")
                 .attr('style', 'position: fixed; left: 10px; top: 10px;');
 
             div.append("span")
