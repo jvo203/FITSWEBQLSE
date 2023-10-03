@@ -1727,10 +1727,9 @@ function crosshair_move(event) {
     console.log("P-V pixel:", pixel, "P-V pixel2:", pixel2);
 
     // get the RGB from the pixel
-    let r = pixel[0];
-    let g = pixel[1];
-    let b = pixel[2];
-    let a = pixel[3];
+    let r = pixel2[0];
+    let g = pixel2[1];
+    let b = pixel2[2];
 
     // set the background of "pvtooltip" to r,g,b
     d3.select("#pvtooltip")
@@ -1766,7 +1765,7 @@ function crosshair_move(event) {
 
     // update the intensitytooltip html
     d3.select("#intensitytooltip")
-        .html(intensity.toFixed(2) + "/" + intensity2.toFixed(2) + " " + bunit);
+        .html(intensity2.toFixed(2) + " " + bunit);
 }
 
 /** ---------------------------------------------------------------------
@@ -10839,8 +10838,7 @@ function pv_event(event) {
                 .attr("id", "PVCanvas2")
                 .attr("width", width)
                 .attr("height", height)
-                .style("visibility", "hidden")
-                .attr('style', 'position: fixed; left: 10px; top: 10px;');
+                .attr('style', 'position: fixed; left: 10px; top: 10px; visibility: hidden;');
 
             div.append("span")
                 .attr("id", "closePVDiagram")
