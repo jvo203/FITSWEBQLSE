@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-03.4";
+    return "JS2023-10-03.5";
 }
 
 function uuidv4() {
@@ -1124,7 +1124,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("y2", velocityline_position)
         .attr("stroke-width", emStrokeWidth)
         .attr("opacity", 0.5)
-        .attr("stroke", "red")
+        .attr("stroke", "black")
         .attr("stroke-dasharray", "5, 3")
         .attr("pointer-events", "none");
 
@@ -1137,7 +1137,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .attr("y2", svg_height)
         .attr("stroke-width", emStrokeWidth)
         .attr("opacity", 0.5)
-        .attr("stroke", "red")
+        .attr("stroke", "black")
         .attr("stroke-dasharray", "5, 3")
         .attr("pointer-events", "none");
 
@@ -4913,7 +4913,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // clear the right half of the PV canvas
                             ctx.clearRect(c.width / 2, 0, c.width, c.height);
-                            ctx2.clearRect(c.width / 2, 0, c.width, c.height);
+                            ctx2.clearRect(c2.width / 2, 0, c2.width, c2.height);
 
                             // save the current transformation matrix
                             ctx.save();
