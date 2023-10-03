@@ -598,6 +598,7 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
         r = 0xFF * (math_r[x0] + (math_r[x0 + 1] - math_r[x0]) * frac);
         g = 0xFF * (math_g[x0] + (math_g[x0 + 1] - math_g[x0]) * frac);
         b = 0xFF * (math_b[x0] + (math_b[x0 + 1] - math_b[x0]) * frac);
+        a = 0xFF * value; // "stuff" the original pixel intensity into the alpha channel
 
         pvBuffer[pvOffset++] = r;
         pvBuffer[pvOffset++] = g;
