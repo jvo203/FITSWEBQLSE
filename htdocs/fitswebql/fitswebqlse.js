@@ -10829,16 +10829,16 @@ function pv_event(event) {
             var height = Math.round(rect.height - 20);
 
             div.append("canvas")
-                .attr("id", "PVCanvas")
-                .attr("width", width)
-                .attr("height", height)
-                .attr('style', 'position: fixed; left: 10px; top: 10px;');
-
-            div.append("canvas")
                 .attr("id", "PVCanvas2")
                 .attr("width", width)
                 .attr("height", height)
                 .attr('style', 'position: fixed; left: 10px; top: 10px; visibility: hidden;');
+
+            div.append("canvas")
+                .attr("id", "PVCanvas")
+                .attr("width", width)
+                .attr("height", height)
+                .attr('style', 'position: fixed; left: 10px; top: 10px;');
 
             div.append("span")
                 .attr("id", "closePVDiagram")
