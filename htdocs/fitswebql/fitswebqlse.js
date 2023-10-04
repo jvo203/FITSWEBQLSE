@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-03.5";
+    return "JS2023-10-04.0";
 }
 
 function uuidv4() {
@@ -1715,37 +1715,23 @@ function crosshair_move(event) {
     // given y, invert pvyR to get the velocity
     let velocity = pvyR.invert(emFontSize + y);
 
-    // get the 'PVCanvas'
-    let canvas = document.getElementById("PVCanvas");
-    let canvas2 = document.getElementById("PVCanvas2");
+    // get the FITS data container
+    let fitsData = fitsContainer[va_count - 1];
+
+    // get the 'PVCanvas2'
+    let canvas = document.getElementById("PVCanvas2");
 
     // apply a 10-pixel correction to x and y
     let coordX = tooltipX - 10;
     let coordY = tooltipY - 10;
     let pixel = canvas.getContext('2d').getImageData(coordX, coordY, 1, 1).data;
-    let pixel2 = canvas2.getContext('2d').getImageData(coordX, coordY, 1, 1).data;
-    console.log("P-V pixel:", pixel, "P-V pixel2:", pixel2);
 
-    // get the RGB from the pixel
-    let r = pixel2[0];
-    let g = pixel2[1];
-    let b = pixel2[2];
+    // read the original value from the alpha channel
+    let alpha = pixel[3];
 
-    // set the background of "pvtooltip" to r,g,b
-    /*d3.select("#pvtooltip")
-        .style("background-color", "rgb(" + r + "," + g + "," + b + ")");*/
-
-    let fitsData = fitsContainer[va_count - 1];
-
-    let intensity = 6.0 * (pixel[3] / 255 - 0.5); // [0, 1]-- > [-3, 3]
+    let intensity = 6.0 * (alpha / 255 - 0.5); // [0, 1]-- > [-3, 3]
     intensity = intensity * fitsData.pvstd + fitsData.pvmean;
-
-    // clamp the intensity to pvmin and pvmax (replace the endings of the colour scale with the actual values)
     intensity = clamp(intensity, fitsData.pvmin, fitsData.pvmax);
-
-    let intensity2 = 6.0 * (pixel2[3] / 255 - 0.5); // [0, 1]-- > [-3, 3]
-    intensity2 = intensity2 * fitsData.pvstd + fitsData.pvmean;
-    intensity2 = clamp(intensity2, fitsData.pvmin, fitsData.pvmax);
 
     // update the angulartooltip html
     d3.select("#angulartooltip")
@@ -1765,7 +1751,7 @@ function crosshair_move(event) {
 
     // update the intensitytooltip html
     d3.select("#intensitytooltip")
-        .html(intensity2.toFixed(2) + " " + bunit);
+        .html(intensity.toFixed(2) + " " + bunit);
 }
 
 /** ---------------------------------------------------------------------
