@@ -1,3 +1,7 @@
+## [5.0.45] - 2023-10-04
+
+* an improved P-V diagram: an _*all-new*_ crosshair with a tooltip (_*hint*_: hover a mouse over the P-V diagram)
+
 ## [5.0.44] - 2023-09-14
 
 * spectrum binning: replaced the _*Largest Triangle Three Buckets*_ downsampling with true binning (averaging adjacent values)
