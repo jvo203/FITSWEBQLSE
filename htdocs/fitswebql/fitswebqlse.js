@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-04.0";
+    return "JS2023-10-05.0";
 }
 
 function uuidv4() {
@@ -15411,6 +15411,29 @@ function show_scaling_help() {
     }
 }
 
+function load_region() {
+    console.log("loading a ds9 region file");
+
+    // a user-selected ds9 region file
+    let file = document.querySelector("#regionFile").files[0];
+
+    // file name
+    let file_name = file.name;
+
+    // file MIME type
+    let file_type = file.type;
+
+    // file size in bytes
+    let file_size = file.size;
+
+    console.log("file_name:", file_name, "file_type:", file_type, "file_size:", file_size);
+
+    // append the file name to the label text "regionLabel"
+    d3.select("#regionLabel").html("ds9 region: " + file_name + '<input type="file" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+
+    let reader = new FileReader();
+}
+
 function show_fits_header() {
     hide_navigation_bar();
 
@@ -15527,6 +15550,10 @@ function display_menu() {
         .style('cursor', 'pointer')
         .on("click", show_fits_header)
         .html('display header');
+
+    fitsDropdown.append("li")
+        .append("a")
+        .html('<label id="regionLabel" style="cursor:pointer;font-weight:normal">load ds9 region<input type="file" id="regionFile" style="display:none;" onchange="javascript:load_region();"/></label>');
 
     if (!isLocal && va_count == 1 && (window.location.search.indexOf('ALMA') > 0 || window.location.search.indexOf('ALMB') > 0 || window.location.search.indexOf('FGN') > 0 || window.location.search.indexOf('CMG') > 0 || window.location.search.indexOf('SFP') > 0 || window.location.search.indexOf('NROA') > 0)) {
         var url = "";
