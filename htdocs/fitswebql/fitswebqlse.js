@@ -15432,6 +15432,13 @@ function load_region() {
     d3.select("#regionLabel").html("ds9 region: " + file_name + '<input type="file" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
 
     let reader = new FileReader();
+
+    reader.addEventListener('load', function (e) {
+        let text = e.target.result;
+        console.log("region text:", text);
+    });
+
+    reader.readAsText(file);
 }
 
 function show_fits_header() {
