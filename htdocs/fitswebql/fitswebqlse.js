@@ -15429,7 +15429,7 @@ function load_region() {
     console.log("file_name:", file_name, "file_type:", file_type, "file_size:", file_size);
 
     // append the file name to the label text "regionLabel"
-    d3.select("#regionLabel").html("ds9 region: " + file_name + '<input type="file" accept=".reg" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+    d3.select("#regionLabel").html("ds9 region: " + file_name + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
 
     let reader = new FileReader();
 
@@ -15560,7 +15560,7 @@ function display_menu() {
 
     fitsDropdown.append("li")
         .append("a")
-        .html('<label id="regionLabel" style="cursor:pointer;font-weight:normal">load ds9 region<input type="file" accept=".reg" id="regionFile" style="display:none;" onchange="javascript:load_region();"/></label>');
+        .html('<label id="regionLabel" style="cursor:pointer;font-weight:normal">load ds9 region<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/></label>');
 
     if (!isLocal && va_count == 1 && (window.location.search.indexOf('ALMA') > 0 || window.location.search.indexOf('ALMB') > 0 || window.location.search.indexOf('FGN') > 0 || window.location.search.indexOf('CMG') > 0 || window.location.search.indexOf('SFP') > 0 || window.location.search.indexOf('NROA') > 0)) {
         var url = "";
