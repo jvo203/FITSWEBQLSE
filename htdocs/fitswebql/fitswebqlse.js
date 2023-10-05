@@ -15415,7 +15415,9 @@ function load_region() {
     console.log("loading a ds9 region file");
 
     // a user-selected ds9 region file
-    let file = document.querySelector("#regionFile").files[0];
+    const file = document.querySelector("#regionFile").files[0];
+
+    if (!file) return;
 
     // file name
     let file_name = file.name;
@@ -15432,6 +15434,12 @@ function load_region() {
     d3.select("#regionLabel").html("ds9 region: " + file_name + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
 
     let reader = new FileReader();
+
+    reader.addEventListener('error', function (e) {
+        let err = e.target.result;
+        console.log(err);
+        d3.select("#regionLabel").html("error loading " + file_name + " (" + err + ")" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+    });
 
     reader.addEventListener('load', function (e) {
         let text = e.target.result;
