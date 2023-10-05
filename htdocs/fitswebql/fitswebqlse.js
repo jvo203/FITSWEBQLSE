@@ -15436,8 +15436,8 @@ function load_region() {
     let reader = new FileReader();
 
     reader.addEventListener('error', function (e) {
-        let err = e.target.result;
-        console.log(err);
+        let err = e.target.error;
+        console.error(err);
         d3.select("#regionLabel").html("error loading " + file_name + " (" + err + ")" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
     });
 
