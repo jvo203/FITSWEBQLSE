@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-06.0";
+    return "JS2023-10-06.1";
 }
 
 function uuidv4() {
@@ -5550,6 +5550,18 @@ function x2rad(x) {
         throw "CDELT1 is not available";
 }
 
+function ra2x(ra) {
+    let fitsData = fitsContainer[va_count - 1];
+
+    if (fitsData == null)
+        return;
+
+    if (fitsData.CDELT1 != null)
+        return (ra - fitsData.CRVAL1) / fitsData.CDELT1 + fitsData.CRPIX1; // ra * toDegrees; ra is already in [deg]
+    else
+        throw "CDELT1 is not available";
+}
+
 function x2hms(x) {
     return RadiansPrintHMS(x2rad(x));
 };
@@ -5566,6 +5578,18 @@ function y2rad(y) {
 
     if (fitsData.CDELT2 != null)
         return (fitsData.CRVAL2 + (fitsData.height - y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
+    else
+        throw "CDELT2 is not available";
+}
+
+function dec2y(dec) {
+    let fitsData = fitsContainer[va_count - 1];
+
+    if (fitsData == null)
+        return;
+
+    if (fitsData.CDELT2 != null)
+        return fitsData.height - (dec - fitsData.CRVAL2) / fitsData.CDELT2 + fitsData.CRPIX2;
     else
         throw "CDELT2 is not available";
 }
@@ -15448,7 +15472,7 @@ function load_region() {
         // split region into lines
         let lines = region.split(/\r?\n/);
 
-        var coordinate_type = "unknown";
+        var coordinate_system = "unknown";
         var points = [];
 
         // iterate through lines
@@ -15463,17 +15487,17 @@ function load_region() {
 
             // check if the line contains a coordinate system like "physical", "image" or "fk5"
             if (line.startsWith("physical")) {
-                coordinate_type = "physical";
+                coordinate_system = "physical";
                 continue;
             }
 
             if (line.startsWith("image")) {
-                coordinate_type = "image";
+                coordinate_system = "image";
                 continue;
             }
 
             if (line.startsWith("fk5")) {
-                coordinate_type = "fk5";
+                coordinate_system = "fk5";
                 continue;
             }
 
@@ -15492,15 +15516,15 @@ function load_region() {
             }
         }
 
-        console.log("coordinate_type:", coordinate_type);
+        console.log("coordinate_system:", coordinate_system);
 
         // fk5 is unsupported at the moment
-        if (coordinate_type == "fk5") {
+        /*if (coordinate_system == "fk5") {
             alert("WCS (fk5) coordinate system is not supported at the moment. Use a physical or image coordinate system.");
-            coordinate_type = "unknown";
-        }
+            coordinate_system = "unknown";
+        }*/
 
-        if (coordinate_type == "unknown") {
+        if (coordinate_system == "unknown") {
             alert("Unknown / unsupported coordinate system.");
             d3.select("#regionLabel").html(file_name + ": (unsupported coordinate system)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
             return;
@@ -15512,6 +15536,23 @@ function load_region() {
             d3.select("#regionLabel").html(file_name + ": (no points found)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
             return;
         } else {
+            // coordinate system transformation
+            if (coordinate_system == "fk5") {
+                // convert from world (sky) to pixel coordinates
+                for (let i = 0; i < points.length; i++) {
+                    let point = points[i];
+
+                    let ra = point.x;
+                    let dec = point.y;
+
+                    // convert from world (sky) to pixel coordinates
+                    point.x = ra2x(ra);
+                    point.y = dec2y(dec);
+
+                    console.log("ra:", ra, "dec:", dec, "x:", point.x, "y:", point.y);
+                }
+            }
+
             console.log("points:", points);
         }
     });
