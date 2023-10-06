@@ -15508,7 +15508,7 @@ function load_region() {
 
         // check if there are any points
         if (points.length == 0) {
-            alert("No points found in the region file.");
+            alert("No points found in the region file. Supported ds9 shapes: Circle and Point.");
             d3.select("#regionLabel").html(file_name + ": (no points found)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
             return;
         } else {
