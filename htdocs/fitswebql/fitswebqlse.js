@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-05.0";
+    return "JS2023-10-06.0";
 }
 
 function uuidv4() {
@@ -15442,8 +15442,57 @@ function load_region() {
     });
 
     reader.addEventListener('load', function (e) {
-        let text = e.target.result;
-        console.log("region text:", text);
+        let region = e.target.result;
+        console.log(region);
+
+        // split region into lines
+        let lines = region.split(/\r?\n/);
+
+        var coordinate_type = "unknown";
+
+        // iterate through lines
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+
+            // skip empty lines
+            if (line.length == 0) continue;
+
+            // skip lines starting with '#'
+            if (line.startsWith('#')) continue;
+
+            // print a line
+            console.log(line);
+
+            // check if the line contains a coordinate system like "physical", "image" or "fk5"
+            if (line.startsWith("physical")) {
+                coordinate_type = "physical";
+                continue;
+            }
+
+            if (line.startsWith("image")) {
+                coordinate_type = "image";
+                continue;
+            }
+
+            if (line.startsWith("fk5")) {
+                coordinate_type = "fk5";
+                continue;
+            }
+        }
+
+        console.log("coordinate_type:", coordinate_type);
+
+        // fk5 is unsupported at the moment
+        if (coordinate_type == "fk5") {
+            alert("WCS (fk5) coordinate system is not supported at the moment. Use a physical or image coordinate system.");
+            coordinate_type = "unknown";
+        }
+
+        if (coordinate_type == "unknown") {
+            alert("Unknown / unsupported coordinate system.");
+            d3.select("#regionLabel").html(file_name + ": (unsupported coordinate system)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+            return;
+        }
     });
 
     reader.readAsText(file);
