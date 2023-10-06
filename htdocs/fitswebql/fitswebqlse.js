@@ -15449,6 +15449,7 @@ function load_region() {
         let lines = region.split(/\r?\n/);
 
         var coordinate_type = "unknown";
+        var points = [];
 
         // iterate through lines
         for (let i = 0; i < lines.length; i++) {
@@ -15491,6 +15492,13 @@ function load_region() {
         if (coordinate_type == "unknown") {
             alert("Unknown / unsupported coordinate system.");
             d3.select("#regionLabel").html(file_name + ": (unsupported coordinate system)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+            return;
+        }
+
+        // check if there are any points
+        if (points.length == 0) {
+            alert("No points found in the region file.");
+            d3.select("#regionLabel").html(file_name + ": (no points found)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
             return;
         }
     });
