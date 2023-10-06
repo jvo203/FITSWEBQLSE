@@ -15461,9 +15461,6 @@ function load_region() {
             // skip lines starting with '#'
             if (line.startsWith('#')) continue;
 
-            // print a line
-            console.log(line);
-
             // check if the line contains a coordinate system like "physical", "image" or "fk5"
             if (line.startsWith("physical")) {
                 coordinate_type = "physical";
@@ -15478,6 +15475,20 @@ function load_region() {
             if (line.startsWith("fk5")) {
                 coordinate_type = "fk5";
                 continue;
+            }
+
+            // extract the coordinates x,y from "circle(x,y,r)" or "point(x,y)"
+            let match = line.match(/circle\((.*),(.*),.*\)/);
+
+            if (match == null)
+                match = line.match(/point\((.*),(.*)\)/);
+
+            if (match != null) {
+                let x = parseFloat(match[1]);
+                let y = parseFloat(match[2]);
+
+                // push the coordinates to the points array
+                points.push({ x: x, y: y });
             }
         }
 
@@ -15500,6 +15511,8 @@ function load_region() {
             alert("No points found in the region file.");
             d3.select("#regionLabel").html(file_name + ": (no points found)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
             return;
+        } else {
+            console.log("points:", points);
         }
     });
 
