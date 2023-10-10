@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-10.0";
+    return "JS2023-10-10.1";
 }
 
 function uuidv4() {
@@ -5550,18 +5550,6 @@ function x2rad(x) {
         throw "CDELT1 is not available";
 }
 
-function ra2x(ra) {
-    let fitsData = fitsContainer[va_count - 1];
-
-    if (fitsData == null)
-        return;
-
-    if (fitsData.CDELT1 != null)
-        return (ra - fitsData.CRVAL1) / fitsData.CDELT1 + fitsData.CRPIX1; // ra * toDegrees; ra is already in [deg]
-    else
-        throw "CDELT1 is not available";
-}
-
 function x2hms(x) {
     return RadiansPrintHMS(x2rad(x));
 };
@@ -5583,6 +5571,18 @@ function y2rad(y) {
         throw "CDELT2 is not available";
 }
 
+function ra2x(ra) {
+    let fitsData = fitsContainer[va_count - 1];
+
+    if (fitsData == null)
+        return;
+
+    if (fitsData.CDELT1 != null)
+        return (ra - fitsData.CRVAL1) / fitsData.CDELT1 + fitsData.CRPIX1;
+    else
+        throw "CDELT1 is not available";
+}
+
 function dec2y(dec) {
     let fitsData = fitsContainer[va_count - 1];
 
@@ -5590,7 +5590,7 @@ function dec2y(dec) {
         return;
 
     if (fitsData.CDELT2 != null)
-        return fitsData.height - (dec - fitsData.CRVAL2) / fitsData.CDELT2 + fitsData.CRPIX2;
+        return (dec - fitsData.CRVAL2) / fitsData.CDELT2 + fitsData.CRPIX2;
     else
         throw "CDELT2 is not available";
 }
@@ -13087,7 +13087,6 @@ function setup_image_selection() {
 
             var orig_x = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
-            console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
             try {
                 let raText = 'RA N/A';
