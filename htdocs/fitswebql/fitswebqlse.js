@@ -15554,11 +15554,56 @@ function load_region() {
                 }
             }
 
-            console.log("points:", points);
+            display_points(points);
         }
     });
 
     reader.readAsText(file);
+}
+
+function display_points(points) {
+    console.log("points:", points);
+
+    let fitsData = fitsContainer[va_count - 1];
+
+    if (fitsData == null)
+        return;
+
+    var svg = d3.select("#BackSVG");
+
+    // remove the existing "region" group
+    try {
+        d3.select("#region").remove();
+    }
+    catch (e) {
+    }
+
+    var group = svg.append("g")
+        .attr("id", "region");
+
+    for (let i = 0; i < points.length; i++) {
+        let point = points[i];
+
+        let orig_x = point.x;
+        let orig_y = point.y;
+
+        // go from orig_x, orig_y to the mouse coordinates
+        let x = orig_x * (imageContainer[va_count - 1].width - 0) / (fitsData.width - 0);
+        let y = orig_y * (imageContainer[va_count - 1].height - 0) / (fitsData.height - 0);
+        console.log("orig_x:", orig_x, "orig_y:", orig_y, "x:", x, "y:", y);
+
+        // place a circle at the mouse coordinates
+        /*group.append("circle")
+            .attr("id", "region")
+            .attr("cx", x)
+            .attr("cy", y)
+            .attr("r", 5)
+            .attr("fill", "none")
+            .attr("stroke", "red")
+            .attr("stroke-width", 2)
+            .attr("opacity", 0.5)
+            .attr("pointer-events", "none");*/
+    }
 }
 
 function show_fits_header() {
