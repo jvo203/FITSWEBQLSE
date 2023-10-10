@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-06.1";
+    return "JS2023-10-10.0";
 }
 
 function uuidv4() {
@@ -5577,7 +5577,8 @@ function y2rad(y) {
         return;
 
     if (fitsData.CDELT2 != null)
-        return (fitsData.CRVAL2 + (fitsData.height - y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
+        return (fitsData.CRVAL2 + (y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
+    // return (fitsData.CRVAL2 + (fitsData.height - y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
     else
         throw "CDELT2 is not available";
 }
@@ -5811,7 +5812,7 @@ function display_gridlines() {
 
     var y = d3.scaleLinear()
         .range([y_offset + height - 1, y_offset])
-        .domain([1, 0]);
+        .domain([0, 1]);
 
     var svg = d3.select("#BackgroundSVG");
 
@@ -6049,7 +6050,7 @@ function display_cd_gridlines() {
 
     var y = d3.scaleLinear()
         .range([height - 1, 0])
-        .domain([1, -1]);
+        .domain([-1, 1]);
 
     var svg = d3.select("#BackgroundSVG");
 
@@ -6092,7 +6093,7 @@ function display_cd_gridlines() {
                 var orig_y = tmpy * fitsData.height / image.height;
 
                 //use the CD scale matrix
-                let radec = CD_matrix(orig_x, fitsData.height - orig_y);
+                let radec = CD_matrix(orig_x, /*fitsData.height -*/ orig_y);
 
                 if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
@@ -6146,7 +6147,7 @@ function display_cd_gridlines() {
                 var orig_y = tmpy * fitsData.height / image.height;
 
                 //use the CD scale matrix
-                let radec = CD_matrix(orig_x, fitsData.height - orig_y);
+                let radec = CD_matrix(orig_x, /*fitsData.height -*/ orig_y);
 
                 if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
@@ -6202,7 +6203,7 @@ function display_cd_gridlines() {
                 var orig_y = tmpy * fitsData.height / image.height;
 
                 //use the CD scale matrix
-                let radec = CD_matrix(orig_x, fitsData.height - orig_y);
+                let radec = CD_matrix(orig_x, /*fitsData.height -*/ orig_y);
 
                 if (fitsData.CTYPE2.indexOf("DEC") > -1 || fitsData.CTYPE2.indexOf("GLAT") > -1 || fitsData.CTYPE2.indexOf("ELAT") > -1)
                     return RadiansPrintDMS(radec[1]);
@@ -13086,6 +13087,7 @@ function setup_image_selection() {
 
             var orig_x = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
+            console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
             try {
                 let raText = 'RA N/A';
@@ -13118,7 +13120,7 @@ function setup_image_selection() {
             }
             catch (err) {
                 //use the CD scale matrix
-                let radec = CD_matrix(orig_x, fitsData.height - orig_y);
+                let radec = CD_matrix(orig_x, orig_y);
 
                 let raText = 'RA N/A';
                 let decText = 'DEC N/A';
