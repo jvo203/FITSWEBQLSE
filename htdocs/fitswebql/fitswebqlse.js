@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-11.1";
+    return "JS2023-10-11.2";
 }
 
 function uuidv4() {
@@ -15592,7 +15592,7 @@ function display_points(points) {
         console.log("orig_x:", orig_x, "orig_y:", orig_y, "x:", x, "y:", y);
 
         // place a circle at the mouse coordinates
-        /*group.append("circle")
+        group.append("circle")
             .attr("id", "region")
             .attr("cx", x)
             .attr("cy", y)
@@ -15601,7 +15601,7 @@ function display_points(points) {
             .attr("stroke", "red")
             .attr("stroke-width", 2)
             .attr("opacity", 0.5)
-            .attr("pointer-events", "none");*/
+            .attr("pointer-events", "none");
     }
 }
 
