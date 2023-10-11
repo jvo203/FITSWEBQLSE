@@ -1,3 +1,7 @@
+## [5.0.46] - 2023-10-11
+
+* corrected the display of _*RA*_/_*DEC*_ coordinates (for example when moving the mouse over the FITS image), which brings the _*beta*_ v5 into line with FITSWebQL v4 and ds9
+
 ## [5.0.45] - 2023-10-04
 
 * an improved P-V diagram: an _*all-new*_ crosshair with a tooltip (_*hint*_: hover a mouse over the P-V diagram)
