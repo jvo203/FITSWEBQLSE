@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-10.1";
+    return "JS2023-10-11.0";
 }
 
 function uuidv4() {
@@ -5566,7 +5566,6 @@ function y2rad(y) {
 
     if (fitsData.CDELT2 != null)
         return (fitsData.CRVAL2 + (y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
-    // return (fitsData.CRVAL2 + (fitsData.height - y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
     else
         throw "CDELT2 is not available";
 }
