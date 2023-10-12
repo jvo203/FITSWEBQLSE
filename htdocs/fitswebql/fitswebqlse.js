@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-11.2";
+    return "JS2023-10-12.0";
 }
 
 function uuidv4() {
@@ -6399,7 +6399,7 @@ function zoom_beam() {
     if (fitsData.BMIN > 0.0 && fitsData.BMAJ > 0.0) {
         var svg = d3.select("#BackSVG");
 
-        var opacity = displayBeam ? 1 : 0;
+        let opacity = displayBeam ? 1 : 0;
 
         svg = svg.append("g")
             .attr("id", "zoomBeam")
@@ -15503,16 +15503,19 @@ function load_region() {
 
             // extract the coordinates x,y from "circle(x,y,r)" or "point(x,y)"
             let match = line.match(/circle\((.*),(.*),.*\)/);
+            let shape = "circle";
 
-            if (match == null)
+            if (match == null) {
                 match = line.match(/point\((.*),(.*)\)/);
+                shape = "point";
+            }
 
             if (match != null) {
                 let x = parseFloat(match[1]);
                 let y = parseFloat(match[2]);
 
                 // push the coordinates to the points array
-                points.push({ x: x, y: y });
+                points.push({ x: x, y: y, shape: shape });
             }
         }
 
@@ -15568,6 +15571,8 @@ function display_points(points) {
     if (fitsData == null)
         return;
 
+    var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
+
     var svg = d3.select("#BackSVG");
 
     // remove the existing "region" group
@@ -15577,31 +15582,71 @@ function display_points(points) {
     catch (e) {
     }
 
+    let opacity = displayRegion ? 1 : 0;
+
     var group = svg.append("g")
-        .attr("id", "region");
+        .attr("id", "region")
+        .attr("opacity", opacity);
+
+    // get the element with id = "image_rectangle"
+    let rect = d3.select("#image_rectangle");
+
+    var ax = (image_bounding_dims.width - 0) / (parseFloat(rect.attr("width")) - 0);
+    var ay = (image_bounding_dims.height - 0) / (parseFloat(rect.attr("height")) - 0);
+    console.log("ax:", ax, "ay:", ay);
 
     for (let i = 0; i < points.length; i++) {
         let point = points[i];
 
         let orig_x = point.x;
         let orig_y = point.y;
+        let shape = point.shape;
+        console.log("orig_x:", orig_x, "orig_y:", orig_y, "shape:", shape);
 
         // go from orig_x, orig_y to the mouse coordinates
         let x = orig_x * (imageContainer[va_count - 1].width - 0) / (fitsData.width - 0);
         let y = orig_y * (imageContainer[va_count - 1].height - 0) / (fitsData.height - 0);
-        console.log("orig_x:", orig_x, "orig_y:", orig_y, "x:", x, "y:", y);
+        console.log("x:", x, "y:", y);
+
+        let mx = parseFloat(rect.attr("x")) + (x - image_bounding_dims.x1) / ax;
+        let my = parseFloat(rect.attr("y")) - (y - image_bounding_dims.y1 - image_bounding_dims.height - 0) / ay;
+        console.log("orig_x:", orig_x, "orig_y:", orig_y, "mx:", mx, "my:", my);
 
         // place a circle at the mouse coordinates
-        group.append("circle")
-            .attr("id", "region")
-            .attr("cx", x)
-            .attr("cy", y)
-            .attr("r", 5)
-            .attr("fill", "none")
-            .attr("stroke", "red")
-            .attr("stroke-width", 2)
-            .attr("opacity", 0.5)
-            .attr("pointer-events", "none");
+        if (shape == "circle") {
+            group.append("circle")
+                .attr("cx", mx)
+                .attr("cy", my)
+                .attr("r", emFontSize / 4)
+                .attr("fill", "none")
+                .attr("stroke", "red")
+                .attr("stroke-width", 2)
+                .attr("opacity", 0.5)
+                .attr("pointer-events", "none");
+        }
+
+        // make an 'X' mark with the centre at mx, my
+        if (shape == "point") {
+            group.append("line")
+                .attr("x1", mx - emFontSize / 4)
+                .attr("y1", my - emFontSize / 4)
+                .attr("x2", mx + emFontSize / 4)
+                .attr("y2", my + emFontSize / 4)
+                .attr("stroke", "red")
+                .attr("stroke-width", 2)
+                .attr("opacity", 0.5)
+                .attr("pointer-events", "none");
+
+            group.append("line")
+                .attr("x1", mx - emFontSize / 4)
+                .attr("y1", my + emFontSize / 4)
+                .attr("x2", mx + emFontSize / 4)
+                .attr("y2", my - emFontSize / 4)
+                .attr("stroke", "red")
+                .attr("stroke-width", 2)
+                .attr("opacity", 0.5)
+                .attr("pointer-events", "none");
+        }
     }
 }
 
@@ -18421,6 +18466,7 @@ async function mainRenderer() {
         displaySpectrum = localStorage_read_boolean("displaySpectrum", true);
         displayGridlines = localStorage_read_boolean("displayGridlines", false);
         displayBeam = false;
+        displayRegion = true;
 
         has_contours = false;
         has_preferences = false;
