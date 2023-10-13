@@ -5544,8 +5544,13 @@ function x2rad(x) {
     if (fitsData == null)
         return;
 
-    if (fitsData.CDELT1 != null)
+    if (fitsData.CDELT1 != null) {
+        let deg = fitsData.CRVAL1 + (x - fitsData.CRPIX1) * fitsData.CDELT1;
+        let rad = deg / toDegrees;
+        console.log("orig_x:", x, "ra:", deg, "rad:", rad);
+
         return (fitsData.CRVAL1 + (x - fitsData.CRPIX1) * fitsData.CDELT1) / toDegrees;
+    }
     else
         throw "CDELT1 is not available";
 }
@@ -5564,8 +5569,13 @@ function y2rad(y) {
     if (fitsData == null)
         return;
 
-    if (fitsData.CDELT2 != null)
+    if (fitsData.CDELT2 != null) {
+        let deg = fitsData.CRVAL2 + (y - fitsData.CRPIX2) * fitsData.CDELT2;
+        let rad = deg / toDegrees;
+        console.log("orig_y:", y, "dec:", deg, "rad:", rad);
+
         return (fitsData.CRVAL2 + (y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
+    }
     else
         throw "CDELT2 is not available";
 }
@@ -13086,6 +13096,7 @@ function setup_image_selection() {
 
             var orig_x = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
+            console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
             try {
                 let raText = 'RA N/A';
