@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-12.0";
+    return "JS2023-10-13.0";
 }
 
 function uuidv4() {
@@ -15575,17 +15575,19 @@ function display_points(points) {
 
     var svg = d3.select("#BackSVG");
 
-    // remove the existing "region" group
+    // remove the existing "ds9region" group
     try {
-        d3.select("#region").remove();
+        d3.select("#ds9region").remove();
     }
     catch (e) {
     }
 
-    let opacity = displayRegion ? 1 : 0;
+    // override the prior displayRegion value
+    displayRegion = true;
 
+    let opacity = displayRegion ? 1 : 0;
     var group = svg.append("g")
-        .attr("id", "region")
+        .attr("id", "ds9region")
         .attr("opacity", opacity);
 
     // get the element with id = "image_rectangle"
@@ -15648,6 +15650,10 @@ function display_points(points) {
                 .attr("pointer-events", "none");
         }
     }
+
+    document.getElementById("displayRegion").style.display = "block";
+    var htmlStr = displayRegion ? '<span class="fas fa-check-square"></span> ds9 region' : '<span class="far fa-square"></span> ds9 region';
+    d3.select("#displayRegion").html(htmlStr);
 }
 
 function show_fits_header() {
@@ -16122,6 +16128,31 @@ function display_menu() {
                 else {
                     document.getElementById("ContourSVG").style.display = "none";
                     //elem.attr("opacity",0);
+                }
+            })
+            .html(htmlStr);
+    }
+
+    if (va_count == 1 || composite_view) {
+        htmlStr = displayRegion ? '<span class="fas fa-check-square"></span> ds9 region' : '<span class="far fa-square"></span> ds9 region';
+        viewDropdown.append("li")
+            .append("a")
+            .attr("id", "displayRegion")
+            .style('display', 'none')
+            .style('cursor', 'pointer')
+            .on("click", function () {
+                displayRegion = !displayRegion;
+                var htmlStr = displayRegion ? '<span class="fas fa-check-square"></span> ds9 region' : '<span class="far fa-square"></span> ds9 region';
+                d3.select(this).html(htmlStr);
+                var elem = d3.selectAll("#ds9region");
+
+                if (displayRegion) {
+                    //document.getElementById("ContourSVG").style.display = "block";
+                    elem.attr("opacity", 1);
+                }
+                else {
+                    //document.getElementById("ContourSVG").style.display = "none";
+                    elem.attr("opacity", 0);
                 }
             })
             .html(htmlStr);
