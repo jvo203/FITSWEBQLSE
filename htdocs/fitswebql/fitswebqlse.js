@@ -15463,6 +15463,10 @@ function load_region() {
         let err = e.target.error;
         console.error(err);
         d3.select("#regionLabel").html("error loading " + file_name + " (" + err + ")" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+
+        displayRegion = false;
+        d3.select("#ds9region").attr("opacity", 0);
+        document.getElementById("displayRegion").style.display = "none";
     });
 
     reader.addEventListener('load', function (e) {
@@ -15537,6 +15541,11 @@ function load_region() {
         if (points.length == 0) {
             alert("No points found in the region file. Supported ds9 shapes: Circle and Point.");
             d3.select("#regionLabel").html(file_name + ": (no points found)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+
+            displayRegion = false;
+            d3.select("#ds9region").attr("opacity", 0);
+            document.getElementById("displayRegion").style.display = "none";
+
             return;
         } else {
             // coordinate system transformation
@@ -16147,11 +16156,9 @@ function display_menu() {
                 var elem = d3.selectAll("#ds9region");
 
                 if (displayRegion) {
-                    //document.getElementById("ContourSVG").style.display = "block";
                     elem.attr("opacity", 1);
                 }
                 else {
-                    //document.getElementById("ContourSVG").style.display = "none";
                     elem.attr("opacity", 0);
                 }
             })
