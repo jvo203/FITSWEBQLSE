@@ -17015,6 +17015,8 @@ function display_FITS_header(index) {
         };*/
 
         var fitsHeader = fitsData.HEADER;
+        console.log(fitsHeader);
+
         var headerText = document.getElementById('headerText#' + index);
         headerText.innerHTML = fitsHeader.trim().replace(/(.{80})/g, "$1<br>");
 
