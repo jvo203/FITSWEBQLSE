@@ -5586,8 +5586,6 @@ function ra2x(ra) {
     if (fitsData == null)
         return;
 
-    console.log("CRVAL1:", fitsData.CRVAL1, "CRPIX1:", fitsData.CRPIX1, "CDELT1:", fitsData.CDELT1);
-
     if (fitsData.CDELT1 != null)
         return (ra - fitsData.CRVAL1) / fitsData.CDELT1 + fitsData.CRPIX1;
     else
@@ -5599,8 +5597,6 @@ function dec2y(dec) {
 
     if (fitsData == null)
         return;
-
-    console.log("CRVAL2:", fitsData.CRVAL2, "CRPIX2:", fitsData.CRPIX2, "CDELT2:", fitsData.CDELT2);
 
     if (fitsData.CDELT2 != null)
         return (dec - fitsData.CRVAL2) / fitsData.CDELT2 + fitsData.CRPIX2;
