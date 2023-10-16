@@ -872,4 +872,6 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("getWcs", &getWcs, allow_raw_pointers());
     function("pix2sky", &pix2sky, allow_raw_pointers());
     function("sky2pix", &sky2pix, allow_raw_pointers());
+    function("malloc", &malloc, allow_raw_pointers());
+    function("free", &free, allow_raw_pointers());
 }
