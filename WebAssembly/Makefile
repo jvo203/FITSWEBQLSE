@@ -54,6 +54,20 @@ DEP = $(OBJ:%.o=%.d)
 %.o: %.cpp
 	em++ -O3 $(EMFLAGS) $(DEFS) $(INCLUDE) $(CXXFLAGS) -MMD -o $@ -c $<
 
+wcs: wcslib
+	cd /tmp/wcslib; \
+	emconfigure ./configure --prefix=/tmp/system --disable-fortran CFLAGS="-Oz"; \
+	emmake make; \
+	emmake make install; \
+	emmake make clean;
+
+wcslib: wcslib.tar.bz2	
+	tar xjf /tmp/wcslib.tar.bz2 --directory /tmp; \
+	mv /tmp/wcslib-* /tmp/wcslib
+
+wcslib.tar.bz2:	
+	curl "ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2" -o "/tmp/wcslib.tar.bz2"
+
 wasm: $(FFMPEG_OBJ) $(OBJ)
 	em++ -O3 $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) -L$(LIBRARY) $(CXXFLAGS) $(LDFLAGS)
 
