@@ -13,7 +13,7 @@ OBJ := $(OBJ:.c=.o)
 
 INCLUDE = -I./ -I./$(ZFP)/include -I./$(ZFP)/src -I./$(LZ4) -I/tmp/system/include
 LIBRARY = /tmp/system/lib
-CXXFLAGS=-std=c++11 -O3
+CXXFLAGS=-std=c++11 -Oz
 LDFLAGS=-lz --llvm-lto 1
 
 .PHONY=clean
@@ -49,10 +49,10 @@ DEP = $(OBJ:%.o=%.d)
 -include $(DEP)
 
 %.o: %.c
-	emcc -O3 $(FFMPEG_FLAGS) $(EMFLAGS) $(DEFS) $(INCLUDE) -MMD -o $@ -c $<
+	emcc -Oz $(FFMPEG_FLAGS) $(EMFLAGS) $(DEFS) $(INCLUDE) -MMD -o $@ -c $<
 
 %.o: %.cpp
-	em++ -O3 $(EMFLAGS) $(DEFS) $(INCLUDE) $(CXXFLAGS) -MMD -o $@ -c $<
+	em++ -Oz $(EMFLAGS) $(DEFS) $(INCLUDE) $(CXXFLAGS) -MMD -o $@ -c $<
 
 wcs: wcslib
 	cd /tmp/wcslib; \
@@ -69,7 +69,7 @@ wcslib.tar.bz2:
 	curl "ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2" -o "/tmp/wcslib.tar.bz2"
 
 wasm: $(FFMPEG_OBJ) $(OBJ)
-	em++ -O3 $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) -L$(LIBRARY) -lwcs $(CXXFLAGS) $(LDFLAGS)
+	em++ -Oz $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) -L$(LIBRARY) -lwcs $(CXXFLAGS) $(LDFLAGS)
 
 # -s "EXPORTED_FUNCTIONS=['_hevc_init','_hevc_destroy','_hevc_decode_nal_unit']"
 
