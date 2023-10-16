@@ -1,6 +1,10 @@
 using FITSIO
 using WCS
 
+function wcs2pix(deg, crval, crpix, cdelt)
+    return (deg - crval) / cdelt + crpix
+end
+
 # Read in the FITS file
 file = homedir() * "/Downloads/ALMA01018218.fits"
 f = FITS(file)
@@ -28,3 +32,15 @@ println("Physical to FK5: ", worldcoords)
 # convert from fk5 to physical
 pixcoords = world_to_pix(wcs, fk5)
 println("FK5 to Physical: ", pixcoords)
+
+CDELT1 = wcs.cdelt[1]
+CDELT2 = wcs.cdelt[2]
+
+CRPIX1 = wcs.crpix[1]
+CRPIX2 = wcs.crpix[2]
+
+CRVAL1 = wcs.crval[1]
+CRVAL2 = wcs.crval[2]
+
+# JavaScript
+println("JavaScript: ", wcs2pix(fk5[1], CRVAL1, CRPIX1, CDELT1), ", ", wcs2pix(fk5[2], CRVAL2, CRPIX2, CDELT2))
