@@ -26,6 +26,14 @@ extern "C"
 #include "conrec.h"
 }
 
+extern "C"
+{
+    // WCSLIB
+#include <stdio.h>
+#include <wcslib/wcshdr.h>
+#include <wcslib/wcs.h>
+}
+
 // Mathematica v10 MatrixPlot colourmap
 #define NO_COLOURS 9
 static const float math_x[] = {0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0, 1.0};

@@ -11,8 +11,8 @@ SRC := $(ZFP_SRC) $(LZ4_SRC)
 OBJ := $(SRC:.cpp=.o)
 OBJ := $(OBJ:.c=.o)
 
-INCLUDE = -I./ -I./$(ZFP)/include -I./$(ZFP)/src -I./$(LZ4)
-LIBRARY=
+INCLUDE = -I./ -I./$(ZFP)/include -I./$(ZFP)/src -I./$(LZ4) -I/tmp/system/include
+LIBRARY = /tmp/system/lib
 CXXFLAGS=-std=c++11 -O3
 LDFLAGS=-lz --llvm-lto 1
 
@@ -69,7 +69,7 @@ wcslib.tar.bz2:
 	curl "ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2" -o "/tmp/wcslib.tar.bz2"
 
 wasm: $(FFMPEG_OBJ) $(OBJ)
-	em++ -O3 $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) -L$(LIBRARY) $(CXXFLAGS) $(LDFLAGS)
+	em++ -O3 $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) -L$(LIBRARY) -lwcs $(CXXFLAGS) $(LDFLAGS)
 
 # -s "EXPORTED_FUNCTIONS=['_hevc_init','_hevc_destroy','_hevc_decode_nal_unit']"
 
