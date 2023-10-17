@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-17.3";
+    return "JS2023-10-17.4";
 }
 
 function uuidv4() {
@@ -17074,7 +17074,7 @@ function display_FITS_header(index) {
             'LATPOLE',
             'RESTFRQ',
             /NAXIS\d*/,
-            /CTYPE\d+/,
+            /*/CTYPE\d+/,*/ // for some reason RA---TAN, DEC--TAN are causing problems with SUBARU datasets
             /CRPIX\d+/,
             /CRVAL\d+/,
             /CUNIT\d+/,
@@ -17083,6 +17083,15 @@ function display_FITS_header(index) {
             /PV.+/,
             /CROTA\d+/
         ];
+
+        // add CTYPE if CDELT is present        
+        if (fitsData.CDELT1 != null)
+            wcsRegEx.push('CTYPE1');
+
+        if (fitsData.CDELT2 != null)
+            wcsRegEx.push('CTYPE2');
+
+        console.log(wcsRegEx);
 
         // Split the string into an array and filter based on the WCS regular expressions
         var headerArray = fitsHeader.match(/.{1,80}/g);

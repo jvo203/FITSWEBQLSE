@@ -826,7 +826,7 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
 // WCS utility functions
 /*struct wcsprm **/ unsigned int getWcs(/*char **/ unsigned int header, int nkeyrec)
 {
-    int relax = WCSHDR_all, ctrl = 4; // 4 for a full telemetry report, 0 for nothing
+    int relax = WCSHDR_all, ctrl = 0; // 4 for a full telemetry report, 0 for nothing
     int nreject, nwcs, stat;
     struct wcsprm *wcs;
 
