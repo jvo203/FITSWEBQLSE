@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-17.4";
+    return "JS2023-10-17.5";
 }
 
 function uuidv4() {
@@ -17074,7 +17074,7 @@ function display_FITS_header(index) {
             'LATPOLE',
             'RESTFRQ',
             /NAXIS\d*/,
-            /*/CTYPE\d+/,*/ // for some reason RA---TAN, DEC--TAN are causing problems with SUBARU datasets
+            /CTYPE\d+/,
             /CRPIX\d+/,
             /CRVAL\d+/,
             /CUNIT\d+/,
@@ -17084,19 +17084,9 @@ function display_FITS_header(index) {
             /CROTA\d+/
         ];
 
-        // add CTYPE if CDELT is present        
-        if (fitsData.CDELT1 != null)
-            wcsRegEx.push('CTYPE1');
-
-        if (fitsData.CDELT2 != null)
-            wcsRegEx.push('CTYPE2');
-
-        console.log(wcsRegEx);
-
         // Split the string into an array and filter based on the WCS regular expressions
         var headerArray = fitsHeader.match(/.{1,80}/g);
         headerArray = headerArray.filter(function (line) {
-
             // Extract the keyword
             var keyword = line.slice(0, 8).trim();
 
@@ -17107,8 +17097,13 @@ function display_FITS_header(index) {
 
             return false;
         });
-        headerStr = headerArray.join(''); // was '\n' but it confused the WCSLIB library        
 
+        // for each entry replace 'degree' by 'deg   '
+        for (var i = 0; i < headerArray.length; i++) {
+            headerArray[i] = headerArray[i].replace(/degree/g, 'deg   ');
+        }
+
+        headerStr = headerArray.join(''); // was '\n' but it confused the WCSLIB library
         nkeyrec = headerArray.length;
         header = string2buffer(headerStr);
         console.log(nkeyrec, headerStr);
