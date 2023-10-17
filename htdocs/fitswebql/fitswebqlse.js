@@ -12953,7 +12953,7 @@ function setup_image_selection() {
                 }
             }
         })
-        .on("mousemove", (event) => {
+        .on("mousemove", async (event) => {
             // cancel the image animation loop
             if (va_count == 1) {
                 clear_webgl_image_buffers(va_count);
@@ -13129,6 +13129,9 @@ function setup_image_selection() {
             var orig_x = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
             console.log("orig_x:", orig_x, "orig_y:", orig_y);
+
+            let world = await pix2sky(fitsData, orig_x, orig_y);
+            console.log("world:", world);
 
             try {
                 let raText = 'RA N/A';
@@ -17092,7 +17095,7 @@ function display_FITS_header(index) {
 
         nkeyrec = headerArray.length;
         header = string2buffer(headerStr);
-        console.log(nkeyrec, header, headerStr);
+        console.log(nkeyrec, headerStr);
 
         fitsData.coordinatePtr = 0;
         fitsData.wcsPtr = 0;
@@ -17105,15 +17108,12 @@ function display_FITS_header(index) {
                     headerPtr = Module._malloc(nHeaderBytes);
                     headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
                     headerHeap.set(new Uint8Array(header));
-                    console.log('headerPtr', headerPtr, 'nHeaderBytes', nHeaderBytes);
 
                     // Allocate memory on the Emscripten heap for coordinates
                     fitsData.coordinatePtr = Module._malloc(16);
-                    console.log('fitsData.coordinatePtr', fitsData.coordinatePtr);
 
                     // Use byte offset to pass header string to libwcs
                     fitsData.wcsPtr = Module.getWcs(headerHeap.byteOffset, nkeyrec);
-                    console.log('fitsData.wcsPtr', fitsData.wcsPtr);
                     resolve(true);
                 })
                 .catch(e => {
