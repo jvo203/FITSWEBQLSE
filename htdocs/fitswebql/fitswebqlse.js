@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-17.2";
+    return "JS2023-10-17.3";
 }
 
 function uuidv4() {
@@ -5585,10 +5585,6 @@ function x2rad(x) {
         return;
 
     if (fitsData.CDELT1 != null) {
-        let deg = fitsData.CRVAL1 + (x - fitsData.CRPIX1) * fitsData.CDELT1;
-        let rad = deg / toDegrees;
-        //console.log("orig_x:", x, "ra:", deg, "rad:", rad);
-
         return (fitsData.CRVAL1 + (x - fitsData.CRPIX1) * fitsData.CDELT1) / toDegrees;
     }
     else
@@ -5610,10 +5606,6 @@ function y2rad(y) {
         return;
 
     if (fitsData.CDELT2 != null) {
-        let deg = fitsData.CRVAL2 + (y - fitsData.CRPIX2) * fitsData.CDELT2;
-        let rad = deg / toDegrees;
-        //console.log("orig_y:", y, "dec:", deg, "rad:", rad);
-
         return (fitsData.CRVAL2 + (y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
     }
     else
