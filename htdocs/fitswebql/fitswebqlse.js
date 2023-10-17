@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-17.1";
+    return "JS2023-10-17.2";
 }
 
 function uuidv4() {
@@ -14060,6 +14060,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 //console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
                             }
 
+                            display_FITS_header(index);
+
+                            display_preferences(index);
+
                             if (index == va_count)
                                 display_dataset_info();
 
@@ -14072,10 +14076,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 catch (err) {
                                 };
                             };
-
-                            display_preferences(index);
-
-                            display_FITS_header(index);
 
                             if (!composite_view)
                                 add_line_label(index);
