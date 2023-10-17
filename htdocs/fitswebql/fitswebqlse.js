@@ -55,12 +55,12 @@ function string2buffer(str) {
     return buffer;
 }
 
-function pix2sky(wcs, x, y) {
-    wcs.ready
+async function pix2sky(wcs, x, y) {
+    return wcs.ready
         .then(_ => {
             var world;
 
-            Module.pix2sky(wcs.wcsPtr, x, y, this.coordinatePtr);
+            Module.pix2sky(wcs.wcsPtr, x, y, wcs.coordinatePtr);
             world = new Float64Array(Module.HEAPU8.buffer, wcs.coordinatePtr, 2);
 
             return [world[0], world[1]];
@@ -70,13 +70,13 @@ function pix2sky(wcs, x, y) {
         });
 }
 
-function sky2pix(wcs, ra, dec) {
-    wcs.ready
+async function sky2pix(wcs, ra, dec) {
+    return wcs.ready
         .then(_ => {
             var pixcrd;
 
             Module.sky2pix(wcs.wcsPtr, ra, dec, wcs.coordinatePtr);
-            pixcrd = new Float64Array(Module.HEAPU8.buffer, this.coordinatePtr, 2);
+            pixcrd = new Float64Array(Module.HEAPU8.buffer, wcs.coordinatePtr, 2);
 
             return [pixcrd[0], pixcrd[1]];
         })
@@ -15520,7 +15520,7 @@ function load_region() {
         document.getElementById("displayRegion").style.display = "none";
     });
 
-    reader.addEventListener('load', function (e) {
+    reader.addEventListener('load', async function (e) {
         let region = e.target.result;
         console.log(region);
 
@@ -15602,6 +15602,8 @@ function load_region() {
             // coordinate system transformation
             if (coordinate_system == "fk5") {
                 // convert from world (sky) to pixel coordinates
+                let fitsData = fitsContainer[va_count - 1];
+
                 for (let i = 0; i < points.length; i++) {
                     let point = points[i];
 
@@ -15609,10 +15611,15 @@ function load_region() {
                     let dec = point.y;
 
                     // convert from world (sky) to pixel coordinates
-                    point.x = ra2x(ra);
-                    point.y = dec2y(dec);
+                    /*point.x = ra2x(ra);
+                    point.y = dec2y(dec);*/
+
+                    let pixcrd = await sky2pix(fitsData, ra, dec);
+                    point.x = pixcrd[0];
+                    point.y = pixcrd[1];
 
                     console.log("ra:", ra, "dec:", dec, "x:", point.x, "y:", point.y);
+
                 }
             }
 
