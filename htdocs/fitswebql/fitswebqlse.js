@@ -17033,6 +17033,7 @@ function display_FITS_header(index) {
             'RADESYS',
             'LONPOLE',
             'LATPOLE',
+            'RESTFRQ',
             /NAXIS\d*/,
             /CTYPE\d+/,
             /CRPIX\d+/,
@@ -17063,6 +17064,9 @@ function display_FITS_header(index) {
         nkeyrec = headerArray.length;
         header = string2buffer(headerStr);
         console.log(nkeyrec, header, headerStr);
+
+        fitsData.coordinatePtr = 0;
+        fitsData.wcsPtr = 0;
 
         Module.ready
             .then(_ => {
