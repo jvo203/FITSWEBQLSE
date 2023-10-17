@@ -55,6 +55,24 @@ function string2buffer(str) {
     return buffer;
 }
 
+function pix2sky(wcs, x, y) {
+    var world;
+
+    Module.pix2sky(wcs.wcsPtr, x, y, this.coordinatePtr);
+    world = new Float64Array(Module.HEAPU8.buffer, wcs.coordinatePtr, 2);
+
+    return [world[0], world[1]];
+}
+
+function sky2pix(wcs, ra, dec) {
+    var pixcrd;
+
+    Module.sky2pix(wcs.wcsPtr, ra, dec, wcs.coordinatePtr);
+    pixcrd = new Float64Array(Module.HEAPU8.buffer, this.coordinatePtr, 2);
+
+    return [pixcrd[0], pixcrd[1]];
+}
+
 function round(value, precision, mode) {
     //  discuss at: http://locutus.io/php/round/
     // original by: Philip Peterson
