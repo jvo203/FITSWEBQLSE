@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-16.1";
+    return "JS2023-10-17.0";
 }
 
 function uuidv4() {
@@ -43,6 +43,16 @@ Array.prototype.rotate = function (n) {
 
 function clamp(value, min, max) {
     return Math.min(Math.max(min, value), max)
+}
+
+function string2buffer(str) {
+    var buffer = new ArrayBuffer(str.length);
+    var view = new Uint8Array(buffer);
+    for (var i = 0; i < str.length; i += 1) {
+        view[i] = str.charCodeAt(i);
+    }
+
+    return buffer;
 }
 
 function round(value, precision, mode) {
@@ -17015,8 +17025,60 @@ function display_FITS_header(index) {
         };*/
 
         var fitsHeader = fitsData.HEADER;
-        console.log(fitsHeader);
 
+        var wcsRegEx = [
+            'DATE-OBS',
+            'EQUINOX',
+            'WCSAXES',
+            'RADESYS',
+            'LONPOLE',
+            'LATPOLE',
+            /NAXIS\d*/,
+            /CTYPE\d+/,
+            /CRPIX\d+/,
+            /CRVAL\d+/,
+            /CUNIT\d+/,
+            /CDELT\d+/,
+            /CD.+/,
+            /PV.+/,
+            /CROTA\d+/
+        ];
+
+        // Split the string into an array and filter based on the WCS regular expressions
+        var headerArray = fitsHeader.match(/.{1,80}/g);
+        headerArray = headerArray.filter(function (line) {
+
+            // Extract the keyword
+            var keyword = line.slice(0, 8).trim();
+
+            for (var i = 0; i < wcsRegEx.length; i += 1) {
+                var regEx = wcsRegEx[i];
+                if (keyword.match(regEx)) { return true; }
+            }
+
+            return false;
+        });
+        headerStr = headerArray.join('\n');
+
+        nkeyrec = headerArray.length;
+        header = string2buffer(headerStr);
+        console.log(nkeyrec, header, headerStr);
+
+        Module.ready
+            .then(_ => {
+                console.log('WCS WASM ready');
+
+                // Allocate string on Emscripten heap and get byte offset
+                nHeaderBytes = header.byteLength;
+                headerPtr = Module._malloc(nHeaderBytes);
+                headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
+                headerHeap.set(new Uint8Array(header));
+
+                console.log('headerPtr', headerPtr, 'nHeaderBytes', nHeaderBytes);
+            })
+            .catch(e => console.error(e));
+
+        // -------------------------------------
         var headerText = document.getElementById('headerText#' + index);
         headerText.innerHTML = fitsHeader.trim().replace(/(.{80})/g, "$1<br>");
 
