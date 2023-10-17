@@ -828,6 +828,7 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     struct wcsprm *wcs;
 
     wcspih((char *)header, nkeyrec, relax, ctrl, &nreject, &nwcs, &wcs);
+    printf("[WCSLIB] nreject: %d, nwcs: %d\n", nreject, nwcs);
     return (unsigned int)wcs;
 }
 

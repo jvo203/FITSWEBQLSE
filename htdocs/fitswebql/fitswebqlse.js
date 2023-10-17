@@ -17066,15 +17066,20 @@ function display_FITS_header(index) {
 
         Module.ready
             .then(_ => {
-                console.log('WCS WASM ready');
-
                 // Allocate string on Emscripten heap and get byte offset
                 nHeaderBytes = header.byteLength;
                 headerPtr = Module._malloc(nHeaderBytes);
                 headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
                 headerHeap.set(new Uint8Array(header));
-
                 console.log('headerPtr', headerPtr, 'nHeaderBytes', nHeaderBytes);
+
+                // Allocate memory on the Emscripten heap for coordinates
+                fitsData.coordinatePtr = Module._malloc(16);
+                console.log('fitsData.coordinatePtr', fitsData.coordinatePtr);
+
+                // Use byte offset to pass header string to libwcs
+                fitsData.wcsPtr = Module.getWcs(headerHeap.byteOffset, nkeyrec);
+                console.log('fitsData.wcsPtr', fitsData.wcsPtr);
             })
             .catch(e => console.error(e));
 
