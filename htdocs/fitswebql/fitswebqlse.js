@@ -13130,70 +13130,81 @@ function setup_image_selection() {
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
             console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
-            let world = await pix2sky(fitsData, orig_x, orig_y);
-            console.log("world:", world);
+            var radec;
 
             try {
+                let world = await pix2sky(fitsData, orig_x, orig_y);
+
+                // if either world value is NaN throw an error
+                if (isNaN(world[0]) || isNaN(world[1]))
+                    throw new Error("NaN");
+
+                radec = [world[0] / toDegrees, world[1] / toDegrees];
+                console.log("world:", world, "radec:", radec);
+            } catch (err) {
+                //use the CD scale matrix
+                radec = CD_matrix(orig_x, orig_y);
+            }
+
+
+            let raText = 'RA N/A';
+            let decText = 'DEC N/A';
+
+            if (fitsData.CTYPE1.indexOf("RA") > -1) {
+                if (coordsFmt == 'DMS')
+                    raText = 'α: ' + RadiansPrintDMS(radec[0]);
+                else
+                    raText = 'α: ' + RadiansPrintHMS(radec[0]);
+            }
+
+            if (fitsData.CTYPE1.indexOf("GLON") > -1)
+                raText = 'l: ' + RadiansPrintDMS(radec[0]);
+
+            if (fitsData.CTYPE1.indexOf("ELON") > -1)
+                raText = 'λ: ' + RadiansPrintDMS(radec[0]);
+
+            if (fitsData.CTYPE2.indexOf("DEC") > -1)
+                decText = 'δ: ' + RadiansPrintDMS(radec[1]);
+
+            if (fitsData.CTYPE2.indexOf("GLAT") > -1)
+                decText = 'b: ' + RadiansPrintDMS(radec[1]);
+
+            if (fitsData.CTYPE2.indexOf("ELAT") > -1)
+                decText = 'β: ' + RadiansPrintDMS(radec[1]);
+
+            d3.select("#ra").text(raText);
+            d3.select("#dec").text(decText);
+
+            /*try {
                 let raText = 'RA N/A';
                 let decText = 'DEC N/A';
-
+            
                 if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
                         raText = 'α: ' + x2dms(orig_x);
                     else
                         raText = 'α: ' + x2hms(orig_x);
                 }
-
+            
                 if (fitsData.CTYPE1.indexOf("GLON") > -1)
                     raText = 'l: ' + x2dms(orig_x);
-
+            
                 if (fitsData.CTYPE1.indexOf("ELON") > -1)
                     raText = 'λ: ' + x2dms(orig_x);
-
+            
                 if (fitsData.CTYPE2.indexOf("DEC") > -1)
                     decText = 'δ: ' + y2dms(orig_y);
-
+            
                 if (fitsData.CTYPE2.indexOf("GLAT") > -1)
                     decText = 'b: ' + y2dms(orig_y);
-
+            
                 if (fitsData.CTYPE2.indexOf("ELAT") > -1)
                     decText = 'β: ' + y2dms(orig_y);
-
+            
                 d3.select("#ra").text(raText);
                 d3.select("#dec").text(decText);
             }
-            catch (err) {
-                //use the CD scale matrix
-                let radec = CD_matrix(orig_x, orig_y);
-
-                let raText = 'RA N/A';
-                let decText = 'DEC N/A';
-
-                if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                    if (coordsFmt == 'DMS')
-                        raText = 'α: ' + RadiansPrintDMS(radec[0]);
-                    else
-                        raText = 'α: ' + RadiansPrintHMS(radec[0]);
-                }
-
-                if (fitsData.CTYPE1.indexOf("GLON") > -1)
-                    raText = 'l: ' + RadiansPrintDMS(radec[0]);
-
-                if (fitsData.CTYPE1.indexOf("ELON") > -1)
-                    raText = 'λ: ' + RadiansPrintDMS(radec[0]);
-
-                if (fitsData.CTYPE2.indexOf("DEC") > -1)
-                    decText = 'δ: ' + RadiansPrintDMS(radec[1]);
-
-                if (fitsData.CTYPE2.indexOf("GLAT") > -1)
-                    decText = 'b: ' + RadiansPrintDMS(radec[1]);
-
-                if (fitsData.CTYPE2.indexOf("ELAT") > -1)
-                    decText = 'β: ' + RadiansPrintDMS(radec[1]);
-
-                d3.select("#ra").text(raText);
-                d3.select("#dec").text(decText);
-            }
+            */
 
             //for each image
             var pixelText = '';
