@@ -8,6 +8,15 @@ f = FITS(file)
 # read-in the FITS header
 header = read_header(f[1], String)
 
+#=
+# remove the CTYPE3 keyword
+delete!(header, "CTYPE1")
+delete!(header, "CTYPE2")
+
+# export the header as String
+header = String(header)
+=#
+
 # create a WCS object
 wcs_array = WCS.from_header(header)
 wcs = wcs_array[1]
