@@ -821,34 +821,44 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
 }
 
 // WCS utility functions
-struct wcsprm *getWcs(char *header, int nkeyrec)
+/*struct wcsprm **/ unsigned int getWcs(/*char **/ unsigned int header, int nkeyrec)
 {
     int relax = WCSHDR_all, ctrl = 0;
     int nreject, nwcs;
     struct wcsprm *wcs;
 
-    wcspih(header, nkeyrec, relax, ctrl, &nreject, &nwcs, &wcs);
-    return wcs;
+    wcspih((char *)header, nkeyrec, relax, ctrl, &nreject, &nwcs, &wcs);
+    return (unsigned int)wcs;
 }
 
-int pix2sky(struct wcsprm *wcs, double x, double y, double *world)
+int pix2sky(/*struct wcsprm **/ unsigned int wcs, double x, double y, /*double **/ unsigned int world)
 {
     double imgcrd[2], phi[2], theta[2];
     int status[1];
     double pixcrd[2] = {x, y};
 
-    wcsp2s(wcs, 1, 2, pixcrd, imgcrd, phi, theta, world, status);
+    wcsp2s((struct wcsprm *)wcs, 1, 2, pixcrd, imgcrd, phi, theta, (double *)world, status);
     return status[0];
 }
 
-int sky2pix(struct wcsprm *wcs, double ra, double dec, double *pixcrd)
+int sky2pix(/*struct wcsprm **/ unsigned int wcs, double ra, double dec, /*double **/ unsigned int pixcrd)
 {
     double imgcrd[2], phi[2], theta[2];
     int status[1];
     double world[2] = {ra, dec};
 
-    wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, pixcrd, status);
+    wcss2p((struct wcsprm *)wcs, 1, 2, world, phi, theta, imgcrd, (double *)pixcrd, status);
     return status[0];
+}
+
+unsigned int _malloc(unsigned int size)
+{
+    return (unsigned int)malloc(size);
+}
+
+void _free(unsigned int ptr)
+{
+    free((void *)ptr);
 }
 
 EMSCRIPTEN_BINDINGS(Wrapper)
@@ -869,9 +879,9 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("hevc_init_frame", &hevc_init_frame);
     function("hevc_destroy_frame", &hevc_destroy_frame);
     function("hevc_decode_frame", &hevc_decode_frame);
-    function("getWcs", &getWcs, allow_raw_pointers());
-    function("pix2sky", &pix2sky, allow_raw_pointers());
-    function("sky2pix", &sky2pix, allow_raw_pointers());
-    function("malloc", &malloc, allow_raw_pointers());
-    function("free", &free, allow_raw_pointers());
+    function("getWcs", &getWcs);
+    function("pix2sky", &pix2sky);
+    function("sky2pix", &sky2pix);
+    function("_malloc", &_malloc);
+    function("_free", &_free);
 }
