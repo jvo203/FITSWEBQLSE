@@ -9,7 +9,7 @@ f = FITS(file)
 header = read_header(f[1], String)
 
 # create a WCS object
-wcs_array = WCS.from_header(header, ignore_rejected=true)
+wcs_array = WCS.from_header(header)
 wcs = wcs_array[1]
 
 # print the WCS object
