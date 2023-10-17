@@ -824,11 +824,11 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
 /*struct wcsprm **/ unsigned int getWcs(/*char **/ unsigned int header, int nkeyrec)
 {
     int relax = WCSHDR_all, ctrl = 4;
-    int nreject, nwcs;
+    int nreject, nwcs, stat;
     struct wcsprm *wcs;
 
-    wcspih((char *)header, nkeyrec, relax, ctrl, &nreject, &nwcs, &wcs);
-    printf("[WCSLIB] nreject: %d, nwcs: %d\n", nreject, nwcs);
+    stat = wcspih((char *)header, nkeyrec, relax, ctrl, &nreject, &nwcs, &wcs);
+    printf("[WCSLIB] stat: %d, nreject: %d, nwcs: %d\n", stat, nreject, nwcs);
     return (unsigned int)wcs;
 }
 
