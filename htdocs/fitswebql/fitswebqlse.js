@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-17.0";
+    return "JS2023-10-17.1";
 }
 
 function uuidv4() {
@@ -56,21 +56,33 @@ function string2buffer(str) {
 }
 
 function pix2sky(wcs, x, y) {
-    var world;
+    wcs.ready
+        .then(_ => {
+            var world;
 
-    Module.pix2sky(wcs.wcsPtr, x, y, this.coordinatePtr);
-    world = new Float64Array(Module.HEAPU8.buffer, wcs.coordinatePtr, 2);
+            Module.pix2sky(wcs.wcsPtr, x, y, this.coordinatePtr);
+            world = new Float64Array(Module.HEAPU8.buffer, wcs.coordinatePtr, 2);
 
-    return [world[0], world[1]];
+            return [world[0], world[1]];
+        })
+        .catch(err => {
+            console.log(err);
+        });
 }
 
 function sky2pix(wcs, ra, dec) {
-    var pixcrd;
+    wcs.ready
+        .then(_ => {
+            var pixcrd;
 
-    Module.sky2pix(wcs.wcsPtr, ra, dec, wcs.coordinatePtr);
-    pixcrd = new Float64Array(Module.HEAPU8.buffer, this.coordinatePtr, 2);
+            Module.sky2pix(wcs.wcsPtr, ra, dec, wcs.coordinatePtr);
+            pixcrd = new Float64Array(Module.HEAPU8.buffer, this.coordinatePtr, 2);
 
-    return [pixcrd[0], pixcrd[1]];
+            return [pixcrd[0], pixcrd[1]];
+        })
+        .catch(err => {
+            console.log(err);
+        });
 }
 
 function round(value, precision, mode) {
@@ -17086,24 +17098,30 @@ function display_FITS_header(index) {
         fitsData.coordinatePtr = 0;
         fitsData.wcsPtr = 0;
 
-        Module.ready
-            .then(_ => {
-                // Allocate string on Emscripten heap and get byte offset
-                nHeaderBytes = header.byteLength;
-                headerPtr = Module._malloc(nHeaderBytes);
-                headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
-                headerHeap.set(new Uint8Array(header));
-                console.log('headerPtr', headerPtr, 'nHeaderBytes', nHeaderBytes);
+        fitsData.ready = new Promise((resolve, reject) => {
+            Module.ready
+                .then(_ => {
+                    // Allocate string on Emscripten heap and get byte offset
+                    nHeaderBytes = header.byteLength;
+                    headerPtr = Module._malloc(nHeaderBytes);
+                    headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
+                    headerHeap.set(new Uint8Array(header));
+                    console.log('headerPtr', headerPtr, 'nHeaderBytes', nHeaderBytes);
 
-                // Allocate memory on the Emscripten heap for coordinates
-                fitsData.coordinatePtr = Module._malloc(16);
-                console.log('fitsData.coordinatePtr', fitsData.coordinatePtr);
+                    // Allocate memory on the Emscripten heap for coordinates
+                    fitsData.coordinatePtr = Module._malloc(16);
+                    console.log('fitsData.coordinatePtr', fitsData.coordinatePtr);
 
-                // Use byte offset to pass header string to libwcs
-                fitsData.wcsPtr = Module.getWcs(headerHeap.byteOffset, nkeyrec);
-                console.log('fitsData.wcsPtr', fitsData.wcsPtr);
-            })
-            .catch(e => console.error(e));
+                    // Use byte offset to pass header string to libwcs
+                    fitsData.wcsPtr = Module.getWcs(headerHeap.byteOffset, nkeyrec);
+                    console.log('fitsData.wcsPtr', fitsData.wcsPtr);
+                    resolve(true);
+                })
+                .catch(e => {
+                    console.error(e);
+                    reject(false);
+                });
+        });
 
         // -------------------------------------
         var headerText = document.getElementById('headerText#' + index);
