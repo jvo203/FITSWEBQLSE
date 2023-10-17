@@ -17058,7 +17058,7 @@ function display_FITS_header(index) {
 
             return false;
         });
-        headerStr = headerArray.join('\n');
+        headerStr = headerArray.join(''); // was '\n' but it confused the WCSLIB library        
 
         nkeyrec = headerArray.length;
         header = string2buffer(headerStr);
