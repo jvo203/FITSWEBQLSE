@@ -55,6 +55,9 @@ static size_t spectrumLength = 0;
 static unsigned char *pvBuffer = NULL;
 static size_t pvLength = 0;
 
+static double coords[2] = {0.0, 0.0};
+static size_t coordsLength = 2;
+
 #include <iostream>
 #include <algorithm>
 #include <cstdint>
@@ -823,7 +826,7 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
 // WCS utility functions
 /*struct wcsprm **/ unsigned int getWcs(/*char **/ unsigned int header, int nkeyrec)
 {
-    int relax = WCSHDR_all, ctrl = 0; // 4 for a full telemetry report
+    int relax = WCSHDR_all, ctrl = 4; // 4 for a full telemetry report, 0 for nothing
     int nreject, nwcs, stat;
     struct wcsprm *wcs;
 
@@ -832,24 +835,44 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     return (unsigned int)wcs;
 }
 
-int pix2sky(/*struct wcsprm **/ unsigned int wcs, double x, double y, /*double **/ unsigned int world)
+val pix2sky(/*struct wcsprm **/ unsigned int wcs, double x, double y)
 {
     double imgcrd[2], phi[2], theta[2];
     int status[1];
     double pixcrd[2] = {x, y};
 
-    wcsp2s((struct wcsprm *)wcs, 1, 2, pixcrd, imgcrd, phi, theta, (double *)world, status);
-    return status[0];
+    wcsp2s((struct wcsprm *)wcs, 1, 2, pixcrd, imgcrd, phi, theta, (double *)coords, status);
+    printf("[WCSLIB] pix2sky status: %d\n", status[0]);
+
+    // if status[0] > 0 then fill-in coords with NaN
+    if (status[0] > 0)
+    {
+        coords[0] = NAN;
+        coords[1] = NAN;
+    }
+
+    // return status[0];
+    return val(typed_memory_view(coordsLength, coords));
 }
 
-int sky2pix(/*struct wcsprm **/ unsigned int wcs, double ra, double dec, /*double **/ unsigned int pixcrd)
+val sky2pix(/*struct wcsprm **/ unsigned int wcs, double ra, double dec)
 {
     double imgcrd[2], phi[2], theta[2];
     int status[1];
     double world[2] = {ra, dec};
 
-    wcss2p((struct wcsprm *)wcs, 1, 2, world, phi, theta, imgcrd, (double *)pixcrd, status);
-    return status[0];
+    wcss2p((struct wcsprm *)wcs, 1, 2, world, phi, theta, imgcrd, (double *)coords, status);
+    printf("[WCSLIB] sky2pix status: %d\n", status[0]);
+
+    // if status[0] > 0 then fill-in coords with NaN
+    if (status[0] > 0)
+    {
+        coords[0] = NAN;
+        coords[1] = NAN;
+    }
+
+    // return status[0];
+    return val(typed_memory_view(coordsLength, coords));
 }
 
 unsigned int _malloc(unsigned int size)

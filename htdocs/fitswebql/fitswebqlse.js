@@ -58,10 +58,8 @@ function string2buffer(str) {
 async function pix2sky(wcs, x, y) {
     return wcs.ready
         .then(_ => {
-            var world;
-
-            Module.pix2sky(wcs.wcsPtr, x, y, wcs.coordinatePtr);
-            world = new Float64Array(Module.HEAPU8.buffer, wcs.coordinatePtr, 2);
+            var world = Module.pix2sky(wcs.wcsPtr, x, y);
+            // console.log("world:", world);            
 
             return [world[0], world[1]];
         })
@@ -73,10 +71,8 @@ async function pix2sky(wcs, x, y) {
 async function sky2pix(wcs, ra, dec) {
     return wcs.ready
         .then(_ => {
-            var pixcrd;
-
-            Module.sky2pix(wcs.wcsPtr, ra, dec, wcs.coordinatePtr);
-            pixcrd = new Float64Array(Module.HEAPU8.buffer, wcs.coordinatePtr, 2);
+            var pixcrd = Module.sky2pix(wcs.wcsPtr, ra, dec);
+            // console.log("pixcrd:", pixcrd);            
 
             return [pixcrd[0], pixcrd[1]];
         })
@@ -17108,9 +17104,6 @@ function display_FITS_header(index) {
         header = string2buffer(headerStr);
         console.log(nkeyrec, headerStr);
 
-        fitsData.coordinatePtr = 0;
-        fitsData.wcsPtr = 0;
-
         fitsData.ready = new Promise((resolve, reject) => {
             Module.ready
                 .then(_ => {
@@ -17119,9 +17112,6 @@ function display_FITS_header(index) {
                     headerPtr = Module._malloc(nHeaderBytes);
                     headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
                     headerHeap.set(new Uint8Array(header));
-
-                    // Allocate memory on the Emscripten heap for coordinates
-                    fitsData.coordinatePtr = Module._malloc(16);
 
                     // Use byte offset to pass header string to libwcs
                     fitsData.wcsPtr = Module.getWcs(headerHeap.byteOffset, nkeyrec);
