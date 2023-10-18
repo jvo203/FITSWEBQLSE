@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-18.2";
+    return "JS2023-10-18.3";
 }
 
 function uuidv4() {
@@ -929,7 +929,7 @@ function erfinv(x) {
     return sqrt2 * Math.sign(x);
 }
 
-function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
+async function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
     d3.select("#PVContourSVG").remove();
     d3.select("#PVSVGX").remove();
     d3.select("#PVSVGY").remove();
@@ -1024,16 +1024,22 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
     var midx = (x1 + x2) / 2;
     var midy = (y1 + y2) / 2;
 
-    // find the radec for the mid point
-    let midra = x2rad(midx);
-    let middec = y2rad(midy);
+    let fitsData = fitsContainer[va_count - 1];
+
+    // find the radec for the mid point    
+    let world = await pix2sky(fitsData, midx, midy);
+    let midra = world[0] / toDegrees;
+    let middec = world[1] / toDegrees;
     console.log("midx:", midx, "midy:", midy, "midra:", midra, "middec:", middec);
 
     // find the dmin and dmax
-    let ra1 = x2rad(x1);
-    let dec1 = y2rad(y1);
-    let ra2 = x2rad(x2);
-    let dec2 = y2rad(y2);
+    world = await pix2sky(fitsData, x1, y1);
+    let ra1 = world[0] / toDegrees;
+    let dec1 = world[1] / toDegrees;
+
+    world = await pix2sky(fitsData, x2, y2);
+    let ra2 = world[0] / toDegrees;
+    let dec2 = world[1] / toDegrees;
 
     let dmin = HaversineDistance(midra, middec, ra1, dec1);
     let dmax = HaversineDistance(midra, middec, ra2, dec2);
@@ -1211,8 +1217,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
 
     d3.select("#pv_rectangle").moveToFront();
 
-    // labels
-    let fitsData = fitsContainer[va_count - 1];
+    // labels    
 
     // attach the statistics to the fitsData object
     fitsData.pvmin = pmin;
@@ -1361,7 +1366,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .text(bunit);
 }
 
-function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
+async function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
     d3.select("#PVContourSVG").remove();
     d3.select("#PVSVGX").remove();
     d3.select("#PVSVGY").remove();
@@ -1453,16 +1458,22 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
     var midx = (x1 + x2) / 2;
     var midy = (y1 + y2) / 2;
 
+    let fitsData = fitsContainer[va_count - 1];
+
     // find the radec for the mid point
-    let midra = x2rad(midx);
-    let middec = y2rad(midy);
+    let world = await pix2sky(fitsData, midx, midy);
+    let midra = world[0] / toDegrees;
+    let middec = world[1] / toDegrees;
     console.log("midx:", midx, "midy:", midy, "midra:", midra, "middec:", middec);
 
     // find the dmin and dmax
-    let ra1 = x2rad(x1);
-    let dec1 = y2rad(y1);
-    let ra2 = x2rad(x2);
-    let dec2 = y2rad(y2);
+    world = await pix2sky(fitsData, x1, y1);
+    let ra1 = world[0] / toDegrees;
+    let dec1 = world[1] / toDegrees;
+
+    world = await pix2sky(fitsData, x2, y2);
+    let ra2 = world[0] / toDegrees;
+    let dec2 = world[1] / toDegrees;
 
     let dmin = HaversineDistance(midra, middec, ra1, dec1);
     let dmax = HaversineDistance(midra, middec, ra2, dec2);
@@ -1560,8 +1571,6 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
         .attr("stroke-dasharray", "5, 3");
 
     // labels
-    let fitsData = fitsContainer[va_count - 1];
-
     xsvg.append("text")
         .attr("id", "pvxlabel")
         .attr("x", (svg_width + 4 * emFontSize) / 2)
@@ -6628,7 +6637,7 @@ function frame_reference_type(index) {
     }
 }
 
-function display_dataset_info() {
+async function display_dataset_info() {
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData == null)
@@ -6640,21 +6649,12 @@ function display_dataset_info() {
 
     xradec = new Array(null, null);
 
-    /*console.log("RA:", fitsData.OBSRA, fitsData.CTYPE1, "DEC:", fitsData.OBSDEC, fitsData.CTYPE2);
-  	
-    if (fitsData.OBSRA != '' && fitsData.OBSDEC != '') {
-      var ra = ParseRA('+' + fitsData.OBSRA.toString());
-      var dec = ParseDec(fitsData.OBSDEC.toString());
-      xradec = new Array((ra / 3600.0) / toDegrees, (dec / 3600.0) / toDegrees);
-    }
-    else
-      xradec = new Array(null, null);*/
+    let orig_x = fitsData.width / 2;
+    let orig_y = fitsData.height / 2;
+    let world = await pix2sky(fitsData, orig_x, orig_y);
 
-    if (fitsData.CTYPE1.indexOf("RA") > -1 || fitsData.CTYPE1.indexOf("GLON") > -1 || fitsData.CTYPE1.indexOf("ELON") > -1)
-        xradec[0] = (fitsData.CRVAL1 + (fitsData.width / 2 - fitsData.CRPIX1) * fitsData.CDELT1) / toDegrees;
-
-    if (fitsData.CTYPE2.indexOf("DEC") > -1 || fitsData.CTYPE2.indexOf("GLAT") > -1 || fitsData.CTYPE2.indexOf("ELAT") > -1)
-        xradec[1] = (fitsData.CRVAL2 + (fitsData.height - fitsData.height / 2 - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
+    xradec[0] = world[0] / toDegrees;
+    xradec[1] = world[1] / toDegrees;
 
     try {
         d3.select("#information").remove();
