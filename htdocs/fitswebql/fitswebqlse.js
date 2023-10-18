@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-18.0";
+    return "JS2023-10-18.1";
 }
 
 function uuidv4() {
@@ -17082,6 +17082,10 @@ function display_FITS_header(index) {
 
                     // Use byte offset to pass header string to libwcs
                     stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
+
+                    // Free memory
+                    headerHeap = null;
+                    Module._free(headerPtr);
 
                     if (stat != 0) {
                         console.log("initWcs() failed");
