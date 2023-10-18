@@ -55,7 +55,7 @@ function string2buffer(str) {
     return buffer;
 }
 
-async function pix2sky(wcs, x, y) {
+function _pix2sky(wcs, x, y) {
     return wcs.ready
         .then(_ => {
             var world = Module.pix2sky(wcs.index, x, y);
@@ -68,7 +68,7 @@ async function pix2sky(wcs, x, y) {
         });
 }
 
-async function sky2pix(wcs, ra, dec) {
+function _sky2pix(wcs, ra, dec) {
     return wcs.ready
         .then(_ => {
             var pixcrd = Module.sky2pix(wcs.index, ra, dec);
@@ -79,6 +79,20 @@ async function sky2pix(wcs, ra, dec) {
         .catch(err => {
             console.log(err);
         });
+}
+
+function pix2sky(wcs, x, y) {
+    var world = Module.pix2sky(wcs.index, x, y);
+    // console.log("world:", world);            
+
+    return [world[0], world[1]];
+}
+
+function sky2pix(wcs, ra, dec) {
+    var pixcrd = Module.sky2pix(wcs.index, ra, dec);
+    // console.log("pixcrd:", pixcrd);            
+
+    return [pixcrd[0], pixcrd[1]];
 }
 
 function round(value, precision, mode) {
@@ -929,7 +943,7 @@ function erfinv(x) {
     return sqrt2 * Math.sign(x);
 }
 
-async function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
+function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
     d3.select("#PVContourSVG").remove();
     d3.select("#PVSVGX").remove();
     d3.select("#PVSVGY").remove();
@@ -1027,17 +1041,17 @@ async function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, 
     let fitsData = fitsContainer[va_count - 1];
 
     // find the radec for the mid point    
-    let world = await pix2sky(fitsData, midx, midy);
+    let world = pix2sky(fitsData, midx, midy);
     let midra = world[0] / toDegrees;
     let middec = world[1] / toDegrees;
     console.log("midx:", midx, "midy:", midy, "midra:", midra, "middec:", middec);
 
     // find the dmin and dmax
-    world = await pix2sky(fitsData, x1, y1);
+    world = pix2sky(fitsData, x1, y1);
     let ra1 = world[0] / toDegrees;
     let dec1 = world[1] / toDegrees;
 
-    world = await pix2sky(fitsData, x2, y2);
+    world = pix2sky(fitsData, x2, y2);
     let ra2 = world[0] / toDegrees;
     let dec2 = world[1] / toDegrees;
 
@@ -1366,7 +1380,7 @@ async function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, 
         .text(bunit);
 }
 
-async function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
+function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
     d3.select("#PVContourSVG").remove();
     d3.select("#PVSVGX").remove();
     d3.select("#PVSVGY").remove();
@@ -1461,17 +1475,17 @@ async function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pma
     let fitsData = fitsContainer[va_count - 1];
 
     // find the radec for the mid point
-    let world = await pix2sky(fitsData, midx, midy);
+    let world = pix2sky(fitsData, midx, midy);
     let midra = world[0] / toDegrees;
     let middec = world[1] / toDegrees;
     console.log("midx:", midx, "midy:", midy, "midra:", midra, "middec:", middec);
 
     // find the dmin and dmax
-    world = await pix2sky(fitsData, x1, y1);
+    world = pix2sky(fitsData, x1, y1);
     let ra1 = world[0] / toDegrees;
     let dec1 = world[1] / toDegrees;
 
-    world = await pix2sky(fitsData, x2, y2);
+    world = pix2sky(fitsData, x2, y2);
     let ra2 = world[0] / toDegrees;
     let dec2 = world[1] / toDegrees;
 
@@ -6034,7 +6048,7 @@ function display_gridlines() {
     }
 }
 
-function display_cd_gridlines() {
+function display_wcs_gridlines() {
     if (va_count > 1 && !composite_view)
         return;
 
@@ -6138,20 +6152,17 @@ function display_cd_gridlines() {
                 var orig_x = tmpx * fitsData.width / image.width;
                 var orig_y = tmpy * fitsData.height / image.height;
 
-                //use the CD scale matrix
-                let radec = CD_matrix(orig_x, /*fitsData.height -*/ orig_y);
+                let world = pix2sky(fitsData, orig_x, orig_y);
+                let radec = [world[0] / toDegrees, world[1] / toDegrees];
 
                 if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
                         return RadiansPrintDMS(radec[0]);
                     else
                         return RadiansPrintHMS(radec[0]);
-                }
-
-                if (fitsData.CTYPE1.indexOf("GLON") > -1 || fitsData.CTYPE1.indexOf("ELON") > -1)
+                } else {
                     return RadiansPrintDMS(radec[0]);
-
-                return "";
+                }
             });
 
         svg.append("g")
@@ -6192,20 +6203,17 @@ function display_cd_gridlines() {
                 var orig_x = tmpx * fitsData.width / image.width;
                 var orig_y = tmpy * fitsData.height / image.height;
 
-                //use the CD scale matrix
-                let radec = CD_matrix(orig_x, /*fitsData.height -*/ orig_y);
+                let world = pix2sky(fitsData, orig_x, orig_y);
+                let radec = [world[0] / toDegrees, world[1] / toDegrees];
 
                 if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
                         return RadiansPrintDMS(radec[0]);
                     else
                         return RadiansPrintHMS(radec[0]);
-                }
-
-                if (fitsData.CTYPE1.indexOf("GLON") > -1 || fitsData.CTYPE1.indexOf("ELON") > -1)
+                } else {
                     return RadiansPrintDMS(radec[0]);
-
-                return "";
+                }
             });
 
         svg.append("g")
@@ -6248,12 +6256,9 @@ function display_cd_gridlines() {
                 var orig_x = tmpx * fitsData.width / image.width;
                 var orig_y = tmpy * fitsData.height / image.height;
 
-                //use the CD scale matrix
-                let radec = CD_matrix(orig_x, /*fitsData.height -*/ orig_y);
-
-                if (fitsData.CTYPE2.indexOf("DEC") > -1 || fitsData.CTYPE2.indexOf("GLAT") > -1 || fitsData.CTYPE2.indexOf("ELAT") > -1)
-                    return RadiansPrintDMS(radec[1]);
-                else return "";
+                let world = pix2sky(fitsData, orig_x, orig_y);
+                let radec = [world[0] / toDegrees, world[1] / toDegrees];
+                return RadiansPrintDMS(radec[1]);
             });
 
         svg.append("g")
@@ -6637,7 +6642,7 @@ function frame_reference_type(index) {
     }
 }
 
-async function display_dataset_info() {
+function display_dataset_info() {
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData == null)
@@ -6651,7 +6656,7 @@ async function display_dataset_info() {
 
     let orig_x = fitsData.width / 2;
     let orig_y = fitsData.height / 2;
-    let world = await pix2sky(fitsData, orig_x, orig_y);
+    let world = pix2sky(fitsData, orig_x, orig_y);
 
     xradec[0] = world[0] / toDegrees;
     xradec[1] = world[1] / toDegrees;
@@ -7684,7 +7689,7 @@ function change_coords_fmt() {
             d3.select("#ra").text(raText);
 
             try {
-                display_cd_gridlines();
+                display_wcs_gridlines();
             }
             catch (err) {
                 display_gridlines();
@@ -13126,44 +13131,41 @@ function setup_image_selection() {
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
             // console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
-            pix2sky(fitsData, orig_x, orig_y).then(world => {
-                // if either world value is NaN throw an error
-                if (isNaN(world[0]) || isNaN(world[1]))
-                    throw new Error("NaN WCS");
+            let world = pix2sky(fitsData, orig_x, orig_y);
+            // if either world value is NaN throw an error
+            if (isNaN(world[0]) || isNaN(world[1]))
+                throw new Error("NaN WCS");
 
-                let radec = [world[0] / toDegrees, world[1] / toDegrees];
-                // console.log("world:", world, "radec:", radec);
+            let radec = [world[0] / toDegrees, world[1] / toDegrees];
+            // console.log("world:", world, "radec:", radec);
 
-                let raText = 'RA N/A';
-                let decText = 'DEC N/A';
+            let raText = 'RA N/A';
+            let decText = 'DEC N/A';
 
-                if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                    if (coordsFmt == 'DMS')
-                        raText = 'α: ' + RadiansPrintDMS(radec[0]);
-                    else
-                        raText = 'α: ' + RadiansPrintHMS(radec[0]);
-                }
+            if (fitsData.CTYPE1.indexOf("RA") > -1) {
+                if (coordsFmt == 'DMS')
+                    raText = 'α: ' + RadiansPrintDMS(radec[0]);
+                else
+                    raText = 'α: ' + RadiansPrintHMS(radec[0]);
+            }
 
-                if (fitsData.CTYPE1.indexOf("GLON") > -1)
-                    raText = 'l: ' + RadiansPrintDMS(radec[0]);
+            if (fitsData.CTYPE1.indexOf("GLON") > -1)
+                raText = 'l: ' + RadiansPrintDMS(radec[0]);
 
-                if (fitsData.CTYPE1.indexOf("ELON") > -1)
-                    raText = 'λ: ' + RadiansPrintDMS(radec[0]);
+            if (fitsData.CTYPE1.indexOf("ELON") > -1)
+                raText = 'λ: ' + RadiansPrintDMS(radec[0]);
 
-                if (fitsData.CTYPE2.indexOf("DEC") > -1)
-                    decText = 'δ: ' + RadiansPrintDMS(radec[1]);
+            if (fitsData.CTYPE2.indexOf("DEC") > -1)
+                decText = 'δ: ' + RadiansPrintDMS(radec[1]);
 
-                if (fitsData.CTYPE2.indexOf("GLAT") > -1)
-                    decText = 'b: ' + RadiansPrintDMS(radec[1]);
+            if (fitsData.CTYPE2.indexOf("GLAT") > -1)
+                decText = 'b: ' + RadiansPrintDMS(radec[1]);
 
-                if (fitsData.CTYPE2.indexOf("ELAT") > -1)
-                    decText = 'β: ' + RadiansPrintDMS(radec[1]);
+            if (fitsData.CTYPE2.indexOf("ELAT") > -1)
+                decText = 'β: ' + RadiansPrintDMS(radec[1]);
 
-                d3.select("#ra").text(raText);
-                d3.select("#dec").text(decText);
-            }).catch(error => {
-                console.log(error);
-            });
+            d3.select("#ra").text(raText);
+            d3.select("#dec").text(decText);
 
             //for each image
             var pixelText = '';
@@ -13759,7 +13761,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
             // wait for WebAssembly to get compiled
             Module.ready
-                .then(_ => {
+                .then(async _ => {
                     document.getElementById('welcome').style.display = "none";
                     //console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
 
@@ -14025,9 +14027,11 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 //console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
                             }
 
-                            display_FITS_header(index);
+                            let res = display_FITS_header(index);
 
                             display_preferences(index);
+
+                            await res;
 
                             if (index == va_count)
                                 display_dataset_info();
@@ -14118,7 +14122,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 display_histogram(index);
 
                                 try {
-                                    display_cd_gridlines();
+                                    display_wcs_gridlines();
                                 }
                                 catch (err) {
                                     display_gridlines();
@@ -15579,7 +15583,7 @@ function load_region() {
                     /*point.x = ra2x(ra);
                     point.y = dec2y(dec);*/
 
-                    let pixcrd = await sky2pix(fitsData, ra, dec);
+                    let pixcrd = sky2pix(fitsData, ra, dec);
                     point.x = pixcrd[0];
                     point.y = pixcrd[1];
 
@@ -17002,7 +17006,7 @@ function setup_FITS_header_page() {
     }
 }
 
-function display_FITS_header(index) {
+async function display_FITS_header(index) {
     let fitsData = fitsContainer[index - 1];
 
     try {
@@ -17100,6 +17104,8 @@ function display_FITS_header(index) {
                     reject(false);
                 });
         });
+
+        await fitsData.ready;
 
         // -------------------------------------
         var headerText = document.getElementById('headerText#' + index);
