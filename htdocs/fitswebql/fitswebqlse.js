@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-17.5";
+    return "JS2023-10-18.0";
 }
 
 function uuidv4() {
@@ -58,7 +58,7 @@ function string2buffer(str) {
 async function pix2sky(wcs, x, y) {
     return wcs.ready
         .then(_ => {
-            var world = Module.pix2sky(wcs.wcsPtr, x, y);
+            var world = Module.pix2sky(va_count, x, y);
             // console.log("world:", world);            
 
             return [world[0], world[1]];
@@ -71,7 +71,7 @@ async function pix2sky(wcs, x, y) {
 async function sky2pix(wcs, ra, dec) {
     return wcs.ready
         .then(_ => {
-            var pixcrd = Module.sky2pix(wcs.wcsPtr, ra, dec);
+            var pixcrd = Module.sky2pix(va_count, ra, dec);
             // console.log("pixcrd:", pixcrd);            
 
             return [pixcrd[0], pixcrd[1]];
@@ -13124,24 +13124,16 @@ function setup_image_selection() {
 
             var orig_x = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
-            console.log("orig_x:", orig_x, "orig_y:", orig_y);
+            // console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
-            var radec;
+            let world = await pix2sky(fitsData, orig_x, orig_y);
 
-            try {
-                let world = await pix2sky(fitsData, orig_x, orig_y);
+            // if either world value is NaN throw an error
+            if (isNaN(world[0]) || isNaN(world[1]))
+                throw new Error("NaN WCS");
 
-                // if either world value is NaN throw an error
-                if (isNaN(world[0]) || isNaN(world[1]))
-                    throw new Error("NaN");
-
-                radec = [world[0] / toDegrees, world[1] / toDegrees];
-                console.log("world:", world, "radec:", radec);
-            } catch (err) {
-                //use the CD scale matrix
-                radec = CD_matrix(orig_x, orig_y);
-            }
-
+            let radec = [world[0] / toDegrees, world[1] / toDegrees];
+            // console.log("world:", world, "radec:", radec);
 
             let raText = 'RA N/A';
             let decText = 'DEC N/A';
@@ -13170,37 +13162,6 @@ function setup_image_selection() {
 
             d3.select("#ra").text(raText);
             d3.select("#dec").text(decText);
-
-            /*try {
-                let raText = 'RA N/A';
-                let decText = 'DEC N/A';
-            
-                if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                    if (coordsFmt == 'DMS')
-                        raText = 'α: ' + x2dms(orig_x);
-                    else
-                        raText = 'α: ' + x2hms(orig_x);
-                }
-            
-                if (fitsData.CTYPE1.indexOf("GLON") > -1)
-                    raText = 'l: ' + x2dms(orig_x);
-            
-                if (fitsData.CTYPE1.indexOf("ELON") > -1)
-                    raText = 'λ: ' + x2dms(orig_x);
-            
-                if (fitsData.CTYPE2.indexOf("DEC") > -1)
-                    decText = 'δ: ' + y2dms(orig_y);
-            
-                if (fitsData.CTYPE2.indexOf("GLAT") > -1)
-                    decText = 'b: ' + y2dms(orig_y);
-            
-                if (fitsData.CTYPE2.indexOf("ELAT") > -1)
-                    decText = 'β: ' + y2dms(orig_y);
-            
-                d3.select("#ra").text(raText);
-                d3.select("#dec").text(decText);
-            }
-            */
 
             //for each image
             var pixelText = '';
@@ -17103,7 +17064,7 @@ function display_FITS_header(index) {
             headerArray[i] = headerArray[i].replace(/degree/g, 'deg   ');
         }
 
-        headerStr = headerArray.join(''); // was '\n' but it confused the WCSLIB library
+        headerStr = headerArray.join(''); // was '\n' but it caused confusion in the WCSLIB library
         nkeyrec = headerArray.length;
         header = string2buffer(headerStr);
         console.log(nkeyrec, headerStr);
@@ -17118,8 +17079,14 @@ function display_FITS_header(index) {
                     headerHeap.set(new Uint8Array(header));
 
                     // Use byte offset to pass header string to libwcs
-                    fitsData.wcsPtr = Module.getWcs(headerHeap.byteOffset, nkeyrec);
-                    resolve(true);
+                    stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
+
+                    if (stat != 0) {
+                        console.log("initWcs() failed");
+                        reject(false);
+                    } else {
+                        resolve(true);
+                    }
                 })
                 .catch(e => {
                     console.error(e);

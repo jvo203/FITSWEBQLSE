@@ -55,6 +55,7 @@ static size_t spectrumLength = 0;
 static unsigned char *pvBuffer = NULL;
 static size_t pvLength = 0;
 
+static struct wcsprm **wcs = NULL;
 static double coords[2] = {0.0, 0.0};
 static size_t coordsLength = 2;
 
@@ -824,54 +825,67 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
 }
 
 // WCS utility functions
-/*struct wcsprm **/ unsigned int getWcs(/*char **/ unsigned int header, int nkeyrec)
+int initWcs(int index, /*char **/ unsigned int header, int nkeyrec, int va_count)
 {
     int relax = WCSHDR_all, ctrl = 0; // 4 for a full telemetry report, 0 for nothing
     int nreject, nwcs, stat;
-    struct wcsprm *wcs;
 
-    stat = wcspih((char *)header, nkeyrec, relax, ctrl, &nreject, &nwcs, &wcs);
+    if (wcs == NULL)
+    {
+        wcs = (struct wcsprm **)calloc(va_count, sizeof(struct wcsprm *));
+
+        if (wcs == NULL)
+        {
+            printf("[WCSLIB] failed to allocate memory for wcs.\n");
+            return -1;
+        }
+    }
+
+    stat = wcspih((char *)header, nkeyrec, relax, ctrl, &nreject, &nwcs, &wcs[index - 1]);
     printf("[WCSLIB] stat: %d, nreject: %d, nwcs: %d\n", stat, nreject, nwcs);
-    return (unsigned int)wcs;
+
+    return stat;
 }
 
-val pix2sky(/*struct wcsprm **/ unsigned int wcs, double x, double y)
+val pix2sky(int index, double x, double y)
 {
     double imgcrd[2], phi[2], theta[2];
-    int status[1];
+    int status[1] = {1};
     double pixcrd[2] = {x, y};
 
-    wcsp2s((struct wcsprm *)wcs, 1, 2, pixcrd, imgcrd, phi, theta, (double *)coords, status);
-    printf("[WCSLIB] pix2sky status: %d\n", status[0]);
+    if (wcs != NULL)
+        wcsp2s(wcs[index - 1], 1, 2, pixcrd, imgcrd, phi, theta, coords, status);
 
     // if status[0] > 0 then fill-in coords with NaN
     if (status[0] > 0)
     {
+        printf("[WCSLIB] pix2sky status: %d\n", status[0]);
+
         coords[0] = NAN;
         coords[1] = NAN;
     }
 
-    // return status[0];
     return val(typed_memory_view(coordsLength, coords));
 }
 
-val sky2pix(/*struct wcsprm **/ unsigned int wcs, double ra, double dec)
+val sky2pix(int index, double ra, double dec)
 {
     double imgcrd[2], phi[2], theta[2];
-    int status[1];
+    int status[1] = {1};
     double world[2] = {ra, dec};
 
-    wcss2p((struct wcsprm *)wcs, 1, 2, world, phi, theta, imgcrd, (double *)coords, status);
-    printf("[WCSLIB] sky2pix status: %d\n", status[0]);
+    if (wcs != NULL)
+        wcss2p(wcs[index - 1], 1, 2, world, phi, theta, imgcrd, coords, status);
 
     // if status[0] > 0 then fill-in coords with NaN
     if (status[0] > 0)
     {
+        printf("[WCSLIB] sky2pix status: %d\n", status[0]);
+
         coords[0] = NAN;
         coords[1] = NAN;
     }
 
-    // return status[0];
     return val(typed_memory_view(coordsLength, coords));
 }
 
@@ -903,7 +917,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("hevc_init_frame", &hevc_init_frame);
     function("hevc_destroy_frame", &hevc_destroy_frame);
     function("hevc_decode_frame", &hevc_decode_frame);
-    function("getWcs", &getWcs);
+    function("initWcs", &initWcs);
     function("pix2sky", &pix2sky);
     function("sky2pix", &sky2pix);
     function("_malloc", &_malloc);
