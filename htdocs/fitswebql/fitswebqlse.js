@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-18.1";
+    return "JS2023-10-18.2";
 }
 
 function uuidv4() {
@@ -58,7 +58,7 @@ function string2buffer(str) {
 async function pix2sky(wcs, x, y) {
     return wcs.ready
         .then(_ => {
-            var world = Module.pix2sky(va_count, x, y);
+            var world = Module.pix2sky(wcs.index, x, y);
             // console.log("world:", world);            
 
             return [world[0], world[1]];
@@ -71,7 +71,7 @@ async function pix2sky(wcs, x, y) {
 async function sky2pix(wcs, ra, dec) {
     return wcs.ready
         .then(_ => {
-            var pixcrd = Module.sky2pix(va_count, ra, dec);
+            var pixcrd = Module.sky2pix(wcs.index, ra, dec);
             // console.log("pixcrd:", pixcrd);            
 
             return [pixcrd[0], pixcrd[1]];
@@ -17081,6 +17081,7 @@ function display_FITS_header(index) {
                     headerHeap.set(new Uint8Array(header));
 
                     // Use byte offset to pass header string to libwcs
+                    fitsData.index = index;
                     stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
 
                     // Free memory
