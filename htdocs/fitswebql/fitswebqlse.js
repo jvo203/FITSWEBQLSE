@@ -17080,8 +17080,7 @@ function display_FITS_header(index) {
                     headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
                     headerHeap.set(new Uint8Array(header));
 
-                    // Use byte offset to pass header string to libwcs
-                    fitsData.index = index;
+                    // Use byte offset to pass header string to libwcs                    
                     stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
 
                     // Free memory
@@ -17092,6 +17091,7 @@ function display_FITS_header(index) {
                         console.log("initWcs() failed");
                         reject(false);
                     } else {
+                        fitsData.index = index;
                         resolve(true);
                     }
                 })
