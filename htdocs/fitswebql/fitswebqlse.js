@@ -12949,7 +12949,7 @@ function setup_image_selection() {
                 }
             }
         })
-        .on("mousemove", async (event) => {
+        .on("mousemove", (event) => {
             // cancel the image animation loop
             if (va_count == 1) {
                 clear_webgl_image_buffers(va_count);
@@ -13126,42 +13126,44 @@ function setup_image_selection() {
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
             // console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
-            let world = await pix2sky(fitsData, orig_x, orig_y);
+            pix2sky(fitsData, orig_x, orig_y).then(world => {
+                // if either world value is NaN throw an error
+                if (isNaN(world[0]) || isNaN(world[1]))
+                    throw new Error("NaN WCS");
 
-            // if either world value is NaN throw an error
-            if (isNaN(world[0]) || isNaN(world[1]))
-                throw new Error("NaN WCS");
+                let radec = [world[0] / toDegrees, world[1] / toDegrees];
+                // console.log("world:", world, "radec:", radec);
 
-            let radec = [world[0] / toDegrees, world[1] / toDegrees];
-            // console.log("world:", world, "radec:", radec);
+                let raText = 'RA N/A';
+                let decText = 'DEC N/A';
 
-            let raText = 'RA N/A';
-            let decText = 'DEC N/A';
+                if (fitsData.CTYPE1.indexOf("RA") > -1) {
+                    if (coordsFmt == 'DMS')
+                        raText = 'α: ' + RadiansPrintDMS(radec[0]);
+                    else
+                        raText = 'α: ' + RadiansPrintHMS(radec[0]);
+                }
 
-            if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                if (coordsFmt == 'DMS')
-                    raText = 'α: ' + RadiansPrintDMS(radec[0]);
-                else
-                    raText = 'α: ' + RadiansPrintHMS(radec[0]);
-            }
+                if (fitsData.CTYPE1.indexOf("GLON") > -1)
+                    raText = 'l: ' + RadiansPrintDMS(radec[0]);
 
-            if (fitsData.CTYPE1.indexOf("GLON") > -1)
-                raText = 'l: ' + RadiansPrintDMS(radec[0]);
+                if (fitsData.CTYPE1.indexOf("ELON") > -1)
+                    raText = 'λ: ' + RadiansPrintDMS(radec[0]);
 
-            if (fitsData.CTYPE1.indexOf("ELON") > -1)
-                raText = 'λ: ' + RadiansPrintDMS(radec[0]);
+                if (fitsData.CTYPE2.indexOf("DEC") > -1)
+                    decText = 'δ: ' + RadiansPrintDMS(radec[1]);
 
-            if (fitsData.CTYPE2.indexOf("DEC") > -1)
-                decText = 'δ: ' + RadiansPrintDMS(radec[1]);
+                if (fitsData.CTYPE2.indexOf("GLAT") > -1)
+                    decText = 'b: ' + RadiansPrintDMS(radec[1]);
 
-            if (fitsData.CTYPE2.indexOf("GLAT") > -1)
-                decText = 'b: ' + RadiansPrintDMS(radec[1]);
+                if (fitsData.CTYPE2.indexOf("ELAT") > -1)
+                    decText = 'β: ' + RadiansPrintDMS(radec[1]);
 
-            if (fitsData.CTYPE2.indexOf("ELAT") > -1)
-                decText = 'β: ' + RadiansPrintDMS(radec[1]);
-
-            d3.select("#ra").text(raText);
-            d3.select("#dec").text(decText);
+                d3.select("#ra").text(raText);
+                d3.select("#dec").text(decText);
+            }).catch(error => {
+                console.log(error);
+            });
 
             //for each image
             var pixelText = '';
