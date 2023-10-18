@@ -6048,7 +6048,7 @@ function display_gridlines() {
     }
 }
 
-function display_wcs_gridlines() {
+function display_cd_gridlines() {
     if (va_count > 1 && !composite_view)
         return;
 
@@ -7689,7 +7689,7 @@ function change_coords_fmt() {
             d3.select("#ra").text(raText);
 
             try {
-                display_wcs_gridlines();
+                display_cd_gridlines();
             }
             catch (err) {
                 display_gridlines();
@@ -14122,7 +14122,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 display_histogram(index);
 
                                 try {
-                                    display_wcs_gridlines();
+                                    display_cd_gridlines();
                                 }
                                 catch (err) {
                                     display_gridlines();
