@@ -5440,9 +5440,6 @@ function inverse_CD_matrix(arcx, arcy) {
     var dx = (arcx / 86400.0) * 2 * pi;//[s]
     var dy = (arcy / 3600.0) / toDegrees;//["]
 
-    var CRPIX1 = fitsData.CRPIX1;
-    var CRPIX2 = fitsData.CRPIX2;
-
     //convert to radians
     var CRVAL1 = fitsData.CRVAL1 / toDegrees;
     var CRVAL2 = fitsData.CRVAL2 / toDegrees;
