@@ -16929,7 +16929,7 @@ async function display_FITS_header(index) {
             headerArray[i] = headerArray[i].replace(/degree/g, 'deg   ');
         }
 
-        headerStr = headerArray.join('') + '\0'; // '' was '\n' but it caused confusion in the WCSLIB library
+        headerStr = headerArray.join('') + '\0';
         nkeyrec = headerArray.length;
         header = string2buffer(headerStr);
         console.log(nkeyrec, headerArray);
