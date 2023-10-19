@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-18.3";
+    return "JS2023-10-19.0";
 }
 
 function uuidv4() {
@@ -5904,25 +5904,24 @@ function display_gridlines() {
                 var image = imageContainer[va_count - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
-                var tmp = image_bounding_dims.x1 + d * (image_bounding_dims.width - 1);
-                var orig_x = tmp * fitsData.width / image.width;
+                var tmp, orig_x, orig_y;
 
-                try {
-                    if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                        if (coordsFmt == 'DMS')
-                            return x2dms(orig_x);
-                        else
-                            return x2hms(orig_x);
-                    }
+                tmp = image_bounding_dims.x1 + d * (image_bounding_dims.width - 1);
+                orig_x = tmp * fitsData.width / image.width;
+                tmp = image_bounding_dims.y1 + (image_bounding_dims.width - 1);
+                orig_y = tmp * fitsData.height / image.height;
 
-                    if (fitsData.CTYPE1.indexOf("GLON") > -1 || fitsData.CTYPE1.indexOf("ELON") > -1)
-                        return x2dms(orig_x);
+                let world = pix2sky(fitsData, orig_x, orig_y);
+                let radec = [world[0] / toDegrees, world[1] / toDegrees];
+
+                if (fitsData.CTYPE1.indexOf("RA") > -1) {
+                    if (coordsFmt == 'DMS')
+                        return RadiansPrintDMS(radec[0]);
+                    else
+                        return RadiansPrintHMS(radec[0]);
+                } else {
+                    return RadiansPrintDMS(radec[0]);
                 }
-                catch (err) {
-                    console.log(err);
-                }
-
-                return "";
             });
 
         svg.append("g")
@@ -5955,23 +5954,19 @@ function display_gridlines() {
 
                 var tmp = image_bounding_dims.x1 + d * (image_bounding_dims.width - 1);
                 var orig_x = tmp * fitsData.width / image.width;
+                var orig_y = image_bounding_dims.y1 * fitsData.height / image.height;
 
-                try {
-                    if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                        if (coordsFmt == 'DMS')
-                            return x2dms(orig_x);
-                        else
-                            return x2hms(orig_x);
-                    }
+                let world = pix2sky(fitsData, orig_x, orig_y);
+                let radec = [world[0] / toDegrees, world[1] / toDegrees];
 
-                    if (fitsData.CTYPE1.indexOf("GLON") > -1 || fitsData.CTYPE1.indexOf("ELON") > -1)
-                        return x2dms(orig_x);
+                if (fitsData.CTYPE1.indexOf("RA") > -1) {
+                    if (coordsFmt == 'DMS')
+                        return RadiansPrintDMS(radec[0]);
+                    else
+                        return RadiansPrintHMS(radec[0]);
+                } else {
+                    return RadiansPrintDMS(radec[0]);
                 }
-                catch (err) {
-                    console.log(err);
-                }
-
-                return "";
             });
 
         svg.append("g")
@@ -6004,17 +5999,16 @@ function display_gridlines() {
                 var image = imageContainer[va_count - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
-                var tmp = image_bounding_dims.y1 + d * (image_bounding_dims.height - 1);
-                var orig_y = tmp * fitsData.height / image.height;
+                var tmp, orig_x, orig_y;
 
-                try {
-                    return y2dms(orig_y);
-                }
-                catch (err) {
-                    console.log(err);
-                }
+                tmp = image_bounding_dims.x1 + (image_bounding_dims.width - 1);
+                orig_x = tmp * fitsData.width / image.width;
+                tmp = image_bounding_dims.y1 + d * (image_bounding_dims.height - 1);
+                orig_y = tmp * fitsData.height / image.height;
 
-                return "";
+                let world = pix2sky(fitsData, orig_x, orig_y);
+                let radec = [world[0] / toDegrees, world[1] / toDegrees];
+                return RadiansPrintDMS(radec[1]);
             });
 
         svg.append("g")
