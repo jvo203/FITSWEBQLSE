@@ -5554,111 +5554,6 @@ function HaversineDistance(ra1, dec1, ra2, dec2) {
     return d;
 }
 
-function CD_matrix(X, Y) {
-    let fitsData = fitsContainer[va_count - 1];
-
-    if (fitsData == null)
-        return;
-
-    var CRPIX1 = fitsData.CRPIX1;
-    var CRPIX2 = fitsData.CRPIX2;
-
-    var CRVAL1 = fitsData.CRVAL1;
-    var CRVAL2 = fitsData.CRVAL2;
-
-    //console.log(CRPIX1, CRVAL1, CRPIX2, CRVAL2) ;
-
-    //convert to radians
-    CRVAL1 = CRVAL1 / toDegrees;
-    CRVAL2 = CRVAL2 / toDegrees;
-
-    var CD1_1 = fitsData.CD1_1;
-    var CD1_2 = fitsData.CD1_2;
-    var CD2_1 = fitsData.CD2_1;
-    var CD2_2 = fitsData.CD2_2;
-
-    var x = CD1_1 * (X - CRPIX1) + CD1_2 * (Y - CRPIX2);
-    var y = CD2_1 * (X - CRPIX1) + CD2_2 * (Y - CRPIX2);
-
-    //convert to radians
-    x = x / toDegrees;
-    y = y / toDegrees;
-
-    //console.log("x: ", x, "y: ", y, "X: ", X, "Y: ", Y) ;
-
-    var a = Math.atan((x / Math.cos(CRVAL2)) / (1 - y * Math.tan(CRVAL2)));
-    var ra = a + CRVAL1;
-    var dec = Math.atan((y + Math.tan(CRVAL2)) * Math.cos(a) / (1 - y * Math.tan(CRVAL2)));
-
-    var newradec = new Array(ra, dec);
-
-    // console.log(RadiansPrintHMS(ra), RadiansPrintDMS(dec));
-
-    return newradec;
-}
-
-function x2rad(x) {
-    let fitsData = fitsContainer[va_count - 1];
-
-    if (fitsData == null)
-        return;
-
-    if (fitsData.CDELT1 != null) {
-        return (fitsData.CRVAL1 + (x - fitsData.CRPIX1) * fitsData.CDELT1) / toDegrees;
-    }
-    else
-        throw "CDELT1 is not available";
-}
-
-function x2hms(x) {
-    return RadiansPrintHMS(x2rad(x));
-};
-
-function x2dms(x) {
-    return RadiansPrintDMS(x2rad(x));
-};
-
-function y2rad(y) {
-    let fitsData = fitsContainer[va_count - 1];
-
-    if (fitsData == null)
-        return;
-
-    if (fitsData.CDELT2 != null) {
-        return (fitsData.CRVAL2 + (y - fitsData.CRPIX2) * fitsData.CDELT2) / toDegrees;
-    }
-    else
-        throw "CDELT2 is not available";
-}
-
-function ra2x(ra) {
-    let fitsData = fitsContainer[va_count - 1];
-
-    if (fitsData == null)
-        return;
-
-    if (fitsData.CDELT1 != null)
-        return (ra - fitsData.CRVAL1) / fitsData.CDELT1 + fitsData.CRPIX1;
-    else
-        throw "CDELT1 is not available";
-}
-
-function dec2y(dec) {
-    let fitsData = fitsContainer[va_count - 1];
-
-    if (fitsData == null)
-        return;
-
-    if (fitsData.CDELT2 != null)
-        return (dec - fitsData.CRVAL2) / fitsData.CDELT2 + fitsData.CRPIX2;
-    else
-        throw "CDELT2 is not available";
-}
-
-function y2dms(y) {
-    return RadiansPrintDMS(y2rad(y));
-};
-
 function display_scale_info() {
     let fitsData = fitsContainer[va_count - 1];
 
@@ -12420,68 +12315,43 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
             var orig_x = x * fitsData.width / imageCanvas.width;
             var orig_y = y * fitsData.height / imageCanvas.height;
+            // console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
-            try {
-                let raText = 'RA N/A';
-                let decText = 'DEC N/A';
+            let world = pix2sky(fitsData, orig_x, orig_y);
+            // if either world value is NaN throw an error
+            if (isNaN(world[0]) || isNaN(world[1]))
+                throw new Error("NaN WCS");
 
-                if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                    if (coordsFmt == 'DMS')
-                        raText = 'α: ' + x2dms(orig_x);
-                    else
-                        raText = 'α: ' + x2hms(orig_x);
-                }
+            let radec = [world[0] / toDegrees, world[1] / toDegrees];
+            // console.log("world:", world, "radec:", radec);
 
-                if (fitsData.CTYPE1.indexOf("GLON") > -1)
-                    raText = 'l: ' + x2dms(orig_x);
+            let raText = 'RA N/A';
+            let decText = 'DEC N/A';
 
-                if (fitsData.CTYPE1.indexOf("ELON") > -1)
-                    raText = 'λ: ' + x2dms(orig_x);
-
-                if (fitsData.CTYPE2.indexOf("DEC") > -1)
-                    decText = 'δ: ' + y2dms(orig_y);
-
-                if (fitsData.CTYPE2.indexOf("GLAT") > -1)
-                    decText = 'b: ' + y2dms(orig_y);
-
-                if (fitsData.CTYPE2.indexOf("ELAT") > -1)
-                    decText = 'β: ' + y2dms(orig_y);
-
-                d3.select("#ra").text(raText);
-                d3.select("#dec").text(decText);
+            if (fitsData.CTYPE1.indexOf("RA") > -1) {
+                if (coordsFmt == 'DMS')
+                    raText = 'α: ' + RadiansPrintDMS(radec[0]);
+                else
+                    raText = 'α: ' + RadiansPrintHMS(radec[0]);
             }
-            catch (err) {
-                //use the CD scale matrix
-                let radec = CD_matrix(orig_x, fitsData.height - orig_y);
 
-                let raText = 'RA N/A';
-                let decText = 'DEC N/A';
+            if (fitsData.CTYPE1.indexOf("GLON") > -1)
+                raText = 'l: ' + RadiansPrintDMS(radec[0]);
 
-                if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                    if (coordsFmt == 'DMS')
-                        raText = 'α: ' + RadiansPrintDMS(radec[0]);
-                    else
-                        raText = 'α: ' + RadiansPrintHMS(radec[0]);
-                }
+            if (fitsData.CTYPE1.indexOf("ELON") > -1)
+                raText = 'λ: ' + RadiansPrintDMS(radec[0]);
 
-                if (fitsData.CTYPE1.indexOf("GLON") > -1)
-                    raText = 'l: ' + RadiansPrintDMS(radec[0]);
+            if (fitsData.CTYPE2.indexOf("DEC") > -1)
+                decText = 'δ: ' + RadiansPrintDMS(radec[1]);
 
-                if (fitsData.CTYPE1.indexOf("ELON") > -1)
-                    raText = 'λ: ' + RadiansPrintDMS(radec[0]);
+            if (fitsData.CTYPE2.indexOf("GLAT") > -1)
+                decText = 'b: ' + RadiansPrintDMS(radec[1]);
 
-                if (fitsData.CTYPE2.indexOf("DEC") > -1)
-                    decText = 'δ: ' + RadiansPrintDMS(radec[1]);
+            if (fitsData.CTYPE2.indexOf("ELAT") > -1)
+                decText = 'β: ' + RadiansPrintDMS(radec[1]);
 
-                if (fitsData.CTYPE2.indexOf("GLAT") > -1)
-                    decText = 'b: ' + RadiansPrintDMS(radec[1]);
-
-                if (fitsData.CTYPE2.indexOf("ELAT") > -1)
-                    decText = 'β: ' + RadiansPrintDMS(radec[1]);
-
-                d3.select("#ra").text(raText);
-                d3.select("#dec").text(decText);
-            }
+            d3.select("#ra").text(raText);
+            d3.select("#dec").text(decText);
         });
 
     zoom.scaleTo(rect, zoom_scale);
@@ -13123,7 +12993,6 @@ function setup_image_selection() {
 
             var orig_x = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
-            // console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
             let world = pix2sky(fitsData, orig_x, orig_y);
             // if either world value is NaN throw an error
@@ -13131,7 +13000,6 @@ function setup_image_selection() {
                 throw new Error("NaN WCS");
 
             let radec = [world[0] / toDegrees, world[1] / toDegrees];
-            // console.log("world:", world, "radec:", radec);
 
             let raText = 'RA N/A';
             let decText = 'DEC N/A';
