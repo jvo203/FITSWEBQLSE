@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-19.0";
+    return "JS2023-10-20.0";
 }
 
 function uuidv4() {
@@ -2011,7 +2011,7 @@ function webgl_viewport_renderer(gl, container, height) {
     let py = viewport_zoom_settings.py;
     let viewport_size = viewport_zoom_settings.zoomed_size;
     py = height - py - viewport_size;
-    gl.viewport(px, py, viewport_size, viewport_size);
+    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size), Math.round(viewport_size));
 
     // Clear the canvas
     gl.clearColor(0, 0, 0, 0);
@@ -2176,7 +2176,7 @@ function webgl_composite_viewport_renderer(gl, container, height) {
     let py = viewport_zoom_settings.py;
     let viewport_size = viewport_zoom_settings.zoomed_size;
     py = height - py - viewport_size;
-    gl.viewport(px, py, viewport_size, viewport_size);
+    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size), Math.round(viewport_size));
 
     // Clear the canvas
     gl.clearColor(0, 0, 0, 0);
@@ -2402,7 +2402,7 @@ function webgl_zoom_renderer(gl, height) {
         let py = viewport_zoom_settings.py;
         let viewport_size = viewport_zoom_settings.zoomed_size;
         py = height - py - viewport_size;
-        gl.viewport(px, py, viewport_size, viewport_size);
+        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size), Math.round(viewport_size));
 
         // Clear the canvas
         gl.clearColor(0, 0, 0, 0);
@@ -2593,7 +2593,7 @@ function webgl_composite_zoom_renderer(gl, height) {
         let py = viewport_zoom_settings.py;
         let viewport_size = viewport_zoom_settings.zoomed_size;
         py = height - py - viewport_size;
-        gl.viewport(px, py, viewport_size, viewport_size);
+        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size), Math.round(viewport_size));
 
         // Clear the canvas
         gl.clearColor(0, 0, 0, 0);
@@ -3358,7 +3358,7 @@ function webgl_composite_image_renderer(gl, width, height) {
             image.refresh = false;
 
         //WebGL how to convert from clip space to pixels	
-        gl.viewport((width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
+        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width), Math.round(img_height));
         // console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         // console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
         // set the global variable
@@ -3537,10 +3537,10 @@ function webgl_image_renderer(index, gl, width, height) {
         } else
             image.refresh = false;
 
-        //WebGL how to convert from clip space to pixels	
-        gl.viewport((width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
-        // console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
-        // console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
+        //WebGL how to convert from clip space to pixels        
+        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width), Math.round(img_height));
+        //console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
+        //console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
         // set the global variable
         image_gl_viewport = gl.getParameter(gl.VIEWPORT);
 
@@ -5724,24 +5724,6 @@ function display_gridlines() {
     if (fitsData == null)
         return;
 
-    if (fitsData.CTYPE1.indexOf("RA") < 0 && fitsData.CTYPE1.indexOf("GLON") < 0 && fitsData.CTYPE1.indexOf("ELON") < 0) {
-        d3.select("#displayGridlines")
-            .style("font-style", "italic")
-            .style('cursor', 'not-allowed')
-            .style("display", "none")
-            .attr("disabled", "disabled");
-        return;
-    }
-
-    if (fitsData.CTYPE2.indexOf("DEC") < 0 && fitsData.CTYPE2.indexOf("GLAT") < 0 && fitsData.CTYPE2.indexOf("ELAT") < 0) {
-        d3.select("#displayGridlines")
-            .style("font-style", "italic")
-            .style('cursor', 'not-allowed')
-            .style("display", "none")
-            .attr("disabled", "disabled");
-        return;
-    }
-
     if (!has_image)
         return;
 
@@ -5955,24 +5937,6 @@ function display_cd_gridlines() {
     for (let i = 0; i < gridScale.length; i++)
         if (isNaN(gridScale[i]))
             throw "CD matrix is not available";
-
-    if (fitsData.CTYPE1.indexOf("RA") < 0 && fitsData.CTYPE1.indexOf("GLON") < 0 && fitsData.CTYPE1.indexOf("ELON") < 0) {
-        d3.select("#displayGridlines")
-            .style("font-style", "italic")
-            .style('cursor', 'not-allowed')
-            .style("display", "none")
-            .attr("disabled", "disabled");
-        return;
-    }
-
-    if (fitsData.CTYPE2.indexOf("DEC") < 0 && fitsData.CTYPE2.indexOf("GLAT") < 0 && fitsData.CTYPE2.indexOf("ELAT") < 0) {
-        d3.select("#displayGridlines")
-            .style("font-style", "italic")
-            .style('cursor', 'not-allowed')
-            .style("display", "none")
-            .attr("disabled", "disabled");
-        return;
-    }
 
     if (!has_image)
         return;
@@ -12557,14 +12521,14 @@ function setup_image_selection() {
     //svg image rectangle for zooming-in
     var rect = svg.append("rect")
         .attr("id", "image_rectangle")
-        /*.attr("x", Math.floor((width - img_width) / 2))
-        .attr("y", Math.floor((height - img_height) / 2))
-        .attr("width", Math.floor(img_width))
-        .attr("height", Math.floor(img_height))*/
-        .attr("x", (width - img_width) / 2)
+        .attr("x", Math.round((width - img_width) / 2))
+        .attr("y", Math.round((height - img_height) / 2))
+        .attr("width", Math.round(img_width))
+        .attr("height", Math.round(img_height))
+        /*.attr("x", (width - img_width) / 2)
         .attr("y", (height - img_height) / 2)
         .attr("width", img_width)
-        .attr("height", img_height)
+        .attr("height", img_height)*/
         .style('cursor', 'none')//'crosshair')//'none' to mask Chrome latency
         /*.style('cursor', 'crosshair')//'crosshair')*/
         /*.style("fill", "transparent")
@@ -17681,7 +17645,7 @@ function webgl_legend_renderer(index, gl, x, y, width, height) {
 
     // no need for an animation loop, just handle the lost context
     //WebGL how to convert from clip space to pixels	
-    gl.viewport(x, y, width, height);
+    gl.viewport(Math.round(x), Math.round(y), Math.round(width), Math.round(height));
 
     // Clear the canvas
     gl.clearColor(0, 0, 0, 0);
