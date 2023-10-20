@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-20.1";
+    return "JS2023-10-20.2";
 }
 
 function uuidv4() {
@@ -12562,8 +12562,11 @@ function setup_image_selection() {
             }
 
             if (d3.select("#pvline").attr("opacity") < 1.0) {
-                zoom_element.attr("opacity", 1.0);
-                zoom_cross.attr("opacity", 0.75);
+                // commented out on 2023/10/20
+                // these two lines were interfering with the ds9 region import
+                // anyway, the "mousemove" event will take care of the cross-hair
+                /*zoom_element.attr("opacity", 1.0);
+                zoom_cross.attr("opacity", 0.75);*/
             }
 
             d3.select("#pixel").text("").attr("opacity", 0.0);
@@ -12693,7 +12696,6 @@ function setup_image_selection() {
             d3.select("#" + zoom_location).style("stroke", "transparent");
             d3.select("#" + zoom_location + "Cross").attr("opacity", 0.0);
             d3.select("#" + zoom_location + "Beam").attr("opacity", 0.0);
-
             d3.select("#pixel").text("").attr("opacity", 0.0);
 
             document.removeEventListener('copy', copy_coordinates);
@@ -15415,7 +15417,10 @@ function load_region() {
                 }
             }
 
-            display_points(points);
+            let stat = display_points(points);
+
+            if (stat != points.length)
+                alert("ds9 import: some points are outside the image boundaries. Is the region file correct?");
         }
     });
 
@@ -15428,7 +15433,7 @@ function display_points(points) {
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData == null)
-        return;
+        return 0;
 
     var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 
@@ -15456,6 +15461,8 @@ function display_points(points) {
     var ay = (image_bounding_dims.height - 0) / (parseFloat(rect.attr("height")) - 0);
     console.log("ax:", ax, "ay:", ay);
 
+    let no_points = 0;
+
     for (let i = 0; i < points.length; i++) {
         let point = points[i];
 
@@ -15463,6 +15470,9 @@ function display_points(points) {
         let orig_y = point.y;
         let shape = point.shape;
         console.log("orig_x:", orig_x, "orig_y:", orig_y, "shape:", shape);
+
+        if (orig_x < 0 || orig_x > fitsData.width || orig_y < 0 || orig_y > fitsData.height)
+            continue;
 
         // go from orig_x, orig_y to the mouse coordinates
         let x = orig_x * (imageContainer[va_count - 1].width - 0) / (fitsData.width - 0);
@@ -15508,11 +15518,15 @@ function display_points(points) {
                 .attr("opacity", 0.5)
                 .attr("pointer-events", "none");
         }
+
+        no_points++;
     }
 
     document.getElementById("displayRegion").style.display = "block";
     var htmlStr = displayRegion ? '<span class="fas fa-check-square"></span> ds9 region' : '<span class="far fa-square"></span> ds9 region';
     d3.select("#displayRegion").html(htmlStr);
+
+    return no_points;
 }
 
 function show_fits_header() {
