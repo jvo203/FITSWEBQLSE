@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-20.0";
+    return "JS2023-10-20.1";
 }
 
 function uuidv4() {
@@ -15298,14 +15298,14 @@ function load_region() {
     console.log("file_name:", file_name, "file_type:", file_type, "file_size:", file_size);
 
     // append the file name to the label text "regionLabel"
-    d3.select("#regionLabel").html("ds9 region: " + file_name + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+    d3.select("#regionLabel").html("ds9 region: " + file_name + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onclick="javascript:hide_navigation_bar();" onchange="javascript:load_region();"/>');
 
     let reader = new FileReader();
 
     reader.addEventListener('error', function (e) {
         let err = e.target.error;
         console.error(err);
-        d3.select("#regionLabel").html("error loading " + file_name + " (" + err + ")" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+        d3.select("#regionLabel").html("error loading " + file_name + " (" + err + ")" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onclick="javascript:hide_navigation_bar();" onchange="javascript:load_region();"/>');
 
         displayRegion = false;
         d3.select("#ds9region").attr("opacity", 0);
@@ -15376,14 +15376,14 @@ function load_region() {
 
         if (coordinate_system == "unknown") {
             alert("Unknown / unsupported coordinate system.");
-            d3.select("#regionLabel").html(file_name + ": (unsupported coordinate system)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+            d3.select("#regionLabel").html(file_name + ": (unsupported coordinate system)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onclick="javascript:hide_navigation_bar();" onchange="javascript:load_region();"/>');
             return;
         }
 
         // check if there are any points
         if (points.length == 0) {
             alert("No points found in the region file. Supported ds9 shapes: Circle and Point.");
-            d3.select("#regionLabel").html(file_name + ": (no points found)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/>');
+            d3.select("#regionLabel").html(file_name + ": (no points found)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onclick="javascript:hide_navigation_bar();" onchange="javascript:load_region();"/>');
 
             displayRegion = false;
             d3.select("#ds9region").attr("opacity", 0);
@@ -15634,7 +15634,7 @@ function display_menu() {
 
     fitsDropdown.append("li")
         .append("a")
-        .html('<label id="regionLabel" style="cursor:pointer;font-weight:normal">load ds9 region<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onchange="javascript:load_region();"/></label>');
+        .html('<label id="regionLabel" style="cursor:pointer;font-weight:normal">load ds9 region<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onclick="javascript:hide_navigation_bar();" onchange="javascript:load_region();"/></label>');
 
     if (!isLocal && va_count == 1 && (window.location.search.indexOf('ALMA') > 0 || window.location.search.indexOf('ALMB') > 0 || window.location.search.indexOf('FGN') > 0 || window.location.search.indexOf('CMG') > 0 || window.location.search.indexOf('SFP') > 0 || window.location.search.indexOf('NROA') > 0)) {
         var url = "";
