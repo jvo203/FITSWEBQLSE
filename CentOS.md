@@ -86,7 +86,17 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     make -j16
     sudo make install
 
-# 8. ZeroMQ
+# 8. WCSLIB
+
+    wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
+    bunzip2 wcslib.tar.bz2
+    tar xvf wcslib.tar
+    cd wcslib-8.1
+    ./configure --prefix=/usr/local
+    make
+    sudo make install
+
+# 9. ZeroMQ
 
     wget https://github.com/zeromq/libzmq/archive/refs/tags/v4.3.4.tar.gz
     tar zxvf v4.3.4.tar.gz
@@ -94,7 +104,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     ./autogen.sh && ./configure && make -j16
     sudo make install
 
-# 9. CZMQ
+# 10. CZMQ
 
     wget https://github.com/zeromq/czmq/archive/refs/tags/v4.2.1.tar.gz
     tar zxvf v4.2.1.tar.gz
@@ -103,7 +113,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     sudo make install
     sudo ldconfig
 
-# 10. jemalloc
+# 11. jemalloc
 
     wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
     bunzip2 jemalloc-5.3.0.tar.bz2
@@ -113,11 +123,11 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     make -j16
     sudo make install
 
-# 11. Intel SPMD C (ispc)
+# 12. Intel SPMD C (ispc)
 
     manually add ispc from https://ispc.github.io/downloads.html
 
-# 12. Adjust environment variables
+# 13. Adjust environment variables
 
 	Add
 
@@ -127,11 +137,11 @@ ulimit -s unlimited
 
     to .bashrc and re-login
 
-# 13. Splatalogue
+# 14. Splatalogue
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
-# 14. Open up the Ports via a Firewall
+# 15. Open up the Ports via a Firewall
 
     https://mebee.info/2019/10/17/post-2369/
     
@@ -149,13 +159,13 @@ ulimit -s unlimited
     sudo firewall-cmd --list-all
     sudo firewall-cmd --list-ports --zone=public
 
-# 15. Install screen & htop
+# 16. Install screen & htop
 
     sudo dnf install epel-release
     sudo dnf update
     sudo dnf install screen htop
 
-# 16. Launch the processes in parallel on the development cluster
+# 17. Launch the processes in parallel on the development cluster
 
     .bashrc:
     export I_MPI_PORT_RANGE="30000:30000"
