@@ -424,6 +424,18 @@ module fits
          integer(kind=c_int) :: wcsvfree
       end function wcsvfree
 
+      ! int wcsp2s	(	struct wcsprm * 	wcs, int 	ncoord, int 	nelem, const double 	pixcrd[], double 	imgcrd[], double 	phi[], double 	theta[], double 	world[], int 	stat[] )
+      function wcsp2s(wcs, ncoord, nelem, pixcrd, imgcrd, phi, theta, world, stat) bind(c, name='wcsp2s')
+         import :: c_int, c_double, c_ptr
+         implicit none
+         type(c_ptr), intent(in) :: wcs
+         integer(kind=c_int), value :: ncoord, nelem
+         real(kind=c_double), intent(in) :: pixcrd(*)
+         real(kind=c_double), intent(out) :: imgcrd(*), phi(*), theta(*), world(*)
+         integer(kind=c_int), intent(out) :: stat(*)
+         integer(kind=c_int) :: wcsp2s
+      end function wcsp2s
+
       ! custom bindings to POSIX threads
       function my_pthread_create(start_routine, arg, rc) bind(c, name='my_pthread_create')
          import :: c_int, c_ptr, c_funptr
@@ -6395,6 +6407,31 @@ contains
          dec = item%crval2 + (y - item%crpix2)*item%cdelt2 ! [deg]
       end if
    end subroutine pix_to_world
+
+   subroutine pix2sky(wcs, x, y, ra, dec)
+      implicit none
+
+      type(c_ptr), intent(in) :: wcs
+      real, intent(in) :: x, y
+      real(kind=c_double), intent(out) :: ra, dec
+
+      real(kind=c_double) :: pixcrd(2), imgcrd(2), phi(2), theta(2), world(2)
+      integer :: STATUS, STAT(2)
+
+      pixcrd(1) = x - 1.0
+      pixcrd(2) = y - 1.0
+
+      STATUS = WCSP2S(wcs, 1, 2, pixcrd, imgcrd, phi, theta, world, STAT)
+
+      if (STATUS .eq. 0) then
+         ra = world(1)
+         dec = world(2)
+      else
+         ra = ieee_value(0.0, ieee_quiet_nan)
+         dec = ieee_value(0.0, ieee_quiet_nan)
+      end if
+
+   end subroutine pix2sky
 
    recursive subroutine launch_resize_task(user) BIND(C, name='launch_resize_task')
       use, intrinsic :: iso_c_binding
