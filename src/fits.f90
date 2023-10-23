@@ -428,8 +428,8 @@ module fits
       function wcsp2s(wcs, ncoord, nelem, pixcrd, imgcrd, phi, theta, world, stat) bind(c, name='wcsp2s')
          import :: c_int, c_double, c_ptr
          implicit none
-         type(c_ptr), intent(in) :: wcs
-         integer(kind=c_int), value :: ncoord, nelem
+         type(c_ptr), value :: wcs
+         integer(kind=c_int), intent(in), value :: ncoord, nelem
          real(kind=c_double), intent(in) :: pixcrd(*)
          real(kind=c_double), intent(out) :: imgcrd(*), phi(*), theta(*), world(*)
          integer(kind=c_int), intent(out) :: stat(*)
@@ -6411,21 +6411,30 @@ contains
    subroutine pix2sky(wcs, x, y, ra, dec)
       implicit none
 
-      type(c_ptr), intent(in) :: wcs
-      real, intent(in) :: x, y
+      type(c_ptr), intent(inout) :: wcs
+      real(kind=c_float), intent(in) :: x, y
       real(kind=c_double), intent(out) :: ra, dec
 
       real(kind=c_double) :: pixcrd(2), imgcrd(2), phi(2), theta(2), world(2)
-      integer :: STATUS, STAT(2)
+      integer(kind=c_int) :: STATUS, STAT(2)
 
-      pixcrd(1) = x - 1.0
-      pixcrd(2) = y - 1.0
+      pixcrd(1) = real(x, kind=c_double) - 1.0
+      pixcrd(2) = real(y, kind=c_double) - 1.0
 
       STATUS = WCSP2S(wcs, 1, 2, pixcrd, imgcrd, phi, theta, world, STAT)
 
       if (STATUS .eq. 0) then
-         ra = world(1)
-         dec = world(2)
+         if (STAT(1) .eq. 0) then
+            ra = world(1)
+         else
+            ra = ieee_value(0.0, ieee_quiet_nan)
+         end if
+
+         if (STAT(2) .eq. 0) then
+            dec = world(2)
+         else
+            dec = ieee_value(0.0, ieee_quiet_nan)
+         end if
       else
          ra = ieee_value(0.0, ieee_quiet_nan)
          dec = ieee_value(0.0, ieee_quiet_nan)
@@ -6637,6 +6646,9 @@ contains
 
       IERR = WCSPIH (item%hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP)
       print *, 'WCSPIH: ', IERR, NREJECT, NWCS
+
+      call pix2sky(WCSP, cx, cy, lng, lat)
+      print *, 'lng: ', lng, ', lat: ', lat
 
       IF (IERR.NE.0) THEN
          print *, 'WCSPIH error: ', IERR
