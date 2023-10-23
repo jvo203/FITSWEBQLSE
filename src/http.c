@@ -5827,6 +5827,9 @@ void split_wcs(const char *coord, char *key, char *value, const char *null_key)
     memcpy(key, coord, key_len);
     memcpy(value, pos + 1, len - key_len);
 
+    // terminate the key with '\0'
+    key[key_len - 1] = '\0';
+
     // terminate the value with '\0'
     value[len - key_len] = '\0';
 
