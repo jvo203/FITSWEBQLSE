@@ -6418,8 +6418,8 @@ contains
       real(kind=c_double) :: pixcrd(2), imgcrd(2), phi(2), theta(2), world(2)
       integer(kind=c_int) :: STATUS, STAT(2)
 
-      pixcrd(1) = real(x, kind=c_double) ! - 1.0
-      pixcrd(2) = real(y, kind=c_double) ! - 1.0
+      pixcrd(1) = real(x, kind=c_double) - 1.0
+      pixcrd(2) = real(y, kind=c_double) - 1.0
 
       STATUS = WCSP2S(wcs, 1, 2, pixcrd, imgcrd, phi, theta, world, STAT)
 
