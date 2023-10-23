@@ -6419,7 +6419,7 @@ contains
       real(kind=8) :: cdelt3
 
       ! WCS
-      integer :: NKEYRC, RELAX, CTRL, NREJECT, IERR, NWCS, WCSP(2)
+      integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS, WCSP(2)
 
       real(kind=c_double) :: lng, lat;
       real(kind=c_double) :: ra1, dec1, ra2, dec2
@@ -6575,6 +6575,14 @@ contains
 
       RELAX = 2**20 - 1 ! WCSHDR_all
       CTRL = -1
+
+      IERR = WCSPIH (item%hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP)
+      IF (IERR.NE.0) THEN
+         print *, 'WCSPIH error: ', IERR
+      ELSE
+         ! Free the WCSPRM structs and the memory allocated for them.
+         STATUS = WCSVFREE (NWCS, WCSP)
+      END IF
 
       call pix_to_world(item, cx, cy, lng, lat)
       call pix_to_world(item, cx - rx, cy - ry, ra1, dec1)
