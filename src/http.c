@@ -5921,9 +5921,10 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
     split_wcs(ra, ra_key, ra_value, "beam ra");
     split_wcs(dec, dec_key, dec_value, "beam dec");
 
-    // printf("[C] RA '%s' : '%s'\n", ra_key, ra_value);
-    // printf("[C] DEC '%s' : '%s'\n", dec_key, dec_value);
-    // printf("# ra (%s):%s, dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
+    printf("[C] RA(%s) DEC(%s)\n", ra, dec);
+    printf("[C] RA '%s' : '%s'\n", ra_key, ra_value);
+    printf("[C] DEC '%s' : '%s'\n", dec_key, dec_value);
+    printf("# ra (%s):%s, dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
 
     // ra/dec
     snprintf(line, sizeof(line) - 1, "# ra (%s):%s\n# dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);

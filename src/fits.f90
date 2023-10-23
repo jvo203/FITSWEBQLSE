@@ -6642,7 +6642,7 @@ contains
       NKEYRC = (size(item%hdr)-1) / 80
 
       RELAX = 2**20 - 1 ! WCSHDR_all
-      CTRL = -1
+      CTRL = 2
 
       IERR = WCSPIH (item%hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP)
       print *, 'WCSPIH: ', IERR, NREJECT, NWCS
