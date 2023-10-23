@@ -6418,6 +6418,9 @@ contains
       real(c_float) :: cx, cy, rx, ry, r, r2
       real(kind=8) :: cdelt3
 
+      ! WCS
+      integer :: NKEYRC, RELAX, CTRL, NREJECT, IERR, NWCS, WCSP(2)
+
       real(kind=c_double) :: lng, lat;
       real(kind=c_double) :: ra1, dec1, ra2, dec2
       real(kind=c_double) :: beam_width, beam_height
@@ -6566,6 +6569,12 @@ contains
 
       ! combine the spectra from other cluster nodes (if any)
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
+
+      ! WCSLIB
+      NKEYRC = (size(item%hdr)-1) / 80
+
+      RELAX = 2**20 - 1 ! WCSHDR_all
+      CTRL = -1
 
       call pix_to_world(item, cx, cy, lng, lat)
       call pix_to_world(item, cx - rx, cy - ry, ra1, dec1)
