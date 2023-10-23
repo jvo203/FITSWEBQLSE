@@ -403,6 +403,27 @@ module fits
          integer(kind=c_int)            :: c_usleep
       end function c_usleep
 
+      ! WCSLIB
+      ! int wcspih (char *header, int nkeyrec, int relax, int ctrl, int *nreject, int *nwcs, struct wcsprm **wcs)
+      function wcspih(header, nkeyrec, relax, ctrl, nreject, nwcs, wcs) bind(c, name='wcspih')
+         import :: c_int, c_char, c_ptr
+         implicit none
+         character(kind=c_char), intent(in) :: header(*)
+         integer(kind=c_int), value :: nkeyrec, relax, ctrl
+         integer(kind=c_int), intent(out) :: nreject, nwcs
+         type(c_ptr), intent(out) :: wcs
+         integer(kind=c_int) :: wcspih
+      end function wcspih
+
+      ! int wcsvfree	(	int * 	nwcs, struct wcsprm ** 	wcs )
+      function wcsvfree(nwcs, wcs) bind(c, name='wcsvfree')
+         import :: c_int, c_ptr
+         implicit none
+         integer(kind=c_int), intent(inout) :: nwcs
+         type(c_ptr), intent(inout) :: wcs
+         integer(kind=c_int) :: wcsvfree
+      end function wcsvfree
+
       ! custom bindings to POSIX threads
       function my_pthread_create(start_routine, arg, rc) bind(c, name='my_pthread_create')
          import :: c_int, c_ptr, c_funptr
@@ -6419,7 +6440,8 @@ contains
       real(kind=8) :: cdelt3
 
       ! WCS
-      integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS, WCSP(2)
+      integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS ! WCSP(2)
+      type(C_PTR) :: WCSP
 
       real(kind=c_double) :: lng, lat;
       real(kind=c_double) :: ra1, dec1, ra2, dec2
@@ -6577,6 +6599,8 @@ contains
       CTRL = -1
 
       IERR = WCSPIH (item%hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP)
+      print *, 'WCSPIH: ', IERR, NREJECT, NWCS
+
       IF (IERR.NE.0) THEN
          print *, 'WCSPIH error: ', IERR
       ELSE
