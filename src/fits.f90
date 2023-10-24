@@ -6722,8 +6722,8 @@ contains
       call pix2sky(WCSP, cx, cy, lng, lat)
 
       ! beam_width
-      call pix_to_world(item, cx - rx, cy, ra1, dec1)
-      call pix_to_world(item, cx + rx, cy, ra2, dec2)
+      call pix2sky(WCSP, cx - rx, cy, ra1, dec1)
+      call pix2sky(WCSP, cx + rx, cy, ra2, dec2)
 
       ! convert ra, dec from degrees to radians
       ra1 = ra1*deg2rad
@@ -6736,8 +6736,8 @@ contains
       beam_width = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
 
       ! beam_height
-      call pix_to_world(item, cx, cy - ry, ra1, dec1)
-      call pix_to_world(item, cx, cy + ry, ra2, dec2)
+      call pix2sky(WCSP, cx, cy - ry, ra1, dec1)
+      call pix2sky(WCSP, cx, cy + ry, ra2, dec2)
 
       ! convert ra, dec from degrees to radians
       ra1 = ra1*deg2rad
@@ -6759,7 +6759,6 @@ contains
       ! call pix_to_world(item, cx, cy, lng, lat)
       ! call pix_to_world(item, cx - rx, cy - ry, ra1, dec1)
       ! call pix_to_world(item, cx + rx, cy + ry, ra2, dec2)
-
       ! beam_width = abs(ra2 - ra1) ! [deg]
       ! beam_height = abs(dec2 - dec1) ! [deg]
 
