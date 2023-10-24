@@ -6464,6 +6464,76 @@ contains
 
    end subroutine launch_resize_task
 
+   pure function FPeq(a, b)
+      implicit none
+
+      real(kind=c_double), intent(in) :: a, b
+      logical :: FPeq
+
+      real(kind=c_double), parameter :: eps = 1.0d-6
+
+      FPeq = abs(a - b) .lt. eps
+
+   end function FPeq
+
+   pure function spoint_vector3d(lng, lat) result (v)
+      implicit none
+
+      real(kind=c_double), intent(in) :: lng, lat
+      real(kind=c_double), dimension(3) :: v
+
+      v(1) = cos(lat)*cos(lng)
+      v(2) = cos(lat)*sin(lng)
+      v(3) = sin(lat)
+
+   end function spoint_vector3d
+
+   pure function vector3d_cross(v1, v2) result (v)
+      implicit none
+
+      real(kind=c_double), dimension(3), intent(in) :: v1, v2
+      real(kind=c_double), dimension(3) :: v
+
+      v(1) = v1(2)*v2(3) - v1(3)*v2(2)
+      v(2) = v1(3)*v2(1) - v1(1)*v2(3)
+      v(3) = v1(1)*v2(2) - v1(2)*v2(1)
+
+   end function vector3d_cross
+
+   pure function vector3d_length(v)
+      implicit none
+
+      real(kind=c_double), dimension(3), intent(in) :: v
+      real(kind=c_double) :: vector3d_length
+
+      vector3d_length = sqrt(v(1)**2 + v(2)**2 + v(3)**2)
+
+   end function vector3d_length
+
+   pure function AngularDistance(p1lng, p1lat, p2lng, p2lat) result(distance)
+      implicit none
+
+      real(kind=c_double), intent(in) :: p1lng, p1lat, p2lng, p2lat
+      real(kind=c_double) :: distance
+
+      real(kind=c_double) :: dl, f
+      real(kind=c_double), dimension(3) :: v1, v2, v3
+
+      dl = p1lng - p2lng
+      f = ((sin(p1lat) * sin(p2lat) + cos(p1lat) * cos(p2lat) * cos(dl)))
+
+      if (FPeq(f, 1.0D0)) then
+         ! for small distance
+         v1 = spoint_vector3d(p1lng, p1lat)
+         v2 = spoint_vector3d(p2lng, p2lat)
+         v3 = vector3d_cross(v1, v2)
+         distance = vector3d_length(v3)
+      else
+         distance = acos(f)
+      end if
+
+   end function AngularDistance
+
    recursive subroutine spectrum_request_simd(user) BIND(C, name='spectrum_request_simd')
       use omp_lib
       use :: unix_pthread
@@ -6488,6 +6558,8 @@ contains
       ! WCS
       integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS ! WCSP(2)
       type(C_PTR) :: WCSP
+      real(kind=c_double), parameter :: deg2rad = 0.0174532925199432957692369076848861271344287188854172545609719144017d0
+      real(kind=c_double), parameter :: rad2deg = 57.2957795130823208767981548141051703324054724665643215491602438614d0
 
       real(kind=c_double) :: lng, lat;
       real(kind=c_double) :: ra1, dec1, ra2, dec2
@@ -6649,6 +6721,34 @@ contains
 
       call pix2sky(WCSP, cx, cy, lng, lat)
 
+      ! beam_width
+      call pix_to_world(item, cx - rx, cy, ra1, dec1)
+      call pix_to_world(item, cx + rx, cy, ra2, dec2)
+
+      ! convert ra, dec from degrees to radians
+      ra1 = ra1*deg2rad
+      dec1 = dec1*deg2rad
+
+      ra2 = ra2*deg2rad
+      dec2 = dec2*deg2rad
+
+      ! convert from radians to degrees
+      beam_width = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
+
+      ! beam_height
+      call pix_to_world(item, cx, cy - ry, ra1, dec1)
+      call pix_to_world(item, cx, cy + ry, ra2, dec2)
+
+      ! convert ra, dec from degrees to radians
+      ra1 = ra1*deg2rad
+      dec1 = dec1*deg2rad
+
+      ra2 = ra2*deg2rad
+      dec2 = dec2*deg2rad
+
+      ! convert from radians to degrees
+      beam_height = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
+
       IF (IERR.NE.0) THEN
          print *, 'WCSPIH error: ', IERR
       ELSE
@@ -6657,11 +6757,11 @@ contains
       END IF
 
       ! call pix_to_world(item, cx, cy, lng, lat)
-      call pix_to_world(item, cx - rx, cy - ry, ra1, dec1)
-      call pix_to_world(item, cx + rx, cy + ry, ra2, dec2)
+      ! call pix_to_world(item, cx - rx, cy - ry, ra1, dec1)
+      ! call pix_to_world(item, cx + rx, cy + ry, ra2, dec2)
 
-      beam_width = abs(ra2 - ra1) ! [deg]
-      beam_height = abs(dec2 - dec1) ! [deg]
+      ! beam_width = abs(ra2 - ra1) ! [deg]
+      ! beam_height = abs(dec2 - dec1) ! [deg]
 
       print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
 
