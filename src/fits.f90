@@ -6421,20 +6421,13 @@ contains
       ! wcslib uses 1-indexing for pixel coordinates
       pixcrd = (/real(x, kind=c_double), real(y, kind=c_double)/) ! FORTRAN is 1-indexed
 
+      ! print *, 'pixcrd = ', pixcrd
       STATUS = WCSP2S(wcs, 1, 2, pixcrd, imgcrd, phi, theta, world, STAT)
+      ! print *, STATUS, STAT, 'world = ', world
 
       if (STATUS .eq. 0) then
-         if (STAT(1) .eq. 0) then
-            ra = world(1)
-         else
-            ra = ieee_value(0.0, ieee_quiet_nan)
-         end if
-
-         if (STAT(2) .eq. 0) then
-            dec = world(2)
-         else
-            dec = ieee_value(0.0, ieee_quiet_nan)
-         end if
+         ra = world(1)
+         dec = world(2)
       else
          ra = ieee_value(0.0, ieee_quiet_nan)
          dec = ieee_value(0.0, ieee_quiet_nan)
