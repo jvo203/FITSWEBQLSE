@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-24.1";
+    return "JS2023-10-24.2";
 }
 
 function uuidv4() {
@@ -85,7 +85,7 @@ function _sky2pix(wcs, ra, dec) {
 
 function pix2sky(wcs, x, y) {
     // wcslib uses 1-indexing for pixel coordinates
-    var world = Module.pix2sky(wcs.index, x + 1, y + 1);
+    var world = Module.pix2sky(wcs.index, x + 0.5, y + 0.5);
     // console.log("world:", world);            
 
     return [world[0], world[1]];
@@ -96,7 +96,7 @@ function sky2pix(wcs, ra, dec) {
     // console.log("pixcrd:", pixcrd);            
 
     // wcslib uses 1-indexing for pixel coordinates
-    return [pixcrd[0] - 1, pixcrd[1] - 1];
+    return [pixcrd[0] - 0.5, pixcrd[1] - 0.5];
 }
 
 function round(value, precision, mode) {
@@ -15423,8 +15423,9 @@ function load_region() {
                 for (let i = 0; i < points.length; i++) {
                     let point = points[i];
 
-                    point.x -= 1;
-                    point.y -= 1;
+                    // ds9: the lower left pixel of the array will have the image coordinates (1,1). The lower left corner of the array will have coordinates (0.5,0.5)
+                    point.x -= 0.5;
+                    point.y -= 0.5;
 
                     // console.log("x:", point.x, "y:", point.y);
                 }
