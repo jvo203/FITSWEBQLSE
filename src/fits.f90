@@ -6419,8 +6419,7 @@ contains
       integer(kind=c_int) :: STATUS, STAT(2)
 
       ! wcslib uses 1-indexing for pixel coordinates
-      pixcrd(1) = real(x, kind=c_double) ! - 1.0
-      pixcrd(2) = real(y, kind=c_double) ! - 1.0
+      pixcrd = (/real(x, kind=c_double), real(y, kind=c_double)/) ! FORTRAN is 1-indexed
 
       STATUS = WCSP2S(wcs, 1, 2, pixcrd, imgcrd, phi, theta, world, STAT)
 
