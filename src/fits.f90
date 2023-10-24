@@ -6648,7 +6648,6 @@ contains
       print *, 'WCSPIH: ', IERR, NREJECT, NWCS
 
       call pix2sky(WCSP, cx, cy, lng, lat)
-      print *, 'lng: ', lng, ', lat: ', lat
 
       IF (IERR.NE.0) THEN
          print *, 'WCSPIH error: ', IERR
@@ -6657,7 +6656,7 @@ contains
          STATUS = WCSVFREE (NWCS, WCSP)
       END IF
 
-      call pix_to_world(item, cx, cy, lng, lat)
+      ! call pix_to_world(item, cx, cy, lng, lat)
       call pix_to_world(item, cx - rx, cy - ry, ra1, dec1)
       call pix_to_world(item, cx + rx, cy + ry, ra2, dec2)
 
