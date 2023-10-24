@@ -6744,16 +6744,17 @@ contains
 
       IF (IERR.NE.0) THEN
          print *, 'WCSPIH error: ', IERR
+
+         ! a backup method
+         call pix_to_world(item, cx, cy, lng, lat)
+         call pix_to_world(item, cx - rx, cy - ry, ra1, dec1)
+         call pix_to_world(item, cx + rx, cy + ry, ra2, dec2)
+         beam_width = abs(ra2 - ra1) ! [deg]
+         beam_height = abs(dec2 - dec1) ! [deg]
       ELSE
          ! Free the WCSPRM structs and the memory allocated for them.
          STATUS = WCSVFREE (NWCS, WCSP)
       END IF
-
-      ! call pix_to_world(item, cx, cy, lng, lat)
-      ! call pix_to_world(item, cx - rx, cy - ry, ra1, dec1)
-      ! call pix_to_world(item, cx + rx, cy + ry, ra2, dec2)
-      ! beam_width = abs(ra2 - ra1) ! [deg]
-      ! beam_height = abs(dec2 - dec1) ! [deg]
 
       print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
 
