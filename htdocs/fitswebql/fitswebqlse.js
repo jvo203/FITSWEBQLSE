@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-24.2";
+    return "JS2023-10-25.0";
 }
 
 function uuidv4() {
@@ -15662,7 +15662,7 @@ function display_menu() {
 
     fitsDropdown.append("li")
         .append("a")
-        .html('<label id="regionLabel" style="cursor:pointer;font-weight:normal">load ds9 region<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onclick="javascript:hide_navigation_bar();" onchange="javascript:load_region();"/></label>');
+        .html('<label id="regionLabel" style="cursor:pointer;font-weight:normal">import ds9 region<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onclick="javascript:hide_navigation_bar();" onchange="javascript:load_region();"/></label>');
 
     if (!isLocal && va_count == 1 && (window.location.search.indexOf('ALMA') > 0 || window.location.search.indexOf('ALMB') > 0 || window.location.search.indexOf('FGN') > 0 || window.location.search.indexOf('CMG') > 0 || window.location.search.indexOf('SFP') > 0 || window.location.search.indexOf('NROA') > 0)) {
         var url = "";
