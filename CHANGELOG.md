@@ -1,6 +1,6 @@
 ## [5.0.47] - 2023-10-25
 
-* a new functionality: an initial support for importing ds9 region files (_**.reg*_) with _*image*_/_*physical*_/_*wcs*_ (_*fk5*_ only) coordinates and two types of shapes: _*circle*_ and _*point*_ (_*hint*_: a menu setting _*FITS*_ / _*import ds9 region*_)
+* a new functionality: an initial support for importing ds9 region files (*.reg) with _*image*_/_*physical*_/_*wcs*_ (_*fk5*_ only) coordinates and two types of shapes: _*circle*_ and _*point*_ (_*hint*_: a menu setting _*FITS*_ / _*import ds9 region*_)
 * incorporated the WCSLIB library server-side (in the CSV export FORTRAN code ) as well as in the client-side JavaScript (calling the WASM-compiled C code), which replaces a custom implementation of the WCS conversion routines and provides a better compatibility with ds9
 * a minor fix to the CSV export functionality (fixed the _*RA*_ string parsing in the server C code)
 
