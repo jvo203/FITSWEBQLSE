@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-25.0";
+    return "JS2023-10-25.1";
 }
 
 function uuidv4() {
@@ -12960,6 +12960,7 @@ function setup_image_selection() {
 
             var orig_x = x * (fitsData.width - 0) / (imageContainer[va_count - 1].width - 0);
             var orig_y = y * (fitsData.height - 0) / (imageContainer[va_count - 1].height - 0);
+            //console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
             let world = pix2sky(fitsData, orig_x, orig_y);
             // if either world value is NaN throw an error
