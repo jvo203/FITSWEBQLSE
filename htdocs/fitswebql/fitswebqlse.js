@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-27.0";
+    return "JS2023-10-27.1";
 }
 
 function uuidv4() {
@@ -12951,15 +12951,15 @@ function setup_image_selection() {
 
             let rect = event.currentTarget;
 
-            var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 1);
+            var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 0);
             var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect.getAttribute("x"));
 
-            var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 1);
+            var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 0);
             var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect.getAttribute("y"));
 
             var orig_x = x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
             var orig_y = y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
-            console.log("scale:", scale, "ax:", ax, "ay:", ay, "orig_x:", orig_x, "orig_y:", orig_y);
+            // console.log("scale:", scale, "ax:", ax, "ay:", ay, "orig_x:", orig_x, "orig_y:", orig_y);
 
             let world = pix2sky(fitsData, orig_x, orig_y);
             // if either world value is NaN throw an error
@@ -13134,10 +13134,10 @@ function setup_image_selection() {
 
                 let rect = event.currentTarget;
 
-                var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 1);
+                var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 0);
                 var pred_x = image_bounding_dims.x1 + ax * (pred_mouse_x - rect.getAttribute("x"));
 
-                var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 1);
+                var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 0);
                 var pred_y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (pred_mouse_y - rect.getAttribute("y"));
 
                 var fitsX = Math.round(pred_x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1));//x or pred_x
@@ -14416,10 +14416,10 @@ function imageTimeout() {
 
     var rect_elem = d3.select("#image_rectangle");
 
-    var ax = (image_bounding_dims.width - 1) / (rect_elem.attr("width") - 1);
+    var ax = (image_bounding_dims.width - 1) / (rect_elem.attr("width") - 0);
     var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect_elem.attr("x"));
 
-    var ay = (image_bounding_dims.height - 1) / (rect_elem.attr("height") - 1);
+    var ay = (image_bounding_dims.height - 1) / (rect_elem.attr("height") - 0);
     var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect_elem.attr("y"));
 
     var clipSize = Math.min(image_bounding_dims.width, image_bounding_dims.height) / zoom_scale;
@@ -14818,8 +14818,8 @@ function partial_fits_size() {
     var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
     //console.log("BITPIX = ", fitsData.BITPIX);
 
-    var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 1);
-    var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 1);
+    var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 0);
+    var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 0);
 
     var x1 = image_bounding_dims.x1 + ax * (begin_x - offsetx);
     var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (begin_y - offsety);
@@ -15127,8 +15127,8 @@ function submit_pv_line(line_x1, line_y1, line_x2, line_y2) {
     let fitsData = fitsContainer[va_count - 1];
     var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 
-    var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 1);
-    var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 1);
+    var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 0);
+    var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 0);
 
     var x1 = image_bounding_dims.x1 + ax * (line_x1 - offsetx);
     var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (line_y1 - offsety);
@@ -15196,8 +15196,8 @@ function partial_fits_download() {
     let fitsData = fitsContainer[va_count - 1];
     var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
 
-    var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 1);
-    var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 1);
+    var ax = (image_bounding_dims.width - 1) / (d3.select("#image_rectangle").attr("width") - 0);
+    var ay = (image_bounding_dims.height - 1) / (d3.select("#image_rectangle").attr("height") - 0);
 
     var x1 = image_bounding_dims.x1 + ax * (begin_x - offsetx);
     var y1 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (begin_y - offsety);
@@ -15471,8 +15471,8 @@ function display_points(points) {
     // get the element with id = "image_rectangle"
     let rect = d3.select("#image_rectangle");
 
-    var ax = (image_bounding_dims.width - 1) / (parseFloat(rect.attr("width")) - 1);
-    var ay = (image_bounding_dims.height - 1) / (parseFloat(rect.attr("height")) - 1);
+    var ax = (image_bounding_dims.width - 1) / (parseFloat(rect.attr("width")) - 0);
+    var ay = (image_bounding_dims.height - 1) / (parseFloat(rect.attr("height")) - 0);
     console.log("ax:", ax, "ay:", ay);
 
     let no_points = 0;
