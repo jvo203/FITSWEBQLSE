@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-26.0";
+    return "JS2023-10-27.0";
 }
 
 function uuidv4() {
@@ -3256,8 +3256,8 @@ function webgl_composite_image_renderer(gl, width, height) {
     var image = compositeImage;
 
     var scale = get_image_scale(width, height, image.image_bounding_dims.width, image.image_bounding_dims.height);
-    var img_width = scale * image.image_bounding_dims.width;
-    var img_height = scale * image.image_bounding_dims.height;
+    var img_width = Math.floor(scale * image.image_bounding_dims.width);
+    var img_height = Math.floor(scale * image.image_bounding_dims.height);
     //console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
 
     // setup GLSL program
@@ -3434,8 +3434,8 @@ function webgl_image_renderer(index, gl, width, height) {
     var image = imageContainer[index - 1];
 
     var scale = get_image_scale(width, height, image.image_bounding_dims.width, image.image_bounding_dims.height);
-    var img_width = scale * image.image_bounding_dims.width;
-    var img_height = scale * image.image_bounding_dims.height;
+    var img_width = Math.floor(scale * image.image_bounding_dims.width);
+    var img_height = Math.floor(scale * image.image_bounding_dims.height);
     // console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
 
     // setup GLSL program
@@ -3675,9 +3675,8 @@ function process_video(index) {
     ctx.imageSmoothingEnabled = false;
 
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
-
-    var img_width = scale * image_bounding_dims.width;
-    var img_height = scale * image_bounding_dims.height;
+    var img_width = Math.floor(scale * image_bounding_dims.width);
+    var img_height = Math.floor(scale * image_bounding_dims.height);
 
     ctx.drawImage(imageCanvas, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.width, image_bounding_dims.height, (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
 
@@ -3782,8 +3781,8 @@ function process_viewport_canvas(viewportCanvas, index) {
 
         var imageCanvas = imageContainer[index - 1].imageCanvas;
         var scale = get_image_scale(width, height, imageCanvas.width, imageCanvas.height);
-        var img_width = scale * imageCanvas.width;
-        var img_height = scale * imageCanvas.height;
+        var img_width = Math.floor(scale * imageCanvas.width);
+        var img_height = Math.floor(scale * imageCanvas.height);
 
         var px, py;
 
@@ -3963,8 +3962,8 @@ function process_viewport(width, height, w, h, bytes, stride, alpha, index, swap
 
         var imageCanvas = imageContainer[index - 1].imageCanvas;
         var scale = get_image_scale(width, height, imageCanvas.width, imageCanvas.height);
-        var img_width = scale * imageCanvas.width;
-        var img_height = scale * imageCanvas.height;
+        var img_width = Math.floor(scale * imageCanvas.width);
+        var img_height = Math.floor(scale * imageCanvas.height);
 
         var px, py;
 
@@ -5193,8 +5192,8 @@ function fetch_binned_image(dataId) {
             ctx.imageSmoothingEnabled = false;
 
             var scale = get_image_scale(width, height, img.width, img.height);
-            var img_width = scale * img.width;
-            var img_height = scale * img.height;
+            var img_width = Math.floor(scale * img.width);
+            var img_height = Math.floor(scale * img.height);
 
             ctx.drawImage(img, (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         }
@@ -7613,8 +7612,8 @@ function change_colourmap(index, recursive) {
             else
                 scale = 2 * scale / va_count;
 
-            var img_width = scale * image_bounding_dims.width;
-            var img_height = scale * image_bounding_dims.height;
+            var img_width = Math.floor(scale * image_bounding_dims.width);
+            var img_height = Math.floor(scale * image_bounding_dims.height);
 
             let image_position = get_image_position(index, width, height);
             let posx = image_position.posx;
@@ -11856,8 +11855,8 @@ function add_line_label(index) {
     else
         scale = 2 * scale / va_count;
 
-    let img_width = scale * image_bounding_dims.width;
-    let img_height = scale * image_bounding_dims.height;
+    let img_width = Math.floor(scale * image_bounding_dims.width);
+    let img_height = Math.floor(scale * image_bounding_dims.height);
 
     let image_position = get_image_position(index, width, height);
     let posx = image_position.posx;
@@ -12354,8 +12353,8 @@ function setup_image_selection() {
 
     var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
-    var img_width = scale * image_bounding_dims.width;
-    var img_height = scale * image_bounding_dims.height;
+    var img_width = Math.floor(scale * image_bounding_dims.width);
+    var img_height = Math.floor(scale * image_bounding_dims.height);
 
     let fillColour = 'white';
 
@@ -12933,8 +12932,8 @@ function setup_image_selection() {
             var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
 
             var clipSize = Math.min(image_bounding_dims.width, image_bounding_dims.height) / zoom_scale;
-            var sel_width = clipSize * scale;
-            var sel_height = clipSize * scale;
+            var sel_width = Math.floor(clipSize * scale);
+            var sel_height = Math.floor(clipSize * scale);
 
             if (!mousedown) {
                 let mx = mouse_position.x;
@@ -12960,7 +12959,7 @@ function setup_image_selection() {
 
             var orig_x = x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
             var orig_y = y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
-            // console.log("scale:", scale, "ax:", ax, "ay:", ay, "orig_x:", orig_x, "orig_y:", orig_y);
+            console.log("scale:", scale, "ax:", ax, "ay:", ay, "orig_x:", orig_x, "orig_y:", orig_y);
 
             let world = pix2sky(fitsData, orig_x, orig_y);
             // if either world value is NaN throw an error
@@ -14410,8 +14409,8 @@ function imageTimeout() {
     let fitsData = fitsContainer[va_count - 1];
     var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
-    var img_width = scale * image_bounding_dims.width;
-    var img_height = scale * image_bounding_dims.height;
+    var img_width = Math.floor(scale * image_bounding_dims.width);
+    var img_height = Math.floor(scale * image_bounding_dims.height);
 
     //var _y1 = imageContainer[va_count - 1].height - image_bounding_dims.height - image_bounding_dims.y1;
 
@@ -14424,8 +14423,8 @@ function imageTimeout() {
     var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect_elem.attr("y"));
 
     var clipSize = Math.min(image_bounding_dims.width, image_bounding_dims.height) / zoom_scale;
-    var sel_width = clipSize * scale;
-    var sel_height = clipSize * scale;
+    var sel_width = Math.floor(clipSize * scale);
+    var sel_height = Math.floor(clipSize * scale);
 
     var fitsX = Math.round(x * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1));
     var fitsY = Math.round(y * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1));
@@ -17162,8 +17161,8 @@ function display_rgb_legend() {
         let scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
         scale = 2.0 * scale / va_count;
 
-        let img_width = scale * image_bounding_dims.width;
-        let img_height = scale * image_bounding_dims.height;
+        let img_width = Math.floor(scale * image_bounding_dims.width);
+        let img_height = Math.floor(scale * image_bounding_dims.height);
 
         for (var i = 0; i < divisions; i++)
             newData.push(min_pixel + (max_pixel - min_pixel) * i / (divisions - 1));
