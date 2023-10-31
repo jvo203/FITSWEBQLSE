@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-31.0";
+    return "JS2023-10-31.1";
 }
 
 function uuidv4() {
@@ -2015,7 +2015,7 @@ function webgl_viewport_renderer(gl, container, height) {
     let py = viewport_zoom_settings.py;
     let viewport_size = viewport_zoom_settings.zoomed_size;
     py = height - py - viewport_size;
-    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 1, Math.round(viewport_size) - 1);
+    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 0, Math.round(viewport_size) - 0);
 
     // Clear the canvas
     gl.clearColor(0, 0, 0, 0);
@@ -2180,7 +2180,7 @@ function webgl_composite_viewport_renderer(gl, container, height) {
     let py = viewport_zoom_settings.py;
     let viewport_size = viewport_zoom_settings.zoomed_size;
     py = height - py - viewport_size;
-    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 1, Math.round(viewport_size) - 1);
+    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 0, Math.round(viewport_size) - 0);
 
     // Clear the canvas
     gl.clearColor(0, 0, 0, 0);
@@ -2406,7 +2406,7 @@ function webgl_zoom_renderer(gl, height) {
         let py = viewport_zoom_settings.py;
         let viewport_size = viewport_zoom_settings.zoomed_size;
         py = height - py - viewport_size;
-        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 1, Math.round(viewport_size) - 1);
+        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 0, Math.round(viewport_size) - 0);
 
         // Clear the canvas
         gl.clearColor(0, 0, 0, 0);
@@ -2597,7 +2597,7 @@ function webgl_composite_zoom_renderer(gl, height) {
         let py = viewport_zoom_settings.py;
         let viewport_size = viewport_zoom_settings.zoomed_size;
         py = height - py - viewport_size;
-        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 1, Math.round(viewport_size) - 1);
+        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 0, Math.round(viewport_size) - 0);
 
         // Clear the canvas
         gl.clearColor(0, 0, 0, 0);
