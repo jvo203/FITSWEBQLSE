@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-31.1";
+    return "JS2023-10-31.2";
 }
 
 function uuidv4() {
@@ -3362,7 +3362,7 @@ function webgl_composite_image_renderer(gl, width, height) {
             image.refresh = false;
 
         //WebGL how to convert from clip space to pixels	
-        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 1, Math.round(img_height) - 1);
+        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
         // console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         // console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
         // set the global variable
@@ -3542,7 +3542,7 @@ function webgl_image_renderer(index, gl, width, height) {
             image.refresh = false;
 
         //WebGL how to convert from clip space to pixels        
-        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 1, Math.round(img_height) - 1);
+        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
         //console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         //console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
         // set the global variable
@@ -5895,7 +5895,7 @@ function display_gridlines() {
             .style("stroke", strokeColour)
             .style("stroke-width", 1.0)
             .attr("opacity", 1.0)
-            .attr("transform", "translate(" + (width + x_offset) + ",0)")
+            .attr("transform", "translate(" + (width - 0 + x_offset) + ",0)")
             .call(yAxis)
             .selectAll("text")
             .attr("y", 0)
@@ -6121,7 +6121,7 @@ function display_cd_gridlines() {
             .style("stroke", strokeColour)
             .style("stroke-width", 1.0)
             .attr("opacity", 1.0)
-            .attr("transform", " translate(" + (width + x_offset) + "," + (y_offset) + ")" + ' rotate(' + angle + ' ' + (- width / 2) + ' ' + (height / 2) + ')')
+            .attr("transform", " translate(" + (width - 0 + x_offset) + "," + (y_offset) + ")" + ' rotate(' + angle + ' ' + (- width / 2) + ' ' + (height / 2) + ')')
             .call(yAxis)
             .selectAll("text")
             .attr("y", 0)
