@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-10-27.1";
+    return "JS2023-10-31.0";
 }
 
 function uuidv4() {
@@ -2015,7 +2015,7 @@ function webgl_viewport_renderer(gl, container, height) {
     let py = viewport_zoom_settings.py;
     let viewport_size = viewport_zoom_settings.zoomed_size;
     py = height - py - viewport_size;
-    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size), Math.round(viewport_size));
+    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 1, Math.round(viewport_size) - 1);
 
     // Clear the canvas
     gl.clearColor(0, 0, 0, 0);
@@ -2180,7 +2180,7 @@ function webgl_composite_viewport_renderer(gl, container, height) {
     let py = viewport_zoom_settings.py;
     let viewport_size = viewport_zoom_settings.zoomed_size;
     py = height - py - viewport_size;
-    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size), Math.round(viewport_size));
+    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 1, Math.round(viewport_size) - 1);
 
     // Clear the canvas
     gl.clearColor(0, 0, 0, 0);
@@ -2406,7 +2406,7 @@ function webgl_zoom_renderer(gl, height) {
         let py = viewport_zoom_settings.py;
         let viewport_size = viewport_zoom_settings.zoomed_size;
         py = height - py - viewport_size;
-        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size), Math.round(viewport_size));
+        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 1, Math.round(viewport_size) - 1);
 
         // Clear the canvas
         gl.clearColor(0, 0, 0, 0);
@@ -2597,7 +2597,7 @@ function webgl_composite_zoom_renderer(gl, height) {
         let py = viewport_zoom_settings.py;
         let viewport_size = viewport_zoom_settings.zoomed_size;
         py = height - py - viewport_size;
-        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size), Math.round(viewport_size));
+        gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 1, Math.round(viewport_size) - 1);
 
         // Clear the canvas
         gl.clearColor(0, 0, 0, 0);
@@ -3362,7 +3362,7 @@ function webgl_composite_image_renderer(gl, width, height) {
             image.refresh = false;
 
         //WebGL how to convert from clip space to pixels	
-        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width), Math.round(img_height));
+        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 1, Math.round(img_height) - 1);
         // console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         // console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
         // set the global variable
@@ -3542,7 +3542,7 @@ function webgl_image_renderer(index, gl, width, height) {
             image.refresh = false;
 
         //WebGL how to convert from clip space to pixels        
-        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width), Math.round(img_height));
+        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 1, Math.round(img_height) - 1);
         //console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         //console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
         // set the global variable
@@ -5929,7 +5929,7 @@ function display_cd_gridlines() {
         return;
 
     //scale
-    var gridScale = inverse_CD_matrix(60, 60);//dx was 10
+    var gridScale = inverse_CD_matrix
     var angle = gridScale[2] * Math.sign(gridScale[0]);
 
     var label_angle = -45;
