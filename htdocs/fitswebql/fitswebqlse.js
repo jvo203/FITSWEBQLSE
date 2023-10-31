@@ -3362,7 +3362,7 @@ function webgl_composite_image_renderer(gl, width, height) {
             image.refresh = false;
 
         //WebGL how to convert from clip space to pixels	
-        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
+        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 1, Math.round(img_height) - 1);
         // console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         // console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
         // set the global variable
@@ -3542,7 +3542,7 @@ function webgl_image_renderer(index, gl, width, height) {
             image.refresh = false;
 
         //WebGL how to convert from clip space to pixels        
-        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
+        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 1, Math.round(img_height) - 1);
         //console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         //console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
         // set the global variable
