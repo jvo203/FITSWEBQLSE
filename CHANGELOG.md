@@ -1,3 +1,8 @@
+## [5.0.48] - 2023-11-01
+
+* improved the translation between the web browser mouse coordinates and the underlying FITS image pixel coordinates
+* updated the mongoose C networking library to v7.12
+
 ## [5.0.47] - 2023-10-25
 
 * a new functionality: an initial support for importing ds9 region files (*.reg) with _*image*_/_*physical*_/_*wcs*_ (_*fk5*_ only) coordinates and two types of shapes: _*circle*_ and _*point*_ (_*hint*_: a menu setting _*FITS*_ / _*import ds9 region*_)
