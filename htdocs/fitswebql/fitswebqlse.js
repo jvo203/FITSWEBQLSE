@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-01.0";
+    return "JS2023-11-01.2";
 }
 
 function uuidv4() {
@@ -1069,7 +1069,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
     console.log("P-V Line offset [arcsec] dmin:", -Math.abs(dmin), "dmax:", Math.abs(dmax));
 
     var xR = d3.scaleLinear()
-        .range([2 * emFontSize, 2 * emFontSize + svg_width - 1])
+        .range([2 * emFontSize, 2 * emFontSize + svg_width])
         .domain([-Math.abs(dmin), Math.abs(dmax)]);
 
     pvxR = xR;
@@ -1109,7 +1109,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .call(xAxis);
 
     var yR = d3.scaleLinear()
-        .range([emFontSize + svg_height - 1, emFontSize])
+        .range([emFontSize + svg_height, emFontSize])
         .domain([vmin, vmax]);
 
     pvyR = yR;
@@ -1749,7 +1749,7 @@ function crosshair_move(event) {
     let x = offset[0];
     let y = offset[1];
 
-    // make sure the line lies within the SVG
+    // make sure the line lies FIRMLY within the SVG
     x = Math.min(Math.max(x, 1), _svg_width - 1);
     y = Math.min(Math.max(y, 1), _svg_height - 1);
 
@@ -5744,11 +5744,11 @@ function display_gridlines() {
     var y_offset = parseFloat(elem.attr("y"));
 
     var x = d3.scaleLinear()
-        .range([x_offset, x_offset + width - 1])
+        .range([x_offset, x_offset + width])
         .domain([0, 1]);
 
     var y = d3.scaleLinear()
-        .range([y_offset + height - 1, y_offset])
+        .range([y_offset + height, y_offset])
         .domain([0, 1]);
 
     var svg = d3.select("#BackgroundSVG");
@@ -5958,11 +5958,11 @@ function display_cd_gridlines() {
     var y_offset = parseFloat(elem.attr("y"));
 
     var x = d3.scaleLinear()
-        .range([0, width - 1])
+        .range([0, width])
         .domain([-1, 1]);
 
     var y = d3.scaleLinear()
-        .range([height - 1, 0])
+        .range([height, 0])
         .domain([-1, 1]);
 
     var svg = d3.select("#BackgroundSVG");
@@ -13982,31 +13982,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
     xmlhttp.send();
 }
 
-function fetch_contours(datasetId) {
-    var xmlhttp = new XMLHttpRequest();
-
-    var url = 'get_contours?datasetId=' + encodeURIComponent(datasetId) + '&' + encodeURIComponent(get_js_version());
-
-    xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 502) {
-            console.log("Connection error, re-fetching contours after 1 second.");
-            setTimeout(function () {
-                fetch_contours(datasetId);
-            }, 1000);
-        }
-
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            var response = JSON.parse(xmlhttp.responseText);
-
-            console.log(response);
-        }
-    }
-
-    xmlhttp.open("GET", url, true);
-    xmlhttp.timeout = 0;
-    xmlhttp.send();
-};
-
 function refresh_tiles(index) {
     if (zoom_scale < 1)
         return;
@@ -14999,16 +14974,16 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
             console.log("PVContourSVG width = ", width, " height = ", height);
 
             var x = d3.scaleLinear()
-                .range([width - 1, 0]) // flip the x-axis
+                .range([width, 0]) // flip the x-axis
                 .domain([0, data[0].length - 1]);
 
             if (flipY) {
                 var y = d3.scaleLinear()
-                    .range([height - 1, 0])
+                    .range([height, 0])
                     .domain([0, data.length - 1]);
             } else {
                 var y = d3.scaleLinear()
-                    .range([0, height - 1])
+                    .range([0, height])
                     .domain([0, data.length - 1]);
             }
 
@@ -15025,8 +15000,8 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
 
             d3.select("#PVContourSVG").append("svg")
                 .attr("id", "PVContourPlot")
-                .attr("x", elem.attr("x"))
-                .attr("y", elem.attr("y"))
+                .attr("x", parseFloat(elem.attr("x")))
+                .attr("y", parseFloat(elem.attr("y")))
                 .attr("width", width)
                 .attr("height", height)
                 .selectAll("path")
@@ -18022,17 +17997,17 @@ function contour_surface_webworker() {
             var height = parseFloat(elem.attr("height"));
 
             var x = d3.scaleLinear()
-                .range([0, width - 1])
+                .range([0, width])
                 .domain([0, data[0].length - 1]);
 
             var y = d3.scaleLinear()
-                .range([height - 1, 0])
+                .range([height, 0])
                 .domain([0, data.length - 1]);
 
             d3.select("#ContourSVG").append("svg")
                 .attr("id", "contourPlot")
-                .attr("x", elem.attr("x"))
-                .attr("y", elem.attr("y"))
+                .attr("x", parseFloat(elem.attr("x")))
+                .attr("y", parseFloat(elem.attr("y")))
                 .attr("width", width)
                 .attr("height", height)
                 .selectAll("path")
