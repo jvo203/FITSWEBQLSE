@@ -6709,38 +6709,43 @@ contains
       RELAX = 2**20 - 1 ! WCSHDR_all
       CTRL = 2
 
-      IERR = WCSPIH (item%hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP)
-      print *, 'WCSPIH: ', IERR, NREJECT, NWCS
+      IERR = 1
 
-      call pix2sky(WCSP, cx, cy, lng, lat)
+      ! an emergency override due to a bug in WCSLIB??? a bug in an older gcc 11.4??? a bug in the CentOS Stream 9???
+      if(IERR.eq.0) then
+         IERR = WCSPIH (item%hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP)
+         print *, 'WCSPIH: ', IERR, NREJECT, NWCS
 
-      ! beam_width
-      call pix2sky(WCSP, cx - rx, cy, ra1, dec1)
-      call pix2sky(WCSP, cx + rx, cy, ra2, dec2)
+         call pix2sky(WCSP, cx, cy, lng, lat)
 
-      ! convert ra, dec from degrees to radians
-      ra1 = ra1*deg2rad
-      dec1 = dec1*deg2rad
+         ! beam_width
+         call pix2sky(WCSP, cx - rx, cy, ra1, dec1)
+         call pix2sky(WCSP, cx + rx, cy, ra2, dec2)
 
-      ra2 = ra2*deg2rad
-      dec2 = dec2*deg2rad
+         ! convert ra, dec from degrees to radians
+         ra1 = ra1*deg2rad
+         dec1 = dec1*deg2rad
 
-      ! convert from radians to degrees
-      beam_width = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
+         ra2 = ra2*deg2rad
+         dec2 = dec2*deg2rad
 
-      ! beam_height
-      call pix2sky(WCSP, cx, cy - ry, ra1, dec1)
-      call pix2sky(WCSP, cx, cy + ry, ra2, dec2)
+         ! convert from radians to degrees
+         beam_width = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
 
-      ! convert ra, dec from degrees to radians
-      ra1 = ra1*deg2rad
-      dec1 = dec1*deg2rad
+         ! beam_height
+         call pix2sky(WCSP, cx, cy - ry, ra1, dec1)
+         call pix2sky(WCSP, cx, cy + ry, ra2, dec2)
 
-      ra2 = ra2*deg2rad
-      dec2 = dec2*deg2rad
+         ! convert ra, dec from degrees to radians
+         ra1 = ra1*deg2rad
+         dec1 = dec1*deg2rad
 
-      ! convert from radians to degrees
-      beam_height = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
+         ra2 = ra2*deg2rad
+         dec2 = dec2*deg2rad
+
+         ! convert from radians to degrees
+         beam_height = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
+      end if
 
       IF (IERR.NE.0) THEN
          print *, 'WCSPIH error: ', IERR
