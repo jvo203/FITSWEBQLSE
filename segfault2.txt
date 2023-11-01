@@ -1,0 +1,56 @@
+[C] pthread_create rc = 0
+[Thread 0x7fffe1d7a640 (LWP 2529911) exited]
+[New Thread 0x7fffe1579640 (LWP 2529912)]
+[New Thread 0x7fffe457f640 (LWP 2529913)]
+[New Thread 0x7fffe3d7e640 (LWP 2529914)]
+[New Thread 0x7fffe357d640 (LWP 2529915)]
+[New Thread 0x7fffe2d7c640 (LWP 2529916)]
+[New Thread 0x7fff762ff640 (LWP 2529917)]
+[New Thread 0x7fff75afe640 (LWP 2529918)]
+[C] pthread_join rc = 0
+[C] spectrum compressed size: 1160 bytes
+[C] float array size: 3044, compressed: 1160 bytes
+[C] PIPE_END_OF_STREAM
+[C] spectrum length: 761, elapsed: 1.893450 [ms], compressed_size: 1160, msg_len: 1180 bytes.
+[Thread 0x7fff762ff640 (LWP 2529917) exited]
+[Thread 0x7fffe357d640 (LWP 2529915) exited]
+[Thread 0x7fffe1579640 (LWP 2529912) exited]
+[Thread 0x7fff752fd640 (LWP 2529910) exited]
+[Thread 0x7fff75afe640 (LWP 2529918) exited]
+[Thread 0x7fffe257b640 (LWP 2529909) exited]
+[Thread 0x7fffe457f640 (LWP 2529913) exited]
+[Thread 0x7fffe2d7c640 (LWP 2529916) exited]
+[Thread 0x7fffe3d7e640 (LWP 2529914) exited]
+[WS] {"type":"kalman_reset","seq_id":812}
+[New Thread 0x7fffe3d7e640 (LWP 2529919)]
+[Thread 0x7fffe3d7e640 (LWP 2529919) exited]
+[WS] {"type":"spectrum","ra":"α: 16ʰ 22ᵐ 9.45ˢ ","dec":"δ: -50° 5' 59.8\"","intensity":"integrated","frame_start":217059525075.8,"frame_end":217307589807.0124,"ref_freq":217150000000,"deltaV":0,"rest":false,"seq_id":812,"timestamp":112976.10000002384}
+[C] CSV spectrum request: ra: α: 16ʰ 22ᵐ 9.45ˢ , dec: δ: -50° 5' 59.8\", x1: -1, y1: -1, x2: -1, y2: -1, beam: 1, intensity: 1, frame_start: 217059525075.799988, frame_end: 217307589807.012390, ref_freq: 217150000000.000000, deltaV: 0.000000, rest: 0, seq_id: 812, timestamp: 112976.101562
+[New Thread 0x7fffe3d7e640 (LWP 2529920)]
+ CSV spectrum for ALMA01572074, x1:          -1 , y1:          -1 , x2:          -1 , y2:          -1 , beam:           1 , intensity:           1 , frame_start:   217059525075.79999      , frame_end:   217307589807.01239      , ref_freq:   217150000000.00000      , deltaV:   0.0000000000000000      , rest: F , seq_id:         812 , timestamp:   112976.102     , fd:          25
+ first:           1 last:        1017 length:        1017 depth:        1017
+[New Thread 0x7fffe2d7c640 (LWP 2529921)]
+[New Thread 0x7fffe457f640 (LWP 2529922)]
+[C] pthread_create rc = 0
+[C] calling fetch_realtime_image_spectrum across the cluster for 'ALMA01572074'
+[C] aborting fetch_realtime_image_spectrum (no cluster nodes found)
+[Thread 0x7fffe457f640 (LWP 2529922) exited]
+[New Thread 0x7fff75afe640 (LWP 2529923)]
+[New Thread 0x7fffe357d640 (LWP 2529924)]
+[New Thread 0x7fffe257b640 (LWP 2529925)]
+[New Thread 0x7fffe1d7a640 (LWP 2529926)]
+[New Thread 0x7fffe1579640 (LWP 2529927)]
+[New Thread 0x7fff762ff640 (LWP 2529928)]
+[New Thread 0x7fff752fd640 (LWP 2529929)]
+[C] pthread_join rc = 0
+ WCSPIH:            0           0           1
+--Type <RET> for more, q to quit, c to continue without paging--
+
+Thread 14699 "fitswebqlse" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fffe3d7e640 (LWP 2529920)]
+0x0000000000476590 in spectrum_request_simd (user=<error reading variable: Attempt to dereference a generic pointer.>) at src/fits.f90:6718
+6718          call pix2sky(WCSP, cx - rx, cy, ra1, dec1)
+(gdb) bt
+#0  0x0000000000476590 in spectrum_request_simd (user=<error reading variable: Attempt to dereference a generic pointer.>) at src/fits.f90:6718
+#1  0x00007fffeda9f802 in start_thread (arg=<optimized out>) at pthread_create.c:443
+#2  0x00007fffeda3f450 in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
