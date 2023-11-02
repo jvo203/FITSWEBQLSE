@@ -1,9 +1,14 @@
-# 0. Development Tools
+# 0.0 Development Tools
 
 	sudo dnf groupinstall "Development Tools"
 	sudo dnf install gcc-gfortran
     sudo dnf install git
     sudo dnf autoremove
+
+# 0.1 GCC Toolset 13
+
+    sudo dnf install gcc-toolset-13
+    scl enable gcc-toolset-13 bash
 
 # 1. Install Intel oneAPI Base + HPC kits (works well on AMD CPUs too, not just Intel's)
 
