@@ -1,6 +1,8 @@
 using LibPQ, Tables
 
 function connect_db(db_name, host)
+    println("LibPQ: connecting to $host")
+
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
     password = user * String(UInt8.([33]))
 
@@ -20,6 +22,8 @@ function get_datasets(conn, threshold, start_date)
     # threshold is given in GB
     # find the datasets with the file_size >= threshold AND regist_date >= starting date
     strSQL = "select dataset_id, file_size, path, regist_date from cube where binf1=1 and binf2=1 and binf3=1 and binf4=1 and file_size>=$(threshold)*1024*1024*1024. and regist_date>='$(start_date)' order by regist_date asc;"
+
+    println("LibPQ: executing query '$strSQL'")
 
     res = execute(conn, strSQL)
     data = columntable(res)
