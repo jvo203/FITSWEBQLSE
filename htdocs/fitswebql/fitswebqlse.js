@@ -2424,8 +2424,14 @@ function webgl_zoom_renderer(gl, height) {
 
         let xmin = (viewport_zoom_settings.x - viewport_zoom_settings.clipSize) / (image.width - 1);
         let ymin = (viewport_zoom_settings.y - viewport_zoom_settings.clipSize) / (image.height - 1);
-        let _width = (2 * viewport_zoom_settings.clipSize) / (image.width - 0);
-        let _height = (2 * viewport_zoom_settings.clipSize) / (image.height - 0);
+        let _width = (2 * viewport_zoom_settings.clipSize) / (image.width - 1);
+        let _height = (2 * viewport_zoom_settings.clipSize) / (image.height - 1);
+
+        // clamp xmin, ymin, _width, _height to [0,1]
+        xmin = clamp(xmin, 0.0, 1.0);
+        ymin = clamp(ymin, 0.0, 1.0);
+        _width = clamp(_width, 0.0, 1.0);
+        _height = clamp(_height, 0.0, 1.0);
 
         //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
@@ -2620,8 +2626,14 @@ function webgl_composite_zoom_renderer(gl, height) {
 
         let xmin = (viewport_zoom_settings.x - viewport_zoom_settings.clipSize) / (image.width - 1);
         let ymin = (viewport_zoom_settings.y - viewport_zoom_settings.clipSize) / (image.height - 1);
-        let _width = (2 * viewport_zoom_settings.clipSize) / (image.width - 0);
-        let _height = (2 * viewport_zoom_settings.clipSize) / (image.height - 0);
+        let _width = (2 * viewport_zoom_settings.clipSize) / (image.width - 1);
+        let _height = (2 * viewport_zoom_settings.clipSize) / (image.height - 1);
+
+        // clamp xmin, ymin, _width, _height to [0,1]
+        xmin = clamp(xmin, 0.0, 1.0);
+        ymin = clamp(ymin, 0.0, 1.0);
+        _width = clamp(_width, 0.0, 1.0);
+        _height = clamp(_height, 0.0, 1.0);
 
         //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
