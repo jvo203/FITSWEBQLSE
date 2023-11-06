@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-02.1";
+    return "JS2023-11-06.0";
 }
 
 function uuidv4() {
@@ -2424,8 +2424,8 @@ function webgl_zoom_renderer(gl, height) {
 
         let xmin = (viewport_zoom_settings.x - viewport_zoom_settings.clipSize) / (image.width - 1);
         let ymin = (viewport_zoom_settings.y - viewport_zoom_settings.clipSize) / (image.height - 1);
-        let _width = (2 * viewport_zoom_settings.clipSize) / (image.width - 1);
-        let _height = (2 * viewport_zoom_settings.clipSize) / (image.height - 1);
+        let _width = (2 * viewport_zoom_settings.clipSize) / (image.width - 0);
+        let _height = (2 * viewport_zoom_settings.clipSize) / (image.height - 0);
 
         //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
@@ -2620,8 +2620,8 @@ function webgl_composite_zoom_renderer(gl, height) {
 
         let xmin = (viewport_zoom_settings.x - viewport_zoom_settings.clipSize) / (image.width - 1);
         let ymin = (viewport_zoom_settings.y - viewport_zoom_settings.clipSize) / (image.height - 1);
-        let _width = (2 * viewport_zoom_settings.clipSize) / (image.width - 1);
-        let _height = (2 * viewport_zoom_settings.clipSize) / (image.height - 1);
+        let _width = (2 * viewport_zoom_settings.clipSize) / (image.width - 0);
+        let _height = (2 * viewport_zoom_settings.clipSize) / (image.height - 0);
 
         //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
