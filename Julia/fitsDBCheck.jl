@@ -1,10 +1,8 @@
 using LibPQ, Tables
 
-function connect_db(db_name)
+function connect_db(db_name, host)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
     password = user * String(UInt8.([33]))
-    # host = "jvof"
-    host = "jvox.vo.nao.ac.jp"
 
     url = "postgresql://" * user
 
@@ -29,16 +27,22 @@ function get_datasets(conn, threshold, start_date)
     return data
 end
 
-conn = connect_db("alma")
-
 threshold = 20 #GB
 start_date = "2023-09-01"
 
-# get the start_date from the command line argument (if there is one)
+# host = "jvof"
+host = "jvox.vo.nao.ac.jp"
+
+# optional: get the start_date and a host from the command line argument (if there is one)
 if length(ARGS) > 0
     start_date = ARGS[1]
 end
 
+if length(ARGS) > 1
+    host = ARGS[2]
+end
+
+conn = connect_db("alma", host)
 datasets = get_datasets(conn, threshold, start_date)
 
 ids = res[:dataset_id]
