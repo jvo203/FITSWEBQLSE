@@ -47,7 +47,7 @@ if length(ARGS) > 1
 end
 
 conn = connect_db("alma", host)
-datasets = get_datasets(conn, threshold, start_date)
+res = get_datasets(conn, threshold, start_date)
 
 ids = res[:dataset_id]
 sizes = res[:file_size]
