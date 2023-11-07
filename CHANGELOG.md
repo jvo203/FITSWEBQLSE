@@ -1,6 +1,6 @@
 ## [5.0.49] - 2023-11-07
 
-* a refinement in the WebGL viewport pixel coordinate translation
+* refined the WebGL viewport pixel coordinate translation
 
 ## [5.0.48] - 2023-11-01
 
