@@ -1,3 +1,7 @@
+## [5.0.49] - 2023-11-07
+
+* a refinement in the WebGL viewport pixel coordinate translation
+
 ## [5.0.48] - 2023-11-01
 
 * improved the translation between the web browser mouse coordinates and the underlying FITS image pixel coordinates
