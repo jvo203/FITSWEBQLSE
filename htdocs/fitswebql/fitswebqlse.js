@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-07.0";
+    return "JS2023-11-07.1";
 }
 
 function uuidv4() {
@@ -2431,12 +2431,6 @@ function webgl_zoom_renderer(gl, height) {
         let _width = xmax - xmin;
         let _height = ymax - ymin;
 
-        // clamp xmin, ymin, _width, _height to [0,1]
-        xmin = clamp(xmin, 0.0, 1.0);
-        ymin = clamp(ymin, 0.0, 1.0);
-        _width = clamp(_width, 0.0, 1.0);
-        _height = clamp(_height, 0.0, 1.0);
-
         //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
@@ -2636,12 +2630,6 @@ function webgl_composite_zoom_renderer(gl, height) {
 
         let _width = xmax - xmin;
         let _height = ymax - ymin;
-
-        // clamp xmin, ymin, _width, _height to [0,1]
-        xmin = clamp(xmin, 0.0, 1.0);
-        ymin = clamp(ymin, 0.0, 1.0);
-        _width = clamp(_width, 0.0, 1.0);
-        _height = clamp(_height, 0.0, 1.0);
 
         //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
