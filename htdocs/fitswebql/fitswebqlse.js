@@ -2968,7 +2968,11 @@ function init_webgl_composite_image_buffers() {
 
 function init_webgl_image_buffers(index) {
     //place the image onto the main canvas
-    var canvas = document.getElementById('HTMLCanvas');
+    if (va_count == 1)
+        var canvas = document.getElementById('HTMLCanvas');
+    else
+        var canvas = document.getElementById('HTMLCanvas' + index);
+
     canvas.style.display = "block";// a hack needed by Apple Safari
     var width = canvas.width;
     var height = canvas.height;
@@ -3195,6 +3199,8 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
                 compositeImageTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel                
                 offset = (offset + 4) | 0;
             }
+        } else {
+            init_webgl_image_buffers(index);
         }
     };
 
@@ -3443,9 +3449,29 @@ function webgl_image_renderer(index, gl, width, height) {
     var image = imageContainer[index - 1];
 
     var scale = get_image_scale(width, height, image.image_bounding_dims.width, image.image_bounding_dims.height);
+
+    if (va_count > 1) {
+        if (va_count == 2)
+            scale = 0.8 * scale;
+        else if (va_count == 4)
+            scale = 0.6 * scale;
+        else if (va_count == 5)
+            scale = 0.5 * scale;
+        else if (va_count == 6)
+            scale = 0.45 * scale;
+        else if (va_count == 7)
+            scale = 0.45 * scale;
+        else
+            scale = 2 * scale / va_count;
+    }
+
     var img_width = Math.floor(scale * image.image_bounding_dims.width);
     var img_height = Math.floor(scale * image.image_bounding_dims.height);
     // console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
+
+    var image_position = get_image_position(index, width, height);
+    var posx = image_position.posx;
+    var posy = image_position.posy;
 
     // setup GLSL program
     var vertexShaderCode = document.getElementById("vertex-shader").text;
@@ -3550,8 +3576,12 @@ function webgl_image_renderer(index, gl, width, height) {
         } else
             image.refresh = false;
 
-        //WebGL how to convert from clip space to pixels        
-        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
+        //WebGL how to convert from clip space to pixels
+        if (va_count == 1)
+            gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
+        else
+            gl.viewport(Math.round(posx - img_width / 2), Math.round(posy - img_height / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
+
         //console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         //console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
         // set the global variable
