@@ -1,0 +1,15 @@
+[C] closing a websocket connection for ALMA01432224/a6ce2847-57f3-4854-9cac-fc85dbabf2d3
+[C] cannot remove a6ce2847-57f3-4854-9cac-fc85dbabf2d3 from the hash table
+[C] deleting a session for ALMA01432224/a6ce2847-57f3-4854-9cac-fc85dbabf2d3
+[C] pv_event_loop terminated.
+WEBSOCKET CONNECTION CLOSED.
+[Thread 0x7fffe36fe640 (LWP 76312) exited]
+ ALMA01432224: dataset has been in cache for more than         3600  seconds. Removing it.
+[C] marking ALMA01432224 for garbage collection.
+[New Thread 0x7fffe36fe640 (LWP 80484)]
+ ALMA01432224: dataset has been in cache for more than         3600  seconds. Removing it.
+[New Thread 0x7ffec8cc7640 (LWP 80485)]
+[C] aborting http_propagate_timeout (no cluster nodes found)
+ deleting ALMA01432224; cache dir: .cache/ALMA01432224, status           0 , bSuccess T
+[Thread 0x7ffec8cc7640 (LWP 80485) exited]
+[Thread 0x7fffe36fe640 (LWP 80484) exited]
