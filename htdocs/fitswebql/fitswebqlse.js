@@ -3471,7 +3471,8 @@ function webgl_image_renderer(index, gl, width, height) {
 
     var image_position = get_image_position(index, width, height);
     var posx = image_position.posx;
-    var posy = image_position.posy;
+    var posy = height - image_position.posy;
+    console.log("index:", index, "image_position:", image_position);
 
     // setup GLSL program
     var vertexShaderCode = document.getElementById("vertex-shader").text;
