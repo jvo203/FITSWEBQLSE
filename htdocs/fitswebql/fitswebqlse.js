@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-07.1";
+    return "JS2023-11-13.0";
 }
 
 function uuidv4() {
@@ -3133,7 +3133,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
-    // console.log("process_hdr_image: #" + index);
+    console.log("process_hdr_image: #" + index);
     var image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
     var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
     console.log(image_bounding_dims, pixel_range);
@@ -3200,57 +3200,58 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
     image_count++;
 
-    if (image_count == va_count && composite_view) {
-        // find the common bounding box for all images
-        // start with the first image
-        let _x1 = imageContainer[0].image_bounding_dims.x1;
-        let _y1 = imageContainer[0].image_bounding_dims.y1;
-        let _width = imageContainer[0].image_bounding_dims.width;
-        let _height = imageContainer[0].image_bounding_dims.height;
+    if (image_count == va_count) {
+        if (composite_view) {
+            // find the common bounding box for all images
+            // start with the first image
+            let _x1 = imageContainer[0].image_bounding_dims.x1;
+            let _y1 = imageContainer[0].image_bounding_dims.y1;
+            let _width = imageContainer[0].image_bounding_dims.width;
+            let _height = imageContainer[0].image_bounding_dims.height;
 
-        // iterate through the remaining images
-        for (let i = 1; i < va_count; i = (i + 1)) {
-            let image_bounding_dims = imageContainer[i].image_bounding_dims;
-            _x1 = Math.min(_x1, image_bounding_dims.x1);
-            _y1 = Math.min(_y1, image_bounding_dims.y1);
-            _width = Math.max(_width, image_bounding_dims.width);
-            _height = Math.max(_height, image_bounding_dims.height);
+            // iterate through the remaining images
+            for (let i = 1; i < va_count; i = (i + 1)) {
+                let image_bounding_dims = imageContainer[i].image_bounding_dims;
+                _x1 = Math.min(_x1, image_bounding_dims.x1);
+                _y1 = Math.min(_y1, image_bounding_dims.y1);
+                _width = Math.max(_width, image_bounding_dims.width);
+                _height = Math.max(_height, image_bounding_dims.height);
+            }
+
+            // make the new bounding box
+            var new_image_bounding_dims = {
+                x1: _x1,
+                y1: _y1,
+                width: _width,
+                height: _height
+            };
+
+            // borrow the tone mapping flux from the first image
+            var new_tone_mapping = { flux: imageContainer[0].tone_mapping.flux };
+
+            compositeImage = { width: img_width, height: img_height, texture: compositeImageTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
+            // console.log("process_hdr_image: all images loaded", compositeImage);
+
+            // clear the composite image buffers
+            clear_webgl_composite_image_buffers();
+
+            //display the composite image        
+            init_webgl_composite_image_buffers();
+
+            setup_image_selection();
+
+            try {
+                display_scale_info();
+            }
+            catch (err) {
+            };
+
+            setup_viewports();
         }
-
-        // make the new bounding box
-        var new_image_bounding_dims = {
-            x1: _x1,
-            y1: _y1,
-            width: _width,
-            height: _height
-        };
-
-        // borrow the tone mapping flux from the first image
-        var new_tone_mapping = { flux: imageContainer[0].tone_mapping.flux };
-
-        compositeImage = { width: img_width, height: img_height, texture: compositeImageTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
-        // console.log("process_hdr_image: all images loaded", compositeImage);
-
-        // clear the composite image buffers
-        clear_webgl_composite_image_buffers();
-
-        //display the composite image        
-        init_webgl_composite_image_buffers();
-
-        setup_image_selection();
-
-        try {
-            display_scale_info();
-        }
-        catch (err) {
-        };
 
         has_image = true;
 
-        setup_viewports();
-
         hide_hourglass();
-
     }
 
     try {
@@ -18338,6 +18339,7 @@ async function mainRenderer() {
         video_fps_control = localStorage.getItem("video_fps_control");
 
     composite_view = (parseInt(votable.getAttribute('data-composite')) == 1) ? true : false;
+    composite_view = false; // an override during development    
     console.log("composite view:", composite_view);
 
     optical_view = false;
