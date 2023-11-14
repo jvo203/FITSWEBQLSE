@@ -83,7 +83,7 @@ ifeq ($(UNAME_S),Linux)
 endif
 
 JEMALLOC = `pkg-config --libs jemalloc` -L`jemalloc-config --libdir` -Wl,-rpath,`jemalloc-config --libdir` -ljemalloc `jemalloc-config --libs`
-TCMALLOC = -ltcmalloc
+TCMALLOC = `pkg-config --libs libtcmalloc` -ltcmalloc
 TARGET = fitswebqlse
 
 # Intel Integrated Performance Primitives Library
@@ -167,7 +167,7 @@ ifneq ($(SHARE),)
 endif
 
 # `pkg-config --libs libavif` `pkg-config --libs libjpeg`
-LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lsqlite3 `pkg-config --libs libcurl` -lz -lbz2 -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq` `pkg-config --libs libtcmalloc`
+LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libmicrohttpd` `pkg-config --libs liblz4` `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lsqlite3 `pkg-config --libs libcurl` -lz -lbz2 -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq`
 
 ifneq ($(UNAME_S),Darwin)
 	LIBS += `pkg-config --libs libcpuid`
