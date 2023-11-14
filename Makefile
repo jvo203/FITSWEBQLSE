@@ -147,7 +147,8 @@ ifeq ($(CC),icx)
 endif
 
 # `pkg-config --cflags libavif` `pkg-config --cflags libjpeg`
-INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` `pkg-config --cflags x265` `pkg-config --cflags jemalloc` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src 
+INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` `pkg-config --cflags x265` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src
+#`pkg-config --cflags jemalloc`
 
 ifneq ($(UNAME_S),Darwin)
 	INC += `pkg-config --cflags libcpuid`
@@ -277,7 +278,8 @@ endif
 	$(FORT) $(FLAGS) $(MOD) -o $@ -c $<
 
 fitswebqlse: $(OBJ)
-	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBS) $(IPP) $(MKL) $(JEMALLOC)
+	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBS) $(IPP) $(MKL) $(TCMALLOC)
+# $(JEMALLOC) # jemalloc apparently is still a bit buggy, causes segmentation faults
 
 test:
 	$(FORT) $(FLAGS) src/wavelet.f90 src/fixed_array.f90 src/zfp_array.f90 src/lz4.f90 src/testWavelets.f90 -o testWavelets -llz4 $(LIBS)
