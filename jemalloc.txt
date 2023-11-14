@@ -1,0 +1,54 @@
+[WS] {"type":"realtime_image_spectrum","dx":1629,"image":false,"quality":"medium","x1":276,"y1":215,"x2":312,"y2":251,"width":636,"height":636,"beam":"circle","intensity":"integrated","frame_start":348787435848,"frame_end":349724155695.0065,"ref_freq":349250000000,"seq_id":4,"timestamp":48014.800000000745}
+[New Thread 0x7fffe55ff640 (LWP 167214)]
+[New Thread 0x7fff08cdf640 (LWP 167215)]
+[New Thread 0x7fffd63ff640 (LWP 167216)]
+[C] calling fetch_realtime_image_spectrum across the cluster for 'ALMA01416945'
+[C] aborting fetch_realtime_image_spectrum (no cluster nodes found)
+[C] pthread_create rc = 0
+[New Thread 0x7fff094e0640 (LWP 167217)]
+[Thread 0x7fffd63ff640 (LWP 167216) exited]
+
+Thread 70810 "fitswebqlse" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fff08cdf640 (LWP 167215)]
+ph_remove (cmp=<optimized out>, offset=40, phn=0x7fffe0c1e600, phn@entry=0x0, ph=ph@entry=0x7fffe0c0d2b8) at include/jemalloc/internal/ph.h:429
+429                             phn_next_set(
+(gdb) bt
+#0  ph_remove (cmp=<optimized out>, offset=40, phn=0x7fffe0c1e600, phn@entry=0x0, ph=ph@entry=0x7fffe0c0d2b8) at include/jemalloc/internal/ph.h:429
+#1  je_edata_heap_remove (ph=ph@entry=0x7fffe0c0d2b8, phn=phn@entry=0x7fffe0c1e600) at src/edata.c:6
+#2  0x00007fffee2758e9 in je_eset_remove (eset=0x7fffe0c0d278, edata=edata@entry=0x7fffe0c1e600) at src/eset.c:126
+#3  0x00007fffee2790b6 in extent_activate_locked (edata=0x7fffe0c1e600, eset=<optimized out>, ecache=0x7fffe0c0d208, pac=0x7fffe0c039f0, tsdn=0x7fff08cdebe8) at src/extent.c:280
+#4  extent_recycle_extract (ehooks=0x7fffe0c000c0, guarded=<optimized out>, alignment=4096, size=8192, expand_edata=0x2000, ecache=0x7fffe0c0d208, pac=0x7fffe0c039f0, tsdn=0x7fff08cdebe8)
+    at src/extent.c:444
+#5  extent_recycle (tsdn=tsdn@entry=0x7fff08cdebe8, pac=pac@entry=0x7fffe0c039f0, ehooks=ehooks@entry=0x7fffe0c000c0, ecache=ecache@entry=0x7fffe0c0d208, expand_edata=expand_edata@entry=0x0,
+    size=size@entry=8192, alignment=<optimized out>, zero=<optimized out>, commit=<optimized out>, growing_retained=<optimized out>, guarded=<optimized out>) at src/extent.c:606
+#6  0x00007fffee279499 in extent_alloc_retained (guarded=false, commit=0x7fff08cdde35, zero=<optimized out>, alignment=<optimized out>, size=140733341101032, expand_edata=0x0,
+    ehooks=<optimized out>, pac=0x7fffe0c039f0, tsdn=0x7fff08cdebe8) at src/extent.c:782
+#7  je_ecache_alloc_grow (tsdn=tsdn@entry=0x7fff08cdebe8, pac=pac@entry=0x7fffe0c039f0, ehooks=<optimized out>, ecache=ecache@entry=0x7fffe0c0d208, expand_edata=expand_edata@entry=0x0,
+    size=size@entry=8192, alignment=<optimized out>, zero=<optimized out>, guarded=<optimized out>) at src/extent.c:104
+#8  0x00007fffee2841be in pac_alloc_real (tsdn=tsdn@entry=0x7fff08cdebe8, pac=pac@entry=0x7fffe0c039f0, ehooks=ehooks@entry=0x7fffe0c000c0, size=size@entry=8192, alignment=alignment@entry=4096,
+    zero=zero@entry=false, guarded=false) at src/pac.c:124
+#9  0x00007fffee284310 in pac_alloc_impl (tsdn=0x7fff08cdebe8, self=0x7fffe0c039f0, size=8192, alignment=4096, zero=<optimized out>, guarded=<optimized out>, frequent_reuse=true,
+    deferred_work_generated=0x7fff08cddfff) at src/pac.c:178
+#10 0x00007fffee2831ad in pai_alloc (deferred_work_generated=0x7fff08cddfff, frequent_reuse=true, guarded=false, zero=false, alignment=<optimized out>, size=8192, self=0x7fffe0c039f0,
+    tsdn=0x7fff08cdebe8) at include/jemalloc/internal/pai.h:43
+#11 je_pa_alloc (tsdn=tsdn@entry=0x7fff08cdebe8, shard=shard@entry=0x7fffe0c039d8, size=8192, alignment=alignment@entry=4096, slab=slab@entry=true, szind=szind@entry=32, zero=false,
+    guarded=false, deferred_work_generated=0x7fff08cddfff) at src/pa.c:139
+#12 0x00007fffee22726d in arena_slab_alloc (tsdn=tsdn@entry=0x7fff08cdebe8, arena=arena@entry=0x7fffe0c01040, binind=binind@entry=32, binshard=binshard@entry=0,
+    bin_info=bin_info@entry=0x7fffee4bb080 <je_bin_infos+1280>) at src/arena.c:839
+#13 0x00007fffee2288a6 in je_arena_cache_bin_fill_small (tsdn=<optimized out>, arena=<optimized out>, cache_bin=<optimized out>, cache_bin_info=<optimized out>, binind=<optimized out>,
+    nfill=<optimized out>) at src/arena.c:1034
+#14 0x00007fffee28e7a9 in je_tcache_alloc_small_hard (tsdn=tsdn@entry=0x7fff08cdebe8, arena=arena@entry=0x7fffe0c01040, tcache=tcache@entry=0x7fff08cdef40,
+    cache_bin=cache_bin@entry=0x7fff08cdf248, binind=binind@entry=32, tcache_success=tcache_success@entry=0x7fff08cde140) at src/tcache.c:238
+#15 0x00007fffee21c3e2 in tcache_alloc_small (slow_path=<optimized out>, zero=false, binind=32, size=<optimized out>, tcache=<optimized out>, arena=0x7fffe0c01040, tsd=0x7fff08cdebe8)
+    at include/jemalloc/internal/tcache_inlines.h:68
+#16 arena_malloc (slow_path=<optimized out>, tcache=<optimized out>, zero=false, ind=32, size=<optimized out>, arena=0x0, tsdn=0x7fff08cdebe8) at include/jemalloc/internal/arena_inlines_b.h:151
+#17 iallocztm (slow_path=<optimized out>, arena=0x0, is_internal=false, tcache=<optimized out>, zero=false, ind=32, size=<optimized out>, tsdn=0x7fff08cdebe8)
+    at include/jemalloc/internal/jemalloc_internal_inlines_c.h:55
+#18 imalloc_no_sample (ind=32, usize=8192, size=<optimized out>, tsd=0x7fff08cdebe8, dopts=<synthetic pointer>, sopts=<synthetic pointer>) at src/jemalloc.c:2398
+#19 imalloc_body (tsd=0x7fff08cdebe8, dopts=<synthetic pointer>, sopts=<synthetic pointer>) at src/jemalloc.c:2573
+#20 imalloc (dopts=<synthetic pointer>, sopts=<synthetic pointer>) at src/jemalloc.c:2687
+#21 je_malloc_default (size=<optimized out>) at src/jemalloc.c:2722
+#22 0x00007fffee21d035 in imalloc_fastpath (fallback_alloc=0x7fffee21c0d0 <je_malloc_default>, size=size@entry=8192) at include/jemalloc/internal/jemalloc_internal_inlines_c.h:266
+#23 0x00000000004651f7 in realtime_image_spectrum_response (ptr=0x7fffed05dac0) at src/ws.c:2981
+#24 0x00007fffeda9f802 in start_thread (arg=<optimized out>) at pthread_create.c:443
+#25 0x00007fffeda3f450 in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
