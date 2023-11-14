@@ -128,11 +128,14 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     make -j16
     sudo make install
 
-# 12. Intel SPMD C (ispc)
+# 12. tcmalloc
+    sudo dnf install gperftools-devel
+
+# 13. Intel SPMD C (ispc)
 
     manually add ispc from https://ispc.github.io/downloads.html
 
-# 13. Adjust environment variables
+# 14. Adjust environment variables
 
 	Add
 
@@ -142,11 +145,11 @@ ulimit -s unlimited
 
     to .bashrc and re-login
 
-# 14. Splatalogue
+# 15. Splatalogue
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
-# 15. Open up the Ports via a Firewall
+# 16. Open up the Ports via a Firewall
 
     https://mebee.info/2019/10/17/post-2369/
     
@@ -164,13 +167,13 @@ ulimit -s unlimited
     sudo firewall-cmd --list-all
     sudo firewall-cmd --list-ports --zone=public
 
-# 16. Install screen & htop
+# 17. Install screen & htop
 
     sudo dnf install epel-release
     sudo dnf update
     sudo dnf install screen htop
 
-# 17. Launch the processes in parallel on the development cluster
+# 18. Launch the processes in parallel on the development cluster
 
     .bashrc:
     export I_MPI_PORT_RANGE="30000:30000"

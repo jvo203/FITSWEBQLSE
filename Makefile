@@ -83,7 +83,8 @@ ifeq ($(UNAME_S),Linux)
 endif
 
 JEMALLOC = `pkg-config --libs jemalloc` -L`jemalloc-config --libdir` -Wl,-rpath,`jemalloc-config --libdir` -ljemalloc `jemalloc-config --libs`
-TCMALLOC = `pkg-config --libs libtcmalloc` -ltcmalloc
+TCMALLOC = -ltcmalloc
+# `pkg-config --libs libtcmalloc`
 TARGET = fitswebqlse
 
 # Intel Integrated Performance Primitives Library
@@ -190,7 +191,7 @@ ifeq ($(UNAME_S),Darwin)
 	#MOD += `pkg-config --cflags json-fortran`
 
 	INC += -I${HOMEBREW_PREFIX}/opt/libpq/include -I${HOMEBREW_PREFIX}/opt/bzip2/include
-	LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib
+	LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
 
 	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-13
 	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-13
