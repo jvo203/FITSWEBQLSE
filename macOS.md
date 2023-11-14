@@ -139,18 +139,21 @@ ld: symbol(s) not found for architecture arm64
 # 12. jemalloc
     brew install jemalloc
 
-# 13. CZMQ
+# 13. tcmalloc
+    brew install gperftools
+
+# 14. CZMQ
     brew install czmq
 
-# 14. NASA CFITSIO
+# 15. NASA CFITSIO
     brew install cfitsio
 
-# 15. WCSLIB
+# 16. WCSLIB
     brew install wcslib
 
-# 16. PostgreSQL (needed by JVO)
+# 17. PostgreSQL (needed by JVO)
     brew install libpq
 
-# 17. FORTRAN formatting in Visual Studio Code
+# 18. FORTRAN formatting in Visual Studio Code
     brew install fortran-language-server
     brew install findent
