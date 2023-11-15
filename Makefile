@@ -142,6 +142,7 @@ ifeq ($(CC),icx)
 # -fast causes static linking problems
 
 	CFLAGS := $(FLAGS)
+	CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 	FLAGS += -heap-arrays 32 -align array64byte -fpp -D__$(OS)__ -shared-intel
 	# -stand f18
 #-mt_mpi
