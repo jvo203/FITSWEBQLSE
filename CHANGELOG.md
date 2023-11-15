@@ -1,7 +1,7 @@
 ## [5.0.50] - 2023-11-15
 
 * replaced the external _*JEMALLOC*_ memory allocator with _*TCMALLOC*_ one (a bug in _*jemalloc*_ caused a segmentation fault)
-* recompiled the WebAssembly with the latest emscripten
+* recompiled the WebAssembly with the latest emscripten compiler
 
 ## [5.0.49] - 2023-11-07
 
