@@ -251,7 +251,7 @@ endif
 ifeq ($(CC),gcc)
 	override CFLAGS += -g -march=native -mcmodel=large -Ofast -flto -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp -Wall -Wextra
 	FLAGS := $(CFLAGS) -std=f2018 -fall-intrinsics
-	CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free	
+	override CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free	
 
 	ifeq ($(FORT),nagfor)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
