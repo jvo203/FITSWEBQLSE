@@ -1,3 +1,7 @@
+## [5.0.51] - 2023-11-17
+
+* adjusted the client-side JavaScript _*clipSize*_ zoom viewport size variable
+
 ## [5.0.50] - 2023-11-15
 
 * replaced the external _*JEMALLOC*_ memory allocator with _*TCMALLOC*_ (a bug in _*jemalloc*_ caused a segmentation fault)
