@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-15.1";
+    return "JS2023-11-17.0";
 }
 
 function uuidv4() {
@@ -6351,7 +6351,7 @@ function zoom_beam() {
             .attr("opacity", opacity);
 
         var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
-        var clipSize = Math.min(image_bounding_dims.width, image_bounding_dims.height) / zoom_scale;
+        var clipSize = Math.min(image_bounding_dims.width - 1, image_bounding_dims.height - 1) / zoom_scale;
 
         var elem = d3.select("#image_rectangle");
         var canvas_width = parseFloat(elem.attr("width"));
@@ -12311,8 +12311,8 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             var x = image_bounding_dims.x1 + rx * (image_bounding_dims.width - 1);
             var y = image_bounding_dims.y1 + ry * (image_bounding_dims.height - 1);
 
-            zoom_dims.x0 = x;
-            zoom_dims.y0 = y;
+            zoom_dims.x0 = Math.round(x);
+            zoom_dims.y0 = Math.round(y);
             zoom_dims.rx = rx;
             zoom_dims.ry = ry;
             //zoom_dims.view = { x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height };
@@ -12971,7 +12971,7 @@ function setup_image_selection() {
             var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
             var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
 
-            var clipSize = Math.min(image_bounding_dims.width, image_bounding_dims.height) / zoom_scale;
+            var clipSize = Math.min(image_bounding_dims.width - 1, image_bounding_dims.height - 1) / zoom_scale;
             var sel_width = Math.floor(clipSize * scale);
             var sel_height = Math.floor(clipSize * scale);
 
@@ -13142,7 +13142,7 @@ function setup_image_selection() {
                 py = Math.round(py);
 
                 //image_stack.push({ x: x, y: y, clipSize: clipSize, px: px, py: py, zoomed_size: zoomed_size });
-                viewport_zoom_settings = { x: x, y: y, clipSize: clipSize, px: px, py: py, zoomed_size: zoomed_size };
+                viewport_zoom_settings = { x: Math.round(x), y: Math.round(y), clipSize: clipSize, px: px, py: py, zoomed_size: zoomed_size };
 
                 if ((mouse_position.x != prev_mouse_position.x) || (mouse_position.y != prev_mouse_position.y)) {
                     prev_mouse_position = mouse_position;
@@ -14446,7 +14446,7 @@ function imageTimeout() {
     x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
     y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
 
-    var clipSize = Math.min(image_bounding_dims.width, image_bounding_dims.height) / zoom_scale;
+    var clipSize = Math.min(image_bounding_dims.width - 1, image_bounding_dims.height - 1) / zoom_scale;
     var sel_width = Math.floor(clipSize * scale);
     var sel_height = Math.floor(clipSize * scale);
 
