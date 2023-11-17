@@ -14456,7 +14456,7 @@ function imageTimeout() {
 
     var image_update = true;
 
-    if (fitsSize > clipSize)
+    if (Math.round(fitsSize) > Math.round(clipSize))
         image_update = true;
     else
         image_update = false;
@@ -18370,7 +18370,7 @@ async function mainRenderer() {
         video_fps_control = localStorage.getItem("video_fps_control");
 
     composite_view = (parseInt(votable.getAttribute('data-composite')) == 1) ? true : false;
-    composite_view = false; // an override during development    
+    // composite_view = false; // an override during development    
     console.log("composite view:", composite_view);
 
     optical_view = false;
