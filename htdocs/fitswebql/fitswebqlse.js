@@ -13142,7 +13142,7 @@ function setup_image_selection() {
                 py = Math.round(py);
 
                 //image_stack.push({ x: x, y: y, clipSize: clipSize, px: px, py: py, zoomed_size: zoomed_size });
-                viewport_zoom_settings = { x: Math.round(x), y: Math.round(y), clipSize: clipSize, px: px, py: py, zoomed_size: zoomed_size };
+                viewport_zoom_settings = { x: x, y: y, clipSize: clipSize, px: px, py: py, zoomed_size: zoomed_size };
 
                 if ((mouse_position.x != prev_mouse_position.x) || (mouse_position.y != prev_mouse_position.y)) {
                     prev_mouse_position = mouse_position;
