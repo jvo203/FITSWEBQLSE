@@ -96,7 +96,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
     bunzip2 wcslib.tar.bz2
     tar xvf wcslib.tar
-    cd wcslib-8.1
+    cd wcslib-8.2.1
     ./configure --prefix=/usr/local
     make
     sudo make install
