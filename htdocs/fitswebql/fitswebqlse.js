@@ -3200,7 +3200,48 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
                 offset = (offset + 4) | 0;
             }
         } else {
+            if (zoom_dims != null)
+                if (zoom_dims.view != null)
+                    image_bounding_dims = zoom_dims.view;
+
+            var c = document.getElementById('HTMLCanvas' + index);
+            var width = c.width;
+            var height = c.height;
+
+            var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
+
+            if (va_count > 1) {
+                if (va_count == 2)
+                    scale = 0.8 * scale;
+                else if (va_count == 4)
+                    scale = 0.6 * scale;
+                else if (va_count == 5)
+                    scale = 0.5 * scale;
+                else if (va_count == 6)
+                    scale = 0.45 * scale;
+                else if (va_count == 7)
+                    scale = 0.45 * scale;
+                else
+                    scale = 2 * scale / va_count;
+            }
+
+            var img_width = Math.floor(scale * image_bounding_dims.width);
+            var img_height = Math.floor(scale * image_bounding_dims.height);
+            // console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
+
+            var image_position = get_image_position(index, width, height);
+            var posx = image_position.posx;
+            var posy = /*height -*/ image_position.posy;
+            console.log("index:", index, "image_position:", image_position);
+
             init_webgl_image_buffers(index);
+
+            setup_image_selection_index(index, posx - img_width / 2, posy - img_height / 2, img_width, img_height);
+
+            //trigger a tileTimeout
+            /*if (zoom_dims != null)
+                if (zoom_dims.view != null)
+                    tileTimeout(true);*/
         }
     };
 
@@ -3447,8 +3488,13 @@ function webgl_composite_image_renderer(gl, width, height) {
 
 function webgl_image_renderer(index, gl, width, height) {
     var image = imageContainer[index - 1];
+    var image_bounding_dims = image.image_bounding_dims;
 
-    var scale = get_image_scale(width, height, image.image_bounding_dims.width, image.image_bounding_dims.height);
+    if (zoom_dims != null)
+        if (zoom_dims.view != null)
+            image_bounding_dims = zoom_dims.view;
+
+    var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
 
     if (va_count > 1) {
         if (va_count == 2)
@@ -3465,8 +3511,8 @@ function webgl_image_renderer(index, gl, width, height) {
             scale = 2 * scale / va_count;
     }
 
-    var img_width = Math.floor(scale * image.image_bounding_dims.width);
-    var img_height = Math.floor(scale * image.image_bounding_dims.height);
+    var img_width = Math.floor(scale * image_bounding_dims.width);
+    var img_height = Math.floor(scale * image_bounding_dims.height);
     // console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
 
     var image_position = get_image_position(index, width, height);
@@ -12044,7 +12090,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
     }
     catch (e) { };
 
-    var zoom = d3.zoom()
+    /*var zoom = d3.zoom()
         .scaleExtent([1, 40])
         .on("zoom", tiles_zoom)
         .on("end", tiles_zoomended);
@@ -12052,7 +12098,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
     var drag = d3.drag()
         .on("start", tiles_dragstarted)
         .on("drag", tiles_dragmove)
-        .on("end", tiles_dragended);
+        .on("end", tiles_dragended);*/
 
     now = performance.now();
     then = now;
@@ -12117,14 +12163,18 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
     var rect = svg.append("rect")
         .attr("id", "image_rectangle" + index)
         .attr("class", "image_rectangle")
-        .attr("x", topx)
-        .attr("y", topy)
-        .attr("width", img_width)
-        .attr("height", img_height)
+        .attr("x", Math.round(topx))
+        .attr("y", Math.round(topy))
+        .attr("width", Math.round(img_width))
+        .attr("height", Math.round(img_height))
         .style('cursor', 'pointer')//'crosshair')//'none' to mask Chrome latency
-        .attr("opacity", 0.0)
-        .call(drag)
-        .call(zoom)
+        .style("fill", "transparent")
+        .style("stroke", "yellow")
+        .style("stroke-width", emStrokeWidth)
+        .style("stroke-dasharray", ("1, 5, 1"))
+        .attr("opacity", 0.75)
+        /*.call(drag)
+        .call(zoom)*/
         .on("click", function () {
             if (isLocal) {
                 //parse window.location to get the value of filename<index>
@@ -12289,11 +12339,13 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             if (imageContainer[index - 1] == null)
                 return;
 
-            var imageCanvas = imageContainer[index - 1].imageCanvas;
-            var image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
+            var image = imageContainer[index - 1];
+            var image_bounding_dims = image.image_bounding_dims;
 
             if (zoom_dims.view != null)
                 image_bounding_dims = zoom_dims.view;
+
+            let rect = event.currentTarget;
 
             if (dragging) {
                 var dx = d3.event.dx;
@@ -12306,19 +12358,28 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
                 image_bounding_dims.y1 = clamp(image_bounding_dims.y1 - dy, 0, imageCanvas.height - 1 - image_bounding_dims.height);
             }
 
-            var rx = (mouse_position.x - d3.select(this).attr("x")) / d3.select(this).attr("width");
+            /*var rx = (mouse_position.x - d3.select(this).attr("x")) / d3.select(this).attr("width");
             var ry = (mouse_position.y - d3.select(this).attr("y")) / d3.select(this).attr("height");
             var x = image_bounding_dims.x1 + rx * (image_bounding_dims.width - 1);
-            var y = image_bounding_dims.y1 + ry * (image_bounding_dims.height - 1);
+            var y = image_bounding_dims.y1 + ry * (image_bounding_dims.height - 1);*/
+
+            var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 0);
+            var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect.getAttribute("x"));
+
+            var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 0);
+            var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect.getAttribute("y"));
+
+            x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
+            y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
 
             zoom_dims.x0 = Math.round(x);
             zoom_dims.y0 = Math.round(y);
-            zoom_dims.rx = rx;
-            zoom_dims.ry = ry;
+            zoom_dims.rx = ax;//rx;
+            zoom_dims.ry = ay;//ry;
             //zoom_dims.view = { x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height };
 
-            var orig_x = x * fitsData.width / imageCanvas.width;
-            var orig_y = y * fitsData.height / imageCanvas.height;
+            var orig_x = x * (fitsData.width - 1) / (image.width - 1);
+            var orig_y = y * (fitsData.height - 1) / (image.height - 1);
             // console.log("orig_x:", orig_x, "orig_y:", orig_y);
 
             let world = pix2sky(fitsData, orig_x, orig_y);
@@ -12358,7 +12419,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             d3.select("#dec").text(decText);
         });
 
-    zoom.scaleTo(rect, zoom_scale);
+    //zoom.scaleTo(rect, zoom_scale);
 }
 
 function show_cursor() {
