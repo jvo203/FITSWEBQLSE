@@ -12159,6 +12159,12 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
     var svg = d3.select("#FrontSVG");
 
+    //add a bounding box			
+    if (theme == 'bright')
+        var strokeStyle = "white";
+    else
+        var strokeStyle = "black";
+
     //svg image rectangle for zooming-in
     var rect = svg.append("rect")
         .attr("id", "image_rectangle" + index)
@@ -12169,10 +12175,10 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
         .attr("height", Math.round(img_height))
         .style('cursor', 'pointer')//'crosshair')//'none' to mask Chrome latency
         .style("fill", "transparent")
-        .style("stroke", "yellow")
-        .style("stroke-width", emStrokeWidth)
-        .style("stroke-dasharray", ("1, 5, 1"))
-        .attr("opacity", 0.75)
+        .style("stroke", strokeStyle)
+        .style("stroke-width", 2)
+        /*.style("stroke-dasharray", ("1, 5, 1"))*/
+        .attr("opacity", 0.75) // was 0.0
         /*.call(drag)
         .call(zoom)*/
         .on("click", function () {
