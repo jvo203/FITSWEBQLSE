@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-20.0";
+    return "JS2023-11-21.0";
 }
 
 function uuidv4() {
@@ -3237,6 +3237,11 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
             init_webgl_image_buffers(index);
 
             setup_image_selection_index(index, posx - img_width / 2, posy - img_height / 2, img_width, img_height);
+
+            // set the border for the last image
+            if (index == va_count) {
+                d3.select("#image_rectangle" + index).attr("opacity", 0.75);
+            }
 
             //trigger a tileTimeout
             /*if (zoom_dims != null)
@@ -12178,7 +12183,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
         .style("stroke", strokeStyle)
         .style("stroke-width", 2)
         /*.style("stroke-dasharray", ("1, 5, 1"))*/
-        .attr("opacity", 0.75) // was 0.0
+        .attr("opacity", 0.0) // was 0.75
         /*.call(drag)
         .call(zoom)*/
         .on("click", function () {
@@ -12232,6 +12237,10 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
         .on("mouseenter", function (event) {
             hide_navigation_bar();
             console.log("switching active view to", d3.select(this).attr("id"));
+
+            for (let i = 0; i < va_count; i++)
+                d3.select("#image_rectangle" + (i + 1)).attr("opacity", 0.0);
+            d3.select(this).attr("opacity", 0.75);
 
             d3.select(this).moveToFront();
             dragging = false;
