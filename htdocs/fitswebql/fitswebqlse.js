@@ -3238,11 +3238,6 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
             setup_image_selection_index(index, posx - img_width / 2, posy - img_height / 2, img_width, img_height);
 
-            // set the border for the last image
-            if (index == va_count) {
-                d3.select("#image_rectangle" + index).attr("opacity", 0.75);
-            }
-
             //trigger a tileTimeout
             /*if (zoom_dims != null)
                 if (zoom_dims.view != null)
@@ -12183,7 +12178,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
         .style("stroke", strokeStyle)
         .style("stroke-width", 2)
         /*.style("stroke-dasharray", ("1, 5, 1"))*/
-        .attr("opacity", 0.0) // was 0.75
+        .attr("opacity", (index == va_count) ? 0.75 : 0.0)
         /*.call(drag)
         .call(zoom)*/
         .on("click", function () {
