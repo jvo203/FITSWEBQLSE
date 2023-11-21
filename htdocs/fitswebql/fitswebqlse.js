@@ -12090,12 +12090,12 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
     }
     catch (e) { };
 
-    /*var zoom = d3.zoom()
+    var zoom = d3.zoom()
         .scaleExtent([1, 40])
         .on("zoom", tiles_zoom)
         .on("end", tiles_zoomended);
 
-    var drag = d3.drag()
+    /*var drag = d3.drag()
         .on("start", tiles_dragstarted)
         .on("drag", tiles_dragmove)
         .on("end", tiles_dragended);*/
@@ -12179,8 +12179,8 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
         .style("stroke-width", 2)
         /*.style("stroke-dasharray", ("1, 5, 1"))*/
         .attr("opacity", (index == va_count) ? 0.75 : 0.0)
-        /*.call(drag)
-        .call(zoom)*/
+        /*.call(drag)*/
+        .call(zoom)
         .on("click", function () {
             if (isLocal) {
                 //parse window.location to get the value of filename<index>
@@ -12429,7 +12429,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             d3.select("#dec").text(decText);
         });
 
-    //zoom.scaleTo(rect, zoom_scale);
+    zoom.scaleTo(rect, zoom_scale);
 }
 
 function show_cursor() {
@@ -14103,55 +14103,18 @@ function refresh_tiles(index) {
     if (zoom_scale < 1)
         return;
 
-    if (zoom_dims == null)
+    /*if (zoom_dims == null)
         return;
 
     if (zoom_dims.view == null)
         return;
 
-    let image_bounding_dims = zoom_dims.view;
+    let image_bounding_dims = zoom_dims.view;*/
 
     if (imageContainer[index - 1] == null)
         return;
-
-    let imageCanvas = imageContainer[index - 1].imageCanvas;
-
-    var c = document.getElementById('HTMLCanvas' + index);
-    var width = c.width;
-    var height = c.height;
-    var ctx = c.getContext("2d");
-
-    ctx.webkitImageSmoothingEnabled = false;
-    ctx.msImageSmoothingEnabled = false;
-    ctx.imageSmoothingEnabled = false;
-    //ctx.globalAlpha=0.9;
-
-    let img_width = 0, img_height = 0;
-    try {
-        let elem = d3.select("#image_rectangle" + index);
-        img_width = elem.attr("width");
-        img_height = elem.attr("height");
-    } catch (err) {
-        return;
-    }
-
-    let image_position = get_image_position(index, width, height);
-    let posx = image_position.posx;
-    let posy = image_position.posy;
-
-    ctx.drawImage(imageCanvas, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.width, image_bounding_dims.height, Math.round(posx - img_width / 2), Math.round(posy - img_height / 2), Math.round(img_width), Math.round(img_height));
-
-    //add a bounding box			
-    if (theme == 'bright')
-        ctx.strokeStyle = "white";
     else
-        ctx.strokeStyle = "black";
-
-    ctx.lineWidth = 2;
-
-    ctx.rect(Math.round(posx - img_width / 2), Math.round(posy - img_height / 2), Math.round(img_width), Math.round(img_height));
-    ctx.stroke();
-    //end of a bounding box
+        imageContainer[index - 1].refresh = true;
 }
 
 function tiles_dragstarted() {
@@ -14187,16 +14150,16 @@ function tiles_dragmove() {
     }
 }
 
-function tiles_zoomended() {
+function tiles_zoomended(event) {
     console.log("zoom end");
 
     //do not wait, call tileTimeout immediately
-    tileTimeout();
+    // tileTimeout();
 }
 
-function tiles_zoom() {
-    console.log("scale: " + d3.event.transform.k);
-    zoom_scale = d3.event.transform.k;
+function tiles_zoom(event) {
+    console.log("scale: " + event.transform.k);
+    zoom_scale = event.transform.k;
     moving = true;
 
     if (zoom_dims == null)
@@ -14206,8 +14169,8 @@ function tiles_zoom() {
     let width = zoom_dims.width;
     let height = zoom_dims.height;
 
-    let new_width = width / zoom_scale;
-    let new_height = height / zoom_scale;
+    let new_width = (width - 0) / zoom_scale;
+    let new_height = (height - 0) / zoom_scale;
 
     let x0 = zoom_dims.x0;
     let y0 = zoom_dims.y0;
@@ -14217,13 +14180,10 @@ function tiles_zoom() {
     let new_y1 = clamp(y0 - ry * new_height, 0, zoom_dims.height - 1 - new_height);
 
     zoom_dims.view = { x1: new_x1, y1: new_y1, width: new_width, height: new_height };
-
     console.log("zoom_dims:", zoom_dims);
 
     for (let i = 1; i <= va_count; i++) {
-        requestAnimationFrame(function () {
-            refresh_tiles(i);
-        });
+        refresh_tiles(i);
 
         //keep zoom scale in sync across all images
         try {
@@ -14232,9 +14192,9 @@ function tiles_zoom() {
         } catch (e) { };
     }
 
-    var tmp = d3.select(this);
+    /*var tmp = d3.select(this);
     var onMouseMoveFunc = tmp.on("mousemove");
-    tmp.each(onMouseMoveFunc);
+    tmp.each(onMouseMoveFunc);*/
 }
 
 function zoomed(event) {
