@@ -3661,8 +3661,8 @@ function webgl_image_renderer(index, gl, width, height) {
                 console.log("view:", view);
 
                 // handle the zoom view
-                xmin = view.x1 / (image.width - 0);// was - 1
-                ymin = view.y1 / (image.height - 0);// was - 1
+                xmin = view.x1 / (image.width - 1);// was - 1
+                ymin = view.y1 / (image.height - 1);// was - 1
                 _width = view.width / image.width;
                 _height = view.height / image.height;
             }
