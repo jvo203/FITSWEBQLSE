@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-21.0";
+    return "JS2023-11-22.0";
 }
 
 function uuidv4() {
@@ -3491,8 +3491,9 @@ function webgl_image_renderer(index, gl, width, height) {
     var image_bounding_dims = image.image_bounding_dims;
 
     if (zoom_dims != null)
-        if (zoom_dims.view != null)
+        if (zoom_dims.view != null) {
             image_bounding_dims = zoom_dims.view;
+        }
 
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
 
@@ -3648,12 +3649,25 @@ function webgl_image_renderer(index, gl, width, height) {
         // Tell WebGL to use our shader program pair
         gl.useProgram(program);
 
-        let xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
-        let ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
-        let _width = image.image_bounding_dims.width / image.width;
-        let _height = image.image_bounding_dims.height / image.height;
+        // by default show the whole image
+        var xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
+        var ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
+        var _width = image.image_bounding_dims.width / image.width;
+        var _height = image.image_bounding_dims.height / image.height;
 
-        //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
+        if (zoom_dims != null)
+            if (zoom_dims.view != null) {
+                let view = zoom_dims.view;
+                console.log("view:", view);
+
+                // handle the zoom view
+                xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
+                ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
+                _width = image.image_bounding_dims.width / image.width;
+                _height = image.image_bounding_dims.height / image.height;
+            }
+
+        console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
         // get the multiplier
