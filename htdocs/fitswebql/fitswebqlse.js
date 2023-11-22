@@ -12191,8 +12191,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
         .style("fill", "transparent")
         .style("stroke", strokeStyle)
         .style("stroke-width", 2)
-        /*.style("stroke-dasharray", ("1, 5, 1"))*/
-        .attr("opacity", (index == va_count) ? 0.75 : 0.0)
+        .attr("opacity", (index == va_count) ? 0.5 : 0.0)
         /*.call(drag)*/
         .call(zoom)
         .on("click", function () {
@@ -12249,7 +12248,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
             for (let i = 0; i < va_count; i++)
                 d3.select("#image_rectangle" + (i + 1)).attr("opacity", 0.0);
-            d3.select(this).attr("opacity", 0.75);
+            d3.select(this).attr("opacity", 0.5);
 
             d3.select(this).moveToFront();
             dragging = false;
