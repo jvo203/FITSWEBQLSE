@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-22.0";
+    return "JS2023-11-22.1";
 }
 
 function uuidv4() {
@@ -3661,10 +3661,10 @@ function webgl_image_renderer(index, gl, width, height) {
                 console.log("view:", view);
 
                 // handle the zoom view
-                xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
-                ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
-                _width = image.image_bounding_dims.width / image.width;
-                _height = image.image_bounding_dims.height / image.height;
+                xmin = view.x1 / (image.width - 0);// was - 1
+                ymin = view.y1 / (image.height - 0);// was - 1
+                _width = view.width / image.width;
+                _height = view.height / image.height;
             }
 
         console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
