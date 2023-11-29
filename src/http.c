@@ -135,6 +135,7 @@ void *handle_fitswebql_request(void *ptr);
 void *handle_notify_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *ptr);
+void *handle_composite_download_request(void *ptr);
 extern int decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);       // GZIP decompression
 extern void zerr(int ret);                  // GZIP error reporting
@@ -4584,6 +4585,52 @@ void *handle_image_request(void *args)
     close(params->fd);
 
     free(params);
+
+    pthread_exit(NULL);
+}
+
+void *handle_composite_download_request(void *ptr)
+{
+    int i;
+
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct composite_download_request *composite_req = (struct composite_download_request *)ptr;
+
+    // check the va_count first
+    if (composite_req->va_count == 0)
+    {
+        if (composite_req->req != NULL)
+            free(composite_req->req);
+
+        free(composite_req);
+        pthread_exit(NULL);
+    }
+
+    if (composite_req->req == NULL)
+    {
+        // iterate through va_count and free the datasetId
+        for (i = 0; i < composite_req->va_count; i++)
+            free(composite_req->datasetId[i]);
+
+        // free the datasetId array
+        free(composite_req->datasetId);
+        free(composite_req);
+
+        pthread_exit(NULL);
+    }
+
+    // TO-DO: iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
+
+    // iterate through va_count and free the datasetId
+    for (i = 0; i < composite_req->va_count; i++)
+        free(composite_req->datasetId[i]);
+
+    // free the datasetId array
+    free(composite_req->datasetId);
+    free(composite_req->req);
+    free(composite_req);
 
     pthread_exit(NULL);
 }
