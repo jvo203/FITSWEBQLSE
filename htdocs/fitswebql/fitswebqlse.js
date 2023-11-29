@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-27.0";
+    return "JS2023-11-29.0";
 }
 
 function uuidv4() {
@@ -18414,7 +18414,7 @@ async function mainRenderer() {
         video_fps_control = localStorage.getItem("video_fps_control");
 
     composite_view = (parseInt(votable.getAttribute('data-composite')) == 1) ? true : false;
-    composite_view = false; // an override during development    
+    // composite_view = false; // an override during development    
     console.log("composite view:", composite_view);
 
     optical_view = false;
