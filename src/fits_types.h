@@ -86,6 +86,13 @@ struct download_request
     void *ptr;
 };
 
+struct composite_download_request
+{
+    char **datasetId; // dataset ids
+    int va_count;     // number of datasets
+    struct download_request *req;
+};
+
 struct image_spectrum_request
 {
     // input
