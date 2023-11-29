@@ -2139,24 +2139,24 @@ static enum MHD_Result on_http_connection(void *cls,
         char filename[1024];
 
         // suggest a filename for saving the downloaded file
-        if (_filename != NULL)
-            snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s", _filename);
+        if (va_count == 1)
+        {
+            if (_filename != NULL)
+                snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s", _filename);
+            else
+                snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId[0]);
+        }
         else
         {
-            if (va_count == 1)
-                snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId[0]);
-            else
-            {
-                // make a filename using a timestamp in the format "FITSWEBQLSE_%Y-%m-%d_%H-%M-%S.tar" (a thread-safe method)
-                struct tm result;
-                time_t now = time(NULL);
-                localtime_r(&now, &result);
+            // make a filename using a timestamp in the format "FITSWEBQLSE_%Y-%m-%d_%H-%M-%S.tar" (a thread-safe method)
+            struct tm result;
+            time_t now = time(NULL);
+            localtime_r(&now, &result);
 
-                char timestamp[32];
-                strftime(timestamp, sizeof(timestamp) - 1, "%Y-%m-%d_%H-%M-%S", &result);
+            char timestamp[32];
+            strftime(timestamp, sizeof(timestamp) - 1, "%Y-%m-%d_%H-%M-%S", &result);
 
-                snprintf(filename, sizeof(filename) - 1, "attachment; filename=FITSWEBQLSE_%s.tar", timestamp);
-            }
+            snprintf(filename, sizeof(filename) - 1, "attachment; filename=FITSWEBQLSE_%s.tar", timestamp);
         }
 
         // create a response from a pipe by passing the read end of the pipe
