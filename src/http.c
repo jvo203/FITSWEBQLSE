@@ -2082,8 +2082,16 @@ static enum MHD_Result on_http_connection(void *cls,
         else
             ref_freq = atof(ref_freq_str);
 
-        // do we have a dataset?
-        void *item = get_dataset(datasetId[0]);
+        // do we have at least one dataset?
+        void *item = NULL;
+
+        for (int i = 0; i < va_count; i++)
+        {
+            item = get_dataset(datasetId[i]);
+
+            if (item != NULL)
+                break;
+        }
 
         if (item == NULL)
         {
