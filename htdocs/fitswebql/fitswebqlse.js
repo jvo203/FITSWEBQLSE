@@ -14915,7 +14915,7 @@ function partial_fits_size() {
     let partial_size = roundUp(fitsHeader.length, 2880) + len * dimx * dimy * Math.round(Math.abs(fitsData.BITPIX) / 8);
 
     // FITS header/data units come in multiples of 2880 bytes
-    return roundUp(partial_size, 2880);
+    return va_count * roundUp(partial_size, 2880);
 }
 
 function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_height, frame_pv) {
