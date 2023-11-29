@@ -1979,11 +1979,59 @@ static enum MHD_Result on_http_connection(void *cls,
         int pipefd[2];
         pthread_t tid;
 
-        char *datasetId = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
-        char *_filename = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "filename");
+        // get datasetId
+        char **datasetId = NULL;
+        int va_count = 0;
 
-        if (datasetId == NULL)
+        char *tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "datasetId");
+
+        // auto-detect multiple lines
+        if (tmp == NULL)
+        {
+            char str_key[255] = "";
+
+            sprintf(str_key, "datasetId%d", va_count + 1);
+
+            while ((tmp = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, str_key)) != NULL)
+            {
+                va_count++;
+                printf("[C] argument %d:%s\n", va_count, tmp);
+                sprintf(str_key, "datasetId%d", va_count + 1);
+
+                datasetId = (char **)realloc(datasetId, va_count * sizeof(char *));
+                datasetId[va_count - 1] = strdup(tmp);
+
+                char enc[256];
+
+                GString *value = g_string_new(tmp);
+
+                mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
+
+                g_string_free(value, TRUE);
+            }
+        }
+        else
+        {
+            va_count = 1;
+
+            // allocate datasetId
+            datasetId = (char **)malloc(sizeof(char *));
+            datasetId[0] = strdup(tmp);
+
+            char enc[256];
+
+            GString *value = g_string_new(tmp);
+
+            mg_url_encode(value->str, value->len, enc, sizeof(enc) - 1);
+
+            g_string_free(value, TRUE);
+        }
+
+        // no datasets have been found by this point
+        if (va_count == 0)
             return http_bad_request(connection);
+
+        char *_filename = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "filename");
 
         char *x1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x1");
 
@@ -2035,22 +2083,50 @@ static enum MHD_Result on_http_connection(void *cls,
             ref_freq = atof(ref_freq_str);
 
         // do we have a dataset?
-        void *item = get_dataset(datasetId);
+        void *item = get_dataset(datasetId[0]);
 
         if (item == NULL)
+        {
+            // deallocate datasetId
+            for (int i = 0; i < va_count; i++)
+                free(datasetId[i]);
+            free(datasetId);
+
             return http_not_found(connection);
+        }
 
         if (get_error_status(item))
+        {
+            // deallocate datasetId
+            for (int i = 0; i < va_count; i++)
+                free(datasetId[i]);
+            free(datasetId);
+
             return http_internal_server_error(connection);
+        }
 
         if (!get_header_status(item))
+        {
+            // deallocate datasetId
+            for (int i = 0; i < va_count; i++)
+                free(datasetId[i]);
+            free(datasetId);
+
             return http_not_found(connection);
+        }
 
         // open a pipe
         status = pipe(pipefd);
 
         if (0 != status)
+        {
+            // deallocate datasetId
+            for (int i = 0; i < va_count; i++)
+                free(datasetId[i]);
+            free(datasetId);
+
             return http_internal_server_error(connection);
+        }
 
         char filename[1024];
 
@@ -2058,7 +2134,7 @@ static enum MHD_Result on_http_connection(void *cls,
         if (_filename != NULL)
             snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s", _filename);
         else
-            snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId);
+            snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId[0]);
 
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
@@ -2114,6 +2190,11 @@ static enum MHD_Result on_http_connection(void *cls,
         }
         else
             close(pipefd[1]);
+
+        // deallocate datasetId
+        for (int i = 0; i < va_count; i++)
+            free(datasetId[i]);
+        free(datasetId);
 
         return ret;
     }
