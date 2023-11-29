@@ -2153,9 +2153,9 @@ static enum MHD_Result on_http_connection(void *cls,
                 localtime_r(&now, &result);
 
                 char timestamp[32];
-                strftime(timestamp, sizeof(timestamp) - 1, "FITSWEBQLSE_%Y-%m-%d_%H-%M-%S.tar", &result);
+                strftime(timestamp, sizeof(timestamp) - 1, "%Y-%m-%d_%H-%M-%S", &result);
 
-                snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s", timestamp);
+                snprintf(filename, sizeof(filename) - 1, "attachment; filename=FITSWEBQLSE_%s.tar", timestamp);
             }
         }
 
