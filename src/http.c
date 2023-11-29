@@ -2142,7 +2142,22 @@ static enum MHD_Result on_http_connection(void *cls,
         if (_filename != NULL)
             snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s", _filename);
         else
-            snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId[0]);
+        {
+            if (va_count == 1)
+                snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId[0]);
+            else
+            {
+                // make a filename using a timestamp in the format "FITSWEBQLSE_%Y-%m-%d_%H:%M:%S.tar" (a thread-safe method)
+                struct tm result;
+                time_t now = time(NULL);
+                localtime_r(&now, &result);
+
+                char timestamp[32];
+                strftime(timestamp, sizeof(timestamp) - 1, "FITSWEBQLSE_%Y-%m-%d_%H:%M:%S.tar", &result);
+
+                snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s", timestamp);
+            }
+        }
 
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
