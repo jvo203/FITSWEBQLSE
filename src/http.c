@@ -2147,13 +2147,13 @@ static enum MHD_Result on_http_connection(void *cls,
                 snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s-subregion.fits", datasetId[0]);
             else
             {
-                // make a filename using a timestamp in the format "FITSWEBQLSE_%Y-%m-%d_%H:%M:%S.tar" (a thread-safe method)
+                // make a filename using a timestamp in the format "FITSWEBQLSE_%Y-%m-%d_%H-%M-%S.tar" (a thread-safe method)
                 struct tm result;
                 time_t now = time(NULL);
                 localtime_r(&now, &result);
 
                 char timestamp[32];
-                strftime(timestamp, sizeof(timestamp) - 1, "FITSWEBQLSE_%Y-%m-%d_%H:%M:%S.tar", &result);
+                strftime(timestamp, sizeof(timestamp) - 1, "FITSWEBQLSE_%Y-%m-%d_%H-%M-%S.tar", &result);
 
                 snprintf(filename, sizeof(filename) - 1, "attachment; filename=%s", timestamp);
             }
