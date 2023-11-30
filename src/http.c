@@ -4655,7 +4655,7 @@ void *handle_composite_download_request(void *ptr)
 
     // TO-DO: iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
 
-    // manually close the write end of the pipe
+    // TEMPORARY: manually close the write end of the pipe
     close(composite_req->req->fd);
 
     // iterate through va_count and free the datasetId
