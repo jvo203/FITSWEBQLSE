@@ -2202,7 +2202,39 @@ static enum MHD_Result on_http_connection(void *cls,
             req->ptr = item;
 
             // create and detach the FORTRAN thread
-            int stat = pthread_create(&tid, NULL, &download_request, req);
+            int stat = -1;
+
+            if (va_count == 1)
+                stat = pthread_create(&tid, NULL, &download_request, req);
+            else
+            {
+                // create a new composite_download_request
+                struct composite_download_request *creq = (struct composite_download_request *)malloc(sizeof(struct composite_download_request));
+
+                if (creq == NULL)
+                {
+                    close(pipefd[1]);
+                    free(req);
+
+                    // deallocate datasetId
+                    for (int i = 0; i < va_count; i++)
+                        free(datasetId[i]);
+                    free(datasetId);
+
+                    return http_internal_server_error(connection);
+                }
+
+                // duplicate the datasetId
+                creq->datasetId = (char **)malloc(va_count * sizeof(char *));
+                for (int i = 0; i < va_count; i++)
+                    creq->datasetId[i] = strdup(datasetId[i]);
+
+                creq->va_count = va_count;
+                creq->req = req;
+
+                // launch a C thread calling handle_composite_download_request
+                stat = pthread_create(&tid, NULL, &handle_composite_download_request, creq);
+            }
 
             if (stat == 0)
                 pthread_detach(tid);
@@ -4622,6 +4654,9 @@ void *handle_composite_download_request(void *ptr)
     }
 
     // TO-DO: iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
+
+    // manually close the write end of the pipe
+    close(composite_req->req->fd);
 
     // iterate through va_count and free the datasetId
     for (i = 0; i < composite_req->va_count; i++)
