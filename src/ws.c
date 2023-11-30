@@ -163,6 +163,9 @@ char *append_null(const char *chars, const int size)
 {
     char *tmp = (char *)malloc(size + 1);
 
+    if (tmp == NULL)
+        return NULL;
+
     memcpy(tmp, chars, size);
     tmp[size] = '\0';
 
@@ -172,6 +175,9 @@ char *append_null(const char *chars, const int size)
 int atoi2(const char *chars, const int size)
 {
     char *tmp = append_null(chars, size);
+
+    if (tmp == NULL)
+        return 0;
 
     int result = atoi(tmp);
 
@@ -183,6 +189,9 @@ int atoi2(const char *chars, const int size)
 double atof2(const char *chars, const int size)
 {
     char *tmp = append_null(chars, size);
+
+    if (tmp == NULL)
+        return 0.0;
 
     double result = atof(tmp);
 
