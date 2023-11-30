@@ -49,3 +49,42 @@ Thread 13 "MHD-single" received signal SIGSEGV, Segmentation fault.
 #8  0x00007fffeb9641ff in _INTERNAL1ebb3278::__kmp_launch_worker (thr=0x7fffe197fdc0) at ../../src/z_Linux_util.cpp:559
 #9  0x00007fffeb690c64 in start_thread () from /usr/lib64/libc.so.6
 #10 0x00007fffeb718550 in clone3 () from /usr/lib64/libc.so.6
+
+
+=================
+
+Tue, 28 Nov 2023 12:40:16 JST	131.113.44.195	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	ALMA01378022
+
+x265 [warning]: Source height < 720p; disabling lookahead-slices
+[New Thread 0x7fffd71d8640 (LWP 811067)]
+x265 [info]: Coding QT: max CU size, min CU size : 32 / 8
+x265 [info]: Residual QT: max TU size, max depth : 32 / 1 inter / 1 intra
+x265 [info]: ME / range / subpel / merge         : hex / 57 / 1 / 2
+x265 [info]: Cb/Cr QP Offset                     : 6 / 6
+x265 [info]: Lookahead / bframes / badapt        : 0 / 0 / 0
+x265 [info]: b-pyramid / weightp / weightb       : 0 / 0 / 0
+x265 [info]: References / ref-limit  cu / depth  : 1 / off / off
+x265 [info]: Rate Control / qCompress            : CRF-28.0 / 0.60
+x265 [info]: tools: rd=2 psy-rd=2.00 early-skip rskip mode=1 signhide tmvp
+x265 [info]: tools: fast-intra strong-intra-smoothing deblock
+[WS] {"type":"video","frame":88658985430.47928,"key":false,"fill":0,"ref_freq":88662530000,"fps":18.260173718028287,"seq_id":14,"bitrate":547,"timestamp":33575.90000009537}
+
+Thread 1 "fitswebqlse" received signal SIGSEGV, Segmentation fault.
+0x00007fffee83a32e in tc_malloc () from /lib64/libtcmalloc.so.4
+Missing separate debuginfos, use: dnf debuginfo-install gperftools-libs-2.9.1-2.el9.x86_64 libunwind-1.6.2-1.el9.x86_64
+
+0x00007fffee83a32e in tc_malloc () from /lib64/libtcmalloc.so.4
+Missing separate debuginfos, use: dnf debuginfo-install gperftools-libs-2.9.1-2.el9.x86_64 libunwind-1.6.2-1.el9.x86_64
+(gdb) bt
+#0  0x00007fffee83a32e in tc_malloc () from /lib64/libtcmalloc.so.4
+#1  0x0000000000460b89 in append_null (size=11, chars=0x24544052 "88662530000,\"fps\":18.260173718028287,\"seq_id\":14,\"bitrate\":547,\"timestamp\":33575.90000009537}") at src/ws.c:164
+#2  atof2 (chars=0x24544052 "88662530000,\"fps\":18.260173718028287,\"seq_id\":14,\"bitrate\":547,\"timestamp\":33575.90000009537}", size=11) at src/ws.c:185
+#3  0x0000000000470f4b in mg_http_ws_callback (c=c@entry=0xe4c690, ev=ev@entry=12, ev_data=ev_data@entry=0x7fffffffb2f0, fn_data=<optimized out>) at src/ws.c:1954
+#4  0x0000000000436092 in mg_call (ev_data=0x7fffffffb2f0, ev=12, c=0xe4c690) at src/mongoose.c:895
+#5  mg_ws_cb (c=0xe4c690, ev=<optimized out>, ev_data=<optimized out>, fn_data=<optimized out>) at src/mongoose.c:8331
+#6  0x00000000004320ea in mg_call (ev_data=0x7fffffffb388, ev=7, c=0xe4c690) at src/mongoose.c:896
+#7  iolog (c=c@entry=0xe4c690, buf=<optimized out>, n=<optimized out>, r=r@entry=true) at src/mongoose.c:6414
+#8  0x0000000000433017 in read_conn (c=0xe4c690) at src/mongoose.c:6579
+#9  mg_mgr_poll (mgr=<optimized out>, ms=<optimized out>) at src/mongoose.c:6897
+#10 0x0000000000472513 in start_ws () at src/ws.c:2340
+#11 0x0000000000407bf8 in main (argc=<optimized out>, argv=<optimized out>) at src/main.c:379
