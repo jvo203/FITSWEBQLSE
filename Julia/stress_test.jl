@@ -2,6 +2,7 @@ using Base.Threads
 using CodecLz4
 using HTTP
 using JSON
+using UUIDs
 using WebSockets
 
 function get_dataset_url(host, port, id)
@@ -89,7 +90,7 @@ function fetch_image_spectrum(host, port, id)
     # decompress the LZ4 encoded JSON string    
     json_str = String(lz4_decompress(json_buf, json_length))
 
-    println("$id: json_length: ", json_length)
+    println("$id: json_length: ", json_length, ", json_str: ", json_str)
 
     # parse the JSON string
     json = JSON.parse(json_str)
@@ -152,6 +153,17 @@ function test(host, port, id)
 
     #println("datasetid: ", id, ", json: ", json)
     #println("datasetid: ", id, ", header: ", header)
+
+    # make a unique uuidv4 session id
+    session_id = UUIDs.uuid4()
+
+    # increment the port number by 1
+    ws_port = string(parse(Int, port) + 1)
+
+    println("datasetid: ", id, ", session_id: ", session_id, ", ws_port: ", ws_port)
+
+    # next open a WebSocket client connection
+    # ws = WebSocket("ws://" * host * ":" * port * "/fitswebql/websocket/" * id * "/" * string(session_id))
 end
 
 host = "capricorn"
