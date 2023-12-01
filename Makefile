@@ -286,6 +286,9 @@ fitswebqlse: $(OBJ)
 # $(TCMALLOC) # tcmalloc also seg. faults on small memory allocations; perhaps a buggy x265 library corrupts the heap?
 # $(JEMALLOC) # jemalloc apparently is still a bit buggy, causes segmentation faults
 
+run:
+	env MIMALLOC_VERBOSE=1 DYLD_INSERT_LIBRARIES=$(HOMEBREW_PREFIX)/lib/libmimalloc.dylib ./$(TARGET)
+
 test:
 	$(FORT) $(FLAGS) src/wavelet.f90 src/fixed_array.f90 src/zfp_array.f90 src/lz4.f90 src/testWavelets.f90 -o testWavelets -llz4 $(LIBS)
 # on macos -L/usr/local/opt/lz4/lib -llz4
