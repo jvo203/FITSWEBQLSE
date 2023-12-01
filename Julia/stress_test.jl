@@ -1,3 +1,4 @@
+using Base.Threads
 using HTTP
 using JSON
 using WebSockets
@@ -63,6 +64,7 @@ host = "capricorn"
 port = "8080"
 datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
 
-for dataset in datasets
-    test(dataset)
-end
+jobs = [@spawn test(dataset) for dataset in datasets]
+wait.(jobs)
+
+println("stress-test completed.")
