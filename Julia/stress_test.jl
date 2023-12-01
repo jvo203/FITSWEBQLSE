@@ -166,7 +166,7 @@ function test(host, port, id)
 
     # next open a WebSocket client connection
     WebSockets.open(wsURL) do ws
-        read_task = @async while true
+        @async while true
             data, success = readguarded(ws)
             if success
                 println(stderr, ws, " received: ", String(data))
