@@ -25,6 +25,22 @@ function get_dataset(host, port, id)
     return HTTP.get(url)
 end
 
+function fetch_image_spectrum(host, port, id)
+    width = 800
+    height = 600
+    strURL = "http://" * host * ":" * port * "/fitswebql/image_spectrum?datasetId=" * id * "&width=" * string(width) * "&height=" * string(height) * "&fetch_data=true"
+
+    resp = HTTP.get(strURL)
+    println("$id::fetch_image_spectrum status: ", resp.status)
+
+    if resp.status != 200
+        return nothing
+    end
+
+    # print the length and type of the received data
+    println("$id: length of the received data: ", length(resp.body), " bytes, type: ", typeof(resp.body))
+end
+
 function test(host, port, id)
     resp = get_dataset(host, port, id)
 
@@ -58,6 +74,9 @@ function test(host, port, id)
         end
 
     end
+
+    # fetch the image spectrum
+    fetch_image_spectrum(host, port, id)
 end
 
 host = "capricorn"
