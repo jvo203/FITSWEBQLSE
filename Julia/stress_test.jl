@@ -1,4 +1,5 @@
 using Base.Threads
+using CodecLz4
 using HTTP
 using JSON
 using WebSockets
@@ -39,6 +40,77 @@ function fetch_image_spectrum(host, port, id)
 
     # print the length and type of the received data
     println("$id: length of the received data: ", length(resp.body), " bytes, type: ", typeof(resp.body))
+
+    if length(resp.body) == 0
+        return nothing
+    end
+
+    data = resp.body
+
+    # parse the received binary data Vector{UInt8}    
+    offset = 1
+
+    # read the string length as UInt32
+    str_length = reinterpret(UInt32, data[offset:offset+3])[1]
+    offset += sizeof(UInt32) + str_length
+
+    # skip the first 7 Float32 numbers
+    offset += 7 * sizeof(Float32)
+
+    # read the img_width and img_height as UInt32
+    img_width = reinterpret(UInt32, data[offset:offset+3])[1]
+    img_height = reinterpret(UInt32, data[offset+4:offset+7])[1]
+    offset += 2 * sizeof(UInt32)
+
+    println("$id: img_width: ", img_width, ", img_height: ", img_height)
+
+    # read the pixels length as UInt32
+    pixels_length = reinterpret(UInt32, data[offset:offset+3])[1]
+    offset += sizeof(UInt32) + pixels_length
+
+    # read the mask length as UInt32
+    mask_length = reinterpret(UInt32, data[offset:offset+3])[1]
+    offset += sizeof(UInt32) + mask_length
+
+    println("$id: pixels_length: ", pixels_length, ", mask_length: ", mask_length)
+
+    # read the json length as UInt32
+    json_length = reinterpret(UInt32, data[offset:offset+3])[1]
+    offset += sizeof(UInt32)
+
+    # read the buffer length as UInt32
+    buffer_length = reinterpret(UInt32, data[offset:offset+3])[1]
+    offset += sizeof(UInt32)
+
+    # read the JSON string encoded in UTF-8
+    json_buf = data[offset:offset+buffer_length-1]
+    offset += buffer_length
+
+    # decompress the LZ4 encoded JSON string    
+    json_str = String(lz4_decompress(json_buf, json_length))
+
+    println("$id: json_length: ", json_length)
+
+    # parse the JSON string
+    json = JSON.parse(json_str)
+
+    # read the FITS header length as UInt32
+    fits_header_length = reinterpret(UInt32, data[offset:offset+3])[1]
+    offset += sizeof(UInt32)
+
+    # read the buffer length as UInt32
+    buffer_length = reinterpret(UInt32, data[offset:offset+3])[1]
+    offset += sizeof(UInt32)
+
+    # read the FITS header string encoded with LZ4
+    fits_header_buf = data[offset:offset+buffer_length-1]
+    offset += buffer_length
+
+    # decompress the LZ4 encoded FITS header string
+    header = String(lz4_decompress(fits_header_buf, fits_header_length))
+    #println("$id: fits_header_length: ", fits_header_length)
+
+    return (json, header)
 end
 
 function test(host, port, id)
@@ -76,12 +148,15 @@ function test(host, port, id)
     end
 
     # fetch the image spectrum
-    fetch_image_spectrum(host, port, id)
+    json, header = fetch_image_spectrum(host, port, id)
+
+    #println("datasetid: ", id, ", json: ", json)
+    println("datasetid: ", id, ", header: ", header)
 end
 
 host = "capricorn"
 port = "8080"
-datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
+datasets = ["ALMA01047077"]#, "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
 
 jobs = [@spawn test(host, port, dataset) for dataset in datasets]
 wait.(jobs)
