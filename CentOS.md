@@ -129,6 +129,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     sudo make install
 
 # 12. tcmalloc
+
     sudo dnf install gperftools-devel
 
 # 13. mimalloc
