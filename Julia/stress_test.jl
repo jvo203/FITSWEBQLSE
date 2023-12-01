@@ -170,9 +170,9 @@ function test(host, port, id)
             data, success = readguarded(ws)
 
             if success
-                println(stderr, ws, " received: ", String(data))
+                println(stderr, "[$id::WS] received: ", String(data))
             else
-                println(stderr, ws, " closed")
+                println(stderr, "[$id::WS] closed")
                 break
             end
         end
@@ -202,7 +202,7 @@ end
 
 host = "capricorn"
 port = "8080"
-datasets = ["ALMA01047077"]#, "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
+datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
 
 jobs = [@spawn test(host, port, dataset) for dataset in datasets]
 wait.(jobs)
