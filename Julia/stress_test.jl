@@ -1,5 +1,6 @@
 using Base.Threads
 using CodecLz4
+using Dates
 using HTTP
 using JSON
 using UUIDs
@@ -164,7 +165,19 @@ function test(host, port, id)
     println("datasetid: ", id, ", wsURL: ", wsURL)
 
     # next open a WebSocket client connection
-    # ws = WebSocket("ws://" * host * ":" * port * "/fitswebql/websocket/" * id * "/" * string(session_id))
+    WebSockets.open(wsURL) do ws_client
+        # make a timestamp as a single floating-point number
+        timestamp = now()
+
+        # send a heartbeat message
+        msg = "[heartbeat] " * string(timestamp)
+        @async writeguarded(ws_client, msg)
+
+        data, success = readguarded(ws_client)
+        if success
+            println(stderr, ws_client, " received: ", String(data))
+        end
+    end
 end
 
 host = "capricorn"
