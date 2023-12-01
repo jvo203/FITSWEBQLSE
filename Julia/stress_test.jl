@@ -160,7 +160,8 @@ function test(host, port, id)
     # increment the port number by 1
     ws_port = string(parse(Int, port) + 1)
 
-    println("datasetid: ", id, ", session_id: ", session_id, ", ws_port: ", ws_port)
+    wsURL = "ws://" * host * ":" * string(ws_port) * "/fitswebql/websocket/" * id * "/" * string(session_id)
+    println("datasetid: ", id, ", wsURL: ", wsURL)
 
     # next open a WebSocket client connection
     # ws = WebSocket("ws://" * host * ":" * port * "/fitswebql/websocket/" * id * "/" * string(session_id))
