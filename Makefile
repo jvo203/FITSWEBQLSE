@@ -287,7 +287,11 @@ fitswebqlse: $(OBJ)
 # $(JEMALLOC) # jemalloc apparently is still a bit buggy, causes segmentation faults
 
 run:
+ifeq ($(UNAME_S),Darwin)
 	env MIMALLOC_VERBOSE=1 DYLD_INSERT_LIBRARIES=$(HOMEBREW_PREFIX)/lib/libmimalloc.dylib ./$(TARGET)
+else
+	env MIMALLOC_VERBOSE=1 LD_PRELOAD=/usr/lib/libmimalloc.dylib ./$(TARGET)
+endif
 
 test:
 	$(FORT) $(FLAGS) src/wavelet.f90 src/fixed_array.f90 src/zfp_array.f90 src/lz4.f90 src/testWavelets.f90 -o testWavelets -llz4 $(LIBS)
