@@ -25,7 +25,7 @@ function get_dataset(host, port, id)
     return HTTP.get(url)
 end
 
-function test(id)
+function test(host, port, id)
     resp = get_dataset(host, port, id)
 
     # check the HTTP response code
@@ -64,7 +64,7 @@ host = "capricorn"
 port = "8080"
 datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
 
-jobs = [@spawn test(dataset) for dataset in datasets]
+jobs = [@spawn test(host, port, dataset) for dataset in datasets]
 wait.(jobs)
 
 println("stress-test completed.")
