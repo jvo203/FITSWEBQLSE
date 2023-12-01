@@ -168,6 +168,7 @@ function test(host, port, id)
     WebSockets.open(wsURL) do ws
         @async while true
             data, success = readguarded(ws)
+
             if success
                 println(stderr, ws, " received: ", String(data))
             else
@@ -176,12 +177,22 @@ function test(host, port, id)
             end
         end
 
-        # make a timestamp as a single floating-point number
-        timestamp = now()
+        @async while true
+            # make a timestamp as a single floating-point number
+            timestamp = now()
 
-        # send a heartbeat message
-        msg = "[heartbeat] " * string(timestamp)
-        writeguarded(ws, msg)
+            # send a heartbeat message
+            msg = "[heartbeat] " * string(timestamp)
+            success = writeguarded(ws, msg)
+
+            if !success
+                break
+            end
+
+            sleep(1)
+        end
+
+        sleep(10)
 
         # send a close message        
         writeguarded(ws, "[close]")
