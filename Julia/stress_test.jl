@@ -151,7 +151,7 @@ function test(host, port, id)
     json, header = fetch_image_spectrum(host, port, id)
 
     #println("datasetid: ", id, ", json: ", json)
-    println("datasetid: ", id, ", header: ", header)
+    #println("datasetid: ", id, ", header: ", header)
 end
 
 host = "capricorn"
