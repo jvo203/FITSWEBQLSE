@@ -134,7 +134,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 13. mimalloc
 
-    sudo dnf install mimalloc-devel    
+    sudo dnf install mimalloc-devel
 
 # 14. Intel SPMD C (ispc)
 
