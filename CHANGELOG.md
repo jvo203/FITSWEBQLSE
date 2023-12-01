@@ -1,3 +1,9 @@
+## [5.0.52] - 2023-12-01
+
+* disabled the _*TCMALLOC*_ memory allocator (a suspected bug in _*tcmalloc*_ small memory allocations caused a segmentation fault)
+* alternatively a _*buggy*_ x265 library might need replacing by Intel SVT-HEVC; for now reverted the memory allocator back to the standard GNU C _*malloc*_/_*calloc*_/_*realloc*_/_*free*_ whilst testing another allocator: _*mimalloc*_
+* recompiled the WebAssembly with the latest emscripten compiler (enabled the _*mimalloc*_ support)
+
 ## [5.0.51] - 2023-11-17
 
 * adjusted the client-side JavaScript _*clipSize*_ zoom viewport size variable
