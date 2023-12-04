@@ -276,11 +276,6 @@ function test(host, port, id)
             sleep(1 / 10)
 
             counter = counter + 1
-
-            if counter > 100
-                #println("real-time image spectrum loop completed.")
-                #break
-            end
         end
 
         # a video loop
