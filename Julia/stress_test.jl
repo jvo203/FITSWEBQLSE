@@ -292,7 +292,7 @@ function test(host, port, id)
 
         # send a close message        
         writeguarded(ws, "[close]")
-        sleep(2)
+        sleep(10)
     end
 end
 
