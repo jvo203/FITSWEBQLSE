@@ -295,7 +295,7 @@ endif
 
 # the debug mode only works on Linux
 debug:
-	gdb env MIMALLOC_VERBOSE=1 LD_PRELOAD=/usr/lib64/libmimalloc.so ./$(TARGET)
+	env MIMALLOC_VERBOSE=1 LD_PRELOAD=/usr/lib64/libmimalloc.so gdb ./$(TARGET)
 
 test:
 	$(FORT) $(FLAGS) src/wavelet.f90 src/fixed_array.f90 src/zfp_array.f90 src/lz4.f90 src/testWavelets.f90 -o testWavelets -llz4 $(LIBS)
