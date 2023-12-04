@@ -287,8 +287,8 @@ function test(host, port, id)
             println("video loop ended.")
         end
 
-        # sleep for 1 hour
-        sleep(3600)
+        # sleep for 12 hours
+        sleep(12 * 3600)
 
         # send a close message        
         writeguarded(ws, "[close]")
