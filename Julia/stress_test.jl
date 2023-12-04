@@ -189,8 +189,17 @@ function test(host, port, id)
         @async while true
             data, success = readguarded(ws)
 
+            # print the type and length of the received data
+            len = length(data)
+
             if success
-                println(stderr, "[$id::WS] received: ", String(data))
+                # check if Vector{UInt8} can be converted to String
+                try
+                    str = String(data)
+                    println(stderr, "[$id::WS] received: ", ascii(str))
+                catch _
+                    println(stderr, "[$id::WS] received binary data $len bytes")
+                end
             else
                 println(stderr, "[$id::WS] closed")
                 break
@@ -218,13 +227,50 @@ function test(host, port, id)
             # make a timestamp as a single floating-point number
             timestamp = Dates.value(now())
 
-            # send a realtime image spectrum message
-            #msg = "[realtime_image_spectrum] " * string(timestamp) * " " * string(data_band_lo) * " " * string(data_band_hi)
-            #success = writeguarded(ws, msg)
+            # a random region
+            x1, x2 = rand(1:fits_width), rand(1:fits_width)
+            y1, y2 = rand(1:fits_height), rand(1:fits_height)
 
-            #if !success
-            #    break
-            #end
+            # image: true 10%, false 90%
+            image = rand() < 0.1 ? true : false
+
+            # beam: "circle" or "square"
+            beam = rand() < 0.5 ? "circle" : "square"
+
+            # intensity: "mean" or "integrated"
+            intensity = rand() < 0.5 ? "mean" : "integrated"
+
+            # quality: "low", "medium", or "high"
+            quality = rand() < 0.33 ? "low" : (rand() < 0.5 ? "medium" : "high")
+
+            # zoomed_size: random between 50 and 200
+            zoomed_size = rand(50:200)
+
+            # make a JSON message
+            msg = JSON.json(Dict("type" => "realtime_image_spectrum",
+                "dx" => 800,
+                "width" => zoomed_size,
+                "height" => zoomed_size,
+                "timestamp" => timestamp,
+                "x1" => x1,
+                "x2" => x2,
+                "y1" => y1,
+                "y2" => y2,
+                "image" => image,
+                "beam" => beam,
+                "intensity" => intensity,
+                "quality" => quality,
+                "frame_start" => data_band_lo,
+                "frame_end" => data_band_hi,
+                "ref_freq" => RESTFRQ,
+                "seq_id" => counter))
+
+            # send a realtime image spectrum message            
+            success = writeguarded(ws, msg)
+
+            if !success
+                break
+            end
 
             # assume fps of 30
             sleep(1 / 30)
@@ -259,9 +305,9 @@ port = "8080"
 datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
 
 # a dry run to warm up (pre-compile) Julia functions
-test(host, port, datasets[1])
+# test(host, port, datasets[1])
 
-# jobs = [@spawn test(host, port, dataset) for dataset in datasets]
-# wait.(jobs)
+jobs = [@spawn test(host, port, dataset) for dataset in datasets]
+wait.(jobs)
 
 println("stress-test completed.")
