@@ -212,7 +212,8 @@ function test(host, port, id)
             sleep(1)
         end
 
-        # a realtime image spectrum loop
+        # a real-time image spectrum loop
+        counter = 0
         @async while true
             # make a timestamp as a single floating-point number
             timestamp = Dates.value(now())
@@ -227,10 +228,25 @@ function test(host, port, id)
 
             # assume fps of 30
             sleep(1 / 30)
-            break
+
+            counter = counter + 1
+
+            if counter > 100
+                println("real-time image spectrum loop completed.")
+                break
+            end
         end
 
-        sleep(1)
+        # a video loop
+        @async begin
+            println("video loop started.")
+
+            sleep(1)
+
+            println("video loop ended.")
+        end
+
+        sleep(5)
 
         # send a close message        
         writeguarded(ws, "[close]")
