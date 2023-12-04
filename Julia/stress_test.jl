@@ -150,10 +150,30 @@ function test(host, port, id)
     end
 
     # fetch the image spectrum
-    json, header = fetch_image_spectrum(host, port, id)
+    json, _ = fetch_image_spectrum(host, port, id)
 
-    #println("datasetid: ", id, ", json: ", json)
+    println("datasetid: ", id, ", json: ", json)
     #println("datasetid: ", id, ", header: ", header)
+
+    # get width and height from the JSON string
+    fits_width = json["width"]
+    fits_height = json["height"]
+    fits_depth = json["depth"]
+    println("datasetid: ", id, ", FITS width: ", fits_width, ", height: ", fits_height, ", depth: ", fits_depth)
+
+    # get the CRVAL3, CRPIX3, CDELT3, and NAXIS3 values from the JSON string
+    CRVAL3 = json["CRVAL3"]
+    CRPIX3 = json["CRPIX3"]
+    CDELT3 = json["CDELT3"]
+    RESTFRQ = json["RESTFRQ"]
+    println("datasetid: ", id, ", FITS crval3: ", CRVAL3, ", crpix3: ", CRPIX3, ", cdelt3: ", CDELT3, ", restfrq: ", RESTFRQ)
+
+    val1 = CRVAL3 + CDELT3 * (1 - CRPIX3)
+    val2 = CRVAL3 + CDELT3 * (fits_depth - CRPIX3)
+
+    data_band_lo = min(val1, val2)
+    data_band_hi = max(val1, val2)
+    println("datasetid: ", id, ", data_band_lo: ", data_band_lo, ", data_band_hi: ", data_band_hi)
 
     # make a unique uuidv4 session id
     session_id = UUIDs.uuid4()
@@ -192,7 +212,7 @@ function test(host, port, id)
             sleep(1)
         end
 
-        sleep(10)
+        sleep(1)
 
         # send a close message        
         writeguarded(ws, "[close]")
