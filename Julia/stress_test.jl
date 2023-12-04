@@ -199,7 +199,7 @@ function test(host, port, id)
 
         @async while true
             # make a timestamp as a single floating-point number
-            timestamp = now()
+            timestamp = Dates.value(now())
 
             # send a heartbeat message
             msg = "[heartbeat] " * string(timestamp)
@@ -210,6 +210,24 @@ function test(host, port, id)
             end
 
             sleep(1)
+        end
+
+        # a realtime image spectrum loop
+        @async while true
+            # make a timestamp as a single floating-point number
+            timestamp = Dates.value(now())
+
+            # send a realtime image spectrum message
+            #msg = "[realtime_image_spectrum] " * string(timestamp) * " " * string(data_band_lo) * " " * string(data_band_hi)
+            #success = writeguarded(ws, msg)
+
+            #if !success
+            #    break
+            #end
+
+            # assume fps of 30
+            sleep(1 / 30)
+            break
         end
 
         sleep(1)
