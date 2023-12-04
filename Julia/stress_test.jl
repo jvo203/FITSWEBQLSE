@@ -278,8 +278,8 @@ function test(host, port, id)
             counter = counter + 1
 
             if counter > 100
-                println("real-time image spectrum loop completed.")
-                break
+                #println("real-time image spectrum loop completed.")
+                #break
             end
         end
 
@@ -292,7 +292,8 @@ function test(host, port, id)
             println("video loop ended.")
         end
 
-        sleep(5)
+        # sleep for 1 hour
+        sleep(3600)
 
         # send a close message        
         writeguarded(ws, "[close]")
