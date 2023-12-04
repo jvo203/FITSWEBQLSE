@@ -272,8 +272,8 @@ function test(host, port, id)
                 break
             end
 
-            # assume fps of 30
-            sleep(1 / 30)
+            # assume fps of 10
+            sleep(1 / 10)
 
             counter = counter + 1
 
