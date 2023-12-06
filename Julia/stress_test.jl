@@ -184,6 +184,8 @@ function test(host, port, id)
     wsURL = "ws://" * host * ":" * string(ws_port) * "/fitswebql/websocket/" * id * "/" * string(session_id)
     println("datasetid: ", id, ", wsURL: ", wsURL)
 
+    base = Dates.value(now())
+
     # next open a WebSocket client connection
     WebSockets.open(wsURL) do ws
         @async while true
@@ -195,10 +197,24 @@ function test(host, port, id)
             if success
                 # check if Vector{UInt8} can be converted to String
                 try
-                    str = String(data)
+                    str = String(copy(data))
                     println(stderr, "[$id::WS] received: ", ascii(str))
                 catch _
-                    println(stderr, "[$id::WS] received binary data $len bytes")
+                    offset = 1
+                    timestamp = reinterpret(Float32, data[offset:offset+3])[1]
+                    offset += sizeof(Float32)
+                    recv_seq_id = reinterpret(UInt32, data[offset:offset+3])[1]
+                    offset += sizeof(UInt32)
+                    msg_type = reinterpret(UInt32, data[offset:offset+3])[1]
+
+                    ts = Dates.value(now()) - base
+                    latency = ts - timestamp
+
+                    if msg_type == 5
+                        println(ts, "\t", timestamp, "\t", latency)
+                    end
+
+                    println(stderr, "[$id::WS] received $len bytes, timestamp: $timestamp, recv_seq_id: $recv_seq_id, type: $msg_type, latency: $latency [ms]")
                 end
             else
                 println(stderr, "[$id::WS] closed")
@@ -222,12 +238,13 @@ function test(host, port, id)
         end
 
         fps = 10
+        video_fps = 5
 
         # a real-time image spectrum loop
         counter = 0
         @async while true
             # make a timestamp as a single floating-point number
-            timestamp = Dates.value(now())
+            timestamp = Dates.value(now()) - base
 
             # a random region
             x1, x2 = rand(1:fits_width), rand(1:fits_width)
@@ -274,7 +291,7 @@ function test(host, port, id)
                 break
             end
 
-            # a set frames per second
+            # a fixed frames per second
             sleep(1 / fps)
 
             counter = counter + 1
@@ -284,12 +301,15 @@ function test(host, port, id)
         @async begin
             seq_id = 0
 
+            # make a timestamp as a single floating-point number
+            timestamp = Dates.value(now()) - base
+
             msg = JSON.json(Dict("type" => "init_video",
                 "width" => 800,
                 "height" => 600,
                 "view" => "tile",
-                "fps" => fps,
-                "timestamp" => Dates.value(now()),
+                "fps" => video_fps,
+                "timestamp" => timestamp,
                 "frame" => data_band_lo,
                 "seq_id" => seq_id,
                 "bitrate" => 1000,
@@ -310,7 +330,7 @@ function test(host, port, id)
                     frame = CRVAL3 + CDELT3 * (i - CRPIX3)
 
                     # make a timestamp as a single floating-point number
-                    timestamp = Dates.value(now())
+                    timestamp = Dates.value(now()) - base
 
                     # make a JSON message
                     msg = JSON.json(Dict("type" => "video",
@@ -318,7 +338,7 @@ function test(host, port, id)
                         "key" => false,
                         "fill" => 255,
                         "ref_freq" => RESTFRQ,
-                        "fps" => fps,
+                        "fps" => video_fps,
                         "seq_id" => seq_id,
                         "bitrate" => 1000,
                         "timestamp" => timestamp))
@@ -330,8 +350,8 @@ function test(host, port, id)
                         break
                     end
 
-                    # a set frames per second
-                    sleep(1 / fps)
+                    # a fixed frames per second
+                    sleep(1 / video_fps)
                 end
             end
 
@@ -345,7 +365,7 @@ function test(host, port, id)
             end
         end
 
-        # sleep for 12 hours
+        # sleep for X hours
         # sleep(12 * 3600)
         sleep(5) # testing
 
