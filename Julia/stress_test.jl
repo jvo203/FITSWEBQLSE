@@ -362,7 +362,7 @@ function test(host, port, id)
         end
 
         # sleep for X hours
-        sleep(1 * 3600)
+        sleep(12 * 3600)
         # sleep(5) # testing
 
         # send a close message        
