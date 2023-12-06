@@ -221,6 +221,8 @@ function test(host, port, id)
             sleep(1)
         end
 
+        fps = 10
+
         # a real-time image spectrum loop
         counter = 0
         @async while true
@@ -272,19 +274,45 @@ function test(host, port, id)
                 break
             end
 
-            # assume fps of 10
-            sleep(1 / 10)
+            # a set frames per second
+            sleep(1 / fps)
 
             counter = counter + 1
         end
 
         # a video loop
         @async begin
-            println("video loop started.")
+            seq_id = 1
+
+            msg = JSON.json(Dict("type" => "init_video",
+                "width" => 800,
+                "height" => 600,
+                "view" => "tile",
+                "fps" => fps,
+                "timestamp" => Dates.value(now()),
+                "frame" => data_band_lo,
+                "seq_id" => seq_id,
+                "bitrate" => 1000,
+                "flux" => "legacy",
+                "ref_freq" => RESTFRQ))
+
+            # send a message
+            success = writeguarded(ws, msg)
+
+            if success
+                println("video loop started.")
+            end
 
             sleep(1)
 
-            println("video loop ended.")
+            msg = JSON.json(Dict("type" => "end_video"))
+
+            # send a message
+            success = writeguarded(ws, msg)
+
+            if success
+                println("video loop ended.")
+            end
         end
 
         # sleep for 12 hours
