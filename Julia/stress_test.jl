@@ -282,7 +282,7 @@ function test(host, port, id)
 
         # a video loop
         @async begin
-            seq_id = 1
+            seq_id = 0
 
             msg = JSON.json(Dict("type" => "init_video",
                 "width" => 800,
@@ -303,7 +303,37 @@ function test(host, port, id)
                 println("video loop started.")
             end
 
-            sleep(1)
+            while true
+                # loop through fits_depth
+                for i in 1:fits_depth
+                    seq_id = seq_id + 1
+                    frame = CRVAL3 + CDELT3 * (i - CRPIX3)
+
+                    # make a timestamp as a single floating-point number
+                    timestamp = Dates.value(now())
+
+                    # make a JSON message
+                    msg = JSON.json(Dict("type" => "video",
+                        "frame" => frame,
+                        "key" => false,
+                        "fill" => 255,
+                        "ref_freq" => RESTFRQ,
+                        "fps" => fps,
+                        "seq_id" => seq_id,
+                        "bitrate" => 1000,
+                        "timestamp" => timestamp))
+
+                    # send a message
+                    success = writeguarded(ws, msg)
+
+                    if !success
+                        break
+                    end
+
+                    # a set frames per second
+                    sleep(1 / fps)
+                end
+            end
 
             msg = JSON.json(Dict("type" => "end_video"))
 
