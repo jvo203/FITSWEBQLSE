@@ -198,7 +198,7 @@ function test(host, port, id)
                 # check if Vector{UInt8} can be converted to String
                 try
                     str = String(copy(data))
-                    println(stderr, "[$id::WS] received: ", ascii(str))
+                    println(stderr, "[$id::WS] received '", ascii(str), "'")
                 catch _
                     offset = 1
                     timestamp = reinterpret(Float32, data[offset:offset+3])[1]
@@ -209,10 +209,6 @@ function test(host, port, id)
 
                     ts = Dates.value(now()) - base
                     latency = ts - timestamp
-
-                    if msg_type == 5
-                        println(ts, "\t", timestamp, "\t", latency)
-                    end
 
                     println(stderr, "[$id::WS] received $len bytes, timestamp: $timestamp, recv_seq_id: $recv_seq_id, type: $msg_type, latency: $latency [ms]")
                 end
@@ -366,8 +362,8 @@ function test(host, port, id)
         end
 
         # sleep for X hours
-        # sleep(12 * 3600)
-        sleep(5) # testing
+        sleep(1 * 3600)
+        # sleep(5) # testing
 
         # send a close message        
         writeguarded(ws, "[close]")
