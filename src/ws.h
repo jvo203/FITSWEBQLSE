@@ -40,6 +40,13 @@ typedef struct
     x265_encoder *encoder;
     x265_picture *picture;
 
+    // WS ring buffer event loop
+    /*pthread_mutex_t ws_cond_mtx;
+    volatile sig_atomic_t ws_exit;
+    pthread_cond_t ws_cond;
+    pthread_t ws_thread;
+    struct ring_buffer *ws_ring;*/
+
     // PV-Diagram
     pthread_mutex_t pv_mtx;
     volatile sig_atomic_t pv_exit;
