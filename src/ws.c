@@ -2510,7 +2510,7 @@ void *ws_pv_response(void *ptr)
         // create a queue message
         struct websocket_message msg = {strdup(resp->session_id), pv_payload, msg_len};
 
-        char *msg_buf;
+        char *msg_buf = NULL;
         size_t _len = sizeof(struct websocket_message);
 
         // reserve space for the binary message
@@ -2521,7 +2521,7 @@ void *ws_pv_response(void *ptr)
 #endif
 
         // pass the message over to mongoose via a communications queue
-        if (queue_len >= _len)
+        if (msg_buf != NULL && queue_len >= _len)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
@@ -2707,7 +2707,7 @@ void *ws_image_spectrum_response(void *ptr)
         // create a queue message
         struct websocket_message msg = {strdup(resp->session_id), image_payload, msg_len};
 
-        char *msg_buf;
+        char *msg_buf = NULL;
         size_t _len = sizeof(struct websocket_message);
 
         // reserve space for the binary message
@@ -2718,7 +2718,7 @@ void *ws_image_spectrum_response(void *ptr)
 #endif
 
         // pass the message over to mongoose via a communications queue
-        if (queue_len >= _len)
+        if (msg_buf != NULL && queue_len >= _len)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
@@ -2789,7 +2789,7 @@ void *ws_image_spectrum_response(void *ptr)
         // create a queue message
         struct websocket_message msg = {strdup(resp->session_id), spectrum_payload, msg_len};
 
-        char *msg_buf;
+        char *msg_buf = NULL;
         size_t _len = sizeof(struct websocket_message);
 
         // reserve space for the binary message
@@ -2800,7 +2800,7 @@ void *ws_image_spectrum_response(void *ptr)
 #endif
 
         // pass the message over to mongoose via a communications queue
-        if (queue_len >= _len)
+        if (msg_buf != NULL && queue_len >= _len)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
@@ -2981,7 +2981,7 @@ void *spectrum_response(void *ptr)
                     // create a queue message
                     struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
-                    char *msg_buf;
+                    char *msg_buf = NULL;
                     size_t _len = sizeof(struct websocket_message);
 
                     // reserve space for the binary message
@@ -2992,7 +2992,7 @@ void *spectrum_response(void *ptr)
 #endif
 
                     // pass the message over to mongoose via a communications queue
-                    if (queue_len >= _len)
+                    if (msg_buf != NULL && queue_len >= _len)
                     {
                         memcpy(msg_buf, &msg, _len);
                         mg_queue_add(&session->queue, _len);
@@ -3149,7 +3149,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 // create a queue message
                 struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
-                char *msg_buf;
+                char *msg_buf = NULL;
                 size_t _len = sizeof(struct websocket_message);
 
                 // reserve space for the binary message
@@ -3160,7 +3160,7 @@ void *realtime_image_spectrum_response(void *ptr)
 #endif
 
                 // pass the message over to mongoose via a communications queue
-                if (queue_len >= _len)
+                if (msg_buf != NULL && queue_len >= _len)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
@@ -3226,7 +3226,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 // create a queue message
                 struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
-                char *msg_buf;
+                char *msg_buf = NULL;
                 size_t _len = sizeof(struct websocket_message);
 
                 // reserve space for the binary message
@@ -3237,7 +3237,7 @@ void *realtime_image_spectrum_response(void *ptr)
 #endif
 
                 // pass the message over to mongoose via a communications queue
-                if (queue_len >= _len)
+                if (msg_buf != NULL && queue_len >= _len)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
@@ -3407,7 +3407,7 @@ void *composite_video_response(void *ptr)
             // create a queue message
             struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
-            char *msg_buf;
+            char *msg_buf = NULL;
             size_t _len = sizeof(struct websocket_message);
 
             // reserve space for the binary message
@@ -3418,7 +3418,7 @@ void *composite_video_response(void *ptr)
 #endif
 
             // pass the message over to mongoose via a communications queue
-            if (queue_len >= _len)
+            if (msg_buf != NULL && queue_len >= _len)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
@@ -3592,7 +3592,7 @@ void *video_response(void *ptr)
             // create a queue message
             struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
 
-            char *msg_buf;
+            char *msg_buf = NULL;
             size_t _len = sizeof(struct websocket_message);
 
             // reserve space for the binary message
@@ -3603,7 +3603,7 @@ void *video_response(void *ptr)
 #endif
 
             // pass the message over to mongoose via a communications queue
-            if (queue_len >= _len)
+            if (msg_buf != NULL && queue_len >= _len)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
