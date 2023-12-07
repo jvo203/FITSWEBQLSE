@@ -2404,7 +2404,7 @@ void start_ws()
     s_wakeup_client = mg_connect(&mgr, WAKEUP_URL, mg_wfn, NULL);
 
     while (s_received_signal == 0)
-        mg_mgr_poll(&mgr, 10); // Event loop. Use 10ms poll interval
+        mg_mgr_poll(&mgr, 100); // Event loop. Use 100ms poll interval
 
     mg_mgr_free(&mgr);
 }
