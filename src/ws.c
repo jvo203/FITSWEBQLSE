@@ -3792,17 +3792,17 @@ void *ws_event_loop(void *arg)
 
         printf("[C] ws_event_loop::wakeup.\n");
 
-        /*struct pv_request *req = NULL;
+        /*struct ws_request *req = NULL;
         int last_seq_id = -1;
 
         // get the requests from the ring buffer
-        while ((req = (struct pv_request *)ring_get(session->pv_ring)) != NULL)
+        while ((req = (struct ws_request *)ring_get(session->ws_ring)) != NULL)
         {
-            printf("[C] pv_event_loop::got a request id %d.\n", req->seq_id);
+            printf("[C] ws_event_loop::got a request id %d.\n", req->seq_id);
 
             if (req->seq_id <= last_seq_id)
             {
-                printf("[C] pv_event_loop::seq_id mismatch! last_seq_id: %d, req->seq_id: %d\n", last_seq_id, req->seq_id);
+                printf("[C] ws_event_loop::seq_id mismatch! last_seq_id: %d, req->seq_id: %d\n", last_seq_id, req->seq_id);
                 free(req);
                 continue;
             }
@@ -3842,10 +3842,7 @@ void *ws_event_loop(void *arg)
                 pthread_t tid_req, tid_resp;
 
                 // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                if (req->va_count == 1)
-                    stat = pthread_create(&tid_req, NULL, &ws_pv_request, req);
-                else
-                    stat = pthread_create(&tid_req, NULL, &ws_composite_pv_request, req);
+                stat = pthread_create(&tid_req, NULL, &ws_pv_request, req);
 
                 if (stat == 0)
                 {
