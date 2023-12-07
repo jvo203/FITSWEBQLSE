@@ -598,12 +598,21 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
 #endif
 
-                if (msg->len > 0)
+                if (msg->len > 0 && msg->buf != NULL)
                     mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
 
                 // release memory
-                free(msg->session_id);
-                free(msg->buf);
+                if (msg->session_id != NULL)
+                {
+                    free(msg->session_id);
+                    msg->session_id = NULL;
+                }
+
+                if (msg->buf != NULL)
+                {
+                    free(msg->buf);
+                    msg->buf = NULL;
+                }
             }
 
             mg_queue_del(&session->queue, len); // Remove message from the queue
