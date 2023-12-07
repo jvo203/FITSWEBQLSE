@@ -6,6 +6,11 @@
 #include "fits_types.h"
 #include "mongoose.h"
 
+// These two helper UDP connections are used to wake up mongoose thread
+static struct mg_connection *s_wakeup_server;
+static struct mg_connection *s_wakeup_client;
+#define WAKEUP_URL "udp://127.0.0.1:40111"
+
 #include <pthread.h>
 #include <glib.h>
 #include <x265.h>
