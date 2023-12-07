@@ -223,6 +223,15 @@ double atof2(const char *chars, const int size)
     return result;
 }
 
+static void mg_wfn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
+{
+    if (ev == MG_EV_READ)
+    {
+        c->recv.len = 0; // Discard received data
+    }
+    (void)ev_data, (void)fn_data;
+}
+
 static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     switch (ev)
@@ -2391,6 +2400,8 @@ void start_ws()
 #endif
 
     mg_http_listen(&mgr, url, mg_http_ws_callback, NULL); // Create HTTP listener
+    s_wakeup_server = mg_listen(&mgr, WAKEUP_URL, mg_wfn, NULL);
+    s_wakeup_client = mg_connect(&mgr, WAKEUP_URL, mg_wfn, NULL);
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 10); // Event loop. Use 10ms poll interval
