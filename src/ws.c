@@ -612,6 +612,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 {
                     free(msg->buf);
                     msg->buf = NULL;
+                    msg->len = 0;
                 }
             }
 
