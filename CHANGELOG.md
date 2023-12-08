@@ -1,3 +1,9 @@
+## [5.0.53] - 2023-12-08
+
+* updated the server-side _*mongoose*_ C networking library
+* improved the responsiveness of the server-side WebSockets mongoose event loop (added a UDP wake-up helper)
+* worked around a potential double _*free()*_ issue (under heavy stress duplicate WebSocket messages could have been retrieved from the mongoose queue, leading to extra _*free()*_ invocations)
+
 ## [5.0.52] - 2023-12-01
 
 * disabled the _*TCMALLOC*_ memory allocator (a suspected bug in _*tcmalloc*_ small memory allocations caused a segmentation fault)
