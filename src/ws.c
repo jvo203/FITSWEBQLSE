@@ -609,9 +609,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 if (msg->buf != NULL)
                 {
                     free(msg->buf);
-                    // commented out on purpose during stress-testing
-                    /*msg->buf = NULL;
-                    msg->len = 0;*/
+                    msg->buf = NULL;
+                    msg->len = 0;
                 }
             }
 
