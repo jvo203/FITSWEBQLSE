@@ -78,7 +78,6 @@ struct websocket_response
 
 struct websocket_message
 {
-    char *session_id;
     char *buf;
     size_t len;
 };
