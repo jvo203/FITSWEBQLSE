@@ -3,16 +3,31 @@
 
 #include "ring_buffer.h"
 
-void init_ring_buffer(struct ring_buffer *rb)
+void init_ring_buffer(struct ring_buffer *rb, int capacity)
 {
     if (rb == NULL)
         return;
 
     rb->start = 0;
     rb->end = 0;
+    rb->capacity = 0;
+
+    if (capacity <= 0)
+        return;
+
+    // allocate memory for data
+    rb->data = (void **)malloc(sizeof(void *) * capacity);
+
+    if (rb->data == NULL)
+    {
+        printf("[C] init_ring_buffer: failed to allocate memory for data.\n");
+        return;
+    }
+
+    rb->capacity = capacity;
 
     // init data to NULL
-    for (int i = 0; i < RING_BUFFER_SIZE; i++)
+    for (int i = 0; i < capacity; i++)
         rb->data[i] = NULL;
 
     pthread_mutex_init(&rb->ring_mtx, NULL);
@@ -30,12 +45,17 @@ void delete_ring_buffer(struct ring_buffer *rb)
 #endif
 
     // free all data
-    for (int i = 0; i < RING_BUFFER_SIZE; i++)
-        if (rb->data[i] != NULL)
-        {
-            printf("[C] freeing ring buffer data at position %d.\n", i);
-            free(rb->data[i]);
-        }
+    if (rb->data != NULL)
+    {
+        for (int i = 0; i < rb->capacity; i++)
+            if (rb->data[i] != NULL)
+            {
+                printf("[C] freeing ring buffer data at position %d.\n", i);
+                free(rb->data[i]);
+            }
+
+        free(rb->data);
+    }
 
     pthread_mutex_unlock(&rb->ring_mtx);
     pthread_mutex_destroy(&rb->ring_mtx);
@@ -55,7 +75,7 @@ void ring_put(struct ring_buffer *rb, void *item)
 
     // put (overwrite) the new data
     rb->data[rb->end++] = item;
-    rb->end %= RING_BUFFER_SIZE;
+    rb->end %= rb->capacity;
 
 #ifdef DEBUG
     printf("[C] ring_put: start=%d, end=%d.\n", rb->start, rb->end);
@@ -83,7 +103,7 @@ void *ring_get(struct ring_buffer *rb)
     if (item != NULL)
     {
         rb->data[rb->start++] = NULL;
-        rb->start %= RING_BUFFER_SIZE;
+        rb->start %= rb->capacity;
     }
 
 #ifdef DEBUG

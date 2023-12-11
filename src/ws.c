@@ -719,7 +719,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->ws_ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
 
                 if (session->ws_ring != NULL)
-                    init_ring_buffer(session->ws_ring);
+                    init_ring_buffer(session->ws_ring, 64);
 
                 pthread_mutex_unlock(&session->ws_mtx);
 
@@ -740,7 +740,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->pv_ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
 
                 if (session->pv_ring != NULL)
-                    init_ring_buffer(session->pv_ring);
+                    init_ring_buffer(session->pv_ring, 8);
 
                 pthread_mutex_unlock(&session->pv_mtx);
 
