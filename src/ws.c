@@ -1659,7 +1659,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             break;
 
             // the previous code starts here (no ring buffer, prone to overwhelming the server)
-            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+            /*struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
             if (resp == NULL)
             {
@@ -1733,7 +1733,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 free(resp);
             }
 
-            break;
+            break;*/
         }
 
         // init_video
