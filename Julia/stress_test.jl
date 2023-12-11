@@ -233,7 +233,7 @@ function test(host, port, id)
             sleep(1)
         end
 
-        fps = 10
+        fps = 30
         video_fps = 5
 
         # a real-time image spectrum loop
