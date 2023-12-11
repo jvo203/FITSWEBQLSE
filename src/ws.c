@@ -1657,6 +1657,83 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             pthread_mutex_unlock(&session->ws_mtx);
 
             break;
+
+            // the previous code starts here (no ring buffer, prone to overwhelming the server)
+            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+
+            if (resp == NULL)
+            {
+                free(req);
+                break;
+            }
+
+            // pass the request to FORTRAN
+            int stat;
+            int pipefd[2];
+
+            // open a Unix pipe
+            stat = pipe(pipefd);
+
+            if (stat == 0)
+            {
+                // pass the read end of the pipe to a C thread
+                resp->session_id = strdup(session->id);
+                resp->fps = 0;
+                resp->bitrate = 0;
+                resp->timestamp = req->timestamp;
+                resp->seq_id = req->seq_id;
+                resp->fd = pipefd[0];
+
+                // pass the write end of the pipe to a FORTRAN thread
+                req->fd = pipefd[1];
+
+                pthread_t tid_req, tid_resp;
+
+                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                stat = pthread_create(&tid_req, NULL, &realtime_image_spectrum_request_simd, req);
+
+                if (stat == 0)
+                {
+                    // launch a pipe read C pthread
+                    stat = pthread_create(&tid_resp, NULL, &realtime_image_spectrum_response, resp);
+
+                    if (stat == 0)
+                        pthread_detach(tid_resp);
+                    else
+                    {
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+
+                        // release the response memory since there is no reader
+                        free(resp->session_id);
+                        free(resp);
+                    }
+
+                    // finally wait for the request thread to end before handling another one
+                    pthread_join(tid_req, NULL);
+                }
+                else
+                {
+                    free(req);
+
+                    // close the write end of the pipe
+                    close(pipefd[1]);
+
+                    // close the read end of the pipe
+                    close(pipefd[0]);
+
+                    // release the response memory since there is no writer
+                    free(resp->session_id);
+                    free(resp);
+                }
+            }
+            else
+            {
+                free(req);
+                free(resp);
+            }
+
+            break;
         }
 
         // init_video
