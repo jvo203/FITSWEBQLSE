@@ -164,8 +164,12 @@ void delete_session(websocket_session *session)
 #endif
 
             // release memory
-            free(msg->session_id);
-            free(msg->buf);
+            if (msg->buf != NULL)
+            {
+                free(msg->buf);
+                msg->buf = NULL;
+                msg->len = 0;
+            }
         }
 
         mg_queue_del(&session->queue, len); // Remove message from the queue
@@ -602,12 +606,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                     mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
 
                 // release memory
-                if (msg->session_id != NULL)
-                {
-                    free(msg->session_id);
-                    msg->session_id = NULL;
-                }
-
                 if (msg->buf != NULL)
                 {
                     free(msg->buf);
@@ -2529,7 +2527,7 @@ void *ws_pv_response(void *ptr)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
         // create a queue message
-        struct websocket_message msg = {strdup(resp->session_id), pv_payload, msg_len};
+        struct websocket_message msg = {pv_payload, msg_len};
 
         char *msg_buf = NULL;
         size_t _len = sizeof(struct websocket_message);
@@ -2553,7 +2551,6 @@ void *ws_pv_response(void *ptr)
         else
         {
             printf("[C] mg_queue_book failed, freeing memory.\n");
-            free(msg.session_id);
             free(pv_payload);
         }
     }
@@ -2729,7 +2726,7 @@ void *ws_image_spectrum_response(void *ptr)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
         // create a queue message
-        struct websocket_message msg = {strdup(resp->session_id), image_payload, msg_len};
+        struct websocket_message msg = {image_payload, msg_len};
 
         char *msg_buf = NULL;
         size_t _len = sizeof(struct websocket_message);
@@ -2753,7 +2750,6 @@ void *ws_image_spectrum_response(void *ptr)
         else
         {
             printf("[C] mg_queue_book failed, freeing memory.\n");
-            free(msg.session_id);
             free(image_payload);
         }
     }
@@ -2814,7 +2810,7 @@ void *ws_image_spectrum_response(void *ptr)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
         // create a queue message
-        struct websocket_message msg = {strdup(resp->session_id), spectrum_payload, msg_len};
+        struct websocket_message msg = {spectrum_payload, msg_len};
 
         char *msg_buf = NULL;
         size_t _len = sizeof(struct websocket_message);
@@ -2838,7 +2834,6 @@ void *ws_image_spectrum_response(void *ptr)
         else
         {
             printf("[C] mg_queue_book failed, freeing memory.\n");
-            free(msg.session_id);
             free(spectrum_payload);
         }
     }
@@ -3009,7 +3004,7 @@ void *spectrum_response(void *ptr)
                         printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
                     // create a queue message
-                    struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+                    struct websocket_message msg = {payload, msg_len};
 
                     char *msg_buf = NULL;
                     size_t _len = sizeof(struct websocket_message);
@@ -3033,7 +3028,6 @@ void *spectrum_response(void *ptr)
                     else
                     {
                         printf("[C] mg_queue_book failed, freeing memory.\n");
-                        free(msg.session_id);
                         free(payload);
                     }
                 }
@@ -3180,7 +3174,7 @@ void *realtime_image_spectrum_response(void *ptr)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
                 // create a queue message
-                struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+                struct websocket_message msg = {payload, msg_len};
 
                 char *msg_buf = NULL;
                 size_t _len = sizeof(struct websocket_message);
@@ -3204,7 +3198,6 @@ void *realtime_image_spectrum_response(void *ptr)
                 else
                 {
                     printf("[C] mg_queue_book failed, freeing memory.\n");
-                    free(msg.session_id);
                     free(payload);
                 }
             }
@@ -3260,7 +3253,7 @@ void *realtime_image_spectrum_response(void *ptr)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
                 // create a queue message
-                struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+                struct websocket_message msg = {payload, msg_len};
 
                 char *msg_buf = NULL;
                 size_t _len = sizeof(struct websocket_message);
@@ -3284,7 +3277,6 @@ void *realtime_image_spectrum_response(void *ptr)
                 else
                 {
                     printf("[C] mg_queue_book failed, freeing memory.\n");
-                    free(msg.session_id);
                     free(payload);
                 }
             }
@@ -3444,7 +3436,7 @@ void *composite_video_response(void *ptr)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
             // create a queue message
-            struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+            struct websocket_message msg = {payload, msg_len};
 
             char *msg_buf = NULL;
             size_t _len = sizeof(struct websocket_message);
@@ -3468,7 +3460,6 @@ void *composite_video_response(void *ptr)
             else
             {
                 printf("[C] mg_queue_book failed, freeing memory.\n");
-                free(msg.session_id);
                 free(payload);
             }
         }
@@ -3632,7 +3623,7 @@ void *video_response(void *ptr)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
             // create a queue message
-            struct websocket_message msg = {strdup(resp->session_id), payload, msg_len};
+            struct websocket_message msg = {payload, msg_len};
 
             char *msg_buf = NULL;
             size_t _len = sizeof(struct websocket_message);
@@ -3656,7 +3647,6 @@ void *video_response(void *ptr)
             else
             {
                 printf("[C] mg_queue_book failed, freeing memory.\n");
-                free(msg.session_id);
                 free(payload);
             }
         }
