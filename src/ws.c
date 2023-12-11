@@ -1500,6 +1500,25 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
         // handle real-time spectrum/viewport requests
         if (strcmp(type, "realtime_image_spectrum") == 0)
         {
+            websocket_session *session = (websocket_session *)c->fn_data;
+
+            if (session == NULL)
+                break;
+
+            if (session->ws_exit)
+                break;
+
+            char *datasetId = session->datasetid;
+            void *item = get_dataset(datasetId);
+
+            if (item == NULL)
+            {
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                break;
+            }
+
+            update_timestamp(item);
+
             struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
 
             if (req == NULL)
@@ -1524,7 +1543,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->seq_id = 0;
             req->timestamp = 0.0;
             req->fd = -1;
-            req->ptr = NULL;
+            req->ptr = item;
 
             for (off = 0; (off = mjson_next(wm->data.ptr, (int)wm->data.len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
             {
@@ -1626,99 +1645,16 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req.dx, req.image, req.quality, req.x1, req.y1, req.x2, req.y2, req.width, req.height, req.beam, req.intensity, req.frame_start, req.frame_end, req.ref_freq, req.seq_id, req.timestamp);
 
-            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+            pthread_mutex_lock(&session->ws_mtx);
 
-            if (resp == NULL)
-            {
-                free(req);
-                break;
-            }
+            // add the request to the circular queue
+            ring_put(session->ws_ring, req);
 
-            // pass the request to FORTRAN
-            char *datasetId = NULL;
+            if (!session->ws_exit)
+                pthread_cond_signal(&session->ws_cond); // wake up the ws event loop
 
-            websocket_session *session = (websocket_session *)c->fn_data;
-
-            if (session != NULL)
-                datasetId = session->datasetid;
-
-            void *item = get_dataset(datasetId);
-
-            if (item != NULL)
-            {
-                update_timestamp(item);
-
-                int stat;
-                int pipefd[2];
-
-                // open a Unix pipe
-                stat = pipe(pipefd);
-
-                if (stat == 0)
-                {
-                    // pass the read end of the pipe to a C thread
-                    resp->session_id = strdup(c->data);
-                    resp->fps = 0;
-                    resp->bitrate = 0;
-                    resp->timestamp = req->timestamp;
-                    resp->seq_id = req->seq_id;
-                    resp->fd = pipefd[0];
-
-                    // pass the write end of the pipe to a FORTRAN thread
-                    req->fd = pipefd[1];
-                    req->ptr = item;
-
-                    pthread_t tid_req, tid_resp;
-
-                    // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                    stat = pthread_create(&tid_req, NULL, &realtime_image_spectrum_request_simd, req);
-
-                    if (stat == 0)
-                    {
-                        pthread_detach(tid_req);
-
-                        // launch a pipe read C pthread
-                        stat = pthread_create(&tid_resp, NULL, &realtime_image_spectrum_response, resp);
-
-                        if (stat == 0)
-                            pthread_detach(tid_resp);
-                        else
-                        {
-                            // close the read end of the pipe
-                            close(pipefd[0]);
-
-                            // release the response memory since there is no reader
-                            free(resp->session_id);
-                            free(resp);
-                        }
-                    }
-                    else
-                    {
-                        free(req);
-
-                        // close the write end of the pipe
-                        close(pipefd[1]);
-
-                        // close the read end of the pipe
-                        close(pipefd[0]);
-
-                        // release the response memory since there is no writer
-                        free(resp->session_id);
-                        free(resp);
-                    }
-                }
-                else
-                {
-                    free(req);
-                    free(resp);
-                }
-            }
-            else
-            {
-                free(req);
-                free(resp);
-                printf("[C] cannot find '%s' in the hash table\n", datasetId);
-            }
+            // finally unlock the mutex
+            pthread_mutex_unlock(&session->ws_mtx);
 
             break;
         }
@@ -3827,11 +3763,11 @@ void *ws_event_loop(void *arg)
 
         printf("[C] ws_event_loop::wakeup.\n");
 
-        /*struct ws_request *req = NULL;
+        struct image_spectrum_request *req = NULL;
         int last_seq_id = -1;
 
         // get the requests from the ring buffer
-        while ((req = (struct ws_request *)ring_get(session->ws_ring)) != NULL)
+        while ((req = (struct image_spectrum_request *)ring_get(session->ws_ring)) != NULL)
         {
             printf("[C] ws_event_loop::got a request id %d.\n", req->seq_id);
 
@@ -3877,12 +3813,12 @@ void *ws_event_loop(void *arg)
                 pthread_t tid_req, tid_resp;
 
                 // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                stat = pthread_create(&tid_req, NULL, &ws_pv_request, req);
+                stat = pthread_create(&tid_req, NULL, &realtime_image_spectrum_request_simd, req);
 
                 if (stat == 0)
                 {
                     // launch a pipe read C pthread
-                    stat = pthread_create(&tid_resp, NULL, &ws_pv_response, resp);
+                    stat = pthread_create(&tid_resp, NULL, &realtime_image_spectrum_response, resp);
 
                     if (stat == 0)
                         pthread_detach(tid_resp);
@@ -3921,7 +3857,7 @@ void *ws_event_loop(void *arg)
                 free(resp);
                 continue;
             }
-        }*/
+        }
     }
 
     pthread_mutex_unlock(&session->ws_cond_mtx);
