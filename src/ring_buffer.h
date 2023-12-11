@@ -2,7 +2,7 @@
 
 #include <pthread.h>
 
-#define RING_BUFFER_SIZE 8
+#define RING_BUFFER_SIZE 128 // was 8
 
 struct ring_buffer
 {
