@@ -243,6 +243,17 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         return;
     }
 
+    if (ev == MG_EV_CLOSE)
+    {
+        printf("[C] mg_pipe_callback: MG_EV_CLOSE (%s)\n", (char *)c->fn_data);
+
+        // release the memory
+        free(c->fn_data);
+        c->fn_data = NULL;
+        c->recv.len = 0; // Consume received data
+        return;
+    }
+
     // get a session id string
     char *session_id = (char *)c->fn_data;
 
@@ -310,18 +321,6 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
 
             c->recv.len = 0; // Consume received data
         }
-    }
-
-    if (ev == MG_EV_CLOSE)
-    {
-        printf("[C] mg_pipe_callback: MG_EV_CLOSE (%s)\n", session_id);
-
-        // release the memory
-        free(c->fn_data);
-        c->fn_data = NULL;
-
-        c->recv.len = 0;   // Consume received data
-        c->is_closing = 1; // And we're done, close this pipe
     }
 
     g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
@@ -2844,7 +2843,18 @@ void *ws_image_spectrum_response(void *ptr)
         // create a queue message
         struct websocket_message msg = {image_payload, msg_len};
 
-        char *msg_buf = NULL;
+        // pass the message over to mongoose via a communications channel
+        ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+        if (sent != sizeof(struct websocket_message))
+        {
+            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+            // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+            free(image_payload);
+        };
+
+        /*char *msg_buf = NULL;
         size_t _len = sizeof(struct websocket_message);
 
         // reserve space for the binary message
@@ -2864,7 +2874,7 @@ void *ws_image_spectrum_response(void *ptr)
         {
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(image_payload);
-        }
+        }*/
     }
     else
     {
@@ -2925,7 +2935,18 @@ void *ws_image_spectrum_response(void *ptr)
         // create a queue message
         struct websocket_message msg = {spectrum_payload, msg_len};
 
-        char *msg_buf = NULL;
+        // pass the message over to mongoose via a communications channel
+        ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+        if (sent != sizeof(struct websocket_message))
+        {
+            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+            // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+            free(spectrum_payload);
+        };
+
+        /*char *msg_buf = NULL;
         size_t _len = sizeof(struct websocket_message);
 
         // reserve space for the binary message
@@ -2945,7 +2966,7 @@ void *ws_image_spectrum_response(void *ptr)
         {
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(spectrum_payload);
-        }
+        }*/
     }
 
     if (offset == read_offset + 5 * sizeof(float))
@@ -3116,7 +3137,18 @@ void *spectrum_response(void *ptr)
                     // create a queue message
                     struct websocket_message msg = {payload, msg_len};
 
-                    char *msg_buf = NULL;
+                    // pass the message over to mongoose via a communications channel
+                    ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+                    if (sent != sizeof(struct websocket_message))
+                    {
+                        printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+                        // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                        free(payload);
+                    };
+
+                    /*char *msg_buf = NULL;
                     size_t _len = sizeof(struct websocket_message);
 
                     // reserve space for the binary message
@@ -3136,7 +3168,7 @@ void *spectrum_response(void *ptr)
                     {
                         printf("[C] mg_queue_book failed, freeing memory.\n");
                         free(payload);
-                    }
+                    }*/
                 }
             }
 
@@ -3283,7 +3315,18 @@ void *realtime_image_spectrum_response(void *ptr)
                 // create a queue message
                 struct websocket_message msg = {payload, msg_len};
 
-                char *msg_buf = NULL;
+                // pass the message over to mongoose via a communications channel
+                ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+                if (sent != sizeof(struct websocket_message))
+                {
+                    printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+                    // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                    free(payload);
+                };
+
+                /*char *msg_buf = NULL;
                 size_t _len = sizeof(struct websocket_message);
 
                 // reserve space for the binary message
@@ -3303,7 +3346,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     printf("[C] mg_queue_book failed, freeing memory.\n");
                     free(payload);
-                }
+                }*/
             }
         }
     }
@@ -3359,7 +3402,18 @@ void *realtime_image_spectrum_response(void *ptr)
                 // create a queue message
                 struct websocket_message msg = {payload, msg_len};
 
-                char *msg_buf = NULL;
+                // pass the message over to mongoose via a communications channel
+                ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+                if (sent != sizeof(struct websocket_message))
+                {
+                    printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+                    // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                    free(payload);
+                };
+
+                /*char *msg_buf = NULL;
                 size_t _len = sizeof(struct websocket_message);
 
                 // reserve space for the binary message
@@ -3379,7 +3433,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     printf("[C] mg_queue_book failed, freeing memory.\n");
                     free(payload);
-                }
+                }*/
             }
         }
     }
@@ -3539,7 +3593,18 @@ void *composite_video_response(void *ptr)
             // create a queue message
             struct websocket_message msg = {payload, msg_len};
 
-            char *msg_buf = NULL;
+            // pass the message over to mongoose via a communications channel
+            ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+            if (sent != sizeof(struct websocket_message))
+            {
+                printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+                // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                free(payload);
+            };
+
+            /*char *msg_buf = NULL;
             size_t _len = sizeof(struct websocket_message);
 
             // reserve space for the binary message
@@ -3559,7 +3624,7 @@ void *composite_video_response(void *ptr)
             {
                 printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
-            }
+            }*/
         }
     }
 
@@ -3723,7 +3788,18 @@ void *video_response(void *ptr)
             // create a queue message
             struct websocket_message msg = {payload, msg_len};
 
-            char *msg_buf = NULL;
+            // pass the message over to mongoose via a communications channel
+            ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+            if (sent != sizeof(struct websocket_message))
+            {
+                printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+                // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+                free(payload);
+            };
+
+            /*char *msg_buf = NULL;
             size_t _len = sizeof(struct websocket_message);
 
             // reserve space for the binary message
@@ -3743,7 +3819,7 @@ void *video_response(void *ptr)
             {
                 printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
-            }
+            }*/
         }
     }
 
