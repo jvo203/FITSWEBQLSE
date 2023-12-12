@@ -254,43 +254,43 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         return;
     }
 
-    // get a session id string
-    char *session_id = (char *)c->fn_data;
-
-    websocket_session *session = NULL;
-
-    // get a session pointer from the hash table
-    if (pthread_mutex_lock(&sessions_mtx) == 0)
-    {
-        session = g_hash_table_lookup(sessions, (gconstpointer)session_id);
-        if (session != NULL)
-            g_atomic_rc_box_acquire(session);
-
-        pthread_mutex_unlock(&sessions_mtx);
-    }
-
-    if (session == NULL)
-    {
-        printf("[C] mg_pipe_callback session %s not found.\n", session_id);
-        c->recv.len = 0;   // Consume received data
-        c->is_closing = 1; // And we're done, close this pipe
-        return;
-    }
-
-    if (session->conn == NULL)
-    {
-        printf("[C] mg_pipe_callback session->conn is NULL.\n");
-        c->recv.len = 0;   // Consume received data
-        c->is_closing = 1; // And we're done, close this pipe
-
-        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
-        session = NULL;
-
-        return;
-    }
-
     if (ev == MG_EV_READ)
     {
+        // get a session id string
+        char *session_id = (char *)c->fn_data;
+
+        websocket_session *session = NULL;
+
+        // get a session pointer from the hash table
+        if (pthread_mutex_lock(&sessions_mtx) == 0)
+        {
+            session = g_hash_table_lookup(sessions, (gconstpointer)session_id);
+            if (session != NULL)
+                g_atomic_rc_box_acquire(session);
+
+            pthread_mutex_unlock(&sessions_mtx);
+        }
+
+        if (session == NULL)
+        {
+            printf("[C] mg_pipe_callback session %s not found.\n", session_id);
+            c->recv.len = 0;   // Consume received data
+            c->is_closing = 1; // And we're done, close this pipe
+            return;
+        }
+
+        if (session->conn == NULL)
+        {
+            printf("[C] mg_pipe_callback session->conn is NULL.\n");
+            c->recv.len = 0;   // Consume received data
+            c->is_closing = 1; // And we're done, close this pipe
+
+            g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+            session = NULL;
+
+            return;
+        }
+
         int i, n;
         size_t offset;
 
@@ -321,10 +321,10 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
 
             c->recv.len = 0; // Consume received data
         }
-    }
 
-    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
-    session = NULL;
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+        session = NULL;
+    }
 
     (void)ev_data;
     (void)fn_data;
