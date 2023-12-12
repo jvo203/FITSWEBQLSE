@@ -93,7 +93,7 @@ void *delete_hash_data(void *arg)
 
     gpointer id = (gpointer)arg;
 
-    void *item;
+    void *item = NULL;
     gboolean steal = false;
     gpointer stolen_key = NULL;
     gpointer stolen_value = NULL;
@@ -182,7 +182,7 @@ void *delete_hash_data_no_timeout(void *arg)
 
     gpointer id = (gpointer)arg;
 
-    void *item;
+    void *item = NULL;
     gboolean steal = false;
     gpointer stolen_key = NULL;
     gpointer stolen_value = NULL;
@@ -413,18 +413,17 @@ bool insert_if_not_exists(const char *datasetid, void *item)
 
 void *get_dataset(const char *datasetid)
 {
-    void *item;
+    void *item = NULL;
 
     if (pthread_mutex_lock(&datasets_mtx) == 0)
     {
-        item = g_hash_table_lookup(datasets, (gconstpointer)datasetid);
+        if (datasetid != NULL)
+            item = g_hash_table_lookup(datasets, (gconstpointer)datasetid);
+
         pthread_mutex_unlock(&datasets_mtx);
     }
     else
-    {
         printf("[C] cannot lock datasets_mtx!\n");
-        item = NULL;
-    }
 
     return item;
 }
