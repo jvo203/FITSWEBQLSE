@@ -1694,6 +1694,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 if (stat == 0)
                 {
+                    pthread_detach(tid_req);
+
                     // launch a pipe read C pthread
                     stat = pthread_create(&tid_resp, NULL, &realtime_image_spectrum_response, resp);
 
@@ -1708,9 +1710,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                         free(resp->session_id);
                         free(resp);
                     }
-
-                    // finally wait for the request thread to end before handling another one
-                    pthread_join(tid_req, NULL);
                 }
                 else
                 {
