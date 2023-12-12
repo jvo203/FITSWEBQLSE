@@ -286,12 +286,96 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
                 msg->buf = NULL;
                 msg->len = 0;
             }
-
-            c->recv.len = 0; // Consume received data
         }
+
+        c->recv.len = 0; // Consume received data
 
         g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
         session = NULL;
+    }
+
+    (void)ev_data;
+    (void)fn_data;
+}
+
+// Pipe event handler.
+static void mg_pipe_callback_loop(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
+{
+    if (c->fn_data == NULL)
+    {
+        c->recv.len = 0;   // Consume received data
+        c->is_closing = 1; // And we're done, close this pipe
+        return;
+    }
+
+    if (ev == MG_EV_CLOSE)
+    {
+        printf("[C] mg_pipe_callback: MG_EV_CLOSE (%s)\n", (char *)c->fn_data);
+
+        // release the memory
+        free(c->fn_data);
+        c->fn_data = NULL;
+        c->recv.len = 0; // Consume received data
+        return;
+    }
+
+    if (ev == MG_EV_READ)
+    {
+        // get a session id string
+        char *session_id = (char *)c->fn_data;
+
+        struct mg_connection *conn = NULL;
+        for (struct mg_connection *t = c->mgr->conns; t != NULL; t = t->next)
+        {
+            // do not bother comparing strings for non-WebSocket connections
+            if (!t->is_websocket)
+                continue;
+
+            websocket_session *session = (websocket_session *)t->fn_data;
+
+            if (session == NULL)
+                continue;
+
+            if (strcmp(session->id, session_id) == 0)
+            {
+#ifdef DEBUG
+                printf("[C] found a WebSocket connection for %s.\n", session_id);
+#endif
+                conn = t;
+                break;
+            }
+        }
+
+        int i, n;
+        size_t offset;
+
+        n = c->recv.len / sizeof(struct websocket_message);
+
+#ifdef DEBUG
+        printf("[C] mg_pipe_callback: received %d binary message(s).\n", n);
+#endif
+
+        for (offset = 0, i = 0; i < n; i++)
+        {
+            struct websocket_message *msg = (struct websocket_message *)(c->recv.buf + offset);
+            offset += sizeof(struct websocket_message);
+
+#ifdef DEBUG
+            printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+#endif
+            if (conn != NULL && msg->len > 0 && msg->buf != NULL)
+                mg_ws_send(conn, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
+
+            // release memory
+            if (msg->buf != NULL)
+            {
+                free(msg->buf);
+                msg->buf = NULL;
+                msg->len = 0;
+            }
+        }
+
+        c->recv.len = 0; // Consume received data
     }
 
     (void)ev_data;
@@ -687,7 +771,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->id = sessionId != NULL ? strdup(sessionId) : NULL;
 
                 session->conn = c;
-                session->channel = mg_mkpipe(c->mgr, mg_pipe_callback, (void *)(sessionId != NULL ? strdup(sessionId) : NULL), false);
+                session->channel = mg_mkpipe(c->mgr, mg_pipe_callback_loop, (void *)(sessionId != NULL ? strdup(sessionId) : NULL), false);
 
                 session->flux = NULL;
                 session->dmin = NAN;
