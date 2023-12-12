@@ -2205,7 +2205,17 @@ static enum MHD_Result on_http_connection(void *cls,
             int stat = -1;
 
             if (va_count == 1)
+            {
                 stat = pthread_create(&tid, NULL, &download_request, req);
+
+                if (stat == 0)
+                    pthread_detach(tid);
+                else
+                {
+                    close(pipefd[1]);
+                    free(req);
+                }
+            }
             else
             {
                 // create a new composite_download_request
@@ -2234,14 +2244,15 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 // launch a C thread calling handle_composite_download_request
                 stat = pthread_create(&tid, NULL, &handle_composite_download_request, creq);
-            }
 
-            if (stat == 0)
-                pthread_detach(tid);
-            else
-            {
-                close(pipefd[1]);
-                free(req);
+                if (stat == 0)
+                    pthread_detach(tid);
+                else
+                {
+                    close(pipefd[1]);
+                    free(creq);
+                    free(req);
+                }
             }
         }
         else
