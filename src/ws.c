@@ -682,12 +682,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (session != NULL)
             {
-                session->datasetid = strdup(datasetId);
-                session->multi = strdup(orig);
-                session->id = strdup(sessionId);
+                session->datasetid = datasetId != NULL ? strdup(datasetId) : NULL;
+                session->multi = orig != NULL ? strdup(orig) : NULL;
+                session->id = sessionId != NULL ? strdup(sessionId) : NULL;
 
                 session->conn = c;
-                session->channel = mg_mkpipe(c->mgr, mg_pipe_callback, (void *)strdup(sessionId), false);
+                session->channel = mg_mkpipe(c->mgr, mg_pipe_callback, (void *)(sessionId != NULL ? strdup(sessionId) : NULL), false);
 
                 session->flux = NULL;
                 session->dmin = NAN;
@@ -797,7 +797,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (session != NULL)
             {
                 // tokenize session->multi
-                datasetId = strdup(session->multi);
+                datasetId = session->multi != NULL ? strdup(session->multi) : NULL;
                 char *token = datasetId;
                 char *rest = token;
 
@@ -936,7 +936,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // next iterate through the multiple datasets launching individual channel threads
             // tokenize session->multi
-            char *datasetId = strdup(session->multi);
+            char *datasetId = session->multi != NULL ? strdup(session->multi) : NULL;
             char *token = datasetId;
             char *rest = token;
             bool skip_frame = false;
@@ -1684,7 +1684,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
-                resp->session_id = strdup(session->id);
+                resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
                 resp->fps = 0;
                 resp->bitrate = 0;
                 resp->timestamp = req->timestamp;
@@ -1820,7 +1820,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             char *json = NULL;
 
             mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%Q,%Q:%d,%Q:%d,%Q:%d,%Q:%d}", "type", "init_video", "width", session->image_width, "height", session->image_height, "padded_width", session->image_width, "padded_height", session->image_height);
-            mg_ws_send(c, json, strlen(json), WEBSOCKET_OP_TEXT);
+            if (json != NULL)
+                mg_ws_send(c, json, strlen(json), WEBSOCKET_OP_TEXT);
 
             free(json);
 
@@ -2067,8 +2068,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             else
                 session->last_frame_idx = frame_idx;
 
-            req->flux = strdup(session->flux);
-            req->len = strlen(req->flux);
+            req->flux = session->flux != NULL ? strdup(session->flux) : NULL;
+            req->len = req->flux != NULL ? strlen(req->flux) : 0;
 
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
@@ -2224,8 +2225,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 break;
 
             req->va_count = 0;
-            req->flux = strdup(flux);
-            req->len = strlen(req->flux);
+            req->flux = flux != NULL ? strdup(flux) : NULL;
+            req->len = req->flux != NULL ? strlen(req->flux) : 0;
             req->width = width;
             req->height = height;
             req->downsize = downsize;
@@ -2234,7 +2235,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             // next iterate through the multiple datasets launching individual channel threads
             // tokenize session->multi
-            char *datasetId = strdup(common_session->multi);
+            char *datasetId = common_session->multi != NULL ? strdup(common_session->multi) : NULL;
             char *token = datasetId;
             char *rest = token;
             bool skip_frame = false;
@@ -3639,7 +3640,7 @@ void *pv_event_loop(void *arg)
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
-                resp->session_id = strdup(session->id);
+                resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
                 resp->fps = 0;
                 resp->bitrate = 0;
                 resp->timestamp = req->timestamp;
@@ -3769,7 +3770,7 @@ void *ws_event_loop(void *arg)
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
-                resp->session_id = strdup(session->id);
+                resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
                 resp->fps = 0;
                 resp->bitrate = 0;
                 resp->timestamp = req->timestamp;
