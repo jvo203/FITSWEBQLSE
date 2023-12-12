@@ -323,8 +323,8 @@ static void mg_pipe_callback_loop(struct mg_connection *c, int ev, void *ev_data
     {
         // get a session id string
         char *session_id = (char *)c->fn_data;
-
         struct mg_connection *conn = NULL;
+
         for (struct mg_connection *t = c->mgr->conns; t != NULL; t = t->next)
         {
             // do not bother comparing strings for non-WebSocket connections
