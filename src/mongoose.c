@@ -986,7 +986,19 @@ void mg_resolve(struct mg_connection *c, const char *url) {
 
 
 
+
 void mg_call(struct mg_connection *c, int ev, void *ev_data) {
+#if MG_ENABLE_PROFILE
+  const char *names[] = {
+      "EV_ERROR",    "EV_OPEN",      "EV_POLL",      "EV_RESOLVE",
+      "EV_CONNECT",  "EV_ACCEPT",    "EV_TLS_HS",    "EV_READ",
+      "EV_WRITE",    "EV_CLOSE",     "EV_HTTP_MSG",  "EV_HTTP_CHUNK",
+      "EV_WS_OPEN",  "EV_WS_MSG",    "EV_WS_CTL",    "EV_MQTT_CMD",
+      "EV_MQTT_MSG", "EV_MQTT_OPEN", "EV_SNTP_TIME", "EV_USER"};
+  if (ev != MG_EV_POLL && ev < (int) (sizeof(names) / sizeof(names[0]))) {
+    MG_PROF_ADD(c, names[ev]);
+  }
+#endif
   // Run user-defined handler first, in order to give it an ability
   // to intercept processing (e.g. clean input buffer) before the
   // protocol handler kicks in
@@ -4182,6 +4194,7 @@ struct mg_connection *mg_mqtt_listen(struct mg_mgr *mgr, const char *url,
 
 
 
+
 size_t mg_vprintf(struct mg_connection *c, const char *fmt, va_list *ap) {
   size_t old = c->send.len;
   mg_vxprintf(mg_pfn_iobuf, &c->send, fmt, ap);
@@ -4308,6 +4321,7 @@ struct mg_connection *mg_alloc_conn(struct mg_mgr *mgr) {
     c->mgr = mgr;
     c->send.align = c->recv.align = MG_IO_SIZE;
     c->id = ++mgr->nextid;
+    MG_PROF_INIT(c);
   }
   return c;
 }
@@ -4321,6 +4335,8 @@ void mg_close_conn(struct mg_connection *c) {
   // before we deallocate received data, see #1331
   mg_call(c, MG_EV_CLOSE, NULL);
   MG_DEBUG(("%lu %ld closed", c->id, c->fd));
+  MG_PROF_DUMP(c);
+  MG_PROF_FREE(c);
 
   mg_tls_free(c);
   mg_iobuf_free(&c->recv);
@@ -4357,6 +4373,7 @@ struct mg_connection *mg_listen(struct mg_mgr *mgr, const char *url,
     MG_ERROR(("OOM %s", url));
   } else if (!mg_open_listener(c, url)) {
     MG_ERROR(("Failed: %s, errno %d", url, errno));
+    MG_PROF_FREE(c);
     free(c);
     c = NULL;
   } else {
@@ -5000,8 +5017,7 @@ static size_t trim_len(struct mg_connection *c, size_t len) {
   }
   // Ensure the MTU isn't lower than the minimum allowed value
   if (ifp->mtu < min_mtu) {
-    MG_ERROR(("MTU is lower than minimum possible value. Setting it to %d.",
-              min_mtu));
+    MG_ERROR(("MTU is lower than minimum, capping to %lu", min_mtu));
     ifp->mtu = (uint16_t) min_mtu;
   }
   // If the total packet size exceeds the MTU, trim the length
@@ -5112,7 +5128,9 @@ static void read_conn(struct mg_connection *c, struct pkt *pkt) {
     if (s->ttype != MIP_TTYPE_ACK) settmout(c, MIP_TTYPE_ACK);
 #endif
 
-    if (c->is_tls) {
+    if (c->is_tls && c->is_tls_hs) {
+      mg_tls_handshake(c);
+    } else if (c->is_tls) {
       // TLS connection. Make room for decrypted data in c->recv
       io = &c->recv;
       if (io->size - io->len < pkt->pay.len &&
@@ -5526,7 +5544,6 @@ void mg_mgr_poll(struct mg_mgr *mgr, int ms) {
     MG_VERBOSE(("%lu .. %c%c%c%c%c", c->id, c->is_tls ? 'T' : 't',
                 c->is_connecting ? 'C' : 'c', c->is_tls_hs ? 'H' : 'h',
                 c->is_resolving ? 'R' : 'r', c->is_closing ? 'C' : 'c'));
-    if (c->is_tls_hs) mg_tls_handshake(c);
     if (can_write(c)) write_conn(c);
     if (c->is_draining && c->send.len == 0 && s->ttype != MIP_TTYPE_FIN)
       init_closure(c);
@@ -6816,6 +6833,11 @@ void mg_connect_resolved(struct mg_connection *c) {
   if (FD(c) == MG_INVALID_SOCKET) {
     mg_error(c, "socket(): %d", MG_SOCK_ERR(-1));
   } else if (c->is_udp) {
+    // union usa usa;
+    // socklen_t slen = tousa(&c->rem, &usa);
+    // connect(FD(c), &usa.sa, slen);
+    // socklen_t slen = tousa(&c->rem, &usa);
+    // setlocaddr(FD(c), &c->loc);
     MG_EPOLL_ADD(c);
 #if MG_ARCH == MG_ARCH_TIRTOS
     union usa usa;  // TI-RTOS NDK requires binding to receive on UDP sockets
@@ -7041,6 +7063,64 @@ static void mg_iotest(struct mg_mgr *mgr, int ms) {
     }
   }
 #endif
+}
+
+static bool mg_socketpair(MG_SOCKET_TYPE sp[2], union usa usa[2], bool udp) {
+  MG_SOCKET_TYPE sock = MG_INVALID_SOCKET;
+  socklen_t n = sizeof(usa[0].sin);
+  bool success = false;
+
+  sock = sp[0] = sp[1] = MG_INVALID_SOCKET;
+  (void) memset(&usa[0], 0, sizeof(usa[0]));
+  usa[0].sin.sin_family = AF_INET;
+  *(uint32_t *) &usa->sin.sin_addr = mg_htonl(0x7f000001U);  // 127.0.0.1
+  usa[1] = usa[0];
+
+  if (udp && (sp[0] = socket(AF_INET, SOCK_DGRAM, 0)) != MG_INVALID_SOCKET &&
+      (sp[1] = socket(AF_INET, SOCK_DGRAM, 0)) != MG_INVALID_SOCKET &&
+      bind(sp[0], &usa[0].sa, n) == 0 && bind(sp[1], &usa[1].sa, n) == 0 &&
+      getsockname(sp[0], &usa[0].sa, &n) == 0 &&
+      getsockname(sp[1], &usa[1].sa, &n) == 0 &&
+      connect(sp[0], &usa[1].sa, n) == 0 &&
+      connect(sp[1], &usa[0].sa, n) == 0) {
+    success = true;
+  } else if (!udp &&
+             (sock = socket(AF_INET, SOCK_STREAM, 0)) != MG_INVALID_SOCKET &&
+             bind(sock, &usa[0].sa, n) == 0 &&
+             listen(sock, MG_SOCK_LISTEN_BACKLOG_SIZE) == 0 &&
+             getsockname(sock, &usa[0].sa, &n) == 0 &&
+             (sp[0] = socket(AF_INET, SOCK_STREAM, 0)) != MG_INVALID_SOCKET &&
+             connect(sp[0], &usa[0].sa, n) == 0 &&
+             (sp[1] = raccept(sock, &usa[1], &n)) != MG_INVALID_SOCKET) {
+    success = true;
+  }
+  if (success) {
+    mg_set_non_blocking_mode(sp[1]);
+  } else {
+    if (sp[0] != MG_INVALID_SOCKET) closesocket(sp[0]);
+    if (sp[1] != MG_INVALID_SOCKET) closesocket(sp[1]);
+    sp[0] = sp[1] = MG_INVALID_SOCKET;
+  }
+  if (sock != MG_INVALID_SOCKET) closesocket(sock);
+  return success;
+}
+
+int mg_mkpipe(struct mg_mgr *mgr, mg_event_handler_t fn, void *fn_data,
+              bool udp) {
+  union usa usa[2];
+  MG_SOCKET_TYPE sp[2] = {MG_INVALID_SOCKET, MG_INVALID_SOCKET};
+  struct mg_connection *c = NULL;
+  if (!mg_socketpair(sp, usa, udp)) {
+    MG_ERROR(("Cannot create socket pair"));
+  } else if ((c = mg_wrapfd(mgr, (int) sp[1], fn, fn_data)) == NULL) {
+    closesocket(sp[0]);
+    closesocket(sp[1]);
+    sp[0] = sp[1] = MG_INVALID_SOCKET;
+  } else {
+    tomgaddr(&usa[0], &c->rem, false);
+    MG_DEBUG(("%lu %p pipe %lu", c->id, c->fd, (unsigned long) sp[0]));
+  }
+  return (int) sp[0];
 }
 
 void mg_mgr_poll(struct mg_mgr *mgr, int ms) {
