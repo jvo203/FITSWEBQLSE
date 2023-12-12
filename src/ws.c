@@ -181,6 +181,12 @@ void delete_session(websocket_session *session)
     session->buf = NULL;
     session->buf_len = 0;
 
+    session->conn = NULL;
+    // close the socket pipe
+    if (session->channel != -1)
+        close(session->channel);
+    session->channel = -1;
+
     // free() has been commented out on purpose
     // it was interfering with glib reference counting release mechanism (a double free)
     // free(session);
@@ -278,7 +284,10 @@ static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, voi
         size_t offset;
 
         n = c->recv.len / sizeof(struct websocket_message);
-        // printf("[C] mg_pipe_callback: received %d binary message(s).\n", n);
+
+#ifdef DEBUG
+        printf("[C] mg_pipe_callback: received %d binary message(s).\n", n);
+#endif
 
         for (offset = 0, i = 0; i < n; i++)
         {
@@ -2628,7 +2637,18 @@ void *ws_pv_response(void *ptr)
         // create a queue message
         struct websocket_message msg = {pv_payload, msg_len};
 
-        char *msg_buf = NULL;
+        // pass the message over to mongoose via a communications channel
+        ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+
+        if (sent != sizeof(struct websocket_message))
+        {
+            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+
+            // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
+            free(pv_payload);
+        };
+
+        /*char *msg_buf = NULL;
         size_t _len = sizeof(struct websocket_message);
 
         // reserve space for the binary message
@@ -2648,7 +2668,7 @@ void *ws_pv_response(void *ptr)
         {
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(pv_payload);
-        }
+        }*/
     }
 
     g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
