@@ -227,15 +227,6 @@ double atof2(const char *chars, const int size)
     return result;
 }
 
-static void mg_udp_wakeup_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
-{
-    if (ev == MG_EV_READ)
-    {
-        c->recv.len = 0; // Discard received data
-    }
-    (void)ev_data, (void)fn_data;
-}
-
 static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     switch (ev)
@@ -2420,8 +2411,6 @@ void start_ws()
 #endif
 
     mg_http_listen(&mgr, url, mg_http_ws_callback, NULL); // Create HTTP listener
-    s_wakeup_server = mg_listen(&mgr, WAKEUP_URL, mg_udp_wakeup_callback, NULL);
-    s_wakeup_client = mg_connect(&mgr, WAKEUP_URL, mg_udp_wakeup_callback, NULL);
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 1000); // Event loop. Use 1000ms poll interval
@@ -2556,9 +2545,6 @@ void *ws_pv_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
-
-            // Wake up Mongoose thread by sending something to one of its connections
-            mg_send(s_wakeup_client, "wakeup", 6);
         }
         else
         {
@@ -2755,9 +2741,6 @@ void *ws_image_spectrum_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
-
-            // Wake up Mongoose thread by sending something to one of its connections
-            mg_send(s_wakeup_client, "wakeup", 6);
         }
         else
         {
@@ -2839,9 +2822,6 @@ void *ws_image_spectrum_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
-
-            // Wake up Mongoose thread by sending something to one of its connections
-            mg_send(s_wakeup_client, "wakeup", 6);
         }
         else
         {
@@ -3033,9 +3013,6 @@ void *spectrum_response(void *ptr)
                     {
                         memcpy(msg_buf, &msg, _len);
                         mg_queue_add(&session->queue, _len);
-
-                        // Wake up Mongoose thread by sending something to one of its connections
-                        mg_send(s_wakeup_client, "wakeup", 6);
                     }
                     else
                     {
@@ -3203,9 +3180,6 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
-
-                    // Wake up Mongoose thread by sending something to one of its connections
-                    mg_send(s_wakeup_client, "wakeup", 6);
                 }
                 else
                 {
@@ -3282,9 +3256,6 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
-
-                    // Wake up Mongoose thread by sending something to one of its connections
-                    mg_send(s_wakeup_client, "wakeup", 6);
                 }
                 else
                 {
@@ -3465,9 +3436,6 @@ void *composite_video_response(void *ptr)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
-
-                // Wake up Mongoose thread by sending something to one of its connections
-                mg_send(s_wakeup_client, "wakeup", 6);
             }
             else
             {
@@ -3652,9 +3620,6 @@ void *video_response(void *ptr)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
-
-                // Wake up Mongoose thread by sending something to one of its connections
-                mg_send(s_wakeup_client, "wakeup", 6);
             }
             else
             {
