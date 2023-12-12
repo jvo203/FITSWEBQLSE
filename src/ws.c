@@ -149,38 +149,6 @@ void delete_session(websocket_session *session)
     pthread_mutex_unlock(&session->pv_mtx);
     pthread_mutex_destroy(&session->pv_mtx);
 
-    // drain the message queue
-    size_t len;
-    char *buf;
-
-    while ((len = mg_queue_next(&session->queue, &buf)) > 0)
-    {
-        if (len == sizeof(struct websocket_message))
-        {
-            struct websocket_message *msg = (struct websocket_message *)buf;
-
-#ifdef DEBUG
-            printf("[C] found a message %zu-bytes long, releasing the memory.\n", msg->len);
-#endif
-
-            // release memory
-            if (msg->buf != NULL)
-            {
-                free(msg->buf);
-                msg->buf = NULL;
-                msg->len = 0;
-            }
-        }
-
-        mg_queue_del(&session->queue, len); // Remove message from the queue
-    }
-
-    // finally release the message queue buffer
-    if (session->buf != NULL)
-        free(session->buf);
-    session->buf = NULL;
-    session->buf_len = 0;
-
     session->conn = NULL;
     // close the socket pipe
     if (session->channel != -1)
@@ -660,59 +628,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         break;
     }
-    case MG_EV_POLL:
-    {
-        // Poll event. Delivered to us every mg_mgr_poll interval or faster
-
-        // only WebSocket sessions allocate memory for user data
-        if (!c->is_websocket)
-            break;
-
-        // check if a session structure has been allocated
-        if (c->fn_data == NULL)
-            break;
-
-        websocket_session *session = (websocket_session *)c->fn_data;
-
-        if (session == NULL)
-            break;
-
-#ifdef DEBUG
-            // printf("[C] polling a message queue for %s/%s\n", session->datasetid, c->data);
-#endif
-
-        size_t len;
-        char *buf;
-
-        // Check if we have a message from the worker
-        while ((len = mg_queue_next(&session->queue, &buf)) > 0)
-        {
-            if (len == sizeof(struct websocket_message))
-            {
-                struct websocket_message *msg = (struct websocket_message *)buf;
-
-                // Got message from worker. Send a response and cleanup
-#ifdef DEBUG
-                printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
-#endif
-
-                if (msg->len > 0 && msg->buf != NULL)
-                    mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
-
-                // release memory
-                if (msg->buf != NULL)
-                {
-                    free(msg->buf);
-                    msg->buf = NULL;
-                    msg->len = 0;
-                }
-            }
-
-            mg_queue_del(&session->queue, len); // Remove message from the queue
-        }
-
-        break;
-    }
     case MG_EV_WS_OPEN:
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
@@ -770,11 +685,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->datasetid = strdup(datasetId);
                 session->multi = strdup(orig);
                 session->id = strdup(sessionId);
-
-                // allocate a message buffer
-                session->buf_len = 1024 * sizeof(struct websocket_message);
-                session->buf = (char *)malloc(session->buf_len);
-                mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue
 
                 session->conn = c;
                 session->channel = mg_mkpipe(c->mgr, mg_pipe_callback, (void *)strdup(sessionId), false);
@@ -2646,28 +2556,6 @@ void *ws_pv_response(void *ptr)
             // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
             free(pv_payload);
         };
-
-        /*char *msg_buf = NULL;
-        size_t _len = sizeof(struct websocket_message);
-
-        // reserve space for the binary message
-        size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-#ifdef DEBUG
-        printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
-#endif
-
-        // pass the message over to mongoose via a communications queue
-        if (msg_buf != NULL && queue_len >= _len)
-        {
-            memcpy(msg_buf, &msg, _len);
-            mg_queue_add(&session->queue, _len);
-        }
-        else
-        {
-            printf("[C] mg_queue_book failed, freeing memory.\n");
-            free(pv_payload);
-        }*/
     }
 
     g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
@@ -2853,28 +2741,6 @@ void *ws_image_spectrum_response(void *ptr)
             // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
             free(image_payload);
         };
-
-        /*char *msg_buf = NULL;
-        size_t _len = sizeof(struct websocket_message);
-
-        // reserve space for the binary message
-        size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-#ifdef DEBUG
-        printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
-#endif
-
-        // pass the message over to mongoose via a communications queue
-        if (msg_buf != NULL && queue_len >= _len)
-        {
-            memcpy(msg_buf, &msg, _len);
-            mg_queue_add(&session->queue, _len);
-        }
-        else
-        {
-            printf("[C] mg_queue_book failed, freeing memory.\n");
-            free(image_payload);
-        }*/
     }
     else
     {
@@ -2945,28 +2811,6 @@ void *ws_image_spectrum_response(void *ptr)
             // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
             free(spectrum_payload);
         };
-
-        /*char *msg_buf = NULL;
-        size_t _len = sizeof(struct websocket_message);
-
-        // reserve space for the binary message
-        size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-#ifdef DEBUG
-        printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
-#endif
-
-        // pass the message over to mongoose via a communications queue
-        if (msg_buf != NULL && queue_len >= _len)
-        {
-            memcpy(msg_buf, &msg, _len);
-            mg_queue_add(&session->queue, _len);
-        }
-        else
-        {
-            printf("[C] mg_queue_book failed, freeing memory.\n");
-            free(spectrum_payload);
-        }*/
     }
 
     if (offset == read_offset + 5 * sizeof(float))
@@ -3147,28 +2991,6 @@ void *spectrum_response(void *ptr)
                         // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                         free(payload);
                     };
-
-                    /*char *msg_buf = NULL;
-                    size_t _len = sizeof(struct websocket_message);
-
-                    // reserve space for the binary message
-                    size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-#ifdef DEBUG
-                    printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
-#endif
-
-                    // pass the message over to mongoose via a communications queue
-                    if (msg_buf != NULL && queue_len >= _len)
-                    {
-                        memcpy(msg_buf, &msg, _len);
-                        mg_queue_add(&session->queue, _len);
-                    }
-                    else
-                    {
-                        printf("[C] mg_queue_book failed, freeing memory.\n");
-                        free(payload);
-                    }*/
                 }
             }
 
@@ -3325,28 +3147,6 @@ void *realtime_image_spectrum_response(void *ptr)
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(payload);
                 };
-
-                /*char *msg_buf = NULL;
-                size_t _len = sizeof(struct websocket_message);
-
-                // reserve space for the binary message
-                size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-#ifdef DEBUG
-                printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
-#endif
-
-                // pass the message over to mongoose via a communications queue
-                if (msg_buf != NULL && queue_len >= _len)
-                {
-                    memcpy(msg_buf, &msg, _len);
-                    mg_queue_add(&session->queue, _len);
-                }
-                else
-                {
-                    printf("[C] mg_queue_book failed, freeing memory.\n");
-                    free(payload);
-                }*/
             }
         }
     }
@@ -3412,28 +3212,6 @@ void *realtime_image_spectrum_response(void *ptr)
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(payload);
                 };
-
-                /*char *msg_buf = NULL;
-                size_t _len = sizeof(struct websocket_message);
-
-                // reserve space for the binary message
-                size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-#ifdef DEBUG
-                printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
-#endif
-
-                // pass the message over to mongoose via a communications queue
-                if (msg_buf != NULL && queue_len >= _len)
-                {
-                    memcpy(msg_buf, &msg, _len);
-                    mg_queue_add(&session->queue, _len);
-                }
-                else
-                {
-                    printf("[C] mg_queue_book failed, freeing memory.\n");
-                    free(payload);
-                }*/
             }
         }
     }
@@ -3603,28 +3381,6 @@ void *composite_video_response(void *ptr)
                 // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                 free(payload);
             };
-
-            /*char *msg_buf = NULL;
-            size_t _len = sizeof(struct websocket_message);
-
-            // reserve space for the binary message
-            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-#ifdef DEBUG
-            printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
-#endif
-
-            // pass the message over to mongoose via a communications queue
-            if (msg_buf != NULL && queue_len >= _len)
-            {
-                memcpy(msg_buf, &msg, _len);
-                mg_queue_add(&session->queue, _len);
-            }
-            else
-            {
-                printf("[C] mg_queue_book failed, freeing memory.\n");
-                free(payload);
-            }*/
         }
     }
 
@@ -3798,28 +3554,6 @@ void *video_response(void *ptr)
                 // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                 free(payload);
             };
-
-            /*char *msg_buf = NULL;
-            size_t _len = sizeof(struct websocket_message);
-
-            // reserve space for the binary message
-            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-#ifdef DEBUG
-            printf("[C] mg_queue_book: %zu, queue_len: %zu\n", _len, queue_len);
-#endif
-
-            // pass the message over to mongoose via a communications queue
-            if (msg_buf != NULL && queue_len >= _len)
-            {
-                memcpy(msg_buf, &msg, _len);
-                mg_queue_add(&session->queue, _len);
-            }
-            else
-            {
-                printf("[C] mg_queue_book failed, freeing memory.\n");
-                free(payload);
-            }*/
         }
     }
 

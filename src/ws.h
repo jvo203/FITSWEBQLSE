@@ -18,11 +18,6 @@ typedef struct
     char *multi;     // multiple ids are separated by a semicolon
     char *id;        // sessionId
 
-    // to be removed
-    struct mg_queue queue; // Worker -> Connection queue
-    char *buf;             // Buffer for messages
-    size_t buf_len;        // Buffer length
-
     // the WebSocket connection and a communications channel (mg_pipe)
     struct mg_connection *conn;
     int channel;
