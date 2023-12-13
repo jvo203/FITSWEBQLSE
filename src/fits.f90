@@ -26,6 +26,11 @@ module fits
    type(c_pthread_mutex_t), save :: file_unit_mtx
 
    enum, bind(C)
+      enumerator single
+      enumerator composite
+   end enum
+
+   enum, bind(C)
       enumerator circle
       enumerator square
    end enum
@@ -81,6 +86,8 @@ module fits
    end type spectrum_request_f
 
    type, bind(c) :: video_request_f
+      integer(kind(composite)) :: video_type
+
       ! needed by tone mapping
       type(C_PTR) :: flux
       integer(kind=c_int) :: len
@@ -105,6 +112,8 @@ module fits
    end type video_request_f
 
    type, bind(c) :: composite_video_request_f
+      integer(kind(composite)) :: video_type
+
       ! needed by tone mapping
       type(C_PTR) :: flux
       integer(kind=c_int) :: len

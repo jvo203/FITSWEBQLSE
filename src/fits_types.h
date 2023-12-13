@@ -50,6 +50,12 @@ struct FITSDownloadStream
     int frame;
 };
 
+enum video_request_type
+{
+    single,
+    composite
+};
+
 enum zoom_shape
 {
     circle,
@@ -147,6 +153,8 @@ struct spectrum_request
 
 struct video_request
 {
+    enum video_request_type video_type;
+
     // needed by tone mapping
     char *flux;
     int len;
@@ -172,6 +180,8 @@ struct video_request
 
 struct composite_video_request
 {
+    enum video_request_type video_type;
+
     // the flux is common across the RGB channels
     char *flux;
     int len;

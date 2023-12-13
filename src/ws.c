@@ -2016,6 +2016,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             int fps = 30;
             int bitrate = 1000;
+
+            req->video_type = single;
             req->keyframe = false; // is it a keyframe?
             req->fill = 0;
             req->seq_id = -1;
@@ -2277,6 +2279,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (req == NULL)
                 break;
 
+            req->video_type = composite;
             req->seq_id = seq_id;
             req->timestamp = timestamp;
             req->va_count = 0;
