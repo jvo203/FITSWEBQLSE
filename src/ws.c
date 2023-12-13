@@ -149,7 +149,6 @@ void delete_session(websocket_session *session)
     pthread_mutex_unlock(&session->pv_mtx);
     pthread_mutex_destroy(&session->pv_mtx);
 
-    session->conn = NULL;
     // close the socket pipe
     if (session->channel != -1)
         close(session->channel);
@@ -203,105 +202,6 @@ double atof2(const char *chars, const int size)
 
 // Pipe event handler.
 static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
-{
-    if (c->fn_data == NULL)
-    {
-        c->recv.len = 0;   // Consume received data
-        c->is_closing = 1; // And we're done, close this pipe
-        return;
-    }
-
-    if (ev == MG_EV_CLOSE)
-    {
-        printf("[C] mg_pipe_callback: MG_EV_CLOSE (%s)\n", (char *)c->fn_data);
-
-        // release the memory
-        free(c->fn_data);
-        c->fn_data = NULL;
-        c->recv.len = 0; // Consume received data
-        return;
-    }
-
-    if (ev == MG_EV_READ)
-    {
-        // get a session id string
-        char *session_id = (char *)c->fn_data;
-
-        websocket_session *session = NULL;
-
-        // get a session pointer from the hash table
-        if (pthread_mutex_lock(&sessions_mtx) == 0)
-        {
-            if (session_id != NULL)
-                session = g_hash_table_lookup(sessions, (gconstpointer)session_id);
-
-            if (session != NULL)
-                g_atomic_rc_box_acquire(session);
-
-            pthread_mutex_unlock(&sessions_mtx);
-        }
-
-        if (session == NULL)
-        {
-            printf("[C] mg_pipe_callback session %s not found.\n", session_id);
-            c->recv.len = 0;   // Consume received data
-            c->is_closing = 1; // And we're done, close this pipe
-            return;
-        }
-
-        if (session->conn == NULL)
-        {
-            printf("[C] mg_pipe_callback session->conn is NULL.\n");
-            c->recv.len = 0;   // Consume received data
-            c->is_closing = 1; // And we're done, close this pipe
-
-            g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
-            session = NULL;
-
-            return;
-        }
-
-        int i, n;
-        size_t offset;
-
-        n = c->recv.len / sizeof(struct websocket_message);
-
-#ifdef DEBUG
-        printf("[C] mg_pipe_callback: received %d binary message(s).\n", n);
-#endif
-
-        for (offset = 0, i = 0; i < n; i++)
-        {
-            struct websocket_message *msg = (struct websocket_message *)(c->recv.buf + offset);
-            offset += sizeof(struct websocket_message);
-
-#ifdef DEBUG
-            printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
-#endif
-            if (msg->len > 0 && msg->buf != NULL && session->conn->is_websocket)
-                mg_ws_send(session->conn, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
-
-            // release memory
-            if (msg->buf != NULL)
-            {
-                free(msg->buf);
-                msg->buf = NULL;
-                msg->len = 0;
-            }
-        }
-
-        c->recv.len = 0; // Consume received data
-
-        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
-        session = NULL;
-    }
-
-    (void)ev_data;
-    (void)fn_data;
-}
-
-// Pipe event handler.
-static void mg_pipe_callback_loop(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     if (c->fn_data == NULL)
     {
@@ -772,8 +672,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->multi = orig != NULL ? strdup(orig) : NULL;
                 session->id = sessionId != NULL ? strdup(sessionId) : NULL;
 
-                session->conn = c;
-                session->channel = mg_mkpipe(c->mgr, mg_pipe_callback_loop, (void *)(sessionId != NULL ? strdup(sessionId) : NULL), false);
+                session->channel = mg_mkpipe(c->mgr, mg_pipe_callback, (void *)(sessionId != NULL ? strdup(sessionId) : NULL), false);
 
                 session->flux = NULL;
                 session->dmin = NAN;

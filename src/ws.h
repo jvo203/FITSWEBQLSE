@@ -18,8 +18,7 @@ typedef struct
     char *multi;     // multiple ids are separated by a semicolon
     char *id;        // sessionId
 
-    // the WebSocket connection and a communications channel (mg_pipe)
-    struct mg_connection *conn;
+    // the WebSocket communications channel (mg_pipe)
     int channel;
 
     char *flux;
