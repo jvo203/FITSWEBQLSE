@@ -39,7 +39,7 @@ typedef struct
     x265_encoder *encoder;
     x265_picture *picture;
 
-    // WS ring buffer event loop
+    // WS spectrum ring buffer event loop
     pthread_mutex_t ws_mtx;
     pthread_mutex_t ws_cond_mtx;
     volatile sig_atomic_t ws_exit;
@@ -47,13 +47,19 @@ typedef struct
     pthread_t ws_thread;
     struct ring_buffer *ws_ring;
 
-    // PV-Diagram
+    // WS video ring buffer event loop
+    pthread_mutex_t video_mtx;
+    pthread_mutex_t video_cond_mtx;
+    volatile sig_atomic_t video_exit;
+    pthread_cond_t video_cond;
+    pthread_t video_thread;
+    struct ring_buffer *video_ring;
+
+    // WS PV-Diagram ring buffer event loop
     pthread_mutex_t pv_mtx;
     volatile sig_atomic_t pv_exit;
-
     pthread_cond_t pv_cond;
     pthread_mutex_t cond_mtx;
-
     pthread_t pv_thread;
     struct ring_buffer *pv_ring;
 } websocket_session;
