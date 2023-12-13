@@ -2098,7 +2098,18 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->flux = session->flux != NULL ? strdup(session->flux) : NULL;
             req->len = req->flux != NULL ? strlen(req->flux) : 0;
 
-            // TO-DO: use the video ring buffer
+            pthread_mutex_lock(&session->video_mtx);
+
+            // add the request to the circular queue
+            ring_put(session->video_ring, req);
+
+            if (!session->video_exit)
+                pthread_cond_signal(&session->video_cond); // wake up the video event loop
+
+            // finally unlock the mutex
+            pthread_mutex_unlock(&session->video_mtx);
+
+            break;
 
             // old code starts here
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
