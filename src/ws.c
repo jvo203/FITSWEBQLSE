@@ -2451,7 +2451,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             }
             else
             {
-                free(req->flux); // req->flux is *NOT* NULL at this point
+                free(req->flux);
                 free(req);
                 free(resp);
             }
