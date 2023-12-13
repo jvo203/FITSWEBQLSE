@@ -3663,7 +3663,10 @@ void *pv_event_loop(void *arg)
         while ((req = (struct pv_request *)ring_get(session->pv_ring)) != NULL)
         {
             if (session->pv_exit)
+            {
+                free(req);
                 break;
+            }
 
             printf("[C] pv_event_loop::got a request id %d.\n", req->seq_id);
 
@@ -3801,7 +3804,10 @@ void *ws_event_loop(void *arg)
         while ((req = (struct image_spectrum_request *)ring_get(session->ws_ring)) != NULL)
         {
             if (session->ws_exit)
+            {
+                free(req);
                 break;
+            }
 
             printf("[C] ws_event_loop::got a request id %d.\n", req->seq_id);
 
@@ -3934,7 +3940,11 @@ void *video_event_loop(void *arg)
         while ((req = (struct video_request *)ring_get(session->video_ring)) != NULL)
         {
             if (session->video_exit)
+            {
+                free(req->flux);
+                free(req);
                 break;
+            }
 
             printf("[C] video_event_loop::got a request seq_id %d.\n", req->seq_id);
 
