@@ -146,6 +146,8 @@ void delete_session(websocket_session *session)
         struct video_request *req = NULL;
         while ((req = (struct video_request *)ring_get(session->video_ring)) != NULL)
         {
+            printf("[C] video ring buffer: draining a request seq_id %d.\n", req->seq_id);
+
             if (req->flux != NULL)
                 free(req->flux);
 
