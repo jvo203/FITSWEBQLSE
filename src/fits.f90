@@ -82,9 +82,11 @@ module fits
 
    type, bind(c) :: video_request_f
       ! input
-      logical(kind=c_bool) :: keyframe
+      logical(kind=c_bool) :: keyframe      
       integer(c_int) :: frame
       integer(c_int) :: fill
+      integer(c_int) :: seq_id;
+      real(c_float) :: timestamp
 
       ! needed by tone mapping
       type(C_PTR) :: flux

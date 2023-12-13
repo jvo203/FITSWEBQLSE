@@ -151,6 +151,8 @@ struct video_request
     bool keyframe; // is it a keyframe?
     int frame;
     int fill;
+    int seq_id;
+    float timestamp;
 
     // needed by tone mapping
     char *flux;

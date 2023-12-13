@@ -24,8 +24,9 @@ extern sig_atomic_t s_received_signal;
 extern int get_header_status(void *item);
 extern void inherent_image_dimensions_C(void *item, int *width, int *height);
 
-void *pv_event_loop(void *arg);
 void *ws_event_loop(void *arg);
+void *video_event_loop(void *arg);
+void *pv_event_loop(void *arg);
 
 void *send_cluster_heartbeat(void *arg);
 
@@ -109,7 +110,7 @@ void delete_session(websocket_session *session)
     pthread_mutex_unlock(&session->vid_mtx);
     pthread_mutex_destroy(&session->vid_mtx);
 
-    // the WS thread
+    // WS spectrum thread
     session->ws_exit = true;
     pthread_cond_signal(&session->ws_cond); // wake up the ws event loop
     pthread_join(session->ws_thread, NULL); // wait for the ws thread to end
@@ -129,7 +130,27 @@ void delete_session(websocket_session *session)
     pthread_mutex_unlock(&session->ws_mtx);
     pthread_mutex_destroy(&session->ws_mtx);
 
-    // the P-V Diagram thread
+    // WS video thread
+    session->video_exit = true;
+    pthread_cond_signal(&session->video_cond); // wake up the video event loop
+    pthread_join(session->video_thread, NULL); // wait for the video thread to end
+
+    pthread_cond_destroy(&session->video_cond);
+    pthread_mutex_destroy(&session->video_cond_mtx);
+
+    pthread_mutex_lock(&session->video_mtx);
+
+    if (session->video_ring != NULL)
+    {
+        delete_ring_buffer(session->video_ring);
+        free(session->video_ring);
+        session->video_ring = NULL;
+    }
+
+    pthread_mutex_unlock(&session->video_mtx);
+    pthread_mutex_destroy(&session->video_mtx);
+
+    // WS P-V Diagram thread
     session->pv_exit = true;
     pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
     pthread_join(session->pv_thread, NULL); // wait for the pv thread to end
@@ -692,15 +713,15 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->encoder = NULL;
                 session->picture = NULL;
 
-                // WS ring buffer event loop
+                int stat;
+
+                // WS spectrum ring buffer event loop
                 session->ws_exit = false;
                 pthread_mutex_init(&session->ws_cond_mtx, NULL);
                 pthread_cond_init(&session->ws_cond, NULL);
 
                 pthread_mutex_init(&session->ws_mtx, NULL);
                 pthread_mutex_lock(&session->ws_mtx);
-
-                int stat;
 
                 // launch a ws_thread
                 stat = pthread_create(&session->ws_thread, NULL, ws_event_loop, session);
@@ -715,7 +736,28 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 pthread_mutex_unlock(&session->ws_mtx);
 
-                // P-V Diagram ring buffer event loop
+                // WS video ring buffer event loop
+                session->video_exit = false;
+                pthread_mutex_init(&session->video_cond_mtx, NULL);
+                pthread_cond_init(&session->video_cond, NULL);
+
+                pthread_mutex_init(&session->video_mtx, NULL);
+                pthread_mutex_lock(&session->video_mtx);
+
+                // launch a ws_thread
+                stat = pthread_create(&session->video_thread, NULL, video_event_loop, session);
+
+                if (stat != 0)
+                    printf("[C] cannot create a video_thread!\n");
+
+                session->video_ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
+
+                if (session->video_ring != NULL)
+                    init_ring_buffer(session->video_ring, 64);
+
+                pthread_mutex_unlock(&session->video_mtx);
+
+                // WS P-V Diagram ring buffer event loop
                 session->pv_exit = false;
                 pthread_mutex_init(&session->cond_mtx, NULL);
                 pthread_cond_init(&session->pv_cond, NULL);
@@ -1964,10 +2006,10 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             int bitrate = 1000;
             req->keyframe = false; // is it a keyframe?
             req->fill = 0;
-            int seq_id = -1;
+            req->seq_id = -1;
 
             req->frame = 0;
-            float timestamp = 0.0;
+            req->timestamp = 0.0;
 
             req->flux = NULL;
             req->len = 0;
@@ -2009,7 +2051,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 // 'seq_id'
                 if (strncmp(wm->data.ptr + koff, "\"seq_id\"", klen) == 0)
-                    seq_id = atoi2(wm->data.ptr + voff, vlen);
+                    req->seq_id = atoi2(wm->data.ptr + voff, vlen);
 
                 // 'key'
                 if (strncmp(wm->data.ptr + koff, "\"key\"", klen) == 0)
@@ -2033,7 +2075,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
                 // 'timestamp'
                 if (strncmp(wm->data.ptr + koff, "\"timestamp\"", klen) == 0)
-                    timestamp = atof2(wm->data.ptr + voff, vlen);
+                    req->timestamp = atof2(wm->data.ptr + voff, vlen);
             }
 
             // get the video frame index
@@ -2041,7 +2083,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
             req->frame = frame_idx;
 
-            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f --> %d}, ref_freq: %f, timestamp: %f\n", fps, bitrate, seq_id, req->keyframe, frame, req->frame, ref_freq, timestamp);
+            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f --> %d}, ref_freq: %f, timestamp: %f\n", fps, bitrate, req->seq_id, req->keyframe, frame, req->frame, ref_freq, req->timestamp);
 
             // skip repeated frames
             if (frame_idx == session->last_frame_idx && !req->keyframe)
@@ -2056,11 +2098,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             req->flux = session->flux != NULL ? strdup(session->flux) : NULL;
             req->len = req->flux != NULL ? strlen(req->flux) : 0;
 
+            // TO-DO: use the video ring buffer
+
+            // old code starts here
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
             if (resp == NULL)
             {
-                free(req->flux); // req->flux is *NOT* NULL at this point
+                free(req->flux);
                 free(req);
                 break;
             }
@@ -2077,8 +2122,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 resp->session_id = strdup(c->data);
                 resp->fps = fps;
                 resp->bitrate = bitrate;
-                resp->timestamp = timestamp;
-                resp->seq_id = seq_id;
+                resp->timestamp = req->timestamp;
+                resp->seq_id = req->seq_id;
                 resp->fd = pipefd[0];
 
                 // pass the write end of the pipe to a FORTRAN thread
@@ -2127,7 +2172,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             }
             else
             {
-                free(req->flux); // req->flux is *NOT* NULL at this point
+                free(req->flux);
                 free(req);
                 free(resp);
             }
@@ -3606,6 +3651,9 @@ void *pv_event_loop(void *arg)
         // get the requests from the ring buffer
         while ((req = (struct pv_request *)ring_get(session->pv_ring)) != NULL)
         {
+            if (session->pv_exit)
+                break;
+
             printf("[C] pv_event_loop::got a request id %d.\n", req->seq_id);
 
             if (req->seq_id <= last_seq_id)
@@ -3650,10 +3698,15 @@ void *pv_event_loop(void *arg)
                 pthread_t tid_req, tid_resp;
 
                 // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                if (req->va_count == 1)
-                    stat = pthread_create(&tid_req, NULL, &ws_pv_request, req);
+                if (session->id != NULL)
+                {
+                    if (req->va_count == 1)
+                        stat = pthread_create(&tid_req, NULL, &ws_pv_request, req);
+                    else
+                        stat = pthread_create(&tid_req, NULL, &ws_composite_pv_request, req);
+                }
                 else
-                    stat = pthread_create(&tid_req, NULL, &ws_composite_pv_request, req);
+                    stat = -1;
 
                 if (stat == 0)
                 {
@@ -3736,6 +3789,9 @@ void *ws_event_loop(void *arg)
         // get the requests from the ring buffer
         while ((req = (struct image_spectrum_request *)ring_get(session->ws_ring)) != NULL)
         {
+            if (session->ws_exit)
+                break;
+
             printf("[C] ws_event_loop::got a request id %d.\n", req->seq_id);
 
             if (req->seq_id <= last_seq_id)
@@ -3780,7 +3836,10 @@ void *ws_event_loop(void *arg)
                 pthread_t tid_req, tid_resp;
 
                 // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                stat = pthread_create(&tid_req, NULL, &realtime_image_spectrum_request_simd, req);
+                if (session->id != NULL)
+                    stat = pthread_create(&tid_req, NULL, &realtime_image_spectrum_request_simd, req);
+                else
+                    stat = -1;
 
                 if (stat == 0)
                 {
@@ -3832,6 +3891,143 @@ void *ws_event_loop(void *arg)
     session = NULL;
 
     printf("[C] ws_event_loop terminated.\n");
+
+    pthread_exit(NULL);
+}
+
+void *video_event_loop(void *arg)
+{
+    if (arg == NULL)
+        pthread_exit(NULL);
+
+    websocket_session *session = (websocket_session *)arg;
+
+    printf("[C] video_event_loop started.\n");
+
+    pthread_mutex_lock(&session->video_cond_mtx);
+
+    while (!session->video_exit)
+    {
+        /* wait on a condition variable */
+        pthread_cond_wait(&session->video_cond, &session->video_cond_mtx);
+
+        if (session->video_exit)
+            break;
+
+        printf("[C] video_event_loop::wakeup.\n");
+
+        struct video_request *req = NULL;
+        int last_seq_id = -1;
+
+        // get the requests from the ring buffer
+        while ((req = (struct video_request *)ring_get(session->video_ring)) != NULL)
+        {
+            if (session->video_exit)
+                break;
+
+            printf("[C] video_event_loop::got a request seq_id %d.\n", req->seq_id);
+
+            if (req->seq_id <= last_seq_id)
+            {
+                printf("[C] video_event_loop::seq_id mismatch! last_seq_id: %d, req->seq_id: %d\n", last_seq_id, req->seq_id);
+                free(req->flux);
+                free(req);
+                continue;
+            }
+            else
+            {
+                last_seq_id = req->seq_id;
+            }
+
+            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+
+            if (resp == NULL)
+            {
+                free(req->flux);
+                free(req);
+                continue;
+            }
+
+            // pass the request to FORTRAN
+            int stat;
+            int pipefd[2];
+
+            // open a Unix pipe
+            stat = pipe(pipefd);
+
+            if (stat == 0)
+            {
+                // pass the read end of the pipe to a C thread
+                resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
+                resp->fps = 0;
+                resp->bitrate = 0;
+                resp->timestamp = req->timestamp;
+                resp->seq_id = req->seq_id;
+                resp->fd = pipefd[0];
+
+                // pass the write end of the pipe to a FORTRAN thread
+                req->fd = pipefd[1];
+
+                pthread_t tid_req, tid_resp;
+
+                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                if (session->id != NULL)
+                    stat = pthread_create(&tid_req, NULL, &video_request_simd, req);
+                else
+                    stat = -1;
+
+                if (stat == 0)
+                {
+                    // launch a pipe read C pthread
+                    stat = pthread_create(&tid_resp, NULL, &video_response, resp);
+
+                    if (stat == 0)
+                        pthread_detach(tid_resp);
+                    else
+                    {
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+
+                        // release the response memory since there is no reader
+                        free(resp->session_id);
+                        free(resp);
+                    }
+
+                    // finally wait for the request thread to end before handling another one
+                    pthread_join(tid_req, NULL);
+                }
+                else
+                {
+                    free(req->flux);
+                    free(req);
+
+                    // close the write end of the pipe
+                    close(pipefd[1]);
+
+                    // close the read end of the pipe
+                    close(pipefd[0]);
+
+                    // release the response memory since there is no writer
+                    free(resp->session_id);
+                    free(resp);
+                }
+            }
+            else
+            {
+                printf("[C] video_event_loop::pipe() failed.\n");
+                free(req->flux);
+                free(req);
+                free(resp);
+                continue;
+            }
+        }
+    }
+
+    pthread_mutex_unlock(&session->video_cond_mtx);
+
+    session = NULL;
+
+    printf("[C] video_event_loop terminated.\n");
 
     pthread_exit(NULL);
 }
