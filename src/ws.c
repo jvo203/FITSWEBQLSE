@@ -2379,7 +2379,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 break;
             }
 
-            // next prepare the respose
+            pthread_mutex_lock(&common_session->video_mtx);
+
+            // add the request to the circular queue
+            ring_put(common_session->video_ring, req);
+
+            if (!common_session->video_exit)
+                pthread_cond_signal(&common_session->video_cond); // wake up the video event loop
+
+            // finally unlock the mutex
+            pthread_mutex_unlock(&common_session->video_mtx);
+
+            break;
+
+            // old code starts here
             struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
             if (resp == NULL)
@@ -4010,14 +4023,24 @@ void *video_event_loop(void *arg)
 
                 // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
                 if (session->id != NULL)
-                    stat = pthread_create(&tid_req, NULL, &video_request_simd, req);
+                {
+                    // check the video type (single or composite)
+                    if (req->video_type == single)
+                        stat = pthread_create(&tid_req, NULL, &video_request_simd, req);
+                    else
+                        stat = pthread_create(&tid_req, NULL, &composite_video_request_simd, req);
+                }
                 else
                     stat = -1;
 
                 if (stat == 0)
                 {
                     // launch a pipe read C pthread
-                    stat = pthread_create(&tid_resp, NULL, &video_response, resp);
+                    // check the video type (single or composite)
+                    if (req->video_type == single)
+                        stat = pthread_create(&tid_resp, NULL, &video_response, resp);
+                    else
+                        stat = pthread_create(&tid_resp, NULL, &composite_video_response, resp);
 
                     if (stat == 0)
                         pthread_detach(tid_resp);
