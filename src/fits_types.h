@@ -147,6 +147,10 @@ struct spectrum_request
 
 struct video_request
 {
+    // needed by tone mapping
+    char *flux;
+    int len;
+
     // input
     bool keyframe; // is it a keyframe?
     int frame;
@@ -154,9 +158,6 @@ struct video_request
     int seq_id;
     float timestamp;
 
-    // needed by tone mapping
-    char *flux;
-    int len;
     float dmin, dmax, dmedian;
     float dmadN, dmadP;
 
@@ -171,16 +172,18 @@ struct video_request
 
 struct composite_video_request
 {
-    // input
-    int va_count;
-    bool keyframe;
-    int fill;
-
     // the flux is common across the RGB channels
     char *flux;
     int len;
 
+    // input
+    bool keyframe;
+    int fill;
+    int seq_id;
+    float timestamp;
+
     // RGB channels (up to three)
+    int va_count;
     void *ptr[3]; // item
     int frame[3];
     float dmin[3], dmax[3], dmedian[3];

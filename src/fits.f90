@@ -81,16 +81,17 @@ module fits
    end type spectrum_request_f
 
    type, bind(c) :: video_request_f
+      ! needed by tone mapping
+      type(C_PTR) :: flux
+      integer(kind=c_int) :: len
+
       ! input
       logical(kind=c_bool) :: keyframe      
       integer(c_int) :: frame
       integer(c_int) :: fill
-      integer(c_int) :: seq_id;
+      integer(c_int) :: seq_id
       real(c_float) :: timestamp
-
-      ! needed by tone mapping
-      type(C_PTR) :: flux
-      integer(kind=c_int) :: len
+      
       real(kind=c_float) dmin, dmax, dmedian
       real(kind=c_float) dmadN, dmadP
 
@@ -104,16 +105,18 @@ module fits
    end type video_request_f
 
    type, bind(c) :: composite_video_request_f
-      ! input
-      integer(c_int) :: va_count
-      logical(kind=c_bool) :: keyframe
-      integer(c_int) :: fill
-
       ! needed by tone mapping
       type(C_PTR) :: flux
       integer(kind=c_int) :: len
 
+      ! input      
+      logical(kind=c_bool) :: keyframe
+      integer(c_int) :: fill
+      integer(c_int) :: seq_id
+      real(c_float) :: timestamp      
+
       ! RGB channels (up to three)
+      integer(c_int) :: va_count
       type(C_PTR) :: ptr(3)
       integer(c_int) :: frame(3)
       real(kind=c_float) dmin(3), dmax(3), dmedian(3)

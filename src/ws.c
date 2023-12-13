@@ -142,6 +142,16 @@ void delete_session(websocket_session *session)
 
     if (session->video_ring != NULL)
     {
+        // drain the video ring buffer and release req->flux
+        struct video_request *req = NULL;
+        while ((req = (struct video_request *)ring_get(session->video_ring)) != NULL)
+        {
+            if (req->flux != NULL)
+                free(req->flux);
+
+            free(req);
+        }
+
         delete_ring_buffer(session->video_ring);
         free(session->video_ring);
         session->video_ring = NULL;
