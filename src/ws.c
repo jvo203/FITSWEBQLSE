@@ -2277,6 +2277,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             if (req == NULL)
                 break;
 
+            req->seq_id = seq_id;
+            req->timestamp = timestamp;
             req->va_count = 0;
             req->flux = flux != NULL ? strdup(flux) : NULL;
             req->len = req->flux != NULL ? strlen(req->flux) : 0;
@@ -2369,7 +2371,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (skip_frame)
             {
-                free(req->flux); // req->flux is *NOT* NULL at this point
+                free(req->flux);
                 free(req);
                 break;
             }
@@ -2379,7 +2381,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             if (resp == NULL)
             {
-                free(req->flux); // req->flux is *NOT* NULL at this point
+                free(req->flux);
                 free(req);
                 break;
             }
@@ -2400,8 +2402,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 resp->session_id = strdup(c->data);
                 resp->fps = fps;
                 resp->bitrate = bitrate;
-                resp->timestamp = timestamp;
-                resp->seq_id = seq_id;
+                resp->timestamp = req->timestamp;
+                resp->seq_id = req->seq_id;
                 resp->fd = pipefd[0];
 
                 // pass the write end of the pipe to a FORTRAN thread
