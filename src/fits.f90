@@ -86,19 +86,19 @@ module fits
    end type spectrum_request_f
 
    type, bind(c) :: video_request_f
+      ! common variables for both single and composite videos
       integer(kind(composite)) :: video_type
-
-      ! needed by tone mapping
       type(C_PTR) :: flux
       integer(kind=c_int) :: len
-
-      ! input
-      logical(kind=c_bool) :: keyframe      
-      integer(c_int) :: frame
-      integer(c_int) :: fill
       integer(c_int) :: seq_id
       real(c_float) :: timestamp
-      
+      integer(kind=c_int) :: fd
+
+      ! input
+      logical(kind=c_bool) :: keyframe
+      integer(c_int) :: frame
+      integer(c_int) :: fill
+
       real(kind=c_float) dmin, dmax, dmedian
       real(kind=c_float) dmadN, dmadP
 
@@ -106,23 +106,22 @@ module fits
       integer(kind=c_int) :: width
       integer(kind=c_int) :: height
       logical(kind=c_bool) :: downsize
-      integer(kind=c_int) :: fd
 
       type(C_PTR) :: ptr
    end type video_request_f
 
    type, bind(c) :: composite_video_request_f
+      ! common variables for both single and composite videos
       integer(kind(composite)) :: video_type
-
-      ! needed by tone mapping
       type(C_PTR) :: flux
       integer(kind=c_int) :: len
+      integer(c_int) :: seq_id
+      real(c_float) :: timestamp
+      integer(kind=c_int) :: fd
 
-      ! input      
+      ! input
       logical(kind=c_bool) :: keyframe
       integer(c_int) :: fill
-      integer(c_int) :: seq_id
-      real(c_float) :: timestamp      
 
       ! RGB channels (up to three)
       integer(c_int) :: va_count
@@ -135,7 +134,6 @@ module fits
       integer(kind=c_int) :: width
       integer(kind=c_int) :: height
       logical(kind=c_bool) :: downsize
-      integer(kind=c_int) :: fd
    end type composite_video_request_f
 
    type, bind(c) :: download_request_f

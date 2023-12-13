@@ -153,18 +153,18 @@ struct spectrum_request
 
 struct video_request
 {
+    // common variables for both single and composite
     enum video_request_type video_type;
-
-    // needed by tone mapping
     char *flux;
     int len;
+    int seq_id;
+    float timestamp;
+    int fd;
 
     // input
     bool keyframe; // is it a keyframe?
     int frame;
     int fill;
-    int seq_id;
-    float timestamp;
 
     float dmin, dmax, dmedian;
     float dmadN, dmadP;
@@ -173,24 +173,24 @@ struct video_request
     int width;
     int height;
     bool downsize;
-    int fd;
 
     void *ptr; // item
 };
 
 struct composite_video_request
 {
+    // common variables for both single and composite
     enum video_request_type video_type;
-
     // the flux is common across the RGB channels
     char *flux;
     int len;
+    int seq_id;
+    float timestamp;
+    int fd;
 
     // input
     bool keyframe;
     int fill;
-    int seq_id;
-    float timestamp;
 
     // RGB channels (up to three)
     int va_count;
@@ -203,7 +203,6 @@ struct composite_video_request
     int width;
     int height;
     bool downsize;
-    int fd;
 };
 
 struct pv_request
