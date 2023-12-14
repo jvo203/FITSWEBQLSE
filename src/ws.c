@@ -235,6 +235,8 @@ double atof2(const char *chars, const int size)
 // Pipe event handler.
 static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
+    printf("[C] mg_pipe_callback: event %d\n", ev);
+
     if (c->fn_data == NULL)
     {
         c->recv.len = 0;   // Consume received data
