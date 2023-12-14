@@ -183,7 +183,8 @@ void delete_session(websocket_session *session)
     pthread_mutex_destroy(&session->pv_mtx);
 
     // close the socket pipe
-    close(session->channel);
+    int stat = close(session->channel);
+    printf("[C] closing a socket pipe channel %d with stat = %d\n", session->channel, stat);
 
     // free() has been commented out on purpose
     // it was interfering with glib reference counting release mechanism (a double free)
