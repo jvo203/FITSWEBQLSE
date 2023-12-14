@@ -183,8 +183,7 @@ void delete_session(websocket_session *session)
     pthread_mutex_destroy(&session->pv_mtx);
 
     // close the socket pipe
-    int stat = close(session->channel);
-    printf("[C] closing a socket pipe channel %d with stat = %d\n", session->channel, stat);
+    close(session->channel);
 
     // free() has been commented out on purpose
     // it was interfering with glib reference counting release mechanism (a double free)
@@ -235,8 +234,6 @@ double atof2(const char *chars, const int size)
 // Pipe event handler.
 static void mg_pipe_callback(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
-    printf("[C] mg_pipe_callback: event %d\n", ev);
-
     if (c->fn_data == NULL)
     {
         c->recv.len = 0;   // Consume received data
