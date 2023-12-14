@@ -183,9 +183,7 @@ void delete_session(websocket_session *session)
     pthread_mutex_destroy(&session->pv_mtx);
 
     // close the socket pipe
-    if (session->channel != -1)
-        close(session->channel);
-    session->channel = -1;
+    close(session->channel);
 
     // free() has been commented out on purpose
     // it was interfering with glib reference counting release mechanism (a double free)
