@@ -154,9 +154,12 @@ ld: symbol(s) not found for architecture arm64
 # 17. WCSLIB
     brew install wcslib
 
-# 18. PostgreSQL (needed by JVO)
+# 18. LIBTAR
+    brew install libtar
+
+# 19. PostgreSQL (needed by JVO)
     brew install libpq
 
-# 19. FORTRAN formatting in Visual Studio Code
+# 20. FORTRAN formatting in Visual Studio Code
     brew install fortran-language-server
     brew install findent
