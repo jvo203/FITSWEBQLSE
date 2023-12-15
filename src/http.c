@@ -4665,6 +4665,22 @@ void *handle_composite_download_request(void *ptr)
     }
 
     // TO-DO: create an in-memory tar archive using libtar
+    // create a new Unix pipe
+    int pipefd[2];
+
+    if (pipe(pipefd) != 0)
+    {
+        // iterate through va_count and free the datasetId
+        for (i = 0; i < composite_req->va_count; i++)
+            free(composite_req->datasetId[i]);
+
+        // free the datasetId array
+        free(composite_req->datasetId);
+        free(composite_req);
+
+        perror("[C] handle_composite_download_request pipe");
+        pthread_exit(NULL);
+    }
 
     // TO-DO: iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
     for (i = 0; i < composite_req->va_count; i++)
@@ -4680,7 +4696,7 @@ void *handle_composite_download_request(void *ptr)
         req->frame_start = composite_req->req->frame_start;
         req->frame_end = composite_req->req->frame_end;
         req->ref_freq = composite_req->req->ref_freq;
-        req->fd = -1;
+        req->fd = -1; // pipefd[1];
         req->ptr = composite_req->req->ptr;
 
         // call FORTRAN
@@ -4688,6 +4704,10 @@ void *handle_composite_download_request(void *ptr)
 
         free(req);
     }
+
+    // close the pipe
+    close(pipefd[1]);
+    close(pipefd[0]);
 
     // TEMPORARY: manually close the write end of the pipe
     close(composite_req->req->fd);
