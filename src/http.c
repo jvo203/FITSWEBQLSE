@@ -4664,6 +4664,8 @@ void *handle_composite_download_request(void *ptr)
         pthread_exit(NULL);
     }
 
+    // TO-DO: create an in-memory tar archive using libtar
+
     // TO-DO: iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
     for (i = 0; i < composite_req->va_count; i++)
     {
