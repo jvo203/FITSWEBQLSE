@@ -702,7 +702,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->datasetid = datasetId != NULL ? strdup(datasetId) : NULL;
                 session->multi = orig != NULL ? strdup(orig) : NULL;
                 session->id = sessionId != NULL ? strdup(sessionId) : NULL;
-                session->channel = mg_mkpipe(c->mgr, mg_pipe_callback, (void *)(sessionId != NULL ? strdup(sessionId) : NULL), true);
+                session->channel = mg_mkpipe(c->mgr, mg_pipe_callback, (void *)(sessionId != NULL ? strdup(sessionId) : NULL), false);
 
                 session->flux = NULL;
                 session->dmin = NAN;
