@@ -21,6 +21,7 @@
 #include <glib.h>
 #include <microhttpd.h>
 #include <curl/curl.h>
+#include <libtar.h>
 
 // LZ4 character streams compressor
 #include <lz4hc.h>
@@ -4645,7 +4646,10 @@ void *handle_composite_download_request(void *ptr)
     if (composite_req->va_count == 0)
     {
         if (composite_req->req != NULL)
+        {
+            close(composite_req->req->fd);
             free(composite_req->req);
+        }
 
         free(composite_req);
         pthread_exit(NULL);
@@ -4665,6 +4669,26 @@ void *handle_composite_download_request(void *ptr)
     }
 
     // TO-DO: create an in-memory tar archive using libtar
+    TAR *pTar = NULL;
+
+    int stat = tar_fdopen(&pTar, composite_req->req->fd, "FITSWEBQLSE", NULL, O_WRONLY | O_CREAT, 0644, TAR_GNU | TAR_VERBOSE);
+
+    if (stat != 0 || pTar == NULL)
+    {
+        // iterate through va_count and free the datasetId
+        for (i = 0; i < composite_req->va_count; i++)
+            free(composite_req->datasetId[i]);
+
+        // free the datasetId array
+        free(composite_req->datasetId);
+        close(composite_req->req->fd);
+        free(composite_req->req);
+        free(composite_req);
+
+        perror("[C] handle_composite_download_request tar_fdopen");
+        pthread_exit(NULL);
+    }
+
     // create a new Unix pipe
     int pipefd[2];
 
@@ -4676,6 +4700,8 @@ void *handle_composite_download_request(void *ptr)
 
         // free the datasetId array
         free(composite_req->datasetId);
+        close(composite_req->req->fd);
+        free(composite_req->req);
         free(composite_req);
 
         perror("[C] handle_composite_download_request pipe");
@@ -4709,8 +4735,12 @@ void *handle_composite_download_request(void *ptr)
     close(pipefd[1]);
     close(pipefd[0]);
 
+    // finalise the tar archive
+    tar_append_eof(pTar);
+    tar_close(pTar);
+
     // TEMPORARY: manually close the write end of the pipe
-    close(composite_req->req->fd);
+    // close(composite_req->req->fd);
 
     // iterate through va_count and free the datasetId
     for (i = 0; i < composite_req->va_count; i++)
