@@ -4673,7 +4673,7 @@ void *handle_composite_download_request(void *ptr)
 
     int stat = tar_fdopen(&pTar, composite_req->req->fd, "FITSWEBQLSE", NULL, O_WRONLY | O_CREAT, 0644, TAR_GNU | TAR_VERBOSE);
 
-    if (stat != 0 || pTar == NULL)
+    if (stat != 0)
     {
         // iterate through va_count and free the datasetId
         for (i = 0; i < composite_req->va_count; i++)
@@ -4694,13 +4694,16 @@ void *handle_composite_download_request(void *ptr)
 
     if (pipe(pipefd) != 0)
     {
+        // finalise the tar archive
+        tar_append_eof(pTar);
+        tar_close(pTar);
+
         // iterate through va_count and free the datasetId
         for (i = 0; i < composite_req->va_count; i++)
             free(composite_req->datasetId[i]);
 
         // free the datasetId array
         free(composite_req->datasetId);
-        close(composite_req->req->fd);
         free(composite_req->req);
         free(composite_req);
 
@@ -4738,9 +4741,6 @@ void *handle_composite_download_request(void *ptr)
     // finalise the tar archive
     tar_append_eof(pTar);
     tar_close(pTar);
-
-    // TEMPORARY: manually close the write end of the pipe
-    // close(composite_req->req->fd);
 
     // iterate through va_count and free the datasetId
     for (i = 0; i < composite_req->va_count; i++)
