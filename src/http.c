@@ -4681,6 +4681,9 @@ void *handle_composite_download_request(void *ptr)
         req->fd = -1;
         req->ptr = composite_req->req->ptr;
 
+        // call FORTRAN
+        download_request(req);
+
         free(req);
     }
 
