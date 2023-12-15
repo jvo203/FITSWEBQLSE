@@ -4668,12 +4668,10 @@ void *handle_composite_download_request(void *ptr)
         pthread_exit(NULL);
     }
 
-    // TO-DO: create an in-memory tar archive using libtar
+    // open for writing an in-memory tar archive using libtar
     TAR *pTar = NULL;
 
-    int stat = tar_fdopen(&pTar, composite_req->req->fd, "FITSWEBQLSE", NULL, O_WRONLY | O_CREAT, 0644, TAR_GNU | TAR_VERBOSE);
-
-    if (stat != 0)
+    if (tar_fdopen(&pTar, composite_req->req->fd, "FITSWEBQLSE", NULL, O_WRONLY | O_CREAT, 0644, TAR_GNU | TAR_VERBOSE) != 0)
     {
         // iterate through va_count and free the datasetId
         for (i = 0; i < composite_req->va_count; i++)
@@ -4689,31 +4687,18 @@ void *handle_composite_download_request(void *ptr)
         pthread_exit(NULL);
     }
 
-    // create a new Unix pipe
-    int pipefd[2];
-
-    if (pipe(pipefd) != 0)
-    {
-        // finalise the tar archive
-        tar_append_eof(pTar);
-        tar_close(pTar);
-
-        // iterate through va_count and free the datasetId
-        for (i = 0; i < composite_req->va_count; i++)
-            free(composite_req->datasetId[i]);
-
-        // free the datasetId array
-        free(composite_req->datasetId);
-        free(composite_req->req);
-        free(composite_req);
-
-        perror("[C] handle_composite_download_request pipe");
-        pthread_exit(NULL);
-    }
-
-    // TO-DO: iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
+    // iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
     for (i = 0; i < composite_req->va_count; i++)
     {
+        // create a new Unix pipe
+        int pipefd[2];
+
+        if (pipe(pipefd) != 0)
+        {
+            perror("[C] handle_composite_download_request pipe");
+            continue;
+        }
+
         struct download_request *req = (struct download_request *)malloc(sizeof(struct download_request));
         if (req == NULL)
             continue;
@@ -4728,15 +4713,15 @@ void *handle_composite_download_request(void *ptr)
         req->fd = -1; // pipefd[1];
         req->ptr = composite_req->req->ptr;
 
-        // call FORTRAN
+        // call FORTRAN, the result will be written to the pipe and FORTRAN will close the write end of the pipe
         download_request(req);
 
         free(req);
-    }
 
-    // close the pipe
-    close(pipefd[1]);
-    close(pipefd[0]);
+        // TEMPORARY: close the pipe
+        close(pipefd[1]);
+        close(pipefd[0]);
+    }
 
     // finalise the tar archive
     tar_append_eof(pTar);
