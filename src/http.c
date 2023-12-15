@@ -4665,6 +4665,24 @@ void *handle_composite_download_request(void *ptr)
     }
 
     // TO-DO: iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
+    for (i = 0; i < composite_req->va_count; i++)
+    {
+        struct download_request *req = (struct download_request *)malloc(sizeof(struct download_request));
+        if (req == NULL)
+            continue;
+
+        req->x1 = composite_req->req->x1;
+        req->x2 = composite_req->req->x2;
+        req->y1 = composite_req->req->y1;
+        req->y2 = composite_req->req->y2;
+        req->frame_start = composite_req->req->frame_start;
+        req->frame_end = composite_req->req->frame_end;
+        req->ref_freq = composite_req->req->ref_freq;
+        req->fd = -1;
+        req->ptr = composite_req->req->ptr;
+
+        free(req);
+    }
 
     // TEMPORARY: manually close the write end of the pipe
     close(composite_req->req->fd);
