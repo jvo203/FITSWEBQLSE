@@ -4690,6 +4690,9 @@ void *handle_composite_download_request(void *ptr)
     // iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
     for (i = 0; i < composite_req->va_count; i++)
     {
+        if (pTar == NULL)
+            break;
+
         // create a new Unix pipe
         int pipefd[2];
 
@@ -4724,8 +4727,13 @@ void *handle_composite_download_request(void *ptr)
     }
 
     // finalise the tar archive
-    tar_append_eof(pTar);
-    tar_close(pTar);
+    if (pTar != NULL)
+    {
+        tar_append_eof(pTar);
+        tar_close(pTar);
+    }
+    else
+        close(composite_req->req->fd);
 
     // iterate through va_count and free the datasetId
     for (i = 0; i < composite_req->va_count; i++)
