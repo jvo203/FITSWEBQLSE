@@ -4719,6 +4719,11 @@ void *handle_composite_download_request(void *ptr)
         /*if (pTar == NULL)
             break;*/
 
+        void *item = get_dataset(composite_req->datasetId[i]); // each item pointer is unique
+
+        if (item == NULL)
+            continue;
+
         pthread_t tid;
         int tstat = -1;
 
@@ -4743,7 +4748,7 @@ void *handle_composite_download_request(void *ptr)
         req->frame_end = composite_req->req->frame_end;
         req->ref_freq = composite_req->req->ref_freq;
         req->fd = pipefd[1];
-        req->ptr = get_dataset(composite_req->datasetId[i]); // each item pointer is unique
+        req->ptr = item;
 
         // call FORTRAN, the result will be written to the pipe and FORTRAN will close the write end of the pipe
         tstat = pthread_create(&tid, NULL, &download_request, req);
