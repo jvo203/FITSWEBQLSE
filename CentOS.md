@@ -138,7 +138,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 14. libtar
 
-    sudo dnf install libtar-devel
+    sudo dnf install rust-tar-devel
 
 # 15. Intel SPMD C (ispc)
 
