@@ -4795,7 +4795,7 @@ void *handle_composite_download_request(void *ptr)
         if (buf != NULL)
         {
 #if DEBUG
-            printf("[C] calling mtar_write_file_header [%s]::%zd bytes\n", composite_req->datasetId[i], offset);
+            printf("[C] calling mtar_write_file_header [%s]::%zu bytes\n", composite_req->datasetId[i], offset);
 #endif
 
             // write the partial FITS file to the tar archive
