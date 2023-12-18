@@ -4717,6 +4717,9 @@ void *handle_composite_download_request(void *ptr)
         /*if (pTar == NULL)
             break;*/
 
+        pthread_t tid;
+        int tstat = -1;
+
         // create a new Unix pipe
         int pipefd[2];
 
@@ -4737,14 +4740,21 @@ void *handle_composite_download_request(void *ptr)
         req->frame_start = composite_req->req->frame_start;
         req->frame_end = composite_req->req->frame_end;
         req->ref_freq = composite_req->req->ref_freq;
-        req->fd = -1; // pipefd[1];
+        req->fd = pipefd[1];
         req->ptr = composite_req->req->ptr;
 
         // call FORTRAN, the result will be written to the pipe and FORTRAN will close the write end of the pipe
-        download_request(req);
+        tstat = pthread_create(&tid, NULL, &download_request, req);
 
-        // TEMPORARY: close the pipe
-        close(pipefd[1]);
+        if (tstat == 0)
+            pthread_detach(tid);
+        else
+        {
+            close(pipefd[1]);
+            free(req);
+        }
+
+        // close the read pipe
         close(pipefd[0]);
     }
 
