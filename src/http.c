@@ -4743,8 +4743,6 @@ void *handle_composite_download_request(void *ptr)
         // call FORTRAN, the result will be written to the pipe and FORTRAN will close the write end of the pipe
         download_request(req);
 
-        free(req);
-
         // TEMPORARY: close the pipe
         close(pipefd[1]);
         close(pipefd[0]);
