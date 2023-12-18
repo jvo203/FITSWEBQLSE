@@ -4754,8 +4754,50 @@ void *handle_composite_download_request(void *ptr)
             free(req);
         }
 
+        // read from the pipe and write to the tar archive
+        ssize_t n = 0;
+        size_t offset = 0;
+        size_t buf_size = 0x40000;
+
+        char *buf = malloc(buf_size);
+
+        if (buf != NULL)
+            while ((n = read(pipefd[0], buf + offset, buf_size - offset)) > 0)
+            {
+                offset += n;
+
+                // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+
+                if (offset == buf_size)
+                {
+                    printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
+
+                    size_t new_size = buf_size << 1;
+                    char *tmp = realloc(buf, new_size);
+
+                    if (tmp != NULL)
+                    {
+                        buf = tmp;
+                        buf_size = new_size;
+                    }
+                }
+            }
+
         // close the read pipe
         close(pipefd[0]);
+
+        if (0 == n)
+            printf("[C] PIPE_END_OF_STREAM\n");
+
+        if (n < 0)
+            printf("[C] PIPE_END_WITH_ERROR\n");
+
+        if (buf != NULL)
+        {
+            mtar_write_file_header(&tar, composite_req->datasetId[i], (unsigned int)n);
+            mtar_write_data(&tar, buf, (unsigned int)n);
+            free(buf);
+        }
     }
 
     // finalise the tar archive
