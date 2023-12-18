@@ -4798,6 +4798,8 @@ void *handle_composite_download_request(void *ptr)
             printf("[C] calling mtar_write_file_header [%s]::%zd bytes\n", composite_req->datasetId[i], offset);
 #endif
 
+            // write the partial FITS file to the tar archive
+            // TO-DO: handle 64-bit <size_t> file sizes (right now mtar uses <unsigned int> internally)
             mtar_write_file_header(&tar, composite_req->datasetId[i], (unsigned int)offset);
             mtar_write_data(&tar, buf, (unsigned int)offset);
 
