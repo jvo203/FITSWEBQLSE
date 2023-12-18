@@ -4713,7 +4713,7 @@ void *handle_composite_download_request(void *ptr)
     }
 
 // iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
-#pragma omp parallel for private(i)
+#pragma omp parallel for private(i) shared(composite_req)
     for (i = 0; i < composite_req->va_count; i++)
     {
         /*if (pTar == NULL)
@@ -4801,10 +4801,13 @@ void *handle_composite_download_request(void *ptr)
             printf("[C] calling mtar_write_file_header [%s]::%zu bytes\n", composite_req->datasetId[i], offset);
 #endif
 
-            // write the partial FITS file to the tar archive
             // TO-DO: handle 64-bit <size_t> file sizes (right now mtar uses <unsigned int> internally)
-            mtar_write_file_header(&tar, composite_req->datasetId[i], (unsigned int)offset);
-            mtar_write_data(&tar, buf, (unsigned int)offset);
+            if (offset > 0)
+            {
+                // write the partial FITS file to the tar archive
+                mtar_write_file_header(&tar, composite_req->datasetId[i], (unsigned int)offset);
+                mtar_write_data(&tar, buf, (unsigned int)offset);
+            }
 
             free(buf);
         }
