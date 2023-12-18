@@ -21,7 +21,8 @@
 #include <glib.h>
 #include <microhttpd.h>
 #include <curl/curl.h>
-#include <libtar.h>
+
+// a libtar alternative C library
 #include "microtar.h"
 
 // LZ4 character streams compressor
