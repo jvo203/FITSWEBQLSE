@@ -4670,7 +4670,7 @@ void *handle_composite_download_request(void *ptr)
     }
 
     // open for writing an in-memory tar archive using libtar
-    TAR *pTar = NULL;
+    /*TAR *pTar = NULL;
 
     if (tar_fdopen(&pTar, composite_req->req->fd, "FITSWEBQLSE", NULL, O_WRONLY | O_CREAT, 0644, TAR_GNU | TAR_VERBOSE) != 0)
     {
@@ -4686,13 +4686,36 @@ void *handle_composite_download_request(void *ptr)
 
         perror("[C] handle_composite_download_request tar_fdopen");
         pthread_exit(NULL);
+    }*/
+
+    mtar_t tar;
+
+    /* Open archive for writing */
+    int stat = mtar_open(&tar, composite_req->req->fd, "w");
+
+    if (stat == MTAR_EOPENFAIL)
+        close(composite_req->req->fd);
+
+    if (stat != MTAR_ESUCCESS)
+    {
+        // iterate through va_count and free the datasetId
+        for (i = 0; i < composite_req->va_count; i++)
+            free(composite_req->datasetId[i]);
+
+        // free the datasetId array
+        free(composite_req->datasetId);
+        free(composite_req->req);
+        free(composite_req);
+
+        perror("[C] handle_composite_download_request mtar_open");
+        pthread_exit(NULL);
     }
 
     // iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
     for (i = 0; i < composite_req->va_count; i++)
     {
-        if (pTar == NULL)
-            break;
+        /*if (pTar == NULL)
+            break;*/
 
         // create a new Unix pipe
         int pipefd[2];
@@ -4728,13 +4751,19 @@ void *handle_composite_download_request(void *ptr)
     }
 
     // finalise the tar archive
-    if (pTar != NULL)
+    /*if (pTar != NULL)
     {
         tar_append_eof(pTar);
         tar_close(pTar);
     }
     else
-        close(composite_req->req->fd);
+        close(composite_req->req->fd);*/
+
+    /* Finalize -- this needs to be the last thing done before closing */
+    mtar_finalize(&tar);
+
+    /* Close archive */
+    mtar_close(&tar);
 
     // iterate through va_count and free the datasetId
     for (i = 0; i < composite_req->va_count; i++)
