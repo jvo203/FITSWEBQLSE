@@ -4713,7 +4713,7 @@ void *handle_composite_download_request(void *ptr)
     }
 
 // iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
-#pragma omp parallel for private(i) shared(composite_req)
+#pragma omp parallel for private(i) shared(composite_req, tar)
     for (i = 0; i < composite_req->va_count; i++)
     {
         /*if (pTar == NULL)
@@ -4743,7 +4743,7 @@ void *handle_composite_download_request(void *ptr)
         req->frame_end = composite_req->req->frame_end;
         req->ref_freq = composite_req->req->ref_freq;
         req->fd = pipefd[1];
-        req->ptr = composite_req->req->ptr;
+        req->ptr = get_dataset(composite_req->datasetId[i]); // each item pointer is unique
 
         // call FORTRAN, the result will be written to the pipe and FORTRAN will close the write end of the pipe
         tstat = pthread_create(&tid, NULL, &download_request, req);
