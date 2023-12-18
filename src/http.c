@@ -22,6 +22,7 @@
 #include <microhttpd.h>
 #include <curl/curl.h>
 #include <libtar.h>
+#include "microtar.h"
 
 // LZ4 character streams compressor
 #include <lz4hc.h>
