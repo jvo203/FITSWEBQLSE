@@ -136,11 +136,15 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     sudo dnf install mimalloc-devel
 
-# 14. Intel SPMD C (ispc)
+# 14. libtar
+
+    sudo dnf install libtar-devel
+
+# 15. Intel SPMD C (ispc)
 
     manually add ispc from https://ispc.github.io/downloads.html
 
-# 15. Adjust environment variables
+# 16. Adjust environment variables
 
 	Add
 
@@ -150,11 +154,11 @@ ulimit -s unlimited
 
     to .bashrc and re-login
 
-# 16. Splatalogue
+# 17. Splatalogue
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
-# 17. Open up the Ports via a Firewall
+# 18. Open up the Ports via a Firewall
 
     https://mebee.info/2019/10/17/post-2369/
     
@@ -172,13 +176,13 @@ ulimit -s unlimited
     sudo firewall-cmd --list-all
     sudo firewall-cmd --list-ports --zone=public
 
-# 18. Install screen & htop
+# 19. Install screen & htop
 
     sudo dnf install epel-release
     sudo dnf update
     sudo dnf install screen htop
 
-# 19. Launch the processes in parallel on the development cluster
+# 20. Launch the processes in parallel on the development cluster
 
     .bashrc:
     export I_MPI_PORT_RANGE="30000:30000"
