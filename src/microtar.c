@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "microtar.h"
 
@@ -190,7 +189,7 @@ static int file_seek(mtar_t *tar, unsigned offset)
 
 static int file_close(mtar_t *tar)
 {
-  close(tar->fd);
+  fclose(tar->stream);
   return MTAR_ESUCCESS;
 }
 
@@ -213,9 +212,9 @@ int mtar_open(mtar_t *tar, int fd, const char *mode)
     mode = "wb";
   if (strchr(mode, 'a'))
     mode = "ab";
-  /* Associate a file descriptor with input/output */
-  tar->fd = fd;
-  if (tar->fd == -1)
+  /* Open file */
+  tar->stream = fdopen(fd, mode);
+  if (!tar->stream)
   {
     return MTAR_EOPENFAIL;
   }

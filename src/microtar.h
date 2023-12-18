@@ -61,7 +61,7 @@ extern "C"
     int (*write)(mtar_t *tar, const void *data, unsigned size);
     int (*seek)(mtar_t *tar, unsigned pos);
     int (*close)(mtar_t *tar);
-    int fd;
+    void *stream;
     unsigned pos;
     unsigned remaining_data;
     unsigned last_header;
