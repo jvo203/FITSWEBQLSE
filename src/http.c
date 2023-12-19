@@ -138,7 +138,7 @@ void *handle_fitswebql_request(void *ptr);
 void *handle_notify_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *ptr);
-void *handle_composite_download_request(void *ptr);
+void *handle_composite_download_request_tar(void *ptr);
 extern int decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);       // GZIP decompression
 extern void zerr(int ret);                  // GZIP error reporting
@@ -2246,7 +2246,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 creq->req = req;
 
                 // launch a C thread calling handle_composite_download_request
-                stat = pthread_create(&tid, NULL, &handle_composite_download_request, creq);
+                stat = pthread_create(&tid, NULL, &handle_composite_download_request_tar, creq);
 
                 if (stat == 0)
                     pthread_detach(tid);
@@ -4635,7 +4635,7 @@ void *handle_image_request(void *args)
     pthread_exit(NULL);
 }
 
-void *handle_composite_download_request(void *ptr)
+void *handle_composite_download_request_tar(void *ptr)
 {
     int i;
 
