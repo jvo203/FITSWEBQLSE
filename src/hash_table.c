@@ -371,6 +371,9 @@ void rmcache(const char *dir)
 
 void insert_dataset(const char *datasetid, int len, void *item)
 {
+    if (datasetid == NULL)
+        return;
+
     char *id = strndup(datasetid, len);
 
     if (pthread_mutex_lock(&datasets_mtx) == 0)
@@ -388,6 +391,9 @@ void insert_dataset(const char *datasetid, int len, void *item)
 
 bool insert_if_not_exists(const char *datasetid, void *item)
 {
+    if (datasetid == NULL)
+        return false;
+
     printf("[C] insert_if_not_exists(%s,%p)\n", datasetid, item);
 
     bool exists;
@@ -415,11 +421,12 @@ void *get_dataset(const char *datasetid)
 {
     void *item = NULL;
 
+    if (datasetid == NULL)
+        return NULL;
+
     if (pthread_mutex_lock(&datasets_mtx) == 0)
     {
-        if (datasetid != NULL)
-            item = g_hash_table_lookup(datasets, (gconstpointer)datasetid);
-
+        item = g_hash_table_lookup(datasets, (gconstpointer)datasetid);
         pthread_mutex_unlock(&datasets_mtx);
     }
     else
@@ -430,6 +437,9 @@ void *get_dataset(const char *datasetid)
 
 bool dataset_exists(const char *datasetid)
 {
+    if (datasetid == NULL)
+        return false;
+
     if (pthread_mutex_lock(&datasets_mtx) != 0)
     {
         printf("[C] cannot lock datasets_mtx!\n");
