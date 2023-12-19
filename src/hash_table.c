@@ -329,6 +329,9 @@ int write_array(const char *file, void *src, size_t frame_size)
 
 int mkcache(const char *dir)
 {
+    if (dir == NULL)
+        return -1;
+
     struct stat st = {0};
 
     // make a cache directory if it does not exist
@@ -355,6 +358,9 @@ int mkcache(const char *dir)
 
 void rmcache(const char *dir)
 {
+    if (dir == NULL)
+        return;
+
     GString *cmd = g_string_new("rm -rf ");
 
     g_string_append_printf(cmd, "%s", dir);
