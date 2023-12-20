@@ -5645,7 +5645,7 @@ void *gzip_compress(void *args)
     if (n < 0)
         printf("[C] GZIP_PIPE_END_WITH_ERROR\n");
 
-    // finalise the zlib
+    // flush the compressor
     z.avail_in = 0;
     z.next_in = in;
 
