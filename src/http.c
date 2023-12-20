@@ -5587,6 +5587,10 @@ void *stream_molecules(void *args)
 
 void *gzip_compress(void *args)
 {
+    // gzip compression
+    z_stream z;
+    unsigned char out[CHUNK];
+
     if (args == NULL)
         pthread_exit(NULL);
 
