@@ -202,6 +202,7 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
 void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
 
 void *stream_molecules(void *args);
+void *gzip_compress(void *args);
 static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
 
 static enum MHD_Result http_ok(struct MHD_Connection *connection)
@@ -4904,6 +4905,33 @@ void *handle_composite_download_request_tar_gz(void *ptr)
         pthread_exit(NULL);
     }
 
+    // open a gzip compression thread
+    struct gzip_req gz_req;
+
+    gz_req.readfd = gz_pipefd[0];            // the gzip read-end of the pipe
+    gz_req.writefd = composite_req->req->fd; // the write end of the HTTP response pipe
+
+    gz_stat = pthread_create(&gz_tid, NULL, &gzip_compress, &gz_req);
+
+    if (gz_stat != 0)
+    {
+        close(gz_pipefd[1]);
+        close(gz_pipefd[0]);
+
+        // iterate through va_count and free the datasetId
+        for (i = 0; i < composite_req->va_count; i++)
+            free(composite_req->datasetId[i]);
+
+        // free the datasetId array
+        free(composite_req->datasetId);
+        close(composite_req->req->fd);
+        free(composite_req->req);
+        free(composite_req);
+
+        perror("[C] handle_composite_download_request gzip pipe");
+        pthread_exit(NULL);
+    }
+
     // open for writing an in-memory tar archive using libtar
     /*TAR *pTar = NULL;
 
@@ -4926,7 +4954,7 @@ void *handle_composite_download_request_tar_gz(void *ptr)
 
     mtar_t tar;
 
-    /* Open archive for writing */
+    /* Open archive for writing, passing the gzip write-end of the pipe */
     int stat = mtar_open(&tar, gz_pipefd[1] /*composite_req->req->fd*/, "w");
 
     if (stat == MTAR_EOPENFAIL)
@@ -5067,6 +5095,10 @@ void *handle_composite_download_request_tar_gz(void *ptr)
 
     /* Close archive */
     mtar_close(&tar);
+
+    // join the gzip compression thread
+    if (pthread_join(gz_tid, NULL) != 0)
+        perror("[C] handle_composite_download_request gzip pthread_join");
 
     // iterate through va_count and free the datasetId
     for (i = 0; i < composite_req->va_count; i++)

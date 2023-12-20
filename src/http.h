@@ -115,7 +115,7 @@ struct splat_req
     unsigned char out[CHUNK];
 };
 
-struct tar_req
+struct gzip_req
 {
     // Unix pipe read/write ends
     int readfd, writefd;
