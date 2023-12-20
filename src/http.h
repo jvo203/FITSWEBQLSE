@@ -117,8 +117,9 @@ struct splat_req
 
 struct gzip_req
 {
-    // Unix pipe read/write ends
-    int fd_in, fd_out;
+    // Unix pipe ends
+    int fd_in;  // reading
+    int fd_out; // writing
 };
 
 struct mad_req

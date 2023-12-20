@@ -5598,7 +5598,6 @@ void *gzip_compress(void *args)
     // close the write end of the pipe
     close(req->fd_out);
 
-    free(req);
     pthread_exit(NULL);
 }
 
