@@ -4924,8 +4924,6 @@ void *handle_composite_download_request_tar_gz(void *ptr)
         perror("[C] handle_composite_download_request gzip pipe");
         pthread_exit(NULL);
     }
-    else
-        pthread_detach(gz_tid);
 
     // open for writing an in-memory tar archive using libtar
     /*TAR *pTar = NULL;
@@ -4966,6 +4964,9 @@ void *handle_composite_download_request_tar_gz(void *ptr)
         close(composite_req->req->fd);
         free(composite_req->req);
         free(composite_req);
+
+        // join the gzip compression thread
+        pthread_join(gz_tid, NULL);
 
         perror("[C] handle_composite_download_request mtar_open");
         pthread_exit(NULL);
@@ -5100,6 +5101,9 @@ void *handle_composite_download_request_tar_gz(void *ptr)
     free(composite_req->datasetId);
     free(composite_req->req);
     free(composite_req);
+
+    // join the gzip compression thread
+    pthread_join(gz_tid, NULL);
 
     pthread_exit(NULL);
 }
@@ -5595,6 +5599,7 @@ void *gzip_compress(void *args)
         pthread_exit(NULL);
 
     struct gzip_req *req = (struct gzip_req *)args;
+    printf("[C] gzip_compress: fd_in: %d, fd_out: %d\n", req->fd_in, req->fd_out);
 
     // close the read end of the pipe
     close(req->fd_in);
@@ -5602,6 +5607,7 @@ void *gzip_compress(void *args)
     // close the write end of the pipe
     close(req->fd_out);
 
+    printf("[C] gzip_compress thread terminated.\n");
     pthread_exit(NULL);
 }
 
