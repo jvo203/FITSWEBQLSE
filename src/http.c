@@ -5615,7 +5615,25 @@ void *gzip_compress(void *args)
 
     while ((n = read(req->fd_in, in, sizeof(in))) > 0)
     {
-        printf("[C] GZIP_PIPE_RECV %zd BYTES\n", n);
+        // printf("[C] GZIP_PIPE_RECV %zd BYTES\n", n);
+
+        // compress
+        z.avail_in = (unsigned int)n; // size of input
+        z.next_in = in;               // input char array
+
+        do
+        {
+            z.avail_out = CHUNK; // size of output
+            z.next_out = out;    // output char array
+            CALL_ZLIB(deflate(&z, Z_NO_FLUSH));
+            size_t have = CHUNK - z.avail_out;
+
+            if (have > 0)
+            {
+                // printf("ZLIB avail_out: %zu\n", have);
+                chunked_write(req->fd_out, (const char *)out, have);
+            }
+        } while (z.avail_out == 0);
     }
 
     // close the read end of the pipe
@@ -5626,6 +5644,26 @@ void *gzip_compress(void *args)
 
     if (n < 0)
         printf("[C] GZIP_PIPE_END_WITH_ERROR\n");
+
+    // finalise the zlib
+    z.avail_in = 0;
+    z.next_in = in;
+
+    do
+    {
+        z.avail_out = CHUNK; // size of output
+        z.next_out = out;    // output char array
+        CALL_ZLIB(deflate(&z, Z_FINISH));
+        size_t have = CHUNK - z.avail_out;
+
+        if (have > 0)
+        {
+            // printf("Z_FINISH avail_out: %zu\n", have);
+            chunked_write(req->fd_out, (const char *)out, have);
+        }
+    } while (z.avail_out == 0);
+
+    CALL_ZLIB(deflateEnd(&z));
 
     // close the write end of the pipe
     close(req->fd_out);
