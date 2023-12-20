@@ -115,6 +115,16 @@ struct splat_req
     unsigned char out[CHUNK];
 };
 
+struct tar_req
+{
+    // Unix pipe read/write ends
+    int readfd, writefd;
+
+    // gzip compression with zlib
+    z_stream z;
+    unsigned char out[CHUNK];
+};
+
 struct mad_req
 {
     char *datasetid;

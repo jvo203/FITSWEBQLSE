@@ -4850,6 +4850,12 @@ void *handle_composite_download_request_tar_gz(void *ptr)
 {
     int i;
 
+    pthread_t gz_tid;
+    int gz_stat = -1;
+
+    // create a new Unix pipe for gzip compression of the tar archive
+    int gz_pipefd[2];
+
     if (ptr == NULL)
         pthread_exit(NULL);
 
@@ -4881,6 +4887,23 @@ void *handle_composite_download_request_tar_gz(void *ptr)
         pthread_exit(NULL);
     }
 
+    // open a Unix pipe for gzip compression of the tar archive
+    if (pipe(gz_pipefd) != 0)
+    {
+        // iterate through va_count and free the datasetId
+        for (i = 0; i < composite_req->va_count; i++)
+            free(composite_req->datasetId[i]);
+
+        // free the datasetId array
+        free(composite_req->datasetId);
+        close(composite_req->req->fd);
+        free(composite_req->req);
+        free(composite_req);
+
+        perror("[C] handle_composite_download_request gzip pipe");
+        pthread_exit(NULL);
+    }
+
     // open for writing an in-memory tar archive using libtar
     /*TAR *pTar = NULL;
 
@@ -4898,12 +4921,13 @@ void *handle_composite_download_request_tar_gz(void *ptr)
 
         perror("[C] handle_composite_download_request tar_fdopen");
         pthread_exit(NULL);
-    }*/
+    }
+    */
 
     mtar_t tar;
 
     /* Open archive for writing */
-    int stat = mtar_open(&tar, composite_req->req->fd, "w");
+    int stat = mtar_open(&tar, gz_pipefd[1] /*composite_req->req->fd*/, "w");
 
     if (stat == MTAR_EOPENFAIL)
         close(composite_req->req->fd);
