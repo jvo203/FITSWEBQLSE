@@ -5601,8 +5601,31 @@ void *gzip_compress(void *args)
     struct gzip_req *req = (struct gzip_req *)args;
     printf("[C] gzip_compress: fd_in: %d, fd_out: %d\n", req->fd_in, req->fd_out);
 
+    // open the compressor
+    z.zalloc = Z_NULL;
+    z.zfree = Z_NULL;
+    z.opaque = Z_NULL;
+    z.next_in = Z_NULL;
+    z.avail_in = 0;
+    CALL_ZLIB(deflateInit2(&z, Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
+
+    // read from the pipe and compress
+    ssize_t n = 0;
+    unsigned char in[CHUNK];
+
+    while ((n = read(req->fd_in, in, sizeof(in))) > 0)
+    {
+        printf("[C] GZIP_PIPE_RECV %zd BYTES\n", n);
+    }
+
     // close the read end of the pipe
     close(req->fd_in);
+
+    if (0 == n)
+        printf("[C] GZIP_PIPE_END_OF_STREAM\n");
+
+    if (n < 0)
+        printf("[C] GZIP_PIPE_END_WITH_ERROR\n");
 
     // close the write end of the pipe
     close(req->fd_out);
