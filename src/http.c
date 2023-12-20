@@ -4972,8 +4972,8 @@ void *handle_composite_download_request_tar_gz(void *ptr)
         pthread_exit(NULL);
     }
 
-// iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
-#pragma omp parallel for private(i) shared(composite_req, tar)
+    // iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
+    // disabled with gzip #pragma omp parallel for private(i) shared(composite_req, tar)
     for (i = 0; i < composite_req->va_count; i++)
     {
         /*if (pTar == NULL)
@@ -5059,7 +5059,7 @@ void *handle_composite_download_request_tar_gz(void *ptr)
         if (n < 0)
             printf("[C] PIPE_END_WITH_ERROR\n");
 
-#pragma omp critical
+        // disabled with gzip #pragma omp critical
         if (buf != NULL)
         {
 #if DEBUG
