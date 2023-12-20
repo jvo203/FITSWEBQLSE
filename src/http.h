@@ -118,11 +118,7 @@ struct splat_req
 struct gzip_req
 {
     // Unix pipe read/write ends
-    int readfd, writefd;
-
-    // gzip compression with zlib
-    z_stream z;
-    unsigned char out[CHUNK];
+    int fd_in, fd_out;
 };
 
 struct mad_req

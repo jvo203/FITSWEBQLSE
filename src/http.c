@@ -4851,9 +4851,6 @@ void *handle_composite_download_request_tar_gz(void *ptr)
 {
     int i;
 
-    pthread_t gz_tid;
-    int gz_stat = -1;
-
     // create a new Unix pipe for gzip compression of the tar archive
     int gz_pipefd[2];
 
@@ -4906,14 +4903,10 @@ void *handle_composite_download_request_tar_gz(void *ptr)
     }
 
     // open a gzip compression thread
-    struct gzip_req gz_req;
+    pthread_t gz_tid;
+    struct gzip_req gz_req = {gz_pipefd[0], composite_req->req->fd};
 
-    gz_req.readfd = gz_pipefd[0];            // the gzip read-end of the pipe
-    gz_req.writefd = composite_req->req->fd; // the write end of the HTTP response pipe
-
-    gz_stat = pthread_create(&gz_tid, NULL, &gzip_compress, &gz_req);
-
-    if (gz_stat != 0)
+    if (pthread_create(&gz_tid, NULL, &gzip_compress, &gz_req) != 0)
     {
         close(gz_pipefd[1]);
         close(gz_pipefd[0]);
@@ -4931,6 +4924,8 @@ void *handle_composite_download_request_tar_gz(void *ptr)
         perror("[C] handle_composite_download_request gzip pipe");
         pthread_exit(NULL);
     }
+    else
+        pthread_detach(gz_tid);
 
     // open for writing an in-memory tar archive using libtar
     /*TAR *pTar = NULL;
@@ -4958,7 +4953,7 @@ void *handle_composite_download_request_tar_gz(void *ptr)
     int stat = mtar_open(&tar, gz_pipefd[1] /*composite_req->req->fd*/, "w");
 
     if (stat == MTAR_EOPENFAIL)
-        close(composite_req->req->fd);
+        close(gz_pipefd[1]);
 
     if (stat != MTAR_ESUCCESS)
     {
@@ -4968,6 +4963,7 @@ void *handle_composite_download_request_tar_gz(void *ptr)
 
         // free the datasetId array
         free(composite_req->datasetId);
+        close(composite_req->req->fd);
         free(composite_req->req);
         free(composite_req);
 
@@ -5095,10 +5091,6 @@ void *handle_composite_download_request_tar_gz(void *ptr)
 
     /* Close archive */
     mtar_close(&tar);
-
-    // join the gzip compression thread
-    if (pthread_join(gz_tid, NULL) != 0)
-        perror("[C] handle_composite_download_request gzip pthread_join");
 
     // iterate through va_count and free the datasetId
     for (i = 0; i < composite_req->va_count; i++)
@@ -5590,7 +5582,23 @@ void *stream_molecules(void *args)
     close(req->fd);
 
     free(req);
+    pthread_exit(NULL);
+}
 
+void *gzip_compress(void *args)
+{
+    if (args == NULL)
+        pthread_exit(NULL);
+
+    struct gzip_req *req = (struct gzip_req *)args;
+
+    // close the read end of the pipe
+    close(req->fd_in);
+
+    // close the write end of the pipe
+    close(req->fd_out);
+
+    free(req);
     pthread_exit(NULL);
 }
 
