@@ -139,6 +139,7 @@ void *handle_notify_request(void *ptr);
 void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *ptr);
 void *handle_composite_download_request_tar(void *ptr);
+void *handle_composite_download_request_tar_gz(void *ptr);
 extern int decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);       // GZIP decompression
 extern void zerr(int ret);                  // GZIP error reporting
@@ -2246,7 +2247,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 creq->req = req;
 
                 // launch a C thread calling handle_composite_download_request
-                stat = pthread_create(&tid, NULL, &handle_composite_download_request_tar, creq);
+                stat = pthread_create(&tid, NULL, &handle_composite_download_request_tar_gz, creq);
 
                 if (stat == 0)
                     pthread_detach(tid);
@@ -4636,6 +4637,216 @@ void *handle_image_request(void *args)
 }
 
 void *handle_composite_download_request_tar(void *ptr)
+{
+    int i;
+
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct composite_download_request *composite_req = (struct composite_download_request *)ptr;
+
+    // check the va_count first
+    if (composite_req->va_count == 0)
+    {
+        if (composite_req->req != NULL)
+        {
+            close(composite_req->req->fd);
+            free(composite_req->req);
+        }
+
+        free(composite_req);
+        pthread_exit(NULL);
+    }
+
+    if (composite_req->req == NULL)
+    {
+        // iterate through va_count and free the datasetId
+        for (i = 0; i < composite_req->va_count; i++)
+            free(composite_req->datasetId[i]);
+
+        // free the datasetId array
+        free(composite_req->datasetId);
+        free(composite_req);
+
+        pthread_exit(NULL);
+    }
+
+    // open for writing an in-memory tar archive using libtar
+    /*TAR *pTar = NULL;
+
+    if (tar_fdopen(&pTar, composite_req->req->fd, "FITSWEBQLSE", NULL, O_WRONLY | O_CREAT, 0644, TAR_GNU | TAR_VERBOSE) != 0)
+    {
+        // iterate through va_count and free the datasetId
+        for (i = 0; i < composite_req->va_count; i++)
+            free(composite_req->datasetId[i]);
+
+        // free the datasetId array
+        free(composite_req->datasetId);
+        close(composite_req->req->fd);
+        free(composite_req->req);
+        free(composite_req);
+
+        perror("[C] handle_composite_download_request tar_fdopen");
+        pthread_exit(NULL);
+    }*/
+
+    mtar_t tar;
+
+    /* Open archive for writing */
+    int stat = mtar_open(&tar, composite_req->req->fd, "w");
+
+    if (stat == MTAR_EOPENFAIL)
+        close(composite_req->req->fd);
+
+    if (stat != MTAR_ESUCCESS)
+    {
+        // iterate through va_count and free the datasetId
+        for (i = 0; i < composite_req->va_count; i++)
+            free(composite_req->datasetId[i]);
+
+        // free the datasetId array
+        free(composite_req->datasetId);
+        free(composite_req->req);
+        free(composite_req);
+
+        perror("[C] handle_composite_download_request mtar_open");
+        pthread_exit(NULL);
+    }
+
+// iterate through datasets (duplicate the <download_request> structure as <req> will be freed from within FORTRAN)
+#pragma omp parallel for private(i) shared(composite_req, tar)
+    for (i = 0; i < composite_req->va_count; i++)
+    {
+        /*if (pTar == NULL)
+            break;*/
+
+        void *item = get_dataset(composite_req->datasetId[i]); // each item pointer is unique
+
+        if (item == NULL)
+            continue;
+
+        pthread_t tid;
+        int tstat = -1;
+
+        // create a new Unix pipe
+        int pipefd[2];
+
+        if (pipe(pipefd) != 0)
+        {
+            perror("[C] handle_composite_download_request pipe");
+            continue;
+        }
+
+        struct download_request *req = (struct download_request *)malloc(sizeof(struct download_request));
+        if (req == NULL)
+            continue;
+
+        req->x1 = composite_req->req->x1;
+        req->x2 = composite_req->req->x2;
+        req->y1 = composite_req->req->y1;
+        req->y2 = composite_req->req->y2;
+        req->frame_start = composite_req->req->frame_start;
+        req->frame_end = composite_req->req->frame_end;
+        req->ref_freq = composite_req->req->ref_freq;
+        req->fd = pipefd[1];
+        req->ptr = item;
+
+        // call FORTRAN, the result will be written to the pipe and FORTRAN will close the write end of the pipe
+        tstat = pthread_create(&tid, NULL, &download_request, req);
+
+        if (tstat == 0)
+            pthread_detach(tid);
+        else
+        {
+            close(pipefd[1]);
+            free(req);
+        }
+
+        // read from the pipe and write to the tar archive
+        ssize_t n = 0;
+        size_t offset = 0;
+        size_t buf_size = 0x40000;
+
+        char *buf = malloc(buf_size);
+
+        if (buf != NULL)
+            while ((n = read(pipefd[0], buf + offset, buf_size - offset)) > 0)
+            {
+                offset += n;
+
+                // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+
+                if (offset == buf_size)
+                {
+                    printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
+
+                    size_t new_size = buf_size << 1;
+                    char *tmp = realloc(buf, new_size);
+
+                    if (tmp != NULL)
+                    {
+                        buf = tmp;
+                        buf_size = new_size;
+                    }
+                }
+            }
+
+        // close the read pipe
+        close(pipefd[0]);
+
+        if (0 == n)
+            printf("[C] PIPE_END_OF_STREAM\n");
+
+        if (n < 0)
+            printf("[C] PIPE_END_WITH_ERROR\n");
+
+#pragma omp critical
+        if (buf != NULL)
+        {
+#if DEBUG
+            printf("[C] calling mtar_write_file_header [%s]::%zu bytes\n", composite_req->datasetId[i], offset);
+#endif
+
+            // TO-DO: handle 64-bit <size_t> file sizes (right now mtar uses <unsigned int> internally)
+            if (offset > 0)
+            {
+                // write the partial FITS file to the tar archive
+                mtar_write_file_header(&tar, composite_req->datasetId[i], (unsigned int)offset);
+                mtar_write_data(&tar, buf, (unsigned int)offset);
+            }
+
+            free(buf);
+        }
+    }
+
+    // finalise the tar archive
+    /*if (pTar != NULL)
+    {
+        tar_append_eof(pTar);
+        tar_close(pTar);
+    }
+    else
+        close(composite_req->req->fd);*/
+
+    /* Finalize -- this needs to be the last thing done before closing */
+    mtar_finalize(&tar);
+
+    /* Close archive */
+    mtar_close(&tar);
+
+    // iterate through va_count and free the datasetId
+    for (i = 0; i < composite_req->va_count; i++)
+        free(composite_req->datasetId[i]);
+
+    // free the datasetId array
+    free(composite_req->datasetId);
+    free(composite_req->req);
+    free(composite_req);
+
+    pthread_exit(NULL);
+}
+
+void *handle_composite_download_request_tar_gz(void *ptr)
 {
     int i;
 
