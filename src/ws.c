@@ -642,6 +642,51 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         break;
     }
+    case MG_EV_WAKEUP:
+    {
+#ifdef DEBUG
+        printf("[C] MG_EV_WAKEUP\n");
+#endif
+        struct mg_str *data = (struct mg_str *)ev_data;
+
+        if (data != NULL)
+        {
+#ifdef DEBUG
+            printf("[C] MG_EV_WAKEUP received %zu bytes.\n", data->len);
+#endif
+
+            int i, n;
+            size_t offset;
+
+            n = data->len / sizeof(struct websocket_message);
+
+#ifdef DEBUG
+            printf("[C] MG_EV_WAKEUP: received %d binary message(s).\n", n);
+#endif
+
+            for (offset = 0, i = 0; i < n; i++)
+            {
+                struct websocket_message *msg = (struct websocket_message *)(data->ptr + offset);
+                offset += sizeof(struct websocket_message);
+
+#ifdef DEBUG
+                printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+#endif
+                if (msg->len > 0 && msg->buf != NULL)
+                    mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
+
+                // release memory
+                if (msg->buf != NULL)
+                {
+                    free(msg->buf);
+                    msg->buf = NULL;
+                    msg->len = 0;
+                }
+            }
+        }
+
+        break;
+    }
     case MG_EV_WS_OPEN:
     {
         struct mg_http_message *hm = (struct mg_http_message *)ev_data;
