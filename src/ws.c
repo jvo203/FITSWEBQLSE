@@ -182,9 +182,6 @@ void delete_session(websocket_session *session)
     pthread_mutex_unlock(&session->pv_mtx);
     pthread_mutex_destroy(&session->pv_mtx);
 
-    // close the socket pipe
-    close(session->channel);
-
     // free() has been commented out on purpose
     // it was interfering with glib reference counting release mechanism (a double free)
     // free(session);
@@ -702,7 +699,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
                 session->datasetid = datasetId != NULL ? strdup(datasetId) : NULL;
                 session->multi = orig != NULL ? strdup(orig) : NULL;
                 session->id = sessionId != NULL ? strdup(sessionId) : NULL;
-                session->channel = mg_mkpipe(c->mgr, mg_pipe_callback, (void *)(sessionId != NULL ? strdup(sessionId) : NULL), false);
+                session->conn_id = c->id;
+                session->mgr = c->mgr;
 
                 session->flux = NULL;
                 session->dmin = NAN;
@@ -2619,11 +2617,11 @@ void *ws_pv_response(void *ptr)
         struct websocket_message msg = {pv_payload, msg_len};
 
         // pass the message over to mongoose via a communications channel
-        ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+        bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
 
-        if (sent != sizeof(struct websocket_message))
+        if (!sent)
         {
-            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+            printf("[C] mg_wakeup() failed.\n");
 
             // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
             free(pv_payload);
@@ -2806,11 +2804,11 @@ void *ws_image_spectrum_response(void *ptr)
         struct websocket_message msg = {image_payload, msg_len};
 
         // pass the message over to mongoose via a communications channel
-        ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+        bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
 
-        if (sent != sizeof(struct websocket_message))
+        if (!sent)
         {
-            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+            printf("[C] mg_wakeup() failed.\n");
 
             // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
             free(image_payload);
@@ -2876,11 +2874,11 @@ void *ws_image_spectrum_response(void *ptr)
         struct websocket_message msg = {spectrum_payload, msg_len};
 
         // pass the message over to mongoose via a communications channel
-        ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+        bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
 
-        if (sent != sizeof(struct websocket_message))
+        if (!sent)
         {
-            printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+            printf("[C] mg_wakeup() failed.\n");
 
             // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
             free(spectrum_payload);
@@ -3058,11 +3056,11 @@ void *spectrum_response(void *ptr)
                     struct websocket_message msg = {payload, msg_len};
 
                     // pass the message over to mongoose via a communications channel
-                    ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+                    bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
 
-                    if (sent != sizeof(struct websocket_message))
+                    if (!sent)
                     {
-                        printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+                        printf("[C] mg_wakeup() failed.\n");
 
                         // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                         free(payload);
@@ -3216,11 +3214,11 @@ void *realtime_image_spectrum_response(void *ptr)
                 struct websocket_message msg = {payload, msg_len};
 
                 // pass the message over to mongoose via a communications channel
-                ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+                bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
 
-                if (sent != sizeof(struct websocket_message))
+                if (!sent)
                 {
-                    printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+                    printf("[C] mg_wakeup() failed.\n");
 
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(payload);
@@ -3281,11 +3279,11 @@ void *realtime_image_spectrum_response(void *ptr)
                 struct websocket_message msg = {payload, msg_len};
 
                 // pass the message over to mongoose via a communications channel
-                ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+                bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
 
-                if (sent != sizeof(struct websocket_message))
+                if (!sent)
                 {
-                    printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+                    printf("[C] mg_wakeup() failed.\n");
 
                     // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                     free(payload);
@@ -3452,11 +3450,11 @@ void *composite_video_response(void *ptr)
             struct websocket_message msg = {payload, msg_len};
 
             // pass the message over to mongoose via a communications channel
-            ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+            bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
 
-            if (sent != sizeof(struct websocket_message))
+            if (!sent)
             {
-                printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+                printf("[C] mg_wakeup() failed.\n");
 
                 // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                 free(payload);
@@ -3627,11 +3625,11 @@ void *video_response(void *ptr)
             struct websocket_message msg = {payload, msg_len};
 
             // pass the message over to mongoose via a communications channel
-            ssize_t sent = send(session->channel, &msg, sizeof(struct websocket_message), 0); // Wakeup event manager
+            bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
 
-            if (sent != sizeof(struct websocket_message))
+            if (!sent)
             {
-                printf("[C] only sent %zd bytes instead of %zu.\n", sent, sizeof(struct websocket_message));
+                printf("[C] mg_wakeup() failed.\n");
 
                 // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                 free(payload);
