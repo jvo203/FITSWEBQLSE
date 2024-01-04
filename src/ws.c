@@ -2496,6 +2496,7 @@ void start_ws()
 #endif
 
     mg_http_listen(&mgr, url, mg_http_ws_callback, NULL); // Create HTTP listener
+    mg_wakeup_init(&mgr);                                 // Initialise wakeup socket pair
 
     while (s_received_signal == 0)
         mg_mgr_poll(&mgr, 1000); // Event loop. Use 1000ms poll interval
