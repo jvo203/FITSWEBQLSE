@@ -571,19 +571,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             printf("[C] MG_EV_WAKEUP received %zu bytes.\n", data->len);
 #endif
 
-            int i, n;
-            size_t offset;
-
-            n = data->len / sizeof(struct mg_str);
-
-#ifdef DEBUG
-            printf("[C] MG_EV_WAKEUP: received %d binary message(s).\n", n);
-#endif
-
-            for (offset = 0, i = 0; i < n; i++)
+            if (data->ptr != NULL && data->len == sizeof(struct mg_str))
             {
-                struct mg_str *msg = (struct mg_str *)(data->ptr + offset);
-                offset += sizeof(struct mg_str);
+                struct mg_str *msg = (struct mg_str *)data->ptr;
 
 #ifdef DEBUG
                 printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
