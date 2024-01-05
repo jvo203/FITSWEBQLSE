@@ -7302,17 +7302,23 @@ static void wufn(struct mg_connection *c, int ev, void *evd, void *fnd) {
     // MG_INFO(("Got data"));
     // mg_hexdump(c->recv.buf, c->recv.len);
     if (c->recv.len >= sizeof(*id)) {
-      struct mg_str data = mg_str_n((char *) c->recv.buf + sizeof(*id), c->recv.len - sizeof(*id));
-      struct mg_connection *t;
-      for (t = c->mgr->conns; t != NULL; t = t->next) {
+      char* ptr = (char *) c->recv.buf + sizeof(*id);      
+      struct mg_str* data = (struct mg_str*)ptr;
+      for (struct mg_connection * t = c->mgr->conns; t != NULL; t = t->next) {
         if (t->id == *id) {          
-          mg_call(t, MG_EV_WAKEUP, &data);
-          data.ptr = NULL; // prevent freeing the original data 
+          mg_call(t, MG_EV_WAKEUP, data);
+          data->ptr = NULL; // prevent freeing the original data 
+          data->len = 0;
           break; // stop searching for the connection
         }
       }
       // free the original data in case a connection was not found
-      free((char*)data.ptr); // it's OK to free NULL
+      if(data->ptr != NULL)
+      {      
+        free((char*)data->ptr);
+        data->ptr = NULL;
+        data->len = 0;
+      }
     }    
     c->recv.len = 0;  // Consume received data
   } else if (ev == MG_EV_CLOSE) {

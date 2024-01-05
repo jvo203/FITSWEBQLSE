@@ -563,33 +563,28 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 #ifdef DEBUG
         printf("[C] MG_EV_WAKEUP\n");
 #endif
-        struct mg_str *data = (struct mg_str *)ev_data;
+        struct mg_str *msg = (struct mg_str *)ev_data;
 
-        if (data != NULL)
+        if (msg != NULL && msg->ptr != NULL && msg->len > 0)
         {
 #ifdef DEBUG
-            printf("[C] MG_EV_WAKEUP received %zu bytes.\n", data->len);
+            printf("[C] MG_EV_WAKEUP received %zu bytes.\n", msg->len);
 #endif
 
-            if (data->ptr != NULL && data->len == sizeof(struct mg_str))
+            if (c->is_websocket)
             {
-                struct mg_str *msg = (struct mg_str *)data->ptr;
-
-                if (c->is_websocket && msg->len > 0 && msg->ptr != NULL)
-                {
 #ifdef DEBUG
-                    printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+                printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
 #endif
-                    mg_ws_send(c, msg->ptr, msg->len, WEBSOCKET_OP_BINARY);
-                }
+                mg_ws_send(c, msg->ptr, msg->len, WEBSOCKET_OP_BINARY);
+            }
 
-                // release memory
-                if (msg->ptr != NULL)
-                {
-                    free((char *)msg->ptr);
-                    msg->ptr = NULL;
-                    msg->len = 0;
-                }
+            // release memory
+            if (msg->ptr != NULL)
+            {
+                free((char *)msg->ptr);
+                msg->ptr = NULL;
+                msg->len = 0;
             }
         }
 
