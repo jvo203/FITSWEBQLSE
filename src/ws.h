@@ -77,12 +77,6 @@ struct websocket_response
     int fd;
 };
 
-struct websocket_message
-{
-    char *buf;
-    size_t len;
-};
-
 void init_session_table();
 websocket_session *new_session(void);
 void delete_session_table();

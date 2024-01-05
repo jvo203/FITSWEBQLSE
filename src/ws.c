@@ -574,7 +574,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             int i, n;
             size_t offset;
 
-            n = data->len / sizeof(struct websocket_message);
+            n = data->len / sizeof(struct mg_str);
 
 #ifdef DEBUG
             printf("[C] MG_EV_WAKEUP: received %d binary message(s).\n", n);
@@ -582,20 +582,20 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
             for (offset = 0, i = 0; i < n; i++)
             {
-                struct websocket_message *msg = (struct websocket_message *)(data->ptr + offset);
-                offset += sizeof(struct websocket_message);
+                struct mg_str *msg = (struct mg_str *)(data->ptr + offset);
+                offset += sizeof(struct mg_str);
 
 #ifdef DEBUG
                 printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
 #endif
-                if (msg->len > 0 && msg->buf != NULL)
-                    mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
+                if (msg->len > 0 && msg->ptr != NULL)
+                    mg_ws_send(c, msg->ptr, msg->len, WEBSOCKET_OP_BINARY);
 
                 // release memory
-                if (msg->buf != NULL)
+                if (msg->ptr != NULL)
                 {
-                    free(msg->buf);
-                    msg->buf = NULL;
+                    free((char *)msg->ptr);
+                    msg->ptr = NULL;
                     msg->len = 0;
                 }
             }
@@ -2436,6 +2436,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
     default:
         break;
     }
+
+    (void)fn_data;
 }
 
 void start_ws()
@@ -2573,10 +2575,10 @@ void *ws_pv_response(void *ptr)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
         // create a queue message
-        struct websocket_message msg = {pv_payload, msg_len};
+        struct mg_str msg = {pv_payload, msg_len};
 
         // pass the message over to mongoose via a communications channel
-        bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
+        bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct mg_str)); // Wakeup event manager
 
         if (!sent)
         {
@@ -2760,10 +2762,10 @@ void *ws_image_spectrum_response(void *ptr)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
         // create a queue message
-        struct websocket_message msg = {image_payload, msg_len};
+        struct mg_str msg = {image_payload, msg_len};
 
         // pass the message over to mongoose via a communications channel
-        bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
+        bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct mg_str)); // Wakeup event manager
 
         if (!sent)
         {
@@ -2830,10 +2832,10 @@ void *ws_image_spectrum_response(void *ptr)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
         // create a queue message
-        struct websocket_message msg = {spectrum_payload, msg_len};
+        struct mg_str msg = {spectrum_payload, msg_len};
 
         // pass the message over to mongoose via a communications channel
-        bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
+        bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct mg_str)); // Wakeup event manager
 
         if (!sent)
         {
@@ -3012,10 +3014,10 @@ void *spectrum_response(void *ptr)
                         printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
                     // create a queue message
-                    struct websocket_message msg = {payload, msg_len};
+                    struct mg_str msg = {payload, msg_len};
 
                     // pass the message over to mongoose via a communications channel
-                    bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
+                    bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct mg_str)); // Wakeup event manager
 
                     if (!sent)
                     {
@@ -3170,10 +3172,10 @@ void *realtime_image_spectrum_response(void *ptr)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
                 // create a queue message
-                struct websocket_message msg = {payload, msg_len};
+                struct mg_str msg = {payload, msg_len};
 
                 // pass the message over to mongoose via a communications channel
-                bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
+                bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct mg_str)); // Wakeup event manager
 
                 if (!sent)
                 {
@@ -3235,10 +3237,10 @@ void *realtime_image_spectrum_response(void *ptr)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
                 // create a queue message
-                struct websocket_message msg = {payload, msg_len};
+                struct mg_str msg = {payload, msg_len};
 
                 // pass the message over to mongoose via a communications channel
-                bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
+                bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct mg_str)); // Wakeup event manager
 
                 if (!sent)
                 {
@@ -3406,10 +3408,10 @@ void *composite_video_response(void *ptr)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
             // create a queue message
-            struct websocket_message msg = {payload, msg_len};
+            struct mg_str msg = {payload, msg_len};
 
             // pass the message over to mongoose via a communications channel
-            bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
+            bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct mg_str)); // Wakeup event manager
 
             if (!sent)
             {
@@ -3581,10 +3583,10 @@ void *video_response(void *ptr)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
             // create a queue message
-            struct websocket_message msg = {payload, msg_len};
+            struct mg_str msg = {payload, msg_len};
 
             // pass the message over to mongoose via a communications channel
-            bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct websocket_message)); // Wakeup event manager
+            bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct mg_str)); // Wakeup event manager
 
             if (!sent)
             {
