@@ -575,11 +575,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
             {
                 struct mg_str *msg = (struct mg_str *)data->ptr;
 
-#ifdef DEBUG
-                printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
-#endif
                 if (c->is_websocket && msg->len > 0 && msg->ptr != NULL)
+                {
+#ifdef DEBUG
+                    printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+#endif
                     mg_ws_send(c, msg->ptr, msg->len, WEBSOCKET_OP_BINARY);
+                }
 
                 // release memory
                 if (msg->ptr != NULL)
