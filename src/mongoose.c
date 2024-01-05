@@ -7342,16 +7342,18 @@ bool mg_wakeup_init(struct mg_mgr *mgr) {
 }
 
 bool mg_wakeup(struct mg_mgr *mgr, unsigned long conn_id, const void *buf, size_t len) {                
+  // safety first, no need to send anything if there is no valid data
+  if(len == 0 || buf == NULL)
+    return false;
+
   if (mgr->pipe != MG_INVALID_SOCKET && conn_id > 0) {
     char *extended_buf = (char *) alloca(len + sizeof(conn_id));
 
     if(extended_buf == NULL)
       return false;        
 
-    memcpy(extended_buf, &conn_id, sizeof(conn_id));
-
-    if(len > 0 && buf != NULL)
-      memcpy(extended_buf + sizeof(conn_id), buf, len);
+    memcpy(extended_buf, &conn_id, sizeof(conn_id));  
+    memcpy(extended_buf + sizeof(conn_id), buf, len);
 
     if(send(mgr->pipe, extended_buf, len + sizeof(conn_id), MSG_NONBLOCKING) == (ssize_t)(len + sizeof(conn_id)))
       return true;    
