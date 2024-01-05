@@ -7341,8 +7341,7 @@ bool mg_wakeup_init(struct mg_mgr *mgr) {
   return ok;
 }
 
-bool mg_wakeup(struct mg_mgr *mgr, unsigned long conn_id, const void *buf,
-               size_t len) {
+bool mg_wakeup(struct mg_mgr *mgr, unsigned long conn_id, const void *buf, size_t len) {                
   if (mgr->pipe != MG_INVALID_SOCKET && conn_id > 0) {
     char *extended_buf = (char *) alloca(len + sizeof(conn_id));
 
