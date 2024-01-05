@@ -7350,7 +7350,9 @@ bool mg_wakeup(struct mg_mgr *mgr, unsigned long conn_id, const void *buf,
       return false;        
 
     memcpy(extended_buf, &conn_id, sizeof(conn_id));
-    memcpy(extended_buf + sizeof(conn_id), buf, len);
+
+    if(len > 0 && buf != NULL)
+      memcpy(extended_buf + sizeof(conn_id), buf, len);
 
     if(send(mgr->pipe, extended_buf, len + sizeof(conn_id), MSG_NONBLOCKING) == (ssize_t)(len + sizeof(conn_id)))
       return true;    
