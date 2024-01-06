@@ -216,6 +216,7 @@ function test(host, port, id, stat)
                 end
             else
                 println(stderr, "[$id::WS] closed")
+                sleep(5)
                 return
             end
         end
@@ -370,6 +371,7 @@ function test(host, port, id, stat)
         # send a close message
         println("[$id::WS] closing...")
         writeguarded(ws, "[close]")
+        sleep(5)
         return
     end
 end
