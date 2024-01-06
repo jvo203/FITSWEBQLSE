@@ -1,6 +1,7 @@
 using Base.Threads
 using CodecLz4
 using Dates
+using Distributed
 using HTTP
 using JSON
 using UUIDs
@@ -115,7 +116,7 @@ function fetch_image_spectrum(host, port, id)
     return (json, header)
 end
 
-function test(host, port, id)
+function test(host, port, id, stat)
     resp = get_dataset(host, port, id)
 
     # check the HTTP response code
@@ -209,6 +210,7 @@ function test(host, port, id)
 
                     ts = Dates.value(now()) - base
                     latency = ts - timestamp
+                    put!(stat, latency)
 
                     println(stderr, "[$id::WS] received $len bytes, timestamp: $timestamp, recv_seq_id: $recv_seq_id, type: $msg_type, latency: $latency [ms]")
                 end
@@ -362,7 +364,7 @@ function test(host, port, id)
         end
 
         # sleep for X hours
-        sleep(12 * 3600)
+        sleep(1 * 3600) # was 12 hours
         # sleep(5) # testing
 
         # send a close message        
@@ -371,14 +373,43 @@ function test(host, port, id)
     end
 end
 
+responses::Int64 = 0
+total_time::Float64 = 0.0
+stat = RemoteChannel(() -> Channel{Float64}(32))
+
+stat_task = @async while true
+    global responses, total_time
+    
+    try        
+        response_time = take!(stat)        
+        total_time += response_time
+        responses += 1        
+    catch e
+        if isa(e, InvalidStateException) && e.state == :closed
+            println("statistics task completed, #responses: ", responses, ", total_time: ", total_time, " [ms]")
+            
+            if responses > 0
+                println("average response time: ", total_time / responses, " [ms]")
+            end
+
+            break
+        else
+            println(e)
+        end
+    end
+end
+
 host = "capricorn"
 port = "8080"
 datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
 
 # a dry run to warm up (pre-compile) Julia functions
-# test(host, port, datasets[1])
+# test(host, port, datasets[1], stat)
 
-jobs = [@spawn test(host, port, dataset) for dataset in datasets]
+jobs = [Threads.@spawn test(host, port, dataset, stat) for dataset in datasets]
 wait.(jobs)
+
+close(stat)
+wait(stat_task)
 
 println("stress-test completed.")
