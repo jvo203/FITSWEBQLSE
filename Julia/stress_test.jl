@@ -216,7 +216,7 @@ function test(host, port, id, stat)
                 end
             else
                 println(stderr, "[$id::WS] closed")
-                break
+                return
             end
         end
 
@@ -367,9 +367,10 @@ function test(host, port, id, stat)
         sleep(1 * 3600) # was 12 hours
         # sleep(5) # testing
 
-        # send a close message        
+        # send a close message
+        println("[$id::WS] closing...")
         writeguarded(ws, "[close]")
-        sleep(10)
+        return
     end
 end
 
@@ -379,15 +380,15 @@ stat = RemoteChannel(() -> Channel{Float64}(32))
 
 stat_task = @async while true
     global responses, total_time
-    
-    try        
-        response_time = take!(stat)        
+
+    try
+        response_time = take!(stat)
         total_time += response_time
-        responses += 1        
+        responses += 1
     catch e
         if isa(e, InvalidStateException) && e.state == :closed
             println("statistics task completed, #responses: ", responses, ", total_time: ", total_time, " [ms]")
-            
+
             if responses > 0
                 println("average response time: ", total_time / responses, " [ms]")
             end
