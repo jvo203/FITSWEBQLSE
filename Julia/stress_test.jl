@@ -216,12 +216,12 @@ function test(host, port, id, stat)
                 end
             else
                 println(stderr, "[$id::WS] closed")
-                sleep(5)
                 return
             end
         end
 
         @async while true
+            try
             # make a timestamp as a single floating-point number
             timestamp = Dates.value(now())
 
@@ -234,6 +234,9 @@ function test(host, port, id, stat)
             end
 
             sleep(1)
+            catch e
+                break
+            end
         end
 
         fps = 30
@@ -371,8 +374,6 @@ function test(host, port, id, stat)
         # send a close message
         println("[$id::WS] closing...")
         writeguarded(ws, "[close]")
-        sleep(5)
-        return
     end
 end
 
