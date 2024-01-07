@@ -370,8 +370,8 @@ function test(host, port, id, stat)
         end
 
         # sleep for X hours
-        #sleep(1 * 3600) # was 12 hours
-        sleep(10) # testing
+        sleep(1 * 3600) # was 12 hours
+        # sleep(10) # testing
         running = false
 
         # send a close message
