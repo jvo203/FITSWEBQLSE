@@ -189,7 +189,9 @@ function test(host, port, id, stat)
 
     # next open a WebSocket client connection
     WebSockets.open(wsURL) do ws
-        @async while true
+        running  = true
+
+        @async while running
             data, success = readguarded(ws)
 
             # print the type and length of the received data
@@ -216,11 +218,11 @@ function test(host, port, id, stat)
                 end
             else
                 println(stderr, "[$id::WS] closed")
-                return
+                break
             end
         end
 
-        @async while true
+        @async while running
             try
             # make a timestamp as a single floating-point number
             timestamp = Dates.value(now())
@@ -244,7 +246,7 @@ function test(host, port, id, stat)
 
         # a real-time image spectrum loop
         counter = 0
-        @async while true
+        @async while running
             # make a timestamp as a single floating-point number
             timestamp = Dates.value(now()) - base
 
@@ -325,7 +327,7 @@ function test(host, port, id, stat)
                 println("video loop started.")
             end
 
-            while true
+            while running
                 # loop through fits_depth
                 for i in 1:fits_depth
                     seq_id = seq_id + 1
@@ -368,12 +370,14 @@ function test(host, port, id, stat)
         end
 
         # sleep for X hours
-        sleep(1 * 3600) # was 12 hours
-        # sleep(5) # testing
+        #sleep(1 * 3600) # was 12 hours
+        # sleep(10) # testing
+        running = false
 
         # send a close message
         println("[$id::WS] closing...")
         writeguarded(ws, "[close]")
+        break
     end
 end
 
