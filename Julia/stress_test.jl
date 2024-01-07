@@ -377,7 +377,6 @@ function test(host, port, id, stat)
         # send a close message
         println("[$id::WS] closing...")
         writeguarded(ws, "[close]")
-        break
     end
 end
 
