@@ -237,7 +237,7 @@ function test(host, port, id, stat)
                 end
 
                 sleep(1)
-            catch e
+            catch _
                 break
             end
         end
@@ -418,10 +418,10 @@ port = "8080"
 datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
 
 # a dry run to warm up (pre-compile) Julia functions
-test(host, port, datasets[1], stat)
+# test(host, port, datasets[1], stat)
 
-#jobs = [Threads.@spawn test(host, port, dataset, stat) for dataset in datasets]
-#wait.(jobs)
+jobs = [Threads.@spawn test(host, port, dataset, stat) for dataset in datasets]
+wait.(jobs)
 
 close(stat)
 wait(stat_task)
