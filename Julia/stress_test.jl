@@ -2,6 +2,7 @@ using Base.Threads
 using CodecLz4
 using Dates
 using Distributed
+using FHist, Statistics, Plots
 using HTTP
 using JSON
 using UUIDs
@@ -383,6 +384,7 @@ end
 responses::Int64 = 0
 total_time::Float64 = 0.0
 stat = RemoteChannel(() -> Channel{Float64}(32))
+hist = Hist1D(Float64, bins=0.0:10.0:1000.0, overflow=true)
 
 stat_task = @async while true
     global responses, total_time
@@ -391,12 +393,17 @@ stat_task = @async while true
         response_time = take!(stat)
         total_time += response_time
         responses += 1
+        push!(hist, response_time)
     catch e
         if isa(e, InvalidStateException) && e.state == :closed
             println("statistics task completed, #responses: ", responses, ", total_time: ", total_time, " [ms]")
 
             if responses > 0
                 println("average response time: ", total_time / responses, " [ms]")
+                println("histogram: ", hist)
+                print("mean: ", mean(hist), ", std: ", std(hist), ", median: ", median(hist))
+                plot(hist; size=(600, 500), legend=:topright)
+                savefig(homedir() * "/histogram.pdf")
             end
 
             break
@@ -411,10 +418,10 @@ port = "8080"
 datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
 
 # a dry run to warm up (pre-compile) Julia functions
-# test(host, port, datasets[1], stat)
+test(host, port, datasets[1], stat)
 
-jobs = [Threads.@spawn test(host, port, dataset, stat) for dataset in datasets]
-wait.(jobs)
+#jobs = [Threads.@spawn test(host, port, dataset, stat) for dataset in datasets]
+#wait.(jobs)
 
 close(stat)
 wait(stat_task)
