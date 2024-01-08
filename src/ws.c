@@ -548,14 +548,12 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data, 
 
         // all else
         {
-            /*printf("rejecting the connection.\n");
+            printf("rejecting the connection.\n");
 
             c->is_closing = 1; // Tell mongoose to close this connection
 
             // reject the connection
-            mg_http_reply(c, 404, "", "Rejected");*/
-
-            mg_http_reply(c, 200, "", "Testing");
+            mg_http_reply(c, 404, "", "Rejected");
         }
 
         break;
