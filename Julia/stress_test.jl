@@ -38,6 +38,18 @@ function fetch_image_spectrum(host, port, id)
     resp = HTTP.get(strURL)
     println("$id::fetch_image_spectrum status: ", resp.status)
 
+    # repeat the request up to 5 times if no content has been found
+    for _ in 1:5
+        if resp.status == 204
+            println("$id::fetch_image_spectrum status: ", resp.status, ", retrying...")
+            sleep(1)
+            resp = HTTP.get(strURL)
+            println("$id::fetch_image_spectrum status: ", resp.status)
+        else
+            break
+        end
+    end
+
     if resp.status != 200
         return nothing
     end
