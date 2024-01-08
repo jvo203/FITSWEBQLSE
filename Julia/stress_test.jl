@@ -117,7 +117,7 @@ function fetch_image_spectrum(host, port, id)
     return (json, header)
 end
 
-function test(host, port, id, stat)
+function test(host, port, id, stat, duration)
     resp = get_dataset(host, port, id)
 
     # check the HTTP response code
@@ -370,9 +370,8 @@ function test(host, port, id, stat)
             end
         end
 
-        # sleep for X hours
-        sleep(1 * 3600) # was 12 hours
-        # sleep(10) # testing
+        # sleep for X seconds
+        sleep(duration)
         running = false
 
         # send a close message
@@ -418,10 +417,11 @@ port = "8080"
 datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALMA01015786", "ALMA01084695"]
 
 # a dry run to warm up (pre-compile) Julia functions
-# test(host, port, datasets[1], stat)
+test(host, port, datasets[1], stat, 3600)
 
-jobs = [Threads.@spawn test(host, port, dataset, stat) for dataset in datasets]
-wait.(jobs)
+# the real test
+#jobs = [Threads.@spawn test(host, port, dataset, stat, 1 * 3600) for dataset in datasets]
+#wait.(jobs)
 
 close(stat)
 wait(stat_task)
