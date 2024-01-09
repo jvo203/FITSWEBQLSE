@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2023-11-29.0";
+    return "JS2024-01-09.0";
 }
 
 function uuidv4() {
@@ -13697,10 +13697,31 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 204) {
-            console.log("Server not ready / No Content, long-polling image again after 500ms.");
+            console.log("Server not ready / No Content, long-polling the server again after 100ms.");
             setTimeout(function () {
-                fetch_image_spectrum(_datasetId, index, fetch_data, false);
-            }, 500);
+                // read the counter value from the URL location &counter=...
+                var loc = window.location.href;
+                var counter = parseInt(loc.split('&counter=')[1]);
+
+                // if the counter is NAN set it to 1 else increment it
+                if (isNaN(counter)) {
+                    counter = 1;
+                }
+                else {
+                    // delete the counter from the URL loc
+                    loc = loc.split('&counter=')[0];
+                    counter++;
+                }
+
+                // stop after 5 attempts
+                if (counter > 5) {
+                    hide_hourglass();
+                    show_not_found();
+                    return;
+                }
+
+                window.location.replace(loc + '&counter=' + counter);
+            }, 100);
 
             if (dataset_timeout == -1) {
                 dataset_timeout = setTimeout(function () {
