@@ -2,6 +2,7 @@
 
 * updated the server-side _*mongoose*_ C networking library and replaced a UDP wake-up helper with a new _*mg_wakeup()*_ function from _*mongoose*_
 * the server-side WebSockets: implemented separate event loops for the real-time spectra/video and PV-Diagram WebSocket messages
+* .tar.gz FUGIN multiple-dataset partial FITS downloads compressed with a microtar ANSI C library  
 
 ## [5.0.53] - 2023-12-08
 
