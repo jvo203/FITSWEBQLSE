@@ -229,6 +229,29 @@ static enum MHD_Result http_ok(struct MHD_Connection *connection)
         return MHD_NO;
 };
 
+static enum MHD_Result http_testing(struct MHD_Connection *connection)
+{
+    struct MHD_Response *response;
+    int ret;
+    const char *okstr = "200 Testing";
+
+    response =
+        MHD_create_response_from_buffer(strlen(okstr),
+                                        (void *)okstr,
+                                        MHD_RESPMEM_PERSISTENT);
+    if (NULL != response)
+    {
+        ret =
+            MHD_queue_response(connection, MHD_HTTP_OK,
+                               response);
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+    else
+        return MHD_NO;
+};
+
 static enum MHD_Result http_not_found(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
@@ -3852,7 +3875,7 @@ static enum MHD_Result on_http_connection(void *cls,
     else
     {
         // root document
-
+        return http_testing(connection);
         if (options.local)
             return serve_file(connection, "/local.html");
         else
