@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-09.0";
+    return "JS2024-01-15.0";
 }
 
 function uuidv4() {
@@ -3661,8 +3661,8 @@ function webgl_image_renderer(index, gl, width, height) {
                 console.log("view:", view);
 
                 // handle the zoom view
-                xmin = view.x1 / (image.width - 1);// was - 1
-                ymin = view.y1 / (image.height - 1);// was - 1
+                xmin = view.x1 / (image.width - 0);// was - 1
+                ymin = view.y1 / (image.height - 0);// was - 1                
                 _width = view.width / image.width;
                 _height = view.height / image.height;
             }
@@ -12397,8 +12397,8 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
             zoom_dims.x0 = Math.round(x);
             zoom_dims.y0 = Math.round(y);
-            zoom_dims.rx = ax;//rx;
-            zoom_dims.ry = ay;//ry;
+            zoom_dims.x1 = image_bounding_dims.x1;
+            zoom_dims.y1 = image_bounding_dims.y1;
             //zoom_dims.view = { x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height };
 
             var orig_x = x * (fitsData.width - 1) / (image.width - 1);
@@ -14208,10 +14208,10 @@ function tiles_zoom(event) {
 
     let x0 = zoom_dims.x0;
     let y0 = zoom_dims.y0;
-    let rx = zoom_dims.rx;
-    let ry = zoom_dims.ry;
-    let new_x1 = clamp(x0 - rx * new_width, 0, zoom_dims.width - 1 - new_width);
-    let new_y1 = clamp(y0 - ry * new_height, 0, zoom_dims.height - 1 - new_height);
+    let x1 = zoom_dims.x1;
+    let y1 = zoom_dims.y1;
+    let new_x1 = clamp(x0 - (x0 - x1) / zoom_scale, 0, zoom_dims.width - 1 - new_width);
+    let new_y1 = clamp(y0 - (y0 - y1) / zoom_scale, 0, zoom_dims.height - 1 - new_height);
 
     zoom_dims.view = { x1: new_x1, y1: new_y1, width: new_width, height: new_height };
     console.log("zoom_dims:", zoom_dims);
