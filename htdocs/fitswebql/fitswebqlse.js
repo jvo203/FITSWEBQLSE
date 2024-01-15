@@ -12285,8 +12285,8 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             if (zoom_dims == null) {
                 zoom_dims = {
                     x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height, x0: image_bounding_dims.x1 + 0.5 * (image_bounding_dims.width - 1), y0: image_bounding_dims.y1 + 0.5 * (image_bounding_dims.height - 1),
-                    rx: 0.5,
-                    ry: 0.5,
+                    dx: 0,
+                    dy: 0,
                     view: null,
                     prev_view: null
                 };
@@ -12392,8 +12392,9 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
             zoom_dims.x0 = Math.round(x);
             zoom_dims.y0 = Math.round(y);
-            zoom_dims.x1 = Math.round(image_bounding_dims.x1);
-            zoom_dims.y1 = Math.round(image_bounding_dims.y1);
+            console.log("zoom_dims.x0:", zoom_dims.x0, "zoom_dims.y0:", zoom_dims.y0);
+            // zoom_dims.x1 = image_bounding_dims.x1;
+            // zoom_dims.y1 = image_bounding_dims.y1;
             // zoom_dims.view = { x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height };
 
             var orig_x = x * (fitsData.width - 1) / (image.width - 1);
