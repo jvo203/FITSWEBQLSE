@@ -14202,6 +14202,7 @@ function tiles_zoom(event) {
     if (zoom_dims == null)
         return;
 
+    console.log("tiles_zoom::zoom_dims.x0:", zoom_dims.x0, "zoom_dims.y0:", zoom_dims.y0);
     zoom_dims.scale = zoom_scale;
 
     //rescale the image
