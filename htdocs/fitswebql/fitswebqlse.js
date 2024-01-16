@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-15.0";
+    return "JS2024-01-16.0";
 }
 
 function uuidv4() {
@@ -12284,6 +12284,8 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
             if (zoom_dims == null) {
                 zoom_dims = {
+                    scale: 1.0,
+                    dims: image_bounding_dims,
                     x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height, x0: image_bounding_dims.x1 + 0.5 * (image_bounding_dims.width - 1), y0: image_bounding_dims.y1 + 0.5 * (image_bounding_dims.height - 1),
                     dx: 0,
                     dy: 0,
@@ -12390,8 +12392,13 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
             y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
 
-            zoom_dims.x0 = Math.round(x);
-            zoom_dims.y0 = Math.round(y);
+            let x0 = Math.round(x);
+            let y0 = Math.round(y);
+            /*zoom_dims.x1 += (x0 - zoom_dims.x0) * zoom_dims.scale;
+            zoom_dims.y1 += (y0 - zoom_dims.y0) * zoom_dims.scale;*/
+            zoom_dims.x0 = x0;
+            zoom_dims.y0 = y0;
+
             console.log("zoom_dims.x0:", zoom_dims.x0, "zoom_dims.y0:", zoom_dims.y0);
             // zoom_dims.x1 = image_bounding_dims.x1;
             // zoom_dims.y1 = image_bounding_dims.y1;
@@ -14195,6 +14202,8 @@ function tiles_zoom(event) {
     if (zoom_dims == null)
         return;
 
+    zoom_dims.scale = zoom_scale;
+
     //rescale the image
     let width = zoom_dims.width;
     let height = zoom_dims.height;
@@ -14204,13 +14213,24 @@ function tiles_zoom(event) {
 
     let x0 = zoom_dims.x0;
     let y0 = zoom_dims.y0;
-    let x1 = zoom_dims.x1;
-    let y1 = zoom_dims.y1;
+    let x1 = zoom_dims.dims.x1;
+    let y1 = zoom_dims.dims.y1;
     let new_x1 = clamp(x0 - (x0 - x1) / zoom_scale, 0, zoom_dims.width - new_width);
     let new_y1 = clamp(y0 - (y0 - y1) / zoom_scale, 0, zoom_dims.height - new_height);
 
     zoom_dims.view = { x1: new_x1, y1: new_y1, width: new_width, height: new_height };
     console.log("zoom_dims:", zoom_dims, "view:", zoom_dims.view);
+
+    /*if (zoom_scale > 1.0) {
+        let new_x0 = Math.round((new_x1 * zoom_scale - x1) / (zoom_scale - 1));
+        let new_y0 = Math.round((new_y1 * zoom_scale - y1) / (zoom_scale - 1));
+
+        if (zoom_dims.x0 != new_x0 || zoom_dims.y0 != new_y0) {
+            console.log("CORRECTION! x0:", x0, "y0:", y0, "new_x0:", new_x0, "new_y0:", new_y0);
+            zoom_dims.x0 = new_x0;
+            zoom_dims.y0 = new_y0;
+        }
+    }*/
 
     for (let i = 1; i <= va_count; i++) {
         refresh_tiles(i);
