@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-17.0";
+    return "JS2024-01-18.0";
 }
 
 function uuidv4() {
@@ -3658,7 +3658,7 @@ function webgl_image_renderer(index, gl, width, height) {
         if (zoom_dims != null)
             if (zoom_dims.view != null) {
                 let view = zoom_dims.view;
-                console.log("view:", view);
+                // console.log("view:", view);                
 
                 // handle the zoom view
                 xmin = view.x1 / (image.width - 0);// was - 1
@@ -12106,6 +12106,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
     var zoom = d3.zoom()
         .scaleExtent([1, 40])
+        .on("start", tiles_zoomstarted)
         .on("zoom", tiles_zoom)
         .on("end", tiles_zoomended);
 
@@ -12284,9 +12285,13 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
             if (zoom_dims == null) {
                 zoom_dims = {
+                    scale: 1.0,
+                    dims: image_bounding_dims,
                     x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height, x0: image_bounding_dims.x1 + 0.5 * (image_bounding_dims.width - 1), y0: image_bounding_dims.y1 + 0.5 * (image_bounding_dims.height - 1),
                     dx: 0,
                     dy: 0,
+                    prev_x0: -1,
+                    prev_y0: -1,
                     view: null,
                     prev_view: null
                 };
@@ -12390,17 +12395,12 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
             y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
 
-            // for debugging fix y
-            y = 500.0;
-
             let x0 = Math.round(x);
             let y0 = Math.round(y);
-            zoom_dims.dx = x0 - zoom_dims.x1;
-            zoom_dims.dy = 0;//y0 - zoom_dims.y1;
             zoom_dims.x0 = x0;
             zoom_dims.y0 = y0;
 
-            console.log("zoom_dims.x0:", zoom_dims.x0, "zoom_dims.y0:", zoom_dims.y0, "zoom_dims.dx:", zoom_dims.dx, "zoom_dims.dy:", zoom_dims.dy);
+            // console.log("zoom_dims.x0:", zoom_dims.x0, "zoom_dims.y0:", zoom_dims.y0, "zoom_dims.dx:", zoom_dims.dx, "zoom_dims.dy:", zoom_dims.dy);
             // zoom_dims.x1 = image_bounding_dims.x1;
             // zoom_dims.y1 = image_bounding_dims.y1;
             // zoom_dims.view = { x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height };
@@ -14187,6 +14187,36 @@ function tiles_dragmove() {
         });
     }
 }
+function tiles_zoomstarted(event) {
+    console.log("zoom start");
+
+    if (zoom_dims == null)
+        return;
+
+    console.log("zoom_dims.prev_x0:", zoom_dims.prev_x0, "zoom_dims.prev_y0:", zoom_dims.prev_y0);
+
+    if (zoom_dims.prev_x0 != -1) {
+        zoom_dims.dx = zoom_dims.x0 - zoom_dims.prev_x0;
+    }
+
+    if (zoom_dims.prev_y0 != -1) {
+        zoom_dims.dy = zoom_dims.y0 - zoom_dims.prev_y0;
+    }
+
+    zoom_dims.prev_x0 = zoom_dims.x0;
+    zoom_dims.prev_y0 = zoom_dims.y0;
+    // console.log("zoom_dims.dx:", zoom_dims.dx, "zoom_dims.dy:", zoom_dims.dy);
+
+    {
+        zoom_dims.dims.x1 += (1.0 - zoom_dims.scale) * zoom_dims.dx;
+        zoom_dims.dx = 0;
+    }
+
+    {
+        zoom_dims.dims.y1 += (1.0 - zoom_dims.scale) * zoom_dims.dy;
+        zoom_dims.dy = 0;
+    }
+}
 
 function tiles_zoomended(event) {
     console.log("zoom end");
@@ -14215,12 +14245,13 @@ function tiles_zoom(event) {
 
     let x0 = zoom_dims.x0;
     let y0 = zoom_dims.y0;
-    let dx = zoom_dims.dx / zoom_scale;
-    let dy = zoom_dims.dy / zoom_scale;
-    //let new_x1 = clamp(x0 - (x0 - x1) / zoom_scale, 0, zoom_dims.width - new_width);
-    //let new_y1 = clamp(y0 - (y0 - y1) / zoom_scale, 0, zoom_dims.height - new_height);
-    let new_x1 = clamp(x0 - dx, 0, zoom_dims.width - new_width);
-    let new_y1 = clamp(y0 - dy, 0, zoom_dims.height - new_height);
+    let x1 = zoom_dims.dims.x1;
+    let y1 = zoom_dims.dims.y1;
+    // console.log("x0:", x0, "x1:", x1, "scale:", zoom_scale);
+    let new_x1 = clamp(x0 - (x0 - x1) / zoom_scale, 0, zoom_dims.width - new_width);
+    let new_y1 = clamp(y0 - (y0 - y1) / zoom_scale, 0, zoom_dims.height - new_height);
+    // console.log("new_x1:", new_x1, "new_y1:", new_y1);
+
     zoom_dims.x1 = new_x1;
     zoom_dims.y1 = new_y1;
 
