@@ -2709,7 +2709,7 @@ void *ws_image_spectrum_response(void *ptr)
         uint32_t id = resp->seq_id;
         uint32_t msg_type = 2;
         // 0 - spectrum, 1 - viewport,
-        // 2 - image, 3 - full, spectrum,  refresh,
+        // 2 - image, 3 - full spectrum refresh,
         // 4 - histogram
 
         size_t ws_offset = 0;
