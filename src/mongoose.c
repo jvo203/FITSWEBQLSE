@@ -7681,14 +7681,85 @@ bool mg_wakeup_init(struct mg_mgr *mgr) {
   return ok;
 }
 
+
+// a custom mg_wakeup() event handler
+static void mg_wakeup_callback(struct mg_connection *c, int ev, void *ev_data)
+{
+    if (ev == MG_EV_READ)
+    {
+        unsigned long *id = (unsigned long *)c->recv.buf;
+        // MG_INFO(("Got data"));
+        // mg_hexdump(c->recv.buf, c->recv.len);
+        if (c->recv.len >= sizeof(*id))
+        {
+            char *ptr = (char *)c->recv.buf + sizeof(*id);
+            struct mg_str *data = (struct mg_str *)ptr;
+            for (struct mg_connection *t = c->mgr->conns; t != NULL; t = t->next)
+            {
+                if (t->id == *id)
+                {
+                    mg_call(t, MG_EV_WAKEUP, data);
+                    data->ptr = NULL; // prevent freeing the original data
+                    data->len = 0;
+                    break; // stop searching for the connection
+                }
+            }
+            // free the original data in case a connection was not found
+            if (data->ptr != NULL)
+            {
+                free((char *)data->ptr);
+                data->ptr = NULL;
+                data->len = 0;
+            }
+        }
+        c->recv.len = 0; // Consume received data
+    }
+    else if (ev == MG_EV_CLOSE)
+    {
+        closesocket(c->mgr->pipe);        // When we're closing, close the other
+        c->mgr->pipe = MG_INVALID_SOCKET; // side of the socketpair, too
+    }
+    (void)ev_data;
+}
+
+// a custom mg_wakeup_init() function with an optional custom handler
+bool mg_wakeup_init_handler(struct mg_mgr *mgr)
+{
+    bool ok = false;
+    if (mgr->pipe == MG_INVALID_SOCKET)
+    {
+        union usa usa[2];
+        MG_SOCKET_TYPE sp[2] = {MG_INVALID_SOCKET, MG_INVALID_SOCKET};
+        struct mg_connection *c = NULL;
+        if (!mg_socketpair(sp, usa))
+        {
+            MG_ERROR(("Cannot create socket pair"));
+        }
+        else if ((c = mg_wrapfd(mgr, (int)sp[1], mg_wakeup_callback, NULL)) == NULL)
+        {
+            closesocket(sp[0]);
+            closesocket(sp[1]);
+            sp[0] = sp[1] = MG_INVALID_SOCKET;
+        }
+        else
+        {
+            tomgaddr(&usa[0], &c->rem, false);
+            MG_DEBUG(("%lu %p pipe %lu", c->id, c->fd, (unsigned long)sp[0]));
+            mgr->pipe = sp[0];
+            ok = true;
+        }
+    }
+    return ok;
+}
+
 bool mg_wakeup(struct mg_mgr *mgr, unsigned long conn_id, const void *buf,
                size_t len) {
   if (mgr->pipe != MG_INVALID_SOCKET && conn_id > 0) {
     char *extended_buf = (char *) alloca(len + sizeof(conn_id));
     memcpy(extended_buf, &conn_id, sizeof(conn_id));
-    memcpy(extended_buf + sizeof(conn_id), buf, len);
-    send(mgr->pipe, extended_buf, len + sizeof(conn_id), MSG_NONBLOCKING);
-    return true;
+    memcpy(extended_buf + sizeof(conn_id), buf, len);    
+    if(send(mgr->pipe, extended_buf, len + sizeof(conn_id), MSG_NONBLOCKING) == (ssize_t)(len + sizeof(conn_id)))
+      return true;  // Success    
   }
   return false;
 }
