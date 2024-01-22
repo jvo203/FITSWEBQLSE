@@ -1,5 +1,5 @@
 // Copyright (c) 2004-2013 Sergey Lyubka
-// Copyright (c) 2013-2024 Cesanta Software Limited
+// Copyright (c) 2013-2022 Cesanta Software Limited
 // All rights reserved
 //
 // This software is dual-licensed: you can redistribute it and/or modify
@@ -61,12 +61,16 @@ extern "C" {
 #define MG_ARCH MG_ARCH_AZURERTOS
 #elif defined(PICO_TARGET_NAME)
 #define MG_ARCH MG_ARCH_RP2040
+#elif defined(__ARMCC_VERSION)
+#define MG_ARCH MG_ARCH_ARMCC
 #elif defined(__RTTHREAD__)
 #define MG_ARCH MG_ARCH_RTTHREAD
 #endif
 #endif  // !defined(MG_ARCH)
 
-#if !defined(MG_ARCH) || (MG_ARCH == MG_ARCH_CUSTOM)
+// if the user did not specify an MG_ARCH, or specified a custom one, OR
+// we guessed a known IDE, pull the customized config (Configuration Wizard)
+#if !defined(MG_ARCH) || (MG_ARCH == MG_ARCH_CUSTOM) || MG_ARCH == MG_ARCH_ARMCC
 #include "mongoose_custom.h"  // keep this include
 #endif
 
@@ -184,7 +188,6 @@ extern "C" {
 #if defined(__ARMCC_VERSION)
 #define mode_t size_t
 #include <time.h>
-#include <alloca.h>
 #else
 #include <sys/stat.h>
 #endif
@@ -290,7 +293,6 @@ int mkdir(const char *, mode_t);
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <alloca.h>
 #include <string.h>
 #include <time.h>
 #if MG_ARCH == MG_ARCH_CMSIS_RTOS1
@@ -316,9 +318,6 @@ static inline int mg_mkdir(const char *path, mode_t mode) {
     !defined MG_ENABLE_RL && (!defined(MG_ENABLE_LWIP) || !MG_ENABLE_LWIP) && \
     (!defined(MG_ENABLE_TCPIP) || !MG_ENABLE_TCPIP)
 #define MG_ENABLE_RL 1
-#ifndef MG_SOCK_LISTEN_BACKLOG_SIZE
-#define MG_SOCK_LISTEN_BACKLOG_SIZE 3
-#endif
 #endif
 
 #endif
@@ -784,7 +783,7 @@ struct timeval {
 #endif
 
 #ifndef MG_SOCK_LISTEN_BACKLOG_SIZE
-#define MG_SOCK_LISTEN_BACKLOG_SIZE 128
+#define MG_SOCK_LISTEN_BACKLOG_SIZE 3
 #endif
 
 #ifndef MG_DIRSEP
@@ -2097,7 +2096,7 @@ typedef uint64_t uECC_word_t;
 
 struct mg_connection;
 typedef void (*mg_event_handler_t)(struct mg_connection *, int ev,
-                                   void *ev_data);
+                                   void *ev_data, void *fn_data);
 void mg_call(struct mg_connection *c, int ev, void *ev_data);
 void mg_error(struct mg_connection *c, const char *fmt, ...);
 
@@ -2675,8 +2674,6 @@ MG_IRAM void mg_ota_boot(void);  // Bootloader function
 #define MG_DEVICE_NONE 0        // Dummy system
 #define MG_DEVICE_STM32H5 1     // STM32 H5
 #define MG_DEVICE_STM32H7 2     // STM32 H7
-#define MG_DEVICE_RT1020 3      // IMXRT1020
-#define MG_DEVICE_RT1060 4      // IMXRT1060
 #define MG_DEVICE_CH32V307 100  // WCH CH32V307
 #define MG_DEVICE_CUSTOM 1000   // Custom implementation
 
