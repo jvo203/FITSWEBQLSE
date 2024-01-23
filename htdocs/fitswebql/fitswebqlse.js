@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-22.0";
+    return "JS2024-01-23.0";
 }
 
 function uuidv4() {
@@ -12293,7 +12293,9 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
                     prev_x0: -1,
                     prev_y0: -1,
                     view: null,
-                    prev_view: null
+                    prev_view: null,
+                    rect: null,
+                    mouse_position: null
                 };
             }
         })
@@ -12399,6 +12401,8 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             let y0 = Math.round(y);
             zoom_dims.x0 = x0;
             zoom_dims.y0 = y0;
+            zoom_dims.rect = rect;
+            zoom_dims.mouse_position = mouse_position;
 
             // console.log("zoom_dims.x0:", zoom_dims.x0, "zoom_dims.y0:", zoom_dims.y0, "zoom_dims.dx:", zoom_dims.dx, "zoom_dims.dy:", zoom_dims.dy);
             // zoom_dims.x1 = image_bounding_dims.x1;
@@ -14250,11 +14254,14 @@ function tiles_zoom(event) {
     // console.log("x0:", x0, "x1:", x1, "scale:", zoom_scale);
     let _x1 = x0 - (x0 - x1) / zoom_scale;
     let _y1 = y0 - (y0 - y1) / zoom_scale;
+    console.log("_x1:", _x1, "_y1:", _y1, "new_width:", new_width, "new_height:", new_height);
     let new_x1 = clamp(_x1, 0, zoom_dims.width - new_width);
     let new_y1 = clamp(_y1, 0, zoom_dims.height - new_height);
     let dx1 = new_x1 - _x1;
     let dy1 = new_y1 - _y1;
-    console.log("new_x1:", new_x1, "new_y1:", new_y1, "dx1:", dx1, "dy1:", dy1);
+    if (dx1 != 0 || dy1 != 0) {
+        console.log("CORRECTION: new_x1:", new_x1, "new_y1:", new_y1, "dx1:", dx1, "dy1:", dy1);
+    }
 
     zoom_dims.x1 = new_x1;
     zoom_dims.y1 = new_y1;
@@ -14262,15 +14269,66 @@ function tiles_zoom(event) {
     zoom_dims.view = { x1: new_x1, y1: new_y1, width: new_width, height: new_height };
     console.log("zoom_dims:", zoom_dims, "view:", zoom_dims.view);
 
+    // x0, y0 cross-check
+    var cross_x0 = x0;
+    var cross_y0 = y0;
+    if (zoom_dims.rect != null && zoom_dims.mouse_position != null) {
+        let image_bounding_dims = zoom_dims.view;
+        let rect = zoom_dims.rect;
+        let mouse_position = zoom_dims.mouse_position;
+
+        var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 0);
+        var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect.getAttribute("x"));
+
+        var ay = (image_bounding_dims.height - 1) / (rect.getAttribute("height") - 0);
+        var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect.getAttribute("y"));
+
+        x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
+        y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
+
+        cross_x0 = Math.round(x);
+        cross_y0 = Math.round(y);
+        console.log("XCHECK --> x0:", x0, "y0:", y0, "cross_x0:", cross_x0, "cross_y0:", cross_y0);
+
+        if (dx1 != 0 || dy1 != 0) {
+            zoom_dims.x0 = cross_x0;
+            zoom_dims.y0 = cross_y0;
+            zoom_dims.prev_x0 = zoom_dims.x0;
+            zoom_dims.prev_y0 = zoom_dims.y0;
+            // tiles_zoomstarted(event);
+            console.log("{X0,Y0} CORRECTION: x0:", x0, "y0:", y0, "new_x0:", zoom_dims.x0, "new_y0:", zoom_dims.y0);
+        }
+    }
+
+    // RE-SET the zoom_dims
+    if (zoom_scale == 1.0) {
+        // adjust zoom_dims.dims.x1 by dx1 and zoom_dims.dims.y1 by dy1
+        zoom_dims.dims.x1 += dx1;
+        zoom_dims.dims.y1 += dy1;
+
+        // round
+        zoom_dims.x1 = Math.round(zoom_dims.dims.x1);
+        zoom_dims.y1 = Math.round(zoom_dims.dims.y1);
+    }
+
     // apply a correction to x0 and x1
-    if (zoom_scale > 1.0) {
-        /*zoom_dims.x0 += dx1;// / (1 - zoom_scale);
-        zoom_dims.y0 += dy1;// / (1 - zoom_scale);
+    if (zoom_scale >= 1.0) {
+        /*zoom_dims.x0 -= dx1;// / (1 - zoom_scale);
+        zoom_dims.y0 -= dy1;// / (1 - zoom_scale);
         zoom_dims.prev_x0 = zoom_dims.x0;
         zoom_dims.prev_y0 = zoom_dims.y0;*/
-        if (dx1 != 0 || dy1 != 0) {
-            console.log("CORRECTION! x0:", x0, "y0:", y0, "new_x0:", zoom_dims.x0, "new_y0:", zoom_dims.y0);
-        }
+        //tiles_zoomstarted(event);
+        /*if (dx1 != 0 || dy1 != 0) {
+            zoom_dims.x0 -= dx1;// / (1 - zoom_scale);
+            zoom_dims.y0 -= dy1;// / (1 - zoom_scale);
+            tiles_zoomstarted(event);
+            zoom_dims.view.x1 = zoom_dims.x0 - (zoom_dims.x0 - zoom_dims.dims.x1) / zoom_scale;
+            zoom_dims.view.y1 = zoom_dims.y0 - (zoom_dims.y0 - zoom_dims.dims.y1) / zoom_scale;
+            zoom_dims.x1 = zoom_dims.view.x1;
+            zoom_dims.y1 = zoom_dims.view.y1;
+            console.log("{X0,Y0} CORRECTION: x0:", x0, "y0:", y0, "new_x0:", zoom_dims.x0, "new_y0:", zoom_dims.y0);
+            console.log("NEW view:", zoom_dims.view);
+        }*/
     }
 
     /*if (zoom_scale > 1.0) {
@@ -14279,8 +14337,10 @@ function tiles_zoom(event) {
 
         if (zoom_dims.x0 != new_x0 || zoom_dims.y0 != new_y0) {
             console.log("CORRECTION! x0:", x0, "y0:", y0, "new_x0:", new_x0, "new_y0:", new_y0);
-            zoom_dims.x0 = new_x0;
-            zoom_dims.y0 = new_y0;
+            zoom_dims.x0 = cross_x0;// new_x0;
+            zoom_dims.y0 = cross_y0; new_y0;
+            zoom_dims.prev_x0 = zoom_dims.x0;
+            zoom_dims.prev_y0 = zoom_dims.y0;
         }
     }*/
 
