@@ -14307,11 +14307,7 @@ function tiles_zoom(event) {
 
     // RE-SET the zoom_dims
     if (zoom_scale == 1.0) {
-        // adjust zoom_dims.dims.x1 by dx1 and zoom_dims.dims.y1 by dy1
-        //zoom_dims.dims.x1 += dx1;
-        //zoom_dims.dims.y1 += dy1;
-
-        // round
+        // round to the nearest integer (remove small numerical errors)
         zoom_dims.x1 = Math.round(zoom_dims.dims.x1);
         zoom_dims.y1 = Math.round(zoom_dims.dims.y1);
     }
