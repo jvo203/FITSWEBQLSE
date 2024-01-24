@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-23.0";
+    return "JS2024-01-24.0";
 }
 
 function uuidv4() {
@@ -14290,21 +14290,26 @@ function tiles_zoom(event) {
         cross_y0 = Math.round(y);
         console.log("XCHECK --> x0:", x0, "y0:", y0, "cross_x0:", cross_x0, "cross_y0:", cross_y0);
 
-        if (dx1 != 0 || dy1 != 0) {
+        if (dx1 != 0) {
             zoom_dims.x0 = cross_x0;
-            zoom_dims.y0 = cross_y0;
             zoom_dims.prev_x0 = zoom_dims.x0;
+            zoom_dims.dims.x1 += zoom_dims.scale * dx1;
+            console.log("X0 CORRECTION: x0:", x0, "new_x0:", zoom_dims.x0, "dims.x1:", zoom_dims.dims.x1);
+        }
+
+        if (dy1 != 0) {
+            zoom_dims.y0 = cross_y0;
             zoom_dims.prev_y0 = zoom_dims.y0;
-            // tiles_zoomstarted(event);
-            console.log("{X0,Y0} CORRECTION: x0:", x0, "y0:", y0, "new_x0:", zoom_dims.x0, "new_y0:", zoom_dims.y0);
+            zoom_dims.dims.y1 += zoom_dims.scale * dy1;
+            console.log("Y0 CORRECTION: y0:", y0, "new_y0:", zoom_dims.y0, "dims.y1:", zoom_dims.dims.y1);
         }
     }
 
     // RE-SET the zoom_dims
     if (zoom_scale == 1.0) {
         // adjust zoom_dims.dims.x1 by dx1 and zoom_dims.dims.y1 by dy1
-        zoom_dims.dims.x1 += dx1;
-        zoom_dims.dims.y1 += dy1;
+        //zoom_dims.dims.x1 += dx1;
+        //zoom_dims.dims.y1 += dy1;
 
         // round
         zoom_dims.x1 = Math.round(zoom_dims.dims.x1);
