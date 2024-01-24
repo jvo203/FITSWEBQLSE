@@ -12110,10 +12110,10 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
         .on("zoom", tiles_zoom)
         .on("end", tiles_zoomended);
 
-    /*var drag = d3.drag()
+    var drag = d3.drag()
         .on("start", tiles_dragstarted)
         .on("drag", tiles_dragmove)
-        .on("end", tiles_dragended);*/
+        .on("end", tiles_dragended);
 
     now = performance.now();
     then = now;
@@ -12193,7 +12193,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
         .style("stroke", strokeStyle)
         .style("stroke-width", 2)
         .attr("opacity", (index == va_count) ? 0.5 : 0.0)
-        /*.call(drag)*/
+        .call(drag)
         .call(zoom)
         .on("click", function () {
             if (isLocal) {
@@ -14159,31 +14159,70 @@ function refresh_tiles(index) {
         imageContainer[index - 1].refresh = true;
 }
 
-function tiles_dragstarted() {
+function tiles_dragstarted(event) {
     console.log("drag started");
 
-    d3.select(this).style('cursor', 'move');
+    // set the cursor for each "image_rectangle" + index
+    for (let i = 1; i <= va_count; i++) {
+        d3.select("#image_rectangle" + i).style('cursor', 'move');
+    }
+    //d3.select(this).style('cursor', 'move');
 
     dragging = true;
 }
 
-function tiles_dragended() {
+function tiles_dragended(event) {
     console.log("drag ended");
 
-    d3.select(this).style('cursor', 'pointer');
+    // set the cursor for each "image_rectangle" + index
+    for (let i = 1; i <= va_count; i++) {
+        d3.select("#image_rectangle" + i).style('cursor', 'pointer');
+    }
+    //d3.select(this).style('cursor', 'pointer');
 
     dragging = false;
 
     //do not wait, call tileTimeout immediately
-    tileTimeout();
+    // tileTimeout();
 }
 
-function tiles_dragmove() {
+function tiles_dragmove(event) {
     console.log("drag move");
 
-    var elem = d3.select(this);
+    if (zoom_dims == null)
+        return;
+
+    var offset;
+
+    try {
+        offset = d3.pointer(event);
+    }
+    catch (e) {
+        console.log(e);
+        return;
+    }
+
+    if (isNaN(offset[0]) || isNaN(offset[1]))
+        return;
+
+    mouse_position = { x: offset[0], y: offset[1] };
+    console.log("mouse_position:", mouse_position);
+
+    // track the changes
+    let dx = mouse_position.x - zoom_dims.mouse_position.x;
+    let dy = mouse_position.y - zoom_dims.mouse_position.y;
+
+    // TO-DO: track incremental changes
+
+    // adjust the zoom_dims.view x1 and y1
+    zoom_dims.view.x1 -= dx;
+    zoom_dims.view.y1 -= dy;
+
+    // then adjust zoom_dims.dims x1 and y1 (adjusted for the scale)
+
+    /*var elem = d3.select(this);
     var onMouseMoveFunc = elem.on("mousemove");
-    elem.each(onMouseMoveFunc);
+    elem.each(onMouseMoveFunc);*/
 
     for (let i = 1; i <= va_count; i++) {
         requestAnimationFrame(function () {
