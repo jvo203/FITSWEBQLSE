@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-24.0";
+    return "JS2024-01-25.0";
 }
 
 function uuidv4() {
@@ -14212,17 +14212,16 @@ function tiles_dragmove(event) {
     let dx = mouse_position.x - zoom_dims.mouse_position.x;
     let dy = mouse_position.y - zoom_dims.mouse_position.y;
 
-    // TO-DO: track incremental changes
+    // set the new mouse position
+    zoom_dims.mouse_position = mouse_position;
 
     // adjust the zoom_dims.view x1 and y1
     zoom_dims.view.x1 -= dx;
     zoom_dims.view.y1 -= dy;
 
     // then adjust zoom_dims.dims x1 and y1 (adjusted for the scale)
-
-    /*var elem = d3.select(this);
-    var onMouseMoveFunc = elem.on("mousemove");
-    elem.each(onMouseMoveFunc);*/
+    zoom_dims.dims.x1 -= zoom_dims.scale * dx;
+    zoom_dims.dims.y1 -= zoom_dims.scale * dy;
 
     for (let i = 1; i <= va_count; i++) {
         requestAnimationFrame(function () {
@@ -14393,10 +14392,6 @@ function tiles_zoom(event) {
             elem.node().__zoom.k = zoom_scale;
         } catch (e) { };
     }
-
-    /*var tmp = d3.select(this);
-    var onMouseMoveFunc = tmp.on("mousemove");
-    tmp.each(onMouseMoveFunc);*/
 }
 
 function zoomed(event) {
