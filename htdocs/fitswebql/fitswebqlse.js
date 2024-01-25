@@ -12377,7 +12377,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
             let rect = event.currentTarget;
 
-            if (dragging) {
+            /*if (dragging) {
                 var dx = d3.event.dx;
                 var dy = d3.event.dy;
 
@@ -12386,7 +12386,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
                 image_bounding_dims.x1 = clamp(image_bounding_dims.x1 - dx, 0, imageCanvas.width - 1 - image_bounding_dims.width);
                 image_bounding_dims.y1 = clamp(image_bounding_dims.y1 - dy, 0, imageCanvas.height - 1 - image_bounding_dims.height);
-            }
+            }*/
 
             var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 0);
             var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect.getAttribute("x"));
@@ -12397,8 +12397,8 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
             y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
 
-            let x0 = Math.round(x);
-            let y0 = Math.round(y);
+            let x0 = x;
+            let y0 = y;
             zoom_dims.x0 = x0;
             zoom_dims.y0 = y0;
             zoom_dims.rect = rect;
@@ -14162,6 +14162,13 @@ function refresh_tiles(index) {
 function tiles_dragstarted(event) {
     console.log("drag started");
 
+    if (zoom_dims == null)
+        return;
+
+    // backup the view.x1 and y1
+    zoom_dims.prev_x1 = zoom_dims.view.x1;
+    zoom_dims.prev_y1 = zoom_dims.view.y1;
+
     // set the cursor for each "image_rectangle" + index
     for (let i = 1; i <= va_count; i++) {
         d3.select("#image_rectangle" + i).style('cursor', 'move');
@@ -14173,6 +14180,33 @@ function tiles_dragstarted(event) {
 
 function tiles_dragended(event) {
     console.log("drag ended");
+
+    if (zoom_dims == null)
+        return;
+
+    var offset;
+
+    try {
+        offset = d3.pointer(event);
+    }
+    catch (e) {
+        console.log(e);
+        return;
+    }
+
+    if (isNaN(offset[0]) || isNaN(offset[1]))
+        return;
+
+    mouse_position = { x: offset[0], y: offset[1] };
+    console.log("mouse_position:", mouse_position);
+
+    // track the changes
+    let dx = mouse_position.x - zoom_dims.mouse_position.x;
+    let dy = mouse_position.y - zoom_dims.mouse_position.y;
+
+    // then adjust zoom_dims.dims x1 and y1 (adjusted for the scale)
+    zoom_dims.dims.x1 -= zoom_dims.scale * dx;
+    zoom_dims.dims.y1 -= zoom_dims.scale * (-dy); // invert the Y-axis
 
     // set the cursor for each "image_rectangle" + index
     for (let i = 1; i <= va_count; i++) {
@@ -14212,23 +14246,15 @@ function tiles_dragmove(event) {
     let dx = mouse_position.x - zoom_dims.mouse_position.x;
     let dy = mouse_position.y - zoom_dims.mouse_position.y;
 
-    // set the new mouse position
-    zoom_dims.mouse_position = mouse_position;
-
     // adjust the zoom_dims.view x1 and y1
-    zoom_dims.view.x1 -= dx;
-    zoom_dims.view.y1 -= -dy;
+    zoom_dims.view.x1 = zoom_dims.prev_x1 - dx;
+    zoom_dims.view.y1 = zoom_dims.prev_y1 - (-dy); // invert the Y-axis
 
     // TO-DO: limit the zoom_dims.view x1 and y1 to the image bounding box
     // TO-DO: adjust the zoom_dims.x0 and y0 too ? the x0, y0 should remain the same
     // we are still looking at the same point in the image, just moving it around
     // zoom_dims.x0 -= dx;    
-    //zoom_dims.y0 -= dy;
-
-
-    // then adjust zoom_dims.dims x1 and y1 (adjusted for the scale)
-    zoom_dims.dims.x1 -= zoom_dims.scale * dx;
-    zoom_dims.dims.y1 -= zoom_dims.scale * (-dy);
+    //zoom_dims.y0 -= dy;    
 
     for (let i = 1; i <= va_count; i++) {
         requestAnimationFrame(function () {
@@ -14331,8 +14357,8 @@ function tiles_zoom(event) {
         x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
         y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
 
-        cross_x0 = Math.round(x);
-        cross_y0 = Math.round(y);
+        cross_x0 = x;
+        cross_y0 = y;
         console.log("XCHECK --> x0:", x0, "y0:", y0, "cross_x0:", cross_x0, "cross_y0:", cross_y0);
 
         if (dx1 != 0) {
