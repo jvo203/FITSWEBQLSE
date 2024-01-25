@@ -14198,15 +14198,15 @@ function tiles_dragended(event) {
         return;
 
     mouse_position = { x: offset[0], y: offset[1] };
-    console.log("mouse_position:", mouse_position);
+    zoom_dims.mouse_position = mouse_position;
 
-    // track the changes
-    let dx = mouse_position.x - zoom_dims.mouse_position.x;
-    let dy = mouse_position.y - zoom_dims.mouse_position.y;
+    // track the changes in zoom_dims.view x1 and y1
+    let dx = zoom_dims.view.x1 - zoom_dims.prev_x1;
+    let dy = zoom_dims.view.y1 - zoom_dims.prev_y1;
 
     // then adjust zoom_dims.dims x1 and y1 (adjusted for the scale)
-    zoom_dims.dims.x1 -= zoom_dims.scale * dx;
-    zoom_dims.dims.y1 -= zoom_dims.scale * (-dy); // invert the Y-axis
+    zoom_dims.dims.x1 += zoom_dims.scale * dx;
+    zoom_dims.dims.y1 += zoom_dims.scale * dy;
 
     // set the cursor for each "image_rectangle" + index
     for (let i = 1; i <= va_count; i++) {
@@ -14247,8 +14247,8 @@ function tiles_dragmove(event) {
     let dy = mouse_position.y - zoom_dims.mouse_position.y;
 
     // adjust the zoom_dims.view x1 and y1
-    zoom_dims.view.x1 = zoom_dims.prev_x1 - dx;
-    zoom_dims.view.y1 = zoom_dims.prev_y1 - (-dy); // invert the Y-axis
+    zoom_dims.view.x1 = zoom_dims.prev_x1 - dx / zoom_dims.scale;
+    zoom_dims.view.y1 = zoom_dims.prev_y1 - (-dy) / zoom_dims.scale; // invert the Y-axis
 
     // TO-DO: limit the zoom_dims.view x1 and y1 to the image bounding box
     // TO-DO: adjust the zoom_dims.x0 and y0 too ? the x0, y0 should remain the same
