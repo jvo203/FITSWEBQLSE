@@ -14217,11 +14217,18 @@ function tiles_dragmove(event) {
 
     // adjust the zoom_dims.view x1 and y1
     zoom_dims.view.x1 -= dx;
-    zoom_dims.view.y1 -= dy;
+    zoom_dims.view.y1 -= -dy;
+
+    // TO-DO: limit the zoom_dims.view x1 and y1 to the image bounding box
+    // TO-DO: adjust the zoom_dims.x0 and y0 too ? the x0, y0 should remain the same
+    // we are still looking at the same point in the image, just moving it around
+    // zoom_dims.x0 -= dx;    
+    //zoom_dims.y0 -= dy;
+
 
     // then adjust zoom_dims.dims x1 and y1 (adjusted for the scale)
     zoom_dims.dims.x1 -= zoom_dims.scale * dx;
-    zoom_dims.dims.y1 -= zoom_dims.scale * dy;
+    zoom_dims.dims.y1 -= zoom_dims.scale * (-dy);
 
     for (let i = 1; i <= va_count; i++) {
         requestAnimationFrame(function () {
