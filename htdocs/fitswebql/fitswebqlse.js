@@ -14165,7 +14165,7 @@ function tiles_dragstarted(event) {
     if (zoom_dims == null)
         return;
 
-    // backup the view.x1 and y1
+    // backup the zoom_dims.view x1 and y1
     zoom_dims.prev_x1 = zoom_dims.view.x1;
     zoom_dims.prev_y1 = zoom_dims.view.y1;
 
@@ -14247,8 +14247,8 @@ function tiles_dragmove(event) {
     let dy = mouse_position.y - zoom_dims.mouse_position.y;
 
     // adjust the zoom_dims.view x1 and y1
-    zoom_dims.view.x1 = zoom_dims.prev_x1 - dx / zoom_dims.scale;
-    zoom_dims.view.y1 = zoom_dims.prev_y1 - (-dy) / zoom_dims.scale; // invert the Y-axis
+    zoom_dims.view.x1 = clamp(zoom_dims.prev_x1 - dx / zoom_dims.scale, 0, zoom_dims.width - zoom_dims.view.width);
+    zoom_dims.view.y1 = clamp(zoom_dims.prev_y1 - (-dy) / zoom_dims.scale, 0, zoom_dims.height - zoom_dims.view.height); // invert the Y-axis
 
     // TO-DO: limit the zoom_dims.view x1 and y1 to the image bounding box
     // TO-DO: adjust the zoom_dims.x0 and y0 too ? the x0, y0 should remain the same
