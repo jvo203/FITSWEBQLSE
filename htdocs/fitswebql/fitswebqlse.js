@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-25.0";
+    return "JS2024-01-26.0";
 }
 
 function uuidv4() {
@@ -12377,17 +12377,6 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
             let rect = event.currentTarget;
 
-            /*if (dragging) {
-                var dx = d3.event.dx;
-                var dy = d3.event.dy;
-
-                dx *= image_bounding_dims.width / d3.select(this).attr("width");
-                dy *= image_bounding_dims.height / d3.select(this).attr("height");
-
-                image_bounding_dims.x1 = clamp(image_bounding_dims.x1 - dx, 0, imageCanvas.width - 1 - image_bounding_dims.width);
-                image_bounding_dims.y1 = clamp(image_bounding_dims.y1 - dy, 0, imageCanvas.height - 1 - image_bounding_dims.height);
-            }*/
-
             var ax = (image_bounding_dims.width - 1) / (rect.getAttribute("width") - 0);
             var x = image_bounding_dims.x1 + ax * (mouse_position.x - rect.getAttribute("x"));
 
@@ -12403,11 +12392,6 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             zoom_dims.y0 = y0;
             zoom_dims.rect = rect;
             zoom_dims.mouse_position = mouse_position;
-
-            // console.log("zoom_dims.x0:", zoom_dims.x0, "zoom_dims.y0:", zoom_dims.y0, "zoom_dims.dx:", zoom_dims.dx, "zoom_dims.dy:", zoom_dims.dy);
-            // zoom_dims.x1 = image_bounding_dims.x1;
-            // zoom_dims.y1 = image_bounding_dims.y1;
-            // zoom_dims.view = { x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height };
 
             var orig_x = x * (fitsData.width - 1) / (image.width - 1);
             var orig_y = y * (fitsData.height - 1) / (image.height - 1);
@@ -14145,14 +14129,6 @@ function refresh_tiles(index) {
     if (zoom_scale < 1)
         return;
 
-    /*if (zoom_dims == null)
-        return;
-
-    if (zoom_dims.view == null)
-        return;
-
-    let image_bounding_dims = zoom_dims.view;*/
-
     if (imageContainer[index - 1] == null)
         return;
     else
@@ -14173,7 +14149,6 @@ function tiles_dragstarted(event) {
     for (let i = 1; i <= va_count; i++) {
         d3.select("#image_rectangle" + i).style('cursor', 'move');
     }
-    //d3.select(this).style('cursor', 'move');
 
     dragging = true;
 }
@@ -14212,12 +14187,11 @@ function tiles_dragended(event) {
     for (let i = 1; i <= va_count; i++) {
         d3.select("#image_rectangle" + i).style('cursor', 'pointer');
     }
-    //d3.select(this).style('cursor', 'pointer');
 
     dragging = false;
 
-    //do not wait, call tileTimeout immediately
-    // tileTimeout();
+    // do not wait, call tileTimeout immediately
+    tileTimeout();
 }
 
 function tiles_dragmove(event) {
@@ -14240,7 +14214,6 @@ function tiles_dragmove(event) {
         return;
 
     mouse_position = { x: offset[0], y: offset[1] };
-    console.log("mouse_position:", mouse_position);
 
     // track the changes
     let dx = mouse_position.x - zoom_dims.mouse_position.x;
@@ -14248,13 +14221,7 @@ function tiles_dragmove(event) {
 
     // adjust the zoom_dims.view x1 and y1
     zoom_dims.view.x1 = clamp(zoom_dims.prev_x1 - dx / zoom_dims.scale, 0, zoom_dims.width - zoom_dims.view.width);
-    zoom_dims.view.y1 = clamp(zoom_dims.prev_y1 - (-dy) / zoom_dims.scale, 0, zoom_dims.height - zoom_dims.view.height); // invert the Y-axis
-
-    // TO-DO: limit the zoom_dims.view x1 and y1 to the image bounding box
-    // TO-DO: adjust the zoom_dims.x0 and y0 too ? the x0, y0 should remain the same
-    // we are still looking at the same point in the image, just moving it around
-    // zoom_dims.x0 -= dx;    
-    //zoom_dims.y0 -= dy;    
+    zoom_dims.view.y1 = clamp(zoom_dims.prev_y1 - (-dy) / zoom_dims.scale, 0, zoom_dims.height - zoom_dims.view.height); // invert the Y-axis    
 
     for (let i = 1; i <= va_count; i++) {
         requestAnimationFrame(function () {
@@ -14268,8 +14235,6 @@ function tiles_zoomstarted(event) {
     if (zoom_dims == null)
         return;
 
-    console.log("zoom_dims.prev_x0:", zoom_dims.prev_x0, "zoom_dims.prev_y0:", zoom_dims.prev_y0);
-
     if (zoom_dims.prev_x0 != -1) {
         zoom_dims.dx = zoom_dims.x0 - zoom_dims.prev_x0;
     }
@@ -14280,7 +14245,6 @@ function tiles_zoomstarted(event) {
 
     zoom_dims.prev_x0 = zoom_dims.x0;
     zoom_dims.prev_y0 = zoom_dims.y0;
-    // console.log("zoom_dims.dx:", zoom_dims.dx, "zoom_dims.dy:", zoom_dims.dy);
 
     {
         zoom_dims.dims.x1 += (1.0 - zoom_dims.scale) * zoom_dims.dx;
@@ -14296,8 +14260,8 @@ function tiles_zoomstarted(event) {
 function tiles_zoomended(event) {
     console.log("zoom end");
 
-    //do not wait, call tileTimeout immediately
-    // tileTimeout();
+    // do not wait, call tileTimeout immediately
+    tileTimeout();
 }
 
 function tiles_zoom(event) {
@@ -14308,7 +14272,6 @@ function tiles_zoom(event) {
     if (zoom_dims == null)
         return;
 
-    console.log("tiles_zoom::zoom_dims.x0:", zoom_dims.x0, "zoom_dims.y0:", zoom_dims.y0);
     zoom_dims.scale = zoom_scale;
 
     //rescale the image
@@ -14322,14 +14285,15 @@ function tiles_zoom(event) {
     let y0 = zoom_dims.y0;
     let x1 = zoom_dims.dims.x1;
     let y1 = zoom_dims.dims.y1;
-    // console.log("x0:", x0, "x1:", x1, "scale:", zoom_scale);
+
     let _x1 = x0 - (x0 - x1) / zoom_scale;
     let _y1 = y0 - (y0 - y1) / zoom_scale;
-    console.log("_x1:", _x1, "_y1:", _y1, "new_width:", new_width, "new_height:", new_height);
+
     let new_x1 = clamp(_x1, 0, zoom_dims.width - new_width);
     let new_y1 = clamp(_y1, 0, zoom_dims.height - new_height);
     let dx1 = new_x1 - _x1;
     let dy1 = new_y1 - _y1;
+
     if (dx1 != 0 || dy1 != 0) {
         console.log("CORRECTION: new_x1:", new_x1, "new_y1:", new_y1, "dx1:", dx1, "dy1:", dy1);
     }
@@ -14359,7 +14323,6 @@ function tiles_zoom(event) {
 
         cross_x0 = x;
         cross_y0 = y;
-        console.log("XCHECK --> x0:", x0, "y0:", y0, "cross_x0:", cross_x0, "cross_y0:", cross_y0);
 
         if (dx1 != 0) {
             zoom_dims.x0 = cross_x0;
@@ -14382,39 +14345,6 @@ function tiles_zoom(event) {
         zoom_dims.x1 = Math.round(zoom_dims.dims.x1);
         zoom_dims.y1 = Math.round(zoom_dims.dims.y1);
     }
-
-    // apply a correction to x0 and x1
-    if (zoom_scale >= 1.0) {
-        /*zoom_dims.x0 -= dx1;// / (1 - zoom_scale);
-        zoom_dims.y0 -= dy1;// / (1 - zoom_scale);
-        zoom_dims.prev_x0 = zoom_dims.x0;
-        zoom_dims.prev_y0 = zoom_dims.y0;*/
-        //tiles_zoomstarted(event);
-        /*if (dx1 != 0 || dy1 != 0) {
-            zoom_dims.x0 -= dx1;// / (1 - zoom_scale);
-            zoom_dims.y0 -= dy1;// / (1 - zoom_scale);
-            tiles_zoomstarted(event);
-            zoom_dims.view.x1 = zoom_dims.x0 - (zoom_dims.x0 - zoom_dims.dims.x1) / zoom_scale;
-            zoom_dims.view.y1 = zoom_dims.y0 - (zoom_dims.y0 - zoom_dims.dims.y1) / zoom_scale;
-            zoom_dims.x1 = zoom_dims.view.x1;
-            zoom_dims.y1 = zoom_dims.view.y1;
-            console.log("{X0,Y0} CORRECTION: x0:", x0, "y0:", y0, "new_x0:", zoom_dims.x0, "new_y0:", zoom_dims.y0);
-            console.log("NEW view:", zoom_dims.view);
-        }*/
-    }
-
-    /*if (zoom_scale > 1.0) {
-        let new_x0 = Math.round((new_x1 * zoom_scale - x1) / (zoom_scale - 1));
-        let new_y0 = Math.round((new_y1 * zoom_scale - y1) / (zoom_scale - 1));
-
-        if (zoom_dims.x0 != new_x0 || zoom_dims.y0 != new_y0) {
-            console.log("CORRECTION! x0:", x0, "y0:", y0, "new_x0:", new_x0, "new_y0:", new_y0);
-            zoom_dims.x0 = cross_x0;// new_x0;
-            zoom_dims.y0 = cross_y0; new_y0;
-            zoom_dims.prev_x0 = zoom_dims.x0;
-            zoom_dims.prev_y0 = zoom_dims.y0;
-        }
-    }*/
 
     for (let i = 1; i <= va_count; i++) {
         refresh_tiles(i);
@@ -14608,6 +14538,8 @@ function tileTimeout(force = false) {
     }
 
     zoom_dims.prev_view = { x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height };
+
+    return; // only for the time being
 
     viewport_count = 0;
     sent_seq_id++;
