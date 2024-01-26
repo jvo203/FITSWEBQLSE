@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-26.0";
+    return "JS2024-01-26.1";
 }
 
 function uuidv4() {
@@ -13277,11 +13277,11 @@ function setup_image_selection() {
 
                 if (realtime_spectrum && fitsData.depth > 1 && !optical_view) {
                     sent_seq_id++;
+                    var range = get_axes_range(width, height);
+                    var dx = range.xMax - range.xMin;
 
                     for (let index = 0; index < va_count; index++) {
-                        // a real-time websocket request
-                        var range = get_axes_range(width, height);
-                        var dx = range.xMax - range.xMin;
+                        // a real-time websocket request                        
 
                         if (viewport_zoom_settings != null) {
                             let _width = viewport_zoom_settings.zoomed_size;
@@ -14544,6 +14544,16 @@ function tileTimeout(force = false) {
 
     var request_images = true;
 
+    var canvas = document.getElementById("SpectrumCanvas");
+    var width = canvas.width;
+    var height = canvas.height;
+    var range = get_axes_range(width, height);
+    var dx = range.xMax - range.xMin;
+
+    let rect = zoom_dims.rect;
+    let _width = rect.getAttribute("width");
+    let _height = rect.getAttribute("height");
+
     for (let index = 0; index < va_count; index++) {
         let img_width = image_bounding_dims.width;
         let img_height = image_bounding_dims.height;
@@ -14579,18 +14589,35 @@ function tileTimeout(force = false) {
         if (imageContainer[index] == null)
             continue;
 
-        var imageCanvas = imageContainer[index].imageCanvas;
+        var canvas = imageContainer[index];
 
-        let x1 = image_bounding_dims.x1 * fitsData.width / imageCanvas.width;
-        let y1 = (fitsData.height - 1) - image_bounding_dims.y1 * fitsData.height / imageCanvas.height;
-        let x2 = (image_bounding_dims.x1 + image_bounding_dims.width - 1) * fitsData.width / imageCanvas.width;
-        let y2 = (fitsData.height - 1) - (image_bounding_dims.y1 + image_bounding_dims.height - 1) * fitsData.height / imageCanvas.height;
+        let x1 = image_bounding_dims.x1 * (fitsData.width - 1) / (canvas.width - 1);
+        let y1 = image_bounding_dims.y1 * (fitsData.height - 1) / (canvas.height - 1);
+        let x2 = (image_bounding_dims.x1 + image_bounding_dims.width - 1) * (fitsData.width - 1) / (canvas.width - 1);
+        let y2 = (image_bounding_dims.y1 + image_bounding_dims.height - 1) * (fitsData.height - 1) / (canvas.height - 1);
 
-        var strRequest = 'x1=' + clamp(Math.round(x1), 0, fitsData.width - 1) + '&y1=' + clamp(Math.round(y2), 0, fitsData.height - 1) + '&x2=' + clamp(Math.round(x2), 0, fitsData.width - 1) + '&y2=' + clamp(Math.round(y1), 0, fitsData.height - 1) + '&image=' + (image ? 'true' : 'false') + '&beam=' + beam + '&intensity=' + intensity_mode + '&frame_start=' + data_band_lo + '&frame_end=' + data_band_hi + '&ref_freq=' + RESTFRQ + '&seq_id=' + sent_seq_id + '&timestamp=' + performance.now();
+        var request = {
+            type: "realtime_image_spectrum",
+            dx: dx,
+            image: image,
+            quality: image_quality,
+            x1: clamp(Math.round(x1 + 1), 1, fitsData.width),
+            y1: clamp(Math.round(y1 + 1), 1, fitsData.height),
+            x2: clamp(Math.round(x2 + 1), 1, fitsData.width),
+            y2: clamp(Math.round(y2 + 1), 1, fitsData.height),
+            width: _width,
+            height: _height,
+            beam: "square",
+            intensity: intensity_mode,
+            frame_start: data_band_lo,
+            frame_end: data_band_hi,
+            ref_freq: RESTFRQ,
+            seq_id: sent_seq_id,
+            timestamp: performance.now()
+        };
 
-        //console.log(strRequest);
-
-        wsConn[index].send('[spectrum] ' + strRequest);
+        if (wsConn[index].readyState == 1)
+            wsConn[index].send(JSON.stringify(request));
     }
 
     if (request_images) {
