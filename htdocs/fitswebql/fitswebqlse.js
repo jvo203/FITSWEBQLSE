@@ -14539,8 +14539,6 @@ function tileTimeout(force = false) {
 
     zoom_dims.prev_view = { x1: image_bounding_dims.x1, y1: image_bounding_dims.y1, width: image_bounding_dims.width, height: image_bounding_dims.height };
 
-    return; // only for the time being
-
     viewport_count = 0;
     sent_seq_id++;
 
