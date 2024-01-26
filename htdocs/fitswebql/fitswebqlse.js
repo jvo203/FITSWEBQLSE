@@ -14550,10 +14550,6 @@ function tileTimeout(force = false) {
     var range = get_axes_range(width, height);
     var dx = range.xMax - range.xMin;
 
-    let rect = zoom_dims.rect;
-    let _width = rect.getAttribute("width");
-    let _height = rect.getAttribute("height");
-
     for (let index = 0; index < va_count; index++) {
         let img_width = image_bounding_dims.width;
         let img_height = image_bounding_dims.height;
@@ -14605,9 +14601,9 @@ function tileTimeout(force = false) {
             y1: clamp(Math.round(y1 + 1), 1, fitsData.height),
             x2: clamp(Math.round(x2 + 1), 1, fitsData.width),
             y2: clamp(Math.round(y2 + 1), 1, fitsData.height),
-            width: _width,
-            height: _height,
-            beam: "square",
+            width: view_width,
+            height: view_height,
+            beam: beam,
             intensity: intensity_mode,
             frame_start: data_band_lo,
             frame_end: data_band_hi,
