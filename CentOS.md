@@ -23,8 +23,7 @@ repo_gpgcheck=1
 gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
 
     sudo dnf update
-    sudo dnf install intel-basekit
-    sudo dnf install intel-hpckit
+    sudo dnf install intel-basekit intel-hpckit intel-oneapi-ispc
 
     .bashrc:
 
