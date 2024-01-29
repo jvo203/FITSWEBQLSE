@@ -2289,10 +2289,10 @@ static enum MHD_Result on_http_connection(void *cls,
         pthread_t tid;
 
         if (freqStartStr != NULL)
-            freq_start = atof(freqStartStr);
+            freq_start = atof(freqStartStr) / 1e9; // convert to GHz
 
         if (freqEndStr != NULL)
-            freq_end = atof(freqEndStr);
+            freq_end = atof(freqEndStr) / 1e9; // convert to GHz
 
         // printf("[C] Accept-Encoding: %s\n", encoding);
 
