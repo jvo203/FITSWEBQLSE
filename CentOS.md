@@ -35,9 +35,9 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 3. NASM
 
-    wget https://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.gz
-    tar zxvf nasm-2.15.05.tar.gz
-    cd nasm-2.15.05
+    wget https://www.nasm.us/pub/nasm/releasebuilds/2.16.01/nasm-2.16.01.tar.gz
+    tar zxvf nasm-2.16.01.tar.gz
+    cd nasm-2.16.01
     ./configure
     make -j16
     sudo make install
@@ -67,16 +67,16 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
     tar zxvf libmicrohttpd-latest.tar.gz
-    cd libmicrohttpd-0.9.75
+    cd libmicrohttpd-0.9.77
     ./configure
     make
     sudo make install
 
 # 6. libcpuid
     
-    wget https://github.com/anrieff/libcpuid/releases/download/v0.6.1/libcpuid-0.6.1.tar.gz
-    tar zxvf libcpuid-0.6.1.tar.gz
-    cd libcpuid-0.6.1
+    wget https://github.com/anrieff/libcpuid/releases/download/v0.6.4/libcpuid-0.6.4.tar.gz
+    tar zxvf libcpuid-0.6.4.tar.gz
+    cd libcpuid-0.6.4
     ./configure
     make
     sudo make install
@@ -102,9 +102,9 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 9. ZeroMQ
 
-    wget https://github.com/zeromq/libzmq/archive/refs/tags/v4.3.4.tar.gz
-    tar zxvf v4.3.4.tar.gz
-    cd libzmq-4.3.4
+    wget https://github.com/zeromq/libzmq/archive/refs/tags/v4.3.5.tar.gz
+    tar zxvf v4.3.5.tar.gz
+    cd libzmq-4.3.5
     ./autogen.sh && ./configure && make -j16
     sudo make install
 
