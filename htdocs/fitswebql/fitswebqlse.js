@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-26.1";
+    return "JS2024-01-29.0";
 }
 
 function uuidv4() {
@@ -10488,7 +10488,6 @@ function zoom_molecules(freq) {
 
     var modal = document.getElementById('molecularlist');
     var scroller = zenscroll.createScroller(modal);
-
     var m = document.getElementsByClassName("molecularp");
 
     for (var i = 0; i < m.length; i++) {
@@ -13547,6 +13546,7 @@ async function fetch_spectral_lines(datasetId, freq_start, freq_end) {
 
     //freq_start, freq_end [Hz]
     var url = 'get_splatalogue?datasetId=' + encodeURIComponent(datasetId) + '&freq_start=' + freq_start + '&freq_end=' + freq_end + '&' + encodeURIComponent(get_js_version());
+    console.log("fetch_spectral_lines:", url);
 
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 404) {
@@ -13592,7 +13592,7 @@ async function fetch_spectral_lines(datasetId, freq_start, freq_end) {
             };
 
             index_molecules();
-            //console.log("#SPLATALOGUE molecules: ", molecules.length);
+            // console.log("#SPLATALOGUE molecules: ", molecules.length);
 
             let fitsData = fitsContainer[va_count - 1];
 
