@@ -6868,7 +6868,7 @@ contains
       ! &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
       ! &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
       ! &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
-      !   req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
+      ! & req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
 
       ! respond with a 2D viewport if req%image .eq. .true.
       if (.not. allocated(item%compressed)) then
