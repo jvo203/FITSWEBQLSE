@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-29.0";
+    return "JS2024-01-30.0";
 }
 
 function uuidv4() {
@@ -3736,8 +3736,8 @@ function process_video(index) {
         let img_width = 0, img_height = 0;
         try {
             let elem = d3.select("#image_rectangle" + index);
-            img_width = elem.attr("width");
-            img_height = elem.attr("height");
+            img_width = parseFloat(elem.attr("width"));
+            img_height = parseFloat(elem.attr("height"));
         } catch (err) {
             return;
         }
@@ -3846,8 +3846,8 @@ function process_viewport_canvas(viewportCanvas, index) {
         let img_width = 0, img_height = 0;
         try {
             let elem = d3.select("#image_rectangle" + index);
-            img_width = elem.attr("width");
-            img_height = elem.attr("height");
+            img_width = parseFloat(elem.attr("width"));
+            img_height = parseFloat(elem.attr("height"));
         } catch (err) {
             return;
         }
@@ -4027,8 +4027,8 @@ function process_viewport(width, height, w, h, bytes, stride, alpha, index, swap
         let img_width = 0, img_height = 0;
         try {
             let elem = d3.select("#image_rectangle" + index);
-            img_width = elem.attr("width");
-            img_height = elem.attr("height");
+            img_width = parseFloat(elem.attr("width"));
+            img_height = parseFloat(elem.attr("height"));
         } catch (err) {
             return;
         }
@@ -14557,8 +14557,8 @@ function tileTimeout(force = false) {
         let view_width = 0, view_height = 0;
         try {
             let elem = d3.select("#image_rectangle" + (index + 1));
-            view_width = elem.attr("width");
-            view_height = elem.attr("height");
+            view_width = parseFloat(elem.attr("width"));
+            view_height = parseFloat(elem.attr("height"));
         } catch (err) {
             continue;
         }
