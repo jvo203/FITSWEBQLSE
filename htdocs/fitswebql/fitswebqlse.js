@@ -3058,7 +3058,7 @@ function clear_webgl_internal_buffers(image) {
 }
 
 function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
-    console.log("process_hdr_viewport: #" + index);
+    // console.log("process_hdr_viewport: #" + index);
     if (streaming || moving || windowLeft)
         return;
 
@@ -3118,8 +3118,10 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
                 // attach the viewportContainer to the imageContainer
                 imageContainer[index - 1].viewportContainer = viewportContainer;
 
-                // refresh the image
-                imageContainer[index - 1].refresh = true;
+                clear_webgl_image_buffers(index);
+
+                // display the viewport as an image
+                init_webgl_image_buffers(index);
             }
         }
     }
@@ -3141,13 +3143,13 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
             }
         }
 
-        //display the composite viewport        
+        // display the composite viewport        
         init_webgl_composite_viewport_buffers(viewportContainer);
     }
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
-    console.log("process_hdr_image: #" + index);
+    // console.log("process_hdr_image: #" + index);
     var image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
     var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
     console.log(image_bounding_dims, pixel_range);
@@ -3172,7 +3174,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         tone_mapping = imageContainer[index - 1].tone_mapping;
     }
 
-    imageContainer[index - 1] = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture, image_bounding_dims: image_bounding_dims, pixel_range: pixel_range, tone_mapping: tone_mapping };
+    imageContainer[index - 1] = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture, image_bounding_dims: image_bounding_dims, pixel_range: pixel_range, tone_mapping: tone_mapping, viewportContainer: null, first: false };
 
     //next display the image
     if (va_count == 1) {
@@ -14142,11 +14144,18 @@ function refresh_tiles(index) {
     if (imageContainer[index - 1] == null)
         return;
     else {
-        // remove a viewport from the imageContainer
-        imageContainer[index - 1].viewportContainer = null;
+        if (imageContainer[index - 1].viewportContainer != null) {
+            // remove a viewport from the imageContainer
+            imageContainer[index - 1].viewportContainer = null;
 
-        // refresh the image
-        imageContainer[index - 1].refresh = true;
+            clear_webgl_image_buffers(index);
+
+            // re-display the image
+            init_webgl_image_buffers(index);
+        } else {
+            // refresh the image
+            imageContainer[index - 1].refresh = true;
+        }
     }
 }
 
