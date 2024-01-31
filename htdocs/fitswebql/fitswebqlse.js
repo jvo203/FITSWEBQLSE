@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-30.0";
+    return "JS2024-01-31.0";
 }
 
 function uuidv4() {
@@ -3058,7 +3058,7 @@ function clear_webgl_internal_buffers(image) {
 }
 
 function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
-    // console.log("process_hdr_viewport: #" + index);
+    console.log("process_hdr_viewport: #" + index);
     if (streaming || moving || windowLeft)
         return;
 
@@ -3111,6 +3111,16 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
                 offset = (offset + 4) | 0;
             }
 
+        } else {
+            let viewportContainer = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture };
+
+            if (imageContainer[index - 1] != null) {
+                // attach the viewportContainer to the imageContainer
+                imageContainer[index - 1].viewportContainer = viewportContainer;
+
+                // refresh the image
+                imageContainer[index - 1].refresh = true;
+            }
         }
     }
 
@@ -14131,8 +14141,13 @@ function refresh_tiles(index) {
 
     if (imageContainer[index - 1] == null)
         return;
-    else
+    else {
+        // remove a viewport from the imageContainer
+        imageContainer[index - 1].viewportContainer = null;
+
+        // refresh the image
         imageContainer[index - 1].refresh = true;
+    }
 }
 
 function tiles_dragstarted(event) {
