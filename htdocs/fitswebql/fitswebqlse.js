@@ -3608,10 +3608,19 @@ function webgl_image_renderer(index, gl, width, height) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-    if (webgl2)
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, image.width, image.height, 0, gl.RG, gl.FLOAT, image.texture);
-    else
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, image.width, image.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, image.texture);
+    var container = image.viewportContainer;
+
+    if (container == null) {
+        if (webgl2)
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, image.width, image.height, 0, gl.RG, gl.FLOAT, image.texture);
+        else
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, image.width, image.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, image.texture);
+    } else {
+        if (webgl2)
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, container.width, container.height, 0, gl.RG, gl.FLOAT, container.texture);
+        else
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, container.width, container.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, container.texture);
+    }
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -3678,6 +3687,13 @@ function webgl_image_renderer(index, gl, width, height) {
                 _width = view.width / image.width;
                 _height = view.height / image.height;
             }
+
+        if (container != null) {
+            xmin = 0;
+            ymin = 0;
+            _width = 1;
+            _height = 1;
+        }
 
         console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
