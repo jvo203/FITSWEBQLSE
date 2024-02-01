@@ -1,6 +1,6 @@
 ## [5.0.54] - 2024-01-29
 
-* corrected a problem with spectral lines (molecules) not being displayed after clicking _*F_REST*_ in a web browser
+* corrected a problem with spectral lines (molecules) not being displayed after modifying _*V_SRC*_ and/or clicking _*F_REST*_ in a web browser
 * updated the server-side _*mongoose*_ C networking library and replaced a UDP wake-up helper with a new _*mg_wakeup()*_ function from _*mongoose*_
 * the server-side WebSockets: separated the event loops for real-time spectra/video and PV-Diagram WebSocket messages
 * .tar.gz FUGIN multiple-dataset partial FITS downloads compressed with a microtar ANSI C library
