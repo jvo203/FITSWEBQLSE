@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-01-31.0";
+    return "JS2024-02-01.0";
 }
 
 function uuidv4() {
