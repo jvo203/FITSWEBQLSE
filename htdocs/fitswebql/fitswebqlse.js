@@ -5248,6 +5248,7 @@ async function open_websocket_connection(_datasetId, index) {
                                     let dims = { x1: tmp.x1, y1: height - tmp.y1 - tmp.height, width: tmp.width, height: tmp.height };
 
                                     videoFrame[index - 1] = {
+                                        first: true,
                                         width: width,
                                         height: height,
                                         padded_width: data.padded_width,
