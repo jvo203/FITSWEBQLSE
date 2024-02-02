@@ -3752,7 +3752,7 @@ function process_video(index) {
     if (va_count > 1 && !composite_view) {
         //place imageCanvas onto a corresponding image_rectangle (should really be using video_rectangle here...)
 
-        var c = document.getElementById('HTMLCanvas' + index);
+        var c = document.getElementById('VideoCanvas' + index);
         var width = c.width;
         var height = c.height;
         var ctx = c.getContext("2d");
@@ -10014,14 +10014,27 @@ function x_axis_mouseenter(offset) {
 
     //clear the VideoCanvas
     requestAnimationFrame(function () {
-        var c = document.getElementById('VideoCanvas');
-        var ctx = c.getContext("2d");
+        if (va_count > 1 && !composite_view) {
+            for (let index = 0; index < va_count; index++) {
+                var c = document.getElementById('VideoCanvas' + (index + 1));
+                var ctx = c.getContext("2d");
 
-        var width = c.width;
-        var height = c.height;
+                var width = c.width;
+                var height = c.height;
 
-        ctx.clearRect(0, 0, width, height);
-        ctx.globalAlpha = 1.0;
+                ctx.clearRect(0, 0, width, height);
+                ctx.globalAlpha = 0.0;
+            }
+        } else {
+            var c = document.getElementById('VideoCanvas');
+            var ctx = c.getContext("2d");
+
+            var width = c.width;
+            var height = c.height;
+
+            ctx.clearRect(0, 0, width, height);
+            ctx.globalAlpha = 1.0;
+        }
     });
 
     if (va_count == 1) {
@@ -10164,14 +10177,27 @@ function x_axis_mouseleave() {
     d3.select("#lower").attr("pointer-events", "auto");
 
     requestAnimationFrame(function () {
-        var c = document.getElementById('VideoCanvas');
-        var ctx = c.getContext("2d");
+        if (va_count > 1 && !composite_view) {
+            for (let index = 0; index < va_count; index++) {
+                var c = document.getElementById('VideoCanvas' + (index + 1));
+                var ctx = c.getContext("2d");
 
-        var width = c.width;
-        var height = c.height;
+                var width = c.width;
+                var height = c.height;
 
-        ctx.clearRect(0, 0, width, height);
-        ctx.globalAlpha = 0.0;
+                ctx.clearRect(0, 0, width, height);
+                ctx.globalAlpha = 0.0;
+            }
+        } else {
+            var c = document.getElementById('VideoCanvas');
+            var ctx = c.getContext("2d");
+
+            var width = c.width;
+            var height = c.height;
+
+            ctx.clearRect(0, 0, width, height);
+            ctx.globalAlpha = 0.0;
+        }
     });
 
     if (va_count == 1) {
@@ -18885,6 +18911,16 @@ async function mainRenderer() {
             .attr("width", width)
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: ' + (va_count + 2));
+
+        if (va_count > 1) {
+            for (let index = 0; index < va_count; index++) {
+                d3.select("#mainDiv").append("canvas")
+                    .attr("id", "VideoCanvas" + (index + 1))
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: ' + (20 + index + 1));
+            }
+        }
 
         d3.select("#mainDiv").append("canvas")
             .attr("id", "VideoCanvas")
