@@ -67,7 +67,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
     tar zxvf libmicrohttpd-latest.tar.gz
-    cd libmicrohttpd-0.9.77
+    cd libmicrohttpd-1.0.0
     ./configure
     make
     sudo make install
