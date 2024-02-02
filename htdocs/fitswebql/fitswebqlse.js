@@ -10016,24 +10016,32 @@ function x_axis_mouseenter(offset) {
     requestAnimationFrame(function () {
         if (va_count > 1 && !composite_view) {
             for (let index = 0; index < va_count; index++) {
-                var c = document.getElementById('VideoCanvas' + (index + 1));
-                var ctx = c.getContext("2d");
+                var gl = imageContainer[index].gl;
 
-                var width = c.width;
-                var height = c.height;
+                if (gl !== undefined && gl != null) {
+                    gl.clearColor(0, 0, 0, 0);
+                    gl.clear(gl.COLOR_BUFFER_BIT);
+                }
 
-                ctx.clearRect(0, 0, width, height);
-                ctx.globalAlpha = 0.0;
+                clear_webgl_image_buffers(index + 1);
             }
         } else {
-            var c = document.getElementById('VideoCanvas');
-            var ctx = c.getContext("2d");
+            var gl = null;
 
-            var width = c.width;
-            var height = c.height;
+            if (!composite_view)
+                gl = imageContainer[va_count - 1].gl;
+            else
+                gl = compositeImage.gl;
 
-            ctx.clearRect(0, 0, width, height);
-            ctx.globalAlpha = 1.0;
+            if (gl !== undefined && gl != null) {
+                gl.clearColor(0, 0, 0, 0);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+            }
+
+            if (!composite_view)
+                clear_webgl_image_buffers(va_count);
+            else
+                clear_webgl_composite_image_buffers();
         }
     });
 
@@ -10063,8 +10071,6 @@ function x_axis_mouseenter(offset) {
         var rect = document.getElementById('mainDiv').getBoundingClientRect();
         var width = Math.round(rect.width - 20);
         var height = Math.round(rect.height - 20);
-
-        let ui = '&width=' + width + '&height=' + height;
 
         if (composite_view) {
             var request = {
@@ -10179,24 +10185,15 @@ function x_axis_mouseleave() {
     requestAnimationFrame(function () {
         if (va_count > 1 && !composite_view) {
             for (let index = 0; index < va_count; index++) {
-                var c = document.getElementById('VideoCanvas' + (index + 1));
-                var ctx = c.getContext("2d");
-
-                var width = c.width;
-                var height = c.height;
-
-                ctx.clearRect(0, 0, width, height);
-                ctx.globalAlpha = 0.0;
+                // re-display the image
+                init_webgl_image_buffers(index + 1);
             }
         } else {
-            var c = document.getElementById('VideoCanvas');
-            var ctx = c.getContext("2d");
-
-            var width = c.width;
-            var height = c.height;
-
-            ctx.clearRect(0, 0, width, height);
-            ctx.globalAlpha = 0.0;
+            // re-display the image
+            if (!composite_view)
+                init_webgl_image_buffers(va_count);
+            else
+                init_webgl_composite_image_buffers();
         }
     });
 
