@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-01.0";
+    return "JS2024-02-02.0";
 }
 
 function uuidv4() {
@@ -12413,10 +12413,8 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
             y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
 
-            let x0 = x;
-            let y0 = y;
-            zoom_dims.x0 = x0;
-            zoom_dims.y0 = y0;
+            zoom_dims.x0 = Math.round(x);
+            zoom_dims.y0 = Math.round(y);
             zoom_dims.rect = rect;
             zoom_dims.mouse_position = mouse_position;
 
@@ -14361,8 +14359,8 @@ function tiles_zoom(event) {
         x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
         y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
 
-        cross_x0 = x;
-        cross_y0 = y;
+        cross_x0 = Math.round(x);
+        cross_y0 = Math.round(y);
 
         if (dx1 != 0) {
             zoom_dims.x0 = cross_x0;
