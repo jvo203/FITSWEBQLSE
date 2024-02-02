@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-02.1";
+    return "JS2024-02-02.2";
 }
 
 function uuidv4() {
@@ -10250,8 +10250,9 @@ function x_axis_mouseleave() {
 
             video_stack[index] = [];
 
-            if (va_count > 1)
-                refresh_tiles(index + 1);
+            // not needed anymore (handled above)
+            /*if (va_count > 1)
+                refresh_tiles(index + 1);*/
         }
 
         try {
