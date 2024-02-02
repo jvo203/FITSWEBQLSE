@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-02.0";
+    return "JS2024-02-02.1";
 }
 
 function uuidv4() {
@@ -18890,7 +18890,7 @@ async function mainRenderer() {
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 0');
 
-        if (va_count > 1) {
+        if (va_count > 1 && !composite_view) {
             for (let index = 0; index < va_count; index++) {
                 d3.select("#mainDiv").append("canvas")
                     .attr("id", "HTMLCanvas" + (index + 1))
@@ -18911,22 +18911,6 @@ async function mainRenderer() {
             .attr("width", width)
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: ' + (va_count + 2));
-
-        if (va_count > 1) {
-            for (let index = 0; index < va_count; index++) {
-                d3.select("#mainDiv").append("canvas")
-                    .attr("id", "VideoCanvas" + (index + 1))
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: ' + (20 + index + 1));
-            }
-        }
-
-        d3.select("#mainDiv").append("canvas")
-            .attr("id", "VideoCanvas")
-            .attr("width", width)
-            .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 49');
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "ContourSVG")
