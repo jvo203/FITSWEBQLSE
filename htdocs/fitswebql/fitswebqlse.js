@@ -4858,8 +4858,6 @@ async function open_websocket_connection(_datasetId, index) {
                                 else
                                     fill = 255;
 
-                                var data;
-
                                 try {
                                     // contouring
                                     var contours = 0;
@@ -4877,17 +4875,16 @@ async function open_websocket_connection(_datasetId, index) {
                                     }
 
                                     var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, _colourmap, fill, contours);
-                                    data = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
+                                    // data = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
+                                    videoFrame[index - 1].rgba = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // receive RGBA texture from the WASM module
+
+                                    requestAnimationFrame(function () {
+                                        process_hdr_video(index)
+                                    });
                                 } catch (e) {
-                                    //console.log(e);
+                                    console.log(e);
                                 };
 
-                                var img = new ImageData(data, videoFrame[index - 1].width, videoFrame[index - 1].height);
-                                videoFrame[index - 1].img = img;
-
-                                requestAnimationFrame(function () {
-                                    process_video(index)
-                                });
                             }
                             else {
                                 try {
