@@ -20,7 +20,7 @@ static AVPacket **avpkt = NULL;
 
 extern AVCodec ff_hevc_decoder;
 
-void apply_contour(unsigned char *canvas, unsigned int w, unsigned int h, const unsigned char *luma, unsigned int stride_luma, const unsigned char *alpha, unsigned int stride_alpha, int nc);
+void apply_contour(float *canvas, unsigned int w, unsigned int h, const unsigned char *luma, unsigned int stride_luma, const unsigned char *alpha, unsigned int stride_alpha, int nc);
 
 void hevc_init(int va_count)
 {
@@ -271,7 +271,7 @@ double hevc_decode_nal_unit(int index, const unsigned char *data, size_t data_le
     return elapsed;
 }
 
-void apply_contour(unsigned char *canvas, unsigned int w, unsigned int h, const unsigned char *luma, unsigned int stride_luma, const unsigned char *alpha, unsigned int stride_alpha, int nc)
+void apply_contour(float *canvas, unsigned int w, unsigned int h, const unsigned char *luma, unsigned int stride_luma, const unsigned char *alpha, unsigned int stride_alpha, int nc)
 {
     if (canvas == NULL || luma == NULL || alpha == NULL)
         return;

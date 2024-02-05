@@ -8,6 +8,6 @@ int conrec(float **d,
            float *y,
            int nc,
            float *z,
-           unsigned char *canvas,
+           float *canvas,
            int img_width,
            int img_height);

@@ -38,7 +38,7 @@ MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 // set a single pixel on an RGBA canvas
 // was int x, int y but changed to int y, int x (CONREC uses a reversed order? FORTRAN?)
-void set_pixel(unsigned char *buffer, int width, int height, int y, int x, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+void set_pixel(float *buffer, int width, int height, int y, int x, float r, float g, float b, float a)
 {
     if (x < 0 || x >= width || y < 0 || y >= height)
     {
@@ -55,7 +55,7 @@ void set_pixel(unsigned char *buffer, int width, int height, int y, int x, unsig
 }
 
 // downloaded from: https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
-void line(unsigned char *buffer, int width, int height, int x0, int y0, int x1, int y1, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+void line(float *buffer, int width, int height, int x0, int y0, int x1, int y1, float r, float g, float b, float a)
 {
 
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
@@ -180,7 +180,7 @@ int conrec(float **d,
            float *y,
            int nc,
            float *z,
-           unsigned char *canvas,
+           float *canvas,
            int img_width,
            int img_height)
 // d               ! matrix of data to contour
@@ -396,7 +396,7 @@ int conrec(float **d,
                                 /*set_pixel(canvas, img_width, img_height, roundf(x1), roundf(y1), 255, 204, 0, 255);
                                 set_pixel(canvas, img_width, img_height, roundf(x2), roundf(y2), 255, 204, 0, 255);*/
                                 // draw_line(canvas, img_width, img_height, x1, y1, x2, y2, 255, 204, 0, 255);
-                                line(canvas, img_width, img_height, roundf(x1), roundf(y1), round(x2), round(y2), 0, 0, 0, 255);
+                                line(canvas, img_width, img_height, roundf(x1), roundf(y1), round(x2), round(y2), 0, 0, 0, 1);
                             }
                         }
                     }
