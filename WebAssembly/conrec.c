@@ -393,9 +393,6 @@ int conrec(float **d,
                                 line_count++;
                                 // printf("%f %f %f %f %f\n", x1, y1, x2, y2, z[k]);
                                 // printf("%f %f %f %f %d\n", x1, y1, x2, y2, k);
-                                /*set_pixel(canvas, img_width, img_height, roundf(x1), roundf(y1), 255, 204, 0, 255);
-                                set_pixel(canvas, img_width, img_height, roundf(x2), roundf(y2), 255, 204, 0, 255);*/
-                                // draw_line(canvas, img_width, img_height, x1, y1, x2, y2, 255, 204, 0, 255);
                                 line(canvas, img_width, img_height, roundf(x1), roundf(y1), round(x2), round(y2), 0, 0, 0, 1);
                             }
                         }
