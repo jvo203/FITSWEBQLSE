@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-05.0";
+    return "JS2024-02-05.1";
 }
 
 function uuidv4() {
@@ -3059,7 +3059,7 @@ function clear_webgl_internal_buffers(image) {
 
 function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     // console.log("process_hdr_viewport: #" + index);
-    if (streaming || moving || windowLeft)
+    if (streaming || moving || dragging || windowLeft)
         return;
 
     // combine pixels with a mask	
@@ -14315,10 +14315,14 @@ function tiles_zoomstarted(event) {
         zoom_dims.dims.y1 += (1.0 - zoom_dims.scale) * zoom_dims.dy;
         zoom_dims.dy = 0;
     }
+
+    dragging = true;
 }
 
 function tiles_zoomended(event) {
     console.log("zoom end");
+
+    dragging = false;
 
     // do not wait, call tileTimeout immediately
     tileTimeout();
