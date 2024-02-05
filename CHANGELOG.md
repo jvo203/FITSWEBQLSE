@@ -1,3 +1,7 @@
+## [5.0.55] - 2024-02-05
+
+* added a 120s timeout to libmicrohttpd start-up flags, removed MHD_USE_TURBO
+
 ## [5.0.54] - 2024-01-29
 
 * corrected a problem with spectral lines (molecules) not being displayed after modifying _*V_SRC*_ and/or clicking _*F_REST*_ in a web browser
