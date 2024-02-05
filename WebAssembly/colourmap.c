@@ -1,9 +1,10 @@
 #include "colourmap.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
-void apply_colourmap(unsigned char *canvas, int w, int h, const unsigned char *luma, int stride_luma, const unsigned char *alpha, int stride_alpha, bool invert, const float *r, const float *g, const float *b, unsigned char fill)
+void apply_colourmap(float *canvas, int w, int h, const unsigned char *luma, int stride_luma, const unsigned char *alpha, int stride_alpha, bool invert, const float *r, const float *g, const float *b, float fill)
 {
     if (canvas == NULL || luma == NULL || alpha == NULL)
         return;
@@ -31,9 +32,9 @@ void apply_colourmap(unsigned char *canvas, int w, int h, const unsigned char *l
             float frac = pos - floorf(pos);
             int x0 = floorf(pos);
 
-            unsigned char r_pixel = 0xFF * (r[x0] + (r[x0 + 1] - r[x0]) * frac);
-            unsigned char g_pixel = 0xFF * (g[x0] + (g[x0 + 1] - g[x0]) * frac);
-            unsigned char b_pixel = 0xFF * (b[x0] + (b[x0 + 1] - b[x0]) * frac);
+            float r_pixel = r[x0] + (r[x0 + 1] - r[x0]) * frac;
+            float g_pixel = g[x0] + (g[x0 + 1] - g[x0]) * frac;
+            float b_pixel = b[x0] + (b[x0 + 1] - b[x0]) * frac;
 
             r_pixel = (mask == 0) ? fill : r_pixel;
             g_pixel = (mask == 0) ? fill : g_pixel;
@@ -42,7 +43,7 @@ void apply_colourmap(unsigned char *canvas, int w, int h, const unsigned char *l
             canvas[dst_offset++] = r_pixel;
             canvas[dst_offset++] = g_pixel;
             canvas[dst_offset++] = b_pixel;
-            canvas[dst_offset++] = 255; // the alpha channel
+            canvas[dst_offset++] = 1.0f; // the alpha channel
         }
     }
 }
@@ -58,7 +59,7 @@ float clamp(float x, float min, float max)
     return x;
 }
 
-void apply_amber(unsigned char *canvas, int w, int h, const unsigned char *luma, int stride_luma, const unsigned char *alpha, int stride_alpha, unsigned char fill)
+void apply_amber(float *canvas, int w, int h, const unsigned char *luma, int stride_luma, const unsigned char *alpha, int stride_alpha, float fill)
 {
     if (canvas == NULL || luma == NULL || alpha == NULL)
         return;
@@ -76,19 +77,19 @@ void apply_amber(unsigned char *canvas, int w, int h, const unsigned char *luma,
 
         for (int i = 0; i < w; i++)
         {
-            unsigned char pixel = luma[luma_offset++];
+            float pixel = luma[luma_offset++] / 255.0f;
             unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;
             pixel = (mask == 0) ? fill : pixel;
 
             canvas[dst_offset++] = pixel;
-            canvas[dst_offset++] = clamp(roundf(pixel * 204.0f / 255.0f), 0.0f, 255.0f);
-            canvas[dst_offset++] = 0;
-            canvas[dst_offset++] = 255; // the alpha channel
+            canvas[dst_offset++] = clamp(roundf(pixel * 204.0f / 255.0f), 0.0f, 1.0f);
+            canvas[dst_offset++] = 0.0f;
+            canvas[dst_offset++] = 1.0f; // the alpha channel
         }
     }
 }
 
-void apply_greyscale(unsigned char *canvas, int w, int h, const unsigned char *luma, int stride_luma, const unsigned char *alpha, int stride_alpha, bool invert, unsigned char fill)
+void apply_greyscale(float *canvas, int w, int h, const unsigned char *luma, int stride_luma, const unsigned char *alpha, int stride_alpha, bool invert, float fill)
 {
     if (canvas == NULL || luma == NULL || alpha == NULL)
         return;
@@ -106,19 +107,19 @@ void apply_greyscale(unsigned char *canvas, int w, int h, const unsigned char *l
 
         for (int i = 0; i < w; i++)
         {
-            unsigned char pixel = invert ? (255 - luma[luma_offset++]) : luma[luma_offset++];
+            float pixel = invert ? (1.0f - luma[luma_offset++] / 255.0f) : luma[luma_offset++] / 255.0f;
             unsigned char mask = alpha[alpha_offset++] < 128 ? 0 : 255;
             pixel = (mask == 0) ? fill : pixel;
 
             canvas[dst_offset++] = pixel;
             canvas[dst_offset++] = pixel;
             canvas[dst_offset++] = pixel;
-            canvas[dst_offset++] = 255; // the alpha channel
+            canvas[dst_offset++] = 1.0f; // the alpha channel
         }
     }
 }
 
-void apply_composite(unsigned char *canvas, int w, int h, const unsigned char *_r, const unsigned char *_g, const unsigned char *_b, int stride_r, int stride_g, int stride_b)
+void apply_composite(float *canvas, int w, int h, const unsigned char *_r, const unsigned char *_g, const unsigned char *_b, int stride_r, int stride_g, int stride_b)
 {
     if (canvas == NULL || _r == NULL || _g == NULL || _b == NULL)
         return;
@@ -134,10 +135,10 @@ void apply_composite(unsigned char *canvas, int w, int h, const unsigned char *_
 
         for (int i = 0; i < w; i++)
         {
-            canvas[dst_offset++] = _r[r_offset++];
-            canvas[dst_offset++] = _g[g_offset++];
-            canvas[dst_offset++] = _b[b_offset++];
-            canvas[dst_offset++] = 255; // the alpha channel
+            canvas[dst_offset++] = _r[r_offset++] / 255.0f;
+            canvas[dst_offset++] = _g[g_offset++] / 255.0f;
+            canvas[dst_offset++] = _b[b_offset++] / 255.0f;
+            canvas[dst_offset++] = 1.0f; // the alpha channel
         }
     }
 }
