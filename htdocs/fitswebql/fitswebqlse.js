@@ -4854,9 +4854,9 @@ async function open_websocket_connection(_datasetId, index) {
                                 var data, fill;
 
                                 if (theme == "dark")
-                                    fill = 0;
+                                    fill = 0.0;
                                 else
-                                    fill = 255;
+                                    fill = 1.0;
 
                                 try {
                                     // contouring
