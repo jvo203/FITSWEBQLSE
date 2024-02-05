@@ -3729,6 +3729,12 @@ function webgl_image_renderer(index, gl, width, height) {
     image.loopId = requestAnimationFrame(image_rendering_loop);
 }
 
+function process_hdr_video(index) {
+    if (!streaming || videoFrame[index - 1] == null || videoFrame[index - 1].rgba == null)
+        return;
+
+}
+
 function process_video(index) {
     if (!streaming || videoFrame[index - 1] == null || videoFrame[index - 1].img == null)
         return;
@@ -5242,15 +5248,12 @@ async function open_websocket_connection(_datasetId, index) {
 
                                 if (imageFrame != null) {
                                     let tmp = imageFrame.image_bounding_dims;
-                                    let dims = { x1: tmp.x1, y1: height - tmp.y1 - tmp.height, width: tmp.width, height: tmp.height };
+                                    let dims = { x1: tmp.x1, y1: tmp.y1, width: tmp.width, height: tmp.height };
 
                                     videoFrame[index - 1] = {
                                         first: true,
                                         width: width,
                                         height: height,
-                                        padded_width: data.padded_width,
-                                        padded_height: data.padded_height,
-                                        img: null,
                                         scaleX: imageFrame.width / width,
                                         scaleY: imageFrame.height / height,
                                         image_bounding_dims: dims,
@@ -18666,6 +18669,7 @@ async function mainRenderer() {
         initKalmanFilter = false;
         windowLeft = false;
         streaming = false;
+        dragging = false;
         video_playback = false;
         video_offset = null;
         video_timeout = -1;
