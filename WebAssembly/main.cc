@@ -473,7 +473,7 @@ void hevc_destroy_frame(int va_count)
     printf("[hevc_destroy_frame] done.\n");
 }
 
-/*val*/ buffer hevc_decode_frame(unsigned int _w, unsigned int _h, std::string const &bytes, int index, std::string const &colourmap, unsigned char fill, int contours)
+/*val*/ buffer hevc_decode_frame(unsigned int _w, unsigned int _h, std::string const &bytes, int index, std::string const &colourmap, float fill, int contours)
 {
     buffer wasmBuffer = {0, 0};
 
