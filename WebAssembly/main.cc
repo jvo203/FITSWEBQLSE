@@ -439,11 +439,14 @@ void hevc_init_frame(int va_count, int width, int height)
 
     if (canvasBuffer == NULL)
     {
-        canvasBuffer = (unsigned char *)malloc(len);
+        canvasBuffer = (float *)calloc(len, sizeof(float));
 
         if (canvasBuffer != NULL)
         {
-            memset(canvasBuffer, 0, len);
+            // initialise canvasBuffer with 0.0f
+            for (size_t i = 0; i < len; i++)
+                canvasBuffer[i] = 0.0f;
+
             canvasLength = len;
         }
 
