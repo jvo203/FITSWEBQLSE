@@ -1914,31 +1914,50 @@ function createProgram(gl, vertexShaderCode, fragmentShaderCode) {
     return program;
 };
 
-function webgl_video_renderer(gl, container, height) {
-    let image = videoFrame[va_count - 1];
+function webgl_video_renderer(index, gl, width, height) {
+    let image = videoFrame[index - 1];
 
     if (image == null) {
-        console.log("webgl_viewport_renderer: null image");
+        console.log("webgl_video_renderer: null video");
         return;
     }
+
+    var image_bounding_dims = image.image_bounding_dims;
+
+    if (zoom_dims != null)
+        if (zoom_dims.view != null) {
+            image_bounding_dims = zoom_dims.view;
+        }
+
+    var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
+
+    if (va_count > 1) {
+        if (va_count == 2)
+            scale = 0.8 * scale;
+        else if (va_count == 4)
+            scale = 0.6 * scale;
+        else if (va_count == 5)
+            scale = 0.5 * scale;
+        else if (va_count == 6)
+            scale = 0.45 * scale;
+        else if (va_count == 7)
+            scale = 0.45 * scale;
+        else
+            scale = 2 * scale / va_count;
+    }
+
+    var img_width = Math.floor(scale * image_bounding_dims.width);
+    var img_height = Math.floor(scale * image_bounding_dims.height);
+    // console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
+
+    var image_position = get_image_position(index, width, height);
+    var posx = image_position.posx;
+    var posy = height - image_position.posy;
+    console.log("index:", index, "image_position:", image_position);
 
     // setup GLSL program
     var vertexShaderCode = document.getElementById("vertex-shader").text;
     var fragmentShaderCode = document.getElementById("rgba-shader").text;
-
-    if (webgl2)
-        fragmentShaderCode = fragmentShaderCode + "\ncolour.a = colour.g;\n";
-
-    fragmentShaderCode += document.getElementById(colourmap + "-shader").text;
-
-    // grey-out pixels for alpha = 0.0
-    var pos = fragmentShaderCode.lastIndexOf("}");
-    fragmentShaderCode = fragmentShaderCode.insert_at(pos, "if (gl_FragColor.a == 0.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.3);\n");
-
-    if (zoom_shape == "circle") {
-        pos = fragmentShaderCode.lastIndexOf("}");
-        fragmentShaderCode = fragmentShaderCode.insert_at(pos, "float r_x = v_texcoord.z;\n float r_y = v_texcoord.w;\n if (r_x * r_x + r_y * r_y > 1.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.0);\n");
-    }
 
     // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
     if (webgl2) {
@@ -1967,6 +1986,8 @@ function webgl_video_renderer(gl, container, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
+    console.log("webgl_video_renderer: vertexShaderCode: ", vertexShaderCode);
+    console.log("webgl_video_renderer: fragmentShaderCode: ", fragmentShaderCode);
     var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
@@ -2007,8 +2028,6 @@ function webgl_video_renderer(gl, container, height) {
     if (status != gl.FRAMEBUFFER_COMPLETE) {
         console.error(status);
     }
-
-    let index = va_count;
 
     //WebGL how to convert from clip space to pixels		
     let px = viewport_zoom_settings.px;
