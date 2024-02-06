@@ -1986,8 +1986,6 @@ function webgl_video_renderer(index, gl, width, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
-    console.log("webgl_video_renderer: vertexShaderCode: ", vertexShaderCode);
-    console.log("webgl_video_renderer: fragmentShaderCode: ", fragmentShaderCode);
     var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
@@ -2020,9 +2018,9 @@ function webgl_video_renderer(index, gl, width, height) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
     if (webgl2)
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, container.width, container.height, 0, gl.RG, gl.FLOAT, container.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
     else
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, container.width, container.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, container.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, image.width, image.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, image.texture);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
