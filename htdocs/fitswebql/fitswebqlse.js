@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-05.1";
+    return "JS2024-02-06.0";
 }
 
 function uuidv4() {
@@ -3023,12 +3023,70 @@ function init_webgl_image_buffers(index) {
     }
 }
 
+function init_webgl_video_buffers(index) {
+    //place the image onto the main canvas
+    if (va_count == 1)
+        var canvas = document.getElementById('HTMLCanvas');
+    else
+        var canvas = document.getElementById('HTMLCanvas' + index);
+
+    canvas.style.display = "block";// a hack needed by Apple Safari
+    var width = canvas.width;
+    var height = canvas.height;
+
+    if (webgl1 || webgl2) {
+        canvas.addEventListener("webglcontextlost", function (event) {
+            event.preventDefault();
+            console.error("HTMLCanvas: webglcontextlost");
+        }, false);
+
+        canvas.addEventListener(
+            "webglcontextrestored", function () {
+                console.log("HTMLCanvas: webglcontextrestored");
+                init_webgl_video_buffers(index);
+            }, false);
+    }
+
+    if (webgl2) {
+        var ctx = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
+        videoFrame[index - 1].gl = ctx;
+        // console.log("init_webgl is using the WebGL2 context.");
+
+        // enable floating-point textures filtering			
+        ctx.getExtension('OES_texture_float_linear');
+
+        // needed by gl.checkFramebufferStatus
+        ctx.getExtension('EXT_color_buffer_float');
+
+        // call the common WebGL renderer
+        webgl_video_renderer(index, ctx, width, height);
+    } else if (webgl1) {
+        var ctx = canvas.getContext("webgl", { preserveDrawingBuffer: true });
+        videoFrame[index - 1].gl = ctx;
+        // console.log("init_webgl is using the WebGL1 context.");
+
+        // enable floating-point textures
+        ctx.getExtension('OES_texture_float');
+        ctx.getExtension('OES_texture_float_linear');
+
+        // call the common WebGL renderer
+        webgl_video_renderer(index, ctx, width, height);
+    } else {
+        console.log("WebGL not supported by your browser, falling back onto HTML 2D Canvas (not implemented yet).");
+        return;
+    }
+}
+
 function clear_webgl_composite_image_buffers() {
     clear_webgl_internal_buffers(compositeImage);
 }
 
 function clear_webgl_image_buffers(index) {
     clear_webgl_internal_buffers(imageContainer[index - 1]);
+}
+
+function clear_webgl_video_buffers(index) {
+    clear_webgl_internal_buffers(videoFrame[index - 1]);
 }
 
 function clear_webgl_internal_buffers(image) {
@@ -3732,6 +3790,13 @@ function webgl_image_renderer(index, gl, width, height) {
 function process_hdr_video(index) {
     if (!streaming || videoFrame[index - 1] == null || videoFrame[index - 1].rgba == null)
         return;
+
+    if (videoFrame[index - 1].first) {
+        // init the video WebGL renderer
+        init_webgl_video_buffers(index);
+
+        videoFrame[index - 1].first = false;
+    }
 
 }
 
