@@ -1914,6 +1914,176 @@ function createProgram(gl, vertexShaderCode, fragmentShaderCode) {
     return program;
 };
 
+function webgl_video_renderer(gl, container, height) {
+    let image = videoFrame[va_count - 1];
+
+    if (image == null) {
+        console.log("webgl_viewport_renderer: null image");
+        return;
+    }
+
+    // setup GLSL program
+    var vertexShaderCode = document.getElementById("vertex-shader").text;
+    var fragmentShaderCode = document.getElementById("rgba-shader").text;
+
+    if (webgl2)
+        fragmentShaderCode = fragmentShaderCode + "\ncolour.a = colour.g;\n";
+
+    fragmentShaderCode += document.getElementById(colourmap + "-shader").text;
+
+    // grey-out pixels for alpha = 0.0
+    var pos = fragmentShaderCode.lastIndexOf("}");
+    fragmentShaderCode = fragmentShaderCode.insert_at(pos, "if (gl_FragColor.a == 0.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.3);\n");
+
+    if (zoom_shape == "circle") {
+        pos = fragmentShaderCode.lastIndexOf("}");
+        fragmentShaderCode = fragmentShaderCode.insert_at(pos, "float r_x = v_texcoord.z;\n float r_y = v_texcoord.w;\n if (r_x * r_x + r_y * r_y > 1.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.0);\n");
+    }
+
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    if (webgl2) {
+        var prefix = "#version 300 es\n";
+        vertexShaderCode = prefix + vertexShaderCode;
+        fragmentShaderCode = prefix + fragmentShaderCode;
+
+        // attribute -> in
+        vertexShaderCode = vertexShaderCode.replace(/attribute/g, "in");
+        fragmentShaderCode = fragmentShaderCode.replace(/attribute/g, "in");
+
+        // varying -> out
+        vertexShaderCode = vertexShaderCode.replace(/varying/g, "out");
+
+        // varying -> in
+        fragmentShaderCode = fragmentShaderCode.replace(/varying/g, "in");
+
+        // texture2D -> texture
+        fragmentShaderCode = fragmentShaderCode.replace(/texture2D/g, "texture");
+
+        // replace gl_FragColor with a custom variable, i.e. texColour
+        fragmentShaderCode = fragmentShaderCode.replace(/gl_FragColor/g, "texColour");
+
+        // add the definition of texColour
+        var pos = fragmentShaderCode.indexOf("void main()");
+        fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
+    }
+
+    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
+
+    // look up where the vertex data needs to go.
+    var positionLocation = gl.getAttribLocation(program, "a_position");
+
+    // Create a position buffer
+    var positionBuffer = gl.createBuffer();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    // Put a unit quad in the buffer
+    var positions = [
+        -1, -1,
+        -1, 1,
+        1, -1,
+        1, -1,
+        -1, 1,
+        1, 1,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    // load a texture
+    var tex = gl.createTexture();
+
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    /*gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);*/
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    if (webgl2)
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, container.width, container.height, 0, gl.RG, gl.FLOAT, container.texture);
+    else
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, container.width, container.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, container.texture);
+
+    var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (status != gl.FRAMEBUFFER_COMPLETE) {
+        console.error(status);
+    }
+
+    let index = va_count;
+
+    //WebGL how to convert from clip space to pixels		
+    let px = viewport_zoom_settings.px;
+    let py = viewport_zoom_settings.py;
+    let viewport_size = viewport_zoom_settings.zoomed_size;
+    py = height - py - viewport_size;
+    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 0, Math.round(viewport_size) - 0);
+
+    // Clear the canvas
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // the image bounding box
+    var locationOfBox = gl.getUniformLocation(program, "box");
+
+    // image tone mapping
+    var locationOfParams = gl.getUniformLocation(program, "params");
+
+    // drawRegion (execute the GLSL program)
+    // Tell WebGL to use our shader program pair
+    gl.useProgram(program);
+
+    // show the entire viewport texture
+    let xmin = 0.0;
+    let ymin = 0.0;
+    let _width = 1.0;
+    let _height = 1.0;
+
+    gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
+
+    // get the multiplier
+    var noise_sensitivity = document.getElementById('sensitivity' + index).value;
+    var multiplier = get_noise_sensitivity(noise_sensitivity);
+
+    if (image.tone_mapping.flux == "legacy") {
+        var params = [image.tone_mapping.black, image.tone_mapping.white, image.tone_mapping.lmin, image.tone_mapping.lmax];
+        gl.uniform4fv(locationOfParams, params);
+    } else {
+        if (image.tone_mapping.flux == "ratio")
+            var params = [image.tone_mapping.median, multiplier * image.tone_mapping.ratio_sensitivity, image.tone_mapping.black, image.tone_mapping.white];
+        else
+            var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, image.tone_mapping.black, image.tone_mapping.white];
+
+        gl.uniform4fv(locationOfParams, params);
+    }
+
+    // Setup the attributes to pull data from our buffers
+    gl.enableVertexAttribArray(positionLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    // execute the GLSL program
+    // draw the quad (2 triangles, 6 vertices)
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    invalidateViewport = true;
+
+    // clean-up WebGL buffers etc.
+
+    // position buffer	
+    if (positionBuffer != undefined)
+        gl.deleteBuffer(positionBuffer);
+
+    // texture	
+    if (tex != undefined)
+        gl.deleteTexture(tex);
+
+    // program
+    if (program != undefined) {
+        gl.deleteShader(program.vShader);
+        gl.deleteShader(program.fShader);
+        gl.deleteProgram(program);
+    }
+}
+
 function webgl_viewport_renderer(gl, container, height) {
     let image = imageContainer[va_count - 1];
 

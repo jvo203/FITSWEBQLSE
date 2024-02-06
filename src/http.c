@@ -4039,6 +4039,14 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "</script>\n");
 
     // GLSL fragment shaders
+    g_string_append(html, "<script id=\"rgba-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file(html, SHARE "/htdocs/fitswebql/rgba-shader.frag");
+#else
+    include_file(html, "htdocs/fitswebql/rgba-shader.frag");
+#endif
+    g_string_append(html, "</script>\n");
+
     g_string_append(html, "<script id=\"common-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
     include_file(html, SHARE "/htdocs/fitswebql/common-shader.frag");
