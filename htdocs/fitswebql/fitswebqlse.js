@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-07.0";
+    return "JS2024-02-07.1";
 }
 
 function uuidv4() {
@@ -5106,8 +5106,6 @@ async function open_websocket_connection(_datasetId, index) {
                                         first: true,
                                         width: width,
                                         height: height,
-                                        scaleX: imageFrame.width / width,
-                                        scaleY: imageFrame.height / height,
                                         image_bounding_dims: dims,
                                         //image_bounding_dims: imageFrame.image_bounding_dims,
                                         //image_bounding_dims: {x1: 0, y1: 0, width: width, height: height},
@@ -18559,7 +18557,7 @@ async function mainRenderer() {
         vidInterval = 1000 / vidFPS;
 
         //track the bitrate with a Kalman Filter
-        target_bitrate = 1000; // was 1000
+        target_bitrate = 10000; // was 1000
         bitrate = target_bitrate;
         eta = 0.1;
         variance = 0.0;
