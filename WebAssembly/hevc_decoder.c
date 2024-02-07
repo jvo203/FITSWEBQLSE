@@ -283,9 +283,8 @@ void apply_contour(float *canvas, unsigned int w, unsigned int h, const unsigned
     float **d = (float **)calloc(h, sizeof(float *));
     for (int i = 0; i < h; i++)
     {
-        // Y-mirror-flip the image
-        size_t luma_offset = (h - 1 - i) * stride_luma;
-        size_t alpha_offset = (h - 1 - i) * stride_alpha;
+        size_t luma_offset = i * stride_luma;
+        size_t alpha_offset = i * stride_alpha;
 
         d[i] = (float *)calloc(w, sizeof(float));
         for (int j = 0; j < w; j++)

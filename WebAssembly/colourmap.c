@@ -18,9 +18,8 @@ void apply_colourmap(float *canvas, int w, int h, const unsigned char *luma, int
 
     for (int j = 0; j < h; j++)
     {
-        // Y-mirror-flip the image
-        size_t luma_offset = (h - 1 - j) * stride_luma;
-        size_t alpha_offset = (h - 1 - j) * stride_alpha;
+        size_t luma_offset = j * stride_luma;
+        size_t alpha_offset = j * stride_alpha;
 
         for (int i = 0; i < w; i++)
         {
@@ -70,10 +69,8 @@ void apply_amber(float *canvas, int w, int h, const unsigned char *luma, int str
 
     for (int j = 0; j < h; j++)
     {
-
-        // Y-mirror-flip the image
-        size_t luma_offset = (h - 1 - j) * stride_luma;
-        size_t alpha_offset = (h - 1 - j) * stride_alpha;
+        size_t luma_offset = j * stride_luma;
+        size_t alpha_offset = j * stride_alpha;
 
         for (int i = 0; i < w; i++)
         {
@@ -100,10 +97,8 @@ void apply_greyscale(float *canvas, int w, int h, const unsigned char *luma, int
 
     for (int j = 0; j < h; j++)
     {
-
-        // Y-mirror-flip the image
-        size_t luma_offset = (h - 1 - j) * stride_luma;
-        size_t alpha_offset = (h - 1 - j) * stride_alpha;
+        size_t luma_offset = j * stride_luma;
+        size_t alpha_offset = j * stride_alpha;
 
         for (int i = 0; i < w; i++)
         {
@@ -128,10 +123,9 @@ void apply_composite(float *canvas, int w, int h, const unsigned char *_r, const
 
     for (int j = 0; j < h; j++)
     {
-        // Y-mirror-flip the image
-        size_t r_offset = (h - 1 - j) * stride_r;
-        size_t g_offset = (h - 1 - j) * stride_g;
-        size_t b_offset = (h - 1 - j) * stride_b;
+        size_t r_offset = j * stride_r;
+        size_t g_offset = j * stride_g;
+        size_t b_offset = j * stride_b;
 
         for (int i = 0; i < w; i++)
         {
