@@ -1,6 +1,7 @@
 ## [5.0.55] - 2024-02-05
 
 * added a 120s timeout to libmicrohttpd start-up flags, removed MHD_USE_TURBO
+* replaced HTML5 Canvas with WebGL for the streaming video frequency channels
 
 ## [5.0.54] - 2024-01-29
 
