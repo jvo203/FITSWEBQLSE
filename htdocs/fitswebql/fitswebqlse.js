@@ -1987,12 +1987,14 @@ function webgl_video_renderer(index, gl, width, height) {
     }
 
     var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
+    image.program = program;
 
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(program, "a_position");
 
     // Create a position buffer
     var positionBuffer = gl.createBuffer();
+    image.positionBuffer = positionBuffer;
 
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     // Put a unit quad in the buffer
@@ -2008,6 +2010,7 @@ function webgl_video_renderer(index, gl, width, height) {
 
     // load a texture
     var tex = gl.createTexture();
+    image.tex = tex;
 
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -2017,8 +2020,15 @@ function webgl_video_renderer(index, gl, width, height) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-    if (webgl2)
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+    if (webgl2) {
+        console.log("image:", image);
+        console.log("image.rgba:", image.rgba);
+        console.log("dims:", image.width * image.height * 4);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.rgba);
+        let _image = imageContainer[index - 1];
+        console.log("_image:", _image);
+        //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, _image.width, _image.height, 0, gl.RG, gl.FLOAT, _image.texture);
+    }
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
 
@@ -2028,11 +2038,12 @@ function webgl_video_renderer(index, gl, width, height) {
     }
 
     //WebGL how to convert from clip space to pixels		
-    let px = viewport_zoom_settings.px;
-    let py = viewport_zoom_settings.py;
-    let viewport_size = viewport_zoom_settings.zoomed_size;
-    py = height - py - viewport_size;
-    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 0, Math.round(viewport_size) - 0);
+    if (va_count == 1 || composite_view)
+        gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
+    else
+        gl.viewport(Math.round(posx - img_width / 2), Math.round(posy - img_height / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
+
+    console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
 
     // Clear the canvas
     gl.clearColor(0, 0, 0, 0);
@@ -2041,36 +2052,24 @@ function webgl_video_renderer(index, gl, width, height) {
     // the image bounding box
     var locationOfBox = gl.getUniformLocation(program, "box");
 
-    // image tone mapping
-    var locationOfParams = gl.getUniformLocation(program, "params");
-
     // drawRegion (execute the GLSL program)
     // Tell WebGL to use our shader program pair
     gl.useProgram(program);
 
-    // show the entire viewport texture
-    let xmin = 0.0;
+    // by default show the whole image
+    var xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
+    var ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
+    var _width = image.image_bounding_dims.width / image.width;
+    var _height = image.image_bounding_dims.height / image.height;
+
+    // show the entire texture
+    /*let xmin = 0.0;
     let ymin = 0.0;
     let _width = 1.0;
-    let _height = 1.0;
+    let _height = 1.0;*/
 
+    console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
     gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
-
-    // get the multiplier
-    var noise_sensitivity = document.getElementById('sensitivity' + index).value;
-    var multiplier = get_noise_sensitivity(noise_sensitivity);
-
-    if (image.tone_mapping.flux == "legacy") {
-        var params = [image.tone_mapping.black, image.tone_mapping.white, image.tone_mapping.lmin, image.tone_mapping.lmax];
-        gl.uniform4fv(locationOfParams, params);
-    } else {
-        if (image.tone_mapping.flux == "ratio")
-            var params = [image.tone_mapping.median, multiplier * image.tone_mapping.ratio_sensitivity, image.tone_mapping.black, image.tone_mapping.white];
-        else
-            var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, image.tone_mapping.black, image.tone_mapping.white];
-
-        gl.uniform4fv(locationOfParams, params);
-    }
 
     // Setup the attributes to pull data from our buffers
     gl.enableVertexAttribArray(positionLocation);
@@ -2080,25 +2079,6 @@ function webgl_video_renderer(index, gl, width, height) {
     // execute the GLSL program
     // draw the quad (2 triangles, 6 vertices)
     gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-    invalidateViewport = true;
-
-    // clean-up WebGL buffers etc.
-
-    // position buffer	
-    if (positionBuffer != undefined)
-        gl.deleteBuffer(positionBuffer);
-
-    // texture	
-    if (tex != undefined)
-        gl.deleteTexture(tex);
-
-    // program
-    if (program != undefined) {
-        gl.deleteShader(program.vShader);
-        gl.deleteShader(program.fShader);
-        gl.deleteProgram(program);
-    }
 }
 
 function webgl_viewport_renderer(gl, container, height) {
@@ -5134,7 +5114,9 @@ async function open_websocket_connection(_datasetId, index) {
 
                                     var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, _colourmap, fill, contours);
                                     // data = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
-                                    videoFrame[index - 1].rgba = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // receive RGBA texture from the WASM module
+                                    var rgba = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // receive RGBA texture from the WASM module                                    
+
+                                    videoFrame[index - 1].rgba = rgba;
 
                                     requestAnimationFrame(function () {
                                         process_hdr_video(index)
@@ -10486,7 +10468,8 @@ function x_axis_mouseleave() {
 
     if (videoFrame[0] != null) {
         if (composite_view) {
-            videoFrame[0].img = null;
+            clear_webgl_video_buffers(1);
+            videoFrame[0].rgba = null;
             videoFrame[0] = null;
 
             if (wsConn[0].readyState == 1)
@@ -10494,7 +10477,8 @@ function x_axis_mouseleave() {
 
             video_stack[0] = [];
         } else for (let index = 0; index < va_count; index++) {
-            videoFrame[index].img = null;
+            clear_webgl_video_buffers(index + 1);
+            videoFrame[index].rgba = null;
             videoFrame[index] = null;
 
             if (wsConn[index].readyState == 1)
