@@ -12,5 +12,5 @@ void main() {
     
     // RGBA pass-through
     gl_FragColor = colour;
-    gl_FragColor.rgb *= gl_FragColor.a;
+    // gl_FragColor.rgb *= gl_FragColor.a;
 }

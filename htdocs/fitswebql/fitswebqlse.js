@@ -1914,6 +1914,35 @@ function createProgram(gl, vertexShaderCode, fragmentShaderCode) {
     return program;
 };
 
+function update_webgl_video_texture(index) {
+    console.log("update_webgl_video_texture: index:", index, "videoFrame:", videoFrame, "videoFrame[index - 1]:", videoFrame[index - 1]);
+    let image = videoFrame[index - 1];
+
+    if (image == null) {
+        console.log("update_webgl_video_texture: null video");
+        return;
+    }
+
+    var gl = image.gl;
+
+    if (gl == null) {
+        console.log("update_webgl_video_texture: null gl");
+        return;
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, image.tex);
+
+    if (webgl2) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.rgba);
+    }
+    else
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+
+    // execute the GLSL program
+    // draw the quad (2 triangles, 6 vertices)
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+}
+
 function webgl_video_renderer(index, gl, width, height) {
     let image = videoFrame[index - 1];
 
@@ -2025,12 +2054,14 @@ function webgl_video_renderer(index, gl, width, height) {
         console.log("image.rgba:", image.rgba);
         console.log("dims:", image.width * image.height * 4);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.rgba);
-        let _image = imageContainer[index - 1];
-        console.log("_image:", _image);
+        //let _image = imageContainer[index - 1];
+        //console.log("_image:", _image);
         //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, _image.width, _image.height, 0, gl.RG, gl.FLOAT, _image.texture);
     }
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+
+    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -2169,6 +2200,8 @@ function webgl_viewport_renderer(gl, container, height) {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, container.width, container.height, 0, gl.RG, gl.FLOAT, container.texture);
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, container.width, container.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, container.texture);
+
+    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -2336,6 +2369,8 @@ function webgl_composite_viewport_renderer(gl, container, height) {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, container.width, container.height, 0, gl.RGBA, gl.FLOAT, container.texture);
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, container.width, container.height, 0, gl.RGBA, gl.FLOAT, container.texture);
+
+    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -2523,6 +2558,8 @@ function webgl_zoom_renderer(gl, height) {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, image.width, image.height, 0, gl.RG, gl.FLOAT, image.texture);
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, image.width, image.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, image.texture);
+
+    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -2720,6 +2757,8 @@ function webgl_composite_zoom_renderer(gl, height) {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+
+    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -3631,6 +3670,8 @@ function webgl_composite_image_renderer(gl, width, height) {
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
 
+    //gl.bindTexture(gl.TEXTURE_2D, null);
+
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
         console.error(status);
@@ -3847,6 +3888,8 @@ function webgl_image_renderer(index, gl, width, height) {
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, container.width, container.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, container.texture);
     }
 
+    //gl.bindTexture(gl.TEXTURE_2D, null);
+
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
         console.error(status);
@@ -3963,6 +4006,9 @@ function process_hdr_video(index) {
         init_webgl_video_buffers(index);
 
         videoFrame[index - 1].first = false;
+    } else {
+        // update the video WebGL texture
+        update_webgl_video_texture(index);
     }
 
 }
