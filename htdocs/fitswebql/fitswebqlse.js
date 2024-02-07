@@ -1960,7 +1960,7 @@ function webgl_video_renderer(index, gl, width, height) {
 
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
 
-    if (va_count > 1) {
+    if (va_count > 1 && !composite_view) {
         if (va_count == 2)
             scale = 0.8 * scale;
         else if (va_count == 4)
@@ -3218,7 +3218,7 @@ function init_webgl_image_buffers(index) {
 
 function init_webgl_video_buffers(index) {
     //place the image onto the main canvas
-    if (va_count == 1)
+    if (va_count == 1 || composite_view)
         var canvas = document.getElementById('HTMLCanvas');
     else
         var canvas = document.getElementById('HTMLCanvas' + index);
@@ -10085,7 +10085,7 @@ function x_axis_mouseleave() {
 
     if (videoFrame[0] != null) {
         if (composite_view) {
-            if (!videoFrame[index - 1].first) {
+            if (!videoFrame[0].first) {
                 clear_webgl_video_buffers(1);
             }
 
