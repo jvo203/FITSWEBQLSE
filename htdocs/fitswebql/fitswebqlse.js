@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-07.1";
+    return "JS2024-02-07.2";
 }
 
 function uuidv4() {
@@ -3985,6 +3985,39 @@ function process_hdr_video(index) {
         return;
 
     if (videoFrame[index - 1].first) {
+        //clear the VideoCanvas
+        {
+            if (va_count > 1 && !composite_view) {
+                for (let index = 0; index < va_count; index++) {
+                    var gl = imageContainer[index].gl;
+
+                    /*if (gl !== undefined && gl != null) {
+                        gl.clearColor(0, 0, 0, 0);
+                        gl.clear(gl.COLOR_BUFFER_BIT);
+                    }*/
+
+                    clear_webgl_image_buffers(index + 1);
+                }
+            } else {
+                var gl = null;
+
+                if (!composite_view)
+                    gl = imageContainer[va_count - 1].gl;
+                else
+                    gl = compositeImage.gl;
+
+                /*if (gl !== undefined && gl != null) {
+                    gl.clearColor(0, 0, 0, 0);
+                    gl.clear(gl.COLOR_BUFFER_BIT);
+                }*/
+
+                if (!composite_view)
+                    clear_webgl_image_buffers(va_count);
+                else
+                    clear_webgl_composite_image_buffers();
+            }
+        }
+
         // init the video WebGL renderer
         init_webgl_video_buffers(index);
 
@@ -9863,39 +9896,7 @@ function x_axis_mouseenter(offset) {
 
     d3.select("#lower").attr("pointer-events", "none");
 
-    //clear the VideoCanvas
-    requestAnimationFrame(function () {
-        if (va_count > 1 && !composite_view) {
-            for (let index = 0; index < va_count; index++) {
-                var gl = imageContainer[index].gl;
-
-                if (gl !== undefined && gl != null) {
-                    gl.clearColor(0, 0, 0, 0);
-                    gl.clear(gl.COLOR_BUFFER_BIT);
-                }
-
-                clear_webgl_image_buffers(index + 1);
-            }
-        } else {
-            var gl = null;
-
-            if (!composite_view)
-                gl = imageContainer[va_count - 1].gl;
-            else
-                gl = compositeImage.gl;
-
-            if (gl !== undefined && gl != null) {
-                gl.clearColor(0, 0, 0, 0);
-                gl.clear(gl.COLOR_BUFFER_BIT);
-            }
-
-            if (!composite_view)
-                clear_webgl_image_buffers(va_count);
-            else
-                clear_webgl_composite_image_buffers();
-        }
-    });
-
+    // clear the legend
     if (va_count == 1) {
         var elem = d3.select("#legend"); elem.attr("opacity", 0);
 
