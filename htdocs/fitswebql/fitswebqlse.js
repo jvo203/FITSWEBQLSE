@@ -10085,7 +10085,10 @@ function x_axis_mouseleave() {
 
     if (videoFrame[0] != null) {
         if (composite_view) {
-            clear_webgl_video_buffers(1);
+            if (!videoFrame[index - 1].first) {
+                clear_webgl_video_buffers(1);
+            }
+
             videoFrame[0].rgba = null;
             videoFrame[0] = null;
 
@@ -10094,7 +10097,10 @@ function x_axis_mouseleave() {
 
             video_stack[0] = [];
         } else for (let index = 0; index < va_count; index++) {
-            clear_webgl_video_buffers(index + 1);
+            if (!videoFrame[index].first) {
+                clear_webgl_video_buffers(index + 1);
+            }
+
             videoFrame[index].rgba = null;
             videoFrame[index] = null;
 
