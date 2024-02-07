@@ -1941,6 +1941,9 @@ function update_webgl_video_texture(index) {
     // execute the GLSL program
     // draw the quad (2 triangles, 6 vertices)
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    // unbind the texture
+    gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
 function webgl_video_renderer(index, gl, width, height) {
@@ -2050,18 +2053,10 @@ function webgl_video_renderer(index, gl, width, height) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
     if (webgl2) {
-        console.log("image:", image);
-        console.log("image.rgba:", image.rgba);
-        console.log("dims:", image.width * image.height * 4);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.rgba);
-        //let _image = imageContainer[index - 1];
-        //console.log("_image:", _image);
-        //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, _image.width, _image.height, 0, gl.RG, gl.FLOAT, _image.texture);
     }
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
-
-    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -2093,12 +2088,6 @@ function webgl_video_renderer(index, gl, width, height) {
     var _width = image.image_bounding_dims.width / image.width;
     var _height = image.image_bounding_dims.height / image.height;
 
-    // show the entire texture
-    /*let xmin = 0.0;
-    let ymin = 0.0;
-    let _width = 1.0;
-    let _height = 1.0;*/
-
     console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
     gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
@@ -2110,6 +2099,9 @@ function webgl_video_renderer(index, gl, width, height) {
     // execute the GLSL program
     // draw the quad (2 triangles, 6 vertices)
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    // unbind the texture
+    gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
 function webgl_viewport_renderer(gl, container, height) {
@@ -2201,8 +2193,6 @@ function webgl_viewport_renderer(gl, container, height) {
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, container.width, container.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, container.texture);
 
-    //gl.bindTexture(gl.TEXTURE_2D, null);
-
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
         console.error(status);
@@ -2263,6 +2253,9 @@ function webgl_viewport_renderer(gl, container, height) {
     // execute the GLSL program
     // draw the quad (2 triangles, 6 vertices)
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    // unbind the texture
+    gl.bindTexture(gl.TEXTURE_2D, null);
 
     invalidateViewport = true;
 
@@ -2370,8 +2363,6 @@ function webgl_composite_viewport_renderer(gl, container, height) {
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, container.width, container.height, 0, gl.RGBA, gl.FLOAT, container.texture);
 
-    //gl.bindTexture(gl.TEXTURE_2D, null);
-
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
         console.error(status);
@@ -2439,6 +2430,9 @@ function webgl_composite_viewport_renderer(gl, container, height) {
     // execute the GLSL program
     // draw the quad (2 triangles, 6 vertices)
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    // unbind the texture
+    gl.bindTexture(gl.TEXTURE_2D, null);
 
     invalidateViewport = true;
 
@@ -2558,8 +2552,6 @@ function webgl_zoom_renderer(gl, height) {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, image.width, image.height, 0, gl.RG, gl.FLOAT, image.texture);
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, image.width, image.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, image.texture);
-
-    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -2757,8 +2749,6 @@ function webgl_composite_zoom_renderer(gl, height) {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
-
-    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
@@ -3670,8 +3660,6 @@ function webgl_composite_image_renderer(gl, width, height) {
     else
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
 
-    //gl.bindTexture(gl.TEXTURE_2D, null);
-
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
         console.error(status);
@@ -3887,8 +3875,6 @@ function webgl_image_renderer(index, gl, width, height) {
         else
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE_ALPHA, container.width, container.height, 0, gl.LUMINANCE_ALPHA, gl.FLOAT, container.texture);
     }
-
-    //gl.bindTexture(gl.TEXTURE_2D, null);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
