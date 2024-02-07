@@ -407,6 +407,13 @@ module fits
 
       end function get_physical_cores
 
+      ! int get_cluster_size()
+      integer(c_int) function get_cluster_size() BIND(C, name='get_cluster_size')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+      end function get_cluster_size
+
       ! POSIX usleep
       ! int usleep(useconds_t useconds)
       function c_usleep(useconds) bind(c, name='usleep')
@@ -4010,7 +4017,7 @@ contains
       integer cn, cm
       integer(kind=8) :: npixels, j
       integer naxes(4)
-      integer max_threads, tid, frame
+      integer cluster_size, max_threads, tid, frame
       integer(c_int) :: start, end, num_per_node
       integer :: total_per_node
       integer, dimension(4) :: fpixels, lpixels, incs
@@ -4262,11 +4269,20 @@ contains
       else
          ! read a range of 2D planes in parallel on each cluster node
 
+         ! get the number of extra nodes in a cluster (0 for a single node)
+         cluster_size = get_cluster_size()
+
          ! interleave computation with disk access
          ! cap the number of threads to avoid system overload
-         max_threads = min(get_max_threads(), 4)
+         if (cluster_size .eq. 0) then
+            ! a single node, increase the number of threads but cap it
+            ! cap the number of threads for NFS-mounted file systems
+            max_threads = min(get_max_threads(), 16)
+         else
+            max_threads = min(get_max_threads(), 4)
+         end if
 
-         print *, "max_threads:", max_threads
+         print *, "<read_fits_file> max_threads:", max_threads, "cluster_size:", cluster_size
 
          if (.not. allocated(thread_units)) then
             allocate (thread_units(max_threads))
