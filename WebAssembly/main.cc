@@ -443,9 +443,9 @@ void hevc_init_frame(int va_count, int width, int height)
 
         if (canvasBuffer != NULL)
         {
-            // initialise canvasBuffer with 0.0f
+            // initialise canvasBuffer with NaN
             for (size_t i = 0; i < len; i++)
-                canvasBuffer[i] = 0.0f;
+                canvasBuffer[i] = NAN;
 
             canvasLength = len;
         }

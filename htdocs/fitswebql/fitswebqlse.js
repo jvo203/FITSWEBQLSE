@@ -3985,6 +3985,12 @@ function process_hdr_video(index) {
         return;
 
     if (videoFrame[index - 1].first) {
+        // check the first value of rgba for NaN
+        if (isNaN(videoFrame[index - 1].rgba[0])) {
+            console.log("process_hdr_video: NaN detected, skipping the frame");
+            return;
+        }
+
         //clear the VideoCanvas
         {
             if (va_count > 1 && !composite_view) {
