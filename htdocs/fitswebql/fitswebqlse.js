@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-07.2";
+    return "JS2024-02-08.0";
 }
 
 function uuidv4() {
@@ -2084,6 +2084,18 @@ function webgl_video_renderer(index, gl, width, height) {
     var ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
     var _width = image.image_bounding_dims.width / image.width;
     var _height = image.image_bounding_dims.height / image.height;
+
+    if (zoom_dims != null)
+        if (zoom_dims.view != null) {
+            let view = zoom_dims.view;
+            // console.log("view:", view);                
+
+            // handle the zoom view
+            xmin = view.x1 / (image.width - 0);// was - 1
+            ymin = view.y1 / (image.height - 0);// was - 1                
+            _width = view.width / image.width;
+            _height = view.height / image.height;
+        }
 
     console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
     gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
