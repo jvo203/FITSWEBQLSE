@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-08.0";
+    return "JS2024-02-10.0";
 }
 
 function uuidv4() {
@@ -18582,7 +18582,7 @@ async function mainRenderer() {
         vidInterval = 1000 / vidFPS;
 
         //track the bitrate with a Kalman Filter
-        target_bitrate = 10000; // was 1000
+        target_bitrate = 1000;
         bitrate = target_bitrate;
         eta = 0.1;
         variance = 0.0;
