@@ -1943,6 +1943,17 @@ function update_webgl_video_texture(index) {
     gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
+function webgl_video_viewport_renderer(index, gl, width, height) {
+    let image = videoFrame[index - 1];
+
+    if (image == null) {
+        console.log("webgl_video_renderer: null video");
+        return;
+    }
+
+    var image_bounding_dims = image.image_bounding_dims;
+}
+
 function webgl_video_renderer(index, gl, width, height) {
     let image = videoFrame[index - 1];
 
@@ -3282,6 +3293,60 @@ function init_webgl_video_buffers(index) {
     }
 }
 
+function init_webgl_video_viewport_buffers(index) {
+    //place the image onto the main canvas
+    if (va_count > 1 && !composite_view)
+        return;
+
+    var canvas = document.getElementById('ViewportCanvas');
+
+    canvas.style.display = "block";// a hack needed by Apple Safari
+    var width = canvas.width;
+    var height = canvas.height;
+
+    if (webgl1 || webgl2) {
+        canvas.addEventListener("webglcontextlost", function (event) {
+            event.preventDefault();
+            console.error("HTMLCanvas: webglcontextlost");
+        }, false);
+
+        canvas.addEventListener(
+            "webglcontextrestored", function () {
+                console.log("HTMLCanvas: webglcontextrestored");
+                init_webgl_video_viewport_buffers(index);
+            }, false);
+    }
+
+    if (webgl2) {
+        var ctx = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
+        videoFrame[index - 1].view_gl = ctx;
+        // console.log("init_webgl is using the WebGL2 context.");
+
+        // enable floating-point textures filtering			
+        ctx.getExtension('OES_texture_float_linear');
+
+        // needed by gl.checkFramebufferStatus
+        ctx.getExtension('EXT_color_buffer_float');
+
+        // call the common WebGL renderer
+        webgl_video_viewport_renderer(index, ctx, width, height);
+    } else if (webgl1) {
+        var ctx = canvas.getContext("webgl", { preserveDrawingBuffer: true });
+        videoFrame[index - 1].view_gl = ctx;
+        // console.log("init_webgl is using the WebGL1 context.");
+
+        // enable floating-point textures
+        ctx.getExtension('OES_texture_float');
+        ctx.getExtension('OES_texture_float_linear');
+
+        // call the common WebGL renderer
+        webgl_video_viewport_renderer(index, ctx, width, height);
+    } else {
+        console.log("WebGL not supported by your browser, falling back onto HTML 2D Canvas (not implemented yet).");
+        return;
+    }
+}
+
 function clear_webgl_composite_image_buffers() {
     clear_webgl_internal_buffers(compositeImage);
 }
@@ -4040,7 +4105,8 @@ function process_hdr_video(index) {
         init_webgl_video_buffers(index);
 
         if (viewport_zoom_settings != null) {
-            console.log("process_hdr_video: setting up the zoom settings");
+            // init the video WebGL video viewport (zoom) renderer
+            init_webgl_video_viewport_buffers(index);
         }
 
         videoFrame[index - 1].first = false;
