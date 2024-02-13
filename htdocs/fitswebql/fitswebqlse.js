@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-10.0";
+    return "JS2024-02-13.0";
 }
 
 function uuidv4() {
@@ -4038,6 +4038,10 @@ function process_hdr_video(index) {
 
         // init the video WebGL renderer
         init_webgl_video_buffers(index);
+
+        if (viewport_zoom_settings != null) {
+            console.log("process_hdr_video: setting up the zoom settings");
+        }
 
         videoFrame[index - 1].first = false;
     } else {
