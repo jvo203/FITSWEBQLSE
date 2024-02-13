@@ -3319,7 +3319,7 @@ function init_webgl_video_viewport_buffers(index) {
 
     if (webgl2) {
         var ctx = canvas.getContext("webgl2", { preserveDrawingBuffer: true });
-        videoFrame[index - 1].view_gl = ctx;
+        videoFrame[index - 1].zoom.gl = ctx;
         // console.log("init_webgl is using the WebGL2 context.");
 
         // enable floating-point textures filtering			
@@ -3332,7 +3332,7 @@ function init_webgl_video_viewport_buffers(index) {
         webgl_video_viewport_renderer(index, ctx, width, height);
     } else if (webgl1) {
         var ctx = canvas.getContext("webgl", { preserveDrawingBuffer: true });
-        videoFrame[index - 1].view_gl = ctx;
+        videoFrame[index - 1].zoom.gl = ctx;
         // console.log("init_webgl is using the WebGL1 context.");
 
         // enable floating-point textures
@@ -3356,7 +3356,12 @@ function clear_webgl_image_buffers(index) {
 }
 
 function clear_webgl_video_buffers(index) {
-    clear_webgl_internal_buffers(videoFrame[index - 1]);
+    var video = videoFrame[index - 1];
+
+    clear_webgl_internal_buffers(video);
+
+    if (videoFrame[index - 1].zoom != null)
+        clear_webgl_internal_buffers(video.zoom);
 }
 
 function clear_webgl_internal_buffers(image) {
@@ -3372,15 +3377,18 @@ function clear_webgl_internal_buffers(image) {
         return;
 
     // position buffer
-    gl.deleteBuffer(image.positionBuffer);
+    if (image.positionBuffer !== undefined)
+        gl.deleteBuffer(image.positionBuffer);
 
     // texture
     gl.deleteTexture(image.tex);
 
     // program
-    gl.deleteShader(image.program.vShader);
-    gl.deleteShader(image.program.fShader);
-    gl.deleteProgram(image.program);
+    if (image.program !== undefined) {
+        gl.deleteShader(image.program.vShader);
+        gl.deleteShader(image.program.fShader);
+        gl.deleteProgram(image.program);
+    }
 
     image.gl = null;
 }
@@ -4107,6 +4115,8 @@ function process_hdr_video(index) {
         if (viewport_zoom_settings != null) {
             // init the video WebGL video viewport (zoom) renderer
             init_webgl_video_viewport_buffers(index);
+
+            videoFrame[index - 1].zoom.first = false;
         }
 
         videoFrame[index - 1].first = false;
@@ -5228,6 +5238,7 @@ async function open_websocket_connection(_datasetId, index) {
                                         width: width,
                                         height: height,
                                         image_bounding_dims: dims,
+                                        zoom: { first: true },
                                         //image_bounding_dims: imageFrame.image_bounding_dims,
                                         //image_bounding_dims: {x1: 0, y1: 0, width: width, height: height},
                                     }
