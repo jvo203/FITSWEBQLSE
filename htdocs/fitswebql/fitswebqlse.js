@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-14.0";
+    return "JS2024-02-14.1";
 }
 
 function uuidv4() {
@@ -3661,7 +3661,9 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     }
 
     if (imageContainer[index - 1] != null) {
-        clear_webgl_image_buffers(index);
+        if (!streaming) {
+            clear_webgl_image_buffers(index);
+        }
 
         // re-use the existing tone mapping settings if possible
         tone_mapping = imageContainer[index - 1].tone_mapping;
@@ -3671,7 +3673,9 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
     //next display the image
     if (va_count == 1) {
-        init_webgl_image_buffers(va_count);
+        if (!streaming) {
+            init_webgl_image_buffers(va_count);
+        }
 
         setup_image_selection();
 
@@ -3739,7 +3743,9 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
             var posy = /*height -*/ image_position.posy;
             console.log("index:", index, "image_position:", image_position);
 
-            init_webgl_image_buffers(index);
+            if (!streaming) {
+                init_webgl_image_buffers(index);
+            }
 
             setup_image_selection_index(index, posx - img_width / 2, posy - img_height / 2, img_width, img_height);
 
@@ -3784,11 +3790,13 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
             compositeImage = { width: img_width, height: img_height, texture: compositeImageTexture, image_bounding_dims: new_image_bounding_dims, tone_mapping: new_tone_mapping };
             // console.log("process_hdr_image: all images loaded", compositeImage);
 
-            // clear the composite image buffers
-            clear_webgl_composite_image_buffers();
+            if (!streaming) {
+                // clear the composite image buffers
+                clear_webgl_composite_image_buffers();
 
-            //display the composite image        
-            init_webgl_composite_image_buffers();
+                //display the composite image        
+                init_webgl_composite_image_buffers();
+            }
 
             setup_image_selection();
 
