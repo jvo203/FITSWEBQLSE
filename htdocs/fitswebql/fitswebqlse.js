@@ -1943,6 +1943,37 @@ function update_webgl_video_texture(index) {
     gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
+function update_webgl_video_viewport_texture(index) {
+    let image = videoFrame[index - 1];
+    if (image == null) {
+        console.log("update_webgl_video_texture: null video");
+        return;
+    }
+
+    var frame = image.zoom;
+
+    var gl = frame.gl;
+    if (gl == null) {
+        console.log("update_webgl_video_viewport_texture: null gl");
+        return;
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, frame.tex);
+
+    if (webgl2) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.rgba);
+    }
+    else
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+
+    // execute the GLSL program
+    // draw the quad (2 triangles, 6 vertices)
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    // unbind the texture
+    gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
 function webgl_video_viewport_renderer(index, gl, width, height) {
     let image = videoFrame[index - 1];
 
@@ -2040,8 +2071,13 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
     }
 
     //WebGL how to convert from clip space to pixels		
-    let px = viewport_zoom_settings.px;
-    let py = viewport_zoom_settings.py;
+    //let px = viewport_zoom_settings.px;
+    //let py = viewport_zoom_settings.py;
+
+    // force the upper location, overriding the current <zoom_location>
+    let px = emStrokeWidth;
+    let py = emStrokeWidth;
+
     let viewport_size = viewport_zoom_settings.zoomed_size;
     py = height - py - viewport_size;
     gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 0, Math.round(viewport_size) - 0);
@@ -4244,6 +4280,11 @@ function process_hdr_video(index) {
     } else {
         // update the video WebGL texture
         update_webgl_video_texture(index);
+
+        if (viewport_zoom_settings != null) {
+            // update the video WebGL video viewport (zoom) texture
+            update_webgl_video_viewport_texture(index);
+        }
     }
 
 }
