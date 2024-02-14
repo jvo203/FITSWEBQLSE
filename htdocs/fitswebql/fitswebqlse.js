@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-13.0";
+    return "JS2024-02-14.0";
 }
 
 function uuidv4() {
@@ -1951,7 +1951,135 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
         return;
     }
 
+    var frame = image.zoom;
     var image_bounding_dims = image.image_bounding_dims;
+
+    // setup GLSL program
+    var vertexShaderCode = document.getElementById("vertex-shader").text;
+    var fragmentShaderCode = document.getElementById("rgba-shader").text;
+
+    // grey-out pixels for alpha = 0.0
+    var pos = fragmentShaderCode.lastIndexOf("}");
+    fragmentShaderCode = fragmentShaderCode.insert_at(pos, "if (gl_FragColor.a == 0.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.3);\n");
+
+    if (zoom_shape == "circle") {
+        pos = fragmentShaderCode.lastIndexOf("}");
+        fragmentShaderCode = fragmentShaderCode.insert_at(pos, "float r_x = v_texcoord.z;\n float r_y = v_texcoord.w;\n if (r_x * r_x + r_y * r_y > 1.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.0);\n");
+    }
+
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    if (webgl2) {
+        var prefix = "#version 300 es\n";
+        vertexShaderCode = prefix + vertexShaderCode;
+        fragmentShaderCode = prefix + fragmentShaderCode;
+
+        // attribute -> in
+        vertexShaderCode = vertexShaderCode.replace(/attribute/g, "in");
+        fragmentShaderCode = fragmentShaderCode.replace(/attribute/g, "in");
+
+        // varying -> out
+        vertexShaderCode = vertexShaderCode.replace(/varying/g, "out");
+
+        // varying -> in
+        fragmentShaderCode = fragmentShaderCode.replace(/varying/g, "in");
+
+        // texture2D -> texture
+        fragmentShaderCode = fragmentShaderCode.replace(/texture2D/g, "texture");
+
+        // replace gl_FragColor with a custom variable, i.e. texColour
+        fragmentShaderCode = fragmentShaderCode.replace(/gl_FragColor/g, "texColour");
+
+        // add the definition of texColour
+        var pos = fragmentShaderCode.indexOf("void main()");
+        fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
+    }
+
+    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
+    frame.program = program;
+
+    // look up where the vertex data needs to go.
+    var positionLocation = gl.getAttribLocation(program, "a_position");
+
+    // Create a position buffer
+    var positionBuffer = gl.createBuffer();
+    frame.positionBuffer = positionBuffer;
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    // Put a unit quad in the buffer
+    var positions = [
+        -1, -1,
+        -1, 1,
+        1, -1,
+        1, -1,
+        -1, 1,
+        1, 1,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    // load a texture
+    var tex = gl.createTexture();
+    frame.tex = tex;
+
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    /*gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);*/
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    if (webgl2) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.rgba);
+    }
+    else
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+
+    var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (status != gl.FRAMEBUFFER_COMPLETE) {
+        console.error(status);
+    }
+
+    //WebGL how to convert from clip space to pixels		
+    let px = viewport_zoom_settings.px;
+    let py = viewport_zoom_settings.py;
+    let viewport_size = viewport_zoom_settings.zoomed_size;
+    py = height - py - viewport_size;
+    gl.viewport(Math.round(px), Math.round(py), Math.round(viewport_size) - 0, Math.round(viewport_size) - 0);
+
+    // Clear the canvas
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // the image bounding box
+    var locationOfBox = gl.getUniformLocation(program, "box");
+
+    // drawRegion (execute the GLSL program)
+    // Tell WebGL to use our shader program pair
+    gl.useProgram(program);
+
+    let xmin = (viewport_zoom_settings.x - viewport_zoom_settings.clipSize - 1) / (image.width - 1);
+    let ymin = (viewport_zoom_settings.y - viewport_zoom_settings.clipSize - 1) / (image.height - 1);
+
+    let xmax = (viewport_zoom_settings.x + viewport_zoom_settings.clipSize + 1) / (image.width - 1);
+    let ymax = (viewport_zoom_settings.y + viewport_zoom_settings.clipSize + 1) / (image.height - 1);
+
+    let _width = xmax - xmin;
+    let _height = ymax - ymin;
+
+    //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
+    gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
+
+    // Setup the attributes to pull data from our buffers
+    gl.enableVertexAttribArray(positionLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    // execute the GLSL program
+    // draw the quad (2 triangles, 6 vertices)
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    // unbind the texture
+    gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
 function webgl_video_renderer(index, gl, width, height) {
@@ -2499,13 +2627,6 @@ function webgl_zoom_renderer(gl, height) {
         pos = fragmentShaderCode.lastIndexOf("}");
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "float r_x = v_texcoord.z;\n float r_y = v_texcoord.w;\n if (r_x * r_x + r_y * r_y > 1.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.0);\n");
     }
-
-    // testing purposes
-    /*{
-      pos = fragmentShaderCode.lastIndexOf("}");
-      fragmentShaderCode = fragmentShaderCode.insert_at(pos, "gl_FragColor.rgba = vec4(255.0, 0.0, 0.0, 0.5);\n");
-    }*/
-
 
     // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
     if (webgl2) {
