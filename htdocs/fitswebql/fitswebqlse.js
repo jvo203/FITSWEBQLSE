@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-14.1";
+    return "JS2024-02-14.2";
 }
 
 function uuidv4() {
@@ -3532,6 +3532,10 @@ function clear_webgl_internal_buffers(image) {
 
     if (gl === undefined || gl == null)
         return;
+
+    // Clear the canvas
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
     // position buffer
     if (image.positionBuffer !== undefined)
