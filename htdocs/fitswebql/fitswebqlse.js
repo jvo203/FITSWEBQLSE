@@ -3526,6 +3526,14 @@ function clear_webgl_video_buffers(index) {
             gl.clear(gl.COLOR_BUFFER_BIT);
         }
 
+        // also hide the viewport cursor of the image rectangle
+        var zoom_element = d3.select("#zoom");
+        var zoom_cross = d3.select("#zoomCross");
+
+        zoom_element.attr("opacity", 0.0);
+        zoom_cross.attr("opacity", 0.0);
+
+
         clear_webgl_internal_buffers(video.zoom);
     }
 }
