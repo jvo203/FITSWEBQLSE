@@ -3532,7 +3532,7 @@ function clear_webgl_video_buffers(index) {
 
         zoom_element.attr("opacity", 0.0);
         zoom_cross.attr("opacity", 0.0);
-
+        viewport_zoom_settings = null;
 
         clear_webgl_internal_buffers(video.zoom);
     }
