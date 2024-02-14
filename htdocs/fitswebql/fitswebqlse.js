@@ -3517,8 +3517,17 @@ function clear_webgl_video_buffers(index) {
 
     clear_webgl_internal_buffers(video);
 
-    if (videoFrame[index - 1].zoom != null)
+    if (videoFrame[index - 1].zoom != null) {
+        var gl = videoFrame[index - 1].zoom.gl;
+
+        if (gl !== undefined && gl != null) {
+            // Clear the canvas
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        }
+
         clear_webgl_internal_buffers(video.zoom);
+    }
 }
 
 function clear_webgl_internal_buffers(image) {
@@ -3532,10 +3541,6 @@ function clear_webgl_internal_buffers(image) {
 
     if (gl === undefined || gl == null)
         return;
-
-    // Clear the canvas
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
 
     // position buffer
     if (image.positionBuffer !== undefined)
