@@ -63,60 +63,6 @@ extern options_t options; // <options> is defined in main.c
 
 #include "mongoose.h" // mg_url_encode
 
-#ifdef MONGOOSE_HTTP_CLIENT
-typedef struct
-{
-    char *url;
-    int port;
-    int progress;
-    int *counter;
-    bool done;
-} progress_t;
-
-static void progress_fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
-{
-    progress_t *req = (progress_t *)fn_data;
-
-    if (ev == MG_EV_CONNECT)
-    {
-        // Connected to server. Extract host name from URL
-        struct mg_str host = mg_url_host(req->url);
-
-        // Send request
-        mg_printf(c,
-                  "POST %s HTTP/1.0\r\n"
-                  "Host: %.*s:%d\r\n"
-                  "Content-Type: octet-stream\r\n"
-                  "Content-Length: %d\r\n"
-                  "\r\n",
-                  mg_url_uri(req->url),
-                  (int)host.len, host.ptr, req->port, (int)sizeof(int));
-
-        // append the "POST" data buffer
-        mg_send(c, &(req->progress), sizeof(int));
-    }
-    else if (ev == MG_EV_HTTP_MSG)
-    {
-        // Response is received. Print it
-        struct mg_http_message *hm = (struct mg_http_message *)ev_data;
-        // printf("%.*s", (int)hm->message.len, hm->message.ptr);
-
-        // Examine the HTTP response code. Upon success ('OK') set the return value <counter> to <progress>
-        if (mg_http_status(hm) == 200)
-            // if (atoi(hm->uri.ptr) == 200)
-            *(req->counter) = req->progress;
-
-        c->is_closing = 1; // Tell mongoose to close this connection
-        req->done = true;  // Tell event loop to stop
-    }
-    else if (ev == MG_EV_ERROR)
-    {
-        req->done = true; // Error, tell event loop to stop
-    }
-}
-
-#endif
-
 inline const char *denull(const char *str)
 {
     if (str != NULL)
@@ -5338,22 +5284,6 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
         g_string_append_printf(url, "%s:", root);
         g_string_append_printf(url, "%" PRIu16 "/progress/%.*s", options.ws_port, (int)_len, _id);
 
-#ifdef MONGOOSE_HTTP_CLIENT
-        // use mongoose HTTP client as libcURL leaks memory in Intel Clear Linux ...
-        // apparently it's OK, it is not a real memory leak, just DBus caching ...
-        // https://github.com/clearlinux/distribution/issues/2574#issuecomment-1058618721
-        progress_t req = {url->str, options.ws_port, progress, &counter, false};
-
-        struct mg_mgr mgr; // Event manager
-
-        mg_log_set(MG_LL_DEBUG);                            // Set to 0 to disable debug
-        mg_mgr_init(&mgr);                                  // Initialise event manager
-        mg_http_connect(&mgr, url->str, progress_fn, &req); // Create client connection
-        while (!req.done)
-            mg_mgr_poll(&mgr, 1000); // Infinite event loop
-
-        mg_mgr_free(&mgr); // Free resources
-#else
         CURL *curl;
         CURLcode res;
 
@@ -5413,7 +5343,6 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
             /* always cleanup */
             curl_easy_cleanup(curl);
         }
-#endif
 
         g_string_free(url, TRUE);
     }
