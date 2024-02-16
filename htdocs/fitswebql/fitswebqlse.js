@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-14.2";
+    return "JS2024-02-16.0";
 }
 
 function uuidv4() {
@@ -16667,6 +16667,12 @@ function display_menu() {
 
     helpDropdown.append("li")
         .append("a")
+        .style('cursor', 'pointer')
+        .on("click", show_changelog)
+        .html('<span class="fas fa-newspaper"></span> changelog');
+
+    helpDropdown.append("li")
+        .append("a")
         .attr("href", "mailto:help_desk@jvo.nao.ac.jp?subject=" + votable.getAttribute('data-server-string') + " feedback [" + votable.getAttribute('data-server-version') + "/" + get_js_version() + "]")
         .html('<span class="fas fa-comment-dots"></span> send feedback');
 
@@ -16691,6 +16697,25 @@ function show_help() {
     window.onclick = function (event) {
         if (event.target == modal) {
             $("#help").modal("hide");
+        }
+    }
+}
+
+function show_changelog() {
+    hide_navigation_bar();
+    $("#changelog").modal("show");
+
+    var modal = document.getElementById('changelog');
+    var span = document.getElementById('changelogclose');
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        $("#changelog").modal("hide");
+    }
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            $("#changelog").modal("hide");
         }
     }
 }
@@ -17235,9 +17260,77 @@ function setup_help() {
         .text("CREDITS:");
 
     footer.append("p")
-        .text("Site design Ⓒ Christopher A. Zapart @ NAOJ, 2015 - 2023. JavaScript RA/DEC conversion Ⓒ Robert Martin Ayers, 2009, 2011, 2014.");
+        .text("Software Development Ⓒ Christopher A. Zapart @ NAOJ, 2015 - 2024. JavaScript RA/DEC conversion Ⓒ Robert Martin Ayers, 2009, 2011, 2014.");
 
     footer.append("h3")
+        .text("VERSION:");
+
+    footer.append("p")
+        .text(votable.getAttribute('data-server-version') + "/" + get_js_version());
+}
+
+function setup_changelog() {
+    var div = d3.select("body")
+        .append("div")
+        .attr("class", "container")
+        .append("div")
+        .attr("id", "changelog")
+        .attr("class", "modal fade")
+        .attr("role", "dialog")
+        .append("div")
+        .attr("class", "modal-dialog");
+
+    var contentDiv = div.append("div")
+        .attr("class", "modal-content");
+
+    var headerDiv = contentDiv.append("div")
+        .attr("class", "modal-header");
+
+    headerDiv.append("span")
+        .attr("id", "changelogclose")
+        .attr("class", "close")
+        .style("color", "red")
+        .text("×");
+
+    headerDiv.append("h2")
+        .text("FITSWEBQLSE CHANGELOG");
+
+    var bodyDiv = contentDiv.append("div")
+        .attr("id", "modal-body")
+        .attr("class", "modal-body");
+
+    bodyDiv.append("p")
+        .html('<iframe id="github-iframe2" src="" style="width:100%;height:50vh;border:none;color:inherit;" title="Changelog"></iframe>');
+
+    let html = '<!DOCTYPE html><html>';
+    html += '<head><script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script></head>';
+    html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md">';
+
+    if (theme == 'bright') {
+        html += '<template><style>* { color:gray;font-size:small;font-family: Helvetica;}</style></template>';
+    }
+
+    if (theme == 'dark') {
+        html += '<template><style>* { color:lightgray;font-size:small;font-family:Helvetica;}</style></template>';
+    }
+
+    // a fallback message in case the changelog cannot be loaded
+    html += '<script type="text/markdown"># **The** [CHANGELOG](https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md) could not be loaded.</script>';
+    html += '</zero-md></body></html>';
+
+    var iframe = document.getElementById('github-iframe2');
+    iframe.src = 'data:text/html;base64,' + window.btoa(html);
+
+    var footer = contentDiv.append("div")
+        .attr("class", "modal-footer");
+
+    footer.append("h4")
+        .text("CREDITS:");
+
+    footer.append("p")
+        .text("Software Development Ⓒ Christopher A. Zapart @ NAOJ, 2015 - 2024. JavaScript RA/DEC conversion Ⓒ Robert Martin Ayers, 2009, 2011, 2014.");
+
+    footer.append("h4")
         .text("VERSION:");
 
     footer.append("p")
@@ -19187,6 +19280,8 @@ async function mainRenderer() {
         await res3d; display_menu();
 
         setup_help();
+
+        setup_changelog();
 
         setup_FITS_header_page();
 
