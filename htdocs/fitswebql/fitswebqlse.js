@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-16.0";
+    return "JS2024-02-16.1";
 }
 
 function uuidv4() {
@@ -9342,21 +9342,6 @@ function get_spectrum_margin() {
     return 0.1;
 }
 
-function setup_3d_view() {
-    var svg = d3.select("#FrontSVG");
-    var width = parseFloat(svg.attr("width"));
-    var height = parseFloat(svg.attr("height"));
-
-    var rect = d3.select("#image_rectangle");
-    var rect_width = parseFloat(rect.attr("width"));
-    var rect_height = parseFloat(rect.attr("height"));
-
-    var position = (width - rect_width) / 2 - 10 * emFontSize;
-
-    if (va_count > 1 && composite_view)
-        position = (width + rect_width) / 2 + 2 * emFontSize;
-}
-
 function dragstart(event) {
     freqdrag = true;
     event.preventDefault = true;
@@ -10170,6 +10155,11 @@ function setup_axes() {
 }
 
 function x_axis_mouseenter(offset) {
+    if (streaming) {
+        console.log("streaming is active, calling 'x_axis_mouseleave()' to reset video streaming.");
+        x_axis_mouseleave();
+    }
+
     //send an init_video command via WebSockets
     streaming = true;
     video_stack = new Array(va_count);
