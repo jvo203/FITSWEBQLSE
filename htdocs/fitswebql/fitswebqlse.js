@@ -16666,7 +16666,7 @@ function display_menu() {
         .append("a")
         .style('cursor', 'pointer')
         .on("click", show_changelog)
-        .html('<span class="fas fa-newspaper"></span> changelog');
+        .html('<span class="fas fa-newspaper"></span> change log');
 
     helpDropdown.append("li")
         .append("a")
@@ -16902,14 +16902,6 @@ function show_welcome() {
         show_help();
         return false;
     });
-
-    /*ul.append("li")
-        .attr("class", "list-group-item list-group-item-success")
-        .html('<h4>HDR image rendering with WebGL</h4>');*/
-
-    /*ul.append("li")
-      .attr("class", "list-group-item list-group-item-success")
-      .html('<h4>32-bit floating-point High Dynamic Range images compressed with <a href="https://en.wikipedia.org/wiki/OpenEXR"><em>OpenEXR</em></a></h4>');*/
 
     ul.append("li")
         .attr("class", "list-group-item list-group-item-success")
