@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-16.1";
+    return "JS2024-02-16.2";
 }
 
 function uuidv4() {
@@ -3532,6 +3532,13 @@ function clear_webgl_video_buffers(index) {
 
         zoom_element.attr("opacity", 0.0);
         zoom_cross.attr("opacity", 0.0);
+
+        // extra cleanup
+        d3.select("#" + zoom_location).style("stroke", "transparent");
+        d3.select("#" + zoom_location + "Cross").attr("opacity", 0.0);
+        d3.select("#" + zoom_location + "Beam").attr("opacity", 0.0);
+        d3.select("#pixel").text("").attr("opacity", 0.0);
+
         viewport_zoom_settings = null;
 
         clear_webgl_internal_buffers(video.zoom);
@@ -4262,9 +4269,9 @@ function process_hdr_video(index) {
         {
             if (va_count > 1 && !composite_view) {
                 for (let index = 0; index < va_count; index++) {
-                    var gl = imageContainer[index].gl;
+                    /*var gl = imageContainer[index].gl;
 
-                    /*if (gl !== undefined && gl != null) {
+                    if (gl !== undefined && gl != null) {
                         gl.clearColor(0, 0, 0, 0);
                         gl.clear(gl.COLOR_BUFFER_BIT);
                     }*/
@@ -4272,14 +4279,14 @@ function process_hdr_video(index) {
                     clear_webgl_image_buffers(index + 1);
                 }
             } else {
-                var gl = null;
+                /*let gl = null;
 
                 if (!composite_view)
                     gl = imageContainer[va_count - 1].gl;
                 else
                     gl = compositeImage.gl;
 
-                /*if (gl !== undefined && gl != null) {
+                if (gl !== undefined && gl != null) {
                     gl.clearColor(0, 0, 0, 0);
                     gl.clear(gl.COLOR_BUFFER_BIT);
                 }*/
