@@ -128,6 +128,7 @@ extern int get_image_status(void *item);
 extern float get_progress(void *item);
 extern float get_elapsed(void *item);
 extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
+extern void inherent_image_dimensions_C(void *item, int *width, int *height);
 
 static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user);
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user);
@@ -2544,6 +2545,45 @@ static enum MHD_Result on_http_connection(void *cls,
         // printf("[C] calculate_global_statistics_C sumP = %f, countP = %ld, sumN = %f, countN = %ld\n", sumP, countP, sumN, countN);
 
         mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%.*g,%Q:%ld,%Q:%.*g,%Q:%ld}", "sumP", 12, sumP, "countP", countP, "sumN", 12, sumN, "countN", countN);
+
+        // the response will be freed by libmicrohttpd
+        struct MHD_Response *response = MHD_create_response_from_buffer(strlen(json), (void *)json, MHD_RESPMEM_MUST_FREE);
+
+        MHD_add_response_header(response, "Cache-Control", "no-cache");
+        MHD_add_response_header(response, "Cache-Control", "no-store");
+        MHD_add_response_header(response, "Pragma", "no-cache");
+        MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
+
+        enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+
+        MHD_destroy_response(response);
+
+        return ret;
+    }
+
+    if (strstr(url, "/inner/") != NULL)
+    {
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+            datasetId++; // skip the slash character
+
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+        // do we have a dataset?
+        void *item = get_dataset(datasetId);
+
+        if (item == NULL)
+            return http_not_found(connection);
+
+        char *json = NULL;
+        int width, height;
+
+        inherent_image_dimensions_C(item, &width, &height);
+
+        // reply with JSON ...
+        mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%d,%Q:%d}", "width", width, "height", height);
 
         // the response will be freed by libmicrohttpd
         struct MHD_Response *response = MHD_create_response_from_buffer(strlen(json), (void *)json, MHD_RESPMEM_MUST_FREE);
@@ -6992,7 +7032,7 @@ void *fetch_inner_dimensions(void *ptr)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/inner/%.*s", options.ws_port, (int)len, datasetid);
+        g_string_append_printf(url, "%" PRIu16 "/inner/%.*s", options.http_port, (int)len, datasetid);
         // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
