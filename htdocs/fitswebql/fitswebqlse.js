@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-16.2";
+    return "JS2024-02-19.1";
 }
 
 function uuidv4() {
@@ -3575,7 +3575,7 @@ function clear_webgl_internal_buffers(image) {
 }
 
 function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
-    // console.log("process_hdr_viewport: #" + index);
+    console.log("process_hdr_viewport: #" + index);
     if (streaming || moving || dragging || windowLeft)
         return;
 
