@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-20.3";
+    return "JS2024-02-20.6";
 }
 
 function uuidv4() {
@@ -3546,6 +3546,7 @@ function clear_webgl_video_buffers(index) {
 }
 
 function clear_webgl_internal_buffers(image) {
+    console.log("clear_webgl_internal_buffers: ", image);
     if (image.first)
         return;
 
@@ -4098,6 +4099,8 @@ function webgl_image_renderer(index, gl, width, height) {
         var pos = fragmentShaderCode.indexOf("void main()");
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
+
+    console.log("webgl_image_renderer: #" + index, "colourmap:", colourmap);
 
     var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
     image.program = program;
@@ -7875,6 +7878,8 @@ function change_colourmap(index, recursive) {
     colourmap = document.getElementById('colourmap' + index).value;
     localStorage.setItem("v5_colourmap", colourmap);
 
+    console.log("change_colourmap:", colourmap, "index:", index, "recursive:", recursive);
+
     if (imageContainer[index - 1] != null) {
         clear_webgl_image_buffers(index);
         clear_webgl_legend_buffers(index);
@@ -7922,13 +7927,6 @@ function change_colourmap(index, recursive) {
                 document.getElementById('colourmap' + i).value = colourmap;
                 change_colourmap(i, false);
             }
-    }
-
-    //trigger a tileTimeout
-    if (recursive) {
-        if (zoom_dims != null)
-            if (zoom_dims.view != null)
-                tileTimeout(true);
     }
 }
 
@@ -18109,14 +18107,17 @@ function clear_webgl_legend_buffers(index) {
         return;
 
     // position buffer	
-    gl.deleteBuffer(image.legend_positionBuffer);
+    if (image.legend_positionBuffer !== undefined)
+        gl.deleteBuffer(image.legend_positionBuffer);
 
     // program
-    gl.deleteShader(image.legend_program.vShader);
-    gl.deleteShader(image.legend_program.fShader);
-    gl.deleteProgram(image.legend_program);
+    if (image.legend_program !== undefined) {
+        gl.deleteShader(image.legend_program.vShader);
+        gl.deleteShader(image.legend_program.fShader);
+        gl.deleteProgram(image.legend_program);
+    }
 
-    //image.legend_gl = null;
+    // image.legend_gl = null; // do not nullify the context, it will be reused
 }
 
 function webgl_legend_renderer(index, gl, x, y, width, height) {
