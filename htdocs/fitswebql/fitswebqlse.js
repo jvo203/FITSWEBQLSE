@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-20.2";
+    return "JS2024-02-20.3";
 }
 
 function uuidv4() {
@@ -16865,7 +16865,8 @@ function show_welcome() {
 
     let html = '<!DOCTYPE html><html>';
     html += '<head><script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script></head>';
-    html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md">';
+    let src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/CHANGELOG.md';
+    html += '<body><zero-md src="' + src + '">';
 
     if (theme == 'bright') {
         html += '<template><style>* { color:gray;font-size:small;font-family: Helvetica;}</style></template>';
@@ -16876,7 +16877,7 @@ function show_welcome() {
     }
 
     // a fallback message in case the changelog cannot be loaded
-    html += '<script type="text/markdown"># **The** [CHANGELOG](https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md) could not be loaded.</script>';
+    html += '<script type="text/markdown"># **The** [CHANGELOG](' + src + ') could not be loaded.</script>';
     html += '</zero-md></body></html>';
 
     var iframe = document.getElementById('github-iframe');
@@ -17249,7 +17250,8 @@ function setup_changelog() {
 
     let html = '<!DOCTYPE html><html>';
     html += '<head><script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script></head>';
-    html += '<body><zero-md src="https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md">';
+    let src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/CHANGELOG.md';
+    html += '<body><zero-md src="' + src + '">';
 
     if (theme == 'bright') {
         html += '<template><style>* { color:gray;font-size:small;font-family: Helvetica;}</style></template>';
@@ -17260,7 +17262,7 @@ function setup_changelog() {
     }
 
     // a fallback message in case the changelog cannot be loaded
-    html += '<script type="text/markdown"># **The** [CHANGELOG](https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/CHANGELOG.md) could not be loaded.</script>';
+    html += '<script type="text/markdown"># **The** [CHANGELOG](' + src + ') could not be loaded.</script>';
     html += '</zero-md></body></html>';
 
     var iframe = document.getElementById('github-iframe2');
