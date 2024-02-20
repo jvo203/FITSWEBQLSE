@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-20.1";
+    return "JS2024-02-20.2";
 }
 
 function uuidv4() {
@@ -7885,51 +7885,6 @@ function change_colourmap(index, recursive) {
     if (va_count == 1) {
         display_legend();
     }
-    else
-        if (!composite_view) {
-            if (zoom_dims != null)
-                if (zoom_dims.view != null)
-                    image_bounding_dims = zoom_dims.view;
-
-            //place the image onto the main canvas
-            var c = document.getElementById('HTMLCanvas' + index);
-            var width = c.width;
-            var height = c.height;
-            var ctx = c.getContext("2d");
-
-            ctx.webkitImageSmoothingEnabled = false;
-            ctx.msImageSmoothingEnabled = false;
-            ctx.imageSmoothingEnabled = false;
-            //ctx.globalAlpha=0.9;
-
-            var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
-
-            if (va_count == 2)
-                scale = 0.8 * scale;
-            else if (va_count == 4)
-                scale = 0.6 * scale;
-            else if (va_count == 5)
-                scale = 0.5 * scale;
-            else if (va_count == 6)
-                scale = 0.45 * scale;
-            else if (va_count == 7)
-                scale = 0.45 * scale;
-            else
-                scale = 2 * scale / va_count;
-
-            var img_width = Math.floor(scale * image_bounding_dims.width);
-            var img_height = Math.floor(scale * image_bounding_dims.height);
-
-            let image_position = get_image_position(index, width, height);
-            let posx = image_position.posx;
-            let posy = image_position.posy;
-
-            ctx.drawImage(newImageCanvas, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.width, image_bounding_dims.height, posx - img_width / 2, posy - img_height / 2, img_width, img_height);
-
-            //add_line_label(index) ;
-
-            //setup_image_selection_index(index, posx-img_width/2, posy-img_height/2, img_width, img_height);
-        };
 
     let fitsData = fitsContainer[index - 1];
 
