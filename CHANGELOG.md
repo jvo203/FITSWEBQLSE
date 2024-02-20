@@ -1,9 +1,10 @@
-## [5.0.55] - 2024-02-?? (planned)
+## [5.0.55] - 2024-02-20
 
 * added a 120s timeout to libmicrohttpd start-up flags, removed MHD_USE_TURBO
-* replaced HTML5 Canvas with WebGL for displaying streaming video frames
-* removed the _*optional*_ mongoose HTTP client part (libcurl is used in all places)
+* replaced HTML5 Canvas with WebGL for streaming video frames
+* removed the _*optional*_ mongoose HTTP client part (using libcurl instead)
 * added a CHANGELOG popup to the _*Help*_ menu
+* completed the multi-dataset support
 
 ## [5.0.54] - 2024-01-29
 
