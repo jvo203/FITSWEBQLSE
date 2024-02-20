@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-20.0";
+    return "JS2024-02-20.1";
 }
 
 function uuidv4() {
@@ -3632,10 +3632,10 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
             let viewportContainer = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture };
 
             if (imageContainer[index - 1] != null) {
+                clear_webgl_image_buffers(index);
+
                 // attach the viewportContainer to the imageContainer
                 imageContainer[index - 1].viewportContainer = viewportContainer;
-
-                clear_webgl_image_buffers(index);
 
                 // display the viewport as an image
                 init_webgl_image_buffers(index);
@@ -4213,7 +4213,7 @@ function webgl_image_renderer(index, gl, width, height) {
                 _height = view.height / image.height;
             }
 
-        if (container != null) {
+        if (image.viewportContainer != null) {
             xmin = 0;
             ymin = 0;
             _width = 1;
@@ -14327,10 +14327,10 @@ function refresh_tiles(index) {
     }
     else {
         if (imageContainer[index - 1].viewportContainer != null) {
+            clear_webgl_image_buffers(index);
+
             // remove a viewport from the imageContainer
             imageContainer[index - 1].viewportContainer = null;
-
-            clear_webgl_image_buffers(index);
 
             // re-display the image
             init_webgl_image_buffers(index);
@@ -14348,8 +14348,10 @@ function tiles_dragstarted(event) {
         return;
 
     // backup the zoom_dims.view x1 and y1
-    zoom_dims.prev_x1 = zoom_dims.view.x1;
-    zoom_dims.prev_y1 = zoom_dims.view.y1;
+    if (zoom_dims.view != null) {
+        zoom_dims.prev_x1 = zoom_dims.view.x1;
+        zoom_dims.prev_y1 = zoom_dims.view.y1;
+    }
 
     // set the cursor for each "image_rectangle" + index
     for (let i = 1; i <= va_count; i++) {
