@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-19.1";
+    return "JS2024-02-20.0";
 }
 
 function uuidv4() {
@@ -14322,8 +14322,9 @@ function refresh_tiles(index) {
     if (zoom_scale < 1)
         return;
 
-    if (imageContainer[index - 1] == null)
+    if (imageContainer[index - 1] == null) {
         return;
+    }
     else {
         if (imageContainer[index - 1].viewportContainer != null) {
             // remove a viewport from the imageContainer
@@ -14429,9 +14430,7 @@ function tiles_dragmove(event) {
     zoom_dims.view.y1 = clamp(zoom_dims.prev_y1 - (-dy) / zoom_dims.scale, 0, zoom_dims.height - zoom_dims.view.height); // invert the Y-axis    
 
     for (let i = 1; i <= va_count; i++) {
-        requestAnimationFrame(function () {
-            refresh_tiles(i);
-        });
+        refresh_tiles(i);
     }
 }
 function tiles_zoomstarted(event) {
