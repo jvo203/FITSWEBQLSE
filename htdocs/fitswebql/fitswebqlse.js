@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-20.6";
+    return "JS2024-02-21.1";
 }
 
 function uuidv4() {
@@ -2739,7 +2739,7 @@ function webgl_zoom_renderer(gl, height) {
     viewport.refresh = true;
 
     // shoud be done in an animation loop
-    function zoom_rendering_loop() {
+    function zoom_rendering_loop(_timestamp) {
         if (viewport_zoom_settings == null) {
             // console.log("webgl_zoom_renderer: null viewport_zoom_settings");
             viewport.loopId = requestAnimationFrame(zoom_rendering_loop);
@@ -2936,7 +2936,7 @@ function webgl_composite_zoom_renderer(gl, height) {
     viewport.refresh = true;
 
     // shoud be done in an animation loop
-    function composite_zoom_rendering_loop() {
+    function composite_zoom_rendering_loop(_timestamp) {
         if (viewport_zoom_settings == null) {
             // console.log("webgl_zoom_renderer: null viewport_zoom_settings");
             viewport.loopId = requestAnimationFrame(composite_zoom_rendering_loop);
@@ -3941,7 +3941,7 @@ function webgl_composite_image_renderer(gl, width, height) {
     image.first = true;
 
     // shoud be done in an animation loop
-    function composite_image_rendering_loop() {
+    function composite_image_rendering_loop(_timestamp) {
         // set a flag
         image.first = false;
 
@@ -4159,7 +4159,7 @@ function webgl_image_renderer(index, gl, width, height) {
     image.first = true;
 
     // shoud be done in an animation loop
-    function image_rendering_loop() {
+    function image_rendering_loop(_timestamp) {
         // set a flag
         image.first = false;
 
