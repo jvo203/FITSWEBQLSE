@@ -2025,11 +2025,10 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
-    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
-    frame.program = program;
+    frame.program = program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
-    var positionLocation = gl.getAttribLocation(program, "a_position");
+    var positionLocation = gl.getAttribLocation(frame.program, "a_position");
 
     // Create a position buffer
     var positionBuffer = gl.createBuffer();
@@ -2087,11 +2086,11 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // the image bounding box
-    var locationOfBox = gl.getUniformLocation(program, "box");
+    var locationOfBox = gl.getUniformLocation(frame.program, "box");
 
     // drawRegion (execute the GLSL program)
     // Tell WebGL to use our shader program pair
-    gl.useProgram(program);
+    gl.useProgram(frame.program);
 
     let xmin = (viewport_zoom_settings.x - viewport_zoom_settings.clipSize - 1) / (image.width - 1);
     let ymin = (viewport_zoom_settings.y - viewport_zoom_settings.clipSize - 1) / (image.height - 1);
@@ -2190,11 +2189,10 @@ function webgl_video_renderer(index, gl, width, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
-    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
-    image.program = program;
+    image.program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
-    var positionLocation = gl.getAttribLocation(program, "a_position");
+    var positionLocation = gl.getAttribLocation(image.program, "a_position");
 
     // Create a position buffer
     var positionBuffer = gl.createBuffer();
@@ -2248,11 +2246,11 @@ function webgl_video_renderer(index, gl, width, height) {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // the image bounding box
-    var locationOfBox = gl.getUniformLocation(program, "box");
+    var locationOfBox = gl.getUniformLocation(image.program, "box");
 
     // drawRegion (execute the GLSL program)
     // Tell WebGL to use our shader program pair
-    gl.useProgram(program);
+    gl.useProgram(image.program);
 
     // by default show the whole image
     var xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
@@ -2445,11 +2443,11 @@ function webgl_viewport_renderer(gl, container, height) {
 
     // clean-up WebGL buffers etc.
 
-    // position buffer	
+    // position buffer
     if (positionBuffer != undefined)
         gl.deleteBuffer(positionBuffer);
 
-    // texture	
+    // texture
     if (tex != undefined)
         gl.deleteTexture(tex);
 
@@ -2622,11 +2620,11 @@ function webgl_composite_viewport_renderer(gl, container, height) {
 
     // clean-up WebGL buffers etc.
 
-    // position buffer	
+    // position buffer
     if (positionBuffer != undefined)
         gl.deleteBuffer(positionBuffer);
 
-    // texture	
+    // texture
     if (tex != undefined)
         gl.deleteTexture(tex);
 
@@ -3162,10 +3160,11 @@ function clear_webgl_zoom_buffers() {
         gl.deleteTexture(viewport.tex);
 
     // program
-    if (viewport.program != undefined) {
+    if (viewport.program != undefined && viewport.program != null) {
         gl.deleteShader(viewport.program.vShader);
         gl.deleteShader(viewport.program.fShader);
         gl.deleteProgram(viewport.program);
+        viewport.program = null;
     }
 
     viewport.gl = null;
@@ -3566,10 +3565,11 @@ function clear_webgl_internal_buffers(image) {
     gl.deleteTexture(image.tex);
 
     // program
-    if (image.program !== undefined) {
+    if (image.program !== undefined && image.program != null) {
         gl.deleteShader(image.program.vShader);
         gl.deleteShader(image.program.fShader);
         gl.deleteProgram(image.program);
+        image.program = null;
     }
 
     image.gl = null;
@@ -3893,11 +3893,10 @@ function webgl_composite_image_renderer(gl, width, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
-    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
-    image.program = program;
+    image.program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
-    var positionLocation = gl.getAttribLocation(program, "a_position");
+    var positionLocation = gl.getAttribLocation(image.program, "a_position");
 
     // Create a position buffer
     var positionBuffer = gl.createBuffer();
@@ -3967,19 +3966,19 @@ function webgl_composite_image_renderer(gl, width, height) {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         // the image bounding box
-        var locationOfBox = gl.getUniformLocation(program, "box");
+        var locationOfBox = gl.getUniformLocation(image.program, "box");
 
         // image tone mapping
-        var locationOfParamsR = gl.getUniformLocation(program, "params_r");
-        var locationOfParamsG = gl.getUniformLocation(program, "params_g");
-        var locationOfParamsB = gl.getUniformLocation(program, "params_b");
+        var locationOfParamsR = gl.getUniformLocation(image.program, "params_r");
+        var locationOfParamsG = gl.getUniformLocation(image.program, "params_g");
+        var locationOfParamsB = gl.getUniformLocation(image.program, "params_b");
 
         // create an array with parameter locations
         var locationOfParams = [locationOfParamsR, locationOfParamsG, locationOfParamsB];
 
         // drawRegion (execute the GLSL program)
         // Tell WebGL to use our shader program pair
-        gl.useProgram(program);
+        gl.useProgram(image.program);
 
         let xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
         let ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
@@ -4100,13 +4099,10 @@ function webgl_image_renderer(index, gl, width, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
-    console.log("webgl_image_renderer: #" + index, "colourmap:", colourmap);
-
-    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
-    image.program = program;
+    image.program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
-    var positionLocation = gl.getAttribLocation(program, "a_position");
+    var positionLocation = gl.getAttribLocation(image.program, "a_position");
 
     // Create a position buffer
     var positionBuffer = gl.createBuffer();
@@ -4189,14 +4185,14 @@ function webgl_image_renderer(index, gl, width, height) {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         // the image bounding box
-        var locationOfBox = gl.getUniformLocation(program, "box");
+        var locationOfBox = gl.getUniformLocation(image.program, "box");
 
         // image tone mapping
-        var locationOfParams = gl.getUniformLocation(program, "params");
+        var locationOfParams = gl.getUniformLocation(image.program, "params");
 
         // drawRegion (execute the GLSL program)
         // Tell WebGL to use our shader program pair
-        gl.useProgram(program);
+        gl.useProgram(image.program);
 
         // by default show the whole image
         var xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
@@ -18111,10 +18107,11 @@ function clear_webgl_legend_buffers(index) {
         gl.deleteBuffer(image.legend_positionBuffer);
 
     // program
-    if (image.legend_program !== undefined) {
+    if (image.legend_program !== undefined && image.legend_program != null) {
         gl.deleteShader(image.legend_program.vShader);
         gl.deleteShader(image.legend_program.fShader);
         gl.deleteProgram(image.legend_program);
+        image.legend_program = null;
     }
 
     // image.legend_gl = null; // do not nullify the context, it will be reused
@@ -18158,11 +18155,10 @@ function webgl_legend_renderer(index, gl, x, y, width, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
-    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
-    image.legend_program = program;
+    image.legend_program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
-    var positionLocation = gl.getAttribLocation(program, "a_position");
+    var positionLocation = gl.getAttribLocation(image.legend_program, "a_position");
 
     // Create a position buffer
     var positionBuffer = gl.createBuffer();
@@ -18190,7 +18186,7 @@ function webgl_legend_renderer(index, gl, x, y, width, height) {
 
     // drawRegion (execute the GLSL program)
     // Tell WebGL to use our shader program pair
-    gl.useProgram(program);
+    gl.useProgram(image.legend_program);
 
     // Setup the attributes to pull data from our buffers
     gl.enableVertexAttribArray(positionLocation);
