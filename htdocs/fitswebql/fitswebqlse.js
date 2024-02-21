@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-21.3";
+    return "JS2024-02-21.4";
 }
 
 function uuidv4() {
@@ -7580,6 +7580,8 @@ function change_tone_mapping(index, recursive) {
 
     if (va_count == 1) {
         update_legend();
+    } else {
+        draw_rbg_legend(index);
     }
 
     if (!composite_view) {
@@ -8014,6 +8016,8 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
 
         if (va_count == 1) {
             update_legend();
+        } else {
+            draw_rbg_legend(index);
         }
     }
 
@@ -8132,7 +8136,6 @@ function get_tone_mapping_value_square(value, black, sensitivity) {
 
 function get_tone_mapping_logistic(value, median, sensitivity) {
     var pixel = 1.0 / (1.0 + Math.exp(-6.0 * (value - median) * sensitivity));
-    console.log(value, median, sensitivity, pixel);
 
     return clamp(255 * pixel, 0, 255);
 }
@@ -15182,7 +15185,11 @@ function change_noise_sensitivity(index) {
 
     image.refresh = true;
 
-    update_legend();
+    if (va_count == 1) {
+        update_legend();
+    } else {
+        draw_rbg_legend(index);
+    }
 }
 
 function partial_fits_size() {
@@ -17571,192 +17578,202 @@ function download_confirmation(partialSize) {
     $('#downloadConfirmation').modal('show');
 }
 
+function draw_rbg_legend(index) {
+    if (index > 3 || !composite_view)
+        return;
+
+    //do we have all the inputs?
+    var black, white, median, multiplier, flux;
+
+    var flux_elem = d3.select("#flux_path" + index);
+
+    try {
+        flux = document.getElementById('flux' + index).value
+    }
+    catch (e) {
+        console.log('flux not available yet');
+        return;
+    };
+
+    try {
+        black = parseFloat(flux_elem.attr("black"));
+    }
+    catch (e) {
+        console.log('black not available yet');
+        return;
+    };
+
+    try {
+        white = parseFloat(flux_elem.attr("white"));
+    }
+    catch (e) {
+        console.log('white not available yet');
+        return;
+    };
+
+    try {
+        median = parseFloat(flux_elem.attr("median"));
+    }
+    catch (e) {
+        console.log('median not available yet');
+        return;
+    };
+
+    multiplier = get_noise_sensitivity(noise_sensitivity);
+
+    try {
+        d3.select("#legend" + index).remove();
+    }
+    catch (e) {
+    }
+
+    var svg = d3.select("#BackgroundSVG");
+    var width = parseFloat(svg.attr("width"));
+    var height = parseFloat(svg.attr("height"));
+
+    var divisions = 64;//100
+    var legendHeight = 0.8 * height;
+    var rectHeight = legendHeight / divisions;
+    var rectWidth = 5 * rectHeight;//0.05*width;
+    var newData = [];
+
+    if (imageContainer[index - 1] == null) {
+        console.log("no imageContainer element @", index - 1);
+        return;
+    }
+
+    let image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
+    let pixel_range = imageContainer[index - 1].pixel_range;
+    let min_pixel = pixel_range.min_pixel;
+    let max_pixel = pixel_range.max_pixel;
+
+    let scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
+    scale = 2.0 * scale / va_count;
+
+    let img_width = Math.floor(scale * image_bounding_dims.width);
+    let img_height = Math.floor(scale * image_bounding_dims.height);
+
+    for (var i = 0; i < divisions; i++)
+        newData.push(min_pixel + (max_pixel - min_pixel) * i / (divisions - 1));
+
+    //var x = Math.max(0.05*width, (width+img_width)/2 + 0.5*rectWidth);
+    //var x = Math.max(0.05*width + (index-1)*1.5*rectWidth, (width-img_width)/2 - va_count*2.4*rectWidth + (index-1)*1.5*rectWidth);
+    var x = (width - img_width) / 2 - 0.05 * width - (va_count + 1.5 - index) * 1.5 * rectWidth;
+
+    // first remove any existing legend group
+    d3.select("#legend" + index).remove();
+
+    let opacity = displayLegend ? 1 : 0;
+    var group = svg.append("g")
+        .attr("id", "legend" + index)
+        .attr("opacity", opacity);
+
+    let strokeColour = 'white';
+
+    if (theme == 'bright')
+        strokeColour = 'black';
+
+    let rgb = ['red', 'green', 'blue'];
+
+    group.selectAll('rect')
+        .data(newData)
+        .enter()
+        .append('rect')
+        .attr("x", (x + rectWidth / 2))
+        .attr("y", function (d, i) { return (0.9 * height - (i + 1) * rectHeight); })
+        .attr("height", (rectHeight + 1))
+        .attr("width", rectWidth / 2)
+        //.attr("stroke", strokeColour)
+        //.attr("stroke-width", 0.1)
+        .attr("stroke", "none")
+        //.attr('fill', function(d, i) { return pixel2rgba(1.0*d, index-1, 0.8);});
+        .attr('fill', function (d, i) {
+            let raw = get_tone_mapping(d, flux, black, white, median, multiplier, index);
+            let colour = interpolate_colourmap(raw, rgb[index - 1], 0.8);
+            return colour;
+        });
+
+    var upper_range;
+
+    if (flux == "ratio")
+        upper_range = 0.999;
+    else
+        upper_range = 1.0;
+
+    var colourScale = d3.scaleLinear()
+        .range([0.8 * height, 0])
+        .domain([0, upper_range]);
+
+    var colourAxis = d3.axisRight(colourScale)
+        .tickSizeOuter([0])
+        .tickSizeInner([0])
+        .tickFormat(function (d) {
+            var prefix = "";
+
+            if (d == 0)
+                prefix = "≤";
+
+            if (d == 1)
+                prefix = "≥";
+
+            var pixelVal = get_pixel_flux(d, index);
+
+            var number;
+
+            if (Math.abs(pixelVal) <= 0.001 || Math.abs(pixelVal) >= 1000)
+                number = pixelVal.toExponential(3);
+            else
+                number = pixelVal.toPrecision(3);
+
+            return prefix + number;
+        });
+
+    group.append("g")
+        .attr("class", "colouraxis")
+        .attr("id", "legendaxis")
+        .style("stroke-width", emStrokeWidth)
+        .attr("transform", "translate(" + x + "," + 0.1 * height + ")")
+        .call(colourAxis);
+
+    let fitsData = fitsContainer[index - 1];
+
+    var bunit = '';
+    if (fitsData.BUNIT != '') {
+        bunit = fitsData.BUNIT.trim();
+
+        if (fitsData.depth > 1 && has_velocity_info)
+            bunit += '•km/s';
+
+        bunit = "[" + bunit + "]";
+    }
+
+    let line = fitsData.LINE.trim();
+    let filter = fitsData.FILTER.trim();
+
+    if (filter != "")
+        line = filter;
+    else {
+        if (line == "")
+            line = "line-" + index;
+    }
+
+    group.append("foreignObject")
+        .attr("x", (x + 0.0 * rectWidth))
+        .attr("y", 0.9 * height + 0.75 * emFontSize)
+        .attr("width", 5 * emFontSize)
+        .attr("height", 3 * emFontSize)
+        .append("xhtml:div")
+        .html('<p style="text-align: left">' + plain2chem(line, false) + '&nbsp;' + bunit + '</p>');
+}
+
 function display_rgb_legend() {
     console.log("display_rgb_legend()");
 
-    if (va_count > 3)
+    if (va_count > 3 || !composite_view)
         return;
 
     for (let index = 1; index <= va_count; index++) {
-        //do we have all the inputs?
-        var black, white, median, multiplier, flux;
-
-        var flux_elem = d3.select("#flux_path" + index);
-
-        try {
-            flux = document.getElementById('flux' + index).value
-        }
-        catch (e) {
-            console.log('flux not available yet');
-            return;
-        };
-
-        try {
-            black = parseFloat(flux_elem.attr("black"));
-        }
-        catch (e) {
-            console.log('black not available yet');
-            return;
-        };
-
-        try {
-            white = parseFloat(flux_elem.attr("white"));
-        }
-        catch (e) {
-            console.log('white not available yet');
-            return;
-        };
-
-        try {
-            median = parseFloat(flux_elem.attr("median"));
-        }
-        catch (e) {
-            console.log('median not available yet');
-            return;
-        };
-
-        multiplier = get_noise_sensitivity(noise_sensitivity);
-
-        try {
-            d3.select("#legend" + index).remove();
-        }
-        catch (e) {
-        }
-
-        var svg = d3.select("#BackgroundSVG");
-        var width = parseFloat(svg.attr("width"));
-        var height = parseFloat(svg.attr("height"));
-
-        var divisions = 64;//100
-        var legendHeight = 0.8 * height;
-        var rectHeight = legendHeight / divisions;
-        var rectWidth = 5 * rectHeight;//0.05*width;
-        var newData = [];
-
-        if (imageContainer[index - 1] == null) {
-            console.log("no imageContainer element @", index - 1);
-            return;
-        }
-
-        let image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
-        let pixel_range = imageContainer[index - 1].pixel_range;
-        let min_pixel = pixel_range.min_pixel;
-        let max_pixel = pixel_range.max_pixel;
-
-        let scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
-        scale = 2.0 * scale / va_count;
-
-        let img_width = Math.floor(scale * image_bounding_dims.width);
-        let img_height = Math.floor(scale * image_bounding_dims.height);
-
-        for (var i = 0; i < divisions; i++)
-            newData.push(min_pixel + (max_pixel - min_pixel) * i / (divisions - 1));
-
-        //var x = Math.max(0.05*width, (width+img_width)/2 + 0.5*rectWidth);
-        //var x = Math.max(0.05*width + (index-1)*1.5*rectWidth, (width-img_width)/2 - va_count*2.4*rectWidth + (index-1)*1.5*rectWidth);
-        var x = (width - img_width) / 2 - 0.05 * width - (va_count + 1.5 - index) * 1.5 * rectWidth;
-
-        var group = svg.append("g")
-            .attr("id", "legend" + index)
-            .attr("opacity", 1.0);
-
-        let strokeColour = 'white';
-
-        if (theme == 'bright')
-            strokeColour = 'black';
-
-        let rgb = ['red', 'green', 'blue'];
-
-        group.selectAll('rect')
-            .data(newData)
-            .enter()
-            .append('rect')
-            .attr("x", (x + rectWidth / 2))
-            .attr("y", function (d, i) { return (0.9 * height - (i + 1) * rectHeight); })
-            .attr("height", (rectHeight + 1))
-            .attr("width", rectWidth / 2)
-            //.attr("stroke", strokeColour)
-            //.attr("stroke-width", 0.1)
-            .attr("stroke", "none")
-            //.attr('fill', function(d, i) { return pixel2rgba(1.0*d, index-1, 0.8);});
-            .attr('fill', function (d, i) {
-                let raw = get_tone_mapping(d, flux, black, white, median, multiplier, index);
-                let colour = interpolate_colourmap(raw, rgb[index - 1], 0.8);
-                console.log(i, d, rgb[index - 1], raw, colour);
-                return colour;
-            });
-
-        var upper_range;
-
-        if (flux == "ratio")
-            upper_range = 0.999;
-        else
-            upper_range = 1.0;
-
-        var colourScale = d3.scaleLinear()
-            .range([0.8 * height, 0])
-            .domain([0, upper_range]);
-
-        var colourAxis = d3.axisRight(colourScale)
-            .tickSizeOuter([0])
-            .tickSizeInner([0])
-            .tickFormat(function (d) {
-                var prefix = "";
-
-                if (d == 0)
-                    prefix = "≤";
-
-                if (d == 1)
-                    prefix = "≥";
-
-                var pixelVal = get_pixel_flux(d, index);
-
-                var number;
-
-                if (Math.abs(pixelVal) <= 0.001 || Math.abs(pixelVal) >= 1000)
-                    number = pixelVal.toExponential(3);
-                else
-                    number = pixelVal.toPrecision(3);
-
-                return prefix + number;
-            });
-
-        group.append("g")
-            .attr("class", "colouraxis")
-            .attr("id", "legendaxis")
-            .style("stroke-width", emStrokeWidth)
-            .attr("transform", "translate(" + x + "," + 0.1 * height + ")")
-            .call(colourAxis);
-
-        let fitsData = fitsContainer[index - 1];
-
-        var bunit = '';
-        if (fitsData.BUNIT != '') {
-            bunit = fitsData.BUNIT.trim();
-
-            if (fitsData.depth > 1 && has_velocity_info)
-                bunit += '•km/s';
-
-            bunit = "[" + bunit + "]";
-        }
-
-        let line = fitsData.LINE.trim();
-        let filter = fitsData.FILTER.trim();
-
-        if (filter != "")
-            line = filter;
-        else {
-            if (line == "")
-                line = "line-" + index;
-        }
-
-        group.append("foreignObject")
-            .attr("x", (x + 0.0 * rectWidth))
-            .attr("y", 0.9 * height + 0.75 * emFontSize)
-            .attr("width", 5 * emFontSize)
-            .attr("height", 3 * emFontSize)
-            .append("xhtml:div")
-            .html('<p style="text-align: left">' + plain2chem(line, false) + '&nbsp;' + bunit + '</p>');
+        draw_rbg_legend(index);
     }
 
     if (va_count == 1) {
@@ -17766,16 +17783,6 @@ function display_rgb_legend() {
             elem.attr("opacity", 1);
         else
             elem.attr("opacity", 0);
-    }
-    else {
-        for (let index = 1; index <= va_count; index++) {
-            var elem = d3.select("#legend" + index);
-
-            if (displayLegend)
-                elem.attr("opacity", 1);
-            else
-                elem.attr("opacity", 0);
-        }
     }
 }
 
