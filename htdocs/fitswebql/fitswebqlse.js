@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-21.4";
+    return "JS2024-02-21.5";
 }
 
 function uuidv4() {
@@ -17660,8 +17660,12 @@ function draw_rbg_legend(index) {
     //var x = Math.max(0.05*width + (index-1)*1.5*rectWidth, (width-img_width)/2 - va_count*2.4*rectWidth + (index-1)*1.5*rectWidth);
     var x = (width - img_width) / 2 - 0.05 * width - (va_count + 1.5 - index) * 1.5 * rectWidth;
 
-    // first remove any existing legend group
-    d3.select("#legend" + index).remove();
+    try {
+        // first remove any existing legend group
+        d3.select("#legend" + index).remove();
+    }
+    catch (e) {
+    }
 
     let opacity = displayLegend ? 1 : 0;
     var group = svg.append("g")
