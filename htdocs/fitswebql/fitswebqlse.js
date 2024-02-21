@@ -2030,11 +2030,10 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(frame.program, "a_position");
 
-    // Create a position buffer
-    var positionBuffer = gl.createBuffer();
-    frame.positionBuffer = positionBuffer;
+    // Create a position buffer    
+    frame.positionBuffer = gl.createBuffer();
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, frame.positionBuffer);
     // Put a unit quad in the buffer
     var positions = [
         -1, -1,
@@ -2046,11 +2045,10 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture
-    var tex = gl.createTexture();
-    frame.tex = tex;
+    // load a texture    
+    frame.tex = gl.createTexture();
 
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.bindTexture(gl.TEXTURE_2D, frame.tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     /*gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -2106,7 +2104,7 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
 
     // Setup the attributes to pull data from our buffers
     gl.enableVertexAttribArray(positionLocation);
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, frame.positionBuffer);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
     // execute the GLSL program
@@ -2194,11 +2192,10 @@ function webgl_video_renderer(index, gl, width, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(image.program, "a_position");
 
-    // Create a position buffer
-    var positionBuffer = gl.createBuffer();
-    image.positionBuffer = positionBuffer;
+    // Create a position buffer    
+    image.positionBuffer = gl.createBuffer();
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, image.positionBuffer);
     // Put a unit quad in the buffer
     var positions = [
         -1, -1,
@@ -2210,11 +2207,10 @@ function webgl_video_renderer(index, gl, width, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture
-    var tex = gl.createTexture();
-    image.tex = tex;
+    // load a texture    
+    image.tex = gl.createTexture();
 
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.bindTexture(gl.TEXTURE_2D, image.tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     /*gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -2275,7 +2271,7 @@ function webgl_video_renderer(index, gl, width, height) {
 
     // Setup the attributes to pull data from our buffers
     gl.enableVertexAttribArray(positionLocation);
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, image.positionBuffer);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
     // execute the GLSL program
@@ -2689,17 +2685,15 @@ function webgl_zoom_renderer(gl, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
-    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
-    viewport.program = program;
+    viewport.program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
-    var positionLocation = gl.getAttribLocation(program, "a_position");
+    var positionLocation = gl.getAttribLocation(viewport.program, "a_position");
 
-    // Create a position buffer
-    var positionBuffer = gl.createBuffer();
-    viewport.positionBuffer = positionBuffer;
+    // Create a position buffer    
+    viewport.positionBuffer = gl.createBuffer();
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, viewport.positionBuffer);
     // Put a unit quad in the buffer
     var positions = [
         -1, -1,
@@ -2711,11 +2705,10 @@ function webgl_zoom_renderer(gl, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture
-    var tex = gl.createTexture();
-    viewport.tex = tex;
+    // load a texture    
+    viewport.tex = gl.createTexture();
 
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.bindTexture(gl.TEXTURE_2D, viewport.tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     /*gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -2784,14 +2777,14 @@ function webgl_zoom_renderer(gl, height) {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         // the image bounding box
-        var locationOfBox = gl.getUniformLocation(program, "box");
+        var locationOfBox = gl.getUniformLocation(viewport.program, "box");
 
         // image tone mapping
-        var locationOfParams = gl.getUniformLocation(program, "params");
+        var locationOfParams = gl.getUniformLocation(viewport.program, "params");
 
         // drawRegion (execute the GLSL program)
         // Tell WebGL to use our shader program pair
-        gl.useProgram(program);
+        gl.useProgram(viewport.program);
 
         let xmin = (viewport_zoom_settings.x - viewport_zoom_settings.clipSize - 1) / (image.width - 1);
         let ymin = (viewport_zoom_settings.y - viewport_zoom_settings.clipSize - 1) / (image.height - 1);
@@ -2823,7 +2816,7 @@ function webgl_zoom_renderer(gl, height) {
 
         // Setup the attributes to pull data from our buffers
         gl.enableVertexAttribArray(positionLocation);
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, viewport.positionBuffer);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
         // execute the GLSL program
@@ -2886,17 +2879,15 @@ function webgl_composite_zoom_renderer(gl, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
-    var program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
-    viewport.program = program;
+    viewport.program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
-    var positionLocation = gl.getAttribLocation(program, "a_position");
+    var positionLocation = gl.getAttribLocation(viewport.program, "a_position");
 
-    // Create a position buffer
-    var positionBuffer = gl.createBuffer();
-    viewport.positionBuffer = positionBuffer;
+    // Create a position buffer    
+    viewport.positionBuffer = gl.createBuffer();
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, viewport.positionBuffer);
     // Put a unit quad in the buffer
     var positions = [
         -1, -1,
@@ -2908,11 +2899,10 @@ function webgl_composite_zoom_renderer(gl, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture
-    var tex = gl.createTexture();
-    viewport.tex = tex;
+    // load a texture    
+    viewport.tex = gl.createTexture();
 
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.bindTexture(gl.TEXTURE_2D, viewport.tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     /*gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -2979,19 +2969,19 @@ function webgl_composite_zoom_renderer(gl, height) {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         // the image bounding box
-        var locationOfBox = gl.getUniformLocation(program, "box");
+        var locationOfBox = gl.getUniformLocation(viewport.program, "box");
 
         // image tone mapping        
-        var locationOfParamsR = gl.getUniformLocation(program, "params_r");
-        var locationOfParamsG = gl.getUniformLocation(program, "params_g");
-        var locationOfParamsB = gl.getUniformLocation(program, "params_b");
+        var locationOfParamsR = gl.getUniformLocation(viewport.program, "params_r");
+        var locationOfParamsG = gl.getUniformLocation(viewport.program, "params_g");
+        var locationOfParamsB = gl.getUniformLocation(viewport.program, "params_b");
 
         // create an array with parameter locations
         var locationOfParams = [locationOfParamsR, locationOfParamsG, locationOfParamsB];
 
         // drawRegion (execute the GLSL program)
         // Tell WebGL to use our shader program pair
-        gl.useProgram(program);
+        gl.useProgram(viewport.program);
 
         let xmin = (viewport_zoom_settings.x - viewport_zoom_settings.clipSize - 1) / (image.width - 1);
         let ymin = (viewport_zoom_settings.y - viewport_zoom_settings.clipSize - 1) / (image.height - 1);
@@ -3027,7 +3017,7 @@ function webgl_composite_zoom_renderer(gl, height) {
 
         // Setup the attributes to pull data from our buffers
         gl.enableVertexAttribArray(positionLocation);
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, viewport.positionBuffer);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
         // execute the GLSL program
@@ -3544,7 +3534,6 @@ function clear_webgl_video_buffers(index) {
 }
 
 function clear_webgl_internal_buffers(image) {
-    console.log("clear_webgl_internal_buffers: ", image);
     if (image.first)
         return;
 
@@ -3890,16 +3879,15 @@ function webgl_composite_image_renderer(gl, width, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "out vec4 texColour;\n\n");
     }
 
-    image.program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
+    compositeImage.program = createProgram(gl, vertexShaderCode, fragmentShaderCode);
 
     // look up where the vertex data needs to go.
-    var positionLocation = gl.getAttribLocation(image.program, "a_position");
+    var positionLocation = gl.getAttribLocation(compositeImage.program, "a_position");
 
-    // Create a position buffer
-    var positionBuffer = gl.createBuffer();
-    image.positionBuffer = positionBuffer;
+    // Create a position buffer    
+    compositeImage.positionBuffer = gl.createBuffer();
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, compositeImage.positionBuffer);
     // Put a unit quad in the buffer
     var positions = [
         -1, -1,
@@ -3911,11 +3899,10 @@ function webgl_composite_image_renderer(gl, width, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture
-    var tex = gl.createTexture();
-    image.tex = tex;
+    // load a texture    
+    compositeImage.tex = gl.createTexture();
 
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.bindTexture(gl.TEXTURE_2D, compositeImage.tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     /*gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -3924,32 +3911,32 @@ function webgl_composite_image_renderer(gl, width, height) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
     if (webgl2)
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, compositeImage.width, compositeImage.height, 0, gl.RGBA, gl.FLOAT, compositeImage.texture);
     else
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, image.width, image.height, 0, gl.RGBA, gl.FLOAT, image.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, compositeImage.width, compositeImage.height, 0, gl.RGBA, gl.FLOAT, compositeImage.texture);
 
     var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
     if (status != gl.FRAMEBUFFER_COMPLETE) {
         console.error(status);
     }
 
-    image.refresh = true;
-    image.first = true;
+    compositeImage.refresh = true;
+    compositeImage.first = true;
 
     // shoud be done in an animation loop
     function composite_image_rendering_loop(_timestamp) {
         // set a flag
-        image.first = false;
+        compositeImage.first = false;
 
-        if (image.gl === undefined || image.gl == null) {
+        if (compositeImage.gl === undefined || compositeImage.gl == null) {
             return;
         }
 
-        if (!image.refresh) {
-            image.loopId = requestAnimationFrame(composite_image_rendering_loop);
+        if (!compositeImage.refresh) {
+            compositeImage.loopId = requestAnimationFrame(composite_image_rendering_loop);
             return;
         } else
-            image.refresh = false;
+            compositeImage.refresh = false;
 
         //WebGL how to convert from clip space to pixels	
         gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
@@ -3963,24 +3950,24 @@ function webgl_composite_image_renderer(gl, width, height) {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         // the image bounding box
-        var locationOfBox = gl.getUniformLocation(image.program, "box");
+        var locationOfBox = gl.getUniformLocation(compositeImage.program, "box");
 
         // image tone mapping
-        var locationOfParamsR = gl.getUniformLocation(image.program, "params_r");
-        var locationOfParamsG = gl.getUniformLocation(image.program, "params_g");
-        var locationOfParamsB = gl.getUniformLocation(image.program, "params_b");
+        var locationOfParamsR = gl.getUniformLocation(compositeImage.program, "params_r");
+        var locationOfParamsG = gl.getUniformLocation(compositeImage.program, "params_g");
+        var locationOfParamsB = gl.getUniformLocation(compositeImage.program, "params_b");
 
         // create an array with parameter locations
         var locationOfParams = [locationOfParamsR, locationOfParamsG, locationOfParamsB];
 
         // drawRegion (execute the GLSL program)
         // Tell WebGL to use our shader program pair
-        gl.useProgram(image.program);
+        gl.useProgram(compositeImage.program);
 
-        let xmin = image.image_bounding_dims.x1 / (image.width - 0);// was - 1
-        let ymin = image.image_bounding_dims.y1 / (image.height - 0);// was - 1
-        let _width = image.image_bounding_dims.width / image.width;
-        let _height = image.image_bounding_dims.height / image.height;
+        let xmin = compositeImage.image_bounding_dims.x1 / (compositeImage.width - 0);// was - 1
+        let ymin = compositeImage.image_bounding_dims.y1 / (compositeImage.height - 0);// was - 1
+        let _width = compositeImage.image_bounding_dims.width / compositeImage.width;
+        let _height = compositeImage.image_bounding_dims.height / compositeImage.height;
 
         // console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
@@ -4007,17 +3994,17 @@ function webgl_composite_image_renderer(gl, width, height) {
 
         // Setup the attributes to pull data from our buffers
         gl.enableVertexAttribArray(positionLocation);
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, compositeImage.positionBuffer);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
         // execute the GLSL program
         // draw the quad (2 triangles, 6 vertices)
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-        image.loopId = requestAnimationFrame(composite_image_rendering_loop);
+        compositeImage.loopId = requestAnimationFrame(composite_image_rendering_loop);
     };
 
-    image.loopId = requestAnimationFrame(composite_image_rendering_loop);
+    compositeImage.loopId = requestAnimationFrame(composite_image_rendering_loop);
 }
 
 function webgl_image_renderer(index, gl, width, height) {
@@ -4101,11 +4088,10 @@ function webgl_image_renderer(index, gl, width, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(image.program, "a_position");
 
-    // Create a position buffer
-    var positionBuffer = gl.createBuffer();
-    image.positionBuffer = positionBuffer;
+    // Create a position buffer    
+    image.positionBuffer = gl.createBuffer();
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, image.positionBuffer);
     // Put a unit quad in the buffer
     var positions = [
         -1, -1,
@@ -4117,11 +4103,10 @@ function webgl_image_renderer(index, gl, width, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture
-    var tex = gl.createTexture();
-    image.tex = tex;
+    // load a texture    
+    image.tex = gl.createTexture();
 
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.bindTexture(gl.TEXTURE_2D, image.tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     /*gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -4237,7 +4222,7 @@ function webgl_image_renderer(index, gl, width, height) {
 
         // Setup the attributes to pull data from our buffers
         gl.enableVertexAttribArray(positionLocation);
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, image.positionBuffer);
         gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
         // execute the GLSL program
@@ -18159,11 +18144,10 @@ function webgl_legend_renderer(index, gl, x, y, width, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(image.legend_program, "a_position");
 
-    // Create a position buffer
-    var positionBuffer = gl.createBuffer();
-    image.legend_positionBuffer = positionBuffer;
+    // Create a position buffer    
+    image.legend_positionBuffer = gl.createBuffer();
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, image.legend_positionBuffer);
     // Put a unit quad in the buffer
     var positions = [
         -1, -1,
@@ -18189,7 +18173,7 @@ function webgl_legend_renderer(index, gl, x, y, width, height) {
 
     // Setup the attributes to pull data from our buffers
     gl.enableVertexAttribArray(positionLocation);
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, image.legend_positionBuffer);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
     // execute the GLSL program
