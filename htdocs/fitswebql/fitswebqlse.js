@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-21.1";
+    return "JS2024-02-21.3";
 }
 
 function uuidv4() {
@@ -3296,8 +3296,7 @@ function init_webgl_composite_image_buffers() {
         canvas.addEventListener("webglcontextlost", function (event) {
             event.preventDefault();
 
-            var image = compositeImage;
-            cancelAnimationFrame(image.loopId);
+            cancelAnimationFrame(compositeImage.loopId);
             console.error("HTMLCanvas: webglcontextlost");
         }, false);
 
@@ -3847,18 +3846,16 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 }
 
 function webgl_composite_image_renderer(gl, width, height) {
-    var image = compositeImage;
-
-    var scale = get_image_scale(width, height, image.image_bounding_dims.width, image.image_bounding_dims.height);
-    var img_width = Math.floor(scale * image.image_bounding_dims.width);
-    var img_height = Math.floor(scale * image.image_bounding_dims.height);
-    //console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image.image_bounding_dims.width, "orig. height:", image.image_bounding_dims.height);
+    var scale = get_image_scale(width, height, compositeImage.image_bounding_dims.width, compositeImage.image_bounding_dims.height);
+    var img_width = Math.floor(scale * compositeImage.image_bounding_dims.width);
+    var img_height = Math.floor(scale * compositeImage.image_bounding_dims.height);
+    //console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", compositeImage.image_bounding_dims.width, "orig. height:", compositeImage.image_bounding_dims.height);
 
     // setup GLSL program
     var vertexShaderCode = document.getElementById("vertex-shader").text;
     try {
-        var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById(image.tone_mapping.flux + "-composite-shader").text;
-        console.log("webgl_composite_image_renderer: using a common tone mapping", image.tone_mapping.flux);
+        var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById(compositeImage.tone_mapping.flux + "-composite-shader").text;
+        console.log("webgl_composite_image_renderer: using a common tone mapping", compositeImage.tone_mapping.flux);
     } catch (_) {
         // this will be triggered only for datasets where the tone mapping has not been set (i.e. the mask is null etc...)
         var fragmentShaderCode = document.getElementById("common-shader").text + document.getElementById("legacy-composite-shader").text;
@@ -8150,6 +8147,7 @@ function get_tone_mapping_value_square(value, black, sensitivity) {
 
 function get_tone_mapping_logistic(value, median, sensitivity) {
     var pixel = 1.0 / (1.0 + Math.exp(-6.0 * (value - median) * sensitivity));
+    console.log(value, median, sensitivity, pixel);
 
     return clamp(255 * pixel, 0, 255);
 }
@@ -17699,6 +17697,7 @@ function display_rgb_legend() {
             .attr('fill', function (d, i) {
                 let raw = get_tone_mapping(d, flux, black, white, median, multiplier, index);
                 let colour = interpolate_colourmap(raw, rgb[index - 1], 0.8);
+                console.log(i, d, rgb[index - 1], raw, colour);
                 return colour;
             });
 
