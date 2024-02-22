@@ -2658,7 +2658,13 @@ static enum MHD_Result on_http_connection(void *cls,
             datasetId++; // skip the slash character
 
         if (datasetId == NULL)
+        {
+            // free the context pointer
+            free(progress);
+            *ptr = NULL;
+
             return http_bad_request(connection);
+        }
 
 #ifdef DEBUG
         printf("<submit_progress> POST request for '%s': progress = %d\n", datasetId, *progress);
@@ -2671,10 +2677,18 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
             {
+                // free the context pointer
+                free(progress);
+                *ptr = NULL;
+
                 return http_accepted(connection);
             }
             else
             {
+                // free the context pointer
+                free(progress);
+                *ptr = NULL;
+
                 // signal a catastrophic error
                 return http_internal_server_error(connection);
             }
@@ -2684,6 +2698,10 @@ static enum MHD_Result on_http_connection(void *cls,
             // check if we've gone past the FITS header stage
             if (!get_header_status(item))
             {
+                // free the context pointer
+                free(progress);
+                *ptr = NULL;
+
                 return http_accepted(connection);
             }
         }
