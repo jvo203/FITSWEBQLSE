@@ -5,7 +5,6 @@
 * removed the _*optional*_ mongoose HTTP client part (using libcurl instead)
 * added a CHANGELOG popup to the _*Help*_ menu
 * completed the multi-dataset support
-* force a web page reload after modifying the URL (i.e. after an RGB mode change)
 
 ## [5.0.54] - 2024-01-29
 
