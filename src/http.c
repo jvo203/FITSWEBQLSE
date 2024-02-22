@@ -1600,27 +1600,26 @@ static enum MHD_Result on_http_connection(void *cls,
                                           void **ptr)
 {
     (void)cls; // silence gcc warnings
-    //(void)upload_data; // silence gcc warnings
 
-    // static int dummy;
+    static int dummy;
     enum MHD_Result ret;
 
     // accept both "GET" and "POST"
-    // if (0 != strcmp(method, "GET"))
-    //    return MHD_NO; /* unexpected method */
-
-    /*if (&dummy != *ptr)
+    if (0 != strcmp(method, "POST"))
     {
-        // The first time only the headers are valid,
-        // do not respond in the first round...
-        *ptr = &dummy;
-        return MHD_YES;
-    }*/
+        if (&dummy != *ptr)
+        {
+            // The first time only the headers are valid,
+            // do not respond in the first round...
+            *ptr = &dummy;
+            return MHD_YES;
+        }
 
-    if (0 != *upload_data_size && 0 == strcmp(method, "GET"))
-        return MHD_NO; /* upload data in a GET!? */
+        if (0 != *upload_data_size && 0 == strcmp(method, "GET"))
+            return MHD_NO; /* upload data in a GET!? */
 
-    //*ptr = NULL; /* clear context pointer */
+        *ptr = NULL; /* clear context pointer */
+    }
 
     const char *user_agent = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
     const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
