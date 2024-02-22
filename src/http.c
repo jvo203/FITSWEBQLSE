@@ -1599,28 +1599,28 @@ static enum MHD_Result on_http_connection(void *cls,
                                           size_t *upload_data_size,
                                           void **ptr)
 {
-    (void)cls;         // silence gcc warnings
-    (void)upload_data; // silence gcc warnings
+    (void)cls; // silence gcc warnings
+    //(void)upload_data; // silence gcc warnings
 
-    static int dummy;
+    // static int dummy;
     enum MHD_Result ret;
 
-    // accept both "GET" and "PUT"
+    // accept both "GET" and "POST"
     // if (0 != strcmp(method, "GET"))
     //    return MHD_NO; /* unexpected method */
 
-    if (&dummy != *ptr)
+    /*if (&dummy != *ptr)
     {
-        /* The first time only the headers are valid,
-         do not respond in the first round... */
+        // The first time only the headers are valid,
+        // do not respond in the first round...
         *ptr = &dummy;
         return MHD_YES;
-    }
+    }*/
 
     if (0 != *upload_data_size && 0 == strcmp(method, "GET"))
         return MHD_NO; /* upload data in a GET!? */
 
-    *ptr = NULL; /* clear context pointer */
+    //*ptr = NULL; /* clear context pointer */
 
     const char *user_agent = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
     const char *forwarded_for = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "X-Forwarded-For");
@@ -2598,6 +2598,105 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_destroy_response(response);
 
         return ret;
+    }
+
+    if (strstr(url, "/submit_progress/") != NULL)
+    {
+#ifdef DEBUG
+        printf("<submit_progress> method = %s, upload_data_size = %zu, upload_data = %p, ptr = %p\n", method, *upload_data_size, upload_data, *ptr);
+#endif
+
+        // first prepare the memory buffer
+        if (NULL == *ptr)
+        {
+            *ptr = malloc(sizeof(int));
+
+            if (NULL == *ptr)
+                return MHD_NO;
+
+            *(int *)(*ptr) = 0; // set the initial progress value to 0
+            return MHD_YES;
+        }
+
+        // OK, now we have a non-NULL context pointer
+        if (0 == strcmp(method, "POST"))
+        {
+            // parse the binary buffer
+            if (*upload_data_size != 0)
+            {
+                // check if the size matches sizeof(int)
+                if (*upload_data_size == sizeof(int))
+                {
+                    // print out the payload
+#ifdef DEBUG
+                    printf("<submit_progress> POST request: %d\n", *(int *)upload_data);
+#endif
+
+                    // copy the integer progress variable from the payload
+                    *(int *)(*ptr) = *(int *)upload_data;
+
+                    // copy the payload to the context pointer
+                    // memcpy(*ptr, upload_data, sizeof(int));
+
+                    *upload_data_size = 0;
+                    return MHD_YES;
+                }
+                else
+                {
+                    // there is a size mismatch, ignore the payload
+                    return MHD_NO;
+                }
+            }
+        }
+
+        // get the progress from the non-NULL context pointer and handle the response
+        int *progress = *ptr;
+
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+            datasetId++; // skip the slash character
+
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+#ifdef DEBUG
+        printf("<submit_progress> POST request for '%s': progress = %d\n", datasetId, *progress);
+#endif
+
+        // do we have a dataset?
+        void *item = get_dataset(datasetId);
+
+        if (item == NULL)
+        {
+            if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
+            {
+                return http_accepted(connection);
+            }
+            else
+            {
+                // signal a catastrophic error
+                return http_internal_server_error(connection);
+            }
+        }
+        else
+        {
+            // check if we've gone past the FITS header stage
+            if (!get_header_status(item))
+            {
+                return http_accepted(connection);
+            }
+        }
+
+        // submit the POST progress to FORTRAN
+        if (*progress > 0)
+            update_progress_C(item, *progress);
+
+        // free the context pointer
+        free(progress);
+        *ptr = NULL;
+
+        return http_ok(connection);
     }
 
     if (strstr(url, "/viewport/") != NULL)
@@ -5322,7 +5421,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
         // form an HTTP request URL
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", root);
-        g_string_append_printf(url, "%" PRIu16 "/submit_progress/%.*s", options.ws_port, (int)_len, _id);
+        g_string_append_printf(url, "%" PRIu16 "/submit_progress/%.*s", options.http_port, (int)_len, _id);
 
         CURL *curl;
         CURLcode res;
