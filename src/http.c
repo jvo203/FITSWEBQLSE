@@ -5322,7 +5322,7 @@ int submit_progress(char *root, char *datasetid, int len, int progress)
         // form an HTTP request URL
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", root);
-        g_string_append_printf(url, "%" PRIu16 "/progress/%.*s", options.ws_port, (int)_len, _id);
+        g_string_append_printf(url, "%" PRIu16 "/submit_progress/%.*s", options.ws_port, (int)_len, _id);
 
         CURL *curl;
         CURLcode res;
