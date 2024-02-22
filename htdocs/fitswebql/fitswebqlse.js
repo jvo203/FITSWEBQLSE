@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-21.5";
+    return "JS2024-02-22.0";
 }
 
 function uuidv4() {
@@ -13841,6 +13841,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                 }
 
                 window.location.replace(loc + '&counter=' + counter);
+                window.location.reload();
             }, 100);
 
             if (dataset_timeout == -1) {
@@ -16372,6 +16373,9 @@ function display_menu() {
                     window.location.replace(loc + "&view=composite");
                 else
                     window.location.replace(loc);
+
+                // force a reload
+                window.location.reload();
 
                 /*var new_loc = window.location.href.replace("&view=", "&dummy=");
         	
