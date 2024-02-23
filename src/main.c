@@ -259,7 +259,10 @@ int main(int argc, char *argv[])
     options.url_port = 80;
 
     options.root = NULL;
-    options.zmq_port = BEACON_PORT;
+
+    // if the port is 0 the cluster auto-discovery will be disabled
+    // the port can be set in the config.ini file
+    options.zmq_port = 0; // was BEACON_PORT;
 
     // parse options command-line options (over-rides the .ini config file)
     int opt;
@@ -555,9 +558,15 @@ static void *autodiscovery_daemon(void *ptr)
 {
     (void)ptr;
 
+    if (options.zmq_port == 0)
+    {
+        printf("ZeroMQ node auto-discovery is disabled. To enable the cluster functionality please specify a non-zero port in 'config.ini'.\n");
+        pthread_exit(NULL);
+    }
+
     speaker = zactor_new(zbeacon, NULL);
     if (speaker == NULL)
-        return NULL;
+        pthread_exit(NULL);
 
 #ifdef DEBUG
     zstr_send(speaker, "VERBOSE");
@@ -579,7 +588,7 @@ static void *autodiscovery_daemon(void *ptr)
 
     listener = zactor_new(zbeacon, NULL);
     if (listener == NULL)
-        return NULL;
+        pthread_exit(NULL);
 
 #ifdef DEBUG
     zstr_send(listener, "VERBOSE");
@@ -589,7 +598,7 @@ static void *autodiscovery_daemon(void *ptr)
     if (hostname != NULL)
         free(hostname);
     else
-        return NULL;
+        pthread_exit(NULL);
 
     zsock_send(listener, "sb", "SUBSCRIBE", "", 0);
     zsock_set_rcvtimeo(listener, 500);
