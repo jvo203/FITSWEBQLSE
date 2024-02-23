@@ -71,10 +71,7 @@ inline const char *denull(const char *str)
         return "\"\"";
 };
 
-// HTML
-#define PAGE "<html lang=\"en\"><head><title>FITSWEBQL SE</title>" \
-             "</head><body>FITSWEBQLSE (libmicrohttpd)</body></html>"
-
+// HTML server
 struct MHD_Daemon *http_server = NULL;
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
@@ -4497,7 +4494,7 @@ void start_http()
                                    &on_client_connect,
                                    NULL,
                                    &on_http_connection,
-                                   PAGE,
+                                   NULL,
                                    MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
                                    MHD_OPTION_END);
 
