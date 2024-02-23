@@ -164,6 +164,16 @@ ulimit -s unlimited
     sudo firewall-cmd --add-port=50000/udp --zone=public --permanent    
     sudo firewall-cmd --reload
 
+    jvof:
+    sudo firewall-cmd --add-port={9000,9001,60000}/tcp --zone=public --permanent
+    sudo firewall-cmd --add-port=60000/udp --zone=public --permanent    
+    sudo firewall-cmd --reload
+
+    jvow:
+    sudo firewall-cmd --add-port={9000,9001,65000}/tcp --zone=public --permanent
+    sudo firewall-cmd --add-port=65000/udp --zone=public --permanent    
+    sudo firewall-cmd --reload
+
     sudo firewall-cmd --list-all
     sudo firewall-cmd --list-ports --zone=public
 
