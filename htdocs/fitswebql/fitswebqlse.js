@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-22.1";
+    return "JS2024-02-24.0";
 }
 
 function uuidv4() {
@@ -14829,8 +14829,8 @@ function imageTimeout() {
     var x2 = Math.round(fitsX + fitsSize);
     var y2 = Math.round(fitsY + fitsSize);
 
-    var dimx = x2 - x1 + 1;
-    var dimy = y2 - y1 + 1;
+    var dimx = Math.abs(x2 - x1) + 1;
+    var dimy = Math.abs(y2 - y1) + 1;
 
     if (dimx != dimy)
         console.log("unequal dimensions:", dimx, dimy, "fitsX =", fitsX, "fitsY =", fitsY, "fitsSize =", fitsSize);
@@ -15195,7 +15195,7 @@ function change_noise_sensitivity(index) {
 
 function partial_fits_size() {
     let frame_bounds = get_frame_bounds(data_band_lo, data_band_hi, va_count - 1);
-    let len = frame_bounds.frame_end - frame_bounds.frame_start + 1;
+    let len = Math.abs(frame_bounds.frame_end - frame_bounds.frame_start) + 1;
 
     //console.log("frame_bounds:", frame_bounds, "#frames:", len);
 
@@ -15227,8 +15227,8 @@ function partial_fits_size() {
     var orig_x2 = x2 * (fitsData.width - 1) / (imageContainer[va_count - 1].width - 1);
     var orig_y2 = y2 * (fitsData.height - 1) / (imageContainer[va_count - 1].height - 1);
 
-    let dimx = Math.abs(orig_x2 - orig_x1 + 1);
-    let dimy = Math.abs(orig_y2 - orig_y1 + 1);
+    let dimx = Math.abs(orig_x2 - orig_x1) + 1;
+    let dimy = Math.abs(orig_y2 - orig_y1) + 1;
 
     let fitsHeader = fitsData.HEADER;
 

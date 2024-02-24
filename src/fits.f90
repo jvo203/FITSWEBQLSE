@@ -6627,8 +6627,8 @@ contains
       x2 = min(item%naxes(1), req%x2)
       y2 = min(item%naxes(2), req%y2)
 
-      dimx = abs(x2 - x1 + 1)
-      dimy = abs(y2 - y1 + 1)
+      dimx = abs(x2 - x1) + 1
+      dimy = abs(y2 - y1) + 1
 
       ! calculate the centre and squared radius
       cx = 0.5*abs(x1 + x2)
@@ -6909,8 +6909,8 @@ contains
       ! print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3) ! ifort
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
-      dimx = abs(req%x2 - req%x1 + 1)
-      dimy = abs(req%y2 - req%y1 + 1)
+      dimx = abs(req%x2 - req%x1) + 1
+      dimy = abs(req%y2 - req%y1) + 1
       npixels = dimx*dimy
 
       ! sanity checks
@@ -7192,8 +7192,8 @@ contains
       if ((.not. allocated(item%pixels)) .or. (.not. allocated(item%mask))) return
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
-      dimx = abs(req%x2 - req%x1 + 1)
-      dimy = abs(req%y2 - req%y1 + 1)
+      dimx = abs(req%x2 - req%x1) + 1
+      dimy = abs(req%y2 - req%y1) + 1
 
       ! memory allocation
       allocate (pixels(req%x1:req%x2, req%y1:req%y2))
@@ -7349,8 +7349,8 @@ contains
       length = last - first + 1
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
-      dimx = abs(req%x2 - req%x1 + 1)
-      dimy = abs(req%y2 - req%y1 + 1)
+      dimx = abs(req%x2 - req%x1) + 1
+      dimy = abs(req%y2 - req%y1) + 1
       npixels = dimx*dimy
 
       ! sanity checks
@@ -7578,8 +7578,8 @@ contains
 
       print *, 'x1:', x1, 'y1:', y1, 'x2:', x2, 'y2:', y2
 
-      dx = abs(x2 - x1 + 1)
-      dy = abs(y2 - y1 + 1)
+      dx = abs(x2 - x1) + 1
+      dy = abs(y2 - y1) + 1
       dt = 1.0/sqrt(dx**2 + dy**2)/100.0 ! sample the line with a fine granularity
 
       print *, 'dx:', dx, 'dy:', dy, 'dt:', dt
@@ -8754,8 +8754,8 @@ contains
 
       print *, 'x1:', x1, 'y1:', y1, 'x2:', x2, 'y2:', y2
 
-      dx = abs(x2 - x1 + 1)
-      dy = abs(y2 - y1 + 1)
+      dx = abs(x2 - x1) + 1
+      dy = abs(y2 - y1) + 1
       dp = sqrt(dx**2 + dy**2)
       dt = 1.0/dp/100.0 ! sample the line with a fine granularity
 
@@ -9031,8 +9031,8 @@ contains
 
       print *, 'x1:', x1, 'y1:', y1, 'x2:', x2, 'y2:', y2
 
-      dx = abs(x2 - x1 + 1)
-      dy = abs(y2 - y1 + 1)
+      dx = abs(x2 - x1) + 1
+      dy = abs(y2 - y1) + 1
       dp = sqrt(dx**2 + dy**2)
       dt = 1.0/dp/100.0 ! sample the line with a fine granularity
 
@@ -9409,8 +9409,8 @@ contains
       width = item%naxes(1)
       height = item%naxes(2)
 
-      dimx = abs(req%x2 - req%x1 + 1)
-      dimy = abs(req%y2 - req%y1 + 1)
+      dimx = abs(req%x2 - req%x1) + 1
+      dimy = abs(req%y2 - req%y1) + 1
       npixels = dimx*dimy
 
       ! allocate and zero-out the spectrum
