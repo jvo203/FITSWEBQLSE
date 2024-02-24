@@ -1,3 +1,7 @@
+## [5.0.56] - 2024-03-??
+
+* set the ZeroMQ port to 0 by default, hence assuming a single-server mode (the port can be specified in the _*config.ini*_ file)
+
 ## [5.0.55] - 2024-02-22
 
 * added a 120s timeout to libmicrohttpd start-up flags, removed MHD_USE_TURBO
