@@ -1,0 +1,39 @@
+[C] pthread_join rc = 0
+ P-V diagram cluster_req%valid: F
+ processed #points:           6 P-V diagram elapsed time:    1.0068044066429138      [ms]
+ scale:   9.42083263
+ P-V min:  -2.41699219E-02 max:   2.34375000     mean:  0.272937119     std:  0.494537681     elapsed time:   1.3113021850585938E-003 [ms]
+[C] fd: 25; width: 6; height: 84, precision: 6, pmean: 0.272937, pstd: 0.494538, pmin: -0.024170, pmax: 2.343750, xmin: 1, xmax: 6, vmin: -106.480071, vmax: -161.682302
+[C] P-V Diagram compressed size: 152 bytes
+free(): invalid next size (fast)
+[C] PIPE_END_OF_STREAM
+[Thread 0x7fffd2ffd640 (LWP 95867) exited]
+[Thread 0x7fffd0ff9640 (LWP 95869) exited]
+[Thread 0x7fffd27fc640 (LWP 95868) exited]
+[Thread 0x7fffd37fe640 (LWP 95866) exited]
+[Thread 0x7fffd97fa640 (LWP 95865) exited]
+[Thread 0x7fffdb7fe640 (LWP 95864) exited]
+[Thread 0x7fffd1ffb640 (LWP 95863) exited]
+[Thread 0x7fffd8ff9640 (LWP 95861) exited]
+
+Thread 27019 "fitswebqlse" received signal SIGABRT, Aborted.
+[Switching to Thread 0x7fffd17fa640 (LWP 95860)]
+__pthread_kill_implementation (threadid=<optimized out>, signo=signo@entry=6, no_tid=no_tid@entry=0) at pthread_kill.c:44
+Downloading 0.00 MB source file /usr/src/debug/glibc-2.34-100.el9.x86_64/nptl/pthread_kill.c
+44            return INTERNAL_SYSCALL_ERROR_P (ret) ? INTERNAL_SYSCALL_ERRNO (ret) : 0;
+(gdb) bt
+#0  __pthread_kill_implementation (threadid=<optimized out>, signo=signo@entry=6, no_tid=no_tid@entry=0)
+    at pthread_kill.c:44
+#1  0x00007fffee88b9b3 in __pthread_kill_internal (signo=6, threadid=<optimized out>) at pthread_kill.c:78
+#2  0x00007fffee83e646 in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#3  0x00007fffee8287f3 in __GI_abort () at abort.c:79
+#4  0x00007fffee829130 in __libc_message (fmt=fmt@entry=0x7fffee9bb6a8 "%s\n") at ../sysdeps/posix/libc_fatal.c:150
+#5  0x00007fffee8959f7 in malloc_printerr (str=str@entry=0x7fffee9be220 "free(): invalid next size (fast)") at malloc.c:5515
+#6  0x00007fffee897303 in _int_free (av=0x7fffb0000020, p=0x7fffb1572b00, have_lock=0) at malloc.c:4389
+#7  0x00007fffee899d35 in __GI___libc_free (mem=<optimized out>) at malloc.c:3258
+#8  0x00007fffee899e22 in tcache_thread_shutdown () at malloc.c:3094
+#9  __malloc_arena_thread_freeres () at /usr/src/debug/glibc-2.34-100.el9.x86_64/malloc/arena.c:945
+#10 0x00007fffee89bd5a in __libc_thread_freeres () at thread-freeres.c:44
+#11 0x00007fffee889adb in start_thread (arg=<optimized out>) at pthread_create.c:457
+#12 0x00007fffee90ec40 in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
+(gdb)
