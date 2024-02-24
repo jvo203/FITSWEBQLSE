@@ -1,3 +1,25 @@
+deleting ALMA01399840
+Fri, 02 Feb 2024 20:31:03 JST	<IP>	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0	GET	<URL>	HTTP/1.1	ALMA01760547
+  0.0000000000000000      , rest: F , timestamp:   213706.000     , fd:          25
+ first:        2022 last:        2105 length:          84 depth:        3836
+ velocity range: v1:  -106.48007121311943      v2:  -161.68230194590319       [km/s]
+[New Thread 0x7fffd8ff9640 (LWP 95861)]
+ x1:         100 y1:          98 x2:          98 y2:          95
+ dx:   1.00000000     dy:   2.00000000     dp:   2.23606801     dt:   4.47213557E-03
+[C] ws_pv_response: session_id: 18a06292-0771-429d-a2fa-acd427fb53f5, fd: 24
+ npoints:           6
+[New Thread 0x7fffdaffd640 (LWP 95862)]
+[C] calling fetch_pv_diagram across the cluster for 'ALMA01387486'
+[C] aborting fetch_pv_diagram (no cluster nodes found)
+[C] pthread_create rc = 0
+[Thread 0x7fffdaffd640 (LWP 95862) exited]
+[New Thread 0x7fffd1ffb640 (LWP 95863)]
+[New Thread 0x7fffdb7fe640 (LWP 95864)]
+[New Thread 0x7fffd97fa640 (LWP 95865)]
+[New Thread 0x7fffd37fe640 (LWP 95866)]
+[New Thread 0x7fffd2ffd640 (LWP 95867)]
+[New Thread 0x7fffd27fc640 (LWP 95868)]
+[New Thread 0x7fffd0ff9640 (LWP 95869)]
 [C] pthread_join rc = 0
  P-V diagram cluster_req%valid: F
  processed #points:           6 P-V diagram elapsed time:    1.0068044066429138      [ms]
