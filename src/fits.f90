@@ -8679,7 +8679,7 @@ contains
       type(c_ptr) :: pid
       integer(kind=c_int) :: rc
 
-      integer :: frame, first, last, length, npoints, i, j, max_threads
+      integer :: frame, first, last, length, capacity, npoints, i, j, max_threads
       real :: dx, dy, dp, t, dt
       integer(c_int) :: x1, x2, y1, y2
       integer :: prev_x, prev_y, cur_x, cur_y
@@ -8762,8 +8762,8 @@ contains
       print *, 'dx:', dx, 'dy:', dy, 'dp:', dp, 'dt:', dt
 
       ! over-allocate the points array
-      npoints = ceiling(2*dp)
-      allocate (points(2,npoints))
+      capacity = ceiling(2*dp)
+      allocate (points(2,capacity))
 
       ! first enumerate points along the line
       npoints = 0
@@ -8781,9 +8781,12 @@ contains
          end if
 
          t = t + dt
+
+         ! break the loop if capacity is exceeded
+         if (npoints .ge. capacity) exit
       end do
 
-      print *, 'npoints:', npoints
+      print *, 'npoints:', npoints, 'capacity:', capacity
 
       ! there will be at least one point
       ! allocate the pv array using an appropriate astronomical orientation convention
@@ -8980,7 +8983,7 @@ contains
       type(c_ptr) :: pid
       integer(kind=c_int) :: rc
 
-      integer :: frame, first, last, length, i, j, max_threads
+      integer :: frame, first, last, length, i, j, max_threads, capacity
       real :: dx, dy, dp, t, dt
       integer(c_int) :: x1, x2, y1, y2
       integer :: prev_x, prev_y, cur_x, cur_y
@@ -9039,8 +9042,8 @@ contains
       print *, 'dx:', dx, 'dy:', dy, 'dp:', dp, 'dt:', dt
 
       ! over-allocate the points array
-      npoints = ceiling(2*dp)
-      allocate (points(2,npoints))
+      capacity = ceiling(2*dp)
+      allocate (points(2,capacity))
 
       ! first enumerate points along the line
       npoints = 0
@@ -9058,9 +9061,12 @@ contains
          end if
 
          t = t + dt
+
+         ! break the loop if capacity is exceeded
+         if (npoints .ge. capacity) exit
       end do
 
-      print *, 'npoints:', npoints
+      print *, 'npoints:', npoints, 'capacity:', capacity
 
       ! there will be at least one point
       ! allocate the pv array using an appropriate astronomical orientation convention
