@@ -2,6 +2,7 @@
 
 * set the ZeroMQ port to 0 by default, hence assuming a single-server mode (the port can be specified in the _*config.ini*_ file)
 * corrected the P-V Diagram line length calculation inside a FORTRAN subroutine, added capacity checks to prevent potential out-of-bounds accesses
+* shifted handling of <submit_progress> HTTP POST requests from _*mongoose*_ to _*libmicrohttpd_* 
 
 ## [5.0.55] - 2024-02-22
 
