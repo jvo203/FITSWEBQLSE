@@ -246,3 +246,10 @@ struct cluster_pv_request
 
     void *ptr;
 };
+
+// a custom mg_str structure
+struct data_buf
+{
+    char *buf;
+    size_t len;
+};

@@ -126,6 +126,7 @@ extern float get_progress(void *item);
 extern float get_elapsed(void *item);
 extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
 extern void inherent_image_dimensions_C(void *item, int *width, int *height);
+extern void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 
 static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user);
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user);
@@ -1865,13 +1866,13 @@ static enum MHD_Result on_http_connection(void *cls,
         if (NULL == *ptr)
         {
             // allocate struct mg_str
-            struct mg_str *_ptr = malloc(sizeof(struct mg_str));
+            struct data_buf *_ptr = malloc(sizeof(struct data_buf));
 
             if (NULL == _ptr)
                 return MHD_NO; // cannot allocate memory, signal a catastrophic error
 
             // initialize the new struct mg_str
-            _ptr->ptr = NULL;
+            _ptr->buf = NULL;
             _ptr->len = 0;
 
             *ptr = _ptr;
@@ -1885,14 +1886,14 @@ static enum MHD_Result on_http_connection(void *cls,
             // append the upload data to the buffer
             if (*upload_data_size != 0)
             {
-                struct mg_str *_ptr = (struct mg_str *)*ptr;
+                struct data_buf *_ptr = (struct data_buf *)*ptr;
 
                 // (re)allocate a new buffer
-                char *new_ptr = realloc(_ptr->ptr, _ptr->len + *upload_data_size);
+                char *new_ptr = realloc(_ptr->buf, _ptr->len + *upload_data_size);
 
                 if (NULL == new_ptr)
                 {
-                    free(_ptr->ptr);
+                    free(_ptr->buf);
                     free(_ptr);
 
                     *ptr = NULL;
@@ -1903,12 +1904,86 @@ static enum MHD_Result on_http_connection(void *cls,
                 memcpy(new_ptr + _ptr->len, upload_data, *upload_data_size);
 
                 // update the buffer
-                _ptr->ptr = new_ptr;
+                _ptr->buf = new_ptr;
                 _ptr->len += *upload_data_size;
 
                 *upload_data_size = 0;
                 return MHD_YES;
             }
+        }
+
+        int *progress = NULL;
+        int *idx = NULL;
+
+        size_t offset = 0;
+        size_t expected_size = sizeof(int);
+
+        // first check the size of the buffer (should be at least sizeof(int))
+        struct data_buf *_ptr = (struct data_buf *)*ptr;
+
+        if (_ptr->len < expected_size)
+        {
+            free(_ptr->buf);
+            free(_ptr);
+
+            *ptr = NULL;
+            return http_bad_request(connection);
+        }
+
+        const char *data = _ptr->buf;
+
+        // get the progress from the non-NULL context pointer and handle the response
+        progress = (int *)data;
+        offset += sizeof(progress);
+
+        if (*progress > 0)
+            expected_size += sizeof(int) + 5 * (*progress) * sizeof(float);
+
+        // re-check the size of the buffer
+        if (_ptr->len != expected_size)
+        {
+            printf("[C] ERROR expected %zu, received %zu bytes.\n", expected_size, _ptr->len);
+
+            free(_ptr->buf);
+            free(_ptr);
+
+            *ptr = NULL;
+            return http_bad_request(connection);
+        }
+
+        // extract the FORTRAN arrays
+        float *frame_min = NULL;
+        float *frame_max = NULL;
+        float *frame_median = NULL;
+        float *mean_spectrum = NULL;
+        float *integrated_spectrum = NULL;
+
+        if (*progress > 0)
+        {
+            // idx
+            idx = (int *)(data + offset);
+            offset += sizeof(idx);
+            (*idx)++; // convert a C index into a FORTRAN array index
+
+            // frame_min
+            frame_min = (float *)(data + offset);
+            offset += (*progress) * sizeof(float);
+
+            // frame_max
+            frame_max = (float *)(data + offset);
+            offset += (*progress) * sizeof(float);
+
+            // frame_median
+            frame_median = (float *)(data + offset);
+            offset += (*progress) * sizeof(float);
+
+            // mean_spectrum
+            mean_spectrum = (float *)(data + offset);
+            offset += (*progress) * sizeof(float);
+
+            // integrated_spectrum
+            integrated_spectrum = (float *)(data + offset);
+            offset += (*progress) * sizeof(float);
         }
 
         char *datasetId = strrchr(url, '/');
@@ -1917,16 +1992,26 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             datasetId++; // skip the slash character
 
+#ifdef DEBUG
+            printf("<range> POST request for '%s': progress = %d, idx = %d\n", datasetId, *progress, *idx);
+#endif
+
             void *item = get_dataset(datasetId);
 
             if (item == NULL)
             {
                 if (dataset_exists(datasetId)) // a <NULL> entry should have been created prior to loading the FITS file
+                {
+                    free(_ptr->buf);
+                    free(_ptr);
+
+                    *ptr = NULL;
                     return http_accepted(connection);
+                }
                 else
                 {
                     // signal a catastrophic error
-                    GString *json = g_string_new("{\"startindex\":0,\"endindex\":0,\"status\":-2}");
+                    /*GString *json = g_string_new("{\"startindex\":0,\"endindex\":0,\"status\":-2}");
 
                     size_t json_len = json->len;
                     gchar *json_str = g_string_free(json, FALSE);
@@ -1941,9 +2026,19 @@ static enum MHD_Result on_http_connection(void *cls,
                     enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
                     MHD_destroy_response(response);
 
-                    return ret;
+                    return ret;*/
+
+                    free(_ptr->buf);
+                    free(_ptr);
+
+                    *ptr = NULL;
+                    return http_accepted(connection);
                 }
             }
+
+            // submit the POST data arrays to FORTRAN
+            if (*progress > 0)
+                submit_channel_range(item, *idx, *progress, frame_min, frame_max, frame_median, mean_spectrum, integrated_spectrum);
 
             int start, end, status;
 
@@ -1971,7 +2066,13 @@ static enum MHD_Result on_http_connection(void *cls,
             return ret;
         }
         else
+        {
+            free(_ptr->buf);
+            free(_ptr);
+
+            *ptr = NULL;
             return http_bad_request(connection);
+        }
     }
 
     if (strstr(url, "/get_fits") != NULL)
