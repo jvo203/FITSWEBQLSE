@@ -2063,6 +2063,10 @@ static enum MHD_Result on_http_connection(void *cls,
             enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
             MHD_destroy_response(response);
 
+            free(_ptr->buf);
+            free(_ptr);
+
+            *ptr = NULL;
             return ret;
         }
         else
