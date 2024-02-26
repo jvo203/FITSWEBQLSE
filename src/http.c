@@ -1854,8 +1854,63 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_not_found(connection);
     }
 
+    // a FITS channel range combined POST/GET request
     if (strstr(url, "/range/") != NULL)
     {
+#ifdef DEBUG
+        printf("<range> method = %s, upload_data_size = %zu, upload_data = %p, ptr = %p\n", method, *upload_data_size, upload_data, *ptr);
+#endif
+
+        // first prepare the memory buffer
+        if (NULL == *ptr)
+        {
+            // allocate struct mg_str
+            struct mg_str *_ptr = malloc(sizeof(struct mg_str));
+
+            if (NULL == _ptr)
+                return MHD_NO; // cannot allocate memory, signal a catastrophic error
+
+            // initialize the new struct mg_str
+            _ptr->ptr = NULL;
+            _ptr->len = 0;
+
+            *ptr = _ptr;
+
+            return MHD_YES;
+        }
+
+        // OK, now we have a non-NULL context pointer
+        if (0 == strcmp(method, "POST"))
+        {
+            // append the upload data to the buffer
+            if (*upload_data_size != 0)
+            {
+                struct mg_str *_ptr = (struct mg_str *)*ptr;
+
+                // (re)allocate a new buffer
+                char *new_ptr = realloc(_ptr->ptr, _ptr->len + *upload_data_size);
+
+                if (NULL == new_ptr)
+                {
+                    free(_ptr->ptr);
+                    free(_ptr);
+
+                    *ptr = NULL;
+                    return MHD_NO; // cannot allocate memory, signal a catastrophic error
+                }
+
+                // copy the upload data to the buffer
+                memcpy(new_ptr + _ptr->len, upload_data, *upload_data_size);
+
+                // update the buffer
+                _ptr->ptr = new_ptr;
+                _ptr->len += *upload_data_size;
+
+                *upload_data_size = 0;
+                return MHD_YES;
+            }
+        }
+
         char *datasetId = strrchr(url, '/');
 
         if (datasetId != NULL)
@@ -1916,7 +1971,7 @@ static enum MHD_Result on_http_connection(void *cls,
             return ret;
         }
         else
-            return http_not_found(connection);
+            return http_bad_request(connection);
     }
 
     if (strstr(url, "/get_fits") != NULL)
@@ -5343,7 +5398,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
 
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", root);
-        g_string_append_printf(url, "%" PRIu16 "/range/%.*s", options.ws_port, (int)_len, _id);
+        g_string_append_printf(url, "%" PRIu16 "/range/%.*s", options.http_port, (int)_len, _id);
         // printf("[C] URL: '%s'\n", url->str);
 
         curl = curl_easy_init();
