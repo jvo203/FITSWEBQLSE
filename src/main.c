@@ -16,7 +16,7 @@
 
 extern int get_physical_cores();
 
-#ifdef DEBUG
+#ifdef MEMDEBUG
 #include <jemalloc/jemalloc.h>
 
 static pthread_t jemalloc_t;
@@ -212,7 +212,7 @@ void ipp_init()
 
 int main(int argc, char *argv[])
 {
-#ifdef DEBUG
+#ifdef MEMDEBUG
     int jemalloc_res = pthread_create(&jemalloc_t, NULL, jemalloc_daemon, NULL);
 
     if (jemalloc_res)
@@ -439,7 +439,7 @@ int main(int argc, char *argv[])
 
     x265_cleanup();
 
-#ifdef DEBUG
+#ifdef MEMDEBUG
     // wait for the jemalloc thread
     pthread_join(jemalloc_t, NULL);
 #endif
@@ -709,7 +709,7 @@ static void *garbage_collection_daemon(void *ptr)
     pthread_exit(NULL);
 }
 
-#ifdef DEBUG
+#ifdef MEMDEBUG
 static void *jemalloc_daemon(void *arg)
 {
     (void)arg;
