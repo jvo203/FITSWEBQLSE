@@ -1,12 +1,13 @@
 ## [5.0.57] - 2024-03-XX
 
-* fixed a "_*bit rot*_" in the FORTRAN code (changed handling of implicit integer conversions by the gfortran compiler)
+* fixed a "_*bit rot*_" in the FORTRAN code (due to changed handling of implicit integer conversions by the gfortran compiler)
+* shifted handling of <_*/range/id*_> HTTP POST requests from _*mongoose*_ to _*libmicrohttpd*_
 
 ## [5.0.56] - 2024-02-24
 
 * set the ZeroMQ port to 0 by default, hence assuming a single-server mode (the port can be specified in the _*config.ini*_ file)
 * corrected the P-V Diagram line length calculation inside a FORTRAN subroutine, added capacity checks to prevent potential out-of-bounds accesses
-* shifted handling of <submit_progress> HTTP POST requests from _*mongoose*_ to _*libmicrohttpd*_ 
+* shifted handling of <_*/submit_progress/id*_> HTTP POST requests from _*mongoose*_ to _*libmicrohttpd*_
 
 ## [5.0.55] - 2024-02-22
 
