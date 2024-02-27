@@ -1930,17 +1930,12 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
         }
 
+        // for convenience, cast the buffer to a data pointer
         const char *data = _ptr->buf;
-
-        // display the length of the buffer
-        printf("[C] buffer length = %zu\n", _ptr->len);
 
         // get the progress from the non-NULL context pointer and handle the response
         progress = (int *)data;
-        offset += sizeof(progress);
-
-        // display the progress value
-        printf("[C] progress = %d\n", *(int *)data);
+        offset += sizeof(int);
 
         if (*progress > 0)
             expected_size += sizeof(int) + 5 * (*progress) * sizeof(float);
@@ -1968,7 +1963,7 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             // idx
             idx = (int *)(data + offset);
-            offset += sizeof(idx);
+            offset += sizeof(int);
             (*idx)++; // convert a C index into a FORTRAN array index
 
             // frame_min
@@ -2052,7 +2047,7 @@ static enum MHD_Result on_http_connection(void *cls,
             int start, end, status;
 
             // get the channel range from FORTRAN
-            get_channel_range_C(item, 0, &start, &end, &status);
+            get_channel_range_C(item, *progress, &start, &end, &status);
 
             // make JSON
             GString *json = g_string_sized_new(1024);
