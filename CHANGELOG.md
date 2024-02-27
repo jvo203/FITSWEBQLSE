@@ -1,3 +1,7 @@
+## [5.0.57] - 2024-03-XX
+
+* fixed a "_*bit rot*_" in the FORTRAN code (changed handling of implicit integer conversions by the gfortran compiler)
+
 ## [5.0.56] - 2024-02-24
 
 * set the ZeroMQ port to 0 by default, hence assuming a single-server mode (the port can be specified in the _*config.ini*_ file)
