@@ -1932,9 +1932,15 @@ static enum MHD_Result on_http_connection(void *cls,
 
         const char *data = _ptr->buf;
 
+        // display the length of the buffer
+        printf("[C] buffer length = %zu\n", _ptr->len);
+
         // get the progress from the non-NULL context pointer and handle the response
         progress = (int *)data;
         offset += sizeof(progress);
+
+        // display the progress value
+        printf("[C] progress = %d\n", *(int *)data);
 
         if (*progress > 0)
             expected_size += sizeof(int) + 5 * (*progress) * sizeof(float);
@@ -1993,7 +1999,10 @@ static enum MHD_Result on_http_connection(void *cls,
             datasetId++; // skip the slash character
 
 #ifdef DEBUG
-            printf("<range> POST request for '%s': progress = %d, idx = %d\n", datasetId, *progress, *idx);
+            if (*progress > 0)
+                printf("<range> POST request for '%s': progress = %d, idx = %d\n", datasetId, *progress, *idx);
+            else
+                printf("<range> POST request for '%s': progress = %d\n", datasetId, *progress);
 #endif
 
             void *item = get_dataset(datasetId);

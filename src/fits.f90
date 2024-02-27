@@ -1422,7 +1422,7 @@ contains
       cache_len = 0
 
       ! files over this threshold will be put into the fast cache preferentially
-      cache_threshold = threshold*(1024**3)! [GiB]
+      cache_threshold = int(threshold, kind=8)*(1024**3)! [GiB]
 
       ! destroy mutexes
       rc = c_pthread_mutex_destroy(item%header_mtx)
