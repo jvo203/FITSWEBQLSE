@@ -1,4 +1,4 @@
-## [5.0.57] - 2024-03-XX
+## [5.0.57] - 2024-02-28
 
 * fixed a "_*bit rot*_" in the FORTRAN code (due to changed handling of implicit integer conversions by the gfortran compiler)
 * shifted handling of <_*/range/id*_> HTTP POST requests from _*mongoose*_ to _*libmicrohttpd*_
