@@ -74,6 +74,11 @@ inline const char *denull(const char *str)
 // HTML server
 struct MHD_Daemon *http_server = NULL;
 
+#ifdef MICROWS
+// WebSocket server
+struct MHD_Daemon *ws_server = NULL;
+#endif
+
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
 void create_root_path(const char *root);
 void *forward_fitswebql_request(void *ptr);
@@ -4697,6 +4702,16 @@ void stop_http()
         http_server = NULL;
         printf("done\n");
     }
+
+#ifdef MICROWS
+    if (ws_server != NULL)
+    {
+        printf("[C] shutting down the µHTTP-WS daemon... ");
+        MHD_stop_daemon(ws_server);
+        ws_server = NULL;
+        printf("done\n");
+    }
+#endif
 
     if (splat_db != NULL)
     {

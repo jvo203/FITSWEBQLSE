@@ -2428,7 +2428,11 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
 void start_ws()
 {
     char url[256] = "";
+#ifdef MICROWS
+    sprintf(url, "ws://0.0.0.0:%d", options.ws_port + 1); // effectively disable the mongoose WS server; using libmicrohttpd instead
+#else
     sprintf(url, "ws://0.0.0.0:%d", options.ws_port);
+#endif
 
     struct mg_mgr mgr; // Event manager
 
