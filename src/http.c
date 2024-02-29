@@ -4672,7 +4672,7 @@ void start_http()
 
 #ifdef MICROWS
     // TO-DO: start a µHTTP-WS server
-    ws_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC /* | MHD_USE_TURBO */,
+    ws_server = MHD_start_daemon(MHD_ALLOW_UPGRADE | MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC /* | MHD_USE_TURBO */,
                                  options.ws_port,
                                  NULL,
                                  NULL,
