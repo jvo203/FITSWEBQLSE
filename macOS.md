@@ -127,6 +127,15 @@ ld: symbol(s) not found for architecture arm64
 # 8. libmicrohttpd
     brew install libmicrohttpd
 
+    or, when using the experimental libmicrohttpd websocket support (define MICROWS in the Makefile)
+
+    wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
+    tar zxvf libmicrohttpd-latest.tar.gz
+    cd libmicrohttpd-1.0.1
+    ./configure --enable-experimental
+    make
+    sudo make install
+
 # 9. LZ4
     brew install lz4
 
