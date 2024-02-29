@@ -627,7 +627,6 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
     MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
 
     enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
     MHD_destroy_response(response);
 
     return ret;
@@ -655,7 +654,6 @@ static enum MHD_Result send_progress(struct MHD_Connection *connection, float pr
     MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
 
     enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
     MHD_destroy_response(response);
 
     return ret;
@@ -2301,7 +2299,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
         MHD_destroy_response(response);
 
         // the code below should be run in a separate thread
@@ -2465,7 +2462,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
             // queue the response
             enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
             MHD_destroy_response(response);
 
             printf("[C] calling stream_molecules with the pipe file descriptor %d\n", pipefd[1]);
@@ -2578,7 +2574,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
         MHD_destroy_response(response);
 
         // the code below should be run in a separate thread
@@ -2729,7 +2724,6 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
 
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
         MHD_destroy_response(response);
 
         return ret;
@@ -2768,7 +2762,6 @@ static enum MHD_Result on_http_connection(void *cls,
         MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
 
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
         MHD_destroy_response(response);
 
         return ret;
@@ -3021,7 +3014,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
         MHD_destroy_response(response);
 
         // the code below should be run in a separate thread
@@ -3168,7 +3160,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
         MHD_destroy_response(response);
 
         // the code below should be run in a separate thread
@@ -3263,7 +3254,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
         MHD_destroy_response(response);
 
         // the code below should be run in a separate thread
@@ -3439,7 +3429,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // queue the response
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
         MHD_destroy_response(response);
 
         // the code below should be run in a separate thread
@@ -4655,7 +4644,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     MHD_add_response_header(response, "Content-Type", "text/html; charset=utf-8");
 
     enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-
     MHD_destroy_response(response);
 
     return ret;

@@ -43,5 +43,6 @@ on_ws_connection(void *cls,
                              MHD_HTTP_OK,
                              response);
     MHD_destroy_response(response);
+
     return ret;
 }
