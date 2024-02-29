@@ -4655,7 +4655,7 @@ void start_http()
 
     // http_server = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC | MHD_USE_TURBO,
     // added a timeout, disabled MHD_USE_TURBO on 2024/02/05
-    http_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC /* | MHD_USE_TURBO */,
+    http_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                    options.http_port,
                                    &on_client_connect,
                                    NULL,
@@ -4672,7 +4672,7 @@ void start_http()
 
 #ifdef MICROWS
     // TO-DO: start a µHTTP-WS server
-    ws_server = MHD_start_daemon(MHD_ALLOW_UPGRADE | MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC /* | MHD_USE_TURBO */,
+    ws_server = MHD_start_daemon(MHD_ALLOW_UPGRADE | MHD_USE_AUTO | MHD_USE_AUTO_INTERNAL_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                  options.ws_port,
                                  NULL,
                                  NULL,
