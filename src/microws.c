@@ -1,3 +1,6 @@
+#ifdef MICROWS
+
+#include <microhttpd_ws.h>
 #include <microhttpd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -172,3 +175,5 @@ my_ws_connection(void *cls,
     MHD_destroy_response(response);
     return ret;
 }
+
+#endif // MICROWS
