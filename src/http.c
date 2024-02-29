@@ -77,6 +77,15 @@ struct MHD_Daemon *http_server = NULL;
 #ifdef MICROWS
 // WebSocket server
 struct MHD_Daemon *ws_server = NULL;
+
+enum MHD_Result on_ws_connection(void *cls,
+                                 struct MHD_Connection *connection,
+                                 const char *url,
+                                 const char *method,
+                                 const char *version,
+                                 const char *upload_data,
+                                 size_t *upload_data_size,
+                                 void **ptr);
 #endif
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
@@ -4679,7 +4688,7 @@ void start_http()
                                  options.ws_port,
                                  NULL,
                                  NULL,
-                                 &on_http_connection,
+                                 &on_ws_connection,
                                  NULL,
                                  MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
                                  MHD_OPTION_END);
