@@ -4669,28 +4669,48 @@ void start_http()
 
     if (http_server == NULL)
     {
-        printf("[C] Could not start a libmicrohttpd web server.\n");
+        printf("[C] Could not start a libmicrohttpd HTTP server.\n");
         return;
     }
-    else
+
+#ifdef MICROWS
+    // TO-DO: start a µHTTP-WS server
+    ws_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC /* | MHD_USE_TURBO */,
+                                 options.ws_port,
+                                 NULL,
+                                 NULL,
+                                 &on_http_connection,
+                                 NULL,
+                                 MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
+                                 MHD_OPTION_END);
+
+    if (ws_server == NULL)
     {
-#ifdef SHARE
-        int rc = sqlite3_open_v2(SHARE "/splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
-#else
-        int rc = sqlite3_open_v2("splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
+        printf("[C] Could not start a libmicrohttpd WebSocket server.\n");
+        return;
+    }
 #endif
 
-        if (rc)
-        {
-            fprintf(stderr, "[C] Can't open local splatalogue database: %s\n", sqlite3_errmsg(splat_db));
-            sqlite3_close(splat_db);
-            splat_db = NULL;
-        }
+#ifdef SHARE
+    int rc = sqlite3_open_v2(SHARE "/splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
+#else
+    int rc = sqlite3_open_v2("splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
+#endif
+
+    if (rc)
+    {
+        fprintf(stderr, "[C] Can't open local splatalogue database: %s\n", sqlite3_errmsg(splat_db));
+        sqlite3_close(splat_db);
+        splat_db = NULL;
+    }
 
 #ifdef DEBUG
-        printf("[C] µHTTP daemon listening on port %" PRIu16 "... Press CTRL-C to stop it.\n", options.http_port);
+    printf("[C] µHTTP daemon listening on port %" PRIu16 "... Press CTRL-C to stop it.\n", options.http_port);
+
+#ifdef MICROWS
+    printf("[C] µHTTP-WS daemon listening on port %" PRIu16 "... Press CTRL-C to stop it.\n", options.ws_port);
 #endif
-    }
+#endif
 };
 
 void stop_http()
