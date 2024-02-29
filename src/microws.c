@@ -1,10 +1,10 @@
-#ifdef MICROWS
-
-#include <microhttpd_ws.h>
 #include <microhttpd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+#ifdef MICROWS
+#include <microhttpd_ws.h>
 
 #define PAGE_INVALID_WEBSOCKET_REQUEST "Invalid WebSocket request!"
 
