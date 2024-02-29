@@ -4697,7 +4697,7 @@ void stop_http()
 {
     if (http_server != NULL)
     {
-        printf("[C] shutting down the µHTTP daemon... ");
+        printf("[C] shutting down the µHTTP daemon...");
         MHD_stop_daemon(http_server);
         http_server = NULL;
         printf("done\n");
@@ -4706,7 +4706,7 @@ void stop_http()
 #ifdef MICROWS
     if (ws_server != NULL)
     {
-        printf("[C] shutting down the µHTTP-WS daemon... ");
+        printf("[C] shutting down the µHTTP-WS daemon...");
         MHD_stop_daemon(ws_server);
         ws_server = NULL;
         printf("done\n");
