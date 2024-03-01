@@ -111,3 +111,11 @@ extern void get_inner_dimensions(void *ptr, int width, int height, int *fits_wid
 extern void get_spectrum_range_C(void *ptr, double frame_start, double frame_end, double ref_freq, int *first, int *last);
 extern void fill_global_statistics(void *ptr, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
 extern void update_timestamp(void *ptr);
+
+// now used in microws.c too
+extern GHashTable *sessions;
+extern pthread_mutex_t sessions_mtx;
+
+void *ws_event_loop(void *arg);
+void *video_event_loop(void *arg);
+void *pv_event_loop(void *arg);

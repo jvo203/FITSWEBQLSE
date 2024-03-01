@@ -7,9 +7,6 @@
 #include "ws.h"
 #include "hash_table.h"
 
-static GHashTable *sessions;
-pthread_mutex_t sessions_mtx;
-
 #ifdef MICROWS
 #include <microhttpd_ws.h>
 

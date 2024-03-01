@@ -16,17 +16,13 @@ extern GMutex cluster_mtx;
 
 #include "hash_table.h"
 
-static GHashTable *sessions;
+GHashTable *sessions = NULL;
 pthread_mutex_t sessions_mtx;
 
 extern options_t options; // <options> is defined in main.c
 extern sig_atomic_t s_received_signal;
 extern int get_header_status(void *item);
 extern void inherent_image_dimensions_C(void *item, int *width, int *height);
-
-void *ws_event_loop(void *arg);
-void *video_event_loop(void *arg);
-void *pv_event_loop(void *arg);
 
 void *send_cluster_heartbeat(void *arg);
 
