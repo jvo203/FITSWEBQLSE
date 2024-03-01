@@ -58,11 +58,26 @@ make_blocking(MHD_socket fd)
 #endif /* MHD_WINSOCK_SOCKETS */
 }
 
+static void *ws_send_messages(void *cls)
+{
+    if (cls == NULL)
+        pthread_exit(NULL);
+
+    websocket_session *session = (websocket_session *)cls;
+
+    // TO-DO
+    // ...
+
+    pthread_exit(NULL);
+}
+
 static void *ws_receive_messages(void *cls)
 {
     if (cls == NULL)
         pthread_exit(NULL);
 
+    char buf[1024]; // a buffer for incoming WebSocket messages
+    ssize_t got;
     int result;
 
     websocket_session *session = (websocket_session *)cls;
@@ -117,11 +132,52 @@ static void *ws_receive_messages(void *cls)
 
     session->disconnect = false;
     // TO-DO
+    /* start the message-send thread */
+    pthread_t pt;
+    if (0 != pthread_create(&pt, NULL, &ws_send_messages, session))
+    {
+        pthread_cond_destroy(&session->wake_up_sender);
+        pthread_mutex_destroy(&session->send_mutex);
+        MHD_upgrade_action(session->urh, MHD_UPGRADE_ACTION_CLOSE);
+
+        // remove a session pointer from the hash table
+        remove_session(session);
+
+        free(session->extra_in);
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+        pthread_exit(NULL);
+    }
+
+    /* start by parsing extra data MHD may have already read, if any */
+    // TO-DO
+
+    // first memset the buffer
+    memset(buf, 0, sizeof(buf));
+
+    /* the main loop for receiving data */
+    while (1)
+    {
+        got = recv(session->fd, buf, sizeof(buf) - 1, 0); // -1 will ensure the buffer is always null-terminated
+
+        if (0 >= got)
+        {
+            /* the TCP/IP socket has been closed */
+            break;
+        }
+
+        if (0 < got)
+        {
+            // print the received message
+            printf("[C] WebSocket received: %s\n", buf);
+
+            // handle the messages
+        }
+    }
 
     // clean-up
     session->disconnect = true;
     pthread_cond_signal(&session->wake_up_sender);
-
+    pthread_join(pt, NULL);
     struct MHD_UpgradeResponseHandle *urh = session->urh;
     if (NULL != urh)
     {
@@ -389,7 +445,6 @@ on_ws_connection(void *cls,
                 *ptr = '\0';
         }
 
-        /*actually do not reject the connections, accept all 'as-is' */
         // reject connections without an entry in a hash table
         if (!dataset_exists(datasetId))
         {
