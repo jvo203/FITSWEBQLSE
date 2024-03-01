@@ -78,7 +78,7 @@ upgrade_handler(void *cls,
         return;
 
     websocket_session *session = (websocket_session *)cls;
-    printf("[C] upgrade_handler: %s\n", session->id);
+    printf("[C] WebSocket upgrade_handler: %s\n", session->id);
 
     // TO-DO
 

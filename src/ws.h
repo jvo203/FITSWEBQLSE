@@ -3,6 +3,7 @@
 #include <glib.h>
 
 #include "mongoose.h"
+#include <microhttpd.h>
 #include "fits_types.h"
 #include "mongoose.h"
 
@@ -17,6 +18,48 @@ typedef struct
     char *datasetid; // a single id
     char *multi;     // multiple ids are separated by a semicolon
     char *id;        // sessionId
+
+#ifdef MICROWS
+    /* the TCP/IP socket for reading/writing */
+    MHD_socket fd;
+
+    /* the UpgradeResponseHandle of libmicrohttpd (needed for closing the socket) */
+    struct MHD_UpgradeResponseHandle *urh;
+
+    /* the websocket encode/decode stream */
+    struct MHD_WebSocketStream *ws;
+
+    /* the possibly read data at the start (only used once) */
+    char *extra_in;
+    size_t extra_in_size;
+
+    /* specifies whether the websocket shall be closed (1) or not (0) */
+    int disconnect;
+
+    /* condition variable to wake up the sender of this connection */
+    pthread_cond_t wake_up_sender;
+
+    /* mutex to ensure that no send actions are mixed
+       (sending can be done by send and recv thread;
+        may not be simultaneously locked by the same thread) */
+    pthread_mutex_t send_mutex;
+
+    /* specifies whether a ping shall be executed (1), is being executed (2) or
+       no ping is pending (0) */
+    int ping_status;
+
+    /* the start time of the ping, if a ping is running */
+    struct timespec ping_start;
+
+    /* the message used for the ping (must match the pong response)*/
+    char ping_message[128];
+
+    /* the length of the ping message (may not exceed 125) */
+    size_t ping_message_len;
+
+    /* the numeric ping message suffix to detect ping messages, which are too old */
+    int ping_counter;
+#endif
 
     // the WebSocket communications via mg_wakeup()
     struct mg_mgr *mgr;
