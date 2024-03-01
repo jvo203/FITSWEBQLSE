@@ -12,7 +12,7 @@
 
 #define PAGE_INVALID_WEBSOCKET_REQUEST "Invalid WebSocket request!"
 
-static void remove_session(const websocket_session *session)
+static void remove_session(websocket_session *session)
 {
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
@@ -484,6 +484,7 @@ on_ws_connection(void *cls,
                 }
 
                 // hold on to the session pointer, pass it to the WebSocket upgrade handler
+                g_atomic_rc_box_acquire(session);
             }
         }
 
