@@ -80,9 +80,23 @@ upgrade_handler(void *cls,
     websocket_session *session = (websocket_session *)cls;
     printf("[C] WebSocket upgrade_handler: %s\n", session->id);
 
-    // TO-DO
+    if (0 != extra_in_size)
+    {
+        session->extra_in = (char *)malloc(extra_in_size);
 
-    return;
+        if (session->extra_in != NULL)
+            memcpy(session->extra_in, extra_in, extra_in_size);
+    }
+    else
+        session->extra_in = NULL;
+
+    session->extra_in_size = extra_in_size;
+    session->fd = fd;
+    session->urh = urh;
+
+    /* create a receiver thread */
+    if (0 == pthread_create(&pt, NULL, &ws_receive_messages, session))
+        pthread_detach(pt);
 }
 
 /**
