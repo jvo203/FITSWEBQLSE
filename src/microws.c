@@ -12,6 +12,113 @@
 
 #define PAGE_INVALID_WEBSOCKET_REQUEST "Invalid WebSocket request!"
 
+static void remove_session(const websocket_session *session)
+{
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        if (g_hash_table_remove(sessions, (gpointer)session->id))
+        {
+            printf("[C] removed %s from the hash table\n", session->id);
+        }
+        else
+            printf("[C] cannot remove %s from the hash table\n", session->id);
+
+        pthread_mutex_unlock(&sessions_mtx);
+
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+    }
+    else
+        printf("[C] cannot lock sessions_mtx!\n");
+}
+
+/**
+ * Change socket to blocking.
+ *
+ * @param fd the socket to manipulate
+ */
+static void
+make_blocking(MHD_socket fd)
+{
+#if defined(MHD_POSIX_SOCKETS)
+    int flags;
+
+    flags = fcntl(fd, F_GETFL);
+    if (-1 == flags)
+        abort();
+
+    if ((flags & ~O_NONBLOCK) != flags)
+        if (-1 == fcntl(fd, F_SETFL, flags & ~O_NONBLOCK))
+            abort();
+
+#elif defined(MHD_WINSOCK_SOCKETS)
+    unsigned long flags = 0;
+
+    if (0 != ioctlsocket(fd, (int)FIONBIO, &flags))
+        abort();
+#endif /* MHD_WINSOCK_SOCKETS */
+}
+
+static void *ws_receive_messages(void *cls)
+{
+    if (cls == NULL)
+        pthread_exit(NULL);
+
+    int result;
+
+    websocket_session *session = (websocket_session *)cls;
+
+    /* make the socket blocking */
+    make_blocking(session->fd);
+
+    /* initialize the wake-up-sender condition variable */
+    if (0 != pthread_cond_init(&session->wake_up_sender, NULL))
+    {
+        MHD_upgrade_action(session->urh,
+                           MHD_UPGRADE_ACTION_CLOSE);
+
+        // remove a session pointer from the hash table
+        remove_session(session);
+
+        free(session->extra_in);
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+        pthread_exit(NULL);
+    }
+
+    /* initialize the send mutex */
+    if (0 != pthread_mutex_init(&session->send_mutex, NULL))
+    {
+        MHD_upgrade_action(session->urh,
+                           MHD_UPGRADE_ACTION_CLOSE);
+
+        // remove a session pointer from the hash table
+        remove_session(session);
+
+        pthread_cond_destroy(&session->wake_up_sender);
+        free(session->extra_in);
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+        pthread_exit(NULL);
+    }
+
+    /* initialize the web socket stream for encoding/decoding */
+    result = MHD_websocket_stream_init(&session->ws, MHD_WEBSOCKET_FLAG_SERVER | MHD_WEBSOCKET_FLAG_NO_FRAGMENTS, 0);
+    if (MHD_WEBSOCKET_STATUS_OK != result)
+    {
+        pthread_cond_destroy(&session->wake_up_sender);
+        pthread_mutex_destroy(&session->send_mutex);
+        MHD_upgrade_action(session->urh, MHD_UPGRADE_ACTION_CLOSE);
+
+        // remove a session pointer from the hash table
+        remove_session(session);
+
+        free(session->extra_in);
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+        pthread_exit(NULL);
+    }
+
+    printf("[C] WebSocket receive_messages: exit\n");
+    pthread_exit(NULL);
+}
+
 /**
  * Function called after a protocol "upgrade" response was sent
  * successfully and the socket should now be controlled by some
@@ -97,6 +204,16 @@ upgrade_handler(void *cls,
     /* create a receiver thread */
     if (0 == pthread_create(&pt, NULL, &ws_receive_messages, session))
         pthread_detach(pt);
+    else
+    {
+        printf("[C] cannot create a WebSocket receiver thread!\n");
+
+        // remove a session pointer from the hash table
+        remove_session(session);
+
+        free(session->extra_in);
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+    }
 }
 
 /**
