@@ -68,7 +68,6 @@ upgrade_handler(void *cls,
                 MHD_socket fd,
                 struct MHD_UpgradeResponseHandle *urh)
 {
-    struct ConnectedUser *cu;
     pthread_t pt;
     (void)connection; /* Unused. Silent compiler warning. */
     (void)req_cls;    /* Unused. Silent compiler warning. */
@@ -79,6 +78,7 @@ upgrade_handler(void *cls,
         return;
 
     websocket_session *session = (websocket_session *)cls;
+    printf("[C] upgrade_handler: %s\n", session->id);
 
     // TO-DO
 
