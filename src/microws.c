@@ -73,11 +73,17 @@ upgrade_handler(void *cls,
 {
     struct ConnectedUser *cu;
     pthread_t pt;
-    (void)cls;        /* Unused. Silent compiler warning. */
     (void)connection; /* Unused. Silent compiler warning. */
     (void)req_cls;    /* Unused. Silent compiler warning. */
 
     /* This callback must return as soon as possible. */
+
+    if (cls == NULL)
+        return;
+
+    websocket_session *session = (websocket_session *)cls;
+
+    // TO-DO
 
     return;
 }
@@ -339,10 +345,10 @@ on_ws_connection(void *cls,
                 // add a session pointer to the hash table
                 if (pthread_mutex_lock(&sessions_mtx) == 0)
                 {
-                    g_hash_table_replace(sessions, (gpointer)strdup(c->data), g_atomic_rc_box_acquire(session));
+                    g_hash_table_replace(sessions, (gpointer)strdup(sessionId), g_atomic_rc_box_acquire(session));
                     pthread_mutex_unlock(&sessions_mtx);
 
-                    printf("[C] inserted %s into the hash table\n", c->data);
+                    printf("[C] inserted %s into the hash table\n", sessionId);
                 }
                 else
                 {
