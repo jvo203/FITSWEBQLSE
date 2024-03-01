@@ -624,12 +624,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
 
         char *orig = NULL;
         if (datasetId != NULL)
+        {
             orig = strdup(datasetId);
 
-        // split the string by ';', get the leading datasetId
-        char *ptr = strchr(datasetId, ';');
-        if (ptr != NULL)
-            *ptr = '\0';
+            // split the string by ';', get the leading datasetId
+            char *ptr = strchr(datasetId, ';');
+            if (ptr != NULL)
+                *ptr = '\0';
+        }
 
         /*actually do not reject the connections, accept all 'as-is' */
         // reject connections without an entry in a hash table

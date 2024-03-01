@@ -1,7 +1,14 @@
 #include <microhttpd.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 #include <stdio.h>
+
+#include "ws.h"
+#include "hash_table.h"
+
+static GHashTable *sessions;
+pthread_mutex_t sessions_mtx;
 
 #ifdef MICROWS
 #include <microhttpd_ws.h>
@@ -146,6 +153,7 @@ on_ws_connection(void *cls,
     {
         is_valid = 0;
     }
+
     value = MHD_lookup_connection_value(connection,
                                         MHD_HEADER_KIND,
                                         MHD_HTTP_HEADER_CONNECTION);
@@ -153,6 +161,7 @@ on_ws_connection(void *cls,
     {
         is_valid = 0;
     }
+
     value = MHD_lookup_connection_value(connection,
                                         MHD_HEADER_KIND,
                                         MHD_HTTP_HEADER_UPGRADE);
@@ -160,6 +169,7 @@ on_ws_connection(void *cls,
     {
         is_valid = 0;
     }
+
     value = MHD_lookup_connection_value(connection,
                                         MHD_HEADER_KIND,
                                         MHD_HTTP_HEADER_SEC_WEBSOCKET_VERSION);
@@ -167,6 +177,7 @@ on_ws_connection(void *cls,
     {
         is_valid = 0;
     }
+
     value = MHD_lookup_connection_value(connection,
                                         MHD_HEADER_KIND,
                                         MHD_HTTP_HEADER_SEC_WEBSOCKET_KEY);
@@ -175,11 +186,184 @@ on_ws_connection(void *cls,
         is_valid = 0;
     }
 
+    // finally validate the URL (datasetId? sessionId? etc.)
+    websocket_session *session = NULL;
+
+    if (strstr(url, "/websocket/") != NULL)
+    {
+        printf("[C] URL: %s\n", url);
+
+        char *sessionId = strrchr(url, '/');
+        if (sessionId != NULL)
+        {
+            // zero-out the slash (get rid of it) to cancel the session id part
+            *sessionId = '\0';
+
+            sessionId++; // skip the slash character
+
+            printf("[C] WEBSOCKET SESSIONID: '%s'\n", sessionId);
+        }
+        else
+        {
+            is_valid = 0;
+        }
+
+        char *datasetId = strrchr(url, '/');
+        if (datasetId != NULL)
+        {
+            datasetId++; // skip the slash character
+
+            printf("[C] WEBSOCKET DATASETID: '%s'\n", datasetId);
+        }
+        else
+        {
+            is_valid = 0;
+        }
+
+        char *orig = NULL;
+        if (datasetId != NULL)
+        {
+            orig = strdup(datasetId);
+
+            // split the string by ';', get the leading datasetId
+            char *ptr = strchr(datasetId, ';');
+            if (ptr != NULL)
+                *ptr = '\0';
+        }
+
+        /*actually do not reject the connections, accept all 'as-is' */
+        // reject connections without an entry in a hash table
+        if (!dataset_exists(datasetId))
+        {
+            printf("[C] rejecting the WebSocket connection for '%s'.\n", datasetId);
+            is_valid = 0;
+        }
+        else if (is_valid)
+        {
+            printf("[C] accepting the WebSocket connection for '%s'.\n", datasetId);
+
+            session = new_session();
+
+            if (session != NULL)
+            {
+                // datasetId != NULL && sessionId != NULL
+                session->datasetid = strdup(datasetId);
+                session->multi = orig != NULL ? strdup(orig) : NULL;
+                session->id = strdup(sessionId);
+                session->conn_id = -1;
+                session->mgr = NULL;
+
+                session->flux = NULL;
+                session->dmin = NAN;
+                session->dmax = NAN;
+                session->dmedian = NAN;
+                session->dmadN = NAN;
+                session->dmadP = NAN;
+                pthread_mutex_init(&session->stat_mtx, NULL);
+
+                session->image_width = 0;
+                session->image_height = 0;
+                session->bDownsize = false;
+
+                pthread_mutex_init(&session->vid_mtx, NULL);
+                session->last_frame_idx = -1;
+                session->param = NULL;
+                session->encoder = NULL;
+                session->picture = NULL;
+
+                int stat;
+
+                // WS spectrum ring buffer event loop
+                session->ws_exit = false;
+                pthread_mutex_init(&session->ws_cond_mtx, NULL);
+                pthread_cond_init(&session->ws_cond, NULL);
+
+                pthread_mutex_init(&session->ws_mtx, NULL);
+                pthread_mutex_lock(&session->ws_mtx);
+
+                // launch a ws_thread
+                stat = pthread_create(&session->ws_thread, NULL, ws_event_loop, session);
+
+                if (stat != 0)
+                    printf("[C] cannot create a ws_thread!\n");
+
+                session->ws_ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
+
+                if (session->ws_ring != NULL)
+                    init_ring_buffer(session->ws_ring, 64);
+
+                pthread_mutex_unlock(&session->ws_mtx);
+
+                // WS video ring buffer event loop
+                session->video_exit = false;
+                pthread_mutex_init(&session->video_cond_mtx, NULL);
+                pthread_cond_init(&session->video_cond, NULL);
+
+                pthread_mutex_init(&session->video_mtx, NULL);
+                pthread_mutex_lock(&session->video_mtx);
+
+                // launch a ws_thread
+                stat = pthread_create(&session->video_thread, NULL, video_event_loop, session);
+
+                if (stat != 0)
+                    printf("[C] cannot create a video_thread!\n");
+
+                session->video_ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
+
+                if (session->video_ring != NULL)
+                    init_ring_buffer(session->video_ring, 64);
+
+                pthread_mutex_unlock(&session->video_mtx);
+
+                // WS P-V Diagram ring buffer event loop
+                session->pv_exit = false;
+                pthread_mutex_init(&session->cond_mtx, NULL);
+                pthread_cond_init(&session->pv_cond, NULL);
+
+                pthread_mutex_init(&session->pv_mtx, NULL);
+                pthread_mutex_lock(&session->pv_mtx);
+
+                // launch a pv_thread
+                stat = pthread_create(&session->pv_thread, NULL, pv_event_loop, session);
+
+                if (stat != 0)
+                    printf("[C] cannot create a pv_thread!\n");
+
+                session->pv_ring = (struct ring_buffer *)malloc(sizeof(struct ring_buffer));
+
+                if (session->pv_ring != NULL)
+                    init_ring_buffer(session->pv_ring, 8);
+
+                pthread_mutex_unlock(&session->pv_mtx);
+
+                // add a session pointer to the hash table
+                if (pthread_mutex_lock(&sessions_mtx) == 0)
+                {
+                    g_hash_table_replace(sessions, (gpointer)strdup(c->data), g_atomic_rc_box_acquire(session));
+                    pthread_mutex_unlock(&sessions_mtx);
+
+                    printf("[C] inserted %s into the hash table\n", c->data);
+                }
+                else
+                {
+                    printf("[C] cannot lock sessions_mtx!\n");
+                }
+
+                // hold on to the session pointer, pass it to the WebSocket upgrade handler
+            }
+        }
+
+        free(orig);
+    }
+    else
+    {
+        is_valid = 0;
+    }
+
     if (1 == is_valid)
     {
         /* create the response for upgrade */
-        response = MHD_create_response_for_upgrade(&upgrade_handler,
-                                                   NULL);
+        response = MHD_create_response_for_upgrade(&upgrade_handler, session);
 
         /**
          * For the response we need at least the following headers:
