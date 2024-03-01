@@ -115,6 +115,30 @@ static void *ws_receive_messages(void *cls)
         pthread_exit(NULL);
     }
 
+    session->disconnect = false;
+    // TO-DO
+
+    // clean-up
+    session->disconnect = true;
+    pthread_cond_signal(&session->wake_up_sender);
+
+    struct MHD_UpgradeResponseHandle *urh = session->urh;
+    if (NULL != urh)
+    {
+        session->urh = NULL;
+        MHD_upgrade_action(urh, MHD_UPGRADE_ACTION_CLOSE);
+    }
+
+    pthread_cond_destroy(&session->wake_up_sender);
+    pthread_mutex_destroy(&session->send_mutex);
+    MHD_websocket_stream_free(session->ws);
+
+    // remove a session pointer from the hash table
+    remove_session(session);
+
+    free(session->extra_in);
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+
     printf("[C] WebSocket receive_messages: exit\n");
     pthread_exit(NULL);
 }
@@ -484,7 +508,6 @@ on_ws_connection(void *cls,
                 }
 
                 // hold on to the session pointer, pass it to the WebSocket upgrade handler
-                g_atomic_rc_box_acquire(session);
             }
         }
 
