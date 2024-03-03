@@ -122,6 +122,7 @@ struct websocket_response
 
 void init_session_table();
 websocket_session *new_session(void);
+void remove_session(websocket_session *session);
 void delete_session_table();
 void delete_session(websocket_session *session);
 

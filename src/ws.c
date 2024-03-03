@@ -53,6 +53,25 @@ websocket_session *new_session(void)
     return g_atomic_rc_box_new(websocket_session);
 }
 
+void remove_session(websocket_session *session)
+{
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        if (g_hash_table_remove(sessions, (gpointer)session->id))
+        {
+            printf("[C] removed %s from the hash table\n", session->id);
+        }
+        else
+            printf("[C] cannot remove %s from the hash table\n", session->id);
+
+        pthread_mutex_unlock(&sessions_mtx);
+
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+    }
+    else
+        printf("[C] cannot lock sessions_mtx!\n");
+}
+
 void delete_session(websocket_session *session)
 {
     if (session == NULL)
