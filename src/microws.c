@@ -138,7 +138,7 @@ static void *ws_receive_messages(void *cls)
     /* the main loop for receiving data */
     while (1)
     {
-        got = recv(session->fd, buf, sizeof(buf) - 1, 0); // -1 will ensure the buffer is always null-terminated
+        got = recv(session->fd, buf, sizeof(buf), 0);
 
         if (0 >= got)
         {
@@ -148,8 +148,8 @@ static void *ws_receive_messages(void *cls)
 
         if (0 < got)
         {
-            // print the received message
-            printf("[C] WebSocket received: %s\n", buf);
+            // print the received message #bytes
+            printf("[C] WebSocket received %zd bytes\n", got);
 
             // handle the messages
         }
