@@ -142,6 +142,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     MHD_websocket_free(session->ws, frame_data);
                     return 0;
                 case MHD_WEBSOCKET_STATUS_CLOSE_FRAME:
+                    printf("[C] WebSocket received a close frame\n");
                     /* if we receive a close frame, we will respond with one */
                     MHD_websocket_free(session->ws, frame_data);
                     {
