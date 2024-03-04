@@ -52,6 +52,72 @@ static void *ws_send_messages(void *cls)
     pthread_exit(NULL);
 }
 
+/**
+ * Sends all data of the given buffer via the TCP/IP socket
+ *
+ * @param fd  The TCP/IP socket which is used for sending
+ * @param buf The buffer with the data to send
+ * @param len The length in bytes of the data in the buffer
+ */
+static void send_all(websocket_session *session, const char *buf, size_t len)
+{
+    ssize_t ret;
+    size_t off;
+
+    if (0 != pthread_mutex_lock(&session->send_mutex))
+    {
+        printf("[C] cannot lock the WebSocket send_mutex!\n");
+        return; // abort();
+    }
+
+    for (off = 0; off < len; off += ret)
+    {
+        ret = send(session->fd, &buf[off], (int)(len - off), 0);
+
+        if (0 > ret)
+        {
+            if (EAGAIN == errno)
+            {
+                ret = 0;
+                continue;
+            }
+            break;
+        }
+
+        if (0 == ret)
+            break;
+    }
+
+    if (0 != pthread_mutex_unlock(&session->send_mutex))
+    {
+        printf("[C] cannot lock the WebSocket send_mutex!\n");
+        return; // abort();
+    }
+}
+
+static int parse_received_websocket_stream(websocket_session *session, char *buf, size_t buf_len)
+{
+    if (session == NULL || buf == NULL || buf_len == 0)
+        return 1;
+
+    size_t buf_offset = 0;
+    while (buf_offset < buf_len)
+    {
+        size_t new_offset = 0;
+        char *frame_data = NULL;
+        size_t frame_len = 0;
+
+        int status = MHD_websocket_decode(session->ws,
+                                          buf + buf_offset,
+                                          buf_len - buf_offset,
+                                          &new_offset,
+                                          &frame_data,
+                                          &frame_len);
+    }
+
+    return 0;
+}
+
 static void *ws_receive_messages(void *cls)
 {
     if (cls == NULL)
