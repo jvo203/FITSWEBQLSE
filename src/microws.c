@@ -130,7 +130,14 @@ static void *ws_receive_messages(void *cls)
     }
 
     /* start by parsing extra data MHD may have already read, if any */
-    // TO-DO
+    if (0 != session->extra_in_size)
+    {
+        printf("[C] WebSocket received %zd bytes of extra data\n", session->extra_in_size);
+
+        // finally free the buffer
+        free(session->extra_in);
+        session->extra_in = NULL;
+    }
 
     // first memset the buffer
     memset(buf, 0, sizeof(buf));
