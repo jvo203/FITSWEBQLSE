@@ -306,6 +306,31 @@ static void *ws_receive_messages(void *cls)
             printf("[C] WebSocket received %zd bytes\n", got);
 
             // handle the messages
+            if (0 != parse_received_websocket_stream(session, buf, (size_t)got))
+            {
+                /* A websocket protocol error occurred */
+                session->disconnect = 1;
+                pthread_cond_signal(&session->wake_up_sender);
+                pthread_join(pt, NULL);
+
+                struct MHD_UpgradeResponseHandle *urh = session->urh;
+                if (NULL != urh)
+                {
+                    session->urh = NULL;
+                    MHD_upgrade_action(urh, MHD_UPGRADE_ACTION_CLOSE);
+                }
+
+                pthread_cond_destroy(&session->wake_up_sender);
+                pthread_mutex_destroy(&session->send_mutex);
+                MHD_websocket_stream_free(session->ws);
+
+                // remove a session pointer from the hash table
+                remove_session(session);
+
+                free(session->extra_in);
+                g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+                pthread_exit(NULL);
+            }
         }
     }
 
