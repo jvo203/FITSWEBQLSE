@@ -108,6 +108,92 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                                           &new_offset,
                                           &frame_data,
                                           &frame_len);
+
+        if (0 > status)
+        {
+            /* an error occurred and the connection must be closed */
+            if (NULL != frame_data)
+            {
+                /* depending on the WebSocket flag */
+                /* MHD_WEBSOCKET_FLAG_GENERATE_CLOSE_FRAMES_ON_ERROR */
+                /* close frames might be generated on errors */
+                send_all(session,
+                         frame_data,
+                         frame_len);
+                MHD_websocket_free(session->ws, frame_data);
+            }
+            return 1;
+        }
+        else
+        {
+            buf_offset += new_offset;
+
+            if (0 < status)
+            {
+                /* the frame is complete */
+                switch (status)
+                {
+                case MHD_WEBSOCKET_STATUS_TEXT_FRAME:
+                    printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
+                    MHD_websocket_free(session->ws, frame_data);
+                    return 0;
+                case MHD_WEBSOCKET_STATUS_BINARY_FRAME:
+                    printf("[C] WebSocket received %zu bytes of binary frame\n", frame_len);
+                    MHD_websocket_free(session->ws, frame_data);
+                    return 0;
+                case MHD_WEBSOCKET_STATUS_CLOSE_FRAME:
+                    /* if we receive a close frame, we will respond with one */
+                    MHD_websocket_free(session->ws, frame_data);
+                    {
+                        char *result = NULL;
+                        size_t result_len = 0;
+                        int er = MHD_websocket_encode_close(session->ws,
+                                                            MHD_WEBSOCKET_CLOSEREASON_REGULAR,
+                                                            NULL,
+                                                            0,
+                                                            &result,
+                                                            &result_len);
+                        if (MHD_WEBSOCKET_STATUS_OK == er)
+                        {
+                            send_all(session, result, result_len);
+                            MHD_websocket_free(session->ws, result);
+                        }
+                    }
+                    return 1;
+                case MHD_WEBSOCKET_STATUS_PING_FRAME:
+                    /* if we receive a ping frame, we will respond */
+                    /* with the corresponding pong frame */
+                    {
+                        char *pong = NULL;
+                        size_t pong_len = 0;
+                        int er = MHD_websocket_encode_pong(session->ws,
+                                                           frame_data,
+                                                           frame_len,
+                                                           &pong,
+                                                           &pong_len);
+
+                        MHD_websocket_free(session->ws, frame_data);
+                        if (MHD_WEBSOCKET_STATUS_OK == er)
+                        {
+                            send_all(session, pong, pong_len);
+                            MHD_websocket_free(session->ws, pong);
+                        }
+                    }
+                    return 0;
+
+                case MHD_WEBSOCKET_STATUS_PONG_FRAME:
+                    /* if we receive a pong frame, ignore it*/
+                    MHD_websocket_free(session->ws, frame_data);
+                    return 0;
+                default:
+                    /* This case should really never happen, */
+                    /* because there are only five types of (finished) websocket frames. */
+                    /* If it is ever reached, it means that there is memory corruption. */
+                    MHD_websocket_free(session->ws, frame_data);
+                    return 1;
+                }
+            }
+        }
     }
 
     return 0;
@@ -157,7 +243,7 @@ static void *ws_receive_messages(void *cls)
     }
 
     /* initialize the web socket stream for encoding/decoding */
-    result = MHD_websocket_stream_init(&session->ws, MHD_WEBSOCKET_FLAG_SERVER | MHD_WEBSOCKET_FLAG_NO_FRAGMENTS, 0);
+    result = MHD_websocket_stream_init(&session->ws, MHD_WEBSOCKET_FLAG_SERVER | MHD_WEBSOCKET_FLAG_NO_FRAGMENTS | MHD_WEBSOCKET_FLAG_GENERATE_CLOSE_FRAMES_ON_ERROR, 0);
     if (MHD_WEBSOCKET_STATUS_OK != result)
     {
         pthread_cond_destroy(&session->wake_up_sender);

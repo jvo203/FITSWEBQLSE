@@ -43,22 +43,6 @@ typedef struct
        (sending can be done by send and recv thread;
         may not be simultaneously locked by the same thread) */
     pthread_mutex_t send_mutex;
-
-    /* specifies whether a ping shall be executed (1), is being executed (2) or
-       no ping is pending (0) */
-    int ping_status;
-
-    /* the start time of the ping, if a ping is running */
-    struct timespec ping_start;
-
-    /* the message used for the ping (must match the pong response)*/
-    char ping_message[128];
-
-    /* the length of the ping message (may not exceed 125) */
-    size_t ping_message_len;
-
-    /* the numeric ping message suffix to detect ping messages, which are too old */
-    int ping_counter;
 #endif
 
     // the WebSocket communications via mg_wakeup()
