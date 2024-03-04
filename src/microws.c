@@ -7,6 +7,8 @@
 #include "ws.h"
 #include "hash_table.h"
 
+void *send_cluster_heartbeat(void *arg);
+
 #ifdef MICROWS
 #include <microhttpd_ws.h>
 
@@ -90,6 +92,29 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
         printf("[C] <send_all(%zu bytes)> failed, cannot lock the WebSocket send_mutex!\n", len);
 }
 
+static void encode_send_text(websocket_session *session, const char *data, size_t data_len)
+{
+    if (session == NULL || data == NULL || data_len == 0)
+        return;
+
+    char *frame_data = NULL;
+    size_t frame_len = 0;
+
+    int er = MHD_websocket_encode_text(session->ws,
+                                       data,
+                                       data_len,
+                                       MHD_WEBSOCKET_FRAGMENTATION_NONE,
+                                       &frame_data,
+                                       &frame_len,
+                                       NULL);
+
+    if (MHD_WEBSOCKET_STATUS_OK == er)
+    {
+        send_all(session, frame_data, frame_len);
+        MHD_websocket_free(session->ws, frame_data);
+    }
+}
+
 static int parse_received_websocket_stream(websocket_session *session, char *buf, size_t buf_len)
 {
     if (session == NULL || buf == NULL || buf_len == 0)
@@ -134,7 +159,52 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 switch (status)
                 {
                 case MHD_WEBSOCKET_STATUS_TEXT_FRAME:
-                    printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
+                    // parse the received message
+                    if (NULL != strnstr(frame_data, "[heartbeat]", frame_len))
+                    {
+                        /* re-transmit the heartbeat 'as-is' */
+                        encode_send_text(session, frame_data, frame_len);
+
+                        // get the dataset and update its timestamp
+                        char *datasetId = NULL;
+
+                        // tokenize session->multi
+                        datasetId = session->multi != NULL ? strdup(session->multi) : NULL;
+                        char *token = datasetId;
+                        char *rest = token;
+
+                        while ((token = strtok_r(rest, ";", &rest)) != NULL)
+                        {
+                            void *item = get_dataset(token);
+
+                            if (item != NULL)
+                            {
+                                update_timestamp(item);
+
+                                // trigger updates across the cluster too
+                                // create and detach a thread to send a message to the cluster
+                                pthread_t thread;
+
+                                char *_token = strdup(token);
+                                int stat = pthread_create(&thread, NULL, send_cluster_heartbeat, (void *)_token);
+
+                                if (stat != 0)
+                                {
+                                    printf("[C] cannot create a 'send_cluster_heartbeat' thread!\n");
+                                    free(_token);
+                                }
+                                else
+                                    pthread_detach(thread);
+                            }
+                        }
+
+                        free(datasetId);
+                    }
+                    else
+                    {
+                        printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
+                    }
+
                     MHD_websocket_free(session->ws, frame_data);
                     return 0;
                 case MHD_WEBSOCKET_STATUS_BINARY_FRAME:
@@ -303,8 +373,10 @@ static void *ws_receive_messages(void *cls)
 
         if (0 < got)
         {
+#ifdef DEBUG
             // print the received message #bytes
             printf("[C] WebSocket received %zd bytes\n", got);
+#endif
 
             // handle the messages
             if (0 != parse_received_websocket_stream(session, buf, (size_t)got))
