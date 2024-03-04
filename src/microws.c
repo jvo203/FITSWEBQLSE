@@ -61,38 +61,33 @@ static void *ws_send_messages(void *cls)
  */
 static void send_all(websocket_session *session, const char *buf, size_t len)
 {
-    ssize_t ret;
-    size_t off;
-
-    if (0 != pthread_mutex_lock(&session->send_mutex))
+    if (pthread_mutex_lock(&session->send_mutex) == 0)
     {
-        printf("[C] cannot lock the WebSocket send_mutex!\n");
-        return; // abort();
-    }
+        ssize_t ret;
+        size_t off;
 
-    for (off = 0; off < len; off += ret)
-    {
-        ret = send(session->fd, &buf[off], (int)(len - off), 0);
-
-        if (0 > ret)
+        for (off = 0; off < len; off += ret)
         {
-            if (EAGAIN == errno)
+            ret = send(session->fd, &buf[off], (int)(len - off), 0);
+
+            if (0 > ret)
             {
-                ret = 0;
-                continue;
+                if (EAGAIN == errno)
+                {
+                    ret = 0;
+                    continue;
+                }
+                break;
             }
-            break;
+
+            if (0 == ret)
+                break;
         }
 
-        if (0 == ret)
-            break;
+        pthread_mutex_unlock(&session->send_mutex);
     }
-
-    if (0 != pthread_mutex_unlock(&session->send_mutex))
-    {
-        printf("[C] cannot lock the WebSocket send_mutex!\n");
-        return; // abort();
-    }
+    else
+        printf("[C] <send_all(%zu bytes)> failed, cannot lock the WebSocket send_mutex!\n", len);
 }
 
 static int parse_received_websocket_stream(websocket_session *session, char *buf, size_t buf_len)
