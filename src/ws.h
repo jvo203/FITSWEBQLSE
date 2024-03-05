@@ -44,6 +44,7 @@ typedef struct
 
     /* condition variable to wake up the sender of this connection */
     pthread_cond_t wake_up_sender;
+    pthread_mutex_t wake_up_cond_mtx;
 
     /* mutex to ensure that no send actions are mixed
        (sending can be done by send and recv thread;

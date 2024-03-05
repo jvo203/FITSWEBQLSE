@@ -230,6 +230,7 @@ void delete_session(websocket_session *session)
     // unlock and destroy the write_mtx
     pthread_mutex_unlock(&session->write_mtx);
     pthread_mutex_destroy(&session->write_mtx);
+    pthread_mutex_destroy(&session->wake_up_cond_mtx);
 #endif
 
     // free() has been commented out on purpose

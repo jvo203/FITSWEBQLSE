@@ -703,6 +703,7 @@ on_ws_connection(void *cls,
                 session->buf = (char *)malloc(session->buf_len);
                 mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue
                 pthread_mutex_init(&session->write_mtx, NULL);
+                pthread_mutex_init(&session->wake_up_cond_mtx, NULL);
 
                 session->flux = NULL;
                 session->dmin = NAN;
