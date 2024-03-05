@@ -33,10 +33,11 @@ typedef struct
     char *extra_in;
     size_t extra_in_size;
 
-    /* a mongoose Single-Producer Single-Consumer queue, writes to be protected by a spinlock etc. */
+    /* a mongoose Single-Producer Single-Consumer queue, writes to be protected by a spinlock or a mutex */
     struct mg_queue queue;
-    char *buf;      // Buffer for messages
-    size_t buf_len; // Buffer length
+    char *buf;                 // Buffer for messages
+    size_t buf_len;            // Buffer length
+    pthread_mutex_t write_mtx; // appending to queue one thread at a time
 
     /* specifies whether the websocket shall be closed (1) or not (0) */
     int disconnect;

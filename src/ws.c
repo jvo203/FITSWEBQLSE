@@ -198,6 +198,8 @@ void delete_session(websocket_session *session)
     pthread_mutex_destroy(&session->pv_mtx);
 
 #ifdef MICROWS
+    pthread_mutex_lock(&session->write_mtx);
+
     // drain the message queue
     size_t len;
     char *buf;
@@ -224,6 +226,10 @@ void delete_session(websocket_session *session)
         free(session->buf);
     session->buf = NULL;
     session->buf_len = 0;
+
+    // unlock and destroy the write_mtx
+    pthread_mutex_unlock(&session->write_mtx);
+    pthread_mutex_destroy(&session->write_mtx);
 #endif
 
     // free() has been commented out on purpose

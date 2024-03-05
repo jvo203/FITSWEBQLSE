@@ -353,7 +353,12 @@ int main(int argc, char *argv[])
     // ZeroMQ node auto-discovery
     setenv("ZSYS_SIGHANDLER", "false", 1);
 
-    int res = pthread_create(&zmq_t, NULL, autodiscovery_daemon, NULL);
+    int res = 0;
+
+    if (options.zmq_port == 0)
+        printf("ZeroMQ node auto-discovery is disabled. To enable the cluster functionality please specify a non-zero port in 'config.ini'.\n");
+    else
+        res = pthread_create(&zmq_t, NULL, autodiscovery_daemon, NULL);
 
     if (res)
     {
@@ -557,12 +562,6 @@ int gstrcmp(const void *pa, const void *pb)
 static void *autodiscovery_daemon(void *ptr)
 {
     (void)ptr;
-
-    if (options.zmq_port == 0)
-    {
-        printf("ZeroMQ node auto-discovery is disabled. To enable the cluster functionality please specify a non-zero port in 'config.ini'.\n");
-        pthread_exit(NULL);
-    }
 
     speaker = zactor_new(zbeacon, NULL);
     if (speaker == NULL)
