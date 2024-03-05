@@ -48,8 +48,36 @@ static void *ws_send_messages(void *cls)
 
     websocket_session *session = (websocket_session *)cls;
 
-    // TO-DO
-    // ...
+    // TO-DO: wait for the condition, loop through the queue and send messages
+    /*size_t len;
+    char *buf;
+
+    // Check if we have a message from the worker
+    while ((len = mg_queue_next(&session->queue, &buf)) > 0)
+    {
+        if (len == sizeof(struct data_buf))
+        {
+            struct data_buf *msg = (struct data_buf *)buf;
+
+            // Got message from worker. Send a response and cleanup
+#ifdef DEBUG
+            printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+#endif
+
+            if (msg->len > 0 && msg->buf != NULL)
+                mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
+
+            // release memory
+            if (msg->buf != NULL)
+            {
+                free(msg->buf);
+                msg->buf = NULL;
+                msg->len = 0;
+            }
+        }
+
+        mg_queue_del(&session->queue, len); // Remove message from the queue
+    }*/
 
     pthread_exit(NULL);
 }
