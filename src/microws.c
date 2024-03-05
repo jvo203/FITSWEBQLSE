@@ -207,6 +207,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                             if (item != NULL)
                             {
+#ifdef DEBUG
+                                printf("[C] updating the timestamp for '%s'\n", token);
+#endif
                                 update_timestamp(item);
 
                                 // trigger updates across the cluster too
