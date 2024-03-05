@@ -197,6 +197,35 @@ void delete_session(websocket_session *session)
     pthread_mutex_unlock(&session->pv_mtx);
     pthread_mutex_destroy(&session->pv_mtx);
 
+#ifdef MICROWS
+    // drain the message queue
+    size_t len;
+    char *buf;
+
+    while ((len = mg_queue_next(&session->queue, &buf)) > 0)
+    {
+        if (len == sizeof(struct data_buf))
+        {
+            struct data_buf *msg = (struct data_buf *)buf;
+
+#ifdef DEBUG
+            printf("[C] found a message %zu-bytes long, releasing the memory.\n", msg->len);
+#endif
+
+            // release memory
+            free(msg->buf);
+        }
+
+        mg_queue_del(&session->queue, len); // Remove message from the queue
+    }
+
+    // finally release the message queue buffer
+    if (session->buf != NULL)
+        free(session->buf);
+    session->buf = NULL;
+    session->buf_len = 0;
+#endif
+
     // free() has been commented out on purpose
     // it was interfering with glib reference counting release mechanism (a double free)
     // free(session);
