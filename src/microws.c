@@ -160,7 +160,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 {
                 case MHD_WEBSOCKET_STATUS_TEXT_FRAME:
                     // parse the received message
-                    if (NULL != strnstr(frame_data, "[heartbeat]", frame_len))
+                    if (NULL != strstr(frame_data, "[heartbeat]"))
                     {
                         /* re-transmit the heartbeat 'as-is' */
                         encode_send_text(session, frame_data, frame_len);
