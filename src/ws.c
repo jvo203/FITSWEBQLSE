@@ -616,9 +616,9 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
 #ifdef DEBUG
         printf("[C] MG_EV_WAKEUP\n");
 #endif
-        struct mg_str *msg = (struct mg_str *)ev_data;
+        struct data_buf *msg = (struct data_buf *)ev_data;
 
-        if (msg != NULL && msg->ptr != NULL && msg->len > 0)
+        if (msg != NULL && msg->buf != NULL && msg->len > 0)
         {
 #ifdef DEBUG
             printf("[C] MG_EV_WAKEUP received %zu bytes.\n", msg->len);
@@ -629,14 +629,14 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
 #ifdef DEBUG
                 printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
 #endif
-                mg_ws_send(c, msg->ptr, msg->len, WEBSOCKET_OP_BINARY);
+                mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
             }
 
             // release memory
-            if (msg->ptr != NULL)
+            if (msg->buf != NULL)
             {
-                free((char *)msg->ptr);
-                msg->ptr = NULL;
+                free(msg->buf);
+                msg->buf = NULL;
                 msg->len = 0;
             }
         }
