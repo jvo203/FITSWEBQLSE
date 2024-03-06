@@ -40,7 +40,7 @@ typedef struct
     pthread_mutex_t write_mtx; // appending to queue one thread at a time
 
     /* specifies whether the websocket shall be closed (1) or not (0) */
-    int disconnect;
+    volatile sig_atomic_t disconnect;
 
     /* condition variable to wake up the sender of this connection */
     pthread_cond_t wake_up_sender;
