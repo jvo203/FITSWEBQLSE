@@ -3127,10 +3127,32 @@ void *spectrum_response(void *ptr)
                         printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
                     // create a queue message
-                    struct mg_str msg = {payload, msg_len};
+                    struct data_buf msg = {payload, msg_len};
 
+#ifdef MICROWS
+                    char *msg_buf = NULL;
+                    size_t _len = sizeof(struct data_buf);
+
+                    // reserve space for the binary message
+                    size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+                    // pass the message over to mongoose via a communications queue
+                    if (msg_buf != NULL && queue_len >= _len)
+                    {
+                        memcpy(msg_buf, &msg, _len);
+                        mg_queue_add(&session->queue, _len);
+
+                        // wake up the sender
+                        pthread_cond_signal(&session->wake_up_sender);
+                    }
+                    else
+                    {
+                        printf("[C] mg_queue_book failed, freeing memory.\n");
+                        free(payload);
+                    }
+#else
                     // pass the message over to mongoose via a communications channel
-                    bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct mg_str)); // Wakeup event manager
+                    bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
                     if (!sent)
                     {
@@ -3139,6 +3161,7 @@ void *spectrum_response(void *ptr)
                         // free memory upon a send failure, otherwise memory will be freed in the mongoose pipe event loop
                         free(payload);
                     };
+#endif
                 }
             }
 
