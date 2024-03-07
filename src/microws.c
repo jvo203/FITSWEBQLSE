@@ -928,6 +928,165 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         goto clean_ws_frame;
                     }
 
+                    // handle real-time spectrum/viewport requests
+                    if (strcmp(type, "realtime_image_spectrum") == 0)
+                    {
+                        if (session->ws_exit)
+                            goto clean_ws_frame;
+
+                        char *datasetId = session->datasetid;
+                        void *item = get_dataset(datasetId);
+
+                        if (item == NULL)
+                        {
+                            printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                            goto clean_ws_frame;
+                        }
+
+                        update_timestamp(item);
+
+                        struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+
+                        if (req == NULL)
+                            goto clean_ws_frame;
+
+                        // default values just in case ...
+                        req->dx = 0;
+                        req->image = false;
+                        req->quality = medium;
+                        req->x1 = -1;
+                        req->x2 = -1;
+                        req->y1 = -1;
+                        req->y2 = -1;
+                        req->width = 0;
+                        req->height = 0;
+                        req->beam = circle;
+                        req->intensity = integrated;
+                        req->frame_start = 0.0;
+                        req->frame_end = 0.0;
+                        req->ref_freq = 0.0;
+                        req->median = NAN;
+                        req->seq_id = 0;
+                        req->timestamp = 0.0;
+                        req->fd = -1;
+                        req->ptr = item;
+
+                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+                        {
+                            // printf("key: %.*s, value: %.*s\n", klen, frame_data + koff, vlen, frame_data + voff);
+
+                            // 'dx'
+                            if (strncmp(frame_data + koff, "\"dx\"", klen) == 0)
+                                req->dx = atoi2(frame_data + voff, vlen);
+
+                            // 'image'
+                            if (strncmp(frame_data + koff, "\"image\"", klen) == 0)
+                                if (strncmp(frame_data + voff, "true", vlen) == 0)
+                                    req->image = true;
+
+                            // 'quality'
+                            if (strncmp(frame_data + koff, "\"quality\"", klen) == 0)
+                            {
+                                // low
+                                if (strncmp(frame_data + voff, "\"low\"", vlen) == 0)
+                                    req->quality = low;
+
+                                // medium
+                                if (strncmp(frame_data + voff, "\"medium\"", vlen) == 0)
+                                    req->quality = medium;
+
+                                // high
+                                if (strncmp(frame_data + voff, "\"heigh\"", vlen) == 0)
+                                    req->quality = high;
+                            }
+
+                            // 'x1'
+                            if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
+                                req->x1 = atoi2(frame_data + voff, vlen);
+
+                            // 'y1'
+                            if (strncmp(frame_data + koff, "\"y1\"", klen) == 0)
+                                req->y1 = atoi2(frame_data + voff, vlen);
+
+                            // 'x2'
+                            if (strncmp(frame_data + koff, "\"x2\"", klen) == 0)
+                                req->x2 = atoi2(frame_data + voff, vlen);
+
+                            // 'y2'
+                            if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
+                                req->y2 = atoi2(frame_data + voff, vlen);
+
+                            // 'width'
+                            if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
+                                req->width = atoi2(frame_data + voff, vlen);
+
+                            // 'height'
+                            if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
+                                req->height = atoi2(frame_data + voff, vlen);
+
+                            // 'beam'
+                            if (strncmp(frame_data + koff, "\"beam\"", klen) == 0)
+                            {
+                                // circle
+                                if (strncmp(frame_data + voff, "\"circle\"", vlen) == 0)
+                                    req->beam = circle;
+
+                                // square
+                                if (strncmp(frame_data + voff, "\"square\"", vlen) == 0)
+                                    req->beam = square;
+                            }
+
+                            // 'intensity'
+                            if (strncmp(frame_data + koff, "\"intensity\"", klen) == 0)
+                            {
+                                // mean
+                                if (strncmp(frame_data + voff, "\"mean\"", vlen) == 0)
+                                    req->intensity = mean;
+
+                                // integrated
+                                if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
+                                    req->intensity = integrated;
+                            }
+
+                            // 'frame_start'
+                            if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
+                                req->frame_start = atof2(frame_data + voff, vlen);
+
+                            // 'frame_end'
+                            if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
+                                req->frame_end = atof2(frame_data + voff, vlen);
+
+                            // 'ref_freq'
+                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                                req->ref_freq = atof2(frame_data + voff, vlen);
+
+                            // 'seq_id'
+                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                                req->seq_id = atoi2(frame_data + voff, vlen);
+
+                            // 'timestamp'
+                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                                req->timestamp = atof2(frame_data + voff, vlen);
+                        }
+
+                        // printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req->dx, req->image, req->quality, req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->seq_id, req->timestamp);
+
+                        pthread_mutex_lock(&session->ws_mtx);
+
+                        // add the request to the circular queue
+                        ring_put(session->ws_ring, req);
+
+                        if (!session->ws_exit)
+                            pthread_cond_signal(&session->ws_cond); // wake up the ws event loop
+
+                        // finally unlock the mutex
+                        pthread_mutex_unlock(&session->ws_mtx);
+
+                        goto clean_ws_frame;
+                    }
+
+                    // TO-DO: migrate from ws.c {"init_video", "end_video", "video", "composite_video"}
+
                 clean_ws_frame:
                     MHD_websocket_free(session->ws, frame_data);
                     return 0;
