@@ -240,7 +240,7 @@ void delete_session(websocket_session *session)
     // free(session);
 }
 
-char *append_null(const char *chars, const int size)
+static char *append_null(const char *chars, const int size)
 {
     char *tmp = (char *)malloc(size + 1);
 
@@ -253,7 +253,7 @@ char *append_null(const char *chars, const int size)
     return tmp;
 }
 
-int atoi2(const char *chars, const int size)
+static int atoi2(const char *chars, const int size)
 {
     char *tmp = append_null(chars, size);
 
@@ -267,7 +267,7 @@ int atoi2(const char *chars, const int size)
     return result;
 }
 
-double atof2(const char *chars, const int size)
+static double atof2(const char *chars, const int size)
 {
     char *tmp = append_null(chars, size);
 
