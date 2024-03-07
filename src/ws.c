@@ -2625,6 +2625,8 @@ void *ws_pv_response(void *ptr)
         char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
+        pthread_mutex_lock(&session->queue_mtx);
+
         // reserve space for the binary message
         size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
@@ -2633,12 +2635,14 @@ void *ws_pv_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
+            pthread_mutex_unlock(&session->queue_mtx);
 
             // wake up the sender
             pthread_cond_signal(&session->wake_up_sender);
         }
         else
         {
+            pthread_mutex_unlock(&session->queue_mtx);
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(pv_payload);
         }
@@ -2835,6 +2839,8 @@ void *ws_image_spectrum_response(void *ptr)
         char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
+        pthread_mutex_lock(&session->queue_mtx);
+
         // reserve space for the binary message
         size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
@@ -2843,12 +2849,14 @@ void *ws_image_spectrum_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
+            pthread_mutex_unlock(&session->queue_mtx);
 
             // wake up the sender
             pthread_cond_signal(&session->wake_up_sender);
         }
         else
         {
+            pthread_mutex_unlock(&session->queue_mtx);
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(image_payload);
         }
@@ -2928,6 +2936,8 @@ void *ws_image_spectrum_response(void *ptr)
         char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
+        pthread_mutex_lock(&session->queue_mtx);
+
         // reserve space for the binary message
         size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
@@ -2936,12 +2946,14 @@ void *ws_image_spectrum_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
+            pthread_mutex_unlock(&session->queue_mtx);
 
             // wake up the sender
             pthread_cond_signal(&session->wake_up_sender);
         }
         else
         {
+            pthread_mutex_unlock(&session->queue_mtx);
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(spectrum_payload);
         }
@@ -3133,6 +3145,8 @@ void *spectrum_response(void *ptr)
                     char *msg_buf = NULL;
                     size_t _len = sizeof(struct data_buf);
 
+                    pthread_mutex_lock(&session->queue_mtx);
+
                     // reserve space for the binary message
                     size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
@@ -3141,12 +3155,14 @@ void *spectrum_response(void *ptr)
                     {
                         memcpy(msg_buf, &msg, _len);
                         mg_queue_add(&session->queue, _len);
+                        pthread_mutex_unlock(&session->queue_mtx);
 
                         // wake up the sender
                         pthread_cond_signal(&session->wake_up_sender);
                     }
                     else
                     {
+                        pthread_mutex_unlock(&session->queue_mtx);
                         printf("[C] mg_queue_book failed, freeing memory.\n");
                         free(payload);
                     }
@@ -3314,6 +3330,8 @@ void *realtime_image_spectrum_response(void *ptr)
                 char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
 
+                pthread_mutex_lock(&session->queue_mtx);
+
                 // reserve space for the binary message
                 size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
@@ -3322,12 +3340,14 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
+                    pthread_mutex_unlock(&session->queue_mtx);
 
                     // wake up the sender
                     pthread_cond_signal(&session->wake_up_sender);
                 }
                 else
                 {
+                    pthread_mutex_unlock(&session->queue_mtx);
                     printf("[C] mg_queue_book failed, freeing memory.\n");
                     free(payload);
                 }
@@ -3402,6 +3422,8 @@ void *realtime_image_spectrum_response(void *ptr)
                 char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
 
+                pthread_mutex_lock(&session->queue_mtx);
+
                 // reserve space for the binary message
                 size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
@@ -3410,12 +3432,14 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
+                    pthread_mutex_unlock(&session->queue_mtx);
 
                     // wake up the sender
                     pthread_cond_signal(&session->wake_up_sender);
                 }
                 else
                 {
+                    pthread_mutex_unlock(&session->queue_mtx);
                     printf("[C] mg_queue_book failed, freeing memory.\n");
                     free(payload);
                 }
@@ -3596,6 +3620,8 @@ void *composite_video_response(void *ptr)
             char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
 
+            pthread_mutex_lock(&session->queue_mtx);
+
             // reserve space for the binary message
             size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
@@ -3604,12 +3630,14 @@ void *composite_video_response(void *ptr)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
+                pthread_mutex_unlock(&session->queue_mtx);
 
                 // wake up the sender
                 pthread_cond_signal(&session->wake_up_sender);
             }
             else
             {
+                pthread_mutex_unlock(&session->queue_mtx);
                 printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
             }
@@ -3794,6 +3822,8 @@ void *video_response(void *ptr)
             char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
 
+            pthread_mutex_lock(&session->queue_mtx);
+
             // reserve space for the binary message
             size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
@@ -3802,12 +3832,14 @@ void *video_response(void *ptr)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
+                pthread_mutex_unlock(&session->queue_mtx);
 
                 // wake up the sender
                 pthread_cond_signal(&session->wake_up_sender);
             }
             else
             {
+                pthread_mutex_unlock(&session->queue_mtx);
                 printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
             }
