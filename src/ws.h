@@ -35,9 +35,9 @@ typedef struct
 
     /* a mongoose Single-Producer Single-Consumer queue, writes to be protected by a spinlock or a mutex */
     struct mg_queue queue;
+    pthread_mutex_t queue_mtx; // appending to queue one thread at a time
     char *buf;                 // Buffer for messages
     size_t buf_len;            // Buffer length
-    pthread_mutex_t write_mtx; // appending to queue one thread at a time
 
     /* specifies whether the websocket shall be closed (1) or not (0) */
     volatile sig_atomic_t disconnect;

@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "ws.h"
+#include "mjson.h"
 #include "hash_table.h"
 
 void *send_cluster_heartbeat(void *arg);
@@ -230,12 +231,22 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         }
 
                         free(datasetId);
+                        goto clean_ws_frame;
                     }
                     else
-                    {
                         printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
+
+                    // get the JSON message type
+                    char type[32] = "";
+                    int koff, klen, voff, vlen, vtype, off;
+
+                    if (mjson_get_string(frame_data, (int)frame_len, "$.type", type, sizeof(type)) == -1)
+                    {
+                        printf("[C] cannot get the JSON message type!\n");
+                        goto clean_ws_frame;
                     }
 
+                clean_ws_frame:
                     MHD_websocket_free(session->ws, frame_data);
                     return 0;
                 case MHD_WEBSOCKET_STATUS_BINARY_FRAME:
@@ -733,7 +744,7 @@ on_ws_connection(void *cls,
                 session->buf_len = 1024 * sizeof(struct data_buf);
                 session->buf = (char *)malloc(session->buf_len);
                 mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue
-                pthread_mutex_init(&session->write_mtx, NULL);
+                pthread_mutex_init(&session->queue_mtx, NULL);
                 pthread_mutex_init(&session->wake_up_cond_mtx, NULL);
 
                 session->flux = NULL;
