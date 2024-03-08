@@ -201,8 +201,8 @@ void delete_session(websocket_session *session)
     pthread_mutex_lock(&session->queue_mtx);
 
     // drain the message queue
-    size_t len;
-    char *buf;
+    size_t len = 0;
+    char *buf = NULL;
 
     while ((len = mg_queue_next(&session->queue, &buf)) > 0)
     {

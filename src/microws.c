@@ -173,14 +173,14 @@ static void *ws_send_messages(void *cls)
 
     websocket_session *session = (websocket_session *)cls;
 
-    // TO-DO: wait for the condition, loop through the queue and send messages
+    // wait for the condition, loop through the queue and send messages
     while (!session->pv_exit)
     {
-        if (1 == session->disconnect)
+        if (session->disconnect)
             break;
 
-        size_t len;
-        char *buf;
+        size_t len = 0;
+        char *buf = NULL;
 
         // Check if we have a message from the worker
         while ((len = mg_queue_next(&session->queue, &buf)) > 0)
@@ -194,7 +194,7 @@ static void *ws_send_messages(void *cls)
                 printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
 #endif
 
-                if (msg->len > 0 && msg->buf != NULL && session->disconnect == 0)
+                if (msg->len > 0 && msg->buf != NULL && !session->disconnect)
                     encode_send_binary(session, msg->buf, msg->len);
 
                 // release memory
@@ -213,7 +213,7 @@ static void *ws_send_messages(void *cls)
         pthread_cond_wait(&session->wake_up_sender, &session->wake_up_cond_mtx);
     }
 
-    printf("[C] <ws_send_messages> thread terminated.\n");
+    printf("[C] ws_send_messages terminated.\n");
     pthread_exit(NULL);
 }
 
