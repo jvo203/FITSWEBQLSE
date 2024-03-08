@@ -1117,7 +1117,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         goto clean_ws_frame;
                     }
 
-                    // TO-DO: migrate from ws.c {"end_video", "video", "composite_video", "kalman_reset"}
                     // init_video
                     if (strcmp(type, "init_video") == 0)
                     {
@@ -1444,6 +1443,194 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                         // finally unlock the mutex
                         pthread_mutex_unlock(&session->video_mtx);
+
+                        goto clean_ws_frame;
+                    }
+
+                    if (strcmp(type, "composite_video") == 0)
+                    {
+                        websocket_session *common_session = session;
+
+                        if (common_session == NULL)
+                            goto clean_ws_frame;
+
+                        if (common_session->flux == NULL)
+                            goto clean_ws_frame;
+
+                        // copy common variables from the session
+                        const char *flux = common_session->flux;
+                        int width = common_session->image_width;
+                        int height = common_session->image_height;
+                        bool downsize = common_session->bDownsize;
+
+                        // parse the JSON message common for all datasets
+                        int fps = 30;
+                        int bitrate = 1000;
+                        bool keyframe = false;
+                        int fill = 0;
+                        double frame = 0.0;
+                        double ref_freq = 0.0;
+                        int seq_id = -1;
+                        float timestamp = 0.0;
+
+                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+                        {
+                            // 'fps'
+                            if (strncmp(frame_data + koff, "\"fps\"", klen) == 0)
+                                fps = atoi2(frame_data + voff, vlen);
+
+                            // 'bitrate'
+                            if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
+                                bitrate = atoi2(frame_data + voff, vlen);
+
+                            // 'fill'
+                            if (strncmp(frame_data + koff, "\"fill\"", klen) == 0)
+                                fill = atoi2(frame_data + voff, vlen);
+
+                            // 'seq_id'
+                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                                seq_id = atoi2(frame_data + voff, vlen);
+
+                            // 'key'
+                            if (strncmp(frame_data + koff, "\"key\"", klen) == 0)
+                            {
+                                // false
+                                if (strncmp(frame_data + voff, "false", vlen) == 0)
+                                    keyframe = false;
+
+                                // true
+                                if (strncmp(frame_data + voff, "true", vlen) == 0)
+                                    keyframe = true;
+                            }
+
+                            // 'frame'
+                            if (strncmp(frame_data + koff, "\"frame\"", klen) == 0)
+                                frame = atof2(frame_data + voff, vlen);
+
+                            // 'ref_freq'
+                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                                ref_freq = atof2(frame_data + voff, vlen);
+
+                            // 'timestamp'
+                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                                timestamp = atof2(frame_data + voff, vlen);
+                        }
+
+                        struct composite_video_request *req = (struct composite_video_request *)malloc(sizeof(struct composite_video_request));
+
+                        if (req == NULL)
+                            goto clean_ws_frame;
+
+                        req->video_type = composite;
+                        req->seq_id = seq_id;
+                        req->timestamp = timestamp;
+                        req->va_count = 0;
+                        req->flux = flux != NULL ? strdup(flux) : NULL;
+                        req->len = req->flux != NULL ? strlen(req->flux) : 0;
+                        req->width = width;
+                        req->height = height;
+                        req->downsize = downsize;
+                        req->keyframe = keyframe;
+                        req->fill = fill;
+
+                        // next iterate through the multiple datasets launching individual channel threads
+                        // tokenize session->multi
+                        char *datasetId = common_session->multi != NULL ? strdup(common_session->multi) : NULL;
+                        char *token = datasetId;
+                        char *rest = token;
+                        bool skip_frame = false;
+
+                        while ((token = strtok_r(rest, ";", &rest)) != NULL)
+                        {
+                            void *item = get_dataset(token);
+
+                            if (item == NULL)
+                                continue;
+
+                            update_timestamp(item);
+
+                            websocket_session *_session = NULL;
+
+                            // get the session
+                            if (pthread_mutex_lock(&sessions_mtx) == 0)
+                            {
+                                // iterate through the sessions, find the one with the matching dataset
+                                GHashTableIter iter;
+                                gpointer key, value;
+
+                                g_hash_table_iter_init(&iter, sessions);
+
+                                while (g_hash_table_iter_next(&iter, &key, &value))
+                                {
+                                    websocket_session *__session = (websocket_session *)value;
+
+                                    if (strcmp(__session->datasetid, token) == 0)
+                                    {
+                                        _session = __session;
+                                        break;
+                                    }
+                                }
+
+                                pthread_mutex_unlock(&sessions_mtx);
+                            }
+
+                            if (_session == NULL)
+                                continue;
+
+                            // we have the dataset item and the session, prepare the video request
+                            printf("[C] mg_websocket_callback: preparing video request for dataset '%s'.\n", token);
+
+                            // check if the session video tone mapping has been filled already
+                            // if not, fetch the global data statistics from FORTRAN
+                            if (isnan(_session->dmin) || isnan(_session->dmax) || isnan(_session->dmedian) || isnan(_session->dmadN) || isnan(_session->dmadP))
+                            {
+                                printf("[C] calling 'fill_global_statistics(...)'\n");
+                                fill_global_statistics(item, &(_session->dmin), &(_session->dmax), &(_session->dmedian), &(_session->dmadN), &(_session->dmadP));
+                            }
+
+                            // get the video frame index
+                            int frame_idx;
+                            get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
+
+                            // skip repeated frames
+                            if (frame_idx == _session->last_frame_idx && !req->keyframe)
+                            {
+                                printf("[C] skipping a repeat video frame #%d\n", frame_idx);
+                                skip_frame = true;
+                            }
+                            else
+                                _session->last_frame_idx = frame_idx;
+
+                            // RGB
+                            req->ptr[req->va_count] = item;
+                            req->frame[req->va_count] = frame_idx;
+                            req->dmin[req->va_count] = _session->dmin;
+                            req->dmax[req->va_count] = _session->dmax;
+                            req->dmedian[req->va_count] = _session->dmedian;
+                            req->dmadN[req->va_count] = _session->dmadN;
+                            req->dmadP[req->va_count] = _session->dmadP;
+                            req->va_count++; // increment the channel count
+                        }
+
+                        free(datasetId);
+
+                        if (skip_frame)
+                        {
+                            free(req->flux);
+                            free(req);
+                            goto clean_ws_frame;
+                        }
+
+                        pthread_mutex_lock(&common_session->video_mtx);
+
+                        // add the request to the circular queue
+                        ring_put(common_session->video_ring, req);
+
+                        if (!common_session->video_exit)
+                            pthread_cond_signal(&common_session->video_cond); // wake up the video event loop
+
+                        // finally unlock the mutex
+                        pthread_mutex_unlock(&common_session->video_mtx);
 
                         goto clean_ws_frame;
                     }
