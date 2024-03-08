@@ -1269,6 +1269,43 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         goto clean_ws_frame;
                     }
 
+                    // end_video
+                    if (strcmp(type, "end_video") == 0)
+                    {
+                        pthread_mutex_lock(&session->vid_mtx);
+
+                        free(session->flux);
+                        session->flux = NULL;
+
+                        if (session->encoder != NULL)
+                        {
+                            x265_encoder_close(session->encoder);
+                            session->encoder = NULL;
+                        }
+
+                        if (session->param != NULL)
+                        {
+                            x265_param_free(session->param);
+                            session->param = NULL;
+                        }
+
+                        if (session->picture != NULL)
+                        {
+                            // deallocate RGB planes
+                            for (int i = 0; i < 3; i++)
+                                if (session->picture->planes[i] != NULL)
+                                    free(session->picture->planes[i]);
+
+                            // finally free the picture
+                            x265_picture_free(session->picture);
+                            session->picture = NULL;
+                        }
+
+                        pthread_mutex_unlock(&session->vid_mtx);
+
+                        goto clean_ws_frame;
+                    }
+
                 clean_ws_frame:
                     MHD_websocket_free(session->ws, frame_data);
                     return 0;
