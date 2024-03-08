@@ -1306,6 +1306,148 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         goto clean_ws_frame;
                     }
 
+                    // encode and stream video
+                    if (strcmp(type, "video") == 0)
+                    {
+                        if (session->flux == NULL)
+                            goto clean_ws_frame;
+
+                        char *datasetId = session->datasetid;
+                        void *item = get_dataset(datasetId);
+
+                        if (item == NULL)
+                        {
+                            printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                            goto clean_ws_frame;
+                        }
+
+                        update_timestamp(item);
+
+                        // check if the session video tone mapping has been filled already
+                        // if not, fetch the global data statistics from FORTRAN
+                        if (isnan(session->dmin) || isnan(session->dmax) || isnan(session->dmedian) || isnan(session->dmadN) || isnan(session->dmadP))
+                        {
+                            printf("[C] calling 'fill_global_statistics(...)'\n");
+                            fill_global_statistics(item, &(session->dmin), &(session->dmax), &(session->dmedian), &(session->dmadN), &(session->dmadP));
+                        }
+
+                        struct video_request *req = (struct video_request *)malloc(sizeof(struct video_request));
+
+                        if (req == NULL)
+                            goto clean_ws_frame;
+
+                        int fps = 30;
+                        int bitrate = 1000;
+
+                        req->video_type = single;
+                        req->keyframe = false; // is it a keyframe?
+                        req->fill = 0;
+                        req->seq_id = -1;
+
+                        req->frame = 0;
+                        req->timestamp = 0.0;
+
+                        req->flux = NULL;
+                        req->len = 0;
+
+                        // lock the stat mutex
+                        pthread_mutex_lock(&session->stat_mtx);
+
+                        req->dmin = session->dmin;
+                        req->dmax = session->dmax;
+                        req->dmedian = session->dmedian;
+                        req->dmadN = session->dmadN;
+                        req->dmadP = session->dmadP;
+
+                        // unlock the stat mutex
+                        pthread_mutex_unlock(&session->stat_mtx);
+
+                        req->width = session->image_width;
+                        req->height = session->image_height;
+                        req->downsize = session->bDownsize;
+                        req->fd = -1;
+                        req->ptr = item;
+
+                        double frame = 0.0;
+                        double ref_freq = 0.0;
+
+                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+                        {
+                            // 'fps'
+                            if (strncmp(frame_data + koff, "\"fps\"", klen) == 0)
+                                fps = atoi2(frame_data + voff, vlen);
+
+                            // 'bitrate'
+                            if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
+                                bitrate = atoi2(frame_data + voff, vlen);
+
+                            // 'fill'
+                            if (strncmp(frame_data + koff, "\"fill\"", klen) == 0)
+                                req->fill = atoi2(frame_data + voff, vlen);
+
+                            // 'seq_id'
+                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                                req->seq_id = atoi2(frame_data + voff, vlen);
+
+                            // 'key'
+                            if (strncmp(frame_data + koff, "\"key\"", klen) == 0)
+                            {
+                                // false
+                                if (strncmp(frame_data + voff, "false", vlen) == 0)
+                                    req->keyframe = false;
+
+                                // true
+                                if (strncmp(frame_data + voff, "true", vlen) == 0)
+                                    req->keyframe = true;
+                            }
+
+                            // 'frame'
+                            if (strncmp(frame_data + koff, "\"frame\"", klen) == 0)
+                                frame = atof2(frame_data + voff, vlen);
+
+                            // 'ref_freq'
+                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                                ref_freq = atof2(frame_data + voff, vlen);
+
+                            // 'timestamp'
+                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                                req->timestamp = atof2(frame_data + voff, vlen);
+                        }
+
+                        // get the video frame index
+                        int frame_idx;
+                        get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
+                        req->frame = frame_idx;
+
+                        printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f --> %d}, ref_freq: %f, timestamp: %f\n", fps, bitrate, req->seq_id, req->keyframe, frame, req->frame, ref_freq, req->timestamp);
+
+                        // skip repeated frames
+                        if (frame_idx == session->last_frame_idx && !req->keyframe)
+                        {
+                            printf("[C] skipping a repeat video frame #%d\n", frame_idx);
+                            free(req); // req->flux is NULL at this point, no need to free it
+                            goto clean_ws_frame;
+                        }
+                        else
+                            session->last_frame_idx = frame_idx;
+
+                        req->flux = session->flux != NULL ? strdup(session->flux) : NULL;
+                        req->len = req->flux != NULL ? strlen(req->flux) : 0;
+
+                        pthread_mutex_lock(&session->video_mtx);
+
+                        // add the request to the circular queue
+                        ring_put(session->video_ring, req);
+
+                        if (!session->video_exit)
+                            pthread_cond_signal(&session->video_cond); // wake up the video event loop
+
+                        // finally unlock the mutex
+                        pthread_mutex_unlock(&session->video_mtx);
+
+                        goto clean_ws_frame;
+                    }
+
                 clean_ws_frame:
                     MHD_websocket_free(session->ws, frame_data);
                     return 0;
