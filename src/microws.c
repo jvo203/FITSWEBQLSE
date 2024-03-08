@@ -1117,7 +1117,157 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         goto clean_ws_frame;
                     }
 
-                    // TO-DO: migrate from ws.c {"init_video", "end_video", "video", "composite_video", "kalman_reset"}
+                    // TO-DO: migrate from ws.c {"end_video", "video", "composite_video", "kalman_reset"}
+                    // init_video
+                    if (strcmp(type, "init_video") == 0)
+                    {
+                        char *datasetId = session->datasetid;
+                        void *item = get_dataset(datasetId);
+
+                        if (item == NULL)
+                        {
+
+                            printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                            goto clean_ws_frame;
+                        }
+
+                        update_timestamp(item);
+
+                        // read the parameters
+                        // last_video_seq
+                        int width = 0;
+                        int height = 0;
+                        int fps = 30; // hard-code the initial FPS
+                        int bitrate = 1000;
+
+                        int fits_width, fits_height, inner_width, inner_height;
+                        float scale;
+
+                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+                        {
+                            // 'width'
+                            if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
+                                width = atoi2(frame_data + voff, vlen);
+
+                            // 'height'
+                            if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
+                                height = atoi2(frame_data + voff, vlen);
+
+                            // 'flux'
+                            if (strncmp(frame_data + koff, "\"flux\"", klen) == 0)
+                            {
+                                free(session->flux);
+                                session->flux = strndup(frame_data + voff + 1, vlen - 2); // avoid the enclosing double quotes
+                            }
+
+                            // 'fps'
+                            /*if (strncmp(frame_data + koff, "\"fps\"", klen) == 0)
+                                fps = atoi2(frame_data + voff, vlen);*/
+
+                            // 'bitrate'
+                            if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
+                                bitrate = atoi2(frame_data + voff, vlen);
+                        }
+
+                        // printf("[C]::init_video width: %d, height: %d, flux: %s, fps: %d, bitrate: %d\n", width, height, session->flux, fps, bitrate);
+
+                        get_inner_dimensions(item, width, height, &fits_width, &fits_height, &inner_width, &inner_height, &scale);
+                        // printf("[C] FITS dims: %d x %d, INNER: %d x %d, SCALE: %f\n", fits_width, fits_height, inner_width, inner_height, scale);
+
+                        if (scale < 1.0f)
+                        {
+                            session->image_width = roundf(scale * fits_width);
+                            session->image_height = roundf(scale * fits_height);
+                            session->bDownsize = true;
+                        }
+                        else
+                        {
+                            session->image_width = fits_width;
+                            session->image_height = fits_height;
+                            session->bDownsize = false;
+                        };
+
+                        // send a JSON reply
+                        char *json = NULL;
+
+                        mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%Q,%Q:%d,%Q:%d,%Q:%d,%Q:%d}", "type", "init_video", "width", session->image_width, "height", session->image_height, "padded_width", session->image_width, "padded_height", session->image_height);
+                        if (json != NULL)
+                            encode_send_text(session, json, strlen(json));
+
+                        free(json);
+
+                        // x265
+                        pthread_mutex_lock(&session->vid_mtx);
+
+                        // reset the frame index
+                        session->last_frame_idx = -1;
+
+                        if (session->param != NULL)
+                            goto unlock_mutex_and_break;
+
+                        // alloc HEVC params
+                        x265_param *param = x265_param_alloc();
+                        if (param == NULL)
+                            goto unlock_mutex_and_break;
+
+                        x265_param_default_preset(param, "superfast", "zerolatency");
+
+                        // HEVC param
+                        param->fpsNum = fps;
+                        param->fpsDenom = 1;
+                        param->bRepeatHeaders = 1;
+                        param->internalCsp = X265_CSP_I444;
+
+                        param->internalBitDepth = 8;
+                        param->sourceWidth = session->image_width;
+                        param->sourceHeight = session->image_height;
+
+                        // constant bitrate
+                        param->rc.rateControlMode = X265_RC_CRF;
+                        param->rc.bitrate = bitrate;
+
+                        // finally point the user session param
+                        session->param = param;
+
+                        if (session->encoder != NULL)
+                            goto unlock_mutex_and_break;
+
+                        // HEVC encoder
+                        session->encoder = x265_encoder_open(param);
+                        if (session->encoder == NULL)
+                            goto unlock_mutex_and_break;
+
+                        if (session->picture != NULL)
+                            goto unlock_mutex_and_break;
+
+                        // HEVC picture
+                        x265_picture *picture = x265_picture_alloc();
+                        if (picture == NULL)
+                            goto unlock_mutex_and_break;
+
+                        x265_picture_init(param, picture);
+
+                        // allocate a dummy B channel
+                        const size_t frame_size = session->image_width * session->image_height;
+                        uint8_t *B_buf = (uint8_t *)malloc(frame_size);
+
+                        if (B_buf != NULL)
+                            memset(B_buf, 0, frame_size); // actually use 0 instead of 128 so that the composite RGB case is handled correctly for va_count == 2
+
+                        picture->planes[0] = NULL;
+                        picture->planes[1] = NULL;
+                        picture->planes[2] = B_buf;
+
+                        picture->stride[0] = 0;
+                        picture->stride[1] = 0;
+                        picture->stride[2] = session->image_width;
+
+                        session->picture = picture;
+
+                    unlock_mutex_and_break:
+                        pthread_mutex_unlock(&session->vid_mtx);
+                        goto clean_ws_frame;
+                    }
 
                 clean_ws_frame:
                     MHD_websocket_free(session->ws, frame_data);
