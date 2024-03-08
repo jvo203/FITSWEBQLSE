@@ -83,47 +83,6 @@ make_blocking(MHD_socket fd)
 #endif /* MHD_WINSOCK_SOCKETS */
 }
 
-static void *ws_send_messages(void *cls)
-{
-    if (cls == NULL)
-        pthread_exit(NULL);
-
-    websocket_session *session = (websocket_session *)cls;
-
-    // TO-DO: wait for the condition, loop through the queue and send messages
-    /*size_t len;
-    char *buf;
-
-    // Check if we have a message from the worker
-    while ((len = mg_queue_next(&session->queue, &buf)) > 0)
-    {
-        if (len == sizeof(struct data_buf))
-        {
-            struct data_buf *msg = (struct data_buf *)buf;
-
-            // Got message from worker. Send a response and cleanup
-#ifdef DEBUG
-            printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
-#endif
-
-            if (msg->len > 0 && msg->buf != NULL)
-                mg_ws_send(c, msg->buf, msg->len, WEBSOCKET_OP_BINARY);
-
-            // release memory
-            if (msg->buf != NULL)
-            {
-                free(msg->buf);
-                msg->buf = NULL;
-                msg->len = 0;
-            }
-        }
-
-        mg_queue_del(&session->queue, len); // Remove message from the queue
-    }*/
-
-    pthread_exit(NULL);
-}
-
 /**
  * Sends all data of the given buffer via the TCP/IP socket
  *
@@ -183,6 +142,79 @@ static void encode_send_text(websocket_session *session, const char *data, size_
         send_all(session, frame_data, frame_len);
         MHD_websocket_free(session->ws, frame_data);
     }
+}
+
+static void encode_send_binary(websocket_session *session, const char *data, size_t data_len)
+{
+    if (session == NULL || data == NULL || data_len == 0)
+        return;
+
+    char *frame_data = NULL;
+    size_t frame_len = 0;
+
+    int er = MHD_websocket_encode_binary(session->ws,
+                                         data,
+                                         data_len,
+                                         MHD_WEBSOCKET_FRAGMENTATION_NONE,
+                                         &frame_data,
+                                         &frame_len);
+
+    if (MHD_WEBSOCKET_STATUS_OK == er)
+    {
+        send_all(session, frame_data, frame_len);
+        MHD_websocket_free(session->ws, frame_data);
+    }
+}
+
+static void *ws_send_messages(void *cls)
+{
+    if (cls == NULL)
+        pthread_exit(NULL);
+
+    websocket_session *session = (websocket_session *)cls;
+
+    // TO-DO: wait for the condition, loop through the queue and send messages
+    while (!session->pv_exit)
+    {
+        if (1 == session->disconnect)
+            break;
+
+        size_t len;
+        char *buf;
+
+        // Check if we have a message from the worker
+        while ((len = mg_queue_next(&session->queue, &buf)) > 0)
+        {
+            if (len == sizeof(struct data_buf))
+            {
+                struct data_buf *msg = (struct data_buf *)buf;
+
+                // Retrieved a message from the queue. Send a response and cleanup
+#ifdef DEBUG
+                printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+#endif
+
+                if (msg->len > 0 && msg->buf != NULL && session->disconnect == 0)
+                    encode_send_binary(session, msg->buf, msg->len);
+
+                // release memory
+                if (msg->buf != NULL)
+                {
+                    free(msg->buf);
+                    msg->buf = NULL;
+                    msg->len = 0;
+                }
+            }
+
+            mg_queue_del(&session->queue, len); // Remove message from the queue
+        }
+
+        /* wait on a condition variable */
+        pthread_cond_wait(&session->wake_up_sender, &session->wake_up_cond_mtx);
+    }
+
+    printf("[C] <ws_send_messages> thread terminated.\n");
+    pthread_exit(NULL);
 }
 
 static int parse_received_websocket_stream(websocket_session *session, char *buf, size_t buf_len)
