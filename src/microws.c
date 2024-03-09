@@ -15,6 +15,15 @@ void *send_cluster_heartbeat(void *arg);
 
 #define PAGE_INVALID_WEBSOCKET_REQUEST "Invalid WebSocket request!"
 
+// a function to print characters in a buffer in Ox format
+static void print_hex(const char *buf, size_t len)
+{
+    for (size_t i = 0; i < len; i++)
+        printf("%02X ", (unsigned char)buf[i]);
+
+    printf("\n");
+}
+
 static char *append_null(const char *chars, const int size)
 {
     char *tmp = (char *)malloc(size + 1);
@@ -276,8 +285,20 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // parse the received message
                     if (NULL != strstr(frame_data, "[heartbeat]"))
                     {
+                        // WebSocket text response buffer on the stack
+                        char response[2 + frame_len];
+
+                        response[0] = 0x81; // 10000001
+                        response[1] = (unsigned char)frame_len;
+
+                        // copy the frame_data into the response buffer
+                        memcpy(response + 2, frame_data, frame_len);
+
+                        // send the heartbeat 'as-is'
+                        send_all(session, response, frame_len + 2);
+
                         /* re-transmit the heartbeat 'as-is' */
-                        encode_send_text(session, frame_data, frame_len);
+                        // encode_send_text(session, frame_data, frame_len);
 
                         // get the dataset and update its timestamp
                         char *datasetId = NULL;
@@ -1833,6 +1854,8 @@ static void *ws_receive_messages(void *cls)
             // print the received message #bytes
             printf("[C] WebSocket received %zd bytes\n", got);
 #endif
+
+            // print_hex(buf, got);
 
             // handle the messages
             if (0 != parse_received_websocket_stream(session, buf, (size_t)got))
