@@ -1224,7 +1224,26 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                         mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%Q,%Q:%d,%Q:%d,%Q:%d,%Q:%d}", "type", "init_video", "width", session->image_width, "height", session->image_height, "padded_width", session->image_width, "padded_height", session->image_height);
                         if (json != NULL)
-                            encode_send_text(session, json, strlen(json));
+                        {
+                            size_t len = strlen(json);
+                            printf("[C] sending JSON: %s, len = %zu\n", json, len);
+
+                            if (len > 125)
+                                encode_send_text(session, json, strlen(json));
+                            else
+                            {
+                                // prepare a custom response on the stack
+                                char response[2 + len];
+
+                                response[0] = 0x81; // 10000001
+                                response[1] = (unsigned char)len;
+
+                                memcpy(response + 2, json, len);
+
+                                // send the response
+                                send_all(session, response, len + 2);
+                            }
+                        }
 
                         free(json);
 
