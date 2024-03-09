@@ -101,6 +101,9 @@ make_blocking(MHD_socket fd)
  */
 static void send_all(websocket_session *session, const char *buf, size_t len)
 {
+    if (session->disconnect)
+        return;
+
     if (pthread_mutex_lock(&session->send_mutex) == 0)
     {
         ssize_t ret;
