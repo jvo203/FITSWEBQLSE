@@ -1694,6 +1694,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         pthread_mutex_unlock(&session->encode_mtx);
 
                         MHD_websocket_free(session->ws, frame_data);
+
                         if (MHD_WEBSOCKET_STATUS_OK == er)
                         {
                             send_all(session, pong, pong_len);
