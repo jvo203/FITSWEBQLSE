@@ -281,12 +281,13 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 /* depending on the WebSocket flag */
                 /* MHD_WEBSOCKET_FLAG_GENERATE_CLOSE_FRAMES_ON_ERROR */
                 /* close frames might be generated on errors */
-                send_all(session,
+                /*send_all(session,
                          frame_data,
-                         frame_len);
+                         frame_len);*/
                 MHD_websocket_free(session->ws, frame_data);
             }
-            return 1;
+            // return 1;
+            return 0; // ignore errors
         }
         else
         {
@@ -1768,7 +1769,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     /* because there are only five types of (finished) websocket frames. */
                     /* If it is ever reached, it means that there is memory corruption. */
                     MHD_websocket_free(session->ws, frame_data);
-                    return 1;
+                    return 0; // was 1
                 }
             }
         }
@@ -1824,7 +1825,7 @@ static void *ws_receive_messages(void *cls)
     pthread_mutex_init(&session->encode_mtx, NULL);
 
     /* initialize the web socket stream for encoding/decoding */
-    result = MHD_websocket_stream_init(&session->ws, MHD_WEBSOCKET_FLAG_SERVER | MHD_WEBSOCKET_FLAG_NO_FRAGMENTS | MHD_WEBSOCKET_FLAG_GENERATE_CLOSE_FRAMES_ON_ERROR, 0);
+    result = MHD_websocket_stream_init(&session->ws, MHD_WEBSOCKET_FLAG_SERVER | MHD_WEBSOCKET_FLAG_NO_FRAGMENTS /*| MHD_WEBSOCKET_FLAG_GENERATE_CLOSE_FRAMES_ON_ERROR*/, 0);
 
     if (MHD_WEBSOCKET_STATUS_OK != result)
     {
