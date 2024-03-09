@@ -1890,7 +1890,12 @@ static void *ws_receive_messages(void *cls)
             printf("[C] WebSocket received %zd bytes\n", got);
 #endif
 
-            // print_hex(buf, got);
+            // print the ping frames with the opcode 0x9
+            if (buf[0] == 0x9)
+            {
+                printf("[C] WebSocket received a ping frame\n");
+                print_hex(buf, got);
+            }
 
             // handle the messages
             if (0 != parse_received_websocket_stream(session, buf, (size_t)got))
