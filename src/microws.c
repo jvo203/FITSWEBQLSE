@@ -104,6 +104,8 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
     if (session->disconnect)
         return;
 
+    size_t sent = 0;
+
     if (pthread_mutex_lock(&session->send_mutex) == 0)
     {
         ssize_t ret;
@@ -120,8 +122,13 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
                     ret = 0;
                     continue;
                 }
+                else
+                    perror("send_all");
+
                 break;
             }
+            else
+                sent += (size_t)ret;
 
             if (0 == ret)
                 break;
@@ -130,7 +137,13 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
         pthread_mutex_unlock(&session->send_mutex);
     }
     else
+    {
         printf("[C] <send_all(%zu bytes)> failed, cannot lock the WebSocket send_mutex!\n", len);
+        return;
+    }
+
+    if (sent != len)
+        printf("[C] <send_all(%zu bytes)> failed, sent %zu bytes out of %zu bytes!\n", len, sent, len);
 }
 
 static void encode_send_text(websocket_session *session, const char *data, size_t data_len)
