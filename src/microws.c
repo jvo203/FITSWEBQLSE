@@ -129,6 +129,9 @@ static void encode_send_text(websocket_session *session, const char *data, size_
     char *frame_data = NULL;
     size_t frame_len = 0;
 
+    // lock the encode_mtx
+    pthread_mutex_lock(&session->encode_mtx);
+
     int er = MHD_websocket_encode_text(session->ws,
                                        data,
                                        data_len,
@@ -136,6 +139,9 @@ static void encode_send_text(websocket_session *session, const char *data, size_
                                        &frame_data,
                                        &frame_len,
                                        NULL);
+
+    // unlock the encode_mtx
+    pthread_mutex_unlock(&session->encode_mtx);
 
     if (MHD_WEBSOCKET_STATUS_OK == er)
     {
@@ -152,12 +158,18 @@ static void encode_send_binary(websocket_session *session, const char *data, siz
     char *frame_data = NULL;
     size_t frame_len = 0;
 
+    // lock the encode_mtx
+    pthread_mutex_lock(&session->encode_mtx);
+
     int er = MHD_websocket_encode_binary(session->ws,
                                          data,
                                          data_len,
                                          MHD_WEBSOCKET_FRAGMENTATION_NONE,
                                          &frame_data,
                                          &frame_len);
+
+    // unlock the encode_mtx
+    pthread_mutex_unlock(&session->encode_mtx);
 
     if (MHD_WEBSOCKET_STATUS_OK == er)
     {
@@ -1668,11 +1680,18 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     {
                         char *pong = NULL;
                         size_t pong_len = 0;
+
+                        // lock the encode_mtx
+                        pthread_mutex_lock(&session->encode_mtx);
+
                         int er = MHD_websocket_encode_pong(session->ws,
                                                            frame_data,
                                                            frame_len,
                                                            &pong,
                                                            &pong_len);
+
+                        // unlock the encode_mtx
+                        pthread_mutex_unlock(&session->encode_mtx);
 
                         MHD_websocket_free(session->ws, frame_data);
                         if (MHD_WEBSOCKET_STATUS_OK == er)
@@ -1832,12 +1851,12 @@ static void *ws_receive_messages(void *cls)
                 pthread_cond_destroy(&session->wake_up_sender);
                 pthread_mutex_destroy(&session->send_mutex);
 
-                // lock the encode_mtxt
+                // lock the encode_mtx
                 pthread_mutex_lock(&session->encode_mtx);
 
                 MHD_websocket_stream_free(session->ws);
 
-                // unlock and destroy the encode_mtxt
+                // unlock and destroy the encode_mtx
                 pthread_mutex_unlock(&session->encode_mtx);
                 pthread_mutex_destroy(&session->encode_mtx);
 
@@ -1865,12 +1884,12 @@ static void *ws_receive_messages(void *cls)
     pthread_cond_destroy(&session->wake_up_sender);
     pthread_mutex_destroy(&session->send_mutex);
 
-    // lock the encode_mtxt
+    // lock the encode_mtx
     pthread_mutex_lock(&session->encode_mtx);
 
     MHD_websocket_stream_free(session->ws);
 
-    // unlock and destroy the encode_mtxt
+    // unlock and destroy the encode_mtx
     pthread_mutex_unlock(&session->encode_mtx);
     pthread_mutex_destroy(&session->encode_mtx);
 
