@@ -28,6 +28,7 @@ typedef struct
 
     /* the websocket encode/decode stream */
     struct MHD_WebSocketStream *ws;
+    pthread_mutex_t encode_mtx; // protect the WebSocket stream operations
 
     /* the possibly read data at the start (only used once) */
     char *extra_in;
