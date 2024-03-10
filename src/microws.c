@@ -65,6 +65,61 @@ static double atof2(const char *chars, const int size)
     return result;
 }
 
+size_t prealloc_text_ws_frame(char **frame_data, size_t length)
+{
+    unsigned char *frame;
+    unsigned char idx_first_data;
+
+    if (length <= 125)
+    {
+        idx_first_data = 2;
+    }
+    else if (0xFFFF < length)
+    {
+        idx_first_data = 10;
+    }
+    else
+    {
+        idx_first_data = 4;
+    }
+
+    frame = malloc(idx_first_data + length);
+
+    if (frame == NULL)
+        return 0;
+
+    frame[0] = 0x81; // 10000001
+
+    if (length <= 125)
+    {
+        frame[1] = length & 0x7F;
+        idx_first_data = 2;
+    }
+    else if (0xFFFF < length)
+    {
+        frame[1] = 127;
+        frame[2] = (unsigned char)((length >> 56) & 0xFF);
+        frame[3] = (unsigned char)((length >> 48) & 0xFF);
+        frame[4] = (unsigned char)((length >> 40) & 0xFF);
+        frame[5] = (unsigned char)((length >> 32) & 0xFF);
+        frame[6] = (unsigned char)((length >> 24) & 0xFF);
+        frame[7] = (unsigned char)((length >> 16) & 0xFF);
+        frame[8] = (unsigned char)((length >> 8) & 0xFF);
+        frame[9] = (unsigned char)(length & 0xFF);
+        idx_first_data = 10;
+    }
+    else
+    {
+        frame[1] = 126;
+        frame[2] = (length >> 8) & 0xFF;
+        frame[3] = length & 0xFF;
+        idx_first_data = 4;
+    }
+
+    *frame_data = (char *)frame;
+    return idx_first_data;
+}
+
 size_t prealloc_binary_ws_frame(char **frame_data, size_t length)
 {
     unsigned char *frame;
