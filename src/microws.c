@@ -117,7 +117,7 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
 
             if (0 > ret)
             {
-                if (EAGAIN == errno)
+                if (EAGAIN == errno || EWOULDBLOCK == errno)
                 {
                     ret = 0;
                     continue;
