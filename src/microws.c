@@ -306,7 +306,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         char response[2 + frame_len];
 
                         response[0] = 0x81; // 10000001
-                        response[1] = (unsigned char)frame_len;
+                        response[1] = frame_len & 0x7F;
 
                         // copy the frame_data into the response buffer
                         memcpy(response + 2, frame_data, frame_len);
@@ -1253,7 +1253,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                                 char response[2 + len];
 
                                 response[0] = 0x81; // 10000001
-                                response[1] = (unsigned char)len;
+                                response[1] = len & 0x7F;
 
                                 memcpy(response + 2, json, len);
 
