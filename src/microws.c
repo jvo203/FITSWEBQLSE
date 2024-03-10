@@ -65,11 +65,6 @@ static double atof2(const char *chars, const int size)
     return result;
 }
 
-#define WS_FRAME_TEXT 0x81
-#define WS_FRAME_BINARY 0x82
-#define WS_FRAME_PONG 0x8A
-#define WS_FRAME_CLOSE 0x88
-
 int preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
 {
     unsigned char *frame;
