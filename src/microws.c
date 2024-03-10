@@ -117,7 +117,7 @@ int preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
     }
 
     *frame_data = (char *)frame;
-    return idx_first_data;
+    return (int)idx_first_data;
 }
 
 /**
