@@ -3437,7 +3437,13 @@ void *realtime_image_spectrum_response(void *ptr)
 
             printf("[C] viewport elapsed: %f [ms], processing %ux%u viewport, msg_len = %zu\n", elapsed, view_width, view_height, msg_len);
 
+#ifdef MICROWS
+            char *payload = NULL;
+            size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+            msg_len += ws_len;
+#else
             char *payload = malloc(msg_len);
+#endif
 
             if (payload != NULL)
             {
@@ -3448,7 +3454,11 @@ void *realtime_image_spectrum_response(void *ptr)
                 // 2 - image, 3 - full, spectrum,  refresh,
                 // 4 - histogram
 
+#ifdef MICROWS
+                size_t ws_offset = ws_len;
+#else
                 size_t ws_offset = 0;
+#endif
 
                 memcpy((char *)payload + ws_offset, &ts, sizeof(float));
                 ws_offset += sizeof(float);
