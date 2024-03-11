@@ -135,8 +135,11 @@ static void make_blocking(MHD_socket fd)
         abort();
 
     if ((flags & ~O_NONBLOCK) != flags)
+    {
+        printf("[C] make_blocking: currently the socket is non-blocking, will change it.\n");
         if (-1 == fcntl(fd, F_SETFL, flags & ~O_NONBLOCK))
             abort();
+    }
 
 #elif defined(MHD_WINSOCK_SOCKETS)
     unsigned long flags = 0;
@@ -160,9 +163,12 @@ static void make_non_blocking(MHD_socket fd)
     if (-1 == flags)
         abort();
 
-    if ((flags & O_NONBLOCK) != flags)
+    if ((flags | O_NONBLOCK) != flags)
+    {
+        printf("[C] make_non_blocking: currently the socket is blocking, will change it.\n");
         if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK))
             abort();
+    }
 
 #elif defined(MHD_WINSOCK_SOCKETS)
     unsigned long flags = 1;
@@ -185,6 +191,8 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
         return;
 
     size_t sent = 0;
+
+    printf("[C] <send_all(%zu bytes)> sending data.\n", len);
 
     if (pthread_mutex_lock(&session->send_mutex) == 0)
     {
@@ -224,6 +232,67 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
 
     if (sent != len)
         printf("[C] <send_all(%zu bytes)> failed, sent %zu bytes out of %zu bytes!\n", len, sent, len);
+
+    printf("[C] <send_all(%zu bytes)> sent %zu bytes.\n", len, sent);
+}
+
+/**
+ * Sends all data of the given buffer via the TCP/IP socket
+ * in chunks of 128 bytes
+ *
+ * @param fd  The TCP/IP socket which is used for sending
+ * @param buf The buffer with the data to send
+ * @param len The length in bytes of the data in the buffer
+ */
+static void send_all_chunked(websocket_session *session, const char *buf, size_t len)
+{
+    if (session->disconnect)
+        return;
+
+    size_t sent = 0;
+
+    printf("[C] <send_all_chunked(%zu bytes)> sending data.\n", len);
+
+    if (pthread_mutex_lock(&session->send_mutex) == 0)
+    {
+        ssize_t ret;
+        size_t off;
+
+        for (off = 0; off < len; off += ret)
+        {
+            ret = send(session->fd, &buf[off], (int)MIN(len - off, 128), 0);
+
+            if (0 > ret)
+            {
+                if (EAGAIN == errno || EWOULDBLOCK == errno)
+                {
+                    ret = 0;
+                    continue;
+                }
+                else
+                    perror("send_all_chunked");
+
+                break;
+            }
+            else
+                sent += (size_t)ret;
+
+            if (0 == ret)
+                break;
+        }
+
+        pthread_mutex_unlock(&session->send_mutex);
+    }
+    else
+    {
+        printf("[C] <send_all_chunked(%zu bytes)> failed, cannot lock the WebSocket send_mutex!\n", len);
+        return;
+    }
+
+    if (sent != len)
+        printf("[C] <send_all_chunked(%zu bytes)> failed, sent %zu bytes out of %zu bytes!\n", len, sent, len);
+
+    printf("[C] <send_all_chunked(%zu bytes)> sent %zu bytes.\n", len, sent);
 }
 
 static void encode_send_text(websocket_session *session, const char *data, size_t data_len)
@@ -300,7 +369,7 @@ static void *ws_send_messages(void *cls)
 #endif
 
                 if (msg->len > 0 && msg->buf != NULL && !session->disconnect)
-                    send_all(session, msg->buf, msg->len);
+                    send_all_chunked(session, msg->buf, msg->len);
 
                 // release memory
                 if (msg->buf != NULL)
@@ -324,8 +393,27 @@ static void *ws_send_messages(void *cls)
 
 static int parse_received_websocket_stream(websocket_session *session, char *buf, size_t buf_len)
 {
-    if (session == NULL || buf == NULL || buf_len == 0)
-        return 1;
+    /*if (session == NULL || buf == NULL || buf_len == 0)
+        return 1;*/
+
+    // test
+    {
+        size_t new_offset = 0;
+        char *frame_data = NULL;
+        size_t frame_len = 0;
+
+        int status = MHD_websocket_decode(session->ws,
+                                          buf,
+                                          buf_len,
+                                          &new_offset,
+                                          &frame_data,
+                                          &frame_len);
+
+        if (status == MHD_WEBSOCKET_STATUS_TEXT_FRAME)
+        {
+            printf("[C] parse_received_websocket_stream received a text frame '%.*s'\n", (int)frame_len, frame_data);
+        }
+    }
 
     size_t buf_offset = 0;
     while (buf_offset < buf_len)
@@ -367,6 +455,8 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 switch (status)
                 {
                 case MHD_WEBSOCKET_STATUS_TEXT_FRAME:
+                    printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
+
                     // parse the received message
                     if (NULL != strstr(frame_data, "[heartbeat]"))
                     {
@@ -400,6 +490,8 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                                 // wake up the sender
                                 pthread_cond_signal(&session->wake_up_sender);
+
+                                printf("[C] WebSocket queued a text frame '%.*s'\n", (int)frame_len, frame_data);
                             }
                             else
                             {
@@ -448,8 +540,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         free(datasetId);
                         goto clean_ws_frame;
                     }
-                    else
-                        printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
 
                     // get the JSON message type
                     char type[32] = "";
@@ -2006,6 +2096,24 @@ static void *ws_receive_messages(void *cls)
     while (1)
     {
         got = recv(session->fd, buf, sizeof(buf), 0);
+
+        if (0 > got)
+        {
+            if (EAGAIN == errno || EWOULDBLOCK == errno)
+            {
+                /* no data available right now, try again later */
+                // printf("[C] recv: EAGAIN or EWOULDBLOCK\n");
+                continue;
+            }
+            else
+            {
+                /* a real error occurred */
+                perror("[C] recv");
+                break;
+            }
+        }
+
+        print_hex(buf, got);
 
         if (0 >= got)
         {

@@ -4369,6 +4369,7 @@ function send_ping() {
     if (wsConn[va_count - 1] != null) {
         t = performance.now();
 
+        console.log("sending: [heartbeat] " + t);
         wsConn[va_count - 1].send('[heartbeat] ' + t);
     }
 }
@@ -5340,6 +5341,7 @@ async function open_websocket_connection(_datasetId, index) {
                 }
 
                 if (typeof evt.data === "string") {
+                    console.log("received_msg:", received_msg);
                     var cmd = "[heartbeat]";
                     var pos = received_msg.indexOf(cmd);
 
