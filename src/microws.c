@@ -1898,7 +1898,7 @@ static void *ws_receive_messages(void *cls)
     websocket_session *session = (websocket_session *)cls;
 
     /* make the socket blocking */
-    make_blocking(session->fd);
+    // make_blocking(session->fd);
 
     /* initialize the wake-up-sender condition variable */
     if (0 != pthread_cond_init(&session->wake_up_sender, NULL))
@@ -1985,7 +1985,7 @@ static void *ws_receive_messages(void *cls)
         if (0 >= got)
         {
             /* the TCP/IP socket has been closed */
-            break;
+            // break;
         }
 
         if (0 < got)
