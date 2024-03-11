@@ -238,7 +238,7 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
 
 /**
  * Sends all data of the given buffer via the TCP/IP socket
- * in chunks of 128 bytes
+ * in chunks of 1024 bytes
  *
  * @param fd  The TCP/IP socket which is used for sending
  * @param buf The buffer with the data to send
@@ -260,12 +260,13 @@ static void send_all_chunked(websocket_session *session, const char *buf, size_t
 
         for (off = 0; off < len; off += ret)
         {
-            ret = send(session->fd, &buf[off], (int)MIN(len - off, 128), MSG_DONTWAIT);
+            ret = send(session->fd, &buf[off], (int)MIN(len - off, 1024), MSG_DONTWAIT);
 
             if (0 > ret)
             {
                 if (EAGAIN == errno || EWOULDBLOCK == errno)
                 {
+                    printf("[C] <send_all_chunked(%zu bytes)> EAGAIN or EWOULDBLOCK, retrying.\n", len);
                     ret = 0;
                     continue;
                 }

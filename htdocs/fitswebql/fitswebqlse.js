@@ -4373,6 +4373,7 @@ function send_ping() {
 
         try {
             wsConn[va_count - 1].send('[heartbeat] ' + t);
+            //setTimeout(send_ping, 1000 + ping_latency);
         } catch (e) {
             console.log(e);
             setTimeout(send_ping, 1000 + ping_latency);
