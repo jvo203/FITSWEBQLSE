@@ -2641,7 +2641,7 @@ void *ws_pv_response(void *ptr)
         // reserve space for the binary message
         size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
-        // pass the message over to mongoose via a communications queue
+        // pass the message over to the sender via a communications queue
         if (msg_buf != NULL && queue_len >= _len)
         {
             memcpy(msg_buf, &msg, _len);
