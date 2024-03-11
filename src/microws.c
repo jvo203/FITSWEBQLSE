@@ -65,7 +65,7 @@ static double atof2(const char *chars, const int size)
     return result;
 }
 
-int preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
+size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
 {
     unsigned char *frame;
     unsigned char idx_first_data;
@@ -117,7 +117,7 @@ int preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
     }
 
     *frame_data = (char *)frame;
-    return (int)idx_first_data;
+    return (size_t)idx_first_data;
 }
 
 /**
@@ -287,7 +287,8 @@ static void *ws_send_messages(void *cls)
 #endif
 
                 if (msg->len > 0 && msg->buf != NULL && !session->disconnect)
-                    encode_send_binary(session, msg->buf, msg->len);
+                    // encode_send_binary(session, msg->buf, msg->len);
+                    send_all(session, msg->buf, msg->len);
 
                 // release memory
                 if (msg->buf != NULL)

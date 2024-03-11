@@ -2593,7 +2593,15 @@ void *ws_pv_response(void *ptr)
     }
 
     size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + offset;
+
+#ifdef MICROWS
+    char *pv_payload = NULL;
+
+    size_t ws_len = preamble_ws_frame(&pv_payload, msg_len, WS_FRAME_BINARY);
+    msg_len += ws_len;
+#else
     char *pv_payload = malloc(msg_len);
+#endif
 
     if (pv_payload != NULL)
     {
@@ -2601,7 +2609,11 @@ void *ws_pv_response(void *ptr)
         uint32_t id = resp->seq_id;
         uint32_t msg_type = 7; // P-V diagram
 
+#ifdef MICROWS
+        size_t ws_offset = ws_len;
+#else
         size_t ws_offset = 0;
+#endif
 
         memcpy((char *)pv_payload + ws_offset, &ts, sizeof(float));
         ws_offset += sizeof(float);
