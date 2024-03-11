@@ -287,7 +287,6 @@ static void *ws_send_messages(void *cls)
 #endif
 
                 if (msg->len > 0 && msg->buf != NULL && !session->disconnect)
-                    // encode_send_binary(session, msg->buf, msg->len);
                     send_all(session, msg->buf, msg->len);
 
                 // release memory
