@@ -209,9 +209,6 @@ static void encode_send_text(websocket_session *session, const char *data, size_
     char *frame_data = NULL;
     size_t frame_len = 0;
 
-    // lock the encode_mtx
-    pthread_mutex_lock(&session->encode_mtx);
-
     int er = MHD_websocket_encode_text(session->ws,
                                        data,
                                        data_len,
@@ -219,9 +216,6 @@ static void encode_send_text(websocket_session *session, const char *data, size_
                                        &frame_data,
                                        &frame_len,
                                        NULL);
-
-    // unlock the encode_mtx
-    pthread_mutex_unlock(&session->encode_mtx);
 
     if (MHD_WEBSOCKET_STATUS_OK == er)
     {
@@ -238,18 +232,12 @@ static void encode_send_binary(websocket_session *session, const char *data, siz
     char *frame_data = NULL;
     size_t frame_len = 0;
 
-    // lock the encode_mtx
-    pthread_mutex_lock(&session->encode_mtx);
-
     int er = MHD_websocket_encode_binary(session->ws,
                                          data,
                                          data_len,
                                          MHD_WEBSOCKET_FRAGMENTATION_NONE,
                                          &frame_data,
                                          &frame_len);
-
-    // unlock the encode_mtx
-    pthread_mutex_unlock(&session->encode_mtx);
 
     if (MHD_WEBSOCKET_STATUS_OK == er)
     {
@@ -1839,17 +1827,11 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         char *pong = NULL;
                         size_t pong_len = 0;
 
-                        // lock the encode_mtx
-                        pthread_mutex_lock(&session->encode_mtx);
-
                         int er = MHD_websocket_encode_pong(session->ws,
                                                            frame_data,
                                                            frame_len,
                                                            &pong,
                                                            &pong_len);
-
-                        // unlock the encode_mtx
-                        pthread_mutex_unlock(&session->encode_mtx);
 
                         MHD_websocket_free(session->ws, frame_data);
 
@@ -1922,15 +1904,11 @@ static void *ws_receive_messages(void *cls)
         pthread_exit(NULL);
     }
 
-    // init the encode stream mutex
-    pthread_mutex_init(&session->encode_mtx, NULL);
-
     /* initialize the web socket stream for encoding/decoding */
     result = MHD_websocket_stream_init(&session->ws, MHD_WEBSOCKET_FLAG_SERVER | MHD_WEBSOCKET_FLAG_NO_FRAGMENTS | MHD_WEBSOCKET_FLAG_GENERATE_CLOSE_FRAMES_ON_ERROR, 0);
 
     if (MHD_WEBSOCKET_STATUS_OK != result)
     {
-        pthread_mutex_destroy(&session->encode_mtx);
         pthread_cond_destroy(&session->wake_up_sender);
         pthread_mutex_destroy(&session->send_mutex);
         MHD_upgrade_action(session->urh, MHD_UPGRADE_ACTION_CLOSE);
@@ -2017,14 +1995,7 @@ static void *ws_receive_messages(void *cls)
                 pthread_cond_destroy(&session->wake_up_sender);
                 pthread_mutex_destroy(&session->send_mutex);
 
-                // lock the encode_mtx
-                pthread_mutex_lock(&session->encode_mtx);
-
                 MHD_websocket_stream_free(session->ws);
-
-                // unlock and destroy the encode_mtx
-                pthread_mutex_unlock(&session->encode_mtx);
-                pthread_mutex_destroy(&session->encode_mtx);
 
                 // remove a session pointer from the hash table
                 remove_session(session);
@@ -2050,14 +2021,7 @@ static void *ws_receive_messages(void *cls)
     pthread_cond_destroy(&session->wake_up_sender);
     pthread_mutex_destroy(&session->send_mutex);
 
-    // lock the encode_mtx
-    pthread_mutex_lock(&session->encode_mtx);
-
     MHD_websocket_stream_free(session->ws);
-
-    // unlock and destroy the encode_mtx
-    pthread_mutex_unlock(&session->encode_mtx);
-    pthread_mutex_destroy(&session->encode_mtx);
 
     // remove a session pointer from the hash table
     remove_session(session);
