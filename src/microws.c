@@ -201,7 +201,7 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
 
         for (off = 0; off < len; off += ret)
         {
-            ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT);
+            ret = send(session->fd, &buf[off], (int)(len - off), 0); // MSG_DONTWAIT does not work in macOS
 
             if (0 > ret)
             {
@@ -260,7 +260,7 @@ static void send_all_chunked(websocket_session *session, const char *buf, size_t
 
         for (off = 0; off < len; off += ret)
         {
-            ret = send(session->fd, &buf[off], (int)MIN(len - off, 1024), MSG_DONTWAIT);
+            ret = send(session->fd, &buf[off], (int)MIN(len - off, 1024), 0); // MSG_DONTWAIT does not work in macOS
 
             if (0 > ret)
             {
