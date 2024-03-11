@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-02-24.0";
+    return "JS2024-03-11.0";
 }
 
 function uuidv4() {
@@ -4370,7 +4370,13 @@ function send_ping() {
         t = performance.now();
 
         console.log("sending: [heartbeat] " + t);
-        wsConn[va_count - 1].send('[heartbeat] ' + t);
+
+        try {
+            wsConn[va_count - 1].send('[heartbeat] ' + t);
+        } catch (e) {
+            console.log(e);
+            setTimeout(send_ping, 1000 + ping_latency);
+        }
     }
 }
 
