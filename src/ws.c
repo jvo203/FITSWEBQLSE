@@ -3645,7 +3645,13 @@ void *composite_video_response(void *ptr)
 
         printf("[C] video_response elapsed: %f [ms], msg_len: %zu bytes.\n", elapsed, msg_len);
 
+#ifdef MICROWS
+        char *payload = NULL;
+        size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+        msg_len += ws_len;
+#else
         char *payload = malloc(msg_len);
+#endif
 
         if (payload != NULL)
         {
@@ -3656,7 +3662,11 @@ void *composite_video_response(void *ptr)
             // 2 - image, 3 - full, spectrum,  refresh,
             // 4 - histogram, 5 - video frame
 
+#ifdef MICROWS
+            size_t ws_offset = ws_len;
+#else
             size_t ws_offset = 0;
+#endif
 
             memcpy((char *)payload + ws_offset, &ts, sizeof(float));
             ws_offset += sizeof(float);
