@@ -2596,7 +2596,6 @@ void *ws_pv_response(void *ptr)
 
 #ifdef MICROWS
     char *pv_payload = NULL;
-
     size_t ws_len = preamble_ws_frame(&pv_payload, msg_len, WS_FRAME_BINARY);
     msg_len += ws_len;
 #else
