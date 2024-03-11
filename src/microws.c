@@ -125,8 +125,7 @@ size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
  *
  * @param fd the socket to manipulate
  */
-static void
-make_blocking(MHD_socket fd)
+static void make_blocking(MHD_socket fd)
 {
 #if defined(MHD_POSIX_SOCKETS)
     int flags;
@@ -141,6 +140,32 @@ make_blocking(MHD_socket fd)
 
 #elif defined(MHD_WINSOCK_SOCKETS)
     unsigned long flags = 0;
+
+    if (0 != ioctlsocket(fd, (int)FIONBIO, &flags))
+        abort();
+#endif /* MHD_WINSOCK_SOCKETS */
+}
+
+/**
+ * Change socket to non-blocking.
+ *
+ * @param fd the socket to manipulate
+ */
+static void make_non_blocking(MHD_socket fd)
+{
+#if defined(MHD_POSIX_SOCKETS)
+    int flags;
+
+    flags = fcntl(fd, F_GETFL);
+    if (-1 == flags)
+        abort();
+
+    if ((flags & O_NONBLOCK) != flags)
+        if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK))
+            abort();
+
+#elif defined(MHD_WINSOCK_SOCKETS)
+    unsigned long flags = 1;
 
     if (0 != ioctlsocket(fd, (int)FIONBIO, &flags))
         abort();
