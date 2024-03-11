@@ -1802,6 +1802,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     printf("[C] WebSocket received a close frame\n");
                     /* if we receive a close frame, we will respond with one */
                     MHD_websocket_free(session->ws, frame_data);
+
+                    session->disconnect = true;
+
                     {
                         char *result = NULL;
                         size_t result_len = 0;
@@ -1817,27 +1820,51 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                             MHD_websocket_free(session->ws, result);
                         }
                     }
+
                     return 1;
                 case MHD_WEBSOCKET_STATUS_PING_FRAME:
                     /* if we receive a ping frame, we will respond */
                     /* with the corresponding pong frame */
                     {
                         char *pong = NULL;
-                        size_t pong_len = 0;
+                        size_t pong_len = preamble_ws_frame(&pong, frame_len, WS_FRAME_PONG);
 
-                        int er = MHD_websocket_encode_pong(session->ws,
-                                                           frame_data,
-                                                           frame_len,
-                                                           &pong,
-                                                           &pong_len);
+                        if (pong != NULL)
+                        {
+                            // copy the frame_data into the response buffer
+                            memcpy(pong + pong_len, frame_data, frame_len);
+                            pong_len += frame_len;
+
+                            // create a queue message
+                            struct data_buf msg = {pong, pong_len};
+
+                            char *msg_buf = NULL;
+                            size_t _len = sizeof(struct data_buf);
+
+                            pthread_mutex_lock(&session->queue_mtx);
+
+                            // reserve space for the text message
+                            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+                            // pass the message over to the sender via a communications queue
+                            if (msg_buf != NULL && queue_len >= _len)
+                            {
+                                memcpy(msg_buf, &msg, _len);
+                                mg_queue_add(&session->queue, _len);
+                                pthread_mutex_unlock(&session->queue_mtx);
+
+                                // wake up the sender
+                                pthread_cond_signal(&session->wake_up_sender);
+                            }
+                            else
+                            {
+                                pthread_mutex_unlock(&session->queue_mtx);
+                                printf("[C] mg_queue_book failed, freeing memory.\n");
+                                free(pong);
+                            }
+                        }
 
                         MHD_websocket_free(session->ws, frame_data);
-
-                        if (MHD_WEBSOCKET_STATUS_OK == er)
-                        {
-                            send_all(session, pong, pong_len);
-                            MHD_websocket_free(session->ws, pong);
-                        }
                     }
                     return 0;
 
