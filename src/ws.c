@@ -2855,7 +2855,7 @@ void *ws_image_spectrum_response(void *ptr)
         // reserve space for the binary message
         size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
-        // pass the message over to mongoose via a communications queue
+        // pass the message over to the sender via a communications queue
         if (msg_buf != NULL && queue_len >= _len)
         {
             memcpy(msg_buf, &msg, _len);
@@ -2952,7 +2952,7 @@ void *ws_image_spectrum_response(void *ptr)
         // reserve space for the binary message
         size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
-        // pass the message over to mongoose via a communications queue
+        // pass the message over to the sender via a communications queue
         if (msg_buf != NULL && queue_len >= _len)
         {
             memcpy(msg_buf, &msg, _len);
@@ -3161,7 +3161,7 @@ void *spectrum_response(void *ptr)
                     // reserve space for the binary message
                     size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
-                    // pass the message over to mongoose via a communications queue
+                    // pass the message over to the sender via a communications queue
                     if (msg_buf != NULL && queue_len >= _len)
                     {
                         memcpy(msg_buf, &msg, _len);
@@ -3346,7 +3346,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 // reserve space for the binary message
                 size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
-                // pass the message over to mongoose via a communications queue
+                // pass the message over to the sender via a communications queue
                 if (msg_buf != NULL && queue_len >= _len)
                 {
                     memcpy(msg_buf, &msg, _len);
@@ -3438,7 +3438,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 // reserve space for the binary message
                 size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
-                // pass the message over to mongoose via a communications queue
+                // pass the message over to the sender via a communications queue
                 if (msg_buf != NULL && queue_len >= _len)
                 {
                     memcpy(msg_buf, &msg, _len);
@@ -3544,7 +3544,7 @@ void *composite_video_response(void *ptr)
     if (session == NULL)
         goto free_composite_video_mem;
 
-    // compress the planes with x265 and pass the response (payload) over to mongoose
+    // compress the planes with x265 and pass the response (payload) over to the WebSocket sender
     size_t plane_size = session->image_width * session->image_height;
     // size_t expected = sizeof(float) + va_count * sizeof(uint8_t) * plane_size;
     int va_count = 0;
@@ -3636,7 +3636,7 @@ void *composite_video_response(void *ptr)
             // reserve space for the binary message
             size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
-            // pass the message over to mongoose via a communications queue
+            // pass the message over to the sender via a communications queue
             if (msg_buf != NULL && queue_len >= _len)
             {
                 memcpy(msg_buf, &msg, _len);
@@ -3752,7 +3752,7 @@ void *video_response(void *ptr)
     if (session == NULL)
         goto free_video_mem;
 
-    // compress the planes with x265 and pass the response (payload) over to mongoose
+    // compress the planes with x265 and pass the response (payload) over to the WebSocket sender
     size_t plane_size = session->image_width * session->image_height;
     size_t expected = sizeof(float) + 2 * sizeof(uint8_t) * plane_size;
     float elapsed;
@@ -3838,7 +3838,7 @@ void *video_response(void *ptr)
             // reserve space for the binary message
             size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
-            // pass the message over to mongoose via a communications queue
+            // pass the message over to the sender via a communications queue
             if (msg_buf != NULL && queue_len >= _len)
             {
                 memcpy(msg_buf, &msg, _len);
