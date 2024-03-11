@@ -2796,7 +2796,14 @@ void *ws_image_spectrum_response(void *ptr)
 
     size_t write_offset = 0;
     msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + read_offset + padding;
+
+#ifdef MICROWS
+    char *image_payload = NULL;
+    size_t ws_len = preamble_ws_frame(&image_payload, msg_len, WS_FRAME_BINARY);
+    msg_len += ws_len;
+#else
     char *image_payload = malloc(msg_len);
+#endif
 
     if (image_payload != NULL)
     {
@@ -2807,7 +2814,11 @@ void *ws_image_spectrum_response(void *ptr)
         // 2 - image, 3 - full spectrum refresh,
         // 4 - histogram
 
+#ifdef MICROWS
+        size_t ws_offset = ws_len;
+#else
         size_t ws_offset = 0;
+#endif
 
         memcpy((char *)image_payload + ws_offset, &ts, sizeof(float));
         ws_offset += sizeof(float);
@@ -2908,7 +2919,14 @@ void *ws_image_spectrum_response(void *ptr)
     printf("[C] #hist. elements: %u, padding: %d byte(s), orig. spectrum length: %u, compressed_size: %u\n", hist_len, padding, spectrum_len, compressed_size);
 
     msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t) + compressed_size;
+
+#ifdef MICROWS
+    char *spectrum_payload = NULL;
+    ws_len = preamble_ws_frame(&spectrum_payload, msg_len, WS_FRAME_BINARY);
+    msg_len += ws_len;
+#else
     char *spectrum_payload = malloc(msg_len);
+#endif
 
     if (spectrum_payload != NULL)
     {
@@ -2919,7 +2937,11 @@ void *ws_image_spectrum_response(void *ptr)
         // 2 - image, 3 - full, spectrum,  refresh,
         // 4 - histogram
 
+#ifdef MICROWS
+        size_t ws_offset = ws_len;
+#else
         size_t ws_offset = 0;
+#endif
 
         memcpy((char *)spectrum_payload + ws_offset, &ts, sizeof(float));
         ws_offset += sizeof(float);
