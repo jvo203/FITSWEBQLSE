@@ -346,8 +346,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     if (NULL != strstr(frame_data, "[heartbeat]"))
                     {
                         /* re-transmit the heartbeat 'as-is' */
-                        // encode_send_text(session, frame_data, frame_len);
-
                         char *response = NULL;
                         size_t response_len = preamble_ws_frame(&response, frame_len, WS_FRAME_TEXT);
 
