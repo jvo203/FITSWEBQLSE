@@ -358,18 +358,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // parse the received message
                     if (NULL != strstr(frame_data, "[heartbeat]"))
                     {
-                        // WebSocket text response buffer on the stack
-                        /*char response[2 + frame_len];
-
-                        response[0] = 0x81; // 10000001
-                        response[1] = frame_len & 0x7F;
-
-                        // copy the frame_data into the response buffer
-                        memcpy(response + 2, frame_data, frame_len);
-
-                        // send the heartbeat 'as-is'
-                        send_all(session, response, frame_len + 2);*/
-
                         /* re-transmit the heartbeat 'as-is' */
                         // encode_send_text(session, frame_data, frame_len);
 
@@ -390,10 +378,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                             pthread_mutex_lock(&session->queue_mtx);
 
-                            // reserve space for the binary message
+                            // reserve space for the text message
                             size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
 
-                            // pass the message over to mongoose via a communications queue
+                            // pass the message over to the sender via a communications queue
                             if (msg_buf != NULL && queue_len >= _len)
                             {
                                 memcpy(msg_buf, &msg, _len);
@@ -1332,27 +1320,47 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                         // send a JSON reply
                         char *json = NULL;
-
                         mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%Q,%Q:%d,%Q:%d,%Q:%d,%Q:%d}", "type", "init_video", "width", session->image_width, "height", session->image_height, "padded_width", session->image_width, "padded_height", session->image_height);
+
                         if (json != NULL)
                         {
-                            size_t len = strlen(json);
-                            printf("[C] sending JSON: %s, len = %zu\n", json, len);
+                            size_t json_len = strlen(json);
+                            char *response = NULL;
+                            size_t response_len = preamble_ws_frame(&response, json_len, WS_FRAME_TEXT);
 
-                            if (len > 125)
-                                encode_send_text(session, json, strlen(json));
-                            else
+                            if (response != NULL)
                             {
-                                // prepare a custom response on the stack
-                                char response[2 + len];
+                                // copy the frame_data into the response buffer
+                                memcpy(response + response_len, json, json_len);
+                                response_len += json_len;
 
-                                response[0] = 0x81; // 10000001
-                                response[1] = len & 0x7F;
+                                // create a queue message
+                                struct data_buf msg = {response, response_len};
 
-                                memcpy(response + 2, json, len);
+                                char *msg_buf = NULL;
+                                size_t _len = sizeof(struct data_buf);
 
-                                // send the response
-                                send_all(session, response, len + 2);
+                                pthread_mutex_lock(&session->queue_mtx);
+
+                                // reserve space for the text message
+                                size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+                                // pass the message over to the sender via a communications queue
+                                if (msg_buf != NULL && queue_len >= _len)
+                                {
+                                    memcpy(msg_buf, &msg, _len);
+                                    mg_queue_add(&session->queue, _len);
+                                    pthread_mutex_unlock(&session->queue_mtx);
+
+                                    // wake up the sender
+                                    pthread_cond_signal(&session->wake_up_sender);
+                                }
+                                else
+                                {
+                                    pthread_mutex_unlock(&session->queue_mtx);
+                                    printf("[C] mg_queue_book failed, freeing memory.\n");
+                                    free(response);
+                                }
                             }
                         }
 
