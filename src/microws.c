@@ -112,6 +112,8 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type, un
             data_length = flength;
         }
 
+        printf("[C] ws_receive_frame: flength: %d, data_length: %zu\n", flength, data_length);
+
         idx_first_data = (unsigned char)(idx_first_mask + 4);
 
         masks[0] = frame[idx_first_mask + 0];
