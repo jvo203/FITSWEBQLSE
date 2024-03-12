@@ -360,51 +360,6 @@ static void send_all_chunked(websocket_session *session, const char *buf, size_t
     printf("[C] <send_all_chunked(%zu bytes)> sent %zu bytes.\n", len, sent);
 }
 
-static void encode_send_text(websocket_session *session, const char *data, size_t data_len)
-{
-    if (session == NULL || data == NULL || data_len == 0)
-        return;
-
-    char *frame_data = NULL;
-    size_t frame_len = 0;
-
-    int er = MHD_websocket_encode_text(session->ws,
-                                       data,
-                                       data_len,
-                                       MHD_WEBSOCKET_FRAGMENTATION_NONE,
-                                       &frame_data,
-                                       &frame_len,
-                                       NULL);
-
-    if (MHD_WEBSOCKET_STATUS_OK == er)
-    {
-        send_all(session, frame_data, frame_len);
-        MHD_websocket_free(session->ws, frame_data);
-    }
-}
-
-static void encode_send_binary(websocket_session *session, const char *data, size_t data_len)
-{
-    if (session == NULL || data == NULL || data_len == 0)
-        return;
-
-    char *frame_data = NULL;
-    size_t frame_len = 0;
-
-    int er = MHD_websocket_encode_binary(session->ws,
-                                         data,
-                                         data_len,
-                                         MHD_WEBSOCKET_FRAGMENTATION_NONE,
-                                         &frame_data,
-                                         &frame_len);
-
-    if (MHD_WEBSOCKET_STATUS_OK == er)
-    {
-        send_all(session, frame_data, frame_len);
-        MHD_websocket_free(session->ws, frame_data);
-    }
-}
-
 static void *ws_send_messages(void *cls)
 {
     if (cls == NULL)
@@ -1989,7 +1944,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
         }
         return 0;
 
-    case MHD_WEBSOCKET_STATUS_PONG_FRAME:
+    case WS_OPCODE_PONG_FRAME:
         /* if we receive a pong frame, ignore it*/
         return 0;
     default:

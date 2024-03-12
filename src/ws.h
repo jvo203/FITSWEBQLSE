@@ -23,6 +23,7 @@
 #define WS_OPCODE_TEXT_FRAME 1
 #define WS_OPCODE_BINARY_FRAME 2
 #define WS_OPCODE_PING_FRAME 9
+#define WS_OPCODE_PONG_FRAME 10
 #define WS_OPCODE_CON_CLOSE_FRAME 8
 
 size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type);
