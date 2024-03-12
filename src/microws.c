@@ -76,18 +76,14 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type)
     int i;
     int j;
 
-    printf("[C] ws_receive_frame: processing %zu bytes.\n", *length);
+    *type = frame[0] & 0x0F;
+    printf("[C] ws_receive_frame type %d, processing %zu bytes.\n", *type, *length);
 
     if (frame[0] == (WS_FIN | WS_OPCODE_CON_CLOSE_FRAME))
-    {
-        *type = WS_OPCODE_CON_CLOSE_FRAME;
-        *length = 0;
         return;
-    }
 
-    if (frame[0] == (WS_FIN | WS_OPCODE_TEXT_FRAME))
+    if (frame[0] == (WS_FIN | WS_OPCODE_TEXT_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_BINARY_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_PING_FRAME))
     {
-        *type = WS_OPCODE_TEXT_FRAME;
         idx_first_mask = 2;
         mask = frame[1];
         flength = mask & 0x7F;
@@ -119,14 +115,12 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type)
         printf("\n");
 
         *length = data_length;
-        frame[j] = '\0';
+
+        if (*type == WS_OPCODE_TEXT_FRAME)
+            frame[j] = '\0';
     }
     else
-    {
-        printf("[C] ws_receive_frame: received an unknown frame.\n");
-        *type = frame[0] & 0x0F;
-        *length = 0;
-    }
+        printf("[C] ws_receive_frame: received an unknown frame %02X (%d).\n", frame[0], *type);
 }
 
 size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
