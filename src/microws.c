@@ -91,14 +91,25 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type)
         if (flength == 126)
         {
             idx_first_mask = 4;
+
+            // the following 2 bytes interpreted as a 16-bit unsigned integer are the data length
+            data_length = (frame[2] << 8) | frame[3];
         }
         else if (flength == 127)
         {
             idx_first_mask = 10;
+
+            // the following 8 bytes interpreted as a 64-bit unsigned integer
+            // (the most significant bit MUST be 0) are the data length
+            data_length = (frame[2] << 56) | (frame[3] << 48) | (frame[4] << 40) | (frame[5] << 32) | (frame[6] << 24) | (frame[7] << 16) | (frame[8] << 8) | frame[9];
+        }
+        else
+        {
+            data_length = flength;
         }
 
         idx_first_data = (unsigned char)(idx_first_mask + 4);
-        data_length = *length - idx_first_data;
+        // data_length = *length - idx_first_data;
 
         masks[0] = frame[idx_first_mask + 0];
         masks[1] = frame[idx_first_mask + 1];
