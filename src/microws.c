@@ -97,7 +97,7 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type, un
             idx_first_mask = 4;
 
             // the following 2 bytes interpreted as a 16-bit unsigned integer are the data length
-            data_length = (frame[2] << 8) | frame[3];
+            data_length = ((size_t)frame[2] << 8) | (size_t)frame[3];
         }
         else if (flength == 127)
         {
@@ -109,7 +109,7 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type, un
         }
         else
         {
-            data_length = flength;
+            data_length = (size_t)flength;
         }
 
         printf("[C] ws_receive_frame: flength: %d, data_length: %zu\n", flength, data_length);

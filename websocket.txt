@@ -99,3 +99,52 @@ CA 07 42 66 DD 4B 46 68 C5 01 46 73 D3 10 0F 78 DD 08 41 79 CC 1E 55 33 CD 10 4D
 [C] ws_receive_frame: received an unknown frame CA (10).
 [C] new_frame: 0x0, new_frame_len: 0
 make: *** [run] Segmentation fault: 11
+
+=========================================================
+
+[C] WebSocket received 1023 bytes
+[C] ws_receive_frame type 1, processing 1023 bytes.
+[C] ws_receive_frame: flength: 126, data_length: 292
+{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":672,"y1":364,"x2":750,"y2":442,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":134,"timestamp":37480}
+[C] ws_receive_frame: i: 300, length: 1023, new_length: 723
+[C] WebSocket received a text frame '{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":672,"y1":364,"x2":750,"y2":442,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":134,"timestamp":37480}'
+[C] new_frame: 0x700007151c9c, new_frame_len: 723
+new_frame_len = 723, ringing a bell
+[C] ws_receive_frame type 1, processing 723 bytes.
+[C] ws_receive_frame: flength: 126, data_length: 292
+{"typ[C] ws_event_loop::wakeup.
+[C] ws_event_loop::got a request id 134.
+e":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":674,"y1":373,"x2":752,"y2":451,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":135,"timestamp":37505}
+[C] ws_receive_frame: i: 300, length: 723, new_length: 423
+[C] WebSocket received a text frame '{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":674,"y1":373,"x2":752,"y2":451,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":135,"timestamp":37505}'
+[C] new_frame: 0x700007151dc8, new_frame_len: 423
+new_frame_len = 423, ringing a bell
+[C] ws_receive_frame type 1, processing 423 bytes.
+[C] ws_receive_frame: flength: 126, data_length: 292
+{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":683,"y1":358,"x2":761,"y2":436,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":136,"timestamp":37555}
+[C] ws_receive_frame: i: 300, length: 423, new_length: 123
+[C] WebSocket received a text frame '{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":683,"y1":358,"x2":761,"y2":436,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":136,"timestamp":37555}'
+[C] pthread_create rc = 0
+[C] calling fetch_realtime_image_spectrum across the cluster for 'ALMA01003454'
+[C] aborting fetch_realtime_image_spectrum (no cluster nodes found)
+[C] new_frame: 0x700007151ef4, new_frame_len: 123
+new_frame_len = 123, ringing a bell
+[C] ws_receive_frame type 1, processing 123 bytes.
+[C] ws_receive_frame: flength: 126, data_length: 292
+{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":702,"y1":324,"x2":780,"y2":402,"w���4���)�_�$���)�Ϩ$���)���<���)���)���)���)���)���)���)���)���)�W�<���)������)���)���)���)���)�w�<���)�,B���)���)���)���)���)���)���)���)���)���
+'$o���)���)���4���)��Y%���)�
+[C] ws_receive_frame: i: 300, length: 123, new_length: 18446744073709551439
+[C] WebSocket received a text frame '{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":702,"y1":324,"x2":780,"y2":402,"w���4���)�_�$���)�Ϩ$���)���<���)���)���)���)���)���)���)���)���)�W�<���)������)���)���)���)���)�w�<���)�,B���)���)���)���)���)���)���)���)���)���
+'$o���)���)���4���)��Y%���)�'
+[C] new_frame: 0x700007152020, new_frame_len: 18446744073709551439
+new_frame_len = 18446744073709551439, ringing a bell
+[C] ws_receive_frame type 0, processing 18446744073709551439 bytes.
+[C] ws_receive_frame: received an unknown frame 00 (0).
+[C] new_frame: 0x0, new_frame_len: 0
+C2 E3 DD 41 89 BD 9F 18 9B AB 8B 41 CE EE CE 41 DF A5 93 1F 9A B7 85 0B C9 E2 C8 44 89 BD 8B 4A C2 F5 CA 45 CE A5 85 0B C2 E9 DD 4C C5 F4 C0 5D D2 A5 93 0B C2 E9 DD 4C CC F5 C8 5D CE E3 8B 05 89 E1 DB 48 C6 E2 F6 5A DF E6 DB 5D 89 BD 98 18 9F B1 99 1A 92 B2 90 10 9D B1 87 1F 9E B2 98 11 87 A5 CF 5B CA EA CC 76 CE E9 CD 0B 91 B6 98 1C 9E B2 9D 1F 93 B6 9B 1F 9F AB 8B 5B CE E1 F6 4F D9 E2 D8 0B 91 B6 98 1C 99 B0 98 19 9B B7 99 19 9B AB 8B 5A CE F6 F6 40 CF A5 93 18 98 B0 85 0B DF EE C4 4C D8 F3 C8 44 DB A5 93 1A 9C B2 9E 10 D6 81 FE 01 24 07 FC EB EC 7C DE 9F 95 77 99 C9 D6 25 8E 8E 8D 6B 88 82 81 62 A3 82 81 66 9B 8E B3 74 8C 8E 8F 73 8E 9E 81 25 D0 C9 88 7F DE D1 DD 32 CA DA C0 25 95 86 8D 60 99 C9 D6 61 9D 87 9F 62 D0 C9 9D 72 9D 87 85 73 85 C9 D6 25 91 8E 88 6E 89 86 CE 2B DE 93 DD 25 C6 DC DE 3F D0 C9 95 36 DE D1 DE 3F CF C7 CE 7F CE C9 D6 3F CC DD C0 25 85 D9 CE 3D CF DD DD 2B DE 9C 85 63 88 83 CE 3D CA DA DC 2B DE 83 89 6E 9B 83 98 25 C6 DD DD 37 D0 C9 8E 62 9D 86 CE 3D DE 88 85 75 9F 87 89 25 D0 C9 85 69 88 8E 82 74 95 9F 95 25 C6 C9 85 69 88 8E 8B 75 9D 9F 89 63 DE C7 CE 61 8E 8A 81 62 A3 98 98 66 8E 9F CE 3D CD DA D8 31 CC D8 D5 32 C5 D2 DA 31 D2 DD D9 32 CD D3 C0 25 9A 99 8D 6A 99 B4 89 69 98 C9 D6 36 CD DE D9 32 C8 DD D4 36 CE DD D8 2B DE 99 89 61 A3 8D 9E 62 8D C9 D6 36 CD DE DE 30 CD DB DC 37 CC DB DC 2B DE 98 89 76 A3 82 88 25 C6 DA DF 3F D0 C9 98 6E 91 8E 9F 73 9D 86 9C 25 C6 D8 DB 31 CC DE 91
+[C] WebSocket received 477 bytes
+[C] ws_receive_frame type 2, processing 477 bytes.
+[C] ws_receive_frame: received an unknown frame C2 (2).
+[C] WebSocket received 477 bytes of binary frame
+[C] new_frame: 0x0, new_frame_len: 0
+make: *** [run] Segmentation fault: 11
