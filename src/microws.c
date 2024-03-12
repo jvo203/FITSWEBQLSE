@@ -65,11 +65,10 @@ static double atof2(const char *chars, const int size)
     return result;
 }
 
-static unsigned char *ws_receive_frame(unsigned char *frame, ssize_t *length, int *type)
+static void ws_receive_frame(unsigned char *frame, size_t *length, int *type)
 {
     unsigned char masks[4];
     unsigned char mask;
-    unsigned char *msg;
     unsigned char flength;
     unsigned char idx_first_mask;
     unsigned char idx_first_data;
@@ -77,13 +76,22 @@ static unsigned char *ws_receive_frame(unsigned char *frame, ssize_t *length, in
     int i;
     int j;
 
-    msg = NULL;
+    printf("[C] ws_receive_frame: processing %zu bytes.\n", *length);
+
+    if (frame[0] == (WS_FIN | WS_OPCODE_CON_CLOSE_FRAME))
+    {
+        *type = WS_OPCODE_CON_CLOSE_FRAME;
+        *length = 0;
+        return;
+    }
+
     if (frame[0] == (WS_FIN | WS_OPCODE_TEXT_FRAME))
     {
         *type = WS_OPCODE_TEXT_FRAME;
         idx_first_mask = 2;
         mask = frame[1];
         flength = mask & 0x7F;
+
         if (flength == 126)
         {
             idx_first_mask = 4;
@@ -92,32 +100,33 @@ static unsigned char *ws_receive_frame(unsigned char *frame, ssize_t *length, in
         {
             idx_first_mask = 10;
         }
+
         idx_first_data = (unsigned char)(idx_first_mask + 4);
-        data_length = (size_t)*length - idx_first_data;
+        data_length = *length - idx_first_data;
+
         masks[0] = frame[idx_first_mask + 0];
         masks[1] = frame[idx_first_mask + 1];
         masks[2] = frame[idx_first_mask + 2];
         masks[3] = frame[idx_first_mask + 3];
-        msg = malloc(data_length + 1);
-        if (NULL != msg)
+
+        // decode the message
+        for (i = idx_first_data, j = 0; i < *length; i++, j++)
         {
-            for (i = idx_first_data, j = 0; i < *length; i++, j++)
-            {
-                msg[j] = frame[i] ^ masks[j % 4];
-            }
-            *length = (ssize_t)data_length;
-            msg[j] = '\0';
+            char c = frame[i] ^ masks[j % 4];
+            printf("%c", c);
+            frame[j] = frame[i] ^ masks[j % 4]; // neat, overwrite the incoming frame buffer
         }
-    }
-    else if (frame[0] == (WS_FIN | WS_OPCODE_CON_CLOSE_FRAME))
-    {
-        *type = WS_OPCODE_CON_CLOSE_FRAME;
+        printf("\n");
+
+        *length = data_length;
+        frame[j] = '\0';
     }
     else
     {
+        printf("[C] ws_receive_frame: received an unknown frame.\n");
         *type = frame[0] & 0x0F;
+        *length = 0;
     }
-    return msg;
 }
 
 size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
@@ -449,1609 +458,1545 @@ static void *ws_send_messages(void *cls)
 
 static int parse_received_websocket_stream(websocket_session *session, char *buf, size_t buf_len)
 {
-    /*if (session == NULL || buf == NULL || buf_len == 0)
-        return 1;*/
+    char *frame_data = buf;
+    size_t frame_len = buf_len;
+    int type = 0;
 
-    // test
+    ws_receive_frame((unsigned char *)frame_data, &frame_len, &type);
+
+    /* application logic */
+    switch (type)
     {
-        size_t new_offset = 0;
-        char *frame_data = NULL;
-        size_t frame_len = 0;
+    case WS_OPCODE_TEXT_FRAME:
+        printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
 
-        int status = MHD_websocket_decode(session->ws,
-                                          buf,
-                                          buf_len,
-                                          &new_offset,
-                                          &frame_data,
-                                          &frame_len);
-
-        if (status == MHD_WEBSOCKET_STATUS_TEXT_FRAME)
+        // parse the received message
+        if (NULL != strstr(frame_data, "[heartbeat]"))
         {
-            printf("[C] parse_received_websocket_stream received a text frame '%.*s'\n", (int)frame_len, frame_data);
-        }
-    }
+            /* re-transmit the heartbeat 'as-is' */
+            char *response = NULL;
+            size_t response_len = preamble_ws_frame(&response, frame_len, WS_FRAME_TEXT);
 
-    size_t buf_offset = 0;
-    while (buf_offset < buf_len)
-    {
-        size_t new_offset = 0;
-        char *frame_data = NULL;
-        size_t frame_len = 0;
-
-        int status = MHD_websocket_decode(session->ws,
-                                          buf + buf_offset,
-                                          buf_len - buf_offset,
-                                          &new_offset,
-                                          &frame_data,
-                                          &frame_len);
-
-        if (0 > status)
-        {
-            /* an error occurred and the connection must be closed */
-            if (NULL != frame_data)
+            if (response != NULL)
             {
-                /* depending on the WebSocket flag */
-                /* MHD_WEBSOCKET_FLAG_GENERATE_CLOSE_FRAMES_ON_ERROR */
-                /* close frames might be generated on errors */
-                send_all(session,
-                         frame_data,
-                         frame_len);
-                MHD_websocket_free(session->ws, frame_data);
-            }
-            return 1;
-            // return 0; // ignore errors
-        }
-        else
-        {
-            buf_offset += new_offset;
+                // copy the frame_data into the response buffer
+                memcpy(response + response_len, frame_data, frame_len);
+                response_len += frame_len;
 
-            if (0 < status)
-            {
-                /* the frame is complete */
-                switch (status)
+                // create a queue message
+                struct data_buf msg = {response, response_len};
+
+                char *msg_buf = NULL;
+                size_t _len = sizeof(struct data_buf);
+
+                pthread_mutex_lock(&session->queue_mtx);
+
+                // reserve space for the text message
+                size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+                // pass the message over to the sender via a communications queue
+                if (msg_buf != NULL && queue_len >= _len)
                 {
-                case MHD_WEBSOCKET_STATUS_TEXT_FRAME:
-                    printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
+                    memcpy(msg_buf, &msg, _len);
+                    mg_queue_add(&session->queue, _len);
+                    pthread_mutex_unlock(&session->queue_mtx);
 
-                    // parse the received message
-                    if (NULL != strstr(frame_data, "[heartbeat]"))
+                    // wake up the sender
+                    pthread_cond_signal(&session->wake_up_sender);
+
+                    printf("[C] WebSocket queued a text frame '%.*s'\n", (int)frame_len, frame_data);
+                }
+                else
+                {
+                    pthread_mutex_unlock(&session->queue_mtx);
+                    printf("[C] mg_queue_book failed, freeing memory.\n");
+                    free(response);
+                }
+            }
+
+            // get the dataset and update its timestamp
+            char *datasetId = NULL;
+
+            // tokenize session->multi
+            datasetId = session->multi != NULL ? strdup(session->multi) : NULL;
+            char *token = datasetId;
+            char *rest = token;
+
+            while ((token = strtok_r(rest, ";", &rest)) != NULL)
+            {
+                void *item = get_dataset(token);
+
+                if (item != NULL)
+                {
+                    // #ifdef DEBUG
+                    printf("[C] updating the timestamp for '%s'\n", token);
+                    // #endif
+                    update_timestamp(item);
+
+                    // trigger updates across the cluster too
+                    // create and detach a thread to send a message to the cluster
+                    pthread_t thread;
+
+                    char *_token = strdup(token);
+                    int stat = pthread_create(&thread, NULL, send_cluster_heartbeat, (void *)_token);
+
+                    if (stat != 0)
                     {
-                        /* re-transmit the heartbeat 'as-is' */
-                        char *response = NULL;
-                        size_t response_len = preamble_ws_frame(&response, frame_len, WS_FRAME_TEXT);
-
-                        if (response != NULL)
-                        {
-                            // copy the frame_data into the response buffer
-                            memcpy(response + response_len, frame_data, frame_len);
-                            response_len += frame_len;
-
-                            // create a queue message
-                            struct data_buf msg = {response, response_len};
-
-                            char *msg_buf = NULL;
-                            size_t _len = sizeof(struct data_buf);
-
-                            pthread_mutex_lock(&session->queue_mtx);
-
-                            // reserve space for the text message
-                            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-                            // pass the message over to the sender via a communications queue
-                            if (msg_buf != NULL && queue_len >= _len)
-                            {
-                                memcpy(msg_buf, &msg, _len);
-                                mg_queue_add(&session->queue, _len);
-                                pthread_mutex_unlock(&session->queue_mtx);
-
-                                // wake up the sender
-                                pthread_cond_signal(&session->wake_up_sender);
-
-                                printf("[C] WebSocket queued a text frame '%.*s'\n", (int)frame_len, frame_data);
-                            }
-                            else
-                            {
-                                pthread_mutex_unlock(&session->queue_mtx);
-                                printf("[C] mg_queue_book failed, freeing memory.\n");
-                                free(response);
-                            }
-                        }
-
-                        // get the dataset and update its timestamp
-                        char *datasetId = NULL;
-
-                        // tokenize session->multi
-                        datasetId = session->multi != NULL ? strdup(session->multi) : NULL;
-                        char *token = datasetId;
-                        char *rest = token;
-
-                        while ((token = strtok_r(rest, ";", &rest)) != NULL)
-                        {
-                            void *item = get_dataset(token);
-
-                            if (item != NULL)
-                            {
-                                // #ifdef DEBUG
-                                printf("[C] updating the timestamp for '%s'\n", token);
-                                // #endif
-                                update_timestamp(item);
-
-                                // trigger updates across the cluster too
-                                // create and detach a thread to send a message to the cluster
-                                pthread_t thread;
-
-                                char *_token = strdup(token);
-                                int stat = pthread_create(&thread, NULL, send_cluster_heartbeat, (void *)_token);
-
-                                if (stat != 0)
-                                {
-                                    printf("[C] cannot create a 'send_cluster_heartbeat' thread!\n");
-                                    free(_token);
-                                }
-                                else
-                                    pthread_detach(thread);
-                            }
-                        }
-
-                        free(datasetId);
-                        goto clean_ws_frame;
+                        printf("[C] cannot create a 'send_cluster_heartbeat' thread!\n");
+                        free(_token);
                     }
+                    else
+                        pthread_detach(thread);
+                }
+            }
 
-                    // get the JSON message type
-                    char type[32] = "";
-                    int koff, klen, voff, vlen, vtype, off;
+            free(datasetId);
+            goto clean_ws_frame;
+        }
 
-                    if (mjson_get_string(frame_data, (int)frame_len, "$.type", type, sizeof(type)) == -1)
-                    {
-                        printf("[C] cannot get the JSON message type!\n");
-                        goto clean_ws_frame;
-                    }
+        // get the JSON message type
+        char type[32] = "";
+        int koff, klen, voff, vlen, vtype, off;
 
-                    if (strcmp(type, "composite_pv") == 0)
-                    {
-                        if (session->pv_exit)
-                            goto clean_ws_frame;
+        if (mjson_get_string(frame_data, (int)frame_len, "$.type", type, sizeof(type)) == -1)
+        {
+            printf("[C] cannot get the JSON message type!\n");
+            goto clean_ws_frame;
+        }
 
-                        // parse the JSON request
-                        struct pv_request *req = (struct pv_request *)malloc(sizeof(struct pv_request));
+        if (strcmp(type, "composite_pv") == 0)
+        {
+            if (session->pv_exit)
+                goto clean_ws_frame;
 
-                        if (req == NULL)
-                            goto clean_ws_frame;
+            // parse the JSON request
+            struct pv_request *req = (struct pv_request *)malloc(sizeof(struct pv_request));
 
-                        req->x1 = -1;
-                        req->y1 = -1;
-                        req->x2 = -1;
-                        req->y2 = -1;
-                        req->width = 0;
-                        req->height = 0;
-                        req->frame_start = 0.0;
-                        req->frame_end = 0.0;
-                        req->ref_freq = 0.0;
-                        req->deltaV = 0.0;
-                        req->rest = false;
-                        req->seq_id = 0;
-                        req->timestamp = 0.0;
-                        req->fd = -1;
-                        req->va_count = 0;
-                        req->ptr[0] = NULL;
-                        req->ptr[1] = NULL;
-                        req->ptr[2] = NULL;
+            if (req == NULL)
+                goto clean_ws_frame;
 
-                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
-                        {
-                            //  printf("key: %.*s, value: %.*s\n", klen, frame_data + koff, vlen, frame_data + voff);
+            req->x1 = -1;
+            req->y1 = -1;
+            req->x2 = -1;
+            req->y2 = -1;
+            req->width = 0;
+            req->height = 0;
+            req->frame_start = 0.0;
+            req->frame_end = 0.0;
+            req->ref_freq = 0.0;
+            req->deltaV = 0.0;
+            req->rest = false;
+            req->seq_id = 0;
+            req->timestamp = 0.0;
+            req->fd = -1;
+            req->va_count = 0;
+            req->ptr[0] = NULL;
+            req->ptr[1] = NULL;
+            req->ptr[2] = NULL;
 
-                            // 'x1'
-                            if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
-                                req->x1 = atoi2(frame_data + voff, vlen);
+            for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                //  printf("key: %.*s, value: %.*s\n", klen, frame_data + koff, vlen, frame_data + voff);
 
-                            // 'y1'
-                            if (strncmp(frame_data + koff, "\"y1\"", klen) == 0)
-                                req->y1 = atoi2(frame_data + voff, vlen);
+                // 'x1'
+                if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
+                    req->x1 = atoi2(frame_data + voff, vlen);
 
-                            // 'x2'
-                            if (strncmp(frame_data + koff, "\"x2\"", klen) == 0)
-                                req->x2 = atoi2(frame_data + voff, vlen);
+                // 'y1'
+                if (strncmp(frame_data + koff, "\"y1\"", klen) == 0)
+                    req->y1 = atoi2(frame_data + voff, vlen);
 
-                            // 'y2'
-                            if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
-                                req->y2 = atoi2(frame_data + voff, vlen);
+                // 'x2'
+                if (strncmp(frame_data + koff, "\"x2\"", klen) == 0)
+                    req->x2 = atoi2(frame_data + voff, vlen);
 
-                            // 'width'
-                            if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
-                                req->width = atoi2(frame_data + voff, vlen);
+                // 'y2'
+                if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
+                    req->y2 = atoi2(frame_data + voff, vlen);
 
-                            // 'height'
-                            if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
-                                req->height = atoi2(frame_data + voff, vlen);
+                // 'width'
+                if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
+                    req->width = atoi2(frame_data + voff, vlen);
 
-                            // 'frame_start'
-                            if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
-                                req->frame_start = atof2(frame_data + voff, vlen);
+                // 'height'
+                if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
+                    req->height = atoi2(frame_data + voff, vlen);
 
-                            // 'frame_end'
-                            if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
-                                req->frame_end = atof2(frame_data + voff, vlen);
+                // 'frame_start'
+                if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
+                    req->frame_start = atof2(frame_data + voff, vlen);
 
-                            // 'ref_freq'
-                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
-                                req->ref_freq = atof2(frame_data + voff, vlen);
+                // 'frame_end'
+                if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
+                    req->frame_end = atof2(frame_data + voff, vlen);
 
-                            // 'deltaV'
-                            if (strncmp(frame_data + koff, "\"deltaV\"", klen) == 0)
-                                req->deltaV = atof2(frame_data + voff, vlen);
+                // 'ref_freq'
+                if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                    req->ref_freq = atof2(frame_data + voff, vlen);
 
-                            // 'rest'
-                            if (strncmp(frame_data + koff, "\"rest\"", klen) == 0)
-                                if (strncmp(frame_data + voff, "true", vlen) == 0)
-                                    req->rest = true;
+                // 'deltaV'
+                if (strncmp(frame_data + koff, "\"deltaV\"", klen) == 0)
+                    req->deltaV = atof2(frame_data + voff, vlen);
 
-                            // 'seq_id'
-                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
-                                req->seq_id = atoi2(frame_data + voff, vlen);
+                // 'rest'
+                if (strncmp(frame_data + koff, "\"rest\"", klen) == 0)
+                    if (strncmp(frame_data + voff, "true", vlen) == 0)
+                        req->rest = true;
 
-                            // 'timestamp'
-                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
-                                req->timestamp = atof2(frame_data + voff, vlen);
-                        }
+                // 'seq_id'
+                if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                    req->seq_id = atoi2(frame_data + voff, vlen);
 
-                        // next iterate through the multiple datasets launching individual channel threads
-                        // tokenize session->multi
-                        char *datasetId = session->multi != NULL ? strdup(session->multi) : NULL;
-                        char *token = datasetId;
-                        char *rest = token;
-                        bool skip_frame = false;
+                // 'timestamp'
+                if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                    req->timestamp = atof2(frame_data + voff, vlen);
+            }
 
-                        while ((token = strtok_r(rest, ";", &rest)) != NULL)
-                        {
-                            void *item = get_dataset(token);
+            // next iterate through the multiple datasets launching individual channel threads
+            // tokenize session->multi
+            char *datasetId = session->multi != NULL ? strdup(session->multi) : NULL;
+            char *token = datasetId;
+            char *rest = token;
+            bool skip_frame = false;
 
-                            if (item == NULL)
-                                continue;
+            while ((token = strtok_r(rest, ";", &rest)) != NULL)
+            {
+                void *item = get_dataset(token);
 
-                            update_timestamp(item);
+                if (item == NULL)
+                    continue;
 
-                            // RGB
-                            req->ptr[req->va_count] = item;
-                            req->va_count++; // increment the channel count
-                        }
+                update_timestamp(item);
 
-                        free(datasetId);
+                // RGB
+                req->ptr[req->va_count] = item;
+                req->va_count++; // increment the channel count
+            }
 
-                        if (req->va_count > 0)
-                        {
-                            pthread_mutex_lock(&session->pv_mtx);
+            free(datasetId);
 
-                            // add the request to the circular queue
-                            ring_put(session->pv_ring, req);
+            if (req->va_count > 0)
+            {
+                pthread_mutex_lock(&session->pv_mtx);
 
-                            if (!session->pv_exit)
-                                pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
+                // add the request to the circular queue
+                ring_put(session->pv_ring, req);
 
-                            // finally unlock the mutex
-                            pthread_mutex_unlock(&session->pv_mtx);
-                        }
-                        else
-                            free(req);
+                if (!session->pv_exit)
+                    pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
 
-                        goto clean_ws_frame;
-                    }
+                // finally unlock the mutex
+                pthread_mutex_unlock(&session->pv_mtx);
+            }
+            else
+                free(req);
 
-                    // [WS] {"type":"pv","x1":108,"y1":127,"x2":131,"y2":99,"width":1129,"height":801,"frame_start":146830393957.08142,"frame_end":147767129569,"ref_freq":147300000000,"deltaV":0,"rest":false,"timestamp":10713.300000000745}
-                    if (strcmp(type, "pv") == 0)
-                    {
-                        if (session->pv_exit)
-                            goto clean_ws_frame;
+            goto clean_ws_frame;
+        }
 
-                        char *datasetId = session->datasetid;
-                        void *item = get_dataset(datasetId);
+        // [WS] {"type":"pv","x1":108,"y1":127,"x2":131,"y2":99,"width":1129,"height":801,"frame_start":146830393957.08142,"frame_end":147767129569,"ref_freq":147300000000,"deltaV":0,"rest":false,"timestamp":10713.300000000745}
+        if (strcmp(type, "pv") == 0)
+        {
+            if (session->pv_exit)
+                goto clean_ws_frame;
 
-                        if (item == NULL)
-                        {
-                            printf("[C] cannot find '%s' in the hash table\n", datasetId);
-                            goto clean_ws_frame;
-                        }
+            char *datasetId = session->datasetid;
+            void *item = get_dataset(datasetId);
 
-                        update_timestamp(item);
+            if (item == NULL)
+            {
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                goto clean_ws_frame;
+            }
 
-                        // parse the JSON request
-                        struct pv_request *req = (struct pv_request *)malloc(sizeof(struct pv_request));
+            update_timestamp(item);
 
-                        if (req == NULL)
-                            goto clean_ws_frame;
+            // parse the JSON request
+            struct pv_request *req = (struct pv_request *)malloc(sizeof(struct pv_request));
 
-                        // default values just in case ...
-                        req->x1 = -1;
-                        req->y1 = -1;
-                        req->x2 = -1;
-                        req->y2 = -1;
-                        req->width = 0;
-                        req->height = 0;
-                        req->frame_start = 0.0;
-                        req->frame_end = 0.0;
-                        req->ref_freq = 0.0;
-                        req->deltaV = 0.0;
-                        req->rest = false;
-                        req->seq_id = 0;
-                        req->timestamp = 0.0;
-                        req->fd = -1;
-                        req->va_count = 1;
-                        req->ptr[0] = item;
+            if (req == NULL)
+                goto clean_ws_frame;
 
-                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
-                        {
-                            //  printf("key: %.*s, value: %.*s\n", klen, frame_data + koff, vlen, frame_data + voff);
+            // default values just in case ...
+            req->x1 = -1;
+            req->y1 = -1;
+            req->x2 = -1;
+            req->y2 = -1;
+            req->width = 0;
+            req->height = 0;
+            req->frame_start = 0.0;
+            req->frame_end = 0.0;
+            req->ref_freq = 0.0;
+            req->deltaV = 0.0;
+            req->rest = false;
+            req->seq_id = 0;
+            req->timestamp = 0.0;
+            req->fd = -1;
+            req->va_count = 1;
+            req->ptr[0] = item;
 
-                            // 'x1'
-                            if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
-                                req->x1 = atoi2(frame_data + voff, vlen);
+            for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                //  printf("key: %.*s, value: %.*s\n", klen, frame_data + koff, vlen, frame_data + voff);
 
-                            // 'y1'
-                            if (strncmp(frame_data + koff, "\"y1\"", klen) == 0)
-                                req->y1 = atoi2(frame_data + voff, vlen);
+                // 'x1'
+                if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
+                    req->x1 = atoi2(frame_data + voff, vlen);
 
-                            // 'x2'
-                            if (strncmp(frame_data + koff, "\"x2\"", klen) == 0)
-                                req->x2 = atoi2(frame_data + voff, vlen);
+                // 'y1'
+                if (strncmp(frame_data + koff, "\"y1\"", klen) == 0)
+                    req->y1 = atoi2(frame_data + voff, vlen);
 
-                            // 'y2'
-                            if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
-                                req->y2 = atoi2(frame_data + voff, vlen);
+                // 'x2'
+                if (strncmp(frame_data + koff, "\"x2\"", klen) == 0)
+                    req->x2 = atoi2(frame_data + voff, vlen);
 
-                            // 'width'
-                            if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
-                                req->width = atoi2(frame_data + voff, vlen);
+                // 'y2'
+                if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
+                    req->y2 = atoi2(frame_data + voff, vlen);
 
-                            // 'height'
-                            if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
-                                req->height = atoi2(frame_data + voff, vlen);
+                // 'width'
+                if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
+                    req->width = atoi2(frame_data + voff, vlen);
 
-                            // 'frame_start'
-                            if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
-                                req->frame_start = atof2(frame_data + voff, vlen);
+                // 'height'
+                if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
+                    req->height = atoi2(frame_data + voff, vlen);
 
-                            // 'frame_end'
-                            if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
-                                req->frame_end = atof2(frame_data + voff, vlen);
+                // 'frame_start'
+                if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
+                    req->frame_start = atof2(frame_data + voff, vlen);
 
-                            // 'ref_freq'
-                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
-                                req->ref_freq = atof2(frame_data + voff, vlen);
+                // 'frame_end'
+                if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
+                    req->frame_end = atof2(frame_data + voff, vlen);
 
-                            // 'deltaV'
-                            if (strncmp(frame_data + koff, "\"deltaV\"", klen) == 0)
-                                req->deltaV = atof2(frame_data + voff, vlen);
+                // 'ref_freq'
+                if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                    req->ref_freq = atof2(frame_data + voff, vlen);
 
-                            // 'rest'
-                            if (strncmp(frame_data + koff, "\"rest\"", klen) == 0)
-                                if (strncmp(frame_data + voff, "true", vlen) == 0)
-                                    req->rest = true;
+                // 'deltaV'
+                if (strncmp(frame_data + koff, "\"deltaV\"", klen) == 0)
+                    req->deltaV = atof2(frame_data + voff, vlen);
 
-                            // 'seq_id'
-                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
-                                req->seq_id = atoi2(frame_data + voff, vlen);
+                // 'rest'
+                if (strncmp(frame_data + koff, "\"rest\"", klen) == 0)
+                    if (strncmp(frame_data + voff, "true", vlen) == 0)
+                        req->rest = true;
 
-                            // 'timestamp'
-                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
-                                req->timestamp = atof2(frame_data + voff, vlen);
-                        }
+                // 'seq_id'
+                if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                    req->seq_id = atoi2(frame_data + voff, vlen);
 
-                        // printf("[C] P-V Diagram request: x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, timestamp: %f\n", req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->timestamp);
+                // 'timestamp'
+                if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                    req->timestamp = atof2(frame_data + voff, vlen);
+            }
 
-                        pthread_mutex_lock(&session->pv_mtx);
+            // printf("[C] P-V Diagram request: x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, timestamp: %f\n", req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->timestamp);
 
-                        // add the request to the circular queue
-                        ring_put(session->pv_ring, req);
+            pthread_mutex_lock(&session->pv_mtx);
 
-                        if (!session->pv_exit)
-                            pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
+            // add the request to the circular queue
+            ring_put(session->pv_ring, req);
 
-                        // finally unlock the mutex
-                        pthread_mutex_unlock(&session->pv_mtx);
+            if (!session->pv_exit)
+                pthread_cond_signal(&session->pv_cond); // wake up the pv event loop
 
-                        goto clean_ws_frame;
-                    }
+            // finally unlock the mutex
+            pthread_mutex_unlock(&session->pv_mtx);
 
-                    // [WS] {"type":"image","dx":1462,"width":1541.5999755859375,"height":794,"quality":"medium","intensity":"integrated","frame_start":344401602984.4286,"frame_end":344629439356.3494,"ref_freq":345115000000,"timestamp":8141.999999999999}
-                    if (strcmp(type, "image") == 0)
-                    {
-                        struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+            goto clean_ws_frame;
+        }
 
-                        if (req == NULL)
-                            goto clean_ws_frame;
+        // [WS] {"type":"image","dx":1462,"width":1541.5999755859375,"height":794,"quality":"medium","intensity":"integrated","frame_start":344401602984.4286,"frame_end":344629439356.3494,"ref_freq":345115000000,"timestamp":8141.999999999999}
+        if (strcmp(type, "image") == 0)
+        {
+            struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
 
-                        // default values just in case ...
-                        req->dx = 0;
-                        req->image = true;
+            if (req == NULL)
+                goto clean_ws_frame;
+
+            // default values just in case ...
+            req->dx = 0;
+            req->image = true;
+            req->quality = medium;
+            req->x1 = -1;
+            req->x2 = -1;
+            req->y1 = -1;
+            req->y2 = -1;
+            req->width = 0;
+            req->height = 0;
+            req->beam = square;
+            req->intensity = integrated;
+            req->frame_start = 0.0;
+            req->frame_end = 0.0;
+            req->ref_freq = 0.0;
+            req->median = NAN;
+            req->seq_id = 0;
+            req->timestamp = 0.0;
+            req->fd = -1;
+            req->ptr = NULL;
+
+            for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // printf("key: %.*s, value: %.*s\n", klen, frame_data + koff, vlen, frame_data + voff);
+
+                // 'dx'
+                if (strncmp(frame_data + koff, "\"dx\"", klen) == 0)
+                    req->dx = atoi2(frame_data + voff, vlen);
+
+                // 'quality'
+                if (strncmp(frame_data + koff, "\"quality\"", klen) == 0)
+                {
+                    // low
+                    if (strncmp(frame_data + voff, "\"low\"", vlen) == 0)
+                        req->quality = low;
+
+                    // medium
+                    if (strncmp(frame_data + voff, "\"medium\"", vlen) == 0)
                         req->quality = medium;
-                        req->x1 = -1;
-                        req->x2 = -1;
-                        req->y1 = -1;
-                        req->y2 = -1;
-                        req->width = 0;
-                        req->height = 0;
-                        req->beam = square;
+
+                    // high
+                    if (strncmp(frame_data + voff, "\"heigh\"", vlen) == 0)
+                        req->quality = high;
+                }
+
+                // 'width'
+                if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
+                    req->width = atoi2(frame_data + voff, vlen);
+
+                // 'height'
+                if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
+                    req->height = atoi2(frame_data + voff, vlen);
+
+                // 'intensity'
+                if (strncmp(frame_data + koff, "\"intensity\"", klen) == 0)
+                {
+                    // mean
+                    if (strncmp(frame_data + voff, "\"mean\"", vlen) == 0)
+                        req->intensity = mean;
+
+                    // integrated
+                    if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
                         req->intensity = integrated;
-                        req->frame_start = 0.0;
-                        req->frame_end = 0.0;
-                        req->ref_freq = 0.0;
-                        req->median = NAN;
-                        req->seq_id = 0;
-                        req->timestamp = 0.0;
-                        req->fd = -1;
-                        req->ptr = NULL;
+                }
 
-                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
-                        {
-                            // printf("key: %.*s, value: %.*s\n", klen, frame_data + koff, vlen, frame_data + voff);
+                // 'frame_start'
+                if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
+                    req->frame_start = atof2(frame_data + voff, vlen);
 
-                            // 'dx'
-                            if (strncmp(frame_data + koff, "\"dx\"", klen) == 0)
-                                req->dx = atoi2(frame_data + voff, vlen);
+                // 'frame_end'
+                if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
+                    req->frame_end = atof2(frame_data + voff, vlen);
 
-                            // 'quality'
-                            if (strncmp(frame_data + koff, "\"quality\"", klen) == 0)
-                            {
-                                // low
-                                if (strncmp(frame_data + voff, "\"low\"", vlen) == 0)
-                                    req->quality = low;
+                // 'ref_freq'
+                if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                    req->ref_freq = atof2(frame_data + voff, vlen);
 
-                                // medium
-                                if (strncmp(frame_data + voff, "\"medium\"", vlen) == 0)
-                                    req->quality = medium;
+                // 'seq_id'
+                if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                    req->seq_id = atoi2(frame_data + voff, vlen);
 
-                                // high
-                                if (strncmp(frame_data + voff, "\"heigh\"", vlen) == 0)
-                                    req->quality = high;
-                            }
+                // 'timestamp'
+                if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                    req->timestamp = atof2(frame_data + voff, vlen);
+            }
 
-                            // 'width'
-                            if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
-                                req->width = atoi2(frame_data + voff, vlen);
+            // printf("[C] dx: %d, quality: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req->dx, req->quality, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->seq_id, req->timestamp);
 
-                            // 'height'
-                            if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
-                                req->height = atoi2(frame_data + voff, vlen);
+            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
-                            // 'intensity'
-                            if (strncmp(frame_data + koff, "\"intensity\"", klen) == 0)
-                            {
-                                // mean
-                                if (strncmp(frame_data + voff, "\"mean\"", vlen) == 0)
-                                    req->intensity = mean;
+            if (resp == NULL)
+            {
+                free(req);
+                goto clean_ws_frame;
+            }
 
-                                // integrated
-                                if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
-                                    req->intensity = integrated;
-                            }
+            // pass the request to FORTRAN
+            char *datasetId = session->datasetid;
+            void *item = get_dataset(datasetId);
 
-                            // 'frame_start'
-                            if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
-                                req->frame_start = atof2(frame_data + voff, vlen);
+            if (item != NULL)
+            {
+                update_timestamp(item);
 
-                            // 'frame_end'
-                            if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
-                                req->frame_end = atof2(frame_data + voff, vlen);
+                int stat;
+                int pipefd[2];
 
-                            // 'ref_freq'
-                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
-                                req->ref_freq = atof2(frame_data + voff, vlen);
+                // open a Unix pipe
+                stat = pipe(pipefd);
 
-                            // 'seq_id'
-                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
-                                req->seq_id = atoi2(frame_data + voff, vlen);
+                if (stat == 0)
+                {
+                    // pass the read end of the pipe to a C thread
+                    resp->session_id = strdup(session->id);
+                    resp->fps = 0;
+                    resp->bitrate = 0;
+                    resp->timestamp = req->timestamp;
+                    resp->seq_id = req->seq_id;
+                    resp->fd = pipefd[0];
 
-                            // 'timestamp'
-                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
-                                req->timestamp = atof2(frame_data + voff, vlen);
-                        }
+                    // pass the write end of the pipe to a FORTRAN thread
+                    req->fd = pipefd[1];
+                    req->ptr = item;
 
-                        // printf("[C] dx: %d, quality: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req->dx, req->quality, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->seq_id, req->timestamp);
+                    pthread_t tid_req, tid_resp;
 
-                        struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+                    // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                    stat = pthread_create(&tid_req, NULL, &ws_image_spectrum_request, req);
 
-                        if (resp == NULL)
-                        {
-                            free(req);
-                            goto clean_ws_frame;
-                        }
-
-                        // pass the request to FORTRAN
-                        char *datasetId = session->datasetid;
-                        void *item = get_dataset(datasetId);
-
-                        if (item != NULL)
-                        {
-                            update_timestamp(item);
-
-                            int stat;
-                            int pipefd[2];
-
-                            // open a Unix pipe
-                            stat = pipe(pipefd);
-
-                            if (stat == 0)
-                            {
-                                // pass the read end of the pipe to a C thread
-                                resp->session_id = strdup(session->id);
-                                resp->fps = 0;
-                                resp->bitrate = 0;
-                                resp->timestamp = req->timestamp;
-                                resp->seq_id = req->seq_id;
-                                resp->fd = pipefd[0];
-
-                                // pass the write end of the pipe to a FORTRAN thread
-                                req->fd = pipefd[1];
-                                req->ptr = item;
-
-                                pthread_t tid_req, tid_resp;
-
-                                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                                stat = pthread_create(&tid_req, NULL, &ws_image_spectrum_request, req);
-
-                                if (stat == 0)
-                                {
-                                    pthread_detach(tid_req);
-
-                                    // launch a pipe read C pthread
-                                    stat = pthread_create(&tid_resp, NULL, &ws_image_spectrum_response, resp);
-
-                                    if (stat == 0)
-                                        pthread_detach(tid_resp);
-                                    else
-                                    {
-                                        // close the read end of the pipe
-                                        close(pipefd[0]);
-
-                                        // release the response memory since there is no reader
-                                        free(resp->session_id);
-                                        free(resp);
-                                    }
-                                }
-                                else
-                                {
-                                    free(req);
-
-                                    // close the write end of the pipe
-                                    close(pipefd[1]);
-
-                                    // close the read end of the pipe
-                                    close(pipefd[0]);
-
-                                    // release the response memory since there is no writer
-                                    free(resp->session_id);
-                                    free(resp);
-                                }
-                            }
-                            else
-                            {
-                                free(req);
-                                free(resp);
-                            }
-                        }
-                        else
-                        {
-                            free(req);
-                            printf("[C] cannot find '%s' in the hash table\n", datasetId);
-                        }
-
-                        goto clean_ws_frame;
-                    }
-
-                    // handle CSV spectrum export requests
-                    if (strcmp(type, "spectrum") == 0)
+                    if (stat == 0)
                     {
-                        struct spectrum_request *req = (struct spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+                        pthread_detach(tid_req);
 
-                        if (req == NULL)
-                            goto clean_ws_frame;
+                        // launch a pipe read C pthread
+                        stat = pthread_create(&tid_resp, NULL, &ws_image_spectrum_response, resp);
 
-                        // default values just in case ...
-                        req->ra = NULL;
-                        req->dec = NULL;
-                        req->x1 = -1;
-                        req->x2 = -1;
-                        req->y1 = -1;
-                        req->y2 = -1;
-                        req->beam = square; // by default assume a rectangular (square) viewport
-                        req->intensity = integrated;
-                        req->frame_start = 0.0;
-                        req->frame_end = 0.0;
-                        req->ref_freq = 0.0;
-                        req->deltaV = 0.0;
-                        req->rest = false;
-                        req->seq_id = 0;
-                        req->timestamp = 0.0;
-                        req->fd = -1;
-                        req->ptr = NULL;
-
-                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
-                        {
-                            // printf("key: '%.*s', value: '%.*s'\n", klen, frame_data + koff, vlen, frame_data + voff);
-
-                            // 'ra'
-                            if (strncmp(frame_data + koff, "\"ra\"", klen) == 0)
-                                req->ra = strndup(frame_data + voff + 1, vlen - 2); // skip the surrounding ""
-
-                            // 'dec'
-                            if (strncmp(frame_data + koff, "\"dec\"", klen) == 0)
-                                req->dec = strndup(frame_data + voff + 1, vlen - 2); // skip the surrounding ""
-
-                            // 'x1'
-                            if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
-                                req->x1 = atoi2(frame_data + voff, vlen);
-
-                            // 'y1'
-                            if (strncmp(frame_data + koff, "\"y1\"", klen) == 0)
-                                req->y1 = atoi2(frame_data + voff, vlen);
-
-                            // 'x2'
-                            if (strncmp(frame_data + koff, "\"x2\"", klen) == 0)
-                                req->x2 = atoi2(frame_data + voff, vlen);
-
-                            // 'y2'
-                            if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
-                                req->y2 = atoi2(frame_data + voff, vlen);
-
-                            // 'beam'
-                            if (strncmp(frame_data + koff, "\"beam\"", klen) == 0)
-                            {
-                                // circle
-                                if (strncmp(frame_data + voff, "\"circle\"", vlen) == 0)
-                                    req->beam = circle;
-
-                                // square
-                                if (strncmp(frame_data + voff, "\"square\"", vlen) == 0)
-                                    req->beam = square;
-                            }
-
-                            // 'intensity'
-                            if (strncmp(frame_data + koff, "\"intensity\"", klen) == 0)
-                            {
-                                // mean
-                                if (strncmp(frame_data + voff, "\"mean\"", vlen) == 0)
-                                    req->intensity = mean;
-
-                                // integrated
-                                if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
-                                    req->intensity = integrated;
-                            }
-
-                            // 'frame_start'
-                            if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
-                                req->frame_start = atof2(frame_data + voff, vlen);
-
-                            // 'frame_end'
-                            if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
-                                req->frame_end = atof2(frame_data + voff, vlen);
-
-                            // 'ref_freq'
-                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
-                                req->ref_freq = atof2(frame_data + voff, vlen);
-
-                            // 'deltaV'
-                            if (strncmp(frame_data + koff, "\"deltaV\"", klen) == 0)
-                                req->deltaV = atof2(frame_data + voff, vlen);
-
-                            // 'rest'
-                            if (strncmp(frame_data + koff, "\"rest\"", klen) == 0)
-                                if (strncmp(frame_data + voff, "true", vlen) == 0)
-                                    req->rest = true;
-
-                            // 'seq_id'
-                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
-                                req->seq_id = atoi2(frame_data + voff, vlen);
-
-                            // 'timestamp'
-                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
-                                req->timestamp = atof2(frame_data + voff, vlen);
-                        }
-
-                        printf("[C] CSV spectrum request: ra: %s, dec: %s, x1: %d, y1: %d, x2: %d, y2: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, seq_id: %d, timestamp: %f\n", req->ra, req->dec, req->x1, req->y1, req->x2, req->y2, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->seq_id, req->timestamp);
-
-                        struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
-
-                        if (resp == NULL)
-                        {
-                            free(req->ra);
-                            free(req->dec);
-                            free(req);
-                            goto clean_ws_frame;
-                        }
-
-                        // pass the request to FORTRAN
-                        char *datasetId = session->datasetid;
-                        void *item = get_dataset(datasetId);
-
-                        if (item != NULL)
-                        {
-                            update_timestamp(item);
-
-                            int stat;
-                            int pipefd[2];
-
-                            // open a Unix pipe
-                            stat = pipe(pipefd);
-
-                            if (stat == 0)
-                            {
-                                // pass the read end of the pipe to a C thread
-                                resp->session_id = strdup(session->id);
-                                resp->fps = 0;
-                                resp->bitrate = 0;
-                                resp->timestamp = req->timestamp;
-                                resp->seq_id = req->seq_id;
-                                resp->fd = pipefd[0];
-
-                                // pass the write end of the pipe to a FORTRAN thread
-                                req->fd = pipefd[1];
-                                req->ptr = item;
-
-                                pthread_t tid_req, tid_resp;
-
-                                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                                stat = pthread_create(&tid_req, NULL, &spectrum_request_simd, req);
-
-                                if (stat == 0)
-                                {
-                                    pthread_detach(tid_req);
-
-                                    // launch a pipe read C pthread
-                                    stat = pthread_create(&tid_resp, NULL, &spectrum_response, resp);
-
-                                    if (stat == 0)
-                                        pthread_detach(tid_resp);
-                                    else
-                                    {
-                                        // close the read end of the pipe
-                                        close(pipefd[0]);
-
-                                        // release the response memory since there is no reader
-                                        free(resp->session_id);
-                                        free(resp);
-                                    }
-                                }
-                                else
-                                {
-                                    free(req->ra);
-                                    free(req->dec);
-                                    free(req);
-
-                                    // close the write end of the pipe
-                                    close(pipefd[1]);
-
-                                    // close the read end of the pipe
-                                    close(pipefd[0]);
-
-                                    // release the response memory since there is no writer
-                                    free(resp->session_id);
-                                    free(resp);
-                                }
-                            }
-                            else
-                            {
-                                free(req->ra);
-                                free(req->dec);
-                                free(req);
-                                free(resp);
-                            }
-                        }
+                        if (stat == 0)
+                            pthread_detach(tid_resp);
                         else
                         {
-                            free(req->ra);
-                            free(req->dec);
-                            free(req);
+                            // close the read end of the pipe
+                            close(pipefd[0]);
+
+                            // release the response memory since there is no reader
+                            free(resp->session_id);
                             free(resp);
-                            printf("[C] cannot find '%s' in the hash table\n", datasetId);
                         }
-
-                        goto clean_ws_frame;
                     }
-
-                    // handle real-time spectrum/viewport requests
-                    if (strcmp(type, "realtime_image_spectrum") == 0)
+                    else
                     {
-                        if (session->ws_exit)
-                            goto clean_ws_frame;
+                        free(req);
 
-                        char *datasetId = session->datasetid;
-                        void *item = get_dataset(datasetId);
+                        // close the write end of the pipe
+                        close(pipefd[1]);
 
-                        if (item == NULL)
-                        {
-                            printf("[C] cannot find '%s' in the hash table\n", datasetId);
-                            goto clean_ws_frame;
-                        }
+                        // close the read end of the pipe
+                        close(pipefd[0]);
 
-                        update_timestamp(item);
+                        // release the response memory since there is no writer
+                        free(resp->session_id);
+                        free(resp);
+                    }
+                }
+                else
+                {
+                    free(req);
+                    free(resp);
+                }
+            }
+            else
+            {
+                free(req);
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+            }
 
-                        struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+            goto clean_ws_frame;
+        }
 
-                        if (req == NULL)
-                            goto clean_ws_frame;
+        // handle CSV spectrum export requests
+        if (strcmp(type, "spectrum") == 0)
+        {
+            struct spectrum_request *req = (struct spectrum_request *)malloc(sizeof(struct image_spectrum_request));
 
-                        // default values just in case ...
-                        req->dx = 0;
-                        req->image = false;
-                        req->quality = medium;
-                        req->x1 = -1;
-                        req->x2 = -1;
-                        req->y1 = -1;
-                        req->y2 = -1;
-                        req->width = 0;
-                        req->height = 0;
+            if (req == NULL)
+                goto clean_ws_frame;
+
+            // default values just in case ...
+            req->ra = NULL;
+            req->dec = NULL;
+            req->x1 = -1;
+            req->x2 = -1;
+            req->y1 = -1;
+            req->y2 = -1;
+            req->beam = square; // by default assume a rectangular (square) viewport
+            req->intensity = integrated;
+            req->frame_start = 0.0;
+            req->frame_end = 0.0;
+            req->ref_freq = 0.0;
+            req->deltaV = 0.0;
+            req->rest = false;
+            req->seq_id = 0;
+            req->timestamp = 0.0;
+            req->fd = -1;
+            req->ptr = NULL;
+
+            for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // printf("key: '%.*s', value: '%.*s'\n", klen, frame_data + koff, vlen, frame_data + voff);
+
+                // 'ra'
+                if (strncmp(frame_data + koff, "\"ra\"", klen) == 0)
+                    req->ra = strndup(frame_data + voff + 1, vlen - 2); // skip the surrounding ""
+
+                // 'dec'
+                if (strncmp(frame_data + koff, "\"dec\"", klen) == 0)
+                    req->dec = strndup(frame_data + voff + 1, vlen - 2); // skip the surrounding ""
+
+                // 'x1'
+                if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
+                    req->x1 = atoi2(frame_data + voff, vlen);
+
+                // 'y1'
+                if (strncmp(frame_data + koff, "\"y1\"", klen) == 0)
+                    req->y1 = atoi2(frame_data + voff, vlen);
+
+                // 'x2'
+                if (strncmp(frame_data + koff, "\"x2\"", klen) == 0)
+                    req->x2 = atoi2(frame_data + voff, vlen);
+
+                // 'y2'
+                if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
+                    req->y2 = atoi2(frame_data + voff, vlen);
+
+                // 'beam'
+                if (strncmp(frame_data + koff, "\"beam\"", klen) == 0)
+                {
+                    // circle
+                    if (strncmp(frame_data + voff, "\"circle\"", vlen) == 0)
                         req->beam = circle;
+
+                    // square
+                    if (strncmp(frame_data + voff, "\"square\"", vlen) == 0)
+                        req->beam = square;
+                }
+
+                // 'intensity'
+                if (strncmp(frame_data + koff, "\"intensity\"", klen) == 0)
+                {
+                    // mean
+                    if (strncmp(frame_data + voff, "\"mean\"", vlen) == 0)
+                        req->intensity = mean;
+
+                    // integrated
+                    if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
                         req->intensity = integrated;
-                        req->frame_start = 0.0;
-                        req->frame_end = 0.0;
-                        req->ref_freq = 0.0;
-                        req->median = NAN;
-                        req->seq_id = 0;
-                        req->timestamp = 0.0;
-                        req->fd = -1;
-                        req->ptr = item;
+                }
 
-                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
-                        {
-                            // printf("key: %.*s, value: %.*s\n", klen, frame_data + koff, vlen, frame_data + voff);
+                // 'frame_start'
+                if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
+                    req->frame_start = atof2(frame_data + voff, vlen);
 
-                            // 'dx'
-                            if (strncmp(frame_data + koff, "\"dx\"", klen) == 0)
-                                req->dx = atoi2(frame_data + voff, vlen);
+                // 'frame_end'
+                if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
+                    req->frame_end = atof2(frame_data + voff, vlen);
 
-                            // 'image'
-                            if (strncmp(frame_data + koff, "\"image\"", klen) == 0)
-                                if (strncmp(frame_data + voff, "true", vlen) == 0)
-                                    req->image = true;
+                // 'ref_freq'
+                if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                    req->ref_freq = atof2(frame_data + voff, vlen);
 
-                            // 'quality'
-                            if (strncmp(frame_data + koff, "\"quality\"", klen) == 0)
-                            {
-                                // low
-                                if (strncmp(frame_data + voff, "\"low\"", vlen) == 0)
-                                    req->quality = low;
+                // 'deltaV'
+                if (strncmp(frame_data + koff, "\"deltaV\"", klen) == 0)
+                    req->deltaV = atof2(frame_data + voff, vlen);
 
-                                // medium
-                                if (strncmp(frame_data + voff, "\"medium\"", vlen) == 0)
-                                    req->quality = medium;
+                // 'rest'
+                if (strncmp(frame_data + koff, "\"rest\"", klen) == 0)
+                    if (strncmp(frame_data + voff, "true", vlen) == 0)
+                        req->rest = true;
 
-                                // high
-                                if (strncmp(frame_data + voff, "\"heigh\"", vlen) == 0)
-                                    req->quality = high;
-                            }
+                // 'seq_id'
+                if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                    req->seq_id = atoi2(frame_data + voff, vlen);
 
-                            // 'x1'
-                            if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
-                                req->x1 = atoi2(frame_data + voff, vlen);
+                // 'timestamp'
+                if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                    req->timestamp = atof2(frame_data + voff, vlen);
+            }
 
-                            // 'y1'
-                            if (strncmp(frame_data + koff, "\"y1\"", klen) == 0)
-                                req->y1 = atoi2(frame_data + voff, vlen);
+            printf("[C] CSV spectrum request: ra: %s, dec: %s, x1: %d, y1: %d, x2: %d, y2: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, seq_id: %d, timestamp: %f\n", req->ra, req->dec, req->x1, req->y1, req->x2, req->y2, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->seq_id, req->timestamp);
 
-                            // 'x2'
-                            if (strncmp(frame_data + koff, "\"x2\"", klen) == 0)
-                                req->x2 = atoi2(frame_data + voff, vlen);
+            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
 
-                            // 'y2'
-                            if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
-                                req->y2 = atoi2(frame_data + voff, vlen);
+            if (resp == NULL)
+            {
+                free(req->ra);
+                free(req->dec);
+                free(req);
+                goto clean_ws_frame;
+            }
 
-                            // 'width'
-                            if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
-                                req->width = atoi2(frame_data + voff, vlen);
+            // pass the request to FORTRAN
+            char *datasetId = session->datasetid;
+            void *item = get_dataset(datasetId);
 
-                            // 'height'
-                            if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
-                                req->height = atoi2(frame_data + voff, vlen);
+            if (item != NULL)
+            {
+                update_timestamp(item);
 
-                            // 'beam'
-                            if (strncmp(frame_data + koff, "\"beam\"", klen) == 0)
-                            {
-                                // circle
-                                if (strncmp(frame_data + voff, "\"circle\"", vlen) == 0)
-                                    req->beam = circle;
+                int stat;
+                int pipefd[2];
 
-                                // square
-                                if (strncmp(frame_data + voff, "\"square\"", vlen) == 0)
-                                    req->beam = square;
-                            }
+                // open a Unix pipe
+                stat = pipe(pipefd);
 
-                            // 'intensity'
-                            if (strncmp(frame_data + koff, "\"intensity\"", klen) == 0)
-                            {
-                                // mean
-                                if (strncmp(frame_data + voff, "\"mean\"", vlen) == 0)
-                                    req->intensity = mean;
+                if (stat == 0)
+                {
+                    // pass the read end of the pipe to a C thread
+                    resp->session_id = strdup(session->id);
+                    resp->fps = 0;
+                    resp->bitrate = 0;
+                    resp->timestamp = req->timestamp;
+                    resp->seq_id = req->seq_id;
+                    resp->fd = pipefd[0];
 
-                                // integrated
-                                if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
-                                    req->intensity = integrated;
-                            }
+                    // pass the write end of the pipe to a FORTRAN thread
+                    req->fd = pipefd[1];
+                    req->ptr = item;
 
-                            // 'frame_start'
-                            if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
-                                req->frame_start = atof2(frame_data + voff, vlen);
+                    pthread_t tid_req, tid_resp;
 
-                            // 'frame_end'
-                            if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
-                                req->frame_end = atof2(frame_data + voff, vlen);
+                    // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                    stat = pthread_create(&tid_req, NULL, &spectrum_request_simd, req);
 
-                            // 'ref_freq'
-                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
-                                req->ref_freq = atof2(frame_data + voff, vlen);
-
-                            // 'seq_id'
-                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
-                                req->seq_id = atoi2(frame_data + voff, vlen);
-
-                            // 'timestamp'
-                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
-                                req->timestamp = atof2(frame_data + voff, vlen);
-                        }
-
-                        // printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req->dx, req->image, req->quality, req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->seq_id, req->timestamp);
-
-                        pthread_mutex_lock(&session->ws_mtx);
-
-                        // add the request to the circular queue
-                        ring_put(session->ws_ring, req);
-
-                        if (!session->ws_exit)
-                            pthread_cond_signal(&session->ws_cond); // wake up the ws event loop
-
-                        // finally unlock the mutex
-                        pthread_mutex_unlock(&session->ws_mtx);
-
-                        goto clean_ws_frame;
-                    }
-
-                    // init_video
-                    if (strcmp(type, "init_video") == 0)
+                    if (stat == 0)
                     {
-                        char *datasetId = session->datasetid;
-                        void *item = get_dataset(datasetId);
+                        pthread_detach(tid_req);
 
-                        if (item == NULL)
-                        {
+                        // launch a pipe read C pthread
+                        stat = pthread_create(&tid_resp, NULL, &spectrum_response, resp);
 
-                            printf("[C] cannot find '%s' in the hash table\n", datasetId);
-                            goto clean_ws_frame;
-                        }
-
-                        update_timestamp(item);
-
-                        // read the parameters
-                        // last_video_seq
-                        int width = 0;
-                        int height = 0;
-                        int fps = 30; // hard-code the initial FPS
-                        int bitrate = 1000;
-
-                        int fits_width, fits_height, inner_width, inner_height;
-                        float scale;
-
-                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
-                        {
-                            // 'width'
-                            if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
-                                width = atoi2(frame_data + voff, vlen);
-
-                            // 'height'
-                            if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
-                                height = atoi2(frame_data + voff, vlen);
-
-                            // 'flux'
-                            if (strncmp(frame_data + koff, "\"flux\"", klen) == 0)
-                            {
-                                free(session->flux);
-                                session->flux = strndup(frame_data + voff + 1, vlen - 2); // avoid the enclosing double quotes
-                            }
-
-                            // 'fps'
-                            /*if (strncmp(frame_data + koff, "\"fps\"", klen) == 0)
-                                fps = atoi2(frame_data + voff, vlen);*/
-
-                            // 'bitrate'
-                            if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
-                                bitrate = atoi2(frame_data + voff, vlen);
-                        }
-
-                        // printf("[C]::init_video width: %d, height: %d, flux: %s, fps: %d, bitrate: %d\n", width, height, session->flux, fps, bitrate);
-
-                        get_inner_dimensions(item, width, height, &fits_width, &fits_height, &inner_width, &inner_height, &scale);
-                        // printf("[C] FITS dims: %d x %d, INNER: %d x %d, SCALE: %f\n", fits_width, fits_height, inner_width, inner_height, scale);
-
-                        if (scale < 1.0f)
-                        {
-                            session->image_width = roundf(scale * fits_width);
-                            session->image_height = roundf(scale * fits_height);
-                            session->bDownsize = true;
-                        }
+                        if (stat == 0)
+                            pthread_detach(tid_resp);
                         else
                         {
-                            session->image_width = fits_width;
-                            session->image_height = fits_height;
-                            session->bDownsize = false;
-                        };
+                            // close the read end of the pipe
+                            close(pipefd[0]);
 
-                        // send a JSON reply
-                        char *json = NULL;
-                        mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%Q,%Q:%d,%Q:%d,%Q:%d,%Q:%d}", "type", "init_video", "width", session->image_width, "height", session->image_height, "padded_width", session->image_width, "padded_height", session->image_height);
-
-                        if (json != NULL)
-                        {
-                            size_t json_len = strlen(json);
-                            char *response = NULL;
-                            size_t response_len = preamble_ws_frame(&response, json_len, WS_FRAME_TEXT);
-
-                            if (response != NULL)
-                            {
-                                // copy the frame_data into the response buffer
-                                memcpy(response + response_len, json, json_len);
-                                response_len += json_len;
-
-                                // create a queue message
-                                struct data_buf msg = {response, response_len};
-
-                                char *msg_buf = NULL;
-                                size_t _len = sizeof(struct data_buf);
-
-                                pthread_mutex_lock(&session->queue_mtx);
-
-                                // reserve space for the text message
-                                size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-                                // pass the message over to the sender via a communications queue
-                                if (msg_buf != NULL && queue_len >= _len)
-                                {
-                                    memcpy(msg_buf, &msg, _len);
-                                    mg_queue_add(&session->queue, _len);
-                                    pthread_mutex_unlock(&session->queue_mtx);
-
-                                    // wake up the sender
-                                    pthread_cond_signal(&session->wake_up_sender);
-                                }
-                                else
-                                {
-                                    pthread_mutex_unlock(&session->queue_mtx);
-                                    printf("[C] mg_queue_book failed, freeing memory.\n");
-                                    free(response);
-                                }
-                            }
+                            // release the response memory since there is no reader
+                            free(resp->session_id);
+                            free(resp);
                         }
-
-                        free(json);
-
-                        // x265
-                        pthread_mutex_lock(&session->vid_mtx);
-
-                        // reset the frame index
-                        session->last_frame_idx = -1;
-
-                        if (session->param != NULL)
-                            goto unlock_mutex_and_break;
-
-                        // alloc HEVC params
-                        x265_param *param = x265_param_alloc();
-                        if (param == NULL)
-                            goto unlock_mutex_and_break;
-
-                        x265_param_default_preset(param, "superfast", "zerolatency");
-
-                        // HEVC param
-                        param->fpsNum = fps;
-                        param->fpsDenom = 1;
-                        param->bRepeatHeaders = 1;
-                        param->internalCsp = X265_CSP_I444;
-
-                        param->internalBitDepth = 8;
-                        param->sourceWidth = session->image_width;
-                        param->sourceHeight = session->image_height;
-
-                        // constant bitrate
-                        param->rc.rateControlMode = X265_RC_CRF;
-                        param->rc.bitrate = bitrate;
-
-                        // finally point the user session param
-                        session->param = param;
-
-                        if (session->encoder != NULL)
-                            goto unlock_mutex_and_break;
-
-                        // HEVC encoder
-                        session->encoder = x265_encoder_open(param);
-                        if (session->encoder == NULL)
-                            goto unlock_mutex_and_break;
-
-                        if (session->picture != NULL)
-                            goto unlock_mutex_and_break;
-
-                        // HEVC picture
-                        x265_picture *picture = x265_picture_alloc();
-                        if (picture == NULL)
-                            goto unlock_mutex_and_break;
-
-                        x265_picture_init(param, picture);
-
-                        // allocate a dummy B channel
-                        const size_t frame_size = session->image_width * session->image_height;
-                        uint8_t *B_buf = (uint8_t *)malloc(frame_size);
-
-                        if (B_buf != NULL)
-                            memset(B_buf, 0, frame_size); // actually use 0 instead of 128 so that the composite RGB case is handled correctly for va_count == 2
-
-                        picture->planes[0] = NULL;
-                        picture->planes[1] = NULL;
-                        picture->planes[2] = B_buf;
-
-                        picture->stride[0] = 0;
-                        picture->stride[1] = 0;
-                        picture->stride[2] = session->image_width;
-
-                        session->picture = picture;
-
-                    unlock_mutex_and_break:
-                        pthread_mutex_unlock(&session->vid_mtx);
-                        goto clean_ws_frame;
                     }
-
-                    // end_video
-                    if (strcmp(type, "end_video") == 0)
+                    else
                     {
-                        pthread_mutex_lock(&session->vid_mtx);
+                        free(req->ra);
+                        free(req->dec);
+                        free(req);
 
-                        free(session->flux);
-                        session->flux = NULL;
+                        // close the write end of the pipe
+                        close(pipefd[1]);
 
-                        if (session->encoder != NULL)
-                        {
-                            x265_encoder_close(session->encoder);
-                            session->encoder = NULL;
-                        }
+                        // close the read end of the pipe
+                        close(pipefd[0]);
 
-                        if (session->param != NULL)
-                        {
-                            x265_param_free(session->param);
-                            session->param = NULL;
-                        }
-
-                        if (session->picture != NULL)
-                        {
-                            // deallocate RGB planes
-                            for (int i = 0; i < 3; i++)
-                                if (session->picture->planes[i] != NULL)
-                                    free(session->picture->planes[i]);
-
-                            // finally free the picture
-                            x265_picture_free(session->picture);
-                            session->picture = NULL;
-                        }
-
-                        pthread_mutex_unlock(&session->vid_mtx);
-
-                        goto clean_ws_frame;
+                        // release the response memory since there is no writer
+                        free(resp->session_id);
+                        free(resp);
                     }
+                }
+                else
+                {
+                    free(req->ra);
+                    free(req->dec);
+                    free(req);
+                    free(resp);
+                }
+            }
+            else
+            {
+                free(req->ra);
+                free(req->dec);
+                free(req);
+                free(resp);
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+            }
 
-                    // encode and stream video
-                    if (strcmp(type, "video") == 0)
+            goto clean_ws_frame;
+        }
+
+        // handle real-time spectrum/viewport requests
+        if (strcmp(type, "realtime_image_spectrum") == 0)
+        {
+            if (session->ws_exit)
+                goto clean_ws_frame;
+
+            char *datasetId = session->datasetid;
+            void *item = get_dataset(datasetId);
+
+            if (item == NULL)
+            {
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                goto clean_ws_frame;
+            }
+
+            update_timestamp(item);
+
+            struct image_spectrum_request *req = (struct image_spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+
+            if (req == NULL)
+                goto clean_ws_frame;
+
+            // default values just in case ...
+            req->dx = 0;
+            req->image = false;
+            req->quality = medium;
+            req->x1 = -1;
+            req->x2 = -1;
+            req->y1 = -1;
+            req->y2 = -1;
+            req->width = 0;
+            req->height = 0;
+            req->beam = circle;
+            req->intensity = integrated;
+            req->frame_start = 0.0;
+            req->frame_end = 0.0;
+            req->ref_freq = 0.0;
+            req->median = NAN;
+            req->seq_id = 0;
+            req->timestamp = 0.0;
+            req->fd = -1;
+            req->ptr = item;
+
+            for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // printf("key: %.*s, value: %.*s\n", klen, frame_data + koff, vlen, frame_data + voff);
+
+                // 'dx'
+                if (strncmp(frame_data + koff, "\"dx\"", klen) == 0)
+                    req->dx = atoi2(frame_data + voff, vlen);
+
+                // 'image'
+                if (strncmp(frame_data + koff, "\"image\"", klen) == 0)
+                    if (strncmp(frame_data + voff, "true", vlen) == 0)
+                        req->image = true;
+
+                // 'quality'
+                if (strncmp(frame_data + koff, "\"quality\"", klen) == 0)
+                {
+                    // low
+                    if (strncmp(frame_data + voff, "\"low\"", vlen) == 0)
+                        req->quality = low;
+
+                    // medium
+                    if (strncmp(frame_data + voff, "\"medium\"", vlen) == 0)
+                        req->quality = medium;
+
+                    // high
+                    if (strncmp(frame_data + voff, "\"heigh\"", vlen) == 0)
+                        req->quality = high;
+                }
+
+                // 'x1'
+                if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
+                    req->x1 = atoi2(frame_data + voff, vlen);
+
+                // 'y1'
+                if (strncmp(frame_data + koff, "\"y1\"", klen) == 0)
+                    req->y1 = atoi2(frame_data + voff, vlen);
+
+                // 'x2'
+                if (strncmp(frame_data + koff, "\"x2\"", klen) == 0)
+                    req->x2 = atoi2(frame_data + voff, vlen);
+
+                // 'y2'
+                if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
+                    req->y2 = atoi2(frame_data + voff, vlen);
+
+                // 'width'
+                if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
+                    req->width = atoi2(frame_data + voff, vlen);
+
+                // 'height'
+                if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
+                    req->height = atoi2(frame_data + voff, vlen);
+
+                // 'beam'
+                if (strncmp(frame_data + koff, "\"beam\"", klen) == 0)
+                {
+                    // circle
+                    if (strncmp(frame_data + voff, "\"circle\"", vlen) == 0)
+                        req->beam = circle;
+
+                    // square
+                    if (strncmp(frame_data + voff, "\"square\"", vlen) == 0)
+                        req->beam = square;
+                }
+
+                // 'intensity'
+                if (strncmp(frame_data + koff, "\"intensity\"", klen) == 0)
+                {
+                    // mean
+                    if (strncmp(frame_data + voff, "\"mean\"", vlen) == 0)
+                        req->intensity = mean;
+
+                    // integrated
+                    if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
+                        req->intensity = integrated;
+                }
+
+                // 'frame_start'
+                if (strncmp(frame_data + koff, "\"frame_start\"", klen) == 0)
+                    req->frame_start = atof2(frame_data + voff, vlen);
+
+                // 'frame_end'
+                if (strncmp(frame_data + koff, "\"frame_end\"", klen) == 0)
+                    req->frame_end = atof2(frame_data + voff, vlen);
+
+                // 'ref_freq'
+                if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                    req->ref_freq = atof2(frame_data + voff, vlen);
+
+                // 'seq_id'
+                if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                    req->seq_id = atoi2(frame_data + voff, vlen);
+
+                // 'timestamp'
+                if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                    req->timestamp = atof2(frame_data + voff, vlen);
+            }
+
+            // printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req->dx, req->image, req->quality, req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->seq_id, req->timestamp);
+
+            pthread_mutex_lock(&session->ws_mtx);
+
+            // add the request to the circular queue
+            ring_put(session->ws_ring, req);
+
+            if (!session->ws_exit)
+                pthread_cond_signal(&session->ws_cond); // wake up the ws event loop
+
+            // finally unlock the mutex
+            pthread_mutex_unlock(&session->ws_mtx);
+
+            goto clean_ws_frame;
+        }
+
+        // init_video
+        if (strcmp(type, "init_video") == 0)
+        {
+            char *datasetId = session->datasetid;
+            void *item = get_dataset(datasetId);
+
+            if (item == NULL)
+            {
+
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                goto clean_ws_frame;
+            }
+
+            update_timestamp(item);
+
+            // read the parameters
+            // last_video_seq
+            int width = 0;
+            int height = 0;
+            int fps = 30; // hard-code the initial FPS
+            int bitrate = 1000;
+
+            int fits_width, fits_height, inner_width, inner_height;
+            float scale;
+
+            for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // 'width'
+                if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
+                    width = atoi2(frame_data + voff, vlen);
+
+                // 'height'
+                if (strncmp(frame_data + koff, "\"height\"", klen) == 0)
+                    height = atoi2(frame_data + voff, vlen);
+
+                // 'flux'
+                if (strncmp(frame_data + koff, "\"flux\"", klen) == 0)
+                {
+                    free(session->flux);
+                    session->flux = strndup(frame_data + voff + 1, vlen - 2); // avoid the enclosing double quotes
+                }
+
+                // 'fps'
+                /*if (strncmp(frame_data + koff, "\"fps\"", klen) == 0)
+                    fps = atoi2(frame_data + voff, vlen);*/
+
+                // 'bitrate'
+                if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
+                    bitrate = atoi2(frame_data + voff, vlen);
+            }
+
+            // printf("[C]::init_video width: %d, height: %d, flux: %s, fps: %d, bitrate: %d\n", width, height, session->flux, fps, bitrate);
+
+            get_inner_dimensions(item, width, height, &fits_width, &fits_height, &inner_width, &inner_height, &scale);
+            // printf("[C] FITS dims: %d x %d, INNER: %d x %d, SCALE: %f\n", fits_width, fits_height, inner_width, inner_height, scale);
+
+            if (scale < 1.0f)
+            {
+                session->image_width = roundf(scale * fits_width);
+                session->image_height = roundf(scale * fits_height);
+                session->bDownsize = true;
+            }
+            else
+            {
+                session->image_width = fits_width;
+                session->image_height = fits_height;
+                session->bDownsize = false;
+            };
+
+            // send a JSON reply
+            char *json = NULL;
+            mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%Q,%Q:%d,%Q:%d,%Q:%d,%Q:%d}", "type", "init_video", "width", session->image_width, "height", session->image_height, "padded_width", session->image_width, "padded_height", session->image_height);
+
+            if (json != NULL)
+            {
+                size_t json_len = strlen(json);
+                char *response = NULL;
+                size_t response_len = preamble_ws_frame(&response, json_len, WS_FRAME_TEXT);
+
+                if (response != NULL)
+                {
+                    // copy the frame_data into the response buffer
+                    memcpy(response + response_len, json, json_len);
+                    response_len += json_len;
+
+                    // create a queue message
+                    struct data_buf msg = {response, response_len};
+
+                    char *msg_buf = NULL;
+                    size_t _len = sizeof(struct data_buf);
+
+                    pthread_mutex_lock(&session->queue_mtx);
+
+                    // reserve space for the text message
+                    size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+                    // pass the message over to the sender via a communications queue
+                    if (msg_buf != NULL && queue_len >= _len)
                     {
-                        if (session->flux == NULL)
-                            goto clean_ws_frame;
+                        memcpy(msg_buf, &msg, _len);
+                        mg_queue_add(&session->queue, _len);
+                        pthread_mutex_unlock(&session->queue_mtx);
 
-                        char *datasetId = session->datasetid;
-                        void *item = get_dataset(datasetId);
-
-                        if (item == NULL)
-                        {
-                            printf("[C] cannot find '%s' in the hash table\n", datasetId);
-                            goto clean_ws_frame;
-                        }
-
-                        update_timestamp(item);
-
-                        // check if the session video tone mapping has been filled already
-                        // if not, fetch the global data statistics from FORTRAN
-                        if (isnan(session->dmin) || isnan(session->dmax) || isnan(session->dmedian) || isnan(session->dmadN) || isnan(session->dmadP))
-                        {
-                            printf("[C] calling 'fill_global_statistics(...)'\n");
-                            fill_global_statistics(item, &(session->dmin), &(session->dmax), &(session->dmedian), &(session->dmadN), &(session->dmadP));
-                        }
-
-                        struct video_request *req = (struct video_request *)malloc(sizeof(struct video_request));
-
-                        if (req == NULL)
-                            goto clean_ws_frame;
-
-                        int fps = 30;
-                        int bitrate = 1000;
-
-                        req->video_type = single;
-                        req->keyframe = false; // is it a keyframe?
-                        req->fill = 0;
-                        req->seq_id = -1;
-
-                        req->frame = 0;
-                        req->timestamp = 0.0;
-
-                        req->flux = NULL;
-                        req->len = 0;
-
-                        // lock the stat mutex
-                        pthread_mutex_lock(&session->stat_mtx);
-
-                        req->dmin = session->dmin;
-                        req->dmax = session->dmax;
-                        req->dmedian = session->dmedian;
-                        req->dmadN = session->dmadN;
-                        req->dmadP = session->dmadP;
-
-                        // unlock the stat mutex
-                        pthread_mutex_unlock(&session->stat_mtx);
-
-                        req->width = session->image_width;
-                        req->height = session->image_height;
-                        req->downsize = session->bDownsize;
-                        req->fd = -1;
-                        req->ptr = item;
-
-                        double frame = 0.0;
-                        double ref_freq = 0.0;
-
-                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
-                        {
-                            // 'fps'
-                            if (strncmp(frame_data + koff, "\"fps\"", klen) == 0)
-                                fps = atoi2(frame_data + voff, vlen);
-
-                            // 'bitrate'
-                            if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
-                                bitrate = atoi2(frame_data + voff, vlen);
-
-                            // 'fill'
-                            if (strncmp(frame_data + koff, "\"fill\"", klen) == 0)
-                                req->fill = atoi2(frame_data + voff, vlen);
-
-                            // 'seq_id'
-                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
-                                req->seq_id = atoi2(frame_data + voff, vlen);
-
-                            // 'key'
-                            if (strncmp(frame_data + koff, "\"key\"", klen) == 0)
-                            {
-                                // false
-                                if (strncmp(frame_data + voff, "false", vlen) == 0)
-                                    req->keyframe = false;
-
-                                // true
-                                if (strncmp(frame_data + voff, "true", vlen) == 0)
-                                    req->keyframe = true;
-                            }
-
-                            // 'frame'
-                            if (strncmp(frame_data + koff, "\"frame\"", klen) == 0)
-                                frame = atof2(frame_data + voff, vlen);
-
-                            // 'ref_freq'
-                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
-                                ref_freq = atof2(frame_data + voff, vlen);
-
-                            // 'timestamp'
-                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
-                                req->timestamp = atof2(frame_data + voff, vlen);
-                        }
-
-                        // get the video frame index
-                        int frame_idx;
-                        get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
-                        req->frame = frame_idx;
-
-                        printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f --> %d}, ref_freq: %f, timestamp: %f\n", fps, bitrate, req->seq_id, req->keyframe, frame, req->frame, ref_freq, req->timestamp);
-
-                        // skip repeated frames
-                        if (frame_idx == session->last_frame_idx && !req->keyframe)
-                        {
-                            printf("[C] skipping a repeat video frame #%d\n", frame_idx);
-                            free(req); // req->flux is NULL at this point, no need to free it
-                            goto clean_ws_frame;
-                        }
-                        else
-                            session->last_frame_idx = frame_idx;
-
-                        req->flux = session->flux != NULL ? strdup(session->flux) : NULL;
-                        req->len = req->flux != NULL ? strlen(req->flux) : 0;
-
-                        pthread_mutex_lock(&session->video_mtx);
-
-                        // add the request to the circular queue
-                        ring_put(session->video_ring, req);
-
-                        if (!session->video_exit)
-                            pthread_cond_signal(&session->video_cond); // wake up the video event loop
-
-                        // finally unlock the mutex
-                        pthread_mutex_unlock(&session->video_mtx);
-
-                        goto clean_ws_frame;
+                        // wake up the sender
+                        pthread_cond_signal(&session->wake_up_sender);
                     }
-
-                    if (strcmp(type, "composite_video") == 0)
+                    else
                     {
-                        websocket_session *common_session = session;
-
-                        if (common_session == NULL)
-                            goto clean_ws_frame;
-
-                        if (common_session->flux == NULL)
-                            goto clean_ws_frame;
-
-                        // copy common variables from the session
-                        const char *flux = common_session->flux;
-                        int width = common_session->image_width;
-                        int height = common_session->image_height;
-                        bool downsize = common_session->bDownsize;
-
-                        // parse the JSON message common for all datasets
-                        int fps = 30;
-                        int bitrate = 1000;
-                        bool keyframe = false;
-                        int fill = 0;
-                        double frame = 0.0;
-                        double ref_freq = 0.0;
-                        int seq_id = -1;
-                        float timestamp = 0.0;
-
-                        for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
-                        {
-                            // 'fps'
-                            if (strncmp(frame_data + koff, "\"fps\"", klen) == 0)
-                                fps = atoi2(frame_data + voff, vlen);
-
-                            // 'bitrate'
-                            if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
-                                bitrate = atoi2(frame_data + voff, vlen);
-
-                            // 'fill'
-                            if (strncmp(frame_data + koff, "\"fill\"", klen) == 0)
-                                fill = atoi2(frame_data + voff, vlen);
-
-                            // 'seq_id'
-                            if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
-                                seq_id = atoi2(frame_data + voff, vlen);
-
-                            // 'key'
-                            if (strncmp(frame_data + koff, "\"key\"", klen) == 0)
-                            {
-                                // false
-                                if (strncmp(frame_data + voff, "false", vlen) == 0)
-                                    keyframe = false;
-
-                                // true
-                                if (strncmp(frame_data + voff, "true", vlen) == 0)
-                                    keyframe = true;
-                            }
-
-                            // 'frame'
-                            if (strncmp(frame_data + koff, "\"frame\"", klen) == 0)
-                                frame = atof2(frame_data + voff, vlen);
-
-                            // 'ref_freq'
-                            if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
-                                ref_freq = atof2(frame_data + voff, vlen);
-
-                            // 'timestamp'
-                            if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
-                                timestamp = atof2(frame_data + voff, vlen);
-                        }
-
-                        struct composite_video_request *req = (struct composite_video_request *)malloc(sizeof(struct composite_video_request));
-
-                        if (req == NULL)
-                            goto clean_ws_frame;
-
-                        req->video_type = composite;
-                        req->seq_id = seq_id;
-                        req->timestamp = timestamp;
-                        req->va_count = 0;
-                        req->flux = flux != NULL ? strdup(flux) : NULL;
-                        req->len = req->flux != NULL ? strlen(req->flux) : 0;
-                        req->width = width;
-                        req->height = height;
-                        req->downsize = downsize;
-                        req->keyframe = keyframe;
-                        req->fill = fill;
-
-                        // next iterate through the multiple datasets launching individual channel threads
-                        // tokenize session->multi
-                        char *datasetId = common_session->multi != NULL ? strdup(common_session->multi) : NULL;
-                        char *token = datasetId;
-                        char *rest = token;
-                        bool skip_frame = false;
-
-                        while ((token = strtok_r(rest, ";", &rest)) != NULL)
-                        {
-                            void *item = get_dataset(token);
-
-                            if (item == NULL)
-                                continue;
-
-                            update_timestamp(item);
-
-                            websocket_session *_session = NULL;
-
-                            // get the session
-                            if (pthread_mutex_lock(&sessions_mtx) == 0)
-                            {
-                                // iterate through the sessions, find the one with the matching dataset
-                                GHashTableIter iter;
-                                gpointer key, value;
-
-                                g_hash_table_iter_init(&iter, sessions);
-
-                                while (g_hash_table_iter_next(&iter, &key, &value))
-                                {
-                                    websocket_session *__session = (websocket_session *)value;
-
-                                    if (strcmp(__session->datasetid, token) == 0)
-                                    {
-                                        _session = __session;
-                                        break;
-                                    }
-                                }
-
-                                pthread_mutex_unlock(&sessions_mtx);
-                            }
-
-                            if (_session == NULL)
-                                continue;
-
-                            // we have the dataset item and the session, prepare the video request
-                            printf("[C] mg_websocket_callback: preparing video request for dataset '%s'.\n", token);
-
-                            // check if the session video tone mapping has been filled already
-                            // if not, fetch the global data statistics from FORTRAN
-                            if (isnan(_session->dmin) || isnan(_session->dmax) || isnan(_session->dmedian) || isnan(_session->dmadN) || isnan(_session->dmadP))
-                            {
-                                printf("[C] calling 'fill_global_statistics(...)'\n");
-                                fill_global_statistics(item, &(_session->dmin), &(_session->dmax), &(_session->dmedian), &(_session->dmadN), &(_session->dmadP));
-                            }
-
-                            // get the video frame index
-                            int frame_idx;
-                            get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
-
-                            // skip repeated frames
-                            if (frame_idx == _session->last_frame_idx && !req->keyframe)
-                            {
-                                printf("[C] skipping a repeat video frame #%d\n", frame_idx);
-                                skip_frame = true;
-                            }
-                            else
-                                _session->last_frame_idx = frame_idx;
-
-                            // RGB
-                            req->ptr[req->va_count] = item;
-                            req->frame[req->va_count] = frame_idx;
-                            req->dmin[req->va_count] = _session->dmin;
-                            req->dmax[req->va_count] = _session->dmax;
-                            req->dmedian[req->va_count] = _session->dmedian;
-                            req->dmadN[req->va_count] = _session->dmadN;
-                            req->dmadP[req->va_count] = _session->dmadP;
-                            req->va_count++; // increment the channel count
-                        }
-
-                        free(datasetId);
-
-                        if (skip_frame)
-                        {
-                            free(req->flux);
-                            free(req);
-                            goto clean_ws_frame;
-                        }
-
-                        pthread_mutex_lock(&common_session->video_mtx);
-
-                        // add the request to the circular queue
-                        ring_put(common_session->video_ring, req);
-
-                        if (!common_session->video_exit)
-                            pthread_cond_signal(&common_session->video_cond); // wake up the video event loop
-
-                        // finally unlock the mutex
-                        pthread_mutex_unlock(&common_session->video_mtx);
-
-                        goto clean_ws_frame;
+                        pthread_mutex_unlock(&session->queue_mtx);
+                        printf("[C] mg_queue_book failed, freeing memory.\n");
+                        free(response);
                     }
+                }
+            }
 
-                clean_ws_frame:
-                    MHD_websocket_free(session->ws, frame_data);
-                    return 0;
-                case MHD_WEBSOCKET_STATUS_BINARY_FRAME:
-                    printf("[C] WebSocket received %zu bytes of binary frame\n", frame_len);
-                    MHD_websocket_free(session->ws, frame_data);
-                    return 0;
-                case MHD_WEBSOCKET_STATUS_CLOSE_FRAME:
-                    printf("[C] WebSocket received a close frame\n");
-                    /* if we receive a close frame, we will respond with one */
-                    MHD_websocket_free(session->ws, frame_data);
+            free(json);
 
-                    session->disconnect = true;
+            // x265
+            pthread_mutex_lock(&session->vid_mtx);
 
+            // reset the frame index
+            session->last_frame_idx = -1;
+
+            if (session->param != NULL)
+                goto unlock_mutex_and_break;
+
+            // alloc HEVC params
+            x265_param *param = x265_param_alloc();
+            if (param == NULL)
+                goto unlock_mutex_and_break;
+
+            x265_param_default_preset(param, "superfast", "zerolatency");
+
+            // HEVC param
+            param->fpsNum = fps;
+            param->fpsDenom = 1;
+            param->bRepeatHeaders = 1;
+            param->internalCsp = X265_CSP_I444;
+
+            param->internalBitDepth = 8;
+            param->sourceWidth = session->image_width;
+            param->sourceHeight = session->image_height;
+
+            // constant bitrate
+            param->rc.rateControlMode = X265_RC_CRF;
+            param->rc.bitrate = bitrate;
+
+            // finally point the user session param
+            session->param = param;
+
+            if (session->encoder != NULL)
+                goto unlock_mutex_and_break;
+
+            // HEVC encoder
+            session->encoder = x265_encoder_open(param);
+            if (session->encoder == NULL)
+                goto unlock_mutex_and_break;
+
+            if (session->picture != NULL)
+                goto unlock_mutex_and_break;
+
+            // HEVC picture
+            x265_picture *picture = x265_picture_alloc();
+            if (picture == NULL)
+                goto unlock_mutex_and_break;
+
+            x265_picture_init(param, picture);
+
+            // allocate a dummy B channel
+            const size_t frame_size = session->image_width * session->image_height;
+            uint8_t *B_buf = (uint8_t *)malloc(frame_size);
+
+            if (B_buf != NULL)
+                memset(B_buf, 0, frame_size); // actually use 0 instead of 128 so that the composite RGB case is handled correctly for va_count == 2
+
+            picture->planes[0] = NULL;
+            picture->planes[1] = NULL;
+            picture->planes[2] = B_buf;
+
+            picture->stride[0] = 0;
+            picture->stride[1] = 0;
+            picture->stride[2] = session->image_width;
+
+            session->picture = picture;
+
+        unlock_mutex_and_break:
+            pthread_mutex_unlock(&session->vid_mtx);
+            goto clean_ws_frame;
+        }
+
+        // end_video
+        if (strcmp(type, "end_video") == 0)
+        {
+            pthread_mutex_lock(&session->vid_mtx);
+
+            free(session->flux);
+            session->flux = NULL;
+
+            if (session->encoder != NULL)
+            {
+                x265_encoder_close(session->encoder);
+                session->encoder = NULL;
+            }
+
+            if (session->param != NULL)
+            {
+                x265_param_free(session->param);
+                session->param = NULL;
+            }
+
+            if (session->picture != NULL)
+            {
+                // deallocate RGB planes
+                for (int i = 0; i < 3; i++)
+                    if (session->picture->planes[i] != NULL)
+                        free(session->picture->planes[i]);
+
+                // finally free the picture
+                x265_picture_free(session->picture);
+                session->picture = NULL;
+            }
+
+            pthread_mutex_unlock(&session->vid_mtx);
+
+            goto clean_ws_frame;
+        }
+
+        // encode and stream video
+        if (strcmp(type, "video") == 0)
+        {
+            if (session->flux == NULL)
+                goto clean_ws_frame;
+
+            char *datasetId = session->datasetid;
+            void *item = get_dataset(datasetId);
+
+            if (item == NULL)
+            {
+                printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                goto clean_ws_frame;
+            }
+
+            update_timestamp(item);
+
+            // check if the session video tone mapping has been filled already
+            // if not, fetch the global data statistics from FORTRAN
+            if (isnan(session->dmin) || isnan(session->dmax) || isnan(session->dmedian) || isnan(session->dmadN) || isnan(session->dmadP))
+            {
+                printf("[C] calling 'fill_global_statistics(...)'\n");
+                fill_global_statistics(item, &(session->dmin), &(session->dmax), &(session->dmedian), &(session->dmadN), &(session->dmadP));
+            }
+
+            struct video_request *req = (struct video_request *)malloc(sizeof(struct video_request));
+
+            if (req == NULL)
+                goto clean_ws_frame;
+
+            int fps = 30;
+            int bitrate = 1000;
+
+            req->video_type = single;
+            req->keyframe = false; // is it a keyframe?
+            req->fill = 0;
+            req->seq_id = -1;
+
+            req->frame = 0;
+            req->timestamp = 0.0;
+
+            req->flux = NULL;
+            req->len = 0;
+
+            // lock the stat mutex
+            pthread_mutex_lock(&session->stat_mtx);
+
+            req->dmin = session->dmin;
+            req->dmax = session->dmax;
+            req->dmedian = session->dmedian;
+            req->dmadN = session->dmadN;
+            req->dmadP = session->dmadP;
+
+            // unlock the stat mutex
+            pthread_mutex_unlock(&session->stat_mtx);
+
+            req->width = session->image_width;
+            req->height = session->image_height;
+            req->downsize = session->bDownsize;
+            req->fd = -1;
+            req->ptr = item;
+
+            double frame = 0.0;
+            double ref_freq = 0.0;
+
+            for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // 'fps'
+                if (strncmp(frame_data + koff, "\"fps\"", klen) == 0)
+                    fps = atoi2(frame_data + voff, vlen);
+
+                // 'bitrate'
+                if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
+                    bitrate = atoi2(frame_data + voff, vlen);
+
+                // 'fill'
+                if (strncmp(frame_data + koff, "\"fill\"", klen) == 0)
+                    req->fill = atoi2(frame_data + voff, vlen);
+
+                // 'seq_id'
+                if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                    req->seq_id = atoi2(frame_data + voff, vlen);
+
+                // 'key'
+                if (strncmp(frame_data + koff, "\"key\"", klen) == 0)
+                {
+                    // false
+                    if (strncmp(frame_data + voff, "false", vlen) == 0)
+                        req->keyframe = false;
+
+                    // true
+                    if (strncmp(frame_data + voff, "true", vlen) == 0)
+                        req->keyframe = true;
+                }
+
+                // 'frame'
+                if (strncmp(frame_data + koff, "\"frame\"", klen) == 0)
+                    frame = atof2(frame_data + voff, vlen);
+
+                // 'ref_freq'
+                if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                    ref_freq = atof2(frame_data + voff, vlen);
+
+                // 'timestamp'
+                if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                    req->timestamp = atof2(frame_data + voff, vlen);
+            }
+
+            // get the video frame index
+            int frame_idx;
+            get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
+            req->frame = frame_idx;
+
+            printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f --> %d}, ref_freq: %f, timestamp: %f\n", fps, bitrate, req->seq_id, req->keyframe, frame, req->frame, ref_freq, req->timestamp);
+
+            // skip repeated frames
+            if (frame_idx == session->last_frame_idx && !req->keyframe)
+            {
+                printf("[C] skipping a repeat video frame #%d\n", frame_idx);
+                free(req); // req->flux is NULL at this point, no need to free it
+                goto clean_ws_frame;
+            }
+            else
+                session->last_frame_idx = frame_idx;
+
+            req->flux = session->flux != NULL ? strdup(session->flux) : NULL;
+            req->len = req->flux != NULL ? strlen(req->flux) : 0;
+
+            pthread_mutex_lock(&session->video_mtx);
+
+            // add the request to the circular queue
+            ring_put(session->video_ring, req);
+
+            if (!session->video_exit)
+                pthread_cond_signal(&session->video_cond); // wake up the video event loop
+
+            // finally unlock the mutex
+            pthread_mutex_unlock(&session->video_mtx);
+
+            goto clean_ws_frame;
+        }
+
+        if (strcmp(type, "composite_video") == 0)
+        {
+            websocket_session *common_session = session;
+
+            if (common_session == NULL)
+                goto clean_ws_frame;
+
+            if (common_session->flux == NULL)
+                goto clean_ws_frame;
+
+            // copy common variables from the session
+            const char *flux = common_session->flux;
+            int width = common_session->image_width;
+            int height = common_session->image_height;
+            bool downsize = common_session->bDownsize;
+
+            // parse the JSON message common for all datasets
+            int fps = 30;
+            int bitrate = 1000;
+            bool keyframe = false;
+            int fill = 0;
+            double frame = 0.0;
+            double ref_freq = 0.0;
+            int seq_id = -1;
+            float timestamp = 0.0;
+
+            for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
+            {
+                // 'fps'
+                if (strncmp(frame_data + koff, "\"fps\"", klen) == 0)
+                    fps = atoi2(frame_data + voff, vlen);
+
+                // 'bitrate'
+                if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
+                    bitrate = atoi2(frame_data + voff, vlen);
+
+                // 'fill'
+                if (strncmp(frame_data + koff, "\"fill\"", klen) == 0)
+                    fill = atoi2(frame_data + voff, vlen);
+
+                // 'seq_id'
+                if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
+                    seq_id = atoi2(frame_data + voff, vlen);
+
+                // 'key'
+                if (strncmp(frame_data + koff, "\"key\"", klen) == 0)
+                {
+                    // false
+                    if (strncmp(frame_data + voff, "false", vlen) == 0)
+                        keyframe = false;
+
+                    // true
+                    if (strncmp(frame_data + voff, "true", vlen) == 0)
+                        keyframe = true;
+                }
+
+                // 'frame'
+                if (strncmp(frame_data + koff, "\"frame\"", klen) == 0)
+                    frame = atof2(frame_data + voff, vlen);
+
+                // 'ref_freq'
+                if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
+                    ref_freq = atof2(frame_data + voff, vlen);
+
+                // 'timestamp'
+                if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
+                    timestamp = atof2(frame_data + voff, vlen);
+            }
+
+            struct composite_video_request *req = (struct composite_video_request *)malloc(sizeof(struct composite_video_request));
+
+            if (req == NULL)
+                goto clean_ws_frame;
+
+            req->video_type = composite;
+            req->seq_id = seq_id;
+            req->timestamp = timestamp;
+            req->va_count = 0;
+            req->flux = flux != NULL ? strdup(flux) : NULL;
+            req->len = req->flux != NULL ? strlen(req->flux) : 0;
+            req->width = width;
+            req->height = height;
+            req->downsize = downsize;
+            req->keyframe = keyframe;
+            req->fill = fill;
+
+            // next iterate through the multiple datasets launching individual channel threads
+            // tokenize session->multi
+            char *datasetId = common_session->multi != NULL ? strdup(common_session->multi) : NULL;
+            char *token = datasetId;
+            char *rest = token;
+            bool skip_frame = false;
+
+            while ((token = strtok_r(rest, ";", &rest)) != NULL)
+            {
+                void *item = get_dataset(token);
+
+                if (item == NULL)
+                    continue;
+
+                update_timestamp(item);
+
+                websocket_session *_session = NULL;
+
+                // get the session
+                if (pthread_mutex_lock(&sessions_mtx) == 0)
+                {
+                    // iterate through the sessions, find the one with the matching dataset
+                    GHashTableIter iter;
+                    gpointer key, value;
+
+                    g_hash_table_iter_init(&iter, sessions);
+
+                    while (g_hash_table_iter_next(&iter, &key, &value))
                     {
-                        char *result = NULL;
-                        size_t result_len = 0;
-                        int er = MHD_websocket_encode_close(session->ws,
-                                                            MHD_WEBSOCKET_CLOSEREASON_REGULAR,
-                                                            NULL,
-                                                            0,
-                                                            &result,
-                                                            &result_len);
-                        if (MHD_WEBSOCKET_STATUS_OK == er)
+                        websocket_session *__session = (websocket_session *)value;
+
+                        if (strcmp(__session->datasetid, token) == 0)
                         {
-                            send_all(session, result, result_len);
-                            MHD_websocket_free(session->ws, result);
+                            _session = __session;
+                            break;
                         }
                     }
 
-                    return 1;
-                case MHD_WEBSOCKET_STATUS_PING_FRAME:
-                    /* if we receive a ping frame, we will respond */
-                    /* with the corresponding pong frame */
-                    {
-                        char *pong = NULL;
-                        size_t pong_len = preamble_ws_frame(&pong, frame_len, WS_FRAME_PONG);
+                    pthread_mutex_unlock(&sessions_mtx);
+                }
 
-                        if (pong != NULL)
-                        {
-                            // copy the frame_data into the response buffer
-                            memcpy(pong + pong_len, frame_data, frame_len);
-                            pong_len += frame_len;
+                if (_session == NULL)
+                    continue;
 
-                            // create a queue message
-                            struct data_buf msg = {pong, pong_len};
+                // we have the dataset item and the session, prepare the video request
+                printf("[C] mg_websocket_callback: preparing video request for dataset '%s'.\n", token);
 
-                            char *msg_buf = NULL;
-                            size_t _len = sizeof(struct data_buf);
+                // check if the session video tone mapping has been filled already
+                // if not, fetch the global data statistics from FORTRAN
+                if (isnan(_session->dmin) || isnan(_session->dmax) || isnan(_session->dmedian) || isnan(_session->dmadN) || isnan(_session->dmadP))
+                {
+                    printf("[C] calling 'fill_global_statistics(...)'\n");
+                    fill_global_statistics(item, &(_session->dmin), &(_session->dmax), &(_session->dmedian), &(_session->dmadN), &(_session->dmadP));
+                }
 
-                            pthread_mutex_lock(&session->queue_mtx);
+                // get the video frame index
+                int frame_idx;
+                get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
 
-                            // reserve space for the text message
-                            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+                // skip repeated frames
+                if (frame_idx == _session->last_frame_idx && !req->keyframe)
+                {
+                    printf("[C] skipping a repeat video frame #%d\n", frame_idx);
+                    skip_frame = true;
+                }
+                else
+                    _session->last_frame_idx = frame_idx;
 
-                            // pass the message over to the sender via a communications queue
-                            if (msg_buf != NULL && queue_len >= _len)
-                            {
-                                memcpy(msg_buf, &msg, _len);
-                                mg_queue_add(&session->queue, _len);
-                                pthread_mutex_unlock(&session->queue_mtx);
+                // RGB
+                req->ptr[req->va_count] = item;
+                req->frame[req->va_count] = frame_idx;
+                req->dmin[req->va_count] = _session->dmin;
+                req->dmax[req->va_count] = _session->dmax;
+                req->dmedian[req->va_count] = _session->dmedian;
+                req->dmadN[req->va_count] = _session->dmadN;
+                req->dmadP[req->va_count] = _session->dmadP;
+                req->va_count++; // increment the channel count
+            }
 
-                                // wake up the sender
-                                pthread_cond_signal(&session->wake_up_sender);
-                            }
-                            else
-                            {
-                                pthread_mutex_unlock(&session->queue_mtx);
-                                printf("[C] mg_queue_book failed, freeing memory.\n");
-                                free(pong);
-                            }
-                        }
+            free(datasetId);
 
-                        MHD_websocket_free(session->ws, frame_data);
-                    }
-                    return 0;
+            if (skip_frame)
+            {
+                free(req->flux);
+                free(req);
+                goto clean_ws_frame;
+            }
 
-                case MHD_WEBSOCKET_STATUS_PONG_FRAME:
-                    /* if we receive a pong frame, ignore it*/
-                    MHD_websocket_free(session->ws, frame_data);
-                    return 0;
-                default:
-                    /* This case should really never happen, */
-                    /* because there are only five types of (finished) websocket frames. */
-                    /* If it is ever reached, it means that there is memory corruption. */
-                    MHD_websocket_free(session->ws, frame_data);
-                    return 1;
+            pthread_mutex_lock(&common_session->video_mtx);
+
+            // add the request to the circular queue
+            ring_put(common_session->video_ring, req);
+
+            if (!common_session->video_exit)
+                pthread_cond_signal(&common_session->video_cond); // wake up the video event loop
+
+            // finally unlock the mutex
+            pthread_mutex_unlock(&common_session->video_mtx);
+
+            goto clean_ws_frame;
+        }
+
+    clean_ws_frame:
+        return 0;
+    case WS_OPCODE_BINARY_FRAME:
+        printf("[C] WebSocket received %zu bytes of binary frame\n", frame_len);
+        return 0;
+    case WS_OPCODE_CON_CLOSE_FRAME:
+        printf("[C] WebSocket received a close frame\n");
+        /* if we receive a close frame, we will respond with one */
+        session->disconnect = true;
+
+        char *result = NULL;
+        size_t result_len = 0;
+        int er = MHD_websocket_encode_close(session->ws,
+                                            MHD_WEBSOCKET_CLOSEREASON_REGULAR,
+                                            NULL,
+                                            0,
+                                            &result,
+                                            &result_len);
+
+        if (MHD_WEBSOCKET_STATUS_OK == er)
+        {
+            send_all(session, result, result_len);
+            MHD_websocket_free(session->ws, result);
+        }
+
+        return 1;
+    case MHD_WEBSOCKET_STATUS_PING_FRAME:
+        /* if we receive a ping frame, we will respond */
+        /* with the corresponding pong frame */
+        {
+            char *pong = NULL;
+            size_t pong_len = preamble_ws_frame(&pong, frame_len, WS_FRAME_PONG);
+
+            if (pong != NULL)
+            {
+                // copy the frame_data into the response buffer
+                memcpy(pong + pong_len, frame_data, frame_len);
+                pong_len += frame_len;
+
+                // create a queue message
+                struct data_buf msg = {pong, pong_len};
+
+                char *msg_buf = NULL;
+                size_t _len = sizeof(struct data_buf);
+
+                pthread_mutex_lock(&session->queue_mtx);
+
+                // reserve space for the text message
+                size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+                // pass the message over to the sender via a communications queue
+                if (msg_buf != NULL && queue_len >= _len)
+                {
+                    memcpy(msg_buf, &msg, _len);
+                    mg_queue_add(&session->queue, _len);
+                    pthread_mutex_unlock(&session->queue_mtx);
+
+                    // wake up the sender
+                    pthread_cond_signal(&session->wake_up_sender);
+                }
+                else
+                {
+                    pthread_mutex_unlock(&session->queue_mtx);
+                    printf("[C] mg_queue_book failed, freeing memory.\n");
+                    free(pong);
                 }
             }
         }
+        return 0;
+
+    case MHD_WEBSOCKET_STATUS_PONG_FRAME:
+        /* if we receive a pong frame, ignore it*/
+        return 0;
+    default:
+        /* This case should really never happen, */
+        /* because there are only five types of (finished) websocket frames. */
+        /* If it is ever reached, it means that there is memory corruption. */
+        return 0;
     }
 
     return 0;
@@ -2179,10 +2124,10 @@ static void *ws_receive_messages(void *cls)
 
         if (0 < got)
         {
-#ifdef DEBUG
+            // #ifdef DEBUG
             // print the received message #bytes
             printf("[C] WebSocket received %zd bytes\n", got);
-#endif
+            // #endif
 
             // print the ping frames with the opcode 0x9
             if (buf[0] == 0x9)
