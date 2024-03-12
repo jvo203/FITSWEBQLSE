@@ -65,9 +65,8 @@ static double atof2(const char *chars, const int size)
     return result;
 }
 
-static char ws_receive_frame(unsigned char *frame, size_t *length, int *type)
+static void ws_receive_frame(unsigned char *frame, size_t *length, int *type, unsigned char **new_frame, size_t *new_length)
 {
-    unsigned char orig;
     unsigned char masks[4];
     unsigned char mask;
     unsigned char flength;
@@ -77,12 +76,15 @@ static char ws_receive_frame(unsigned char *frame, size_t *length, int *type)
     int i;
     int j;
 
+    // re-set the pointers
+    *new_frame = NULL;
+    *new_length = 0;
+
     *type = frame[0] & 0x0F;
-    orig = 0x00;
     printf("[C] ws_receive_frame type %d, processing %zu bytes.\n", *type, *length);
 
     if (frame[0] == (WS_FIN | WS_OPCODE_CON_CLOSE_FRAME))
-        return orig;
+        return;
 
     if (frame[0] == (WS_FIN | WS_OPCODE_TEXT_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_BINARY_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_PING_FRAME))
     {
@@ -111,7 +113,6 @@ static char ws_receive_frame(unsigned char *frame, size_t *length, int *type)
         }
 
         idx_first_data = (unsigned char)(idx_first_mask + 4);
-        // data_length = *length - idx_first_data;
 
         masks[0] = frame[idx_first_mask + 0];
         masks[1] = frame[idx_first_mask + 1];
@@ -127,18 +128,19 @@ static char ws_receive_frame(unsigned char *frame, size_t *length, int *type)
         }
         printf("\n");
 
-        *length = data_length;
+        // point the new frame to the next data
+        *new_frame = frame + i;
+        *new_length = *length - i;
+        printf("[C] ws_receive_frame: i: %d, length: %zu, new_length: %zu\n", i, *length, *new_length);
 
+        *length = data_length;
         if (*type == WS_OPCODE_TEXT_FRAME)
-        {
-            orig = (char)frame[j];
             frame[j] = '\0';
-        }
     }
     else
         printf("[C] ws_receive_frame: received an unknown frame %02X (%d).\n", frame[0], *type);
 
-    return orig;
+    return;
 }
 
 size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
@@ -431,12 +433,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
     char *new_frame = NULL;
     size_t new_frame_len = 0;
 
-    int type = 0;
-    char c = '\0';
-
     do
     {
-        c = ws_receive_frame((unsigned char *)frame_data, &frame_len, &type);
+        int type = 0;
+        ws_receive_frame((unsigned char *)frame_data, &frame_len, &type, (unsigned char **)&new_frame, &new_frame_len);
 
         /* application logic */
         switch (type)
@@ -1971,6 +1971,20 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             /* If it is ever reached, it means that there is memory corruption. */
             break;
         }
+
+        // print the new_frame and new_frame_len
+        printf("[C] new_frame: %p, new_frame_len: %zu\n", new_frame, new_frame_len);
+
+        if (new_frame != NULL && new_frame_len != 0)
+        {
+            // print a bell character
+            printf("new_frame_len = %zu, ringing a bell\=n\a");
+
+            // point the frame_data to the new_frame
+            frame_data = new_frame;
+            frame_len = new_frame_len;
+        }
+
     } while (new_frame != NULL && new_frame_len != 0);
 
     return 0;
