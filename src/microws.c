@@ -120,7 +120,7 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type, un
         masks[3] = frame[idx_first_mask + 3];
 
         // decode the message
-        for (i = idx_first_data, j = 0; i < *length; i++, j++)
+        for (i = idx_first_data, j = 0; j < data_length; i++, j++)
         {
             char c = frame[i] ^ masks[j % 4];
             printf("%c", c);
@@ -279,7 +279,7 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
 
         for (off = 0; off < len; off += ret)
         {
-            ret = send(session->fd, &buf[off], (int)(len - off), 0); // MSG_DONTWAIT does not work in macOS
+            ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT); // MSG_DONTWAIT does not work in macOS
 
             if (0 > ret)
             {
@@ -403,7 +403,7 @@ static void *ws_send_messages(void *cls)
 #endif
 
                 if (msg->len > 0 && msg->buf != NULL && !session->disconnect)
-                    send_all_chunked(session, msg->buf, msg->len);
+                    send_all(session, msg->buf, msg->len);
 
                 // release memory
                 if (msg->buf != NULL)
@@ -1978,7 +1978,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
         if (new_frame != NULL && new_frame_len != 0)
         {
             // print a bell character
-            printf("new_frame_len = %zu, ringing a bell\=n\a");
+            printf("new_frame_len = %zu, ringing a bell\n\a");
 
             // point the frame_data to the new_frame
             frame_data = new_frame;
