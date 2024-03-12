@@ -65,6 +65,61 @@ static double atof2(const char *chars, const int size)
     return result;
 }
 
+static unsigned char *ws_receive_frame(unsigned char *frame, ssize_t *length, int *type)
+{
+    unsigned char masks[4];
+    unsigned char mask;
+    unsigned char *msg;
+    unsigned char flength;
+    unsigned char idx_first_mask;
+    unsigned char idx_first_data;
+    size_t data_length;
+    int i;
+    int j;
+
+    msg = NULL;
+    if (frame[0] == (WS_FIN | WS_OPCODE_TEXT_FRAME))
+    {
+        *type = WS_OPCODE_TEXT_FRAME;
+        idx_first_mask = 2;
+        mask = frame[1];
+        flength = mask & 0x7F;
+        if (flength == 126)
+        {
+            idx_first_mask = 4;
+        }
+        else if (flength == 127)
+        {
+            idx_first_mask = 10;
+        }
+        idx_first_data = (unsigned char)(idx_first_mask + 4);
+        data_length = (size_t)*length - idx_first_data;
+        masks[0] = frame[idx_first_mask + 0];
+        masks[1] = frame[idx_first_mask + 1];
+        masks[2] = frame[idx_first_mask + 2];
+        masks[3] = frame[idx_first_mask + 3];
+        msg = malloc(data_length + 1);
+        if (NULL != msg)
+        {
+            for (i = idx_first_data, j = 0; i < *length; i++, j++)
+            {
+                msg[j] = frame[i] ^ masks[j % 4];
+            }
+            *length = (ssize_t)data_length;
+            msg[j] = '\0';
+        }
+    }
+    else if (frame[0] == (WS_FIN | WS_OPCODE_CON_CLOSE_FRAME))
+    {
+        *type = WS_OPCODE_CON_CLOSE_FRAME;
+    }
+    else
+    {
+        *type = frame[0] & 0x0F;
+    }
+    return msg;
+}
+
 size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
 {
     unsigned char *frame;
@@ -2096,7 +2151,7 @@ static void *ws_receive_messages(void *cls)
     /* the main loop for receiving data */
     while (1)
     {
-        got = recv(session->fd, buf, sizeof(buf), 0);
+        got = recv(session->fd, buf, sizeof(buf) - 1, 0); // reserve the last byte for the null terminator
 
         if (0 > got)
         {

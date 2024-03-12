@@ -14,10 +14,16 @@
 #include "ring_buffer.h"
 
 #ifdef MICROWS
+#define WS_FIN 0x80
 #define WS_FRAME_TEXT 0x81
 #define WS_FRAME_BINARY 0x82
+#define WS_FRAME_PING 0x89
 #define WS_FRAME_PONG 0x8A
-#define WS_FRAME_CLOSE 0x88
+
+#define WS_FIN 128
+#define WS_OPCODE_TEXT_FRAME 1
+#define WS_OPCODE_BINARY_FRAME 2
+#define WS_OPCODE_CON_CLOSE_FRAME 8
 
 size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type);
 #endif
