@@ -14,7 +14,6 @@
 #include "ring_buffer.h"
 
 #ifdef MICROWS
-#define WS_FIN 0x80
 #define WS_FRAME_TEXT 0x81
 #define WS_FRAME_BINARY 0x82
 #define WS_FRAME_PING 0x89
