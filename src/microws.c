@@ -1945,7 +1945,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
         }
 
         return 1;
-    case MHD_WEBSOCKET_STATUS_PING_FRAME:
+    case WS_OPCODE_PING_FRAME:
         /* if we receive a ping frame, we will respond */
         /* with the corresponding pong frame */
         {
