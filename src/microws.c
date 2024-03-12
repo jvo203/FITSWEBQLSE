@@ -1978,7 +1978,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
         if (new_frame != NULL && new_frame_len != 0)
         {
             // print a bell character
-            printf("new_frame_len = %zu, ringing a bell\n\a");
+            printf("new_frame_len = %zu, ringing a bell\n\a", new_frame_len);
 
             // point the frame_data to the new_frame
             frame_data = new_frame;
