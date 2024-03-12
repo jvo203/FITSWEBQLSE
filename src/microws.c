@@ -105,7 +105,7 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type, un
 
             // the following 8 bytes interpreted as a 64-bit unsigned integer
             // (the most significant bit MUST be 0) are the data length
-            data_length = (frame[2] << 56) | (frame[3] << 48) | (frame[4] << 40) | (frame[5] << 32) | (frame[6] << 24) | (frame[7] << 16) | (frame[8] << 8) | frame[9];
+            data_length = ((size_t)frame[2] << 56) | ((size_t)frame[3] << 48) | ((size_t)frame[4] << 40) | ((size_t)frame[5] << 32) | ((size_t)frame[6] << 24) | ((size_t)frame[7] << 16) | ((size_t)frame[8] << 8) | (size_t)frame[9];
         }
         else
         {
