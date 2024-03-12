@@ -46,3 +46,56 @@ C9 21 0C CD 82 7F 4E 94 90 69 5A CD C5 2C 1F CD D4 67 42 93 91 75 54 87 C2 20 19
 [C] <send_all(181 bytes)> sent 181 bytes.
 [C] aborting fetch_realtime_image_spectrum (no cluster nodes found)
 make: *** [run] Segmentation fault: 11
+
+==============================================================================
+
+[C] WebSocket received 1023 bytes
+[C] ws_receive_frame type 1, processing 1023 bytes.
+[C] ws_receive_frame: flength: 35, data_length: 35
+{"type":"kalman_reset","seq_id":15}
+[C] ws_receive_frame: i: 41, length: 1023, new_length: 982
+[C] WebSocket received a text frame '{"type":"kalman_reset","seq_id":15}'
+[C] new_frame: 0x70000fc86b99, new_frame_len: 982
+new_frame_len = 982, ringing a bell
+[C] ws_receive_frame type 1, processing 982 bytes.
+[C] ws_receive_frame: flength: 126, data_length: 288
+{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":501,"y1":-2,"x2":579,"y2":76,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":16,"timestamp":4288}
+[C] ws_receive_frame: i: 296, length: 982, new_length: 686
+[C] WebSocket received a text frame '{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":501,"y1":-2,"x2":579,"y2":76,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":16,"timestamp":4288}'
+[C] new_frame: 0x70000fc86cc1, new_frame_len: 686
+new_frame_len = 686, ringing a bell
+[C] ws_receive_frame type 1, processing 686 bytes.
+[C] ws_receive_frame: flength: 126, data_length: 290
+{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":525,"y1":163,"x2":603,"y2":241,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":17,"timestamp":4304}
+[C] ws_receive_frame: i: 298, length: 686, new_length: 388
+[C] WebSocket received a text frame '{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":525,"y1":163,"x2":603,"y2":241,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":17,"timestamp":4304}'
+[C] ws_event_loop::wakeup.
+[C] ws_event_loop::got a request id 16.
+[C] new_frame: 0x70000fc86deb, new_frame_len: 388
+new_frame_len = 388, ringing a bell
+[C] ws_receive_frame type 1, processing 388 bytes.
+[C] ws_receive_frame: flength: 126, data_length: 290
+{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":544,"y1":272,"x2":622,"y2":350,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":18,"timestamp":4350}
+[C] ws_receive_frame: i: 298, length: 388, new_length: 90
+[C] WebSocket received a text frame '{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":544,"y1":272,"x2":622,"y2":350,"width":610,"height":610,"beam":"circle","intensity":"integrated","frame_start":114603959966.65518,"frame_end":115554681264,"ref_freq":115271000000,"seq_id":18,"timestamp":4350}'
+[C] new_frame: 0x70000fc86f15, new_frame_len: 90
+new_frame_len = 90, ringing a bell
+[C] ws_receive_frame type 1, processing 90 bytes.
+[C] ws_receive_frame: flength: 126, data_length: 290
+{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":�2ך�2J��wG��rJ�zvG��rJ�2��2J�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ����2J�0E��J�2wJ�2wJ�2wJ�2wJ����2J�����J�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ����D��2wJ�2wJ�2ך�2J�"7��2J�2wJ�2wJ�2wJ�2wJ�3wJ�2wJ�-wJ�8wJ
+[C] ws_receive_frame: i: 298, length: 90, new_length: 18446744073709551408
+[C] WebSocket received a text frame '{"type":"realtime_image_spectrum","dx":1561,"image":false,"quality":"medium","x1":�2ך�2J��wG��rJ�zvG��rJ�2��2J�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ����2J�0E��J�2wJ�2wJ�2wJ�2wJ����2J�����J�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ�2wJ����D��2wJ�2wJ�2ך�2J�"7��2J�2wJ�2wJ�2wJ�2wJ�3wJ�2wJ�-wJ�8wJ'
+[C] calling fetch_realtime_image_spectrum across the cluster for 'ALMA01003454'
+[C] aborting fetch_realtime_image_spectrum (no cluster nodes found)
+[C] pthread_create rc = 0
+[C] new_frame: 0x70000fc8703f, new_frame_len: 18446744073709551408
+new_frame_len = 18446744073709551408, ringing a bell
+[C] ws_receive_frame type 0, processing 18446744073709551408 bytes.
+[C] ws_receive_frame: received an unknown frame 00 (0).
+[C] new_frame: 0x0, new_frame_len: 0
+CA 07 42 66 DD 4B 46 68 C5 01 46 73 D3 10 0F 78 DD 08 41 79 CC 1E 55 33 CD 10 4D 79 C6 05 5B 68 88 5B 13 3E 97 10 4D 7C CE 02 5B 68 97 57 1E 2D 97 46 55 70 C9 03 47 66 DD 50 12 2B 92 10 4D 68 9C 5B 05 29 93 57 55 66 DD 5B 19 3E 9A 5C 04 23 8B 4B 55 70 DD 5B 19 3E 9A 55 05 2B 8B 57 13 68 D3 10 11 38 9E 5F 12 15 8C 46 16 38 8B 10 4D 7B CE 06 41 7A CC 0B 42 73 C6 04 41 64 C9 07 42 7B C7 1E 55 2C 8D 53 1A 2F A0 57 19 2E DD 08 46 7B CA 07 42 7E C9 0A 46 78 C9 06 5B 68 8D 57 11 15 99 40 12 3B DD 08 46 7B CA 00 40 7B CF 02 47 7A CF 02 5B 68 8C 57 06 15 96 56 55 70 CE 0B 5B 68 8B 5B 1A 2F 8C 46 16 27 8F 10 4D 7E CC 05 41 37
+[C] WebSocket received 208 bytes
+[C] ws_receive_frame type 10, processing 208 bytes.
+[C] ws_receive_frame: received an unknown frame CA (10).
+[C] new_frame: 0x0, new_frame_len: 0
+make: *** [run] Segmentation fault: 11
