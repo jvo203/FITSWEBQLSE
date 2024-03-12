@@ -65,8 +65,9 @@ static double atof2(const char *chars, const int size)
     return result;
 }
 
-static void ws_receive_frame(unsigned char *frame, size_t *length, int *type)
+static char ws_receive_frame(unsigned char *frame, size_t *length, int *type)
 {
+    unsigned char orig;
     unsigned char masks[4];
     unsigned char mask;
     unsigned char flength;
@@ -77,10 +78,11 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type)
     int j;
 
     *type = frame[0] & 0x0F;
+    orig = 0x00;
     printf("[C] ws_receive_frame type %d, processing %zu bytes.\n", *type, *length);
 
     if (frame[0] == (WS_FIN | WS_OPCODE_CON_CLOSE_FRAME))
-        return;
+        return orig;
 
     if (frame[0] == (WS_FIN | WS_OPCODE_TEXT_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_BINARY_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_PING_FRAME))
     {
@@ -128,10 +130,15 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type)
         *length = data_length;
 
         if (*type == WS_OPCODE_TEXT_FRAME)
+        {
+            orig = (char)frame[j];
             frame[j] = '\0';
+        }
     }
     else
         printf("[C] ws_receive_frame: received an unknown frame %02X (%d).\n", frame[0], *type);
+
+    return orig;
 }
 
 size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
@@ -421,8 +428,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
     char *frame_data = buf;
     size_t frame_len = buf_len;
     int type = 0;
+    char c = '\0';
 
-    ws_receive_frame((unsigned char *)frame_data, &frame_len, &type);
+    c = ws_receive_frame((unsigned char *)frame_data, &frame_len, &type);
 
     /* application logic */
     switch (type)
@@ -1880,10 +1888,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
         }
 
     clean_ws_frame:
-        return 0;
+        break;
     case WS_OPCODE_BINARY_FRAME:
         printf("[C] WebSocket received %zu bytes of binary frame\n", frame_len);
-        return 0;
+        break;
     case WS_OPCODE_CON_CLOSE_FRAME:
         printf("[C] WebSocket received a close frame\n");
         /* if we receive a close frame, we will respond with one */
@@ -1947,16 +1955,15 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 }
             }
         }
-        return 0;
-
+        break;
     case WS_OPCODE_PONG_FRAME:
         /* if we receive a pong frame, ignore it*/
-        return 0;
+        break;
     default:
         /* This case should really never happen, */
         /* because there are only five types of (finished) websocket frames. */
         /* If it is ever reached, it means that there is memory corruption. */
-        return 0;
+        break;
     }
 
     return 0;
