@@ -304,7 +304,7 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
             }
 #endif
 
-            // MSG_DONTWAIT may not necessarily  work in macOS
+            // MSG_DONTWAIT may not necessarily work in macOS
             ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT);
 
             if (0 > ret)
