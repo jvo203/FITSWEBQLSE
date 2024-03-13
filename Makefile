@@ -162,7 +162,7 @@ endif
 
 MOD =
 # -I/home/chris/zfp/include
-DEF = -DNODEBUG -DMG_DATA_SIZE=50 -DHAVE_ZLIB -DMICROWS
+DEF = -DNODEBUG -DMG_DATA_SIZE=50 -DHAVE_ZLIB -DMICROWS -DPOLL
 
 ifneq ($(SHARE),)
 	DEF += -DSHARE='"$(SHARE)"'
