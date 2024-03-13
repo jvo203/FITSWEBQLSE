@@ -300,6 +300,9 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
             }
             else if (poll_ret < 0)
             {
+                if (EAGAIN == errno)
+                    continue;
+
                 perror("send_all");
                 break;
             }
@@ -2131,7 +2134,7 @@ static void *ws_receive_messages(void *cls)
 
         if (ret < 0)
         {
-            if (EINTR == errno)
+            if (EAGAIN == errno)
                 continue;
 
             perror("[C] poll");
