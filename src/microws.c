@@ -285,6 +285,7 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
         struct pollfd fds[1];
         fds[0].fd = session->fd;
         fds[0].events = POLLOUT;
+        fds[0].revents = 0;
 #endif
 
         for (off = 0; off < len; off += ret)
@@ -2031,8 +2032,18 @@ static void *ws_receive_messages(void *cls)
 
     websocket_session *session = (websocket_session *)cls;
 
+#ifdef POLL
+    struct pollfd fds[1];
+    fds[0].fd = session->fd;
+    fds[0].events = POLLIN;
+    fds[0].revents = 0;
+
+    /* make the socket non-blocking */
+    make_non_blocking(session->fd);
+#else
     /* make the socket blocking */
     make_blocking(session->fd);
+#endif
 
     /* initialize the wake-up-sender condition variable */
     if (0 != pthread_cond_init(&session->wake_up_sender, NULL))
