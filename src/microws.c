@@ -65,27 +65,24 @@ static double atof2(const char *chars, const int size)
     return result;
 }
 
-static void ws_receive_frame(unsigned char *frame, size_t *length, int *type, unsigned char **new_frame, size_t *new_length)
+static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
 {
     unsigned char masks[4];
     unsigned char mask;
     unsigned char flength;
     unsigned char idx_first_mask;
     unsigned char idx_first_data;
-    size_t data_length;
+    size_t data_length, consumed;
     int i;
     int j;
-
-    // re-set the pointers
-    *new_frame = NULL;
-    *new_length = 0;
 
     *type = frame[0] & 0x0F;
     printf("[C] ws_receive_frame type %d, processing %zu bytes.\n", *type, *length);
 
     if (frame[0] == (WS_FIN | WS_OPCODE_CON_CLOSE_FRAME))
-        return;
+        return 0;
 
+    consumed = 0; // assume not data is consumed
     if (frame[0] == (WS_FIN | WS_OPCODE_TEXT_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_BINARY_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_PING_FRAME))
     {
         idx_first_mask = 2;
@@ -124,16 +121,19 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type, un
         // decode the message
         for (i = idx_first_data, j = 0; j < data_length; i++, j++)
         {
+            // make sure not to exceeded the frame length
+            // return 0 if there is insufficient data to complete the frame
+            if (i >= *length)
+                return 0;
+
             char c = frame[i] ^ masks[j % 4];
             printf("%c", c);
             frame[j] = frame[i] ^ masks[j % 4]; // neat, overwrite the incoming frame buffer
         }
         printf("\n");
 
-        // point the new frame to the next data
-        *new_frame = frame + i;
-        *new_length = *length - i;
-        printf("[C] ws_receive_frame: i: %d, length: %zu, new_length: %zu\n", i, *length, *new_length);
+        // the entire WebSocket frame has been processed
+        consumed = i; // the number of bytes consumed (equal to idx_first_data + data_length)
 
         *length = data_length;
         if (*type == WS_OPCODE_TEXT_FRAME)
@@ -142,7 +142,7 @@ static void ws_receive_frame(unsigned char *frame, size_t *length, int *type, un
     else
         printf("[C] ws_receive_frame: received an unknown frame %02X (%d).\n", frame[0], *type);
 
-    return;
+    return consumed;
 }
 
 size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
@@ -427,18 +427,16 @@ static void *ws_send_messages(void *cls)
     pthread_exit(NULL);
 }
 
-static int parse_received_websocket_stream(websocket_session *session, char *buf, size_t buf_len)
+static int parse_received_websocket_stream(websocket_session *session, char *buf, size_t *buf_len)
 {
     char *frame_data = buf;
-    size_t frame_len = buf_len;
-
-    char *new_frame = NULL;
-    size_t new_frame_len = 0;
+    size_t frame_len = *buf_len;
+    size_t processed = 0;
 
     do
     {
         int type = 0;
-        ws_receive_frame((unsigned char *)frame_data, &frame_len, &type, (unsigned char **)&new_frame, &new_frame_len);
+        processed = ws_receive_frame((unsigned char *)frame_data, &frame_len, &type);
 
         /* application logic */
         switch (type)
@@ -1974,20 +1972,23 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             break;
         }
 
-        // print the new_frame and new_frame_len
-        printf("[C] new_frame: %p, new_frame_len: %zu\n", new_frame, new_frame_len);
-
-        if (new_frame != NULL && new_frame_len != 0)
+        if (processed > 0)
         {
-            // print a bell character
-            printf("new_frame_len = %zu, ringing a bell\n\a", new_frame_len);
+            printf("[C] WebSocket processed %zu bytes of data\n", processed);
 
-            // point the frame_data to the new_frame
-            frame_data = new_frame;
-            frame_len = new_frame_len;
+            // memmove the remaining data to the beginning of the buffer
+            memmove(frame_data, frame_data + processed, *buf_len - processed);
+
+            size_t remaining = *buf_len - processed;
+            *buf_len -= processed;
+
+            printf("[C] WebSocket remaining %zu bytes of data, cursor is at %zu\n", remaining, *buf_len);
         }
 
-    } while (new_frame != NULL && new_frame_len != 0);
+        // break out of the loop if there is no more data to process
+        if (*buf_len == 0)
+            break;
+    } while (processed > 0);
 
     return 0;
 }
@@ -1999,6 +2000,7 @@ static void *ws_receive_messages(void *cls)
 
     char buf[1024]; // a buffer for incoming WebSocket messages
     ssize_t got;
+    size_t cursor = 0;
     int result;
 
     websocket_session *session = (websocket_session *)cls;
@@ -2086,7 +2088,7 @@ static void *ws_receive_messages(void *cls)
     /* the main loop for receiving data */
     while (1)
     {
-        got = recv(session->fd, buf, sizeof(buf) - 1, 0); // reserve the last byte for the null terminator
+        got = recv(session->fd, buf + cursor, sizeof(buf) - cursor, 0);
 
         if (0 > got)
         {
@@ -2104,55 +2106,54 @@ static void *ws_receive_messages(void *cls)
             }
         }
 
-        print_hex(buf, got);
-
-        if (0 >= got)
+        if (0 == got)
         {
             /* the TCP/IP socket has been closed */
             break;
         }
 
-        if (0 < got)
+        // 0 < got
+        print_hex(buf, got);
+        cursor += (size_t)got;
+
+        // #ifdef DEBUG
+        // print the received message #bytes
+        printf("[C] WebSocket received %zd bytes, new cursor = %zu\n", got, cursor);
+        // #endif
+
+        // print the ping frames with the opcode 0x9
+        if (buf[0] == 0x9)
         {
-            // #ifdef DEBUG
-            // print the received message #bytes
-            printf("[C] WebSocket received %zd bytes\n", got);
-            // #endif
+            printf("[C] WebSocket received a ping frame\n");
+            print_hex(buf, got);
+        }
 
-            // print the ping frames with the opcode 0x9
-            if (buf[0] == 0x9)
+        // handle the messages
+        if (0 != parse_received_websocket_stream(session, buf, &cursor))
+        {
+            /* A websocket protocol error occurred */
+            session->disconnect = true;
+            pthread_cond_signal(&session->wake_up_sender);
+            pthread_join(pt, NULL);
+
+            struct MHD_UpgradeResponseHandle *urh = session->urh;
+            if (NULL != urh)
             {
-                printf("[C] WebSocket received a ping frame\n");
-                print_hex(buf, got);
+                session->urh = NULL;
+                MHD_upgrade_action(urh, MHD_UPGRADE_ACTION_CLOSE);
             }
 
-            // handle the messages
-            if (0 != parse_received_websocket_stream(session, buf, (size_t)got))
-            {
-                /* A websocket protocol error occurred */
-                session->disconnect = true;
-                pthread_cond_signal(&session->wake_up_sender);
-                pthread_join(pt, NULL);
+            pthread_cond_destroy(&session->wake_up_sender);
+            pthread_mutex_destroy(&session->send_mutex);
 
-                struct MHD_UpgradeResponseHandle *urh = session->urh;
-                if (NULL != urh)
-                {
-                    session->urh = NULL;
-                    MHD_upgrade_action(urh, MHD_UPGRADE_ACTION_CLOSE);
-                }
+            MHD_websocket_stream_free(session->ws);
 
-                pthread_cond_destroy(&session->wake_up_sender);
-                pthread_mutex_destroy(&session->send_mutex);
+            // remove a session pointer from the hash table
+            remove_session(session);
 
-                MHD_websocket_stream_free(session->ws);
-
-                // remove a session pointer from the hash table
-                remove_session(session);
-
-                free(session->extra_in);
-                g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
-                pthread_exit(NULL);
-            }
+            free(session->extra_in);
+            g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+            pthread_exit(NULL);
         }
     }
 
