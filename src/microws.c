@@ -276,16 +276,36 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
 
     size_t sent = 0;
 
-    printf("[C] <send_all(%zu bytes)> sending data.\n", len);
-
     if (pthread_mutex_lock(&session->send_mutex) == 0)
     {
         ssize_t ret;
         size_t off;
 
+#ifdef POLL
+        struct pollfd fds[1];
+        fds[0].fd = session->fd;
+        fds[0].events = POLLOUT;
+#endif
+
         for (off = 0; off < len; off += ret)
         {
-            ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT); // MSG_DONTWAIT does not work in macOS
+#ifdef POLL
+            int poll_ret = poll(fds, 1, 1000);
+
+            if (poll_ret == 0)
+            {
+                printf("[C] <send_all(%zu bytes)> poll timeout, retrying.\n", len);
+                continue;
+            }
+            else if (poll_ret < 0)
+            {
+                perror("send_all");
+                break;
+            }
+#endif
+
+            // MSG_DONTWAIT may not necessarily  work in macOS
+            ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT);
 
             if (0 > ret)
             {
@@ -316,8 +336,6 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
 
     if (sent != len)
         printf("[C] <send_all(%zu bytes)> failed, sent %zu bytes out of %zu bytes!\n", len, sent, len);
-
-    printf("[C] <send_all(%zu bytes)> sent %zu bytes.\n", len, sent);
 }
 
 /**
