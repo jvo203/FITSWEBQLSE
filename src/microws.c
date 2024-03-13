@@ -13,6 +13,10 @@ void *send_cluster_heartbeat(void *arg);
 #ifdef MICROWS
 #include <microhttpd_ws.h>
 
+#ifdef POLL
+#include <poll.h>
+#endif
+
 #define PAGE_INVALID_WEBSOCKET_REQUEST "Invalid WebSocket request!"
 
 // a function to print characters in a buffer in Ox format
