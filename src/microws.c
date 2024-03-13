@@ -2125,6 +2125,26 @@ static void *ws_receive_messages(void *cls)
     /* the main loop for receiving data */
     while (1)
     {
+#ifdef POLL
+        /* poll the socket for incoming data */
+        int ret = poll(fds, 1, -1);
+
+        if (ret < 0)
+        {
+            if (EINTR == errno)
+                continue;
+
+            perror("[C] poll");
+            break;
+        }
+
+        if (0 == ret)
+        {
+            /* no data available right now, try again later */
+            continue;
+        }
+#endif
+
         got = recv(session->fd, buf + cursor, sizeof(buf) - cursor, 0);
 
         if (0 > got)
