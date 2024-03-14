@@ -124,7 +124,11 @@ static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
 
         // return if there is insufficient data to complete the frame
         if (idx_first_data + data_length > *length)
+        {
+            // reset (revert) the type
+            *type = 0;
             return 0;
+        }
 
         // decode the message
         for (i = idx_first_data, j = 0; j < (int)data_length; i++, j++)
