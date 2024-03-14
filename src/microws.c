@@ -435,7 +435,14 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     memcpy(response + response_len, frame_data, frame_len);
                     response_len += frame_len;
 
-                    // create a queue message
+                    // a direct send
+                    if(!session->disconnect)
+                    {
+                        send_all(session, response, response_len);
+                        free(response);
+                    }
+
+                    /*// create a queue message
                     struct data_buf msg = {response, response_len};
 
                     char *msg_buf = NULL;
@@ -463,7 +470,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         pthread_mutex_unlock(&session->queue_mtx);
                         printf("[C] mg_queue_book failed, freeing memory.\n");
                         free(response);
-                    }
+                    }*/
                 }
 
                 // get the dataset and update its timestamp
@@ -1399,7 +1406,14 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         memcpy(response + response_len, json, json_len);
                         response_len += json_len;
 
-                        // create a queue message
+                        // a direct send
+                        if(!session->disconnect)
+                        {
+                            send_all(session, response, response_len);
+                            free(response);
+                        }
+
+                        /*// create a queue message
                         struct data_buf msg = {response, response_len};
 
                         char *msg_buf = NULL;
@@ -1425,7 +1439,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                             pthread_mutex_unlock(&session->queue_mtx);
                             printf("[C] mg_queue_book failed, freeing memory.\n");
                             free(response);
-                        }
+                        }*/
                     }
                 }
 
@@ -1910,7 +1924,14 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     memcpy(pong + pong_len, frame_data, frame_len);
                     pong_len += frame_len;
 
-                    // create a queue message
+                    // a direct send
+                    if(!session->disconnect)
+                    {
+                        send_all(session, pong, pong_len);
+                        free(pong);
+                    }
+
+                    /*// create a queue message
                     struct data_buf msg = {pong, pong_len};
 
                     char *msg_buf = NULL;
@@ -1936,7 +1957,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         pthread_mutex_unlock(&session->queue_mtx);
                         printf("[C] mg_queue_book failed, freeing memory.\n");
                         free(pong);
-                    }
+                    }*/
                 }
             }
             break;
