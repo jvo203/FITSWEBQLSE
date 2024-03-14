@@ -2002,9 +2002,8 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             /* if we receive a pong frame, ignore it*/
             break;
         default:
-            /* This case should really never happen, */
-            /* because there are only five types of (finished) websocket frames. */
-            /* If it is ever reached, it means that there is memory corruption. */
+            /* there might have been insufficient data to complete a frame */
+            /* break, await more data */            
             break;
         }
 
