@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-03-14.0";
+    return "JS2024-03-14.1";
 }
 
 function uuidv4() {
@@ -15637,6 +15637,7 @@ function partial_fits_download() {
     //console.log(url) ;
     //window.location.assign(url);
     window.open(url, '_blank');
+    window.focus();
 }
 
 function ok_download() {
