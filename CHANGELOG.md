@@ -1,8 +1,10 @@
-## [5.0.58] - 2024-0?-??
+## [5.1.0] - 2024-0?-??
 
 * changed the display of the approximate size of partial FITS downloads to the IEC _*binary*_ format (i.e. MiB, GiB, TiB, etc.)
 * for consistency switched the display of the full FITS filesize also to the _*binary*_ format
 * completely re-wrote the real-time WebSocket communication between the server and the web browser (replaced the _*mongoose*_ C networking library with a custom C code loosely based on _*libmicrohttpd*_) 
+
+# 5.0
 
 ## [5.0.57] - 2024-02-28
 
