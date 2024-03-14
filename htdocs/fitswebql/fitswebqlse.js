@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-03-11.0";
+    return "JS2024-03-14.0";
 }
 
 function uuidv4() {
@@ -4369,8 +4369,6 @@ function send_ping() {
     if (wsConn[va_count - 1] != null) {
         t = performance.now();
 
-        console.log("sending: [heartbeat] " + t);
-
         try {
             wsConn[va_count - 1].send('[heartbeat] ' + t);
             //setTimeout(send_ping, 1000 + ping_latency);
@@ -5348,7 +5346,6 @@ async function open_websocket_connection(_datasetId, index) {
                 }
 
                 if (typeof evt.data === "string") {
-                    console.log("received_msg:", received_msg);
                     var cmd = "[heartbeat]";
                     var pos = received_msg.indexOf(cmd);
 
@@ -17551,7 +17548,7 @@ function download_confirmation(partialSize) {
         .attr("id", "modal-body")
         .attr("class", "modal-body");
 
-    let strPartialSize = numeral(partialSize).format('0.0b');
+    let strPartialSize = numeral(partialSize).format('0.0 ib');
 
     bodyDiv.append("p")
         .html("Estimated FITS cut-out size: " + strPartialSize + ". Proceed with the download?");
