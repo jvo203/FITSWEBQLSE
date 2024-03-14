@@ -436,11 +436,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     response_len += frame_len;
 
                     // a direct send
-                    if(!session->disconnect)
-                    {
+                    if(!session->disconnect)                    
                         send_all(session, response, response_len);
-                        free(response);
-                    }
+                    free(response);                    
 
                     /*// create a queue message
                     struct data_buf msg = {response, response_len};
@@ -1407,11 +1405,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         response_len += json_len;
 
                         // a direct send
-                        if(!session->disconnect)
-                        {
+                        if(!session->disconnect)                        
                             send_all(session, response, response_len);
-                            free(response);
-                        }
+                        free(response);                        
 
                         /*// create a queue message
                         struct data_buf msg = {response, response_len};
@@ -1925,11 +1921,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     pong_len += frame_len;
 
                     // a direct send
-                    if(!session->disconnect)
-                    {
+                    if(!session->disconnect)                    
                         send_all(session, pong, pong_len);
-                        free(pong);
-                    }
+                    free(pong);                    
 
                     /*// create a queue message
                     struct data_buf msg = {pong, pong_len};
