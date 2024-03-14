@@ -1,3 +1,8 @@
+## [5.0.58] - 2024-0?-??
+
+* changed the display of the approximate size of partial FITS downloads to the _*binary*_ format (i.e. MiB, GiB, TiB, etc.)
+* completely re-wrote the real-time WebSocket communication between the server and the web browser (replaced the _*mongoose*_ C networking library with a custom C code loosely based on _*libmicrohttpd*_) 
+
 ## [5.0.57] - 2024-02-28
 
 * fixed a "_*bit rot*_" in the FORTRAN code due to changed handling of implicit integer conversions by the gfortran compiler
