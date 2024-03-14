@@ -1,8 +1,8 @@
 ## [5.1.0] - 2024-0?-??
 
-* changed the display of the approximate size of partial FITS downloads to the _*IEC binary*_ format (i.e. MiB, GiB, TiB, etc.)
+* changed the display of the approximate size of FITS cut-outs to the _*IEC binary*_ format (i.e. MiB, GiB, TiB, etc.)
 * switched the display of the full FITS filesize to the _*IEC binary*_ format
-* fixed automatically hiding the newly-opened empty tab upon FITS cut-outs (partial FITS downloads)
+* improved automatic hiding of the newly-opened empty tab upon performing FITS cut-outs
 * completely re-wrote the real-time WebSocket communication between the server and the web browser (replaced the _*mongoose*_ C networking library with a custom C code loosely based on _*libmicrohttpd*_) 
 
 # 5.0
