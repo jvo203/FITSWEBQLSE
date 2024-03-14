@@ -2629,6 +2629,9 @@ void *ws_pv_response(void *ptr)
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+        // create a queue message
+        struct data_buf msg = {pv_payload, msg_len};
+
 #ifdef MICROWS
 #ifdef DIRECT
         if (!session->disconnect)
@@ -2661,9 +2664,6 @@ void *ws_pv_response(void *ptr)
         }
 #endif
 #else
-        // create a queue message
-        struct data_buf msg = {pv_payload, msg_len};
-
         // pass the message over to mongoose via a communications channel
         bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -2860,6 +2860,9 @@ void *ws_image_spectrum_response(void *ptr)
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+        // create a queue message
+        struct data_buf msg = {image_payload, msg_len};
+
 #ifdef MICROWS
 #ifdef DIRECT
         if (!session->disconnect)
@@ -2892,9 +2895,6 @@ void *ws_image_spectrum_response(void *ptr)
         }
 #endif
 #else
-        // create a queue message
-        struct data_buf msg = {image_payload, msg_len};
-
         // pass the message over to mongoose via a communications channel
         bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -2974,6 +2974,9 @@ void *ws_image_spectrum_response(void *ptr)
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+        // create a queue message
+        struct data_buf msg = {spectrum_payload, msg_len};
+
 #ifdef MICROWS
 #ifdef DIRECT
         if (!session->disconnect)
@@ -3006,9 +3009,6 @@ void *ws_image_spectrum_response(void *ptr)
         }
 #endif
 #else
-        // create a queue message
-        struct data_buf msg = {spectrum_payload, msg_len};
-
         // pass the message over to mongoose via a communications channel
         bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3199,6 +3199,9 @@ void *spectrum_response(void *ptr)
                     if (ws_offset != msg_len)
                         printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+                    // create a queue message
+                    struct data_buf msg = {payload, msg_len};
+
 #ifdef MICROWS
 #ifdef DIRECT
                     if (!session->disconnect)
@@ -3231,9 +3234,6 @@ void *spectrum_response(void *ptr)
                     }
 #endif
 #else
-                    // create a queue message
-                    struct data_buf msg = {payload, msg_len};
-
                     // pass the message over to mongoose via a communications channel
                     bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3400,6 +3400,9 @@ void *realtime_image_spectrum_response(void *ptr)
                 if (ws_offset != msg_len)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+                // create a queue message
+                struct data_buf msg = {payload, msg_len};
+
 #ifdef MICROWS
 #ifdef DIRECT
                 if (!session->disconnect)
@@ -3432,9 +3435,6 @@ void *realtime_image_spectrum_response(void *ptr)
                 }
 #endif
 #else
-                // create a queue message
-                struct data_buf msg = {payload, msg_len};
-
                 // pass the message over to mongoose via a communications channel
                 bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3508,6 +3508,9 @@ void *realtime_image_spectrum_response(void *ptr)
                 if (ws_offset != msg_len)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+                // create a queue message
+                struct data_buf msg = {payload, msg_len};
+
 #ifdef MICROWS
 #ifdef DIRECT
                 if (!session->disconnect)
@@ -3540,9 +3543,6 @@ void *realtime_image_spectrum_response(void *ptr)
                 }
 #endif
 #else
-                // create a queue message
-                struct data_buf msg = {payload, msg_len};
-
                 // pass the message over to mongoose via a communications channel
                 bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3722,6 +3722,9 @@ void *composite_video_response(void *ptr)
             if (ws_offset != msg_len)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+            // create a queue message
+            struct data_buf msg = {payload, msg_len};
+
 #ifdef MICROWS
 #ifdef DIRECT
             if (!session->disconnect)
@@ -3754,9 +3757,6 @@ void *composite_video_response(void *ptr)
             }
 #endif
 #else
-            // create a queue message
-            struct data_buf msg = {payload, msg_len};
-
             // pass the message over to mongoose via a communications channel
             bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3940,6 +3940,9 @@ void *video_response(void *ptr)
             if (ws_offset != msg_len)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
+            // create a queue message
+            struct data_buf msg = {payload, msg_len};
+
 #ifdef MICROWS
 #ifdef DIRECT
             if (!session->disconnect)
@@ -3972,9 +3975,6 @@ void *video_response(void *ptr)
             }
 #endif
 #else
-            // create a queue message
-            struct data_buf msg = {payload, msg_len};
-
             // pass the message over to mongoose via a communications channel
             bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
