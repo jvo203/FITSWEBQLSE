@@ -354,67 +354,6 @@ void send_all(websocket_session *session, const char *buf, size_t len)
         printf("[C] <send_all(%zu bytes)> failed, sent %zu bytes out of %zu bytes!\n", len, sent, len);
 }
 
-/**
- * Sends all data of the given buffer via the TCP/IP socket
- * in chunks of 1024 bytes
- *
- * @param fd  The TCP/IP socket which is used for sending
- * @param buf The buffer with the data to send
- * @param len The length in bytes of the data in the buffer
- */
-static void send_all_chunked(websocket_session *session, const char *buf, size_t len)
-{
-    if (session->disconnect)
-        return;
-
-    size_t sent = 0;
-
-    printf("[C] <send_all_chunked(%zu bytes)> sending data.\n", len);
-
-    if (pthread_mutex_lock(&session->send_mutex) == 0)
-    {        
-        ssize_t ret = 0;
-        size_t off;        
-
-        for (off = 0; off < len; off += ret)
-        {
-            ret = send(session->fd, &buf[off], (int)MIN(len - off, 1024), 0); // MSG_DONTWAIT does not work in macOS
-
-            if (0 > ret)
-            {
-                if (EAGAIN == errno || EWOULDBLOCK == errno)
-                {
-                    printf("[C] <send_all_chunked(%zu bytes)> EAGAIN or EWOULDBLOCK, retrying.\n", len);
-                    ret = 0;
-                    continue;
-                }
-                else
-                {
-                    perror("send_all_chunked");
-                    break;
-                }
-            }
-            else
-                sent += (size_t)ret;
-
-            if (0 == ret)
-                break;
-        }
-
-        pthread_mutex_unlock(&session->send_mutex);
-    }
-    else
-    {
-        printf("[C] <send_all_chunked(%zu bytes)> failed, cannot lock the WebSocket send_mutex!\n", len);
-        return;
-    }
-
-    if (sent != len)
-        printf("[C] <send_all_chunked(%zu bytes)> failed, sent %zu bytes out of %zu bytes!\n", len, sent, len);
-
-    printf("[C] <send_all_chunked(%zu bytes)> sent %zu bytes.\n", len, sent);
-}
-
 static void *ws_send_messages(void *cls)
 {
     if (cls == NULL)
