@@ -2627,13 +2627,16 @@ void *ws_pv_response(void *ptr)
         ws_offset += offset;
 
         if (ws_offset != msg_len)
-            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
-
-        // create a queue message
-        struct data_buf msg = {pv_payload, msg_len};
+            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);        
 
 #ifdef MICROWS
-        char *msg_buf = NULL;
+        if (!session->disconnect)
+        {
+            send_all(session, pv_payload, msg_len);
+            free(pv_payload);
+        }
+
+        /*char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
         pthread_mutex_lock(&session->queue_mtx);
@@ -2656,8 +2659,11 @@ void *ws_pv_response(void *ptr)
             pthread_mutex_unlock(&session->queue_mtx);
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(pv_payload);
-        }
+        }*/
 #else
+        // create a queue message
+        struct data_buf msg = {pv_payload, msg_len};
+
         // pass the message over to mongoose via a communications channel
         bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -2852,13 +2858,16 @@ void *ws_image_spectrum_response(void *ptr)
         write_offset += sizeof(uint32_t) + hist_len * sizeof(int);
 
         if (ws_offset != msg_len)
-            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
-
-        // create a queue message
-        struct data_buf msg = {image_payload, msg_len};
+            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);        
 
 #ifdef MICROWS
-        char *msg_buf = NULL;
+        if (!session->disconnect)
+        {
+            send_all(session, image_payload, msg_len);
+            free(image_payload);
+        }
+
+        /*char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
         pthread_mutex_lock(&session->queue_mtx);
@@ -2881,8 +2890,11 @@ void *ws_image_spectrum_response(void *ptr)
             pthread_mutex_unlock(&session->queue_mtx);
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(image_payload);
-        }
+        }*/
 #else
+        // create a queue message
+        struct data_buf msg = {image_payload, msg_len};
+
         // pass the message over to mongoose via a communications channel
         bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -2960,13 +2972,16 @@ void *ws_image_spectrum_response(void *ptr)
         ws_offset += compressed_size;
 
         if (ws_offset != msg_len)
-            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
-
-        // create a queue message
-        struct data_buf msg = {spectrum_payload, msg_len};
+            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);        
 
 #ifdef MICROWS
-        char *msg_buf = NULL;
+        if (!session->disconnect)
+        {
+            send_all(session, spectrum_payload, msg_len);
+            free(spectrum_payload);
+        }
+
+        /*char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
         pthread_mutex_lock(&session->queue_mtx);
@@ -2989,8 +3004,11 @@ void *ws_image_spectrum_response(void *ptr)
             pthread_mutex_unlock(&session->queue_mtx);
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(spectrum_payload);
-        }
+        }*/
 #else
+        // create a queue message
+        struct data_buf msg = {spectrum_payload, msg_len};
+
         // pass the message over to mongoose via a communications channel
         bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3179,13 +3197,16 @@ void *spectrum_response(void *ptr)
                     ws_offset += compressed_size;
 
                     if (ws_offset != msg_len)
-                        printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
-
-                    // create a queue message
-                    struct data_buf msg = {payload, msg_len};
+                        printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);                    
 
 #ifdef MICROWS
-                    char *msg_buf = NULL;
+                    if (!session->disconnect)
+                    {
+                        send_all(session, payload, msg_len);
+                        free(payload);
+                    }
+
+                    /*char *msg_buf = NULL;
                     size_t _len = sizeof(struct data_buf);
 
                     pthread_mutex_lock(&session->queue_mtx);
@@ -3208,8 +3229,11 @@ void *spectrum_response(void *ptr)
                         pthread_mutex_unlock(&session->queue_mtx);
                         printf("[C] mg_queue_book failed, freeing memory.\n");
                         free(payload);
-                    }
+                    }*/
 #else
+                    // create a queue message
+                    struct data_buf msg = {payload, msg_len};
+
                     // pass the message over to mongoose via a communications channel
                     bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3374,13 +3398,16 @@ void *realtime_image_spectrum_response(void *ptr)
                 ws_offset += compressed_size;
 
                 if (ws_offset != msg_len)
-                    printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
-
-                // create a queue message
-                struct data_buf msg = {payload, msg_len};
+                    printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);                
 
 #ifdef MICROWS
-                char *msg_buf = NULL;
+                if (!session->disconnect)
+                {
+                    send_all(session, payload, msg_len);
+                    free(payload);
+                }
+
+                /*char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
 
                 pthread_mutex_lock(&session->queue_mtx);
@@ -3403,8 +3430,11 @@ void *realtime_image_spectrum_response(void *ptr)
                     pthread_mutex_unlock(&session->queue_mtx);
                     printf("[C] mg_queue_book failed, freeing memory.\n");
                     free(payload);
-                }
+                }*/
 #else
+                // create a queue message
+                struct data_buf msg = {payload, msg_len};
+
                 // pass the message over to mongoose via a communications channel
                 bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3476,13 +3506,16 @@ void *realtime_image_spectrum_response(void *ptr)
                 ws_offset += view_size;
 
                 if (ws_offset != msg_len)
-                    printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
-
-                // create a queue message
-                struct data_buf msg = {payload, msg_len};
+                    printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);                
 
 #ifdef MICROWS
-                char *msg_buf = NULL;
+                if (!session->disconnect)
+                {
+                    send_all(session, payload, msg_len);
+                    free(payload);
+                }
+
+                /*char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
 
                 pthread_mutex_lock(&session->queue_mtx);
@@ -3505,8 +3538,11 @@ void *realtime_image_spectrum_response(void *ptr)
                     pthread_mutex_unlock(&session->queue_mtx);
                     printf("[C] mg_queue_book failed, freeing memory.\n");
                     free(payload);
-                }
+                }*/
 #else
+                // create a queue message
+                struct data_buf msg = {payload, msg_len};
+
                 // pass the message over to mongoose via a communications channel
                 bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3684,13 +3720,16 @@ void *composite_video_response(void *ptr)
             ws_offset += pNals[i].sizeBytes;
 
             if (ws_offset != msg_len)
-                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
-
-            // create a queue message
-            struct data_buf msg = {payload, msg_len};
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);            
 
 #ifdef MICROWS
-            char *msg_buf = NULL;
+            if (!session->disconnect)
+            {
+                send_all(session, payload, msg_len);
+                free(payload);
+            }
+
+            /*char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
 
             pthread_mutex_lock(&session->queue_mtx);
@@ -3713,8 +3752,11 @@ void *composite_video_response(void *ptr)
                 pthread_mutex_unlock(&session->queue_mtx);
                 printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
-            }
+            }*/
 #else
+            // create a queue message
+            struct data_buf msg = {payload, msg_len};
+
             // pass the message over to mongoose via a communications channel
             bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 
@@ -3896,13 +3938,16 @@ void *video_response(void *ptr)
             ws_offset += pNals[i].sizeBytes;
 
             if (ws_offset != msg_len)
-                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
-
-            // create a queue message
-            struct data_buf msg = {payload, msg_len};
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);            
 
 #ifdef MICROWS
-            char *msg_buf = NULL;
+            if (!session->disconnect)
+            {
+                send_all(session, payload, msg_len);
+                free(payload);
+            }
+
+            /*char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
 
             pthread_mutex_lock(&session->queue_mtx);
@@ -3925,8 +3970,11 @@ void *video_response(void *ptr)
                 pthread_mutex_unlock(&session->queue_mtx);
                 printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
-            }
+            }*/
 #else
+            // create a queue message
+            struct data_buf msg = {payload, msg_len};
+
             // pass the message over to mongoose via a communications channel
             bool sent = mg_wakeup(session->mgr, session->conn_id, &msg, sizeof(struct data_buf)); // Wakeup event manager
 

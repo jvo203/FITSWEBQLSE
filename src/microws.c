@@ -272,7 +272,7 @@ static void make_non_blocking(MHD_socket fd)
  * @param buf The buffer with the data to send
  * @param len The length in bytes of the data in the buffer
  */
-static void send_all(websocket_session *session, const char *buf, size_t len)
+void send_all(websocket_session *session, const char *buf, size_t len)
 {
     if (session->disconnect)
         return;

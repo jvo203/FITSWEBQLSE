@@ -115,6 +115,10 @@ typedef struct
     struct ring_buffer *pv_ring;
 } websocket_session;
 
+#ifdef MICROWS
+void send_all(websocket_session *session, const char *buf, size_t len);
+#endif
+
 struct websocket_response
 {
     char *session_id;
