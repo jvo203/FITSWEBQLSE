@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-03-14.1";
+    return "JS2024-03-14.2";
 }
 
 function uuidv4() {
@@ -14118,7 +14118,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                             if (!isLocal) {
                                 let filesize = fitsData.filesize;
-                                let strFileSize = numeral(filesize).format('0.0b');
+                                let strFileSize = numeral(filesize).format('0.0ib');
                                 d3.select("#FITS").html("full download (" + strFileSize + ")");
                             }
 
