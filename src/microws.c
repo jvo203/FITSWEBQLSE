@@ -274,6 +274,9 @@ static void make_non_blocking(MHD_socket fd)
  */
 void send_all(websocket_session *session, const char *buf, size_t len)
 {
+    if(buf == NULL || len == 0)
+        return;
+
     if (session->disconnect)
         return;
 
