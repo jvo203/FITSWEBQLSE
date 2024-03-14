@@ -127,7 +127,7 @@ static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
             return 0;
 
         // decode the message
-        for (i = idx_first_data, j = 0; j < data_length; i++, j++)
+        for (i = idx_first_data, j = 0; j < (int)data_length; i++, j++)
         {
             char c = frame[i] ^ masks[j % 4];
             printf("%c", c);
@@ -277,7 +277,7 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
 
     if (pthread_mutex_lock(&session->send_mutex) == 0)
     {
-        ssize_t ret;
+        ssize_t ret = 0;
         size_t off;
 
 #ifdef POLL
@@ -296,12 +296,16 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
             if (poll_ret == 0)
             {
                 printf("[C] <send_all(%zu bytes)> poll timeout, retrying.\n", len);
+                ret = 0;
                 continue;
             }
             else if (poll_ret < 0)
             {
                 if (EAGAIN == errno)
+                {
+                    ret = 0;
                     continue;
+                }
 
                 perror("send_all");
                 break;
@@ -318,10 +322,11 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
                     ret = 0;
                     continue;
                 }
-                else
+                else 
+                {
                     perror("send_all");
-
-                break;
+                    break;
+                }
             }
             else
                 sent += (size_t)ret;
@@ -360,9 +365,9 @@ static void send_all_chunked(websocket_session *session, const char *buf, size_t
     printf("[C] <send_all_chunked(%zu bytes)> sending data.\n", len);
 
     if (pthread_mutex_lock(&session->send_mutex) == 0)
-    {
-        ssize_t ret;
-        size_t off;
+    {        
+        ssize_t ret = 0;
+        size_t off;        
 
         for (off = 0; off < len; off += ret)
         {
@@ -377,9 +382,10 @@ static void send_all_chunked(websocket_session *session, const char *buf, size_t
                     continue;
                 }
                 else
+                {
                     perror("send_all_chunked");
-
-                break;
+                    break;
+                }
             }
             else
                 sent += (size_t)ret;
