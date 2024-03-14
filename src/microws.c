@@ -122,14 +122,13 @@ static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
         masks[2] = frame[idx_first_mask + 2];
         masks[3] = frame[idx_first_mask + 3];
 
+        // return if there is insufficient data to complete the frame
+        if (idx_first_data + data_length > *length)
+            return 0;
+
         // decode the message
         for (i = idx_first_data, j = 0; j < data_length; i++, j++)
         {
-            // make sure not to exceeded the frame length
-            // return 0 if there is insufficient data to complete the frame
-            if (i >= *length)
-                return 0;
-
             char c = frame[i] ^ masks[j % 4];
             printf("%c", c);
             frame[j] = frame[i] ^ masks[j % 4]; // neat, overwrite the incoming frame buffer
@@ -2007,6 +2006,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             memmove(frame_data, frame_data + processed, *buf_len - processed);
 
             size_t remaining = *buf_len - processed;
+            frame_len = remaining;
             *buf_len -= processed;
 
             printf("[C] WebSocket remaining %zu bytes of data, cursor is at %zu\n", remaining, *buf_len);
