@@ -2630,11 +2630,9 @@ void *ws_pv_response(void *ptr)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);        
 
 #ifdef MICROWS
-        if (!session->disconnect)
-        {
+        if (!session->disconnect)        
             send_all(session, pv_payload, msg_len);
-            free(pv_payload);
-        }
+        free(pv_payload);        
 
         /*char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
@@ -2861,11 +2859,9 @@ void *ws_image_spectrum_response(void *ptr)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);        
 
 #ifdef MICROWS
-        if (!session->disconnect)
-        {
+        if (!session->disconnect)        
             send_all(session, image_payload, msg_len);
-            free(image_payload);
-        }
+        free(image_payload);        
 
         /*char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
@@ -2975,11 +2971,9 @@ void *ws_image_spectrum_response(void *ptr)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);        
 
 #ifdef MICROWS
-        if (!session->disconnect)
-        {
+        if (!session->disconnect)        
             send_all(session, spectrum_payload, msg_len);
-            free(spectrum_payload);
-        }
+        free(spectrum_payload);        
 
         /*char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
@@ -3200,11 +3194,9 @@ void *spectrum_response(void *ptr)
                         printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);                    
 
 #ifdef MICROWS
-                    if (!session->disconnect)
-                    {
+                    if (!session->disconnect)                    
                         send_all(session, payload, msg_len);
-                        free(payload);
-                    }
+                    free(payload);                    
 
                     /*char *msg_buf = NULL;
                     size_t _len = sizeof(struct data_buf);
@@ -3401,11 +3393,9 @@ void *realtime_image_spectrum_response(void *ptr)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);                
 
 #ifdef MICROWS
-                if (!session->disconnect)
-                {
+                if (!session->disconnect)                
                     send_all(session, payload, msg_len);
-                    free(payload);
-                }
+                free(payload);                
 
                 /*char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
@@ -3509,11 +3499,9 @@ void *realtime_image_spectrum_response(void *ptr)
                     printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);                
 
 #ifdef MICROWS
-                if (!session->disconnect)
-                {
+                if (!session->disconnect)                
                     send_all(session, payload, msg_len);
-                    free(payload);
-                }
+                free(payload);
 
                 /*char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
@@ -3723,11 +3711,9 @@ void *composite_video_response(void *ptr)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);            
 
 #ifdef MICROWS
-            if (!session->disconnect)
-            {
+            if (!session->disconnect)            
                 send_all(session, payload, msg_len);
-                free(payload);
-            }
+            free(payload);            
 
             /*char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
@@ -3941,11 +3927,9 @@ void *video_response(void *ptr)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);            
 
 #ifdef MICROWS
-            if (!session->disconnect)
-            {
+            if (!session->disconnect)            
                 send_all(session, payload, msg_len);
-                free(payload);
-            }
+            free(payload);            
 
             /*char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
