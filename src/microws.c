@@ -2012,8 +2012,8 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             printf("[C] WebSocket remaining %zu bytes of data, cursor is at %zu\n", remaining, *buf_len);
 
             // ring a bell if remaining > 0
-            if (remaining > 0)
-                printf("\a");
+            /*if (remaining > 0)
+                printf("\a");*/
         }
 
         // break out of the loop if there is no more data to process
