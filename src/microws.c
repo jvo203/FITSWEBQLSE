@@ -282,16 +282,17 @@ static void send_all(websocket_session *session, const char *buf, size_t len)
         size_t off;
 
 #ifdef POLL
-        struct pollfd fds[1];
-        fds[0].fd = session->fd;
-        fds[0].events = POLLOUT;
-        fds[0].revents = 0;
+        struct pollfd fds;
+        fds.fd = session->fd;
+        fds.events = POLLOUT;
+        fds.revents = 0;
 #endif
 
         for (off = 0; off < len; off += ret)
         {
 #ifdef POLL
-            int poll_ret = poll(fds, 1, 1000);
+            /* poll the socket for the ability to write */
+            int poll_ret = poll(&fds, 1, -1);
 
             if (poll_ret == 0)
             {
@@ -2036,10 +2037,10 @@ static void *ws_receive_messages(void *cls)
     websocket_session *session = (websocket_session *)cls;
 
 #ifdef POLL
-    struct pollfd fds[1];
-    fds[0].fd = session->fd;
-    fds[0].events = POLLIN;
-    fds[0].revents = 0;
+    struct pollfd fds;
+    fds.fd = session->fd;
+    fds.events = POLLIN;
+    fds.revents = 0;
 
     /* make the socket non-blocking */
     make_non_blocking(session->fd);
@@ -2130,7 +2131,7 @@ static void *ws_receive_messages(void *cls)
     {
 #ifdef POLL
         /* poll the socket for incoming data */
-        int ret = poll(fds, 1, -1);
+        int ret = poll(&fds, 1, -1);
 
         if (ret < 0)
         {
