@@ -130,10 +130,10 @@ static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
         for (i = idx_first_data, j = 0; j < (int)data_length; i++, j++)
         {
             char c = frame[i] ^ masks[j % 4];
-            printf("%c", c);
+            // printf("%c", c);
             frame[j] = frame[i] ^ masks[j % 4]; // neat, overwrite the incoming frame buffer
         }
-        printf("\n");
+        // printf("\n");
 
         // the entire WebSocket frame has been processed
         consumed = i; // the number of bytes consumed (equal to idx_first_data + data_length)
