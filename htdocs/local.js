@@ -56,7 +56,7 @@ function show_directory_contents(response) {
         .html("<thead><tr style=\"color:inherit\"><th>name</th><th>size <a href=\"#unit\">[1]</a></th><th>last modified</th></tr></thead>"));
     //class=\"danger\" style=\"color:black\"
 
-    $("#filesystem").append($("<p>[1] Base 10 (decimal)</p>")
+    $("#filesystem").append($("<p>[1] Base-2 (IEC binary)</p>")
         .attr("id", "unit"));
 
     //contents
@@ -166,7 +166,7 @@ function show_directory_contents(response) {
                 .attr("onclick", tmp)
                 //.attr("onmouseenter", cmd)
                 .attr('title', group_str)
-                .html("<td><p href=\"" + url + "\"><span class=\"glyphicon glyphicon-open-file\"></span>&nbsp;&nbsp;" + filelist[i].name + "</p></td><td>" + numeral(filelist[i].size).format('0. bd') + "</td><td>" + filelist[i].last_modified + "</td>"));
+                .html("<td><p href=\"" + url + "\"><span class=\"glyphicon glyphicon-open-file\"></span>&nbsp;&nbsp;" + filelist[i].name + "</p></td><td>" + numeral(filelist[i].size).format('0.0 ib') + "</td><td>" + filelist[i].last_modified + "</td>"));
         }
     }
 
