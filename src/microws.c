@@ -81,7 +81,9 @@ static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
     int j;
 
     *type = frame[0] & 0x0F;
+#ifdef DEBUG
     printf("[C] ws_receive_frame type %d, processing %zu bytes.\n", *type, *length);
+#endif
 
     if (frame[0] == (WS_FIN | WS_OPCODE_CON_CLOSE_FRAME))
         return 0;
@@ -113,7 +115,9 @@ static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
             data_length = (size_t)flength;
         }
 
+#ifdef DEBUG
         printf("[C] ws_receive_frame: flength: %d, data_length: %zu\n", flength, data_length);
+#endif
 
         idx_first_data = (unsigned char)(idx_first_mask + 4);
 
@@ -132,12 +136,7 @@ static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
 
         // decode the message
         for (i = idx_first_data, j = 0; j < (int)data_length; i++, j++)
-        {
-            char c = frame[i] ^ masks[j % 4];
-            // printf("%c", c);
             frame[j] = frame[i] ^ masks[j % 4]; // neat, overwrite the incoming frame buffer
-        }
-        // printf("\n");
 
         // the entire WebSocket frame has been processed
         consumed = i; // the number of bytes consumed (equal to idx_first_data + data_length)
@@ -420,7 +419,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
         switch (type)
         {
         case WS_OPCODE_TEXT_FRAME:
+#ifdef DEBUG
             printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
+#endif
 
             // parse the received message
             if (NULL != strstr(frame_data, "[heartbeat]"))
@@ -461,8 +462,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                         // wake up the sender
                         pthread_cond_signal(&session->wake_up_sender);
-
-                        printf("[C] WebSocket queued a text frame '%.*s'\n", (int)frame_len, frame_data);
                     }
                     else
                     {
@@ -487,9 +486,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                     if (item != NULL)
                     {
-                        // #ifdef DEBUG
+#ifdef DEBUG
                         printf("[C] updating the timestamp for '%s'\n", token);
-                        // #endif
+#endif
                         update_timestamp(item);
 
                         // trigger updates across the cluster too
@@ -1972,7 +1971,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
         if (processed > 0)
         {
+#ifdef DEBUG
             printf("[C] WebSocket processed %zu bytes of data\n", processed);
+#endif
 
             // memmove the remaining data to the beginning of the buffer
             memmove(frame_data, frame_data + processed, *buf_len - processed);
@@ -1981,11 +1982,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             frame_len = remaining;
             *buf_len -= processed;
 
+#ifdef DEBUG
             printf("[C] WebSocket remaining %zu bytes of data, cursor is at %zu\n", remaining, *buf_len);
-
-            // ring a bell if remaining > 0
-            /*if (remaining > 0)
-                printf("\a");*/
+#endif
         }
 
         // break out of the loop if there is no more data to process
@@ -2146,13 +2145,14 @@ static void *ws_receive_messages(void *cls)
         }
 
         // 0 < got
-        // print_hex(buf, got);
+#ifdef DEBUG
+        print_hex(buf, got);
+#endif
         cursor += (size_t)got;
 
-        // #ifdef DEBUG
-        // print the received message #bytes
+#ifdef DEBUG
         printf("[C] WebSocket received %zd bytes, new cursor = %zu\n", got, cursor);
-        // #endif
+#endif
 
         // handle the messages
         if (0 != parse_received_websocket_stream(session, buf, &cursor))
