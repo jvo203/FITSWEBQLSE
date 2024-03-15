@@ -450,7 +450,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     char *msg_buf = NULL;
                     size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                     pthread_spin_lock(&session->queue_lock);
 #else
                     pthread_mutex_lock(&session->queue_mtx);
@@ -464,7 +464,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     {
                         memcpy(msg_buf, &msg, _len);
                         mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                         pthread_spin_unlock(&session->queue_lock);
 #else
                         pthread_mutex_unlock(&session->queue_mtx);
@@ -475,7 +475,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     }
                     else
                     {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                         pthread_spin_unlock(&session->queue_lock);
 #else
                         pthread_mutex_unlock(&session->queue_mtx);
@@ -1431,7 +1431,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         char *msg_buf = NULL;
                         size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                         pthread_spin_lock(&session->queue_lock);
 #else
                         pthread_mutex_lock(&session->queue_mtx);
@@ -1445,7 +1445,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         {
                             memcpy(msg_buf, &msg, _len);
                             mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                             pthread_spin_unlock(&session->queue_lock);
 #else
                             pthread_mutex_unlock(&session->queue_mtx);
@@ -1456,7 +1456,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         }
                         else
                         {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                             pthread_spin_unlock(&session->queue_lock);
 #else
                             pthread_mutex_unlock(&session->queue_mtx);
@@ -1961,7 +1961,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     char *msg_buf = NULL;
                     size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                     pthread_spin_lock(&session->queue_lock);
 #else
                     pthread_mutex_lock(&session->queue_mtx);
@@ -1975,7 +1975,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     {
                         memcpy(msg_buf, &msg, _len);
                         mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                         pthread_spin_unlock(&session->queue_lock);
 #else
                         pthread_mutex_unlock(&session->queue_mtx);
@@ -1986,7 +1986,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     }
                     else
                     {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                         pthread_spin_unlock(&session->queue_lock);
 #else
                         pthread_mutex_unlock(&session->queue_mtx);
@@ -2517,7 +2517,7 @@ on_ws_connection(void *cls,
                 session->buf_len = 1024 * sizeof(struct data_buf);
                 session->buf = (char *)malloc(session->buf_len);
                 mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                 pthread_spin_init(&session->queue_lock, PTHREAD_PROCESS_PRIVATE);
 #else
                 pthread_mutex_init(&session->queue_mtx, NULL);

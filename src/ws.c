@@ -198,7 +198,7 @@ void delete_session(websocket_session *session)
     pthread_mutex_destroy(&session->pv_mtx);
 
 #ifdef MICROWS
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
     pthread_spin_lock(&session->queue_lock);
 #else
     pthread_mutex_lock(&session->queue_mtx);
@@ -234,7 +234,7 @@ void delete_session(websocket_session *session)
     session->buf_len = 0;
 
 // unlock and destroy the queue_mtx
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
     pthread_spin_unlock(&session->queue_lock);
     pthread_spin_destroy(&session->queue_lock);
 #else
@@ -2645,7 +2645,7 @@ void *ws_pv_response(void *ptr)
         char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
         pthread_spin_lock(&session->queue_lock);
 #else
         pthread_mutex_lock(&session->queue_mtx);
@@ -2659,7 +2659,7 @@ void *ws_pv_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
             pthread_spin_unlock(&session->queue_lock);
 #else
             pthread_mutex_unlock(&session->queue_mtx);
@@ -2670,7 +2670,7 @@ void *ws_pv_response(void *ptr)
         }
         else
         {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
             pthread_spin_unlock(&session->queue_lock);
 #else
             pthread_mutex_unlock(&session->queue_mtx);
@@ -2888,7 +2888,7 @@ void *ws_image_spectrum_response(void *ptr)
         char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
         pthread_spin_lock(&session->queue_lock);
 #else
         pthread_mutex_lock(&session->queue_mtx);
@@ -2902,7 +2902,7 @@ void *ws_image_spectrum_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
             pthread_spin_unlock(&session->queue_lock);
 #else
             pthread_mutex_unlock(&session->queue_mtx);
@@ -2913,7 +2913,7 @@ void *ws_image_spectrum_response(void *ptr)
         }
         else
         {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
             pthread_spin_unlock(&session->queue_lock);
 #else
             pthread_mutex_unlock(&session->queue_mtx);
@@ -3014,7 +3014,7 @@ void *ws_image_spectrum_response(void *ptr)
         char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
         pthread_spin_lock(&session->queue_lock);
 #else
         pthread_mutex_lock(&session->queue_mtx);
@@ -3028,7 +3028,7 @@ void *ws_image_spectrum_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
             pthread_spin_unlock(&session->queue_lock);
 #else
             pthread_mutex_unlock(&session->queue_mtx);
@@ -3039,7 +3039,7 @@ void *ws_image_spectrum_response(void *ptr)
         }
         else
         {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
             pthread_spin_unlock(&session->queue_lock);
 #else
             pthread_mutex_unlock(&session->queue_mtx);
@@ -3251,7 +3251,7 @@ void *spectrum_response(void *ptr)
                     char *msg_buf = NULL;
                     size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                     pthread_spin_lock(&session->queue_lock);
 #else
                     pthread_mutex_lock(&session->queue_mtx);
@@ -3265,7 +3265,7 @@ void *spectrum_response(void *ptr)
                     {
                         memcpy(msg_buf, &msg, _len);
                         mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                         pthread_spin_unlock(&session->queue_lock);
 #else
                         pthread_mutex_unlock(&session->queue_mtx);
@@ -3276,7 +3276,7 @@ void *spectrum_response(void *ptr)
                     }
                     else
                     {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                         pthread_spin_unlock(&session->queue_lock);
 #else
                         pthread_mutex_unlock(&session->queue_mtx);
@@ -3464,7 +3464,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                 pthread_spin_lock(&session->queue_lock);
 #else
                 pthread_mutex_lock(&session->queue_mtx);
@@ -3478,7 +3478,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                     pthread_spin_unlock(&session->queue_lock);
 #else
                     pthread_mutex_unlock(&session->queue_mtx);
@@ -3489,7 +3489,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 }
                 else
                 {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                     pthread_spin_unlock(&session->queue_lock);
 #else
                     pthread_mutex_unlock(&session->queue_mtx);
@@ -3584,7 +3584,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                 pthread_spin_lock(&session->queue_lock);
 #else
                 pthread_mutex_lock(&session->queue_mtx);
@@ -3598,7 +3598,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                     pthread_spin_unlock(&session->queue_lock);
 #else
                     pthread_mutex_unlock(&session->queue_mtx);
@@ -3609,7 +3609,7 @@ void *realtime_image_spectrum_response(void *ptr)
                 }
                 else
                 {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                     pthread_spin_unlock(&session->queue_lock);
 #else
                     pthread_mutex_unlock(&session->queue_mtx);
@@ -3810,7 +3810,7 @@ void *composite_video_response(void *ptr)
             char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
             pthread_spin_lock(&session->queue_lock);
 #else
             pthread_mutex_lock(&session->queue_mtx);
@@ -3824,7 +3824,7 @@ void *composite_video_response(void *ptr)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                 pthread_spin_unlock(&session->queue_lock);
 #else
                 pthread_mutex_unlock(&session->queue_mtx);
@@ -3835,7 +3835,7 @@ void *composite_video_response(void *ptr)
             }
             else
             {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                 pthread_spin_unlock(&session->queue_lock);
 #else
                 pthread_mutex_unlock(&session->queue_mtx);
@@ -4040,7 +4040,7 @@ void *video_response(void *ptr)
             char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
 
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
             pthread_spin_lock(&session->queue_lock);
 #else
             pthread_mutex_lock(&session->queue_mtx);
@@ -4054,7 +4054,7 @@ void *video_response(void *ptr)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                 pthread_spin_unlock(&session->queue_lock);
 #else
                 pthread_mutex_unlock(&session->queue_mtx);
@@ -4065,7 +4065,7 @@ void *video_response(void *ptr)
             }
             else
             {
-#if !defined(__APPLE__) || !defined(__MACH__)
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
                 pthread_spin_unlock(&session->queue_lock);
 #else
                 pthread_mutex_unlock(&session->queue_mtx);
