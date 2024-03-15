@@ -209,6 +209,24 @@ size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
 }
 
 /**
+ * @brief Make the socket real-time interactive
+ * by disabling the Nagle's algorithm
+ * (enabling TCP_NODELAY)
+ *
+ * * @param fd the socket to manipulate
+ */
+static void make_real_time(MHD_socket fd)
+{
+    int flag = 1;
+    int result = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int));
+
+    if (result < 0)
+        perror("make_real_time");
+    else
+        printf("[C] make_real_time: the socket is now real-time interactive.\n");
+}
+
+/**
  * Change socket to blocking.
  *
  * @param fd the socket to manipulate
@@ -321,8 +339,8 @@ void send_all(websocket_session *session, const char *buf, size_t len)
 #endif
 
             // MSG_DONTWAIT may not necessarily work in macOS
-            ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT);
-            // ret = send(session->fd, &buf[off], MIN((int)(len - off), 1500), MSG_DONTWAIT); // chunking does not seem to make a difference, the network stack will handle it
+            // ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT);
+            ret = send(session->fd, &buf[off], MIN((int)(len - off), 1500), MSG_DONTWAIT); // chunking does not seem to make a difference, the network stack will handle it
 
             if (0 > ret)
             {
@@ -2046,6 +2064,9 @@ static void *ws_receive_messages(void *cls)
 
     websocket_session *session = (websocket_session *)cls;
 
+    // disable Nagle
+    make_real_time(session->fd);
+
 #ifdef POLL
     struct pollfd fds;
     fds.fd = session->fd;
@@ -2062,8 +2083,7 @@ static void *ws_receive_messages(void *cls)
     /* initialize the wake-up-sender condition variable */
     if (0 != pthread_cond_init(&session->wake_up_sender, NULL))
     {
-        MHD_upgrade_action(session->urh,
-                           MHD_UPGRADE_ACTION_CLOSE);
+        MHD_upgrade_action(session->urh, MHD_UPGRADE_ACTION_CLOSE);
 
         // remove a session pointer from the hash table
         remove_session(session);
