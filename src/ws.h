@@ -52,7 +52,7 @@ typedef struct
     /* a mongoose Single-Producer Single-Consumer queue, writes to be protected by a spinlock or a mutex */
     struct mg_queue queue;
 #if !defined(__APPLE__) || !defined(__MACH__)
-    // use a spinlock on Linux and elsewhere
+    // use a spinlock on Linux
     pthread_spinlock_t queue_lock;
 #else
     // use a mutex on macOS

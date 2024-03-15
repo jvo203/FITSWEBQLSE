@@ -231,7 +231,11 @@ void delete_session(websocket_session *session)
 
     // unlock and destroy the queue_mtx
     pthread_mutex_unlock(&session->queue_mtx);
+#if !defined(__APPLE__) || !defined(__MACH__)
+    pthread_spin_destroy(&session->queue_lock);
+#else
     pthread_mutex_destroy(&session->queue_mtx);
+#endif
     pthread_mutex_destroy(&session->wake_up_cond_mtx);
 #endif
 
