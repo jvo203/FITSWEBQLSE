@@ -218,12 +218,22 @@ size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
 static void make_real_time(MHD_socket fd)
 {
     int flag = 1;
+
+    // TCP_NODELAY
     int result = setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int));
 
     if (result < 0)
-        perror("make_real_time");
+        perror("make_real_time (TCP_NODELAY)");
     else
-        printf("[C] make_real_time: the socket is now real-time interactive.\n");
+        printf("[C] upgraded the WebSocket to real-time.\n");
+
+    // SO_KEEPALIVE
+    result = setsockopt(fd, SOL_TCP, SO_KEEPALIVE, (char *)&flag, sizeof(int));
+
+    if (result < 0)
+        perror("make_real_time (KEEPALIVE)");
+    else
+        printf("[C] keeping the WebSocket alive.\n");
 }
 
 /**
@@ -340,7 +350,9 @@ void send_all(websocket_session *session, const char *buf, size_t len)
 
             // MSG_DONTWAIT may not necessarily work in macOS
             // ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT);
-            ret = send(session->fd, &buf[off], MIN((int)(len - off), 1500), MSG_DONTWAIT); // chunking does not seem to make a difference, the network stack will handle it
+
+            // custom chunking since we have disabled Nagle's algorithm
+            ret = send(session->fd, &buf[off], MIN((int)(len - off), 1500), MSG_DONTWAIT);
 
             if (0 > ret)
             {
