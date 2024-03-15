@@ -88,7 +88,7 @@ static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
     if (frame[0] == (WS_FIN | WS_OPCODE_CON_CLOSE_FRAME))
         return 0;
 
-    consumed = 0; // assume not data is consumed
+    consumed = 0; // assume no data is consumed
     if (frame[0] == (WS_FIN | WS_OPCODE_TEXT_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_BINARY_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_PING_FRAME) || frame[0] == (WS_FIN | WS_OPCODE_PONG_FRAME))
     {
         idx_first_mask = 2;
