@@ -51,9 +51,15 @@ typedef struct
 
     /* a mongoose Single-Producer Single-Consumer queue, writes to be protected by a spinlock or a mutex */
     struct mg_queue queue;
+#if !defined(__APPLE__) || !defined(__MACH__)
+    // use a spinlock on Linux and elsewhere
+    pthread_spinlock_t queue_lock;
+#else
+    // use a mutex on macOS
     pthread_mutex_t queue_mtx; // appending to queue one thread at a time
-    char *buf;                 // Buffer for messages
-    size_t buf_len;            // Buffer length
+#endif
+    char *buf;      // Buffer for messages
+    size_t buf_len; // Buffer length
 
     /* specifies whether the websocket shall be closed (1) or not (0) */
     volatile sig_atomic_t disconnect;
