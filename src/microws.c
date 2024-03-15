@@ -146,7 +146,7 @@ static size_t ws_receive_frame(unsigned char *frame, size_t *length, int *type)
             frame[j] = '\0';
     }
     else
-        printf("[C] ws_receive_frame: received an unknown frame %02X (%d).\n", frame[0], *type);
+        printf("[C] ws_receive_frame: received an unsupported frame %02X (%d).\n", frame[0], *type);
 
     return consumed;
 }
