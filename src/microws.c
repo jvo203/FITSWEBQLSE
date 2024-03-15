@@ -228,7 +228,7 @@ static void make_real_time(MHD_socket fd)
         printf("[C] upgraded the WebSocket to real-time.\n");
 
     // SO_KEEPALIVE
-    result = setsockopt(fd, SOL_TCP, SO_KEEPALIVE, (char *)&flag, sizeof(int));
+    result = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&flag, sizeof(int));
 
     if (result < 0)
         perror("make_real_time (KEEPALIVE)");
@@ -348,11 +348,14 @@ void send_all(websocket_session *session, const char *buf, size_t len)
             }
 #endif
 
-            // MSG_DONTWAIT may not necessarily work in macOS
+            // no chunking, send as much as possible in one go
             // ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT);
 
             // custom chunking since we have disabled Nagle's algorithm
-            ret = send(session->fd, &buf[off], MIN((int)(len - off), 1500), MSG_DONTWAIT);
+            // ret = send(session->fd, &buf[off], MIN((int)(len - off), 1500), MSG_DONTWAIT);
+
+            // chunk in jumbo frames instead
+            ret = send(session->fd, &buf[off], MIN((int)(len - off), 9000), MSG_DONTWAIT);
 
             if (0 > ret)
             {
