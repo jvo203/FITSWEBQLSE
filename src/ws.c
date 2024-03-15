@@ -198,7 +198,11 @@ void delete_session(websocket_session *session)
     pthread_mutex_destroy(&session->pv_mtx);
 
 #ifdef MICROWS
+#if !defined(__APPLE__) || !defined(__MACH__)
+    pthread_spin_lock(&session->queue_lock);
+#else
     pthread_mutex_lock(&session->queue_mtx);
+#endif
 
     // drain the message queue
     size_t len = 0;
@@ -229,11 +233,12 @@ void delete_session(websocket_session *session)
     session->buf = NULL;
     session->buf_len = 0;
 
-    // unlock and destroy the queue_mtx
-    pthread_mutex_unlock(&session->queue_mtx);
+// unlock and destroy the queue_mtx
 #if !defined(__APPLE__) || !defined(__MACH__)
+    pthread_spin_unlock(&session->queue_lock);
     pthread_spin_destroy(&session->queue_lock);
 #else
+    pthread_mutex_unlock(&session->queue_mtx);
     pthread_mutex_destroy(&session->queue_mtx);
 #endif
     pthread_mutex_destroy(&session->wake_up_cond_mtx);
@@ -2640,7 +2645,11 @@ void *ws_pv_response(void *ptr)
         char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
+        pthread_spin_lock(&session->queue_lock);
+#else
         pthread_mutex_lock(&session->queue_mtx);
+#endif
 
         // reserve space for the binary message
         size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
@@ -2650,14 +2659,22 @@ void *ws_pv_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
+#if !defined(__APPLE__) || !defined(__MACH__)
+            pthread_spin_unlock(&session->queue_lock);
+#else
             pthread_mutex_unlock(&session->queue_mtx);
+#endif
 
             // wake up the sender
             pthread_cond_signal(&session->wake_up_sender);
         }
         else
         {
+#if !defined(__APPLE__) || !defined(__MACH__)
+            pthread_spin_unlock(&session->queue_lock);
+#else
             pthread_mutex_unlock(&session->queue_mtx);
+#endif
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(pv_payload);
         }
@@ -2871,7 +2888,11 @@ void *ws_image_spectrum_response(void *ptr)
         char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
+        pthread_spin_lock(&session->queue_lock);
+#else
         pthread_mutex_lock(&session->queue_mtx);
+#endif
 
         // reserve space for the binary message
         size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
@@ -2881,14 +2902,22 @@ void *ws_image_spectrum_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
+#if !defined(__APPLE__) || !defined(__MACH__)
+            pthread_spin_unlock(&session->queue_lock);
+#else
             pthread_mutex_unlock(&session->queue_mtx);
+#endif
 
             // wake up the sender
             pthread_cond_signal(&session->wake_up_sender);
         }
         else
         {
+#if !defined(__APPLE__) || !defined(__MACH__)
+            pthread_spin_unlock(&session->queue_lock);
+#else
             pthread_mutex_unlock(&session->queue_mtx);
+#endif
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(image_payload);
         }
@@ -2985,7 +3014,11 @@ void *ws_image_spectrum_response(void *ptr)
         char *msg_buf = NULL;
         size_t _len = sizeof(struct data_buf);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
+        pthread_spin_lock(&session->queue_lock);
+#else
         pthread_mutex_lock(&session->queue_mtx);
+#endif
 
         // reserve space for the binary message
         size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
@@ -2995,14 +3028,22 @@ void *ws_image_spectrum_response(void *ptr)
         {
             memcpy(msg_buf, &msg, _len);
             mg_queue_add(&session->queue, _len);
+#if !defined(__APPLE__) || !defined(__MACH__)
+            pthread_spin_unlock(&session->queue_lock);
+#else
             pthread_mutex_unlock(&session->queue_mtx);
+#endif
 
             // wake up the sender
             pthread_cond_signal(&session->wake_up_sender);
         }
         else
         {
+#if !defined(__APPLE__) || !defined(__MACH__)
+            pthread_spin_unlock(&session->queue_lock);
+#else
             pthread_mutex_unlock(&session->queue_mtx);
+#endif
             printf("[C] mg_queue_book failed, freeing memory.\n");
             free(spectrum_payload);
         }
@@ -3210,7 +3251,11 @@ void *spectrum_response(void *ptr)
                     char *msg_buf = NULL;
                     size_t _len = sizeof(struct data_buf);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
+                    pthread_spin_lock(&session->queue_lock);
+#else
                     pthread_mutex_lock(&session->queue_mtx);
+#endif
 
                     // reserve space for the binary message
                     size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
@@ -3220,14 +3265,22 @@ void *spectrum_response(void *ptr)
                     {
                         memcpy(msg_buf, &msg, _len);
                         mg_queue_add(&session->queue, _len);
+#if !defined(__APPLE__) || !defined(__MACH__)
+                        pthread_spin_unlock(&session->queue_lock);
+#else
                         pthread_mutex_unlock(&session->queue_mtx);
+#endif
 
                         // wake up the sender
                         pthread_cond_signal(&session->wake_up_sender);
                     }
                     else
                     {
+#if !defined(__APPLE__) || !defined(__MACH__)
+                        pthread_spin_unlock(&session->queue_lock);
+#else
                         pthread_mutex_unlock(&session->queue_mtx);
+#endif
                         printf("[C] mg_queue_book failed, freeing memory.\n");
                         free(payload);
                     }
@@ -3411,7 +3464,11 @@ void *realtime_image_spectrum_response(void *ptr)
                 char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
+                pthread_spin_lock(&session->queue_lock);
+#else
                 pthread_mutex_lock(&session->queue_mtx);
+#endif
 
                 // reserve space for the binary message
                 size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
@@ -3421,14 +3478,22 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
+#if !defined(__APPLE__) || !defined(__MACH__)
+                    pthread_spin_unlock(&session->queue_lock);
+#else
                     pthread_mutex_unlock(&session->queue_mtx);
+#endif
 
                     // wake up the sender
                     pthread_cond_signal(&session->wake_up_sender);
                 }
                 else
                 {
+#if !defined(__APPLE__) || !defined(__MACH__)
+                    pthread_spin_unlock(&session->queue_lock);
+#else
                     pthread_mutex_unlock(&session->queue_mtx);
+#endif
                     printf("[C] mg_queue_book failed, freeing memory.\n");
                     free(payload);
                 }
@@ -3519,7 +3584,11 @@ void *realtime_image_spectrum_response(void *ptr)
                 char *msg_buf = NULL;
                 size_t _len = sizeof(struct data_buf);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
+                pthread_spin_lock(&session->queue_lock);
+#else
                 pthread_mutex_lock(&session->queue_mtx);
+#endif
 
                 // reserve space for the binary message
                 size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
@@ -3529,14 +3598,22 @@ void *realtime_image_spectrum_response(void *ptr)
                 {
                     memcpy(msg_buf, &msg, _len);
                     mg_queue_add(&session->queue, _len);
+#if !defined(__APPLE__) || !defined(__MACH__)
+                    pthread_spin_unlock(&session->queue_lock);
+#else
                     pthread_mutex_unlock(&session->queue_mtx);
+#endif
 
                     // wake up the sender
                     pthread_cond_signal(&session->wake_up_sender);
                 }
                 else
                 {
+#if !defined(__APPLE__) || !defined(__MACH__)
+                    pthread_spin_unlock(&session->queue_lock);
+#else
                     pthread_mutex_unlock(&session->queue_mtx);
+#endif
                     printf("[C] mg_queue_book failed, freeing memory.\n");
                     free(payload);
                 }
@@ -3733,7 +3810,11 @@ void *composite_video_response(void *ptr)
             char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
+            pthread_spin_lock(&session->queue_lock);
+#else
             pthread_mutex_lock(&session->queue_mtx);
+#endif
 
             // reserve space for the binary message
             size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
@@ -3743,14 +3824,22 @@ void *composite_video_response(void *ptr)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
+#if !defined(__APPLE__) || !defined(__MACH__)
+                pthread_spin_unlock(&session->queue_lock);
+#else
                 pthread_mutex_unlock(&session->queue_mtx);
+#endif
 
                 // wake up the sender
                 pthread_cond_signal(&session->wake_up_sender);
             }
             else
             {
+#if !defined(__APPLE__) || !defined(__MACH__)
+                pthread_spin_unlock(&session->queue_lock);
+#else
                 pthread_mutex_unlock(&session->queue_mtx);
+#endif
                 printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
             }
@@ -3951,7 +4040,11 @@ void *video_response(void *ptr)
             char *msg_buf = NULL;
             size_t _len = sizeof(struct data_buf);
 
+#if !defined(__APPLE__) || !defined(__MACH__)
+            pthread_spin_lock(&session->queue_lock);
+#else
             pthread_mutex_lock(&session->queue_mtx);
+#endif
 
             // reserve space for the binary message
             size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
@@ -3961,14 +4054,22 @@ void *video_response(void *ptr)
             {
                 memcpy(msg_buf, &msg, _len);
                 mg_queue_add(&session->queue, _len);
+#if !defined(__APPLE__) || !defined(__MACH__)
+                pthread_spin_unlock(&session->queue_lock);
+#else
                 pthread_mutex_unlock(&session->queue_mtx);
+#endif
 
                 // wake up the sender
                 pthread_cond_signal(&session->wake_up_sender);
             }
             else
             {
+#if !defined(__APPLE__) || !defined(__MACH__)
+                pthread_spin_unlock(&session->queue_lock);
+#else
                 pthread_mutex_unlock(&session->queue_mtx);
+#endif
                 printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
             }
