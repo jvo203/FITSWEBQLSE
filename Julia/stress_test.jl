@@ -370,7 +370,7 @@ function test(host, port, id, stat, duration)
             end
         end
 
-        # a P-V diagram loop        
+        # a P-V Diagram loop        
         @async while running
             seq_id = 0
 
