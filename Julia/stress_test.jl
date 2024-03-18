@@ -419,7 +419,7 @@ datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALM
 # a dry run to warm up (pre-compile) Julia functions
 # test(host, port, datasets[1], stat, 10)
 
-# the real test
+# the real test running, for example, for 1 hour or 12 hours
 jobs = [Threads.@spawn test(host, port, dataset, stat, 1 * 3600) for dataset in datasets]
 wait.(jobs)
 
