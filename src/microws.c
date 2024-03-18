@@ -472,7 +472,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     memcpy(response + response_len, frame_data, frame_len);
                     response_len += frame_len;
 
-#ifdef DIRECT
+// #ifdef DIRECT
+// always send the heartbeat directly (the priority is to measure the latency)
+#ifdef MICROWS
                     // a direct send
                     if (!session->disconnect)
                         send_all(session, response, response_len);
