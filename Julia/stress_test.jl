@@ -396,7 +396,7 @@ function test(host, port, id, stat, duration)
                 "deltaV" => 0.0,
                 "seq_id" => seq_id))
 
-            # send a realtime image spectrum message            
+            # submit a P-V line request
             success = writeguarded(ws, msg)
 
             if !success
