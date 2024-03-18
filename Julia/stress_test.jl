@@ -370,6 +370,45 @@ function test(host, port, id, stat, duration)
             end
         end
 
+        # a P-V diagram loop        
+        @async while running
+            seq_id = 0
+
+            # make a timestamp as a single floating-point number
+            timestamp = Dates.value(now()) - base
+
+            # a random region
+            x1, x2 = rand(1:fits_width), rand(1:fits_width)
+            y1, y2 = rand(1:fits_height), rand(1:fits_height)
+
+            # make a JSON message
+            msg = JSON.json(Dict("type" => "pv",
+                "width" => 800,
+                "height" => 600,
+                "timestamp" => timestamp,
+                "x1" => x1,
+                "x2" => x2,
+                "y1" => y1,
+                "y2" => y2,
+                "frame_start" => data_band_lo,
+                "frame_end" => data_band_hi,
+                "ref_freq" => RESTFRQ,
+                "deltaV" => 0.0,
+                "seq_id" => seq_id))
+
+            # send a realtime image spectrum message            
+            success = writeguarded(ws, msg)
+
+            if !success
+                break
+            end
+
+            seq_id = seq_id + 1
+
+            # a fixed frames per second
+            sleep(1 / video_fps)
+        end
+
         # sleep for X seconds
         sleep(duration)
         running = false
