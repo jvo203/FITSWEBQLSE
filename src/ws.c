@@ -4146,6 +4146,14 @@ void *pv_event_loop(void *arg)
                 break;
             }
 
+#ifdef MICROWS
+            if (session->disconnect)
+            {
+                free(req);
+                break;
+            }
+#endif
+
             printf("[C] pv_event_loop::got a request id %d.\n", req->seq_id);
 
             if (req->seq_id <= last_seq_id)
@@ -4287,6 +4295,14 @@ void *ws_event_loop(void *arg)
                 break;
             }
 
+#ifdef MICROWS
+            if (session->disconnect)
+            {
+                free(req);
+                break;
+            }
+#endif
+
             printf("[C] ws_event_loop::got a request id %d.\n", req->seq_id);
 
             if (req->seq_id <= last_seq_id)
@@ -4423,6 +4439,15 @@ void *video_event_loop(void *arg)
                 free(req);
                 break;
             }
+
+#ifdef MICROWS
+            if (session->disconnect)
+            {
+                free(req->flux);
+                free(req);
+                break;
+            }
+#endif
 
             printf("[C] video_event_loop::got a request seq_id %d.\n", req->seq_id);
 
