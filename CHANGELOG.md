@@ -1,12 +1,10 @@
 ## [5.1.0] - 2024-0?-??
 
-* out of _*beta*_, into _*stable*_ operation and maintenance, receiving occasional bug fixes, tweaks and optimisations as well as new features
+* out of _*beta*_, into _*stable*_ operation and maintenance, receiving bug fixes, tweaks and new features
 * changed the display of the approximate size of FITS cut-outs to the _*IEC binary*_ format (i.e. MiB, GiB, TiB, etc.)
-* switched the display of the FITS file size to the _*IEC binary*_ format
+* switched the display of the FITS file size to _*IEC binary*_
 * improved automatic hiding of the newly-opened empty tab upon performing FITS cut-outs (browser dependent)
 * completely re-wrote the server-side real-time WebSocket communication between the server and the web browser (replaced the _*mongoose*_ C networking library with a custom C code loosely based on _*libmicrohttpd*_) in order to increase the performance
-
-# 5.0
 
 ## [5.0.57] - 2024-02-28
 
