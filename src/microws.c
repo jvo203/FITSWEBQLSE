@@ -326,9 +326,6 @@ void send_all(websocket_session *session, const char *buf, size_t len)
     if (session->disconnect)
         return;
 
-    // TCP_QUICKACK
-    enable_quickack(session->fd);
-
     size_t sent = 0;
 
     if (pthread_mutex_lock(&session->send_mutex) == 0)
@@ -342,6 +339,9 @@ void send_all(websocket_session *session, const char *buf, size_t len)
         fds.events = POLLOUT;
         fds.revents = 0;
 #endif
+
+        // TCP_QUICKACK
+        enable_quickack(session->fd);
 
         for (off = 0; off < len; off += ret)
         {
