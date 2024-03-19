@@ -415,7 +415,9 @@ function test(host, port, id, stat, duration)
 
         # send a close message
         println("[$id::WS] closing...")
-        writeguarded(ws, "[close]")
+        # writeguarded(ws, "[close]")
+        # close the WebSocket connection
+        close(ws)
     end
 end
 
@@ -459,7 +461,7 @@ datasets = ["ALMA01047077", "ALMA01018218", "ALMA01003454", "ALMA01575449", "ALM
 # test(host, port, datasets[1], stat, 10)
 
 # the real test running, for example, for 1 hour or 12 hours
-jobs = [Threads.@spawn test(host, port, dataset, stat, 12 * 3600) for dataset in datasets]
+jobs = [Threads.@spawn test(host, port, dataset, stat, 1 * 3600) for dataset in datasets]
 wait.(jobs)
 
 close(stat)
