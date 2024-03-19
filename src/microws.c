@@ -225,15 +225,25 @@ static void make_real_time(MHD_socket fd)
     if (result < 0)
         perror("make_real_time (TCP_NODELAY)");
     else
-        printf("[C] upgraded the WebSocket to real-time.\n");
+        printf("[C] WebSocket enabled TCP_NODELAY.\n");
 
     // SO_KEEPALIVE
     result = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&flag, sizeof(int));
 
     if (result < 0)
-        perror("make_real_time (KEEPALIVE)");
+        perror("make_real_time (SO_KEEPALIVE)");
     else
-        printf("[C] keeping the WebSocket alive.\n");
+        printf("[C] WebSocket enabled SO_KEEPALIVE.\n");
+
+#if (!defined(__APPLE__) || !defined(__MACH__))
+    // TCP_QUICKACK
+    result = setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, (char *)&flag, sizeof(int));
+
+    if (result < 0)
+        perror("make_real_time (TCP_QUICKACK)");
+    else
+        printf("[C] WebSocket enabled TCP_QUICKACK.\n");
+#endif
 }
 
 /**
