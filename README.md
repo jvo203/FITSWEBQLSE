@@ -1,9 +1,9 @@
-# NEWS: Breaking Through the 1TB Barrier
+# FITSWEBQLSE STATUS: _*STABLE*_ (March 2024 ~)
+In **stable** operation and maintenance, receiving occasional bug fixes, tweaks and optimisations as well as new features.
+
+# Breaking Through the 1TB Barrier
 
 ![Alt text](IVOA.jpg?raw=true "JVO Breaking Through the 1TB Barrier")
-
-# FITSWEBQLSE STATUS
-The _stable_ **BETA** milestone has been reached. It works natively on **Apple Silicon**. The attention has turned towards debugging, optimising as well as adding extra functionality. For example, a _real-time_ **Position-Velocity** diagram has already been implemented.
 
 ## PROJECT LAZARUS (a.k.a. FORTRAN RESURRECTED) (January 2022 ~)
 A resurrection of the previous Fortran code, this time without CoArrays but with manual HTTP-based distributed computing. Julia has been found to suffer from serious RAM fragmentation and/or automatic garbage collection issues after running for "long-enough" in a 24h server environment.
