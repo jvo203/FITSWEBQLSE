@@ -208,10 +208,24 @@ size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type)
     return (size_t)idx_first_data;
 }
 
+// TCP_QUICKACK is a Linux-specific socket option to enable or disable quick acknowledgment.
+// it seems it needs to be re-enabled periodically (before each send_all())
+static void enable_quickack(MHD_socket fd)
+{
+#if (!defined(__APPLE__) || !defined(__MACH__))
+    int flag = 1;
+    int result = setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, (char *)&flag, sizeof(int));
+
+    if (result < 0)
+        perror("enable_quickack");
+#endif
+}
+
 /**
  * @brief Make the socket real-time interactive
  * by disabling the Nagle's algorithm
  * (enabling TCP_NODELAY)
+ * and enabling TCP_QUICKACK
  *
  * * @param fd the socket to manipulate
  */
@@ -235,15 +249,8 @@ static void make_real_time(MHD_socket fd)
     else
         printf("[C] WebSocket enabled SO_KEEPALIVE.\n");
 
-#if (!defined(__APPLE__) || !defined(__MACH__))
     // TCP_QUICKACK
-    result = setsockopt(fd, IPPROTO_TCP, TCP_QUICKACK, (char *)&flag, sizeof(int));
-
-    if (result < 0)
-        perror("make_real_time (TCP_QUICKACK)");
-    else
-        printf("[C] WebSocket enabled TCP_QUICKACK.\n");
-#endif
+    enable_quickack(fd);
 }
 
 /**
@@ -318,6 +325,9 @@ void send_all(websocket_session *session, const char *buf, size_t len)
 
     if (session->disconnect)
         return;
+
+    // TCP_QUICKACK
+    enable_quickack(session->fd);
 
     size_t sent = 0;
 
