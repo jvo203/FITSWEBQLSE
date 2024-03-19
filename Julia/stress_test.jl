@@ -417,9 +417,8 @@ function test(host, port, id, stat, duration)
         println("[$id::WS] closing...")
         # writeguarded(ws, "[close]")
 
-        # close the WebSocket connection
+        # close the WebSocket connection and wait for the server to close the connection
         close(ws)
-        sleep(1)
     end
 end
 
