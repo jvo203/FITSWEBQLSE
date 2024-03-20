@@ -187,11 +187,10 @@ function test(host, port, id, stat, duration)
     println("datasetid: ", id, ", wsURL: ", wsURL)
 
     base = Dates.value(now())
+    running = true
 
     # next open a WebSocket client connection
     WebSockets.open(wsURL) do ws
-        running = true
-
         @async while running
             data, success = readguarded(ws)
 
@@ -419,6 +418,7 @@ function test(host, port, id, stat, duration)
 
         # close the WebSocket connection and wait for the server to close the connection
         close(ws)
+        return
     end
 end
 
