@@ -2570,6 +2570,9 @@ on_ws_connection(void *cls,
                 session->conn_id = -1;
                 session->mgr = NULL;
 
+                session->items = NULL;
+                session->va_count = 0;
+
                 session->buf_len = 1024 * sizeof(struct data_buf);
                 session->buf = (char *)malloc(session->buf_len);
                 mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue

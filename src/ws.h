@@ -35,6 +35,9 @@ typedef struct
     char *multi;     // multiple ids are separated by a semicolon
     char *id;        // sessionId
 
+    void **items;
+    int va_count;
+
 #ifdef MICROWS
     /* the TCP/IP socket for reading/writing */
     MHD_socket fd;
