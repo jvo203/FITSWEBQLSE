@@ -13,6 +13,7 @@ struct timeout_arg
 void init_hash_table();
 void delete_hash_table();
 void garbage_collect();
+void free_dataset(gpointer item);
 void free_hash_data(gpointer item);
 void *delete_hash_data(void *arg);
 void *delete_hash_data_no_timeout(void *arg);
