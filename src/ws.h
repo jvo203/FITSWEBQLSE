@@ -77,9 +77,11 @@ typedef struct
     pthread_mutex_t send_mutex;
 #endif
 
+#ifndef MICROWS
     // the WebSocket communications via mg_wakeup()
     struct mg_mgr *mgr;
     unsigned long conn_id; // Parent connection ID
+#endif
 
     char *flux;
     float dmin, dmax, dmedian;

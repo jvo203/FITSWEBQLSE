@@ -711,8 +711,13 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
                 session->datasetid = datasetId != NULL ? strdup(datasetId) : NULL;
                 session->multi = orig != NULL ? strdup(orig) : NULL;
                 session->id = sessionId != NULL ? strdup(sessionId) : NULL;
+#ifndef MICROWS
                 session->conn_id = c->id;
                 session->mgr = c->mgr;
+#endif
+
+                session->items = NULL;
+                session->va_count = 0;
 
                 session->flux = NULL;
                 session->dmin = NAN;

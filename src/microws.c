@@ -2567,8 +2567,6 @@ on_ws_connection(void *cls,
                 session->datasetid = strdup(datasetId);
                 session->multi = orig != NULL ? strdup(orig) : NULL;
                 session->id = strdup(sessionId);
-                session->conn_id = -1;
-                session->mgr = NULL;
 
                 session->items = NULL;
                 session->va_count = 0;
