@@ -540,7 +540,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 #endif
                 }
 
-                // get the dataset and update its timestamp
+                // get all the datasets and update their timestamps
                 char *datasetId = NULL;
 
                 // tokenize session->multi
@@ -2604,6 +2604,10 @@ on_ws_connection(void *cls,
 
                     free(_datasetId);
                 }
+
+                // if there are no items by this point, reject the connection
+                if (session->items == NULL)
+                    is_valid = 0;
 
                 if (!is_valid)
                 {
