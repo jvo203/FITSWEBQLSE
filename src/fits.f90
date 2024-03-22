@@ -1428,14 +1428,14 @@ contains
       item%ref = item%ref - 1
 
       if (item%ref .gt. 0) then
-         print *, item%datasetid, ': dataset has ', item%ref, ' references, not deleting it.'
+         print *, item%datasetid, ': dataset has ', item%ref, ' reference(s), not deleting it.'
          rc = c_pthread_mutex_unlock(item%ref_mtx)
          rc = c_pthread_mutex_unlock(item%loading_mtx)
          return
       end if
 
       if (item%ref .lt. 0) then
-         print *, item%datasetid, ': dataset has ', item%ref, ' references, something is wrong.'
+         print *, item%datasetid, ': dataset has ', item%ref, ' reference(s), something is wrong.'
       end if
 
       ! unlock the ref. mutex

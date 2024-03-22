@@ -2571,6 +2571,45 @@ on_ws_connection(void *cls,
                 session->items = NULL;
                 session->va_count = 0;
 
+                // tokenize session->multi
+                if (orig != NULL)
+                {
+                    char *_datasetId = strdup(orig);
+                    char *token = _datasetId;
+                    char *rest = token;
+
+                    while ((token = strtok_r(rest, ";", &rest)) != NULL)
+                    {
+                        void *item = get_dataset(token);
+
+                        if (item == NULL)
+                            is_valid = 0;
+
+                        if (session->items == NULL)
+                        {
+                            // allocate the first item
+                            session->items = (void **)malloc(sizeof(void *));
+                        }
+                        else
+                        {
+                            // reallocate items
+                            session->items = (void **)realloc(session->items, (session->va_count + 1) * sizeof(void *));
+                        }
+
+                        session->items[session->va_count++] = item;
+
+                        if (item != NULL)
+                        {
+                            // increment the reference count
+                            increment_refcount(item);
+                        }
+                    }
+
+                    free(_datasetId);
+                }
+
+                printf("[C] va_count: %d\n", session->va_count);
+
                 session->buf_len = 1024 * sizeof(struct data_buf);
                 session->buf = (char *)malloc(session->buf_len);
                 mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue
