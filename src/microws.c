@@ -819,7 +819,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         req->timestamp = atof2(frame_data + voff, vlen);
                 }
 
-                // printf("[C] P-V Diagram request: x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, timestamp: %f\n", req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->timestamp);
+                printf("[C] P-V Diagram request: x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, frame_start: %f, frame_end: %f, ref_freq: %f, deltaV: %f, rest: %d, timestamp: %f, seq_id: %d\n", req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest, req->timestamp, req->seq_id);
 
                 pthread_mutex_lock(&session->pv_mtx);
 
