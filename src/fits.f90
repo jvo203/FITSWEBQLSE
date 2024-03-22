@@ -395,6 +395,10 @@ module fits
 
       ! datasets opened from a URL will not be cached
       logical :: cache = .true. ! if true, the dataset will be cached
+
+      ! reference counting
+      integer :: ref = 1 ! start with 1 upon the initial allocation
+      type(c_pthread_mutex_t) :: ref_mtx
    contains
       final :: close_fits_file
    end type dataset
@@ -1418,6 +1422,25 @@ contains
       ! lock the loading mutex
       rc = c_pthread_mutex_lock(item%loading_mtx)
 
+      ! lock the ref. mutex and decrement the reference count
+      rc = c_pthread_mutex_lock(item%ref_mtx)
+
+      item%ref = item%ref - 1
+
+      if (item%ref .gt. 0) then
+         print *, item%datasetid, ': dataset has ', item%ref, ' references, not deleting it.'
+         rc = c_pthread_mutex_unlock(item%ref_mtx)
+         rc = c_pthread_mutex_unlock(item%loading_mtx)
+         return
+      end if
+
+      if (item%ref .lt. 0) then
+         print *, item%datasetid, ': dataset has ', item%ref, ' references, something is wrong.'
+      end if
+
+      ! unlock the ref. mutex
+      rc = c_pthread_mutex_unlock(item%ref_mtx)
+
       file = ''
       cache_len = 0
 
@@ -1432,6 +1455,7 @@ contains
       rc = c_pthread_mutex_destroy(item%image_mtx)
       rc = c_pthread_mutex_destroy(item%video_mtx)
       rc = c_pthread_mutex_destroy(item%timestamp_mtx)
+      rc = c_pthread_mutex_destroy(item%ref_mtx)
 
       ! check if the dataset can be cached in the first place
       if (.not. item%cache .or. item%error) then
@@ -3345,6 +3369,7 @@ contains
       rc = c_pthread_mutex_init(item%image_mtx, c_null_ptr)
       rc = c_pthread_mutex_init(item%video_mtx, c_null_ptr)
       rc = c_pthread_mutex_init(item%timestamp_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%ref_mtx, c_null_ptr)
 
       ! init and lock the loading mutex
       rc = c_pthread_mutex_init(item%loading_mtx, c_null_ptr)
@@ -3464,6 +3489,7 @@ contains
       rc = c_pthread_mutex_init(item%image_mtx, c_null_ptr)
       rc = c_pthread_mutex_init(item%video_mtx, c_null_ptr)
       rc = c_pthread_mutex_init(item%timestamp_mtx, c_null_ptr)
+      rc = c_pthread_mutex_init(item%ref_mtx, c_null_ptr)
 
       ! init and lock the loading mutex
       rc = c_pthread_mutex_init(item%loading_mtx, c_null_ptr)
