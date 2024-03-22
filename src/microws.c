@@ -726,14 +726,17 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 if (session->pv_exit)
                     goto clean_ws_frame;
 
-                char *datasetId = session->datasetid;
+                /*char *datasetId = session->datasetid;
                 void *item = get_dataset(datasetId);
 
                 if (item == NULL)
                 {
                     printf("[C] cannot find '%s' in the hash table\n", datasetId);
                     goto clean_ws_frame;
-                }
+                }*/
+
+                // get the first item
+                void *item = session->items[0];
 
                 update_timestamp(item);
 
@@ -940,8 +943,11 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 }
 
                 // pass the request to FORTRAN
-                char *datasetId = session->datasetid;
-                void *item = get_dataset(datasetId);
+                /*char *datasetId = session->datasetid;
+                void *item = get_dataset(datasetId);*/
+
+                // get the first item
+                void *item = session->items[0];
 
                 if (item != NULL)
                 {
@@ -1015,7 +1021,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 else
                 {
                     free(req);
-                    printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                    // printf("[C] cannot find '%s' in the hash table\n", datasetId);
                 }
 
                 goto clean_ws_frame;
@@ -1143,8 +1149,11 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 }
 
                 // pass the request to FORTRAN
-                char *datasetId = session->datasetid;
-                void *item = get_dataset(datasetId);
+                /*char *datasetId = session->datasetid;
+                void *item = get_dataset(datasetId);*/
+
+                // get the first item
+                void *item = session->items[0];
 
                 if (item != NULL)
                 {
@@ -1225,7 +1234,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     free(req->dec);
                     free(req);
                     free(resp);
-                    printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                    // printf("[C] cannot find '%s' in the hash table\n", datasetId);
                 }
 
                 goto clean_ws_frame;
@@ -1237,14 +1246,17 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 if (session->ws_exit)
                     goto clean_ws_frame;
 
-                char *datasetId = session->datasetid;
+                /*char *datasetId = session->datasetid;
                 void *item = get_dataset(datasetId);
 
                 if (item == NULL)
                 {
                     printf("[C] cannot find '%s' in the hash table\n", datasetId);
                     goto clean_ws_frame;
-                }
+                }*/
+
+                // get the first item
+                void *item = session->items[0];
 
                 update_timestamp(item);
 
@@ -1391,7 +1403,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             // init_video
             if (strcmp(type, "init_video") == 0)
             {
-                char *datasetId = session->datasetid;
+                /*char *datasetId = session->datasetid;
                 void *item = get_dataset(datasetId);
 
                 if (item == NULL)
@@ -1399,7 +1411,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                     printf("[C] cannot find '%s' in the hash table\n", datasetId);
                     goto clean_ws_frame;
-                }
+                }*/
+
+                // get the first item
+                void *item = session->items[0];
 
                 update_timestamp(item);
 
@@ -1640,14 +1655,17 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 if (session->flux == NULL)
                     goto clean_ws_frame;
 
-                char *datasetId = session->datasetid;
+                /*char *datasetId = session->datasetid;
                 void *item = get_dataset(datasetId);
 
                 if (item == NULL)
                 {
                     printf("[C] cannot find '%s' in the hash table\n", datasetId);
                     goto clean_ws_frame;
-                }
+                }*/
+
+                // get the first item
+                void *item = session->items[0];
 
                 update_timestamp(item);
 
