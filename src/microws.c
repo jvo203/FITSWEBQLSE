@@ -2557,8 +2557,6 @@ on_ws_connection(void *cls,
         }
         else if (is_valid)
         {
-            printf("[C] accepting the WebSocket connection for '%s'.\n", datasetId);
-
             session = new_session();
 
             if (session != NULL)
@@ -2582,9 +2580,6 @@ on_ws_connection(void *cls,
                     {
                         void *item = get_dataset(token);
 
-                        if (item == NULL)
-                            is_valid = 0;
-
                         if (session->items == NULL)
                         {
                             // allocate the first item
@@ -2603,12 +2598,49 @@ on_ws_connection(void *cls,
                             // increment the reference count
                             increment_refcount(item);
                         }
+                        else
+                            is_valid = 0;
                     }
 
                     free(_datasetId);
                 }
 
-                printf("[C] va_count: %d\n", session->va_count);
+                if (!is_valid)
+                {
+                    printf("[C] rejecting the WebSocket connection for '%s'.\n", datasetId);
+
+                    // clean up the items
+                    if (session->items != NULL)
+                    {
+                        for (int i = 0; i < session->va_count; i++)
+                        {
+                            void *item = session->items[i];
+
+                            if (item != NULL)
+                            {
+                                // decrement the reference count
+                                free_dataset(item);
+                            }
+                        }
+
+                        free(session->items);
+                    }
+
+                    // clean up the session fields allocated so far
+                    if (session->datasetid != NULL)
+                        free(session->datasetid);
+
+                    if (session->multi != NULL)
+                        free(session->multi);
+
+                    if (session->id != NULL)
+                        free(session->id);
+
+                    free(session);
+                    session = NULL;
+
+                    goto end_of_session;
+                }
 
                 session->buf_len = 1024 * sizeof(struct data_buf);
                 session->buf = (char *)malloc(session->buf_len);
@@ -2716,7 +2748,10 @@ on_ws_connection(void *cls,
                     printf("[C] cannot lock sessions_mtx!\n");
                 }
 
-                // hold on to the session pointer, pass it to the WebSocket upgrade handler
+                printf("[C] accepting the WebSocket connection for '%s', va_count: %d.\n", datasetId, session->va_count);
+
+            // hold on to the session pointer, pass it to the WebSocket upgrade handler
+            end_of_session:;
             }
         }
 

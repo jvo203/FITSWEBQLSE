@@ -244,6 +244,23 @@ void delete_session(websocket_session *session)
     pthread_mutex_destroy(&session->wake_up_cond_mtx);
 #endif
 
+    // clean up the items
+    if (session->items != NULL)
+    {
+        for (int i = 0; i < session->va_count; i++)
+        {
+            void *item = session->items[i];
+
+            if (item != NULL)
+            {
+                // decrement the reference count
+                free_dataset(item);
+            }
+        }
+
+        free(session->items);
+    }
+
     // free() has been commented out on purpose
     // it was interfering with glib reference counting release mechanism (a double free)
     // free(session);
