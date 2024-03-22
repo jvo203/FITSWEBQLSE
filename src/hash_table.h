@@ -13,7 +13,6 @@ struct timeout_arg
 void init_hash_table();
 void delete_hash_table();
 void garbage_collect();
-void free_dataset(gpointer item);
 void free_hash_data(gpointer item);
 void *delete_hash_data(void *arg);
 void *delete_hash_data_no_timeout(void *arg);
@@ -25,6 +24,9 @@ void *get_dataset(const char *datasetid);
 int mkcache(const char *dir);
 void rmcache(const char *dir);
 
+// make "free_dataset" a macro to "free_hash_data"
+#define free_dataset free_hash_data
+
 int rdopen(const char *file);
 int wropen(const char *file);
 int read_frame(int fd, void *dst, int pos, size_t frame_size);
@@ -33,6 +35,7 @@ int read_array(const char *file, void *dst, size_t frame_size);
 int write_array(const char *file, void *src, size_t frame_size);
 
 // Fortran callbacks
+extern void increment_refcount(void *ptr);
 extern void delete_dataset(void *ptr, char *dir, size_t len, int threshold);
 extern int dataset_timeout(void *ptr, int timeout);
 extern void get_channel_range_C(void *ptr, int progress, int *startindex, int *endindex, int *status);

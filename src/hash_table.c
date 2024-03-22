@@ -214,20 +214,11 @@ void *delete_hash_data_no_timeout(void *arg)
     pthread_exit(NULL);
 }
 
-void free_dataset(gpointer item)
+void free_hash_data(gpointer item)
 {
     // call Fortran to delete the dataset
     if (item != NULL)
         delete_dataset(item, options.cache, strlen(options.cache), options.threshold);
-}
-
-void free_hash_data(gpointer item)
-{
-    // a temporary solution
-    // in due time the new version will call g_atomic_rc_box_release_full(item, (GDestroyNotify)free_dataset);
-
-    if (item != NULL)
-        free_dataset(item);
 }
 
 int rdopen(const char *file)
