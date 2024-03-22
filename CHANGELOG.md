@@ -4,6 +4,7 @@
 * switched the display of the FITS file size to _*IEC binary*_
 * improved automatic hiding of the newly-opened empty tab upon performing FITS cut-outs (browser dependent)
 * re-wrote the _*server-side*_ real-time WebSocket communication between the server and the web browser (replaced the _*mongoose*_ C networking library with a custom C code loosely based on _*libmicrohttpd_ws*_), increasing the performance
+* added reference counting to the FORTRAN _*dataset*_ derived type
 * out of _*beta*_ into _*stable*_ operation and maintenance, receiving bug fixes, tweaks and new features
 
 ---
