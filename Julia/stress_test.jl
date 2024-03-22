@@ -371,7 +371,7 @@ function test(host, port, id, stat, duration)
 
         # a P-V Diagram loop        
         @async while running
-            seq_id = 0
+            pv_seq_id = 0
 
             # make a timestamp as a single floating-point number
             timestamp = Dates.value(now()) - base
@@ -393,7 +393,7 @@ function test(host, port, id, stat, duration)
                 "frame_end" => data_band_hi,
                 "ref_freq" => RESTFRQ,
                 "deltaV" => 0.0,
-                "seq_id" => seq_id))
+                "seq_id" => pv_seq_id))
 
             # submit a P-V line request
             success = writeguarded(ws, msg)
@@ -402,7 +402,7 @@ function test(host, port, id, stat, duration)
                 break
             end
 
-            seq_id = seq_id + 1
+            pv_seq_id = pv_seq_id + 1
 
             # a fixed frames per second
             sleep(1 / video_fps)
