@@ -371,7 +371,7 @@ function test(host, port, id, stat, duration)
 
         # a P-V Diagram loop
         pv_seq_id = 0
-        @async while running
+        @async while false # running # disabled for now as the capricorn server could not handle the load
             # make a timestamp as a single floating-point number
             timestamp = Dates.value(now()) - base
 
