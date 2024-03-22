@@ -2685,6 +2685,26 @@ contains
 
    end subroutine print_dataset
 
+   ! increment the reference count
+   subroutine increment_refcount(ptr) BIND(C, name='increment_refcount')
+      type(c_ptr), intent(in), value :: ptr
+
+      type(dataset), pointer :: item
+      integer(kind=c_int) :: rc
+
+      if (.not. c_associated(ptr)) return
+      call c_f_pointer(ptr, item)
+
+      ! lock the ref. mutex
+      rc = c_pthread_mutex_lock(item%ref_mtx)
+
+      item%ref = item%ref + 1
+
+      ! unlock the ref. mutex
+      rc = c_pthread_mutex_unlock(item%ref_mtx)
+
+   end subroutine increment_refcount
+
    subroutine set_error_status(item, error)
       type(dataset), pointer, intent(inout) :: item
       logical, intent(in) :: error
