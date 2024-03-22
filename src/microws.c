@@ -475,9 +475,9 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
         switch (type)
         {
         case WS_OPCODE_TEXT_FRAME:
-#ifdef DEBUG
+            // #ifdef DEBUG
             printf("[C] WebSocket received a text frame '%.*s'\n", (int)frame_len, frame_data);
-#endif
+            // #endif
 
             // parse the received message
             if (NULL != strstr(frame_data, "[heartbeat]"))
