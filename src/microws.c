@@ -340,9 +340,6 @@ void send_all(websocket_session *session, const char *buf, size_t len)
         fds.revents = 0;
 #endif
 
-        // TCP_QUICKACK
-        enable_quickack(session->fd);
-
         for (off = 0; off < len; off += ret)
         {
 #ifdef POLL
@@ -396,6 +393,9 @@ void send_all(websocket_session *session, const char *buf, size_t len)
             if (0 == ret)
                 break;
         }
+
+        // don't delay the sending operation, re-enable TCP_QUICKACK here for the next send
+        enable_quickack(session->fd);
 
         pthread_mutex_unlock(&session->send_mutex);
     }
