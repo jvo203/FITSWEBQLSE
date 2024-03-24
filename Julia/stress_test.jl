@@ -424,7 +424,7 @@ end
 responses::Int64 = 0
 total_time::Float64 = 0.0
 stat = RemoteChannel(() -> Channel{Float64}(32))
-hist = Hist1D(Float64, bins=0.0:10.0:2000.0, overflow=true) # 0.0:10.0:2000.0 or 0.0:1.0:20.0
+hist = Hist1D(; counttype=Float64, binedges=0.0:10.0:2000.0, overflow=true) # 0.0:10.0:2000.0 or 0.0:1.0:20.0
 
 stat_task = @async while true
     global responses, total_time
