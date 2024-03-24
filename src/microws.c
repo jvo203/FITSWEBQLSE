@@ -368,14 +368,14 @@ void send_all(websocket_session *session, const char *buf, size_t len)
             }
 #endif
 
-            // no chunking, send as much as possible in one go
-            // ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT);
+            // no chunking, send as much as possible as soon as possible
+            ret = send(session->fd, &buf[off], (int)(len - off), MSG_DONTWAIT);
 
-            // custom chunking since we have disabled Nagle's algorithm
+            // custom chunking using normal frames
             // ret = send(session->fd, &buf[off], MIN((int)(len - off), 1460), MSG_DONTWAIT);
 
             // chunking using jumbo frames instead
-            ret = send(session->fd, &buf[off], MIN((int)(len - off), 8960), MSG_DONTWAIT);
+            // ret = send(session->fd, &buf[off], MIN((int)(len - off), 8960), MSG_DONTWAIT);
 
             if (0 > ret)
             {
