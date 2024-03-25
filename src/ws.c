@@ -48,7 +48,7 @@ void delete_session_table()
     pthread_mutex_destroy(&sessions_mtx);
 }
 
-void close_all_sessions()
+void close_sessions()
 {
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {

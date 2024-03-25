@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
     start_ws();
 #endif
 
-    close_all_sessions();
+    close_sessions();
     stop_http();
 
     // clean-up ZeroMQ
