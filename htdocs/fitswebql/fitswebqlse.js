@@ -4371,9 +4371,8 @@ function send_ping() {
 
         try {
             wsConn[va_count - 1].send('[heartbeat] ' + t);
-            //setTimeout(send_ping, 1000 + ping_latency);
         } catch (e) {
-            console.log(e);
+            // console.log(e);
             setTimeout(send_ping, 1000 + ping_latency);
         }
     }
@@ -4635,7 +4634,15 @@ async function open_websocket_connection(_datasetId, index) {
                 d3.select("#latency").text('websocket conn. error');
             });
 
-            ALMAWS.addEventListener("close", function (evt) { });
+            ALMAWS.addEventListener("close", function (evt) {
+                console.log("websocket conn. closed");
+
+                d3.select("#ping")
+                    .attr("fill", "red")
+                    .attr("opacity", 0.8);
+
+                d3.select("#latency").text('websocket conn. closed');
+            });
 
             ALMAWS.addEventListener("message", function (evt) {
                 var t = performance.now();
@@ -5326,13 +5333,10 @@ async function open_websocket_connection(_datasetId, index) {
                 }
 
                 if (typeof evt.data === "string") {
-                    console.log(evt.data);
                     var cmd = "[close]";
                     var pos = received_msg.indexOf(cmd);
 
                     if (pos >= 0) {
-                        console.log("close command received");
-
                         if (ALMAWS != null)
                             ALMAWS.close();
 
@@ -5349,13 +5353,10 @@ async function open_websocket_connection(_datasetId, index) {
                 }
 
                 if (typeof evt.data === "string") {
-                    console.log(evt.data);
                     var cmd = "[heartbeat]";
                     var pos = received_msg.indexOf(cmd);
 
                     if (pos >= 0) {
-                        console.log("heartbeat command received");
-
                         setTimeout(send_ping, 1000 + ping_latency);
 
                         var previous_t = parseFloat(received_msg.substring(pos + cmd.length));

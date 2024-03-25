@@ -323,9 +323,6 @@ void send_all(websocket_session *session, const char *buf, size_t len)
     if (buf == NULL || len == 0)
         return;
 
-    if (session->disconnect)
-        return;
-
     size_t sent = 0;
 
     if (pthread_mutex_lock(&session->send_mutex) == 0)

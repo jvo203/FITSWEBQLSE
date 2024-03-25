@@ -73,8 +73,12 @@ void close_sessions()
                 // the mongoose event loop is already closed by this point so we cannot use mg_ws_send() here
                 // this code path is only valid for the custom microws solution
 
+                session->disconnect = true;
+                // wake up the sender
+                pthread_cond_signal(&session->wake_up_sender);
+
                 // close message
-                const char *cmd = "[close]";
+                /*const char *cmd = "[close]";
 
                 char *response = NULL;
                 size_t response_len = preamble_ws_frame(&response, strlen(cmd), WEBSOCKET_OP_TEXT);
@@ -92,12 +96,9 @@ void close_sessions()
                         send_all(session, response, response_len);
                     }
                     free(response);
-                }
+                }*/
 
-                printf("[C] sleeping 1s ...\n");
-                sleep(1);
-
-                /*char *result = NULL;
+                char *result = NULL;
                 size_t result_len = 0;
                 int er = MHD_websocket_encode_close(session->ws,
                                                     MHD_WEBSOCKET_CLOSEREASON_REGULAR,
@@ -111,10 +112,6 @@ void close_sessions()
                     send_all(session, result, result_len);
                     MHD_websocket_free(session->ws, result);
                 }
-
-                session->disconnect = true;
-                // wake up the sender
-                pthread_cond_signal(&session->wake_up_sender);*/
 #endif
 
                 // remove a session pointer from the hash table
@@ -134,7 +131,7 @@ void close_sessions()
 
 #ifdef MICROWS
         // give it time to close the connection
-        sleep(10);
+        // sleep(10);
 #endif
 
         pthread_mutex_unlock(&sessions_mtx);
