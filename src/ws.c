@@ -109,7 +109,6 @@ void close_sessions()
                 session->disconnect = true;
                 // wake up the sender
                 pthread_cond_signal(&session->wake_up_sender);
-
 #endif
 
                 // remove a session pointer from the hash table
