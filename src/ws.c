@@ -3276,7 +3276,7 @@ void *spectrum_response(void *ptr)
 
     if (session == NULL)
     {
-        printf("[C] realtime_image_spectrum_response session %s not found.\n", resp->session_id);
+        printf("[C] spectrum_response session %s not found.\n", resp->session_id);
 
         // release the incoming buffer
         free(buf);
