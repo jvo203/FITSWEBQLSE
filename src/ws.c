@@ -8,6 +8,10 @@
 #include "ws.h"
 #include "mjson.h"
 
+#ifdef MICROWS
+#include <microhttpd_ws.h>
+#endif
+
 #include <curl/curl.h>
 #include "cluster.h"
 
@@ -61,21 +65,72 @@ void close_sessions()
 
             if (session != NULL)
             {
+                g_atomic_rc_box_acquire(session);
                 printf("[C] closing a websocket connection for %s/%s\n", session->datasetid, key);
 
-                // remove a session pointer from the hash table
-                if (g_hash_table_remove(sessions, (gpointer)key))
+#ifdef MICROWS
+                // send a close WebSocket frame
+                // the mongoose event loop is already closed by this point so we cannot use mg_ws_send() here
+                // this code path is only valid for the custom microws solution
+
+                // close message
+                const char *cmd = "[close]";
+
+                char *response = NULL;
+                size_t response_len = preamble_ws_frame(&response, strlen(cmd), WEBSOCKET_OP_TEXT);
+
+                if (response != NULL)
                 {
-                    printf("[C] removed %s from the hash table\n", key);
+                    // copy the command into the response buffer
+                    memcpy(response + response_len, cmd, strlen(cmd));
+                    response_len += strlen(cmd);
+
+                    // a direct send
+                    if (!session->disconnect)
+                        send_all(session, response, response_len);
+                    free(response);
                 }
+
+                char *result = NULL;
+                size_t result_len = 0;
+                int er = MHD_websocket_encode_close(session->ws,
+                                                    MHD_WEBSOCKET_CLOSEREASON_REGULAR,
+                                                    NULL,
+                                                    0,
+                                                    &result,
+                                                    &result_len);
+
+                if (MHD_WEBSOCKET_STATUS_OK == er)
+                {
+                    send_all(session, result, result_len);
+                    MHD_websocket_free(session->ws, result);
+                }
+
+                session->disconnect = true;
+                // wake up the sender
+                pthread_cond_signal(&session->wake_up_sender);
+
+#endif
+
+                // remove a session pointer from the hash table
+                printf("[C] removing '%s' from the hash table...", key);
+
+                if (g_hash_table_remove(sessions, (gpointer)key))
+                    printf("done.\n");
                 else
-                    printf("[C] cannot remove %s from the hash table\n", key);
+                    printf("cannot remove '%s' from the hash table.\n", key);
 
                 g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+                session = NULL;
             }
         }
 
         g_list_free(keys);
+
+#ifdef MICROWS
+        // give it time to close the connection
+        // sleep(10);
+#endif
 
         pthread_mutex_unlock(&sessions_mtx);
     }
