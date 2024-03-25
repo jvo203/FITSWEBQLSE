@@ -87,11 +87,17 @@ void close_sessions()
 
                     // a direct send
                     if (!session->disconnect)
+                    {
+                        printf("[C] sending a '[close]' frame to %s/%s\n", session->datasetid, key);
                         send_all(session, response, response_len);
+                    }
                     free(response);
                 }
 
-                char *result = NULL;
+                printf("[C] sleeping 1s ...\n");
+                sleep(1);
+
+                /*char *result = NULL;
                 size_t result_len = 0;
                 int er = MHD_websocket_encode_close(session->ws,
                                                     MHD_WEBSOCKET_CLOSEREASON_REGULAR,
@@ -108,7 +114,7 @@ void close_sessions()
 
                 session->disconnect = true;
                 // wake up the sender
-                pthread_cond_signal(&session->wake_up_sender);
+                pthread_cond_signal(&session->wake_up_sender);*/
 #endif
 
                 // remove a session pointer from the hash table
@@ -128,7 +134,7 @@ void close_sessions()
 
 #ifdef MICROWS
         // give it time to close the connection
-        // sleep(10);
+        sleep(10);
 #endif
 
         pthread_mutex_unlock(&sessions_mtx);

@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-03-19.0";
+    return "JS2024-03-25.0";
 }
 
 function uuidv4() {
@@ -5326,10 +5326,13 @@ async function open_websocket_connection(_datasetId, index) {
                 }
 
                 if (typeof evt.data === "string") {
+                    console.log(evt.data);
                     var cmd = "[close]";
                     var pos = received_msg.indexOf(cmd);
 
                     if (pos >= 0) {
+                        console.log("close command received");
+
                         if (ALMAWS != null)
                             ALMAWS.close();
 
@@ -5346,10 +5349,13 @@ async function open_websocket_connection(_datasetId, index) {
                 }
 
                 if (typeof evt.data === "string") {
+                    console.log(evt.data);
                     var cmd = "[heartbeat]";
                     var pos = received_msg.indexOf(cmd);
 
                     if (pos >= 0) {
+                        console.log("heartbeat command received");
+
                         setTimeout(send_ping, 1000 + ping_latency);
 
                         var previous_t = parseFloat(received_msg.substring(pos + cmd.length));

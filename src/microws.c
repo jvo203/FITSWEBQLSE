@@ -407,6 +407,10 @@ void send_all(websocket_session *session, const char *buf, size_t len)
 
     if (sent != len)
         printf("[C] <send_all(%zu bytes)> failed, sent %zu bytes out of %zu bytes!\n", len, sent, len);
+#ifdef DEBUG
+    else
+        printf("[C] <send_all(%zu bytes)> sent %zu bytes.\n", len, sent);
+#endif
 }
 
 static void *ws_send_messages(void *cls)
