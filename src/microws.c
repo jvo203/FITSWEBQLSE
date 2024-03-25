@@ -727,15 +727,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 if (session->pv_exit)
                     goto clean_ws_frame;
 
-                /*char *datasetId = session->datasetid;
-                void *item = get_dataset(datasetId);
-
-                if (item == NULL)
-                {
-                    printf("[C] cannot find '%s' in the hash table\n", datasetId);
-                    goto clean_ws_frame;
-                }*/
-
                 // get the first item
                 void *item = session->items[0];
 
@@ -944,71 +935,51 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 }
 
                 // pass the request to FORTRAN
-                /*char *datasetId = session->datasetid;
-                void *item = get_dataset(datasetId);*/
-
                 // get the first item
                 void *item = session->items[0];
 
-                if (item != NULL)
+                update_timestamp(item);
+
+                int stat;
+                int pipefd[2];
+
+                // open a Unix pipe
+                stat = pipe(pipefd);
+
+                if (stat == 0)
                 {
-                    update_timestamp(item);
+                    // pass the read end of the pipe to a C thread
+                    resp->session_id = strdup(session->id);
+                    resp->fps = 0;
+                    resp->bitrate = 0;
+                    resp->timestamp = req->timestamp;
+                    resp->seq_id = req->seq_id;
+                    resp->fd = pipefd[0];
 
-                    int stat;
-                    int pipefd[2];
+                    // pass the write end of the pipe to a FORTRAN thread
+                    req->fd = pipefd[1];
+                    req->ptr = item;
 
-                    // open a Unix pipe
-                    stat = pipe(pipefd);
+                    pthread_t tid_req, tid_resp;
+
+                    // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                    stat = pthread_create(&tid_req, NULL, &ws_image_spectrum_request, req);
 
                     if (stat == 0)
                     {
-                        // pass the read end of the pipe to a C thread
-                        resp->session_id = strdup(session->id);
-                        resp->fps = 0;
-                        resp->bitrate = 0;
-                        resp->timestamp = req->timestamp;
-                        resp->seq_id = req->seq_id;
-                        resp->fd = pipefd[0];
+                        pthread_detach(tid_req);
 
-                        // pass the write end of the pipe to a FORTRAN thread
-                        req->fd = pipefd[1];
-                        req->ptr = item;
-
-                        pthread_t tid_req, tid_resp;
-
-                        // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                        stat = pthread_create(&tid_req, NULL, &ws_image_spectrum_request, req);
+                        // launch a pipe read C pthread
+                        stat = pthread_create(&tid_resp, NULL, &ws_image_spectrum_response, resp);
 
                         if (stat == 0)
-                        {
-                            pthread_detach(tid_req);
-
-                            // launch a pipe read C pthread
-                            stat = pthread_create(&tid_resp, NULL, &ws_image_spectrum_response, resp);
-
-                            if (stat == 0)
-                                pthread_detach(tid_resp);
-                            else
-                            {
-                                // close the read end of the pipe
-                                close(pipefd[0]);
-
-                                // release the response memory since there is no reader
-                                free(resp->session_id);
-                                free(resp);
-                            }
-                        }
+                            pthread_detach(tid_resp);
                         else
                         {
-                            free(req);
-
-                            // close the write end of the pipe
-                            close(pipefd[1]);
-
                             // close the read end of the pipe
                             close(pipefd[0]);
 
-                            // release the response memory since there is no writer
+                            // release the response memory since there is no reader
                             free(resp->session_id);
                             free(resp);
                         }
@@ -1016,13 +987,22 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     else
                     {
                         free(req);
+
+                        // close the write end of the pipe
+                        close(pipefd[1]);
+
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+
+                        // release the response memory since there is no writer
+                        free(resp->session_id);
                         free(resp);
                     }
                 }
                 else
                 {
                     free(req);
-                    // printf("[C] cannot find '%s' in the hash table\n", datasetId);
+                    free(resp);
                 }
 
                 goto clean_ws_frame;
@@ -1150,73 +1130,51 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 }
 
                 // pass the request to FORTRAN
-                /*char *datasetId = session->datasetid;
-                void *item = get_dataset(datasetId);*/
-
                 // get the first item
                 void *item = session->items[0];
 
-                if (item != NULL)
+                update_timestamp(item);
+
+                int stat;
+                int pipefd[2];
+
+                // open a Unix pipe
+                stat = pipe(pipefd);
+
+                if (stat == 0)
                 {
-                    update_timestamp(item);
+                    // pass the read end of the pipe to a C thread
+                    resp->session_id = strdup(session->id);
+                    resp->fps = 0;
+                    resp->bitrate = 0;
+                    resp->timestamp = req->timestamp;
+                    resp->seq_id = req->seq_id;
+                    resp->fd = pipefd[0];
 
-                    int stat;
-                    int pipefd[2];
+                    // pass the write end of the pipe to a FORTRAN thread
+                    req->fd = pipefd[1];
+                    req->ptr = item;
 
-                    // open a Unix pipe
-                    stat = pipe(pipefd);
+                    pthread_t tid_req, tid_resp;
+
+                    // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
+                    stat = pthread_create(&tid_req, NULL, &spectrum_request_simd, req);
 
                     if (stat == 0)
                     {
-                        // pass the read end of the pipe to a C thread
-                        resp->session_id = strdup(session->id);
-                        resp->fps = 0;
-                        resp->bitrate = 0;
-                        resp->timestamp = req->timestamp;
-                        resp->seq_id = req->seq_id;
-                        resp->fd = pipefd[0];
+                        pthread_detach(tid_req);
 
-                        // pass the write end of the pipe to a FORTRAN thread
-                        req->fd = pipefd[1];
-                        req->ptr = item;
-
-                        pthread_t tid_req, tid_resp;
-
-                        // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                        stat = pthread_create(&tid_req, NULL, &spectrum_request_simd, req);
+                        // launch a pipe read C pthread
+                        stat = pthread_create(&tid_resp, NULL, &spectrum_response, resp);
 
                         if (stat == 0)
-                        {
-                            pthread_detach(tid_req);
-
-                            // launch a pipe read C pthread
-                            stat = pthread_create(&tid_resp, NULL, &spectrum_response, resp);
-
-                            if (stat == 0)
-                                pthread_detach(tid_resp);
-                            else
-                            {
-                                // close the read end of the pipe
-                                close(pipefd[0]);
-
-                                // release the response memory since there is no reader
-                                free(resp->session_id);
-                                free(resp);
-                            }
-                        }
+                            pthread_detach(tid_resp);
                         else
                         {
-                            free(req->ra);
-                            free(req->dec);
-                            free(req);
-
-                            // close the write end of the pipe
-                            close(pipefd[1]);
-
                             // close the read end of the pipe
                             close(pipefd[0]);
 
-                            // release the response memory since there is no writer
+                            // release the response memory since there is no reader
                             free(resp->session_id);
                             free(resp);
                         }
@@ -1226,6 +1184,15 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         free(req->ra);
                         free(req->dec);
                         free(req);
+
+                        // close the write end of the pipe
+                        close(pipefd[1]);
+
+                        // close the read end of the pipe
+                        close(pipefd[0]);
+
+                        // release the response memory since there is no writer
+                        free(resp->session_id);
                         free(resp);
                     }
                 }
@@ -1235,7 +1202,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     free(req->dec);
                     free(req);
                     free(resp);
-                    // printf("[C] cannot find '%s' in the hash table\n", datasetId);
                 }
 
                 goto clean_ws_frame;
@@ -1246,15 +1212,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             {
                 if (session->ws_exit)
                     goto clean_ws_frame;
-
-                /*char *datasetId = session->datasetid;
-                void *item = get_dataset(datasetId);
-
-                if (item == NULL)
-                {
-                    printf("[C] cannot find '%s' in the hash table\n", datasetId);
-                    goto clean_ws_frame;
-                }*/
 
                 // get the first item
                 void *item = session->items[0];
@@ -1404,16 +1361,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             // init_video
             if (strcmp(type, "init_video") == 0)
             {
-                /*char *datasetId = session->datasetid;
-                void *item = get_dataset(datasetId);
-
-                if (item == NULL)
-                {
-
-                    printf("[C] cannot find '%s' in the hash table\n", datasetId);
-                    goto clean_ws_frame;
-                }*/
-
                 // get the first item
                 void *item = session->items[0];
 
@@ -1655,15 +1602,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             {
                 if (session->flux == NULL)
                     goto clean_ws_frame;
-
-                /*char *datasetId = session->datasetid;
-                void *item = get_dataset(datasetId);
-
-                if (item == NULL)
-                {
-                    printf("[C] cannot find '%s' in the hash table\n", datasetId);
-                    goto clean_ws_frame;
-                }*/
 
                 // get the first item
                 void *item = session->items[0];
