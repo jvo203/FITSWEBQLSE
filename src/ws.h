@@ -147,6 +147,7 @@ websocket_session *new_session(void);
 void remove_session(websocket_session *session);
 void delete_session_table();
 void delete_session(websocket_session *session);
+void close_all_sessions();
 
 /*static void release_session(websocket_session *session)
 {

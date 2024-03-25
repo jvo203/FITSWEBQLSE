@@ -48,6 +48,39 @@ void delete_session_table()
     pthread_mutex_destroy(&sessions_mtx);
 }
 
+void close_all_sessions()
+{
+    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    {
+        GList *keys = g_hash_table_get_keys(sessions);
+
+        for (GList *it = keys; it != NULL; it = it->next)
+        {
+            char *key = (char *)it->data;
+            websocket_session *session = (websocket_session *)g_hash_table_lookup(sessions, key);
+
+            if (session != NULL)
+            {
+                printf("[C] closing a websocket connection for %s/%s\n", session->datasetid, key);
+
+                // remove a session pointer from the hash table
+                if (g_hash_table_remove(sessions, (gpointer)key))
+                {
+                    printf("[C] removed %s from the hash table\n", key);
+                }
+                else
+                    printf("[C] cannot remove %s from the hash table\n", key);
+
+                g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+            }
+        }
+
+        g_list_free(keys);
+
+        pthread_mutex_unlock(&sessions_mtx);
+    }
+}
+
 websocket_session *new_session(void)
 {
     return g_atomic_rc_box_new(websocket_session);
