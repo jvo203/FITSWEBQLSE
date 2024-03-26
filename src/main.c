@@ -391,7 +391,16 @@ int main(int argc, char *argv[])
     start_ws();
 #endif
 
+    // stop accepting new connections
+    quiesce_http();
+
     close_sessions();
+
+#ifdef MICROWS
+    printf("[C] sleep(10s); waiting for any remaining sessions to close...\n");
+    sleep(10);
+#endif
+
     stop_http();
 
     // clean-up ZeroMQ
@@ -428,6 +437,7 @@ int main(int argc, char *argv[])
     delete_cluster();
 
     delete_hash_table();
+
     delete_session_table();
 
     curl_global_cleanup();

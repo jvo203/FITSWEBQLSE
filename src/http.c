@@ -4710,6 +4710,25 @@ void start_http()
 #endif
 };
 
+void quiesce_http()
+{
+    if (http_server != NULL)
+    {
+        printf("[C] quiescing the µHTTP daemon...");
+        MHD_quiesce_daemon(http_server);
+        printf("done\n");
+    }
+
+#ifdef MICROWS
+    if (ws_server != NULL)
+    {
+        printf("[C] quiescing the µHTTP-WS daemon...");
+        MHD_quiesce_daemon(ws_server);
+        printf("done\n");
+    }
+#endif
+}
+
 void stop_http()
 {
     if (http_server != NULL)

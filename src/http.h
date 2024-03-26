@@ -251,5 +251,6 @@ struct http_image_spectrum_request
 };
 
 void start_http();
+void quiesce_http();
 void stop_http();
 void *http_propagate_timeout(void *user);
