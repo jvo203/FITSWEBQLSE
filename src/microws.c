@@ -387,6 +387,10 @@ void send_all(websocket_session *session, const char *buf, size_t len)
             else
                 sent += (size_t)ret;
 
+#ifdef DEBUG
+            printf("[C] <send_all(%zu bytes)> sent %zd bytes.\n", len, ret);
+#endif
+
             if (0 == ret)
                 break;
         }
