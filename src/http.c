@@ -45,6 +45,7 @@
 
 #include "json.h"
 #include "http.h"
+#include "ws.h"
 #include "mjson.h"
 
 #include "cluster.h"
@@ -159,6 +160,9 @@ void write_viewport(int fd, int width, int height, const float *restrict pixels,
 void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
 void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
+
+// combined WebSocket write functions, to be used from FORTRAN
+void write_ws_spectrum(websocket_session *session, const float *elapsed, const float *spectrum, int n, int precision);
 
 void *stream_molecules(void *args);
 void *gzip_compress(void *args);
