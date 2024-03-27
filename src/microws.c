@@ -953,7 +953,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 if (stat == 0)
                 {
                     // pass the read end of the pipe to a C thread
-                    // resp->session_id = strdup(session->id);
                     resp->session = g_atomic_rc_box_acquire(session);
                     resp->fps = 0;
                     resp->bitrate = 0;
@@ -985,7 +984,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                             close(pipefd[0]);
 
                             // release the response memory since there is no reader
-                            // free(resp->session_id);
                             g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                             free(resp);
                         }
@@ -1001,7 +999,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         close(pipefd[0]);
 
                         // release the response memory since there is no writer
-                        // free(resp->session_id);
                         g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                         free(resp);
                     }
@@ -1151,7 +1148,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 if (stat == 0)
                 {
                     // pass the read end of the pipe to a C thread
-                    // resp->session_id = strdup(session->id);
                     resp->session = g_atomic_rc_box_acquire(session);
                     resp->fps = 0;
                     resp->bitrate = 0;
@@ -1183,7 +1179,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                             close(pipefd[0]);
 
                             // release the response memory since there is no reader
-                            // free(resp->session_id);
                             g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                             free(resp);
                         }
@@ -1201,7 +1196,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         close(pipefd[0]);
 
                         // release the response memory since there is no writer
-                        // free(resp->session_id);
                         g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                         free(resp);
                     }
