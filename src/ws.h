@@ -132,7 +132,8 @@ void send_all(websocket_session *session, const char *buf, size_t len);
 
 struct websocket_response
 {
-    char *session_id;
+    // char *session_id;
+    websocket_session *session;
     int seq_id;
     int fps;
     int bitrate;
