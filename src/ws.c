@@ -1381,7 +1381,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
                 if (stat == 0)
                 {
                     // pass the read end of the pipe to a C thread
-                    resp->session_id = strdup(c->data);
+                    // resp->session_id = strdup(c->data);
+                    resp->session = g_atomic_rc_box_acquire(session);
                     resp->fps = 0;
                     resp->bitrate = 0;
                     resp->timestamp = req->timestamp;
@@ -1412,7 +1413,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
                             close(pipefd[0]);
 
                             // release the response memory since there is no reader
-                            free(resp->session_id);
+                            // free(resp->session_id);
+                            g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                             free(resp);
                         }
                     }
@@ -1427,7 +1429,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
                         close(pipefd[0]);
 
                         // release the response memory since there is no writer
-                        free(resp->session_id);
+                        // free(resp->session_id);
+                        g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                         free(resp);
                     }
                 }
@@ -1590,7 +1593,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
                 if (stat == 0)
                 {
                     // pass the read end of the pipe to a C thread
-                    resp->session_id = strdup(c->data);
+                    // resp->session_id = strdup(c->data);
+                    resp->session = g_atomic_rc_box_acquire(session);
                     resp->fps = 0;
                     resp->bitrate = 0;
                     resp->timestamp = req->timestamp;
@@ -1621,7 +1625,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
                             close(pipefd[0]);
 
                             // release the response memory since there is no reader
-                            free(resp->session_id);
+                            // free(resp->session_id);
+                            g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                             free(resp);
                         }
                     }
@@ -1638,7 +1643,8 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
                         close(pipefd[0]);
 
                         // release the response memory since there is no writer
-                        free(resp->session_id);
+                        // free(resp->session_id);
+                        g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                         free(resp);
                     }
                 }
@@ -1822,82 +1828,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
             pthread_mutex_unlock(&session->ws_mtx);
 
             break;
-
-            // the previous code starts here (no ring buffer, prone to overwhelming the server)
-            /*struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
-
-            if (resp == NULL)
-            {
-                free(req);
-                break;
-            }
-
-            // pass the request to FORTRAN
-            int stat;
-            int pipefd[2];
-
-            // open a Unix pipe
-            stat = pipe(pipefd);
-
-            if (stat == 0)
-            {
-                // pass the read end of the pipe to a C thread
-                resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
-                resp->fps = 0;
-                resp->bitrate = 0;
-                resp->timestamp = req->timestamp;
-                resp->seq_id = req->seq_id;
-                resp->fd = pipefd[0];
-
-                // pass the write end of the pipe to a FORTRAN thread
-                req->fd = pipefd[1];
-
-                pthread_t tid_req, tid_resp;
-
-                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                stat = pthread_create(&tid_req, NULL, &realtime_image_spectrum_request_simd, req);
-
-                if (stat == 0)
-                {
-                    pthread_detach(tid_req);
-
-                    // launch a pipe read C pthread
-                    stat = pthread_create(&tid_resp, NULL, &realtime_image_spectrum_response, resp);
-
-                    if (stat == 0)
-                        pthread_detach(tid_resp);
-                    else
-                    {
-                        // close the read end of the pipe
-                        close(pipefd[0]);
-
-                        // release the response memory since there is no reader
-                        free(resp->session_id);
-                        free(resp);
-                    }
-                }
-                else
-                {
-                    free(req);
-
-                    // close the write end of the pipe
-                    close(pipefd[1]);
-
-                    // close the read end of the pipe
-                    close(pipefd[0]);
-
-                    // release the response memory since there is no writer
-                    free(resp->session_id);
-                    free(resp);
-                }
-            }
-            else
-            {
-                free(req);
-                free(resp);
-            }
-
-            break;*/
         }
 
         // init_video
@@ -2243,85 +2173,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
             pthread_mutex_unlock(&session->video_mtx);
 
             break;
-
-            // old code starts here
-            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
-
-            if (resp == NULL)
-            {
-                free(req->flux);
-                free(req);
-                break;
-            }
-
-            int stat;
-            int pipefd[2];
-
-            // open a Unix pipe
-            stat = pipe(pipefd);
-
-            if (stat == 0)
-            {
-                // pass the read end of the pipe to a C thread
-                resp->session_id = strdup(c->data);
-                resp->fps = fps;
-                resp->bitrate = bitrate;
-                resp->timestamp = req->timestamp;
-                resp->seq_id = req->seq_id;
-                resp->fd = pipefd[0];
-
-                // pass the write end of the pipe to a FORTRAN thread
-                req->fd = pipefd[1];
-                req->ptr = item;
-
-                pthread_t tid_req, tid_resp;
-
-                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                stat = pthread_create(&tid_req, NULL, &video_request_simd, req);
-
-                if (stat == 0)
-                {
-                    pthread_detach(tid_req);
-
-                    // launch a pipe read C pthread
-                    stat = pthread_create(&tid_resp, NULL, &video_response, resp);
-
-                    if (stat == 0)
-                        pthread_detach(tid_resp);
-                    else
-                    {
-                        // close the read end of the pipe
-                        close(pipefd[0]);
-
-                        // release the response memory since there is no reader
-                        free(resp->session_id);
-                        free(resp);
-                    }
-                }
-                else
-                {
-                    free(req->flux);
-                    free(req);
-
-                    // close the write end of the pipe
-                    close(pipefd[1]);
-
-                    // close the read end of the pipe
-                    close(pipefd[0]);
-
-                    // release the response memory since there is no writer
-                    free(resp->session_id);
-                    free(resp);
-                }
-            }
-            else
-            {
-                free(req->flux);
-                free(req);
-                free(resp);
-            }
-
-            break;
         }
 
         if (strcmp(type, "composite_video") == 0)
@@ -2510,88 +2361,6 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
             pthread_mutex_unlock(&common_session->video_mtx);
 
             break;
-
-            // old code starts here
-            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
-
-            if (resp == NULL)
-            {
-                free(req->flux);
-                free(req);
-                break;
-            }
-
-            int stat;
-            int pipefd[2];
-
-            // open a Unix pipe
-            stat = pipe(pipefd);
-
-            if (stat == 0)
-            {
-#ifdef DEBUG
-                printf("[C] mg_websocket_callback: composite video pipes: %d:%d\n", pipefd[0], pipefd[1]);
-#endif
-
-                // pass the read end of the pipe to a C thread
-                resp->session_id = strdup(c->data);
-                resp->fps = fps;
-                resp->bitrate = bitrate;
-                resp->timestamp = req->timestamp;
-                resp->seq_id = req->seq_id;
-                resp->fd = pipefd[0];
-
-                // pass the write end of the pipe to a FORTRAN thread
-                req->fd = pipefd[1];
-
-                pthread_t tid_req, tid_resp;
-
-                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                stat = pthread_create(&tid_req, NULL, &composite_video_request_simd, req);
-
-                if (stat == 0)
-                {
-                    stat = pthread_detach(tid_req);
-
-                    // launch a pipe read C pthread
-                    stat = pthread_create(&tid_resp, NULL, &composite_video_response, resp);
-
-                    if (stat == 0)
-                        pthread_detach(tid_resp);
-                    else
-                    {
-                        // close the read end of the pipe
-                        close(pipefd[0]);
-
-                        // release the response memory since there is no reader
-                        free(resp->session_id);
-                        free(resp);
-                    }
-                }
-                else
-                {
-                    free(req->flux);
-                    free(req);
-
-                    // close the write end of the pipe
-                    close(pipefd[1]);
-
-                    // close the read end of the pipe
-                    close(pipefd[0]);
-
-                    // release the response memory since there is no writer
-                    free(resp->session_id);
-                    free(resp);
-                }
-            }
-            else
-            {
-                free(req->flux);
-                free(req);
-                free(resp);
-            }
-
-            break;
         }
 
         break;
@@ -2645,8 +2414,6 @@ void *ws_pv_response(void *ptr)
 
     struct websocket_response *resp = (struct websocket_response *)ptr;
 
-    printf("[C] ws_pv_response: session_id: %s, fd: %d\n", resp->session_id, resp->fd);
-
     ssize_t n = 0;
     size_t offset = 0;
     size_t buf_size = 0x40000;
@@ -2689,9 +2456,9 @@ void *ws_pv_response(void *ptr)
         goto free_pv_mem;
 
     // get a session based on resp->session_id
-    websocket_session *session = NULL;
+    websocket_session *session = resp->session; // NULL;
 
-    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    /*if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
         if (resp->session_id != NULL)
             session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
@@ -2700,11 +2467,11 @@ void *ws_pv_response(void *ptr)
             g_atomic_rc_box_acquire(session);
 
         pthread_mutex_unlock(&sessions_mtx);
-    }
+    }*/
 
     if (session == NULL)
     {
-        printf("[C] ws_pv_response session %s not found.\n", resp->session_id);
+        printf("[C] ws_pv_response session not found.\n");
         goto free_pv_mem;
     }
 
@@ -2813,7 +2580,7 @@ free_pv_mem:
     free(buf);
 
     // release the memory
-    free(resp->session_id);
+    // free(resp->session_id);
     free(resp);
 
     pthread_exit(NULL);
@@ -2867,10 +2634,10 @@ void *ws_image_spectrum_response(void *ptr)
     if (offset < sizeof(uint32_t))
         goto free_image_spectrum_mem;
 
-    websocket_session *session = NULL;
+    websocket_session *session = resp->session; // NULL;
 
     // get the session
-    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    /*if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
         if (resp->session_id != NULL)
             session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
@@ -2879,7 +2646,7 @@ void *ws_image_spectrum_response(void *ptr)
             g_atomic_rc_box_acquire(session);
 
         pthread_mutex_unlock(&sessions_mtx);
-    }
+    }*/
 
     if (session == NULL)
         goto free_image_spectrum_mem;
@@ -3210,7 +2977,7 @@ free_image_spectrum_mem:
     free(buf);
 
     // release the memory
-    free(resp->session_id);
+    // free(resp->session_id);
     free(resp);
 
     pthread_exit(NULL);
@@ -3261,9 +3028,9 @@ void *spectrum_response(void *ptr)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
     // get a session based on resp->session_id
-    websocket_session *session = NULL;
+    websocket_session *session = resp->session; // NULL;
 
-    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    /*if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
         if (resp->session_id != NULL)
             session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
@@ -3272,17 +3039,17 @@ void *spectrum_response(void *ptr)
             g_atomic_rc_box_acquire(session);
 
         pthread_mutex_unlock(&sessions_mtx);
-    }
+    }*/
 
     if (session == NULL)
     {
-        printf("[C] spectrum_response session %s not found.\n", resp->session_id);
+        printf("[C] spectrum_response session not found.\n");
 
         // release the incoming buffer
         free(buf);
 
         // release the memory
-        free(resp->session_id);
+        // free(resp->session_id);
         free(resp);
 
         pthread_exit(NULL);
@@ -3423,7 +3190,7 @@ void *spectrum_response(void *ptr)
     free(buf);
 
     // release the memory
-    free(resp->session_id);
+    // free(resp->session_id);
     free(resp);
 
     pthread_exit(NULL);
@@ -3479,9 +3246,9 @@ void *realtime_image_spectrum_response(void *ptr)
     float elapsed;
 
     // get a session based on resp->session_id
-    websocket_session *session = NULL;
+    websocket_session *session = resp->session; // NULL;
 
-    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    /*if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
         if (resp->session_id != NULL)
             session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
@@ -3490,17 +3257,17 @@ void *realtime_image_spectrum_response(void *ptr)
             g_atomic_rc_box_acquire(session);
 
         pthread_mutex_unlock(&sessions_mtx);
-    }
+    }*/
 
     if (session == NULL)
     {
-        printf("[C] realtime_image_spectrum_response session %s not found.\n", resp->session_id);
+        printf("[C] realtime_image_spectrum_response session not found.\n");
 
         // release the incoming buffer
         free(buf);
 
         // release the memory
-        free(resp->session_id);
+        // free(resp->session_id);
         free(resp);
 
         pthread_exit(NULL);
@@ -3753,7 +3520,7 @@ void *realtime_image_spectrum_response(void *ptr)
     free(buf);
 
     // release the memory
-    free(resp->session_id);
+    // free(resp->session_id);
     free(resp);
 
     pthread_exit(NULL);
@@ -3803,10 +3570,10 @@ void *composite_video_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    websocket_session *session = NULL;
+    websocket_session *session = resp->session; // NULL;
 
     // get the session
-    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    /*if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
         if (resp->session_id != NULL)
             session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
@@ -3815,7 +3582,7 @@ void *composite_video_response(void *ptr)
             g_atomic_rc_box_acquire(session);
 
         pthread_mutex_unlock(&sessions_mtx);
-    }
+    }*/
 
     if (session == NULL)
         goto free_composite_video_mem;
@@ -3989,7 +3756,7 @@ free_composite_video_mem:
     free(buf);
 
     // release the memory
-    free(resp->session_id);
+    // free(resp->session_id);
     free(resp);
 
     pthread_exit(NULL);
@@ -4039,10 +3806,10 @@ void *video_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    websocket_session *session = NULL;
+    websocket_session *session = resp->session; // NULL;
 
     // get the session
-    if (pthread_mutex_lock(&sessions_mtx) == 0)
+    /*if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
         if (resp->session_id != NULL)
             session = (websocket_session *)g_hash_table_lookup(sessions, (gconstpointer)resp->session_id);
@@ -4051,7 +3818,7 @@ void *video_response(void *ptr)
             g_atomic_rc_box_acquire(session);
 
         pthread_mutex_unlock(&sessions_mtx);
-    }
+    }*/
 
     if (session == NULL)
         goto free_video_mem;
@@ -4219,7 +3986,7 @@ free_video_mem:
     free(buf);
 
     // release the memory
-    free(resp->session_id);
+    // free(resp->session_id);
     free(resp);
 
     pthread_exit(NULL);
@@ -4297,7 +4064,8 @@ void *pv_event_loop(void *arg)
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
-                resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
+                // resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
+                resp->session = g_atomic_rc_box_acquire(session);
                 resp->fps = 0;
                 resp->bitrate = 0;
                 resp->timestamp = req->timestamp;
@@ -4333,7 +4101,8 @@ void *pv_event_loop(void *arg)
                         close(pipefd[0]);
 
                         // release the response memory since there is no reader
-                        free(resp->session_id);
+                        // free(resp->session_id);
+                        g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                         free(resp);
                     }
 
@@ -4351,7 +4120,8 @@ void *pv_event_loop(void *arg)
                     close(pipefd[0]);
 
                     // release the response memory since there is no writer
-                    free(resp->session_id);
+                    // free(resp->session_id);
+                    g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                     free(resp);
                 }
             }
@@ -4446,7 +4216,8 @@ void *ws_event_loop(void *arg)
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
-                resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
+                // resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
+                resp->session = g_atomic_rc_box_acquire(session);
                 resp->fps = 0;
                 resp->bitrate = 0;
                 resp->timestamp = req->timestamp;
@@ -4477,7 +4248,8 @@ void *ws_event_loop(void *arg)
                         close(pipefd[0]);
 
                         // release the response memory since there is no reader
-                        free(resp->session_id);
+                        // free(resp->session_id);
+                        g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                         free(resp);
                     }
 
@@ -4495,7 +4267,8 @@ void *ws_event_loop(void *arg)
                     close(pipefd[0]);
 
                     // release the response memory since there is no writer
-                    free(resp->session_id);
+                    // free(resp->session_id);
+                    g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                     free(resp);
                 }
             }
@@ -4594,7 +4367,8 @@ void *video_event_loop(void *arg)
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
-                resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
+                // resp->session_id = session->id != NULL ? strdup(session->id) : NULL;
+                resp->session = g_atomic_rc_box_acquire(session);
                 resp->fps = 0;
                 resp->bitrate = 0;
                 resp->timestamp = req->timestamp;
@@ -4635,7 +4409,8 @@ void *video_event_loop(void *arg)
                         close(pipefd[0]);
 
                         // release the response memory since there is no reader
-                        free(resp->session_id);
+                        // free(resp->session_id);
+                        g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                         free(resp);
                     }
 
@@ -4654,7 +4429,8 @@ void *video_event_loop(void *arg)
                     close(pipefd[0]);
 
                     // release the response memory since there is no writer
-                    free(resp->session_id);
+                    // free(resp->session_id);
+                    g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
                     free(resp);
                 }
             }
