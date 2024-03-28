@@ -52,8 +52,10 @@ void delete_session_table()
     pthread_mutex_destroy(&sessions_mtx);
 }
 
-void close_sessions()
+int close_sessions()
 {
+    int count = 0;
+
     if (pthread_mutex_lock(&sessions_mtx) == 0)
     {
         GList *keys = g_hash_table_get_keys(sessions);
@@ -124,6 +126,8 @@ void close_sessions()
 
                 g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
                 session = NULL;
+
+                count++;
             }
         }
 
@@ -136,6 +140,8 @@ void close_sessions()
 
         pthread_mutex_unlock(&sessions_mtx);
     }
+
+    return count;
 }
 
 websocket_session *new_session(void)

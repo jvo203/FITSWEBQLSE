@@ -394,11 +394,14 @@ int main(int argc, char *argv[])
     // stop accepting new connections
     quiesce_http();
 
-    close_sessions();
+    int no_sessions = close_sessions();
 
 #ifdef MICROWS
-    printf("[C] sleep(10s); waiting for any remaining sessions to close...\n");
-    sleep(10);
+    if (no_sessions > 0)
+    {
+        printf("[C] sleep(10s); waiting for any remaining sessions to close...\n");
+        sleep(10);
+    }
 #endif
 
     stop_http();
