@@ -394,9 +394,10 @@ int main(int argc, char *argv[])
     // stop accepting new connections
     quiesce_http();
 
+#ifdef MICROWS
+    // close all websocket sessions
     int no_sessions = close_sessions();
 
-#ifdef MICROWS
     if (no_sessions > 0)
     {
         printf("[C] sleep(10 seconds); waiting for any remaining sessions to close...\n");
