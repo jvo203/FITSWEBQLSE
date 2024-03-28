@@ -1,11 +1,12 @@
-## [5.1.0] - 2024-0?-??
+## [5.1.0] - 2024-03-28
 
 * changed the display of the approximate size of FITS cut-outs to the _*IEC binary*_ format (i.e. MiB, GiB, TiB, etc.)
 * switched the display of the FITS file size to _*IEC binary*_
 * improved automatic hiding of the newly-opened empty tab upon performing FITS cut-outs (browser dependent)
 * re-wrote the _*server-side*_ real-time WebSocket communication between the server and the web browser (replaced the _*mongoose*_ C networking library with a custom C code loosely based on _*libmicrohttpd_ws*_)
 * added reference counting to the FORTRAN _*FITS dataset*_ derived type
-* out of _*beta*_ into _*stable*_ operation and maintenance, receiving bug fixes, tweaks and new features
+* re-compiled the _*WebAssembly*_ with the latest _*emscripten*_ compiler
+* out of _*beta*_ into _*stable*_ operation and maintenance, receiving bug fixes, tweaks and improvements
 
 ---
 
