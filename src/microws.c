@@ -2126,7 +2126,7 @@ static void *ws_receive_messages(void *cls)
     }
 
     session->disconnect = false;
-    // TO-DO
+
     /* start the message-send thread */
     pthread_t pt;
     if (0 != pthread_create(&pt, NULL, &ws_send_messages, session))
