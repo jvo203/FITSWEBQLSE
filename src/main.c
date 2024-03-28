@@ -399,7 +399,7 @@ int main(int argc, char *argv[])
 #ifdef MICROWS
     if (no_sessions > 0)
     {
-        printf("[C] sleep(10s); waiting for any remaining sessions to close...\n");
+        printf("[C] sleep(10 seconds); waiting for any remaining sessions to close...\n");
         sleep(10);
     }
 #endif
