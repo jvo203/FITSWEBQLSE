@@ -2834,9 +2834,9 @@ void write_ws_spectrum(websocket_session *session, const float *elapsed, const f
             printf("[C] float array size: %zu, compressed: %zu bytes\n", length * sizeof(float), zfpsize);
 
             // transmit the data
-            uint32_t compressed_size = zfpsize;
+            /*uint32_t compressed_size = zfpsize;
 
-            /*chunked_write(fd, (const char *)elapsed, sizeof(float));                    // elapsed compute time
+            chunked_write(fd, (const char *)elapsed, sizeof(float));                    // elapsed compute time
             chunked_write(fd, (const char *)&length, sizeof(length));                   // spectrum length after decompressing
             chunked_write(fd, (const char *)&compressed_size, sizeof(compressed_size)); // compressed buffer size
             chunked_write(fd, (const char *)compressed, zfpsize);*/
@@ -2876,11 +2876,11 @@ void write_ws_spectrum(websocket_session *session, const float *elapsed, const f
                     memcpy((char *)payload + ws_offset, &length, sizeof(uint32_t));
                     ws_offset += sizeof(uint32_t);
 
-                    memcpy((char *)payload + ws_offset, buf + 2 * sizeof(uint32_t) + sizeof(float), compressed_size);
-                    ws_offset += compressed_size;
+                    memcpy((char *)payload + ws_offset, compressed, zfpsize);
+                    ws_offset += zfpsize;
 
                     if (ws_offset != msg_len)
-                        printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+                        printf("[C] <write_ws_spectrum> size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
                     // create a queue message
                     struct data_buf msg = {payload, msg_len};
