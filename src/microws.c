@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdio.h>
 
+// ZFP floating-point compressor
+#include <zfp.h>
+
 #include "ws.h"
 #include "mjson.h"
 #include "hash_table.h"
@@ -2771,6 +2774,87 @@ on_ws_connection(void *cls,
     }
 
     return ret;
+}
+
+void write_ws_spectrum(websocket_session *session, const float *elapsed, const float *spectrum, int n, int precision)
+{
+    uchar *compressed;
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = n;
+
+    uint32_t length = n;
+
+    if (spectrum == NULL || n <= 0)
+    {
+        printf("[C] <write_ws_spectrum> invalid spectrum data!\n");
+        goto release_session;
+    }
+
+    // spectrum with ZFP
+    field = zfp_field_1d((void *)spectrum, data_type, nx);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    compressed = (uchar *)malloc(bufsize);
+
+    if (compressed != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)compressed, bufsize);
+
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+            // compress entire array
+            zfpsize = zfp_compress(zfp, field);
+
+            if (zfpsize == 0)
+                printf("[C] ZFP compression failed!\n");
+            else
+                printf("[C] spectrum compressed size: %zu bytes\n", zfpsize);
+
+            bitstream_close(stream);
+
+            // the compressed part is available at compressed_pixels[0..zfpsize-1]
+            printf("[C] float array size: %zu, compressed: %zu bytes\n", length * sizeof(float), zfpsize);
+
+            // transmit the data
+            /*uint32_t compressed_size = zfpsize;
+
+            chunked_write(fd, (const char *)elapsed, sizeof(float));                    // elapsed compute time
+            chunked_write(fd, (const char *)&length, sizeof(length));                   // spectrum length after decompressing
+            chunked_write(fd, (const char *)&compressed_size, sizeof(compressed_size)); // compressed buffer size
+            chunked_write(fd, (const char *)compressed, zfpsize);*/
+
+            // TO-DO: directly prepare and queue the WebSocket message
+        }
+
+        free(compressed);
+    }
+    else
+        printf("[C] a NULL compressed buffer!\n");
+
+    // clean up
+    zfp_field_free(field);
+    zfp_stream_close(zfp);
+
+release_session:
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
 }
 
 #endif // MICROWS
