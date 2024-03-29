@@ -2793,7 +2793,7 @@ void write_ws_spectrum(websocket_session *session, const float *elapsed, const f
     if (spectrum == NULL || n <= 0)
     {
         printf("[C] <write_ws_spectrum> invalid spectrum data!\n");
-        goto release_session;
+        goto write_ws_spectrum_release_session;
     }
 
     // spectrum with ZFP
@@ -2847,13 +2847,13 @@ void write_ws_spectrum(websocket_session *session, const float *elapsed, const f
         free(compressed);
     }
     else
-        printf("[C] a NULL compressed buffer!\n");
+        printf("[C] <write_ws_spectrum> a NULL compressed buffer!\n");
 
     // clean up
     zfp_field_free(field);
     zfp_stream_close(zfp);
 
-release_session:
+write_ws_spectrum_release_session:
     g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
 }
 
