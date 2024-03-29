@@ -2834,14 +2834,101 @@ void write_ws_spectrum(websocket_session *session, const float *elapsed, const f
             printf("[C] float array size: %zu, compressed: %zu bytes\n", length * sizeof(float), zfpsize);
 
             // transmit the data
-            /*uint32_t compressed_size = zfpsize;
+            uint32_t compressed_size = zfpsize;
 
-            chunked_write(fd, (const char *)elapsed, sizeof(float));                    // elapsed compute time
+            /*chunked_write(fd, (const char *)elapsed, sizeof(float));                    // elapsed compute time
             chunked_write(fd, (const char *)&length, sizeof(length));                   // spectrum length after decompressing
             chunked_write(fd, (const char *)&compressed_size, sizeof(compressed_size)); // compressed buffer size
             chunked_write(fd, (const char *)compressed, zfpsize);*/
 
-            // TO-DO: directly prepare and queue the WebSocket message
+            if (zfpsize > 0)
+            {
+                // TO-DO: directly prepare and queue the WebSocket message
+                size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + zfpsize;
+
+                char *payload = NULL;
+                size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+                msg_len += ws_len;
+
+                if (payload != NULL)
+                {
+                    float ts = 0.0f; // resp->timestamp;
+                    uint32_t id = 0; // resp->seq_id;
+                    uint32_t msg_type = 0;
+                    // 0 - spectrum, 1 - viewport,
+                    // 2 - image, 3 - full, spectrum,  refresh,
+                    // 4 - histogram
+
+                    size_t ws_offset = ws_len;
+
+                    memcpy((char *)payload + ws_offset, &ts, sizeof(float));
+                    ws_offset += sizeof(float);
+
+                    memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+                    ws_offset += sizeof(uint32_t);
+
+                    memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+                    ws_offset += sizeof(uint32_t);
+
+                    memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+                    ws_offset += sizeof(float);
+
+                    memcpy((char *)payload + ws_offset, &length, sizeof(uint32_t));
+                    ws_offset += sizeof(uint32_t);
+
+                    memcpy((char *)payload + ws_offset, buf + 2 * sizeof(uint32_t) + sizeof(float), compressed_size);
+                    ws_offset += compressed_size;
+
+                    if (ws_offset != msg_len)
+                        printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+                    // create a queue message
+                    struct data_buf msg = {payload, msg_len};
+
+#ifdef DIRECT
+                    if (!session->disconnect)
+                        send_all(session, payload, msg_len);
+                    free(payload);
+#else
+                    char *msg_buf = NULL;
+                    size_t _len = sizeof(struct data_buf);
+
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+                    pthread_spin_lock(&session->queue_lock);
+#else
+                    pthread_mutex_lock(&session->queue_mtx);
+#endif
+
+                    // reserve space for the binary message
+                    size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+                    // pass the message over to the sender via a communications queue
+                    if (msg_buf != NULL && queue_len >= _len)
+                    {
+                        memcpy(msg_buf, &msg, _len);
+                        mg_queue_add(&session->queue, _len);
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+                        pthread_spin_unlock(&session->queue_lock);
+#else
+                        pthread_mutex_unlock(&session->queue_mtx);
+#endif
+
+                        // wake up the sender
+                        pthread_cond_signal(&session->wake_up_sender);
+                    }
+                    else
+                    {
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+                        pthread_spin_unlock(&session->queue_lock);
+#else
+                        pthread_mutex_unlock(&session->queue_mtx);
+#endif
+                        printf("[C] mg_queue_book failed, freeing memory.\n");
+                        free(payload);
+                    }
+#endif
+                }
+            }
         }
 
         free(compressed);
