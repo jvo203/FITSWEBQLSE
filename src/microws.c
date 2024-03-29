@@ -2870,7 +2870,7 @@ void write_ws_spectrum(websocket_session *session, const float *elapsed, const f
                     memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
                     ws_offset += sizeof(uint32_t);
 
-                    memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+                    memcpy((char *)payload + ws_offset, (const char *)elapsed, sizeof(float));
                     ws_offset += sizeof(float);
 
                     memcpy((char *)payload + ws_offset, &length, sizeof(uint32_t));
