@@ -2841,9 +2841,9 @@ void write_ws_spectrum(websocket_session *session, const float *elapsed, const f
             chunked_write(fd, (const char *)&compressed_size, sizeof(compressed_size)); // compressed buffer size
             chunked_write(fd, (const char *)compressed, zfpsize);*/
 
+            // directly prepare and queue the WebSocket message
             if (zfpsize > 0)
             {
-                // TO-DO: directly prepare and queue the WebSocket message
                 size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + zfpsize;
 
                 char *payload = NULL;
