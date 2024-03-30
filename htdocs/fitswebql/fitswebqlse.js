@@ -4668,26 +4668,28 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame = new Uint8Array(received_msg, offset);
                         // console.log("computed:", computed, "spectrum length:", spectrum_len, "frame.length:", frame.length);
 
-                        // FPZIP decoder part				
-                        Module.ready
-                            .then(_ => {
-                                let start = performance.now();
-                                // var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
-                                var res = Module.decompressZFPspectrum(spectrum_len, frame);
-                                const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-                                let elapsed = Math.round(performance.now() - start);
+                        waitForModuleReady().then(() => {
+                            // FPZIP decoder part				
+                            Module.ready
+                                .then(_ => {
+                                    let start = performance.now();
+                                    // var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
+                                    var res = Module.decompressZFPspectrum(spectrum_len, frame);
+                                    const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                    let elapsed = Math.round(performance.now() - start);
 
-                                // console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
+                                    // console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
 
-                                if (spectrum.length > 0) {
-                                    if (!windowLeft) {
-                                        spectrum_stack[index - 1].push({ spectrum: spectrum, id: recv_seq_id });
-                                        //console.log("index:", index, "spectrum_stack length:", spectrum_stack[index - 1].length);
-                                    };
-                                }
+                                    if (spectrum.length > 0) {
+                                        if (!windowLeft) {
+                                            spectrum_stack[index - 1].push({ spectrum: spectrum, id: recv_seq_id });
+                                            //console.log("index:", index, "spectrum_stack length:", spectrum_stack[index - 1].length);
+                                        };
+                                    }
 
-                            })
-                            .catch(e => console.error(e));
+                                })
+                                .catch(e => console.error(e));
+                        }).catch(e => console.error(e));
 
                         //console.log("[ws] computed = " + computed.toFixed(1) + " [ms]" + " length: " + length + " spectrum length:" + spectrum.length + " spectrum: " + spectrum);
 
@@ -4906,53 +4908,55 @@ async function open_websocket_connection(_datasetId, index) {
 
                         var frame = new Uint8Array(received_msg, offset);
 
-                        // FPZIP decoder part				
-                        Module.ready
-                            .then(_ => {
-                                // var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
-                                var res = Module.decompressZFPspectrum(spectrum_len, frame);
-                                const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                        waitForModuleReady().then(() => {
+                            // FPZIP decoder part				
+                            Module.ready
+                                .then(_ => {
+                                    // var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
+                                    var res = Module.decompressZFPspectrum(spectrum_len, frame);
+                                    const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                // console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
+                                    // console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
 
-                                if (spectrum.length > 0) {
-                                    // attach the spectrum as either "mean" or "integrated"
-                                    //insert a spectrum object to the spectrumContainer at <index-1>
+                                    if (spectrum.length > 0) {
+                                        // attach the spectrum as either "mean" or "integrated"
+                                        //insert a spectrum object to the spectrumContainer at <index-1>
 
-                                    fitsContainer[index - 1].depth = spectrum.length;
+                                        fitsContainer[index - 1].depth = spectrum.length;
 
-                                    if (intensity_mode == "mean") {
-                                        fitsContainer[index - 1].mean_spectrum = spectrum;
-                                        mean_spectrumContainer[index - 1] = spectrum;
-                                    }
+                                        if (intensity_mode == "mean") {
+                                            fitsContainer[index - 1].mean_spectrum = spectrum;
+                                            mean_spectrumContainer[index - 1] = spectrum;
+                                        }
 
-                                    if (intensity_mode == "integrated") {
-                                        fitsContainer[index - 1].integrated_spectrum = spectrum;
-                                        integrated_spectrumContainer[index - 1] = spectrum;
-                                    }
+                                        if (intensity_mode == "integrated") {
+                                            fitsContainer[index - 1].integrated_spectrum = spectrum;
+                                            integrated_spectrumContainer[index - 1] = spectrum;
+                                        }
 
-                                    spectrum_count++;
+                                        spectrum_count++;
 
-                                    if (va_count == 1) {
-                                        setup_axes();
-
-                                        plot_spectrum([spectrum]);
-                                    }
-                                    else {
-                                        if (spectrum_count == va_count) {
+                                        if (va_count == 1) {
                                             setup_axes();
 
-                                            if (intensity_mode == "mean")
-                                                plot_spectrum(mean_spectrumContainer);
+                                            plot_spectrum([spectrum]);
+                                        }
+                                        else {
+                                            if (spectrum_count == va_count) {
+                                                setup_axes();
 
-                                            if (intensity_mode == "integrated")
-                                                plot_spectrum(integrated_spectrumContainer);
+                                                if (intensity_mode == "mean")
+                                                    plot_spectrum(mean_spectrumContainer);
+
+                                                if (intensity_mode == "integrated")
+                                                    plot_spectrum(integrated_spectrumContainer);
+                                            }
                                         }
                                     }
-                                }
 
-                            })
-                            .catch(e => console.error(e));
+                                })
+                                .catch(e => console.error(e));
+                        }).catch(e => console.error(e));
 
                         return;
                     }
@@ -13873,391 +13877,393 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
             setup_window_timeout();
 
-            // wait for WebAssembly to get compiled
-            Module.ready
-                .then(async _ => {
-                    document.getElementById('welcome').style.display = "none";
-                    //console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
+            waitForModuleReady().then(async _ => {
+                // wait for WebAssembly to get compiled
+                Module.ready
+                    .then(async _ => {
+                        document.getElementById('welcome').style.display = "none";
+                        //console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
 
-                    var received_msg = xmlhttp.response;
+                        var received_msg = xmlhttp.response;
 
-                    if (received_msg.byteLength == 0) {
-                        hide_hourglass();
-                        show_not_found();
-                        return;
-                    }
-
-                    if (received_msg instanceof ArrayBuffer) {
-                        var fitsHeader, mean_spectrum, integrated_spectrum;
-
-                        var dv = new DataView(received_msg);
-                        //console.log("FITSImage dataview byte length: ", dv.byteLength);
-
-                        var tone_mapping = new Object();
-                        let p = 0.5;
-                        tone_mapping.lmin = Math.log(p);
-                        tone_mapping.lmax = Math.log(p + 1.0);
-
-                        var offset = 0;
-                        var str_length = dv.getUint32(offset, endianness);
-                        offset += 4;
-
-                        let flux = new Uint8Array(received_msg, offset, str_length);
-                        tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
-                        offset += str_length;
-
-                        tone_mapping.min = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        tone_mapping.max = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        tone_mapping.median = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        tone_mapping.white = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        tone_mapping.black = dv.getFloat32(offset, endianness);
-                        offset += 4;
-
-                        //console.log(tone_mapping);
-
-                        var img_width = dv.getUint32(offset, endianness);
-                        offset += 4;
-
-                        var img_height = dv.getUint32(offset, endianness);
-                        offset += 4;
-
-                        //console.log('img_width:', img_width, 'img_height:', img_height);
-
-                        var pixels_length = dv.getUint32(offset, endianness);
-                        offset += 4;
-
-                        //console.log('pixels length:', pixels_length);
-
-                        var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
-                        offset += pixels_length;
-
-                        var mask_length = dv.getUint32(offset, endianness);
-                        offset += 4;
-
-                        //console.log('mask length:', mask_length);
-
-                        var frame_mask = new Uint8Array(received_msg, offset, mask_length);
-                        offset += mask_length;
-
-                        if (tone_mapping.flux == "legacy") {
-                            tone_mapping.black = tone_mapping.min;
-                            tone_mapping.white = tone_mapping.max;
+                        if (received_msg.byteLength == 0) {
+                            hide_hourglass();
+                            show_not_found();
+                            return;
                         }
 
-                        //console.log(tone_mapping);
+                        if (received_msg instanceof ArrayBuffer) {
+                            var fitsHeader, mean_spectrum, integrated_spectrum;
 
-                        var has_json = true;
+                            var dv = new DataView(received_msg);
+                            //console.log("FITSImage dataview byte length: ", dv.byteLength);
 
-                        try {
-                            var json_len = dv.getUint32(offset, endianness);
+                            var tone_mapping = new Object();
+                            let p = 0.5;
+                            tone_mapping.lmin = Math.log(p);
+                            tone_mapping.lmax = Math.log(p + 1.0);
+
+                            var offset = 0;
+                            var str_length = dv.getUint32(offset, endianness);
                             offset += 4;
 
-                            var buffer_len = dv.getUint32(offset, endianness);
+                            let flux = new Uint8Array(received_msg, offset, str_length);
+                            tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
+                            offset += str_length;
+
+                            tone_mapping.min = dv.getFloat32(offset, endianness);
                             offset += 4;
 
-                            var json = new Uint8Array(received_msg, offset, buffer_len);
-                            offset += buffer_len;
-                            //console.log("FITS json length:", json_len);
-                        } catch (err) {
-                            has_json = false;
-                        }
-
-                        var has_header = true;
-
-                        try {
-                            var header_len = dv.getUint32(offset, endianness);
+                            tone_mapping.max = dv.getFloat32(offset, endianness);
                             offset += 4;
 
-                            var buffer_len = dv.getUint32(offset, endianness);
+                            tone_mapping.median = dv.getFloat32(offset, endianness);
                             offset += 4;
 
-                            var header = new Uint8Array(received_msg, offset, buffer_len);
-                            offset += buffer_len;
-                            //console.log("FITS header length:", header_len);
-                        } catch (err) {
-                            has_header = false;
-                        }
-
-                        var mean_spectrum;
-                        var has_mean_spectrum = true;
-
-                        try {
-                            var spectrum_len = dv.getUint32(offset, endianness);
+                            tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
                             offset += 4;
 
-                            var buffer_len = dv.getUint32(offset, endianness);
+                            tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
                             offset += 4;
 
-                            var buffer = new Uint8Array(received_msg, offset, buffer_len);
-                            offset += buffer_len;
-                            //console.log("FITS mean spectrum length:", spectrum_len);
-
-                            // FPZIP decoder part				
-                            /*Module.ready
-                              .then(_ => {*/
-                            let start = performance.now();
-                            // mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
-                            var res = Module.decompressZFPspectrum(spectrum_len, buffer);
-                            mean_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-                            let elapsed = Math.round(performance.now() - start);
-
-                            //console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
-                            /*})
-                            .catch(e => {
-                              console.error(e);
-                              has_mean_spectrum = false;
-                            });*/
-                        } catch (err) {
-                            has_mean_spectrum = false;
-                        }
-
-                        var integrated_spectrum;
-                        var has_integrated_spectrum = true;
-
-                        try {
-                            var spectrum_len = dv.getUint32(offset, endianness);
+                            tone_mapping.white = dv.getFloat32(offset, endianness);
                             offset += 4;
 
-                            var buffer_len = dv.getUint32(offset, endianness);
+                            tone_mapping.black = dv.getFloat32(offset, endianness);
                             offset += 4;
 
-                            var buffer = new Uint8Array(received_msg, offset, buffer_len);
-                            offset += buffer_len;
-                            //console.log("FITS integrated spectrum length:", spectrum_len);
+                            //console.log(tone_mapping);
 
-                            // FPZIP decoder part				
-                            /*Module.ready
-                              .then(_ => {*/
-                            let start = performance.now();
-                            // integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
-                            var res = Module.decompressZFPspectrum(spectrum_len, buffer);
-                            integrated_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-                            let elapsed = Math.round(performance.now() - start);
+                            var img_width = dv.getUint32(offset, endianness);
+                            offset += 4;
 
-                            //console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
-                            /*})
-                            .catch(e => {
-                              console.error(e);
-                              has_integrated_spectrum = false;
-                            });*/
-                        } catch (err) {
-                            has_integrated_spectrum = false;
-                        }
+                            var img_height = dv.getUint32(offset, endianness);
+                            offset += 4;
 
-                        if (has_header) {
-                            // decompress the FITS data etc.
-                            var LZ4 = require('lz4');
+                            //console.log('img_width:', img_width, 'img_height:', img_height);
 
-                            var uncompressed = new Uint8Array(header_len);
-                            uncompressedSize = LZ4.decodeBlock(header, uncompressed);
-                            uncompressed = uncompressed.slice(0, uncompressedSize);
+                            var pixels_length = dv.getUint32(offset, endianness);
+                            offset += 4;
+
+                            //console.log('pixels length:', pixels_length);
+
+                            var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
+                            offset += pixels_length;
+
+                            var mask_length = dv.getUint32(offset, endianness);
+                            offset += 4;
+
+                            //console.log('mask length:', mask_length);
+
+                            var frame_mask = new Uint8Array(received_msg, offset, mask_length);
+                            offset += mask_length;
+
+                            if (tone_mapping.flux == "legacy") {
+                                tone_mapping.black = tone_mapping.min;
+                                tone_mapping.white = tone_mapping.max;
+                            }
+
+                            //console.log(tone_mapping);
+
+                            var has_json = true;
 
                             try {
-                                fitsHeader = new TextDecoder().decode(uncompressed);
+                                var json_len = dv.getUint32(offset, endianness);
+                                offset += 4;
+
+                                var buffer_len = dv.getUint32(offset, endianness);
+                                offset += 4;
+
+                                var json = new Uint8Array(received_msg, offset, buffer_len);
+                                offset += buffer_len;
+                                //console.log("FITS json length:", json_len);
+                            } catch (err) {
+                                has_json = false;
                             }
-                            catch (err) {
-                                fitsHeader = '';
-                                for (var i = 0; i < uncompressed.length; i++)
-                                    fitsHeader += String.fromCharCode(uncompressed[i]);
-                            };
 
-                            // console.log(fitsHeader);
-                        }
-
-                        if (has_json) {
-                            // decompress the FITS data etc.
-                            var LZ4 = require('lz4');
-
-                            var uncompressed = new Uint8Array(json_len);
-                            uncompressedSize = LZ4.decodeBlock(json, uncompressed);
-                            uncompressed = uncompressed.slice(0, uncompressedSize);
-
-                            var fitsData;
+                            var has_header = true;
 
                             try {
-                                fitsData = new TextDecoder().decode(uncompressed);
+                                var header_len = dv.getUint32(offset, endianness);
+                                offset += 4;
+
+                                var buffer_len = dv.getUint32(offset, endianness);
+                                offset += 4;
+
+                                var header = new Uint8Array(received_msg, offset, buffer_len);
+                                offset += buffer_len;
+                                //console.log("FITS header length:", header_len);
+                            } catch (err) {
+                                has_header = false;
                             }
-                            catch (err) {
-                                fitsData = '';
-                                for (var i = 0; i < uncompressed.length; i++)
-                                    fitsData += String.fromCharCode(uncompressed[i]);
-                            };
 
-                            //console.log(fitsData);
-                            fitsData = JSON.parse(fitsData);
+                            var mean_spectrum;
+                            var has_mean_spectrum = true;
 
-                            // replace the dummy FITS header
+                            try {
+                                var spectrum_len = dv.getUint32(offset, endianness);
+                                offset += 4;
+
+                                var buffer_len = dv.getUint32(offset, endianness);
+                                offset += 4;
+
+                                var buffer = new Uint8Array(received_msg, offset, buffer_len);
+                                offset += buffer_len;
+                                //console.log("FITS mean spectrum length:", spectrum_len);
+
+                                // FPZIP decoder part				
+                                /*Module.ready
+                                  .then(_ => {*/
+                                let start = performance.now();
+                                // mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
+                                var res = Module.decompressZFPspectrum(spectrum_len, buffer);
+                                mean_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                let elapsed = Math.round(performance.now() - start);
+
+                                //console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+                                /*})
+                                .catch(e => {
+                                  console.error(e);
+                                  has_mean_spectrum = false;
+                                });*/
+                            } catch (err) {
+                                has_mean_spectrum = false;
+                            }
+
+                            var integrated_spectrum;
+                            var has_integrated_spectrum = true;
+
+                            try {
+                                var spectrum_len = dv.getUint32(offset, endianness);
+                                offset += 4;
+
+                                var buffer_len = dv.getUint32(offset, endianness);
+                                offset += 4;
+
+                                var buffer = new Uint8Array(received_msg, offset, buffer_len);
+                                offset += buffer_len;
+                                //console.log("FITS integrated spectrum length:", spectrum_len);
+
+                                // FPZIP decoder part				
+                                /*Module.ready
+                                  .then(_ => {*/
+                                let start = performance.now();
+                                // integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
+                                var res = Module.decompressZFPspectrum(spectrum_len, buffer);
+                                integrated_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                let elapsed = Math.round(performance.now() - start);
+
+                                //console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
+                                /*})
+                                .catch(e => {
+                                  console.error(e);
+                                  has_integrated_spectrum = false;
+                                });*/
+                            } catch (err) {
+                                has_integrated_spectrum = false;
+                            }
+
                             if (has_header) {
-                                fitsData.HEADER = fitsHeader;
-                            } else {
-                                fitsData.HEADER = 'N/A';
-                            };
+                                // decompress the FITS data etc.
+                                var LZ4 = require('lz4');
 
-                            // replace the dummy mean spectrum
-                            if (has_mean_spectrum) {
-                                fitsData.mean_spectrum = mean_spectrum;
-                            }
+                                var uncompressed = new Uint8Array(header_len);
+                                uncompressedSize = LZ4.decodeBlock(header, uncompressed);
+                                uncompressed = uncompressed.slice(0, uncompressedSize);
 
-                            // replace the dummy integrated spectrum
-                            if (has_integrated_spectrum) {
-                                fitsData.integrated_spectrum = integrated_spectrum;
-                            }
-
-                            // console.log(fitsData);
-
-                            // handle the fitsData part
-                            fitsContainer[index - 1] = fitsData;
-                            optical_view = fitsData.is_optical;
-
-                            if (!isLocal) {
-                                let filesize = fitsData.filesize;
-                                let strFileSize = numeral(filesize).format('0.0ib');
-                                d3.select("#FITS").html("full download (" + strFileSize + ")");
-                            }
-
-                            {
-                                frame_reference_unit(index);
-
-                                //rescale CRVAL3 and CDELT3
-                                fitsData.CRVAL3 *= frame_multiplier;
-                                fitsData.CDELT3 *= frame_multiplier;
-
-                                frame_reference_type(index);
-
-                                //console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
-                            }
-
-                            let res = display_FITS_header(index);
-
-                            display_preferences(index);
-
-                            await res;
-
-                            if (index == va_count)
-                                display_dataset_info();
-
-                            if (va_count == 1 || composite_view) {
                                 try {
-                                    if (index == va_count) {
-                                        display_scale_info();
-                                    }
+                                    fitsHeader = new TextDecoder().decode(uncompressed);
                                 }
                                 catch (err) {
+                                    fitsHeader = '';
+                                    for (var i = 0; i < uncompressed.length; i++)
+                                        fitsHeader += String.fromCharCode(uncompressed[i]);
                                 };
-                            };
 
-                            if (!composite_view)
-                                add_line_label(index);
+                                // console.log(fitsHeader);
+                            }
 
-                            frame_start = 0;
-                            frame_end = fitsData.depth - 1;
+                            if (has_json) {
+                                // decompress the FITS data etc.
+                                var LZ4 = require('lz4');
 
-                            if (fitsData.depth > 1) {
-                                //insert a spectrum object to the spectrumContainer at <index-1>
-                                mean_spectrumContainer[index - 1] = fitsData.mean_spectrum;
-                                integrated_spectrumContainer[index - 1] = fitsData.integrated_spectrum;
+                                var uncompressed = new Uint8Array(json_len);
+                                uncompressedSize = LZ4.decodeBlock(json, uncompressed);
+                                uncompressed = uncompressed.slice(0, uncompressedSize);
 
-                                spectrum_count++;
+                                var fitsData;
 
-                                if (va_count == 1) {
-                                    setup_axes();
-
-                                    if (intensity_mode == "mean")
-                                        plot_spectrum([fitsData.mean_spectrum]);
-
-                                    if (intensity_mode == "integrated")
-                                        plot_spectrum([fitsData.integrated_spectrum]);
-
-                                    if (molecules.length > 0)
-                                        display_molecules();
+                                try {
+                                    fitsData = new TextDecoder().decode(uncompressed);
                                 }
-                                else {
-                                    if (spectrum_count == va_count) {
-                                        //console.log("mean spectrumContainer:", mean_spectrumContainer);
-                                        //console.log("integrated spectrumContainer:", integrated_spectrumContainer);
+                                catch (err) {
+                                    fitsData = '';
+                                    for (var i = 0; i < uncompressed.length; i++)
+                                        fitsData += String.fromCharCode(uncompressed[i]);
+                                };
 
-                                        //display an RGB legend in place of REF FRQ			
-                                        display_composite_legend();
+                                //console.log(fitsData);
+                                fitsData = JSON.parse(fitsData);
 
+                                // replace the dummy FITS header
+                                if (has_header) {
+                                    fitsData.HEADER = fitsHeader;
+                                } else {
+                                    fitsData.HEADER = 'N/A';
+                                };
+
+                                // replace the dummy mean spectrum
+                                if (has_mean_spectrum) {
+                                    fitsData.mean_spectrum = mean_spectrum;
+                                }
+
+                                // replace the dummy integrated spectrum
+                                if (has_integrated_spectrum) {
+                                    fitsData.integrated_spectrum = integrated_spectrum;
+                                }
+
+                                // console.log(fitsData);
+
+                                // handle the fitsData part
+                                fitsContainer[index - 1] = fitsData;
+                                optical_view = fitsData.is_optical;
+
+                                if (!isLocal) {
+                                    let filesize = fitsData.filesize;
+                                    let strFileSize = numeral(filesize).format('0.0ib');
+                                    d3.select("#FITS").html("full download (" + strFileSize + ")");
+                                }
+
+                                {
+                                    frame_reference_unit(index);
+
+                                    //rescale CRVAL3 and CDELT3
+                                    fitsData.CRVAL3 *= frame_multiplier;
+                                    fitsData.CDELT3 *= frame_multiplier;
+
+                                    frame_reference_type(index);
+
+                                    //console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
+                                }
+
+                                let res = display_FITS_header(index);
+
+                                display_preferences(index);
+
+                                await res;
+
+                                if (index == va_count)
+                                    display_dataset_info();
+
+                                if (va_count == 1 || composite_view) {
+                                    try {
+                                        if (index == va_count) {
+                                            display_scale_info();
+                                        }
+                                    }
+                                    catch (err) {
+                                    };
+                                };
+
+                                if (!composite_view)
+                                    add_line_label(index);
+
+                                frame_start = 0;
+                                frame_end = fitsData.depth - 1;
+
+                                if (fitsData.depth > 1) {
+                                    //insert a spectrum object to the spectrumContainer at <index-1>
+                                    mean_spectrumContainer[index - 1] = fitsData.mean_spectrum;
+                                    integrated_spectrumContainer[index - 1] = fitsData.integrated_spectrum;
+
+                                    spectrum_count++;
+
+                                    if (va_count == 1) {
                                         setup_axes();
 
                                         if (intensity_mode == "mean")
-                                            plot_spectrum(mean_spectrumContainer);
+                                            plot_spectrum([fitsData.mean_spectrum]);
 
                                         if (intensity_mode == "integrated")
-                                            plot_spectrum(integrated_spectrumContainer);
+                                            plot_spectrum([fitsData.integrated_spectrum]);
 
                                         if (molecules.length > 0)
                                             display_molecules();
                                     }
+                                    else {
+                                        if (spectrum_count == va_count) {
+                                            //console.log("mean spectrumContainer:", mean_spectrumContainer);
+                                            //console.log("integrated spectrumContainer:", integrated_spectrumContainer);
+
+                                            //display an RGB legend in place of REF FRQ			
+                                            display_composite_legend();
+
+                                            setup_axes();
+
+                                            if (intensity_mode == "mean")
+                                                plot_spectrum(mean_spectrumContainer);
+
+                                            if (intensity_mode == "integrated")
+                                                plot_spectrum(integrated_spectrumContainer);
+
+                                            if (molecules.length > 0)
+                                                display_molecules();
+                                        }
+                                    }
+                                }
+                                else {
+                                    spectrum_count++;
                                 }
                             }
-                            else {
-                                spectrum_count++;
-                            }
-                        }
 
-                        // WASM decoder part				
-                        /*Module.ready
-                          .then(_ => {*/
-                        {
-                            // console.log("processing an HDR image");
-                            let start = performance.now();
+                            // WASM decoder part				
+                            /*Module.ready
+                              .then(_ => {*/
+                            {
+                                // console.log("processing an HDR image");
+                                let start = performance.now();
 
-                            // decompressZFP returns std::vector<float>
-                            // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                            var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
-                            const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                // decompressZFP returns std::vector<float>
+                                // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
+                                var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
+                                const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                            var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
-                            const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+                                var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
+                                const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
 
-                            let elapsed = Math.round(performance.now() - start);
+                                let elapsed = Math.round(performance.now() - start);
 
-                            //console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+                                //console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-                            process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+                                process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
-                            if (has_json) {
-                                display_histogram(index);
+                                if (has_json) {
+                                    display_histogram(index);
 
-                                try {
-                                    display_cd_gridlines();
+                                    try {
+                                        display_cd_gridlines();
+                                    }
+                                    catch (err) {
+                                        display_gridlines();
+                                    };
+
+                                    display_beam();
                                 }
-                                catch (err) {
-                                    display_gridlines();
-                                };
 
-                                display_beam();
+                                if (composite_view) {
+                                    if (spectrum_count == va_count)
+                                        display_rgb_legend();
+                                } else {
+                                    display_legend();
+                                }
                             }
-
-                            if (composite_view) {
-                                if (spectrum_count == va_count)
-                                    display_rgb_legend();
-                            } else {
-                                display_legend();
-                            }
+                            /*})
+                            .catch(e => console.error(e));*/
                         }
-                        /*})
-                        .catch(e => console.error(e));*/
-                    }
 
-                })
-                .catch(e => console.error(e));
+                    })
+                    .catch(e => console.error(e));
+            }).catch(e => console.error(e));
         }
     }
 
@@ -17437,33 +17443,38 @@ async function display_FITS_header(index) {
         console.log(nkeyrec, headerArray);
 
         fitsData.ready = new Promise((resolve, reject) => {
-            Module.ready
-                .then(_ => {
-                    // Allocate string on Emscripten heap and get byte offset
-                    nHeaderBytes = header.byteLength;
-                    headerPtr = Module._malloc(nHeaderBytes);
-                    headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
-                    headerHeap.set(new Uint8Array(header));
+            waitForModuleReady().then(_ => {
+                Module.ready
+                    .then(_ => {
+                        // Allocate string on Emscripten heap and get byte offset
+                        nHeaderBytes = header.byteLength;
+                        headerPtr = Module._malloc(nHeaderBytes);
+                        headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
+                        headerHeap.set(new Uint8Array(header));
 
-                    // Use byte offset to pass header string to libwcs                    
-                    stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
+                        // Use byte offset to pass header string to libwcs                    
+                        stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
 
-                    // Free memory
-                    headerHeap = null;
-                    Module._free(headerPtr);
+                        // Free memory
+                        headerHeap = null;
+                        Module._free(headerPtr);
 
-                    if (stat != 0) {
-                        console.log("initWcs() failed");
+                        if (stat != 0) {
+                            console.log("initWcs() failed");
+                            reject(false);
+                        } else {
+                            fitsData.index = index;
+                            resolve(true);
+                        }
+                    })
+                    .catch(e => {
+                        console.error(e);
                         reject(false);
-                    } else {
-                        fitsData.index = index;
-                        resolve(true);
-                    }
-                })
-                .catch(e => {
-                    console.error(e);
-                    reject(false);
-                });
+                    });
+            }).catch(e => {
+                console.error(e);
+                reject(false);
+            });
         });
 
         await fitsData.ready;
