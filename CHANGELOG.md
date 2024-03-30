@@ -1,3 +1,7 @@
+## [5.1.1] - 2024-03-30
+
+* asynchronous (_*non-blocking*_) loading of WebAssembly to speed up the initial web page loading
+
 ## [5.1.0] - 2024-03-28
 
 * changed the display of the approximate size of FITS cut-outs to the _*IEC binary*_ format (i.e. MiB, GiB, TiB, etc.)
