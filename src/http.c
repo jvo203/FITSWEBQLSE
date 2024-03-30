@@ -4267,8 +4267,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     else
     {
         // server version: use the CDN version of WASM files
-        // g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".min.js\"></script>\n");
-        g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/htdocs/fitswebql/client." WASM_VERSION ".min.js\"></script>\n");
+        g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".min.js\"></script>\n");
     }
 
     // bootstrap
