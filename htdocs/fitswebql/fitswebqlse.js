@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-03-25.0";
+    return "JS2024-03-30.0";
 }
 
 function uuidv4() {
@@ -18703,6 +18703,13 @@ async function open_3d_view() {
     catch (e) {
         has_webgl = false;
         console.log('WebGL disabled', e);
+    }
+}
+
+// async function to wait until Module.ready is defined
+async function waitForModuleReady() {
+    while (typeof Module === 'undefined' || typeof Module.ready === 'undefined') {
+        await sleep(100);
     }
 }
 

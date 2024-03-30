@@ -4258,9 +4258,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // mathjs
     g_string_append(html, "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.3/math.min.js\" integrity =\"sha512-AZlpUxTyDgo/Ne1TyeXv345mwyAKh646DnZSsEt0GAF7aSFWu94UjCBcgm+yqKyH/6g9boKAzIEMO+wEGc6mJQ==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script>");
 
-    // pre-define the Module object
-    g_string_append(html, "<script>var Module = {};</script>\n");
-
     // WebAssembly JS+binary
     if (options.local)
     {
