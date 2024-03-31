@@ -4543,7 +4543,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         g_string_append(html, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.css\"/>\n");
     }
 
-    // Asynchronous WebAssembly JS+binary
+    // Asynchronous WebAssembly JS+WASM
     if (options.local)
     {
         // local version
