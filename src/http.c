@@ -4258,18 +4258,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // mathjs
     g_string_append(html, "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.3/math.min.js\" integrity =\"sha512-AZlpUxTyDgo/Ne1TyeXv345mwyAKh646DnZSsEt0GAF7aSFWu94UjCBcgm+yqKyH/6g9boKAzIEMO+wEGc6mJQ==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script>");
 
-    // WebAssembly JS+binary
-    if (options.local)
-    {
-        // local version
-        g_string_append(html, "<script async type=\"text/javascript\" src=\"client." WASM_VERSION ".js\"></script>\n");
-    }
-    else
-    {
-        // server version: use the CDN version of WASM files
-        g_string_append(html, "<script async type=\"text/javascript\" src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".min.js\"></script>\n");
-    }
-
     // bootstrap
     g_string_append(html,
                     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, "
@@ -4553,6 +4541,18 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         // server version: use automatically minified files served from the CDN
         g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.js\"></script>\n");
         g_string_append(html, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.css\"/>\n");
+    }
+
+    // Asynchronous WebAssembly JS+binary
+    if (options.local)
+    {
+        // local version
+        g_string_append(html, "<script async type=\"text/javascript\" src=\"client." WASM_VERSION ".js\"></script>\n");
+    }
+    else
+    {
+        // server version: use the CDN version of WASM files
+        g_string_append(html, "<script async type=\"text/javascript\" src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".min.js\"></script>\n");
     }
 
     // HTML content

@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-03-30.0";
+    return "JS2024-03-31.0";
 }
 
 function uuidv4() {
@@ -18720,6 +18720,7 @@ async function open_3d_view() {
 // async function to wait until Module.ready is defined
 async function waitForModuleReady() {
     while (typeof Module === 'undefined' || typeof Module.ready === 'undefined') {
+        console.log('waiting for Module.ready...');
         await sleep(100);
     }
 }
