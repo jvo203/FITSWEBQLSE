@@ -1,3 +1,7 @@
+## [5.1.2] - 2024-03-31
+
+* further improved _*asynchronous*_ loading of WebAssembly
+
 ## [5.1.1] - 2024-03-30
 
 * asynchronous (_*non-blocking*_) loading of WebAssembly to speed up the initial web page loading
