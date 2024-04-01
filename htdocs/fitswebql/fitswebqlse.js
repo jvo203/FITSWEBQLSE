@@ -16846,7 +16846,11 @@ function show_welcome() {
     html += '</zero-md></body></html>';
 
     var iframe = document.getElementById('github-iframe');
+    iframe.onload = function () {
+        console.log('iframe.contentWindow =', iframe.contentWindow);
+    };
     iframe.src = 'data:text/html;base64,' + window.btoa(html);
+    console.log('iframe.src =', iframe.src, 'html =', html);
 
     if (!isLocal) {
         ul.append("li")
