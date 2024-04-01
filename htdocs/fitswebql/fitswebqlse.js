@@ -17216,14 +17216,14 @@ function setup_changelog() {
         //    .html('<zero-md src="' + src + '"></zero-md>');
 
         // create a div without showing it
-        let div = document.createElement('div');
+        /*let div = document.createElement('div');
         // div.style.display = 'none';
         div.innerHTML = '<zero-md src="' + src + '"></zero-md>';
         // document.body.appendChild(div);
         // bodyDiv.append(div);
-        console.log(div);
+        console.log(div);*/
 
-        bodyDiv.append("div")
+        bodyDiv.append("p")
             .attr("class", "changelog")
             .html('<zero-md src="' + src + '"></zero-md>');
     }
