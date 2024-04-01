@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-03-31.0";
+    return "JS2024-04-01.0";
 }
 
 function uuidv4() {
@@ -3826,12 +3826,6 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
         hide_hourglass();
     }
-
-    try {
-        var element = document.getElementById('BackHTMLCanvas');
-        element.parentNode.removeChild(element);
-    }
-    catch (e) { }
 }
 
 function webgl_composite_image_renderer(gl, width, height) {
@@ -5466,43 +5460,6 @@ async function open_websocket_connection(_datasetId, index) {
         // The browser doesn't support WebSocket
         alert("WebSocket NOT supported by your Browser, progress updates disabled.");
     }
-}
-
-function fetch_binned_image(dataId) {
-    var url = null;
-
-    if (dataId >= "ALMA01000000")
-        url = 'https://jvo.nao.ac.jp/portal/alma/archive.do?pictSize=512&dataId=' + dataId + '&dataType=image&action=quicklook';
-    else
-        url = 'https://jvo.nao.ac.jp/portal/alma/sv.do?pictSize=512&dataId=' + dataId + '&dataType=image&action=quicklook';
-
-    var img = new Image();
-
-    img.onload = function () {
-        if (has_image)
-            return;
-
-        //console.log("JVO Image Resolution: ", img.width, img.height);
-
-        try {
-            var c = document.getElementById('BackHTMLCanvas');
-            var width = c.width;
-            var height = c.height;
-            var ctx = c.getContext("2d");
-
-            ctx.webkitImageSmoothingEnabled = false;
-            ctx.msImageSmoothingEnabled = false;
-            ctx.imageSmoothingEnabled = false;
-
-            var scale = get_image_scale(width, height, img.width, img.height);
-            var img_width = Math.floor(scale * img.width);
-            var img_height = Math.floor(scale * img.height);
-
-            ctx.drawImage(img, (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
-        }
-        catch (e) { };
-    };
-    img.src = url;
 }
 
 function image_pixel_range(pixels, mask, width, height) {
@@ -19099,13 +19056,7 @@ async function mainRenderer() {
             .attr("id", "ClusterSVG")
             .attr("width", width)
             .attr("height", 9)
-            .attr('style', 'position: fixed; left: 10px; top: 0px; z-index: -1'); // top: -2px
-
-        d3.select("#mainDiv").append("canvas")
-            .attr("id", "BackHTMLCanvas")
-            .attr("width", width)
-            .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 0');
+            .attr('style', 'position: fixed; left: 10px; top: 0px; z-index: 0'); // top: -2px        
 
         if (va_count > 1 && !composite_view) {
             for (let index = 0; index < va_count; index++) {
@@ -19263,10 +19214,7 @@ async function mainRenderer() {
         if (welcome)
             show_welcome();
 
-        display_hourglass();
-
-        if (!isLocal && va_count == 1)
-            fetch_binned_image(datasetId + '_00_00_00');
+        display_hourglass();        
 
         // RGB composite image variables
         compositeImage = null;
