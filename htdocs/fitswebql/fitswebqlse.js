@@ -16846,11 +16846,7 @@ function show_welcome() {
     html += '</zero-md></body></html>';
 
     var iframe = document.getElementById('github-iframe');
-    iframe.onload = function () {
-        console.log('iframe.contentWindow =', iframe.contentWindow);
-    };
     iframe.src = 'data:text/html;base64,' + window.btoa(html);
-    console.log('iframe.src =', iframe.src, 'html =', html);
 
     if (!isLocal) {
         ul.append("li")
@@ -17214,7 +17210,25 @@ function setup_changelog() {
         .attr("id", "modal-body")
         .attr("class", "modal-body");
 
-    bodyDiv.append("p")
+    {
+        let src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/CHANGELOG.md';
+        //bodyDiv.append("p")
+        //    .html('<zero-md src="' + src + '"></zero-md>');
+
+        // create a div without showing it
+        let div = document.createElement('div');
+        // div.style.display = 'none';
+        div.innerHTML = '<zero-md src="' + src + '"></zero-md>';
+        // document.body.appendChild(div);
+        // bodyDiv.append(div);
+        console.log(div);
+
+        bodyDiv.append("div")
+            .attr("class", "changelog")
+            .html('<zero-md src="' + src + '"></zero-md>');
+    }
+
+    /*bodyDiv.append("p")
         .html('<iframe id="github-iframe2" src="" style="width:100%;height:50vh;border:none;color:inherit;" title="Changelog"></iframe>');
 
     let html = '<!DOCTYPE html><html>';
@@ -17235,7 +17249,7 @@ function setup_changelog() {
     html += '</zero-md></body></html>';
 
     var iframe = document.getElementById('github-iframe2');
-    iframe.src = 'data:text/html;base64,' + window.btoa(html);
+    iframe.src = 'data:text/html;base64,' + window.btoa(html);*/
 
     var footer = contentDiv.append("div")
         .attr("class", "modal-footer");
@@ -19218,7 +19232,7 @@ async function mainRenderer() {
         if (welcome)
             show_welcome();
 
-        display_hourglass();        
+        display_hourglass();
 
         // RGB composite image variables
         compositeImage = null;
