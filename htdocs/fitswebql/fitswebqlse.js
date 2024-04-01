@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-04-01.0";
+    return "JS2024-04-01.1";
 }
 
 function uuidv4() {
@@ -16936,7 +16936,7 @@ function setup_help() {
     var pv = bodyDiv.append("video")
         .attr("width", "100%")
         .attr("controls", "")
-        .attr("preload", "metadata");
+        .attr("preload", "none"); // metadata
 
     pv.append("source")
         .attr("src", "https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/pv_diagram.mp4");
@@ -16953,7 +16953,7 @@ function setup_help() {
     var csv = bodyDiv.append("video")
         .attr("width", "100%")
         .attr("controls", "")
-        .attr("preload", "metadata");
+        .attr("preload", "none"); // metadata
 
     csv.append("source")
         .attr("src", "https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE/htdocs/fitswebql/spectrum_export.mp4");
@@ -17113,7 +17113,7 @@ function setup_help() {
     var vid = bodyDiv.append("video")
         .attr("width", "100%")
         .attr("controls", "")
-        .attr("preload", "metadata");
+        .attr("preload", "none"); // metadata
 
     vid.append("source")
         .attr("src", "https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/fixed_scale_y_axis.mp4");
