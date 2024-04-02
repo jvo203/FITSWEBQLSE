@@ -4253,11 +4253,12 @@ static enum MHD_Result body_compress(void **buf, size_t *buf_size)
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
 {
     int i;
+    enum MHD_Result comp;
     bool has_fits = true;
 
-    bool compress = can_compress(connection);
+    /*bool compress = false;
 
-    /*const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
+    const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
 
     if (encoding != NULL)
         compress = strstr(encoding, "gzip") != NULL;*/
@@ -4694,6 +4695,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     size_t html_len = html->len;
     gchar *html_str = g_string_free(html, FALSE);
 
+    if (can_compress(connection))
+        comp = body_compress((void **)&html_str, &html_len);
+
     struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html_len, (void *)html_str, g_free);
     // deallocate the html content after libmicrohttpd has taken ownership of the string
 
@@ -4707,6 +4711,16 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     MHD_add_response_header(response, "Cache-Control", "no-store");
     MHD_add_response_header(response, "Pragma", "no-cache");
     MHD_add_response_header(response, "Content-Type", "text/html; charset=utf-8");
+
+    if (MHD_YES == comp)
+    {
+        /* Need to indicate to client that body is compressed */
+        if (MHD_NO == MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_ENCODING, "deflate"))
+        {
+            MHD_destroy_response(response);
+            return MHD_NO;
+        }
+    }
 
     enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
     MHD_destroy_response(response);
