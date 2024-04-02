@@ -1,3 +1,7 @@
+## [5.1.4] - 2024-04-??
+
+* load a versioned Font Awesome Kit in order to take advantage of the browser cache
+
 ## [5.1.3] - 2024-04-02
 
 * removed fetching of the binned PNG background image from the JVO server whilst the FITS dataset is being loaded (saves _*several hundred kilobytes*_ in Internet traffic)
