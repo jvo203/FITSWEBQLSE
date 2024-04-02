@@ -115,6 +115,17 @@ struct splat_req
     unsigned char out[CHUNK];
 };
 
+struct html_req
+{
+    bool first;
+    char *buf;
+    size_t len;
+
+    // gzip compression
+    z_stream z;
+    unsigned char out[CHUNK];
+};
+
 struct gzip_req
 {
     // Unix pipe ends
