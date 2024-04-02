@@ -1,7 +1,7 @@
-## [5.1.4] - 2024-04-??
+## [5.1.4] - 2024-04-03
 
-* load a versioned Font Awesome Kit in order to take advantage of the browser cache
-* compress the main web page response, reducing the trasmitted size from 173kB to 35kB
+* switched to a _*versioned*_ Font Awesome Kit in order to take advantage of a browser cache
+* _*compress*_ the main web page response, reducing the trasmitted size from 173kB to 35kB
 
 ## [5.1.3] - 2024-04-02
 
