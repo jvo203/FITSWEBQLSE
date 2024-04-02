@@ -1,7 +1,7 @@
 ## [5.1.4] - 2024-04-??
 
 * load a versioned Font Awesome Kit in order to take advantage of the browser cache
-* compress the FITS dataset HTTP response
+* compress the main web page response, reducing the trasmitted size from 173kB to 35kB
 
 ## [5.1.3] - 2024-04-02
 
