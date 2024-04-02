@@ -4698,8 +4698,8 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     if (can_compress(connection))
         comp = body_compress((void **)&html_str, &html_len);
 
-    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html_len, (void *)html_str, g_free);
     // deallocate the html content after libmicrohttpd has taken ownership of the string
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html_len, (void *)html_str, g_free);
 
     if (response == NULL)
     {
