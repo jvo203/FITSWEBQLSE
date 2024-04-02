@@ -2414,8 +2414,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // printf("[C] Accept-Encoding: %s\n", encoding);
 
-        if (strstr(encoding, "gzip") != NULL)
-            compress = true;
+        if (encoding != NULL)
+            compress = strstr(encoding, "gzip") != NULL;
 
         if (splat_db == NULL)
             return http_internal_server_error(connection);
@@ -4200,6 +4200,12 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 {
     int i;
     bool has_fits = true;
+    bool compress = false;
+
+    const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
+
+    if (encoding != NULL)
+        compress = strstr(encoding, "gzip") != NULL;
 
     // go through the dataset list looking up entries in the hash table
     for (i = 0; i < va_count; i++)
