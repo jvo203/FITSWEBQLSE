@@ -4196,6 +4196,58 @@ void create_root_path(const char *root)
     free(link);
 }
 
+bool can_compress(struct MHD_Connection *con)
+{
+    const char *ae;
+    const char *de;
+
+    ae = MHD_lookup_connection_value(con,
+                                     MHD_HEADER_KIND,
+                                     MHD_HTTP_HEADER_ACCEPT_ENCODING);
+    if (NULL == ae)
+        return false;
+
+    if (0 == strcmp(ae, "*"))
+        return true;
+
+    de = strstr(ae, "deflate");
+
+    if (NULL == de)
+        return false;
+
+    if (((de == ae) || (de[-1] == ',') || (de[-1] == ' ')) && ((de[strlen("deflate")] == '\0') || (de[strlen("deflate")] == ',') || (de[strlen("deflate")] == ';')))
+        return true;
+
+    return false;
+}
+
+static enum MHD_Result body_compress(void **buf, size_t *buf_size)
+{
+    Bytef *cbuf;
+    uLongf cbuf_size;
+    int ret;
+
+    cbuf_size = compressBound((uLong)*buf_size);
+    cbuf = malloc(cbuf_size);
+
+    if (NULL == cbuf)
+        return MHD_NO;
+
+    ret = compress(cbuf, &cbuf_size, (const Bytef *)*buf, (uLong)*buf_size);
+
+    if ((Z_OK != ret) || (cbuf_size >= *buf_size))
+    {
+        /* compression failed */
+        free(cbuf);
+        return MHD_NO;
+    }
+
+    free(*buf);
+    *buf = (void *)cbuf;
+    *buf_size = (size_t)cbuf_size;
+    return MHD_YES;
+}
+
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
 {
     int i;
