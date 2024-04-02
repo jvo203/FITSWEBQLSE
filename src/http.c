@@ -4243,10 +4243,10 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                           "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                           "fitswebql/marchingsquares-isobands.min.js\" defer></script>\n");
 
-    // zero-dm
+    // Markdown-to-HTML converter
     g_string_append(html, "<script "
                           "src=\"https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js\" "
-                          "type=\"module\"></script>\n");    
+                          "type=\"module\"></script>\n");
 
     // Font Awesome
     g_string_append(html, "<script src=\"https://kit.fontawesome.com/8433b7dde2.js\" crossorigin=\"anonymous\"></script>\n");
