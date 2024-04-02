@@ -4228,7 +4228,7 @@ static enum MHD_Result body_compress(void **buf, size_t *buf_size)
     int ret;
 
     cbuf_size = compressBound((uLong)*buf_size);
-    cbuf = malloc(cbuf_size);
+    cbuf = g_try_malloc(cbuf_size); // returns NULL upon a failure
 
     if (NULL == cbuf)
         return MHD_NO;
@@ -4242,7 +4242,9 @@ static enum MHD_Result body_compress(void **buf, size_t *buf_size)
         return MHD_NO;
     }
 
-    free(*buf);
+    // free the original buffer, replace it with the compressed one
+    g_free(*buf); // we are using glib memory management
+
     *buf = (void *)cbuf;
     *buf_size = (size_t)cbuf_size;
     return MHD_YES;
@@ -4694,6 +4696,12 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(html_len, (void *)html_str, g_free);
     // deallocate the html content after libmicrohttpd has taken ownership of the string
+
+    if (response == NULL)
+    {
+        g_free(html_str);
+        return MHD_NO;
+    }
 
     MHD_add_response_header(response, "Cache-Control", "no-cache");
     MHD_add_response_header(response, "Cache-Control", "no-store");
