@@ -1,3 +1,9 @@
+## [5.1.3] - 2024-04-02
+
+* removed fetching of the binned PNG background image from the JVO server whilst the FITS dataset is being loaded (saves _*several hundred kilobytes*_ in Internet traffic)
+* removed preloading of the metadata for three MP4 help video files (saves three HTTP requests to the CDN)
+* optimised loading from the browser cache of the _*zero-md*_ JavaScript library + dependencies, used to display the _*CHANGELOG*_
+
 ## [5.1.2] - 2024-03-31
 
 * further improved _*asynchronous*_ loading of WebAssembly
