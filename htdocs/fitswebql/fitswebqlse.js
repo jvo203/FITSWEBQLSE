@@ -16824,14 +16824,8 @@ function show_welcome() {
         return false;
     });
 
-    ul.append("li")
-        .attr("class", "list-group-item list-group-item-success")
-        .html('<iframe id="github-iframe" src="" style="width:100%;height:12.5vh;border:none;color:inherit;" title="Changelog"></iframe>');
-
-    let html = '<!DOCTYPE html><html>';
-    html += '<head><script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script></head>';
     let src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/CHANGELOG.md';
-    html += '<body><zero-md src="' + src + '">';
+    let html = '<zero-md src="' + src + '">';
 
     if (theme == 'bright') {
         html += '<template><style>* { color:gray;font-size:small;font-family: Helvetica;}</style></template>';
@@ -16841,12 +16835,11 @@ function show_welcome() {
         html += '<template><style>* { color:lightgray;font-size:small;font-family:Helvetica;}</style></template>';
     }
 
-    // a fallback message in case the changelog cannot be loaded
-    html += '<script type="text/markdown"># **The** [CHANGELOG](' + src + ') could not be loaded.</script>';
-    html += '</zero-md></body></html>';
+    html += '</zero-md>';
 
-    var iframe = document.getElementById('github-iframe');
-    iframe.src = 'data:text/html;base64,' + window.btoa(html);
+    ul.append("li")
+        .attr("class", "list-group-item list-group-item-success changelog1")
+        .html(html);
 
     if (!isLocal) {
         ul.append("li")
@@ -17224,7 +17217,7 @@ function setup_changelog() {
     html += '</zero-md>';
 
     bodyDiv.append("p")
-        .attr("class", "changelog")
+        .attr("class", "changelog2")
         .html(html);
 
     var footer = contentDiv.append("div")
