@@ -4255,7 +4255,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                           "type=\"module\"></script>\n");
 
     // Font Awesome
-    g_string_append(html, "<script src=\"https://kit.fontawesome.com/8433b7dde2.js\" crossorigin=\"anonymous\"></script>\n");
+    g_string_append(html, "<script src=\"https://kit.fontawesome.com/8433b7dde2.js?ver=5.15.4\" crossorigin=\"anonymous\"></script>\n");
 
     // HTML5 FileSaver
     g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/FileSaver.min.js\"></script>\n");
