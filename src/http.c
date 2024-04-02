@@ -4252,12 +4252,13 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 {
     int i;
     bool has_fits = true;
-    bool compress = false;
 
-    const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
+    bool compress = can_compress(connection);
+
+    /*const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
 
     if (encoding != NULL)
-        compress = strstr(encoding, "gzip") != NULL;
+        compress = strstr(encoding, "gzip") != NULL;*/
 
     // go through the dataset list looking up entries in the hash table
     for (i = 0; i < va_count; i++)
