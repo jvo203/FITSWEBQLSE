@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-04-01.1";
+    return "JS2024-04-02.0";
 }
 
 function uuidv4() {
@@ -17210,31 +17210,8 @@ function setup_changelog() {
         .attr("id", "modal-body")
         .attr("class", "modal-body");
 
-    {
-        let src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/CHANGELOG.md';
-        //bodyDiv.append("p")
-        //    .html('<zero-md src="' + src + '"></zero-md>');
-
-        // create a div without showing it
-        /*let div = document.createElement('div');
-        // div.style.display = 'none';
-        div.innerHTML = '<zero-md src="' + src + '"></zero-md>';
-        // document.body.appendChild(div);
-        // bodyDiv.append(div);
-        console.log(div);*/
-
-        bodyDiv.append("p")
-            .attr("class", "changelog")
-            .html('<zero-md src="' + src + '"></zero-md>');
-    }
-
-    /*bodyDiv.append("p")
-        .html('<iframe id="github-iframe2" src="" style="width:100%;height:50vh;border:none;color:inherit;" title="Changelog"></iframe>');
-
-    let html = '<!DOCTYPE html><html>';
-    html += '<head><script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script></head>';
     let src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/CHANGELOG.md';
-    html += '<body><zero-md src="' + src + '">';
+    let html = '<zero-md src="' + src + '">';
 
     if (theme == 'bright') {
         html += '<template><style>* { color:gray;font-size:small;font-family: Helvetica;}</style></template>';
@@ -17244,12 +17221,11 @@ function setup_changelog() {
         html += '<template><style>* { color:lightgray;font-size:small;font-family:Helvetica;}</style></template>';
     }
 
-    // a fallback message in case the changelog cannot be loaded
-    html += '<script type="text/markdown"># **The** [CHANGELOG](' + src + ') could not be loaded.</script>';
-    html += '</zero-md></body></html>';
+    html += '</zero-md>';
 
-    var iframe = document.getElementById('github-iframe2');
-    iframe.src = 'data:text/html;base64,' + window.btoa(html);*/
+    bodyDiv.append("p")
+        .attr("class", "changelog")
+        .html(html);
 
     var footer = contentDiv.append("div")
         .attr("class", "modal-footer");
