@@ -4236,9 +4236,8 @@ bool can_compress(struct MHD_Connection *con)
     const char *ae;
     const char *de;
 
-    ae = MHD_lookup_connection_value(con,
-                                     MHD_HEADER_KIND,
-                                     MHD_HTTP_HEADER_ACCEPT_ENCODING);
+    ae = MHD_lookup_connection_value(con, MHD_HEADER_KIND, MHD_HTTP_HEADER_ACCEPT_ENCODING);
+
     if (NULL == ae)
         return false;
 
