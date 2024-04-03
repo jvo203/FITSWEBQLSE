@@ -4292,6 +4292,7 @@ static enum MHD_Result compress_buf(z_stream *strm, const void *src, size_t src_
     void *tmp_dest;
     *dest = NULL;
     *dest_size = 0;
+
     do
     {
         if (src_size > CHUNK)
@@ -4305,65 +4306,71 @@ static enum MHD_Result compress_buf(z_stream *strm, const void *src, size_t src_
             strm->avail_in = (uInt)src_size;
             flush = Z_SYNC_FLUSH;
         }
+
         *offset += strm->avail_in;
         strm->next_in = (const Bytef *)src;
+
         do
         {
             strm->avail_out = CHUNK;
             strm->next_out = tmp;
+
             ret = (Z_OK == deflate(strm, flush)) ? MHD_YES : MHD_NO;
             have = CHUNK - strm->avail_out;
+
             *dest_size += have;
             tmp_dest = realloc(*dest, *dest_size);
+
             if (NULL == tmp_dest)
             {
                 free(*dest);
                 *dest = NULL;
                 return MHD_NO;
             }
+
             *dest = tmp_dest;
             memcpy(((uint8_t *)(*dest)) + ((*dest_size) - have), tmp, have);
         } while (0 == strm->avail_out);
     } while (flush != Z_SYNC_FLUSH);
+
     return ret;
 }
 
 static ssize_t read_cb(void *cls, uint64_t pos, char *mem, size_t size)
 {
-    if (cls == NULL)
-        return MHD_CONTENT_READER_END_WITH_ERROR;
-
-    struct html_req *req = (struct html_req *)cls;
-
-    void *src;
+    char *src;
     void *buf;
     ssize_t ret;
     size_t offset;
     size_t r_size;
 
+    if (cls == NULL)
+        return MHD_CONTENT_READER_END_WITH_ERROR;
+
+    struct html_req *req = (struct html_req *)cls;
+
     if (pos > SSIZE_MAX)
         return MHD_CONTENT_READER_END_WITH_ERROR;
+
     offset = (size_t)pos;
-    src = malloc(size);
-    if (NULL == src)
-        return MHD_CONTENT_READER_END_WITH_ERROR;
-    r_size = fread(src, 1, size, holder->file);
-    if (0 == r_size)
-    {
-        ret = (0 != ferror(holder->file)) ? MHD_CONTENT_READER_END_WITH_ERROR : MHD_CONTENT_READER_END_OF_STREAM;
-        goto done;
-    }
-    if (MHD_YES != compress_buf(&holder->stream, src, r_size, &offset, &buf,
-                                &size, holder->buf))
+
+    if (offset >= req->len)
+        return MHD_CONTENT_READER_END_OF_STREAM;
+
+    src = req->buf + offset;
+
+    // r_size = fread(src, 1, size, holder->file);
+    r_size = MIN(size, req->len - offset);
+
+    if (MHD_YES != compress_buf(&req->z, src, r_size, &offset, &buf, &size, req->buf))
         ret = MHD_CONTENT_READER_END_WITH_ERROR;
     else
     {
         memcpy(mem, buf, size);
         ret = (ssize_t)size;
     }
+
     free(buf); /* Buf may be set even on error return. */
-done:
-    free(src);
     return ret;
 }
 
