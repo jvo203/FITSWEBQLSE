@@ -4284,16 +4284,22 @@ static enum MHD_Result body_compress(void **buf, size_t *buf_size)
     return MHD_YES;
 }
 
+// streaming gzip-compress the buffer and send the response
+static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection, const char *buf, size_t len)
+{
+    return MHD_NO;
+}
+
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
 {
     int i;
     bool has_fits = true;
     enum MHD_Result comp = MHD_NO;
-    bool gzip_compress = false;
+    bool gcompress = false;
 
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
     if (encoding != NULL)
-        gzip_compress = strstr(encoding, "gzip") != NULL;
+        gcompress = strstr(encoding, "gzip") != NULL;
 
     // go through the dataset list looking up entries in the hash table
     for (i = 0; i < va_count; i++)
@@ -4726,6 +4732,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     size_t html_len = html->len;
     gchar *html_str = g_string_free(html, FALSE);
+
+    if (gcompress && streaming_gzip_response(connection, html_str, html_len) == MHD_YES)
+        return MHD_YES;
 
     if (can_compress(connection))
         comp = body_compress((void **)&html_str, &html_len);
