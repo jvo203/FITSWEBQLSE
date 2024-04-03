@@ -4284,6 +4284,17 @@ static enum MHD_Result body_compress(void **buf, size_t *buf_size)
     return MHD_YES;
 }
 
+static void free_cb(void *cls)
+{
+    if (cls == NULL)
+        return;
+
+    struct html_req *req = (struct html_req *)cls;
+    CALL_ZLIB(deflateEnd(&(req->z)));
+    g_free(req->buf);
+    free(req);
+}
+
 // streaming gzip-compress the buffer and send the response
 static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection, char *buf, size_t len)
 {
@@ -4306,7 +4317,14 @@ static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection
 
     CALL_ZLIB(deflateInit2(&(req->z), Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
 
-    // ... incomplete code
+    struct MHD_Response *response = MHD_create_response_from_callback(MHD_SIZE_UNKNOWN, 1024, &read_cb, req, &free_cb);
+
+    if (NULL == response)
+    {
+        CALL_ZLIB(deflateEnd(&(req->z)));
+        free(req);
+        return MHD_NO;
+    }
 
     free(req);
     return MHD_NO;
