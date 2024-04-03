@@ -4306,9 +4306,9 @@ static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection
 
     CALL_ZLIB(deflateInit2(&(req->z), Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
 
-    // ...
-    free(req);
+    // ... incomplete code
 
+    free(req);
     return MHD_NO;
 }
 
