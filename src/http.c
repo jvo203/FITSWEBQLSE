@@ -4285,8 +4285,30 @@ static enum MHD_Result body_compress(void **buf, size_t *buf_size)
 }
 
 // streaming gzip-compress the buffer and send the response
-static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection, const char *buf, size_t len)
+static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection, char *buf, size_t len)
 {
+    // allocate struct html_req
+    struct html_req *req = (struct html_req *)malloc(sizeof(struct html_req));
+
+    if (NULL == req)
+        return MHD_NO;
+
+    // initialize the struct
+    req->buf = buf;
+    req->len = len;
+
+    // initialize zlib
+    req->z.zalloc = Z_NULL;
+    req->z.zfree = Z_NULL;
+    req->z.opaque = Z_NULL;
+    req->z.next_in = Z_NULL;
+    req->z.avail_in = 0;
+
+    CALL_ZLIB(deflateInit2(&(req->z), Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
+
+    // ...
+    free(req);
+
     return MHD_NO;
 }
 
