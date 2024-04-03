@@ -117,7 +117,6 @@ struct splat_req
 
 struct html_req
 {
-    bool first;
     char *buf;
     size_t len;
 
