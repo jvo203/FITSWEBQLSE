@@ -4326,8 +4326,16 @@ static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection
         return MHD_NO;
     }
 
-    free(req);
-    return MHD_NO;
+    MHD_add_response_header(response, "Cache-Control", "no-cache");
+    MHD_add_response_header(response, "Cache-Control", "no-store");
+    MHD_add_response_header(response, "Pragma", "no-cache");
+    MHD_add_response_header(response, "Content-Type", "text/html; charset=utf-8");
+    MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_ENCODING, "gzip");
+
+    enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+    MHD_destroy_response(response);
+
+    return ret;
 }
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
