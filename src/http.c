@@ -4349,6 +4349,8 @@ static ssize_t read_cb(void *cls, uint64_t pos, char *mem, size_t size)
 
     struct html_req *req = (struct html_req *)cls;
 
+    printf("[C] read_cb: pos=%" PRIu64 ", size=%zu\n", pos, size);
+
     if (pos > SSIZE_MAX)
         return MHD_CONTENT_READER_END_WITH_ERROR;
 
