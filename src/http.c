@@ -168,20 +168,14 @@ static enum MHD_Result http_ok(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
     int ret;
-    const char *okstr =
-        "<html><body><div align='center'><p>200 OK Processing a request.</p></div><div align='center'><img src=\"/fortran.webp\" alt=\" Powered by Fortran 2018\" style = \"height:40px; margin-top:25px;\" ></div></ body></ html>";
+    const char *okstr = "<html><body><div align='center'><p>200 OK Processing a request.</p></div><div align='center'><img src=\"/fortran.webp\" alt=\" Powered by Fortran 2018\" style = \"height:40px; margin-top:25px;\" ></div></ body></ html>";
 
-    response =
-        MHD_create_response_from_buffer(strlen(okstr),
-                                        (void *)okstr,
-                                        MHD_RESPMEM_PERSISTENT);
+    response = MHD_create_response_from_buffer(strlen(okstr), (void *)okstr, MHD_RESPMEM_PERSISTENT);
+
     if (NULL != response)
     {
-        ret =
-            MHD_queue_response(connection, MHD_HTTP_OK,
-                               response);
+        ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
         MHD_destroy_response(response);
-
         return ret;
     }
     else
@@ -192,20 +186,14 @@ static enum MHD_Result http_not_found(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
     int ret;
-    const char *errorstr =
-        "404 Not Found";
+    const char *errorstr = "404 Not Found";
 
-    response =
-        MHD_create_response_from_buffer(strlen(errorstr),
-                                        (void *)errorstr,
-                                        MHD_RESPMEM_PERSISTENT);
+    response = MHD_create_response_from_buffer(strlen(errorstr), (void *)errorstr, MHD_RESPMEM_PERSISTENT);
+
     if (NULL != response)
     {
-        ret =
-            MHD_queue_response(connection, MHD_HTTP_NOT_FOUND,
-                               response);
+        ret = MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, response);
         MHD_destroy_response(response);
-
         return ret;
     }
     else
@@ -216,20 +204,14 @@ static enum MHD_Result http_bad_request(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
     int ret;
-    const char *errorstr =
-        "400 Bad Request";
+    const char *errorstr = "400 Bad Request";
 
-    response =
-        MHD_create_response_from_buffer(strlen(errorstr),
-                                        (void *)errorstr,
-                                        MHD_RESPMEM_PERSISTENT);
+    response = MHD_create_response_from_buffer(strlen(errorstr), (void *)errorstr, MHD_RESPMEM_PERSISTENT);
+
     if (NULL != response)
     {
-        ret =
-            MHD_queue_response(connection, MHD_HTTP_NOT_FOUND,
-                               response);
+        ret = MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, response);
         MHD_destroy_response(response);
-
         return ret;
     }
     else
@@ -240,20 +222,14 @@ static enum MHD_Result http_accepted(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
     int ret;
-    const char *errorstr =
-        "202 Accepted";
+    const char *errorstr = "202 Accepted";
 
-    response =
-        MHD_create_response_from_buffer(strlen(errorstr),
-                                        (void *)errorstr,
-                                        MHD_RESPMEM_PERSISTENT);
+    response = MHD_create_response_from_buffer(strlen(errorstr), (void *)errorstr, MHD_RESPMEM_PERSISTENT);
+
     if (NULL != response)
     {
-        ret =
-            MHD_queue_response(connection, MHD_HTTP_ACCEPTED,
-                               response);
+        ret = MHD_queue_response(connection, MHD_HTTP_ACCEPTED, response);
         MHD_destroy_response(response);
-
         return ret;
     }
     else
@@ -264,20 +240,14 @@ static enum MHD_Result http_no_content(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
     int ret;
-    const char *errorstr =
-        "204 No Content";
+    const char *errorstr = "204 No Content";
 
-    response =
-        MHD_create_response_from_buffer(strlen(errorstr),
-                                        (void *)errorstr,
-                                        MHD_RESPMEM_PERSISTENT);
+    response = MHD_create_response_from_buffer(strlen(errorstr), (void *)errorstr, MHD_RESPMEM_PERSISTENT);
+
     if (NULL != response)
     {
-        ret =
-            MHD_queue_response(connection, MHD_HTTP_NO_CONTENT,
-                               response);
+        ret = MHD_queue_response(connection, MHD_HTTP_NO_CONTENT, response);
         MHD_destroy_response(response);
-
         return ret;
     }
     else
@@ -288,20 +258,14 @@ static enum MHD_Result http_acknowledge(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
     int ret;
-    const char *okstr =
-        "200 OK Request Acknowledged\n";
+    const char *okstr = "200 OK Request Acknowledged\n";
 
-    response =
-        MHD_create_response_from_buffer(strlen(okstr),
-                                        (void *)okstr,
-                                        MHD_RESPMEM_PERSISTENT);
+    response = MHD_create_response_from_buffer(strlen(okstr), (void *)okstr, MHD_RESPMEM_PERSISTENT);
+
     if (NULL != response)
     {
-        ret =
-            MHD_queue_response(connection, MHD_HTTP_OK,
-                               response);
+        ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
         MHD_destroy_response(response);
-
         return ret;
     }
     else
@@ -312,20 +276,14 @@ static enum MHD_Result http_internal_server_error(struct MHD_Connection *connect
 {
     struct MHD_Response *response;
     int ret;
-    const char *errorstr =
-        "500 Internal Server Error";
+    const char *errorstr = "500 Internal Server Error";
 
-    response =
-        MHD_create_response_from_buffer(strlen(errorstr),
-                                        (void *)errorstr,
-                                        MHD_RESPMEM_PERSISTENT);
+    response = MHD_create_response_from_buffer(strlen(errorstr), (void *)errorstr, MHD_RESPMEM_PERSISTENT);
+
     if (NULL != response)
     {
-        ret =
-            MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR,
-                               response);
+        ret = MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
         MHD_destroy_response(response);
-
         return ret;
     }
     else
@@ -336,20 +294,14 @@ static enum MHD_Result http_not_implemented(struct MHD_Connection *connection)
 {
     struct MHD_Response *response;
     int ret;
-    const char *errorstr =
-        "501 Not Implemented";
+    const char *errorstr = "501 Not Implemented";
 
-    response =
-        MHD_create_response_from_buffer(strlen(errorstr),
-                                        (void *)errorstr,
-                                        MHD_RESPMEM_PERSISTENT);
+    response = MHD_create_response_from_buffer(strlen(errorstr), (void *)errorstr, MHD_RESPMEM_PERSISTENT);
+
     if (NULL != response)
     {
-        ret =
-            MHD_queue_response(connection, MHD_HTTP_NOT_IMPLEMENTED,
-                               response);
+        ret = MHD_queue_response(connection, MHD_HTTP_NOT_IMPLEMENTED, response);
         MHD_destroy_response(response);
-
         return ret;
     }
     else
@@ -382,13 +334,13 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
 
     if (-1 != fd)
     {
-        if ((0 != fstat(fd, &buf)) ||
-            (!S_ISREG(buf.st_mode)))
+        if ((0 != fstat(fd, &buf)) || (!S_ISREG(buf.st_mode)))
         {
             /* not a regular file, refuse to serve */
-            if (0 != close(fd))
-                abort();
+            close(fd);
             fd = -1;
+
+            return http_internal_server_error(connection);
         }
 
         struct tm tm = {0};
@@ -426,6 +378,9 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
 
             struct MHD_Response *response = MHD_create_response_from_buffer(0, NULL, MHD_RESPMEM_PERSISTENT);
 
+            if (NULL == response)
+                return MHD_NO;
+
             MHD_add_response_header(response, "Cache-Control", "public, max-age=86400");
             MHD_add_response_header(response, MHD_HTTP_HEADER_ETAG, last_etag);
 
@@ -444,8 +399,7 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
 
         if (NULL == response)
         {
-            if (0 != close(fd))
-                abort();
+            close(fd);
             return MHD_NO;
         }
 
@@ -621,6 +575,12 @@ static enum MHD_Result get_directory(struct MHD_Connection *connection, char *di
 
     struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
 
+    if (NULL == response)
+    {
+        g_free(json_str);
+        return MHD_NO;
+    }
+
     MHD_add_response_header(response, "Cache-Control", "no-cache");
     MHD_add_response_header(response, "Cache-Control", "no-store");
     MHD_add_response_header(response, "Pragma", "no-cache");
@@ -647,6 +607,12 @@ static enum MHD_Result send_progress(struct MHD_Connection *connection, float pr
     gchar *json_str = g_string_free(json, FALSE);
 
     struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
+
+    if (NULL == response)
+    {
+        g_free(json_str);
+        return MHD_NO;
+    }
 
     MHD_add_response_header(response, "Cache-Control", "no-cache");
     MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -1798,15 +1764,15 @@ static enum MHD_Result on_http_connection(void *cls,
 
             if (NULL != response)
             {
-                ret =
-                    MHD_queue_response(connection, MHD_HTTP_OK,
-                                       response);
+                ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
                 MHD_destroy_response(response);
-
                 return ret;
             }
             else
+            {
+                g_free(json_str);
                 return MHD_NO;
+            }
         }
         else
             return http_bad_request(connection);
@@ -1820,20 +1786,14 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             timestamp++;
 
-            struct MHD_Response *response =
-                MHD_create_response_from_buffer(strlen(timestamp),
-                                                (void *)timestamp,
-                                                MHD_RESPMEM_MUST_COPY);
-
-            MHD_add_response_header(response, "Content-Type", "text/plain; charset=utf-8");
+            struct MHD_Response *response = MHD_create_response_from_buffer(strlen(timestamp), (void *)timestamp, MHD_RESPMEM_MUST_COPY);
 
             if (NULL != response)
             {
-                ret =
-                    MHD_queue_response(connection, MHD_HTTP_OK,
-                                       response);
-                MHD_destroy_response(response);
+                MHD_add_response_header(response, "Content-Type", "text/plain; charset=utf-8");
 
+                ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+                MHD_destroy_response(response);
                 return ret;
             }
             else
@@ -2034,6 +1994,12 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
 
+                    if (NULL != response)
+                    {
+                        g_free(json_str);
+                        return MHD_NO;
+                    }
+
                     MHD_add_response_header(response, "Cache-Control", "no-cache");
                     MHD_add_response_header(response, "Cache-Control", "no-store");
                     MHD_add_response_header(response, "Pragma", "no-cache");
@@ -2069,15 +2035,24 @@ static enum MHD_Result on_http_connection(void *cls,
             size_t json_len = json->len;
             gchar *json_str = g_string_free(json, FALSE);
 
+            enum MHD_Result ret;
             struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
 
-            MHD_add_response_header(response, "Cache-Control", "no-cache");
-            MHD_add_response_header(response, "Cache-Control", "no-store");
-            MHD_add_response_header(response, "Pragma", "no-cache");
-            MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
+            if (NULL == response)
+            {
+                g_free(json_str);
+                ret = MHD_NO;
+            }
+            else
+            {
+                MHD_add_response_header(response, "Cache-Control", "no-cache");
+                MHD_add_response_header(response, "Cache-Control", "no-store");
+                MHD_add_response_header(response, "Pragma", "no-cache");
+                MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
 
-            enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-            MHD_destroy_response(response);
+                ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+                MHD_destroy_response(response);
+            }
 
             free(_ptr->buf);
             free(_ptr);
@@ -2287,6 +2262,18 @@ static enum MHD_Result on_http_connection(void *cls,
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
 
+        if (NULL == response)
+        {
+            close(pipefd[1]);
+
+            // deallocate datasetId
+            for (int i = 0; i < va_count; i++)
+                free(datasetId[i]);
+            free(datasetId);
+
+            return http_internal_server_error(connection);
+        }
+
         // add headers
         MHD_add_response_header(response, "Cache-Control", "no-cache");
         MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -2453,6 +2440,12 @@ static enum MHD_Result on_http_connection(void *cls,
             // create a response from the pipe by passing the read end of the pipe
             struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
 
+            if (response == NULL)
+            {
+                close(pipefd[1]);
+                return http_internal_server_error(connection);
+            }
+
             // add headers
             MHD_add_response_header(response, "Cache-Control", "public, max-age=86400");
             MHD_add_response_header(response, "Content-Type", "application/json");
@@ -2565,6 +2558,12 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+        if (NULL == response)
+        {
+            close(pipefd[1]);
+            return http_internal_server_error(connection);
+        }
 
         // add headers
         MHD_add_response_header(response, "Cache-Control", "no-cache");
@@ -2718,6 +2717,12 @@ static enum MHD_Result on_http_connection(void *cls,
         // the response will be freed by libmicrohttpd
         struct MHD_Response *response = MHD_create_response_from_buffer(strlen(json), (void *)json, MHD_RESPMEM_MUST_FREE);
 
+        if (NULL == response)
+        {
+            free(json);
+            return MHD_NO;
+        }
+
         MHD_add_response_header(response, "Cache-Control", "no-cache");
         MHD_add_response_header(response, "Cache-Control", "no-store");
         MHD_add_response_header(response, "Pragma", "no-cache");
@@ -2755,6 +2760,12 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // the response will be freed by libmicrohttpd
         struct MHD_Response *response = MHD_create_response_from_buffer(strlen(json), (void *)json, MHD_RESPMEM_MUST_FREE);
+
+        if (NULL == response)
+        {
+            free(json);
+            return MHD_NO;
+        }
 
         MHD_add_response_header(response, "Cache-Control", "no-cache");
         MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -3006,6 +3017,12 @@ static enum MHD_Result on_http_connection(void *cls,
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
 
+        if (NULL == response)
+        {
+            close(pipefd[1]);
+            return http_internal_server_error(connection);
+        }
+
         // add headers
         MHD_add_response_header(response, "Cache-Control", "no-cache");
         MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -3152,6 +3169,12 @@ static enum MHD_Result on_http_connection(void *cls,
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
 
+        if (NULL == response)
+        {
+            close(pipefd[1]);
+            return http_internal_server_error(connection);
+        }
+
         // add headers
         MHD_add_response_header(response, "Cache-Control", "no-cache");
         MHD_add_response_header(response, "Cache-Control", "no-store");
@@ -3245,6 +3268,12 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+        if (NULL == response)
+        {
+            close(pipefd[1]);
+            return http_internal_server_error(connection);
+        }
 
         // add headers
         MHD_add_response_header(response, "Cache-Control", "no-cache");
@@ -3420,6 +3449,12 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+        if (NULL == response)
+        {
+            close(pipefd[1]);
+            return http_internal_server_error(connection);
+        }
 
         // add headers
         MHD_add_response_header(response, "Cache-Control", "no-cache");
