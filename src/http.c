@@ -4253,8 +4253,8 @@ static enum MHD_Result body_compress(void **buf, size_t *buf_size)
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
 {
     int i;
-    enum MHD_Result comp;
     bool has_fits = true;
+    enum MHD_Result comp = MHD_NO;
 
     /*bool compress = false;
 
