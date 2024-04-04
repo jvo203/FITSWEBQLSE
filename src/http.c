@@ -4164,7 +4164,7 @@ static enum MHD_Result on_http_connection(void *cls,
     return http_not_found(connection);
 }
 
-void include_file(GString *str, const char *filename)
+static void include_file(GString *str, const char *filename)
 {
     int fd = -1;
     void *buffer = NULL;
@@ -4182,6 +4182,35 @@ void include_file(GString *str, const char *filename)
         if (buffer != MAP_FAILED)
         {
             g_string_append_len(str, (const char *)buffer, size);
+
+            if (munmap(buffer, size) == -1)
+                perror("un-mapping error");
+        }
+        else
+            perror("error mapping a file");
+
+        close(fd);
+    };
+}
+
+static void include_file_fd(int dst, const char *filename)
+{
+    int fd = -1;
+    void *buffer = NULL;
+
+    struct stat st;
+    stat(filename, &st);
+    long size = st.st_size;
+
+    fd = open(filename, O_RDONLY);
+
+    if (fd != -1)
+    {
+        buffer = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+
+        if (buffer != MAP_FAILED)
+        {
+            chunked_write(dst, buffer, size);
 
             if (munmap(buffer, size) == -1)
                 perror("un-mapping error");
@@ -4956,6 +4985,129 @@ void *write_html(void *ptr)
     dprintf(fd, "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\" integrity=\"sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu\" crossorigin=\"anonymous\">");
     dprintf(fd, "<script src=\"https://code.jquery.com/jquery-1.12.4.min.js\" integrity=\"sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ\" crossorigin=\"anonymous\"></script>");
     dprintf(fd, "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js\" integrity=\"sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd\" crossorigin=\"anonymous\"></script>");
+
+    // GLSL vertex shader
+    dprintf(fd, "<script id=\"vertex-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/vertex-shader.vert");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/vertex-shader.vert");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"legend-vertex-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/legend-vertex-shader.vert");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/legend-vertex-shader.vert");
+#endif
+    dprintf(fd, "</script>\n");
+
+    // GLSL fragment shaders
+    dprintf(fd, "<script id=\"rgba-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/rgba-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/rgba-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"common-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/common-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/common-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"legend-common-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/legend-common-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/legend-common-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    // tone mappings
+    dprintf(fd, "<script id=\"ratio-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/ratio-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/ratio-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"ratio-composite-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/ratio-composite-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/ratio-composite-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"logistic-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/logistic-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/logistic-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"logistic-composite-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/logistic-composite-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/logistic-composite-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"square-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/square-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/square-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"square-composite-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/square-composite-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/square-composite-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"legacy-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/legacy-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/legacy-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"legacy-composite-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/legacy-composite-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/legacy-composite-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"linear-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/linear-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/linear-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"linear-composite-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/linear-composite-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/linear-composite-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
 
     // close the write pipe
     close(req->fd);
