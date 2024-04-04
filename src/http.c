@@ -4369,6 +4369,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         compression = true;
 
     // pipe-based streaming
+    if (false) // disabled for now as there is no speed advantage
     {
         int pipefd[2];
 
@@ -6671,7 +6672,7 @@ void *gzip_compress(void *args)
     z.opaque = Z_NULL;
     z.next_in = Z_NULL;
     z.avail_in = 0;
-    CALL_ZLIB(deflateInit2(&z, Z_DEFAULT_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY)); // was Z_BEST_COMPRESSION
+    CALL_ZLIB(deflateInit2(&z, Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
 
     // read from the pipe and compress
     ssize_t n = 0;
