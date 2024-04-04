@@ -4417,7 +4417,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
             free(req->va_list);
             free(req);
 
-            fprintf(fp, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Internal Server Error</title>\n</head>\n<body>\n<h1>Internal Server Error</h1>\n<p>Failed to create a HTML writer thread.</p>\n</body>\n</html>\n");
+            fprintf(fp, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Internal Server Error</title>\n</head>\n<body>\n<h1>Internal Server Error</h1>\n<p>Failed to create an HTML writer thread.</p>\n</body>\n</html>\n");
             fclose(fp);
         }
 
