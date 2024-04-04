@@ -10,24 +10,6 @@
 
 #include <zlib.h>
 
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-#include <stddef.h>
-#include <stdint.h>
-
-#ifndef SSIZE_MAX
-#ifdef __SSIZE_MAX__
-#define SSIZE_MAX __SSIZE_MAX__
-#elif defined(PTRDIFF_MAX)
-#define SSIZE_MAX PTRDIFF_MAX
-#elif defined(INTPTR_MAX)
-#define SSIZE_MAX INTPTR_MAX
-#else
-#define SSIZE_MAX ((ssize_t)(((size_t)-1) >> 1))
-#endif
-#endif /* ! SSIZE_MAX */
-
 /* CHUNK is the size of the memory chunk used by the zlib & other routines. */
 
 #define CHUNK 0x4000
