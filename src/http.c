@@ -4917,13 +4917,50 @@ execute_alma:
 
 void *write_html(void *ptr)
 {
-    bool has_fits = true;
-
     if (ptr == NULL)
         pthread_exit(NULL);
 
     struct html_req *req = (struct html_req *)ptr;
     int fd = req->fd;
+
+    // create a new Unix pipe for gzip compression of the HTML response
+    int gz_pipefd[2];
+    pthread_t gz_tid;
+    struct gzip_req gz_req;
+
+    if (req->compression)
+    {
+        if (pipe(gz_pipefd) != 0)
+        {
+            close(req->fd);
+            free(req->root);
+            for (int i = 0; i < req->va_count; i++)
+                free(req->va_list[i]);
+            free(req->va_list);
+            free(req);
+            pthread_exit(NULL);
+        }
+
+        gz_req.fd_in = gz_pipefd[0];
+        gz_req.fd_out = fd;
+        fd = gz_pipefd[1]; // re-direct the output to the write end of the gzip pipe
+
+        if (pthread_create(&gz_tid, NULL, &gzip_compress, &gz_req) != 0)
+        {
+            close(gz_pipefd[1]);
+            close(gz_pipefd[0]);
+
+            close(req->fd);
+            free(req->root);
+            for (int i = 0; i < req->va_count; i++)
+                free(req->va_list[i]);
+            free(req->va_list);
+            free(req);
+            pthread_exit(NULL);
+        }
+    }
+
+    bool has_fits = true;
 
     // go through the dataset list looking up entries in the hash table
     for (int i = 0; i < req->va_count; i++)
@@ -5353,6 +5390,12 @@ void *write_html(void *ptr)
 
     // close the write pipe
     close(req->fd);
+
+    if (req->compression)
+    {
+        // wait for the gzip thread to finish
+        pthread_join(gz_tid, NULL);
+    }
 
     // deallocate the req
     free(req->root);
@@ -5887,13 +5930,13 @@ void *handle_composite_download_request_tar(void *ptr)
 
 void *handle_composite_download_request_tar_gz(void *ptr)
 {
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
     int i;
 
     // create a new Unix pipe for gzip compression of the tar archive
     int gz_pipefd[2];
-
-    if (ptr == NULL)
-        pthread_exit(NULL);
 
     struct composite_download_request *composite_req = (struct composite_download_request *)ptr;
 
