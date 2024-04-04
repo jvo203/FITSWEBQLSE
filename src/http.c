@@ -4830,7 +4830,6 @@ execute_alma:
         g_string_append(html, "data-root-path='/' ");
 
     g_string_append(html, " data-server-version='" VERSION_STRING "' data-server-string='" SERVER_STRING);
-
     g_string_append_printf(html, "' data-version-major='%d", VERSION_MAJOR);
     g_string_append_printf(html, "' data-version-minor='%d", VERSION_MINOR);
     g_string_append_printf(html, "' data-version-sub='%d", VERSION_SUB);
@@ -4912,11 +4911,17 @@ execute_alma:
 
 void *write_html(void *ptr)
 {
+    bool has_fits = true;
+
     if (ptr == NULL)
         pthread_exit(NULL);
 
     struct html_req *req = (struct html_req *)ptr;
     int fd = req->fd;
+
+    // go through the dataset list looking up entries in the hash table
+    for (int i = 0; i < req->va_count; i++)
+        has_fits = has_fits && dataset_exists(req->va_list[i]);
 
     // dynamically generate HTML content
     dprintf(fd, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n");
@@ -5108,6 +5113,237 @@ void *write_html(void *ptr)
     include_file_fd(fd, "htdocs/fitswebql/linear-composite-shader.frag");
 #endif
     dprintf(fd, "</script>\n");
+
+    // colourmaps
+    dprintf(fd, "<script id=\"composite-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/composite-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/composite-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"greyscale-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/greyscale-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/greyscale-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"negative-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/negative-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/negative-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"amber-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/amber-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/amber-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"red-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/red-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/red-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"green-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/green-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/green-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"blue-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/blue-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/blue-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"hot-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/hot-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/hot-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"rainbow-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/rainbow-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/rainbow-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"parula-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/parula-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/parula-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"inferno-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/inferno-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/inferno-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"magma-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/magma-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/magma-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"plasma-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/plasma-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/plasma-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"viridis-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/viridis-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/viridis-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"cubehelix-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/cubehelix-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/cubehelix-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"jet-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/jet-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/jet-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    dprintf(fd, "<script id=\"haxby-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+    include_file_fd(fd, SHARE "/htdocs/fitswebql/haxby-shader.frag");
+#else
+    include_file_fd(fd, "htdocs/fitswebql/haxby-shader.frag");
+#endif
+    dprintf(fd, "</script>\n");
+
+    // FITSWebQL main JavaScript + CSS
+    if (options.local)
+    {
+        // local version
+        dprintf(fd, "<script src=\"fitswebqlse.js?" VERSION_STRING "\"></script>\n");
+        dprintf(fd, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING "\"/>\n");
+    }
+    else
+    {
+        // server version: use automatically minified files served from the CDN
+        dprintf(fd, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.js\"></script>\n");
+        dprintf(fd, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.css\"/>\n");
+    }
+
+    // Asynchronous WebAssembly JS+WASM
+    if (options.local)
+    {
+        // local version
+        dprintf(fd, "<script async type=\"text/javascript\" src=\"client." WASM_VERSION ".js\"></script>\n");
+    }
+    else
+    {
+        // server version: use the CDN version of WASM files
+        dprintf(fd, "<script async type=\"text/javascript\" src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".min.js\"></script>\n");
+    }
+
+    // HTML content
+    dprintf(fd, "<title>FITSWEBQLSE</title></head><body>\n");
+    dprintf(fd, "<div id='votable' style='width: 0; height: 0;' data-va_count='%d' ", req->va_count);
+
+    if (req->va_count == 1)
+        dprintf(fd, "data-datasetId='%s' ", req->va_list[0]);
+    else
+    {
+        for (int i = 0; i < req->va_count; i++)
+            dprintf(fd, "data-datasetId%d='%s' ", (i + 1), req->va_list[i]);
+
+        if (composite && req->va_count <= 3)
+            dprintf(fd, "data-composite='1' ");
+    }
+
+    if (!options.local)
+    {
+        if (req->root != NULL)
+            dprintf(fd, "data-root-path='%s' ", req->root);
+        else
+            dprintf(fd, "data-root-path='/' ");
+    }
+    else
+        dprintf(fd, "data-root-path='/' ");
+
+    dprintf(fd, " data-server-version='" VERSION_STRING "' data-server-string='" SERVER_STRING);
+    dprintf(fd, "' data-version-major='%d", VERSION_MAJOR);
+    dprintf(fd, "' data-version-minor='%d", VERSION_MINOR);
+    dprintf(fd, "' data-version-sub='%d", VERSION_SUB);
+
+    if (options.local)
+        dprintf(fd, "' data-server-mode='LOCAL");
+    else
+        dprintf(fd, "' data-server-mode='SERVER");
+
+    dprintf(fd, "' data-has-fits='%d'></div>\n", (has_fits ? 1 : 0));
+
+    dprintf(fd, "<script>var WS_PORT = %" PRIu16 ";</script>\n", options.ws_port);
+
+    // scrollIntoView with ZenScroll (the original one does not work in Safari)
+    dprintf(fd, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                "fitswebql/zenscroll-min.js\"></script>\n");
+
+    // the page entry point
+    dprintf(fd, "<script>"
+                "const golden_ratio = 1.6180339887;"
+                "var ALMAWS = null ;"
+                "var wsVideo = null ;"
+                "var wsConn = null;"
+                "var firstTime = true;"
+                "var has_image = false;"
+                "var PROGRESS_VARIABLE = 0.0;"
+                "var PROGRESS_INFO = '' ;"
+                "var RESTFRQ = 0.0;"
+                "var USER_SELFRQ = 0.0;"
+                "var USER_DELTAV = 0.0;"
+                "var ROOT_PATH = '/fitswebql/';"
+                "var idleSearch = -1;"
+                "var idleResize = -1;"
+                "var idleWindow = -1;"
+                "var idlePV = -1;"
+                "window.onresize = resizeMe;"
+                "window.onbeforeunload = close_websocket_connections;"
+                "mainRenderer(); </script>\n");
+
+    dprintf(fd, "</body></html>");
 
     // close the write pipe
     close(req->fd);
