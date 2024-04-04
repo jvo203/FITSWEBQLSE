@@ -123,9 +123,8 @@ struct html_req
     int composite;
     char *root;
 
-    // outputs (a pipe file descriptor)
-    // int fd;
-    FILE *fp; // let's use buffered writes
+    // outputs (a pipe file descriptor converted to a FILE pointer)
+    FILE *fp;
 };
 
 struct gzip_req
