@@ -124,6 +124,7 @@ struct html_req
     char *root;
 
     // outputs (a write-end pipe file descriptor)
+    bool compression;
     int fd;
 };
 

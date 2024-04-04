@@ -4361,10 +4361,14 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 {
     int i;
     bool has_fits = true;
+    bool compression = false;
     enum MHD_Result comp = MHD_NO;
 
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
     if (encoding != NULL && strstr(encoding, "gzip") != NULL)
+        compression = true;
+
+    // pipe-based streaming
     {
         int pipefd[2];
 
@@ -4397,6 +4401,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
         // and the pipe
         req->fd = pipefd[1];
+        req->compression = compression;
 
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
@@ -4420,6 +4425,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         MHD_add_response_header(response, "Pragma", "no-cache");
         MHD_add_response_header(response, "Content-Type", "text/html; charset=utf-8");
 
+        if (compression)
+            MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_ENCODING, "gzip");
+
         enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
         MHD_destroy_response(response);
 
@@ -4436,10 +4444,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                 free(req->va_list[i]);
             free(req->va_list);
             free(req);
-
-            const char *msg = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Internal Server Error</title>\n</head>\n<body>\n<h1>Internal Server Error</h1>\n<p>Failed to create an HTML writer thread.</p>\n</body>\n</html>\n";
-
-            write(pipefd[1], msg, strlen(msg));
             close(pipefd[1]);
         }
 
