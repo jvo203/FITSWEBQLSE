@@ -97,6 +97,7 @@ void *handle_image_spectrum_request(void *args);
 void *handle_image_request(void *ptr);
 void *handle_composite_download_request_tar(void *ptr);
 void *handle_composite_download_request_tar_gz(void *ptr);
+void *write_html(void *ptr);
 extern int decompress(int fdin, int fdout); // Z decompression
 extern int inf(int source, int dest);       // GZIP decompression
 extern void zerr(int ret);                  // GZIP error reporting
@@ -4888,6 +4889,29 @@ execute_alma:
     MHD_destroy_response(response);
 
     return ret;
+}
+
+void *write_html(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct html_req *req = (struct html_req *)ptr;
+
+    // write a dummy Hello World
+    fprintf(req->fp, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Hello World</title>\n</head>\n<body>\n<h1>Hello World</h1>\n<p>This is a dummy response.</p>\n</body>\n</html>\n");
+
+    // close the write stream
+    fclose(req->fp);
+
+    // deallocate the req
+    free(req->root);
+    for (int i = 0; i < req->va_count; i++)
+        free(req->va_list[i]);
+    free(req->va_list);
+    free(req);
+
+    pthread_exit(NULL);
 }
 
 void start_http()
