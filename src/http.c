@@ -4336,7 +4336,23 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
     if (encoding != NULL && strstr(encoding, "gzip") != NULL)
     {
-        // TO-DO: directly write into the gzip compression pipe
+        int pipefd[2];
+
+        // create a pipe
+        int status = pipe(pipefd);
+
+        if (0 != status)
+            goto execute_alma;
+
+        // convert the write end of the pipe to a FILE pointer
+        FILE *fp = fdopen(pipefd[1], "w");
+
+        if (NULL == fp)
+        {
+            close(pipefd[0]);
+            close(pipefd[1]);
+            goto execute_alma;
+        }
 
         // allocate struct html_req
         struct html_req *req = (struct html_req *)malloc(sizeof(struct html_req));
@@ -4359,7 +4375,51 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         else
             req->root = NULL;
 
-        goto execute_alma; // for now
+        // and the pipe
+        req->fp = fp;
+
+        // create a response from a pipe by passing the read end of the pipe
+        struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+        if (NULL == response)
+        {
+            free(req->root);
+            for (i = 0; i < va_count; i++)
+                free(req->va_list[i]);
+            free(req->va_list);
+            free(req);
+
+            close(pipefd[0]);
+            fclose(fp);
+
+            goto execute_alma;
+        }
+
+        MHD_add_response_header(response, "Cache-Control", "no-cache");
+        MHD_add_response_header(response, "Cache-Control", "no-store");
+        MHD_add_response_header(response, "Pragma", "no-cache");
+        MHD_add_response_header(response, "Content-Type", "text/html; charset=utf-8");
+
+        enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+        MHD_destroy_response(response);
+
+        // create and detach a writer thread
+        pthread_t tid;
+        int stat = pthread_create(&tid, NULL, &write_html, req);
+
+        if (stat == 0)
+            pthread_detach(tid);
+        else
+        {
+            free(req->root);
+            for (i = 0; i < va_count; i++)
+                free(req->va_list[i]);
+            free(req->va_list);
+            free(req);
+            fclose(fp);
+        }
+
+        return ret;
     }
 
 execute_alma:
