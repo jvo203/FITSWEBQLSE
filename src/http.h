@@ -117,12 +117,14 @@ struct splat_req
 
 struct html_req
 {
-    char *buf;
-    size_t len;
+    // inputs
+    char **va_list;
+    int va_count;
+    int composite;
+    char *root;
 
-    // gzip compression
-    z_stream z;
-    unsigned char out[CHUNK];
+    // outputs (a pipe descriptor converted to a FILE pointer)
+    FILE *fp;
 };
 
 struct gzip_req
