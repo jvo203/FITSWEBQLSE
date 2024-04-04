@@ -4342,6 +4342,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     if (gcompress)
         return streaming_gzip_response(connection, html_str, html_len);*/
 
+execute_alma:
     // go through the dataset list looking up entries in the hash table
     for (i = 0; i < va_count; i++)
         has_fits = has_fits && dataset_exists(va_list[i]);
