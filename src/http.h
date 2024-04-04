@@ -124,7 +124,8 @@ struct html_req
     char *root;
 
     // outputs (a pipe file descriptor)
-    int fd;
+    // int fd;
+    FILE *fp; // let's use buffered writes
 };
 
 struct gzip_req

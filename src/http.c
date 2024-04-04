@@ -4336,7 +4336,28 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
     if (encoding != NULL && strstr(encoding, "gzip") != NULL)
     {
-        // TO-DO: directly write into the compression pipe
+        // TO-DO: directly write into the gzip compression pipe
+
+        // allocate struct html_req
+        struct html_req *req = (struct html_req *)malloc(sizeof(struct html_req));
+
+        if (NULL == req)
+            goto execute_alma;
+
+        // initialize the struct
+        // duplicate the valist and va_count
+        req->va_list = (char **)malloc(va_count * sizeof(char *));
+        for (i = 0; i < va_count; i++)
+            req->va_list[i] = strdup(va_list[i]);
+
+        req->va_count = va_count;
+        req->composite = composite;
+
+        // duplicate root
+        if (root != NULL)
+            req->root = strdup(root);
+        else
+            req->root = NULL;
 
         goto execute_alma; // for now
     }
