@@ -4369,7 +4369,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         compression = true;
 
     // pipe-based streaming
-    if (false) // disabled for now as there is no speed advantage
     {
         int pipefd[2];
 
@@ -4944,6 +4943,7 @@ void *write_html(void *ptr)
 
         gz_req.fd_in = gz_pipefd[0];
         gz_req.fd_out = fd;
+
         fd = gz_pipefd[1]; // re-direct the output to the write end of the gzip pipe
 
         if (pthread_create(&gz_tid, NULL, &gzip_compress, &gz_req) != 0)
