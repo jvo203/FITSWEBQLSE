@@ -4320,10 +4320,8 @@ static void free_cb(void *cls)
 
     if (req != NULL)
     {
-        if (req->buf != NULL)
-            g_free(req->buf);
-
         deflateEnd(&(req->z));
+        g_free(req->buf);
         free(req);
     }
 }
@@ -4370,6 +4368,7 @@ static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection
     if (NULL == response)
     {
         CALL_ZLIB(deflateEnd(&(req->z)));
+        g_free(req->buf);
         free(req);
         return MHD_NO;
     }
