@@ -4338,6 +4338,14 @@ static ssize_t read_cb(void *cls, uint64_t pos, char *mem, size_t size)
     // TO-DO
     // ...
 
+    size_t have = CHUNK - req->z.avail_out;
+
+    if (have > 0)
+    {
+        // printf("ZLIB avail_out: %zu\n", have);
+        // chunked_write(req->fd, (const char *)req->out, have);
+    }
+
     return MHD_CONTENT_READER_END_OF_STREAM;
 }
 
