@@ -4345,16 +4345,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         if (0 != status)
             goto execute_alma;
 
-        // convert the write end of the pipe to a FILE pointer
-        FILE *fp = fdopen(pipefd[1], "w");
-
-        if (NULL == fp)
-        {
-            close(pipefd[0]);
-            close(pipefd[1]);
-            goto execute_alma;
-        }
-
         // allocate struct html_req
         struct html_req *req = (struct html_req *)malloc(sizeof(struct html_req));
 
@@ -4377,7 +4367,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
             req->root = NULL;
 
         // and the pipe
-        req->fp = fp;
+        req->fd = pipefd[1];
 
         // create a response from a pipe by passing the read end of the pipe
         struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
@@ -4391,7 +4381,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
             free(req);
 
             close(pipefd[0]);
-            fclose(fp);
+            close(pipefd[1]);
 
             goto execute_alma;
         }
@@ -4418,8 +4408,8 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
             free(req->va_list);
             free(req);
 
-            fprintf(fp, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Internal Server Error</title>\n</head>\n<body>\n<h1>Internal Server Error</h1>\n<p>Failed to create an HTML writer thread.</p>\n</body>\n</html>\n");
-            fclose(fp);
+            write(pipefd[1], "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Internal Server Error</title>\n</head>\n<body>\n<h1>Internal Server Error</h1>\n<p>Failed to create an HTML writer thread.</p>\n</body>\n</html>\n", 269);
+            close(pipefd[1]);
         }
 
         return ret;
@@ -4897,48 +4887,78 @@ void *write_html(void *ptr)
         pthread_exit(NULL);
 
     struct html_req *req = (struct html_req *)ptr;
-    FILE *fp = req->fp;
+    int fd = req->fd;
 
     // dynamically generate HTML content
-    fprintf(fp, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n");
+    dprintf(fd, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n");
 
-    fprintf(fp,
+    dprintf(fd,
             "<link href=\"https://fonts.googleapis.com/css?family=Inconsolata\" "
             "rel=\"stylesheet\"/>\n");
-    fprintf(fp,
+    dprintf(fd,
             "<link href=\"https://fonts.googleapis.com/css?family=Material+Icons\" "
             "rel=\"stylesheet\"/>\n");
-    fprintf(fp, "<script src=\"https://cdn.jsdelivr.net/npm/d3@7\"></script>\n");
-    fprintf(fp, "<script "
+    dprintf(fd, "<script src=\"https://cdn.jsdelivr.net/npm/d3@7\"></script>\n");
+    dprintf(fd, "<script "
                 "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                 "fitswebql/reconnecting-websocket.min.js\"></script>\n");
-    fprintf(fp, "<script "
+    dprintf(fd, "<script "
                 "src=\"//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/"
                 "numeral.min.js\"></script>\n");
-    fprintf(fp, "<script "
+    dprintf(fd, "<script "
                 "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                 "fitswebql/ra_dec_conversion.min.js\"></script>\n");
-    fprintf(fp, "<script "
+    dprintf(fd, "<script "
                 "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                 "fitswebql/sylvester.min.js\"></script>\n");
-    fprintf(fp, "<script "
+    dprintf(fd, "<script "
                 "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                 "fitswebql/shortcut.min.js\"></script>\n");
-    fprintf(fp, "<script "
+    dprintf(fd, "<script "
                 "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                 "fitswebql/colourmaps.min.js\"></script>\n");
-    fprintf(fp, "<script "
+    dprintf(fd, "<script "
                 "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                 "fitswebql/lz4.min.js\"></script>\n");
-    fprintf(fp, "<script "
+    dprintf(fd, "<script "
                 "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                 "fitswebql/marchingsquares-isocontours.min.js\" defer></script>\n");
-    fprintf(fp, "<script "
+    dprintf(fd, "<script "
                 "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                 "fitswebql/marchingsquares-isobands.min.js\" defer></script>\n");
 
-    // close the write stream
-    fclose(req->fp);
+    // Markdown-to-HTML converter
+    dprintf(fd, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js\" "
+                "type=\"module\"></script>\n");
+
+    // Font Awesome
+    dprintf(fd, "<script src=\"https://kit.fontawesome.com/8433b7dde2.js?ver=5.15.4\" crossorigin=\"anonymous\"></script>\n");
+
+    // HTML5 FileSaver
+    dprintf(fd, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/FileSaver.min.js\"></script>\n");
+
+    // client-side colourmaps (used by the composite legend)
+    dprintf(fd, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/colourmaps.min.js\"></script>\n");
+
+    // d3.js colour scale legend
+    dprintf(fd, "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js\" integrity=\"sha512-wNH6xsp2n8CfB91nrBtfc4sfLwYPBMjSWVUwQOp60AYYXH6i8yCwuKFZ4rgK2i6pQek/b+bSyR7b01/922IBzQ==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script>\n");
+
+    // mathjs
+    dprintf(fd, "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.3/math.min.js\" integrity =\"sha512-AZlpUxTyDgo/Ne1TyeXv345mwyAKh646DnZSsEt0GAF7aSFWu94UjCBcgm+yqKyH/6g9boKAzIEMO+wEGc6mJQ==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script>");
+
+    // bootstrap
+    dprintf(fd,
+            "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, "
+            "user-scalable=no, minimum-scale=1, maximum-scale=1\">\n");
+
+    // version 3.4.1
+    dprintf(fd, "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css\" integrity=\"sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu\" crossorigin=\"anonymous\">");
+    dprintf(fd, "<script src=\"https://code.jquery.com/jquery-1.12.4.min.js\" integrity=\"sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ\" crossorigin=\"anonymous\"></script>");
+    dprintf(fd, "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js\" integrity=\"sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd\" crossorigin=\"anonymous\"></script>");
+
+    // close the write pipe
+    close(req->fd);
 
     // deallocate the req
     free(req->root);
