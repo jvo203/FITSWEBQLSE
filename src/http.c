@@ -4313,8 +4313,38 @@ static enum MHD_Result body_compress(void **buf, size_t *buf_size)
     return MHD_YES;
 }
 
+// define free_cb
+static void free_cb(void *cls)
+{
+    struct html_req *req = (struct html_req *)cls;
+
+    if (req != NULL)
+    {
+        if (req->buf != NULL)
+            g_free(req->buf);
+
+        deflateEnd(&(req->z));
+        free(req);
+    }
+}
+
+static ssize_t read_cb(void *cls, uint64_t pos, char *mem, size_t size)
+{
+    printf("[C] read_cb: requesting %zu bytes at %" PRIu64 "\n", size, pos);
+
+    struct html_req *req = (struct html_req *)cls;
+
+    if (req == NULL)
+        return MHD_CONTENT_READER_END_WITH_ERROR;
+
+    // TO-DO
+    // ...
+
+    return MHD_CONTENT_READER_END_OF_STREAM;
+}
+
 // streaming gzip-compress the buffer and send the response
-/*static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection, char *buf, size_t len)
+static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection, char *buf, size_t len)
 {
     // allocate struct html_req
     struct html_req *req = (struct html_req *)malloc(sizeof(struct html_req));
@@ -4354,18 +4384,18 @@ static enum MHD_Result body_compress(void **buf, size_t *buf_size)
     MHD_destroy_response(response);
 
     return ret;
-}*/
+}
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root)
 {
     int i;
     bool has_fits = true;
-    bool compression = false;
+    bool gcompression = false;
     enum MHD_Result comp = MHD_NO;
 
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
     if (encoding != NULL && strstr(encoding, "gzip") != NULL)
-        compression = true;
+        gcompression = true;
 
     // go through the dataset list looking up entries in the hash table
     for (i = 0; i < va_count; i++)
@@ -4797,6 +4827,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     size_t html_len = html->len;
     gchar *html_str = g_string_free(html, FALSE);
+
+    if (gcompression)
+        return streaming_gzip_response(connection, html_str, html_len);
 
     if (can_compress(connection))
         comp = body_compress((void **)&html_str, &html_len);
