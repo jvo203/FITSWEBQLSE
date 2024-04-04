@@ -4333,14 +4333,13 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     bool has_fits = true;
     enum MHD_Result comp = MHD_NO;
 
-    /*bool gcompress = false;
-
     const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
-    if (encoding != NULL)
-        gcompress = strstr(encoding, "gzip") != NULL;
+    if (encoding != NULL && strstr(encoding, "gzip") != NULL)
+    {
+        // TO-DO: directly write into the compression pipe
 
-    if (gcompress)
-        return streaming_gzip_response(connection, html_str, html_len);*/
+        goto execute_alma; // for now
+    }
 
 execute_alma:
     // go through the dataset list looking up entries in the hash table
