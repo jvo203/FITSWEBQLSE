@@ -4897,9 +4897,45 @@ void *write_html(void *ptr)
         pthread_exit(NULL);
 
     struct html_req *req = (struct html_req *)ptr;
+    FILE *fp = req->fp;
 
-    // write a dummy Hello World
-    fprintf(req->fp, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Hello World</title>\n</head>\n<body>\n<h1>Hello World</h1>\n<p>This is a dummy response.</p>\n</body>\n</html>\n");
+    // dynamically generate HTML content
+    fprintf(fp, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n");
+
+    fprintf(fp,
+            "<link href=\"https://fonts.googleapis.com/css?family=Inconsolata\" "
+            "rel=\"stylesheet\"/>\n");
+    fprintf(fp,
+            "<link href=\"https://fonts.googleapis.com/css?family=Material+Icons\" "
+            "rel=\"stylesheet\"/>\n");
+    fprintf(fp, "<script src=\"https://cdn.jsdelivr.net/npm/d3@7\"></script>\n");
+    fprintf(fp, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                "fitswebql/reconnecting-websocket.min.js\"></script>\n");
+    fprintf(fp, "<script "
+                "src=\"//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/"
+                "numeral.min.js\"></script>\n");
+    fprintf(fp, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                "fitswebql/ra_dec_conversion.min.js\"></script>\n");
+    fprintf(fp, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                "fitswebql/sylvester.min.js\"></script>\n");
+    fprintf(fp, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                "fitswebql/shortcut.min.js\"></script>\n");
+    fprintf(fp, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                "fitswebql/colourmaps.min.js\"></script>\n");
+    fprintf(fp, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                "fitswebql/lz4.min.js\"></script>\n");
+    fprintf(fp, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                "fitswebql/marchingsquares-isocontours.min.js\" defer></script>\n");
+    fprintf(fp, "<script "
+                "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
+                "fitswebql/marchingsquares-isobands.min.js\" defer></script>\n");
 
     // close the write stream
     fclose(req->fp);
