@@ -5389,7 +5389,7 @@ void *write_html(void *ptr)
     dprintf(fd, "</body></html>");
 
     // close the write pipe
-    close(req->fd);
+    close(fd);
 
     if (req->compression)
     {
