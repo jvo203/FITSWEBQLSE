@@ -4361,6 +4361,7 @@ static enum MHD_Result streaming_gzip_response(struct MHD_Connection *connection
     // initialize the struct
     req->buf = buf;
     req->len = len;
+    req->cursor = 0;
 
     // initialize zlib
     req->z.zalloc = Z_NULL;

@@ -120,6 +120,7 @@ struct html_req
     // source
     char *buf;
     size_t len;
+    size_t cursor;
 
     // gzip compression
     z_stream z;
