@@ -18682,15 +18682,13 @@ async function fetch_shader(filename) {
 }
 
 async function fetch_glsl_shaders() {
-    // there is no need to fetch the shaders in local mode as they are embedded in the HTML file
+    // there is no need to fetch the shaders in local mode as they will be embedded in the HTML file
     if (isLocal)
         return;
 
     // define an array of GLSL shaders to fetch
     var shaders = ["vertex-shader.vert", "legend-vertex-shader.vert", "rgba-shader.frag", "common-shader.frag", "legend-common-shader.frag", "ratio-shader.frag", "ratio-composite-shader.frag", "logistic-shader.frag", "logistic-composite-shader.frag", "square-shader.frag", "square-composite-shader.frag", "legacy-shader.frag", "legacy-composite-shader.frag", "linear-shader.frag", "linear-composite-shader.frag", "composite-shader.frag", "greyscale-shader.frag", "negative-shader.frag", "amber-shader.frag", "red-shader.frag", "green-shader.frag", "blue-shader.frag", "hot-shader.frag", "rainbow-shader.frag", "parula-shader.frag", "inferno-shader.frag", "magma-shader.frag", "plasma-shader.frag", "viridis-shader.frag", "cubehelix-shader.frag", "jet-shader.frag", "haxby-shader.frag"];
     console.log("fetching", shaders.length, "GLSL shaders...");
-
-    // fetch the GLSL shaders asynchronously
 
     // create an array of fetch_shader promises
     var promises = shaders.map(fetch_shader);
