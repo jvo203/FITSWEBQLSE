@@ -4401,9 +4401,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     bool gcompression = false;
     enum MHD_Result comp = MHD_NO;
 
-    const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
+    /*const char *encoding = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, "Accept-Encoding");
     if (encoding != NULL && strstr(encoding, "gzip") != NULL)
-        gcompression = true;
+        gcompression = true;*/
 
     // go through the dataset list looking up entries in the hash table
     for (i = 0; i < va_count; i++)
@@ -4477,265 +4477,268 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "<script src=\"https://code.jquery.com/jquery-1.12.4.min.js\" integrity=\"sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ\" crossorigin=\"anonymous\"></script>");
     g_string_append(html, "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js\" integrity=\"sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd\" crossorigin=\"anonymous\"></script>");
 
-    // GLSL vertex shader
-    g_string_append(html, "<script id=\"vertex-shader\" type=\"x-shader/x-vertex\">\n");
+    if (options.local)
+    {
+        // GLSL vertex shader
+        g_string_append(html, "<script id=\"vertex-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/vertex-shader.vert");
+        include_file(html, SHARE "/htdocs/fitswebql/vertex-shader.vert");
 #else
-    include_file(html, "htdocs/fitswebql/vertex-shader.vert");
+        include_file(html, "htdocs/fitswebql/vertex-shader.vert");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"legend-vertex-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"legend-vertex-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/legend-vertex-shader.vert");
+        include_file(html, SHARE "/htdocs/fitswebql/legend-vertex-shader.vert");
 #else
-    include_file(html, "htdocs/fitswebql/legend-vertex-shader.vert");
+        include_file(html, "htdocs/fitswebql/legend-vertex-shader.vert");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    // GLSL fragment shaders
-    g_string_append(html, "<script id=\"rgba-shader\" type=\"x-shader/x-vertex\">\n");
+        // GLSL fragment shaders
+        g_string_append(html, "<script id=\"rgba-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/rgba-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/rgba-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/rgba-shader.frag");
+        include_file(html, "htdocs/fitswebql/rgba-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"common-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"common-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/common-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/common-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/common-shader.frag");
+        include_file(html, "htdocs/fitswebql/common-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"legend-common-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"legend-common-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/legend-common-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/legend-common-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/legend-common-shader.frag");
+        include_file(html, "htdocs/fitswebql/legend-common-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    // tone mappings
-    g_string_append(html, "<script id=\"ratio-shader\" type=\"x-shader/x-vertex\">\n");
+        // tone mappings
+        g_string_append(html, "<script id=\"ratio-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/ratio-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/ratio-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/ratio-shader.frag");
+        include_file(html, "htdocs/fitswebql/ratio-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"ratio-composite-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"ratio-composite-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/ratio-composite-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/ratio-composite-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/ratio-composite-shader.frag");
+        include_file(html, "htdocs/fitswebql/ratio-composite-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"logistic-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"logistic-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/logistic-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/logistic-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/logistic-shader.frag");
+        include_file(html, "htdocs/fitswebql/logistic-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"logistic-composite-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"logistic-composite-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/logistic-composite-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/logistic-composite-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/logistic-composite-shader.frag");
+        include_file(html, "htdocs/fitswebql/logistic-composite-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"square-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"square-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/square-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/square-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/square-shader.frag");
+        include_file(html, "htdocs/fitswebql/square-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"square-composite-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"square-composite-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/square-composite-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/square-composite-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/square-composite-shader.frag");
+        include_file(html, "htdocs/fitswebql/square-composite-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"legacy-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"legacy-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/legacy-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/legacy-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/legacy-shader.frag");
+        include_file(html, "htdocs/fitswebql/legacy-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"legacy-composite-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"legacy-composite-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/legacy-composite-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/legacy-composite-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/legacy-composite-shader.frag");
+        include_file(html, "htdocs/fitswebql/legacy-composite-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"linear-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"linear-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/linear-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/linear-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/linear-shader.frag");
+        include_file(html, "htdocs/fitswebql/linear-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"linear-composite-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"linear-composite-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/linear-composite-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/linear-composite-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/linear-composite-shader.frag");
+        include_file(html, "htdocs/fitswebql/linear-composite-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    // colourmaps
-    g_string_append(html, "<script id=\"composite-shader\" type=\"x-shader/x-vertex\">\n");
+        // colourmaps
+        g_string_append(html, "<script id=\"composite-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/composite-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/composite-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/composite-shader.frag");
+        include_file(html, "htdocs/fitswebql/composite-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"greyscale-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"greyscale-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/greyscale-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/greyscale-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/greyscale-shader.frag");
+        include_file(html, "htdocs/fitswebql/greyscale-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"negative-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"negative-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/negative-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/negative-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/negative-shader.frag");
+        include_file(html, "htdocs/fitswebql/negative-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"amber-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"amber-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/amber-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/amber-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/amber-shader.frag");
+        include_file(html, "htdocs/fitswebql/amber-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"red-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"red-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/red-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/red-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/red-shader.frag");
+        include_file(html, "htdocs/fitswebql/red-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"green-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"green-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/green-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/green-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/green-shader.frag");
+        include_file(html, "htdocs/fitswebql/green-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"blue-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"blue-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/blue-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/blue-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/blue-shader.frag");
+        include_file(html, "htdocs/fitswebql/blue-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"hot-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"hot-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/hot-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/hot-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/hot-shader.frag");
+        include_file(html, "htdocs/fitswebql/hot-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"rainbow-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"rainbow-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/rainbow-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/rainbow-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/rainbow-shader.frag");
+        include_file(html, "htdocs/fitswebql/rainbow-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"parula-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"parula-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/parula-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/parula-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/parula-shader.frag");
+        include_file(html, "htdocs/fitswebql/parula-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"inferno-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"inferno-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/inferno-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/inferno-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/inferno-shader.frag");
+        include_file(html, "htdocs/fitswebql/inferno-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"magma-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"magma-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/magma-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/magma-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/magma-shader.frag");
+        include_file(html, "htdocs/fitswebql/magma-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"plasma-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"plasma-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/plasma-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/plasma-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/plasma-shader.frag");
+        include_file(html, "htdocs/fitswebql/plasma-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"viridis-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"viridis-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/viridis-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/viridis-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/viridis-shader.frag");
+        include_file(html, "htdocs/fitswebql/viridis-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"cubehelix-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"cubehelix-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/cubehelix-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/cubehelix-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/cubehelix-shader.frag");
+        include_file(html, "htdocs/fitswebql/cubehelix-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"jet-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"jet-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/jet-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/jet-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/jet-shader.frag");
+        include_file(html, "htdocs/fitswebql/jet-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
 
-    g_string_append(html, "<script id=\"haxby-shader\" type=\"x-shader/x-vertex\">\n");
+        g_string_append(html, "<script id=\"haxby-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
-    include_file(html, SHARE "/htdocs/fitswebql/haxby-shader.frag");
+        include_file(html, SHARE "/htdocs/fitswebql/haxby-shader.frag");
 #else
-    include_file(html, "htdocs/fitswebql/haxby-shader.frag");
+        include_file(html, "htdocs/fitswebql/haxby-shader.frag");
 #endif
-    g_string_append(html, "</script>\n");
+        g_string_append(html, "</script>\n");
+    }
 
     // FITSWebQL main JavaScript + CSS
     if (options.local)
@@ -4747,8 +4750,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     }
     else
     {
+        g_string_append(html, "<script src=\"fitswebqlse.js?" VERSION_STRING "\"></script>\n"); // under development
         // server version: use automatically minified files served from the CDN
-        g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.js\"></script>\n");
+        // g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.js\"></script>\n");
         g_string_append(html, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.css\"/>\n");
     }
 
@@ -4836,8 +4840,8 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     size_t html_len = html->len;
     gchar *html_str = g_string_free(html, FALSE);
 
-    if (gcompression)
-        return streaming_gzip_response(connection, html_str, html_len);
+    /*if (gcompression)
+        return streaming_gzip_response(connection, html_str, html_len);*/
 
     if (can_compress(connection))
         comp = body_compress((void **)&html_str, &html_len);
