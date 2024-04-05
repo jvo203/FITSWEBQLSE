@@ -18671,7 +18671,7 @@ async function fetch_shader(filename) {
     // compose the URL
     var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/' + filename;
 
-    fetch(url).then(function (response) {
+    await fetch(url).then(function (response) {
         return response.text();
     }).then(function (text) {
         // create a new script element
@@ -18703,9 +18703,6 @@ async function fetch_glsl_shaders() {
     await Promise.all(promises);
 
     console.log('finished fetching GLSL shaders.');
-
-    console.log("common-shader:", document.getElementById("common-shader"));
-    // console.log("legacy-shader", document.getElementById("legacy-shader"));
 }
 
 // async function to wait until Module.ready is defined
