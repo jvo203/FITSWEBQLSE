@@ -3655,7 +3655,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
-    // console.log("process_hdr_image: #" + index);
+    console.log("process_hdr_image: #" + index);
     var image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
     var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
     console.log(image_bounding_dims, pixel_range);
@@ -4847,9 +4847,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-                            resGLSL.then(_ => {
-                                process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
-                            });
+                            process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
                             if (displayContours)
                                 update_contours();
@@ -13836,7 +13834,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
             setup_window_timeout();
 
-            waitForModuleReady().then(async _ => {
+            Promise.all([waitForModuleReady(), resGLSL]).then(async _ => {
                 // wait for WebAssembly to get compiled
                 Module.ready
                     .then(async _ => {
@@ -14194,9 +14192,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 //console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-                                resGLSL.then(_ => {
-                                    process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
-                                });
+                                process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
                                 if (has_json) {
                                     display_histogram(index);
