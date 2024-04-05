@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-04-02.0";
+    return "JS2024-04-05.0";
 }
 
 function uuidv4() {
@@ -4847,7 +4847,9 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-                            process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+                            resGLSL.then(_ => {
+                                process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+                            });
 
                             if (displayContours)
                                 update_contours();
@@ -14192,7 +14194,9 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 //console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-                                process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+                                resGLSL.then(_ => {
+                                    process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+                                });
 
                                 if (has_json) {
                                     display_histogram(index);
@@ -18650,8 +18654,6 @@ function sleep(ms) {
 }
 
 async function open_3d_view() {
-    // await sleep(5000);
-
     try {
         enable_3d_view();
     }
@@ -18659,6 +18661,51 @@ async function open_3d_view() {
         has_webgl = false;
         console.log('WebGL disabled', e);
     }
+}
+
+// a function to asynchronously fetch a GLSL shader
+async function fetch_shader(filename) {
+    // extract the id from the filename (discard the extension)
+    var id = filename.split('.')[0];
+
+    // compose the URL
+    var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/' + filename;
+
+    fetch(url).then(function (response) {
+        return response.text();
+    }).then(function (text) {
+        // create a new script element
+        var script = document.createElement('script');
+        script.type = 'x-shader/x-fragment';
+        script.id = id;
+        script.text = text;
+
+        // append the script element to the document
+        document.head.appendChild(script);
+    });
+}
+
+async function fetch_glsl_shaders() {
+    // there is no need to fetch the shaders in local mode as they are embedded in the HTML file
+    if (isLocal)
+        return;
+
+    // define an array of GLSL shaders to fetch
+    var shaders = ["vertex-shader.vert", "legend-vertex-shader.vert", "rgba-shader.frag", "common-shader.frag", "legend-common-shader.frag", "ratio-shader.frag", "ratio-composite-shader.frag", "logistic-shader.frag", "logistic-composite-shader.frag", "square-shader.frag", "square-composite-shader.frag", "legacy-shader.frag", "legacy-composite-shader.frag", "linear-shader.frag", "linear-composite-shader.frag", "composite-shader.frag", "greyscale-shader.frag", "negative-shader.frag", "amber-shader.frag", "red-shader.frag", "green-shader.frag", "blue-shader.frag", "hot-shader.frag", "rainbow-shader.frag", "parula-shader.frag", "inferno-shader.frag", "magma-shader.frag", "plasma-shader.frag", "viridis-shader.frag", "cubehelix-shader.frag", "jet-shader.frag", "haxby-shader.frag"];
+    console.log("fetching", shaders.length, "GLSL shaders...");
+
+    // fetch the GLSL shaders asynchronously
+
+    // create an array of fetch_shader promises
+    var promises = shaders.map(fetch_shader);
+
+    // wait for all promises to resolve
+    await Promise.all(promises);
+
+    console.log('finished fetching GLSL shaders.');
+
+    console.log("common-shader:", document.getElementById("common-shader"));
+    // console.log("legacy-shader", document.getElementById("legacy-shader"));
 }
 
 // async function to wait until Module.ready is defined
@@ -18671,6 +18718,7 @@ async function waitForModuleReady() {
 
 async function mainRenderer() {
     votable = document.getElementById('votable');
+    isLocal = (votable.getAttribute('data-server-mode').indexOf("LOCAL") > -1) ? true : false;
 
     webgl1 = test_webgl1();
     webgl2 = test_webgl2();
@@ -18682,6 +18730,7 @@ async function mainRenderer() {
     }
 
     var res3d = open_3d_view();
+    resGLSL = fetch_glsl_shaders();
 
     //intercept print events
     if (window.matchMedia) {
@@ -18702,8 +18751,6 @@ async function mainRenderer() {
     if (votable.getAttribute('data-root-path') != null)
         ROOT_PATH = votable.getAttribute('data-root-path').trim();
     console.log("ROOT_PATH=" + ROOT_PATH);
-
-    isLocal = (votable.getAttribute('data-server-mode').indexOf("LOCAL") > -1) ? true : false;
 
     endianness = getEndianness();
     console.log('endianness: ', endianness);
