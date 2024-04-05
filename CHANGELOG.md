@@ -1,6 +1,6 @@
 ## [5.1.5] - 2024-04-??
 
-* asynchronous (_*non-blocking*_) fetching of GLSL shaders from the _*Content Delivery Network*_ (CDN) in the client-side JavaScript
+* asynchronous (_*non-blocking*_) fetching of WebGL GLSL shaders from the _*Content Delivery Network*_ (CDN) in the client-side JavaScript
 * further reduced the compressed size of the initial web page response down to 1.73kB by off-loading the GLSL shaders to the CDN
 
 ## [5.1.4] - 2024-04-03
