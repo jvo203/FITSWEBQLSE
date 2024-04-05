@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-04-05.0";
+    return "JS2024-04-05.1";
 }
 
 function uuidv4() {
@@ -3655,7 +3655,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
-    console.log("process_hdr_image: #" + index);
+    // console.log("process_hdr_image: #" + index);
     var image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
     var pixel_range = image_pixel_range(pixels, alpha, img_width, img_height);
     console.log(image_bounding_dims, pixel_range);
