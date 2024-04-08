@@ -49,6 +49,14 @@ open("../htdocs/fitswebql/glsl_shaders.bin", "w") do f
     write(f, compressed)
 end
 
+# ==================================================================================================
+#
+# The JSON approach was abandoned because the JSON strings were not properly escaped.
+# And after properly escaping the shader JSON strings the total compressed size went up from 26kB to around 40kB.
+# The XML approach was chosen instead.
+#
+# ==================================================================================================
+
 # iterate through shaders and write to XML as "<shader id="id">shader</shader>"
 # make an XML array with shader as "<shader id="id">shader</shader>" where the id is the filename without the extension
 
