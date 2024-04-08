@@ -1,4 +1,4 @@
-## [5.1.6] - 2024-04-??
+## [5.1.6] - 2024-04-08
 
 * reduced the long-poll interval for the image/spectrum from 500ms to 250ms
 * coalesced the WebGL GLSL shaders into a single LZ4-compressed file (164kB down to 26kB), significantly cutting the number of HTTP requests to the CDN
