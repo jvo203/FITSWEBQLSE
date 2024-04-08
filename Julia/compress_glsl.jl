@@ -22,7 +22,13 @@ for shader in shaders
     # prepend any control characters from src with a backslash
     # src = replace(src, r"[\x00-\x1f]" => m -> "\\" * m.match)
 
-    JSON.Writer.write(json, "{\"id\": \"$id\", \"shader\": \"$src\"}")
+    # JSON.Writer.write(json, "{\"id\": \"$id\", \"shader\": \"$src\"}")
+
+    # make a Dict with id and shader
+    dict = Dict("id" => id, "shader" => src)
+
+    # write the Dict as JSON
+    JSON.Writer.write(json, JSON.json(dict))
 
     if shader != shaders[end]
         JSON.Writer.write(json, ",")
