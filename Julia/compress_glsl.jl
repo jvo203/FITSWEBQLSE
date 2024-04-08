@@ -35,3 +35,9 @@ println("Compressed JSON object length: ", length(compressed))
 #open("../htdocs/fitswebql/shaders.json", "w") do f
 #    write(f, JSON.Writer.print(json))
 #end
+
+# write a binary file .bin with the uncompressed json length as UInt32 and the compressed json
+open("../htdocs/fitswebql/glsl_shaders.bin", "w") do f
+    write(f, UInt32(length(json)))
+    write(f, compressed)
+end
