@@ -48,3 +48,40 @@ open("../htdocs/fitswebql/glsl_shaders.bin", "w") do f
     write(f, UInt32(length(json)))
     write(f, compressed)
 end
+
+# iterate through shaders and write to XML as "<shader id="id">shader</shader>"
+# make an XML array with shader as "<shader id="id">shader</shader>" where the id is the filename without the extension
+
+# create a root XML document
+xml = "<shaders>"
+
+for shader in shaders
+    global xml
+
+    id = split(shader, ".")[1]
+    println("Processing $shader, id: $id")
+
+    # read the text file as String
+    src = read(src_dir * shader, String)
+
+    # create an XML element
+    xml *= "<shader id=\"$id\">$src</shader>"
+end
+
+xml *= "</shaders>"
+
+# convert String to UInt8 array
+xml = [UInt8(c) for c in xml]
+
+compressed = lz4_hc_compress(xml)
+
+# print the JSON object length
+println("XML object length: ", length(xml))
+println("Compressed XML object length: ", length(compressed))
+
+
+# write a binary file .bin with the uncompressed xml length as UInt32 and the compressed json
+open("../htdocs/fitswebql/glsl_shaders.bin", "w") do f
+    write(f, UInt32(length(xml)))
+    write(f, compressed)
+end
