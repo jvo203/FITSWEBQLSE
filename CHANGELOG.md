@@ -1,3 +1,7 @@
+## [5.1.6] - 2024-04-??
+
+* reduced the long-poll interval for the image/spectrum from 500ms to 250ms
+
 ## [5.1.5] - 2024-04-05
 
 * asynchronous (_*non-blocking*_) fetching of WebGL GLSL shaders from the _*Content Delivery Network*_ (CDN) in the client-side JavaScript
