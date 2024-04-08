@@ -18659,28 +18659,7 @@ async function open_3d_view() {
     }
 }
 
-// a function to asynchronously fetch a GLSL shader
-async function fetch_shader(filename) {
-    // extract the id from the filename (discard the extension)
-    var id = filename.split('.')[0];
-
-    // compose the URL
-    var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/' + filename;
-
-    await fetch(url).then(function (response) {
-        return response.text();
-    }).then(function (text) {
-        // create a new script element
-        var script = document.createElement('script');
-        script.type = 'x-shader/x-fragment';
-        script.id = id;
-        script.text = text;
-
-        // append the script element to the document
-        document.head.appendChild(script);
-    });
-}
-
+// a function to asynchronously fetch GLSL shaders from a LZ4-compressed XML file
 async function fetch_glsl() {
     // var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/glsl_shaders.bin';
     var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/htdocs/fitswebql/glsl_shaders.bin';
@@ -18692,7 +18671,7 @@ async function fetch_glsl() {
         // create a new DataView object
         var view = new DataView(buffer);
 
-        // extract the UInt32 value from the first 4 bytes as the decompressed JSON length
+        // extract the UInt32 value from the first 4 bytes as the decompressed XML length
         var xmlLength = view.getUint32(0, endianness);
         console.log('XML length:', xmlLength);
 
@@ -18712,9 +18691,6 @@ async function fetch_glsl() {
             // parse the XML, iterate through "shader" elements, get the "id" from the attribute
             var parser = new DOMParser();
             var xmlDoc = parser.parseFromString(xml, "application/xml");
-
-            console.log('xmlDoc:', xmlDoc);
-
             var shaders = xmlDoc.getElementsByTagName("shader");
 
             for (var i = 0; i < shaders.length; i++) {
@@ -18731,7 +18707,7 @@ async function fetch_glsl() {
                 document.head.appendChild(script);
             }
         } catch (e) {
-            console.error('Failed to parse GLSL JSON:', e);
+            console.error('Failed to parse GLSL XML:', e);
             return;
         }
     }).catch(function (error) {
@@ -18745,19 +18721,6 @@ async function fetch_glsl_shaders() {
         return;
 
     await fetch_glsl();
-
-    /* legacy code (multiple HTTP requests)
-    // define an array of GLSL shaders to fetch
-    var shaders = ["vertex-shader.vert", "legend-vertex-shader.vert", "rgba-shader.frag", "common-shader.frag", "legend-common-shader.frag", "ratio-shader.frag", "ratio-composite-shader.frag", "logistic-shader.frag", "logistic-composite-shader.frag", "square-shader.frag", "square-composite-shader.frag", "legacy-shader.frag", "legacy-composite-shader.frag", "linear-shader.frag", "linear-composite-shader.frag", "composite-shader.frag", "greyscale-shader.frag", "negative-shader.frag", "amber-shader.frag", "red-shader.frag", "green-shader.frag", "blue-shader.frag", "hot-shader.frag", "rainbow-shader.frag", "parula-shader.frag", "inferno-shader.frag", "magma-shader.frag", "plasma-shader.frag", "viridis-shader.frag", "cubehelix-shader.frag", "jet-shader.frag", "haxby-shader.frag"];
-    console.log("fetching", shaders.length, "GLSL shaders...");
-
-    // create an array of fetch_shader promises
-    var promises = shaders.map(fetch_shader);
-
-    // wait for all promises to resolve
-    await Promise.all(promises);
-
-    console.log('finished fetching GLSL shaders.');*/
 }
 
 // async function to wait until Module.ready is defined
