@@ -17,7 +17,10 @@ for shader in shaders
     src = read(src_dir * shader, String)
 
     # remove any control characters from src
-    src = replace(src, r"[\x00-\x1f]" => "")
+    # src = replace(src, r"[\x00-\x1f]" => "")    
+
+    # prepend any control characters from src with a backslash
+    # src = replace(src, r"[\x00-\x1f]" => m -> "\\" * m.match)
 
     JSON.Writer.write(json, "{\"id\": \"$id\", \"shader\": \"$src\"}")
 
