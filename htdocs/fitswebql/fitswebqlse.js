@@ -18665,6 +18665,11 @@ async function fetch_glsl() {
 
     // fetch a binary file containing the GLSL shaders
     await fetch(url).then(function (response) {
+        // throw an error if the status is not 200
+        if (!response.ok) {
+            throw new Error('HTTP status ' + response.status);
+        }
+
         return response.arrayBuffer();
     }).then(function (buffer) {
         // create a new DataView object
