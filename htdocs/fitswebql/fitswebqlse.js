@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-04-05.1";
+    return "JS2024-04-08.0";
 }
 
 function uuidv4() {
@@ -13663,10 +13663,10 @@ async function fetch_spectral_lines(datasetId, freq_start, freq_end) {
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 202) {
-            console.log("Server not ready, long-polling molecules again after 500 ms.");
+            console.log("Server not ready, long-polling molecules again after 250 ms.");
             setTimeout(function () {
                 fetch_spectral_lines(datasetId, freq_start, freq_end);
-            }, 500);
+            }, 250);
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -13772,7 +13772,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                 dataset_timeout = -1;
             }
 
-            console.log("Connection error:", xmlhttp.status, ", re - fetching image after 1 second.");
+            console.log("Connection error:", xmlhttp.status, ", re-fetching image after 1 second.");
             setTimeout(function () {
                 fetch_image_spectrum(_datasetId, index, fetch_data, true);
             }, 1000);
@@ -13784,10 +13784,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                 dataset_timeout = -1;
             }
 
-            console.log("Server not ready, long-polling image again after 500ms.");
+            console.log("Server not ready, long-polling image again after 250ms.");
             setTimeout(function () {
                 fetch_image_spectrum(_datasetId, index, fetch_data, false);
-            }, 500);
+            }, 250);
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 204) {
