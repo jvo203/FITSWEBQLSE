@@ -4196,35 +4196,6 @@ static void include_file(GString *str, const char *filename)
     };
 }
 
-static void include_file_fd(int dst, const char *filename)
-{
-    int fd = -1;
-    void *buffer = NULL;
-
-    struct stat st;
-    stat(filename, &st);
-    long size = st.st_size;
-
-    fd = open(filename, O_RDONLY);
-
-    if (fd != -1)
-    {
-        buffer = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
-
-        if (buffer != MAP_FAILED)
-        {
-            chunked_write(dst, buffer, size);
-
-            if (munmap(buffer, size) == -1)
-                perror("un-mapping error");
-        }
-        else
-            perror("error mapping a file");
-
-        close(fd);
-    };
-}
-
 void create_root_path(const char *root)
 {
     if (root == NULL)
