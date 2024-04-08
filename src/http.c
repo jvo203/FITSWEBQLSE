@@ -426,6 +426,10 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
         if (pos != NULL)
             MHD_add_response_header(response, "Content-Type", "application/wasm");
 
+        pos = (char *)strstr(url, ".bin");
+        if (pos != NULL)
+            MHD_add_response_header(response, "Content-Type", "application/octet-stream");
+
         pos = (char *)strstr(url, ".ico");
         if (pos != NULL)
             MHD_add_response_header(response, "Content-Type", "image/x-icon");
