@@ -64,6 +64,11 @@ for shader in shaders
     # read the text file as String
     src = read(src_dir * shader, String)
 
+    # escape &, < and > characters
+    src = replace(src, "&" => "&amp;")
+    src = replace(src, "<" => "&lt;")
+    src = replace(src, ">" => "&gt;")
+
     # create an XML element
     xml *= "<shader id=\"$id\">$src</shader>"
 end
