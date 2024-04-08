@@ -16,6 +16,9 @@ for shader in shaders
     # read the text file as String
     src = read(src_dir * shader, String)
 
+    # remove any control characters from src
+    src = replace(src, r"[\x00-\x1f]" => "")
+
     JSON.Writer.write(json, "{\"id\": \"$id\", \"shader\": \"$src\"}")
 
     if shader != shaders[end]
