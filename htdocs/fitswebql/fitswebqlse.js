@@ -18683,8 +18683,7 @@ async function fetch_shader(filename) {
 
 async function fetch_glsl() {
     // var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/glsl_shaders.bin';
-    // var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/htdocs/fitswebql/glsl_shaders.bin';
-    var url = 'glsl_shaders.bin';
+    var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/htdocs/fitswebql/glsl_shaders.bin';
 
     // fetch a binary file containing the GLSL shaders
     await fetch(url).then(function (response) {
@@ -18707,20 +18706,8 @@ async function fetch_glsl() {
         let uncompressedSize = LZ4.decodeBlock(compressedArray, uncompressed);
         uncompressed = uncompressed.slice(0, uncompressedSize);
 
-        const xmlStr = '<q id="a"><span id="b">hey!</span></q>';
-        var parser = new DOMParser();
-        const doc = parser.parseFromString(xmlStr, "application/xml");
-        // print the name of the root element or error message
-        const errorNode = doc.querySelector("parsererror");
-        if (errorNode) {
-            console.log("error while parsing");
-        } else {
-            console.log(doc.documentElement.nodeName);
-        }
-
         try {
             var xml = new TextDecoder().decode(uncompressed);
-            console.log('XML:', xml);
 
             // parse the XML, iterate through "shader" elements, get the "id" from the attribute
             var parser = new DOMParser();
@@ -18733,7 +18720,15 @@ async function fetch_glsl() {
             for (var i = 0; i < shaders.length; i++) {
                 var id = shaders[i].getAttribute("id");
                 var text = shaders[i].textContent;
-                console.log('id:', id, 'text:', text);
+
+                // create a new script element
+                var script = document.createElement('script');
+                script.type = 'x-shader/x-fragment';
+                script.id = id;
+                script.text = text;
+
+                // append the script element to the document
+                document.head.appendChild(script);
             }
         } catch (e) {
             console.error('Failed to parse GLSL JSON:', e);
