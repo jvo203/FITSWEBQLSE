@@ -18681,12 +18681,11 @@ async function fetch_shader(filename) {
     });
 }
 
-async function fetch_glsl()
-{
+async function fetch_glsl() {
     // var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/glsl_shaders.bin';
     // var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@develop/htdocs/fitswebql/glsl_shaders.bin';
     var url = 'glsl_shaders.bin';
-    
+
     // fetch a binary file containing the GLSL shaders
     await fetch(url).then(function (response) {
         return response.arrayBuffer();
@@ -18695,8 +18694,8 @@ async function fetch_glsl()
         var view = new DataView(buffer);
 
         // extract the UInt32 value from the first 4 bytes as the decompressed JSON length
-        var jsonLength = view.getUint32(0, endianness);
-        console.log('JSON length:', jsonLength);
+        var xmlLength = view.getUint32(0, endianness);
+        console.log('XML length:', xmlLength);
 
         // get the remaining array to be decompressed with LZ4
         var compressedArray = new Uint8Array(buffer, 4, buffer.byteLength - 4);
@@ -18704,17 +18703,38 @@ async function fetch_glsl()
         var LZ4 = require('lz4');
 
         // decompress with LZ4
-        var uncompressed = new Uint8Array(jsonLength);
+        var uncompressed = new Uint8Array(xmlLength);
         let uncompressedSize = LZ4.decodeBlock(compressedArray, uncompressed);
         uncompressed = uncompressed.slice(0, uncompressedSize);
-        console.log(uncompressed);
+
+        const xmlStr = '<q id="a"><span id="b">hey!</span></q>';
+        var parser = new DOMParser();
+        const doc = parser.parseFromString(xmlStr, "application/xml");
+        // print the name of the root element or error message
+        const errorNode = doc.querySelector("parsererror");
+        if (errorNode) {
+            console.log("error while parsing");
+        } else {
+            console.log(doc.documentElement.nodeName);
+        }
 
         try {
-            var json = new TextDecoder().decode(uncompressed);
-            console.log(json);
+            var xml = new TextDecoder().decode(uncompressed);
+            console.log('XML:', xml);
 
-            var shaders = JSON.parse(json);
-            console.log('GLSL shaders:', shaders);
+            // parse the XML, iterate through "shader" elements, get the "id" from the attribute
+            var parser = new DOMParser();
+            var xmlDoc = parser.parseFromString(xml, "application/xml");
+
+            console.log('xmlDoc:', xmlDoc);
+
+            var shaders = xmlDoc.getElementsByTagName("shader");
+
+            for (var i = 0; i < shaders.length; i++) {
+                var id = shaders[i].getAttribute("id");
+                var text = shaders[i].textContent;
+                console.log('id:', id, 'text:', text);
+            }
         } catch (e) {
             console.error('Failed to parse GLSL JSON:', e);
             return;
