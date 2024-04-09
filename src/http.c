@@ -4430,6 +4430,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // Font Awesome
     g_string_append(html, "<script src=\"https://kit.fontawesome.com/8433b7dde2.js?ver=5.15.4\" crossorigin=\"anonymous\"></script>\n");
 
+    // Bzip2 decoder
+    g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/bzip2.min.js\"></script>\n");
+
     // HTML5 FileSaver
     g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/FileSaver.min.js\"></script>\n");
 
