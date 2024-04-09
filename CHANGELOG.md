@@ -1,3 +1,7 @@
+## [5.1.7] - 2024-04-??
+
+* reduced the compressed size of the WebGL GSLS archive from 26kB to 20kB by replacing the LZ4HC compressor with BZIP2
+
 ## [5.1.6] - 2024-04-08
 
 * reduced the long-poll interval for the image/spectrum from 500ms to 250ms
