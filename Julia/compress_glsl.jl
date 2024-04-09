@@ -99,6 +99,6 @@ println("Compressed XML object length (BZIP2): ", length(compressed2))
 
 # write a binary file .bin with the uncompressed xml length as UInt32 and the compressed json
 open("../htdocs/fitswebql/glsl_shaders.bin", "w") do f
-    write(f, UInt32(length(xml)))
+    # write(f, UInt32(length(xml))) # not needed by BZIP2 (only needed by LZ4HC)
     write(f, compressed2)
 end
