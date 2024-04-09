@@ -4723,8 +4723,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     {
         // local version
         g_string_append(html, "<script src=\"fitswebqlse.js?" VERSION_STRING "\"></script>\n");
-        g_string_append(html, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING
-                              "\"/>\n");
+        g_string_append(html, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING "\"/>\n");
     }
     else
     {
