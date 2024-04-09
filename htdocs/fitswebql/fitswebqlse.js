@@ -18662,7 +18662,6 @@ async function open_3d_view() {
 // a function to asynchronously fetch GLSL shaders from a LZ4-compressed XML file
 async function fetch_glsl() {
     var url = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/glsl_shaders.bin';
-    var url = 'glsl_shaders.bin';
 
     // fetch a binary file containing the GLSL shaders
     await fetch(url).then(function (response) {
