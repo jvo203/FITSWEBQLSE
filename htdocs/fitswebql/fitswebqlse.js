@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-04-08.1";
+    return "JS2024-04-09.0";
 }
 
 function uuidv4() {
@@ -4663,7 +4663,7 @@ async function open_websocket_connection(_datasetId, index) {
                         // console.log("computed:", computed, "spectrum length:", spectrum_len, "frame.length:", frame.length);
 
                         waitForModuleReady().then(() => {
-                            // FPZIP decoder part				
+                            // ZFP decoder part				
                             Module.ready
                                 .then(_ => {
                                     let start = performance.now();
@@ -4903,7 +4903,7 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame = new Uint8Array(received_msg, offset);
 
                         waitForModuleReady().then(() => {
-                            // FPZIP decoder part				
+                            // ZFP decoder part				
                             Module.ready
                                 .then(_ => {
                                     // var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
@@ -13968,7 +13968,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 offset += buffer_len;
                                 //console.log("FITS mean spectrum length:", spectrum_len);
 
-                                // FPZIP decoder part				
+                                // ZFP decoder part				
                                 /*Module.ready
                                   .then(_ => {*/
                                 let start = performance.now();
