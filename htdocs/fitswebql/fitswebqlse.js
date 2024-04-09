@@ -18696,7 +18696,7 @@ async function fetch_glsl() {
                 document.head.appendChild(script);
             }
         } catch (e) {
-            console.error('Failed to parse GLSL XML:', e);
+            console.error('Failed to decompress/parse GLSL XML:', e);
             return;
         }
     }).catch(function (error) {
