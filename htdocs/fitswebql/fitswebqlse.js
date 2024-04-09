@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-04-09.0";
+    return "JS2024-04-09.1";
 }
 
 function uuidv4() {
@@ -18673,7 +18673,7 @@ async function fetch_glsl() {
         return response.arrayBuffer();
     }).then(function (buffer) {
         // create a new DataView object
-        var view = new DataView(buffer);
+        /*var view = new DataView(buffer);
 
         // extract the UInt32 value from the first 4 bytes as the decompressed XML length
         var xmlLength = view.getUint32(0, endianness);
@@ -18687,10 +18687,13 @@ async function fetch_glsl() {
         // decompress with LZ4
         var uncompressed = new Uint8Array(xmlLength);
         let uncompressedSize = LZ4.decodeBlock(compressedArray, uncompressed);
-        uncompressed = uncompressed.slice(0, uncompressedSize);
+        uncompressed = uncompressed.slice(0, uncompressedSize);*/
 
         try {
-            var xml = new TextDecoder().decode(uncompressed);
+            // var xml = new TextDecoder().decode(uncompressed);
+            // bzip2 decoder 
+            var bytes = new Uint8Array(buffer);
+            var xml = bzip2.simple(bzip2.array(bytes));
 
             // parse the XML, iterate through "shader" elements, get the "id" from the attribute
             var parser = new DOMParser();
