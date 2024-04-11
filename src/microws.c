@@ -2847,7 +2847,6 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
 
                 if (payload != NULL)
                 {
-                    float ts = *timestamp;
                     uint32_t id = (unsigned int)(*seq_id);
                     uint32_t msg_type = 0;
                     // 0 - spectrum, 1 - viewport,
@@ -2856,7 +2855,7 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
 
                     size_t ws_offset = ws_len;
 
-                    memcpy((char *)payload + ws_offset, &ts, sizeof(float));
+                    memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
                     ws_offset += sizeof(float);
 
                     memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
@@ -3032,17 +3031,101 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
     // directly prepare and queue the WebSocket message
     if (zfpsize > 0 && compressed_size > 0)
     {
-        // pipe the compressed viewport
-        uint32_t view_width = width;
-        uint32_t view_height = height;
-        uint32_t pixels_len = zfpsize;
-        uint32_t mask_len = compressed_size;
+        size_t view_size = zfpsize + (size_t)compressed_size;
 
-        /*size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + zfpsize;
+        // size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + zfpsize;
+        //  header
+        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
+        // body
+        msg_len += view_size;
 
         char *payload = NULL;
         size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
-        msg_len += ws_len;*/
+        msg_len += ws_len;
+
+        if (payload != NULL)
+        {
+            uint32_t id = (unsigned int)(*seq_id);
+            uint32_t msg_type = 1;
+            // 0 - spectrum, 1 - viewport,
+            // 2 - image, 3 - full, spectrum,  refresh,
+            // 4 - histogram
+
+#ifdef MICROWS
+            size_t ws_offset = ws_len;
+#else
+            size_t ws_offset = 0;
+#endif
+
+            memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+            ws_offset += sizeof(float);
+
+            // pixels
+            memcpy((char *)payload + ws_offset, compressed_pixels, zfpsize);
+            ws_offset += zfpsize;
+
+            // mask
+            memcpy((char *)payload + ws_offset, compressed_mask, (size_t)compressed_size);
+            ws_offset += (size_t)compressed_size;
+
+            if (ws_offset != msg_len)
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+            // create a queue message
+            struct data_buf msg = {payload, msg_len};
+
+#ifdef DIRECT
+            if (!session->disconnect)
+                send_all(session, payload, msg_len);
+            free(payload);
+#else
+            char *msg_buf = NULL;
+            size_t _len = sizeof(struct data_buf);
+
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+            pthread_spin_lock(&session->queue_lock);
+#else
+            pthread_mutex_lock(&session->queue_mtx);
+#endif
+
+            // reserve space for the binary message
+            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+            // pass the message over to the sender via a communications queue
+            if (msg_buf != NULL && queue_len >= _len)
+            {
+                memcpy(msg_buf, &msg, _len);
+                mg_queue_add(&session->queue, _len);
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+                pthread_spin_unlock(&session->queue_lock);
+#else
+                pthread_mutex_unlock(&session->queue_mtx);
+#endif
+
+                // wake up the sender
+                pthread_cond_signal(&session->wake_up_sender);
+            }
+            else
+            {
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+                pthread_spin_unlock(&session->queue_lock);
+#else
+                pthread_mutex_unlock(&session->queue_mtx);
+#endif
+                printf("[C] mg_queue_book failed, freeing memory.\n");
+                free(payload);
+            }
+#endif
+        }
     }
 
     // release the memory
