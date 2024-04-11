@@ -2965,7 +2965,7 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
 
     if (width <= 0 || height <= 0)
     {
-        printf("[C] <write_ws_spectrum> invalid image data!\n");
+        printf("[C] <write_ws_viewport> invalid image data!\n");
         goto write_ws_viewport_release_session;
     }
 
