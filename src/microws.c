@@ -3031,13 +3031,18 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
     // directly prepare and queue the WebSocket message
     if (zfpsize > 0 && compressed_size > 0)
     {
+        uint32_t view_width = width;
+        uint32_t view_height = height;
+        uint32_t pixels_len = zfpsize;
+        uint32_t mask_len = compressed_size;
+
         size_t view_size = zfpsize + (size_t)compressed_size;
 
         // size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + zfpsize;
         //  header
         size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
         // body
-        msg_len += view_size;
+        msg_len += 4 * sizeof(uint32_t) + view_size;
 
         char *payload = NULL;
         size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
@@ -3069,11 +3074,27 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
             memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
             ws_offset += sizeof(float);
 
-            // pixels
+            // view_width
+            memcpy((char *)payload + ws_offset, &view_width, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // view_height
+            memcpy((char *)payload + ws_offset, &view_height, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // pixels_len
+            memcpy((char *)payload + ws_offset, &pixels_len, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // compressed_pixels
             memcpy((char *)payload + ws_offset, compressed_pixels, zfpsize);
             ws_offset += zfpsize;
 
-            // mask
+            // mask_len
+            memcpy((char *)payload + ws_offset, &mask_len, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // compressed_mask
             memcpy((char *)payload + ws_offset, compressed_mask, (size_t)compressed_size);
             ws_offset += (size_t)compressed_size;
 
