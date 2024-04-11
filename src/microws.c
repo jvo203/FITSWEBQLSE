@@ -18,7 +18,7 @@ void *send_cluster_heartbeat(void *arg);
 
 // combined WebSocket write functions, to be used from FORTRAN
 void write_ws_spectrum(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *spectrum, int n, int precision);
-void write_ws_viewport(websocket_session *session, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
+void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 
 #ifdef POLL
 #include <poll.h>
