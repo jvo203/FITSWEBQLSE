@@ -17,7 +17,7 @@ void *send_cluster_heartbeat(void *arg);
 #include <microhttpd_ws.h>
 
 // combined WebSocket write functions, to be used from FORTRAN
-void write_ws_spectrum(websocket_session *session, const float *elapsed, const float *spectrum, int n, int precision);
+void write_ws_spectrum(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *spectrum, int n, int precision);
 void write_ws_viewport(websocket_session *session, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 
 #ifdef POLL
@@ -2776,7 +2776,7 @@ on_ws_connection(void *cls,
     return ret;
 }
 
-void write_ws_spectrum(websocket_session *session, const float *elapsed, const float *spectrum, int n, int precision)
+void write_ws_spectrum(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *spectrum, int n, int precision)
 {
     uchar *compressed;
     // ZFP variables
@@ -2833,14 +2833,6 @@ void write_ws_spectrum(websocket_session *session, const float *elapsed, const f
             // the compressed part is available at compressed_pixels[0..zfpsize-1]
             printf("[C] float array size: %zu, compressed: %zu bytes\n", length * sizeof(float), zfpsize);
 
-            // transmit the data
-            /*uint32_t compressed_size = zfpsize;
-
-            chunked_write(fd, (const char *)elapsed, sizeof(float));                    // elapsed compute time
-            chunked_write(fd, (const char *)&length, sizeof(length));                   // spectrum length after decompressing
-            chunked_write(fd, (const char *)&compressed_size, sizeof(compressed_size)); // compressed buffer size
-            chunked_write(fd, (const char *)compressed, zfpsize);*/
-
             // directly prepare and queue the WebSocket message
             if (zfpsize > 0)
             {
@@ -2852,8 +2844,8 @@ void write_ws_spectrum(websocket_session *session, const float *elapsed, const f
 
                 if (payload != NULL)
                 {
-                    float ts = 0.0f; // resp->timestamp;
-                    uint32_t id = 0; // resp->seq_id;
+                    float ts = *timestamp;
+                    uint32_t id = (unsigned int)(*seq_id);
                     uint32_t msg_type = 0;
                     // 0 - spectrum, 1 - viewport,
                     // 2 - image, 3 - full, spectrum,  refresh,
