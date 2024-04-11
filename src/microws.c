@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdio.h>
 
+// LZ4 character streams compressor
+#include <lz4hc.h>
+
 // ZFP floating-point compressor
 #include <zfp.h>
 
@@ -2933,6 +2936,117 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
     zfp_stream_close(zfp);
 
 write_ws_spectrum_release_session:
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+}
+
+void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
+{
+    uchar *restrict compressed_pixels = NULL;
+    char *restrict compressed_mask = NULL;
+
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = width;
+    uint ny = height;
+
+    int mask_size, worst_size;
+    int compressed_size = 0;
+
+    if (pixels == NULL || mask == NULL)
+    {
+        printf("[C] <write_ws_viewport> NULL pixels || mask!\n");
+        goto write_ws_viewport_release_session;
+    }
+
+    if (width <= 0 || height <= 0)
+    {
+        printf("[C] <write_ws_spectrum> invalid image data!\n");
+        goto write_ws_viewport_release_session;
+    }
+
+    // compress pixels with ZFP
+    field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    compressed_pixels = (uchar *)malloc(bufsize);
+
+    if (compressed_pixels != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)compressed_pixels, bufsize);
+
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+            // compress entire array
+            zfpsize = zfp_compress(zfp, field);
+
+            if (zfpsize == 0)
+                printf("[C] ZFP compression failed!\n");
+            else
+                printf("[C] viewport pixels compressed size: %zu bytes\n", zfpsize);
+
+            bitstream_close(stream);
+
+            // the compressed part is available at compressed_pixels[0..zfpsize-1]
+        }
+
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+    }
+    else
+        printf("[C] a NULL compressed_pixels buffer!\n");
+
+    // compress mask with LZ4-HC
+    mask_size = width * height;
+
+    worst_size = LZ4_compressBound(mask_size);
+
+    compressed_mask = (char *)malloc(worst_size);
+
+    if (compressed_mask != NULL)
+    {
+        // compress the mask as much as possible
+        compressed_size = LZ4_compress_HC((const char *)mask, compressed_mask, mask_size, worst_size, LZ4HC_CLEVEL_MAX);
+
+        printf("[C] viewport mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
+    }
+
+    // directly prepare and queue the WebSocket message
+    if (zfpsize > 0 && compressed_size > 0)
+    {
+        // pipe the compressed viewport
+        uint32_t view_width = width;
+        uint32_t view_height = height;
+        uint32_t pixels_len = zfpsize;
+        uint32_t mask_len = compressed_size;
+    }
+
+    // release the memory
+    if (compressed_pixels != NULL)
+        free(compressed_pixels);
+
+    if (compressed_mask != NULL)
+        free(compressed_mask);
+
+write_ws_viewport_release_session:
     g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
 }
 
