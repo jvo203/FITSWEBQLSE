@@ -1255,6 +1255,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->median = NAN;
                 req->seq_id = 0;
                 req->timestamp = 0.0;
+                req->session = NULL;
                 req->fd = -1;
                 req->ptr = item;
 
