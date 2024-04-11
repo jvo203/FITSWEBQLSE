@@ -3037,6 +3037,12 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
         uint32_t view_height = height;
         uint32_t pixels_len = zfpsize;
         uint32_t mask_len = compressed_size;
+
+        /*size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + zfpsize;
+
+        char *payload = NULL;
+        size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+        msg_len += ws_len;*/
     }
 
     // release the memory
