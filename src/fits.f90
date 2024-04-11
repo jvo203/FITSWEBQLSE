@@ -60,9 +60,13 @@ module fits
       integer(c_int) :: seq_id
       real(c_float) :: timestamp
 
-      ! output
+      ! output (WebSocket session pointer)
+      type(C_PTR) :: session
+
+      ! legacy output (a Unix pipe)
       integer(kind=c_int) :: fd
 
+      ! dataset pointer
       type(C_PTR) :: ptr
 
    end type image_spectrum_request_f

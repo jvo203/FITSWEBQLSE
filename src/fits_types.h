@@ -120,9 +120,13 @@ struct image_spectrum_request
     int seq_id;
     float timestamp;
 
-    // output (the 'write' end of a Unix pipe)
+    // output (WebSocket session pointer)
+    void *session;
+
+    // legacy output (the 'write' end of a Unix pipe)
     int fd;
 
+    // dataset pointer
     void *ptr;
 };
 
