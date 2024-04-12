@@ -7171,8 +7171,6 @@ contains
             call system_clock(finish_t)
             elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-            ! call write_elapsed(req%fd, elapsed)
-            ! call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
             call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
             &c_loc(reduced_spectrum), size(reduced_spectrum), precision)
          else
@@ -7181,8 +7179,6 @@ contains
             call system_clock(finish_t)
             elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-            ! call write_elapsed(req%fd, elapsed)
-            ! call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
             call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
             &c_loc(spectrum), size(spectrum), precision)
          end if
@@ -7235,12 +7231,10 @@ contains
                ! join a thread
                rc = my_pthread_join(task_pid)
 
-               ! call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
                call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
                &req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
             else
                ! no need for downsizing
-               ! call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
                call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
                &dimx, dimy, c_loc(pixels), c_loc(mask), precision)
             end if
@@ -7357,9 +7351,8 @@ contains
          call system_clock(finish_t)
          elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-         call write_elapsed(req%fd, elapsed)
-         call write_spectrum(req%fd, c_null_ptr, 0, precision)
-         call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+         call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
+         &req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
       else
          ! no need for downsizing
 
@@ -7367,12 +7360,11 @@ contains
          call system_clock(finish_t)
          elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-         call write_elapsed(req%fd, elapsed)
-         call write_spectrum(req%fd, c_null_ptr, 0, precision)
-         call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+         call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
+         &dimx, dimy, c_loc(pixels), c_loc(mask), precision)
       end if
 
-      print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
+      ! print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
    end subroutine realtime_viewport_request
 
    recursive subroutine viewport_request(user) BIND(C, name='viewport_request')
