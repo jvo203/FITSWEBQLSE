@@ -6978,7 +6978,6 @@ contains
             print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
          end if
 
-         if (req%fd .ne. -1) call close_pipe(req%fd)
          nullify (item)
          call release_session(req%session) ! decrement the session reference counter
          nullify (req) ! disassociate the FORTRAN pointer from the C memory region
@@ -7151,96 +7150,90 @@ contains
       ! combine the spectra from other cluster nodes (if any)
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
 
-      if (req%fd .ne. -1) then
+      ! the spectrum part
+      if (req%image) then
+         precision = ZFP_HIGH_PRECISION
+      else
+         precision = ZFP_MEDIUM_PRECISION
+      end if
 
-         ! the spectrum part
+      threshold = req%dx/2
 
-         if (req%image) then
+      if (size(spectrum) .gt. threshold) then
+         ! downsize the spectrum
+         call LTTB(spectrum, threshold, reduced_spectrum)
+
+         ! end the timer
+         call system_clock(finish_t)
+         elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
+         call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
+         &c_loc(reduced_spectrum), size(reduced_spectrum), precision)
+      else
+
+         ! end the timer
+         call system_clock(finish_t)
+         elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
+         call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
+         &c_loc(spectrum), size(spectrum), precision)
+      end if
+
+      ! the image (viewport) part
+      if (req%image) then
+         select case (req%quality)
+          case (low)
+            precision = ZFP_LOW_PRECISION
+          case (high)
             precision = ZFP_HIGH_PRECISION
-         else
+          case default
             precision = ZFP_MEDIUM_PRECISION
-         end if
+         end select
 
-         threshold = req%dx/2
+         native_size = dimx*dimy
+         viewport_size = req%width*req%height
+         scale = real(req%width)/real(dimx)
 
-         if (size(spectrum) .gt. threshold) then
-            ! downsize the spectrum
-            call LTTB(spectrum, threshold, reduced_spectrum)
+         ! print *, 'native:', native_size, 'viewport:', viewport_size, 'scale:', scale ! ifort
 
-            ! end the timer
-            call system_clock(finish_t)
-            elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+         if (native_size .gt. viewport_size) then
+            ! downsize the pixels/mask from {dimx,dimy} to {req%width,req%height}
 
-            call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
-            &c_loc(reduced_spectrum), size(reduced_spectrum), precision)
-         else
+            allocate (view_pixels(req%width, req%height))
+            allocate (view_mask(req%width, req%height))
 
-            ! end the timer
-            call system_clock(finish_t)
-            elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+            task%pSrc = c_loc(pixels)
+            task%srcWidth = dimx
+            task%srcHeight = dimy
 
-            call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
-            &c_loc(spectrum), size(spectrum), precision)
-         end if
+            task%pDest = c_loc(view_pixels)
+            task%dstWidth = req%width
+            task%dstHeight = req%height
 
-         ! the image (viewport) part
-         if (req%image) then
-            select case (req%quality)
-             case (low)
-               precision = ZFP_LOW_PRECISION
-             case (high)
-               precision = ZFP_HIGH_PRECISION
-             case default
-               precision = ZFP_MEDIUM_PRECISION
-            end select
-
-            native_size = dimx*dimy
-            viewport_size = req%width*req%height
-            scale = real(req%width)/real(dimx)
-
-            ! print *, 'native:', native_size, 'viewport:', viewport_size, 'scale:', scale ! ifort
-
-            if (native_size .gt. viewport_size) then
-               ! downsize the pixels/mask from {dimx,dimy} to {req%width,req%height}
-
-               allocate (view_pixels(req%width, req%height))
-               allocate (view_mask(req%width, req%height))
-
-               task%pSrc = c_loc(pixels)
-               task%srcWidth = dimx
-               task%srcHeight = dimy
-
-               task%pDest = c_loc(view_pixels)
-               task%dstWidth = req%width
-               task%dstHeight = req%height
-
-               if (scale .gt. 0.2) then
-                  task%numLobes = 3
-                  ! call resizeLanczos(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height, 3)
-               else
-                  task%numLobes = 0
-                  ! call resizeSuper(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height)
-               end if
-
-               ! launch a pthread to resize pixels
-               task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
-
-               call resizeNearest(c_loc(mask), dimx, dimy, c_loc(view_mask), req%width, req%height)
-               ! call resizeMask(mask, dimx, dimy, view_mask, req%width, req%height)
-
-               ! join a thread
-               rc = my_pthread_join(task_pid)
-
-               call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
-               &req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+            if (scale .gt. 0.2) then
+               task%numLobes = 3
+               ! call resizeLanczos(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height, 3)
             else
-               ! no need for downsizing
-               call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
-               &dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+               task%numLobes = 0
+               ! call resizeSuper(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height)
             end if
-         end if
 
-         call close_pipe(req%fd)
+            ! launch a pthread to resize pixels
+            task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
+
+            call resizeNearest(c_loc(mask), dimx, dimy, c_loc(view_mask), req%width, req%height)
+            ! call resizeMask(mask, dimx, dimy, view_mask, req%width, req%height)
+
+            ! join a thread
+            rc = my_pthread_join(task_pid)
+
+            call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
+            &req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+         else
+            ! no need for downsizing
+            call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
+            &dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+         end if
       end if
 
       nullify (item)
