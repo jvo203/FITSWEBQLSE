@@ -509,6 +509,14 @@ module fits
          character(kind=c_char), intent(in) :: datasetid(*)
       end function get_dataset
 
+      ! void release_session(websocket_session *session);
+      subroutine release_session(session) BIND(C, name='release_session')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), value :: session
+      end subroutine release_session
+
       ! void download_response(int fd, const char *filename);
       subroutine download_response(fd, filename) BIND(C, name='download_response')
          use, intrinsic :: ISO_C_BINDING
@@ -1177,6 +1185,19 @@ module fits
          type(C_PTR), value, intent(in) :: spectrum
       end subroutine write_spectrum
 
+      ! void write_ws_spectrum(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *spectrum, int n, int precision)
+      subroutine write_ws_spectrum(session, seq_id, timestamp, elapsed, spectrum, n, precision)&
+      & BIND(C, name='write_ws_spectrum')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value :: session
+         integer(c_int), intent(in) :: seq_id
+         real(c_float), intent(in) :: timestamp, elapsed
+         type(C_PTR), value :: spectrum
+         integer(c_int), value, intent(in) :: n, precision
+      end subroutine write_ws_spectrum
+
       subroutine write_histogram(fd, histogram, n) BIND(C, name='write_histogram')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -1194,6 +1215,19 @@ module fits
          type(C_PTR), value :: pixels, mask
 
       end subroutine write_viewport
+
+      ! void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
+      subroutine write_ws_viewport(session, seq_id, timestamp, elapsed, width, height, pixels, mask, precision)&
+      & BIND(C, name='write_ws_viewport')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value :: session
+         integer(c_int), intent(in) :: seq_id
+         real(c_float), intent(in) :: timestamp, elapsed
+         integer(c_int), value, intent(in) :: width, height, precision
+         type(C_PTR), value :: pixels, mask
+      end subroutine write_ws_viewport
 
       ! size_t chunked_write(int fd, const char *src, size_t n)
       integer(kind=c_size_t) function chunked_write(fd, src, n) BIND(C, name='chunked_write')
@@ -6946,6 +6980,7 @@ contains
 
          if (req%fd .ne. -1) call close_pipe(req%fd)
          nullify (item)
+         call release_session(req%session) ! decrement the session reference counter
          nullify (req) ! disassociate the FORTRAN pointer from the C memory region
          call free(user) ! release C memory
 
@@ -7136,16 +7171,20 @@ contains
             call system_clock(finish_t)
             elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-            call write_elapsed(req%fd, elapsed)
-            call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
+            ! call write_elapsed(req%fd, elapsed)
+            ! call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), precision)
+            call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
+            &c_loc(reduced_spectrum), size(reduced_spectrum), precision)
          else
 
             ! end the timer
             call system_clock(finish_t)
             elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-            call write_elapsed(req%fd, elapsed)
-            call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+            ! call write_elapsed(req%fd, elapsed)
+            ! call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), precision)
+            call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
+            &c_loc(spectrum), size(spectrum), precision)
          end if
 
          ! the image (viewport) part
@@ -7196,10 +7235,14 @@ contains
                ! join a thread
                rc = my_pthread_join(task_pid)
 
-               call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+               ! call write_viewport(req%fd, req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+               call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
+               &req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
             else
                ! no need for downsizing
-               call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+               ! call write_viewport(req%fd, dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+               call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
+               &dimx, dimy, c_loc(pixels), c_loc(mask), precision)
             end if
          end if
 
@@ -7207,6 +7250,7 @@ contains
       end if
 
       nullify (item)
+      call release_session(req%session) ! decrement the session reference counter
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 

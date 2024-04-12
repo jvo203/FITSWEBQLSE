@@ -2794,10 +2794,16 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
 
     uint32_t length = n;
 
+    if (session == NULL)
+    {
+        printf("[C] <write_ws_spectrum> NULL session pointer!\n");
+        return;
+    }
+
     if (spectrum == NULL || n <= 0)
     {
         printf("[C] <write_ws_spectrum> invalid spectrum data!\n");
-        goto write_ws_spectrum_release_session;
+        return;
     }
 
     // spectrum with ZFP
@@ -2934,9 +2940,6 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
     // clean up
     zfp_field_free(field);
     zfp_stream_close(zfp);
-
-write_ws_spectrum_release_session:
-    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
 }
 
 void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
@@ -2957,16 +2960,22 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
     int mask_size, worst_size;
     int compressed_size = 0;
 
+    if (session == NULL)
+    {
+        printf("[C] <write_ws_viewport> NULL session pointer!\n");
+        return;
+    }
+
     if (pixels == NULL || mask == NULL)
     {
         printf("[C] <write_ws_viewport> NULL pixels || mask!\n");
-        goto write_ws_viewport_release_session;
+        return;
     }
 
     if (width <= 0 || height <= 0)
     {
         printf("[C] <write_ws_viewport> invalid image data!\n");
-        goto write_ws_viewport_release_session;
+        return;
     }
 
     // compress pixels with ZFP
@@ -3156,9 +3165,6 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
 
     if (compressed_mask != NULL)
         free(compressed_mask);
-
-write_ws_viewport_release_session:
-    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
 }
 
 #endif // MICROWS

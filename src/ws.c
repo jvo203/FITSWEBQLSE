@@ -168,6 +168,13 @@ void remove_session(websocket_session *session)
         printf("[C] cannot lock sessions_mtx!\n");
 }
 
+// to be called mainly from FORTRAN
+void release_session(websocket_session *session)
+{
+    if (session != NULL)
+        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+};
+
 void delete_session(websocket_session *session)
 {
     if (session == NULL)
@@ -4133,6 +4140,8 @@ void *ws_event_loop(void *arg)
             if (stat == 0)
             {
                 // pass the read end of the pipe to a C thread
+                req->session = g_atomic_rc_box_acquire(session);
+
                 resp->session = g_atomic_rc_box_acquire(session);
                 resp->fps = 0;
                 resp->bitrate = 0;
@@ -4173,6 +4182,8 @@ void *ws_event_loop(void *arg)
                 }
                 else
                 {
+                    release_session(req->session);
+
                     free(req);
 
                     // close the write end of the pipe
