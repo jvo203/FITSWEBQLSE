@@ -3810,7 +3810,7 @@ void *ws_event_loop(void *arg)
             req->session = g_atomic_rc_box_acquire(session);
             req->fd = -1; // not used anymore
 
-            // launch a FORTRAN subroutine directly from C, session will be released and <req> freed from within FORTRAN
+            // launch a FORTRAN subroutine directly from C, the session will be released and <req> freed from within FORTRAN
             realtime_image_spectrum_request_simd(req);
         }
     }
