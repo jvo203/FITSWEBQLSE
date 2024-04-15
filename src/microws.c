@@ -26,7 +26,7 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
 
 // video
 void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
-void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels);
+void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, size_t no_pixels);
 
 #ifdef POLL
 #include <poll.h>
@@ -3317,6 +3317,163 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
     pthread_mutex_unlock(&session->vid_mtx);
 }
 
-void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels){};
+void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, size_t no_pixels)
+{
+    if (session == NULL)
+    {
+        printf("[C] <write_ws_composite_video> NULL session pointer!\n");
+        return;
+    }
+
+    if (pixels == NULL)
+    {
+        printf("[C] <write_ws_composite_video> NULL pixels!\n");
+        return;
+    }
+
+    // compress the planes with x265 and pass the response (payload) over to the WebSocket sender
+    size_t plane_size = session->image_width * session->image_height;
+    int va_count = 0;
+
+    va_count = no_pixels / plane_size;
+    if (va_count > 0)
+        printf("[C] va_count: %d\n", va_count);
+
+    if (va_count < 1 || va_count > 3)
+    {
+        printf("[C] <write_ws_composite_video> invalid va_count: %d\n", va_count);
+        return;
+    }
+
+    // x265 encoding
+    pthread_mutex_lock(&session->vid_mtx);
+
+    if ((session->picture == NULL) || (session->encoder == NULL))
+    {
+        pthread_mutex_unlock(&session->vid_mtx);
+        return;
+    }
+
+    size_t plane_offset = 0;
+    for (int i = 0; i < va_count; i++)
+    {
+        if (session->picture->planes[i] != NULL)
+            free(session->picture->planes[i]);
+
+        session->picture->planes[i] = (uint8_t *)(pixels + plane_offset);
+        session->picture->stride[i] = session->image_width;
+        plane_offset += plane_size;
+    }
+
+    // RGB-encode
+    x265_nal *pNals = NULL;
+    uint32_t iNal = 0;
+
+    int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL);
+    printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
+
+    for (unsigned int i = 0; i < iNal; i++)
+    {
+        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + pNals[i].sizeBytes;
+
+        printf("[C] video_response elapsed: %f [ms], msg_len: %zu bytes.\n", *elapsed, msg_len);
+
+#ifdef MICROWS
+        char *payload = NULL;
+        size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+        msg_len += ws_len;
+#else
+        char *payload = malloc(msg_len);
+#endif
+
+        if (payload != NULL)
+        {
+            uint32_t id = (unsigned int)(*seq_id);
+            uint32_t msg_type = 5;
+            // 0 - spectrum, 1 - viewport,
+            // 2 - image, 3 - full, spectrum,  refresh,
+            // 4 - histogram, 5 - video frame
+
+#ifdef MICROWS
+            size_t ws_offset = ws_len;
+#else
+            size_t ws_offset = 0;
+#endif
+
+            memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, pNals[i].payload, pNals[i].sizeBytes);
+            ws_offset += pNals[i].sizeBytes;
+
+            if (ws_offset != msg_len)
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+            // create a queue message
+            struct data_buf msg = {payload, msg_len};
+
+#ifdef DIRECT
+            if (!session->disconnect)
+                send_all(session, payload, msg_len);
+            free(payload);
+#else
+            char *msg_buf = NULL;
+            size_t _len = sizeof(struct data_buf);
+
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+            pthread_spin_lock(&session->queue_lock);
+#else
+            pthread_mutex_lock(&session->queue_mtx);
+#endif
+
+            // reserve space for the binary message
+            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+            // pass the message over to the sender via a communications queue
+            if (msg_buf != NULL && queue_len >= _len)
+            {
+                memcpy(msg_buf, &msg, _len);
+                mg_queue_add(&session->queue, _len);
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+                pthread_spin_unlock(&session->queue_lock);
+#else
+                pthread_mutex_unlock(&session->queue_mtx);
+#endif
+
+                // wake up the sender
+                pthread_cond_signal(&session->wake_up_sender);
+            }
+            else
+            {
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+                pthread_spin_unlock(&session->queue_lock);
+#else
+                pthread_mutex_unlock(&session->queue_mtx);
+#endif
+                printf("[C] mg_queue_book failed, freeing memory.\n");
+                free(payload);
+            }
+#endif
+        }
+    }
+
+    // done with the planes
+    for (int i = 0; i < va_count; i++)
+    {
+        session->picture->planes[i] = NULL;
+        session->picture->stride[i] = 0;
+    }
+
+    pthread_mutex_unlock(&session->vid_mtx);
+}
 
 #endif // MICROWS

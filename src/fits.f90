@@ -1245,8 +1245,8 @@ module fits
          type(C_PTR), value :: pixels, mask
       end subroutine write_ws_video
 
-      ! void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels);
-      subroutine write_ws_composite_video(session, seq_id, timestamp, elapsed, pixels)&
+      ! void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, size_t no_pixels);
+      subroutine write_ws_composite_video(session, seq_id, timestamp, elapsed, pixels, no_pixels)&
       & BIND(C, name='write_ws_composite_video')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -1255,6 +1255,7 @@ module fits
          integer(c_int), intent(in) :: seq_id
          real(c_float), intent(in) :: timestamp, elapsed
          type(C_PTR), value :: pixels
+         integer(c_size_t), value, intent(in) :: no_pixels
       end subroutine write_ws_composite_video
 
       ! size_t chunked_write(int fd, const char *src, size_t n)
@@ -8270,7 +8271,7 @@ contains
       call system_clock(finish_t)
       elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-      call write_ws_composite_video(req%session, req%seq_id, req%timestamp, elapsed, c_loc(pixels))
+      call write_ws_composite_video(req%session, req%seq_id, req%timestamp, elapsed, c_loc(pixels), sizeof(pixels))
 
       ! if (req%fd .ne. -1) then
       !  call write_elapsed(req%fd, elapsed)
