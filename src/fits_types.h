@@ -163,7 +163,9 @@ struct video_request
     int len;
     int seq_id;
     float timestamp;
-    int fd;
+
+    // output (WebSocket session pointer)
+    void *session;
 
     // input
     bool keyframe; // is it a keyframe?
@@ -173,7 +175,7 @@ struct video_request
     float dmin, dmax, dmedian;
     float dmadN, dmadP;
 
-    // output (the 'write' end of a Unix pipe)
+    // output
     int width;
     int height;
     bool downsize;
@@ -190,7 +192,9 @@ struct composite_video_request
     int len;
     int seq_id;
     float timestamp;
-    int fd;
+
+    // output (WebSocket session pointer)
+    void *session;
 
     // input
     bool keyframe;
@@ -203,7 +207,7 @@ struct composite_video_request
     float dmin[3], dmax[3], dmedian[3];
     float dmadN[3], dmadP[3];
 
-    // output (the 'write' end of a Unix pipe)
+    // output
     int width;
     int height;
     bool downsize;

@@ -2099,7 +2099,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
             req->width = session->image_width;
             req->height = session->image_height;
             req->downsize = session->bDownsize;
-            req->fd = -1;
+            req->session = NULL;
             req->ptr = item;
 
             double frame = 0.0;
@@ -2267,6 +2267,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
             req->downsize = downsize;
             req->keyframe = keyframe;
             req->fill = fill;
+            req->session = NULL;
 
             // next iterate through the multiple datasets launching individual channel threads
             // tokenize session->multi
@@ -3881,97 +3882,13 @@ void *video_event_loop(void *arg)
                 last_seq_id = req->seq_id;
             }
 
-            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+            // pass the session to FORTRAN
+            req->session = g_atomic_rc_box_acquire(session);
 
-            if (resp == NULL)
-            {
-                free(req->flux);
-                free(req);
-                continue;
-            }
-
-            // pass the request to FORTRAN
-            int stat;
-            int pipefd[2];
-
-            // open a Unix pipe
-            stat = pipe(pipefd);
-
-            if (stat == 0)
-            {
-                // pass the read end of the pipe to a C thread
-                resp->session = g_atomic_rc_box_acquire(session);
-                resp->fps = 0;
-                resp->bitrate = 0;
-                resp->timestamp = req->timestamp;
-                resp->seq_id = req->seq_id;
-                resp->fd = pipefd[0];
-
-                // pass the write end of the pipe to a FORTRAN thread
-                req->fd = pipefd[1];
-
-                pthread_t tid_req, tid_resp;
-
-                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                if (session->id != NULL)
-                {
-                    // check the video type (single or composite)
-                    if (req->video_type == single)
-                        stat = pthread_create(&tid_req, NULL, &video_request_simd, req);
-                    else
-                        stat = pthread_create(&tid_req, NULL, &composite_video_request_simd, req);
-                }
-                else
-                    stat = -1;
-
-                if (stat == 0)
-                {
-                    // launch a pipe read C pthread
-                    // check the video type (single or composite)
-                    if (req->video_type == single)
-                        stat = pthread_create(&tid_resp, NULL, &video_response, resp);
-                    else
-                        stat = pthread_create(&tid_resp, NULL, &composite_video_response, resp);
-
-                    if (stat == 0)
-                        pthread_detach(tid_resp);
-                    else
-                    {
-                        // close the read end of the pipe
-                        close(pipefd[0]);
-
-                        // release the response memory since there is no reader
-                        g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
-                        free(resp);
-                    }
-
-                    // finally wait for the request thread to end before handling another one
-                    pthread_join(tid_req, NULL);
-                }
-                else
-                {
-                    free(req->flux);
-                    free(req);
-
-                    // close the write end of the pipe
-                    close(pipefd[1]);
-
-                    // close the read end of the pipe
-                    close(pipefd[0]);
-
-                    // release the response memory since there is no writer
-                    g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
-                    free(resp);
-                }
-            }
+            if (req->video_type == single)
+                video_request_simd(req);
             else
-            {
-                printf("[C] video_event_loop::pipe() failed.\n");
-                free(req->flux);
-                free(req);
-                free(resp);
-                continue;
-            }
+                composite_video_request_simd(req);
         }
     }
 

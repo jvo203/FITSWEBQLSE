@@ -20,8 +20,13 @@ void *send_cluster_heartbeat(void *arg);
 #include <microhttpd_ws.h>
 
 // combined WebSocket write functions, to be used from FORTRAN
+// image/spectrum
 void write_ws_spectrum(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *spectrum, int n, int precision);
 void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
+
+// video
+void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
+void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels);
 
 #ifdef POLL
 #include <poll.h>
@@ -1665,7 +1670,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->width = session->image_width;
                 req->height = session->image_height;
                 req->downsize = session->bDownsize;
-                req->fd = -1;
+                req->session = NULL;
                 req->ptr = item;
 
                 double frame = 0.0;
@@ -1719,7 +1724,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 get_spectrum_range_C(item, frame, frame, ref_freq, &frame_idx, &frame_idx);
                 req->frame = frame_idx;
 
-                printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f --> %d}, ref_freq: %f, timestamp: %f\n", fps, bitrate, req->seq_id, req->keyframe, frame, req->frame, ref_freq, req->timestamp);
+                // printf("[C]::video fps: %d, bitrate: %d, seq_id: %d, keyframe: %d, frame: {%f --> %d}, ref_freq: %f, timestamp: %f\n", fps, bitrate, req->seq_id, req->keyframe, frame, req->frame, ref_freq, req->timestamp);
 
                 // skip repeated frames
                 if (frame_idx == session->last_frame_idx && !req->keyframe)
@@ -1833,6 +1838,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->downsize = downsize;
                 req->keyframe = keyframe;
                 req->fill = fill;
+                req->session = NULL;
 
                 // next iterate through the multiple datasets launching individual channel threads
                 // tokenize session->multi
@@ -1879,7 +1885,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         continue;
 
                     // we have the dataset item and the session, prepare the video request
-                    printf("[C] mg_websocket_callback: preparing video request for dataset '%s'.\n", token);
+                    printf("[C] parse_received_websocket_stream: preparing video request for dataset '%s'.\n", token);
 
                     // check if the session video tone mapping has been filled already
                     // if not, fetch the global data statistics from FORTRAN
@@ -3166,5 +3172,151 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
     if (compressed_mask != NULL)
         free(compressed_mask);
 }
+
+void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask)
+{
+    if (session == NULL)
+    {
+        printf("[C] <write_ws_video> NULL session pointer!\n");
+        return;
+    }
+
+    if (pixels == NULL || mask == NULL)
+    {
+        printf("[C] <write_ws_video> NULL pixels || mask!\n");
+        return;
+    }
+
+    // compress the planes with x265 and pass the response (payload) over to the WebSocket sender
+    uint8_t *luma = (uint8_t *)pixels;
+    uint8_t *alpha = (uint8_t *)mask;
+
+    // x265 encoding
+    pthread_mutex_lock(&session->vid_mtx);
+
+    if ((session->picture == NULL) || (session->encoder == NULL))
+    {
+        pthread_mutex_unlock(&session->vid_mtx);
+        return;
+    }
+
+    session->picture->planes[0] = luma;
+    session->picture->planes[1] = alpha;
+
+    session->picture->stride[0] = session->image_width;
+    session->picture->stride[1] = session->image_width;
+
+    // RGB-encode
+    x265_nal *pNals = NULL;
+    uint32_t iNal = 0;
+
+    int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL);
+    printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
+
+    for (unsigned int i = 0; i < iNal; i++)
+    {
+        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + pNals[i].sizeBytes;
+
+        printf("[C] video_response elapsed: %f [ms], msg_len: %zu bytes.\n", *elapsed, msg_len);
+
+#ifdef MICROWS
+        char *payload = NULL;
+        size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+        msg_len += ws_len;
+#else
+        char *payload = malloc(msg_len);
+#endif
+
+        if (payload != NULL)
+        {
+            uint32_t id = (unsigned int)(*seq_id);
+            uint32_t msg_type = 5;
+            // 0 - spectrum, 1 - viewport,
+            // 2 - image, 3 - full, spectrum,  refresh,
+            // 4 - histogram, 5 - video frame
+
+#ifdef MICROWS
+            size_t ws_offset = ws_len;
+#else
+            size_t ws_offset = 0;
+#endif
+
+            memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, pNals[i].payload, pNals[i].sizeBytes);
+            ws_offset += pNals[i].sizeBytes;
+
+            if (ws_offset != msg_len)
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+            // create a queue message
+            struct data_buf msg = {payload, msg_len};
+
+#ifdef DIRECT
+            if (!session->disconnect)
+                send_all(session, payload, msg_len);
+            free(payload);
+#else
+            char *msg_buf = NULL;
+            size_t _len = sizeof(struct data_buf);
+
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+            pthread_spin_lock(&session->queue_lock);
+#else
+            pthread_mutex_lock(&session->queue_mtx);
+#endif
+
+            // reserve space for the binary message
+            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+            // pass the message over to the sender via a communications queue
+            if (msg_buf != NULL && queue_len >= _len)
+            {
+                memcpy(msg_buf, &msg, _len);
+                mg_queue_add(&session->queue, _len);
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+                pthread_spin_unlock(&session->queue_lock);
+#else
+                pthread_mutex_unlock(&session->queue_mtx);
+#endif
+
+                // wake up the sender
+                pthread_cond_signal(&session->wake_up_sender);
+            }
+            else
+            {
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+                pthread_spin_unlock(&session->queue_lock);
+#else
+                pthread_mutex_unlock(&session->queue_mtx);
+#endif
+                printf("[C] mg_queue_book failed, freeing memory.\n");
+                free(payload);
+            }
+#endif
+        }
+    }
+
+    // done with the planes
+    session->picture->planes[0] = NULL;
+    session->picture->planes[1] = NULL;
+
+    session->picture->stride[0] = 0;
+    session->picture->stride[1] = 0;
+
+    pthread_mutex_unlock(&session->vid_mtx);
+}
+
+void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels){};
 
 #endif // MICROWS

@@ -96,7 +96,9 @@ module fits
       integer(kind=c_int) :: len
       integer(c_int) :: seq_id
       real(c_float) :: timestamp
-      integer(kind=c_int) :: fd
+
+      ! output (WebSocket session pointer)
+      type(C_PTR) :: session
 
       ! input
       logical(kind=c_bool) :: keyframe
@@ -121,7 +123,9 @@ module fits
       integer(kind=c_int) :: len
       integer(c_int) :: seq_id
       real(c_float) :: timestamp
-      integer(kind=c_int) :: fd
+
+      ! output (WebSocket session pointer)
+      type(C_PTR) :: session
 
       ! input
       logical(kind=c_bool) :: keyframe
@@ -1228,6 +1232,30 @@ module fits
          integer(c_int), value, intent(in) :: width, height, precision
          type(C_PTR), value :: pixels, mask
       end subroutine write_ws_viewport
+
+      ! void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
+      subroutine write_ws_video(session, seq_id, timestamp, elapsed, pixels, mask)&
+      & BIND(C, name='write_ws_video')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value :: session
+         integer(c_int), intent(in) :: seq_id
+         real(c_float), intent(in) :: timestamp, elapsed
+         type(C_PTR), value :: pixels, mask
+      end subroutine write_ws_video
+
+      ! void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels);
+      subroutine write_ws_composite_video(session, seq_id, timestamp, elapsed, pixels)&
+      & BIND(C, name='write_ws_composite_video')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value :: session
+         integer(c_int), intent(in) :: seq_id
+         real(c_float), intent(in) :: timestamp, elapsed
+         type(C_PTR), value :: pixels
+      end subroutine write_ws_composite_video
 
       ! size_t chunked_write(int fd, const char *src, size_t n)
       integer(kind=c_size_t) function chunked_write(fd, src, n) BIND(C, name='chunked_write')
@@ -8020,10 +8048,7 @@ contains
       ! print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', &
       ! &req%frame, 'fill:', req%fill, 'fd:', req%fd
 
-      if (.not. allocated(item%compressed)) then
-         call close_pipe(req%fd)
-         goto 5000
-      end if
+      if (.not. allocated(item%compressed)) goto 5000
 
       ! set the video tone mapping
       allocate (character(len=req%len)::tone%flux)
@@ -8079,10 +8104,7 @@ contains
          rc = my_pthread_join(pid)
 
          ! skip invalid frames (not found on other cluster nodes)
-         if (.not. fetch_req%valid) then
-            call close_pipe(req%fd)
-            goto 5000
-         end if
+         if (.not. fetch_req%valid) goto 5000
       else
          call get_video_frame(item, req%frame, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
       end if
@@ -8091,21 +8113,24 @@ contains
       call system_clock(finish_t)
       elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-      if (req%fd .ne. -1) then
-         call write_elapsed(req%fd, elapsed)
+      call write_ws_video(req%session, req%seq_id, req%timestamp, elapsed, c_loc(pixels), c_loc(mask))
 
-         ! send pixels
-         written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+      ! if (req%fd .ne. -1) then
+      ! call write_elapsed(req%fd, elapsed)
 
-         ! send mask
-         written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+      ! send pixels
+      ! written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
 
-         call close_pipe(req%fd)
-      end if
+      ! send mask
+      ! written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+
+      ! call close_pipe(req%fd)
+      ! end if
 
 5000  nullify (item)
       nullify (flux)
       call free(req%flux)
+      call release_session(req%session) ! decrement the session reference counter
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
@@ -8147,10 +8172,7 @@ contains
       ! print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
       ! &req%va_count, 'fd:', req%fd
 
-      if(req%va_count .le. 0) then
-         if (req%fd .ne. -1) call close_pipe(req%fd)
-         goto 9000
-      end if
+      if(req%va_count .le. 0) goto 9000
 
       ! allocate the composite pixels
       allocate (pixels(req%width, req%height, req%va_count))
@@ -8248,17 +8270,20 @@ contains
       call system_clock(finish_t)
       elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-      if (req%fd .ne. -1) then
-         call write_elapsed(req%fd, elapsed)
+      call write_ws_composite_video(req%session, req%seq_id, req%timestamp, elapsed, c_loc(pixels))
 
-         ! send pixels
-         written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+      ! if (req%fd .ne. -1) then
+      !  call write_elapsed(req%fd, elapsed)
 
-         call close_pipe(req%fd)
-      end if
+      ! send pixels
+      ! written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+
+      !call close_pipe(req%fd)
+      !end if
 
 9000  nullify (flux)
       call free(req%flux)
+      call release_session(req%session) ! decrement the session reference counter
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
