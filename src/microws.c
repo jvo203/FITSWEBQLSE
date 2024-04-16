@@ -3480,7 +3480,160 @@ void write_ws_composite_video(websocket_session *session, const int *seq_id, con
     pthread_mutex_unlock(&session->vid_mtx);
 }
 
-void write_ws_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2){};
+static void rpad(char *dst, const char *src, const char pad, const size_t sz)
+{
+    memset(dst, pad, sz);
+    dst[sz] = 0x0;
+    memcpy(dst, src, strlen(src));
+}
+
+void write_ws_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2)
+{
+    uchar *restrict compressed_pv = NULL;
+
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = width;
+    uint ny = height;
+
+    if (pv == NULL)
+        return;
+
+    if (width <= 0 || height <= 0)
+        return;
+
+    printf("[C] <write_ws_pv_diagram>: width: %d; height: %d, precision: %d, pmean: %f, pstd: %f, pmin: %f, pmax: %f, xmin: %d, xmax: %d, vmin: %f, vmax: %f\n", width, height, precision, pmean, pstd, pmin, pmax, xmin, xmax, vmin, vmax);
+
+    // compress PV with ZFP
+    field = zfp_field_2d((void *)pv, data_type, nx, ny);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    compressed_pv = (uchar *)malloc(bufsize);
+
+    if (compressed_pv != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)compressed_pv, bufsize);
+
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+            // compress entire array
+            zfpsize = zfp_compress(zfp, field);
+
+            if (zfpsize == 0)
+                printf("[C] ZFP compression failed!\n");
+            else
+                printf("[C] P-V Diagram compressed size: %zu bytes\n", zfpsize);
+
+            bitstream_close(stream);
+
+            // the compressed part is available at compressed_pv[0..zfpsize-1]
+        }
+    }
+    else
+        printf("[C] a NULL compressed_pv buffer!\n");
+
+    // clean up
+    zfp_field_free(field);
+    zfp_stream_close(zfp);
+
+    const char id[] = "ZFP";
+
+    // pad the id with spaces so that the length is a multiple of 4 (JavaScript needs it ...)
+    int padded_len = 4 * (strlen(id) / 4 + 1);
+
+    // memory for a new padded id
+    char padded_id[padded_len + 1];
+
+    // right-pad the id with spaces
+    rpad(padded_id, id, ' ', padded_len);
+
+    // transmit the data
+    /*float tmp;
+    double tmp2;
+    uint32_t xlen, ylen;
+
+    uint32_t id_len = strlen(padded_id);
+
+    uint32_t img_width = width;
+    uint32_t img_height = height;
+    uint32_t pv_len = zfpsize;
+
+    // the id length
+    chunked_write(fd, (const char *)&id_len, sizeof(id_len));
+
+    // id
+    chunked_write(fd, padded_id, id_len);
+
+    // pmin
+    tmp = pmin;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // pmax
+    tmp = pmax;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // pmean
+    tmp = pmean;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // pstd
+    tmp = pstd;
+    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+    // vmin
+    tmp2 = vmin;
+    chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
+
+    // vmax
+    tmp2 = vmax;
+    chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
+
+    // x1
+    xlen = x1;
+    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
+
+    // y1
+    ylen = y1;
+    chunked_write(fd, (const char *)&ylen, sizeof(ylen));
+
+    // x2
+    xlen = x2;
+    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
+
+    // y2
+    ylen = y2;
+    chunked_write(fd, (const char *)&ylen, sizeof(ylen));
+
+    // the P-V diagram
+    chunked_write(fd, (const char *)&img_width, sizeof(img_width));
+    chunked_write(fd, (const char *)&img_height, sizeof(img_height));
+
+    // pv (use a chunked version for larger tranfers)
+    chunked_write(fd, (const char *)&pv_len, sizeof(pv_len));
+    if (compressed_pv != NULL)
+        chunked_write(fd, (char *)compressed_pv, pv_len);*/
+
+    // release the memory
+    free(compressed_pv);
+}
 
 void write_ws_composite_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count){};
 

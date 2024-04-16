@@ -6557,7 +6557,7 @@ void write_viewport(int fd, int width, int height, const float *restrict pixels,
         free(compressed_mask);
 }
 
-void rpad(char *dst, const char *src, const char pad, const size_t sz)
+static void rpad(char *dst, const char *src, const char pad, const size_t sz)
 {
     memset(dst, pad, sz);
     dst[sz] = 0x0;
