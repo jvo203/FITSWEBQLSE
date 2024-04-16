@@ -28,6 +28,10 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
 void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
 void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, size_t no_pixels);
 
+// pv
+void write_ws_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
+void write_ws_composite_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
+
 #ifdef POLL
 #include <poll.h>
 #endif

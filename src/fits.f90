@@ -1148,6 +1148,36 @@ module fits
          type(C_PTR), value :: pv
       end subroutine write_composite_pv_diagram
 
+      ! void write_ws_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
+      subroutine write_ws_pv_diagram(session, width, height, precision, pv, pmean, pstd, pmin, pmax, xmin, xmax, vmin, vmax,&
+      & x1, y1, x2, y2) BIND(C, name='write_ws_pv_diagram')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value :: session
+         integer(c_int), value, intent(in) :: width, height, precision
+         real(kind=c_float), value, intent(in) :: pmean, pstd, pmin, pmax
+         integer(kind=c_int), value, intent(in) :: xmin, xmax
+         real(kind=c_double), value, intent(in) :: vmin, vmax
+         integer(kind=c_int), value, intent(in) :: x1, y1, x2, y2
+         type(C_PTR), value :: pv
+      end subroutine write_ws_pv_diagram
+
+      ! void write_ws_composite_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
+      subroutine write_ws_composite_pv_diagram(session, width, height, precision, pv, pmean, pstd, pmin, pmax, xmin, xmax, vmin,&
+      & vmax, x1, y1, x2, y2, va_count) BIND(C, name='write_ws_composite_pv_diagram')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value :: session
+         integer(c_int), value, intent(in) :: width, height, precision, va_count
+         type(C_PTR), value :: pmean, pstd, pmin, pmax
+         integer(kind=c_int), value, intent(in) :: xmin, xmax
+         real(kind=c_double), value, intent(in) :: vmin, vmax
+         integer(kind=c_int), value, intent(in) :: x1, y1, x2, y2
+         type(C_PTR), value :: pv
+      end subroutine write_ws_composite_pv_diagram
+
       ! void write_elapsed(int fd, const float* elapsed)
       subroutine write_elapsed(fd, elapsed) BIND(C, name='write_elapsed')
          use, intrinsic :: ISO_C_BINDING
