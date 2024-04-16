@@ -1148,13 +1148,15 @@ module fits
          type(C_PTR), value :: pv
       end subroutine write_composite_pv_diagram
 
-      ! void write_ws_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
-      subroutine write_ws_pv_diagram(session, width, height, precision, pv, pmean, pstd, pmin, pmax, xmin, xmax, vmin, vmax,&
-      & x1, y1, x2, y2) BIND(C, name='write_ws_pv_diagram')
+      ! void write_ws_pv_diagram(websocket_session *session, const int *seq_id, const float *timestamp, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
+      subroutine write_ws_pv_diagram(session, seq_id, timestamp, width, height, precision, pv, pmean, pstd, pmin, pmax,&
+      & xmin, xmax, vmin, vmax, x1, y1, x2, y2) BIND(C, name='write_ws_pv_diagram')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
          type(C_PTR), value :: session
+         integer(c_int), intent(in) :: seq_id
+         real(c_float), intent(in) :: timestamp
          integer(c_int), value, intent(in) :: width, height, precision
          real(kind=c_float), value, intent(in) :: pmean, pstd, pmin, pmax
          integer(kind=c_int), value, intent(in) :: xmin, xmax
@@ -1163,13 +1165,15 @@ module fits
          type(C_PTR), value :: pv
       end subroutine write_ws_pv_diagram
 
-      ! void write_ws_composite_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
-      subroutine write_ws_composite_pv_diagram(session, width, height, precision, pv, pmean, pstd, pmin, pmax, xmin, xmax, vmin,&
-      & vmax, x1, y1, x2, y2, va_count) BIND(C, name='write_ws_composite_pv_diagram')
+      ! void write_ws_composite_pv_diagram(websocket_session *session, const int *seq_id, const float *timestamp, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
+      subroutine write_ws_composite_pv_diagram(session, seq_id, timestamp, width, height, precision, pv, pmean, pstd, pmin, pmax,&
+      & xmin, xmax, vmin, vmax, x1, y1, x2, y2, va_count) BIND(C, name='write_ws_composite_pv_diagram')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
          type(C_PTR), value :: session
+         integer(c_int), intent(in) :: seq_id
+         real(c_float), intent(in) :: timestamp
          integer(c_int), value, intent(in) :: width, height, precision, va_count
          type(C_PTR), value :: pmean, pstd, pmin, pmax
          integer(kind=c_int), value, intent(in) :: xmin, xmax
@@ -9072,8 +9076,8 @@ contains
       deallocate (points)
 
       ! send the P-V diagram via a WebSocket
-      call write_ws_pv_diagram(req%session, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
-      & 1, npoints, v1, v2, x1, y1, x2, y2)
+      call write_ws_pv_diagram(req%session, req%seq_id, req%timestamp, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels),&
+      & pmean, pstd, pmin, pmax, 1, npoints, v1, v2, x1, y1, x2, y2)
 
       ! free the P-V diagram
       deallocate (pv)
@@ -9425,9 +9429,9 @@ contains
       !$omp END PARALLEL
 
       ! send the composite P-V diagram via a WebSocket
-      call write_ws_composite_pv_diagram(req%session, composite_width, composite_height, ZFP_PV_PRECISION, c_loc(composite_pixels),&
-      & c_loc(pmean), c_loc(pstd), c_loc(pmin), c_loc(pmax), 1, composite_npoints, composite_v1, composite_v2,&
-      & req%x1, req%y1, req%x2, req%y2, req%va_count)
+      call write_ws_composite_pv_diagram(req%session, req%seq_id, req%timestamp, composite_width, composite_height,&
+      & ZFP_PV_PRECISION, c_loc(composite_pixels), c_loc(pmean), c_loc(pstd), c_loc(pmin), c_loc(pmax),&
+      & 1, composite_npoints, composite_v1, composite_v2, req%x1, req%y1, req%x2, req%y2, req%va_count)
 
       call release_session(req%session) ! decrement the session reference counter
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region

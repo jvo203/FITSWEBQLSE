@@ -29,8 +29,8 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
 void write_ws_composite_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, size_t no_pixels);
 
 // pv
-void write_ws_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
-void write_ws_composite_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
+void write_ws_pv_diagram(websocket_session *session, const int *seq_id, const float *timestamp, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
+void write_ws_composite_pv_diagram(websocket_session *session, const int *seq_id, const float *timestamp, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
 
 #ifdef POLL
 #include <poll.h>
@@ -3487,7 +3487,7 @@ static void rpad(char *dst, const char *src, const char pad, const size_t sz)
     memcpy(dst, src, strlen(src));
 }
 
-void write_ws_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2)
+void write_ws_pv_diagram(websocket_session *session, const int *seq_id, const float *timestamp, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2)
 {
     uchar *restrict compressed_pv = NULL;
 
@@ -3500,6 +3500,12 @@ void write_ws_pv_diagram(websocket_session *session, int width, int height, int 
     size_t zfpsize = 0;
     uint nx = width;
     uint ny = height;
+
+    if (session == NULL)
+    {
+        printf("[C] <write_ws_pv_diagram> NULL session pointer!\n");
+        return;
+    }
 
     if (pv == NULL)
         return;
@@ -3554,6 +3560,9 @@ void write_ws_pv_diagram(websocket_session *session, int width, int height, int 
     zfp_field_free(field);
     zfp_stream_close(zfp);
 
+    if (compressed_pv == NULL)
+        return;
+
     const char id[] = "ZFP";
 
     // pad the id with spaces so that the length is a multiple of 4 (JavaScript needs it ...)
@@ -3566,7 +3575,7 @@ void write_ws_pv_diagram(websocket_session *session, int width, int height, int 
     rpad(padded_id, id, ' ', padded_len);
 
     // transmit the data
-    /*float tmp;
+    float tmp;
     double tmp2;
     uint32_t xlen, ylen;
 
@@ -3576,65 +3585,159 @@ void write_ws_pv_diagram(websocket_session *session, int width, int height, int 
     uint32_t img_height = height;
     uint32_t pv_len = zfpsize;
 
-    // the id length
-    chunked_write(fd, (const char *)&id_len, sizeof(id_len));
+    size_t payload_len = sizeof(uint32_t) + id_len + 4 * sizeof(float) + 2 * sizeof(double) + 7 * sizeof(uint32_t) + zfpsize;
+    size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + payload_len;
 
-    // id
-    chunked_write(fd, padded_id, id_len);
+    char *pv_payload = NULL;
+    size_t ws_len = preamble_ws_frame(&pv_payload, msg_len, WS_FRAME_BINARY);
+    msg_len += ws_len;
 
-    // pmin
-    tmp = pmin;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+    if (pv_payload != NULL)
+    {
+        uint32_t id = (unsigned int)(*seq_id);
+        uint32_t msg_type = 7; // P-V diagram
 
-    // pmax
-    tmp = pmax;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        size_t ws_offset = ws_len;
 
-    // pmean
-    tmp = pmean;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        memcpy((char *)pv_payload + ws_offset, timestamp, sizeof(float));
+        ws_offset += sizeof(float);
 
-    // pstd
-    tmp = pstd;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        memcpy((char *)pv_payload + ws_offset, &id, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
 
-    // vmin
-    tmp2 = vmin;
-    chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
+        memcpy((char *)pv_payload + ws_offset, &msg_type, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
 
-    // vmax
-    tmp2 = vmax;
-    chunked_write(fd, (const char *)&tmp2, sizeof(tmp2));
+        // the id length
+        memcpy((char *)pv_payload + ws_offset, &id_len, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
 
-    // x1
-    xlen = x1;
-    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
+        // id
+        memcpy((char *)pv_payload + ws_offset, padded_id, id_len);
+        ws_offset += id_len;
 
-    // y1
-    ylen = y1;
-    chunked_write(fd, (const char *)&ylen, sizeof(ylen));
+        // pmin
+        tmp = pmin;
+        memcpy((char *)pv_payload + ws_offset, (const char *)&tmp, sizeof(tmp));
+        ws_offset += sizeof(tmp);
 
-    // x2
-    xlen = x2;
-    chunked_write(fd, (const char *)&xlen, sizeof(xlen));
+        // pmax
+        tmp = pmax;
+        memcpy((char *)pv_payload + ws_offset, (const char *)&tmp, sizeof(tmp));
+        ws_offset += sizeof(tmp);
 
-    // y2
-    ylen = y2;
-    chunked_write(fd, (const char *)&ylen, sizeof(ylen));
+        // pmean
+        tmp = pmean;
+        memcpy((char *)pv_payload + ws_offset, (const char *)&tmp, sizeof(tmp));
+        ws_offset += sizeof(tmp);
 
-    // the P-V diagram
-    chunked_write(fd, (const char *)&img_width, sizeof(img_width));
-    chunked_write(fd, (const char *)&img_height, sizeof(img_height));
+        // pstd
+        tmp = pstd;
+        memcpy((char *)pv_payload + ws_offset, (const char *)&tmp, sizeof(tmp));
+        ws_offset += sizeof(tmp);
 
-    // pv (use a chunked version for larger tranfers)
-    chunked_write(fd, (const char *)&pv_len, sizeof(pv_len));
-    if (compressed_pv != NULL)
-        chunked_write(fd, (char *)compressed_pv, pv_len);*/
+        // vmin
+        tmp2 = vmin;
+        memcpy((char *)pv_payload + ws_offset, (char *)&tmp2, sizeof(tmp2));
+        ws_offset += sizeof(tmp2);
+
+        // vmax
+        tmp2 = vmax;
+        memcpy((char *)pv_payload + ws_offset, (char *)&tmp2, sizeof(tmp2));
+        ws_offset += sizeof(tmp2);
+
+        // x1
+        xlen = x1;
+        memcpy((char *)pv_payload + ws_offset, (const char *)&xlen, sizeof(xlen));
+        ws_offset += sizeof(xlen);
+
+        // y1
+        ylen = y1;
+        memcpy((char *)pv_payload + ws_offset, (const char *)&ylen, sizeof(ylen));
+        ws_offset += sizeof(ylen);
+
+        // x2
+        xlen = x2;
+        memcpy((char *)pv_payload + ws_offset, (const char *)&xlen, sizeof(xlen));
+        ws_offset += sizeof(xlen);
+
+        // y2
+        ylen = y2;
+        memcpy((char *)pv_payload + ws_offset, (const char *)&ylen, sizeof(ylen));
+        ws_offset += sizeof(ylen);
+
+        // the P-V diagram
+        memcpy((char *)pv_payload + ws_offset, (const char *)&img_width, sizeof(img_width));
+        ws_offset += sizeof(img_width);
+
+        memcpy((char *)pv_payload + ws_offset, (const char *)&img_height, sizeof(img_height));
+        ws_offset += sizeof(img_height);
+
+        // pv (use a chunked version for larger tranfers)
+        memcpy((char *)pv_payload + ws_offset, (const char *)&pv_len, sizeof(pv_len));
+        ws_offset += sizeof(pv_len);
+
+        memcpy((char *)pv_payload + ws_offset, compressed_pv, pv_len);
+        ws_offset += pv_len;
+
+        if (ws_offset != msg_len)
+            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+        // create a queue message
+        struct data_buf msg = {pv_payload, msg_len};
+
+#ifdef DIRECT
+        if (!session->disconnect)
+            send_all(session, pv_payload, msg_len);
+        free(pv_payload);
+#else
+        char *msg_buf = NULL;
+        size_t _len = sizeof(struct data_buf);
+
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+        pthread_spin_lock(&session->queue_lock);
+#else
+        pthread_mutex_lock(&session->queue_mtx);
+#endif
+
+        // reserve space for the binary message
+        size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
+
+        // pass the message over to the sender via a communications queue
+        if (msg_buf != NULL && queue_len >= _len)
+        {
+            memcpy(msg_buf, &msg, _len);
+            mg_queue_add(&session->queue, _len);
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+            pthread_spin_unlock(&session->queue_lock);
+#else
+            pthread_mutex_unlock(&session->queue_mtx);
+#endif
+
+            // wake up the sender
+            pthread_cond_signal(&session->wake_up_sender);
+        }
+        else
+        {
+#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
+            pthread_spin_unlock(&session->queue_lock);
+#else
+            pthread_mutex_unlock(&session->queue_mtx);
+#endif
+            printf("[C] mg_queue_book failed, freeing memory.\n");
+            free(pv_payload);
+        }
+#endif
+    }
 
     // release the memory
     free(compressed_pv);
 }
 
-void write_ws_composite_pv_diagram(websocket_session *session, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count){};
+void write_ws_composite_pv_diagram(websocket_session *session, const int *seq_id, const float *timestamp, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count)
+{
+    // the composite P-V Diagram is no longer being used
+    printf("[C] <write_ws_composite_pv_diagram> not implemented as the composite P-V Diagram is no longer being used!\n");
+};
 
 #endif // MICROWS
