@@ -1041,7 +1041,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
             req->rest = false;
             req->seq_id = 0;
             req->timestamp = 0.0;
-            req->fd = -1;
+            req->session = NULL;
             req->va_count = 0;
             req->ptr[0] = NULL;
             req->ptr[1] = NULL;
@@ -1189,7 +1189,7 @@ static void mg_http_ws_callback(struct mg_connection *c, int ev, void *ev_data)
             req->rest = false;
             req->seq_id = 0;
             req->timestamp = 0.0;
-            req->fd = -1;
+            req->session = NULL;
             req->va_count = 1;
             req->ptr[0] = item;
 
@@ -3658,89 +3658,13 @@ void *pv_event_loop(void *arg)
                 last_seq_id = req->seq_id;
             }
 
-            struct websocket_response *resp = (struct websocket_response *)malloc(sizeof(struct websocket_response));
+            // pass the session to FORTRAN
+            req->session = g_atomic_rc_box_acquire(session);
 
-            if (resp == NULL)
-            {
-                free(req);
-                continue;
-            }
-
-            // pass the request to FORTRAN
-            int stat;
-            int pipefd[2];
-
-            // open a Unix pipe
-            stat = pipe(pipefd);
-
-            if (stat == 0)
-            {
-                // pass the read end of the pipe to a C thread
-                resp->session = g_atomic_rc_box_acquire(session);
-                resp->fps = 0;
-                resp->bitrate = 0;
-                resp->timestamp = req->timestamp;
-                resp->seq_id = req->seq_id;
-                resp->fd = pipefd[0];
-
-                // pass the write end of the pipe to a FORTRAN thread
-                req->fd = pipefd[1];
-
-                pthread_t tid_req, tid_resp;
-
-                // launch a FORTRAN pthread directly from C, <req> will be freed from within FORTRAN
-                if (session->id != NULL)
-                {
-                    if (req->va_count == 1)
-                        stat = pthread_create(&tid_req, NULL, &ws_pv_request, req);
-                    else
-                        stat = pthread_create(&tid_req, NULL, &ws_composite_pv_request, req);
-                }
-                else
-                    stat = -1;
-
-                if (stat == 0)
-                {
-                    // launch a pipe read C pthread
-                    stat = pthread_create(&tid_resp, NULL, &ws_pv_response, resp);
-
-                    if (stat == 0)
-                        pthread_detach(tid_resp);
-                    else
-                    {
-                        // close the read end of the pipe
-                        close(pipefd[0]);
-
-                        // release the response memory since there is no reader
-                        g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
-                        free(resp);
-                    }
-
-                    // finally wait for the request thread to end before handling another one
-                    pthread_join(tid_req, NULL);
-                }
-                else
-                {
-                    free(req);
-
-                    // close the write end of the pipe
-                    close(pipefd[1]);
-
-                    // close the read end of the pipe
-                    close(pipefd[0]);
-
-                    // release the response memory since there is no writer
-                    g_atomic_rc_box_release_full(resp->session, (GDestroyNotify)delete_session);
-                    free(resp);
-                }
-            }
+            if (req->va_count == 1)
+                ws_pv_request(req);
             else
-            {
-                printf("[C] pv_event_loop::pipe() failed.\n");
-                free(req);
-                free(resp);
-                continue;
-            }
+                ws_composite_pv_request(req);
         }
     }
 

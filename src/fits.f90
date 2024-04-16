@@ -169,8 +169,8 @@ module fits
       integer(c_int) :: va_count
       type(C_PTR) :: ptr(3)
 
-      ! output
-      integer(kind=c_int) :: fd
+      ! output (WebSocket session pointer)
+      type(C_PTR) :: session
    end type pv_request_f
 
    type, bind(c) :: cluster_pv_request_f
@@ -8818,15 +8818,15 @@ contains
       if (.not. c_associated(req%ptr(1))) return
       call c_f_pointer(req%ptr(1), item)
 
-      print *, 'P-V diagram for ', item%datasetid,&
-      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
-      &', width:', req%width, ', height:', req%height, ', frame_start:', req%frame_start,&
-      & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
-      &', rest:', req%rest, ', timestamp:', req%timestamp, ', fd:', req%fd
+      ! print *, 'P-V diagram for ', item%datasetid,&
+      ! &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
+      ! &', width:', req%width, ', height:', req%height, ', frame_start:', req%frame_start,&
+      ! & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
+      ! &', rest:', req%rest, ', timestamp:', req%timestamp, ', fd:', req%fd
 
       if (.not. allocated(item%compressed)) then
-         if (req%fd .ne. -1) call close_pipe(req%fd)
          nullify (item)
+         call release_session(req%session) ! decrement the session reference counter
          nullify (req) ! disassociate the FORTRAN pointer from the C memory region
          call free(user) ! release C memory
          return
@@ -9041,14 +9041,9 @@ contains
       ! free the points
       deallocate (points)
 
-      if (req%fd .ne. -1) then
-         ! send the P-V diagram via a Unix pipe
-         call write_pv_diagram(req%fd, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
-         & 1, npoints, v1, v2, x1, y1, x2, y2)
-
-         call close_pipe(req%fd)
-         req%fd = -1
-      end if
+      ! send the P-V diagram via a WebSocket
+      call write_ws_pv_diagram(req%session, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels), pmean, pstd, pmin, pmax,&
+      & 1, npoints, v1, v2, x1, y1, x2, y2)
 
       ! free the P-V diagram
       deallocate (pv)
@@ -9062,6 +9057,7 @@ contains
       end if
 
       nullify (item)
+      call release_session(req%session) ! decrement the session reference counter
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
@@ -9338,17 +9334,17 @@ contains
       call c_f_pointer(user, req)
 
       if(req%va_count .le. 0) then
-         if (req%fd .ne. -1) call close_pipe(req%fd)
+         call release_session(req%session) ! decrement the session reference counter
          nullify (req) ! disassociate the FORTRAN pointer from the C memory region
          call free(user) ! release C memory
          return
       end if
 
-      print *, 'Composite P-V diagram va_count: ', req%va_count,&
-      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
-      &', width:', req%width, ', height:', req%height, ', frame_start:', req%frame_start,&
-      & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
-      &', rest:', req%rest, ', timestamp:', req%timestamp, ', fd:', req%fd
+      ! print *, 'Composite P-V diagram va_count: ', req%va_count,&
+      ! &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
+      ! &', width:', req%width, ', height:', req%height, ', frame_start:', req%frame_start,&
+      ! & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
+      ! &', rest:', req%rest, ', timestamp:', req%timestamp, ', fd:', req%fd
 
       allocate (pmin(req%va_count))
       allocate (pmax(req%va_count))
@@ -9398,18 +9394,12 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      if (req%fd .ne. -1) then
-         ! send the composite P-V diagram via a Unix pipe
-         if(allocated(composite_pixels)) then
-            call write_composite_pv_diagram(req%fd, composite_width, composite_height, ZFP_PV_PRECISION, c_loc(composite_pixels),&
-            & c_loc(pmean), c_loc(pstd), c_loc(pmin), c_loc(pmax), 1, composite_npoints, composite_v1, composite_v2,&
-            & req%x1, req%y1, req%x2, req%y2, req%va_count)
-         end if
+      ! send the composite P-V diagram via a WebSocket
+      call write_ws_composite_pv_diagram(req%session, composite_width, composite_height, ZFP_PV_PRECISION, c_loc(composite_pixels),&
+      & c_loc(pmean), c_loc(pstd), c_loc(pmin), c_loc(pmax), 1, composite_npoints, composite_v1, composite_v2,&
+      & req%x1, req%y1, req%x2, req%y2, req%va_count)
 
-         call close_pipe(req%fd)
-         req%fd = -1
-      end if
-
+      call release_session(req%session) ! decrement the session reference counter
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 

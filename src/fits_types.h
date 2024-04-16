@@ -234,8 +234,8 @@ struct pv_request
     int va_count;
     void *ptr[3]; // item
 
-    // output (the 'write' end of a Unix pipe)
-    int fd;
+    // output (WebSocket session pointer)
+    void *session;
 };
 
 struct cluster_pv_request

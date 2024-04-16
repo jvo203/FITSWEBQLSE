@@ -634,7 +634,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->rest = false;
                 req->seq_id = 0;
                 req->timestamp = 0.0;
-                req->fd = -1;
+                req->session = NULL;
                 req->va_count = 0;
                 req->ptr[0] = NULL;
                 req->ptr[1] = NULL;
@@ -771,7 +771,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->rest = false;
                 req->seq_id = 0;
                 req->timestamp = 0.0;
-                req->fd = -1;
+                req->session = NULL;
                 req->va_count = 1;
                 req->ptr[0] = item;
 
