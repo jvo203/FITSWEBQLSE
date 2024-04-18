@@ -2867,7 +2867,7 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
                     uint32_t id = (unsigned int)(*seq_id);
                     uint32_t msg_type = 0;
                     // 0 - spectrum, 1 - viewport,
-                    // 2 - image, 3 - full, spectrum,  refresh,
+                    // 2 - image, 3 - full spectrum refresh,
                     // 4 - histogram
 
                     size_t ws_offset = ws_len;
@@ -3073,7 +3073,7 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
             uint32_t id = (unsigned int)(*seq_id);
             uint32_t msg_type = 1;
             // 0 - spectrum, 1 - viewport,
-            // 2 - image, 3 - full, spectrum,  refresh,
+            // 2 - image, 3 - full spectrum refresh,
             // 4 - histogram
 
 #ifdef MICROWS
@@ -3236,7 +3236,7 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
             uint32_t id = (unsigned int)(*seq_id);
             uint32_t msg_type = 5;
             // 0 - spectrum, 1 - viewport,
-            // 2 - image, 3 - full, spectrum,  refresh,
+            // 2 - image, 3 - full spectrum refresh,
             // 4 - histogram, 5 - video frame
 
 #ifdef MICROWS
@@ -3395,7 +3395,7 @@ void write_ws_composite_video(websocket_session *session, const int *seq_id, con
             uint32_t id = (unsigned int)(*seq_id);
             uint32_t msg_type = 5;
             // 0 - spectrum, 1 - viewport,
-            // 2 - image, 3 - full, spectrum,  refresh,
+            // 2 - image, 3 - full spectrum refresh,
             // 4 - histogram, 5 - video frame
 
 #ifdef MICROWS
