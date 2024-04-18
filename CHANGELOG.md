@@ -1,3 +1,7 @@
+## [5.1.8] - 2024-04-??
+
+* server-side optimisations: removed the Unix pipe and the accompanying request/response POSIX threads from three WebSocket event loop functions: <_*ws_event_loop*_>, <_*video_event_loop*_> and <_*pv_event_loop*_>
+
 ## [5.1.7] - 2024-04-09
 
 * reduced the compressed size of the WebGL GSLS archive from 26kB to 20kB by replacing the LZ4HC compressor with BZIP2
