@@ -1,5 +1,6 @@
 ## [5.1.8] - 2024-04-??
 
+* added handling of _*/cluster_heartbeat/id*_ to the _*libmicrohttpd*_ HTTP server
 * server-side optimisations: removed the Unix pipe and the accompanying request/response POSIX threads from three WebSocket event loop functions: <_*ws_event_loop*_>, <_*video_event_loop*_> and <_*pv_event_loop*_>
 
 ## [5.1.7] - 2024-04-09

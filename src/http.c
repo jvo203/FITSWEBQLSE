@@ -120,6 +120,7 @@ void *fetch_image(void *ptr);
 void *fetch_realtime_image_spectrum(void *ptr);
 void *fetch_pv_diagram(void *ptr);
 int submit_progress(char *root, char *datasetid, int len, int progress);
+extern void update_timestamp(void *ptr);
 
 PGconn *jvo_db_connect(char *db);
 char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id);
@@ -1802,6 +1803,32 @@ static enum MHD_Result on_http_connection(void *cls,
             }
             else
                 return MHD_NO;
+        }
+        else
+            return http_bad_request(connection);
+    }
+
+    if (strstr(url, "/cluster_heartbeat/") != NULL)
+    {
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+        {
+            datasetId++; // skip the slash character
+
+#ifdef DEBUG
+            printf("[C] <cluster_heartbeat> request for '%s'\n", datasetId);
+#endif
+
+            void *item = get_dataset(datasetId);
+
+            if (item != NULL)
+            {
+                update_timestamp(item);
+                return http_ok(connection);
+            }
+            else
+                return http_not_found(connection);
         }
         else
             return http_bad_request(connection);

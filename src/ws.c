@@ -3870,10 +3870,10 @@ void *send_cluster_heartbeat(void *arg)
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
     {
-        // URL: http://cluster_ip:ws_port/heartbeat/id
+        // URL: http://cluster_ip:ws_port/cluster_heartbeat/id
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/heartbeat/%.*s", options.ws_port, (int)len, datasetid);
+        g_string_append_printf(url, "%" PRIu16 "/cluster_heartbeat/%.*s", options.http_port, (int)len, datasetid);
         // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
