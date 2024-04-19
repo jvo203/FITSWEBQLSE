@@ -89,6 +89,14 @@ module fits
 
    end type spectrum_request_f
 
+   type :: video_response_f
+      type(C_PTR) :: session
+      integer(c_int) :: seq_id
+      real(c_float) :: timestamp, elapsed
+      integer(kind=1), pointer :: pixels(:, :), mask(:, :)
+   end type video_response_f
+
+
    type, bind(c) :: video_request_f
       ! common variables for both single and composite videos
       integer(kind(composite)) :: video_type
@@ -8052,11 +8060,12 @@ contains
       type(video_request_f), pointer :: req
 
       type(video_fetch_f), allocatable, target :: fetch_req
+      type(video_response_f), pointer :: resp => null()
       type(c_ptr) :: pid
       integer(kind=c_int) :: rc
 
       type(video_tone_mapping) :: tone
-      integer(kind=1), allocatable, target :: pixels(:, :), mask(:, :)
+      integer(kind=1), pointer, contiguous :: pixels(:, :), mask(:, :)
       integer :: i
       integer(kind=c_size_t) :: written
       character(kind=c_char), pointer :: flux(:)
@@ -8148,30 +8157,65 @@ contains
       call system_clock(finish_t)
       elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-      call write_ws_video(req%session, req%seq_id, req%timestamp, elapsed, c_loc(pixels), c_loc(mask))
+      ! allocate & prepare the response structure for a POSIX thread
+      allocate (resp)
 
-      ! if (req%fd .ne. -1) then
-      ! call write_elapsed(req%fd, elapsed)
+      resp%session = req%session
+      resp%seq_id = req%seq_id
+      resp%timestamp = req%timestamp
+      resp%elapsed = elapsed
+      resp%pixels => pixels
+      resp%mask => mask
 
-      ! send pixels
-      ! written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
+      rc = my_pthread_create_detached(start_routine=c_funloc(send_ws_video), arg=c_loc(resp))
 
-      ! send mask
-      ! written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
+      ! examine the rc
+      if (rc .ne. 0) then
+         print *, 'my_pthread_create_detached failed with rc:', rc
 
-      ! call close_pipe(req%fd)
-      ! end if
+         deallocate(resp)
+
+         call write_ws_video(req%session, req%seq_id, req%timestamp, elapsed, c_loc(pixels), c_loc(mask))
+
+         ! they are pointers now, either a new thread deallocates them or the main thread
+         deallocate (pixels)
+         deallocate (mask)
+
+         call release_session(req%session) ! decrement the session reference counter
+      end if
 
 5000  nullify (item)
       nullify (flux)
       call free(req%flux)
-      call release_session(req%session) ! decrement the session reference counter
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
       ! print *, 'video_request elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine video_request_simd
+
+   recursive subroutine send_ws_video(arg) BIND(C)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: arg
+
+      type(video_response_f), pointer :: resp
+
+      if (.not. c_associated(arg)) return
+      call c_f_pointer(arg, resp)
+
+      call write_ws_video(resp%session, resp%seq_id, resp%timestamp, resp%elapsed, c_loc(resp%pixels), c_loc(resp%mask))
+
+      ! deallocate the pixels/mask
+      deallocate (resp%pixels)
+      deallocate (resp%mask)
+
+      call release_session(resp%session) ! decrement the session reference counter
+
+      deallocate (resp)
+
+   end subroutine send_ws_video
 
    recursive subroutine composite_video_request_simd(user) BIND(C, name='composite_video_request_simd')
       use :: unix_pthread
@@ -8359,6 +8403,8 @@ contains
       logical(kind=c_bool) :: downsize
       integer(kind=1), intent(out), target :: dst_pixels(dst_width, dst_height)
       integer(kind=1), intent(out), target :: dst_mask(dst_width, dst_height)
+      ! integer(kind=1), intent(out), pointer :: dst_pixels(:, :)
+      ! integer(kind=1), intent(out), pointer :: dst_mask(:, :)
 
       integer(kind=1), allocatable, target :: pixels(:, :), mask(:, :)
       integer(c_int) :: width, height, cm, start, work_size

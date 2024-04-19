@@ -53,7 +53,9 @@ extern int my_pthread_create_detached(void *(*start_routine)(void *), void *arg)
     rc = pthread_create(&thread, &attr, start_routine, arg);
     pthread_attr_destroy(&attr);
 
-    printf("[C] pthread_create_detached rc = %d\n", rc);
+    if (rc != 0)
+        printf("[C] pthread_create_detached rc = %d\n", rc);
+
     return rc;
 }
 
