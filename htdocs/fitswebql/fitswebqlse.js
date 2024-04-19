@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-04-09.2";
+    return "JS2024-04-19.0";
 }
 
 function uuidv4() {
@@ -5016,7 +5016,7 @@ async function open_websocket_connection(_datasetId, index) {
                             target_bitrate = 0.8 * bitrate;
                         }
 
-                        //console.log("[ws] computed = " + computed.toFixed(1) + " [ms], latency = " + latency.toFixed(1) + "[ms], n/w transfer time = " + (1000 * transfer).toFixed(1) + " [ms],  n/w bandwidth = " + Math.round(bandwidth) + " [kbps], frame length:" + frame.length);
+                        console.log("[ws] computed = " + computed.toFixed(1) + " [ms], latency = " + latency.toFixed(1) + "[ms], n/w transfer time = " + (1000 * transfer).toFixed(1) + " [ms], n/w bandwidth = " + Math.round(bandwidth) + " [kbps], frame length:" + frame.length + " bytes, received_msg.byteLength = " + received_msg.byteLength + " bytes");
 
                         //call the wasm decoder
                         {
