@@ -1,3 +1,7 @@
+## [5.1.9] - 2024-04-??
+
+* interleaving a video frame preparation in FORTRAN with x265 encoding and WebSocket transmission in C
+
 ## [5.1.8] - 2024-04-18
 
 * added handling of _*/cluster_heartbeat/id*_ to the _*libmicrohttpd*_ HTTP server part
