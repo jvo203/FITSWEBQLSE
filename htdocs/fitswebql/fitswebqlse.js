@@ -5000,6 +5000,7 @@ async function open_websocket_connection(_datasetId, index) {
                     //video
                     if (type == 5) {
                         computed = dv.getFloat32(12, endianness);
+                        console.log("computed = " + computed + " [ms]");
 
                         var frame = new Uint8Array(received_msg, 16);
 

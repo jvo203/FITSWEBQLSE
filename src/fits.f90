@@ -8190,7 +8190,7 @@ contains
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
-      ! print *, 'video_request elapsed time:', elapsed, '[ms]' ! ifort
+      print *, 'video_request elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine video_request_simd
 

@@ -3091,7 +3091,7 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
             memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
             ws_offset += sizeof(uint32_t);
 
-            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+            memcpy((char *)payload + ws_offset, elapsed, sizeof(float));
             ws_offset += sizeof(float);
 
             // view_width
@@ -3254,7 +3254,7 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
             memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
             ws_offset += sizeof(uint32_t);
 
-            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+            memcpy((char *)payload + ws_offset, elapsed, sizeof(float));
             ws_offset += sizeof(float);
 
             memcpy((char *)payload + ws_offset, pNals[i].payload, pNals[i].sizeBytes);
@@ -3413,7 +3413,7 @@ void write_ws_composite_video(websocket_session *session, const int *seq_id, con
             memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
             ws_offset += sizeof(uint32_t);
 
-            memcpy((char *)payload + ws_offset, &elapsed, sizeof(float));
+            memcpy((char *)payload + ws_offset, elapsed, sizeof(float));
             ws_offset += sizeof(float);
 
             memcpy((char *)payload + ws_offset, pNals[i].payload, pNals[i].sizeBytes);
