@@ -8233,6 +8233,8 @@ contains
       real, parameter :: u = 7.5
 
       type(composite_video_request_f), pointer :: req
+      type(composite_video_response_f), pointer :: resp => null()
+      integer(kind=c_int) :: resp_rc
       character(kind=c_char), pointer :: flux(:)
 
       ! RGB channels
@@ -8355,20 +8357,62 @@ contains
       call system_clock(finish_t)
       elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-      call write_ws_composite_video(req%session, req%seq_id, req%timestamp, elapsed, c_loc(pixels), sizeof(pixels))
+      ! allocate & prepare the response structure for a POSIX thread
+      allocate (resp)
 
-      ! <pixels> is a pointer now, either a new thread deallocates it or the main thread
-      deallocate (pixels)
+      resp%session = req%session
+      resp%seq_id = req%seq_id
+      resp%timestamp = req%timestamp
+      resp%elapsed = elapsed
+      resp%pixels => pixels
+
+      resp_rc = my_pthread_create_detached(start_routine=c_funloc(send_ws_composite_video), arg=c_loc(resp))
+
+      ! examine the response rc
+      if (resp_rc .ne. 0) then
+         print *, 'my_pthread_create_detached failed with rc:', resp_rc
+
+         deallocate(resp)
+
+         call write_ws_composite_video(req%session, req%seq_id, req%timestamp, elapsed, c_loc(pixels), sizeof(pixels))
+
+         ! <pixels> is a pointer now, either a new thread deallocates it or the main thread
+         deallocate (pixels)
+
+         call release_session(req%session) ! decrement the session reference counter
+      end if
 
 9000  nullify (flux)
       call free(req%flux)
-      call release_session(req%session) ! decrement the session reference counter
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
       ! print *, 'composite_video_request_simd elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine composite_video_request_simd
+
+   recursive subroutine send_ws_composite_video(arg) BIND(C)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: arg
+
+      type(composite_video_response_f), pointer :: resp
+
+      if (.not. c_associated(arg)) return
+      call c_f_pointer(arg, resp)
+
+      call write_ws_composite_video(resp%session, resp%seq_id, resp%timestamp, resp%elapsed,&
+      & c_loc(resp%pixels), sizeof(resp%pixels))
+
+      ! deallocate the pixels
+      deallocate (resp%pixels)
+
+      call release_session(resp%session) ! decrement the session reference counter
+
+      deallocate (resp)
+
+   end subroutine send_ws_composite_video
 
    subroutine fill_global_statistics(ptr, dmin, dmax, dmedian, dmadN, dmadP) BIND(C, name='fill_global_statistics')
       use, intrinsic :: iso_c_binding
