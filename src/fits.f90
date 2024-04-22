@@ -8205,7 +8205,6 @@ contains
       implicit none
 
       type(c_ptr), intent(in), value :: arg
-
       type(video_response_f), pointer :: resp
 
       if (.not. c_associated(arg)) return
@@ -8396,7 +8395,6 @@ contains
       implicit none
 
       type(c_ptr), intent(in), value :: arg
-
       type(composite_video_response_f), pointer :: resp
 
       if (.not. c_associated(arg)) return
