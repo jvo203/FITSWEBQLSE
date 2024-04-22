@@ -96,6 +96,12 @@ module fits
       integer(kind=1), pointer :: pixels(:, :), mask(:, :)
    end type video_response_f
 
+   type :: composite_video_response_f
+      type(C_PTR) :: session
+      integer(c_int) :: seq_id
+      real(c_float) :: timestamp, elapsed
+      integer(kind=1), pointer :: pixels(:, :, :)
+   end type composite_video_response_f
 
    type, bind(c) :: video_request_f
       ! common variables for both single and composite videos
@@ -8230,7 +8236,7 @@ contains
       character(kind=c_char), pointer :: flux(:)
 
       ! RGB channels
-      integer(kind=1), allocatable, target :: pixels(:, :, :) ! (width, height, va_count)
+      integer(kind=1), pointer, contiguous :: pixels(:, :, :) ! (width, height, va_count)
       integer :: tid ! loop counter
       integer(kind=c_size_t) :: written
 
@@ -8351,14 +8357,8 @@ contains
 
       call write_ws_composite_video(req%session, req%seq_id, req%timestamp, elapsed, c_loc(pixels), sizeof(pixels))
 
-      ! if (req%fd .ne. -1) then
-      !  call write_elapsed(req%fd, elapsed)
-
-      ! send pixels
-      ! written = chunked_write(req%fd, c_loc(pixels), sizeof(pixels))
-
-      !call close_pipe(req%fd)
-      !end if
+      ! <pixels> is a pointer now, either a new thread deallocates it or the main thread
+      deallocate (pixels)
 
 9000  nullify (flux)
       call free(req%flux)
