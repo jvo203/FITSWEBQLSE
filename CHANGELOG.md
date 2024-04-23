@@ -1,7 +1,7 @@
 ## [5.1.9] - 2024-04-??
 
-* interleaving a video frame preparation in FORTRAN with x265 encoding and WebSocket transmission in C
-* interleaving a P-V diagram preparation in FORTRAN with ZFP compression and WebSocket transmission in C
+* interleaving a _*video frame*_ preparation in FORTRAN with x265 encoding and WebSocket transmission in C
+* interleaving a _*P-V Diagram*_ preparation in FORTRAN with ZFP compression and WebSocket transmission in C
 
 ## [5.1.8] - 2024-04-18
 
