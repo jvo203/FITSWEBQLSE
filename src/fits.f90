@@ -224,7 +224,6 @@ module fits
       real(kind=c_double) :: vmin, vmax
       integer(kind=c_int) :: x1, y1, x2, y2
       real(kind=c_float), pointer :: pixels(:, :) => null() ! the PV diagram
-      logical :: allocated_pixels = .false.
    end type pv_response_f
 
    type, bind(c) :: video_fetch_f
@@ -8913,6 +8912,7 @@ contains
 
       type(dataset), pointer :: item
       type(pv_request_f), pointer :: req
+      type(pv_response_f), pointer :: resp => null()
 
       ! cluster
       type(pv_request_t), target :: cluster_req
@@ -9178,24 +9178,81 @@ contains
       ! free the points
       deallocate (points)
 
-      ! send the P-V diagram via a WebSocket
-      call write_ws_pv_diagram(req%session, req%seq_id, req%timestamp, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels),&
-      & pmean, pstd, pmin, pmax, 1, npoints, v1, v2, x1, y1, x2, y2)
+      ! allocate & prepare the response structure for a POSIX thread
+      allocate (resp)
+
+      resp%session = req%session
+      resp%seq_id = req%seq_id
+      resp%timestamp = req%timestamp
+      resp%width = img_width
+      resp%height = img_height
+      resp%pmin = pmin
+      resp%pmax = pmax
+      resp%pmean = pmean
+      resp%pstd = pstd
+      resp%xmin = 1
+      resp%xmax = npoints
+      resp%vmin = v1
+      resp%vmax = v2
+      resp%x1 = x1
+      resp%y1 = y1
+      resp%x2 = x2
+      resp%y2 = y2
+      resp%pixels => pixels
+
+      rc = my_pthread_create_detached(start_routine=c_funloc(send_ws_pv_diagram), arg=c_loc(resp))
+
+      ! examine the response rc
+      if (rc .ne. 0) then
+         print *, 'my_pthread_create_detached failed with rc:', rc
+
+         deallocate(resp)
+
+         ! send the P-V diagram via a WebSocket
+         call write_ws_pv_diagram(req%session, req%seq_id, req%timestamp, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels),&
+         & pmean, pstd, pmin, pmax, 1, npoints, v1, v2, x1, y1, x2, y2)
+
+         ! free the memory region pointed to by pixels
+         if (associated(pixels)) deallocate (pixels)
+         nullify (pixels)
+
+         call release_session(req%session) ! decrement the session reference counter
+      end if
 
       ! free the cluster P-V diagram
       deallocate (cluster_pv)
 
-      ! free the memory region pointed to by pixels
-      if (associated(pixels)) deallocate (pixels)
-
       nullify (item)
-      call release_session(req%session) ! decrement the session reference counter
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
       return
 
    end subroutine ws_pv_request
+
+   recursive subroutine send_ws_pv_diagram(arg) BIND(C)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: arg
+      type(pv_response_f), pointer :: resp
+
+      if (.not. c_associated(arg)) return
+      call c_f_pointer(arg, resp)
+
+      if(associated(resp%pixels)) then
+         call write_ws_pv_diagram(resp%session, resp%seq_id, resp%timestamp, resp%width, resp%height, ZFP_PV_PRECISION,&
+         & c_loc(resp%pixels), resp%pmean, resp%pstd, resp%pmin, resp%pmax, resp%xmin, resp%xmax, resp%vmin, resp%vmax,&
+         & resp%x1, resp%y1, resp%x2, resp%y2)
+
+         deallocate (resp%pixels)
+      end if
+
+      call release_session(resp%session) ! decrement the session reference counter
+
+      deallocate (resp)
+
+   end subroutine send_ws_pv_diagram
 
    subroutine get_pv_diagram(item, req, pixels, width, height, pmin, pmax, pmean, pstd, npoints, v1, v2)
       use omp_lib
