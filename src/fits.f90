@@ -214,6 +214,19 @@ module fits
 
    end type pv_request_t
 
+   type :: pv_response_f
+      type(C_PTR) :: session
+      integer(c_int) :: seq_id
+      real(c_float) :: timestamp
+      integer(c_int) :: width, height
+      real(kind=c_float) :: pmean, pstd, pmin, pmax
+      integer(kind=c_int) :: xmin, xmax
+      real(kind=c_double) :: vmin, vmax
+      integer(kind=c_int) :: x1, y1, x2, y2
+      real(kind=c_float), pointer :: pixels(:, :) => null() ! the PV diagram
+      logical :: allocated_pixels = .false.
+   end type pv_response_f
+
    type, bind(c) :: video_fetch_f
       ! input
       type(c_ptr) :: datasetid
@@ -8920,7 +8933,8 @@ contains
       ! the maximum exponent
       integer :: max_exp
 
-      real(kind=c_float), allocatable, target :: pv(:, :), cluster_pv(:, :)
+      real(kind=c_float), pointer, contiguous :: pv(:, :) => null()
+      real(kind=c_float), allocatable, target :: cluster_pv(:, :)
       integer(kind=8) :: npixels
       real(kind=c_float) :: pmin, pmax, pmean, pstd
       real(kind=8) :: f, v1, v2
@@ -8928,8 +8942,7 @@ contains
       ! image downscaling
       real :: scale
       integer :: img_width, img_height
-      real(kind=c_float), pointer :: pixels(:, :)
-      logical :: allocated_pixels
+      real(kind=c_float), pointer :: pixels(:, :) => null()
 
       ! timing
       real(kind=8) :: t1, t2
@@ -9126,18 +9139,20 @@ contains
          img_height = nint(scale*length)
 
          allocate (pixels(img_width, img_height))
-         allocated_pixels = .true.
 
          if (scale .gt. 0.2) then
             call resizeLanczos(c_loc(pv), npoints, length, c_loc(pixels), img_width, img_height, 3)
          else
             call resizeSuper(c_loc(pv), npoints, length, c_loc(pixels), img_width, img_height)
          end if
+
+         ! pv is no longer needed
+         deallocate (pv)
+         nullify (pv)
       else
          img_width = npoints
          img_height = length
          pixels => pv
-         allocated_pixels = .false.
       end if
 
       ! start the timer
@@ -9167,16 +9182,11 @@ contains
       call write_ws_pv_diagram(req%session, req%seq_id, req%timestamp, img_width, img_height, ZFP_PV_PRECISION, c_loc(pixels),&
       & pmean, pstd, pmin, pmax, 1, npoints, v1, v2, x1, y1, x2, y2)
 
-      ! free the P-V diagram
-      deallocate (pv)
+      ! free the cluster P-V diagram
       deallocate (cluster_pv)
 
-      ! free the pixels but only if they were allocated
-      if (allocated_pixels) then
-         deallocate (pixels)
-      else
-         nullify (pixels)
-      end if
+      ! free the memory region pointed to by pixels
+      if (associated(pixels)) deallocate (pixels)
 
       nullify (item)
       call release_session(req%session) ! decrement the session reference counter
