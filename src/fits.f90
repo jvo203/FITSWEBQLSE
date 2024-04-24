@@ -7259,7 +7259,6 @@ contains
          call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
          &c_loc(reduced_spectrum), size(reduced_spectrum), precision)
       else
-
          ! end the timer
          call system_clock(finish_t)
          elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
