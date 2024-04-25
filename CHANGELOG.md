@@ -1,7 +1,8 @@
-## [5.1.9] - 2024-04-??
+## [5.1.9] - 2024-05-??
 
 * interleaving a _*video frame*_ preparation in FORTRAN with x265 encoding and WebSocket transmission in C
 * interleaving a _*P-V Diagram*_ preparation in FORTRAN with ZFP compression and WebSocket transmission in C
+* recompiled the WebAssembly with the latest emscripten compiler
 
 ## [5.1.8] - 2024-04-18
 
@@ -26,7 +27,7 @@
 ## [5.1.4] - 2024-04-03
 
 * switched to a _*versioned*_ Font Awesome Kit in order to take advantage of a browser cache
-* _*compress*_ the main web page response, reducing the trasmitted size from 173kB to 35kB
+* _*compress*_ the main web page response, reducing the transmitted size from 173kB to 35kB
 
 ## [5.1.3] - 2024-04-02
 
