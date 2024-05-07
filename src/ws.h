@@ -5,7 +5,6 @@
 #include "mongoose.h"
 #include <microhttpd.h>
 #include "fits_types.h"
-#include "mongoose.h"
 
 #include <pthread.h>
 #include <glib.h>
