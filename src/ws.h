@@ -51,6 +51,8 @@ typedef struct
     char *extra_in;
     size_t extra_in_size;
 
+    GAsyncQueue *send_queue;
+
     /* a mongoose Single-Producer Single-Consumer queue, writes to be protected by a spinlock or a mutex */
     struct mg_queue queue;
 #if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
