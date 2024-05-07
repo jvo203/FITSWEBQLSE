@@ -330,6 +330,9 @@ void delete_session(websocket_session *session)
         mg_queue_del(&session->queue, len); // Remove message from the queue
     }
 
+    if (session->send_queue != NULL)
+        g_async_queue_unref(session->send_queue);
+
     // finally release the message queue buffer
     if (session->buf != NULL)
         free(session->buf);

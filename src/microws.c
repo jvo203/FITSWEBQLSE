@@ -2628,6 +2628,8 @@ on_ws_connection(void *cls,
                     goto end_of_session;
                 }
 
+                session->send_queue = g_async_queue_new();
+
                 session->buf_len = 1024 * sizeof(struct data_buf);
                 session->buf = (char *)malloc(session->buf_len);
                 mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue
