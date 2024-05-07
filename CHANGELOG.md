@@ -1,8 +1,8 @@
-## [5.1.9] - 2024-05-??
+## [5.1.9] - 2024-05-07
 
 * interleaving a _*video frame*_ preparation in FORTRAN with x265 encoding and WebSocket transmission in C
 * interleaving a _*P-V Diagram*_ preparation in FORTRAN with ZFP compression and WebSocket transmission in C
-* recompiled the WebAssembly with the latest _*emscripten*_ compiler
+* recompiled the client-side WebAssembly with the latest _*emscripten*_ compiler
 
 ## [5.1.8] - 2024-04-18
 
