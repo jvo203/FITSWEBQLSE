@@ -330,8 +330,26 @@ void delete_session(websocket_session *session)
         mg_queue_del(&session->queue, len); // Remove message from the queue
     }
 
+    // drain and unreference the message queue
     if (session->send_queue != NULL)
+    {
+        gpointer item = NULL;
+        while ((item = g_async_queue_try_pop(session->send_queue)) != NULL)
+        {
+            struct data_buf *msg = (struct data_buf *)item;
+
+#ifdef DEBUG
+            printf("[C] found a message %zu-bytes long, releasing the memory.\n", msg->len);
+#endif
+
+            free(msg->buf);
+            msg->buf = NULL;
+            msg->len = 0;
+            free(msg);
+        }
+
         g_async_queue_unref(session->send_queue);
+    }
 
     // finally release the message queue buffer
     if (session->buf != NULL)
