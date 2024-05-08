@@ -2,7 +2,11 @@
 
 #include <glib.h>
 
-#include "mongoose.h"
+#include <stdbool.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+
 #include <microhttpd.h>
 #include "fits_types.h"
 
@@ -61,12 +65,6 @@ typedef struct
        (sending can be done by send and recv thread;
         may not be simultaneously locked by the same thread) */
     pthread_mutex_t send_mutex;
-#endif
-
-#ifndef MICROWS
-    // the WebSocket communications via mg_wakeup()
-    struct mg_mgr *mgr;
-    unsigned long conn_id; // Parent connection ID
 #endif
 
     char *flux;
