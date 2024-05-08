@@ -2345,6 +2345,17 @@ upgrade_handler(void *cls,
     }
 }
 
+void free_queue_item(gpointer item)
+{
+    if (item == NULL)
+        return;
+
+    struct data_buf *msg = (struct data_buf *)item;
+
+    free(msg->buf);
+    free(msg);
+}
+
 /**
  * Function called by the MHD_daemon when the client tries to access a page.
  *
@@ -2591,7 +2602,7 @@ on_ws_connection(void *cls,
                     goto end_of_session;
                 }
 
-                session->send_queue = g_async_queue_new();
+                session->send_queue = g_async_queue_new_full(free_queue_item);
 
                 session->buf_len = 1024 * sizeof(struct data_buf);
                 session->buf = (char *)malloc(session->buf_len);
