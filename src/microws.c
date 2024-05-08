@@ -443,16 +443,17 @@ static void *ws_send_messages(void *cls)
     if (session->send_queue == NULL)
         pthread_exit(NULL);
 
-    // wait for the condition, loop through the queue and send messages
+    // wait for the exit conditions, loop through a send queue and send messages
     while (!session->pv_exit)
     {
         if (session->disconnect)
             break;
 
         gpointer item = NULL;
+        guint64 timeout = 100000; // [microseconds] 100ms
 
-        // Check for messages in a send queue
-        while ((item = g_async_queue_try_pop(session->send_queue)) != NULL) // to be replaced by g_async_queue_timed_pop()
+        // pop messages from the send queue
+        while ((item = g_async_queue_timeout_pop(session->send_queue, timeout)) != NULL)
         {
             struct data_buf *msg = (struct data_buf *)item;
 
