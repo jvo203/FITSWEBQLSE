@@ -1,3 +1,7 @@
+## [5.1.10] - 2024-06-??
+
+* completed the removal of the _*mongoose*_ networking library from the server-side C code
+
 ## [5.1.9] - 2024-05-07
 
 * interleaving a _*video frame*_ preparation in FORTRAN with x265 encoding and WebSocket transmission in C
