@@ -440,44 +440,34 @@ static void *ws_send_messages(void *cls)
 
     websocket_session *session = (websocket_session *)cls;
 
+    if (session->send_queue == NULL)
+        pthread_exit(NULL);
+
     // wait for the condition, loop through the queue and send messages
     while (!session->pv_exit)
     {
         if (session->disconnect)
             break;
 
-        size_t len = 0;
-        char *buf = NULL;
+        gpointer item = NULL;
 
-        // Check if we have a message from the worker
-        while ((len = mg_queue_next(&session->queue, &buf)) > 0)
+        // Check for messages in a send queue
+        while ((item = g_async_queue_try_pop(session->send_queue)) != NULL) // to be replaced by g_async_queue_timed_pop()
         {
-            if (len == sizeof(struct data_buf))
-            {
-                struct data_buf *msg = (struct data_buf *)buf;
+            struct data_buf *msg = (struct data_buf *)item;
 
-                // Retrieved a message from the queue. Send a response and cleanup
+            // Retrieved a message from the queue. Send a response and cleanup
 #ifdef DEBUG
-                printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
+            printf("[C] found a WebSocket connection, sending %zu bytes.\n", msg->len);
 #endif
 
-                if (msg->len > 0 && msg->buf != NULL && !session->disconnect)
-                    send_all(session, msg->buf, msg->len);
+            if (msg->len > 0 && msg->buf != NULL && !session->disconnect)
+                send_all(session, msg->buf, msg->len);
 
-                // release memory
-                if (msg->buf != NULL)
-                {
-                    free(msg->buf);
-                    msg->buf = NULL;
-                    msg->len = 0;
-                }
-            }
-
-            mg_queue_del(&session->queue, len); // Remove message from the queue
+            // release memory
+            free(msg->buf);
+            free(msg);
         }
-
-        /* wait on a condition variable */
-        pthread_cond_wait(&session->wake_up_sender, &session->wake_up_cond_mtx);
     }
 
     printf("[C] ws_send_messages terminated.\n");
@@ -522,44 +512,16 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         send_all(session, response, response_len);
                     free(response);
 #else
-                    // create a queue message
-                    struct data_buf msg = {response, response_len};
+                    // queue a message
+                    struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
 
-                    char *msg_buf = NULL;
-                    size_t _len = sizeof(struct data_buf);
-
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                    pthread_spin_lock(&session->queue_lock);
-#else
-                    pthread_mutex_lock(&session->queue_mtx);
-#endif
-
-                    // reserve space for the text message
-                    size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-                    // pass the message over to the sender via a communications queue
-                    if (msg_buf != NULL && queue_len >= _len)
+                    if (msg != NULL)
                     {
-                        memcpy(msg_buf, &msg, _len);
-                        mg_queue_add(&session->queue, _len);
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                        pthread_spin_unlock(&session->queue_lock);
-#else
-                        pthread_mutex_unlock(&session->queue_mtx);
-#endif
+                        msg->buf = response;
+                        msg->len = response_len;
 
-                        // wake up the sender
-                        pthread_cond_signal(&session->wake_up_sender);
-                    }
-                    else
-                    {
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                        pthread_spin_unlock(&session->queue_lock);
-#else
-                        pthread_mutex_unlock(&session->queue_mtx);
-#endif
-                        printf("[C] mg_queue_book failed, freeing memory.\n");
-                        free(response);
+                        // push the message into the queue
+                        g_async_queue_push(session->send_queue, msg);
                     }
 #endif
                 }
