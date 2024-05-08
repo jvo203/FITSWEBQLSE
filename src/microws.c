@@ -3505,4 +3505,470 @@ void write_ws_composite_pv_diagram(websocket_session *session, const int *seq_id
     printf("[C] <write_ws_composite_pv_diagram> not implemented as the composite P-V Diagram is no longer being used!\n");
 };
 
+void *ws_image_spectrum_response(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct websocket_response *resp = (struct websocket_response *)ptr;
+
+    ssize_t n = 0;
+    size_t offset = 0;
+    size_t buf_size = 0x40000;
+
+    char *buf = malloc(buf_size);
+
+    if (buf != NULL)
+        while ((n = read(resp->fd, buf + offset, buf_size - offset)) > 0)
+        {
+            offset += n;
+
+            // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+
+            if (offset == buf_size)
+            {
+                printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
+
+                size_t new_size = buf_size << 1;
+                char *tmp = realloc(buf, new_size);
+
+                if (tmp != NULL)
+                {
+                    buf = tmp;
+                    buf_size = new_size;
+                }
+            }
+        }
+
+    // close the read end of the pipe
+    close(resp->fd);
+
+    if (0 == n)
+        printf("[C] PIPE_END_OF_STREAM\n");
+
+    if (n < 0)
+        printf("[C] PIPE_END_WITH_ERROR\n");
+
+    // <offset> contains the number of valid bytes in <buf>
+    if (offset < sizeof(uint32_t))
+        goto free_image_spectrum_mem;
+
+    websocket_session *session = resp->session;
+
+    if (session == NULL)
+        goto free_image_spectrum_mem;
+
+    size_t read_offset = 0; // a 'read' cursor into <buf>
+
+    size_t msg_len = 0;
+
+    // image + histogram
+    uint32_t flux_len = 0;
+    uint32_t pixels_len = 0;
+    uint32_t mask_len = 0;
+    uint32_t hist_len = 0;
+
+    // spectrum
+    uint32_t spectrum_len = 0;
+    uint32_t compressed_size = 0;
+
+    memcpy(&flux_len, buf + read_offset, sizeof(uint32_t));
+
+    read_offset += sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t);
+
+    if (offset < read_offset + sizeof(uint32_t))
+        goto free_image_spectrum_session;
+
+    // pixels
+    memcpy(&pixels_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t) + pixels_len;
+
+    if (offset < read_offset + sizeof(uint32_t))
+        goto free_image_spectrum_session;
+
+    // mask
+    memcpy(&mask_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t) + mask_len;
+
+    if (offset < read_offset + sizeof(uint32_t))
+        goto free_image_spectrum_session;
+
+    // histogram
+    memcpy(&hist_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t) + hist_len * sizeof(int);
+
+    if (offset < read_offset)
+        goto free_image_spectrum_session;
+
+    int padding = 4 - read_offset % 4;
+
+    size_t write_offset = 0;
+    msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + read_offset + padding;
+
+#ifdef MICROWS
+    char *image_payload = NULL;
+    size_t ws_len = preamble_ws_frame(&image_payload, msg_len, WS_FRAME_BINARY);
+    msg_len += ws_len;
+#else
+    char *image_payload = malloc(msg_len);
+#endif
+
+    if (image_payload != NULL)
+    {
+        float ts = resp->timestamp;
+        uint32_t id = resp->seq_id;
+        uint32_t msg_type = 2;
+        // 0 - spectrum, 1 - viewport,
+        // 2 - image, 3 - full spectrum refresh,
+        // 4 - histogram
+
+#ifdef MICROWS
+        size_t ws_offset = ws_len;
+#else
+        size_t ws_offset = 0;
+#endif
+
+        memcpy((char *)image_payload + ws_offset, &ts, sizeof(float));
+        ws_offset += sizeof(float);
+
+        memcpy((char *)image_payload + ws_offset, &id, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        memcpy((char *)image_payload + ws_offset, &msg_type, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        // fill-in the content up to pixels/mask
+        write_offset = sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len + sizeof(uint32_t) + mask_len;
+        memcpy((char *)image_payload + ws_offset, buf, write_offset);
+        ws_offset += write_offset;
+
+        // add an optional padding
+        if (padding > 0)
+        {
+            char extra[padding];
+
+            // fill-in the padding with zeroes
+            memset(extra, 0, padding);
+
+            memcpy((char *)image_payload + ws_offset, extra, padding);
+            ws_offset += padding;
+        }
+
+        // and the histogram
+        memcpy((char *)image_payload + ws_offset, buf + write_offset, sizeof(uint32_t) + hist_len * sizeof(int));
+        ws_offset += sizeof(uint32_t) + hist_len * sizeof(int);
+        write_offset += sizeof(uint32_t) + hist_len * sizeof(int);
+
+        if (ws_offset != msg_len)
+            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+#ifdef DIRECT
+        if (!session->disconnect)
+            send_all(session, image_payload, msg_len);
+        free(image_payload);
+#else
+        // queue a message
+        struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
+
+        if (msg != NULL)
+        {
+            msg->buf = image_payload;
+            msg->len = msg_len;
+
+            // push the message into the queue
+            g_async_queue_push(session->send_queue, msg);
+        }
+        else
+            free(image_payload);
+#endif
+    }
+    else
+    {
+        // all-or-nothing, skip the spectrum if the image message cannot not be created
+        goto free_image_spectrum_session;
+    }
+
+    // original spectrum length
+    memcpy(&spectrum_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
+
+    if (offset < read_offset)
+        goto free_image_spectrum_session;
+
+    // compressed spectrum
+    memcpy(&compressed_size, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t) + compressed_size;
+
+    if (offset < read_offset)
+        goto free_image_spectrum_session;
+
+    printf("[C] offset: %zu, read_offset: %zu\n", offset, read_offset);
+    printf("[C] #hist. elements: %u, padding: %d byte(s), orig. spectrum length: %u, compressed_size: %u\n", hist_len, padding, spectrum_len, compressed_size);
+
+    msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t) + compressed_size;
+
+#ifdef MICROWS
+    char *spectrum_payload = NULL;
+    ws_len = preamble_ws_frame(&spectrum_payload, msg_len, WS_FRAME_BINARY);
+    msg_len += ws_len;
+#else
+    char *spectrum_payload = malloc(msg_len);
+#endif
+
+    if (spectrum_payload != NULL)
+    {
+        float ts = resp->timestamp;
+        uint32_t id = resp->seq_id;
+        uint32_t msg_type = 3;
+        // 0 - spectrum, 1 - viewport,
+        // 2 - image, 3 - full spectrum refresh,
+        // 4 - histogram
+
+#ifdef MICROWS
+        size_t ws_offset = ws_len;
+#else
+        size_t ws_offset = 0;
+#endif
+
+        memcpy((char *)spectrum_payload + ws_offset, &ts, sizeof(float));
+        ws_offset += sizeof(float);
+
+        memcpy((char *)spectrum_payload + ws_offset, &id, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        memcpy((char *)spectrum_payload + ws_offset, &msg_type, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        memcpy((char *)spectrum_payload + ws_offset, &spectrum_len, sizeof(uint32_t));
+        ws_offset += sizeof(uint32_t);
+
+        write_offset += 2 * sizeof(uint32_t); // skip the first 2 ints; get to the compressed data
+        memcpy((char *)spectrum_payload + ws_offset, buf + write_offset, compressed_size);
+        ws_offset += compressed_size;
+
+        if (ws_offset != msg_len)
+            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+#ifdef DIRECT
+        if (!session->disconnect)
+            send_all(session, spectrum_payload, msg_len);
+        free(spectrum_payload);
+#else
+        // queue a message
+        struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
+
+        if (msg != NULL)
+        {
+            msg->buf = spectrum_payload;
+            msg->len = msg_len;
+
+            // push the message into the queue
+            g_async_queue_push(session->send_queue, msg);
+        }
+        else
+            free(spectrum_payload);
+#endif
+    }
+
+    if (offset == read_offset + 5 * sizeof(float))
+    {
+        printf("[C] extra video tone mapping information detected.\n");
+
+        // lock the stat mutex
+        pthread_mutex_lock(&session->stat_mtx);
+
+        // copy the statistics
+        memcpy(&(session->dmin), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
+
+        memcpy(&(session->dmax), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
+
+        memcpy(&(session->dmedian), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
+
+        memcpy(&(session->dmadN), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
+
+        memcpy(&(session->dmadP), buf + read_offset, sizeof(float));
+        read_offset += sizeof(float);
+
+        // unlock the stat mutex
+        pthread_mutex_unlock(&session->stat_mtx);
+    }
+
+free_image_spectrum_session:
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+    session = NULL;
+
+    // release the incoming buffer
+free_image_spectrum_mem:
+    free(buf);
+
+    // release the memory
+    free(resp);
+
+    pthread_exit(NULL);
+}
+
+void *spectrum_response(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct websocket_response *resp = (struct websocket_response *)ptr;
+
+    ssize_t n = 0;
+    size_t offset = 0;
+    size_t buf_size = 0x8000;
+
+    char *buf = malloc(buf_size);
+
+    if (buf != NULL)
+        while ((n = read(resp->fd, buf + offset, buf_size - offset)) > 0)
+        {
+            offset += n;
+
+            // printf("[C] PIPE_RECV %zd BYTES, OFFSET: %zu, buf_size: %zu\n", n, offset, buf_size);
+
+            if (offset == buf_size)
+            {
+                printf("[C] OFFSET == BUF_SIZE, re-sizing the buffer\n");
+
+                size_t new_size = buf_size << 1;
+                char *tmp = realloc(buf, new_size);
+
+                if (tmp != NULL)
+                {
+                    buf = tmp;
+                    buf_size = new_size;
+                }
+            }
+        }
+
+    // close the read end of the pipe
+    close(resp->fd);
+
+    if (0 == n)
+        printf("[C] PIPE_END_OF_STREAM\n");
+
+    if (n < 0)
+        printf("[C] PIPE_END_WITH_ERROR\n");
+
+    websocket_session *session = resp->session;
+
+    if (session == NULL)
+    {
+        printf("[C] spectrum_response session not found.\n");
+
+        // release the incoming buffer
+        free(buf);
+
+        // release the memory
+        free(resp);
+
+        pthread_exit(NULL);
+    }
+
+    // process the received data, prepare a WebSocket response
+    if (offset > 0)
+    {
+        printf("\n%.*s\n", (int)offset, buf);
+
+        char *compressed_csv = NULL;
+        int compressed_size, worst_size;
+
+        // LZ4-compress the CSV payload
+        worst_size = LZ4_compressBound(offset);
+
+        compressed_csv = (char *)malloc(worst_size);
+
+        if (compressed_csv != NULL)
+        {
+            // compress CSV as much as possible
+            compressed_size = LZ4_compress_HC((const char *)buf, compressed_csv, offset, worst_size, LZ4HC_CLEVEL_MAX);
+
+            printf("[C] CSV length: %zu; compressed: %d bytes\n", offset, compressed_size);
+
+            if (compressed_size > 0)
+            {
+                size_t msg_len = sizeof(float) + 3 * sizeof(uint32_t) + compressed_size;
+
+#ifdef MICROWS
+                char *payload = NULL;
+                size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+                msg_len += ws_len;
+#else
+                char *payload = malloc(msg_len);
+#endif
+
+                if (payload != NULL)
+                {
+                    float ts = resp->timestamp;
+                    uint32_t id = 0;
+                    uint32_t msg_type = 6;
+                    uint32_t payload_len = offset; // the original size
+
+#ifdef MICROWS
+                    size_t ws_offset = ws_len;
+#else
+                    size_t ws_offset = 0;
+#endif
+
+                    memcpy((char *)payload + ws_offset, &ts, sizeof(float));
+                    ws_offset += sizeof(float);
+
+                    memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+                    ws_offset += sizeof(uint32_t);
+
+                    memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+                    ws_offset += sizeof(uint32_t);
+
+                    memcpy((char *)payload + ws_offset, &payload_len, sizeof(uint32_t));
+                    ws_offset += sizeof(uint32_t);
+
+                    memcpy((char *)payload + ws_offset, compressed_csv, compressed_size);
+                    ws_offset += compressed_size;
+
+                    if (ws_offset != msg_len)
+                        printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+#ifdef DIRECT
+                    if (!session->disconnect)
+                        send_all(session, payload, msg_len);
+                    free(payload);
+#else
+                    // queue a message
+                    struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
+
+                    if (msg != NULL)
+                    {
+                        msg->buf = payload;
+                        msg->len = msg_len;
+
+                        // push the message into the queue
+                        g_async_queue_push(session->send_queue, msg);
+                    }
+                    else
+                        free(payload);
+#endif
+                }
+            }
+
+            free(compressed_csv);
+        }
+    }
+
+    g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
+    session = NULL;
+
+    // release the incoming buffer
+    free(buf);
+
+    // release the memory
+    free(resp);
+
+    pthread_exit(NULL);
+}
+
 #endif // MICROWS
