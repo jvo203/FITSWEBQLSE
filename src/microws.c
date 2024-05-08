@@ -524,6 +524,8 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         // push the message into the send queue
                         g_async_queue_push(session->send_queue, msg);
                     }
+                    else
+                        free(response);
 #endif
                 }
 
@@ -1429,45 +1431,19 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                             send_all(session, response, response_len);
                         free(response);
 #else
-                        // create a queue message
-                        struct data_buf msg = {response, response_len};
+                        // queue a message
+                        struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
 
-                        char *msg_buf = NULL;
-                        size_t _len = sizeof(struct data_buf);
-
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                        pthread_spin_lock(&session->queue_lock);
-#else
-                        pthread_mutex_lock(&session->queue_mtx);
-#endif
-
-                        // reserve space for the text message
-                        size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-                        // pass the message over to the sender via a communications queue
-                        if (msg_buf != NULL && queue_len >= _len)
+                        if (msg != NULL)
                         {
-                            memcpy(msg_buf, &msg, _len);
-                            mg_queue_add(&session->queue, _len);
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                            pthread_spin_unlock(&session->queue_lock);
-#else
-                            pthread_mutex_unlock(&session->queue_mtx);
-#endif
+                            msg->buf = response;
+                            msg->len = response_len;
 
-                            // wake up the sender
-                            pthread_cond_signal(&session->wake_up_sender);
+                            // push the message into the queue
+                            g_async_queue_push(session->send_queue, msg);
                         }
                         else
-                        {
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                            pthread_spin_unlock(&session->queue_lock);
-#else
-                            pthread_mutex_unlock(&session->queue_mtx);
-#endif
-                            printf("[C] mg_queue_book failed, freeing memory.\n");
                             free(response);
-                        }
 #endif
                     }
                 }
@@ -1965,6 +1941,8 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         // push the message into the queue
                         g_async_queue_push(session->send_queue, msg);
                     }
+                    else
+                        free(pong);
 #endif
                 }
             }
@@ -2841,50 +2819,24 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
                     if (ws_offset != msg_len)
                         printf("[C] <write_ws_spectrum> size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-                    // create a queue message
-                    struct data_buf msg = {payload, msg_len};
-
 #ifdef DIRECT
                     if (!session->disconnect)
                         send_all(session, payload, msg_len);
                     free(payload);
 #else
-                    char *msg_buf = NULL;
-                    size_t _len = sizeof(struct data_buf);
+                    // queue a message
+                    struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
 
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                    pthread_spin_lock(&session->queue_lock);
-#else
-                    pthread_mutex_lock(&session->queue_mtx);
-#endif
-
-                    // reserve space for the binary message
-                    size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-                    // pass the message over to the sender via a communications queue
-                    if (msg_buf != NULL && queue_len >= _len)
+                    if (msg != NULL)
                     {
-                        memcpy(msg_buf, &msg, _len);
-                        mg_queue_add(&session->queue, _len);
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                        pthread_spin_unlock(&session->queue_lock);
-#else
-                        pthread_mutex_unlock(&session->queue_mtx);
-#endif
+                        msg->buf = payload;
+                        msg->len = msg_len;
 
-                        // wake up the sender
-                        pthread_cond_signal(&session->wake_up_sender);
+                        // push the message into the queue
+                        g_async_queue_push(session->send_queue, msg);
                     }
                     else
-                    {
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                        pthread_spin_unlock(&session->queue_lock);
-#else
-                        pthread_mutex_unlock(&session->queue_mtx);
-#endif
-                        printf("[C] mg_queue_book failed, freeing memory.\n");
                         free(payload);
-                    }
 #endif
                 }
             }
@@ -3006,7 +2958,6 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
 
         size_t view_size = zfpsize + (size_t)compressed_size;
 
-        // size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + zfpsize;
         //  header
         size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
         // body
@@ -3069,50 +3020,24 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
             if (ws_offset != msg_len)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-            // create a queue message
-            struct data_buf msg = {payload, msg_len};
-
 #ifdef DIRECT
             if (!session->disconnect)
                 send_all(session, payload, msg_len);
             free(payload);
 #else
-            char *msg_buf = NULL;
-            size_t _len = sizeof(struct data_buf);
+            // queue a message
+            struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
 
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-            pthread_spin_lock(&session->queue_lock);
-#else
-            pthread_mutex_lock(&session->queue_mtx);
-#endif
-
-            // reserve space for the binary message
-            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-            // pass the message over to the sender via a communications queue
-            if (msg_buf != NULL && queue_len >= _len)
+            if (msg != NULL)
             {
-                memcpy(msg_buf, &msg, _len);
-                mg_queue_add(&session->queue, _len);
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                pthread_spin_unlock(&session->queue_lock);
-#else
-                pthread_mutex_unlock(&session->queue_mtx);
-#endif
+                msg->buf = payload;
+                msg->len = msg_len;
 
-                // wake up the sender
-                pthread_cond_signal(&session->wake_up_sender);
+                // push the message into the queue
+                g_async_queue_push(session->send_queue, msg);
             }
             else
-            {
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                pthread_spin_unlock(&session->queue_lock);
-#else
-                pthread_mutex_unlock(&session->queue_mtx);
-#endif
-                printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
-            }
 #endif
         }
     }
@@ -3211,50 +3136,24 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
             if (ws_offset != msg_len)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-            // create a queue message
-            struct data_buf msg = {payload, msg_len};
-
 #ifdef DIRECT
             if (!session->disconnect)
                 send_all(session, payload, msg_len);
             free(payload);
 #else
-            char *msg_buf = NULL;
-            size_t _len = sizeof(struct data_buf);
+            // queue a message
+            struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
 
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-            pthread_spin_lock(&session->queue_lock);
-#else
-            pthread_mutex_lock(&session->queue_mtx);
-#endif
-
-            // reserve space for the binary message
-            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-            // pass the message over to the sender via a communications queue
-            if (msg_buf != NULL && queue_len >= _len)
+            if (msg != NULL)
             {
-                memcpy(msg_buf, &msg, _len);
-                mg_queue_add(&session->queue, _len);
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                pthread_spin_unlock(&session->queue_lock);
-#else
-                pthread_mutex_unlock(&session->queue_mtx);
-#endif
+                msg->buf = payload;
+                msg->len = msg_len;
 
-                // wake up the sender
-                pthread_cond_signal(&session->wake_up_sender);
+                // push the message into the queue
+                g_async_queue_push(session->send_queue, msg);
             }
             else
-            {
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                pthread_spin_unlock(&session->queue_lock);
-#else
-                pthread_mutex_unlock(&session->queue_mtx);
-#endif
-                printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
-            }
 #endif
         }
     }
@@ -3370,50 +3269,24 @@ void write_ws_composite_video(websocket_session *session, const int *seq_id, con
             if (ws_offset != msg_len)
                 printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-            // create a queue message
-            struct data_buf msg = {payload, msg_len};
-
 #ifdef DIRECT
             if (!session->disconnect)
                 send_all(session, payload, msg_len);
             free(payload);
 #else
-            char *msg_buf = NULL;
-            size_t _len = sizeof(struct data_buf);
+            // queue a message
+            struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
 
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-            pthread_spin_lock(&session->queue_lock);
-#else
-            pthread_mutex_lock(&session->queue_mtx);
-#endif
-
-            // reserve space for the binary message
-            size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-            // pass the message over to the sender via a communications queue
-            if (msg_buf != NULL && queue_len >= _len)
+            if (msg != NULL)
             {
-                memcpy(msg_buf, &msg, _len);
-                mg_queue_add(&session->queue, _len);
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                pthread_spin_unlock(&session->queue_lock);
-#else
-                pthread_mutex_unlock(&session->queue_mtx);
-#endif
+                msg->buf = payload;
+                msg->len = msg_len;
 
-                // wake up the sender
-                pthread_cond_signal(&session->wake_up_sender);
+                // push the message into the queue
+                g_async_queue_push(session->send_queue, msg);
             }
             else
-            {
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                pthread_spin_unlock(&session->queue_lock);
-#else
-                pthread_mutex_unlock(&session->queue_mtx);
-#endif
-                printf("[C] mg_queue_book failed, freeing memory.\n");
                 free(payload);
-            }
 #endif
         }
     }
@@ -3631,50 +3504,24 @@ void write_ws_pv_diagram(websocket_session *session, const int *seq_id, const fl
         if (ws_offset != msg_len)
             printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
-        // create a queue message
-        struct data_buf msg = {pv_payload, msg_len};
-
 #ifdef DIRECT
         if (!session->disconnect)
             send_all(session, pv_payload, msg_len);
         free(pv_payload);
 #else
-        char *msg_buf = NULL;
-        size_t _len = sizeof(struct data_buf);
+        // queue a message
+        struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
 
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-        pthread_spin_lock(&session->queue_lock);
-#else
-        pthread_mutex_lock(&session->queue_mtx);
-#endif
-
-        // reserve space for the binary message
-        size_t queue_len = mg_queue_book(&session->queue, &msg_buf, _len);
-
-        // pass the message over to the sender via a communications queue
-        if (msg_buf != NULL && queue_len >= _len)
+        if (msg != NULL)
         {
-            memcpy(msg_buf, &msg, _len);
-            mg_queue_add(&session->queue, _len);
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-            pthread_spin_unlock(&session->queue_lock);
-#else
-            pthread_mutex_unlock(&session->queue_mtx);
-#endif
+            msg->buf = pv_payload;
+            msg->len = msg_len;
 
-            // wake up the sender
-            pthread_cond_signal(&session->wake_up_sender);
+            // push the message into the queue
+            g_async_queue_push(session->send_queue, msg);
         }
         else
-        {
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-            pthread_spin_unlock(&session->queue_lock);
-#else
-            pthread_mutex_unlock(&session->queue_mtx);
-#endif
-            printf("[C] mg_queue_book failed, freeing memory.\n");
             free(pv_payload);
-        }
 #endif
     }
 
