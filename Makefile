@@ -294,7 +294,7 @@ run:
 ifeq ($(UNAME_S),Darwin)
 	env MIMALLOC_VERBOSE=1 DYLD_INSERT_LIBRARIES=$(HOMEBREW_PREFIX)/lib/libmimalloc.dylib ./$(TARGET)
 else
-	env MIMALLOC_VERBOSE=1 LD_PRELOAD=/usr/lib64/libmimalloc.so ./$(TARGET)
+	env MIMALLOC_VERBOSE=1 LD_PRELOAD=/usr/lib64/libmimalloc.so:/usr/local/lib64/libmimalloc.so ./$(TARGET)
 endif
 
 # the debug mode only works on Linux
