@@ -540,12 +540,14 @@ void *video_event_loop(void *arg)
     pthread_exit(NULL);
 }
 
+// taken from mongoose.c
 static bool mg_is_url_safe(int c)
 {
     return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') ||
            (c >= 'A' && c <= 'Z') || c == '.' || c == '_' || c == '-' || c == '~';
 }
 
+// taken from mongoose.c
 char *mg_hex(const void *buf, size_t len, char *to)
 {
     const unsigned char *p = (const unsigned char *)buf;
@@ -560,6 +562,7 @@ char *mg_hex(const void *buf, size_t len, char *to)
     return to;
 }
 
+// taken from mongoose.c
 size_t mg_url_encode(const char *s, size_t sl, char *buf, size_t len)
 {
     size_t i, n = 0;
