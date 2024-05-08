@@ -343,8 +343,6 @@ void delete_session(websocket_session *session)
 #endif
 
             free(msg->buf);
-            msg->buf = NULL;
-            msg->len = 0;
             free(msg);
         }
 
