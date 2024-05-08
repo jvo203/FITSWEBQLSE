@@ -8,9 +8,7 @@
 #include "ws.h"
 #include "mjson.h"
 
-#ifdef MICROWS
 #include <microhttpd_ws.h>
-#endif
 
 #include <curl/curl.h>
 #include "cluster.h"
@@ -70,7 +68,6 @@ int close_sessions()
                 g_atomic_rc_box_acquire(session);
                 printf("[C] closing a websocket connection for %s/%s\n", session->datasetid, key);
 
-#ifdef MICROWS
                 // send a close WebSocket frame
                 // the mongoose event loop is already closed by this point so we cannot use mg_ws_send() here
                 // this code path is only valid for the custom microws solution
@@ -91,7 +88,6 @@ int close_sessions()
                     send_all(session, result, result_len);
                     MHD_websocket_free(session->ws, result);
                 }
-#endif
 
                 // remove a session pointer from the hash table
                 printf("[C] removing '%s' from the hash table...", key);
@@ -109,11 +105,6 @@ int close_sessions()
         }
 
         g_list_free(keys);
-
-#ifdef MICROWS
-        // give it time to close the connection
-        // sleep(10);
-#endif
 
         pthread_mutex_unlock(&sessions_mtx);
     }
@@ -352,13 +343,11 @@ void *pv_event_loop(void *arg)
                 break;
             }
 
-#ifdef MICROWS
             if (session->disconnect)
             {
                 free(req);
                 break;
             }
-#endif
 
             printf("[C] pv_event_loop::got a request id %d.\n", req->seq_id);
 
@@ -425,13 +414,11 @@ void *ws_event_loop(void *arg)
                 break;
             }
 
-#ifdef MICROWS
             if (session->disconnect)
             {
                 free(req);
                 break;
             }
-#endif
 
             printf("[C] ws_event_loop::got a request id %d.\n", req->seq_id);
 
@@ -498,14 +485,12 @@ void *video_event_loop(void *arg)
                 break;
             }
 
-#ifdef MICROWS
             if (session->disconnect)
             {
                 free(req->flux);
                 free(req);
                 break;
             }
-#endif
 
             printf("[C] video_event_loop::got a request seq_id %d.\n", req->seq_id);
 

@@ -16,7 +16,6 @@
 
 #include "ring_buffer.h"
 
-#ifdef MICROWS
 #define WS_FRAME_TEXT 0x81
 #define WS_FRAME_BINARY 0x82
 #define WS_FRAME_PING 0x89
@@ -30,7 +29,6 @@
 #define WS_OPCODE_CON_CLOSE_FRAME 8
 
 size_t preamble_ws_frame(char **frame_data, size_t length, unsigned char type);
-#endif
 
 typedef struct
 {
@@ -41,7 +39,6 @@ typedef struct
     void **items;
     int va_count;
 
-#ifdef MICROWS
     /* the TCP/IP socket for reading/writing */
     MHD_socket fd;
 
@@ -65,7 +62,6 @@ typedef struct
        (sending can be done by send and recv thread;
         may not be simultaneously locked by the same thread) */
     pthread_mutex_t send_mutex;
-#endif
 
     char *flux;
     float dmin, dmax, dmedian;
@@ -110,9 +106,7 @@ typedef struct
     struct ring_buffer *pv_ring;
 } websocket_session;
 
-#ifdef MICROWS
 void send_all(websocket_session *session, const char *buf, size_t len);
-#endif
 
 struct websocket_response
 {

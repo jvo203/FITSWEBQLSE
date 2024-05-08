@@ -74,7 +74,6 @@ inline const char *denull(const char *str)
 // HTML server
 struct MHD_Daemon *http_server = NULL;
 
-#ifdef MICROWS
 // WebSocket server
 struct MHD_Daemon *ws_server = NULL;
 
@@ -86,7 +85,6 @@ enum MHD_Result on_ws_connection(void *cls,
                                  const char *upload_data,
                                  size_t *upload_data_size,
                                  void **ptr);
-#endif
 
 static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va_list, int va_count, int composite, char *root);
 void create_root_path(const char *root);
@@ -4899,7 +4897,6 @@ void start_http()
         return;
     }
 
-#ifdef MICROWS
     // start a µHTTP-WS server
     ws_server = MHD_start_daemon(MHD_ALLOW_UPGRADE | MHD_USE_AUTO_INTERNAL_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                  options.ws_port,
@@ -4915,7 +4912,6 @@ void start_http()
         printf("[C] Could not start a libmicrohttpd WebSocket server.\n");
         return;
     }
-#endif
 
 #ifdef SHARE
     int rc = sqlite3_open_v2(SHARE "/splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
@@ -4932,10 +4928,7 @@ void start_http()
 
 #ifdef DEBUG
     printf("[C] µHTTP daemon listening on port %" PRIu16 "... Press CTRL-C to stop it.\n", options.http_port);
-
-#ifdef MICROWS
     printf("[C] µHTTP-WS daemon listening on port %" PRIu16 "... Press CTRL-C to stop it.\n", options.ws_port);
-#endif
 #endif
 };
 
@@ -4948,14 +4941,12 @@ void quiesce_http()
         printf("done\n");
     }
 
-#ifdef MICROWS
     if (ws_server != NULL)
     {
         printf("[C] quiescing the µHTTP-WS daemon...");
         MHD_quiesce_daemon(ws_server);
         printf("done\n");
     }
-#endif
 }
 
 void stop_http()
@@ -4968,7 +4959,6 @@ void stop_http()
         printf("done\n");
     }
 
-#ifdef MICROWS
     if (ws_server != NULL)
     {
         printf("[C] shutting down the µHTTP-WS daemon...");
@@ -4976,7 +4966,6 @@ void stop_http()
         ws_server = NULL;
         printf("done\n");
     }
-#endif
 
     if (splat_db != NULL)
     {

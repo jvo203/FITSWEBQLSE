@@ -383,15 +383,12 @@ int main(int argc, char *argv[])
 
     start_http();
 
-#ifdef MICROWS
     while (s_received_signal == 0)
         sleep(1);
-#endif
 
     // stop accepting new connections
     quiesce_http();
 
-#ifdef MICROWS
     // close all websocket sessions
     int no_sessions = close_sessions();
 
@@ -400,7 +397,6 @@ int main(int argc, char *argv[])
         printf("[C] sleep(10 seconds); waiting for any remaining sessions to close...\n");
         sleep(10);
     }
-#endif
 
     stop_http();
 

@@ -16,7 +16,6 @@
 
 void *send_cluster_heartbeat(void *arg);
 
-#ifdef MICROWS
 #include <microhttpd_ws.h>
 
 // combined WebSocket write functions, to be used from FORTRAN
@@ -2945,11 +2944,7 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
             // 2 - image, 3 - full spectrum refresh,
             // 4 - histogram
 
-#ifdef MICROWS
             size_t ws_offset = ws_len;
-#else
-            size_t ws_offset = 0;
-#endif
 
             memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
             ws_offset += sizeof(float);
@@ -3066,13 +3061,9 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
 
         printf("[C] video_response elapsed: %f [ms], msg_len: %zu bytes.\n", *elapsed, msg_len);
 
-#ifdef MICROWS
         char *payload = NULL;
         size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
         msg_len += ws_len;
-#else
-        char *payload = malloc(msg_len);
-#endif
 
         if (payload != NULL)
         {
@@ -3082,11 +3073,7 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
             // 2 - image, 3 - full spectrum refresh,
             // 4 - histogram, 5 - video frame
 
-#ifdef MICROWS
             size_t ws_offset = ws_len;
-#else
-            size_t ws_offset = 0;
-#endif
 
             memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
             ws_offset += sizeof(float);
@@ -3199,13 +3186,9 @@ void write_ws_composite_video(websocket_session *session, const int *seq_id, con
 
         printf("[C] video_response elapsed: %f [ms], msg_len: %zu bytes.\n", *elapsed, msg_len);
 
-#ifdef MICROWS
         char *payload = NULL;
         size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
         msg_len += ws_len;
-#else
-        char *payload = malloc(msg_len);
-#endif
 
         if (payload != NULL)
         {
@@ -3215,11 +3198,7 @@ void write_ws_composite_video(websocket_session *session, const int *seq_id, con
             // 2 - image, 3 - full spectrum refresh,
             // 4 - histogram, 5 - video frame
 
-#ifdef MICROWS
             size_t ws_offset = ws_len;
-#else
-            size_t ws_offset = 0;
-#endif
 
             memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
             ws_offset += sizeof(float);
@@ -3605,13 +3584,9 @@ void *ws_image_spectrum_response(void *ptr)
     size_t write_offset = 0;
     msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + read_offset + padding;
 
-#ifdef MICROWS
     char *image_payload = NULL;
     size_t ws_len = preamble_ws_frame(&image_payload, msg_len, WS_FRAME_BINARY);
     msg_len += ws_len;
-#else
-    char *image_payload = malloc(msg_len);
-#endif
 
     if (image_payload != NULL)
     {
@@ -3622,11 +3597,7 @@ void *ws_image_spectrum_response(void *ptr)
         // 2 - image, 3 - full spectrum refresh,
         // 4 - histogram
 
-#ifdef MICROWS
         size_t ws_offset = ws_len;
-#else
-        size_t ws_offset = 0;
-#endif
 
         memcpy((char *)image_payload + ws_offset, &ts, sizeof(float));
         ws_offset += sizeof(float);
@@ -3707,13 +3678,9 @@ void *ws_image_spectrum_response(void *ptr)
 
     msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(uint32_t) + compressed_size;
 
-#ifdef MICROWS
     char *spectrum_payload = NULL;
     ws_len = preamble_ws_frame(&spectrum_payload, msg_len, WS_FRAME_BINARY);
     msg_len += ws_len;
-#else
-    char *spectrum_payload = malloc(msg_len);
-#endif
 
     if (spectrum_payload != NULL)
     {
@@ -3724,11 +3691,7 @@ void *ws_image_spectrum_response(void *ptr)
         // 2 - image, 3 - full spectrum refresh,
         // 4 - histogram
 
-#ifdef MICROWS
         size_t ws_offset = ws_len;
-#else
-        size_t ws_offset = 0;
-#endif
 
         memcpy((char *)spectrum_payload + ws_offset, &ts, sizeof(float));
         ws_offset += sizeof(float);
@@ -3894,13 +3857,9 @@ void *spectrum_response(void *ptr)
             {
                 size_t msg_len = sizeof(float) + 3 * sizeof(uint32_t) + compressed_size;
 
-#ifdef MICROWS
                 char *payload = NULL;
                 size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
                 msg_len += ws_len;
-#else
-                char *payload = malloc(msg_len);
-#endif
 
                 if (payload != NULL)
                 {
@@ -3909,11 +3868,7 @@ void *spectrum_response(void *ptr)
                     uint32_t msg_type = 6;
                     uint32_t payload_len = offset; // the original size
 
-#ifdef MICROWS
                     size_t ws_offset = ws_len;
-#else
-                    size_t ws_offset = 0;
-#endif
 
                     memcpy((char *)payload + ws_offset, &ts, sizeof(float));
                     ws_offset += sizeof(float);
@@ -3970,5 +3925,3 @@ void *spectrum_response(void *ptr)
 
     pthread_exit(NULL);
 }
-
-#endif // MICROWS
