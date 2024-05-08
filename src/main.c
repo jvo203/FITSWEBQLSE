@@ -386,9 +386,6 @@ int main(int argc, char *argv[])
 #ifdef MICROWS
     while (s_received_signal == 0)
         sleep(1);
-#else
-    // a blocking mongoose websocket server
-    start_ws();
 #endif
 
     // stop accepting new connections
