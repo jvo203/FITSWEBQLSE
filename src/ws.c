@@ -339,7 +339,7 @@ void delete_session(websocket_session *session)
             struct data_buf *msg = (struct data_buf *)item;
 
 #ifdef DEBUG
-            printf("[C] found a message %zu-bytes long, releasing the memory.\n", msg->len);
+            printf("[C] <delete_session> found a message %zu-bytes long, releasing the memory.\n", msg->len);
 #endif
 
             free(msg->buf);
