@@ -520,7 +520,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         msg->buf = response;
                         msg->len = response_len;
 
-                        // push the message into the queue
+                        // push the message into the send queue
                         g_async_queue_push(session->send_queue, msg);
                     }
 #endif
