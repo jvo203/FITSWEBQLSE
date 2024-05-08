@@ -2010,19 +2010,6 @@ static void *ws_receive_messages(void *cls)
     make_blocking(session->fd);
 #endif
 
-    /* initialize the wake-up-sender condition variable */
-    if (0 != pthread_cond_init(&session->wake_up_sender, NULL))
-    {
-        MHD_upgrade_action(session->urh, MHD_UPGRADE_ACTION_CLOSE);
-
-        // remove a session pointer from the hash table
-        remove_session(session);
-
-        free(session->extra_in);
-        g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
-        pthread_exit(NULL);
-    }
-
     /* initialize the send mutex */
     if (0 != pthread_mutex_init(&session->send_mutex, NULL))
     {
@@ -2032,7 +2019,6 @@ static void *ws_receive_messages(void *cls)
         // remove a session pointer from the hash table
         remove_session(session);
 
-        pthread_cond_destroy(&session->wake_up_sender);
         free(session->extra_in);
         g_atomic_rc_box_release_full(session, (GDestroyNotify)delete_session);
         pthread_exit(NULL);
@@ -2043,7 +2029,6 @@ static void *ws_receive_messages(void *cls)
 
     if (MHD_WEBSOCKET_STATUS_OK != result)
     {
-        pthread_cond_destroy(&session->wake_up_sender);
         pthread_mutex_destroy(&session->send_mutex);
         MHD_upgrade_action(session->urh, MHD_UPGRADE_ACTION_CLOSE);
 
@@ -2061,7 +2046,6 @@ static void *ws_receive_messages(void *cls)
     pthread_t pt;
     if (0 != pthread_create(&pt, NULL, &ws_send_messages, session))
     {
-        pthread_cond_destroy(&session->wake_up_sender);
         pthread_mutex_destroy(&session->send_mutex);
         MHD_upgrade_action(session->urh, MHD_UPGRADE_ACTION_CLOSE);
 
@@ -2148,7 +2132,6 @@ static void *ws_receive_messages(void *cls)
         {
             /* A websocket protocol error occurred */
             session->disconnect = true;
-            pthread_cond_signal(&session->wake_up_sender);
             pthread_join(pt, NULL);
 
             struct MHD_UpgradeResponseHandle *urh = session->urh;
@@ -2158,7 +2141,6 @@ static void *ws_receive_messages(void *cls)
                 MHD_upgrade_action(urh, MHD_UPGRADE_ACTION_CLOSE);
             }
 
-            pthread_cond_destroy(&session->wake_up_sender);
             pthread_mutex_destroy(&session->send_mutex);
 
             MHD_websocket_stream_free(session->ws);
@@ -2174,7 +2156,6 @@ static void *ws_receive_messages(void *cls)
 
     // clean-up
     session->disconnect = true;
-    pthread_cond_signal(&session->wake_up_sender);
     pthread_join(pt, NULL);
     struct MHD_UpgradeResponseHandle *urh = session->urh;
     if (NULL != urh)
@@ -2183,7 +2164,6 @@ static void *ws_receive_messages(void *cls)
         MHD_upgrade_action(urh, MHD_UPGRADE_ACTION_CLOSE);
     }
 
-    pthread_cond_destroy(&session->wake_up_sender);
     pthread_mutex_destroy(&session->send_mutex);
 
     MHD_websocket_stream_free(session->ws);
@@ -2553,16 +2533,6 @@ on_ws_connection(void *cls,
                 }
 
                 session->send_queue = g_async_queue_new_full(free_queue_item);
-
-                session->buf_len = 1024 * sizeof(struct data_buf);
-                session->buf = (char *)malloc(session->buf_len);
-                mg_queue_init(&session->queue, session->buf, session->buf_len); // Init queue
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-                pthread_spin_init(&session->queue_lock, PTHREAD_PROCESS_PRIVATE);
-#else
-                pthread_mutex_init(&session->queue_mtx, NULL);
-#endif
-                pthread_mutex_init(&session->wake_up_cond_mtx, NULL);
 
                 session->flux = NULL;
                 session->dmin = NAN;

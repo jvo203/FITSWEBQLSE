@@ -51,27 +51,11 @@ typedef struct
     char *extra_in;
     size_t extra_in_size;
 
-    // thread-safe asynchronous queue for sending WebSocket messages
-    GAsyncQueue *send_queue;
-
-    /* a mongoose Single-Producer Single-Consumer queue, writes to be protected by a spinlock or a mutex */
-    struct mg_queue queue;
-#if (!defined(__APPLE__) || !defined(__MACH__)) && defined(SPIN)
-    // use a spinlock on Linux
-    pthread_spinlock_t queue_lock;
-#else
-    // use a mutex on macOS
-    pthread_mutex_t queue_mtx; // appending to queue one thread at a time
-#endif
-    char *buf;      // Buffer for messages
-    size_t buf_len; // Buffer length
-
     /* specifies whether the websocket shall be closed (1) or not (0) */
     volatile sig_atomic_t disconnect;
 
-    /* condition variable to wake up the sender of this connection */
-    pthread_cond_t wake_up_sender;
-    pthread_mutex_t wake_up_cond_mtx;
+    // thread-safe asynchronous queue for sending WebSocket messages
+    GAsyncQueue *send_queue;
 
     /* mutex to ensure that no send actions are mixed
        (sending can be done by send and recv thread;
