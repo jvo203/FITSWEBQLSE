@@ -8,8 +8,6 @@
 #include "ws.h"
 #include "mjson.h"
 
-#include "mongoose.h"
-
 #ifdef MICROWS
 #include <microhttpd_ws.h>
 #endif
@@ -540,6 +538,52 @@ void *video_event_loop(void *arg)
     printf("[C] video_event_loop terminated.\n");
 
     pthread_exit(NULL);
+}
+
+static bool mg_is_url_safe(int c)
+{
+    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') ||
+           (c >= 'A' && c <= 'Z') || c == '.' || c == '_' || c == '-' || c == '~';
+}
+
+char *mg_hex(const void *buf, size_t len, char *to)
+{
+    const unsigned char *p = (const unsigned char *)buf;
+    const char *hex = "0123456789abcdef";
+    size_t i = 0;
+    for (; len--; p++)
+    {
+        to[i++] = hex[p[0] >> 4];
+        to[i++] = hex[p[0] & 0x0f];
+    }
+    to[i] = '\0';
+    return to;
+}
+
+size_t mg_url_encode(const char *s, size_t sl, char *buf, size_t len)
+{
+    size_t i, n = 0;
+    for (i = 0; i < sl; i++)
+    {
+        int c = *(unsigned char *)&s[i];
+        if (n + 4 >= len)
+            return 0;
+        if (mg_is_url_safe(c))
+        {
+            buf[n++] = s[i];
+        }
+        else
+        {
+            buf[n++] = '%';
+            mg_hex(&s[i], 1, &buf[n]);
+            n += 2;
+        }
+    }
+    if (len > 0 && n < len - 1)
+        buf[n] = '\0'; // Null-terminate the destination
+    if (len > 0)
+        buf[len - 1] = '\0'; // Always.
+    return n;
 }
 
 void *send_cluster_heartbeat(void *arg)

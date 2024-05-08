@@ -117,7 +117,7 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 # src/wavelet.f90
 # src/lz4.f90
 # src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/json_write.c src/m_mrgrnk.f90 src/mod_sort.f90 src/wavelet.f90 src/fixed_array.f90 src/fixed_array2.f90 src/zfp_array.f90 src/histogram.c src/classifier.f90 src/fits_omp.f90 src/net.f90 src/main.f90
-SRC = $(ZFP_SRC) src/webql.ispc src/microtar.c src/microws.c src/compress.c src/bunzip.c src/zpipe.c src/junzip.c src/unzip.c src/my_threads.c src/cpu.c src/json.c src/ini.c src/mongoose.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/cluster.c src/http.c src/ws.c src/ring_buffer.c src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/fits.f90 src/main.c
+SRC = $(ZFP_SRC) src/webql.ispc src/microtar.c src/microws.c src/compress.c src/bunzip.c src/zpipe.c src/junzip.c src/unzip.c src/my_threads.c src/cpu.c src/json.c src/ini.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/cluster.c src/http.c src/ws.c src/ring_buffer.c src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/fits.f90 src/main.c
 # src/UStorage.f90 src/List.f90 # does not compile
 
 # macOS Accelerate vImage is actually rather slow
