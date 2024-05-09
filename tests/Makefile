@@ -21,4 +21,4 @@ INC = `pkg-config --cflags cfitsio`
 LIBS = `pkg-config --libs cfitsio`
 
 image:
-	CC $(FLAGS) $(INC) -o test_image_compression test_image_compression.c $(LIBS) -lm
+	$(CC) $(FLAGS) $(INC) -o test_image_compression test_image_compression.c $(LIBS) -lm
