@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := intel
+.DEFAULT_GOAL := image
 
 # GCC FORTRAN
 FORT = gfortran
