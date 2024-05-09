@@ -53,14 +53,7 @@ int main()
     pixels = (float *)malloc(npixels * sizeof(float));
     mask = (char *)malloc(npixels * sizeof(char));
 
-    // it's a test program to don't bother with checking pixels and mask pointers for NULL
-
-    /* Note that even though the FITS images contains unsigned integer */
-    /* pixel values (or more accurately, signed integer pixels with    */
-    /* a bias of 32768),  this routine is reading the values into a    */
-    /* float array.   Cfitsio automatically performs the datatype      */
-    /* conversion in cases like this.                                  */
-
+    // it's a test program to don't bother with checking pixels and mask pointers for NULL, just assume they are properly allocated
     if (fits_read_imgnull(fptr, TFLOAT, fpixel, npixels, pixels, mask, &anynull, &status))
         printerror(status);
 
