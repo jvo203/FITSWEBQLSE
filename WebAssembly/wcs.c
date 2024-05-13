@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "wcs.h"
+
+#define maxvalue(A, B) ((A) > (B) ? (A) : (B))
+#define minvalue(A, B) ((A) < (B) ? (A) : (B))
 
 // read a double keyword value
 static int myffgkyd(char *header, int nkeyrec, /* I - FITS header pointer           */
