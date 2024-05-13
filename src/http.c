@@ -173,6 +173,9 @@ static enum MHD_Result http_ok(struct MHD_Connection *connection)
 
     if (NULL != response)
     {
+        // set html response type
+        MHD_add_response_header(response, "Content-Type", "text/html");
+
         ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
         MHD_destroy_response(response);
         return ret;
@@ -191,6 +194,9 @@ static enum MHD_Result http_not_found(struct MHD_Connection *connection)
 
     if (NULL != response)
     {
+        //  set plain text response type
+        MHD_add_response_header(response, "Content-Type", "text/plain");
+
         ret = MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, response);
         MHD_destroy_response(response);
         return ret;
@@ -209,6 +215,9 @@ static enum MHD_Result http_bad_request(struct MHD_Connection *connection)
 
     if (NULL != response)
     {
+        //  set plain text response type
+        MHD_add_response_header(response, "Content-Type", "text/plain");
+
         ret = MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, response);
         MHD_destroy_response(response);
         return ret;
@@ -227,6 +236,9 @@ static enum MHD_Result http_accepted(struct MHD_Connection *connection)
 
     if (NULL != response)
     {
+        //  set plain text response type
+        MHD_add_response_header(response, "Content-Type", "text/plain");
+
         ret = MHD_queue_response(connection, MHD_HTTP_ACCEPTED, response);
         MHD_destroy_response(response);
         return ret;
@@ -245,6 +257,9 @@ static enum MHD_Result http_no_content(struct MHD_Connection *connection)
 
     if (NULL != response)
     {
+        //  set plain text response type
+        MHD_add_response_header(response, "Content-Type", "text/plain");
+
         ret = MHD_queue_response(connection, MHD_HTTP_NO_CONTENT, response);
         MHD_destroy_response(response);
         return ret;
@@ -263,6 +278,9 @@ static enum MHD_Result http_acknowledge(struct MHD_Connection *connection)
 
     if (NULL != response)
     {
+        //  set plain text response type
+        MHD_add_response_header(response, "Content-Type", "text/plain");
+
         ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
         MHD_destroy_response(response);
         return ret;
@@ -281,6 +299,9 @@ static enum MHD_Result http_internal_server_error(struct MHD_Connection *connect
 
     if (NULL != response)
     {
+        //  set plain text response type
+        MHD_add_response_header(response, "Content-Type", "text/plain");
+
         ret = MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
         MHD_destroy_response(response);
         return ret;
@@ -299,6 +320,9 @@ static enum MHD_Result http_not_implemented(struct MHD_Connection *connection)
 
     if (NULL != response)
     {
+        //  set plain text response type
+        MHD_add_response_header(response, "Content-Type", "text/plain");
+
         ret = MHD_queue_response(connection, MHD_HTTP_NOT_IMPLEMENTED, response);
         MHD_destroy_response(response);
         return ret;
