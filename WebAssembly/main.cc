@@ -927,10 +927,7 @@ int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_coun
         return -1;
     }
 
-    int status = myffgics(hdr, nkeyrec, &fits->xrval, &fits->yrval, &fits->xrpix, &fits->yrpix, &fits->xinc, &fits->yinc, &fits->rot, fits->type);
-    printf("[myffgics] status: %d\n", status);
-
-    return status;
+    return myffgics(hdr, nkeyrec, &fits->xrval, &fits->yrval, &fits->xrpix, &fits->yrpix, &fits->xinc, &fits->yinc, &fits->rot, fits->type);
 }
 
 unsigned int _malloc(unsigned int size)

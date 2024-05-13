@@ -19,7 +19,6 @@ static int myffgkyd(char *header, int nkeyrec, /* I - FITS header pointer       
 
     for (int i = 0; i < nkeyrec; i++)
     {
-        // printf("%.*s\n", 80, header + i * 80);
         strncpy(hdrLine, header + i * 80, 80);
 
         if (strncmp(hdrLine, keyname, strlen(keyname)) == 0)
