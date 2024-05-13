@@ -99,6 +99,14 @@ function sky2pix(wcs, ra, dec) {
     return [pixcrd[0] - 0.5, pixcrd[1] - 0.5];
 }
 
+function fits_pix_to_world(wcs, x, y) {
+    // wcs 1-indexing for pixel coordinates ?
+    var world = Module.fits_pix_to_world(wcs.index, x + 0.5, y + 0.5);
+    // console.log("world:", world);            
+
+    return [world[0], world[1]];
+}
+
 function round(value, precision, mode) {
     //  discuss at: http://locutus.io/php/round/
     // original by: Philip Peterson
@@ -6769,7 +6777,10 @@ function display_dataset_info() {
 
     let orig_x = fitsData.width / 2;
     let orig_y = fitsData.height / 2;
+    let _world = fits_pix_to_world(fitsData, orig_x, orig_y);
     let world = pix2sky(fitsData, orig_x, orig_y);
+
+    console.log("world:", world, "_world:", _world);
 
     xradec[0] = world[0] / toDegrees;
     xradec[1] = world[1] / toDegrees;
