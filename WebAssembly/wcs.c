@@ -57,6 +57,9 @@ int myffgkys(char *header, int nkeyrec, // I - FITS header pointer
             if (string[strlen(string) - 1] == '\'')
                 string[strlen(string) - 1] = '\0';
 
+            // copy the string into the value
+            strncpy(value, string, FLEN_VALUE);
+
             *status = 0;
             return 0;
         }
