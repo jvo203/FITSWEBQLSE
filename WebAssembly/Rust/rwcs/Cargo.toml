@@ -10,9 +10,13 @@ crate-type = ["cdylib", "rlib"]
 [features]
 default = ["console_error_panic_hook", "wee_alloc"]
 
+# "wee_alloc" feature enables use of the `wee_alloc` crate, which is a tiny
+# allocator for wasm that is only ~1K in code size. This is great for code size!
+
 [dependencies]
 wasm-bindgen = "0.2.84"
 cfg-if = "1.0.0"
+wee_alloc = { version = "0.4.5", optional = true }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
