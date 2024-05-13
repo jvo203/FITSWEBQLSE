@@ -939,7 +939,6 @@ val fits_pix_to_world(int index, double x, double y)
     if (prm != NULL)
     {
         struct fitswcs *fits = prm[index - 1];
-        // wcsp2s(wcs[index - 1], 1, 2, pixcrd, imgcrd, phi, theta, coords, status);
         status = ffwldp(xpix, ypix, fits->xrval, fits->yrval, fits->xrpix, fits->yrpix, fits->xinc, fits->yinc, fits->rot, fits->type, &xpos, &ypos, &status);
     }
 
