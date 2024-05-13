@@ -3,11 +3,7 @@ mod utils;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, rwcs!");
+pub fn init_wcs(s: &str, nkeyrec: i32) {
+    // print the string s to the console
+    println!("no. keywords: {}, str: {}", nkeyrec, s);
 }
