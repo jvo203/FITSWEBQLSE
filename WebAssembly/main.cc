@@ -930,6 +930,36 @@ int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_coun
     return myffgics(hdr, nkeyrec, &fits->xrval, &fits->yrval, &fits->xrpix, &fits->yrpix, &fits->xinc, &fits->yinc, &fits->rot, fits->type);
 }
 
+val fits_pix_to_world(int index, double x, double y)
+{
+    int status = 0;
+    double xpos, ypos;
+    double xpix = x, ypix = y;
+
+    if (prm != NULL)
+    {
+        struct fitswcs *fits = prm[index - 1];
+        // wcsp2s(wcs[index - 1], 1, 2, pixcrd, imgcrd, phi, theta, coords, status);
+        status = ffwldp(xpix, ypix, fits->xrval, fits->yrval, fits->xrpix, fits->yrpix, fits->xinc, fits->yinc, fits->rot, fits->type, &xpos, &ypos, &status);
+    }
+
+    // if status != 0 then fill-in coords with NaN
+    if (status != 0)
+    {
+        printf("[WCS] ffwldp status: %d\n", status);
+
+        coords[0] = NAN;
+        coords[1] = NAN;
+    }
+    else
+    {
+        coords[0] = xpos;
+        coords[1] = ypos;
+    }
+
+    return val(typed_memory_view(coordsLength, coords));
+}
+
 unsigned int _malloc(unsigned int size)
 {
     return (unsigned int)malloc(size);
@@ -962,6 +992,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("pix2sky", &pix2sky);
     function("sky2pix", &sky2pix);
     function("fits_read_img_coord", &fits_read_img_coord);
+    function("fits_pix_to_world", &fits_pix_to_world);
     function("_malloc", &_malloc);
     function("_free", &_free);
 }
