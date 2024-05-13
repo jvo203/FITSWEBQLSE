@@ -903,16 +903,6 @@ val sky2pix(int index, double ra, double dec)
 // WCS utility functions (CFITSIO)
 int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_count)
 {
-    int status = 0;
-
-    char *hdr = (char *)header;
-
-    // printf nkeyrec * 80 bytes of header
-    for (int i = 0; i < nkeyrec; i++)
-    {
-        printf("%.*s\n", 80, hdr + i * 80);
-    }
-
     if (prm == NULL)
     {
         prm = (struct fitswcs **)calloc(va_count, sizeof(struct fitswcs *));
@@ -929,6 +919,7 @@ int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_coun
     prm[index - 1] = (struct fitswcs *)malloc(sizeof(struct fitswcs));
 
     struct fitswcs *fits = prm[index - 1];
+    char *hdr = (char *)header;
 
     if (fits == NULL)
     {
@@ -936,7 +927,7 @@ int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_coun
         return -1;
     }
 
-    status = myffgics(hdr, nkeyrec, &fits->xrval, &fits->yrval, &fits->xrpix, &fits->yrpix, &fits->xinc, &fits->yinc, &fits->rot, fits->type);
+    int status = myffgics(hdr, nkeyrec, &fits->xrval, &fits->yrval, &fits->xrpix, &fits->yrpix, &fits->xinc, &fits->yinc, &fits->rot, fits->type);
     printf("[myffgics] status: %d\n", status);
 
     return status;

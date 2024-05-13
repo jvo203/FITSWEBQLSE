@@ -1,4 +1,33 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "wcs.h"
+
+// read a double keyword value
+static int myffgkyd(char *header, int nkeyrec, /* I - FITS header pointer           */
+                    const char *keyname,       /* I - keyword name                 */
+                    double *value,             /* O - keyword value                */
+                    int *status)               /* O - error status                 */
+{
+    char hdrLine[FLEN_CARD]; /* FITS header line */
+    hdrLine[sizeof(hdrLine) - 1] = '\0';
+
+    for (int i = 0; i < nkeyrec; i++)
+    {
+        // printf("%.*s\n", 80, header + i * 80);
+        strncpy(hdrLine, header + i * 80, 80);
+
+        if (strncmp(hdrLine, keyname, strlen(keyname)) == 0)
+        {
+            *value = atof(hdrLine + 10);
+            *status = 0;
+            return 0;
+        }
+    }
+
+    return NO_WCS_KEY;
+}
 
 /*--------------------------------------------------------------------------*/
 int myffgics(char *header, int nkeyrec, /* I - FITS header pointer           */

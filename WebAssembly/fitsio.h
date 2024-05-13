@@ -1,5 +1,6 @@
 #pragma once
 
+#define FLEN_CARD 81  /* length of a FITS header card */
 #define FLEN_VALUE 71 /* max length of a keyword value string */
 
 #define ANGLE_TOO_BIG 501  /* celestial angle too large for projection */
