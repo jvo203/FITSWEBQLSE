@@ -343,6 +343,18 @@ int ffwldp(double xpix, double ypix, double xref, double yref,
     if (*status > 0)
         return (*status);
 
+    // print the input values
+    printf("xpix: %f\n", xpix);
+    printf("ypix: %f\n", ypix);
+    printf("xref: %f\n", xref);
+    printf("yref: %f\n", yref);
+    printf("xrefpix: %f\n", xrefpix);
+    printf("yrefpix: %f\n", yrefpix);
+    printf("xinc: %f\n", xinc);
+    printf("yinc: %f\n", yinc);
+    printf("rot: %f\n", rot);
+    printf("type: %s\n", type);
+
     /*   Offset from ref pixel  */
     dx = (xpix - xrefpix) * xinc;
     dy = (ypix - yrefpix) * yinc;

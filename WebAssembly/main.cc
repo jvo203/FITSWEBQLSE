@@ -34,12 +34,6 @@ extern "C"
 #include <wcslib/wcs.h>
 }
 
-extern "C"
-{
-    // CFITSIO WCS
-#include <wcs.h>
-}
-
 // Mathematica v10 MatrixPlot colourmap
 #define NO_COLOURS 9
 static const float math_x[] = {0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0, 1.0};
@@ -63,7 +57,6 @@ static size_t pvLength = 0;
 
 // WCSLIB
 static struct wcsprm **wcs = NULL;
-static struct fitswcs **prm = NULL;
 static double coords[2] = {0.0, 0.0};
 static size_t coordsLength = 2;
 
@@ -900,65 +893,6 @@ val sky2pix(int index, double ra, double dec)
     return val(typed_memory_view(coordsLength, coords));
 }
 
-// WCS utility functions (CFITSIO)
-int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_count)
-{
-    if (prm == NULL)
-    {
-        prm = (struct fitswcs **)calloc(va_count, sizeof(struct fitswcs *));
-
-        if (prm == NULL)
-        {
-            printf("[fits_read_img_coord] failed to allocate memory for prm.\n");
-            return -1;
-        }
-        else
-            prm[index - 1] = NULL;
-    }
-
-    prm[index - 1] = (struct fitswcs *)malloc(sizeof(struct fitswcs));
-
-    struct fitswcs *fits = prm[index - 1];
-    char *hdr = (char *)header;
-
-    if (fits == NULL)
-    {
-        printf("[fits_read_img_coord] failed to allocate memory for fitswcs.\n");
-        return -1;
-    }
-
-    return myffgics(hdr, nkeyrec, &fits->xrval, &fits->yrval, &fits->xrpix, &fits->yrpix, &fits->xinc, &fits->yinc, &fits->rot, fits->type);
-}
-
-val fits_pix_to_world(int index, double x, double y)
-{
-    int status = 0;
-    double xpos, ypos;
-    double xpix = x, ypix = y;
-
-    if (prm != NULL)
-    {
-        struct fitswcs *fits = prm[index - 1];
-        status = ffwldp(xpix, ypix, fits->xrval, fits->yrval, fits->xrpix, fits->yrpix, fits->xinc, fits->yinc, fits->rot, fits->type, &xpos, &ypos, &status);
-    }
-
-    // if status != 0 then fill-in coords with NaN
-    if (status != 0)
-    {
-        printf("[WCS] ffwldp status: %d\n", status);
-
-        coords[0] = NAN;
-        coords[1] = NAN;
-    }
-    else
-    {
-        coords[0] = xpos;
-        coords[1] = ypos;
-    }
-
-    return val(typed_memory_view(coordsLength, coords));
-}
-
 unsigned int _malloc(unsigned int size)
 {
     return (unsigned int)malloc(size);
@@ -990,8 +924,6 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("initWcs", &initWcs);
     function("pix2sky", &pix2sky);
     function("sky2pix", &sky2pix);
-    function("fits_read_img_coord", &fits_read_img_coord);
-    function("fits_pix_to_world", &fits_pix_to_world);
     function("_malloc", &_malloc);
     function("_free", &_free);
 }

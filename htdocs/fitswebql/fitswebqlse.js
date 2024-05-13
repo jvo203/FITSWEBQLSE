@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-05-13.1";
+    return "JS2024-05-13.2";
 }
 
 function uuidv4() {
@@ -55,34 +55,6 @@ function string2buffer(str) {
     return buffer;
 }
 
-function _pix2sky(wcs, x, y) {
-    return wcs.ready
-        .then(_ => {
-            // wcslib uses 1-indexing for pixel coordinates
-            var world = Module.pix2sky(wcs.index, x + 1, y + 1);
-            // console.log("world:", world);            
-
-            return [world[0], world[1]];
-        })
-        .catch(err => {
-            console.log(err);
-        });
-}
-
-function _sky2pix(wcs, ra, dec) {
-    return wcs.ready
-        .then(_ => {
-            var pixcrd = Module.sky2pix(wcs.index, ra, dec);
-            // console.log("pixcrd:", pixcrd);            
-
-            // wcslib uses 1-indexing for pixel coordinates
-            return [pixcrd[0] - 1, pixcrd[1] - 1];
-        })
-        .catch(err => {
-            console.log(err);
-        });
-}
-
 function pix2sky(wcs, x, y) {
     // wcslib uses 1-indexing for pixel coordinates
     var world = Module.pix2sky(wcs.index, x + 0.5, y + 0.5);
@@ -97,14 +69,6 @@ function sky2pix(wcs, ra, dec) {
 
     // wcslib uses 1-indexing for pixel coordinates
     return [pixcrd[0] - 0.5, pixcrd[1] - 0.5];
-}
-
-function fits_pix_to_world(wcs, x, y) {
-    // wcs 1-indexing for pixel coordinates ?
-    var world = Module.fits_pix_to_world(wcs.index, x + 0.5, y + 0.5);
-    // console.log("world:", world);            
-
-    return [world[0], world[1]];
 }
 
 function round(value, precision, mode) {
@@ -6777,10 +6741,7 @@ function display_dataset_info() {
 
     let orig_x = fitsData.width / 2;
     let orig_y = fitsData.height / 2;
-    let _world = fits_pix_to_world(fitsData, orig_x, orig_y);
     let world = pix2sky(fitsData, orig_x, orig_y);
-
-    console.log("world:", world, "_world:", _world);
 
     xradec[0] = world[0] / toDegrees;
     xradec[1] = world[1] / toDegrees;
@@ -13193,6 +13154,7 @@ function setup_image_selection() {
             // console.log("scale:", scale, "ax:", ax, "ay:", ay, "x:", x, "y:", y, "orig_x:", orig_x, "orig_y:", orig_y);
 
             let world = pix2sky(fitsData, orig_x, orig_y);
+
             // if either world value is NaN throw an error
             if (isNaN(world[0]) || isNaN(world[1]))
                 throw new Error("NaN WCS");
@@ -17407,10 +17369,6 @@ async function display_FITS_header(index) {
                         headerPtr = Module._malloc(nHeaderBytes);
                         headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
                         headerHeap.set(new Uint8Array(header));
-
-                        // for comparison call the CFITSIO routine too
-                        stat = Module.fits_read_img_coord(index, headerHeap.byteOffset, nkeyrec, va_count);
-                        console.log("fits_read_img_coord() status: ", stat);
 
                         // Use byte offset to pass header string to libwcs                    
                         stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
