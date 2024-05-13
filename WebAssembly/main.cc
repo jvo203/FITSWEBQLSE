@@ -904,7 +904,6 @@ val sky2pix(int index, double ra, double dec)
 int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_count)
 {
     int status = 0;
-    struct fitswcs *fits = NULL;
 
     char *hdr = (char *)header;
 
@@ -928,7 +927,8 @@ int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_coun
     }
 
     prm[index - 1] = (struct fitswcs *)malloc(sizeof(struct fitswcs));
-    fits = prm[index - 1];
+
+    struct fitswcs *fits = prm[index - 1];
 
     if (fits == NULL)
     {
@@ -936,7 +936,10 @@ int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_coun
         return -1;
     }
 
-    return myffgics(hdr, nkeyrec, &fits->xrval, &fits->yrval, &fits->xrpix, &fits->yrpix, &fits->xinc, &fits->yinc, &fits->rot, fits->type);
+    status = myffgics(hdr, nkeyrec, &fits->xrval, &fits->yrval, &fits->xrpix, &fits->yrpix, &fits->xinc, &fits->yinc, &fits->rot, fits->type);
+    printf("[myffgics] status: %d\n", status);
+
+    return status;
 }
 
 unsigned int _malloc(unsigned int size)
