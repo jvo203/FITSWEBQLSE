@@ -34,6 +34,12 @@ extern "C"
 #include <wcslib/wcs.h>
 }
 
+extern "C"
+{
+    // CFITSIO WCS
+#include <wcs.h>
+}
+
 // Mathematica v10 MatrixPlot colourmap
 #define NO_COLOURS 9
 static const float math_x[] = {0.0, 0.166667, 0.333333, 0.499999, 0.5, 0.500001, 0.666667, 0.833333, 1.0, 1.0};
@@ -55,7 +61,9 @@ static size_t spectrumLength = 0;
 static unsigned char *pvBuffer = NULL;
 static size_t pvLength = 0;
 
+// WCSLIB
 static struct wcsprm **wcs = NULL;
+static struct fitswcs **prm = NULL;
 static double coords[2] = {0.0, 0.0};
 static size_t coordsLength = 2;
 
@@ -827,8 +835,8 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     return wasmBuffer;
 }
 
-// WCS utility functions
-int initWcs(int index, /*char **/ unsigned int header, int nkeyrec, int va_count)
+// WCS utility functions (WCSLIB)
+int initWcs(int index, unsigned int header, int nkeyrec, int va_count)
 {
     int relax = WCSHDR_all, ctrl = 0; // 4 for a full telemetry report, 0 for nothing
     int nreject, nwcs, stat;
@@ -892,6 +900,33 @@ val sky2pix(int index, double ra, double dec)
     return val(typed_memory_view(coordsLength, coords));
 }
 
+// WCS utility functions (CFITSIO)
+int fits_read_img_coord(int index, unsigned int header, int nkeyrec, int va_count)
+{
+    int status = 0;
+
+    char *hdr = (char *)header;
+
+    // printf nkeyrec * 80 bytes of header
+    for (int i = 0; i < nkeyrec; i++)
+    {
+        printf("%.*s\n", 80, hdr + i * 80);
+    }
+
+    if (prm == NULL)
+    {
+        prm = (struct fitswcs **)calloc(va_count, sizeof(struct fitswcs *));
+
+        if (prm == NULL)
+        {
+            printf("[fits_read_img_coord] failed to allocate memory for wcs.\n");
+            return -1;
+        }
+    }
+
+    return status;
+}
+
 unsigned int _malloc(unsigned int size)
 {
     return (unsigned int)malloc(size);
@@ -923,6 +958,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("initWcs", &initWcs);
     function("pix2sky", &pix2sky);
     function("sky2pix", &sky2pix);
+    function("fits_read_img_coord", &fits_read_img_coord);
     function("_malloc", &_malloc);
     function("_free", &_free);
 }

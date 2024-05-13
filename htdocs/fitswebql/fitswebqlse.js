@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-04-19.1";
+    return "JS2024-05-13.0";
 }
 
 function uuidv4() {
@@ -17395,6 +17395,10 @@ async function display_FITS_header(index) {
                         headerPtr = Module._malloc(nHeaderBytes);
                         headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
                         headerHeap.set(new Uint8Array(header));
+
+                        // for comparison call the CFITSIO routine too
+                        stat = Module.fits_read_img_coord(index, headerHeap.byteOffset, nkeyrec, va_count);
+                        console.log("fits_read_img_coord() status: ", stat);
 
                         // Use byte offset to pass header string to libwcs                    
                         stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
