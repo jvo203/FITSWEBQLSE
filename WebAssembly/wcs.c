@@ -30,44 +30,46 @@ int myffgics(char *header, int nkeyrec, /* I - FITS header pointer           */
     double toler = .0002; /* tolerance for angles to agree (radians) */
                           /*   (= approximately 0.01 degrees) */
 
+    int status = 0;
+
     tstat = 0;
-    if (ffgkyd(fptr, "CRVAL1", xrval, NULL, &tstat))
+    if (myffgkyd(header, nkeyrec, "CRVAL1", xrval, &tstat))
         *xrval = 0.;
 
     tstat = 0;
-    if (ffgkyd(fptr, "CRVAL2", yrval, NULL, &tstat))
+    if (myffgkyd(header, nkeyrec, "CRVAL2", yrval, &tstat))
         *yrval = 0.;
 
     tstat = 0;
-    if (ffgkyd(fptr, "CRPIX1", xrpix, NULL, &tstat))
+    if (myffgkyd(header, nkeyrec, "CRPIX1", xrpix, &tstat))
         *xrpix = 0.;
 
     tstat = 0;
-    if (ffgkyd(fptr, "CRPIX2", yrpix, NULL, &tstat))
+    if (myffgkyd(header, nkeyrec, "CRPIX2", yrpix, &tstat))
         *yrpix = 0.;
 
     /* look for CDELTn first, then CDi_j keywords */
     tstat = 0;
-    if (ffgkyd(fptr, "CDELT1", xinc, NULL, &tstat))
+    if (myffgkyd(header, nkeyrec, "CDELT1", xinc, &tstat))
     {
         /* CASE 1: no CDELTn keyword, so look for the CD matrix */
         tstat = 0;
-        if (ffgkyd(fptr, "CD1_1", &cd11, NULL, &tstat))
+        if (myffgkyd(header, nkeyrec, "CD1_1", &cd11, &tstat))
             tstat = 0; /* reset keyword not found error */
         else
             cd_exists = 1; /* found at least 1 CD_ keyword */
 
-        if (ffgkyd(fptr, "CD2_1", &cd21, NULL, &tstat))
+        if (myffgkyd(header, nkeyrec, "CD2_1", &cd21, &tstat))
             tstat = 0; /* reset keyword not found error */
         else
             cd_exists = 1; /* found at least 1 CD_ keyword */
 
-        if (ffgkyd(fptr, "CD1_2", &cd12, NULL, &tstat))
+        if (myffgkyd(header, nkeyrec, "CD1_2", &cd12, &tstat))
             tstat = 0; /* reset keyword not found error */
         else
             cd_exists = 1; /* found at least 1 CD_ keyword */
 
-        if (ffgkyd(fptr, "CD2_2", &cd22, NULL, &tstat))
+        if (myffgkyd(header, nkeyrec, "CD2_2", &cd22, &tstat))
             tstat = 0; /* reset keyword not found error */
         else
             cd_exists = 1; /* found at least 1 CD_ keyword */
@@ -96,7 +98,7 @@ int myffgics(char *header, int nkeyrec, /* I - FITS header pointer           */
             {
                 /* angles don't agree, so looks like there is some skewness */
                 /* between the axes.  Return with an error to be safe. */
-                *status = APPROX_WCS_KEY;
+                status = APPROX_WCS_KEY;
             }
 
             phia = (phia + phib) / 2.; /* use the average of the 2 values */
@@ -121,42 +123,42 @@ int myffgics(char *header, int nkeyrec, /* I - FITS header pointer           */
 
             /* there was no CDELT1 keyword, but check for CDELT2 just in case */
             tstat = 0;
-            if (ffgkyd(fptr, "CDELT2", yinc, NULL, &tstat))
+            if (myffgkyd(header, nkeyrec, "CDELT2", yinc, &tstat))
                 *yinc = 1.;
 
             tstat = 0;
-            if (ffgkyd(fptr, "CROTA2", rot, NULL, &tstat))
+            if (myffgkyd(header, nkeyrec, "CROTA2", rot, &tstat))
                 *rot = 0.;
         }
     }
     else /* Case 2: CDELTn + optional PC matrix */
     {
-        if (ffgkyd(fptr, "CDELT2", yinc, NULL, &tstat))
+        if (myffgkyd(header, nkeyrec, "CDELT2", yinc, &tstat))
             *yinc = 1.;
 
         tstat = 0;
-        if (ffgkyd(fptr, "CROTA2", rot, NULL, &tstat))
+        if (myffgkyd(header, nkeyrec, "CROTA2", rot, &tstat))
         {
             *rot = 0.;
 
             /* no CROTA2 keyword, so look for the PC matrix */
             tstat = 0;
-            if (ffgkyd(fptr, "PC1_1", &pc11, NULL, &tstat))
+            if (myffgkyd(header, nkeyrec, "PC1_1", &pc11, &tstat))
                 tstat = 0; /* reset keyword not found error */
             else
                 pc_exists = 1; /* found at least 1 PC_ keyword */
 
-            if (ffgkyd(fptr, "PC2_1", &pc21, NULL, &tstat))
+            if (myffgkyd(header, nkeyrec, "PC2_1", &pc21, &tstat))
                 tstat = 0; /* reset keyword not found error */
             else
                 pc_exists = 1; /* found at least 1 PC_ keyword */
 
-            if (ffgkyd(fptr, "PC1_2", &pc12, NULL, &tstat))
+            if (myffgkyd(header, nkeyrec, "PC1_2", &pc12, &tstat))
                 tstat = 0; /* reset keyword not found error */
             else
                 pc_exists = 1; /* found at least 1 PC_ keyword */
 
-            if (ffgkyd(fptr, "PC2_2", &pc22, NULL, &tstat))
+            if (myffgkyd(header, nkeyrec, "PC2_2", &pc22, &tstat))
                 tstat = 0; /* reset keyword not found error */
             else
                 pc_exists = 1; /* found at least 1 PC_ keyword */
@@ -185,7 +187,7 @@ int myffgics(char *header, int nkeyrec, /* I - FITS header pointer           */
                 {
                     /* angles don't agree, so looks like there is some skewness */
                     /* between the axes.  Return with an error to be safe. */
-                    *status = APPROX_WCS_KEY;
+                    status = APPROX_WCS_KEY;
                 }
 
                 phia = (phia + phib) / 2.; /* use the average of the 2 values */
@@ -196,7 +198,7 @@ int myffgics(char *header, int nkeyrec, /* I - FITS header pointer           */
 
     /* get the type of projection, if any */
     tstat = 0;
-    if (ffgkys(fptr, "CTYPE1", ctype, NULL, &tstat))
+    if (myffgkys(header, nkeyrec, "CTYPE1", ctype, &tstat))
         type[0] = '\0';
     else
     {
@@ -228,5 +230,5 @@ int myffgics(char *header, int nkeyrec, /* I - FITS header pointer           */
         }
     }
 
-    return (*status);
+    return status;
 }
