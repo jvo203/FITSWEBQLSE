@@ -29,6 +29,36 @@ static int myffgkyd(char *header, int nkeyrec, /* I - FITS header pointer       
     return NO_WCS_KEY;
 }
 
+// read a string keyword value
+int myffgkys(char *header, int nkeyrec, // I - FITS header pointer
+             const char *keyname,       // I - keyword name
+             char *value,               // O - keyword value
+             int *status)               // O - error status
+{
+    char hdrLine[FLEN_CARD]; // FITS header line
+    hdrLine[sizeof(hdrLine) - 1] = '\0';
+
+    for (int i = 0; i < nkeyrec; i++)
+    {
+        strncpy(hdrLine, header + i * 80, 80);
+
+        if (strncmp(hdrLine, keyname, strlen(keyname)) == 0)
+        {
+            char string[FLEN_CARD] = "";
+
+            sscanf(hdrLine + 10, "'%s'", string);
+
+            if (string[strlen(string) - 1] == '\'')
+                string[strlen(string) - 1] = '\0';
+
+            *status = 0;
+            return 0;
+        }
+    }
+
+    return NO_WCS_KEY;
+}
+
 /*--------------------------------------------------------------------------*/
 int myffgics(char *header, int nkeyrec, /* I - FITS header pointer           */
              double *xrval,             /* O - X reference value           */

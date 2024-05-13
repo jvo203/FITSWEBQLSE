@@ -25,9 +25,3 @@ int myffgics(char *header, int nkeyrec, /* I - FITS header pointer           */
              double *yinc,              /* O - Y increment per pixel       */
              double *rot,               /* O - rotation angle (degrees)    */
              char *type);               /* O - type of projection ('-tan') */
-
-// read a string keyword value
-int myffgkys(char *header, int nkeyrec, // I - FITS header pointer
-             const char *keyname,       // I - keyword name
-             char *value,               // O - keyword value
-             int *status);              // O - error status
