@@ -13653,6 +13653,7 @@ async function fetch_spectral_lines(datasetId, freq_start, freq_end) {
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 404) {
             console.log("No spectral lines found.");
+            return;
         }
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 502) {
