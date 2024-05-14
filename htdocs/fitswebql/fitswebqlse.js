@@ -17360,6 +17360,10 @@ async function display_FITS_header(index) {
         header = string2buffer(headerStr);
         console.log(nkeyrec, headerArray);
 
+        await rwcs;
+        // pass headerStr without the last character to init_wcs_func
+        init_wcs_func(index, headerStr.slice(0, -1), nkeyrec, va_count);
+
         fitsData.ready = new Promise((resolve, reject) => {
             waitForModuleReady().then(_ => {
                 Module.ready
@@ -17394,9 +17398,6 @@ async function display_FITS_header(index) {
                 reject(false);
             });
         });
-
-        // await has_rwcs;
-        init_wcs(index, headerStr, nkeyrec, va_count);
 
         await fitsData.ready;
 
