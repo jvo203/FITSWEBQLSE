@@ -17318,6 +17318,7 @@ async function display_FITS_header(index) {
         var fitsHeader = fitsData.HEADER;
 
         var wcsRegEx = [
+            'BITPIX',
             'DATE-OBS',
             'EQUINOX',
             'WCSAXES',
