@@ -8,7 +8,6 @@ use wasm_bindgen::prelude::*;
 
 extern crate fitsrs;
 extern crate wcs;
-
 extern crate web_sys;
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
@@ -31,7 +30,6 @@ cfg_if! {
 
 #[wasm_bindgen]
 pub fn init_wcs(index: i32, s: &str, n_key_rec: i32, va_count: i32) {
-    // print the string s to the console
     log!(
         "index: {}, #records: {}, str: {}, #datasets: {}",
         index,
