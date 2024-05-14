@@ -4793,6 +4793,19 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         g_string_append(html, "<script async type=\"text/javascript\" src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".min.js\"></script>\n");
     }
 
+    // Rust WebAssembly JS+WASM (sync for now)
+    /*if (options.local)
+    {
+        // local version
+        // g_string_append(html, "<script type=\"text/javascript\" src=\"rwcs.js\"></script>\n");
+        g_string_append(html, "<script type=\"module\" src=\"rwcs.js\"></script>\n");
+    }
+    else
+    {
+        // server version: use the CDN version of WASM files
+        g_string_append(html, "<script type=\"text/javascript\" src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/rwcs.min.js\"></script>\n");
+    }*/
+
     // HTML content
     g_string_append(html, "<title>FITSWEBQLSE</title></head><body>\n");
     g_string_append_printf(html, "<div id='votable' style='width: 0; height: 0;' data-va_count='%d' ", va_count);
@@ -4836,6 +4849,13 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     g_string_append(html, "<script "
                           "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                           "fitswebql/zenscroll-min.js\"></script>\n");
+
+    // append a JS script to call initSync()
+    g_string_append(html, "<script type=\"module\">import init, { init_wcs } from \"./rwcs.js\";"
+                          "init().then(() => {"
+                          "init_wcs(1, 'hello Rust wasm-bindgen', 32, 1);console.log('loaded Rust WASM');"
+                          "});"
+                          "</script>\n");
 
     // the page entry point
     g_string_append(

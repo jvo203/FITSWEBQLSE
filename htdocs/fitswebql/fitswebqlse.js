@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-05-13.2";
+    return "JS2024-05-14.0";
 }
 
 function uuidv4() {
@@ -17394,6 +17394,9 @@ async function display_FITS_header(index) {
                 reject(false);
             });
         });
+
+        // await has_rwcs;
+        init_wcs(index, headerStr, nkeyrec, va_count);
 
         await fitsData.ready;
 

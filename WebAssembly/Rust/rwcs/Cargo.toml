@@ -26,6 +26,10 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 wcs = "0.2.8"
 fitsrs = "0.2.9"
 
+[dependencies.web-sys]
+version = "0.3.69"
+features = ["console"]
+
 [dev-dependencies]
 wasm-bindgen-test = "0.3.42"
 
