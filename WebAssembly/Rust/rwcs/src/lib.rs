@@ -108,29 +108,6 @@ fn parse_generic_card(card: &[u8; 80]) -> Result<Option<Card>, Error> {
     }
 }
 
-fn parse_header<R: Read>(
-    reader: &mut R,
-    num_bytes_read: &mut u64,
-    card_80_bytes_buf: &mut [u8; 80],
-) -> Result<Header<Image>, Error> {
-    let mut cards = HashMap::new();
-
-    /* Consume mandatory keywords */
-    let mut xtension: Image = Xtension::parse(reader, num_bytes_read, card_80_bytes_buf)?;
-
-    /* Consume next non mandatory keywords until `END` is reached */
-    consume_next_card(reader, card_80_bytes_buf, num_bytes_read)?;
-    while let Some(Card { kw, v }) = parse_generic_card(card_80_bytes_buf)? {
-        cards.insert(kw, v);
-        consume_next_card(reader, card_80_bytes_buf, num_bytes_read)?;
-    }
-
-    xtension.update_with_parsed_header(&cards)?;
-
-    /* The last card was a END one */
-    Ok(Header { cards, xtension })
-}
-
 #[wasm_bindgen]
 pub fn init_wcs(index: i32, s: &str, n_key_rec: i32, va_count: i32) {
     utils::set_panic_hook();
@@ -168,12 +145,13 @@ pub fn init_wcs(index: i32, s: &str, n_key_rec: i32, va_count: i32) {
     let header = hdu.get_header();
     log!("Header: {:?}", header);*/
 
-    /*let header: Header<Image> =
-    Header::parse(&mut bytes, &mut num_bytes_read, &mut card_80_bytes_buf).unwrap();*/
+    let header: Header<Image> =
+        Header::parse(&mut bytes, &mut num_bytes_read, &mut card_80_bytes_buf).unwrap();
+    log!("Header: {:?}", header);
 
     /* Consume mandatory keywords */
-    let xtension: Image =
+    /*let xtension: Image =
         Xtension::parse(&mut bytes, &mut num_bytes_read, &mut card_80_bytes_buf).unwrap();
 
-    log!("Xtension: {:?}", xtension);
+    log!("Xtension: {:?}", xtension);*/
 }

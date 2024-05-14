@@ -17356,6 +17356,9 @@ async function display_FITS_header(index) {
             headerArray[i] = headerArray[i].replace(/degree/g, 'deg   ');
         }
 
+        // append a 80-character line beginning with "END" to the headerArray
+        headerArray.push('END'.padEnd(80, ' '));
+
         headerStr = headerArray.join('') + '\0';
         nkeyrec = headerArray.length;
         header = string2buffer(headerStr);
