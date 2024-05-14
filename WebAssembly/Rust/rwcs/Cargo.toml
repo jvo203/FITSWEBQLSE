@@ -24,7 +24,8 @@ wee_alloc = { version = "0.4.5", optional = true }
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.7", optional = true }
 wcs = "0.2.8"
-fitsrs = "0.2.9"
+# fitsrs = "0.2.9"
+fitsrs = { git = "https://github.com/jvo203/fitsrs.git" }
 
 [dependencies.web-sys]
 version = "0.3.69"
