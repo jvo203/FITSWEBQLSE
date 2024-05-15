@@ -4838,7 +4838,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                           "fitswebql/zenscroll-min.js\"></script>\n");
 
     // Rust WebAssembly
-    g_string_append(html, "<script>var rwcs, init_wcs_func, pix2lonlat_func; lonlat2pix_func;</script>\n");
+    g_string_append(html, "<script>var rwcs, init_wcs_func, pix2lonlat_func, lonlat2pix_func;</script>\n");
     g_string_append(html, "<script type=\"module\">import init, {init_wcs, pix2lonlat, lonlat2pix} from \"./rwcs.js\";"
                           "rwcs = init();"
                           "init_wcs_func = init_wcs;"
