@@ -10,6 +10,8 @@ extern crate fitsrs;
 extern crate wcs;
 extern crate web_sys;
 
+use wcs::WCS;
+
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
 macro_rules! log {
     ( $( $t:tt )* ) => {
@@ -54,4 +56,7 @@ pub fn init_wcs(index: i32, s: &str, n_key_rec: i32, va_count: i32) {
     let header: Header<Image> =
         Header::parse(&mut bytes, &mut num_bytes_read, &mut card_80_bytes_buf).unwrap();
     log!("Header: {:?}", header);
+
+    // create a new WCS object from the header
+    let wcs = WCS::new(&header).unwrap();
 }
