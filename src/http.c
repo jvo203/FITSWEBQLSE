@@ -4839,8 +4839,10 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     // WebAssembly Rust
     g_string_append(html, "<script>var rwcs, init_wcs_func, pix2lonlat_func;</script>\n");
-    g_string_append(html, "<script type=\"module\">import init, init_wcs, pix2lonlat from \"./rwcs.js\";"
-                          "rwcs = init(); init_wcs_func = init_wcs; pix2lonlat_func = pix2lonlat;"
+    g_string_append(html, "<script type=\"module\">import init, {init_wcs, pix2lonlat} from \"./rwcs.js\";"
+                          "rwcs = init();"
+                          "init_wcs_func = init_wcs;"
+                          "pix2lonlat_func = pix2lonlat;"
                           "</script>\n");
 
     // the page entry point
