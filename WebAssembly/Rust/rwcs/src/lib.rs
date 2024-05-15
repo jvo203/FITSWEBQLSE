@@ -81,5 +81,5 @@ pub fn pix2lonlat(index: i32, x: f64, y: f64) {
     let xy = ImgXY::new(x - 1.0, y - 1.0);
     let lonlat = wcs.unproj_lonlat(&xy).unwrap();
 
-    log!("[rwcs::pix2sky] {:?}", lonlat);
+    log!("[rwcs::pix2lonlat] {:?}", lonlat);
 }
