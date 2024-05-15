@@ -74,7 +74,14 @@ pub fn init_wcs(index: i32, s: &str) {
 }
 
 #[wasm_bindgen]
-pub fn pix2lonlat(index: i32, x: f64, y: f64) {
+#[derive(Debug)]
+pub struct Sky {
+    pub lon: f64,
+    pub lat: f64,
+}
+
+#[wasm_bindgen]
+pub fn pix2lonlat(index: i32, x: f64, y: f64) -> Sky {
     let binding = DATASETS.read().unwrap();
     let wcs = binding.get(&index).unwrap().read().unwrap();
 
@@ -82,13 +89,12 @@ pub fn pix2lonlat(index: i32, x: f64, y: f64) {
     let lonlat = wcs.unproj_lonlat(&xy).unwrap();
 
     // the lonlat seems to be in radians, convert it to degrees
-    let lon = lonlat.lon().to_degrees();
-    let lat = lonlat.lat().to_degrees();
+    let sky = Sky {
+        lon: lonlat.lon().to_degrees(),
+        lat: lonlat.lat().to_degrees(),
+    };
 
-    log!(
-        "[rwcs::pix2lonlat] {:?} [rad], lon: {} deg, lat: {} deg",
-        lonlat,
-        lon,
-        lat
-    );
+    log!("[rwcs::pix2lonlat] {:?} [rad], {:?} [deg]", lonlat, sky);
+
+    sky
 }

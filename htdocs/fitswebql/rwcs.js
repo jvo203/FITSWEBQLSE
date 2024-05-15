@@ -116,9 +116,11 @@ export function init_wcs(index, s) {
 * @param {number} index
 * @param {number} x
 * @param {number} y
+* @returns {Sky}
 */
 export function pix2lonlat(index, x, y) {
-    wasm.pix2lonlat(index, x, y);
+    const ret = wasm.pix2lonlat(index, x, y);
+    return Sky.__wrap(ret);
 }
 
 let cachedInt32Memory0 = null;
@@ -128,6 +130,60 @@ function getInt32Memory0() {
         cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
     }
     return cachedInt32Memory0;
+}
+
+const SkyFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_sky_free(ptr >>> 0));
+/**
+*/
+export class Sky {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(Sky.prototype);
+        obj.__wbg_ptr = ptr;
+        SkyFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        SkyFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_sky_free(ptr);
+    }
+    /**
+    * @returns {number}
+    */
+    get lon() {
+        const ret = wasm.__wbg_get_sky_lon(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set lon(arg0) {
+        wasm.__wbg_set_sky_lon(this.__wbg_ptr, arg0);
+    }
+    /**
+    * @returns {number}
+    */
+    get lat() {
+        const ret = wasm.__wbg_get_sky_lat(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set lat(arg0) {
+        wasm.__wbg_set_sky_lat(this.__wbg_ptr, arg0);
+    }
 }
 
 async function __wbg_load(module, imports) {
