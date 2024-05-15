@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-05-15.2";
+    return "JS2024-05-15.3";
 }
 
 function uuidv4() {
@@ -68,8 +68,11 @@ function pix2sky(wcs, x, y) {
 }
 
 function sky2pix(wcs, ra, dec) {
+    const { x, y } = lonlat2pix_func(wcs.index, ra, dec);
+    console.log("x:", x, "y:", y);
+
     var pixcrd = Module.sky2pix(wcs.index, ra, dec);
-    // console.log("pixcrd:", pixcrd);            
+    console.log("pixcrd:", pixcrd);
 
     // wcslib uses 1-indexing for pixel coordinates
     return [pixcrd[0] - 0.5, pixcrd[1] - 0.5];
