@@ -123,6 +123,17 @@ export function pix2lonlat(index, x, y) {
     return Sky.__wrap(ret);
 }
 
+/**
+* @param {number} index
+* @param {number} lon
+* @param {number} lat
+* @returns {Pix}
+*/
+export function lonlat2pix(index, lon, lat) {
+    const ret = wasm.lonlat2pix(index, lon, lat);
+    return Pix.__wrap(ret);
+}
+
 let cachedInt32Memory0 = null;
 
 function getInt32Memory0() {
@@ -130,6 +141,60 @@ function getInt32Memory0() {
         cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
     }
     return cachedInt32Memory0;
+}
+
+const PixFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_pix_free(ptr >>> 0));
+/**
+*/
+export class Pix {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(Pix.prototype);
+        obj.__wbg_ptr = ptr;
+        PixFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        PixFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_pix_free(ptr);
+    }
+    /**
+    * @returns {number}
+    */
+    get x() {
+        const ret = wasm.__wbg_get_pix_x(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set x(arg0) {
+        wasm.__wbg_set_pix_x(this.__wbg_ptr, arg0);
+    }
+    /**
+    * @returns {number}
+    */
+    get y() {
+        const ret = wasm.__wbg_get_pix_y(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+    * @param {number} arg0
+    */
+    set y(arg0) {
+        wasm.__wbg_set_pix_y(this.__wbg_ptr, arg0);
+    }
 }
 
 const SkyFinalization = (typeof FinalizationRegistry === 'undefined')

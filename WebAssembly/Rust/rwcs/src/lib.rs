@@ -14,7 +14,7 @@ extern crate fitsrs;
 extern crate wcs;
 extern crate web_sys;
 
-use wcs::{ImgXY, WCS};
+use wcs::{ImgXY, LonLat, WCS};
 
 #[macro_use]
 extern crate lazy_static;
@@ -81,6 +81,13 @@ pub struct Sky {
 }
 
 #[wasm_bindgen]
+#[derive(Debug)]
+pub struct Pix {
+    pub x: f64,
+    pub y: f64,
+}
+
+#[wasm_bindgen]
 pub fn pix2lonlat(index: i32, x: f64, y: f64) -> Sky {
     let binding = DATASETS.read().unwrap();
     let wcs = binding.get(&index).unwrap().read().unwrap();
@@ -97,4 +104,22 @@ pub fn pix2lonlat(index: i32, x: f64, y: f64) -> Sky {
     log!("[rwcs::pix2lonlat] {:?} [rad], {:?} [deg]", lonlat, sky);
 
     sky
+}
+
+#[wasm_bindgen]
+pub fn lonlat2pix(index: i32, lon: f64, lat: f64) -> Pix {
+    let binding = DATASETS.read().unwrap();
+    let wcs = binding.get(&index).unwrap().read().unwrap();
+
+    let lonlat = LonLat::new(lon.to_radians(), lat.to_radians());
+    let xy = wcs.proj_lonlat(&lonlat).unwrap();
+
+    let pix = Pix {
+        x: xy.x(),
+        y: xy.y(),
+    };
+
+    log!("[rwcs::lonlat2pix] {:?} [pix]", pix);
+
+    pix
 }
