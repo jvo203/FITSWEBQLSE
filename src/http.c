@@ -4850,16 +4850,10 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                           "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                           "fitswebql/zenscroll-min.js\"></script>\n");
 
-    // append a JS script to call initSync()
-    /*g_string_append(html, "<script type=\"module\">import init, { init_wcs } from \"./rwcs.js\";"
-                          "init().then(() => {"
-                          "init_wcs(1, 'hello Rust wasm-bindgen', 32, 1);console.log('loaded Rust WASM');"
-                          "});"
-                          "export {init_wcs};"
-                          "</script>\n");*/
-    g_string_append(html, "<script>var rwcs, init_wcs_func;</script>\n");
-    g_string_append(html, "<script type=\"module\">import init, { init_wcs } from \"./rwcs.js\";"
-                          "rwcs = init(); init_wcs_func = init_wcs;"
+    // WebAssembly Rust
+    g_string_append(html, "<script>var rwcs, init_wcs_func, pix2lonlat_func;</script>\n");
+    g_string_append(html, "<script type=\"module\">import init, { init_wcs, pix2lonlat } from \"./rwcs.js\";"
+                          "rwcs = init(); init_wcs_func = init_wcs; pix2lonlat_func = pix2lonlat;"
                           "</script>\n");
 
     // the page entry point

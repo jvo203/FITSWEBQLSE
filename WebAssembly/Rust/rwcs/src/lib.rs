@@ -14,7 +14,7 @@ extern crate fitsrs;
 extern crate wcs;
 extern crate web_sys;
 
-use wcs::WCS;
+use wcs::{ImgXY, WCS};
 
 #[macro_use]
 extern crate lazy_static;
@@ -71,4 +71,15 @@ pub fn init_wcs(index: i32, s: &str) {
         "[rwcs::init_wcs] WCS object created and inserted into DATASETS @ index: {}",
         index
     );
+}
+
+#[wasm_bindgen]
+pub fn pix2lonlat(index: i32, x: f64, y: f64) {
+    let binding = DATASETS.read().unwrap();
+    let wcs = binding.get(&index).unwrap().read().unwrap();
+
+    let xy = ImgXY::new(x - 1.0, y - 1.0);
+    let lonlat = wcs.unproj_lonlat(&xy).unwrap();
+
+    log!("[rwcs::pix2sky] {:?}", lonlat);
 }

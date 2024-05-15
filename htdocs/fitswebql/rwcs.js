@@ -112,6 +112,15 @@ export function init_wcs(index, s) {
     wasm.init_wcs(index, ptr0, len0);
 }
 
+/**
+* @param {number} index
+* @param {number} x
+* @param {number} y
+*/
+export function pix2lonlat(index, x, y) {
+    wasm.pix2lonlat(index, x, y);
+}
+
 let cachedInt32Memory0 = null;
 
 function getInt32Memory0() {
