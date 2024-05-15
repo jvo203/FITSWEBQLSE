@@ -81,5 +81,14 @@ pub fn pix2lonlat(index: i32, x: f64, y: f64) {
     let xy = ImgXY::new(x - 1.0, y - 1.0);
     let lonlat = wcs.unproj_lonlat(&xy).unwrap();
 
-    log!("[rwcs::pix2lonlat] {:?}", lonlat);
+    // the lonlat seems to be in radians, convert it to degrees
+    let lon = lonlat.lon().to_degrees();
+    let lat = lonlat.lat().to_degrees();
+
+    log!(
+        "[rwcs::pix2lonlat] {:?} [rad], lon: {} deg, lat: {} deg",
+        lonlat,
+        lon,
+        lat
+    );
 }
