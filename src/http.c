@@ -4793,19 +4793,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         g_string_append(html, "<script async type=\"text/javascript\" src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".min.js\"></script>\n");
     }
 
-    // Rust WebAssembly JS+WASM (sync for now)
-    /*if (options.local)
-    {
-        // local version
-        // g_string_append(html, "<script type=\"text/javascript\" src=\"rwcs.js\"></script>\n");
-        g_string_append(html, "<script type=\"module\" src=\"rwcs.js\"></script>\n");
-    }
-    else
-    {
-        // server version: use the CDN version of WASM files
-        g_string_append(html, "<script type=\"text/javascript\" src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/rwcs.min.js\"></script>\n");
-    }*/
-
     // HTML content
     g_string_append(html, "<title>FITSWEBQLSE</title></head><body>\n");
     g_string_append_printf(html, "<div id='votable' style='width: 0; height: 0;' data-va_count='%d' ", va_count);
@@ -4852,7 +4839,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     // WebAssembly Rust
     g_string_append(html, "<script>var rwcs, init_wcs_func, pix2lonlat_func;</script>\n");
-    g_string_append(html, "<script type=\"module\">import init, { init_wcs, pix2lonlat } from \"./rwcs.js\";"
+    g_string_append(html, "<script type=\"module\">import init, init_wcs, pix2lonlat from \"./rwcs.js\";"
                           "rwcs = init(); init_wcs_func = init_wcs; pix2lonlat_func = pix2lonlat;"
                           "</script>\n");
 
