@@ -6,11 +6,24 @@ mod utils;
 use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 
+use std::collections::HashMap;
+use std::io::BufReader;
+use std::sync::{Arc, RwLock};
+
 extern crate fitsrs;
 extern crate wcs;
 extern crate web_sys;
 
 use wcs::WCS;
+
+#[macro_use]
+extern crate lazy_static;
+
+// WCS structures
+lazy_static! {
+    static ref DATASETS: Arc<RwLock<HashMap<i32, Arc<RwLock<Box<WCS>>>>>> =
+        Arc::new(RwLock::new(HashMap::new()));
+}
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
 macro_rules! log {
@@ -22,9 +35,6 @@ macro_rules! log {
 use fitsrs::hdu::header::extension::image::Image;
 use fitsrs::hdu::header::Header;
 
-use std::collections::HashMap;
-use std::io::BufReader;
-
 cfg_if! {
     // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global allocator.
     if #[cfg(feature = "wee_alloc")] {
@@ -35,16 +45,8 @@ cfg_if! {
 }
 
 #[wasm_bindgen]
-pub fn init_wcs(index: i32, s: &str, n_key_rec: i32, va_count: i32) {
+pub fn init_wcs(index: i32, s: &str) {
     utils::set_panic_hook();
-
-    log!(
-        "index: {}, #records: {}, str: {}, #datasets: {}",
-        index,
-        n_key_rec,
-        s,
-        va_count
-    );
 
     // create a new BufReader from s
     let mut bytes = BufReader::new(s.as_bytes());
@@ -55,8 +57,18 @@ pub fn init_wcs(index: i32, s: &str, n_key_rec: i32, va_count: i32) {
     // parse the header
     let header: Header<Image> =
         Header::parse(&mut bytes, &mut num_bytes_read, &mut card_80_bytes_buf).unwrap();
-    log!("Header: {:?}", header);
+    log!("[rwcs::init_wcs] {:?}", header);
 
     // create a new WCS object from the header
     let wcs = WCS::new(&header).unwrap();
+
+    DATASETS
+        .write()
+        .unwrap()
+        .insert(index, Arc::new(RwLock::new(Box::new(wcs))));
+
+    log!(
+        "[rwcs::init_wcs] WCS object created and inserted into DATASETS @ index: {}",
+        index
+    );
 }

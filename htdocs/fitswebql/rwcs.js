@@ -105,13 +105,11 @@ function passStringToWasm0(arg, malloc, realloc) {
 /**
 * @param {number} index
 * @param {string} s
-* @param {number} n_key_rec
-* @param {number} va_count
 */
-export function init_wcs(index, s, n_key_rec, va_count) {
+export function init_wcs(index, s) {
     const ptr0 = passStringToWasm0(s, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
-    wasm.init_wcs(index, ptr0, len0, n_key_rec, va_count);
+    wasm.init_wcs(index, ptr0, len0);
 }
 
 let cachedInt32Memory0 = null;

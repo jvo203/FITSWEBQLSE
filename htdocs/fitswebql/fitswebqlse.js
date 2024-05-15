@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-05-14.0";
+    return "JS2024-05-15.0";
 }
 
 function uuidv4() {
@@ -17366,7 +17366,7 @@ async function display_FITS_header(index) {
 
         await rwcs;
         // pass headerStr without the last character to init_wcs_func
-        init_wcs_func(index, headerStr.slice(0, -1), nkeyrec, va_count);
+        init_wcs_func(index, headerStr.slice(0, -1));
 
         fitsData.ready = new Promise((resolve, reject) => {
             waitForModuleReady().then(_ => {

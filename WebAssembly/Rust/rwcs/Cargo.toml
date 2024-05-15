@@ -23,6 +23,7 @@ wee_alloc = { version = "0.4.5", optional = true }
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.7", optional = true }
+lazy_static = "1.4.0"
 # wcs = "0.2.8"
 # fitsrs = "0.2.9"
 fitsrs = { git = "https://github.com/jvo203/fitsrs.git" }
