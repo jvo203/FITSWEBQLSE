@@ -88,7 +88,6 @@ pub fn pix2lonlat(index: i32, x: f64, y: f64) -> Sky {
     let wcs = binding.get(&index).unwrap().read().unwrap();
 
     let xy = ImgXY::new(x - 1.0, y - 1.0);
-
     match wcs.unproj_lonlat(&xy) {
         Some(lonlat) => {
             // the lonlat seems to be in radians, convert it to degrees
