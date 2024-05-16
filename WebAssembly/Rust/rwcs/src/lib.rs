@@ -7,10 +7,8 @@ use cfg_if::cfg_if;
 use wasm_bindgen::prelude::*;
 
 use std::collections::HashMap;
-use std::io::BufReader;
 use std::sync::{Arc, RwLock};
 
-extern crate fitsrs;
 extern crate wcs;
 extern crate web_sys;
 
@@ -32,9 +30,6 @@ macro_rules! log {
     }
 }
 
-use fitsrs::hdu::header::extension::image::Image;
-use fitsrs::hdu::header::Header;
-
 cfg_if! {
     // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global allocator.
     if #[cfg(feature = "wee_alloc")] {
@@ -49,7 +44,7 @@ pub fn init_wcs(index: i32, s: &str) {
     utils::set_panic_hook();
 
     // create a new BufReader from s
-    let mut bytes = BufReader::new(s.as_bytes());
+    /*let mut bytes = BufReader::new(s.as_bytes());
 
     let mut num_bytes_read: u64 = 0;
     let mut card_80_bytes_buf = [0u8; 80];
@@ -57,10 +52,10 @@ pub fn init_wcs(index: i32, s: &str) {
     // parse the header
     let header: Header<Image> =
         Header::parse(&mut bytes, &mut num_bytes_read, &mut card_80_bytes_buf).unwrap();
-    log!("[rwcs::init_wcs] {:?}", header);
+    log!("[rwcs::init_wcs] {:?}", header);*/
 
     // create a new WCS object from the header
-    let wcs = WCS::new(&header).unwrap();
+    let wcs = WCS::new(s).unwrap();
 
     DATASETS
         .write()

@@ -26,7 +26,7 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 lazy_static = "1.4.0"
 # wcs = "0.2.8"
 # fitsrs = "0.2.9"
-fitsrs = { git = "https://github.com/jvo203/fitsrs.git" }
+# fitsrs = { git = "https://github.com/jvo203/fitsrs.git" }
 wcs = { git = "https://github.com/jvo203/wcs-rs.git" }
 
 [dependencies.web-sys]
