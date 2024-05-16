@@ -88,17 +88,29 @@ pub fn pix2lonlat(index: i32, x: f64, y: f64) -> Sky {
     let wcs = binding.get(&index).unwrap().read().unwrap();
 
     let xy = ImgXY::new(x - 1.0, y - 1.0);
-    let lonlat = wcs.unproj_lonlat(&xy).unwrap();
 
-    // the lonlat seems to be in radians, convert it to degrees
-    let sky = Sky {
-        lon: lonlat.lon().to_degrees(),
-        lat: lonlat.lat().to_degrees(),
-    };
+    match wcs.unproj_lonlat(&xy) {
+        Some(lonlat) => {
+            // the lonlat seems to be in radians, convert it to degrees
+            let sky = Sky {
+                lon: lonlat.lon().to_degrees(),
+                lat: lonlat.lat().to_degrees(),
+            };
 
-    log!("[rwcs::pix2lonlat] {:?} [rad], {:?} [deg]", lonlat, sky);
+            log!("[rwcs::pix2lonlat] {:?} [deg]", sky);
 
-    sky
+            sky
+        }
+        None => {
+            // return NaN values
+            let sky = Sky {
+                lon: std::f64::NAN,
+                lat: std::f64::NAN,
+            };
+
+            sky
+        }
+    }
 }
 
 #[wasm_bindgen]
@@ -107,14 +119,25 @@ pub fn lonlat2pix(index: i32, lon: f64, lat: f64) -> Pix {
     let wcs = binding.get(&index).unwrap().read().unwrap();
 
     let lonlat = LonLat::new(lon.to_radians(), lat.to_radians());
-    let xy = wcs.proj_lonlat(&lonlat).unwrap();
+    match wcs.proj_lonlat(&lonlat) {
+        Some(xy) => {
+            let pix = Pix {
+                x: xy.x(), // + 1.0,
+                y: xy.y(), // + 1.0,
+            };
 
-    let pix = Pix {
-        x: xy.x(),
-        y: xy.y(),
-    };
+            log!("[rwcs::lonlat2pix] {:?} [pix]", pix);
 
-    log!("[rwcs::lonlat2pix] {:?} [pix]", pix);
+            pix
+        }
+        None => {
+            // return NaN values
+            let pix = Pix {
+                x: std::f64::NAN,
+                y: std::f64::NAN,
+            };
 
-    pix
+            pix
+        }
+    }
 }
