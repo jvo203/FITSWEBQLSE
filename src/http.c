@@ -4839,12 +4839,14 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 
     // Rust WebAssembly
     g_string_append(html, "<script>var rwcs, init_wcs_func, pix2lonlat_func, lonlat2pix_func;</script>\n");
-    g_string_append(html, "<script type=\"module\">import init, {init_wcs, pix2lonlat, lonlat2pix} from \"./rwcs.js\";"
-                          "rwcs = init();"
+    g_string_append(html, "<script async type=\"module\">import init, {init_wcs, pix2lonlat, lonlat2pix} from \"./rwcs.js\";"
+                          "rwcs = new Promise((resolve, reject) => {init().then( _ => {"
                           "init_wcs_func = init_wcs;"
                           "pix2lonlat_func = pix2lonlat;"
                           "lonlat2pix_func = lonlat2pix;"
-                          "</script>\n");
+                          "resolve(true);})"
+                          ".catch(err => {console.error(err); reject(false);});"
+                          "});</script>\n");
 
     // the page entry point
     g_string_append(
