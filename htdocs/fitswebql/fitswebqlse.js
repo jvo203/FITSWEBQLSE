@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-05-15.3";
+    return "JS2024-05-20.0";
 }
 
 function uuidv4() {
@@ -17371,9 +17371,10 @@ async function display_FITS_header(index) {
         header = string2buffer(headerStr);
         console.log(nkeyrec, headerArray);
 
-        await rwcs;
-        // pass headerStr without the last character to init_wcs_func
-        init_wcs_func(index, headerStr.slice(0, -1));
+        rwcs.then(_ => {
+            // pass headerStr without the last character to init_wcs_func
+            init_wcs_func(index, headerStr.slice(0, -1));
+        });
 
         fitsData.ready = new Promise((resolve, reject) => {
             waitForModuleReady().then(_ => {
