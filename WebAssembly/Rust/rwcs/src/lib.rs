@@ -121,8 +121,8 @@ pub fn lonlat2pix(index: i32, lon: f64, lat: f64) -> Pix {
     match wcs.proj_lonlat(&lonlat) {
         Some(xy) => {
             let pix = Pix {
-                x: xy.x(), // + 1.0,
-                y: xy.y(), // + 1.0,
+                x: xy.x() + 1.0,
+                y: xy.y() + 1.0,
             };
 
             log!("[rwcs::lonlat2pix] {:?} [pix]", pix);
