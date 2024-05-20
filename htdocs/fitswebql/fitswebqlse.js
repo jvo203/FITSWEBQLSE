@@ -17374,7 +17374,10 @@ async function display_FITS_header(index) {
         rwcs.then(_ => {
             // pass headerStr without the last character to init_wcs_func
             init_wcs_func(index, headerStr.slice(0, -1));
-        });
+        })
+            .catch(e => {
+                console.error(e);
+            });
 
         fitsData.ready = new Promise((resolve, reject) => {
             waitForModuleReady().then(_ => {
