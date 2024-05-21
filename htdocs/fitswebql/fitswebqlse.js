@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-05-20.1";
+    return "JS2024-05-21.0";
 }
 
 function uuidv4() {
@@ -57,22 +57,22 @@ function string2buffer(str) {
 
 function pix2sky(wcs, x, y) {
     // call pix2lonlat_func
-    const { lon, lat } = pix2lonlat_func(wcs.index, x + 0.5, y + 0.5);
-    console.log("lon:", lon, "lat:", lat);
+    /*const { lon, lat } = pix2lonlat_func(wcs.index, x + 0.5, y + 0.5);
+    console.log("lon:", lon, "lat:", lat);*/
 
     // wcslib uses 1-indexing for pixel coordinates
     var world = Module.pix2sky(wcs.index, x + 0.5, y + 0.5);
-    console.log("world:", world);
+    // console.log("world:", world);
 
     return [world[0], world[1]];
 }
 
 function sky2pix(wcs, ra, dec) {
-    const { x, y } = lonlat2pix_func(wcs.index, ra, dec);
-    console.log("x:", x, "y:", y);
+    /*const { x, y } = lonlat2pix_func(wcs.index, ra, dec);
+    console.log("x:", x, "y:", y);*/
 
     var pixcrd = Module.sky2pix(wcs.index, ra, dec);
-    console.log("pixcrd:", pixcrd);
+    // console.log("pixcrd:", pixcrd);
 
     // wcslib uses 1-indexing for pixel coordinates
     return [pixcrd[0] - 0.5, pixcrd[1] - 0.5];
@@ -17371,13 +17371,13 @@ async function display_FITS_header(index) {
         header = string2buffer(headerStr);
         console.log(nkeyrec, headerArray);
 
-        rwcs.then(_ => {
+        /*rwcs.then(_ => {
             // pass headerStr without the last character to init_wcs_func
             init_wcs_func(index, headerStr.slice(0, -1));
         })
             .catch(e => {
                 console.error(e);
-            });
+            });*/
 
         fitsData.ready = new Promise((resolve, reject) => {
             waitForModuleReady().then(_ => {
