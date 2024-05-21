@@ -1,7 +1,7 @@
 ## [5.1.10] - 2024-05-21
 
 * completed the removal of the _*mongoose*_ networking library from the server-side C code
-* replaced the _*WCSLIB*_ by _*WSCTools*_ in the client-side WebAssembly, reducing the WASM binary size from 1.1MB to 676KB
+* replaced the _*WCSLIB*_ by _*WCSTools*_ in the client-side WebAssembly, reducing the WASM binary size from 1.1MB to 676KB
 
 ## [5.1.9] - 2024-05-07
 
