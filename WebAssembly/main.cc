@@ -936,7 +936,7 @@ val pix2sky(int index, double x, double y)
 
 val sky2pix(int index, double ra, double dec)
 {
-    int offscl = 0;
+    int offscl = -1;
 
     if (wcs != NULL)
         wcs2pix(wcs[index - 1], ra, dec, &coords[0], &coords[1], &offscl);
