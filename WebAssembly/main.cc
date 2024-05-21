@@ -26,13 +26,24 @@ extern "C"
 #include "conrec.h"
 }
 
-extern "C"
+/*extern "C"
 {
     // WCSLIB
 #include <stdio.h>
 #include <wcslib/wcshdr.h>
 #include <wcslib/wcs.h>
+}*/
+
+extern "C"
+{
+// WCSTools
+#include "wcsinit.h"
 }
+
+// static struct wcsprm **wcs = NULL; // WCSLIB
+static struct WorldCoor **wcs = NULL; // WCSTools
+static double coords[2] = {0.0, 0.0};
+static size_t coordsLength = 2;
 
 // Mathematica v10 MatrixPlot colourmap
 #define NO_COLOURS 9
@@ -54,11 +65,6 @@ static size_t spectrumLength = 0;
 
 static unsigned char *pvBuffer = NULL;
 static size_t pvLength = 0;
-
-// WCSLIB
-static struct wcsprm **wcs = NULL;
-static double coords[2] = {0.0, 0.0};
-static size_t coordsLength = 2;
 
 #include <iostream>
 #include <algorithm>
@@ -829,7 +835,7 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
 }
 
 // WCS utility functions (WCSLIB)
-int initWcs(int index, unsigned int header, int nkeyrec, int va_count)
+/*int initWcs(int index, unsigned int header, int nkeyrec, int va_count)
 {
     int relax = WCSHDR_all, ctrl = 0; // 4 for a full telemetry report, 0 for nothing
     int nreject, nwcs, stat;
@@ -849,9 +855,9 @@ int initWcs(int index, unsigned int header, int nkeyrec, int va_count)
     printf("[WCSLIB] stat: %d, nreject: %d, nwcs: %d\n", stat, nreject, nwcs);
 
     return stat;
-}
+}*/
 
-val pix2sky(int index, double x, double y)
+/*val pix2sky(int index, double x, double y)
 {
     double imgcrd[2], phi[2], theta[2];
     int status[1] = {1};
@@ -870,9 +876,9 @@ val pix2sky(int index, double x, double y)
     }
 
     return val(typed_memory_view(coordsLength, coords));
-}
+}*/
 
-val sky2pix(int index, double ra, double dec)
+/*val sky2pix(int index, double ra, double dec)
 {
     double imgcrd[2], phi[2], theta[2];
     int status[1] = {1};
@@ -885,6 +891,60 @@ val sky2pix(int index, double ra, double dec)
     if (status[0] > 0)
     {
         printf("[WCSLIB] sky2pix status: %d\n", status[0]);
+
+        coords[0] = NAN;
+        coords[1] = NAN;
+    }
+
+    return val(typed_memory_view(coordsLength, coords));
+}*/
+
+// WCS utility functions (WCSTools)
+int initWcs(int index, unsigned int header, int nkeyrec, int va_count)
+{
+    if (wcs == NULL)
+    {
+        wcs = (struct WorldCoor **)calloc(va_count, sizeof(struct WorldCoor *));
+
+        if (wcs == NULL)
+        {
+            printf("[WCSTools] failed to allocate memory for wcs.\n");
+            return -1;
+        }
+    }
+
+    wcs[index - 1] = wcsinit((const char *)header);
+
+    if (wcs[index - 1] == NULL)
+    {
+        printf("[WCSTools] wcsinit failed!\n");
+        return -1;
+    }
+
+    return 0;
+
+    (void)nkeyrec; // unused
+}
+
+val pix2sky(int index, double x, double y)
+{
+    if (wcs != NULL)
+        pix2wcs(wcs[index - 1], x, y, &coords[0], &coords[1]);
+
+    return val(typed_memory_view(coordsLength, coords));
+}
+
+val sky2pix(int index, double ra, double dec)
+{
+    int offscl = 0;
+
+    if (wcs != NULL)
+        wcs2pix(wcs[index - 1], ra, dec, &coords[0], &coords[1], &offscl);
+
+    // if offscl != 0 then fill-in coords with NaN
+    if (offscl != 0)
+    {
+        printf("[WCSTools] wcs2pix offscl: %d\n", offscl);
 
         coords[0] = NAN;
         coords[1] = NAN;

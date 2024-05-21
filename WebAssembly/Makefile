@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := wasm
-VERSION = 24.05.13.0
+VERSION = 24.05.21.0
 
 ZFP = zfp-1.0.0
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
@@ -7,11 +7,16 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 LZ4 = lz4
 LZ4_SRC := $(wildcard $(LZ4)/*.c)
 
-SRC := $(ZFP_SRC) $(LZ4_SRC)
+WCSTOOLS = wcssubs
+# WCSTOOLS_SRC := $(wildcard $(WCSTOOLS)/*.c)
+WCSTOOLS_SRC := $(WCSTOOLS)/wcsinit.c $(WCSTOOLS)/poly.c $(WCSTOOLS)/zpxpos.c $(WCSTOOLS)/wcs.c $(WCSTOOLS)/worldpos.c $(WCSTOOLS)/platepos.c $(WCSTOOLS)/wcslib.c $(WCSTOOLS)/proj.c $(WCSTOOLS)/wcscon.c $(WCSTOOLS)/dsspos.c $(WCSTOOLS)/wcstrig.c $(WCSTOOLS)/cel.c $(WCSTOOLS)/sph.c $(WCSTOOLS)/distort.c $(WCSTOOLS)/hget.c $(WCSTOOLS)/iget.c $(WCSTOOLS)/lin.c $(WCSTOOLS)/tnxpos.c
+
+SRC := $(ZFP_SRC) $(LZ4_SRC) $(WCSTOOLS_SRC)
 OBJ := $(SRC:.cpp=.o)
 OBJ := $(OBJ:.c=.o)
 
-INCLUDE = -I./ -I./$(ZFP)/include -I./$(ZFP)/src -I./$(LZ4) -I/tmp/system/include
+INCLUDE = -I./ -I./$(ZFP)/include -I./$(ZFP)/src -I./$(LZ4) -I./$(WCSTOOLS)
+#-I/tmp/system/include
 LIBRARY = /tmp/system/lib
 CXXFLAGS=-std=c++11 -Oz
 LDFLAGS=-lz --llvm-lto 1
@@ -70,8 +75,9 @@ wcslib.tar.bz2:
 	curl "ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2" -o "/tmp/wcslib.tar.bz2"
 
 wasm: $(FFMPEG_OBJ) $(OBJ)
-	em++ -Oz $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) -L$(LIBRARY) -lwcs $(CXXFLAGS) $(LDFLAGS)
+	em++ -Oz $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) $(CXXFLAGS) $(LDFLAGS)
 
+# -L$(LIBRARY) -lwcs
 # -s "EXPORTED_FUNCTIONS=['_hevc_init','_hevc_destroy','_hevc_decode_nal_unit']"
 
 clean:
