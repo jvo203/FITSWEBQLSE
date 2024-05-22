@@ -36,14 +36,20 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     // load a FITS file
     if (fits_open_file(&fptr, filename, READONLY, &status))
+    {
         printerror(status);
+        return;
+    }
 
     // WCS test
     char *header = NULL;
     int nkeys;
 
     if (fits_hdr2str(fptr, 1, NULL, 0, &header, &nkeys, &status))
+    {
         printerror(status);
+        return;
+    }
 
     printf("header: %s\n", header);
     printf("nkeys: %d\n", nkeys);
