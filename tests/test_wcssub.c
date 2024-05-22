@@ -5,9 +5,8 @@
 // CFITSIO
 #include <fitsio.h>
 
-// WCSLIB
-#include <wcshdr.h>
-#include <wcs.h>
+// WCSTools
+#include "wcsinit.h"
 
 /************************************************************************/
 /* Read a FITS image and compress it with ZFP and OpenEXR               */
