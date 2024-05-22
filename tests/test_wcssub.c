@@ -120,8 +120,8 @@ void test_wcs(const char *filename, const double x, const double y, const double
     if (fits_close_file(fptr, &status))
         printerror(status);
 
-    // release wcs
-    free(wcs);
+    // free the memory
+    wcsfree(wcs);
 
     printf("====================================================\n\n");
 }
