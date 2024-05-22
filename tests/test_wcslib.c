@@ -140,7 +140,7 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
 int main()
 {
-    // test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+    test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
     test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
 
     return 0;
