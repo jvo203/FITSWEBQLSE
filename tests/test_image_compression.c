@@ -35,7 +35,8 @@ int main()
     float *pixels = NULL;
     char *mask = NULL;
 
-    char filename[] = "/mnt/c/Documents and Settings/クリストファー/Downloads/ALMA00000085.fits";
+    // char filename[] = "/mnt/c/Documents and Settings/クリストファー/Downloads/ALMA00000085.fits";
+    char filename[] = "/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits";
 
     status = 0;
 

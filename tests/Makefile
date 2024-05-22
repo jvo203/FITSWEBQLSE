@@ -18,8 +18,8 @@ intel:
 clean:
 	rm -f intel_fixed_array
 
-INC = `pkg-config --cflags cfitsio`
-LIBS = `pkg-config --libs cfitsio`
+INC = `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib`
+LIBS = `pkg-config --libs cfitsio` `pkg-config --cflags wcslib`
 
 image:
 	$(CC) $(FLAGS) $(INC) -o test_image_compression test_image_compression.c $(LIBS) -lm
