@@ -25,17 +25,17 @@ image:
 	$(CC) $(FLAGS) $(INC) -o test_image_compression test_image_compression.c $(LIBS) -lm
 
 wcslib:
-	$(CC) $(FLAGS) $(INC) -o test_wcslib test_wcslib.c $(LIBS) -lm
+	$(CC) $(FLAGS) `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` -o test_wcslib test_wcslib.c `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lm
 
 %.o: %.c
 	$(CC) $(FLAGS) $(INC) -MMD -o $@ -c $<
 
 WCSTOOLS = $(HOME)/Downloads/wcssubs
-SRC := $(WCSTOOLS)/wcsinit.c $(WCSTOOLS)/poly.c $(WCSTOOLS)/zpxpos.c $(WCSTOOLS)/wcs.c $(WCSTOOLS)/worldpos.c $(WCSTOOLS)/platepos.c $(WCSTOOLS)/wcslib.c $(WCSTOOLS)/proj.c $(WCSTOOLS)/wcscon.c $(WCSTOOLS)/dsspos.c $(WCSTOOLS)/wcstrig.c $(WCSTOOLS)/cel.c $(WCSTOOLS)/sph.c $(WCSTOOLS)/distort.c $(WCSTOOLS)/hget.c $(WCSTOOLS)/iget.c $(WCSTOOLS)/lin.c $(WCSTOOLS)/tnxpos.c
+SRC := $(WCSTOOLS)/wcsinit.c $(WCSTOOLS)/poly.c $(WCSTOOLS)/zpxpos.c $(WCSTOOLS)/wcs.c $(WCSTOOLS)/worldpos.c $(WCSTOOLS)/platepos.c $(WCSTOOLS)/wcslib.c $(WCSTOOLS)/proj.c $(WCSTOOLS)/wcscon.c $(WCSTOOLS)/dsspos.c $(WCSTOOLS)/wcstrig.c $(WCSTOOLS)/cel.c $(WCSTOOLS)/sph.c $(WCSTOOLS)/distort.c $(WCSTOOLS)/hget.c $(WCSTOOLS)/iget.c $(WCSTOOLS)/lin.c $(WCSTOOLS)/tnxpos.c $(WCSTOOLS)/hput.c
 OBJ := $(SRC:.c=.o)
 
 INC := `pkg-config --cflags cfitsio` -I$(WCSTOOLS)
 LIBS := `pkg-config --libs cfitsio`
 
 wcssub: $(OBJ)
-	$(CC) $(FLAGS) $(INC) -o test_wcssub test_wcssub.c $(LIBS) -lm
+	$(CC) $(FLAGS) $(INC) $(OBJ) -o test_wcssub test_wcssub.c $(LIBS) -lm

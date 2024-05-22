@@ -30,8 +30,8 @@ void printerror(int status)
 
 void test_wcs(const char *filename, const double x, const double y, const double ra, const double dec)
 {
-    fitsfile *fptr = NULL; /* pointer to the FITS file, defined in fitsio.h */
-    struct wcsprm *wcs = NULL;
+    fitsfile *fptr = NULL;        /* pointer to the FITS file, defined in fitsio.h */
+    struct WorldCoor *wcs = NULL; // WCSTools
 
     int status = 0;
 
@@ -43,35 +43,30 @@ void test_wcs(const char *filename, const double x, const double y, const double
     char *header = NULL;
     int nkeys;
 
-    int relax = WCSHDR_all, ctrl = 4; // 4 for a full telemetry report, 0 for nothing
-    int nreject, nwcs, stat;
-
     if (fits_hdr2str(fptr, 1, NULL, 0, &header, &nkeys, &status))
         printerror(status);
 
     printf("header: %s\n", header);
     printf("nkeys: %d\n", nkeys);
 
-    // allocate wcsprm struct
-    /*wcs = (struct wcsprm *)malloc(sizeof(struct wcsprm));
+    wcs = wcsinit((const char *)header);
     if (wcs == NULL)
     {
-        printf("wcs is NULL\n");
+        printf("[WCSTools] wcsinit failed!\n");
 
+        status = 0;
         if (fits_close_file(fptr, &status))
             printerror(status);
 
         return;
-    }*/
-
-    stat = wcspih(header, nkeys, relax, ctrl, &nreject, &nwcs, &wcs);
-    printf("[WCSLIB] stat: %d, nreject: %d, nwcs: %d\n", stat, nreject, nwcs);
+    }
+    else
+    {
+        printf("[WCSTools] wcsinit success!\n");
+    }
 
     printf("====================================================\n");
 
-    double imgcrd[2] = {0, 0};
-    double phi[2] = {0, 0};
-    double theta[2] = {0, 0};
     double pixcrd[2] = {0, 0};
     double world[2] = {0, 0};
     double coords[2] = {0, 0};
@@ -84,33 +79,23 @@ void test_wcs(const char *filename, const double x, const double y, const double
     pixcrd[0] = x;
     pixcrd[1] = y;
 
-    printf("[WCSLIB] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
-    wcsp2s(wcs, 1, 2, pixcrd, imgcrd, phi, theta, coords, &status);
-    if (status == 0)
-    {
-        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
-        printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
-    }
-    else
-        printf("[WCSLIB] Error: %d\n", status);
+    printf("[WCSTools] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
+    pix2wcs(wcs, x, y, &coords[0], &coords[1]);
+    printf("[WCCTools] world: %f, %f\n", coords[0], coords[1]);
 
     // sky2pix
-    // WCSLIB coordinates
+    // WCS coordinates
     world[0] = coords[0];
     world[1] = coords[1];
+    int offscl = -1;
 
     printf("====================================================\n");
-    printf("[WCSLIB] world: %f, %f\n", world[0], world[1]);
-    wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
-    if (status == 0)
-    {
-        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
-        printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
-    }
+    printf("[WCSTools] world: %f, %f\n", world[0], world[1]);
+    wcs2pix(wcs, world[0], world[1], &coords[0], &coords[1], &offscl);
+    if (offscl == 0)
+        printf("[WCSTools] pixcrd: %f, %f\n", coords[0], coords[1]);
     else
-        printf("[WCSLIB] Error: %d\n", status);
+        printf("[WCSTools] Error: %d\n", offscl);
 
     // ds9 coordinates
     world[0] = ra;
@@ -118,15 +103,11 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     printf("====================================================\n");
     printf("[ds9] world: %f, %f\n", world[0], world[1]);
-    wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
-    if (status == 0)
-    {
-        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
-        printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
-    }
+    wcs2pix(wcs, world[0], world[1], &coords[0], &coords[1], &offscl);
+    if (offscl == 0)
+        printf("[WCSTools] pixcrd: %f, %f\n", coords[0], coords[1]);
     else
-        printf("[WCSLIB] Error: %d\n", status);
+        printf("[WCSTools] Error: %d\n", offscl);
 
     free(header);
 
@@ -134,13 +115,17 @@ void test_wcs(const char *filename, const double x, const double y, const double
     if (fits_close_file(fptr, &status))
         printerror(status);
 
-    wcsvfree(&nwcs, &wcs);
+    // release wcs
+    free(wcs);
+
+    printf("====================================================\n\n");
 }
 
 int main()
 {
-    test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
-    test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+    test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022); // NG file
+    test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452);        // OK file
+    // test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
 
     return 0;
 }
