@@ -94,6 +94,7 @@ pub fn test_wcs(str: &str, x: f64, y: f64, ra: f64, dec: f64) {
 fn main() {
     println!("Comparing the WCS functions with WCSLIB / WCSTools.");
 
+    // passing the ra, dec obtained from SAO ds9
     test_wcs(
         "/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits",
         905.0,
@@ -104,6 +105,7 @@ fn main() {
 
     println!("");
 
+    // passing the ra, dec obtained from SAO ds9
     test_wcs(
         "/Users/chris/Downloads/ALMA01018218.fits",
         856.49056,
