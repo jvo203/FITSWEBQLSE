@@ -65,6 +65,7 @@ void test_wcs(const char *filename, const double x, const double y, const double
         return;
     }
 
+    wcsset(wcs);
     stat = wcspih(header, nkeys, relax, ctrl, &nreject, &nwcs, &wcs);
     printf("[WCSLIB] stat: %d, nreject: %d, nwcs: %d\n", stat, nreject, nwcs);
 
