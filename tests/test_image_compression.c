@@ -53,7 +53,7 @@ int main()
     pixels = (float *)malloc(npixels * sizeof(float));
     mask = (char *)malloc(npixels * sizeof(char));
 
-    // it's a test program to don't bother with checking pixels and mask pointers for NULL, just assume they are properly allocated
+    // it's a test program so don't bother with checking pixels and mask pointers for NULL, just assume they are properly allocated
     if (fits_read_imgnull(fptr, TFLOAT, fpixel, npixels, pixels, mask, &anynull, &status))
         printerror(status);
 
