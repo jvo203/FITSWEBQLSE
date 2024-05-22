@@ -11,6 +11,8 @@
 /tests/intel_fixed_array
 /tests/num_overflow
 /tests/test_image_compression
+/tests/test_wcslib
+/tests/test_wcstools
 /tests/*.dSYM
 
 # optimization reports
