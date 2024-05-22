@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, world!");
+    println!("Comparing the WCS functions with WCSLIB / WCSTools.");
 }
