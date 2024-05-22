@@ -12,7 +12,7 @@
 /tests/num_overflow
 /tests/test_image_compression
 /tests/test_wcslib
-/tests/test_wcstools
+/tests/test_wcssub
 /tests/*.dSYM
 
 # optimization reports

@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := wcs
+.DEFAULT_GOAL := wcssub
 
 # GCC FORTRAN
 FORT = gfortran
@@ -24,5 +24,15 @@ LIBS = `pkg-config --libs cfitsio` `pkg-config --libs wcslib`
 image:
 	$(CC) $(FLAGS) $(INC) -o test_image_compression test_image_compression.c $(LIBS) -lm
 
-wcs:
+wcslib:
 	$(CC) $(FLAGS) $(INC) -o test_wcslib test_wcslib.c $(LIBS) -lm
+
+%.o: %.c
+	$(CC) $(FLAGS) $(INC) -MMD -o $@ -c $<
+
+WCSTOOLS = $(HOME)/Downloads/wcssubs
+SRC := $(WCSTOOLS)/wcsinit.c $(WCSTOOLS)/poly.c $(WCSTOOLS)/zpxpos.c $(WCSTOOLS)/wcs.c $(WCSTOOLS)/worldpos.c $(WCSTOOLS)/platepos.c $(WCSTOOLS)/wcslib.c $(WCSTOOLS)/proj.c $(WCSTOOLS)/wcscon.c $(WCSTOOLS)/dsspos.c $(WCSTOOLS)/wcstrig.c $(WCSTOOLS)/cel.c $(WCSTOOLS)/sph.c $(WCSTOOLS)/distort.c $(WCSTOOLS)/hget.c $(WCSTOOLS)/iget.c $(WCSTOOLS)/lin.c $(WCSTOOLS)/tnxpos.c
+OBJ := $(SRC:.c=.o)
+
+wcssub: $(OBJ)
+	$(CC) $(FLAGS) $(INC) -o test_wcssub test_wcssub.c $(LIBS) -lm
