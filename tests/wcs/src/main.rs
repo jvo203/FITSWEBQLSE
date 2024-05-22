@@ -5,6 +5,71 @@ use std::io::BufReader;
 use fitsrs::fits::Fits;
 use wcs::{ImgXY, LonLat, WCS};
 
+#[derive(Debug)]
+pub struct Sky {
+    pub lon: f64,
+    pub lat: f64,
+}
+
+#[derive(Debug)]
+pub struct Pix {
+    pub x: f64,
+    pub y: f64,
+}
+
+pub fn pix2world(wcs: &WCS, x: f64, y: f64) -> Sky {
+    let xy = ImgXY::new(x - 1.0, y - 1.0);
+
+    match wcs.unproj_lonlat(&xy) {
+        Some(lonlat) => {
+            // the lonlat seems to be in radians, convert it to degrees
+            let sky = Sky {
+                lon: lonlat.lon().to_degrees(),
+                lat: lonlat.lat().to_degrees(),
+            };
+
+            println!("[rwcs::pix2lonlat] {:?} [deg]", sky);
+
+            sky
+        }
+        None => {
+            // return NaN values
+            let sky = Sky {
+                lon: std::f64::NAN,
+                lat: std::f64::NAN,
+            };
+
+            sky
+        }
+    }
+}
+
+pub fn world2pix(wcs: &WCS, lon: f64, lat: f64) -> Pix {
+    let lonlat = LonLat::new(lon.to_radians(), lat.to_radians());
+
+    match wcs.proj_lonlat(&lonlat) {
+        Some(xy) => {
+            let pix = Pix {
+                x: xy.x() + 1.0,
+                y: xy.y() + 1.0,
+            };
+
+            println!("[rwcs::lonlat2pix] {:?} [pix]", pix);
+
+            pix
+        }
+        None => {
+            // return NaN values
+            let pix = Pix {
+                x: std::f64::NAN,
+                y: std::f64::NAN,
+            };
+
+            pix
+        }
+    }
+}
+
 pub fn test_wcs(str: &str, x: f64, y: f64, ra: f64, dec: f64) {
     let fits_file = File::open(str).unwrap();
     let mut reader = BufReader::new(fits_file);
@@ -14,6 +79,14 @@ pub fn test_wcs(str: &str, x: f64, y: f64, ra: f64, dec: f64) {
     println!("Header: {:?}", header);
 
     let wcs = WCS::new(&header).unwrap();
+
+    let world = pix2world(&wcs, x, y);
+    println!("Expected: {:?}", Sky { lon: ra, lat: dec });
+    println!("Result: {:?}", world);
+
+    let pix = world2pix(&wcs, ra, dec);
+    println!("Expected: {:?}", Pix { x, y });
+    println!("Result: {:?}", pix);
 }
 
 fn main() {
