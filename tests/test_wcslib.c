@@ -132,6 +132,7 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     free(header);
 
+    status = 0;
     if (fits_close_file(fptr, &status))
         printerror(status);
 
