@@ -28,7 +28,7 @@ pub fn pix2world(wcs: &WCS, x: f64, y: f64) -> Sky {
                 lat: lonlat.lat().to_degrees(),
             };
 
-            println!("[rwcs::pix2lonlat] {:?} [deg]", sky);
+            println!("[wcs::pix2world] {:?} [deg]", sky);
 
             sky
         }
@@ -54,7 +54,7 @@ pub fn world2pix(wcs: &WCS, lon: f64, lat: f64) -> Pix {
                 y: xy.y() + 1.0,
             };
 
-            println!("[rwcs::lonlat2pix] {:?} [pix]", pix);
+            println!("[wcs::world2pix] {:?} [pix]", pix);
 
             pix
         }
@@ -71,12 +71,14 @@ pub fn world2pix(wcs: &WCS, lon: f64, lat: f64) -> Pix {
 }
 
 pub fn test_wcs(str: &str, x: f64, y: f64, ra: f64, dec: f64) {
+    println!("Testing WCS functions with file: {}", str);
+
     let fits_file = File::open(str).unwrap();
     let mut reader = BufReader::new(fits_file);
     let Fits { hdu } = Fits::from_reader(&mut reader).unwrap();
 
     let header = hdu.get_header();
-    println!("Header: {:?}", header);
+    // println!("Header: {:?}", header);
 
     let wcs = WCS::new(&header).unwrap();
 
@@ -99,6 +101,8 @@ fn main() {
         52.2656215,
         31.2677022,
     ); // NG file
+
+    println!("");
 
     test_wcs(
         "/Users/chris/Downloads/ALMA01018218.fits",
