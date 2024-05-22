@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := image
+.DEFAULT_GOAL := wcs
 
 # GCC FORTRAN
 FORT = gfortran
@@ -23,3 +23,6 @@ LIBS = `pkg-config --libs cfitsio` `pkg-config --libs wcslib`
 
 image:
 	$(CC) $(FLAGS) $(INC) -o test_image_compression test_image_compression.c $(LIBS) -lm
+
+wcs:
+	$(CC) $(FLAGS) $(INC) -o test_wcslib test_wcslib.c $(LIBS) -lm
