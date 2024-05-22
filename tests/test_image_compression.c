@@ -31,8 +31,6 @@ void printerror(int status)
 
 int main()
 {
-    // load a FITS file
-
     fitsfile *fptr = NULL; /* pointer to the FITS file, defined in fitsio.h */
     struct wcsprm *wcs = NULL;
 
@@ -47,6 +45,7 @@ int main()
 
     status = 0;
 
+    // load a FITS file
     if (fits_open_file(&fptr, filename, READONLY, &status))
         printerror(status);
 
@@ -94,10 +93,15 @@ int main()
 
     printf("[WCSLIB] pixcrd#1: %f, %f\n", pixcrd[0], pixcrd[1]);
     wcsp2s(wcs, 1, 2, pixcrd, imgcrd, phi, theta, coords, &status);
-    printf("[WCSLIB] pixcrd#2: %f, %f\n", pixcrd[0], pixcrd[1]);
-    printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-    printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
-    printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
+    if (status == 0)
+    {
+        printf("[WCSLIB] pixcrd#2: %f, %f\n", pixcrd[0], pixcrd[1]);
+        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
+        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
+        printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
+    }
+    else
+        printf("[WCSLIB] Error: %d\n", status);
 
     // sky2pix
     // WCSLIB coordinates
@@ -107,10 +111,15 @@ int main()
     printf("====================================================\n");
     printf("[WCSLIB] world#1: %f, %f\n", world[0], world[1]);
     wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
-    printf("[WCSLIB] world#2: %f, %f\n", world[0], world[1]);
-    printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-    printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
-    printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
+    if (status == 0)
+    {
+        printf("[WCSLIB] world#2: %f, %f\n", world[0], world[1]);
+        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
+        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
+        printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
+    }
+    else
+        printf("[WCSLIB] Error: %d\n", status);
 
     // ds9 coordinates
     world[0] = ra;
@@ -119,10 +128,15 @@ int main()
     printf("====================================================\n");
     printf("[ds9] world#1: %f, %f\n", world[0], world[1]);
     wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
-    printf("[WCSLIB] world#2: %f, %f\n", world[0], world[1]);
-    printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-    printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
-    printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
+    if (status == 0)
+    {
+        printf("[WCSLIB] world#2: %f, %f\n", world[0], world[1]);
+        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
+        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
+        printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
+    }
+    else
+        printf("[WCSLIB] Error: %d\n", status);
 
     free(header);
 
