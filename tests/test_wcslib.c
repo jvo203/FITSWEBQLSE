@@ -70,10 +70,12 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     printf("====================================================\n");
 
-    double imgcrd[2], phi[2], theta[2];
-    double pixcrd[2];
-    double world[2];
-    double coords[2];
+    double imgcrd[2] = {0, 0};
+    double phi[2] = {0, 0};
+    double theta[2] = {0, 0};
+    double pixcrd[2] = {0, 0};
+    double world[2] = {0, 0};
+    double coords[2] = {0, 0};
 
     printf("[ds9] x: %f, y: %f\n", x, y);
     printf("[ds9] ra: %f, dec: %f\n", ra, dec);
@@ -83,11 +85,10 @@ void test_wcs(const char *filename, const double x, const double y, const double
     pixcrd[0] = x;
     pixcrd[1] = y;
 
-    printf("[WCSLIB] pixcrd#1: %f, %f\n", pixcrd[0], pixcrd[1]);
+    printf("[WCSLIB] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
     wcsp2s(wcs, 1, 2, pixcrd, imgcrd, phi, theta, coords, &status);
     if (status == 0)
     {
-        printf("[WCSLIB] pixcrd#2: %f, %f\n", pixcrd[0], pixcrd[1]);
         printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
         printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
         printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
@@ -101,11 +102,10 @@ void test_wcs(const char *filename, const double x, const double y, const double
     world[1] = coords[1];
 
     printf("====================================================\n");
-    printf("[WCSLIB] world#1: %f, %f\n", world[0], world[1]);
+    printf("[WCSLIB] world: %f, %f\n", world[0], world[1]);
     wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
     if (status == 0)
     {
-        printf("[WCSLIB] world#2: %f, %f\n", world[0], world[1]);
         printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
         printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
         printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
@@ -118,11 +118,10 @@ void test_wcs(const char *filename, const double x, const double y, const double
     world[1] = dec;
 
     printf("====================================================\n");
-    printf("[ds9] world#1: %f, %f\n", world[0], world[1]);
+    printf("[ds9] world: %f, %f\n", world[0], world[1]);
     wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
     if (status == 0)
     {
-        printf("[WCSLIB] world#2: %f, %f\n", world[0], world[1]);
         printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
         printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
         printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
