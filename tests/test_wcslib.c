@@ -54,7 +54,7 @@ void test_wcs(const char *filename, const double x, const double y, const double
     printf("nkeys: %d\n", nkeys);
 
     // allocate wcsprm struct
-    wcs = (struct wcsprm *)malloc(sizeof(struct wcsprm));
+    /*wcs = (struct wcsprm *)malloc(sizeof(struct wcsprm));
     if (wcs == NULL)
     {
         printf("wcs is NULL\n");
@@ -63,9 +63,8 @@ void test_wcs(const char *filename, const double x, const double y, const double
             printerror(status);
 
         return;
-    }
+    }*/
 
-    wcsset(wcs);
     stat = wcspih(header, nkeys, relax, ctrl, &nreject, &nwcs, &wcs);
     printf("[WCSLIB] stat: %d, nreject: %d, nwcs: %d\n", stat, nreject, nwcs);
 
@@ -137,7 +136,7 @@ void test_wcs(const char *filename, const double x, const double y, const double
     if (fits_close_file(fptr, &status))
         printerror(status);
 
-    free(wcs);
+    wcsvfree(&nwcs, &wcs);
 }
 
 int main()
