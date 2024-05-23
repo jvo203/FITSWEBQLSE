@@ -53,18 +53,6 @@ void test_wcs(const char *filename, const double x, const double y, const double
     printf("header: %s\n", header);
     printf("nkeys: %d\n", nkeys);
 
-    // allocate wcsprm struct
-    /*wcs = (struct wcsprm *)malloc(sizeof(struct wcsprm));
-    if (wcs == NULL)
-    {
-        printf("wcs is NULL\n");
-
-        if (fits_close_file(fptr, &status))
-            printerror(status);
-
-        return;
-    }*/
-
     stat = wcspih(header, nkeys, relax, ctrl, &nreject, &nwcs, &wcs);
     printf("[WCSLIB] stat: %d, nreject: %d, nwcs: %d\n", stat, nreject, nwcs);
 
@@ -141,8 +129,9 @@ void test_wcs(const char *filename, const double x, const double y, const double
 int main()
 {
     test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
-    // test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452);
-    // test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+    test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452);
+    test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+    test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
 
     return 0;
 }
