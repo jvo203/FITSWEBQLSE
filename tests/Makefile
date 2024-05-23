@@ -2,7 +2,7 @@
 
 # GCC FORTRAN
 FORT = gfortran
-FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize
+FLAGS = -march=native -g -O2 -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize
 #  -fopenmp
 
 # Intel FORTRAN

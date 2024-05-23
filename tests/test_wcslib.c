@@ -47,6 +47,7 @@ void test_wcs(const char *filename, const double x, const double y, const double
     int relax = WCSHDR_all, ctrl = 4; // 4 for a full telemetry report, 0 for nothing
     int nreject, nwcs, stat;
 
+    status = 0;
     if (fits_hdr2str(fptr, 1, NULL, 0, &header, &nkeys, &status))
         printerror(status);
 
@@ -55,6 +56,12 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     stat = wcspih(header, nkeys, relax, ctrl, &nreject, &nwcs, &wcs);
     printf("[WCSLIB] stat: %d, nreject: %d, nwcs: %d\n", stat, nreject, nwcs);
+
+    free(header);
+
+    status = 0;
+    if (fits_close_file(fptr, &status))
+        printerror(status);
 
     printf("====================================================\n");
 
@@ -117,12 +124,6 @@ void test_wcs(const char *filename, const double x, const double y, const double
     else
         printf("[WCSLIB] Error: %d\n", status);
 
-    free(header);
-
-    status = 0;
-    if (fits_close_file(fptr, &status))
-        printerror(status);
-
     wcsvfree(&nwcs, &wcs);
 }
 
@@ -130,6 +131,7 @@ int main()
 {
     test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
     test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452);
+    // test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
     // test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
 
     return 0;
