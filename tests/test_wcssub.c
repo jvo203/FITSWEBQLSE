@@ -114,14 +114,15 @@ void test_wcs(const char *filename, const double x, const double y, const double
     else
         printf("[WCSTools] Error: %d\n", offscl);
 
-    free(header);
+    // free the memory
+    wcsfree(wcs);
+
+    status = 0;
+    fits_free_memory(header, &status);
 
     status = 0;
     if (fits_close_file(fptr, &status))
         printerror(status);
-
-    // free the memory
-    wcsfree(wcs);
 
     printf("====================================================\n\n");
 }

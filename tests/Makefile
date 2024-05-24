@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := wcssub
+.DEFAULT_GOAL := wcslib
 
 # GCC FORTRAN
 FORT = gfortran
@@ -25,7 +25,7 @@ image:
 	$(CC) $(FLAGS) $(INC) -o test_image_compression test_image_compression.c $(LIBS) -lm
 
 wcslib:
-	$(CC) $(FLAGS) `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` -o test_wcslib test_wcslib.c `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lm
+	$(CC) $(FLAGS) `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` -o test_wcslib test_wcslib.c `pkg-config --libs cfitsio` `pkg-config --libs wcslib`
 
 %.o: %.c
 	$(CC) $(FLAGS) $(INC) -MMD -o $@ -c $<
@@ -38,4 +38,4 @@ INC := `pkg-config --cflags cfitsio` -I$(WCSTOOLS)
 LIBS := `pkg-config --libs cfitsio`
 
 wcssub: $(OBJ)
-	$(CC) $(FLAGS) $(INC) $(OBJ) -o test_wcssub test_wcssub.c $(LIBS) -lm
+	$(CC) $(FLAGS) $(INC) $(OBJ) -o test_wcssub test_wcssub.c $(LIBS)

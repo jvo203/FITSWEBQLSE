@@ -6,8 +6,8 @@
 #include <fitsio.h>
 
 // WCSLIB
-#include <wcshdr.h>
 #include <wcs.h>
+#include <wcshdr.h>
 
 /************************************************************************/
 /* Read a FITS image and compress it with ZFP and OpenEXR               */
@@ -41,36 +41,35 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     // WCS test
     char *header = NULL;
-    int nkeys;
+    int nkeyrec;
+
+    if ((status = fits_hdr2str(fptr, 1, NULL, 0, &header, &nkeyrec, &status)))
+        printerror(status);
+
+    printf("header: %s\n", header);
+    printf("nkeyrec: %d\n", nkeyrec);
 
     int relax = WCSHDR_all, ctrl = 0; // 4 for a full telemetry report, 0 for nothing
     int nreject, nwcs;
 
-    status = 0;
-    if (fits_hdr2str(fptr, 1, NULL, 0, &header, &nkeys, &status))
-        printerror(status);
-
-    printf("header: %s\n", header);
-    printf("nkeys: %d\n", nkeys);
-
-    status = wcspih(header, nkeys, relax, ctrl, &nreject, &nwcs, &wcs);
+    status = wcspih(header, nkeyrec, relax, ctrl, &nreject, &nwcs, &wcs);
     printf("[WCSLIB] status: %d, nreject: %d, nwcs: %d\n", status, nreject, nwcs);
 
-    free(header);
-
-    status = 0;
-    if (fits_close_file(fptr, &status))
-        printerror(status);
+    if ((status = wcsset(wcs)))
+    {
+        fprintf(stderr, "wcsset ERROR %d: %s.\n", status, wcs_errmsg[status]);
+        return;
+    }
 
     printf("====================================================\n");
 
     double imgcrd[2] = {0, 0};
-    double phi[2] = {0, 0};
-    double theta[2] = {0, 0};
+    double phi[1] = {0};
+    double theta[1] = {0};
     double pixcrd[2] = {0, 0};
     double world[2] = {0, 0};
     double coords[2] = {0, 0};
-    int stat[2] = {0, 0};
+    int stat[1] = {0};
 
     printf("[ds9] x: %f, y: %f\n", x, y);
     printf("[ds9] ra: %f, dec: %f\n", ra, dec);
@@ -84,15 +83,12 @@ void test_wcs(const char *filename, const double x, const double y, const double
     status = wcsp2s(wcs, 1, 2, pixcrd, imgcrd, phi, theta, coords, stat);
     if (status == 0)
     {
-        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
+        printf("[WCSLIB] phi: %f\n", phi[0]);
+        printf("[WCSLIB] theta: %f\n", theta[0]);
         printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
     }
     else
         printf("[WCSLIB] Error: %d\n", status);
-
-    wcsvfree(&nwcs, &wcs);
-    return;
 
     // sky2pix
     // WCSLIB coordinates
@@ -101,11 +97,11 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     printf("====================================================\n");
     printf("[WCSLIB] world: %f, %f\n", world[0], world[1]);
-    wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
+    status = wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
     if (status == 0)
     {
-        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
+        printf("[WCSLIB] phi: %f\n", phi[0]);
+        printf("[WCSLIB] theta: %f\n", theta[0]);
         printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
     }
     else
@@ -117,25 +113,42 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     printf("====================================================\n");
     printf("[ds9] world: %f, %f\n", world[0], world[1]);
-    wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
+    status = wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
     if (status == 0)
     {
-        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
+        printf("[WCSLIB] phi: %f\n", phi[0]);
+        printf("[WCSLIB] theta: %f\n", theta[0]);
         printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
     }
     else
         printf("[WCSLIB] Error: %d\n", status);
 
-    wcsvfree(&nwcs, &wcs);
+    // Clean up the WCS params structure
+    status = wcsvfree(&nwcs, &wcs);
+
+    status = 0;
+    fits_free_memory(header, &status);
+
+    status = 0;
+    if (fits_close_file(fptr, &status))
+        printerror(status);
+
+    return;
 }
 
 int main()
 {
+    // passing the ra, dec obtained from SAO ds9
     // test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+
+    // passing the ra, dec obtained from SAO ds9
     // test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452);
+
+    // passing the ra, dec obtained from SAO ds9
     test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
-    test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+
+    // passing the ra, dec obtained from SAO ds9
+    // test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
 
     return 0;
 }
