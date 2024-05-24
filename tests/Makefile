@@ -24,8 +24,15 @@ LIBS = `pkg-config --libs cfitsio` `pkg-config --libs wcslib`
 image:
 	$(CC) $(FLAGS) $(INC) -o test_image_compression test_image_compression.c $(LIBS) -lm
 
+#INC := -I/Users/chris/Downloads/cfitsio-4.4.0/include
+#LIBS := -L/Users/chris/Downloads/cfitsio-4.4.0/lib -lcfitsio
+
 wcslib:
-	$(CC) $(FLAGS) `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` -o test_wcslib test_wcslib.c `pkg-config --libs cfitsio` `pkg-config --libs wcslib`
+	$(CC) $(FLAGS) -I/Users/chris/Downloads/cfitsio-4.4.0/include `pkg-config --cflags wcslib` -o test_wcslib test_wcslib.c -L/Users/chris/Downloads/cfitsio-4.4.0/lib -lcfitsio `pkg-config --libs wcslib`
+#$(CC) $(FLAGS) `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` -o test_wcslib test_wcslib.c `pkg-config --libs cfitsio` `pkg-config --libs wcslib`
+
+run:
+	DYLD_LIBRARY_PATH=/Users/chris/Downloads/cfitsio-4.4.0/lib ./test_wcslib
 
 %.o: %.c
 	$(CC) $(FLAGS) $(INC) -MMD -o $@ -c $<
