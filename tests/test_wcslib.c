@@ -142,20 +142,20 @@ int main()
     const char filename2[] = "/Users/chris/Downloads/ALMA01018218.fits";
 
     // passing the ra, dec obtained from SAO ds9
-    // test_wcs(filename1, 905.0, 880.0, 52.2656215, 31.2677022);
+    test_wcs(filename1, 905.0, 880.0, 52.2656215, 31.2677022);
 
     // passing the ra, dec obtained from SAO ds9
-    // test_wcs(filename2, 856.49056, 438.4528, 261.2105354, -34.2435452);
+    test_wcs(filename2, 856.49056, 438.4528, 261.2105354, -34.2435452);
 
     // I know these are duplicates but the C compilers seem to be behaving strangely (CFITSIO::ffopen fails to open the file in the second test_wcs call,it seg. faults)
     const char filename3[] = "/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits";
     const char filename4[] = "/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits";
 
     // passing the ra, dec obtained from SAO ds9
-    test_wcs(filename3, 905.0, 880.0, 52.2656215, 31.2677022);
+    // test_wcs(filename3, 905.0, 880.0, 52.2656215, 31.2677022);
 
     // passing the ra, dec obtained from SAO ds9
-    test_wcs(filename4, 905.0, 880.0, 52.2656215, 31.2677022);
+    // test_wcs(filename4, 905.0, 880.0, 52.2656215, 31.2677022);
 
     return 0;
 }
