@@ -123,9 +123,6 @@ void test_wcs(const char *filename, const double x, const double y, const double
     else
         printf("[WCSLIB] Error: %d\n", status);
 
-    // Clean up the WCS params structure
-    status = wcsvfree(&nwcs, &wcs);
-
     status = 0;
     fits_free_memory(header, &status);
 
@@ -133,22 +130,25 @@ void test_wcs(const char *filename, const double x, const double y, const double
     if (fits_close_file(fptr, &status))
         printerror(status);
 
+    // Clean up the WCS params structure
+    status = wcsvfree(&nwcs, &wcs);
+
     return;
 }
 
 int main()
 {
     // passing the ra, dec obtained from SAO ds9
-    // test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+    test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
 
     // passing the ra, dec obtained from SAO ds9
     // test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452);
 
     // passing the ra, dec obtained from SAO ds9
-    test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+    // test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
 
     // passing the ra, dec obtained from SAO ds9
-    test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+    // test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
 
     return 0;
 }
