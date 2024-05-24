@@ -5,10 +5,6 @@
 // CFITSIO
 #include <fitsio.h>
 
-// WCSLIB
-#include <wcshdr.h>
-#include <wcs.h>
-
 /************************************************************************/
 /* Read a FITS image and compress it with ZFP and OpenEXR               */
 /************************************************************************/
@@ -48,97 +44,6 @@ int main()
     // load a FITS file
     if (fits_open_file(&fptr, filename, READONLY, &status))
         printerror(status);
-
-    // WCS test
-    char *header = NULL;
-    int nkeys;
-
-    int relax = WCSHDR_all, ctrl = 4; // 4 for a full telemetry report, 0 for nothing
-    int nreject, nwcs, stat;
-
-    if (fits_hdr2str(fptr, 1, NULL, 0, &header, &nkeys, &status))
-        printerror(status);
-
-    printf("header: %s\n", header);
-    printf("nkeys: %d\n", nkeys);
-
-    // allocate wcsprm struct
-    wcs = (struct wcsprm *)malloc(sizeof(struct wcsprm));
-    if (wcs == NULL)
-    {
-        printf("wcs is NULL\n");
-        return 1;
-    }
-
-    stat = wcspih(header, nkeys, relax, ctrl, &nreject, &nwcs, &wcs);
-    printf("[WCSLIB] stat: %d, nreject: %d, nwcs: %d\n", stat, nreject, nwcs);
-
-    printf("====================================================\n");
-
-    double imgcrd[2], phi[2], theta[2];
-    double pixcrd[2];
-    double world[2];
-    double coords[2];
-
-    const double x = 905.0, y = 880.0;              // exported from DS9 as 'physical' coordinates
-    const double ra = 52.2656215, dec = 31.2677022; // exported from DS9 as 'fk5' WCS coordinates
-
-    printf("[ds9] x: %f, y: %f\n", x, y);
-    printf("[ds9] ra: %f, dec: %f\n", ra, dec);
-    printf("====================================================\n");
-
-    // pix2sky
-    pixcrd[0] = x;
-    pixcrd[1] = y;
-
-    printf("[WCSLIB] pixcrd#1: %f, %f\n", pixcrd[0], pixcrd[1]);
-    wcsp2s(wcs, 1, 2, pixcrd, imgcrd, phi, theta, coords, &status);
-    if (status == 0)
-    {
-        printf("[WCSLIB] pixcrd#2: %f, %f\n", pixcrd[0], pixcrd[1]);
-        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
-        printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
-    }
-    else
-        printf("[WCSLIB] Error: %d\n", status);
-
-    // sky2pix
-    // WCSLIB coordinates
-    world[0] = coords[0];
-    world[1] = coords[1];
-
-    printf("====================================================\n");
-    printf("[WCSLIB] world#1: %f, %f\n", world[0], world[1]);
-    wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
-    if (status == 0)
-    {
-        printf("[WCSLIB] world#2: %f, %f\n", world[0], world[1]);
-        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
-        printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
-    }
-    else
-        printf("[WCSLIB] Error: %d\n", status);
-
-    // ds9 coordinates
-    world[0] = ra;
-    world[1] = dec;
-
-    printf("====================================================\n");
-    printf("[ds9] world#1: %f, %f\n", world[0], world[1]);
-    wcss2p(wcs, 1, 2, world, phi, theta, imgcrd, coords, &status);
-    if (status == 0)
-    {
-        printf("[WCSLIB] world#2: %f, %f\n", world[0], world[1]);
-        printf("[WCSLIB] phi: %f, %f\n", phi[0], phi[1]);
-        printf("[WCSLIB] theta: %f, %f\n", theta[0], theta[1]);
-        printf("[WCSLIB] coords: %f, %f\n", coords[0], coords[1]);
-    }
-    else
-        printf("[WCSLIB] Error: %d\n", status);
-
-    free(header);
 
     /* read the NAXIS1 and NAXIS2 keyword to get image size */
     if (fits_read_keys_lng(fptr, "NAXIS", 1, 2, naxes, &nfound, &status))
