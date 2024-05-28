@@ -46,3 +46,9 @@ LIBS := `pkg-config --libs cfitsio`
 
 wcssub: $(OBJ)
 	$(CC) $(FLAGS) $(INC) $(OBJ) -o test_wcssub test_wcssub.c $(LIBS)
+
+ast:
+	$(CC) $(CFLAGS) $(INC) -o test_starlink test_starlink.c $(LIBS) -last
+
+clean:
+	rm -f test_wcslib test_wcssub test_starlink *.o *.d $(WCSTOOLS)/*.o $(WCSTOOLS)/*.d
