@@ -100,25 +100,18 @@ void test_wcs(const char *filename, const double x, const double y, const double
     {
         printf("[AST] astRead success!\n");
         astShow(wcsinfo);
+        astSet(wcsinfo, "Report=1");
     }
-
-    AstFrame *frame;
-    AstMapping *mapping;
-    int axes[2] = {1, 2};
-
-    frame = astPickAxes(wcsinfo, 2, axes, &mapping);
-    astShow(frame);
-    astShow(mapping);
 
     int nin, nout;
 
-    nin = astGetI(mapping, "Nin");
-    nout = astGetI(mapping, "Nout");
+    nin = astGetI(wcsinfo, "Nin");
+    nout = astGetI(wcsinfo, "Nout");
     printf("Nin: %d, Nout: %d\n", nin, nout);
 
     printf("====================================================\n");
 
-    double pixcrd[4] = {0, 0, 1, 1}; // dummy pixel coordinates
+    double pixcrd[4] = {0, 0, 0, 0}; // dummy pixel coordinates
     double world[4] = {0, 0, 0, 0};
     double coords[4] = {0, 0, 0, 0};
 
@@ -131,8 +124,6 @@ void test_wcs(const char *filename, const double x, const double y, const double
     pixcrd[1] = y;
 
     printf("[ds9] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
-    // pix2wcs(wcs, x, y, &coords[0], &coords[1]);
-    astSet(wcsinfo, "Report=1");
     astTranN(wcsinfo, 1, 4, 1, pixcrd, 1, 4, 1, coords);
     printf("[AST] world: %f, %f\n", coords[0] * AST__DR2D, coords[1] * AST__DR2D);
 
@@ -142,24 +133,27 @@ void test_wcs(const char *filename, const double x, const double y, const double
     world[1] = coords[1];
 
     printf("====================================================\n");
-    /*printf("[WCSTools] world: %f, %f\n", world[0], world[1]);
-    wcs2pix(wcs, world[0], world[1], &coords[0], &coords[1], &offscl);
-    if (offscl == 0)
-        printf("[WCSTools] pixcrd: %f, %f\n", coords[0], coords[1]);
-    else
-        printf("[WCSTools] Error: %d\n", offscl);*/
+    printf("[AST] world: %f, %f\n", world[0], world[1]);
+    astTranN(wcsinfo, 1, 4, 1, world, 0, 4, 1, coords);
+    printf("[AST] pixcrd: %f, %f\n", coords[0], coords[1]);
 
     // ds9 coordinates
-    world[0] = ra;
-    world[1] = dec;
+    world[0] = ra * AST__DD2R;
+    world[1] = dec * AST__DD2R;
 
     printf("====================================================\n");
-    printf("[ds9] world: %f, %f\n", world[0], world[1]);
-    /*wcs2pix(wcs, world[0], world[1], &coords[0], &coords[1], &offscl);
-    if (offscl == 0)
-        printf("[WCSTools] pixcrd: %f, %f\n", coords[0], coords[1]);
-    else
-        printf("[WCSTools] Error: %d\n", offscl);*/
+    printf("[ds9] (ICRS) world: %f, %f\n", world[0] * AST__DR2D, world[1] * AST__DR2D);
+    astTranN(wcsinfo, 1, 4, 1, world, 0, 4, 1, coords);
+    printf("[AST] pixcrd: %f, %f\n", coords[0], coords[1]);
+
+    // ds9 exported as FK5 then converted to ICRS using AST
+    world[0] = 52.265612 * AST__DD2R;
+    world[1] = 31.267705 * AST__DD2R;
+
+    printf("====================================================\n");
+    printf("[ds9] (FK5 --> ICRS) world: %f, %f\n", world[0] * AST__DR2D, world[1] * AST__DR2D);
+    astTranN(wcsinfo, 1, 4, 1, world, 0, 4, 1, coords);
+    printf("[AST] pixcrd: %f, %f\n", coords[0], coords[1]);
 
     printf("====================================================\n\n");
 
