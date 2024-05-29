@@ -30,8 +30,8 @@ void printerror(int status)
 void test_wcs(const char *filename, const double x, const double y, const double ra, const double dec)
 {
     fitsfile *fptr = NULL; /* pointer to the FITS file, defined in fitsio.h */
-    AstFitsChan *fitschan;
-    AstFrameSet *wcsinfo;
+    AstFitsChan *fitschan = NULL;
+    AstFrameSet *wcsinfo = NULL;
 
     int status = 0;
 
@@ -71,6 +71,36 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     /* Read WCS information from the FitsChan. */
     wcsinfo = astRead(fitschan);
+
+    if (!astOK)
+    {
+        printf("<an error occurred (a message will have been issued)>\n");
+    }
+    else if (wcsinfo == AST__NULL)
+    {
+        printf("<there was no WCS information present>\n");
+    }
+    else if (strcmp(astGetC(wcsinfo, "Class"), "FrameSet"))
+    {
+        printf("<something unexpected was read (i.e. not a FrameSet)>\n");
+    }
+    else
+    {
+        printf("<WCS information was read OK>\n");
+    }
+
+    if (wcsinfo == NULL)
+    {
+        astEnd;
+
+        printf("[AST] astRead failed!\n");
+        return;
+    }
+    else
+    {
+        printf("[AST] astRead success!\n");
+        astShow(wcsinfo);
+    }
 
     printf("====================================================\n");
 
@@ -127,13 +157,13 @@ int main()
     test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022); // NG file
 
     // passing the ra, dec obtained from SAO ds9 as FK5 and converted to ICRS using AST
-    test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.265612, 31.267705); // NG file
+    // test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.265612, 31.267705); // NG file
 
     // passing the ra, dec obtained from SAO ds9
-    test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452); // OK file
+    // test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452); // OK file
 
     // passing the ra, dec obtained from SAO ds9
-    test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
+    // test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
 
     return 0;
 }
