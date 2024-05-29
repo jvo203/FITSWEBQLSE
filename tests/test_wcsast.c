@@ -116,9 +116,10 @@ void test_wcs(const char *filename, const double x, const double y, const double
     pixcrd[0] = x;
     pixcrd[1] = y;
 
-    /*printf("[WCSTools] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
-    pix2wcs(wcs, x, y, &coords[0], &coords[1]);
-    printf("[WCCTools] world: %f, %f\n", coords[0], coords[1]);*/
+    printf("[WCSTools] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
+    // pix2wcs(wcs, x, y, &coords[0], &coords[1]);
+    astTran2(wcsinfo, 1, &pixcrd[0], &pixcrd[1], 1, &coords[0], &coords[1]);
+    printf("[WCCTools] world: %f, %f\n", coords[0], coords[1]);
 
     // sky2pix
     // WCS coordinates
