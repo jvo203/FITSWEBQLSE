@@ -102,11 +102,25 @@ void test_wcs(const char *filename, const double x, const double y, const double
         astShow(wcsinfo);
     }
 
+    AstFrame *frame;
+    AstMapping *mapping;
+    int axes[2] = {1, 2};
+
+    frame = astPickAxes(wcsinfo, 2, axes, &mapping);
+    astShow(frame);
+    astShow(mapping);
+
+    int nin, nout;
+
+    nin = astGetI(mapping, "Nin");
+    nout = astGetI(mapping, "Nout");
+    printf("Nin: %d, Nout: %d\n", nin, nout);
+
     printf("====================================================\n");
 
-    double pixcrd[2] = {0, 0};
-    double world[2] = {0, 0};
-    double coords[2] = {0, 0};
+    double pixcrd[4] = {0, 0, 1, 1}; // dummy pixel coordinates
+    double world[4] = {0, 0, 0, 0};
+    double coords[4] = {0, 0, 0, 0};
 
     printf("[ds9] x: %f, y: %f\n", x, y);
     printf("[ds9] ra: %f, dec: %f\n", ra, dec);
@@ -116,16 +130,16 @@ void test_wcs(const char *filename, const double x, const double y, const double
     pixcrd[0] = x;
     pixcrd[1] = y;
 
-    printf("[WCSTools] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
+    printf("[ds9] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
     // pix2wcs(wcs, x, y, &coords[0], &coords[1]);
-    astTran2(wcsinfo, 1, &pixcrd[0], &pixcrd[1], 1, &coords[0], &coords[1]);
-    printf("[WCCTools] world: %f, %f\n", coords[0], coords[1]);
+    astSet(wcsinfo, "Report=1");
+    astTranN(wcsinfo, 1, 4, 1, pixcrd, 1, 4, 1, coords);
+    printf("[AST] world: %f, %f\n", coords[0] * AST__DR2D, coords[1] * AST__DR2D);
 
     // sky2pix
     // WCS coordinates
     world[0] = coords[0];
     world[1] = coords[1];
-    int offscl = -1;
 
     printf("====================================================\n");
     /*printf("[WCSTools] world: %f, %f\n", world[0], world[1]);
@@ -154,11 +168,14 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
 int main()
 {
-    // passing the ra, dec obtained from SAO ds9
-    test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022); // NG file
+    // passing the ra, dec obtained from SAO ds9 as FK5
+    // test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022); // NG file
 
     // passing the ra, dec obtained from SAO ds9 as FK5 and converted to ICRS using AST
     // test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.265612, 31.267705); // NG file
+
+    // passing the ra, dec obtained from SAO ds9 as ICRS
+    test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656094, 31.2677078);
 
     // passing the ra, dec obtained from SAO ds9
     // test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452); // OK file
