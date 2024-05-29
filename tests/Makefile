@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := wcslib
+.DEFAULT_GOAL := wcsast
 
 # GCC FORTRAN
 FORT = gfortran
@@ -15,8 +15,8 @@ gcc:
 intel:
 	$(IFORT) $(IFLAGS) -o intel_fixed_array intel_fixed_array.f90
 
-clean:
-	rm -f intel_fixed_array
+#clean:
+#rm -f intel_fixed_array
 
 INC = `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib`
 LIBS = `pkg-config --libs cfitsio` `pkg-config --libs wcslib`
@@ -47,8 +47,11 @@ LIBS := `pkg-config --libs cfitsio`
 wcssub: $(OBJ)
 	$(CC) $(FLAGS) $(INC) $(OBJ) -o test_wcssub test_wcssub.c $(LIBS)
 
-ast:
-	$(CC) $(CFLAGS) $(INC) -o test_wcsast test_wcsast.c $(LIBS) -last
+wcsast:
+	$(CC) $(CFLAGS) $(INC) -o test_wcsast test_wcsast.c $(LIBS) `ast_link`
+
+starlink:
+	$(CC) $(CFLAGS) $(INC) -o test_starlink test_starlink.c `ast_link`
 
 clean:
 	rm -f test_wcslib test_wcssub test_starlink test_wcsast *.o *.d $(WCSTOOLS)/*.o $(WCSTOOLS)/*.d

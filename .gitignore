@@ -13,6 +13,8 @@
 /tests/test_image_compression
 /tests/test_wcslib
 /tests/test_wcssub
+/tests/test_wcsast
+/tests/test_starlink
 /tests/*.dSYM
 
 # optimization reports

@@ -5,6 +5,8 @@ int main()
 {
     double ra1, dec1, ra2, dec2;
 
+    astBegin;
+
     AstSkyFrame *icrs = astSkyFrame("System=ICRS"); //,Epoch=2000,equinox=J2000");
     AstSkyFrame *fk5 = astSkyFrame("System=FK5");   //,Epoch=2000,equinox=J2000");
 
@@ -28,6 +30,8 @@ int main()
     printf("Original ra,dec (ds9) exported as ICRS: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(icrs2fk5, 1, &ra1, &dec1, 1, &ra2, &dec2);
     printf("AST ICRS --> FK5: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
+
+    astEnd;
 
     return 0;
 }
