@@ -29,8 +29,9 @@ void printerror(int status)
 
 void test_wcs(const char *filename, const double x, const double y, const double ra, const double dec)
 {
-    fitsfile *fptr = NULL;        /* pointer to the FITS file, defined in fitsio.h */
-    struct WorldCoor *wcs = NULL; // WCSTools
+    fitsfile *fptr = NULL; /* pointer to the FITS file, defined in fitsio.h */
+    AstFitsChan *fitschan;
+    AstFrameSet *wcsinfo;
 
     int status = 0;
 
@@ -54,21 +55,22 @@ void test_wcs(const char *filename, const double x, const double y, const double
     printf("header: %s\n", header);
     printf("nkeys: %d\n", nkeys);
 
-    wcs = wcsinit((const char *)header);
-    if (wcs == NULL)
-    {
-        printf("[WCSTools] wcsinit failed!\n");
+    astBegin;
 
-        status = 0;
-        if (fits_close_file(fptr, &status))
-            printerror(status);
+    /* Create a FitsChan and fill it with FITS header cards. */
+    fitschan = astFitsChan(NULL, NULL, "");
+    astPutCards(fitschan, header);
 
-        return;
-    }
-    else
-    {
-        printf("[WCSTools] wcsinit success!\n");
-    }
+    // free the cfitsio memory
+    status = 0;
+    fits_free_memory(header, &status);
+
+    status = 0;
+    if (fits_close_file(fptr, &status))
+        printerror(status);
+
+    /* Read WCS information from the FitsChan. */
+    wcsinfo = astRead(fitschan);
 
     printf("====================================================\n");
 
@@ -84,9 +86,9 @@ void test_wcs(const char *filename, const double x, const double y, const double
     pixcrd[0] = x;
     pixcrd[1] = y;
 
-    printf("[WCSTools] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
+    /*printf("[WCSTools] pixcrd: %f, %f\n", pixcrd[0], pixcrd[1]);
     pix2wcs(wcs, x, y, &coords[0], &coords[1]);
-    printf("[WCCTools] world: %f, %f\n", coords[0], coords[1]);
+    printf("[WCCTools] world: %f, %f\n", coords[0], coords[1]);*/
 
     // sky2pix
     // WCS coordinates
@@ -95,12 +97,12 @@ void test_wcs(const char *filename, const double x, const double y, const double
     int offscl = -1;
 
     printf("====================================================\n");
-    printf("[WCSTools] world: %f, %f\n", world[0], world[1]);
+    /*printf("[WCSTools] world: %f, %f\n", world[0], world[1]);
     wcs2pix(wcs, world[0], world[1], &coords[0], &coords[1], &offscl);
     if (offscl == 0)
         printf("[WCSTools] pixcrd: %f, %f\n", coords[0], coords[1]);
     else
-        printf("[WCSTools] Error: %d\n", offscl);
+        printf("[WCSTools] Error: %d\n", offscl);*/
 
     // ds9 coordinates
     world[0] = ra;
@@ -108,23 +110,15 @@ void test_wcs(const char *filename, const double x, const double y, const double
 
     printf("====================================================\n");
     printf("[ds9] world: %f, %f\n", world[0], world[1]);
-    wcs2pix(wcs, world[0], world[1], &coords[0], &coords[1], &offscl);
+    /*wcs2pix(wcs, world[0], world[1], &coords[0], &coords[1], &offscl);
     if (offscl == 0)
         printf("[WCSTools] pixcrd: %f, %f\n", coords[0], coords[1]);
     else
-        printf("[WCSTools] Error: %d\n", offscl);
-
-    // free the memory
-    wcsfree(wcs);
-
-    status = 0;
-    fits_free_memory(header, &status);
-
-    status = 0;
-    if (fits_close_file(fptr, &status))
-        printerror(status);
+        printf("[WCSTools] Error: %d\n", offscl);*/
 
     printf("====================================================\n\n");
+
+    astEnd;
 }
 
 int main()
