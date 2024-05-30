@@ -109,7 +109,16 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     make
     sudo make install
 
-# 9. ZeroMQ
+# 9. Starlink AST
+
+    wget https://github.com/Starlink/ast/releases/download/v9.2.10/ast-9.2.10.tar.gz
+    tar zxvf ast-9.2.10.tar.gz
+    cd ast-9.2.10
+    ./configure --prefix=/usr/local
+    make -j16
+    sudo make install
+
+# 10. ZeroMQ
 
     wget https://github.com/zeromq/libzmq/archive/refs/tags/v4.3.5.tar.gz
     tar zxvf v4.3.5.tar.gz
@@ -117,7 +126,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     ./autogen.sh && ./configure && make -j16
     sudo make install
 
-# 10. CZMQ
+# 11. CZMQ
 
     wget https://github.com/zeromq/czmq/archive/refs/tags/v4.2.1.tar.gz
     tar zxvf v4.2.1.tar.gz
@@ -126,7 +135,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     sudo make install
     sudo ldconfig
 
-# 11. jemalloc
+# 12. jemalloc
 
     wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
     bunzip2 jemalloc-5.3.0.tar.bz2
@@ -136,15 +145,15 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     make -j16
     sudo make install
 
-# 12. tcmalloc
+# 13. tcmalloc
 
     sudo dnf install gperftools-devel
 
-# 13. mimalloc
+# 14. mimalloc
 
     sudo dnf install mimalloc-devel
 
-# 14. Adjust environment variables
+# 15. Adjust environment variables
 
 	Add
 
@@ -154,11 +163,11 @@ ulimit -s unlimited
 
     to .bashrc and re-login
 
-# 15. Splatalogue
+# 16. Splatalogue
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
 
-# 16. Open up the Ports via a Firewall
+# 17. Open up the Ports via a Firewall
 
     https://mebee.info/2019/10/17/post-2369/
     
@@ -186,13 +195,13 @@ ulimit -s unlimited
     sudo firewall-cmd --list-all
     sudo firewall-cmd --list-ports --zone=public
 
-# 17. Install screen & htop
+# 18. Install screen & htop
 
     sudo dnf install epel-release
     sudo dnf update
     sudo dnf install screen htop
 
-# 18. Launch the processes in parallel on the development cluster
+# 19. Launch the processes in parallel on the development cluster
 
     .bashrc:
     export I_MPI_PORT_RANGE="30000:30000"
