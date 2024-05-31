@@ -1662,8 +1662,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/wcs") != NULL)
     {
-        double ra, dec;
-
         char *raStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ra");
         char *decStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dec");
         char *from = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "from");
@@ -1674,8 +1672,8 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (raStr != NULL && decStr != NULL)
         {
-            ra = atof(raStr);
-            dec = atof(decStr);
+            double ra = atof(raStr);
+            double dec = atof(decStr);
 
             return http_ok(connection);
 
