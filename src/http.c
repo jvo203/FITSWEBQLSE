@@ -1660,6 +1660,33 @@ static enum MHD_Result on_http_connection(void *cls,
             return get_home_directory(connection);
     };
 
+    if (0 == strcmp(url, "/wcs"))
+    {
+        printf("[C] WCS request received: '%s'\n", url);
+
+        double ra, dec;
+
+        char *raStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ra");
+        char *decStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "dec");
+        char *from = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "from");
+        char *to = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "to");
+
+        if (from == NULL || to == NULL)
+            return http_bad_request(connection);
+
+        if (raStr != NULL && decStr != NULL)
+        {
+            ra = atof(raStr);
+            dec = atof(decStr);
+
+            return http_ok(connection);
+
+            // TO-DO: return get_wcs(connection, ra, dec, from, to);
+        }
+        else
+            return http_bad_request(connection);
+    };
+
     if (strstr(url, "/cluster/") != NULL)
     {
         char *timestamp = strrchr(url, '/');
