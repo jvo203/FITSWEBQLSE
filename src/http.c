@@ -1660,10 +1660,8 @@ static enum MHD_Result on_http_connection(void *cls,
             return get_home_directory(connection);
     };
 
-    if (0 == strcmp(url, "/wcs"))
+    if (strstr(url, "/wcs") != NULL)
     {
-        printf("[C] WCS request received: '%s'\n", url);
-
         double ra, dec;
 
         char *raStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ra");
