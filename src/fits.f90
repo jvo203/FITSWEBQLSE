@@ -9,7 +9,7 @@ module fits
 
    ! the number used at the beginning of the binary cache disk file
    ! when the number change is detected the binary cache gets invalidated and rebuilt
-   integer(kind=4), parameter :: MAGIC_NUMBER = 20240531 ! 202209020
+   integer(kind=4), parameter :: MAGIC_NUMBER = 20240531
 
    integer(c_int), parameter :: ZFP_HIGH_PRECISION = 16
    integer(c_int), parameter :: ZFP_MEDIUM_PRECISION = 11

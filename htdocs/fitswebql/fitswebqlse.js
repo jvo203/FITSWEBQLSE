@@ -15776,8 +15776,8 @@ function load_region() {
                 for (let i = 0; i < points.length; i++) {
                     let point = points[i];
 
-                    let ra = point.x;
-                    let dec = point.y;
+                    var ra = point.x;
+                    var dec = point.y;
 
                     // optionally convert the coordinate systems to the one specified in the FITS header
                     // If fitsData.RADESYS is not empty and the lowercase value does not match coordinate_system
@@ -15785,6 +15785,17 @@ function load_region() {
                     if (fitsData.RADESYS != "" && fitsData.RADESYS.trim().toLowerCase() != coordinate_system) {
                         let url = "wcs?ra=" + ra + "&dec=" + dec + "&from=" + coordinate_system + "&to=" + fitsData.RADESYS.trim().toLowerCase();
                         console.log("WCS url:", url);
+
+                        let response = await fetch(url);
+
+                        if (response.ok) {
+                            await response.json().then(json => {
+                                ra = json.ra;
+                                dec = json.dec;
+                            }).catch(error => {
+                                console.error("Error:", error);
+                            });
+                        }
                     }
 
                     // convert from world (sky) to pixel coordinates
