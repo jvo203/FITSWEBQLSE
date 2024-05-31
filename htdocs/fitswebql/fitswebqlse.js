@@ -15779,10 +15779,15 @@ function load_region() {
                     let ra = point.x;
                     let dec = point.y;
 
-                    // convert from world (sky) to pixel coordinates
-                    /*point.x = ra2x(ra);
-                    point.y = dec2y(dec);*/
+                    // optionally convert the coordinate systems to the one specified in the FITS header
+                    // If fitsData.RADESYS is not empty and the lowercase value does not match coordinate_system
+                    // request a coordinate conversion from the server using HTTP GET
+                    if (fitsData.RADESYS != "" && fitsData.RADESYS.trim().toLowerCase() != coordinate_system) {
+                        let url = "wcs?ra=" + ra + "&dec=" + dec + "&from=" + coordinate_system + "&to=" + fitsData.RADESYS.trim().toLowerCase();
+                        console.log("WCS url:", url);
+                    }
 
+                    // convert from world (sky) to pixel coordinates
                     let pixcrd = sky2pix(fitsData, ra, dec);
                     point.x = pixcrd[0];
                     point.y = pixcrd[1];
