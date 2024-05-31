@@ -9,7 +9,7 @@ module fits
 
    ! the number used at the beginning of the binary cache disk file
    ! when the number change is detected the binary cache gets invalidated and rebuilt
-   integer(kind=4), parameter :: MAGIC_NUMBER = 202209020
+   integer(kind=4), parameter :: MAGIC_NUMBER = 20240531 ! 202209020
 
    integer(c_int), parameter :: ZFP_HIGH_PRECISION = 16
    integer(c_int), parameter :: ZFP_MEDIUM_PRECISION = 11
@@ -373,7 +373,7 @@ module fits
       integer :: bitpix = 0
       integer naxes(4)
       character frameid*70, object*70, line*70, filter*70, date_obs*70
-      character btype*70, bunit*70, specsys*70, timesys*70
+      character btype*70, bunit*70, radesys*70, specsys*70, timesys*70
       character cunit1*70, ctype1*70
       character cunit2*70, ctype2*70
       character cunit3*70, ctype3*70
@@ -1916,6 +1916,10 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%bunit
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%radesys
+      write (unit=fileunit, IOSTAT=ios) item%radesys
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%specsys
       write (unit=fileunit, IOSTAT=ios) item%specsys
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
@@ -2314,6 +2318,10 @@ contains
 
       ! item%bunit
       read (unit=fileunit, IOSTAT=ios) item%bunit
+      if (ios .ne. 0) go to 300
+
+      ! item%radesys
+      read (unit=fileunit, IOSTAT=ios) item%radesys
       if (ios .ne. 0) go to 300
 
       ! item%specsys
@@ -2781,7 +2789,7 @@ contains
 
       print *, 'datasetid:', item%datasetid, ', FRAMEID:', trim(item%frameid),&
       & ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
-      print *, 'LINE: ', trim(item%line), ', FILTER: ', trim(item%filter),&
+      print *, 'LINE: ', trim(item%line), ', FILTER: ', trim(item%filter), ', RADESYS: ', trim(item%radesys),&
       & ', SPECSYS: ', trim(item%specsys), ', TIMESYS: ', trim(item%timesys),&
       & ', OBJECT: ', trim(item%object), ', DATE-OBS: ', trim(item%date_obs)
       print *, 'RESTFRQ: ', item%restfrq, 'BMAJ: ', item%bmaj, ', BMIN: ', item%bmin, ', BPA: ', item%bpa
@@ -3549,6 +3557,7 @@ contains
       item%date_obs = ''
       item%btype = ''
       item%bunit = ''
+      item%radesys = ''
       item%specsys = ''
       item%timesys = ''
 
@@ -3939,6 +3948,8 @@ contains
 
       status = 0; call FTGKYS(unit, 'FILTER', item%filter, comment, status)
 
+      status = 0; call FTGKYS(unit, 'RADESYS', item%radesys, comment, status)
+
       status = 0; call FTGKYS(unit, 'SPECSYS', item%specsys, comment, status)
 
       status = 0; call FTGKYS(unit, 'TIMESYS', item%timesys, comment, status)
@@ -4253,6 +4264,7 @@ contains
       item%date_obs = ''
       item%btype = ''
       item%bunit = ''
+      item%radesys = ''
       item%specsys = ''
       item%timesys = ''
 
@@ -6163,6 +6175,7 @@ contains
       call add_json_double(json, 'RESTFRQ'//c_null_char, item%restfrq)
       call add_json_double(json, 'OBSRA'//c_null_char, item%obsra)
       call add_json_double(json, 'OBSDEC'//c_null_char, item%obsdec)
+      call add_json_string(json, 'RADESYS'//c_null_char, trim(item%radesys)//c_null_char)
 
       call add_json_string(json, 'OBJECT'//c_null_char, trim(item%object)//c_null_char)
       call add_json_string(json, 'DATEOBS'//c_null_char, trim(item%date_obs)//c_null_char)
