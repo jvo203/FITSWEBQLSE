@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-05-21.0";
+    return "JS2024-05-31.0";
 }
 
 function uuidv4() {
@@ -15702,7 +15702,7 @@ function load_region() {
             // skip lines starting with '#'
             if (line.startsWith('#')) continue;
 
-            // check if the line contains a coordinate system like "physical", "image" or "fk5"
+            // check if the line contains a coordinate system like "physical", "image", "fk5" or "icrs"
             if (line.startsWith("physical")) {
                 coordinate_system = "physical";
                 continue;
@@ -15715,6 +15715,11 @@ function load_region() {
 
             if (line.startsWith("fk5")) {
                 coordinate_system = "fk5";
+                continue;
+            }
+
+            if (line.startsWith("icrs")) {
+                coordinate_system = "icrs";
                 continue;
             }
 
@@ -15762,9 +15767,11 @@ function load_region() {
             return;
         } else {
             // coordinate system transformation
-            if (coordinate_system == "fk5") {
+            if (coordinate_system == "fk5" || coordinate_system == "icrs") {
                 // convert from world (sky) to pixel coordinates
                 let fitsData = fitsContainer[va_count - 1];
+
+                console.log("FITS RADESYS:", fitsData.RADESYS);
 
                 for (let i = 0; i < points.length; i++) {
                     let point = points[i];
