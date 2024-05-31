@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-05-31.0";
+    return "JS2024-05-31.1";
 }
 
 function uuidv4() {
@@ -15789,7 +15789,9 @@ function load_region() {
 
                     // console.log("ra:", ra, "dec:", dec, "x:", point.x, "y:", point.y);
                 }
-            } else {
+            }
+
+            if (coordinate_system == "physical" || coordinate_system == "image") {
                 // convert physical/image coordinates to 0-based pixels (subtract 1)
                 for (let i = 0; i < points.length; i++) {
                     let point = points[i];
