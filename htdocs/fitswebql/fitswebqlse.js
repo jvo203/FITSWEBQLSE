@@ -15793,7 +15793,7 @@ function load_region() {
                                 ra = json.ra;
                                 dec = json.dec;
                             }).catch(error => {
-                                console.error("Error:", error);
+                                console.error(error);
                             });
                         }
                     }
