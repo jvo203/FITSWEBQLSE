@@ -15713,10 +15713,11 @@ function load_region() {
                 continue;
             }
 
-            if (line.startsWith("fk4")) {
+            // unsupported, the dec from AST is a bit off
+            /*if (line.startsWith("fk4")) {
                 coordinate_system = "fk4";
                 continue;
-            }
+            }*/
 
             if (line.startsWith("fk5")) {
                 coordinate_system = "fk5";
@@ -15728,15 +15729,17 @@ function load_region() {
                 continue;
             }
 
-            if (line.startsWith("galactic")) {
+            // seems to work fine but disabled for now
+            /*if (line.startsWith("galactic")) {
                 coordinate_system = "galactic";
                 continue;
-            }
+            }*/
 
-            if (line.startsWith("ecliptic")) {
+            // unsupported, the ra,dec from AST is way off
+            /*if (line.startsWith("ecliptic")) {
                 coordinate_system = "ecliptic";
                 continue;
-            }
+            }*/
 
             // extract the coordinates x,y from "circle(x,y,r)" or "point(x,y)"
             let match = line.match(/circle\((.*),(.*),.*\)/);
@@ -15765,7 +15768,7 @@ function load_region() {
         }*/
 
         if (coordinate_system == "unknown") {
-            alert("Unknown / unsupported coordinate system.");
+            alert("Unknown / unsupported coordinate system. Supported ds9 coordinate systems: physical, image, fk5 and icrs.");
             d3.select("#regionLabel").html(file_name + ": (unsupported coordinate system)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onclick="javascript:hide_navigation_bar();" onchange="javascript:load_region();"/>');
             return;
         }
