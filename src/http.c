@@ -501,6 +501,12 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
     }
 }
 
+static enum MHD_Result get_wcs(struct MHD_Connection *connection, double ra, double dec, char *from, char *to)
+{
+    // get the WCS coordinates
+    return MHD_NO;
+}
+
 const char *get_filename_ext(const char *filename)
 {
     const char *dot = strrchr(filename, '.');
@@ -1678,9 +1684,7 @@ static enum MHD_Result on_http_connection(void *cls,
             double ra = atof(raStr);
             double dec = atof(decStr);
 
-            return http_ok(connection);
-
-            // TO-DO: return get_wcs(connection, ra, dec, from, to);
+            return get_wcs(connection, ra, dec, from, to);
         }
         else
             return http_bad_request(connection);
