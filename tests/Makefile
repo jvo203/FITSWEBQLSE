@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := wcsast
+.DEFAULT_GOAL := starlink
 
 # GCC FORTRAN
 FORT = gfortran

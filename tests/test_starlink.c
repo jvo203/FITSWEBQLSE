@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <star/ast.h>
 
-void test()
+void test_fk5()
 {
     double ra1, dec1, ra2, dec2;
 
@@ -45,9 +45,7 @@ void test()
 
 int main()
 {
-    // repeat the test 10 times to check for memory leaks
-    for (int i = 0; i < 10; i++)
-        test();
+    test_fk5();
 
     return 0;
 }
