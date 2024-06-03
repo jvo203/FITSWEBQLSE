@@ -501,10 +501,61 @@ static enum MHD_Result serve_file(struct MHD_Connection *connection, const char 
     }
 }
 
+// return the WCS coordinates converted from one coordinate system to another
 static enum MHD_Result get_wcs(struct MHD_Connection *connection, double ra, double dec, char *from, char *to)
 {
-    // get the WCS coordinates
-    return MHD_NO;
+    double ra1, dec1, ra2, dec2;
+
+    astBegin;
+
+    // char *from_upper = g_ascii_strup(from, -1);
+    // char *to_upper = g_ascii_strup(to, -1);
+
+    AstSkyFrame *source = astSkyFrame("System=%s", from);
+    AstSkyFrame *dest = astSkyFrame("System=%s", to);
+    AstFrameSet *src2dst = astConvert(source, dest, " ");
+
+    // free(from_upper);
+    // free(to_upper);
+
+    // source ra, dec in radians
+    ra1 = ra * AST__DD2R;
+    dec1 = dec * AST__DD2R;
+
+    // dest ra, dec
+    ra2 = dec2 = NAN;
+
+    printf("[C] get_wcs: %s source ra, dec: %f, %f [deg]\n", from, ra1 * AST__DR2D, dec1 * AST__DR2D);
+    astTran2(src2dst, 1, &ra1, &dec1, 1, &ra2, &dec2);
+    printf("[C] get_wcs: astTran2 %s -> %s: %f, %f [deg]\n", from, to, ra2 * AST__DR2D, dec2 * AST__DR2D);
+
+    astEnd;
+
+    // create a JSON response
+    GString *json = g_string_sized_new(128);
+
+    g_string_printf(json, "{\"ra\" : %f, \"dec\" : %f}", ra2 * AST__DR2D, dec2 * AST__DR2D);
+
+    size_t json_len = json->len;
+    gchar *json_str = g_string_free(json, FALSE);
+
+    struct MHD_Response *response = MHD_create_response_from_buffer_with_free_callback(json_len, (void *)json_str, g_free);
+
+    if (NULL == response)
+    {
+        g_free(json_str);
+        return MHD_NO;
+    }
+
+    MHD_add_response_header(response, "Cache-Control", "no-cache");
+    MHD_add_response_header(response, "Cache-Control", "no-store");
+    MHD_add_response_header(response, "Pragma", "no-cache");
+    MHD_add_response_header(response, "Content-Type", "application/json; charset=utf-8");
+
+    enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+    MHD_destroy_response(response);
+
+    return ret;
 }
 
 const char *get_filename_ext(const char *filename)
