@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <ast.h>
 
-int main()
+void test()
 {
     double ra1, dec1, ra2, dec2;
 
@@ -41,6 +41,13 @@ int main()
     astAnnul(fk5);*/
 
     astEnd;
+}
+
+int main()
+{
+    // repeat the test 10 times to check for memory leaks
+    for (int i = 0; i < 10; i++)
+        test();
 
     return 0;
 }
