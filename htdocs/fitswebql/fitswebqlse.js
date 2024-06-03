@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-05-31.1";
+    return "JS2024-06-03.0";
 }
 
 function uuidv4() {
@@ -15713,6 +15713,11 @@ function load_region() {
                 continue;
             }
 
+            if (line.startsWith("fk4")) {
+                coordinate_system = "fk4";
+                continue;
+            }
+
             if (line.startsWith("fk5")) {
                 coordinate_system = "fk5";
                 continue;
@@ -15720,6 +15725,16 @@ function load_region() {
 
             if (line.startsWith("icrs")) {
                 coordinate_system = "icrs";
+                continue;
+            }
+
+            if (line.startsWith("galactic")) {
+                coordinate_system = "galactic";
+                continue;
+            }
+
+            if (line.startsWith("ecliptic")) {
+                coordinate_system = "ecliptic";
                 continue;
             }
 
@@ -15767,7 +15782,7 @@ function load_region() {
             return;
         } else {
             // coordinate system transformation
-            if (coordinate_system == "fk5" || coordinate_system == "icrs") {
+            if (coordinate_system == "fk4" || coordinate_system == "fk5" || coordinate_system == "icrs" || coordinate_system == "galactic" || coordinate_system == "ecliptic") {
                 // convert from world (sky) to pixel coordinates
                 let fitsData = fitsContainer[va_count - 1];
 
