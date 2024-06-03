@@ -51,7 +51,7 @@ wcsast:
 	$(CC) $(CFLAGS) $(INC) -o test_wcsast test_wcsast.c $(LIBS) `ast_link`
 
 starlink:
-	$(CC) $(CFLAGS) $(INC) -o test_starlink test_starlink.c `ast_link`
+	$(CC) $(CFLAGS) $(INC) -o test_starlink test_starlink.c -L/usr/local/lib `ast_link`
 
 clean:
 	rm -f test_wcslib test_wcssub test_starlink test_wcsast *.o *.d $(WCSTOOLS)/*.o $(WCSTOOLS)/*.d
