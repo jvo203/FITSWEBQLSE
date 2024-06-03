@@ -527,7 +527,7 @@ static enum MHD_Result get_wcs(struct MHD_Connection *connection, double ra, dou
 
     printf("[C] get_wcs: %s source ra, dec: %f, %f [deg]\n", from, ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(src2dst, 1, &ra1, &dec1, 1, &ra2, &dec2);
-    printf("[C] get_wcs: astTran2 %s -> %s: %f, %f [deg]\n", from, to, ra2 * AST__DR2D, dec2 * AST__DR2D);
+    printf("[C] get_wcs: astTran2 %s --> %s: %f, %f [deg]\n", from, to, ra2 * AST__DR2D, dec2 * AST__DR2D);
 
     astEnd;
 
