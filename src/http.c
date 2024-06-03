@@ -40,6 +40,9 @@
 // NASA CFITSIO
 #include <fitsio.h>
 
+// Starlink AST
+#include <star/ast.h>
+
 // PostgreSQL
 #include <libpq-fe.h>
 

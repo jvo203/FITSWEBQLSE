@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <ast.h>
+#include <star/ast.h>
 
 void test()
 {
