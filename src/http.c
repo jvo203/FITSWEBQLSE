@@ -534,7 +534,8 @@ static enum MHD_Result get_wcs(struct MHD_Connection *connection, double ra, dou
     // create a JSON response
     GString *json = g_string_sized_new(128);
 
-    g_string_printf(json, "{\"ra\" : %f, \"dec\" : %f}", ra2 * AST__DR2D, dec2 * AST__DR2D);
+    // print as many decimal places as possible
+    g_string_printf(json, "{\"ra\" : %.15f, \"dec\" : %.15f}", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
     size_t json_len = json->len;
     gchar *json_str = g_string_free(json, FALSE);
