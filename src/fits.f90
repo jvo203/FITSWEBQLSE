@@ -6984,6 +6984,9 @@ contains
       print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
 
       ! AST
+      ! FITSCHAN = AST_FITSCHAN( AST_NULL, AST_NULL, ' ', STATUS )
+      ! print *, 'FITSCHAN: ', FITSCHAN
+
       ! loop through all cards
       do ICARD = 1, NKEYRC
          ! CARD = item%hdr((ICARD-1)*80+1:ICARD*80)
