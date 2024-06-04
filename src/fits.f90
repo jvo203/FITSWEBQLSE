@@ -6765,6 +6765,10 @@ contains
       real(c_float) :: cx, cy, rx, ry, r, r2
       real(kind=8) :: cdelt3
 
+      ! AST
+      INTEGER FITSCHAN, ICARD, NCARD, WCSINFO
+      CHARACTER * ( 80 ) CARD
+
       ! WCS
       integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS ! WCSP(2)
       type(C_PTR) :: WCSP
@@ -6978,6 +6982,17 @@ contains
       END IF
 
       print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
+
+      ! AST
+      ! loop through all cards
+      do ICARD = 1, NKEYRC
+         ! CARD = item%hdr((ICARD-1)*80+1:ICARD*80)
+         do NCARD = 1, 80
+            CARD(NCARD:NCARD) = item%hdr((ICARD-1)*80+NCARD)
+         end do
+
+         print *, CARD
+      end do
 
       ! write the CSV header lines (prepended by #)
       if (req%fd .ne. -1) then
