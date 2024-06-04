@@ -284,7 +284,7 @@ endif
 	$(CC) $(CFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
 
 %.o: %.f90
-	$(FORT) $(FLAGS) -fno-second-underscore -ff2c $(MOD) -o $@ -c $<
+	$(FORT) $(FLAGS) -fno-second-underscore $(MOD) -o $@ -c $<
 
 fitswebqlse: $(OBJ)
 	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBS) $(IPP) $(MKL)

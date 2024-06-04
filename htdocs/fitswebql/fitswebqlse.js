@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-03.0";
+    return "JS2024-06-04.0";
 }
 
 function uuidv4() {
@@ -4485,7 +4485,9 @@ async function poll_progress(datasetId, index) {
     var url = 'progress/' + encodeURIComponent(datasetId);
 
     xmlhttp.onreadystatechange = function () {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 404) { };
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 404) {
+            console.log("poll_progress: dataset not found.");
+        };
 
         if (xmlhttp.readyState == 4 && xmlhttp.status == 202) {
             console.log("Server not ready, long-polling progress again after 250 ms.");
@@ -4493,8 +4495,10 @@ async function poll_progress(datasetId, index) {
                 poll_progress(datasetId, index);
             }, 250);
         }
+
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var data = xmlhttp.response;
+            // console.log("poll_progress: data:", data, "index:", index);
 
             try {
                 process_progress_event(data, index);
