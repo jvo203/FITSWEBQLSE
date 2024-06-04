@@ -8,7 +8,7 @@ module fits
    implicit none
 
    ! Starlink AST
-   include 'AST_PAR.f'
+   include 'AST_PAR.f90'
 
    ! the number used at the beginning of the binary cache disk file
    ! when the number change is detected the binary cache gets invalidated and rebuilt

@@ -6,7 +6,7 @@
 !     Define the Fortran 77 interface to the AST library.
 
 !  Language:
-!     Fortran 77
+!     Fortran 77 --> 90
 
 !  Type of Module:
 !     Include file.
