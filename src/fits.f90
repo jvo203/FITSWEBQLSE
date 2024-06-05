@@ -6766,7 +6766,7 @@ contains
 
       ! AST
       integer(c_int) :: ast_status
-      type(C_PTR) :: fitschan
+      type(C_PTR) :: wcsinfo
 
       ! WCS
       integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS ! WCSP(2)
@@ -6925,9 +6925,7 @@ contains
 
       call astBegin
 
-      ! fitschan = astFitsChan(NULL, NULL, "");
-      ! read the header in one go
-      ! fitschan = astFitsChan(item%hdr)
+      wcsinfo = astReadHeader(item%hdr)
 
       ! WCSLIB
       NKEYRC = (size(item%hdr)-1) / 80

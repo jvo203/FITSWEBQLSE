@@ -38,9 +38,17 @@ module ast
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
-         type(C_PTR), intent(in) :: obj
+         type(C_PTR), value, intent(in) :: obj
          integer(C_INT), intent(out) :: status
       end subroutine astShow
+
+      ! AstFrameSet *ast_read_header(const char *header)
+      type(C_PTR) function astReadHeader( header ) bind(C, name="ast_read_header")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         character(C_CHAR), dimension(*), intent(in) :: header
+      end function astReadHeader
    end interface
 
 end module ast
