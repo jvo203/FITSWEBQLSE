@@ -1,5 +1,10 @@
 module ast
+   use, intrinsic :: ISO_C_BINDING
+
    implicit none
+
+! redefine the C_NULL_PTR constant as AST_NULL parameter
+   type(c_ptr), parameter :: AST_NULL = C_NULL_PTR
 
    interface
       ! void astBegin_( void )
@@ -15,6 +20,27 @@ module ast
 
          integer(C_INT), intent(out) :: status
       end subroutine astEnd
+
+      ! AstFitsChan *astFitsChanId_( const char *(* source)( void ),
+      ! void (* sink)( const char * ),
+      ! const char *options, ... )
+      type(C_PTR) function astFitsChan( source, sink, options ) bind(C, name="astFitsChanId_")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_FUNPTR), intent(in) :: source
+         type(C_FUNPTR), intent(in) :: sink
+         character(C_CHAR), dimension(*), intent(in) :: options
+      end function astFitsChan
+
+      ! void astShow_( AstObject *, int * );
+      subroutine astShow( obj, status ) bind(C, name="astShow_")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), intent(in) :: obj
+         integer(C_INT), intent(out) :: status
+      end subroutine astShow
    end interface
 
 end module ast

@@ -6766,6 +6766,7 @@ contains
 
       ! AST
       integer(c_int) :: ast_status
+      type(C_PTR) :: fitschan
 
       ! WCS
       integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS ! WCSP(2)
@@ -6923,6 +6924,10 @@ contains
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
 
       call astBegin
+
+      ! fitschan = astFitsChan(NULL, NULL, "");
+      ! read the header in one go
+      ! fitschan = astFitsChan(item%hdr)
 
       ! WCSLIB
       NKEYRC = (size(item%hdr)-1) / 80
