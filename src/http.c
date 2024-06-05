@@ -535,7 +535,8 @@ static enum MHD_Result get_wcs(struct MHD_Connection *connection, double ra, dou
     GString *json = g_string_sized_new(128);
 
     // print as many decimal places as possible
-    g_string_printf(json, "{\"ra\" : %.15f, \"dec\" : %.15f}", ra2 * AST__DR2D, dec2 * AST__DR2D);
+    // ra + 360 and then take the modulo 360
+    g_string_printf(json, "{\"ra\" : %.15f, \"dec\" : %.15f}", fmod(ra2 * AST__DR2D + 360.0, 360.0), dec2 * AST__DR2D);
 
     size_t json_len = json->len;
     gchar *json_str = g_string_free(json, FALSE);
