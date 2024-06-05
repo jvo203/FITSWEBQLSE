@@ -6922,7 +6922,7 @@ contains
       ! combine the spectra from other cluster nodes (if any)
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
 
-      call AST_BEGIN
+      call astBegin
 
       ! WCSLIB
       NKEYRC = (size(item%hdr)-1) / 80
@@ -6983,7 +6983,7 @@ contains
 
       print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
 
-      call AST_END (ast_status)
+      call astEnd (ast_status)
 
       ! write the CSV header lines (prepended by #)
       if (req%fd .ne. -1) then
