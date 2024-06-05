@@ -39,22 +39,24 @@ void test_fk5()
     AstFrameSet *fk52icrs = astConvert(fk5, icrs, " ");
 
     // ds9 ra,dec in FK5
-    ra1 = 52.2656215 * AST__DD2R;
+    /*ra1 = 52.2656215 * AST__DD2R;
     dec1 = 31.2677022 * AST__DD2R;
 
     printf("Original ra,dec (ds9) exported as FK5: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(fk52icrs, 1, &ra1, &dec1, 1, &ra2, &dec2);
     printf("AST FK5 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
-    printf("====================================================\n");
+    printf("====================================================\n");*/
 
     // ds9 ra,dec in ICRS
-    /*ra1 = 52.2656094 * AST__DD2R;
-    dec1 = 31.2677078 * AST__DD2R;
+    // ra1 = 52.2656094 * AST__DD2R;
+    // dec1 = 31.2677078 * AST__DD2R;
+    ra1 = 248.09530913897819 * AST__DD2R;
+    dec1 = -24.476817083331749 * AST__DD2R;
 
     printf("Original ra,dec (ds9) exported as ICRS: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(icrs2fk5, 1, &ra1, &dec1, 1, &ra2, &dec2);
-    printf("AST ICRS --> FK5: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);*/
+    printf("AST ICRS --> FK5: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
     // Clean up
     // not really needed as astEnd should do it
