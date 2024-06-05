@@ -7,9 +7,6 @@ module fits
 
    implicit none
 
-   ! Starlink AST
-   include 'AST_PAR.f90'
-
    ! the number used at the beginning of the binary cache disk file
    ! when the number change is detected the binary cache gets invalidated and rebuilt
    integer(kind=4), parameter :: MAGIC_NUMBER = 20240531
@@ -6765,10 +6762,6 @@ contains
       real(c_float) :: cx, cy, rx, ry, r, r2
       real(kind=8) :: cdelt3
 
-      ! AST
-      INTEGER FITSCHAN, ICARD, NCARD, WCSINFO
-      CHARACTER * ( 80 ) CARD
-
       ! WCS
       integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS ! WCSP(2)
       type(C_PTR) :: WCSP
@@ -6982,20 +6975,6 @@ contains
       END IF
 
       print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
-
-      ! AST
-      ! FITSCHAN = AST_FITSCHAN( AST_NULL, AST_NULL, ' ', STATUS )
-      ! print *, 'FITSCHAN: ', FITSCHAN
-
-      ! loop through all cards
-      do ICARD = 1, NKEYRC
-         ! CARD = item%hdr((ICARD-1)*80+1:ICARD*80)
-         do NCARD = 1, 80
-            CARD(NCARD:NCARD) = item%hdr((ICARD-1)*80+NCARD)
-         end do
-
-         print *, CARD
-      end do
 
       ! write the CSV header lines (prepended by #)
       if (req%fd .ne. -1) then
