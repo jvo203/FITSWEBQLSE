@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 // Starlink AST
 #include <ast.h>
@@ -20,25 +21,56 @@ AstFrameSet *ast_read_header(const char *header)
 
     if (!astOK)
     {
-        printf("<an error occurred (a message will have been issued)>\n");
+        printf("<[C] an error occurred (a message will have been issued)>\n");
     }
     else if (wcsinfo == AST__NULL)
     {
-        printf("<there was no WCS information present>\n");
+        printf("[C] <there was no WCS information present>\n");
     }
     else if (strcmp(astGetC(wcsinfo, "Class"), "FrameSet"))
     {
-        printf("<something unexpected was read (i.e. not a FrameSet)>\n");
+        printf("[C] <something unexpected was read (i.e. not a FrameSet)>\n");
     }
     else
     {
-        printf("<WCS information was read OK>\n");
+        printf("[C] <WCS information was read OK>\n");
     }
 
-    astShow(wcsinfo);
+    // astShow(wcsinfo);
 
     // annul the FitsChan
     astAnnul(fitschan);
 
     return wcsinfo;
+}
+
+void astPix2Sky(AstFrameSet *wcsinfo, float x, float y, double *ra, double *dec)
+{
+    double pixcrd[4] = {x, y, 0, 0};
+    double coords[4] = {0, 0, 0, 0};
+
+    if (wcsinfo == AST__NULL)
+    {
+        printf("[C] WCS info is NULL\n");
+
+        *ra = NAN;
+        *dec = NAN;
+
+        return;
+    }
+
+    if (strcmp(astGetC(wcsinfo, "Class"), "FrameSet"))
+    {
+        printf("[C] WCS info is not a FrameSet\n");
+
+        *ra = NAN;
+        *dec = NAN;
+
+        return;
+    }
+
+    astTranN(wcsinfo, 1, 4, 1, pixcrd, 1, 4, 1, coords);
+
+    *ra = coords[0] * AST__DR2D;
+    *dec = coords[1] * AST__DR2D;
 }

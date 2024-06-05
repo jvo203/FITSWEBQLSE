@@ -6927,6 +6927,45 @@ contains
 
       wcsinfo = astReadHeader(item%hdr)
 
+      ! check if the WCS is valid
+      if (c_associated(wcsinfo)) then
+         call astPix2Sky( wcsinfo, cx, cy, lng, lat )
+
+         ! check if lng and lat are not NaN (i.e. the WCS is valid)
+         !if (.not. ieee_is_nan(lng) .and. .not. ieee_is_nan(lat)) then
+         ! beam_width
+         call astPix2Sky(wcsinfo, cx - rx, cy, ra1, dec1)
+         call astPix2Sky(wcsinfo, cx + rx, cy, ra2, dec2)
+
+         ! convert ra, dec from degrees to radians
+         ra1 = ra1*deg2rad
+         dec1 = dec1*deg2rad
+
+         ra2 = ra2*deg2rad
+         dec2 = dec2*deg2rad
+
+         ! convert from radians to degrees
+         beam_width = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
+
+         ! beam_height
+         call astPix2Sky(wcsinfo, cx, cy - ry, ra1, dec1)
+         call astPix2Sky(wcsinfo, cx, cy + ry, ra2, dec2)
+
+         ! convert ra, dec from degrees to radians
+         ra1 = ra1*deg2rad
+         dec1 = dec1*deg2rad
+
+         ra2 = ra2*deg2rad
+         dec2 = dec2*deg2rad
+
+         ! convert from radians to degrees
+         beam_height = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
+
+         print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
+      end if
+
+      call astEnd (ast_status)
+
       ! WCSLIB
       NKEYRC = (size(item%hdr)-1) / 80
 
@@ -6985,8 +7024,6 @@ contains
       END IF
 
       print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
-
-      call astEnd (ast_status)
 
       ! write the CSV header lines (prepended by #)
       if (req%fd .ne. -1) then
