@@ -6928,11 +6928,11 @@ contains
       wcsinfo = astReadHeader(item%hdr)
 
       ! check if the WCS is valid
-      if (c_associated(wcsinfo)) then
-         call astPix2Sky( wcsinfo, cx, cy, lng, lat )
+      ! if (c_associated(wcsinfo)) then
+      call astPix2Sky( wcsinfo, cx, cy, lng, lat )
 
-         ! check if lng and lat are not NaN (i.e. the WCS is valid)
-         !if (.not. ieee_is_nan(lng) .and. .not. ieee_is_nan(lat)) then
+      ! check if lng and lat are not NaN (i.e. the WCS is valid)
+      if (.not. ieee_is_nan(lng) .and. .not. ieee_is_nan(lat)) then
          ! beam_width
          call astPix2Sky(wcsinfo, cx - rx, cy, ra1, dec1)
          call astPix2Sky(wcsinfo, cx + rx, cy, ra2, dec2)

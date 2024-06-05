@@ -50,18 +50,6 @@ module ast
          character(C_CHAR), dimension(*), intent(in) :: header
       end function astReadHeader
 
-      ! void astTranN8_( AstMapping *, AstDim, int, AstDim, const double *, int, int, AstDim, double *, int * );
-      subroutine astTranN8( mapping, indim, n, outdim, in, ininc, outinc, out, status ) bind(C, name="astTranN8_")
-         use, intrinsic :: ISO_C_BINDING
-         implicit none
-
-         type(C_PTR), value, intent(in) :: mapping
-         integer(C_INT), value, intent(in) :: indim, n, outdim, ininc, outinc
-         real(C_DOUBLE), dimension(*), intent(in) :: in
-         real(C_DOUBLE), dimension(*), intent(out) :: out
-         integer(C_INT), intent(out) :: status
-      end subroutine astTranN8
-
       ! void astPix2Sky(AstFrameSet *wcsinfo, float x, float y, double *ra, double *dec)
       subroutine astPix2Sky( wcsinfo, x, y, ra, dec ) bind(C, name="astPix2Sky")
          use, intrinsic :: ISO_C_BINDING
