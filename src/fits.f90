@@ -6764,6 +6764,9 @@ contains
       real(c_float) :: cx, cy, rx, ry, r, r2
       real(kind=8) :: cdelt3
 
+      ! AST
+      integer(c_int) :: ast_status
+
       ! WCS
       integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS ! WCSP(2)
       type(C_PTR) :: WCSP
@@ -6919,6 +6922,8 @@ contains
       ! combine the spectra from other cluster nodes (if any)
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
 
+      call AST_BEGIN
+
       ! WCSLIB
       NKEYRC = (size(item%hdr)-1) / 80
 
@@ -6977,6 +6982,8 @@ contains
       END IF
 
       print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
+
+      call AST_END (ast_status)
 
       ! write the CSV header lines (prepended by #)
       if (req%fd .ne. -1) then
