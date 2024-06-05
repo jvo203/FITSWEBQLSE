@@ -1,6 +1,8 @@
 module fits
    use, intrinsic :: ISO_C_BINDING
    use, intrinsic :: ieee_arithmetic
+
+   use ast
    use fixed_array
    use lz4
    use :: unix_pthread
