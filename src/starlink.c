@@ -55,7 +55,6 @@ void astPix2Sky(AstFrameSet *wcsinfo, float x, float y, double *ra, double *dec)
 
         *ra = NAN;
         *dec = NAN;
-
         return;
     }
 
@@ -65,12 +64,12 @@ void astPix2Sky(AstFrameSet *wcsinfo, float x, float y, double *ra, double *dec)
 
         *ra = NAN;
         *dec = NAN;
-
         return;
     }
 
     astTranN(wcsinfo, 1, 4, 1, pixcrd, 1, 4, 1, coords);
 
-    *ra = coords[0] * AST__DR2D;
+    // ra + 360 and then take the modulo 360
+    *ra = fmod(coords[0] * AST__DR2D + 360.0, 360.0);
     *dec = coords[1] * AST__DR2D;
 }
