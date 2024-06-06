@@ -4951,7 +4951,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "var idleWindow = -1;"
               "var idlePV = -1;"
               "window.onresize = resizeMe;"
-              "window.onbeforeunload = close_websocket_connections;"
+              /*"window.onbeforeunload = close_websocket_connections;" // commented out; a FITS file download was causing a WebSocket connection shutdown*/
               "mainRenderer(); </script>\n");
 
     g_string_append(html, "</body></html>");
