@@ -59,6 +59,14 @@ module ast
          real(C_FLOAT), value, intent(in) :: x, y
          real(C_DOUBLE), intent(out) :: ra, dec
       end subroutine astPix2Sky
+
+      ! void ast_annul(AstObject *object)
+      subroutine astAnnul( object ) bind(C, name="ast_annul")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: object
+      end subroutine astAnnul
    end interface
 
 end module ast

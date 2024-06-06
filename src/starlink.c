@@ -6,6 +6,15 @@
 // Starlink AST
 #include <star/ast.h>
 
+// decrement the reference count of an object
+void ast_annul(AstObject *object)
+{
+    if (object != AST__NULL)
+    {
+        astAnnul(object);
+    }
+}
+
 // read a header from a string
 AstFrameSet *ast_read_header(const char *header)
 {

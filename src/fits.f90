@@ -6964,6 +6964,8 @@ contains
          print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
       end if
 
+      call astAnnul(wcsinfo)
+
       call astEnd (ast_status)
 
       ! WCSLIB
