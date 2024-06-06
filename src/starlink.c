@@ -4,7 +4,7 @@
 #include <math.h>
 
 // Starlink AST
-#include <ast.h>
+#include <star/ast.h>
 
 // read a header from a string
 AstFrameSet *ast_read_header(const char *header)
