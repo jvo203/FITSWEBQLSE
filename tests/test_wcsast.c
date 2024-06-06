@@ -169,10 +169,10 @@ int main()
     // test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.265612, 31.267705); // NG file
 
     // passing the ra, dec obtained from SAO ds9 as ICRS
-    test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656094, 31.2677078);
+    // test_wcs("/Users/chris/Downloads/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656094, 31.2677078);
 
     // passing the ra, dec obtained from SAO ds9
-    // test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452); // OK file
+    test_wcs("/Users/chris/Downloads/ALMA01018218.fits", 856.49056, 438.4528, 261.2105354, -34.2435452); // OK file
 
     // passing the ra, dec obtained from SAO ds9
     // test_wcs("/home/chris/ダウンロード/SVS13_13CO.clean.image.pbcor.fits", 905.0, 880.0, 52.2656215, 31.2677022);
