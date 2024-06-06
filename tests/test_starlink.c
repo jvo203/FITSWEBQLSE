@@ -62,9 +62,13 @@ void test_fk5()
     // not really needed as astEnd should do it
     astAnnul(icrs2fk5); // was astAnnul; astFree causes a seg. fault
     astAnnul(fk52icrs);
-
     astAnnul(icrs);
     astAnnul(fk5);
+
+    /*astFree(icrs2fk5); // was astAnnul; astFree causes a seg. fault
+    astFree(fk52icrs);
+    astFree(icrs);
+    astFree(fk5);*/
 
     astEnd;
 }
@@ -72,7 +76,7 @@ void test_fk5()
 int main()
 {
     astBegin;
-    // test_fk4();
+    //  test_fk4();
     test_fk5();
     astEnd;
 
