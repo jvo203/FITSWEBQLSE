@@ -4,7 +4,8 @@
 
 #include <pthread.h>
 
-#define NO_THREADS 128
+#define NO_THREADS 16
+
 // an array of threads
 pthread_t threads[NO_THREADS];
 
@@ -30,6 +31,9 @@ void test_fk4()
     printf("AST FK4 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
     printf("====================================================\n");
+
+    astAnnul(fk42icrs);
+    astAnnul(fk4);
 
     astEnd;
 }
@@ -72,11 +76,6 @@ void test_fk5()
     astAnnul(fk52icrs);
     astAnnul(icrs);
     astAnnul(fk5);
-
-    /*astFree(icrs2fk5); // was astAnnul; astFree causes a seg. fault
-    astFree(fk52icrs);
-    astFree(icrs);
-    astFree(fk5);*/
 
     astEnd;
 }
