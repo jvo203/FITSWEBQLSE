@@ -41,8 +41,7 @@ WCSTOOLS = $(HOME)/Downloads/wcssubs
 SRC := $(WCSTOOLS)/wcsinit.c $(WCSTOOLS)/poly.c $(WCSTOOLS)/zpxpos.c $(WCSTOOLS)/wcs.c $(WCSTOOLS)/worldpos.c $(WCSTOOLS)/platepos.c $(WCSTOOLS)/wcslib.c $(WCSTOOLS)/proj.c $(WCSTOOLS)/wcscon.c $(WCSTOOLS)/dsspos.c $(WCSTOOLS)/wcstrig.c $(WCSTOOLS)/cel.c $(WCSTOOLS)/sph.c $(WCSTOOLS)/distort.c $(WCSTOOLS)/hget.c $(WCSTOOLS)/iget.c $(WCSTOOLS)/lin.c $(WCSTOOLS)/tnxpos.c $(WCSTOOLS)/hput.c
 OBJ := $(SRC:.c=.o)
 
-INC := `pkg-config --cflags cfitsio`
-#-I$(WCSTOOLS)
+INC := `pkg-config --cflags cfitsio` -I$(WCSTOOLS)
 LIBS := `pkg-config --libs cfitsio`
 
 wcssub: $(OBJ)
