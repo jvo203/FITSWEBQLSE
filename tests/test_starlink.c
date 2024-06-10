@@ -95,15 +95,26 @@ void *test_thread(void *arg)
     pthread_exit(NULL);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    int sleep_time = 0;
+
+    if (argc > 1)
+        sleep_time = atoi(argv[1]);
+
+    printf("Testing Starlink AST for %d seconds.\n", sleep_time);
 
     // launch threads
     for (int i = 0; i < NO_THREADS; i++)
         pthread_create(&threads[i], NULL, test_thread, NULL);
 
-    // wait for a key press to terminate
-    getchar();
+    if (sleep_time > 0)
+        sleep(sleep_time);
+    else
+    {
+        // wait for a key press to terminate
+        getchar();
+    }
 
     // terminate threads
     terminate = 1;
