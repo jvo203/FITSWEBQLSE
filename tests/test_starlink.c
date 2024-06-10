@@ -2,6 +2,14 @@
 #include <stdio.h>
 #include <star/ast.h>
 
+#include <pthread.h>
+
+#define NO_THREADS 128
+// an array of threads
+pthread_t threads[NO_THREADS];
+
+static volatile int terminate = 0;
+
 void test_fk4()
 {
     double ra1, dec1, ra2, dec2;
@@ -73,12 +81,34 @@ void test_fk5()
     astEnd;
 }
 
+void *test_thread(void *arg)
+{
+    while (!terminate)
+    {
+        test_fk4();
+        test_fk5();
+    }
+
+    pthread_exit(NULL);
+}
+
 int main()
 {
-    astBegin;
-    //  test_fk4();
-    test_fk5();
-    astEnd;
+
+    // launch threads
+    for (int i = 0; i < NO_THREADS; i++)
+        pthread_create(&threads[i], NULL, test_thread, NULL);
+
+    // wait for a key press to terminate
+    getchar();
+
+    // terminate threads
+    terminate = 1;
+
+    for (int i = 0; i < NO_THREADS; i++)
+        pthread_join(threads[i], NULL);
+
+    printf("All Starlink AST threads terminated\n");
 
     return 0;
 }
