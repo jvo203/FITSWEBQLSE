@@ -83,11 +83,15 @@ void test_fk5()
 
 void *test_thread(void *arg)
 {
+    astBegin;
+
     while (!terminate)
     {
         test_fk4();
         test_fk5();
     }
+
+    astEnd;
 
     pthread_exit(NULL);
 }
