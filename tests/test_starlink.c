@@ -5,10 +5,10 @@
 
 #include <star/ast.h>
 
-#define NO_THREADS 16
+#define MAX_NO_THREADS 1024
 
 // an array of threads
-pthread_t threads[NO_THREADS];
+pthread_t threads[MAX_NO_THREADS];
 
 static volatile int terminate = 0;
 
@@ -20,21 +20,21 @@ void test_fk4()
 
     AstSkyFrame *fk4 = astSkyFrame("System=fk4");
     AstSkyFrame *icrs = astSkyFrame("System=ICRS");
-
     AstFrameSet *fk42icrs = astConvert(fk4, icrs, " ");
 
     // ds9 ra,dec in FK4
     ra1 = 51.4924676 * AST__DD2R;
     dec1 = 31.0959144 * AST__DD2R;
 
-    printf("Original ra,dec (ds9) exported as FK4: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
+    //printf("Original ra,dec (ds9) exported as FK4: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(fk42icrs, 1, &ra1, &dec1, 1, &ra2, &dec2);
-    printf("AST FK4 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
+    //printf("AST FK4 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
-    printf("====================================================\n");
+    //printf("====================================================\n");
 
     astAnnul(fk42icrs);
     astAnnul(fk4);
+    astAnnul(icrs);
 
     astEnd;
 }
@@ -55,11 +55,11 @@ void test_fk5()
     ra1 = 52.2656215 * AST__DD2R;
     dec1 = 31.2677022 * AST__DD2R;
 
-    printf("Original ra,dec (ds9) exported as FK5: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
+    //printf("Original ra,dec (ds9) exported as FK5: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(fk52icrs, 1, &ra1, &dec1, 1, &ra2, &dec2);
-    printf("AST FK5 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
+    //printf("AST FK5 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
-    printf("====================================================\n");
+    //printf("====================================================\n");
 
     // ds9 ra,dec in ICRS
     ra1 = 52.2656094 * AST__DD2R;
@@ -67,9 +67,9 @@ void test_fk5()
     // ra1 = 248.09530913897819 * AST__DD2R;
     // dec1 = -24.476817083331749 * AST__DD2R;
 
-    printf("Original ra,dec (ds9) exported as ICRS: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
+    //printf("Original ra,dec (ds9) exported as ICRS: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(icrs2fk5, 1, &ra1, &dec1, 1, &ra2, &dec2);
-    printf("AST ICRS --> FK5: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
+    //printf("AST ICRS --> FK5: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
     // Clean up
     // not really needed as astEnd should do it
@@ -82,31 +82,37 @@ void test_fk5()
 }
 
 void *test_thread(void *arg)
-{
-    astBegin;
-
+{    
     while (!terminate)
     {
         test_fk4();
         test_fk5();
-    }
-
-    astEnd;
+    }    
 
     pthread_exit(NULL);
 }
 
 int main(int argc, char *argv[])
-{
+{   
+    int no_threads = 1;    
     int sleep_time = 0;
 
     if (argc > 1)
         sleep_time = atoi(argv[1]);
 
-    printf("Testing Starlink AST for %d seconds.\n", sleep_time);
+    if (argc > 2)
+        no_threads = atoi(argv[2]);
+
+    if(no_threads > MAX_NO_THREADS)
+    {
+        printf("Number of threads exceeds the maximum allowed (%d)\n", no_threads);
+        return 1;
+    }
+
+    printf("Testing Starlink AST for %d seconds using %d threads.\n", sleep_time, no_threads);
 
     // launch threads
-    for (int i = 0; i < NO_THREADS; i++)
+    for (int i = 0; i < no_threads; i++)
         pthread_create(&threads[i], NULL, test_thread, NULL);
 
     if (sleep_time > 0)
@@ -120,10 +126,12 @@ int main(int argc, char *argv[])
     // terminate threads
     terminate = 1;
 
-    for (int i = 0; i < NO_THREADS; i++)
+    for (int i = 0; i < no_threads; i++)
         pthread_join(threads[i], NULL);
 
     printf("All Starlink AST threads terminated\n");
+
+    astFlushMemory(1);
 
     return 0;
 }
