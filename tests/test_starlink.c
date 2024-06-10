@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < no_threads; i++)
         pthread_join(threads[i], NULL);
 
-    printf("All Starlink AST threads terminated\n");
+    printf("All Starlink AST threads terminated.\n");
 
     astFlushMemory(1);
 
