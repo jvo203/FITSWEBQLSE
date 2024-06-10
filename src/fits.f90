@@ -6965,7 +6965,6 @@ contains
       end if
 
       call astAnnul(wcsinfo)
-
       call astEnd (ast_status)
 
       ! WCSLIB
