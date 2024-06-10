@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <star/ast.h>
-
+#include <unistd.h>
 #include <pthread.h>
+
+#include <star/ast.h>
 
 #define NO_THREADS 16
 
