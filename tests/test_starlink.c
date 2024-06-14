@@ -26,11 +26,11 @@ void test_fk4()
     ra1 = 51.4924676 * AST__DD2R;
     dec1 = 31.0959144 * AST__DD2R;
 
-    //printf("Original ra,dec (ds9) exported as FK4: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
+    // printf("Original ra,dec (ds9) exported as FK4: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(fk42icrs, 1, &ra1, &dec1, 1, &ra2, &dec2);
-    //printf("AST FK4 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
+    // printf("AST FK4 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
-    //printf("====================================================\n");
+    // printf("====================================================\n");
 
     astAnnul(fk42icrs);
     astAnnul(fk4);
@@ -55,11 +55,11 @@ void test_fk5()
     ra1 = 52.2656215 * AST__DD2R;
     dec1 = 31.2677022 * AST__DD2R;
 
-    //printf("Original ra,dec (ds9) exported as FK5: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
+    // printf("Original ra,dec (ds9) exported as FK5: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(fk52icrs, 1, &ra1, &dec1, 1, &ra2, &dec2);
-    //printf("AST FK5 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
+    // printf("AST FK5 --> ICRS: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
-    //printf("====================================================\n");
+    // printf("====================================================\n");
 
     // ds9 ra,dec in ICRS
     ra1 = 52.2656094 * AST__DD2R;
@@ -67,9 +67,9 @@ void test_fk5()
     // ra1 = 248.09530913897819 * AST__DD2R;
     // dec1 = -24.476817083331749 * AST__DD2R;
 
-    //printf("Original ra,dec (ds9) exported as ICRS: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
+    // printf("Original ra,dec (ds9) exported as ICRS: %f %f\n", ra1 * AST__DR2D, dec1 * AST__DR2D);
     astTran2(icrs2fk5, 1, &ra1, &dec1, 1, &ra2, &dec2);
-    //printf("AST ICRS --> FK5: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
+    // printf("AST ICRS --> FK5: %f %f\n", ra2 * AST__DR2D, dec2 * AST__DR2D);
 
     // Clean up
     // not really needed as astEnd should do it
@@ -82,19 +82,19 @@ void test_fk5()
 }
 
 void *test_thread(void *arg)
-{    
+{
     while (!terminate)
     {
         test_fk4();
         test_fk5();
-    }    
+    }
 
     pthread_exit(NULL);
 }
 
 int main(int argc, char *argv[])
-{   
-    int no_threads = 1;    
+{
+    int no_threads = 1;
     int sleep_time = 0;
 
     if (argc > 1)
@@ -103,13 +103,15 @@ int main(int argc, char *argv[])
     if (argc > 2)
         no_threads = atoi(argv[2]);
 
-    if(no_threads > MAX_NO_THREADS)
+    if (no_threads > MAX_NO_THREADS)
     {
         printf("Number of threads exceeds the maximum allowed (%d)\n", no_threads);
         return 1;
     }
 
     printf("Testing Starlink AST for %d seconds using %d threads.\n", sleep_time, no_threads);
+
+    astBegin;
 
     // launch threads
     for (int i = 0; i < no_threads; i++)
@@ -130,6 +132,8 @@ int main(int argc, char *argv[])
         pthread_join(threads[i], NULL);
 
     printf("All Starlink AST threads terminated.\n");
+
+    astEnd;
 
     astFlushMemory(1);
 
