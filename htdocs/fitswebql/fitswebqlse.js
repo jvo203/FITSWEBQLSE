@@ -14080,6 +14080,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 fitsContainer[index - 1] = fitsData;
                                 optical_view = fitsData.is_optical;
 
+                                if (optical_view) {
+                                    d3.select("#splatMenu").remove();
+                                }
+
                                 if (!isLocal) {
                                     let filesize = fitsData.filesize;
                                     let strFileSize = numeral(filesize).format('0.0ib');
@@ -14191,6 +14195,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
                                 } else {
                                     console.log("Invalid image dimensions: ", img_width, img_height);
+
+                                    // remove the 'Image' menu
+                                    d3.select("#imageMenu").remove();
+                                    d3.select("#splatMenu").remove();
                                 }
 
                                 if (has_json) {
@@ -16135,6 +16143,7 @@ function display_menu() {
 
     //IMAGE
     var imageMenu = mainUL.append("li")
+        .attr("id", "imageMenu")
         .attr("class", "dropdown");
 
     imageMenu.append("a")
@@ -16172,7 +16181,7 @@ function display_menu() {
         .attr("id", "prefDropdown")
         .attr("class", "dropdown-menu");
 
-    //SPLATALOGUE
+    //SPLATALOGUE    
     if (!optical_view) {
         var splatMenu = mainUL.append("li")
             .attr("id", "splatMenu")

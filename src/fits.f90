@@ -1405,6 +1405,16 @@ module fits
          real(kind=c_double), value, intent(in) :: val
       end subroutine add_json_double
 
+      ! void add_json_logical(GString *json, char *key, bool val)
+      subroutine add_json_logical(json, key, val) BIND(C, name='add_json_logical')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), value :: json
+         character(kind=c_char), intent(in) :: key(*)
+         logical(kind=c_bool), value, intent(in) :: val
+      end subroutine add_json_logical
+
    end interface
 
 contains
@@ -6180,6 +6190,7 @@ contains
       call add_json_long(json, 'filesize'//c_null_char, filesize)
       call add_json_integer(json, 'BITPIX'//c_null_char, item%bitpix)
       call add_json_double(json, 'IGNRVAL'//c_null_char, item%ignrval)
+      call add_json_logical(json, 'is_optical'//c_null_char, logical(item%is_optical, kind=c_bool))
 
       call add_json_double(json, 'CD1_1'//c_null_char, item%cd1_1)
       call add_json_double(json, 'CD1_2'//c_null_char, item%cd1_2)

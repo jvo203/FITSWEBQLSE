@@ -104,3 +104,11 @@ extern void add_json_integer_array(GString *json, char *key, int *val, int n)
 
     g_string_append_printf(json, "],");
 }
+
+extern void add_json_logical(GString *json, char *key, bool val)
+{
+    if (json == NULL)
+        return;
+
+    g_string_append_printf(json, "\"%s\" : %s,", key, val ? "true" : "false");
+}
