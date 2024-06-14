@@ -6395,8 +6395,8 @@ contains
       ! get the downscaled image dimensions
       scale = get_image_scale(width, height, inner_width, inner_height)
 
-      ! if naxis .eq. 1, then the image is a spectrum; do not downsize, set scale to 1.0
-      if (item%naxis .eq. 1) scale = 1.0
+      ! do not downsize HDS spectra, set scale to 1.0
+      if (item%is_spectrum) scale = 1.0
 
       if (scale .lt. 1.0) then
          img_width = nint(scale*item%naxes(1))
