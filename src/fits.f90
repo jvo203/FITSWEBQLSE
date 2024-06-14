@@ -406,6 +406,7 @@ module fits
       type(array_ptr), dimension(:), allocatable :: compressed
 
       logical :: is_optical = .true.
+      logical :: is_spectrum = .false.
       logical :: is_xray = .false.
 
       logical :: error = .false.
@@ -2179,6 +2180,10 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%is_optical
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%is_spectrum
+      write (unit=fileunit, IOSTAT=ios) item%is_spectrum
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%is_xray
       write (unit=fileunit, IOSTAT=ios) item%is_xray
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
@@ -2599,6 +2604,10 @@ contains
       read (unit=fileunit, IOSTAT=ios) item%is_optical
       if (ios .ne. 0) go to 300
 
+      ! item%is_spectrum
+      read (unit=fileunit, IOSTAT=ios) item%is_spectrum
+      if (ios .ne. 0) go to 300
+
       ! item%is_xray
       read (unit=fileunit, IOSTAT=ios) item%is_xray
       if (ios .ne. 0) go to 300
@@ -2833,7 +2842,8 @@ contains
       print *, 'CUNIT3: ', trim(item%cunit3), ', CTYPE3: ', trim(item%ctype3)
       print *, 'CD1_1: ', item%cd1_1, 'CD1_2: ', item%cd1_2
       print *, 'CD2_1: ', item%cd2_1, 'CD2_2: ', item%cd2_2
-      print *, 'IS_OPTICAL: ', item%is_optical, ', IS_XRAY: ', item%is_xray, ', FLUX: ', trim(item%flux)
+      print *, 'IS_OPTICAL: ', item%is_optical, ', IS_XRAY: ', item%is_xray, 'IS_SPECTRUM: ', item%is_spectrum,&
+      &', FLUX: ', trim(item%flux)
       print *, 'has_frequency:', item%has_frequency,&
       & ', has_velocity:', item%has_velocity,&
       & ', frame_multiplier = ', item%frame_multiplier
@@ -4065,6 +4075,21 @@ contains
             end if
          end block
 
+      end if
+
+      status = 0; call FTGKYS(unit, 'INSTRUME', value, comment, status)
+
+      ! handle the instrument
+      if (status .eq. 0) then
+         ! first convert the value to lower case
+         call lower_case(value)
+
+         block
+            integer pos
+
+            pos = index(value, 'hds')
+            if (pos .ne. 0) item%is_spectrum = .true.
+         end block
       end if
 
       ! Try moving to the next extension in the FITS file, if it exists.
@@ -6191,6 +6216,7 @@ contains
       call add_json_integer(json, 'BITPIX'//c_null_char, item%bitpix)
       call add_json_double(json, 'IGNRVAL'//c_null_char, item%ignrval)
       call add_json_logical(json, 'is_optical'//c_null_char, logical(item%is_optical, kind=c_bool))
+      call add_json_logical(json, 'is_spectrum'//c_null_char, logical(item%is_spectrum, kind=c_bool))
 
       call add_json_double(json, 'CD1_1'//c_null_char, item%cd1_1)
       call add_json_double(json, 'CD1_2'//c_null_char, item%cd1_2)

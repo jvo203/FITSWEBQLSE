@@ -14079,6 +14079,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 // handle the fitsData part
                                 fitsContainer[index - 1] = fitsData;
                                 optical_view = fitsData.is_optical;
+                                spectrum_view = fitsData.is_spectrum;
 
                                 if (optical_view) {
                                     d3.select("#splatMenu").remove();
@@ -14191,34 +14192,34 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 // console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-                                if (img_height > 1 && img_width > 1) {
+                                if (!spectrum_view) {
                                     process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+
+                                    if (has_json) {
+                                        display_histogram(index);
+
+                                        try {
+                                            display_cd_gridlines();
+                                        }
+                                        catch (err) {
+                                            display_gridlines();
+                                        };
+
+                                        display_beam();
+                                    }
+
+                                    if (composite_view) {
+                                        if (spectrum_count == va_count)
+                                            display_rgb_legend();
+                                    } else {
+                                        display_legend();
+                                    }
                                 } else {
-                                    console.log("Invalid image dimensions: ", img_width, img_height);
+                                    console.log("spectrum_view with dimensions: ", img_width, img_height);
 
                                     // remove the 'Image' menu
                                     d3.select("#imageMenu").remove();
                                     d3.select("#splatMenu").remove();
-                                }
-
-                                if (has_json) {
-                                    display_histogram(index);
-
-                                    try {
-                                        display_cd_gridlines();
-                                    }
-                                    catch (err) {
-                                        display_gridlines();
-                                    };
-
-                                    display_beam();
-                                }
-
-                                if (composite_view) {
-                                    if (spectrum_count == va_count)
-                                        display_rgb_legend();
-                                } else {
-                                    display_legend();
                                 }
                             }
                             /*})
@@ -18926,6 +18927,7 @@ async function mainRenderer() {
     console.log("composite view:", composite_view);
 
     optical_view = false;
+    spectrum_view = false;
 
     if (firstTime) {
         fps = 30;//target fps; 60 is OK in Chrome but a bit laggish in Firefox
