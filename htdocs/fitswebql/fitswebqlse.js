@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-04.0";
+    return "JS2024-06-14.0";
 }
 
 function uuidv4() {
@@ -6837,6 +6837,11 @@ function display_dataset_info() {
 
     let raText = 'RA N/A';
 
+    // check if fitsData.RA is not empty
+    if (fitsData.RA != '') {
+        raText = 'RA: ' + fitsData.RA;
+    }
+
     if (fitsData.CTYPE1.indexOf("RA") > -1) {
         if (coordsFmt == 'DMS')
             raText = 'α: ' + RadiansPrintDMS(xradec[0]);
@@ -6864,6 +6869,11 @@ function display_dataset_info() {
     .text(fitsData.CTYPE1.trim());*/
 
     let decText = 'DEC N/A';
+
+    // check if fitsData.DEC is not empty
+    if (fitsData.DEC != '') {
+        decText = 'DEC: ' + fitsData.DEC;
+    }
 
     if (fitsData.CTYPE2.indexOf("DEC") > -1)
         decText = 'δ: ' + RadiansPrintDMS(xradec[1]);
@@ -14175,9 +14185,13 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 let elapsed = Math.round(performance.now() - start);
 
-                                //console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+                                // console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-                                process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+                                if (img_height > 1 && img_width > 1) {
+                                    process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+                                } else {
+                                    console.log("Invalid image dimensions: ", img_width, img_height);
+                                }
 
                                 if (has_json) {
                                     display_histogram(index);

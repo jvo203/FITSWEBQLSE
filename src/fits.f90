@@ -11,7 +11,7 @@ module fits
 
    ! the number used at the beginning of the binary cache disk file
    ! when the number change is detected the binary cache gets invalidated and rebuilt
-   integer(kind=4), parameter :: MAGIC_NUMBER = 20240531
+   integer(kind=4), parameter :: MAGIC_NUMBER = 20240614
 
    integer(c_int), parameter :: ZFP_HIGH_PRECISION = 16
    integer(c_int), parameter :: ZFP_MEDIUM_PRECISION = 11
@@ -376,6 +376,7 @@ module fits
       integer naxes(4)
       character frameid*70, object*70, line*70, filter*70, date_obs*70
       character btype*70, bunit*70, radesys*70, specsys*70, timesys*70
+      character ra*70, dec*70 ! Subaru HDS RA and DEC
       character cunit1*70, ctype1*70
       character cunit2*70, ctype2*70
       character cunit3*70, ctype3*70
@@ -1704,7 +1705,8 @@ contains
       end if
 
       ! only make a cache for datasets with valid data/image, no errors
-      if (get_image_status(ptr) .eq. 1) then
+      ! and with more than one axis (exclude Subaru HDS spectra, for example)
+      if (get_image_status(ptr) .eq. 1 .and. item%naxis .gt. 1) then
          ! create a cache directory using the <datasetid> folder name
          status = mkcache(cache(1:cache_len)//c_null_char)
 
@@ -1928,6 +1930,14 @@ contains
 
       ! item%timesys
       write (unit=fileunit, IOSTAT=ios) item%timesys
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%ra
+      write (unit=fileunit, IOSTAT=ios) item%ra
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%dec
+      write (unit=fileunit, IOSTAT=ios) item%dec
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
       ! item%cunit1
@@ -2332,6 +2342,14 @@ contains
 
       ! item%timesys
       read (unit=fileunit, IOSTAT=ios) item%timesys
+      if (ios .ne. 0) go to 300
+
+      ! item%ra
+      read (unit=fileunit, IOSTAT=ios) item%ra
+      if (ios .ne. 0) go to 300
+
+      ! item%dec
+      read (unit=fileunit, IOSTAT=ios) item%dec
       if (ios .ne. 0) go to 300
 
       ! item%cunit1
@@ -2792,6 +2810,7 @@ contains
       print *, 'datasetid:', item%datasetid, ', FRAMEID:', trim(item%frameid),&
       & ', BTYPE: ', trim(item%btype), ', BUNIT: ', trim(item%bunit), ', IGNRVAL:', item%ignrval
       print *, 'LINE: ', trim(item%line), ', FILTER: ', trim(item%filter), ', RADESYS: ', trim(item%radesys),&
+      & ', RA: ', trim(item%ra), ', DEC: ', trim(item%dec),&
       & ', SPECSYS: ', trim(item%specsys), ', TIMESYS: ', trim(item%timesys),&
       & ', OBJECT: ', trim(item%object), ', DATE-OBS: ', trim(item%date_obs)
       print *, 'RESTFRQ: ', item%restfrq, 'BMAJ: ', item%bmaj, ', BMIN: ', item%bmin, ', BPA: ', item%bpa
@@ -3562,6 +3581,8 @@ contains
       item%radesys = ''
       item%specsys = ''
       item%timesys = ''
+      item%ra = ''
+      item%dec = ''
 
       ! special handling for the flux
       ! test the first character for 'N' ('NULL')
@@ -3950,7 +3971,13 @@ contains
 
       status = 0; call FTGKYS(unit, 'FILTER', item%filter, comment, status)
 
+      status = 0; call FTGKYS(unit, 'RA', item%ra, comment, status)
+
+      status = 0; call FTGKYS(unit, 'DEC', item%dec, comment, status)
+
       status = 0; call FTGKYS(unit, 'RADESYS', item%radesys, comment, status)
+
+      status = 0; call FTGKYS(unit, 'RADECSYS', item%radesys, comment, status)
 
       status = 0; call FTGKYS(unit, 'SPECSYS', item%specsys, comment, status)
 
@@ -4011,6 +4038,9 @@ contains
                item%is_optical = .false.
                item%flux = 'logistic'
             end if
+
+            pos = index(value, 'subaru')
+            if (pos .ne. 0) item%is_optical = .true.
 
             pos = index(value, 'chandra')
             if (pos .ne. 0) then
@@ -4101,6 +4131,7 @@ contains
       call parse_fits_header(item, unit, naxis, naxes, bitpix)
 
       !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
+      ! HDS only has 1 axis, so we need to check for NAXIS1
       if (naxis .lt. 2) then
          print *, 'READIMAGE failed to read the NAXISn keywords.'
          call set_error_status(item, .true.)
@@ -4269,6 +4300,8 @@ contains
       item%radesys = ''
       item%specsys = ''
       item%timesys = ''
+      item%ra = ''
+      item%dec = ''
 
       ! special handling for the flux
       ! test the first character for 'N' ('NULL')
@@ -4326,12 +4359,17 @@ contains
 
       ! read the FITS header
       call parse_fits_header(item, unit, naxis, naxes, bitpix)
+      print *, item%hdr
 
       !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
-      if (naxis .lt. 2) then
+      ! HDS only has 1 axis, so we need to check for NAXIS1 only.
+      if (naxis .lt. 1) then
          print *, 'READIMAGE failed to read the NAXISn keywords.'
          go to 200
       end if
+
+      ! force the second dimension to be 1 for 1D images (e.g. spectra)
+      if (naxis .eq. 1) naxes(2) = 1
 
       ! detect the FITS header types and units (frequency, velocity)
       call frame_reference_type(item)
@@ -4345,7 +4383,7 @@ contains
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
       ! reset the progress
-      if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
+      if (naxis .eq. 1 .or. naxis .eq. 2 .or. naxes(3) .eq. 1) then
          call set_progress(item, int(0, kind=8), int(1, kind=8))
       else
          call set_progress(item, int(0, kind=8), int(naxes(3), kind=8))
@@ -4388,7 +4426,7 @@ contains
       end if
 
       ! calculate the range for each image
-      if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
+      if (naxis .eq. 1 .or. naxis .eq. 2 .or. naxes(3) .eq. 1) then
          ! client nodes can skip 2D images
          if (c_associated(root)) then
             bSuccess = .true. ! setting this to .true. prevents the error from getting set further on
@@ -5443,7 +5481,7 @@ contains
       sensitivity = 1.0/(white - black)
       ratio_sensitivity = sensitivity
 
-      if (item%is_optical) then
+      if (item%is_optical .and. item%naxis .gt. 1) then
          ! SubaruWebQL-style
          u = 0.5
          v = 15.0
@@ -5496,7 +5534,7 @@ contains
       end if
 
       print *, 'black = ', black, ', white = ', white, ', sensitivity = ', sensitivity, ',&
-      &ratio sensitivity = ', ratio_sensitivity
+      & ratio sensitivity = ', ratio_sensitivity
 
       tone%pmin = pmin
       tone%pmax = pmax
@@ -6177,6 +6215,8 @@ contains
       call add_json_double(json, 'RESTFRQ'//c_null_char, item%restfrq)
       call add_json_double(json, 'OBSRA'//c_null_char, item%obsra)
       call add_json_double(json, 'OBSDEC'//c_null_char, item%obsdec)
+      call add_json_string(json, 'RA'//c_null_char, trim(item%ra)//c_null_char)
+      call add_json_string(json, 'DEC'//c_null_char, trim(item%dec)//c_null_char)
       call add_json_string(json, 'RADESYS'//c_null_char, trim(item%radesys)//c_null_char)
 
       call add_json_string(json, 'OBJECT'//c_null_char, trim(item%object)//c_null_char)
@@ -6317,6 +6357,9 @@ contains
 
       ! get the downscaled image dimensions
       scale = get_image_scale(width, height, inner_width, inner_height)
+
+      ! if naxis .eq. 1, then the image is a spectrum; do not downsize, set scale to 1.0
+      if (item%naxis .eq. 1) scale = 1.0
 
       if (scale .lt. 1.0) then
          img_width = nint(scale*item%naxes(1))
