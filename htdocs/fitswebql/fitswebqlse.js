@@ -3807,6 +3807,85 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     }
 }
 
+function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
+    console.log("process_hds_spectrum");
+    var bounds = true_image_dimensions(alpha, img_width, img_height);
+    console.log("image_bounding_dims:", bounds);
+
+    //bounds.x1 = 0;
+    //bounds.x2 = img_width;
+
+    // print spectrum dimensions
+    console.log("spectrum dimensions:", img_width, img_height);
+    console.log("spectrum pixels:", pixels);
+    console.log("spectrum alpha:", alpha);
+
+    // prepare data for Plotly.js
+    var x = [];
+    var y = [];
+
+    for (var i = 0; i < img_width; i++) {
+        x.push(i);
+        //y.push(pixels[i]);
+
+        // push NaN for the masked pixels
+        if (alpha[i] > 0)
+            y.push(pixels[i]);
+        else
+            y.push(NaN);
+    }
+
+    var data = [{
+        x: x,
+        y: y,
+        type: 'scatter'
+    }];
+
+    var svg = d3.select("#SpectrumSVG");
+    var div_width = parseFloat(svg.attr("width"));
+    var div_height = parseFloat(svg.attr("height"));
+
+    var layout = {
+        title: 'HDS spectrum',
+        autosize: false,
+        width: div_width,
+        height: div_height,
+        xaxis: {
+            autorange: true,
+            range: [bounds.x1, bounds.x2],
+            rangeselector: {
+                buttons: [
+                    {
+                        count: 1,
+                        label: '1',
+                        stepmode: 'backward'
+                    },
+                    {
+                        count: 10000,
+                        label: '10000',
+                        stepmode: 'backward'
+                    },
+                    { step: 'all' }
+                ]
+            },
+            rangeslider: { range: [bounds.x1, bounds.x2] },
+            type: 'linear',
+            title: 'Wavelength (nm)'
+        },
+        yaxis: {
+            autorange: true,
+            type: 'linear',
+            title: 'Intensity'
+        }
+    };
+
+    Plotly.newPlot(div, data, layout);
+
+    has_image = true;
+
+    hide_hourglass();
+}
+
 function webgl_composite_image_renderer(gl, width, height) {
     var scale = get_image_scale(width, height, compositeImage.image_bounding_dims.width, compositeImage.image_bounding_dims.height);
     var img_width = Math.floor(scale * compositeImage.image_bounding_dims.width);
@@ -14224,16 +14303,27 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     // remove an HTML element with id "SpectrumCanvas"
                                     d3.select("#SpectrumCanvas").remove();
 
-                                    var rect = document.getElementById('mainDiv').getBoundingClientRect();
-                                    var width = Math.round(rect.width - 20);
-                                    var height = Math.round(rect.height - 20);
+                                    var svg = d3.select("#FrontSVG");
+                                    var width = parseFloat(svg.attr("width"));
+                                    var height = parseFloat(svg.attr("height"));
 
-                                    // add an HTML element with id "SpectrumDiv" to the "mainDiv"                                    
-                                    d3.select("#mainDiv").append("div")
-                                        .attr("id", "SpectrumDiv")
+                                    // add an HTML div foreign element element with id "SpectrumDiv" to the SVG FrontSVG
+                                    d3.select("#FrontSVG").append("foreignObject")
+                                        .attr("id", "SpectrumSVG")
+                                        .attr("x", 0)
+                                        .attr("y", 0.15 * height)
                                         .attr("width", width)
-                                        .attr("height", height)
-                                        .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 55');
+                                        .attr("height", 0.9 * height)
+                                        .attr("opacity", 1.0)
+                                        .append("xhtml:div")
+                                        .attr("id", "SpectrumDiv");
+
+                                    // add an HTML element with id "SpectrumDiv" to the "mainDiv"
+                                    /*d3.select("#mainDiv").append("div")
+                                        .attr("id", "SpectrumDiv")
+                                        .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 60');*/
+
+                                    process_hds_spectrum(img_width, img_height, pixels, alpha, "SpectrumDiv");
                                 }
                             }
                             /*})
