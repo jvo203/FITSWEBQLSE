@@ -4554,6 +4554,9 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                           "src=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/"
                           "fitswebql/marchingsquares-isobands.min.js\" defer></script>\n");
 
+    // Plotly.js
+    g_string_append(html, "<script src=\"https://cdn.plot.ly/plotly-2.32.0.min.js\" charset=\"utf-8\"></script>\n");
+
     // Markdown-to-HTML converter
     g_string_append(html, "<script "
                           "src=\"https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js\" "
