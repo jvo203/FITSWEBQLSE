@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-14.0";
+    return "JS2024-06-18.0";
 }
 
 function uuidv4() {
@@ -14220,6 +14220,20 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     // remove the 'Image' menu
                                     d3.select("#imageMenu").remove();
                                     d3.select("#splatMenu").remove();
+
+                                    // remove an HTML element with id "SpectrumCanvas"
+                                    d3.select("#SpectrumCanvas").remove();
+
+                                    var rect = document.getElementById('mainDiv').getBoundingClientRect();
+                                    var width = Math.round(rect.width - 20);
+                                    var height = Math.round(rect.height - 20);
+
+                                    // add an HTML element with id "SpectrumDiv" to the "mainDiv"                                    
+                                    d3.select("#mainDiv").append("div")
+                                        .attr("id", "SpectrumDiv")
+                                        .attr("width", width)
+                                        .attr("height", height)
+                                        .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 55');
                                 }
                             }
                             /*})
