@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-18.0";
+    return "JS2024-06-19.0";
 }
 
 function uuidv4() {
@@ -3841,9 +3841,9 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         type: 'scatter'
     }];
 
-    var svg = d3.select("#SpectrumSVG");
+    var svg = d3.select("#FrontSVG");
     var div_width = parseFloat(svg.attr("width"));
-    var div_height = parseFloat(svg.attr("height"));
+    var div_height = 0.95 * parseFloat(svg.attr("height"));
 
     var layout = {
         title: 'HDS spectrum',
@@ -14303,7 +14303,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     // remove an HTML element with id "SpectrumCanvas"
                                     d3.select("#SpectrumCanvas").remove();
 
-                                    var svg = d3.select("#FrontSVG");
+                                    /*var svg = d3.select("#FrontSVG");
                                     var width = parseFloat(svg.attr("width"));
                                     var height = parseFloat(svg.attr("height"));
 
@@ -14316,12 +14316,20 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         .attr("height", 0.9 * height)
                                         .attr("opacity", 1.0)
                                         .append("xhtml:div")
-                                        .attr("id", "SpectrumDiv");
+                                        .attr("id", "SpectrumDiv");*/
+
+                                    var svg = d3.select("#menu_activation_area");
+                                    var y = parseFloat(svg.attr("y"));
+                                    var height = parseFloat(svg.attr("height"));
+
+                                    let top = y + height + 10 + emFontSize; // an extra spacing
+                                    console.log("y:", y, "height:", height, "top:", top);
 
                                     // add an HTML element with id "SpectrumDiv" to the "mainDiv"
-                                    /*d3.select("#mainDiv").append("div")
+                                    d3.select("#mainDiv").append("div")
                                         .attr("id", "SpectrumDiv")
-                                        .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 60');*/
+                                        .on("mouseenter", hide_navigation_bar)
+                                        .attr('style', 'position: fixed; left: 10px; top: ' + top + 'px; z-index: 60');
 
                                     process_hds_spectrum(img_width, img_height, pixels, alpha, "SpectrumDiv");
                                 }
