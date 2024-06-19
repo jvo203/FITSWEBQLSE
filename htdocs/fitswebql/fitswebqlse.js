@@ -3845,8 +3845,42 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     var div_width = parseFloat(svg.attr("width"));
     var div_height = 0.95 * parseFloat(svg.attr("height"));
 
+    let fitsData = fitsContainer[va_count - 1];
+
+    if (fitsData == null)
+        return;
+
+    let titleStr = fitsData.OBJECT.replace(/_/g, " ").trim();
+
+    var dateobs = fitsData.DATEOBS;
+
+    if (dateobs == '')
+        dateobs = '';//'DATEOBS N/A' ;
+    else {
+        var pos = dateobs.indexOf('.');
+
+        if (pos >= 0)
+            dateobs = dateobs.substr(0, pos);
+
+        dateobs = dateobs.replace(/T/g, " ") + ' ' + fitsData.TIMESYS;
+    }
+
+    let raText = '';
+
+    // check if fitsData.RA is not empty
+    if (fitsData.RA != '') {
+        raText = 'RA: ' + fitsData.RA;
+    }
+
+    let decText = '';
+
+    // check if fitsData.DEC is not empty
+    if (fitsData.DEC != '') {
+        decText = 'DEC: ' + fitsData.DEC;
+    }
+
     var layout = {
-        title: 'HDS spectrum',
+        title: titleStr + ' (' + dateobs + ')' + ' ' + raText + ' ' + decText,
         autosize: false,
         width: div_width,
         height: div_height,
@@ -6872,6 +6906,7 @@ function display_dataset_info() {
     }*/
 
     group.append("text")
+        .attr("id", "object")
         .attr("x", width)
         .attr("y", 4.5 * emFontSize)//7*
         .attr("font-family", "Helvetica")//Arial
@@ -6903,6 +6938,7 @@ function display_dataset_info() {
     }
 
     group.append("text")
+        .attr("id", "dateobs")
         .attr("x", width)
         .attr("y", 6.5 * emFontSize)//6.5 6.0
         .attr("font-family", "Helvetica")
@@ -14331,7 +14367,21 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         .on("mouseenter", hide_navigation_bar)
                                         .attr('style', 'position: fixed; left: 10px; top: ' + top + 'px; z-index: 60');
 
-                                    process_hds_spectrum(img_width, img_height, pixels, alpha, "SpectrumDiv");
+                                    try {
+                                        process_hds_spectrum(img_width, img_height, pixels, alpha, "SpectrumDiv");
+
+                                        // remove object, dateobs, ra and dec elements
+                                        d3.select("#object").remove();
+                                        d3.select("#dateobs").remove();
+                                        d3.select("#ra").remove();
+                                        d3.select("#dec").remove();
+
+                                        // remove the jvo logo
+                                        d3.select("#jvoLogo").remove();
+
+                                    } catch (err) {
+                                        console.error(err);
+                                    }
                                 }
                             }
                             /*})
