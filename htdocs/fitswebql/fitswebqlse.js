@@ -3907,8 +3907,9 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
             title: 'Wavelength [Å]'
         },
         yaxis: {
-            autorange: true,
+            fixedrange: false,
             type: 'linear',
+            rangemode: 'tozero',
             title: 'Normalised intensity [arbitrary unit]'
         }
     };
