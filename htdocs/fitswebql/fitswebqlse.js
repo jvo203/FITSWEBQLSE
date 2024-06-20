@@ -3859,7 +3859,7 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     var y = [];
 
     for (var i = 0; i < img_width; i++) {
-        let world = pix2sky(fitsData, i, 0);
+        let world = pix2sky(fitsData, i + 0.5, 0);
         x.push(world[0]);
 
         // push NaN for the masked pixels
