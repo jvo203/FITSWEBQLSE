@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-19.0";
+    return "JS2024-06-20.0";
 }
 
 function uuidv4() {
@@ -3820,31 +3820,6 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     console.log("spectrum pixels:", pixels);
     console.log("spectrum alpha:", alpha);
 
-    // prepare data for Plotly.js
-    var x = [];
-    var y = [];
-
-    for (var i = 0; i < img_width; i++) {
-        x.push(i);
-        //y.push(pixels[i]);
-
-        // push NaN for the masked pixels
-        if (alpha[i] > 0)
-            y.push(pixels[i]);
-        else
-            y.push(NaN);
-    }
-
-    var data = [{
-        x: x,
-        y: y,
-        type: 'scatter'
-    }];
-
-    var svg = d3.select("#FrontSVG");
-    var div_width = parseFloat(svg.attr("width"));
-    var div_height = 0.95 * parseFloat(svg.attr("height"));
-
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData == null)
@@ -3879,6 +3854,31 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         decText = 'DEC: ' + fitsData.DEC;
     }
 
+    // prepare data for Plotly.js
+    var x = [];
+    var y = [];
+
+    for (var i = 0; i < img_width; i++) {
+        let world = pix2sky(fitsData, i, 0);
+        x.push(world[0]);
+
+        // push NaN for the masked pixels
+        if (alpha[i] > 0)
+            y.push(pixels[i]);
+        else
+            y.push(NaN);
+    }
+
+    var data = [{
+        x: x,
+        y: y,
+        type: 'scatter'
+    }];
+
+    var svg = d3.select("#FrontSVG");
+    var div_width = parseFloat(svg.attr("width"));
+    var div_height = 0.95 * parseFloat(svg.attr("height"));
+
     var layout = {
         title: titleStr + ' (' + dateobs + ')' + ' ' + raText + ' ' + decText,
         autosize: false,
@@ -3886,7 +3886,7 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         height: div_height,
         xaxis: {
             autorange: true,
-            range: [bounds.x1, bounds.x2],
+            /*range: [bounds.x1, bounds.x2],*/
             rangeselector: {
                 buttons: [
                     {
@@ -3902,7 +3902,7 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
                     { step: 'all' }
                 ]
             },
-            rangeslider: { range: [bounds.x1, bounds.x2] },
+            rangeslider: { /*range: [bounds.x1, bounds.x2]*/ },
             type: 'linear',
             title: 'Wavelength (nm)'
         },
@@ -14332,9 +14332,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 } else {
                                     console.log("spectrum_view with dimensions: ", img_width, img_height);
 
-                                    // remove the 'Image' menu
+                                    // remove the unrelated menus
                                     d3.select("#imageMenu").remove();
                                     d3.select("#splatMenu").remove();
+                                    d3.select("#viewMenu").remove();
 
                                     // remove an HTML element with id "SpectrumCanvas"
                                     d3.select("#SpectrumCanvas").remove();
@@ -16507,6 +16508,7 @@ function display_menu() {
 
     //VIEW
     var viewMenu = mainUL.append("li")
+        .attr("id", "viewMenu")
         .attr("class", "dropdown");
 
     viewMenu.append("a")
