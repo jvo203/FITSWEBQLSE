@@ -3887,21 +3887,6 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         xaxis: {
             autorange: true,
             /*range: [bounds.x1, bounds.x2],*/
-            rangeselector: {
-                buttons: [
-                    {
-                        count: 1,
-                        label: '1',
-                        stepmode: 'backward'
-                    },
-                    {
-                        count: 10000,
-                        label: '10000',
-                        stepmode: 'backward'
-                    },
-                    { step: 'all' }
-                ]
-            },
             rangeslider: { /*range: [bounds.x1, bounds.x2]*/ },
             type: 'linear',
             title: 'Wavelength [Å]'
