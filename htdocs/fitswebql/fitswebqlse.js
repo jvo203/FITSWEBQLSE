@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-20.0";
+    return "JS2024-06-21.0";
 }
 
 function uuidv4() {
@@ -3816,9 +3816,7 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     //bounds.x2 = img_width;
 
     // print spectrum dimensions
-    console.log("spectrum dimensions:", img_width, img_height);
-    console.log("spectrum pixels:", pixels);
-    console.log("spectrum alpha:", alpha);
+    console.log("HDS spectrum dimensions:", img_width, img_height);
 
     let fitsData = fitsContainer[va_count - 1];
 
@@ -3858,16 +3856,32 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     var x = [];
     var y = [];
 
+    var mean = 0.0;
+    var std = 0.0;
+
     for (var i = 0; i < img_width; i++) {
         let world = pix2sky(fitsData, i - 0.5, 0);
         x.push(world[0]);
 
         // push NaN for the masked pixels
-        if (alpha[i] > 0)
+        if (alpha[i] > 0) {
             y.push(pixels[i]);
+            mean += pixels[i];
+        }
         else
             y.push(NaN);
     }
+
+    mean /= y.length;
+
+    for (var i = 0; i < y.length; i++) {
+        if (alpha[i] > 0)
+            std += Math.pow(y[i] - mean, 2);
+    }
+
+    std = Math.sqrt(std / y.length);
+
+    console.log("HDS spectrum mean:", mean, "std:", std);
 
     var data = [{
         x: x,
@@ -3895,6 +3909,7 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
             fixedrange: false,
             type: 'linear',
             rangemode: 'tozero',
+            range: [0.0, mean + 5.0 * std],
             title: 'Normalised intensity [arbitrary unit]'
         }
     };
