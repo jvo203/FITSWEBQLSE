@@ -1716,8 +1716,7 @@ contains
       end if
 
       ! only make a cache for datasets with valid data/image, no errors
-      ! and with more than one axis (exclude Subaru HDS spectra, for example)
-      if (get_image_status(ptr) .eq. 1 .and. item%naxis .gt. 1) then
+      if (get_image_status(ptr) .eq. 1) then
          ! create a cache directory using the <datasetid> folder name
          status = mkcache(cache(1:cache_len)//c_null_char)
 
@@ -2506,7 +2505,7 @@ contains
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
       ! reset the progress
-      if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+      if (item%naxis .eq. 1 .or. item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
          call set_progress(item, int(0, kind=8), int(1, kind=8))
       else
          call set_progress(item, int(0, kind=8), int(item%naxes(3), kind=8))
@@ -3760,7 +3759,8 @@ contains
       if (.not. bSuccess) then
          call read_fits_file(item, strFilename, strFlux, root, bSuccess)
       else
-         if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+         !if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+         if (item%naxis .eq. 1 .or. item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
             call update_progress(item, 1)
          else
             ! if it's a 3D cube restore the channel information too
