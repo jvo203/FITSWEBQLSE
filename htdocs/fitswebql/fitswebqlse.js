@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-21.0";
+    return "JS2024-06-24.0";
 }
 
 function uuidv4() {
@@ -3883,10 +3883,29 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
     console.log("HDS spectrum mean:", mean, "std:", std);
 
+    var paper_bgcolor, plot_bgcolor, line_color, hover_bgcolor, gridcolor, font_color;
+
+    if (theme == 'bright') {
+        paper_bgcolor = 'rgba(255, 255, 255, 1.0)';
+        plot_bgcolor = 'rgba(255, 255, 255, 1.0)';
+        line_color = '#636EFA'; // default Plotly.js muted blue
+        hover_bgcolor = '#FFFFFF';
+        gridcolor = 'rgba(0, 0, 0, 0.5)';
+        font_color = 'rgba(0, 0, 0, 1.0)'
+    } else {
+        paper_bgcolor = 'rgba(0, 0, 0, 1.0)';
+        plot_bgcolor = 'rgba(0, 0, 0, 1.0)';
+        line_color = 'rgba(255,204,0,1.0)' // Amber
+        hover_bgcolor = '#000000';
+        gridcolor = 'rgba(255, 255, 255, 0.5)';
+        font_color = 'rgba(255, 255, 255, 1.0)'
+    }
+
     var data = [{
         x: x,
         y: y,
-        type: 'scatter'
+        type: 'scatter',
+        line: { color: line_color }
     }];
 
     var svg = d3.select("#FrontSVG");
@@ -3894,7 +3913,12 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     var div_height = 0.95 * parseFloat(svg.attr("height"));
 
     var layout = {
-        title: titleStr + ' (' + dateobs + ')' + ' ' + raText + ' ' + decText,
+        paper_bgcolor: paper_bgcolor,
+        plot_bgcolor: plot_bgcolor,
+        hoverlabel: { bgcolor: hover_bgcolor },
+        title: {
+            text: titleStr + ' (' + dateobs + ')' + ' ' + raText + ' ' + decText, font: { color: font_color }
+        },
         autosize: false,
         width: div_width,
         height: div_height,
@@ -3903,14 +3927,16 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
             /*range: [bounds.x1, bounds.x2],*/
             rangeslider: { /*range: [bounds.x1, bounds.x2]*/ },
             type: 'linear',
-            title: 'Wavelength [Å]'
+            title: { text: 'Wavelength [Å]', font: { color: font_color } },
+            gridcolor: gridcolor
         },
         yaxis: {
             fixedrange: false,
             type: 'linear',
             rangemode: 'tozero',
             range: [0.0, mean + 5.0 * std],
-            title: 'Normalised intensity [arbitrary unit]'
+            title: { text: 'Normalised intensity [arbitrary unit]', font: { color: font_color } },
+            gridcolor: gridcolor
         }
     };
 
