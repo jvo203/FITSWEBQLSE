@@ -3883,6 +3883,18 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
     console.log("HDS spectrum mean:", mean, "std:", std);
 
+    var svg = d3.select("#FrontSVG");
+    var div_width = parseFloat(svg.attr("width"));
+    var div_height = 0.95 * parseFloat(svg.attr("height"));
+
+    plot_time_series(x, y, mean, std, div, div_width, div_height, titleStr, dateobs, raText, decText);
+
+    has_image = true;
+
+    hide_hourglass();
+}
+
+function plot_time_series(x, y, mean, std, div, width, height, title, date, ra, dec) {
     var paper_bgcolor, plot_bgcolor, line_color, hover_bgcolor, gridcolor, font_color;
 
     if (theme == 'bright') {
@@ -3908,20 +3920,16 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         line: { color: line_color }
     }];
 
-    var svg = d3.select("#FrontSVG");
-    var div_width = parseFloat(svg.attr("width"));
-    var div_height = 0.95 * parseFloat(svg.attr("height"));
-
     var layout = {
         paper_bgcolor: paper_bgcolor,
         plot_bgcolor: plot_bgcolor,
         hoverlabel: { bgcolor: hover_bgcolor },
         title: {
-            text: titleStr + ' (' + dateobs + ')' + ' ' + raText + ' ' + decText, font: { color: font_color }
+            text: title + ' (' + date + ')' + ' ' + ra + ' ' + dec, font: { color: font_color }
         },
         autosize: false,
-        width: div_width,
-        height: div_height,
+        width: width,
+        height: height,
         xaxis: {
             autorange: true,
             /*range: [bounds.x1, bounds.x2],*/
@@ -3941,10 +3949,6 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     };
 
     Plotly.newPlot(div, data, layout);
-
-    has_image = true;
-
-    hide_hourglass();
 }
 
 function webgl_composite_image_renderer(gl, width, height) {
