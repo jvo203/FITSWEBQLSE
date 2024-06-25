@@ -3910,7 +3910,12 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         d3.select("#" + div).append("div")
             .attr("id", divId);
 
-        plot_time_series(x, y, mean, std, divId, div_width, div_height, titleStr, dateobs, raText, decText);
+        let title = '';
+
+        if (img_height > 1)
+            title = "Spectrum #" + (k + 1) + "/" + img_height + ' :: ';
+
+        plot_time_series(x, y, mean, std, divId, div_width, div_height, title + titleStr, dateobs, raText, decText);
     }
 
     has_image = true;
