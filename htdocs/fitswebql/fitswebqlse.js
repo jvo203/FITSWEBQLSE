@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-24.0";
+    return "JS2024-06-25.0";
 }
 
 function uuidv4() {
@@ -3808,7 +3808,6 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 }
 
 function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
-    console.log("process_hds_spectrum");
     var bounds = true_image_dimensions(alpha, img_width, img_height);
     console.log("image_bounding_dims:", bounds);
 
@@ -3852,42 +3851,67 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         decText = 'DEC: ' + fitsData.DEC;
     }
 
-    // prepare data for Plotly.js
-    var x = [];
-    var y = [];
-
-    var mean = 0.0;
-    var std = 0.0;
-
-    for (var i = 0; i < img_width; i++) {
-        let world = pix2sky(fitsData, i - 0.5, 0);
-        x.push(world[0]);
-
-        // push NaN for the masked pixels
-        if (alpha[i] > 0) {
-            y.push(pixels[i]);
-            mean += pixels[i];
-        }
-        else
-            y.push(NaN);
-    }
-
-    mean /= y.length;
-
-    for (var i = 0; i < y.length; i++) {
-        if (alpha[i] > 0)
-            std += Math.pow(y[i] - mean, 2);
-    }
-
-    std = Math.sqrt(std / y.length);
-
-    console.log("HDS spectrum mean:", mean, "std:", std);
-
     var svg = d3.select("#FrontSVG");
     var div_width = parseFloat(svg.attr("width"));
     var div_height = 0.95 * parseFloat(svg.attr("height"));
 
-    plot_time_series(x, y, mean, std, div, div_width, div_height, titleStr, dateobs, raText, decText);
+    // override the div height if img_height > 1
+    if (img_height > 1) {
+        //div_width *= 0.9;
+        div_height /= 2;
+
+        // set overflow-y:scroll for the 'SpectrumDiv' div
+        d3.select("#" + div).style("overflow-y", "scroll");
+    }
+
+    // loop through img_height
+    var offset = 0;
+    for (let k = 0; k < img_height; k++) {
+        // prepare data for Plotly.js
+        let x = [];
+        let y = [];
+
+        let mean = 0.0;
+        let std = 0.0;
+        let count = 0;
+
+        // first pass
+        for (let i = 0; i < img_width; i++) {
+            let world = pix2sky(fitsData, i - 0.5, 0);
+            x.push(world[0]);
+
+            // push NaN for the masked pixels
+            if (alpha[offset + i] > 0) {
+                y.push(pixels[offset + i]);
+                mean += pixels[offset + i];
+                count += 1;
+            }
+            else
+                y.push(NaN);
+        }
+
+        mean /= count;
+
+        // second pass
+        for (let i = 0; i < y.length; i++) {
+            if (alpha[offset + i] > 0)
+                std += Math.pow(y[i] - mean, 2);
+        }
+
+        offset += img_width;
+
+        std = Math.sqrt(std / count);
+
+        console.log("HDS spectrum mean:", mean, "std:", std, "count:", count);
+
+        let divId = "SpectrumDiv#" + k;
+
+        // create a new div element by appending it to the "SpectrumDiv" div
+        d3.select("#" + div).append("div")
+            .attr("id", divId);
+
+        plot_time_series(x, y, mean, std, divId, div_width, div_height, titleStr, dateobs, raText, decText);
+    }
 
     has_image = true;
 
@@ -3943,7 +3967,7 @@ function plot_time_series(x, y, mean, std, div, width, height, title, date, ra, 
             type: 'linear',
             rangemode: 'tozero',
             range: [0.0, mean + 5.0 * std],
-            title: { text: 'Normalised intensity [arbitrary unit]', font: { color: font_color } },
+            title: { text: 'Normalised intensity [arb. unit]', font: { color: font_color } },
             gridcolor: gridcolor
         }
     };
