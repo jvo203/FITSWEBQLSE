@@ -3857,11 +3857,11 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
     // override the div height if img_height > 1
     if (img_height > 1) {
+        // set overflow-y:scroll for the 'SpectrumDiv' div
+        d3.select("#" + div).style("overflow-y", "scroll").style("height", div_height + "px");
+
         //div_width *= 0.9;
         div_height /= 2;
-
-        // set overflow-y:scroll for the 'SpectrumDiv' div
-        d3.select("#" + div).style("overflow-y", "scroll");
     }
 
     // loop through img_height
