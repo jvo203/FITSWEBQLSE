@@ -17639,8 +17639,8 @@ async function display_FITS_header(index) {
             /CROTA\d+/
         ];
 
-        // regex for keywords starting with 'WAT2'
-        const watRegEx = /^WAT2/;
+        // regex for keywords starting with 'WAT2_'
+        const watRegEx = /^WAT2_/;
 
         var watArray = fitsHeader.match(/.{1,80}/g);
         watArray = watArray.filter(function (line) {
