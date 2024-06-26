@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-25.0";
+    return "JS2024-06-26.0";
 }
 
 function uuidv4() {
@@ -17638,6 +17638,21 @@ async function display_FITS_header(index) {
             /PV.+/,
             /CROTA\d+/
         ];
+
+        // regex for keywords starting with 'WAT2'
+        const watRegEx = /^WAT2/;
+
+        var watArray = fitsHeader.match(/.{1,80}/g);
+        watArray = watArray.filter(function (line) {
+            // Extract the keyword
+            var keyword = line.slice(0, 8).trim();
+
+            if (keyword.match(watRegEx)) { return true; }
+
+            return false;
+        });
+
+        console.log('WAT ARRAY:', watArray);
 
         // Split the string into an array and filter based on the WCS regular expressions
         var headerArray = fitsHeader.match(/.{1,80}/g);
