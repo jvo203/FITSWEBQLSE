@@ -3864,6 +3864,25 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         div_height /= 2;
     }
 
+    // iterate through fitsData.watArray, discarding the keywords and keeping the values
+    let watArray = fitsData.watArray;
+    let watValues = [];
+
+    for (let i = 0; i < watArray.length; i++) {
+        let wat = watArray[i];
+        let pos = wat.indexOf('=');
+
+        if (pos >= 0) {
+            let value = wat.substr(pos + 1).trim();
+            // strip the enclosing quotes
+            value = value.replace(/'/g, "");
+            watValues.push(value);
+        }
+    }
+
+    // print the WAT values
+    console.log("WAT values:", watValues);
+
     // loop through img_height
     var offset = 0;
     for (let k = 0; k < img_height; k++) {
@@ -17643,7 +17662,7 @@ async function display_FITS_header(index) {
         const watRegEx = /^WAT2_/;
 
         var watArray = fitsHeader.match(/.{1,80}/g);
-        watArray = watArray.filter(function (line) {
+        fitsData.watArray = watArray.filter(function (line) {
             // Extract the keyword
             var keyword = line.slice(0, 8).trim();
 
@@ -17651,8 +17670,6 @@ async function display_FITS_header(index) {
 
             return false;
         });
-
-        console.log('WAT ARRAY:', watArray);
 
         // Split the string into an array and filter based on the WCS regular expressions
         var headerArray = fitsHeader.match(/.{1,80}/g);
