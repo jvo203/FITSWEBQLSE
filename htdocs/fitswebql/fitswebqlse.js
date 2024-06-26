@@ -3916,6 +3916,16 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
         console.log("Spectrum #" + (k + 1) + " values:", specValues);
 
+        let a = NaN;
+        let b = NaN;
+
+        if (specValues.length == 9) {
+            x0 = specValues[2];
+            y0 = specValues[3];
+            a = specValues[4];
+            b = y0 - a * x0;
+        }
+
         // prepare data for Plotly.js
         let x = [];
         let y = [];
@@ -3927,6 +3937,10 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         // first pass
         for (let i = 0; i < img_width; i++) {
             let world = pix2sky(fitsData, i - 0.5, 0);
+
+            // if a and b are not NaN, apply a linear transformation
+            if (!isNaN(a) && !isNaN(b)) { world[0] = a * i + b; }
+
             x.push(world[0]);
 
             // push NaN for the masked pixels
