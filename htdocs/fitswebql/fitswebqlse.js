@@ -3880,12 +3880,42 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         }
     }
 
-    // print the WAT values
-    console.log("WAT values:", watValues);
+    // concatenate the WAT values into a single string
+    let watStr = watValues.join("");
 
     // loop through img_height
     var offset = 0;
     for (let k = 0; k < img_height; k++) {
+        let specStr = '';
+        // extract 'spec' + (k+1) from the WAT string (the value is enclosed in double quotes)
+        let spec = 'spec' + (k + 1);
+        let pos = watStr.indexOf(spec);
+
+        if (pos > -1) {
+            let pos1 = watStr.indexOf('"', pos);
+            let pos2 = watStr.indexOf('"', pos1 + 1);
+
+            if (pos1 > -1 || pos2 > -1) {
+                specStr = watStr.substr(pos1 + 1, pos2 - pos1 - 1);
+                console.log("Spectrum #" + (k + 1) + ":", specStr);
+            }
+        }
+
+        // if specStr is not empty, split it into an array of numbers
+        let specValues = [];
+        if (specStr != '') {
+            let specArray = specStr.split(" ");
+
+            for (let i = 0; i < specArray.length; i++) {
+                let value = parseFloat(specArray[i]);
+
+                if (!isNaN(value))
+                    specValues.push(value);
+            }
+        }
+
+        console.log("Spectrum #" + (k + 1) + " values:", specValues);
+
         // prepare data for Plotly.js
         let x = [];
         let y = [];
@@ -3923,7 +3953,7 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
         console.log("HDS spectrum mean:", mean, "std:", std, "count:", count);
 
-        let divId = "SpectrumDiv#" + k;
+        let divId = "SpectrumDiv#" + (k + 1);
 
         // create a new div element by appending it to the "SpectrumDiv" div
         d3.select("#" + div).append("div")
