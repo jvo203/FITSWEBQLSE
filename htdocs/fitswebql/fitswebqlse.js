@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-26.0";
+    return "JS2024-06-27.0";
 }
 
 function uuidv4() {
@@ -3936,7 +3936,7 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
         // first pass
         for (let i = 0; i < img_width; i++) {
-            let world = pix2sky(fitsData, i - 0.5, 0);
+            let world = pix2sky(fitsData, i + 0.5, 0);// '-' --> '+' for the HDS spectrum            
 
             // if a and b are not NaN, apply a linear transformation
             if (!isNaN(a) && !isNaN(b)) { world[0] = a * i + b; }
