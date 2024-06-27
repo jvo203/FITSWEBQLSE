@@ -4024,8 +4024,7 @@ function plot_time_series(x, y, mean, std, div, width, height, title, date, ra, 
         height: height,
         xaxis: {
             autorange: true,
-            /*range: [bounds.x1, bounds.x2],*/
-            rangeslider: { /*range: [bounds.x1, bounds.x2]*/ },
+            rangeslider: { visible: true },
             type: 'linear',
             title: { text: 'Wavelength [Å]', font: { color: font_color } },
             gridcolor: gridcolor
