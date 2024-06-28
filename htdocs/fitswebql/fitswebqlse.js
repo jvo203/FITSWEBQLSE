@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-27.0";
+    return "JS2024-06-28.0";
 }
 
 function uuidv4() {
@@ -3897,7 +3897,6 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
             if (pos1 > -1 || pos2 > -1) {
                 specStr = watStr.substr(pos1 + 1, pos2 - pos1 - 1);
-                console.log("Spectrum #" + (k + 1) + ":", specStr);
             }
         }
 
@@ -3913,8 +3912,6 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
                     specValues.push(value);
             }
         }
-
-        console.log("Spectrum #" + (k + 1) + " values:", specValues);
 
         let a = NaN;
         let b = NaN;
@@ -3965,7 +3962,7 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
         std = Math.sqrt(std / count);
 
-        console.log("HDS spectrum mean:", mean, "std:", std, "count:", count);
+        // console.log("Spectrum #", (k + 1), "HDS spectrum mean:", mean, "std:", std, "count:", count);
 
         let divId = "SpectrumDiv#" + (k + 1);
 
@@ -14454,56 +14451,48 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 } else {
                                     console.log("spectrum_view with dimensions: ", img_width, img_height);
 
-                                    // remove the unrelated menus
-                                    d3.select("#imageMenu").remove();
-                                    d3.select("#splatMenu").remove();
-                                    d3.select("#viewMenu").remove();
+                                    let fitsData = fitsContainer[va_count - 1];
 
-                                    // remove an HTML element with id "SpectrumCanvas"
-                                    d3.select("#SpectrumCanvas").remove();
+                                    // if img_height > 1 and CTYPE1 is 'PIXEL' then it is a 2D image spectrum                                    
+                                    if (img_height > 1 && fitsData.CTYPE1.trim().toUpperCase() == 'PIXEL') {
+                                        console.log("2D image spectrum with dimensions: ", img_width, img_height);
+                                    } else {
+                                        // remove the unrelated menus
+                                        d3.select("#imageMenu").remove();
+                                        d3.select("#splatMenu").remove();
+                                        d3.select("#viewMenu").remove();
 
-                                    /*var svg = d3.select("#FrontSVG");
-                                    var width = parseFloat(svg.attr("width"));
-                                    var height = parseFloat(svg.attr("height"));
+                                        // remove an HTML element with id "SpectrumCanvas"
+                                        d3.select("#SpectrumCanvas").remove();
 
-                                    // add an HTML div foreign element element with id "SpectrumDiv" to the SVG FrontSVG
-                                    d3.select("#FrontSVG").append("foreignObject")
-                                        .attr("id", "SpectrumSVG")
-                                        .attr("x", 0)
-                                        .attr("y", 0.15 * height)
-                                        .attr("width", width)
-                                        .attr("height", 0.9 * height)
-                                        .attr("opacity", 1.0)
-                                        .append("xhtml:div")
-                                        .attr("id", "SpectrumDiv");*/
+                                        var svg = d3.select("#menu_activation_area");
+                                        var y = parseFloat(svg.attr("y"));
+                                        var height = parseFloat(svg.attr("height"));
 
-                                    var svg = d3.select("#menu_activation_area");
-                                    var y = parseFloat(svg.attr("y"));
-                                    var height = parseFloat(svg.attr("height"));
+                                        let top = y + height + 10 + emFontSize; // an extra spacing
+                                        console.log("y:", y, "height:", height, "top:", top);
 
-                                    let top = y + height + 10 + emFontSize; // an extra spacing
-                                    console.log("y:", y, "height:", height, "top:", top);
+                                        // add an HTML element with id "SpectrumDiv" to the "mainDiv"
+                                        d3.select("#mainDiv").append("div")
+                                            .attr("id", "SpectrumDiv")
+                                            .on("mouseenter", hide_navigation_bar)
+                                            .attr('style', 'position: fixed; left: 10px; top: ' + top + 'px; z-index: 60');
 
-                                    // add an HTML element with id "SpectrumDiv" to the "mainDiv"
-                                    d3.select("#mainDiv").append("div")
-                                        .attr("id", "SpectrumDiv")
-                                        .on("mouseenter", hide_navigation_bar)
-                                        .attr('style', 'position: fixed; left: 10px; top: ' + top + 'px; z-index: 60');
+                                        try {
+                                            process_hds_spectrum(img_width, img_height, pixels, alpha, "SpectrumDiv");
 
-                                    try {
-                                        process_hds_spectrum(img_width, img_height, pixels, alpha, "SpectrumDiv");
+                                            // remove object, dateobs, ra and dec elements
+                                            d3.select("#object").remove();
+                                            d3.select("#dateobs").remove();
+                                            d3.select("#ra").remove();
+                                            d3.select("#dec").remove();
 
-                                        // remove object, dateobs, ra and dec elements
-                                        d3.select("#object").remove();
-                                        d3.select("#dateobs").remove();
-                                        d3.select("#ra").remove();
-                                        d3.select("#dec").remove();
+                                            // remove the jvo logo
+                                            d3.select("#jvoLogo").remove();
 
-                                        // remove the jvo logo
-                                        d3.select("#jvoLogo").remove();
-
-                                    } catch (err) {
-                                        console.error(err);
+                                        } catch (err) {
+                                            console.error(err);
+                                        }
                                     }
                                 }
                             }
