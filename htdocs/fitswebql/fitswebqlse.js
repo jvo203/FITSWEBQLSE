@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-06-28.0";
+    return "JS2024-07-01.0";
 }
 
 function uuidv4() {
@@ -14456,10 +14456,12 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     // if img_height > 1 and CTYPE1 is 'PIXEL' then it is a 2D image spectrum                                    
                                     if (img_height > 1 && fitsData.CTYPE1.trim().toUpperCase() == 'PIXEL') {
                                         console.log("2D image spectrum with dimensions: ", img_width, img_height);
-                                        process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index); // a temporary call
+                                        process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
                                         if (has_json)
                                             display_histogram(index);
+
+                                        display_legend();
                                     } else {
                                         // remove the unrelated menus
                                         d3.select("#imageMenu").remove();
