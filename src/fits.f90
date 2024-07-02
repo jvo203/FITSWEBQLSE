@@ -4204,6 +4204,8 @@ contains
 
       item%filesize = filesize
 
+      if (item%is_spectrum) item%datamin = 0.0
+
       call set_progress(item, int(0, kind=8), npixels)
       call set_header_status(item, .true.)
 
@@ -4413,6 +4415,8 @@ contains
       item%bitpix = bitpix
       item%naxis = naxis
       item%naxes = naxes
+
+      if (item%is_spectrum) item%datamin = 0.0
 
       ! start the timer
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
