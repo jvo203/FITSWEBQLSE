@@ -6399,7 +6399,14 @@ contains
       scale = get_image_scale(width, height, inner_width, inner_height)
 
       ! do not downsize HDS spectra, set scale to 1.0
-      if (item%is_spectrum) scale = 1.0
+      if (item%is_spectrum) then
+         if (item%naxes(2) .gt. 1 .and. trim(item%ctype1) .eq. 'PIXEL') then
+            ! downsizing; use scale 'as-is'
+         else
+            ! disable downsizing
+            scale = 1.0
+         end if
+      end if
 
       if (scale .lt. 1.0) then
          img_width = nint(scale*item%naxes(1))
