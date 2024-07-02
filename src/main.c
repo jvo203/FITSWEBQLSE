@@ -45,7 +45,7 @@ static void *jemalloc_daemon(void *arg);
 #include <curl/curl.h>
 #include <glib.h>
 
-volatile sig_atomic_t s_received_signal = 0;
+static volatile sig_atomic_t s_received_signal = 0;
 
 static void signal_handler(int sig_num)
 {
@@ -384,7 +384,9 @@ int main(int argc, char *argv[])
     start_http();
 
     while (s_received_signal == 0)
+    {
         sleep(1);
+    }
 
     // stop accepting new connections
     quiesce_http();

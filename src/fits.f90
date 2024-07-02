@@ -4396,7 +4396,6 @@ contains
 
       ! read the FITS header
       call parse_fits_header(item, unit, naxis, naxes, bitpix)
-      print *, item%hdr
 
       !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
       ! HDS only has 1 axis, so we need to check for NAXIS1 only.
@@ -5520,7 +5519,7 @@ contains
       sensitivity = 1.0/(white - black)
       ratio_sensitivity = sensitivity
 
-      if (item%is_optical .and. item%naxis .gt. 1) then
+      if (item%is_optical .and. .not. item%is_spectrum) then
          ! SubaruWebQL-style
          u = 0.5
          v = 15.0
