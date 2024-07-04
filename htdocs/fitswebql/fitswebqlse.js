@@ -13890,7 +13890,7 @@ async function fetch_atomic_spectra(wmin, wmax) {
 
     if (response.ok) {
         await response.json().then(json => {
-            return json.lines;
+            return json.lines; // an array of atomic spectral lines
         }).catch(error => {
             console.error(error);
             return [];
