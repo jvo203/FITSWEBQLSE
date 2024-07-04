@@ -18,12 +18,79 @@ try:
 except sqlite3.OperationalError as err:
     print(err, ":", strSQL)
 
+strSQL = "DROP TABLE IF EXISTS new_lines ;"
+
+try:
+    c.execute(strSQL)
+except sqlite3.OperationalError as err:
+    print(err, ":", strSQL)
+
 strSQL = "CREATE TABLE lines (element TEXT, sp_num INTEGER, obs_wl_vac REAL, ritz_wl_vac REAL, intens REAL, hash TEXT UNIQUE) ;"
 
 try:
     c.execute(strSQL)
 except sqlite3.OperationalError as err:
     print(err, ":", strSQL)
+
+
+def finalize_db():
+    #############################################################
+    strSQL = "CREATE TABLE new_lines (element TEXT, sp_num INTEGER, obs_wl_vac REAL, ritz_wl_vac REAL, intens REAL) ;"
+
+    try:
+        c.execute(strSQL)
+    except sqlite3.OperationalError as err:
+        print(err, ":", strSQL)
+
+    #############################################################
+    strSQL = "INSERT INTO new_lines SELECT element, sp_num, obs_wl_vac, ritz_wl_vac, intens FROM lines;"
+
+    try:
+        c.execute(strSQL)
+    except sqlite3.OperationalError as err:
+        print(err, ":", strSQL)
+
+    #############################################################
+    strSQL = "DROP TABLE IF EXISTS lines ;"
+
+    try:
+        c.execute(strSQL)
+    except sqlite3.OperationalError as err:
+        print(err, ":", strSQL)
+
+    #############################################################
+    strSQL = "ALTER TABLE new_lines RENAME TO lines ;"
+
+    try:
+        c.execute(strSQL)
+    except sqlite3.OperationalError as err:
+        print(err, ":", strSQL)
+
+    #############################################################
+    strSQL = "CREATE INDEX obs_idx ON lines (obs_wl_vac) ;"
+
+    try:
+        c.execute(strSQL)
+    except sqlite3.OperationalError as err:
+        print(err, ":", strSQL)
+
+    #############################################################
+    strSQL = "CREATE INDEX ritz_idx ON lines (ritz_wl_vac) ;"
+
+    try:
+        c.execute(strSQL)
+    except sqlite3.OperationalError as err:
+        print(err, ":", strSQL)
+
+    conn.commit()
+
+    #############################################################
+    strSQL = "vacuum ;"
+
+    try:
+        c.execute(strSQL)
+    except sqlite3.OperationalError as err:
+        print(err, ":", strSQL)
 
 
 def fetch_lines(url):
@@ -43,8 +110,7 @@ def fetch_lines(url):
     data = io.StringIO(html_data)
     # print(html_data)
 
-    data_frame = pd.read_csv(data, sep="\t")
-    # .drop("Unnamed: 20", axis=1)
+    data_frame = pd.read_csv(data, sep="\t").drop("Unnamed: 18", axis=1)
     print(data_frame)
 
     # clean intensities
@@ -75,6 +141,46 @@ def fetch_lines(url):
 
     print(data_frame)
 
+    for index, row in data_frame.iterrows():
+        element = row["element"]
+        sp_num = row["sp_num"]
+        obs_wl_vac = row["obs_wl_vac(A)"]
+        ritz_wl_vac = row["ritz_wl_vac(A)"]
+        intens = row["intens"]
+
+        strHash = (
+            element + str(sp_num) + str(obs_wl_vac) + str(ritz_wl_vac) + str(intens)
+        )
+        hash_object = hashlib.md5(strHash.encode())
+        hash = hash_object.hexdigest()
+
+        strSQL = (
+            "INSERT INTO lines VALUES('"
+            + element.replace("'", "''")
+            + "',"
+            + str(sp_num)
+            + ","
+            + str(obs_wl_vac)
+            + ","
+            + str(ritz_wl_vac)
+            + ","
+            + str(intens)
+            + ",'"
+            + hash.replace("'", "''")
+            + "') ;"
+        )
+
+        # print(strSQL)
+
+        try:
+            c.execute(strSQL)
+        except sqlite3.OperationalError as err:
+            print(err, ":", strSQL)
+        except sqlite3.IntegrityError as err:
+            print(err, ":", strSQL)
+
+    conn.commit()
+
 
 web_page = "https://www.nist.gov/pml/atomic-spectra-database"
 server = "https://physics.nist.gov/cgi-bin/ASD/"
@@ -99,5 +205,5 @@ url = (
 
 fetch_lines(url)
 
-# finalize_db()
+finalize_db()
 conn.close()
