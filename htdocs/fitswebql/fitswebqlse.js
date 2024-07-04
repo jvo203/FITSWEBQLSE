@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-01.0";
+    return "JS2024-07-04.0";
 }
 
 function uuidv4() {
@@ -3983,8 +3983,14 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     hide_hourglass();
 }
 
-function plot_time_series(x, y, mean, std, div, width, height, title, date, ra, dec) {
+async function plot_time_series(x, y, mean, std, div, width, height, title, date, ra, dec) {
     var paper_bgcolor, plot_bgcolor, line_color, hover_bgcolor, gridcolor, font_color;
+
+    let wmin = d3.min(x);
+    let wmax = d3.max(x);
+    // console.log("wmin:", wmin, "wmax:", wmax, "Å");
+
+    let spectra = fetch_atomic_spectra(wmin, wmax);
 
     if (theme == 'bright') {
         paper_bgcolor = 'rgba(255, 255, 255, 1.0)';
@@ -4037,6 +4043,10 @@ function plot_time_series(x, y, mean, std, div, width, height, title, date, ra, 
     };
 
     Plotly.newPlot(div, data, layout);
+
+    spectra.then(function (data) {
+        console.log("fetch_atomic_spectra:", data);
+    });
 }
 
 function webgl_composite_image_renderer(gl, width, height) {
@@ -13869,6 +13879,25 @@ function display_molecules() {
         elem.attr("opacity", 1);
     else
         elem.attr("opacity", 0);
+}
+
+async function fetch_atomic_spectra(wmin, wmax) {
+    // wmin, wmax [Å]
+    var url = 'get_atomic_spectra?wmin=' + wmin + '&wmax=' + wmax + '&' + encodeURIComponent(get_js_version());
+    console.log("fetch_atomic_spectra:", url);
+
+    let response = await fetch(url);
+
+    if (response.ok) {
+        await response.json().then(json => {
+            return json.lines;
+        }).catch(error => {
+            console.error(error);
+            return [];
+        });
+    } else {
+        return [];
+    }
 }
 
 async function fetch_spectral_lines(datasetId, freq_start, freq_end) {
