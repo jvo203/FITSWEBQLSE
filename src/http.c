@@ -2623,6 +2623,93 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_not_found(connection);
     }
 
+    if (strstr(url, "/get_atomic_spectra") != NULL)
+    {
+        char *lambdaStartStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "wmin");
+        char *lambdaEndStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "wmax");
+
+        bool compress = false;
+        double wmin = 0.0;
+        double wmax = 0.0;
+
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
+        if (lambdaStartStr != NULL)
+            wmin = atof(lambdaStartStr); // [Å]
+
+        if (lambdaEndStr != NULL)
+            wmax = atof(lambdaEndStr); // [Å]
+
+        // printf("[C] Accept-Encoding: %s\n", encoding);
+
+        if (encoding != NULL)
+            compress = strstr(encoding, "gzip") != NULL;
+
+        if (asd_db == NULL)
+            return http_internal_server_error(connection);
+
+        printf("[C] get_atomic_spectra: %g ≤ λ ≤ %g Å\n", wmin, wmax);
+
+        if (wmin > 0.0 && wmax > 0.0)
+        {
+            return http_not_implemented(connection);
+
+            // open a pipe
+            status = pipe(pipefd);
+
+            if (0 != status)
+                return http_internal_server_error(connection);
+
+            // create a response from the pipe by passing the read end of the pipe
+            struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+            if (response == NULL)
+            {
+                close(pipefd[1]);
+                return http_internal_server_error(connection);
+            }
+
+            // add headers
+            MHD_add_response_header(response, "Cache-Control", "public, max-age=86400");
+            MHD_add_response_header(response, "Content-Type", "application/json");
+
+            if (compress)
+                MHD_add_response_header(response, "Content-Encoding", "gzip");
+
+            // queue the response
+            enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+            MHD_destroy_response(response);
+
+            printf("[C] calling stream_molecules with the pipe file descriptor %d\n", pipefd[1]);
+
+            struct splat_req *args = malloc(sizeof(struct splat_req));
+
+            if (args != NULL)
+            {
+                args->compression = compress;
+                args->freq_start = wmin;
+                args->freq_end = wmax;
+                args->fd = pipefd[1];
+
+                // create and detach the thread
+                int stat = pthread_create(&tid, NULL, &stream_molecules, args);
+
+                if (stat == 0)
+                    pthread_detach(tid);
+                else
+                    close(pipefd[1]);
+            }
+            else
+                close(pipefd[1]);
+
+            return ret;
+        }
+        else
+            return http_not_found(connection);
+    }
+
     if (strstr(url, "/image_spectrum") != NULL)
     {
         int fetch_data = 0;
