@@ -25,7 +25,7 @@ try:
 except sqlite3.OperationalError as err:
     print(err, ":", strSQL)
 
-strSQL = "CREATE TABLE lines (element TEXT, sp_num INTEGER, obs_wl_vac REAL, ritz_wl_vac REAL, intens REAL, hash TEXT UNIQUE) ;"
+strSQL = "CREATE TABLE lines (element TEXT, sp_num INTEGER, obs_wl REAL, ritz_wl REAL, intens REAL, hash TEXT UNIQUE) ;"
 
 try:
     c.execute(strSQL)
@@ -35,7 +35,7 @@ except sqlite3.OperationalError as err:
 
 def finalize_db():
     #############################################################
-    strSQL = "CREATE TABLE new_lines (element TEXT, sp_num INTEGER, obs_wl_vac REAL, ritz_wl_vac REAL, intens REAL) ;"
+    strSQL = "CREATE TABLE new_lines (element TEXT, sp_num INTEGER, obs_wl REAL, ritz_wl REAL, intens REAL) ;"
 
     try:
         c.execute(strSQL)
@@ -43,7 +43,7 @@ def finalize_db():
         print(err, ":", strSQL)
 
     #############################################################
-    strSQL = "INSERT INTO new_lines SELECT element, sp_num, obs_wl_vac, ritz_wl_vac, intens FROM lines;"
+    strSQL = "INSERT INTO new_lines SELECT element, sp_num, obs_wl, ritz_wl, intens FROM lines;"
 
     try:
         c.execute(strSQL)
@@ -67,7 +67,7 @@ def finalize_db():
         print(err, ":", strSQL)
 
     #############################################################
-    strSQL = "CREATE INDEX obs_idx ON lines (obs_wl_vac) ;"
+    strSQL = "CREATE INDEX obs_idx ON lines (obs_wl) ;"
 
     try:
         c.execute(strSQL)
@@ -75,7 +75,7 @@ def finalize_db():
         print(err, ":", strSQL)
 
     #############################################################
-    strSQL = "CREATE INDEX ritz_idx ON lines (ritz_wl_vac) ;"
+    strSQL = "CREATE INDEX ritz_idx ON lines (ritz_wl) ;"
 
     try:
         c.execute(strSQL)
@@ -94,6 +94,8 @@ def finalize_db():
 
 
 def fetch_lines(url):
+    print(url)
+
     success = False
 
     while not success:
@@ -121,12 +123,19 @@ def fetch_lines(url):
     data_frame["intens"] = pd.to_numeric(data_frame["intens"])
 
     # line threshold
-    value = 10**2
+    value = 10**3
     # strength line gA > 10**8 etc.
     data_frame = data_frame[data_frame["intens"] > value]
 
     # filter NaN values
-    column = "ritz_wl_vac(A)"
+    column = "obs_wl_air(A)"
+    # remove '+' characters
+    data_frame[column] = data_frame[column].apply(
+        lambda item: re.sub("[^0-9.]", "", str(item))
+    )
+    data_frame = data_frame[data_frame[column] != ""]
+
+    column = "ritz_wl_air(A)"
     # remove '+' characters
     data_frame[column] = data_frame[column].apply(
         lambda item: re.sub("[^0-9.]", "", str(item))
@@ -144,13 +153,11 @@ def fetch_lines(url):
     for index, row in data_frame.iterrows():
         element = row["element"]
         sp_num = row["sp_num"]
-        obs_wl_vac = row["obs_wl_vac(A)"]
-        ritz_wl_vac = row["ritz_wl_vac(A)"]
+        obs_wl = row["obs_wl_air(A)"]
+        ritz_wl = row["ritz_wl_air(A)"]
         intens = row["intens"]
 
-        strHash = (
-            element + str(sp_num) + str(obs_wl_vac) + str(ritz_wl_vac) + str(intens)
-        )
+        strHash = element + str(sp_num) + str(obs_wl) + str(ritz_wl) + str(intens)
         hash_object = hashlib.md5(strHash.encode())
         hash = hash_object.hexdigest()
 
@@ -160,9 +167,9 @@ def fetch_lines(url):
             + "',"
             + str(sp_num)
             + ","
-            + str(obs_wl_vac)
+            + str(obs_wl)
             + ","
-            + str(ritz_wl_vac)
+            + str(ritz_wl)
             + ","
             + str(intens)
             + ",'"
@@ -191,19 +198,39 @@ server = "https://physics.nist.gov/cgi-bin/ASD/"
 # TAB
 # https://physics.nist.gov/cgi-bin/ASD/lines1.pl?spectra=&output_type=0&low_w=1000&upp_w=1100&unit=0&de=0&plot_out=0&I_scale_type=1&format=3&line_out=3&remove_js=on&en_unit=0&output=0&bibrefs=1&page_size=15&show_obs_wl=1&show_calc_wl=1&order_out=0&max_low_enrg=&show_av=2&max_upp_enrg=&tsb_value=0&min_str=&A_out=0&intens_out=on&max_str=&allowed_out=1&forbid_out=1&min_accur=&min_intens=&conf_out=on&term_out=on&enrg_out=on&J_out=on&submit=Retrieve+Data
 
-wmin = 1000
-wmax = 1001
+# HDS wavelength range
+w1 = 3000  # Angstrom
+w2 = 10000  # Angstrom
+delta = 100  # Angstrom
 
-url = (
-    server
-    + "lines1.pl?spectra=&output_type=0&low_w="
-    + str(wmin)
-    + "&upp_w="
-    + str(wmax)
-    + "&unit=0&de=0&plot_out=0&I_scale_type=1&format=3&line_out=3&remove_js=on&en_unit=0&output=0&bibrefs=1&page_size=15&show_obs_wl=1&show_calc_wl=1&order_out=0&max_low_enrg=&show_av=2&max_upp_enrg=&tsb_value=0&min_str=&A_out=0&intens_out=on&max_str=&allowed_out=1&forbid_out=1&min_accur=&min_intens=&conf_out=on&term_out=on&enrg_out=on&J_out=on&submit=Retrieve+Data"
-)
+for w in range(w1, w2, delta):
+    wmin = w
+    wmax = w + delta
 
-fetch_lines(url)
+    url = (
+        server
+        + "lines1.pl?spectra=&output_type=0&low_w="
+        + str(wmin)
+        + "&upp_w="
+        + str(wmax)
+        + "&unit=0&de=0&plot_out=0&I_scale_type=1&format=3&line_out=3&remove_js=on&en_unit=0&output=0&bibrefs=1&page_size=15&show_obs_wl=1&show_calc_wl=1&order_out=0&max_low_enrg=&show_av=2&max_upp_enrg=&tsb_value=0&min_str=&A_out=0&intens_out=on&max_str=&allowed_out=1&forbid_out=1&min_accur=&min_intens=&conf_out=on&term_out=on&enrg_out=on&J_out=on&submit=Retrieve+Data"
+    )
+
+    fetch_lines(url)
+
+# wmin = 1000
+# wmax = 1001
+
+# url = (
+#    server
+#    + "lines1.pl?spectra=&output_type=0&low_w="
+#    + str(wmin)
+#    + "&upp_w="
+#    + str(wmax)
+#    + "&unit=0&de=0&plot_out=0&I_scale_type=1&format=3&line_out=3&remove_js=on&en_unit=0&output=0&bibrefs=1&page_size=15&show_obs_wl=1&show_calc_wl=1&order_out=0&max_low_enrg=&show_av=2&max_upp_enrg=&tsb_value=0&min_str=&A_out=0&intens_out=on&max_str=&allowed_out=1&forbid_out=1&min_accur=&min_intens=&conf_out=on&term_out=on&enrg_out=on&J_out=on&submit=Retrieve+Data"
+# )
+
+# fetch_lines(url)
 
 finalize_db()
 conn.close()
