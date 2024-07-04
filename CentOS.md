@@ -163,7 +163,7 @@ ulimit -s unlimited
 
     to .bashrc and re-login
 
-# 16. Splatalogue & Atomic Spectra Database
+# 16. Splatalogue & Atomic Spectra Database (ADS)
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
     wget http://jvo.nao.ac.jp/~chris/ads.db
