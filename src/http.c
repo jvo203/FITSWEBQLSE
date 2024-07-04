@@ -61,6 +61,8 @@ extern GMutex cluster_mtx;
 #include "version.h"
 
 #include <sqlite3.h>
+
+static sqlite3 *asd_db = NULL;
 static sqlite3 *splat_db = NULL;
 extern options_t options; // <options> is defined in main.c
 
@@ -5034,10 +5036,27 @@ void start_http()
         return;
     }
 
+    int rc;
+
+// Atomic Spectra Database
 #ifdef SHARE
-    int rc = sqlite3_open_v2(SHARE "/splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
+    rc = sqlite3_open_v2(SHARE "/asd.db", &asd_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
 #else
-    int rc = sqlite3_open_v2("splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
+    rc = sqlite3_open_v2("asd.db", &asd_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
+#endif
+
+    if (rc)
+    {
+        fprintf(stderr, "[C] Can't open local atomic spectra database: %s\n", sqlite3_errmsg(asd_db));
+        sqlite3_close(asd_db);
+        asd_db = NULL;
+    }
+
+// Splatalogue
+#ifdef SHARE
+    rc = sqlite3_open_v2(SHARE "/splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
+#else
+    rc = sqlite3_open_v2("splatalogue_v3.db", &splat_db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, NULL);
 #endif
 
     if (rc)
@@ -5086,6 +5105,12 @@ void stop_http()
         MHD_stop_daemon(ws_server);
         ws_server = NULL;
         printf("done\n");
+    }
+
+    if (asd_db != NULL)
+    {
+        sqlite3_close(asd_db);
+        asd_db = NULL;
     }
 
     if (splat_db != NULL)
