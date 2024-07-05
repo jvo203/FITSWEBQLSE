@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-04.0";
+    return "JS2024-07-05.0";
 }
 
 function uuidv4() {
@@ -3973,7 +3973,7 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         let title = '';
 
         if (img_height > 1)
-            title = "Spectrum #" + (k + 1) + "/" + img_height + ' :: ';
+            title = "Spectrum #" + (k + 1) + "/" + img_height + ': ';
 
         plot_time_series(x, y, mean, std, divId, div_width, div_height, title + titleStr, dateobs, raText, decText);
     }
