@@ -218,19 +218,5 @@ for w in range(w1, w2, delta):
 
     fetch_lines(url)
 
-# wmin = 1000
-# wmax = 1001
-
-# url = (
-#    server
-#    + "lines1.pl?spectra=&output_type=0&low_w="
-#    + str(wmin)
-#    + "&upp_w="
-#    + str(wmax)
-#    + "&unit=0&de=0&plot_out=0&I_scale_type=1&format=3&line_out=3&remove_js=on&en_unit=0&output=0&bibrefs=1&page_size=15&show_obs_wl=1&show_calc_wl=1&order_out=0&max_low_enrg=&show_av=2&max_upp_enrg=&tsb_value=0&min_str=&A_out=0&intens_out=on&max_str=&allowed_out=1&forbid_out=1&min_accur=&min_intens=&conf_out=on&term_out=on&enrg_out=on&J_out=on&submit=Retrieve+Data"
-# )
-
-# fetch_lines(url)
-
 finalize_db()
 conn.close()
