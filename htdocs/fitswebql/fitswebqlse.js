@@ -4044,7 +4044,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
     Plotly.newPlot(div, data, layout);
 
-    spectra.then(function (data) {
+    spectra.then(data => {
         console.log("fetch_atomic_spectra:", data);
     });
 }
@@ -13888,16 +13888,23 @@ async function fetch_atomic_spectra(wmin, wmax) {
 
     let response = await fetch(url);
 
+    var lines = [];
+
     if (response.ok) {
-        await response.json().then(json => {
-            return json.lines; // an array of atomic spectral lines
+        /*await response.text().then(text => {
+            console.log("fetch_atomic_spectra: OK", text);
         }).catch(error => {
             console.error(error);
-            return [];
+        });*/
+
+        await response.json().then(json => {
+            lines = json.lines; // an array of atomic spectral lines
+        }).catch(error => {
+            console.error(error);
         });
-    } else {
-        return [];
     }
+
+    return lines;
 }
 
 async function fetch_spectral_lines(datasetId, freq_start, freq_end) {

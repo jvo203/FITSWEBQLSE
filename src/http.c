@@ -6645,7 +6645,7 @@ static int sqlite_asd_callback(void *userp, int argc, char **argv, char **azColN
         g_string_append_printf(json, "\"ritz_wl\" : %s,", denull(argv[3]));
 
         // relative intensity
-        g_string_append_printf(json, "\"intens\" : %s,", denull(argv[4]));
+        g_string_append_printf(json, "\"intens\" : %s}", denull(argv[4]));
 
         if (req->compression)
         {
