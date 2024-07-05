@@ -2597,13 +2597,13 @@ static enum MHD_Result on_http_connection(void *cls,
 
             printf("[C] calling stream_molecules with the pipe file descriptor %d\n", pipefd[1]);
 
-            struct splat_req *args = malloc(sizeof(struct splat_req));
+            struct lines_req *args = malloc(sizeof(struct lines_req));
 
             if (args != NULL)
             {
                 args->compression = compress;
-                args->freq_start = freq_start;
-                args->freq_end = freq_end;
+                args->min = freq_start;
+                args->max = freq_end;
                 args->fd = pipefd[1];
 
                 // create and detach the thread
@@ -2684,13 +2684,13 @@ static enum MHD_Result on_http_connection(void *cls,
 
             printf("[C] calling stream_molecules with the pipe file descriptor %d\n", pipefd[1]);
 
-            struct splat_req *args = malloc(sizeof(struct splat_req));
+            struct lines_req *args = malloc(sizeof(struct lines_req));
 
             if (args != NULL)
             {
                 args->compression = compress;
-                args->freq_start = wmin;
-                args->freq_end = wmax;
+                args->min = wmin;
+                args->max = wmax;
                 args->fd = pipefd[1];
 
                 // create and detach the thread
@@ -6280,14 +6280,14 @@ void *stream_molecules(void *args)
     if (args == NULL)
         pthread_exit(NULL);
 
-    struct splat_req *req = (struct splat_req *)args;
+    struct lines_req *req = (struct lines_req *)args;
 
     char strSQL[256];
     char chunk_data[256];
     int rc;
     char *zErrMsg = 0;
 
-    snprintf(strSQL, sizeof(strSQL), "SELECT * FROM lines WHERE frequency>=%f AND frequency<=%f;", req->freq_start, req->freq_end);
+    snprintf(strSQL, sizeof(strSQL), "SELECT * FROM lines WHERE frequency>=%f AND frequency<=%f;", req->min, req->max);
     printf("%s\n", strSQL);
 
     req->first = true;
@@ -6434,7 +6434,7 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
 {
     (void)azColName; // silence gcc warnings
 
-    struct splat_req *req = (struct splat_req *)userp;
+    struct lines_req *req = (struct lines_req *)userp;
 
     if (argc == 8)
     {

@@ -102,12 +102,12 @@ struct arg_struct
     int fd;
 };
 
-struct splat_req
+struct lines_req
 {
     bool first;
     bool compression;
-    double freq_start;
-    double freq_end;
+    double min;
+    double max;
     int fd;
 
     // optional gzip compression
