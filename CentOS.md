@@ -166,7 +166,7 @@ ulimit -s unlimited
 # 16. Splatalogue & Atomic Spectra Database (ADS)
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
-    wget http://jvo.nao.ac.jp/~chris/ads.db
+    wget http://jvo.nao.ac.jp/~chris/asd.db
 
 # 17. Open up the Ports via a Firewall
 
