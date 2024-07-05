@@ -165,8 +165,10 @@ void write_pv_diagram(int fd, int width, int height, int precision, const float 
 void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
 
 void *stream_molecules(void *args);
+void *stream_atomic_lines(void *args);
 void *gzip_compress(void *args);
-static int sqlite_callback(void *userp, int argc, char **argv, char **azColName);
+static int sqlite_splatalogue_callback(void *userp, int argc, char **argv, char **azColName);
+static int sqlite_asd_callback(void *userp, int argc, char **argv, char **azColName);
 
 static enum MHD_Result http_ok(struct MHD_Connection *connection)
 {
@@ -2654,8 +2656,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (wmin > 0.0 && wmax > 0.0)
         {
-            return http_not_implemented(connection);
-
             // open a pipe
             status = pipe(pipefd);
 
@@ -2682,7 +2682,7 @@ static enum MHD_Result on_http_connection(void *cls,
             enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
             MHD_destroy_response(response);
 
-            printf("[C] calling stream_molecules with the pipe file descriptor %d\n", pipefd[1]);
+            printf("[C] calling stream_atomic_lines with the pipe file descriptor %d\n", pipefd[1]);
 
             struct lines_req *args = malloc(sizeof(struct lines_req));
 
@@ -2694,7 +2694,7 @@ static enum MHD_Result on_http_connection(void *cls,
                 args->fd = pipefd[1];
 
                 // create and detach the thread
-                int stat = pthread_create(&tid, NULL, &stream_molecules, args);
+                int stat = pthread_create(&tid, NULL, &stream_atomic_lines, args);
 
                 if (stat == 0)
                     pthread_detach(tid);
@@ -6303,7 +6303,7 @@ void *stream_molecules(void *args)
         CALL_ZLIB(deflateInit2(&(req->z), Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
     }
 
-    rc = sqlite3_exec(splat_db, strSQL, sqlite_callback, req, &zErrMsg);
+    rc = sqlite3_exec(splat_db, strSQL, sqlite_splatalogue_callback, req, &zErrMsg);
 
     if (rc != SQLITE_OK)
     {
@@ -6313,6 +6313,78 @@ void *stream_molecules(void *args)
 
     if (req->first)
         snprintf(chunk_data, sizeof(chunk_data), "{\"molecules\" : []}");
+    else
+        snprintf(chunk_data, sizeof(chunk_data), "]}");
+
+    if (req->compression)
+    {
+        req->z.avail_in = strlen(chunk_data);
+        req->z.next_in = (unsigned char *)chunk_data;
+
+        do
+        {
+            req->z.avail_out = CHUNK;   // size of output
+            req->z.next_out = req->out; // output char array
+            CALL_ZLIB(deflate(&(req->z), Z_FINISH));
+            size_t have = CHUNK - req->z.avail_out;
+
+            if (have > 0)
+            {
+                // printf("Z_FINISH avail_out: %zu\n", have);
+                chunked_write(req->fd, (const char *)req->out, have);
+            }
+        } while (req->z.avail_out == 0);
+
+        CALL_ZLIB(deflateEnd(&(req->z)));
+    }
+    else
+        chunked_write(req->fd, (const char *)chunk_data, strlen(chunk_data));
+
+    // close the write end of the pipe
+    close(req->fd);
+
+    free(req);
+    pthread_exit(NULL);
+}
+
+void *stream_atomic_lines(void *args)
+{
+    if (args == NULL)
+        pthread_exit(NULL);
+
+    struct lines_req *req = (struct lines_req *)args;
+
+    char strSQL[256];
+    char chunk_data[256];
+    int rc;
+    char *zErrMsg = 0;
+
+    snprintf(strSQL, sizeof(strSQL), "SELECT * FROM lines WHERE obs_wl>=%f AND obs_wl<=%f;", req->min, req->max);
+    printf("%s\n", strSQL);
+
+    req->first = true;
+
+    if (req->compression)
+    {
+        req->z.zalloc = Z_NULL;
+        req->z.zfree = Z_NULL;
+        req->z.opaque = Z_NULL;
+        req->z.next_in = Z_NULL;
+        req->z.avail_in = 0;
+
+        CALL_ZLIB(deflateInit2(&(req->z), Z_BEST_COMPRESSION, Z_DEFLATED, _windowBits | GZIP_ENCODING, 9, Z_DEFAULT_STRATEGY));
+    }
+
+    rc = sqlite3_exec(asd_db, strSQL, sqlite_asd_callback, req, &zErrMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+    }
+
+    if (req->first)
+        snprintf(chunk_data, sizeof(chunk_data), "{\"lines\" : []}");
     else
         snprintf(chunk_data, sizeof(chunk_data), "]}");
 
@@ -6430,7 +6502,7 @@ void *gzip_compress(void *args)
     pthread_exit(NULL);
 }
 
-static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
+static int sqlite_splatalogue_callback(void *userp, int argc, char **argv, char **azColName)
 {
     (void)azColName; // silence gcc warnings
 
@@ -6438,7 +6510,7 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
 
     if (argc == 8)
     {
-        /*printf("sqlite_callback::molecule:\t");
+        /*printf("sqlite_splatalogue_callback::molecule:\t");
         for (int i = 0; i < argc; i++)
             printf("%s:%s\t", azColName[i], argv[i]);
         printf("\n");*/
@@ -6501,6 +6573,79 @@ static int sqlite_callback(void *userp, int argc, char **argv, char **azColName)
         g_string_append_printf(json, "\"linelist\" : %s}", denull(encoded));
         if (encoded != NULL)
             free(encoded);
+
+        if (req->compression)
+        {
+            req->z.avail_in = json->len;                 // size of input
+            req->z.next_in = (unsigned char *)json->str; // input char array
+
+            do
+            {
+                req->z.avail_out = CHUNK;   // size of output
+                req->z.next_out = req->out; // output char array
+                CALL_ZLIB(deflate(&(req->z), Z_NO_FLUSH));
+                size_t have = CHUNK - req->z.avail_out;
+
+                if (have > 0)
+                {
+                    // printf("ZLIB avail_out: %zu\n", have);
+                    chunked_write(req->fd, (const char *)req->out, have);
+                }
+            } while (req->z.avail_out == 0);
+        }
+        else
+            chunked_write(req->fd, (const char *)json->str, json->len);
+
+        g_string_free(json, TRUE);
+    }
+
+    return 0;
+}
+
+static int sqlite_asd_callback(void *userp, int argc, char **argv, char **azColName)
+{
+    (void)azColName; // silence gcc warnings
+
+    struct lines_req *req = (struct lines_req *)userp;
+
+    if (argc == 5)
+    {
+        /*printf("sqlite_asd_callback::line:\t");
+        for (int i = 0; i < argc; i++)
+            printf("%s:%s\t", azColName[i], argv[i]);
+        printf("\n");*/
+
+        GString *json = g_string_sized_new(1024);
+
+        if (req->first)
+        {
+            req->first = false;
+
+            g_string_printf(json, "{\"lines\" : [");
+        }
+        else
+            g_string_printf(json, ",");
+
+        // json-encode a spectral line
+        char *encoded;
+
+        // element
+        encoded = json_encode_string(denull(argv[0]));
+        g_string_append_printf(json, "{\"element\" : %s,", denull(encoded));
+        if (encoded != NULL)
+            free(encoded);
+
+        // sp_num
+        g_string_append_printf(json, "\"sp_num\" : %s,", denull(argv[1]));
+
+        // obs_wl
+        g_string_append_printf(json, "\"obs_wl\" : %s,", denull(argv[2]));
+
+        // rit_wl
+        g_string_append_printf(json, "\"ritz_wl\" : %s,", denull(argv[3]));
+
+        // relative intensity
+        g_string_append_printf(json, "\"intens\" : %s,", denull(argv[4]));
 
         if (req->compression)
         {
