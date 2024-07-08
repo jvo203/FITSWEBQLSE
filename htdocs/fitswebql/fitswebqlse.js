@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-05.0";
+    return "JS2024-07-08.0";
 }
 
 function uuidv4() {
@@ -3807,7 +3807,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     }
 }
 
-function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
+async function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     var bounds = true_image_dimensions(alpha, img_width, img_height);
     console.log("image_bounding_dims:", bounds);
 
@@ -3975,7 +3975,10 @@ function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
         if (img_height > 1)
             title = "Spectrum #" + (k + 1) + "/" + img_height + ': ';
 
-        plot_time_series(x, y, mean, std, divId, div_width, div_height, title + titleStr, dateobs, raText, decText);
+        let res = plot_time_series(x, y, mean, std, divId, div_width, div_height, title + titleStr, dateobs, raText, decText);
+
+        if (k < 3)
+            await res;
     }
 
     has_image = true;
