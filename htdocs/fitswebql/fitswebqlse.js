@@ -3991,64 +3991,106 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
     let wmin = d3.min(x);
     let wmax = d3.max(x);
-    // console.log("wmin:", wmin, "wmax:", wmax, "Å");
+    // console.log("wmin:", wmin, "wmax:", wmax, "Å");    
 
-    let spectra = fetch_atomic_spectra(wmin, wmax);
+    fetch_atomic_spectra(wmin, wmax).then(spectra => {
+        console.log("fetch_atomic_spectra:", spectra);
 
-    if (theme == 'bright') {
-        paper_bgcolor = 'rgba(255, 255, 255, 1.0)';
-        plot_bgcolor = 'rgba(255, 255, 255, 1.0)';
-        line_color = '#636EFA'; // default Plotly.js muted blue
-        hover_bgcolor = '#FFFFFF';
-        gridcolor = 'rgba(0, 0, 0, 0.5)';
-        font_color = 'rgba(0, 0, 0, 1.0)'
-    } else {
-        paper_bgcolor = 'rgba(0, 0, 0, 1.0)';
-        plot_bgcolor = 'rgba(0, 0, 0, 1.0)';
-        line_color = 'rgba(255,204,0,1.0)' // Amber
-        hover_bgcolor = '#000000';
-        gridcolor = 'rgba(255, 255, 255, 0.5)';
-        font_color = 'rgba(255, 255, 255, 1.0)'
-    }
-
-    var data = [{
-        x: x,
-        y: y,
-        type: 'scatter',
-        line: { color: line_color }
-    }];
-
-    var layout = {
-        paper_bgcolor: paper_bgcolor,
-        plot_bgcolor: plot_bgcolor,
-        hoverlabel: { bgcolor: hover_bgcolor },
-        title: {
-            text: title + ' (' + date + ')' + ' ' + ra + ' ' + dec, font: { color: font_color }
-        },
-        autosize: false,
-        width: width,
-        height: height,
-        xaxis: {
-            autorange: true,
-            rangeslider: { visible: true },
-            type: 'linear',
-            title: { text: 'Wavelength [Å]', font: { color: font_color } },
-            gridcolor: gridcolor
-        },
-        yaxis: {
-            fixedrange: false,
-            type: 'linear',
-            rangemode: 'tozero',
-            range: [0.0, mean + 5.0 * std],
-            title: { text: 'Normalised intensity [arb. unit]', font: { color: font_color } },
-            gridcolor: gridcolor
+        if (theme == 'bright') {
+            paper_bgcolor = 'rgba(255, 255, 255, 1.0)';
+            plot_bgcolor = 'rgba(255, 255, 255, 1.0)';
+            line_color = '#636EFA'; // default Plotly.js muted blue
+            hover_bgcolor = '#FFFFFF';
+            gridcolor = 'rgba(0, 0, 0, 0.5)';
+            font_color = 'rgba(0, 0, 0, 1.0)'
+        } else {
+            paper_bgcolor = 'rgba(0, 0, 0, 1.0)';
+            plot_bgcolor = 'rgba(0, 0, 0, 1.0)';
+            line_color = 'rgba(255,204,0,1.0)' // Amber
+            hover_bgcolor = '#000000';
+            gridcolor = 'rgba(255, 255, 255, 0.5)';
+            font_color = 'rgba(255, 255, 255, 1.0)'
         }
-    };
 
-    Plotly.newPlot(div, data, layout);
+        var data = [{
+            x: x,
+            y: y,
+            type: 'scatter',
+            line: { color: line_color }
+        }];
 
-    spectra.then(data => {
-        console.log("fetch_atomic_spectra:", data);
+        var layout = {
+            paper_bgcolor: paper_bgcolor,
+            plot_bgcolor: plot_bgcolor,
+            hoverlabel: { bgcolor: hover_bgcolor },
+            title: {
+                text: title + ' (' + date + ')' + ' ' + ra + ' ' + dec, font: { color: font_color }
+            },
+            autosize: false,
+            width: width,
+            height: height,
+            xaxis: {
+                autorange: true,
+                rangeslider: { visible: true },
+                type: 'linear',
+                title: { text: 'Wavelength [Å]', font: { color: font_color } },
+                gridcolor: gridcolor
+            },
+            yaxis: {
+                fixedrange: false,
+                type: 'linear',
+                rangemode: 'tozero',
+                range: [0.0, mean + 5.0 * std],
+                title: { text: 'Normalised intensity [arb. unit]', font: { color: font_color } },
+                gridcolor: gridcolor
+            },
+            yaxis2: {
+                title: 'yaxis2 title',
+                titlefont: { color: 'rgb(148, 103, 189)' },
+                tickfont: { color: 'rgb(148, 103, 189)' },
+                overlaying: 'y',
+                side: 'right'
+            },
+            xaxis2: {}
+        };
+
+        let noatoms = spectra.length;
+
+        if (noatoms > 0 && noatoms < 150) {
+            // add xaxis2 for the atomic spectra to the layout at the top
+            layout.xaxis2 = {
+                title: { text: 'Atomic spectra', font: { color: font_color } },
+                overlaying: 'x',
+                side: 'top',
+                gridcolor: gridcolor
+            };
+
+            // add a vertical line for each atomic spectrum
+            /*for (let i = 0; i < noatoms; i++) {
+                    let atom = spectra[i];
+                    let atom_wavelength = atom[0];
+                    let atom_name = atom[1];
+                    let atom_color = atom[2];
+                    let atom_width = atom[3];
+    
+                    let line = {
+                        type: 'line',
+                        x0: atom_wavelength,
+                        y0: 0,
+                        x1: atom_wavelength,
+                        y1: mean + 5.0 * std,
+                        line: {
+                            color: 'grey',
+                            width: 1.5,
+                            dash: 'dot'
+                        }
+                    };
+                }*/
+        }
+
+        console.log("layout:", layout);
+
+        Plotly.newPlot(div, data, layout);
     });
 }
 
