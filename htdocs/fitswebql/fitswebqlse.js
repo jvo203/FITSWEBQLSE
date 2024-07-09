@@ -4095,6 +4095,8 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                     xref: 'x',
                     yref: 'y',
                     text: element + ' ' + romanize(number),
+                    xanchor: 'center',
+                    yanchor: 'center',
                     showarrow: true,
                     arrowhead: 1
                     /*ax: 0,
