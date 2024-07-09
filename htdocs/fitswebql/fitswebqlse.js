@@ -3986,6 +3986,19 @@ async function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
     hide_hourglass();
 }
 
+function romanize(num) {
+    var lookup = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 }, roman = '', i;
+
+    for (i in lookup) {
+        while (num >= lookup[i]) {
+            roman += i;
+            num -= lookup[i];
+        }
+    }
+
+    return roman;
+}
+
 async function plot_time_series(x, y, mean, std, div, width, height, title, date, ra, dec) {
     var paper_bgcolor, plot_bgcolor, line_color, hover_bgcolor, gridcolor, font_color;
 
@@ -4050,6 +4063,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
         if (noatoms > 0 && noatoms < 150) {
             var shapes = [];
+            var annotations = [];
 
             // add a vertical line for each atomic spectrum
             for (let i = 0; i < noatoms; i++) {
@@ -4065,6 +4079,8 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                     y0: 0,
                     x1: wavelength,
                     y1: mean + 5.0 * std,
+                    xref: 'x',
+                    yref: 'y',
                     line: {
                         color: 'grey',
                         width: 1.0,
@@ -4072,10 +4088,25 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                     }
                 };
 
+                let label = {
+                    x: wavelength,
+                    y: mean + 5.0 * std,
+                    /*y: 0,*/
+                    xref: 'x',
+                    yref: 'y',
+                    text: element + ' ' + romanize(number),
+                    showarrow: true,
+                    arrowhead: 1
+                    /*ax: 0,
+                    ay: -40*/
+                };
+
                 shapes.push(line);
+                annotations.push(label);
             }
 
             layout.shapes = shapes;
+            layout.annotations = annotations;
         }
 
         Plotly.newPlot(div, data, layout);
