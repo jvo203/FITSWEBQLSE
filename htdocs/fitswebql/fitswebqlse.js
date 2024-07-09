@@ -4067,7 +4067,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                     y1: mean + 5.0 * std,
                     line: {
                         color: 'grey',
-                        width: 1.5,
+                        width: 1.0,
                         dash: 'dot'
                     }
                 };
