@@ -4007,7 +4007,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
     // console.log("wmin:", wmin, "wmax:", wmax, "Å");    
 
     fetch_atomic_spectra(wmin, wmax).then(spectra => {
-        console.log("fetch_atomic_spectra:", spectra);
+        console.log("fetch_atomic_spectra: #" + spectra.length);
 
         if (theme == 'bright') {
             paper_bgcolor = 'rgba(255, 255, 255, 1.0)';
