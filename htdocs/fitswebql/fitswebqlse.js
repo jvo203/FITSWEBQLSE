@@ -4043,52 +4043,40 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                 range: [0.0, mean + 5.0 * std],
                 title: { text: 'Normalised intensity [arb. unit]', font: { color: font_color } },
                 gridcolor: gridcolor
-            },
-            yaxis2: {
-                title: 'yaxis2 title',
-                titlefont: { color: 'rgb(148, 103, 189)' },
-                tickfont: { color: 'rgb(148, 103, 189)' },
-                overlaying: 'y',
-                side: 'right'
-            },
-            xaxis2: {}
+            }
         };
 
         let noatoms = spectra.length;
 
         if (noatoms > 0 && noatoms < 150) {
-            // add xaxis2 for the atomic spectra to the layout at the top
-            layout.xaxis2 = {
-                title: { text: 'Atomic spectra', font: { color: font_color } },
-                overlaying: 'x',
-                side: 'top',
-                gridcolor: gridcolor
-            };
+            var shapes = [];
 
             // add a vertical line for each atomic spectrum
-            /*for (let i = 0; i < noatoms; i++) {
-                    let atom = spectra[i];
-                    let atom_wavelength = atom[0];
-                    let atom_name = atom[1];
-                    let atom_color = atom[2];
-                    let atom_width = atom[3];
-    
-                    let line = {
-                        type: 'line',
-                        x0: atom_wavelength,
-                        y0: 0,
-                        x1: atom_wavelength,
-                        y1: mean + 5.0 * std,
-                        line: {
-                            color: 'grey',
-                            width: 1.5,
-                            dash: 'dot'
-                        }
-                    };
-                }*/
-        }
+            for (let i = 0; i < noatoms; i++) {
+                let atom = spectra[i];
 
-        console.log("layout:", layout);
+                let element = atom.element;
+                let number = atom.sp_num;
+                let wavelength = atom.obs_wl;
+
+                let line = {
+                    type: 'line',
+                    x0: wavelength,
+                    y0: 0,
+                    x1: wavelength,
+                    y1: mean + 5.0 * std,
+                    line: {
+                        color: 'grey',
+                        width: 1.5,
+                        dash: 'dot'
+                    }
+                };
+
+                shapes.push(line);
+            }
+
+            layout.shapes = shapes;
+        }
 
         Plotly.newPlot(div, data, layout);
     });
