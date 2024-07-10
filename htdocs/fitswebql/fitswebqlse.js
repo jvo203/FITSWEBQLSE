@@ -4112,7 +4112,35 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
         }
 
         Plotly.newPlot(div, data, layout);
+
+        //add relayout event function to graph
+        document.getElementById(div).on('plotly_relayout', function (event) {
+            plotlyRelayoutEventFunction(event, div);
+        });
     });
+}
+
+function plotlyRelayoutEventFunction(event, id) {
+    console.log("plotly_relayout event:", event, "id:", id);
+
+    var xmin, xmax, ymin, ymax;
+
+    try {
+        xmin = event['xaxis.range[0]'];
+        xmax = event['xaxis.range[1]'];
+        ymin = event['yaxis.range[0]'];
+        ymax = event['yaxis.range[1]'];
+    } catch (err) {
+        console.log("plotly_relayout event: no rangeslider event!!");
+        return;
+    }
+
+    console.log("re-sizing the plotly graph", xmin, xmax, ymin, ymax);
+
+    var elem = document.getElementById(id);
+    var layout = elem.layout;
+
+    console.log("layout:", layout);
 }
 
 function webgl_composite_image_renderer(gl, width, height) {
@@ -4532,7 +4560,7 @@ function process_hdr_video(index) {
             if (va_count > 1 && !composite_view) {
                 for (let index = 0; index < va_count; index++) {
                     /*var gl = imageContainer[index].gl;
-
+ 
                     if (gl !== undefined && gl != null) {
                         gl.clearColor(0, 0, 0, 0);
                         gl.clear(gl.COLOR_BUFFER_BIT);
@@ -4542,12 +4570,12 @@ function process_hdr_video(index) {
                 }
             } else {
                 /*let gl = null;
-
+ 
                 if (!composite_view)
                     gl = imageContainer[va_count - 1].gl;
                 else
                     gl = compositeImage.gl;
-
+ 
                 if (gl !== undefined && gl != null) {
                     gl.clearColor(0, 0, 0, 0);
                     gl.clear(gl.COLOR_BUFFER_BIT);
