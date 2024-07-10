@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-08.0";
+    return "JS2024-07-10.0";
 }
 
 function uuidv4() {
@@ -4097,7 +4097,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                     text: element + ' ' + romanize(number),
                     xanchor: 'center',
                     yanchor: 'center',
-                    showarrow: true,
+                    showarrow: false,
                     arrowhead: 1
                     /*ax: 0,
                     ay: -40*/
