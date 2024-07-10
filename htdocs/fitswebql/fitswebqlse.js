@@ -4089,12 +4089,14 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                 };
 
                 let label = {
+                    font: { style: "normal" },
                     x: wavelength,
                     y: mean + 5.0 * std,
                     /*y: 0,*/
                     xref: 'x',
                     yref: 'y',
                     text: element + ' ' + romanize(number),
+                    textangle: -45,
                     xanchor: 'center',
                     yanchor: 'center',
                     showarrow: false,
