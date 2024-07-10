@@ -123,7 +123,7 @@ def fetch_lines(url):
     data_frame["intens"] = pd.to_numeric(data_frame["intens"])
 
     # line threshold
-    value = 10**3
+    value = 10**2  # was 10**3
     # strength line gA > 10**8 etc.
     data_frame = data_frame[data_frame["intens"] > value]
 

@@ -4061,7 +4061,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
         let noatoms = spectra.length;
 
-        if (noatoms > 0 && noatoms < 150) {
+        if (noatoms > 0 && noatoms <= 500) {
             var shapes = [];
             var annotations = [];
 
