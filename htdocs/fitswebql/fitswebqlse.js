@@ -4113,6 +4113,8 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
         Plotly.newPlot(div, data, layout);
 
+        __relayout = false;
+
         //add relayout event function to graph
         document.getElementById(div).on('plotly_relayout', function (event) {
             plotlyRelayoutEventFunction(event, div);
@@ -4121,7 +4123,17 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 }
 
 function plotlyRelayoutEventFunction(event, id) {
-    console.log("plotly_relayout event:", event, "id:", id);
+    console.log("plotly_relayout event:", event, "id:", id, "__relayout:", __relayout);
+
+    // check the __relayout flag
+    if (__relayout) {
+        // remove the object __relayout
+        __relayout = false;
+        return;
+    }
+
+    // set __relayout
+    __relayout = true;
 
     var xmin, xmax, ymin, ymax;
 
@@ -4130,17 +4142,41 @@ function plotlyRelayoutEventFunction(event, id) {
         xmax = event['xaxis.range[1]'];
         ymin = event['yaxis.range[0]'];
         ymax = event['yaxis.range[1]'];
+
+        console.log("re-sizing the plotly graph", xmin, xmax, ymin, ymax);
     } catch (err) {
         console.log("plotly_relayout event: no rangeslider event!!");
         return;
     }
 
-    console.log("re-sizing the plotly graph", xmin, xmax, ymin, ymax);
+    // if ymax is undefined, return
+    if (ymax == undefined) {
+        // check of yxis.range is an array
+        if (Array.isArray(event['yaxis.range'])) {
+            ymax = event['yaxis.range'][1];
+        } else {
+            console.log("plotly_relayout event: no y-axis range!!");
+            return;
+        }
+    }
 
     var elem = document.getElementById(id);
     var layout = elem.layout;
 
-    console.log("layout:", layout);
+    try {
+        var annotations = layout.annotations;
+
+        // iterate through the annotations updating the y position
+        for (let i = 0; i < annotations.length; i++) {
+            let label = annotations[i];
+            label.y = ymax;// - emFontSize;            
+        }
+
+        Plotly.relayout(id, { annotations: annotations });
+    } catch (err) {
+        console.log("plotly_relayout event: no annotations!!");
+        return;
+    }
 }
 
 function webgl_composite_image_renderer(gl, width, height) {
