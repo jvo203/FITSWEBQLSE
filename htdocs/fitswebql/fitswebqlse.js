@@ -4111,9 +4111,9 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
             layout.annotations = annotations;
         }
 
-        Plotly.newPlot(div, data, layout);
+        layout.__relayout = false;
 
-        __relayout = false;
+        Plotly.newPlot(div, data, layout);
 
         //add relayout event function to graph
         document.getElementById(div).on('plotly_relayout', function (event) {
@@ -4123,17 +4123,20 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 }
 
 function plotlyRelayoutEventFunction(event, id) {
-    console.log("plotly_relayout event:", event, "id:", id, "__relayout:", __relayout);
+    var elem = document.getElementById(id);
+    var layout = elem.layout;
+
+    console.log("plotly_relayout event:", event, "id:", id, "__relayout:", layout.__relayout);
 
     // check the __relayout flag
-    if (__relayout) {
-        // remove the object __relayout
-        __relayout = false;
+    if (layout.__relayout) {
+        // re-set the object __relayout
+        layout.__relayout = false;
         return;
     }
 
     // set __relayout
-    __relayout = true;
+    layout.__relayout = true;
 
     var xmin, xmax, ymin, ymax;
 
@@ -4159,9 +4162,6 @@ function plotlyRelayoutEventFunction(event, id) {
             return;
         }
     }
-
-    var elem = document.getElementById(id);
-    var layout = elem.layout;
 
     try {
         var annotations = layout.annotations;
