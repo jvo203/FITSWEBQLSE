@@ -4263,9 +4263,9 @@ function plotlyRelayoutEventFunction(event, id) {
             const lines = db.transaction("lines", "readonly").objectStore("lines");
             const index = lines.index("obs_wl");
 
-            let width = Math.abs(xmax - xmin);
+            /*let width = Math.abs(xmax - xmin);
             xmin -= 0.5 * width;
-            xmax += 0.5 * width;
+            xmax += 0.5 * width;*/
 
             let request = index.getAll(IDBKeyRange.bound(xmin, xmax));
 
