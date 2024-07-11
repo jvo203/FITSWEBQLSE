@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-11.0";
+    return "JS2024-07-11.1";
 }
 
 function uuidv4() {
@@ -4202,7 +4202,11 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
         if (noatoms > limit) {
             //add relayout event function to graph
             document.getElementById(div).on('plotly_relayout', function (event) {
-                plotlyRelayoutEventFunction(event, div);
+                clearTimeout(idleResize);
+
+                idleResize = setTimeout(function () {
+                    plotlyRelayoutEventFunction(event, div);
+                }, 250);
             });
         }
 
