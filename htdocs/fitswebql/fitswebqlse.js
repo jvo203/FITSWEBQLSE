@@ -33,6 +33,8 @@ const wasm_supported = (() => {
 
 console.log(wasm_supported ? "WebAssembly is supported" : "WebAssembly is not supported");
 
+const limit = 500; // Atomic Spectra Database lines number display limit
+
 String.prototype.insert_at = function (index, string) {
     return this.substr(0, index) + string + this.substr(index);
 }
@@ -3999,7 +4001,7 @@ function romanize(num) {
     return roman;
 }
 
-async function insert_atomic_spectra(div, data) {
+function insert_atomic_spectra(div, data) {
     // delete the existing database first
     /*let deleteRequest = indexedDB.deleteDatabase(div);
 
@@ -4074,7 +4076,6 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
     let wmin = d3.min(x);
     let wmax = d3.max(x);
-    let ymax = d3.max(y);
     // console.log("wmin:", wmin, "wmax:", wmax, "Å");    
 
     fetch_atomic_spectra(wmin, wmax).then(spectra => {
@@ -4130,7 +4131,6 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
             }
         };
 
-        const limit = 500;
         let noatoms = spectra.length;
 
         if (noatoms > 0 && noatoms <= limit) {
@@ -4150,9 +4150,9 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                     x0: wavelength,
                     y0: 0,
                     x1: wavelength,
-                    y1: Math.max(ymax, mean + 5.0 * std),
+                    y1: 1.0,
                     xref: 'x',
-                    yref: 'y',
+                    yref: 'paper',
                     line: {
                         color: 'grey',
                         width: 1.0,
@@ -4163,8 +4163,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                 let label = {
                     font: { style: "normal" },
                     x: wavelength,
-                    /*y: mean + 5.0 * std,*/
-                    y: 1.15,
+                    y: 1.05,
                     xref: 'x',
                     yref: 'paper',
                     text: element + ' ' + romanize(number),
@@ -4200,10 +4199,12 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
         Plotly.newPlot(div, data, layout);
 
-        //add relayout event function to graph
-        document.getElementById(div).on('plotly_relayout', function (event) {
-            //plotlyRelayoutEventFunction(event, div);
-        });
+        if (noatoms > limit) {
+            //add relayout event function to graph
+            document.getElementById(div).on('plotly_relayout', function (event) {
+                plotlyRelayoutEventFunction(event, div);
+            });
+        }
 
         insert_atomic_spectra(datasetId + '/' + div, spectra);
     });
@@ -4218,42 +4219,127 @@ function plotlyRelayoutEventFunction(event, id) {
     console.log("plotly_relayout event:", event, "id:", id, "__relayout:", layout.__relayout);
 
     // check the __relayout flag
-    if (layout.__relayout) {
+    /*if (layout.__relayout) {
         // re-set the object __relayout
         layout.__relayout = false;
         return;
-    }
+    }*/
 
     // set __relayout
     layout.__relayout = true;
 
-    var xmin, xmax, ymin, ymax;
+    var xmin, xmax;
 
     try {
         xmin = event['xaxis.range[0]'];
         xmax = event['xaxis.range[1]'];
-        ymin = event['yaxis.range[0]'];
-        ymax = event['yaxis.range[1]'];
 
-        console.log("re-sizing the plotly graph", xmin, xmax, ymin, ymax);
+        console.log("re-sizing the plotly graph", xmin, xmax);
     } catch (err) {
         console.log("plotly_relayout event: no rangeslider event!!");
         return;
     }
 
     // if ymax is undefined, return
-    if (ymax == undefined) {
-        // check of yxis.range is an array
-        if (Array.isArray(event['yaxis.range'])) {
-            ymax = event['yaxis.range'][1];
+    if (xmin == undefined || xmax == undefined) {
+        // check if xais.range is an array
+        if (Array.isArray(event['xaxis.range'])) {
+            xmin = event['xaxis.range'][0];
+            xmax = event['xaxis.range'][1];
         } else {
-            console.log("plotly_relayout event: no y-axis range!!");
+            console.log("plotly_relayout event: no x-axis range!!");
             return;
         }
     }
 
     try {
-        var annotations = layout.annotations;
+        console.log("plotly_relayout event: updating the atomic spectra", xmin, xmax);
+
+        let openRequest = indexedDB.open(dbName, 1);
+
+        openRequest.onsuccess = function () {
+            const db = openRequest.result;
+
+            const lines = db.transaction("lines", "readonly").objectStore("lines");
+            const index = lines.index("obs_wl");
+
+            let width = Math.abs(xmax - xmin);
+            xmin -= 0.5 * width;
+            xmax += 0.5 * width;
+
+            let request = index.getAll(IDBKeyRange.bound(xmin, xmax));
+
+            request.onsuccess = function () {
+                if (request.result !== undefined) {
+                    spectra = request.result;
+                    //console.log("plotly_relayout event: atomic spectra found", spectra.length, "in the range", xmin, xmax, spectra);
+
+                    let noatoms = spectra.length;
+
+                    var shapes = [];
+                    var annotations = [];
+
+                    if (noatoms > 0 && noatoms <= limit) {
+                        for (let i = 0; i < noatoms; i++) {
+                            let atom = spectra[i];
+
+                            let element = atom.element;
+                            let number = atom.sp_num;
+                            let wavelength = atom.obs_wl;
+
+                            let line = {
+                                type: 'line',
+                                x0: wavelength,
+                                y0: 0,
+                                x1: wavelength,
+                                y1: 1.0,
+                                xref: 'x',
+                                yref: 'paper',
+                                line: {
+                                    color: 'grey',
+                                    width: 1.0,
+                                    dash: 'dot'
+                                }
+                            };
+
+                            let label = {
+                                font: { style: "normal" },
+                                x: wavelength,
+                                y: 1.05,
+                                xref: 'x',
+                                yref: 'paper',
+                                text: element + ' ' + romanize(number),
+                                textangle: -45,
+                                xanchor: 'center',
+                                yanchor: 'center',
+                                showarrow: false
+                            };
+
+                            shapes.push(line);
+                            annotations.push(label);
+                        }
+                    } else {
+                        annotations = [{
+                            x: 0.5,
+                            y: 1.05,
+                            xref: 'paper',
+                            yref: 'paper',
+                            text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
+                            showarrow: false
+                        }];
+                    };
+
+                    Plotly.relayout(id, { annotations: annotations, shapes: shapes });
+                } else {
+                    console.log("No spectra found in the range", xmin, xmax);
+                }
+            };
+
+            // close the database
+            db.close();
+        }
+
+        /*var annotations = layout.annotations;
 
         // iterate through the annotations updating the y position
         for (let i = 0; i < annotations.length; i++) {
@@ -4261,7 +4347,7 @@ function plotlyRelayoutEventFunction(event, id) {
             label.y = ymax;// - emFontSize;            
         }
 
-        Plotly.relayout(id, { annotations: annotations });
+        Plotly.relayout(id, { annotations: annotations });*/
     } catch (err) {
         console.log("plotly_relayout event: no annotations!!");
         return;
