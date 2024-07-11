@@ -4129,9 +4129,10 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
             }
         };
 
+        const limit = 500;
         let noatoms = spectra.length;
 
-        if (noatoms > 0 && noatoms <= 500) {
+        if (noatoms > 0 && noatoms <= limit) {
             var shapes = [];
             var annotations = [];
 
@@ -4161,10 +4162,10 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                 let label = {
                     font: { style: "normal" },
                     x: wavelength,
-                    y: mean + 5.0 * std,
-                    /*y: 0,*/
+                    /*y: mean + 5.0 * std,*/
+                    y: 1.15,
                     xref: 'x',
-                    yref: 'y',
+                    yref: 'paper',
                     text: element + ' ' + romanize(number),
                     textangle: -45,
                     xanchor: 'center',
@@ -4181,6 +4182,18 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
             layout.shapes = shapes;
             layout.annotations = annotations;
+        } else {
+            annotations = [{
+                x: 0.5,
+                y: 1.0,
+                xref: 'paper',
+                yref: 'paper',
+                text: 'No atomic spectra found',
+                showarrow: false,
+                font: { size: 16 }
+            }];
+
+            layout.annotations = annotations;
         }
 
         layout.__relayout = false;
@@ -4189,7 +4202,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
         //add relayout event function to graph
         document.getElementById(div).on('plotly_relayout', function (event) {
-            plotlyRelayoutEventFunction(event, div);
+            //plotlyRelayoutEventFunction(event, div);
         });
 
         insert_atomic_spectra(datasetId + '/' + div, spectra);
@@ -4197,6 +4210,8 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 }
 
 function plotlyRelayoutEventFunction(event, id) {
+    const dbName = datasetId + '/' + id;
+
     var elem = document.getElementById(id);
     var layout = elem.layout;
 
