@@ -4192,7 +4192,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
             plotlyRelayoutEventFunction(event, div);
         });
 
-        insert_atomic_spectra(div, spectra);
+        insert_atomic_spectra(datasetId + '/' + div, spectra);
     });
 }
 
