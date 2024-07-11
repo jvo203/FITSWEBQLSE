@@ -4019,26 +4019,26 @@ async function insert_atomic_spectra(div, data) {
         const db = openRequest.result;
         console.log("Populating the atomic spectra database", div);
 
-        //if (event.oldVersion == 0) {
-        // create an object store for the atomic spectra
-        const objectStore = db.createObjectStore("lines", { autoIncrement: true });
+        if (event.oldVersion == 0) {
+            // create an object store for the atomic spectra
+            const objectStore = db.createObjectStore("lines", { autoIncrement: true });
 
-        // create a wavelength index
-        objectStore.createIndex("obs_wl", "obs_wl", { unique: false });
+            // create a wavelength index
+            objectStore.createIndex("obs_wl", "obs_wl", { unique: false });
 
-        // Use transaction oncomplete to make sure the objectStore creation is
-        // finished before adding data into it.
-        objectStore.transaction.oncomplete = (event) => {
-            // Store values in the newly created objectStore.
-            const lines = db
-                .transaction("lines", "readwrite")
-                .objectStore("lines");
+            // Use transaction oncomplete to make sure the objectStore creation is
+            // finished before adding data into it.
+            objectStore.transaction.oncomplete = (event) => {
+                // Store values in the newly created objectStore.
+                const lines = db
+                    .transaction("lines", "readwrite")
+                    .objectStore("lines");
 
-            data.forEach((atom) => {
-                lines.add(atom);
-            });
-        };
-        //}
+                data.forEach((atom) => {
+                    lines.add(atom);
+                });
+            };
+        }
     };
 
     openRequest.onerror = function () {
