@@ -4017,9 +4017,10 @@ async function insert_atomic_spectra(div, data) {
         // triggers if the client had no database
         // ...perform initialization...
         const db = openRequest.result;
-        console.log("Populating the atomic spectra database", div);
 
         if (event.oldVersion == 0) {
+            console.log("Populating the atomic spectra database", div);
+
             // create an object store for the atomic spectra
             const objectStore = db.createObjectStore("lines", { autoIncrement: true });
 
