@@ -4074,6 +4074,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
 
     let wmin = d3.min(x);
     let wmax = d3.max(x);
+    let ymax = d3.max(y);
     // console.log("wmin:", wmin, "wmax:", wmax, "Å");    
 
     fetch_atomic_spectra(wmin, wmax).then(spectra => {
@@ -4149,7 +4150,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                     x0: wavelength,
                     y0: 0,
                     x1: wavelength,
-                    y1: mean + 5.0 * std,
+                    y1: Math.max(ymax, mean + 5.0 * std),
                     xref: 'x',
                     yref: 'y',
                     line: {
@@ -4185,12 +4186,11 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
         } else {
             annotations = [{
                 x: 0.5,
-                y: 1.0,
+                y: 1.05,
                 xref: 'paper',
                 yref: 'paper',
-                text: 'No atomic spectra found',
-                showarrow: false,
-                font: { size: 16 }
+                text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
+                showarrow: false
             }];
 
             layout.annotations = annotations;
