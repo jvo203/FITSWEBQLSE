@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-10.0";
+    return "JS2024-07-11.0";
 }
 
 function uuidv4() {
@@ -3977,7 +3977,7 @@ async function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
         let res = plot_time_series(x, y, mean, std, divId, div_width, div_height, title + titleStr, dateobs, raText, decText);
 
-        if (k < 3)
+        if (k < 2)
             await res;
     }
 
@@ -3997,6 +3997,75 @@ function romanize(num) {
     }
 
     return roman;
+}
+
+async function insert_atomic_spectra(div, data) {
+    // delete the existing database first
+    /*let deleteRequest = indexedDB.deleteDatabase(div);
+
+    deleteRequest.onsuccess = function () {
+        // console.log("Database deleted successfully", div);
+    };
+
+    deleteRequest.onerror = function () {
+        console.error("Error deleting database", div);
+    };*/
+
+    let openRequest = indexedDB.open(div, 1);
+
+    openRequest.onupgradeneeded = function (event) {
+        // triggers if the client had no database
+        // ...perform initialization...
+        const db = openRequest.result;
+        console.log("Populating the atomic spectra database", div);
+
+        //if (event.oldVersion == 0) {
+        // create an object store for the atomic spectra
+        const objectStore = db.createObjectStore("lines", { autoIncrement: true });
+
+        // create a wavelength index
+        objectStore.createIndex("obs_wl", "obs_wl", { unique: false });
+
+        // Use transaction oncomplete to make sure the objectStore creation is
+        // finished before adding data into it.
+        objectStore.transaction.oncomplete = (event) => {
+            // Store values in the newly created objectStore.
+            const lines = db
+                .transaction("lines", "readwrite")
+                .objectStore("lines");
+
+            data.forEach((atom) => {
+                lines.add(atom);
+            });
+        };
+        //}
+    };
+
+    openRequest.onerror = function () {
+        console.error("Error", openRequest.error);
+    };
+
+    /*openRequest.onsuccess = function () {
+        const db = openRequest.result;
+        console.log("Success", db);
+
+        const lines = db.transaction("lines", "readonly").objectStore("lines");
+
+        // list all atomic spectra
+        let cursor = lines.openCursor();
+
+        cursor.onsuccess = function (event) {
+            let cursor = event.target.result;
+
+            if (cursor) {
+                console.log("Atomic spectrum:", cursor.value);
+                cursor.continue();
+            }
+        };
+
+        // close the database
+        db.close();
+    }*/
 }
 
 async function plot_time_series(x, y, mean, std, div, width, height, title, date, ra, dec) {
@@ -4121,6 +4190,8 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
         document.getElementById(div).on('plotly_relayout', function (event) {
             plotlyRelayoutEventFunction(event, div);
         });
+
+        insert_atomic_spectra(div, spectra);
     });
 }
 
