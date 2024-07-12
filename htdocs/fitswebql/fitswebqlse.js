@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-11.1";
+    return "JS2024-07-12.0";
 }
 
 function uuidv4() {
@@ -4115,6 +4115,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
             width: width,
             height: height,
             xaxis: {
+                wrange: [wmin, wmax], // store the original wavelength range
                 autorange: true,
                 rangeslider: { visible: true },
                 type: 'linear',
@@ -4195,8 +4196,6 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
             layout.annotations = annotations;
         }
 
-        layout.__relayout = false;
-
         Plotly.newPlot(div, data, layout);
 
         if (noatoms > limit) {
@@ -4220,17 +4219,7 @@ function plotlyRelayoutEventFunction(event, id) {
     var elem = document.getElementById(id);
     var layout = elem.layout;
 
-    console.log("plotly_relayout event:", event, "id:", id, "__relayout:", layout.__relayout);
-
-    // check the __relayout flag
-    /*if (layout.__relayout) {
-        // re-set the object __relayout
-        layout.__relayout = false;
-        return;
-    }*/
-
-    // set __relayout
-    layout.__relayout = true;
+    console.log("plotly_relayout event:", event, "id:", id);
 
     var xmin, xmax;
 
@@ -4246,11 +4235,16 @@ function plotlyRelayoutEventFunction(event, id) {
 
     // if ymax is undefined, return
     if (xmin == undefined || xmax == undefined) {
-        // check if xais.range is an array
+        // check if xaxis.range is an array
         if (Array.isArray(event['xaxis.range'])) {
             xmin = event['xaxis.range'][0];
             xmax = event['xaxis.range'][1];
-        } else {
+        } else if (event['xaxis.autorange'] == true) {
+            // xaxis.autorange is true, get the original range
+            xmin = layout.xaxis.wrange[0];
+            xmax = layout.xaxis.wrange[1];
+        }
+        else {
             console.log("plotly_relayout event: no x-axis range!!");
             return;
         }
