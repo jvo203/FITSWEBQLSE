@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-12.0";
+    return "JS2024-07-16.0";
 }
 
 function uuidv4() {
@@ -3973,11 +3973,14 @@ async function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
             .attr("id", divId);
 
         let title = '';
+        let yoffset = 1.05;
 
-        if (img_height > 1)
+        if (img_height > 1) {
             title = "Spectrum #" + (k + 1) + "/" + img_height + ': ';
+            yoffset = 1.15;
+        }
 
-        let res = plot_time_series(x, y, mean, std, divId, div_width, div_height, title + titleStr, dateobs, raText, decText);
+        let res = plot_time_series(x, y, mean, std, divId, div_width, div_height, yoffset, title + titleStr, dateobs, raText, decText);
 
         if (k < 2)
             await res;
@@ -4071,7 +4074,7 @@ function insert_atomic_spectra(div, data) {
     }*/
 }
 
-async function plot_time_series(x, y, mean, std, div, width, height, title, date, ra, dec) {
+async function plot_time_series(x, y, mean, std, div, width, height, yoffset, title, date, ra, dec) {
     var paper_bgcolor, plot_bgcolor, line_color, hover_bgcolor, gridcolor, font_color;
 
     let wmin = d3.min(x);
@@ -4164,7 +4167,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                 let label = {
                     font: { style: "normal" },
                     x: wavelength,
-                    y: 1.05,
+                    y: yoffset,
                     xref: 'x',
                     yref: 'paper',
                     text: element + ' ' + romanize(number),
@@ -4186,7 +4189,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
         } else {
             annotations = [{
                 x: 0.5,
-                y: 1.05,
+                y: yoffset,
                 xref: 'paper',
                 yref: 'paper',
                 text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
@@ -4204,7 +4207,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
                 clearTimeout(idleResize);
 
                 idleResize = setTimeout(function () {
-                    plotlyRelayoutEventFunction(event, div);
+                    plotlyRelayoutEventFunction(event, div, yoffset);
                 }, 250);
             });
 
@@ -4213,7 +4216,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, title, date
     });
 }
 
-function plotlyRelayoutEventFunction(event, id) {
+function plotlyRelayoutEventFunction(event, id, yoffset) {
     const dbName = datasetId + '/' + id;
 
     var elem = document.getElementById(id);
@@ -4261,10 +4264,6 @@ function plotlyRelayoutEventFunction(event, id) {
             const lines = db.transaction("lines", "readonly").objectStore("lines");
             const index = lines.index("obs_wl");
 
-            /*let width = Math.abs(xmax - xmin);
-            xmin -= 0.5 * width;
-            xmax += 0.5 * width;*/
-
             let request = index.getAll(IDBKeyRange.bound(xmin, xmax));
 
             request.onsuccess = function () {
@@ -4303,7 +4302,7 @@ function plotlyRelayoutEventFunction(event, id) {
                             let label = {
                                 font: { style: "normal" },
                                 x: wavelength,
-                                y: 1.05,
+                                y: yoffset,
                                 xref: 'x',
                                 yref: 'paper',
                                 text: element + ' ' + romanize(number),
@@ -4319,7 +4318,7 @@ function plotlyRelayoutEventFunction(event, id) {
                     } else {
                         annotations = [{
                             x: 0.5,
-                            y: 1.05,
+                            y: yoffset,
                             xref: 'paper',
                             yref: 'paper',
                             text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
