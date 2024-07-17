@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-16.0";
+    return "JS2024-07-17.0";
 }
 
 function uuidv4() {
@@ -6345,6 +6345,9 @@ function display_scale_info() {
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData == null)
+        return;
+
+    if (fitsData.is_spectrum)
         return;
 
     // add the markers anyway (they are needed by the P-V diagram)
