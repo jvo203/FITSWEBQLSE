@@ -2,7 +2,7 @@ module fits
    use, intrinsic :: ISO_C_BINDING
    use, intrinsic :: ieee_arithmetic
 
-   use ast
+   ! use ast
    use fixed_array
    use lz4
    use :: unix_pthread
@@ -6854,10 +6854,6 @@ contains
       real(c_float) :: cx, cy, rx, ry, r, r2
       real(kind=8) :: cdelt3
 
-      ! AST
-      integer(c_int) :: ast_status
-      type(C_PTR) :: wcsinfo
-
       ! WCS
       integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS ! WCSP(2)
       type(C_PTR) :: WCSP
@@ -7012,50 +7008,6 @@ contains
 
       ! combine the spectra from other cluster nodes (if any)
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
-
-      call astBegin
-
-      wcsinfo = astReadHeader(item%hdr)
-
-      ! check if the WCS is valid
-      ! if (c_associated(wcsinfo)) then
-      call astPix2Sky( wcsinfo, cx, cy, lng, lat )
-
-      ! check if lng and lat are not NaN (i.e. the WCS is valid)
-      if (.not. ieee_is_nan(lng) .and. .not. ieee_is_nan(lat)) then
-         ! beam_width
-         call astPix2Sky(wcsinfo, cx - rx, cy, ra1, dec1)
-         call astPix2Sky(wcsinfo, cx + rx, cy, ra2, dec2)
-
-         ! convert ra, dec from degrees to radians
-         ra1 = ra1*deg2rad
-         dec1 = dec1*deg2rad
-
-         ra2 = ra2*deg2rad
-         dec2 = dec2*deg2rad
-
-         ! convert from radians to degrees
-         beam_width = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
-
-         ! beam_height
-         call astPix2Sky(wcsinfo, cx, cy - ry, ra1, dec1)
-         call astPix2Sky(wcsinfo, cx, cy + ry, ra2, dec2)
-
-         ! convert ra, dec from degrees to radians
-         ra1 = ra1*deg2rad
-         dec1 = dec1*deg2rad
-
-         ra2 = ra2*deg2rad
-         dec2 = dec2*deg2rad
-
-         ! convert from radians to degrees
-         beam_height = AngularDistance(ra1, dec1, ra2, dec2) * rad2deg
-
-         print *, 'lng: ', lng, ', lat: ', lat, ', beam_width: ', beam_width, ', beam_height: ', beam_height
-      end if
-
-      call astAnnul(wcsinfo)
-      call astEnd (ast_status)
 
       ! WCSLIB
       NKEYRC = (size(item%hdr)-1) / 80
