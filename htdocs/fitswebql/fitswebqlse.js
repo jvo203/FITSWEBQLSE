@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-19.0";
+    return "JS2024-07-22.0";
 }
 
 function uuidv4() {
@@ -4006,15 +4006,18 @@ function romanize(num) {
 
 function insert_atomic_spectra(div, data) {
     // delete the existing database first
-    /*let deleteRequest = indexedDB.deleteDatabase(div);
+    // (it might be empty or contain outdated data)
+    {
+        let deleteRequest = indexedDB.deleteDatabase(div);
 
-    deleteRequest.onsuccess = function () {
-        // console.log("Database deleted successfully", div);
-    };
+        deleteRequest.onsuccess = function () {
+            // console.log("Database deleted successfully", div);
+        };
 
-    deleteRequest.onerror = function () {
-        console.error("Error deleting database", div);
-    };*/
+        deleteRequest.onerror = function () {
+            console.error("Error deleting database", div);
+        };
+    }
 
     let openRequest = indexedDB.open(div, 1);
 
