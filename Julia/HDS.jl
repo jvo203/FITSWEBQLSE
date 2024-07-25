@@ -36,3 +36,7 @@ row = data[:, y]
 println("row size: ", size(row))
 
 plot(row, label="Spectrum", xlabel="Pixel", ylabel="Intensity", legend=:topleft)
+
+# the approximate number of peaks in the spectrum to be fitted
+N = Int(round(length(row) / 20))
+println("N: ", N)
