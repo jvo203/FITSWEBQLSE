@@ -5092,7 +5092,6 @@ void start_http()
     signal(SIGPIPE, SIG_IGN); // ignore SIGPIPE
 
     // start a µHTTP server
-    // + MHD_USE_THREAD_PER_CONNECTION
     http_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_THREAD_PER_CONNECTION | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                    options.http_port,
                                    &on_client_connect,
@@ -5109,7 +5108,6 @@ void start_http()
     }
 
     // start a µHTTP-WS server
-    // + MHD_USE_THREAD_PER_CONNECTION
     ws_server = MHD_start_daemon(MHD_ALLOW_UPGRADE | MHD_USE_AUTO_INTERNAL_THREAD | MHD_USE_THREAD_PER_CONNECTION | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                  options.ws_port,
                                  NULL,
