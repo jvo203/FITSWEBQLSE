@@ -5109,7 +5109,8 @@ void start_http()
     }
 
     // start a µHTTP-WS server
-    ws_server = MHD_start_daemon(MHD_ALLOW_UPGRADE | MHD_USE_AUTO_INTERNAL_THREAD | MHD_USE_ERROR_LOG | MHD_USE_ITC,
+    // + MHD_USE_THREAD_PER_CONNECTION
+    ws_server = MHD_start_daemon(MHD_ALLOW_UPGRADE | MHD_USE_AUTO_INTERNAL_THREAD | MHD_USE_THREAD_PER_CONNECTION | MHD_USE_ERROR_LOG | MHD_USE_ITC,
                                  options.ws_port,
                                  NULL,
                                  NULL,
