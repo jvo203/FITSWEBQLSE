@@ -1,4 +1,5 @@
 using FITSIO
+using Optim
 using Plots
 
 dir = homedir()
