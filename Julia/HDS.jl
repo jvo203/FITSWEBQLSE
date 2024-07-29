@@ -1,7 +1,10 @@
 using FITSIO
 using Plots
 
-fitspath = homedir() * "/Downloads/fsclmo_HDSA00042941.fits"
+dir = homedir()
+dir = "/mnt/c/Users/クリストファー"
+fitspath = dir * "/Downloads/fsclmo_HDSA00042941.fits"
+
 
 f = FITS(fitspath)
 N = ndims(f[1])
