@@ -3,6 +3,7 @@ using LinearAlgebra
 using Optim
 using Peaks
 using Plots
+using Statistics
 
 dir = homedir()
 #dir = "/mnt/c/Users/クリストファー"
@@ -77,8 +78,15 @@ function rbf_forward(params::Vector{Float64}, centres::Vector{Float32}, targets:
     return predictions
 end
 
+# get a mean and std of the data in row
+mean_row = mean(row)
+std_row = std(row)
+threshold = mean_row + 3 * std_row
+
 pks, vals = findmaxima(row)
-_, proms = peakproms!(pks, row; minprom=100)
+
+# prune the peaks
+_, proms = peakproms!(pks, row; minprom=threshold)
 
 N = length(pks)
 println("N. peaks: ", N)
