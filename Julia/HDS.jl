@@ -59,7 +59,7 @@ function rbf_cost_function(params::Vector{Float64}, centres::Vector{Float32}, ta
     #return plot(predictions, label="Predictions", xlabel="Pixel", ylabel="Intensity", legend=:topleft)
 
     # the cost is the sum of the squared differences between the predictions and the targets
-    rmse = sum((predictions .- targets) .^ 2) / length(targets)
+    rmse = sqrt(sum((predictions .- targets) .^ 2) / length(targets))
 
     return rmse
 end
@@ -99,14 +99,15 @@ println("#params: ", length(params))
 
 # optimize the parameters with Optim
 #result = optimize(x -> rbf_cost_function(x, centres, row), params, Optim.Options(iterations=100, show_trace=true))
-result = optimize(x -> rbf_cost_function(x, centres, row), params, LBFGS(), Optim.Options(iterations=100, show_trace=true))
-#result = optimize(x -> rbf_cost_function(x, centres, row), params, SimulatedAnnealing(), Optim.Options(iterations=100000, show_trace=true))
+#result = optimize(x -> rbf_cost_function(x, centres, row), params, LBFGS(), Optim.Options(iterations=1000, show_trace=true))
+result = optimize(x -> rbf_cost_function(x, centres, row), params, SimulatedAnnealing(), Optim.Options(iterations=1000000, show_trace=true))
 println(result)
 new_params = Optim.minimizer(result)
+println("new_params: ", new_params)
 
 predicted = rbf_forward(new_params, centres, row)
 plot(predicted, label="Predictions", xlabel="Pixel", ylabel="Intensity", legend=:topleft)
-#scatter!(centres, row[round.(Int, centres)], label="Peaks")
+scatter!(centres, row[round.(Int, centres)], label="Peaks")
 
 # plot the peaks
 #plot(row)
