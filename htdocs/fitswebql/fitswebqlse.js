@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-07-22.0";
+    return "JS2024-08-02.0";
 }
 
 function uuidv4() {
@@ -13211,7 +13211,7 @@ function setup_image_selection() {
     var zoom_cross = d3.select("#zoomCross");
 
     var zoom = d3.zoom()
-        .scaleExtent([10, 200])//was 200
+        .scaleExtent([5, 200])//was [10, 200]
         .on("zoom", zoomed);
 
     now = performance.now();
