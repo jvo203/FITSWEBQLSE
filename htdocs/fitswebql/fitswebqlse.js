@@ -13926,6 +13926,7 @@ function setup_image_selection() {
                     sent_seq_id++;
                     var range = get_axes_range(width, height);
                     var dx = range.xMax - range.xMin;
+                    var dy = range.yMax - range.yMin;
 
                     for (let index = 0; index < va_count; index++) {
                         // a real-time websocket request                        
@@ -13934,25 +13935,48 @@ function setup_image_selection() {
                             let _width = viewport_zoom_settings.zoomed_size;
                             let _height = viewport_zoom_settings.zoomed_size;
 
-                            var request = {
-                                type: "realtime_image_spectrum",
-                                dx: dx,
-                                image: false,
-                                quality: image_quality,
-                                x1: x1 + 1,
-                                y1: y1 + 1,
-                                x2: x2 + 1,
-                                y2: y2 + 1,
-                                width: _width,
-                                height: _height,
-                                beam: zoom_shape,
-                                intensity: intensity_mode,
-                                frame_start: data_band_lo,
-                                frame_end: data_band_hi,
-                                ref_freq: RESTFRQ,
-                                seq_id: sent_seq_id,
-                                timestamp: performance.now()
-                            };
+                            var request;
+
+                            if (fitsData.is_spectrum) {
+                                request = {
+                                    type: "realtime_hds_spectrum",
+                                    dx: dx,
+                                    dy: dy,
+                                    image: false,
+                                    quality: image_quality,
+                                    x1: x1 + 1,
+                                    y1: y1 + 1,
+                                    x2: x2 + 1,
+                                    y2: y2 + 1,
+                                    width: _width,
+                                    height: _height,
+                                    beam: zoom_shape,
+                                    x: fitsX + 1,
+                                    y: fitsY + 1,
+                                    seq_id: sent_seq_id,
+                                    timestamp: performance.now()
+                                };
+                            } else {
+                                request = {
+                                    type: "realtime_image_spectrum",
+                                    dx: dx,
+                                    image: false,
+                                    quality: image_quality,
+                                    x1: x1 + 1,
+                                    y1: y1 + 1,
+                                    x2: x2 + 1,
+                                    y2: y2 + 1,
+                                    width: _width,
+                                    height: _height,
+                                    beam: zoom_shape,
+                                    intensity: intensity_mode,
+                                    frame_start: data_band_lo,
+                                    frame_end: data_band_hi,
+                                    ref_freq: RESTFRQ,
+                                    seq_id: sent_seq_id,
+                                    timestamp: performance.now()
+                                };
+                            }
 
                             if (wsConn[index].readyState == 1)
                                 wsConn[index].send(JSON.stringify(request));

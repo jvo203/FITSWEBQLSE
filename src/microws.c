@@ -1212,6 +1212,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                 // default values just in case ...
                 req->dx = 0;
+                req->dy = 0;
                 req->image = false;
                 req->quality = medium;
                 req->x1 = -1;
@@ -1226,6 +1227,8 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->frame_end = 0.0;
                 req->ref_freq = 0.0;
                 req->median = NAN;
+                req->x = -1;
+                req->y = -1;
                 req->seq_id = 0;
                 req->timestamp = 0.0;
                 req->session = NULL;

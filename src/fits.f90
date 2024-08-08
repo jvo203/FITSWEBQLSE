@@ -50,7 +50,7 @@ module fits
 
    type, bind(c) :: image_spectrum_request_f
       ! input
-      integer(kind=c_int) :: dx
+      integer(kind=c_int) :: dx, dy
       logical(kind=c_bool) :: image
       integer(kind(medium)) :: quality
       integer(c_int) :: x1, y1, x2, y2
@@ -59,6 +59,7 @@ module fits
       integer(kind(medium)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq
       real(c_float) :: median
+      integer(c_int) :: x, y
       integer(c_int) :: seq_id
       real(c_float) :: timestamp
 
