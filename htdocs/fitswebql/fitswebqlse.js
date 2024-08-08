@@ -13939,7 +13939,7 @@ function setup_image_selection() {
 
                             if (fitsData.is_spectrum) {
                                 request = {
-                                    type: "realtime_hds_spectrum",
+                                    type: "realtime_image_spectrum",
                                     dx: dx,
                                     dy: dy,
                                     image: false,
@@ -15559,7 +15559,7 @@ function imageTimeout() {
 
             if (fitsData.is_spectrum) {
                 request = {
-                    type: "realtime_hds_spectrum",
+                    type: "realtime_image_spectrum",
                     dx: dx,
                     dy: dy,
                     image: image_update,

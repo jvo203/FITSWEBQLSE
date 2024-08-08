@@ -1243,6 +1243,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     if (strncmp(frame_data + koff, "\"dx\"", klen) == 0)
                         req->dx = atoi2(frame_data + voff, vlen);
 
+                    // 'dy'
+                    if (strncmp(frame_data + koff, "\"dy\"", klen) == 0)
+                        req->dy = atoi2(frame_data + voff, vlen);
+
                     // 'image'
                     if (strncmp(frame_data + koff, "\"image\"", klen) == 0)
                         if (strncmp(frame_data + voff, "true", vlen) == 0)
@@ -1324,6 +1328,14 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
                         req->ref_freq = atof2(frame_data + voff, vlen);
 
+                    // 'x'
+                    if (strncmp(frame_data + koff, "\"x\"", klen) == 0)
+                        req->x = atoi2(frame_data + voff, vlen);
+
+                    // 'y'
+                    if (strncmp(frame_data + koff, "\"y\"", klen) == 0)
+                        req->y = atoi2(frame_data + voff, vlen);
+
                     // 'seq_id'
                     if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)
                         req->seq_id = atoi2(frame_data + voff, vlen);
@@ -1333,7 +1345,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         req->timestamp = atof2(frame_data + voff, vlen);
                 }
 
-                // printf("[C] dx: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, seq_id: %d, timestamp: %f\n", req->dx, req->image, req->quality, req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->seq_id, req->timestamp);
+                // printf("[C] dx: %d, dy: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, x: %d, y: %d, seq_id: %d, timestamp: %f\n", req->dx, req->dy, req->image, req->quality, req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->x, req->y, req->seq_id, req->timestamp);
 
                 pthread_mutex_lock(&session->ws_mtx);
 
