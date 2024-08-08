@@ -15540,8 +15540,6 @@ function imageTimeout() {
                     dy: dy,
                     image: image_update,
                     quality: image_quality,
-                    x: fitsX + 1,
-                    y: fitsY + 1,
                     x1: x1 + 1,
                     y1: y1 + 1,
                     x2: x2 + 1,
@@ -15549,6 +15547,8 @@ function imageTimeout() {
                     width: _width,
                     height: _height,
                     beam: zoom_shape,
+                    x: fitsX + 1,
+                    y: fitsY + 1,
                     seq_id: sent_seq_id,
                     timestamp: performance.now()
                 };
