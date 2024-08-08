@@ -2436,7 +2436,7 @@ static enum MHD_Result on_http_connection(void *cls,
         // printf("[C] calling viewport_request with the pipe file descriptor %d\n", pipefd[1]);
 
         // got all the data, prepare a request structure and pass it to FORTRAN
-        struct download_request *req = (struct download_request *)malloc(sizeof(struct image_spectrum_request));
+        struct download_request *req = (struct download_request *)malloc(sizeof(struct download_request));
 
         if (req != NULL)
         {
@@ -3418,7 +3418,7 @@ static enum MHD_Result on_http_connection(void *cls,
         // printf("[C] calling viewport_request with the pipe file descriptor %d\n", pipefd[1]);
 
         // got all the data, prepare a request structure and pass it to FORTRAN
-        struct cluster_pv_request *req = (struct cluster_pv_request *)malloc(sizeof(struct image_spectrum_request));
+        struct cluster_pv_request *req = (struct cluster_pv_request *)malloc(sizeof(struct cluster_pv_request));
 
         if (req != NULL)
         {
