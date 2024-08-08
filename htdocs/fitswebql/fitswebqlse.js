@@ -15525,6 +15525,7 @@ function imageTimeout() {
         // a real-time websocket request
         var range = get_axes_range(width, height);
         var dx = range.xMax - range.xMin;
+        var dy = range.yMax - range.yMin;
 
         if (viewport_zoom_settings != null) {
             let _width = viewport_zoom_settings.zoomed_size;
@@ -15536,6 +15537,7 @@ function imageTimeout() {
                 request = {
                     type: "realtime_hds_spectrum",
                     dx: dx,
+                    dy: dy,
                     image: image_update,
                     quality: image_quality,
                     x: fitsX + 1,
