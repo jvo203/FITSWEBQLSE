@@ -7167,6 +7167,11 @@ contains
 
       ! respond with a 2D viewport if req%image .eq. .true.
       if (.not. allocated(item%compressed)) then
+         ! check if the item is an HDS spectrum, in which case we can still respond with X-Y cross-hair spectra
+         if(item%is_spectrum) then
+            ! print *, 'realtime_image_spectrum for ', item%datasetid, ', x:', req%x, ', y:', req%y
+         end if
+
          if (req%image) then
             call realtime_viewport_request(item, req)
          else

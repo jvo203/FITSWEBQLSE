@@ -13228,7 +13228,7 @@ function setup_image_selection() {
         //if (spec_elapsed > fpsInterval)
         {
             spec_then = spec_now - (spec_elapsed % fpsInterval);
-            //console.log("spectrum interval: " + spec_elapsed.toFixed(3) + " [ms]", "fps = ", Math.round(1000 / spec_elapsed)) ;
+            // console.log("spectrum interval: " + spec_elapsed.toFixed(3) + " [ms]", "fps = ", Math.round(1000 / spec_elapsed));
 
             //spectrum
             try {
@@ -13922,14 +13922,15 @@ function setup_image_selection() {
                 var x2 = Math.round(fitsX + fitsSize);
                 var y2 = Math.round(fitsY + fitsSize);
 
-                if (realtime_spectrum && fitsData.depth > 1 && !optical_view) {
+                console.log("got here", optical_view);
+                if (realtime_spectrum /*&& fitsData.depth > 1 && !optical_view*/) {
                     sent_seq_id++;
                     var range = get_axes_range(width, height);
                     var dx = range.xMax - range.xMin;
                     var dy = range.yMax - range.yMin;
 
                     for (let index = 0; index < va_count; index++) {
-                        // a real-time websocket request                        
+                        // a real-time websocket request                                
 
                         if (viewport_zoom_settings != null) {
                             let _width = viewport_zoom_settings.zoomed_size;
