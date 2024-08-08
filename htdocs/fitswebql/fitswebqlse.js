@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-02.0";
+    return "JS2024-08-08.0";
 }
 
 function uuidv4() {
@@ -15530,25 +15530,47 @@ function imageTimeout() {
             let _width = viewport_zoom_settings.zoomed_size;
             let _height = viewport_zoom_settings.zoomed_size;
 
-            var request = {
-                type: "realtime_image_spectrum",
-                dx: dx,
-                image: image_update,
-                quality: image_quality,
-                x1: x1 + 1,
-                y1: y1 + 1,
-                x2: x2 + 1,
-                y2: y2 + 1,
-                width: _width,
-                height: _height,
-                beam: zoom_shape,
-                intensity: intensity_mode,
-                frame_start: data_band_lo,
-                frame_end: data_band_hi,
-                ref_freq: RESTFRQ,
-                seq_id: sent_seq_id,
-                timestamp: performance.now()
-            };
+            var request;
+
+            if (fitsData.is_spectrum) {
+                request = {
+                    type: "realtime_hds_spectrum",
+                    dx: dx,
+                    image: image_update,
+                    quality: image_quality,
+                    x: fitsX + 1,
+                    y: fitsY + 1,
+                    x1: x1 + 1,
+                    y1: y1 + 1,
+                    x2: x2 + 1,
+                    y2: y2 + 1,
+                    width: _width,
+                    height: _height,
+                    beam: zoom_shape,
+                    seq_id: sent_seq_id,
+                    timestamp: performance.now()
+                };
+            } else {
+                request = {
+                    type: "realtime_image_spectrum",
+                    dx: dx,
+                    image: image_update,
+                    quality: image_quality,
+                    x1: x1 + 1,
+                    y1: y1 + 1,
+                    x2: x2 + 1,
+                    y2: y2 + 1,
+                    width: _width,
+                    height: _height,
+                    beam: zoom_shape,
+                    intensity: intensity_mode,
+                    frame_start: data_band_lo,
+                    frame_end: data_band_hi,
+                    ref_freq: RESTFRQ,
+                    seq_id: sent_seq_id,
+                    timestamp: performance.now()
+                };
+            }
 
             if (wsConn[index].readyState == 1)
                 wsConn[index].send(JSON.stringify(request));
