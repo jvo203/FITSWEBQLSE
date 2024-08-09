@@ -7170,12 +7170,11 @@ contains
          ! check if the item is an HDS spectrum, in which case we can still respond with X-Y cross-hair spectra
          if(item%is_spectrum) then
             ! print *, 'realtime_image_spectrum for ', item%datasetid, ', x:', req%x, ', y:', req%y
+            call realtime_hds_spectrum_request(item, req)
          end if
 
          if (req%image) then
             call realtime_viewport_request(item, req)
-         else
-            print *, "item%compressed has not been allocated; aborting 'realtime_image_spectrum_simd'"
          end if
 
          nullify (item)
@@ -7443,6 +7442,56 @@ contains
       ! print *, 'realtime_image_spectrum elapsed time:', elapsed, '[ms]' ! ifort
 
    end subroutine realtime_image_spectrum_request_simd
+
+   subroutine realtime_hds_spectrum_request(item, req)
+      implicit none
+
+      type(dataset), pointer :: item
+      type(image_spectrum_request_f), pointer :: req
+
+      ! timing
+      integer(8) :: start_t, finish_t, crate, cmax
+      real(c_float) :: elapsed
+
+      integer :: x, y
+
+      real(kind=c_float), allocatable, target :: xspec(:), yspec(:)
+      logical(kind=c_bool), allocatable, target :: xmask(:), ymask(:)
+
+      ! start the timer
+      call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+
+      if ((.not. allocated(item%pixels)) .or. (.not. allocated(item%mask))) return
+
+      if (req%x .eq. -1) return
+      if (req%y .eq. -1) return
+
+      ! sanity checks
+      x = max(1, req%x)
+      y = max(1, req%y)
+      x = min(item%naxes(1), x)
+      y = min(item%naxes(2), y)
+
+      print *, 'realtime_hds_spectrum for ', item%datasetid, ', x:', x, ', y:', y
+
+      ! spectra & masks along the X and Y axes
+      xspec = item%pixels(x, :)
+      xmask = item%mask(x, :)
+
+      yspec = item%pixels(:, y)
+      ymask = item%mask(:, y)
+
+      print *, 'xspec:', size(xspec), 'yspec:', size(yspec)
+      print *, 'xmask:', size(xmask), 'ymask:', size(ymask)
+
+      ! end the timer
+      call system_clock(finish_t)
+      elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
+      print *, 'realtime_hds_spectrum elapsed time:', elapsed, '[ms]'
+
+   end subroutine realtime_hds_spectrum_request
+
 
    subroutine realtime_viewport_request(item, req)
       implicit none
