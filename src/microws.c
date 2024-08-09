@@ -2845,6 +2845,9 @@ void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const f
     uchar *restrict xcomp = NULL;
     uchar *restrict ycomp = NULL;
 
+    char *restrict xcomp_mask = NULL;
+    char *restrict ycomp_mask = NULL;
+
     // ZFP variables
     zfp_type data_type = zfp_type_float;
     zfp_field *field = NULL;
@@ -2966,9 +2969,44 @@ void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const f
     else
         printf("[C] a NULL ycomp buffer!\n");
 
+    // compress X-mask with LZ4-HC
+    int xmask_size = xlen;
+    int xcompressed_size = 0;
+
+    int xworst_size = LZ4_compressBound(xmask_size);
+
+    xcomp_mask = (char *)malloc(xworst_size);
+
+    if (xcomp_mask != NULL)
+    {
+        // compress the mask as much as possible
+        xcompressed_size = LZ4_compress_HC((const char *)xmask, xcomp_mask, xmask_size, xworst_size, LZ4HC_CLEVEL_MAX);
+
+        printf("[C] X-spectrum mask raw size: %d; compressed: %d bytes\n", xmask_size, xcompressed_size);
+    }
+
+    // compress Y-mask with LZ4-HC
+    int ymask_size = ylen;
+    int ycompressed_size = 0;
+
+    int yworst_size = LZ4_compressBound(ymask_size);
+
+    ycomp_mask = (char *)malloc(yworst_size);
+
+    if (ycomp_mask != NULL)
+    {
+        // compress the mask as much as possible
+        ycompressed_size = LZ4_compress_HC((const char *)ymask, ycomp_mask, ymask_size, yworst_size, LZ4HC_CLEVEL_MAX);
+
+        printf("[C] Y-spectrum mask raw size: %d; compressed: %d bytes\n", ymask_size, ycompressed_size);
+    }
+
     // free memory
     free(xcomp);
     free(ycomp);
+
+    free(xcomp_mask);
+    free(ycomp_mask);
 }
 
 void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
