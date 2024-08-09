@@ -7478,8 +7478,7 @@ contains
 
       if ((.not. allocated(item%pixels)) .or. (.not. allocated(item%mask))) return
 
-      if (req%x .eq. -1) return
-      if (req%y .eq. -1) return
+      if ((req%x .eq. -1) .or. (req%y .eq. -1)) return
 
       ! sanity checks
       x = max(1, req%x)
