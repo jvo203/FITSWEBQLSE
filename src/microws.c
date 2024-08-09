@@ -22,6 +22,7 @@ void *send_cluster_heartbeat(void *arg);
 // image/spectrum
 void write_ws_spectrum(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *spectrum, int n, int precision);
 void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
+void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, int precision);
 
 // video
 void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
@@ -2837,6 +2838,10 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
     // clean up
     zfp_field_free(field);
     zfp_stream_close(zfp);
+}
+
+void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, int precision)
+{
 }
 
 void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)

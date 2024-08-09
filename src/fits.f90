@@ -1267,6 +1267,19 @@ module fits
          integer(c_int), value, intent(in) :: n, precision
       end subroutine write_ws_spectrum
 
+      ! void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, int precision);
+      subroutine write_ws_hds_spectra(session, seq_id, timestamp, elapsed, xspec, xmask, xlen, yspec, ymask, ylen, precision)&
+      & BIND(C, name='write_ws_hds_spectra')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value :: session
+         integer(c_int), intent(in) :: seq_id
+         real(c_float), intent(in) :: timestamp, elapsed
+         type(C_PTR), value :: xspec, xmask, yspec, ymask
+         integer(c_int), value, intent(in) :: xlen, ylen, precision
+      end subroutine write_ws_hds_spectra
+
       subroutine write_histogram(fd, histogram, n) BIND(C, name='write_histogram')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -7458,6 +7471,8 @@ contains
       real(kind=c_float), allocatable, target :: xspec(:), yspec(:)
       logical(kind=c_bool), allocatable, target :: xmask(:), ymask(:)
 
+      integer(c_int) :: precision
+
       ! start the timer
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
@@ -7484,9 +7499,19 @@ contains
       print *, 'xspec:', size(xspec), 'yspec:', size(yspec)
       print *, 'xmask:', size(xmask), 'ymask:', size(ymask)
 
+      if (req%image) then
+         precision = ZFP_HIGH_PRECISION
+      else
+         precision = ZFP_MEDIUM_PRECISION
+      end if
+
       ! end the timer
       call system_clock(finish_t)
       elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
+      call write_ws_hds_spectra(req%session, req%seq_id, req%timestamp, elapsed,&
+      &c_loc(xspec), c_loc(xmask), size(xspec),&
+      &c_loc(yspec), c_loc(ymask), size(yspec), precision)
 
       print *, 'realtime_hds_spectrum elapsed time:', elapsed, '[ms]'
 
