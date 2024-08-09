@@ -7490,11 +7490,11 @@ contains
       print *, 'realtime_hds_spectrum for ', item%datasetid, ', x:', x, ', y:', y
 
       ! spectra & masks along the X and Y axes
-      xspec = item%pixels(x, :)
-      xmask = item%mask(x, :)
+      xspec = item%pixels(:, y)
+      xmask = item%mask(:, y)
 
-      yspec = item%pixels(:, y)
-      ymask = item%mask(:, y)
+      yspec = item%pixels(x, :)
+      ymask = item%mask(x, :)
 
       print *, 'xspec:', size(xspec), 'yspec:', size(yspec)
       print *, 'xmask:', size(xmask), 'ymask:', size(ymask)
