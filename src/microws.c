@@ -2730,7 +2730,7 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
         return;
     }
 
-    // spectrum with ZFP
+    // compress spectrum with ZFP
     field = zfp_field_1d((void *)spectrum, data_type, nx);
 
     // allocate metadata for a compressed stream
@@ -2842,6 +2842,133 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
 
 void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, int precision)
 {
+    uchar *restrict xcomp = NULL;
+    uchar *restrict ycomp = NULL;
+
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+
+    size_t xsize = 0;
+    size_t ysize = 0;
+
+    uint nx = xlen;
+    uint ny = ylen;
+
+    if (session == NULL)
+    {
+        printf("[C] <write_ws_hds_spectra> NULL session pointer!\n");
+        return;
+    }
+
+    if (xspec == NULL || xmask == NULL || xlen <= 0)
+    {
+        printf("[C] <write_ws_hds_spectra> invalid X spectrum data!\n");
+        return;
+    }
+
+    if (yspec == NULL || ymask == NULL || ylen <= 0)
+    {
+        printf("[C] <write_ws_hds_spectra> invalid Y spectrum data!\n");
+        return;
+    }
+
+    // compress X-spectrum with ZFP
+    field = zfp_field_1d((void *)xspec, data_type, nx);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    xcomp = (uchar *)malloc(bufsize);
+
+    if (xcomp != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)xcomp, bufsize);
+
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+            // compress entire array
+            xsize = zfp_compress(zfp, field);
+
+            if (xsize == 0)
+                printf("[C] ZFP compression failed!\n");
+            else
+                printf("[C] X-spectrum compressed size: %zu bytes\n", xsize);
+
+            bitstream_close(stream);
+
+            // the compressed part is available at xcomp[0..xsize-1]
+        }
+
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+    }
+    else
+        printf("[C] a NULL xcomp buffer!\n");
+
+    // compress Y-spectrum with ZFP
+    field = zfp_field_1d((void *)yspec, data_type, ny);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    ycomp = (uchar *)malloc(bufsize);
+
+    if (ycomp != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)ycomp, bufsize);
+
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+            // compress entire array
+            ysize = zfp_compress(zfp, field);
+
+            if (ysize == 0)
+                printf("[C] ZFP compression failed!\n");
+            else
+                printf("[C] Y-spectrum compressed size: %zu bytes\n", ysize);
+
+            bitstream_close(stream);
+
+            // the compressed part is available at ycomp[0..ysize-1]
+        }
+
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+    }
+    else
+        printf("[C] a NULL ycomp buffer!\n");
+
+    // free memory
+    free(xcomp);
+    free(ycomp);
 }
 
 void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
