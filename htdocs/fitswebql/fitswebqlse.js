@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-16.0";
+    return "JS2024-08-16.1";
 }
 
 function uuidv4() {
@@ -5854,6 +5854,45 @@ async function open_websocket_connection(_datasetId, index) {
                                 pv_contour(3 * dst_width / 2 - img_width / 2, offset + (dst_height - img_height) / 2, img_width, img_height, pvCanvas, flipY, pv_width, pv_height, frame_pv);
                             }, 250);
                         }
+
+                        return;
+                    }
+
+                    // HDS X-Y spectra
+                    if (type == 8) {
+                        hide_cursor();
+                        computed = dv.getFloat32(12, endianness);
+
+                        var offset = 16;
+                        var xlen = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var xcomp_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var xcomp = new Uint8Array(received_msg, offset, xcomp_len);
+                        offset += xcomp_len;
+
+                        var xmask_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var xmask = new Uint8Array(received_msg, offset, xmask_len);
+                        offset += xmask_len;
+
+                        var ylen = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var ycomp_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var ycomp = new Uint8Array(received_msg, offset, ycomp_len);
+                        offset += ycomp_len;
+
+                        var ymask_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        console.log("HDS X-Y spectra: xlen:", xlen, "ylen:", ylen);
+                        console.log("HDS X-Y spectra: xcomp_len:", xcomp_len, "xmask_len:", xmask_len, "ycomp_len:", ycomp_len, "ymask_len:", ymask_len);
 
                         return;
                     }
