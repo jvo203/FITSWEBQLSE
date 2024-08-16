@@ -5876,7 +5876,7 @@ async function open_websocket_connection(_datasetId, index) {
                         var xmask_len = dv.getUint32(offset, endianness);
                         offset += 4;
 
-                        var xmask = new Uint8Array(received_msg, offset, xmask_len);
+                        var xframe = new Uint8Array(received_msg, offset, xmask_len);
                         offset += xmask_len;
 
                         var ylen = dv.getUint32(offset, endianness);
@@ -5891,8 +5891,40 @@ async function open_websocket_connection(_datasetId, index) {
                         var ymask_len = dv.getUint32(offset, endianness);
                         offset += 4;
 
-                        console.log("HDS X-Y spectra: xlen:", xlen, "ylen:", ylen);
-                        console.log("HDS X-Y spectra: xcomp_len:", xcomp_len, "xmask_len:", xmask_len, "ycomp_len:", ycomp_len, "ymask_len:", ymask_len);
+                        var yframe = new Uint8Array(received_msg, offset, ymask_len);
+                        offset += ymask_len;
+
+                        /*console.log("HDS X-Y spectra: xlen:", xlen, "ylen:", ylen);
+                        console.log("HDS X-Y spectra: xcomp_len:", xcomp_len, "xmask_len:", xmask_len, "ycomp_len:", ycomp_len, "ymask_len:", ymask_len);*/
+
+                        waitForModuleReady().then(() => {
+                            // ZFP decoder part				
+                            Module.ready
+                                .then(_ => {
+                                    //console.log("processing HDS X-Y spectra");
+                                    let start = performance.now();
+
+                                    var res = Module.decompressZFPspectrum(xlen, xcomp);
+                                    const xspectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+
+                                    var res = Module.decompressLZ4mask(xlen, 1, xframe);
+                                    const xmask = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+
+                                    // console.log("HDS X-Y spectra: xspectrum:", xspectrum, "xmask:", xmask);
+
+                                    var res = Module.decompressZFPspectrum(ylen, ycomp);
+                                    const yspectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+
+                                    var res = Module.decompressLZ4mask(ylen, 1, yframe);
+                                    const ymask = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+
+                                    // console.log("HDS X-Y spectra: yspectrum:", yspectrum, "ymask:", ymask);
+
+                                    let elapsed = Math.round(performance.now() - start);
+                                    // console.log("HDS X-Y spectra: elapsed: ", elapsed, "[ms]");
+                                })
+                                .catch(e => console.error(e));
+                        }).catch(e => console.error(e));
 
                         return;
                     }
