@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-08.0";
+    return "JS2024-08-16.0";
 }
 
 function uuidv4() {
@@ -13922,7 +13922,6 @@ function setup_image_selection() {
                 var x2 = Math.round(fitsX + fitsSize);
                 var y2 = Math.round(fitsY + fitsSize);
 
-                console.log("got here", optical_view);
                 if (realtime_spectrum /*&& fitsData.depth > 1 && !optical_view*/) {
                     sent_seq_id++;
                     var range = get_axes_range(width, height);
