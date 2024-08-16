@@ -3001,6 +3001,112 @@ void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const f
         printf("[C] Y-spectrum mask raw size: %d; compressed: %d bytes\n", ymask_size, ycompressed_size);
     }
 
+    // directly prepare and queue the WebSocket message
+    if (xcompressed_size > 0 && ycompressed_size > 0 && xsize > 0 && ysize > 0)
+    {
+        uint32_t xlen32 = xlen;
+        uint32_t ylen32 = ylen;
+        uint32_t xcomp_len = xsize;
+        uint32_t ycomp_len = ysize;
+        uint32_t xmask_len = xcompressed_size;
+        uint32_t ymask_len = ycompressed_size;
+
+        size_t hds_size = (size_t)xsize + (size_t)ysize + (size_t)xcompressed_size + (size_t)ycompressed_size;
+
+        //  header
+        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
+        // body
+        msg_len += 6 * sizeof(uint32_t) + hds_size;
+
+        char *payload = NULL;
+        size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+        msg_len += ws_len;
+
+        if (payload != NULL)
+        {
+            uint32_t id = (unsigned int)(*seq_id);
+            uint32_t msg_type = 8;
+            // 0 - spectrum, 1 - viewport,
+            // 2 - image, 3 - full spectrum refresh,
+            // 4 - histogram, 8 - HDS spectra
+
+            size_t ws_offset = ws_len;
+
+            memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, elapsed, sizeof(float));
+            ws_offset += sizeof(float);
+
+            // xlen
+            memcpy((char *)payload + ws_offset, &xlen32, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // xcomp_len
+            memcpy((char *)payload + ws_offset, &xcomp_len, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // xsize
+            memcpy((char *)payload + ws_offset, xcomp, xsize);
+            ws_offset += xsize;
+
+            // xmask_len
+            memcpy((char *)payload + ws_offset, &xmask_len, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // xcompressed_size
+            memcpy((char *)payload + ws_offset, xcomp_mask, xcompressed_size);
+
+            // ylen
+            memcpy((char *)payload + ws_offset, &ylen32, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // ycomp_len
+            memcpy((char *)payload + ws_offset, &ycomp_len, sizeof(uint32));
+            ws_offset += sizeof(uint32);
+
+            // ysize
+            memcpy((char *)payload + ws_offset, ycomp, ysize);
+            ws_offset += ysize;
+
+            // ymask_len
+            memcpy((char *)payload + ws_offset, &ymask_len, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // ycompressed_size
+            memcpy((char *)payload + ws_offset, ycomp_mask, ycompressed_size);
+
+            if (ws_offset != msg_len)
+                printf("[C] <write_ws_hds_spectra> size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+#ifdef DIRECT
+            if (!session->disconnect)
+                send_all(session, payload, msg_len);
+            free(payload);
+#else
+            // queue a message
+            struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
+
+            if (msg != NULL)
+            {
+                msg->buf = payload;
+                msg->len = msg_len;
+
+                // push the message into the queue
+                g_async_queue_push(session->send_queue, msg);
+            }
+            else
+                free(payload);
+#endif
+        }
+    }
+
     // free memory
     free(xcomp);
     free(ycomp);
