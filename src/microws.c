@@ -3062,6 +3062,7 @@ void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const f
 
             // xcompressed_size
             memcpy((char *)payload + ws_offset, xcomp_mask, xcompressed_size);
+            ws_offset += xcompressed_size;
 
             // ylen
             memcpy((char *)payload + ws_offset, &ylen32, sizeof(uint32_t));
@@ -3081,6 +3082,7 @@ void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const f
 
             // ycompressed_size
             memcpy((char *)payload + ws_offset, ycomp_mask, ycompressed_size);
+            ws_offset += ycompressed_size;
 
             if (ws_offset != msg_len)
                 printf("[C] <write_ws_hds_spectra> size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
