@@ -623,13 +623,13 @@ function getStrokeStyle() {
     return style;
 }
 
-function plot_hds_spectrum(xdata, xmask, invert = false) {
-    console.log("plot_hds_spectrum:", xdata, xmask, invert);
+function plot_hds_spectrum(data, mask, index) {
+    console.log("plot_hds_spectrum:", data, mask, index);
 
     if (mousedown)
         return;
 
-    let len = xdata.length;
+    let len = data.length;
 
     if (len < 2) // at least two points are needed to plot a line
         return;
@@ -13374,10 +13374,10 @@ function setup_image_selection() {
                         let data = spectrum_stack[va_count - 1].pop();
 
                         // X direction
-                        plot_hds_spectrum(data.xspectrum, data.xmask);
+                        plot_hds_spectrum(data.xspectrum, data.xmask, 0);
 
                         // Y direction
-                        plot_hds_spectrum(data.yspectrum, data.ymask, true);
+                        plot_hds_spectrum(data.yspectrum, data.ymask, 1);
                     }
                 }
 
