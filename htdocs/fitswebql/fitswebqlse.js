@@ -13330,6 +13330,8 @@ function setup_image_selection() {
                     last_seq_id = new_seq_id;
                     //console.log("last_seq_id:", last_seq_id);
 
+                    let fitsData = fitsContainer[va_count - 1];
+
                     if (!fitsData.is_spectrum) {
                         //pop all <va_count> spectrum stacks
                         var data = [];
