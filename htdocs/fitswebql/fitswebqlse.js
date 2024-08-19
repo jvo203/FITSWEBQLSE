@@ -623,6 +623,10 @@ function getStrokeStyle() {
     return style;
 }
 
+function plot_hds_spectrum(xdata, xmask, invert = false) {
+    console.log("plot_hds_spectrum:", xdata, xmask, invert);
+}
+
 function plot_spectrum(dataArray) {
     /*try {
       if (d3.select("#pvline").attr("opacity") > 0.0)
@@ -13333,7 +13337,7 @@ function setup_image_selection() {
                     let fitsData = fitsContainer[va_count - 1];
 
                     if (!fitsData.is_spectrum) {
-                        //pop all <va_count> spectrum stacks
+                        // pop all <va_count> spectrum stacks
                         var data = [];
 
                         for (let index = 0; index < va_count; index++) {
@@ -13345,6 +13349,15 @@ function setup_image_selection() {
                         replot_y_axis();
 
                         last_spectrum = data;
+                    } else {
+                        // pop X-Y HDS spectra
+                        let data = spectrum_stack[va_count - 1].pop();
+
+                        // X direction
+                        plot_hds_spectrum(data.xspectrum, data.xmask);
+
+                        // Y direction
+                        plot_hds_spectrum(data.yspectrum, data.ymask, true);
                     }
                 }
 
