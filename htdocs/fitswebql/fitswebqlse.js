@@ -625,6 +625,26 @@ function getStrokeStyle() {
 
 function plot_hds_spectrum(xdata, xmask, invert = false) {
     console.log("plot_hds_spectrum:", xdata, xmask, invert);
+
+    if (mousedown)
+        return;
+
+    let len = xdata.length;
+
+    if (len < 2) // at least two points are needed to plot a line
+        return;
+
+    var elem = document.getElementById("SpectrumCanvas");
+    if (displaySpectrum) {
+        elem.style.display = "block";
+        d3.select("#yaxis").attr("opacity", 1);
+        d3.select("#ylabel").attr("opacity", 1);
+    }
+    else {
+        elem.style.display = "none";
+        d3.select("#yaxis").attr("opacity", 0);
+        d3.select("#ylabel").attr("opacity", 0);
+    }
 }
 
 function plot_spectrum(dataArray) {
