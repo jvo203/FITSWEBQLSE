@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-16.1";
+    return "JS2024-08-19.0";
 }
 
 function uuidv4() {
@@ -638,6 +638,7 @@ function plot_spectrum(dataArray) {
         return;
 
     let fitsData = fitsContainer[len - 1];
+
     if (fitsData.depth <= 1 || optical_view) {
         return;
     }
@@ -5922,6 +5923,10 @@ async function open_websocket_connection(_datasetId, index) {
 
                                     let elapsed = Math.round(performance.now() - start);
                                     // console.log("HDS X-Y spectra: elapsed: ", elapsed, "[ms]");
+
+                                    if (!windowLeft) {
+                                        spectrum_stack[index - 1].push({ xspectrum: xspectrum, xmask: xmask, yspectrum: yspectrum, ymask: ymask, id: recv_seq_id });
+                                    };
                                 })
                                 .catch(e => console.error(e));
                         }).catch(e => console.error(e));
@@ -13325,18 +13330,20 @@ function setup_image_selection() {
                     last_seq_id = new_seq_id;
                     //console.log("last_seq_id:", last_seq_id);
 
-                    //pop all <va_count> spectrum stacks
-                    var data = [];
+                    if (!fitsData.is_spectrum) {
+                        //pop all <va_count> spectrum stacks
+                        var data = [];
 
-                    for (let index = 0; index < va_count; index++) {
-                        data.push(spectrum_stack[index].pop().spectrum);
-                        spectrum_stack[index] = [];
+                        for (let index = 0; index < va_count; index++) {
+                            data.push(spectrum_stack[index].pop().spectrum);
+                            spectrum_stack[index] = [];
+                        }
+
+                        plot_spectrum(data);
+                        replot_y_axis();
+
+                        last_spectrum = data;
                     }
-
-                    plot_spectrum(data);
-                    replot_y_axis();
-
-                    last_spectrum = data;
                 }
 
             }
