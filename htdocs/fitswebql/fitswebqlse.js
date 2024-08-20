@@ -646,6 +646,12 @@ function plot_hds_spectrum(data, mask, index) {
         d3.select("#ylabel").attr("opacity", 0);
     }
 
+    var canvas = document.getElementById("SpectrumCanvas");
+    var ctx = canvas.getContext('2d');
+
+    var width = canvas.width;
+    var height = canvas.height;
+
     let mean = 0.0;
     let std = 0.0;
     let count = 0;
@@ -675,6 +681,22 @@ function plot_hds_spectrum(data, mask, index) {
 
     let dmin = 0.0;
     let dmax = mean + 5.0 * std;
+
+    var elem = document.getElementById("image_rectangle");
+    if (elem == null)
+        return;
+
+    var img_width = parseFloat(elem.getAttribute("width"));
+    var img_height = parseFloat(elem.getAttribute("height"));
+    var img_x = parseFloat(elem.getAttribute("x"));
+    var img_y = parseFloat(elem.getAttribute("y"));
+
+    var range = get_axes_range(width, height);
+    var dx = range.xMax - range.xMin;
+    var dy = range.yMax - range.yMin;
+    var chart_height = (height - 1 - range.yMax - 1);
+
+    console.log("dx:", dx, "dy:", dy, "chart_height:", chart_height);
 
 }
 
