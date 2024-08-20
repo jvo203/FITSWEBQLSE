@@ -652,6 +652,9 @@ function plot_hds_spectrum(data, mask, index) {
     var width = canvas.width;
     var height = canvas.height;
 
+    // prepare data for Plotly.js    
+    let y = [];
+
     let mean = 0.0;
     let std = 0.0;
     let count = 0;
@@ -659,9 +662,11 @@ function plot_hds_spectrum(data, mask, index) {
     // first pass
     for (let i = 0; i < len; i++) {
         if (mask[i] > 0) {
+            y.push(data[i]);
             mean += data[i];
             count++;
-        }
+        } else
+            y.push(NaN);
     }
 
     if (count > 0)
@@ -700,7 +705,7 @@ function plot_hds_spectrum(data, mask, index) {
     console.log("dx:", dx, "dy:", dy, "chart_height:", chart_height);
 
     // the X-axis
-    if (index == 0) {
+    /*if (index == 0) {
         var incrx = dx / (len - 1);
         var offset = range.xMin;
         var y = (data[0] - dmin) / (dmax - dmin) * dy;
@@ -727,7 +732,7 @@ function plot_hds_spectrum(data, mask, index) {
         ctx.stroke();
         ctx.closePath();
         ctx.restore();
-    }
+    }*/
 
 }
 
@@ -13459,11 +13464,11 @@ function setup_image_selection() {
                         // pop X-Y HDS spectra
                         let data = spectrum_stack[va_count - 1].pop();
 
-                        var canvas = document.getElementById("SpectrumCanvas");
+                        /*var canvas = document.getElementById("SpectrumCanvas");
                         var ctx = canvas.getContext('2d');
                         var width = canvas.width;
                         var height = canvas.height;
-                        ctx.clearRect(0, 0, width, height);
+                        ctx.clearRect(0, 0, width, height);*/
 
                         // X direction
                         plot_hds_spectrum(data.xspectrum, data.xmask, 0);
