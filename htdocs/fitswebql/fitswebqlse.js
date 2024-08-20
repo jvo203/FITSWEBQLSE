@@ -692,11 +692,42 @@ function plot_hds_spectrum(data, mask, index) {
     var img_y = parseFloat(elem.getAttribute("y"));
 
     var range = get_axes_range(width, height);
+
     var dx = range.xMax - range.xMin;
     var dy = range.yMax - range.yMin;
     var chart_height = (height - 1 - range.yMax - 1);
 
     console.log("dx:", dx, "dy:", dy, "chart_height:", chart_height);
+
+    // the X-axis
+    if (index == 0) {
+        var incrx = dx / (len - 1);
+        var offset = range.xMin;
+        var y = (data[0] - dmin) / (dmax - dmin) * dy;
+
+        ctx.save();
+        ctx.beginPath();
+
+        ctx.moveTo(offset, range.yMax - y);
+        offset += incrx;
+
+        for (var x = 1 | 0; x < data.length; x = (x + 1) | 0) {
+            y = (data[x] - dmin) / (dmax - dmin) * dy;
+            ctx.lineTo(offset, range.yMax - y);
+            offset += incrx;
+        };
+
+        ctx.shadowColor = getShadowStyle();
+        ctx.shadowBlur = 5;
+        ctx.strokeStyle = getStrokeStyle();
+
+        ctx.lineWidth = 1;
+        ctx.strokeWidth = emStrokeWidth;
+
+        ctx.stroke();
+        ctx.closePath();
+        ctx.restore();
+    }
 
 }
 
@@ -13427,6 +13458,12 @@ function setup_image_selection() {
                     } else {
                         // pop X-Y HDS spectra
                         let data = spectrum_stack[va_count - 1].pop();
+
+                        var canvas = document.getElementById("SpectrumCanvas");
+                        var ctx = canvas.getContext('2d');
+                        var width = canvas.width;
+                        var height = canvas.height;
+                        ctx.clearRect(0, 0, width, height);
 
                         // X direction
                         plot_hds_spectrum(data.xspectrum, data.xmask, 0);
