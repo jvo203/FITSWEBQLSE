@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-19.0";
+    return "JS2024-08-20.0";
 }
 
 function uuidv4() {
@@ -624,7 +624,7 @@ function getStrokeStyle() {
 }
 
 function plot_hds_spectrum(data, mask, index) {
-    console.log("plot_hds_spectrum:", data, mask, index);
+    // console.log("plot_hds_spectrum:", data, mask, index);
 
     if (mousedown)
         return;
@@ -645,6 +645,37 @@ function plot_hds_spectrum(data, mask, index) {
         d3.select("#yaxis").attr("opacity", 0);
         d3.select("#ylabel").attr("opacity", 0);
     }
+
+    let mean = 0.0;
+    let std = 0.0;
+    let count = 0;
+
+    // first pass
+    for (let i = 0; i < len; i++) {
+        if (mask[i] > 0) {
+            mean += data[i];
+            count++;
+        }
+    }
+
+    if (count > 0)
+        mean /= count;
+
+    // second pass
+    for (let i = 0; i < len; i++) {
+        if (mask[i] > 0) {
+            std += Math.pow(data[i] - mean, 2);
+        }
+    }
+
+    if (count > 0)
+        std = Math.sqrt(std / count);
+
+    console.log("X-Y index: ", index, "mean:", mean, "std:", std);
+
+    let dmin = 0.0;
+    let dmax = mean + 5.0 * std;
+
 }
 
 function plot_spectrum(dataArray) {
@@ -3977,7 +4008,8 @@ async function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
                 y.push(NaN);
         }
 
-        mean /= count;
+        if (count > 0)
+            mean /= count;
 
         // second pass
         for (let i = 0; i < y.length; i++) {
@@ -3987,7 +4019,8 @@ async function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
         offset += img_width;
 
-        std = Math.sqrt(std / count);
+        if (count > 0)
+            std = Math.sqrt(std / count);
 
         // console.log("Spectrum #", (k + 1), "HDS spectrum mean:", mean, "std:", std, "count:", count);
 
