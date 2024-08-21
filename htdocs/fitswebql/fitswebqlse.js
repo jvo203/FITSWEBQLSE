@@ -694,10 +694,13 @@ function plot_hds_spectrum(data, mask, index) {
     var img_x = parseFloat(elem.getAttribute("x"));
     var img_y = parseFloat(elem.getAttribute("y"));
 
-    var range = get_axes_range(width, height);
+    var dx = img_width;
+    var dy = img_height;
 
-    var dx = range.xMax - range.xMin;
-    var dy = range.yMax - range.yMin;
+    var range = get_axes_range(width, height);
+    //var dx = range.xMax - range.xMin;
+    //var dy = range.yMax - range.yMin;    
+
     var chart_height = (height - 1 - range.yMax - 1);
 
     console.log("dx:", dx, "dy:", dy, "chart_height:", chart_height);
@@ -705,7 +708,7 @@ function plot_hds_spectrum(data, mask, index) {
     // the X-axis
     if (index == 0) {
         var incrx = dx / (len - 1);
-        var offset = range.xMin;
+        var offset = img_x;//range.xMin;
         var offsetx = 0;
         var is_nan = false;
 
