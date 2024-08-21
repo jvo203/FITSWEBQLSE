@@ -709,62 +709,79 @@ function plot_hds_spectrum(data, mask, index) {
     if (index == 0) {
         var incrx = dx / (len - 1);
         var offset = img_x;//range.xMin;
-        var offsetx = 0;
-        var is_nan = false;
+    } else {
+        var incrx = dy / (len - 1);
+        var offset = img_y;//range.yMax;
+    }
 
-        // find the first valid data point
-        while (mask[offsetx] == 0 || data[offsetx] > dmax) {
-            offset += incrx;
-            offsetx++;
+    var offsetx = 0;
+    var is_nan = false;
 
-            if (offsetx >= len)
-                break;
-        }
-
-        console.log("offsetx:", offsetx);
-
-        let datum = data[offsetx];
-        var y = (datum - dmin) / (dmax - dmin) * chart_height;
-
-        ctx.save();
-        ctx.beginPath();
-
-        ctx.moveTo(offset, range.yMax + chart_height - y);
+    // find the first valid data point
+    while (mask[offsetx] == 0 || data[offsetx] > dmax) {
         offset += incrx;
+        offsetx++;
 
-        for (var x = offsetx | 0; x < data.length; x = (x + 1) | 0) {
-            //let datum = clamp(data[x], dmin, dmax);
-            //let datum = data[x];
-            let datum = (mask[x] == 0) || (data[x] > dmax) ? NaN : data[x];
+        if (offsetx >= len)
+            break;
+    }
 
-            // check for NaN
-            if (!isNaN(datum)) {
-                y = (datum - dmin) / (dmax - dmin) * chart_height;
+    console.log("offsetx:", offsetx);
 
-                if (is_nan) {
+    let datum = data[offsetx];
+    var y = (datum - dmin) / (dmax - dmin) * chart_height;
+
+    ctx.save();
+    ctx.beginPath();
+
+    if (index == 0) {
+        ctx.moveTo(offset, range.yMax + chart_height - y);
+    } else {
+        ctx.moveTo(img_x + img_width + emStrokeWidth + chart_height - y, offset);
+    }
+
+    offset += incrx;
+
+    for (var x = offsetx | 0; x < data.length; x = (x + 1) | 0) {
+        //let datum = clamp(data[x], dmin, dmax);
+        //let datum = data[x];
+        let datum = (mask[x] == 0) || (data[x] > dmax) ? NaN : data[x];
+
+        // check for NaN
+        if (!isNaN(datum)) {
+            y = (datum - dmin) / (dmax - dmin) * chart_height;
+
+            if (is_nan) {
+                if (index == 0) {
                     ctx.moveTo(offset, range.yMax + chart_height - y);
                 } else {
-                    ctx.lineTo(offset, range.yMax + chart_height - y);
+                    ctx.moveTo(img_x + img_width + emStrokeWidth + chart_height - y, offset);
                 }
-
-                is_nan = false;
-
             } else {
-                is_nan = true;
+                if (index == 0) {
+                    ctx.lineTo(offset, range.yMax + chart_height - y);
+                } else {
+                    ctx.lineTo(img_x + img_width + emStrokeWidth + chart_height - y, offset);
+                }
             }
 
-            //ctx.lineTo(offset, range.yMax + chart_height - y);
-            offset += incrx;
-        };
+            is_nan = false;
 
-        ctx.lineWidth = 1;
-        ctx.strokeWidth = emStrokeWidth;
-        ctx.strokeStyle = getStrokeStyle();
+        } else {
+            is_nan = true;
+        }
 
-        ctx.stroke();
-        ctx.closePath();
-        ctx.restore();
-    }
+        //ctx.lineTo(offset, range.yMax + chart_height - y);
+        offset += incrx;
+    };
+
+    ctx.lineWidth = 1;
+    ctx.strokeWidth = emStrokeWidth;
+    ctx.strokeStyle = getStrokeStyle();
+
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
 
 }
 
