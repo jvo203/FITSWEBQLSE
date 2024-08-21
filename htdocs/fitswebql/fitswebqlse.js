@@ -661,7 +661,9 @@ function plot_hds_spectrum(data, mask, index) {
         if (mask[i] > 0) {
             mean += data[i];
             count++;
-        }
+        } /*else {
+            data[i] = NaN;
+        }*/
     }
 
     if (count > 0)
@@ -680,7 +682,8 @@ function plot_hds_spectrum(data, mask, index) {
     console.log("X-Y index: ", index, "mean:", mean, "std:", std);
 
     let dmin = 0.0;
-    let dmax = mean + 5.0 * std;
+    let dmax = mean + 0.5 * std;
+    console.log("dmin:", dmin, "dmax:", dmax);
 
     var elem = document.getElementById("image_rectangle");
     if (elem == null)
@@ -703,27 +706,57 @@ function plot_hds_spectrum(data, mask, index) {
     if (index == 0) {
         var incrx = dx / (len - 1);
         var offset = range.xMin;
-        var y = (data[0] - dmin) / (dmax - dmin) * dy;
+        var offsetx = 0;
+        var is_nan = false;
+
+        // find the first valid data point
+        while (mask[offsetx] == 0 || data[offsetx] > dmax) {
+            offset += incrx;
+            offsetx++;
+
+            if (offsetx >= len)
+                break;
+        }
+
+        console.log("offsetx:", offsetx);
+
+        let datum = data[offsetx];
+        var y = (datum - dmin) / (dmax - dmin) * chart_height;
 
         ctx.save();
         ctx.beginPath();
 
-        ctx.moveTo(offset, range.yMax - y);
+        ctx.moveTo(offset, range.yMax + chart_height - y);
         offset += incrx;
 
-        for (var x = 1 | 0; x < data.length; x = (x + 1) | 0) {
-            let datum = clamp(data[x], dmin, dmax);
-            y = (datum - dmin) / (dmax - dmin) * dy;
-            ctx.lineTo(offset, range.yMax - y);
+        for (var x = offsetx | 0; x < data.length; x = (x + 1) | 0) {
+            //let datum = clamp(data[x], dmin, dmax);
+            //let datum = data[x];
+            let datum = (mask[x] == 0) || (data[x] > dmax) ? NaN : data[x];
+
+            // check for NaN
+            if (!isNaN(datum)) {
+                y = (datum - dmin) / (dmax - dmin) * chart_height;
+
+                if (is_nan) {
+                    ctx.moveTo(offset, range.yMax + chart_height - y);
+                } else {
+                    ctx.lineTo(offset, range.yMax + chart_height - y);
+                }
+
+                is_nan = false;
+
+            } else {
+                is_nan = true;
+            }
+
+            //ctx.lineTo(offset, range.yMax + chart_height - y);
             offset += incrx;
         };
 
-        ctx.shadowColor = getShadowStyle();
-        ctx.shadowBlur = 5;
-        ctx.strokeStyle = getStrokeStyle();
-
         ctx.lineWidth = 1;
         ctx.strokeWidth = emStrokeWidth;
+        ctx.strokeStyle = getStrokeStyle();
 
         ctx.stroke();
         ctx.closePath();
@@ -13470,7 +13503,7 @@ function setup_image_selection() {
                         plot_hds_spectrum(data.xspectrum, data.xmask, 0);
 
                         // Y direction
-                        plot_hds_spectrum(data.yspectrum, data.ymask, 1);
+                        //plot_hds_spectrum(data.yspectrum, data.ymask, 1);
                     }
                 }
 
