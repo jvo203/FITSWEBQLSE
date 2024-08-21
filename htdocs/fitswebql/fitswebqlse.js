@@ -13506,7 +13506,7 @@ function setup_image_selection() {
                         plot_hds_spectrum(data.xspectrum, data.xmask, 0);
 
                         // Y direction
-                        //plot_hds_spectrum(data.yspectrum, data.ymask, 1);
+                        plot_hds_spectrum(data.yspectrum, data.ymask, 1);
                     }
                 }
 
