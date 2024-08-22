@@ -4378,6 +4378,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
         myPlot.on('plotly_afterplot', function () {
             d3.selectAll(".annotation-text-g").selectAll('text')
                 .on("click", function (d) {
+                    // d.target.__data__.x ???
                     console.log("annotation-text @" + d.x);
                 });
         });
