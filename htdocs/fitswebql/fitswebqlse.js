@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-21.0";
+    return "JS2024-08-22.0";
 }
 
 function uuidv4() {
@@ -679,11 +679,8 @@ function plot_hds_spectrum(data, mask, index) {
     if (count > 0)
         std = Math.sqrt(std / count);
 
-    console.log("X-Y index: ", index, "mean:", mean, "std:", std);
-
     let dmin = 0.0;
     let dmax = mean + 0.5 * std;
-    console.log("dmin:", dmin, "dmax:", dmax);
 
     var elem = document.getElementById("image_rectangle");
     if (elem == null)
@@ -703,15 +700,13 @@ function plot_hds_spectrum(data, mask, index) {
 
     var chart_height = (height - 1 - range.yMax - 1);
 
-    console.log("dx:", dx, "dy:", dy, "chart_height:", chart_height);
-
     // the X-axis
     if (index == 0) {
         var incrx = dx / (len - 1);
         var offset = img_x;//range.xMin;
     } else {
         var incrx = dy / (len - 1);
-        var offset = img_y;//range.yMax;
+        var offset = img_y + dy;//range.yMax;
     }
 
     var offsetx = 0;
@@ -719,14 +714,17 @@ function plot_hds_spectrum(data, mask, index) {
 
     // find the first valid data point
     while (mask[offsetx] == 0 || data[offsetx] > dmax) {
-        offset += incrx;
+        if (index == 0) {
+            offset += incrx;
+        } else {
+            offset -= incrx;
+        }
+
         offsetx++;
 
         if (offsetx >= len)
             break;
     }
-
-    console.log("offsetx:", offsetx);
 
     let datum = data[offsetx];
     var y = (datum - dmin) / (dmax - dmin) * chart_height;
@@ -740,7 +738,11 @@ function plot_hds_spectrum(data, mask, index) {
         ctx.moveTo(img_x + img_width + emStrokeWidth + chart_height - y, offset);
     }
 
-    offset += incrx;
+    if (index == 0) {
+        offset += incrx;
+    } else {
+        offset -= incrx;
+    }
 
     for (var x = offsetx | 0; x < data.length; x = (x + 1) | 0) {
         //let datum = clamp(data[x], dmin, dmax);
@@ -771,8 +773,11 @@ function plot_hds_spectrum(data, mask, index) {
             is_nan = true;
         }
 
-        //ctx.lineTo(offset, range.yMax + chart_height - y);
-        offset += incrx;
+        if (index == 0) {
+            offset += incrx;
+        } else {
+            offset -= incrx;
+        }
     };
 
     ctx.lineWidth = 1;
