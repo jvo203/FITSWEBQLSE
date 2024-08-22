@@ -4374,6 +4374,16 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
 
         Plotly.newPlot(div, data, layout);
 
+        var myPlot = document.getElementById(div);
+        myPlot.on('plotly_afterplot', function () {
+            console.log("plotly_afterplot event");
+
+            d3.selectAll(".annotation-text-g").selectAll('text')
+                .on("click", function (d) {
+                    console.log("annotation-text @" + d.x);
+                });
+        });
+
         if (noatoms > limit) {
             //add relayout event function to graph
             document.getElementById(div).on('plotly_relayout', function (event) {

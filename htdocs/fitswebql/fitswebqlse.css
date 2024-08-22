@@ -709,3 +709,8 @@ input[type=range].slider:focus::-ms-fill-upper {
     overflow-x: hidden;
     overflow-y: auto;
 }
+
+.annotation-text {
+    cursor: pointer;
+    pointer-events: all;
+}
