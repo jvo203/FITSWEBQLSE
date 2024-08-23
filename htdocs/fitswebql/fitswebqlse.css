@@ -710,7 +710,7 @@ input[type=range].slider:focus::-ms-fill-upper {
     overflow-y: auto;
 }
 
-.annotation-text {
+/*.annotation-text {
     cursor: pointer;
     pointer-events: all;
-}
+}*/

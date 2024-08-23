@@ -4376,9 +4376,10 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
 
         var myPlot = document.getElementById(div);
 
-        myPlot.on('plotly_afterplot', function (event) {
+        /*myPlot.on('plotly_afterplot', function (event) {
             var range = myPlot.layout.xaxis.range;
             var d2p = myPlot._fullLayout.xaxis.d2p;
+            var l2p = myPlot._fullLayout.xaxis.l2p;
 
             let x0 = d2p(wmin);
             let x1 = d2p(wmax);
@@ -4386,17 +4387,17 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
 
             console.log("d2p(" + wmin + ") = ", x0);
             console.log("d2p(" + wmax + ") = ", x1);
-            console.log("d2p(" + (wmax - wmin) + ") = ", dx);
+            console.log("xaxis range dx = ", dx);
 
             d3.selectAll(".annotation-text-g").selectAll('text')
                 .call(d3.drag()
                     .on("drag", dragMolecule)
                     .on("end", dropMolecule));
-            /*.on("click", function (d) {
-                // d.target.__data__.x ???
-                console.log("annotation-text @" + d.x);
-            });*/
-        });
+            //.on("click", function (d) {
+            //   // d.target.__data__.x ???
+            //  console.log("annotation-text @" + d.x);
+            //});
+        });*/
 
         if (noatoms > limit) {
             //add relayout event function to graph
@@ -4423,6 +4424,13 @@ function dragMolecule(event) {
     event.preventDefault = true;
 
     console.log("dragMolecule: ", event, event.dx);
+
+    // re-calculate the redshift
+
+    // shift all the molecules by dx
+    //var elems = d3.selectAll(".annotation-text-g").selectAll('text');//.attr("transform", "translate(" + event.dx + ",0)");
+    //console.log("dragMolecule: ", elems);
+    //elems.attr("transform", "translate(" + 10 + ",100)");
 }
 
 function plotlyRelayoutEventFunction(event, id, yoffset) {
@@ -20010,6 +20018,9 @@ async function mainRenderer() {
         begin_y = 0;
         end_x = 0;
         end_y = 0;
+
+        // HDS redshift
+        redshift = 0.0;
 
         coordsFmt = localStorage_read_string("coordsFmt", "HMS");//DMS or HMS
 
