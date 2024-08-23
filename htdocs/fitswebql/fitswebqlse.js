@@ -4376,7 +4376,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
 
         var myPlot = document.getElementById(div);
 
-        myPlot.on('plotly_afterplot', function () {
+        myPlot.on('plotly_afterplot', function (event) {
             var range = myPlot.layout.xaxis.range;
             var d2p = myPlot._fullLayout.xaxis.d2p;
 
@@ -4389,10 +4389,13 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
             console.log("d2p(" + (wmax - wmin) + ") = ", dx);
 
             d3.selectAll(".annotation-text-g").selectAll('text')
-                .on("click", function (d) {
-                    // d.target.__data__.x ???
-                    console.log("annotation-text @" + d.x);
-                });
+                .call(d3.drag()
+                    .on("drag", dragMolecule)
+                    .on("end", dropMolecule));
+            /*.on("click", function (d) {
+                // d.target.__data__.x ???
+                console.log("annotation-text @" + d.x);
+            });*/
         });
 
         if (noatoms > limit) {
@@ -4408,6 +4411,18 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
             insert_atomic_spectra(datasetId + '/' + div, spectra); // only needed if there is re-layout event
         }
     });
+}
+
+function dropMolecule(event) {
+    event.preventDefault = true;
+
+    // re-layout the graph
+}
+
+function dragMolecule(event) {
+    event.preventDefault = true;
+
+    console.log("dragMolecule: ", event, event.dx);
 }
 
 function plotlyRelayoutEventFunction(event, id, yoffset) {
