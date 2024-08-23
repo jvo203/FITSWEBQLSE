@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-22.0";
+    return "JS2024-08-23.0";
 }
 
 function uuidv4() {
@@ -4375,7 +4375,19 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
         Plotly.newPlot(div, data, layout);
 
         var myPlot = document.getElementById(div);
+
         myPlot.on('plotly_afterplot', function () {
+            var range = myPlot.layout.xaxis.range;
+            var d2p = myPlot._fullLayout.xaxis.d2p;
+
+            let x0 = d2p(wmin);
+            let x1 = d2p(wmax);
+            let dx = x1 - x0;
+
+            console.log("d2p(" + wmin + ") = ", x0);
+            console.log("d2p(" + wmax + ") = ", x1);
+            console.log("d2p(" + (wmax - wmin) + ") = ", dx);
+
             d3.selectAll(".annotation-text-g").selectAll('text')
                 .on("click", function (d) {
                     // d.target.__data__.x ???
@@ -4385,7 +4397,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
 
         if (noatoms > limit) {
             //add relayout event function to graph
-            document.getElementById(div).on('plotly_relayout', function (event) {
+            myPlot.on('plotly_relayout', function (event) {
                 clearTimeout(idleResize);
 
                 idleResize = setTimeout(function () {
