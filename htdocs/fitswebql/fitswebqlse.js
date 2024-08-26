@@ -8285,6 +8285,22 @@ function validate_redshift() {
         // refresh the HDS spectral lines
         console.log("refreshing HDS spectral lines");
     }
+
+    //re-attach lost event handlers
+    {
+        var elem = document.getElementById('redshift');
+        elem.onblur = validate_redshift;
+        elem.onmouseleave = validate_redshift;
+        elem.onkeyup = function (e) {
+            var event = e || window.event;
+
+            if (event.key === 'Enter') {
+                // Enter pressed
+                validate_redshift();
+                return false;
+            }
+        }
+    }
 }
 
 function validate_contour_lines() {
@@ -17385,7 +17401,7 @@ function display_menu() {
         tmp.append("label")
             .attr("for", "redshift")
             .attr("class", "control-label")
-            .html("redshift > -1:&nbsp; ");
+            .html("redshift z > -1:&nbsp; ");
 
         previous_redshift = redshift;
 
@@ -17402,9 +17418,8 @@ function display_menu() {
         elem.onmouseleave = validate_redshift;
         elem.onkeyup = function (e) {
             var event = e || window.event;
-            var charCode = event.which || event.keyCode;
 
-            if (charCode == '13') {
+            if (event.key === 'Enter') {
                 // Enter pressed
                 validate_redshift();
                 return false;
