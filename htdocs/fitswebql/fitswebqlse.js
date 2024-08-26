@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-23.0";
+    return "JS2024-08-26.1";
 }
 
 function uuidv4() {
@@ -8266,6 +8266,27 @@ function submit_corrections() {
     }
 };
 
+function validate_redshift() {
+    var value = document.getElementById('redshift').valueAsNumber;
+
+    if (isNaN(value))
+        document.getElementById('redshift').value = previous_redshift;
+
+    if (value <= -1)
+        document.getElementById('redshift').value = -0.99999;
+
+    if (value > 6.0)
+        document.getElementById('redshift').value = 6.0.toFixed(1);
+
+    value = document.getElementById('redshift').valueAsNumber;
+
+    if (value != previous_redshift) {
+        previous_redshift = value;
+        // refresh the HDS spectral lines
+        console.log("refreshing HDS spectral lines");
+    }
+}
+
 function validate_contour_lines() {
     var value = document.getElementById('contour_lines').valueAsNumber;
 
@@ -14995,6 +15016,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 optical_view = fitsData.is_optical;
                                 spectrum_view = fitsData.is_spectrum;
 
+                                if (!spectrum_view) {
+                                    d3.select("#atomicMenu").remove();
+                                }
+
                                 if (optical_view) {
                                     d3.select("#splatMenu").remove();
                                 }
@@ -15136,6 +15161,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     // if img_height > 1 and CTYPE1 is 'PIXEL' then it is a 2D image spectrum                                    
                                     if (img_height > 1 && fitsData.CTYPE1.trim().toUpperCase() == 'PIXEL') {
                                         console.log("2D image spectrum with dimensions: ", img_width, img_height);
+                                        d3.select("#atomicMenu").remove();
+
                                         process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
                                         if (has_json)
@@ -17325,6 +17352,64 @@ function display_menu() {
             elem.style.display = "block";
         else
             elem.style.display = "none";
+    }
+
+    // Atomic Spectra Database
+    {
+        var atomicMenu = mainUL.append("li")
+            .attr("id", "atomicMenu")
+            .attr("class", "dropdown");
+
+        atomicMenu.append("a")
+            .attr("class", "dropdown-toggle")
+            .attr("data-toggle", "dropdown")
+            .style('cursor', 'pointer')
+            .on("mouseenter", function () {
+                // d3 select all elements with class "dropdown-menu" and set their display to "none"
+                d3.selectAll(".dropdown-menu").style("display", "none");
+                d3.select('#atomicDropdown').style("display", "block");
+            })
+            .html('Atomic Spectra (NIST)<span class="caret"></span>');
+
+
+        var atomicDropdown = atomicMenu.append("ul")
+            .attr("id", "atomicDropdown")
+            .attr("class", "dropdown-menu");
+
+        let tmp = atomicDropdown.append("li")
+            .attr("id", "redshift_li")
+            .append("a")
+            .style("class", "form-group")
+            .attr("class", "form-horizontal");
+
+        tmp.append("label")
+            .attr("for", "redshift")
+            .attr("class", "control-label")
+            .html("redshift > -1:&nbsp; ");
+
+        previous_redshift = redshift;
+
+        tmp.append("input")
+            .attr("id", "redshift")
+            .attr("type", "number")
+            .style("width", "5em")
+            .attr("min", 1)
+            .attr("step", 1)
+            .attr("value", previous_redshift.toFixed(1));
+
+        var elem = document.getElementById('redshift');
+        elem.onblur = validate_redshift;
+        elem.onmouseleave = validate_redshift;
+        elem.onkeyup = function (e) {
+            var event = e || window.event;
+            var charCode = event.which || event.keyCode;
+
+            if (charCode == '13') {
+                // Enter pressed
+                validate_redshift();
+                return false;
+            }
+        }
     }
 
     //VIEW
