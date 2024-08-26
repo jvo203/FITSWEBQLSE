@@ -17354,7 +17354,7 @@ function display_menu() {
             elem.style.display = "none";
     }
 
-    // Atomic Spectra Database
+    // Atomic Spectra Database (NIST)
     {
         var atomicMenu = mainUL.append("li")
             .attr("id", "atomicMenu")
