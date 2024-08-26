@@ -4150,6 +4150,8 @@ async function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
             yoffset = 1.15;
         }
 
+        hds_divs.push({ id: divId, offset: yoffset });
+
         let res = plot_time_series(x, y, mean, std, divId, div_width, div_height, yoffset, title + titleStr, dateobs, raText, decText);
 
         if (k < 2)
@@ -4412,6 +4414,17 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
             insert_atomic_spectra(datasetId + '/' + div, spectra); // only needed if there is re-layout event
         }
     });
+}
+
+function refresh_hds_spectral_lines(item, index) {
+    let div = item.id;
+    let yoffset = item.offset;
+    console.log("refresh_hds_spectral_lines: ", div, yoffset);
+
+    var myPlot = document.getElementById(div);
+    var range = myPlot.layout.xaxis.range;
+
+    console.log("refresh_hds_spectral_lines: ", div, range);
 }
 
 function dropMolecule(event) {
@@ -8284,6 +8297,8 @@ function validate_redshift() {
         previous_redshift = value;
         // refresh the HDS spectral lines
         console.log("refreshing HDS spectral lines");
+
+        hds_divs.forEach(refresh_hds_spectral_lines);
     }
 
     //re-attach lost event handlers
@@ -20121,6 +20136,7 @@ async function mainRenderer() {
 
         // HDS redshift
         redshift = 0.0;
+        hds_divs = [];
 
         coordsFmt = localStorage_read_string("coordsFmt", "HMS");//DMS or HMS
 
