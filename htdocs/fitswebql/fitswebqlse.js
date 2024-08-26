@@ -4416,7 +4416,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
     });
 }
 
-function refresh_hds_spectral_lines(item, index) {
+function refresh_hds_spectral_lines(item, _) {
     let div = item.id;
     let yoffset = item.offset;
     console.log("refresh_hds_spectral_lines: ", div, yoffset);
@@ -4424,7 +4424,7 @@ function refresh_hds_spectral_lines(item, index) {
     var myPlot = document.getElementById(div);
     var range = myPlot.layout.xaxis.range;
 
-    console.log("refresh_hds_spectral_lines: ", div, range);
+    console.log("refresh_hds_spectral_lines: ", div, range, "z:", redshift);
 }
 
 function dropMolecule(event) {
@@ -8291,9 +8291,9 @@ function validate_redshift() {
     if (value > 6.0)
         document.getElementById('redshift').value = 6.0.toFixed(1);
 
-    value = document.getElementById('redshift').valueAsNumber;
+    redshift = document.getElementById('redshift').valueAsNumber;
 
-    if (value != previous_redshift) {
+    if (redshift != previous_redshift) {
         previous_redshift = value;
         // refresh the HDS spectral lines
         console.log("refreshing HDS spectral lines");
