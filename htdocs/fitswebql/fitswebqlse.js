@@ -4362,7 +4362,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
             layout.shapes = shapes;
             layout.annotations = annotations;
         } else {
-            let annotations = [{
+            const annotations = [{
                 x: 0.5,
                 y: yoffset,
                 xref: 'paper',
@@ -4481,9 +4481,6 @@ async function refresh_hds_spectral_lines(item, _) {
                 shapes.push(line);
                 annotations.push(label);
             }
-
-            //layout.shapes = shapes;
-            //layout.annotations = annotations;
         } else {
             annotations = [{
                 x: 0.5,
@@ -4493,8 +4490,6 @@ async function refresh_hds_spectral_lines(item, _) {
                 text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
                 showarrow: false
             }];
-
-            //layout.annotations = annotations;
         }
 
         Plotly.relayout(div, { annotations: annotations, shapes: shapes });
