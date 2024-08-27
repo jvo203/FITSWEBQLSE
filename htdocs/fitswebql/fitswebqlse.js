@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-26.1";
+    return "JS2024-08-27.0";
 }
 
 function uuidv4() {
@@ -4416,15 +4416,14 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
     });
 }
 
-function refresh_hds_spectral_lines(item, _) {
+async function refresh_hds_spectral_lines(item, _) {
     let div = item.id;
     let yoffset = item.offset;
-    console.log("refresh_hds_spectral_lines: ", div, yoffset);
 
     var myPlot = document.getElementById(div);
     var range = myPlot.layout.xaxis.range;
 
-    console.log("refresh_hds_spectral_lines: ", div, range, "z:", redshift);
+    console.log("refresh_hds_spectral_lines: ", div, yoffset, range, "z:", redshift);
 }
 
 function dropMolecule(event) {
@@ -8295,9 +8294,8 @@ function validate_redshift() {
 
     if (redshift != previous_redshift) {
         previous_redshift = value;
-        // refresh the HDS spectral lines
-        console.log("refreshing HDS spectral lines");
 
+        // refresh the HDS spectral lines        
         hds_divs.forEach(refresh_hds_spectral_lines);
     }
 
@@ -17424,8 +17422,8 @@ function display_menu() {
             .attr("id", "redshift")
             .attr("type", "number")
             .style("width", "5em")
-            .attr("min", 1)
-            .attr("step", 1)
+            .attr("min", -0.9)
+            .attr("step", 0.1)
             .attr("value", previous_redshift.toFixed(1));
 
         var elem = document.getElementById('redshift');
