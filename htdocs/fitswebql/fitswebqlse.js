@@ -4254,7 +4254,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
 
     let wmin = d3.min(x);
     let wmax = d3.max(x);
-    // console.log("wmin:", wmin, "wmax:", wmax, "Å");    
+    // console.log("wmin:", wmin, "wmax:", wmax, "Å");
 
     fetch_atomic_spectra(wmin, wmax).then(spectra => {
         console.log("fetch_atomic_spectra: #" + spectra.length);
@@ -4362,7 +4362,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
             layout.shapes = shapes;
             layout.annotations = annotations;
         } else {
-            annotations = [{
+            let annotations = [{
                 x: 0.5,
                 y: yoffset,
                 xref: 'paper',
@@ -4423,7 +4423,82 @@ async function refresh_hds_spectral_lines(item, _) {
     var myPlot = document.getElementById(div);
     var range = myPlot.layout.xaxis.range;
 
-    console.log("refresh_hds_spectral_lines: ", div, yoffset, range, "z:", redshift);
+    // console.log("refresh_hds_spectral_lines: ", div, yoffset, range, "z:", redshift);
+
+    let wmin = range[0];
+    let wmax = range[1];
+    let z = redshift;
+    // console.log("wmin:", wmin, "wmax:", wmax, "Å");
+
+    fetch_atomic_spectra(wmin / (1 + z), wmax / (1 + z)).then(spectra => {
+        console.log(div, "fetch_atomic_spectra: #" + spectra.length);
+
+        let noatoms = spectra.length;
+
+        var shapes = [];
+        var annotations = [];
+
+        if (noatoms > 0 && noatoms <= limit) {
+            // add a vertical line for each atomic spectrum
+            for (let i = 0; i < noatoms; i++) {
+                let atom = spectra[i];
+
+                let element = atom.element;
+                let number = atom.sp_num;
+                let wavelength = atom.obs_wl * (1 + z);
+
+                let line = {
+                    type: 'line',
+                    x0: wavelength,
+                    y0: 0,
+                    x1: wavelength,
+                    y1: 1.0,
+                    xref: 'x',
+                    yref: 'paper',
+                    line: {
+                        color: 'grey',
+                        width: 1.0,
+                        dash: 'dot'
+                    }
+                };
+
+                let label = {
+                    font: { style: "normal" },
+                    x: wavelength,
+                    y: yoffset,
+                    xref: 'x',
+                    yref: 'paper',
+                    text: element + ' ' + romanize(number),
+                    textangle: -45,
+                    xanchor: 'center',
+                    yanchor: 'center',
+                    showarrow: false,
+                    arrowhead: 1
+                    /*ax: 0,
+                    ay: -40*/
+                };
+
+                shapes.push(line);
+                annotations.push(label);
+            }
+
+            //layout.shapes = shapes;
+            //layout.annotations = annotations;
+        } else {
+            annotations = [{
+                x: 0.5,
+                y: yoffset,
+                xref: 'paper',
+                yref: 'paper',
+                text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
+                showarrow: false
+            }];
+
+            //layout.annotations = annotations;
+        }
+
+        Plotly.relayout(div, { annotations: annotations, shapes: shapes });
+    });
 }
 
 function dropMolecule(event) {
