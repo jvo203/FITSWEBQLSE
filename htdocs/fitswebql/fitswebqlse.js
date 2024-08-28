@@ -4401,7 +4401,8 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
             //});
         });*/
 
-        if (noatoms > limit) {
+        // removed the limit check as it was interfering with re-layout event when redshift != 0
+        /*if (noatoms > limit)*/ {
             //add relayout event function to graph
             myPlot.on('plotly_relayout', function (event) {
                 clearTimeout(idleResize);
