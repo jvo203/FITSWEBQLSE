@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-27.0";
+    return "JS2024-08-28.0";
 }
 
 function uuidv4() {
@@ -4423,7 +4423,7 @@ async function refresh_hds_spectral_lines(item, _) {
     var myPlot = document.getElementById(div);
     var range = myPlot.layout.xaxis.range;
 
-    // console.log("refresh_hds_spectral_lines: ", div, yoffset, range, "z:", redshift);
+    console.log("refresh_hds_spectral_lines: ", div, yoffset, range, "z:", redshift);
 
     let wmin = range[0];
     let wmax = range[1];
@@ -4555,95 +4555,92 @@ function plotlyRelayoutEventFunction(event, id, yoffset) {
     try {
         console.log("plotly_relayout event: updating the atomic spectra", xmin, xmax);
 
-        let openRequest = indexedDB.open(dbName, 1);
+        if (Math.abs(redshift) == 0) {
+            let openRequest = indexedDB.open(dbName, 1);
 
-        openRequest.onsuccess = function () {
-            const db = openRequest.result;
+            openRequest.onsuccess = function () {
+                const db = openRequest.result;
 
-            const lines = db.transaction("lines", "readonly").objectStore("lines");
-            const index = lines.index("obs_wl");
+                const lines = db.transaction("lines", "readonly").objectStore("lines");
+                const index = lines.index("obs_wl");
 
-            let request = index.getAll(IDBKeyRange.bound(xmin, xmax));
+                let request = index.getAll(IDBKeyRange.bound(xmin, xmax));
 
-            request.onsuccess = function () {
-                if (request.result !== undefined) {
-                    spectra = request.result;
-                    //console.log("plotly_relayout event: atomic spectra found", spectra.length, "in the range", xmin, xmax, spectra);
+                request.onsuccess = function () {
+                    if (request.result !== undefined) {
+                        spectra = request.result;
+                        console.log("plotly_relayout event: indexedDB  atomic spectra found", spectra.length, "in the range", xmin, xmax, spectra);
 
-                    let noatoms = spectra.length;
+                        let noatoms = spectra.length;
 
-                    var shapes = [];
-                    var annotations = [];
+                        var shapes = [];
+                        var annotations = [];
 
-                    if (noatoms > 0 && noatoms <= limit) {
-                        for (let i = 0; i < noatoms; i++) {
-                            let atom = spectra[i];
+                        if (noatoms > 0 && noatoms <= limit) {
+                            for (let i = 0; i < noatoms; i++) {
+                                let atom = spectra[i];
 
-                            let element = atom.element;
-                            let number = atom.sp_num;
-                            let wavelength = atom.obs_wl;
+                                let element = atom.element;
+                                let number = atom.sp_num;
+                                let wavelength = atom.obs_wl;
 
-                            let line = {
-                                type: 'line',
-                                x0: wavelength,
-                                y0: 0,
-                                x1: wavelength,
-                                y1: 1.0,
-                                xref: 'x',
-                                yref: 'paper',
-                                line: {
-                                    color: 'grey',
-                                    width: 1.0,
-                                    dash: 'dot'
-                                }
-                            };
+                                let line = {
+                                    type: 'line',
+                                    x0: wavelength,
+                                    y0: 0,
+                                    x1: wavelength,
+                                    y1: 1.0,
+                                    xref: 'x',
+                                    yref: 'paper',
+                                    line: {
+                                        color: 'grey',
+                                        width: 1.0,
+                                        dash: 'dot'
+                                    }
+                                };
 
-                            let label = {
-                                font: { style: "normal" },
-                                x: wavelength,
+                                let label = {
+                                    font: { style: "normal" },
+                                    x: wavelength,
+                                    y: yoffset,
+                                    xref: 'x',
+                                    yref: 'paper',
+                                    text: element + ' ' + romanize(number),
+                                    textangle: -45,
+                                    xanchor: 'center',
+                                    yanchor: 'center',
+                                    showarrow: false
+                                };
+
+                                shapes.push(line);
+                                annotations.push(label);
+                            }
+                        } else {
+                            annotations = [{
+                                x: 0.5,
                                 y: yoffset,
-                                xref: 'x',
+                                xref: 'paper',
                                 yref: 'paper',
-                                text: element + ' ' + romanize(number),
-                                textangle: -45,
-                                xanchor: 'center',
-                                yanchor: 'center',
+                                text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
                                 showarrow: false
-                            };
+                            }];
+                        };
 
-                            shapes.push(line);
-                            annotations.push(label);
-                        }
+                        Plotly.relayout(id, { annotations: annotations, shapes: shapes });
                     } else {
-                        annotations = [{
-                            x: 0.5,
-                            y: yoffset,
-                            xref: 'paper',
-                            yref: 'paper',
-                            text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
-                            showarrow: false
-                        }];
-                    };
+                        console.log("No spectra found in the range", xmin, xmax);
+                    }
+                };
 
-                    Plotly.relayout(id, { annotations: annotations, shapes: shapes });
-                } else {
-                    console.log("No spectra found in the range", xmin, xmax);
-                }
-            };
+                // close the database
+                db.close();
+            }
+        } else {
+            // make an item and call refresh_hds_spectral_lines
+            var item = { id: id, offset: yoffset };
 
-            // close the database
-            db.close();
+            refresh_hds_spectral_lines(item, null);
         }
-
-        /*var annotations = layout.annotations;
-
-        // iterate through the annotations updating the y position
-        for (let i = 0; i < annotations.length; i++) {
-            let label = annotations[i];
-            label.y = ymax;// - emFontSize;            
-        }
-
-        Plotly.relayout(id, { annotations: annotations });*/
     } catch (err) {
         console.log("plotly_relayout event: no annotations!!");
         return;
