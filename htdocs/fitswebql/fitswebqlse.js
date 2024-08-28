@@ -4362,12 +4362,14 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
             layout.shapes = shapes;
             layout.annotations = annotations;
         } else {
+            const text = noatoms > 0 ? 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.' : 'No atomic spectra found.';
+
             const annotations = [{
                 x: 0.5,
                 y: yoffset,
                 xref: 'paper',
                 yref: 'paper',
-                text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
+                text: text,
                 showarrow: false
             }];
 
@@ -4483,12 +4485,14 @@ async function refresh_hds_spectral_lines(item, _) {
                 annotations.push(label);
             }
         } else {
+            const text = noatoms > 0 ? 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.' : 'No atomic spectra found.';
+
             annotations = [{
                 x: 0.5,
                 y: yoffset,
                 xref: 'paper',
                 yref: 'paper',
-                text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
+                text: text,
                 showarrow: false
             }];
         }
@@ -4617,12 +4621,14 @@ function plotlyRelayoutEventFunction(event, id, yoffset) {
                                 annotations.push(label);
                             }
                         } else {
+                            const text = noatoms > 0 ? 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.' : 'No atomic spectra found.';
+
                             annotations = [{
                                 x: 0.5,
                                 y: yoffset,
                                 xref: 'paper',
                                 yref: 'paper',
-                                text: 'The number of atomic spectra found (' + noatoms + ') exceeds the limit (' + limit + '). Zoom-in to see the atomic spectra.',
+                                text: text,
                                 showarrow: false
                             }];
                         };
@@ -17505,7 +17511,11 @@ function display_menu() {
                 validate_redshift();
                 return false;
             }
-        }
+        };
+        elem.onchange = function () {
+            redshift = parseFloat(this.value);
+            console.log("redshift:", redshift);
+        };
     }
 
     //VIEW
