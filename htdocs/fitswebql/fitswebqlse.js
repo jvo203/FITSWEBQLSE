@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-29.0";
+    return "JS2024-08-29.1";
 }
 
 function uuidv4() {
@@ -4860,7 +4860,7 @@ function webgl_image_renderer(index, gl, width, height) {
     var image_position = get_image_position(index, width, height);
     var posx = image_position.posx;
     var posy = height - image_position.posy;
-    console.log("index:", index, "image_position:", image_position);
+    // console.log("index:", index, "image_position:", image_position);
 
     // setup GLSL program
     var vertexShaderCode = document.getElementById("vertex-shader").text;
@@ -5021,7 +5021,7 @@ function webgl_image_renderer(index, gl, width, height) {
             _height = 1;
         }
 
-        console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
+        // console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
         // get the multiplier
@@ -15266,12 +15266,18 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 } else {
                                     console.log("spectrum_view with dimensions: ", img_width, img_height);
 
+                                    d3.select("#regionLabel").remove();
+
                                     let fitsData = fitsContainer[va_count - 1];
 
                                     // if img_height > 1 and CTYPE1 is 'PIXEL' then it is a 2D image spectrum                                    
                                     if (img_height > 1 && fitsData.CTYPE1.trim().toUpperCase() == 'PIXEL') {
                                         console.log("2D image spectrum with dimensions: ", img_width, img_height);
+
                                         d3.select("#atomicMenu").remove();
+                                        d3.select("#displayGridlines").remove();
+                                        d3.select("#displayMolecules").remove();
+                                        d3.select("#displayBeam").remove();
 
                                         process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
@@ -17726,6 +17732,7 @@ function display_menu() {
         htmlStr = displayMolecules ? '<span class="fas fa-check-square"></span> spectral lines' : '<span class="far fa-square"></span> spectral lines';
         viewDropdown.append("li")
             .append("a")
+            .attr("id", "displayMolecules")
             .style('cursor', 'pointer')
             .on("click", function () {
                 displayMolecules = !displayMolecules;
