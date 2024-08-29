@@ -9694,6 +9694,7 @@ function display_preferences(index) {
     var htmlStr = displayDownloadConfirmation ? '<span class="fas fa-check-square"></span> download confirmation' : '<span class="far fa-square"></span> download confirmation';
     prefDropdown.append("li")
         .append("a")
+        .attr("id", "download_confirmation")
         .style('cursor', 'pointer')
         .on("click", function () {
             displayDownloadConfirmation = !displayDownloadConfirmation;
@@ -9706,6 +9707,7 @@ function display_preferences(index) {
     var htmlStr = displayScalingHelp ? '<span class="fas fa-check-square"></span> display pop-up help' : '<span class="far fa-square"></span> display pop-up help';
     prefDropdown.append("li")
         .append("a")
+        .attr("id", "display_scaling_help")
         .style('cursor', 'pointer')
         .on("click", function () {
             displayScalingHelp = !displayScalingHelp;
@@ -9718,6 +9720,7 @@ function display_preferences(index) {
     var htmlStr = realtime_spectrum ? '<span class="fas fa-check-square"></span> realtime spectrum updates' : '<span class="far fa-square"></span> realtime spectrum updates';
     prefDropdown.append("li")
         .append("a")
+        .attr("id", "realtime_spectrum")
         .style('cursor', 'pointer')
         .on("click", function () {
             realtime_spectrum = !realtime_spectrum;
@@ -9730,6 +9733,7 @@ function display_preferences(index) {
     var htmlStr = realtime_video ? '<span class="fas fa-check-square"></span> realtime video updates' : '<span class="far fa-square"></span> realtime video updates';
     prefDropdown.append("li")
         .append("a")
+        .attr("id", "realtime_video")
         .style('cursor', 'pointer')
         .on("click", function () {
             realtime_video = !realtime_video;
@@ -9850,6 +9854,7 @@ function display_preferences(index) {
         tmpA = prefDropdown.append("li")
             //.style("background-color", "#FFF")	
             .append("a")
+            .attr("id", "coords_fmt_li")
             .style("class", "form-group")
             .attr("class", "form-horizontal");
 
@@ -9917,6 +9922,7 @@ function display_preferences(index) {
         tmpA = prefDropdown.append("li")
             //.style("background-color", "#FFF")
             .append("a")
+            .attr("id", "intensity_mode_li")
             .style("class", "form-group")
             .attr("class", "form-horizontal");
 
@@ -9936,6 +9942,7 @@ function display_preferences(index) {
     tmpA = prefDropdown.append("li")
         //.style("background-color", "#FFF")	
         .append("a")
+        .attr("id", "zoom_shape_li")
         .style("class", "form-group")
         .attr("class", "form-horizontal");
 
@@ -15267,6 +15274,15 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     console.log("spectrum_view with dimensions: ", img_width, img_height);
 
                                     d3.select("#regionLabel").remove();
+                                    d3.select("#autoscale").remove();
+                                    d3.select("#download_confirmation").remove();
+                                    d3.select("#display_scaling_help").remove();
+                                    d3.select("#realtime_video").remove();
+                                    d3.select("#binning_li").remove();
+                                    d3.select("#video_fps_control_li").remove();
+                                    d3.select("#coords_fmt_li").remove();
+                                    d3.select("#intensity_mode_li").remove();
+                                    d3.select("#zoom_shape_li").remove();
 
                                     let fitsData = fitsContainer[va_count - 1];
 
@@ -15290,6 +15306,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         d3.select("#imageMenu").remove();
                                         d3.select("#splatMenu").remove();
                                         d3.select("#viewMenu").remove();
+                                        d3.select("#realtime_spectrum").remove();
+                                        d3.select("#image_quality_li").remove();
 
                                         // remove an HTML element with id "SpectrumCanvas"
                                         d3.select("#SpectrumCanvas").remove();
