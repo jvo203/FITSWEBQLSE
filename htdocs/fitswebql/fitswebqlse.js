@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-28.0";
+    return "JS2024-08-29.0";
 }
 
 function uuidv4() {
@@ -8387,6 +8387,13 @@ function validate_redshift() {
                 return false;
             }
         }
+        elem.onchange = function () {
+            clearTimeout(idleResize);
+
+            idleResize = setTimeout(function () {
+                validate_redshift();
+            }, 250);
+        };
     }
 }
 
@@ -17495,9 +17502,9 @@ function display_menu() {
         tmp.append("input")
             .attr("id", "redshift")
             .attr("type", "number")
-            .style("width", "5em")
+            .style("width", "7em")
             .attr("min", -0.9)
-            .attr("step", 0.1)
+            .attr("step", 0.0001)
             .attr("value", previous_redshift.toFixed(1));
 
         var elem = document.getElementById('redshift');
@@ -17513,8 +17520,11 @@ function display_menu() {
             }
         };
         elem.onchange = function () {
-            redshift = parseFloat(this.value);
-            console.log("redshift:", redshift);
+            clearTimeout(idleResize);
+
+            idleResize = setTimeout(function () {
+                validate_redshift();
+            }, 250);
         };
     }
 
