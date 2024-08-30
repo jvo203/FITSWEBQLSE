@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-29.1";
+    return "JS2024-08-30.0";
 }
 
 function uuidv4() {
@@ -13924,6 +13924,16 @@ function setup_image_selection() {
                 let raText = 'RA N/A';
                 let decText = 'DEC N/A';
 
+                // check if fitsData.RA is not empty
+                if (fitsData.RA != '') {
+                    raText = 'RA: ' + fitsData.RA;
+                }
+
+                // check if fitsData.DEC is not empty
+                if (fitsData.DEC != '') {
+                    decText = 'DEC: ' + fitsData.DEC;
+                }
+
                 if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
                         raText = 'α: ' + RadiansPrintDMS(xradec[0]);
@@ -14214,6 +14224,11 @@ function setup_image_selection() {
 
             if (fitsData.CTYPE2.indexOf("ELAT") > -1)
                 decText = 'β: ' + RadiansPrintDMS(radec[1]);
+
+            if (spectrum_view) {
+                raText = 'X: ' + Math.round(orig_x);
+                decText = 'Y: ' + Math.round(orig_y);
+            }
 
             d3.select("#ra").text(raText);
             d3.select("#dec").text(decText);
