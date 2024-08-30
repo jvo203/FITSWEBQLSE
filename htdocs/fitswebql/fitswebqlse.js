@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-30.0";
+    return "JS2024-08-30.1";
 }
 
 function uuidv4() {
@@ -14226,8 +14226,8 @@ function setup_image_selection() {
                 decText = 'β: ' + RadiansPrintDMS(radec[1]);
 
             if (spectrum_view) {
-                raText = 'X: ' + Math.round(orig_x);
-                decText = 'Y: ' + Math.round(orig_y);
+                raText = 'X: ' + clamp(Math.round(1 + orig_x), 1, fitsData.width);
+                decText = 'Y: ' + clamp(Math.round(1 + orig_y), 1, fitsData.height);
             }
 
             d3.select("#ra").text(raText);
