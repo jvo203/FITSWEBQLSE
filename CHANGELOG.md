@@ -2,6 +2,7 @@
 
 * initial support for Subaru HDS 1D and 2D FITS spectra (including an integrated _*Atomic Spectra Database*_ from NIST with an optional _*redshift*_ support)
 * switched on full multi-threading in the server-side _*libmicrohttpd*_
+* restored input field 'type=number' spin buttons in Chrome
 * recompiled the client-side WebAssembly with the latest _*emscripten*_ compiler
 
 ## [5.1.10] - 2024-05-21
