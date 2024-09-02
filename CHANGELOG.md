@@ -1,3 +1,9 @@
+## [5.1.11] - 2024-09-??
+
+* initial support for Subaru HDS 1D and 2D FITS spectra (including an integrated _*Atomic Spectra Database*_ from NIST with an optional _*redshift*_ support)
+* switched on full multi-threading in the server-side _*libmicrohttpd*_
+* recompiled the client-side WebAssembly with the latest _*emscripten*_ compiler
+
 ## [5.1.10] - 2024-05-21
 
 * completed the removal of the _*mongoose*_ networking library from the server-side C code
