@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-08-30.1";
+    return "JS2024-09-06.0";
 }
 
 function uuidv4() {
@@ -652,35 +652,8 @@ function plot_hds_spectrum(data, mask, index) {
     var width = canvas.width;
     var height = canvas.height;
 
-    let mean = 0.0;
-    let std = 0.0;
-    let count = 0;
-
-    // first pass
-    for (let i = 0; i < len; i++) {
-        if (mask[i] > 0) {
-            mean += data[i];
-            count++;
-        } /*else {
-            data[i] = NaN;
-        }*/
-    }
-
-    if (count > 0)
-        mean /= count;
-
-    // second pass
-    for (let i = 0; i < len; i++) {
-        if (mask[i] > 0) {
-            std += Math.pow(data[i] - mean, 2);
-        }
-    }
-
-    if (count > 0)
-        std = Math.sqrt(std / count);
-
     let dmin = 0.0;
-    let dmax = mean + 0.5 * std;
+    let dmax = d3.max(data);
 
     var elem = document.getElementById("image_rectangle");
     if (elem == null)
