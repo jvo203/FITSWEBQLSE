@@ -11,7 +11,7 @@ module fits
 
    ! the number used at the beginning of the binary cache disk file
    ! when the number change is detected the binary cache gets invalidated and rebuilt
-   integer(kind=4), parameter :: MAGIC_NUMBER = 20240614
+   integer(kind=4), parameter :: MAGIC_NUMBER = 20240912
 
    integer(c_int), parameter :: ZFP_HIGH_PRECISION = 16
    integer(c_int), parameter :: ZFP_MEDIUM_PRECISION = 11
@@ -389,6 +389,8 @@ module fits
       real(kind=8) :: crval3, cdelt3, crpix3
       real(kind=8) :: obsra, obsdec, datamin, datamax
       real(kind=8) :: cd1_1, cd1_2, cd2_1, cd2_2
+      integer(kind=4) :: bin_fct1 = 1
+      integer(kind=4) :: bin_fct2 = 1
 
       ! extras
       real(kind=8) :: frame_multiplier = 1.0
@@ -2076,6 +2078,14 @@ contains
       write (unit=fileunit, IOSTAT=ios) item%cd2_2
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
+      ! item%bin_fct1
+      write (unit=fileunit, IOSTAT=ios) item%bin_fct1
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+      ! item%bin_fct2
+      write (unit=fileunit, IOSTAT=ios) item%bin_fct2
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%frame_multiplier
       write (unit=fileunit, IOSTAT=ios) item%frame_multiplier
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
@@ -2492,6 +2502,14 @@ contains
       read (unit=fileunit, IOSTAT=ios) item%cd2_2
       if (ios .ne. 0) go to 300
 
+      ! item%bin_fct1
+      read (unit=fileunit, IOSTAT=ios) item%bin_fct1
+      if (ios .ne. 0) go to 300
+
+      ! item%bin_fct2
+      read (unit=fileunit, IOSTAT=ios) item%bin_fct2
+      if (ios .ne. 0) go to 300
+
       ! item%frame_multiplier
       read (unit=fileunit, IOSTAT=ios) item%frame_multiplier
       if (ios .ne. 0) go to 300
@@ -2855,6 +2873,7 @@ contains
       print *, 'CUNIT3: ', trim(item%cunit3), ', CTYPE3: ', trim(item%ctype3)
       print *, 'CD1_1: ', item%cd1_1, 'CD1_2: ', item%cd1_2
       print *, 'CD2_1: ', item%cd2_1, 'CD2_2: ', item%cd2_2
+      print *, 'BIN_FCT1: ', item%bin_fct1, 'BIN_FCT2: ', item%bin_fct2
       print *, 'IS_OPTICAL: ', item%is_optical, ', IS_XRAY: ', item%is_xray, 'IS_SPECTRUM: ', item%is_spectrum,&
       &', FLUX: ', trim(item%flux)
       print *, 'has_frequency:', item%has_frequency,&
@@ -4044,6 +4063,10 @@ contains
 
       status = 0; call FTGKYD(unit, 'CD2_2', item%cd2_2, comment, status)
       if (status .ne. 0) item%cd2_2 = ieee_value(0.D0, ieee_quiet_nan)
+
+      status = 0; call FTGKYJ(unit, 'BIN-FCT1', item%bin_fct1, comment, status)
+
+      status = 0; call FTGKYJ(unit, 'BIN-FCT2', item%bin_fct2, comment, status)
 
       status = 0; call FTGKYS(unit, 'TELESCOP', value, comment, status)
 
