@@ -6281,6 +6281,9 @@ contains
       call add_json_string(json, 'CUNIT3'//c_null_char, trim(item%cunit3)//c_null_char)
       call add_json_string(json, 'CTYPE3'//c_null_char, trim(item%ctype3)//c_null_char)
 
+      call add_json_integer(json, 'BINFCT1'//c_null_char, item%bin_fct1)
+      call add_json_integer(json, 'BINFCT2'//c_null_char, item%bin_fct2)
+
       call add_json_double(json, 'BMAJ'//c_null_char, item%bmaj)
       call add_json_double(json, 'BMIN'//c_null_char, item%bmin)
       call add_json_double(json, 'BPA'//c_null_char, item%bpa)
