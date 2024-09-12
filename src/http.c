@@ -4166,20 +4166,25 @@ static enum MHD_Result on_http_connection(void *cls,
                                 snprintf(dataid, sizeof(dataid) - 1, "%s", datasetId[i]);
 
                             jvo_db = jvo_db_connect(db);
+
+                            if (jvo_db != NULL && table != NULL)
+                                path = get_jvo_path(jvo_db, db, table, dataid);
                         }
                         else
                         {
                             // assume db == "alma"
                             snprintf(dataid, sizeof(dataid) - 1, "%s_00_00_00", datasetId[i]);
+
+                            jvo_db = jvo_db_connect("alma");
+
+                            if (jvo_db != NULL && table != NULL)
+                                path = get_jvo_path(jvo_db, "alma", table, dataid);
                         }
 
-                        if (jvo_db != NULL && table != NULL)
-                        {
-                            path = get_jvo_path(jvo_db, db, table, dataid);
+                        path = get_jvo_path(jvo_db, db, table, dataid);
 
-                            if (path != NULL)
-                                snprintf(filepath, sizeof(filepath) - 1, "%s", path);
-                        }
+                        if (path != NULL)
+                            snprintf(filepath, sizeof(filepath) - 1, "%s", path);
 
                         if (jvo_db != NULL)
                             PQfinish(jvo_db);
