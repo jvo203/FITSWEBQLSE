@@ -31,10 +31,7 @@ function view_akari() {
     var colourmap = document.getElementById("akari_colourmap").value.trim();
 
     if (dataId != "") {
-        var url = null;
-
-        url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(dataId) + "&colourmap=" + encodeURIComponent(colourmap);
-
+        const url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(dataId) + "&colourmap=" + encodeURIComponent(colourmap);
         window.location.href = url;
     }
     else
@@ -48,10 +45,7 @@ function view_moircs() {
     var colourmap = document.getElementById("moircs_colourmap").value.trim();
 
     if (dataId != "") {
-        var url = null;
-
-        url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(dataId) + "&colourmap=" + encodeURIComponent(colourmap);
-
+        const url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(dataId) + "&colourmap=" + encodeURIComponent(colourmap);
         window.location.href = url;
     }
     else
@@ -65,10 +59,7 @@ function view_spcam() {
     var colourmap = document.getElementById("spcam_colourmap").value.trim();
 
     if (dataId != "") {
-        var url = null;
-
-        url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(dataId) + "&colourmap=" + encodeURIComponent(colourmap);
-
+        const url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(dataId) + "&colourmap=" + encodeURIComponent(colourmap);
         window.location.href = url;
     }
     else
@@ -81,10 +72,7 @@ function view_alma() {
     var table = document.getElementById("alma_table").value.trim();
 
     if (datasetId != "") {
-        var url = null;
-
-        url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(datasetId);
-
+        const url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(datasetId);
         window.location.href = url;
     }
     else
@@ -97,10 +85,7 @@ function view_almb() {
     var table = document.getElementById("almb_table").value.trim();
 
     if (datasetId != "") {
-        var url = null;
-
-        url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(datasetId);
-
+        const url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(datasetId);
         window.location.href = url;
     }
     else
@@ -123,10 +108,7 @@ function view_hds() {
     }
 
     if (dataId != "") {
-        var url = null;
-
-        url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(format) + "&datasetId=" + encodeURIComponent(dataId);
-
+        const url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(format) + "&datasetId=" + encodeURIComponent(dataId);
         window.location.href = url;
     }
     else
@@ -137,10 +119,7 @@ function view_url(index) {
     var fits_url = document.getElementById("url" + index.toString()).value.trim();
 
     if (fits_url != "") {
-        var url = null;
-
-        url = "/fitswebql/FITSWebQL.html?" + "url=" + encodeURIComponent(fits_url);
-
+        const url = "/fitswebql/FITSWebQL.html?" + "url=" + encodeURIComponent(fits_url);
         window.location.href = url;
     }
     else
@@ -259,10 +238,7 @@ function view_nro45m2() {
     var table = document.getElementById("nro2_table").value.trim();
 
     if (dataId != "") {
-        var url = null;
-
-        url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(dataId);
-
+        const url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(dataId);
         window.location.href = url;
     }
     else
