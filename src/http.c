@@ -8689,7 +8689,11 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
         return NULL;
 
     memset(path, 0, sizeof(path));
-    snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
+
+    if (strncmp(db, "hds", 3) == 0)
+        snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path_%s FROM path_for_fitswebql WHERE dataset_id = '%s';", table, data_id);
+    else
+        snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
 
     PGresult *res = PQexec(jvo_db, strSQL);
 
@@ -8707,6 +8711,8 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
         {
             if (strncmp(db, "spcam", 5) == 0 || strncmp(db, "moircs", 6) == 0)
                 snprintf(path, sizeof(path) - 1, "%s/subaru/%s/mosaic/", options.db_home, db);
+            else if (strncmp(db, "hds", 3) == 0)
+                snprintf(path, sizeof(path) - 1, "%s/subaru/%s/", options.db_home, db);
             else
                 snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
         }
