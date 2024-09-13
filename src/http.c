@@ -4181,8 +4181,6 @@ static enum MHD_Result on_http_connection(void *cls,
                                 path = get_jvo_path(jvo_db, "alma", table, dataid);
                         }
 
-                        path = get_jvo_path(jvo_db, db, table, dataid);
-
                         if (path != NULL)
                             snprintf(filepath, sizeof(filepath) - 1, "%s", path);
 
