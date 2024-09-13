@@ -107,6 +107,32 @@ function view_almb() {
         alert("no datasetId found !");
 }
 
+function view_hds() {
+    var dataId = document.getElementById("hds_id").value.trim();
+    var db = document.getElementById("hds_db").value.trim();
+
+    // get the format from three radio buttons
+    var format = "";
+
+    // get elements by name (name = "hds_format")
+    var elems = document.getElementsByName("hds_format");
+
+    for (let i = 0; i < elems.length; i++) {
+        if (elems[i].checked)
+            format = elems[i].value.trim();
+    }
+
+    if (dataId != "") {
+        var url = null;
+
+        url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(format) + "&datasetId=" + encodeURIComponent(dataId);
+
+        window.location.href = url;
+    }
+    else
+        alert("no datasetId found !");
+}
+
 function view_url(index) {
     var fits_url = document.getElementById("url" + index.toString()).value.trim();
 

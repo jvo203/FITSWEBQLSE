@@ -157,6 +157,37 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
+                <h2>HDS</h2>
+            </div>
+            <div class="panel-body">
+                <div class="form-inline">
+
+                    <div class="form-group">
+                        <label for="hds_id">datasetId:</label>
+                        <input type="text" class="form-control" id="hds_id" value="PIPE-1.0_00000176">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hds_db">db:</label>
+                        <input type="text" class="form-control" id="hds_db" size="5" value="hds">
+                    </div>
+
+                    <div class="form-group">
+                        <input type="radio" id="1d" name="hds_format" value="1d" checked>
+                        <label for="1d">1d</label>
+                        <input type="radio" id="rmwec" name="hds_format" value="rmwec">
+                        <label for="rmwec">rmwec</label>
+                        <input type="radio" id="fsclmo" name="hds_format" value="fsclmo">
+                        <label for="fsclmo">fsclmo</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-default" onclick="view_hds()">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
                 <h2>HSC</h2>
             </div>
             <div class="panel-body">
