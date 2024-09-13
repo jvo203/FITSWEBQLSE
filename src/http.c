@@ -8705,7 +8705,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
 
         if (pos == NULL)
         {
-            if (strcmp(db, "spcam") == 0 || strcmp(db, "moircs") == 0)
+            if (strncmp(db, "spcam", 5) == 0 || strncmp(db, "moircs", 6) == 0)
                 snprintf(path, sizeof(path) - 1, "%s/subaru/%s/mosaic/", options.db_home, db);
             else
                 snprintf(path, sizeof(path) - 1, "%s/%s/", options.db_home, db);
