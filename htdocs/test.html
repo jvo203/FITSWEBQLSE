@@ -173,10 +173,16 @@
                     </div>
 
                     <div class="form-group">
-                        <input type="radio" id="1d" name="hds_format" value="1d" checked>
-                        <label for="1d">1d</label>
-                        <input type="radio" id="rmwec" name="hds_format" value="rmwec">
-                        <label for="rmwec">rmwec</label>
+                        <label for="hds_table">table:</label>
+                        <input type="text" class="form-control" id="hds_table" size="25"
+                            value="path_for_fitswebql_by_dataid">
+                    </div>
+
+                    <div class="form-group">
+                        <input type="radio" id="1d" name="hds_format" value="1d_nrmwec_fsclmo" checked>
+                        <label for="1d">1d_nrmwec_fsclmo</label>
+                        <input type="radio" id="rmwec" name="hds_format" value="rmwec_fsclmo">
+                        <label for="rmwec">rmwec_fsclmo</label>
                         <input type="radio" id="fsclmo" name="hds_format" value="fsclmo">
                         <label for="fsclmo">fsclmo</label>
                     </div>

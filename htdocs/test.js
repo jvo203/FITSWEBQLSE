@@ -93,22 +93,37 @@ function view_almb() {
 }
 
 function view_hds() {
-    var dataId = document.getElementById("hds_id").value.trim();
-    var db = document.getElementById("hds_db").value.trim();
+    const datasetId = document.getElementById("hds_id").value.trim();
+    const db = document.getElementById("hds_db").value.trim();
+    const table = document.getElementById("hds_table").value.trim();
 
     // get the format from three radio buttons
-    var format = "";
+    var data_type = "";
 
     // get elements by name (name = "hds_format")
     var elems = document.getElementsByName("hds_format");
 
     for (let i = 0; i < elems.length; i++) {
         if (elems[i].checked)
-            format = elems[i].value.trim();
+            data_type = elems[i].value.trim();
     }
 
-    if (dataId != "") {
-        const url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(format) + "&datasetId=" + encodeURIComponent(dataId);
+    if (datasetId != "") {
+        // datasetId = "PIPE-1.0_00000176";
+
+        // extract the version number, i.e. 1.0, from datasetId
+        // <pipeline_version> := PIPE-<version>
+        const version = datasetId.split("_")[0].split("-")[1];
+
+        // extract the rawId, i.e. 00000176, from datasetId
+        // <raw_id> := HDSA[0-1]*
+        const rawId = datasetId.split("_")[1];
+
+        // make a dataId
+        // <data_id> := <pipeline_version>_<data_type>_<raw_id>.fits
+        const dataId = "PIPE-" + version + "_" + data_type + "_" + "HDSA" + rawId + ".fits";
+
+        const url = "/fitswebql/FITSWebQL.html?" + "db=" + encodeURIComponent(db) + "&table=" + encodeURIComponent(table) + "&datasetId=" + encodeURIComponent(dataId);
         window.location.href = url;
     }
     else
