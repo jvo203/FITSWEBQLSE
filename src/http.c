@@ -8687,11 +8687,9 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id)
         return NULL;
 
     memset(path, 0, sizeof(path));
+    memset(strSQL, 0, sizeof(strSQL));
 
-    if (strncmp(db, "hds", 3) == 0)
-        snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path_%s FROM path_for_fitswebql WHERE dataset_id = '%s';", table, data_id);
-    else
-        snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
+    snprintf(strSQL, sizeof(strSQL) - 1, "SELECT path FROM %s WHERE data_id = '%s';", table, data_id);
 
     PGresult *res = PQexec(jvo_db, strSQL);
 
