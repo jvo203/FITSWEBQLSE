@@ -1,4 +1,4 @@
-## [5.1.11] - 2024-09-??
+## [5.1.11] - 2024-09-17
 
 * initial support for Subaru HDS 1D and 2D FITS spectra (including an integrated _*Atomic Spectra Database*_ from NIST with an optional _*redshift*_ support)
 * switched on full multi-threading in the server-side _*libmicrohttpd*_
