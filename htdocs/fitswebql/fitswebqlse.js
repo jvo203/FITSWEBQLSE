@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-09-06.0";
+    return "JS2024-09-19.0";
 }
 
 function uuidv4() {
@@ -17262,7 +17262,12 @@ function display_menu() {
             .attr("href", url)
             .html('full FITS download <span class="fas fa-save"></span>');
     } else {
-        let filename = datasetId + ".fits";
+        let filename = datasetId;
+
+        // check if a filename already ends with ".fits"; if not then append ".fits"
+        if (!filename.endsWith(".fits"))
+            filename += ".fits";
+
         let _url = "get_fits?datasetId=" + encodeURIComponent(datasetId);
         _url += "&filename=" + encodeURIComponent(filename);
 
