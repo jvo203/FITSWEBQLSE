@@ -7509,13 +7509,14 @@ contains
 
    end function find_nearest
 
-   function find_peak(row, mask) result(centre)
+   function find_peak(row, mask, x) result(centre)
       use peaks
       use risk
       implicit none
 
       real(c_float), intent(in) :: row(:)
       logical(kind=c_bool), intent(in) :: mask(:)
+      real(c_float), intent(in) :: x
 
       integer(c_int), allocatable :: maxind(:), minind(:)
       real(c_float), allocatable :: packed(:), maxvals(:), minvals(:)
@@ -7544,7 +7545,7 @@ contains
       if (size(maxind) .eq. 0) return
 
       ! find the peak closest to the middle of the row
-      centre = find_nearest(maxind, real(size(row))/2)
+      centre = find_nearest(maxind, x)
    end function find_peak
 
    subroutine realtime_hds_spectrum_request(item, req)
@@ -7566,7 +7567,7 @@ contains
       ! peaks detection
       real(kind=c_float), allocatable :: row(:)
       logical(kind=c_bool), allocatable :: mask(:)
-      real(kind=c_float) :: mu
+      real(kind=c_float) :: x0, mu
 
       integer(c_int) :: precision
 
@@ -7606,8 +7607,9 @@ contains
 
       print *, 'row:', size(row), 'mask:', size(mask)
 
-      mu = find_peak(row, mask)
-      print *, 'mu:', mu
+      x0 = real(size(row))/2
+      mu = find_peak(row, mask, x0)
+      print *, 'x0:', x0, 'mu:', mu
 
       if (req%image) then
          precision = ZFP_HIGH_PRECISION
