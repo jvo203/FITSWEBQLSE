@@ -7483,6 +7483,7 @@ contains
    end subroutine realtime_image_spectrum_request_simd
 
    subroutine realtime_hds_spectrum_request(item, req)
+      use peaks
       implicit none
 
       type(dataset), pointer :: item
