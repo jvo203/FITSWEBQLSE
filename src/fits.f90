@@ -7482,9 +7482,40 @@ contains
 
    end subroutine realtime_image_spectrum_request_simd
 
-   subroutine realtime_hds_spectrum_request(item, req)
+   function find_peak(row, mask) result(centre)
       use peaks
       use risk
+      implicit none
+
+      real(c_float), intent(in) :: row(:)
+      logical(kind=c_bool), intent(in) :: mask(:)
+
+      integer(c_int), allocatable :: maxind(:), minind(:)
+      real(c_float), allocatable :: packed(:), maxvals(:), minvals(:)
+
+      real(c_float) :: mean, threshold
+      real(c_float) :: centre
+
+      ! NaN by default
+      centre = ieee_value(0.0, ieee_quiet_nan)
+
+      packed = pack(row, mask)
+
+      ! check the size of the packed row, if it's empty then return
+      if (size(packed) .eq. 0) return
+
+      mean = average(row)
+      threshold = mean + 3.0 * stdm(row, mean)
+
+      print *, 'peaks threshold:', threshold
+
+      ! find the peaks
+      call peak_detect(row, threshold, maxind, maxvals, minind, minvals)
+      print *, 'peaks:', maxind, maxvals
+
+   end function find_peak
+
+   subroutine realtime_hds_spectrum_request(item, req)
       implicit none
 
       type(dataset), pointer :: item
@@ -7501,11 +7532,9 @@ contains
       logical(kind=c_bool), allocatable, target :: xmask(:), ymask(:)
 
       ! peaks detection
-      real(kind=c_float), allocatable :: row(:), packed(:)
+      real(kind=c_float), allocatable :: row(:)
       logical(kind=c_bool), allocatable :: mask(:)
-      integer(c_int), allocatable :: maxind(:), minind(:)
-      real(c_float), allocatable :: maxvals(:), minvals(:)
-      real(c_float) :: mean, threshold
+      real(kind=c_float) :: mu
 
       integer(c_int) :: precision
 
@@ -7543,17 +7572,10 @@ contains
       row = item%pixels(x1:x2, y)
       mask = item%mask(x1:x2, y)
 
-      packed = pack(xspec, xmask)
+      print *, 'row:', size(row), 'mask:', size(mask)
 
-      ! check the size of the packed row, if it's empty set the threshold to 0
-      if (size(packed) .eq. 0) then
-         threshold = 0.0
-      else
-         mean = average(packed)
-         threshold = mean + 3.0 * stdm(packed, mean)
-      end if
-
-      print *, 'row:', size(row), 'mask:', size(mask), 'packed:', size(packed), 'peaks threshold:', threshold
+      mu = find_peak(row, mask)
+      print *, 'mu:', mu
 
       if (req%image) then
          precision = ZFP_HIGH_PRECISION
