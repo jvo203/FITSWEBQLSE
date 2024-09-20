@@ -7482,6 +7482,33 @@ contains
 
    end subroutine realtime_image_spectrum_request_simd
 
+   function find_nearest(arr, value) result(nearest)
+      implicit none
+
+      integer(c_int), dimension(:), intent(in) :: arr
+      real(c_float), intent(in) :: value
+      real(c_float) :: nearest
+
+      integer(c_int) :: i, n
+      real(c_float) :: diff, min_diff
+
+      n = size(arr)
+      min_diff = abs(arr(1) - value)
+      nearest = arr(1)
+
+      ! check the size of the array, if it's 1 then return the first element
+      if (n .eq. 1) return
+
+      do i = 2, n
+         diff = abs(arr(i) - value)
+         if (diff .lt. min_diff) then
+            min_diff = diff
+            nearest = arr(i)
+         end if
+      end do
+
+   end function find_nearest
+
    function find_peak(row, mask) result(centre)
       use peaks
       use risk
@@ -7513,6 +7540,11 @@ contains
       call peak_detect(row, threshold, maxind, maxvals, minind, minvals)
       print *, 'peaks:', maxind, maxvals
 
+      ! if no peaks found then return
+      if (size(maxind) .eq. 0) return
+
+      ! find the peak closest to the middle of the row
+      centre = find_nearest(maxind, real(size(row))/2)
    end function find_peak
 
    subroutine realtime_hds_spectrum_request(item, req)
