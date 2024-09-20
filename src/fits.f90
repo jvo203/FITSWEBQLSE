@@ -7493,10 +7493,10 @@ contains
       integer(8) :: start_t, finish_t, crate, cmax
       real(c_float) :: elapsed
 
-      integer :: x, y
+      integer(c_int) :: x, y, x1, x2, y1, y2
 
-      real(kind=c_float), allocatable, target :: xspec(:), yspec(:)
-      logical(kind=c_bool), allocatable, target :: xmask(:), ymask(:)
+      real(kind=c_float), allocatable, target :: xspec(:), yspec(:), row(:)
+      logical(kind=c_bool), allocatable, target :: xmask(:), ymask(:), mask(:)
 
       integer(c_int) :: precision
 
@@ -7508,6 +7508,11 @@ contains
       if ((req%x .eq. -1) .or. (req%y .eq. -1)) return
 
       ! sanity checks
+      x1 = max(1, req%x1)
+      y1 = max(1, req%y1)
+      x2 = min(item%naxes(1), req%x2)
+      y2 = min(item%naxes(2), req%y2)
+
       x = max(1, req%x)
       y = max(1, req%y)
       x = min(item%naxes(1), x)
@@ -7524,6 +7529,12 @@ contains
 
       print *, 'xspec:', size(xspec), 'yspec:', size(yspec)
       print *, 'xmask:', size(xmask), 'ymask:', size(ymask)
+
+      ! viewport centre row
+      row = item%pixels(x1:x2, y)
+      mask = item%mask(x1:x2, y)
+
+      print *, 'row:', size(row), 'mask:', size(mask)
 
       if (req%image) then
          precision = ZFP_HIGH_PRECISION
