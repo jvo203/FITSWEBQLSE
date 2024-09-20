@@ -7484,6 +7484,7 @@ contains
 
    subroutine realtime_hds_spectrum_request(item, req)
       use peaks
+      use risk
       implicit none
 
       type(dataset), pointer :: item
@@ -7495,8 +7496,16 @@ contains
 
       integer(c_int) :: x, y, x1, x2, y1, y2
 
-      real(kind=c_float), allocatable, target :: xspec(:), yspec(:), row(:)
-      logical(kind=c_bool), allocatable, target :: xmask(:), ymask(:), mask(:)
+      ! X and Y spectra
+      real(kind=c_float), allocatable, target :: xspec(:), yspec(:)
+      logical(kind=c_bool), allocatable, target :: xmask(:), ymask(:)
+
+      ! peaks detection
+      real(kind=c_float), allocatable :: row(:), packed(:)
+      logical(kind=c_bool), allocatable :: mask(:)
+      integer(c_int), allocatable :: maxind(:), minind(:)
+      real(c_float), allocatable :: maxvals(:), minvals(:)
+      real(c_float) :: mean, threshold
 
       integer(c_int) :: precision
 
@@ -7534,7 +7543,17 @@ contains
       row = item%pixels(x1:x2, y)
       mask = item%mask(x1:x2, y)
 
-      print *, 'row:', size(row), 'mask:', size(mask)
+      packed = pack(xspec, xmask)
+
+      ! check the size of the packed row, if it's empty set the threshold to 0
+      if (size(packed) .eq. 0) then
+         threshold = 0.0
+      else
+         mean = average(packed)
+         threshold = mean + 3.0 * stdm(packed, mean)
+      end if
+
+      print *, 'row:', size(row), 'mask:', size(mask), 'packed:', size(packed), 'peaks threshold:', threshold
 
       if (req%image) then
          precision = ZFP_HIGH_PRECISION
