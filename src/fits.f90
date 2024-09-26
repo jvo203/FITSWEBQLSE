@@ -7548,6 +7548,60 @@ contains
       centre = find_nearest(maxind, x)
    end function find_peak
 
+   ! a single Gaussian activation function
+   ! \[CapitalPhi][x_, b_, w_, \[Gamma]_, \[Mu]_] = b + w Exp[-\[Gamma] (x - \[Mu])^2]
+   pure function gaussian(x, b, w, gamma, mu) result(y)
+      implicit none
+
+      real(c_float), intent(in) :: x, b, w, gamma, mu
+      real(c_float) :: y
+
+      y = b + w * exp(-gamma * (x - mu)**2)
+   end function gaussian
+
+   ! Rotation Transform (px, py) by a theta angle around the point (alpha, beta)
+   pure subroutine rotate(px, py, alpha, beta, theta, qx, qy)
+      implicit none
+
+      real(c_float), intent(in) :: px, py, alpha, beta, theta
+      real(c_float), intent(out) :: qx, qy
+
+      real(c_float) :: dx, dy
+
+      dx = px - alpha
+      dy = py - beta
+
+      qx = alpha + dx * cos(theta) - dy * sin(theta)
+      qy = beta + dx * sin(theta) + dy * cos(theta)
+   end subroutine rotate
+
+   ! calculate the correlation between the target viewport and the rotated line
+   function correlation(theta, dx, view, mask) result(corr)
+      implicit none
+
+      real(c_float), intent(in) :: theta, dx
+      real(c_float), dimension(:,:), intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+
+      integer :: i, j, dimx, dimy
+      real(c_float) :: corr
+
+      corr = 0.0
+
+      dimx = size(view, 1)
+      dimy = size(view, 2)
+
+      do j = 1, dimy
+         do i = 1, dimx
+            if (mask(i, j)) then
+               corr = corr + view(i, j) * cos(theta*i + dx*j)
+            end if
+         end do
+      end do
+
+      return
+   end function correlation
+
    subroutine realtime_hds_spectrum_request(item, req)
       implicit none
 
