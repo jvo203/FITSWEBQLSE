@@ -7553,20 +7553,20 @@ contains
    pure function gaussian(x, b, w, gamma, mu) result(y)
       implicit none
 
-      real(c_float), intent(in) :: x, b, w, gamma, mu
-      real(c_float) :: y
+      real, intent(in) :: x, b, w, gamma, mu
+      real :: y
 
       y = b + w * exp(-gamma * (x - mu)**2)
    end function gaussian
 
-   ! Rotation Transform (px, py) by a theta angle around the point (alpha, beta)
+   ! a rotation transform of (px, py) by a theta angle around the point (alpha, beta)
    pure subroutine rotate(px, py, alpha, beta, theta, qx, qy)
       implicit none
 
-      real(c_float), intent(in) :: px, py, alpha, beta, theta
-      real(c_float), intent(out) :: qx, qy
+      real, intent(in) :: px, py, alpha, beta, theta
+      real, intent(out) :: qx, qy
 
-      real(c_float) :: dx, dy
+      real :: dx, dy
 
       dx = px - alpha
       dy = py - beta
@@ -7575,26 +7575,31 @@ contains
       qy = beta + dx * sin(theta) + dy * cos(theta)
    end subroutine rotate
 
-   ! calculate the correlation between the target viewport and the rotated line
-   function correlation(theta, dx, view, mask) result(corr)
+   ! a correlation between the target viewport and the rotated line
+   function correlation(theta, b, w, gamma, mu, view, mask) result(corr)
       implicit none
 
-      real(c_float), intent(in) :: theta, dx
+      real(c_float), intent(in) :: theta, b, w, gamma, mu
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
       integer :: i, j, dimx, dimy
-      real(c_float) :: corr
+      real :: corr, qx, qy, x0, y0, rotated
 
       corr = 0.0
 
       dimx = size(view, 1)
       dimy = size(view, 2)
 
+      x0 = mu
+      y0 = real(dimy)/2
+
       do j = 1, dimy
          do i = 1, dimx
             if (mask(i, j)) then
-               corr = corr + view(i, j) * cos(theta*i + dx*j)
+               call rotate(real(i), real(j), x0, y0, theta, qx, qy)
+               rotated = gaussian(qx, b, w, gamma, mu)
+               ! corr = corr + view(i, j) * cos(theta*i + dx*j)
             end if
          end do
       end do
@@ -7603,6 +7608,7 @@ contains
    end function correlation
 
    subroutine realtime_hds_spectrum_request(item, req)
+      use risk
       implicit none
 
       type(dataset), pointer :: item
@@ -7614,6 +7620,10 @@ contains
 
       integer(c_int) :: x, y, x1, x2, y1, y2
 
+      ! the viewport
+      real(kind=c_float), allocatable :: view_pixels(:, :)
+      logical(kind=c_bool), allocatable :: view_mask(:, :)
+
       ! X and Y spectra
       real(kind=c_float), allocatable, target :: xspec(:), yspec(:)
       logical(kind=c_bool), allocatable, target :: xmask(:), ymask(:)
@@ -7621,7 +7631,7 @@ contains
       ! peaks detection
       real(kind=c_float), allocatable :: row(:)
       logical(kind=c_bool), allocatable :: mask(:)
-      real(kind=c_float) :: x0, mu
+      real(kind=c_float) :: x0, b, w, gamma, mu
 
       integer(c_int) :: precision
 
@@ -7645,6 +7655,10 @@ contains
 
       print *, 'realtime_hds_spectrum for ', item%datasetid, ', x:', x, ', y:', y
 
+      ! the viewport
+      view_pixels = item%pixels(x1:x2, y1:y2)
+      view_mask = item%mask(x1:x2, y1:y2)
+
       ! spectra & masks along the X and Y axes
       xspec = item%pixels(:, y)
       xmask = item%mask(:, y)
@@ -7664,6 +7678,12 @@ contains
       x0 = real(size(row))/2
       mu = find_peak(row, mask, x0)
       print *, 'x0:', x0, 'mu:', mu
+
+      ! Gaussian parameters
+      ! b is the average of the view_pixels given the view_mask
+      b = average(pack(view_pixels, view_mask))
+      w = 1.0
+      gamma = 0.1
 
       if (req%image) then
          precision = ZFP_HIGH_PRECISION
