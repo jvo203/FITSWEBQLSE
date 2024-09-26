@@ -5,9 +5,6 @@ typedef unsigned int16 uint16_t;
 typedef unsigned int32 uint32_t;
 typedef unsigned int64 uint64_t;
 
-#define FLT_MIN 1.175494351e-38F
-#define FLT_MAX 3.402823466e+38F
-
 /* FIXED-POINT COMPRESSION */
 #define BASE 4
 #define DIM 16
