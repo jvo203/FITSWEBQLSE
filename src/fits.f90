@@ -7599,7 +7599,7 @@ contains
             if (mask(i, j)) then
                call rotate(real(i), real(j), x0, y0, theta, qx, qy)
                rotated = gaussian(qx, b, w, gamma, mu)
-               ! corr = corr + view(i, j) * cos(theta*i + dx*j)
+               corr = corr + view(i, j) * rotated
             end if
          end do
       end do
@@ -7623,6 +7623,7 @@ contains
       ! the viewport
       real(kind=c_float), allocatable :: view_pixels(:, :)
       logical(kind=c_bool), allocatable :: view_mask(:, :)
+      real(kind=c_float), allocatable :: viewport(:)
 
       ! X and Y spectra
       real(kind=c_float), allocatable, target :: xspec(:), yspec(:)
@@ -7679,9 +7680,12 @@ contains
       mu = find_peak(row, mask, x0)
       print *, 'x0:', x0, 'mu:', mu
 
+      ! pack the viewport for further re-use
+      viewport = pack(view_pixels, view_mask)
+
       ! Gaussian parameters
       ! b is the average of the view_pixels given the view_mask
-      b = average(pack(view_pixels, view_mask))
+      b = average(viewport)
       w = 1.0
       gamma = 0.1
 
