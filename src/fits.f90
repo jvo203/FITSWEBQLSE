@@ -7660,6 +7660,9 @@ contains
       view_pixels = item%pixels(x1:x2, y1:y2)
       view_mask = item%mask(x1:x2, y1:y2)
 
+      ! pack the viewport for further re-use
+      viewport = pack(view_pixels, view_mask)
+
       ! spectra & masks along the X and Y axes
       xspec = item%pixels(:, y)
       xmask = item%mask(:, y)
@@ -7680,12 +7683,8 @@ contains
       mu = find_peak(row, mask, x0)
       print *, 'x0:', x0, 'mu:', mu
 
-      ! pack the viewport for further re-use
-      viewport = pack(view_pixels, view_mask)
-
       ! Gaussian parameters
-      ! b is the average of the view_pixels given the view_mask
-      b = average(viewport)
+      b = average(viewport) ! bias = the average of the viewport
       w = 1.0
       gamma = 0.1
 
