@@ -7720,7 +7720,7 @@ contains
 
       ! check the size of the viewport
       if (size(viewport) .eq. 0 .or. ieee_is_nan(mu)) then
-         theta = ieee_value(0.0, ieee_quiet_nan)
+         theta = 0.0
       else
          ! initial parameters for the Gaussian
          b = average(viewport) ! bias = the average of the viewport
