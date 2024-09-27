@@ -7624,7 +7624,7 @@ contains
       angle_max = 0.0
       step = 10
 
-      do i = -180, 180, step
+      do i = -90, 90, step
          angle = real(i)*deg2rad
          corr = correlation(angle, b, w, gamma, mu, view, mask)
 
@@ -7713,13 +7713,19 @@ contains
       mu = find_peak(row, mask, x0)
       print *, 'x0:', x0, 'mu:', mu
 
-      ! initial parameters for the Gaussian
-      b = average(viewport) ! bias = the average of the viewport
-      w = maxval(viewport) - minval(viewport) - b ! Max[view] - Min[view] - bias
-      gamma = real(size(row))/1000 ! a small gamma value
+      ! check the size of the viewport
+      if (size(viewport) .eq. 0) then
+         theta = ieee_value(0.0, ieee_quiet_nan)
+      else
+         ! initial parameters for the Gaussian
+         b = average(viewport) ! bias = the average of the viewport
+         w = maxval(viewport) - minval(viewport) - b ! Max[view] - Min[view] - bias
+         gamma = real(size(row))/1000 ! a small gamma value
+         print *, 'b:', b, 'w:', w, 'gamma:', gamma
 
-      theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
-      print *, 'theta:', theta
+         theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
+         print *, 'theta:', theta , 'angle:', theta*180/3.1415926535897932384626433832795
+      end if
 
       if (req%image) then
          precision = ZFP_HIGH_PRECISION
