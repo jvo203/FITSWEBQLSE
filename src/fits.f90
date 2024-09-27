@@ -7618,14 +7618,17 @@ contains
 
       real(c_float) :: max_corr, corr
       real(c_float) :: angle, angle_max
-      integer(c_int) :: i
+      integer :: i, step
 
       max_corr = -huge(0.0)
       angle_max = 0.0
+      step = 10
 
-      do i = -180, 180, 10
+      do i = -180, 180, step
          angle = real(i)*deg2rad
          corr = correlation(angle, b, w, gamma, mu, view, mask)
+
+         print *, 'angle [deg]:', i, 'correlation:', corr
 
          if (corr .gt. max_corr) then
             max_corr = corr
@@ -7659,7 +7662,7 @@ contains
       ! peaks detection
       real(kind=c_float), allocatable :: row(:)
       logical(kind=c_bool), allocatable :: mask(:)
-      real(kind=c_float) :: x0, b, w, gamma, mu
+      real(kind=c_float) :: x0, b, w, gamma, mu, theta
 
       integer(c_int) :: precision
 
@@ -7714,6 +7717,9 @@ contains
       b = average(viewport) ! bias = the average of the viewport
       w = maxval(viewport) - minval(viewport) - b ! Max[view] - Min[view] - bias
       gamma = real(size(row))/1000 ! a small gamma value
+
+      theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
+      print *, 'theta:', theta
 
       if (req%image) then
          precision = ZFP_HIGH_PRECISION
