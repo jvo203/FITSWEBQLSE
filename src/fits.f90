@@ -7624,7 +7624,7 @@ contains
       angle_max = 0.0
       step = 10
 
-      do i = -90, 90, step
+      do i = -90, 90-step, step
          angle = real(i)*deg2rad
          corr = correlation(angle, b, w, gamma, mu, view, mask)
 
@@ -7635,6 +7635,11 @@ contains
             angle_max = angle
          end if
       end do
+
+      ! further refine the angle with a bi-section method
+      ! the angle is between [angle - step, angle + step], in radians
+      ! angle_max = bisection(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad, b, w, gamma, mu, view, mask)
+
    end function find_angle
 
    subroutine realtime_hds_spectrum_request(item, req)
@@ -7714,7 +7719,7 @@ contains
       print *, 'x0:', x0, 'mu:', mu
 
       ! check the size of the viewport
-      if (size(viewport) .eq. 0) then
+      if (size(viewport) .eq. 0 .or. ieee_is_nan(mu)) then
          theta = ieee_value(0.0, ieee_quiet_nan)
       else
          ! initial parameters for the Gaussian
