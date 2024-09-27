@@ -7683,10 +7683,10 @@ contains
       mu = find_peak(row, mask, x0)
       print *, 'x0:', x0, 'mu:', mu
 
-      ! Gaussian parameters
+      ! initial parameters for the Gaussian
       b = average(viewport) ! bias = the average of the viewport
-      w = 1.0
-      gamma = 0.1
+      w = maxval(viewport) - minval(viewport) - b ! Max[view] - Min[view] - bias
+      gamma = real(size(row))/1000 ! a small gamma value
 
       if (req%image) then
          precision = ZFP_HIGH_PRECISION
