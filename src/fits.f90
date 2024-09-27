@@ -7607,6 +7607,33 @@ contains
       return
    end function correlation
 
+   function find_angle(b, w, gamma, mu, view, mask) result(angle_max)
+      implicit none
+
+      real(c_float), intent(in) :: b, w, gamma, mu
+      real(c_float), dimension(:,:), intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+
+      real, parameter :: deg2rad = 0.017453292519943295769236907684886
+
+      real(c_float) :: max_corr, corr
+      real(c_float) :: angle, angle_max
+      integer(c_int) :: i
+
+      max_corr = -huge(0.0)
+      angle_max = 0.0
+
+      do i = -180, 180, 10
+         angle = real(i)*deg2rad
+         corr = correlation(angle, b, w, gamma, mu, view, mask)
+
+         if (corr .gt. max_corr) then
+            max_corr = corr
+            angle_max = angle
+         end if
+      end do
+   end function find_angle
+
    subroutine realtime_hds_spectrum_request(item, req)
       use risk
       implicit none
