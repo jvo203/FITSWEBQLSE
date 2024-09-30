@@ -7697,7 +7697,7 @@ contains
       angle = 0.5*(angle1 + angle2)
    end function bisect_angle
 
-   function bisect_angle_derivative(a, b, b0, w, gamma, mu, view, mask) result(angle)
+   pure function bisect_angle_derivative(a, b, b0, w, gamma, mu, view, mask) result(angle)
       implicit none
 
       real(c_float), intent(in) :: a, b, b0, w, gamma, mu
@@ -7714,7 +7714,6 @@ contains
 
       deriv1 = derivative(angle1, b0, w, gamma, mu, view, mask)
       deriv2 = derivative(angle2, b0, w, gamma, mu, view, mask)
-      print *, 'deriv1:', deriv1, 'deriv2:', deriv2
 
       ! verify that the signs differ, if not return the mid-point
       if (sign(1.0, deriv1) .eq. sign(1.0, deriv2)) then
