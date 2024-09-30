@@ -7559,6 +7559,15 @@ contains
       y = b + w * exp(-gamma * (x - mu)**2)
    end function gaussian
 
+   pure function gaussian_derive(x, b, w, gamma, mu) result(y)
+      implicit none
+
+      real, intent(in) :: x, b, w, gamma, mu
+      real :: y
+
+      y = -2.0 * gamma * w * (x - mu) * exp(-gamma * (x - mu)**2)
+   end function gaussian_derive
+
    ! a rotation transform of (px, py) by a theta angle around the point (alpha, beta)
    pure subroutine rotate(px, py, alpha, beta, theta, qx, qy)
       implicit none
@@ -7574,6 +7583,21 @@ contains
       qx = alpha + dx * cos(theta) - dy * sin(theta)
       qy = beta + dx * sin(theta) + dy * cos(theta)
    end subroutine rotate
+
+   pure subroutine rotate_derive(px, py, alpha, beta, theta, dqx, dqy)
+      implicit none
+
+      real, intent(in) :: px, py, alpha, beta, theta
+      real, intent(out) :: dqx, dqy
+
+      real :: dx, dy
+
+      dx = px - alpha
+      dy = py - beta
+
+      dqx = -dx * sin(theta) - dy * cos(theta)
+      dqy = dx * cos(theta) - dy * sin(theta)
+   end subroutine rotate_derive
 
    ! a correlation between the target viewport and the rotated line
    pure function correlation(theta, b, w, gamma, mu, view, mask) result(corr)
@@ -7607,7 +7631,43 @@ contains
       return
    end function correlation
 
-   pure function bisect_angle_copilot(a, b, b0, w, gamma, mu, view, mask) result(angle)
+   ! find the first derivative of the correlation function with respect to the angle theta
+   pure function derivative(theta, b, w, gamma, mu, view, mask) result(deriv)
+      implicit none
+
+      real(c_float), intent(in) :: theta, b, w, gamma, mu
+      real(c_float), dimension(:,:), intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+
+      integer :: i, j, dimx, dimy
+      real :: deriv, qx, qy, dqx, dqy, x0, y0, rotated_derive
+
+      deriv = 0.0
+
+      dimx = size(view, 1)
+      dimy = size(view, 2)
+
+      x0 = mu
+      y0 = real(dimy)/2
+
+      do j = 1, dimy
+         do i = 1, dimx
+            if (mask(i, j)) then
+               call rotate(real(i), real(j), x0, y0, theta, qx, qy)
+               call rotate_derive(real(i), real(j), x0, y0, theta, dqx, dqy)
+
+               rotated_derive = gaussian_derive(qx, b, w, gamma, mu)
+               deriv = deriv + view(i, j) * rotated_derive * dqx
+            end if
+         end do
+      end do
+
+      return
+   end function derivative
+
+   ! this Copilot-suggested function has a flaw
+   ! for the best results a derivative of the correlation function should be used
+   pure function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
       implicit none
 
       real(c_float), intent(in) :: a, b, b0, w, gamma, mu
@@ -7635,9 +7695,9 @@ contains
       end do
 
       angle = 0.5*(angle1 + angle2)
-   end function bisect_angle_copilot
+   end function bisect_angle
 
-   pure function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
+   function bisect_angle_derivative(a, b, b0, w, gamma, mu, view, mask) result(angle)
       implicit none
 
       real(c_float), intent(in) :: a, b, b0, w, gamma, mu
@@ -7645,31 +7705,38 @@ contains
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
       real(c_float) :: angle, angle1, angle2
-      real(c_float) :: corr1, corr2, corr
+      real(c_float) :: deriv1, deriv2, deriv
 
       integer :: i
 
       angle1 = a
       angle2 = b
 
-      corr1 = correlation(angle1, b0, w, gamma, mu, view, mask)
-      corr2 = correlation(angle2, b0, w, gamma, mu, view, mask)
+      deriv1 = derivative(angle1, b0, w, gamma, mu, view, mask)
+      deriv2 = derivative(angle2, b0, w, gamma, mu, view, mask)
+      print *, 'deriv1:', deriv1, 'deriv2:', deriv2
 
-      do i = 1, 20
+      ! verify that the signs differ, if not return the mid-point
+      if (sign(1.0, deriv1) .eq. sign(1.0, deriv2)) then
          angle = 0.5*(angle1 + angle2)
-         corr = correlation(angle, b0, w, gamma, mu, view, mask)
+         return
+      end if
 
-         if (corr .gt. corr1) then
+      do i = 1, 10
+         angle = 0.5*(angle1 + angle2)
+         deriv = derivative(angle, b0, w, gamma, mu, view, mask)
+
+         ! examine the sign of the derivative at the mid-point
+         if (sign(1.0, deriv1) .eq. sign(1.0, deriv)) then
             angle1 = angle
-            corr1 = corr
          else
             angle2 = angle
-            corr2 = corr
+            ! deriv2 = derivative(angle2, b0, w, gamma, mu, view, mask)
          end if
       end do
 
       angle = 0.5*(angle1 + angle2)
-   end function bisect_angle
+   end function bisect_angle_derivative
 
    function find_angle(b, w, gamma, mu, view, mask) result(angle_max)
       implicit none
@@ -7702,7 +7769,8 @@ contains
 
       ! further refine the angle with a bi-section method
       ! the angle is between [angle - step, angle + step], in radians
-      angle_max = bisect_angle_copilot(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad, b, w, gamma, mu, view, mask)
+      angle_max = bisect_angle_derivative(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad,&
+      & b, w, gamma, mu, view, mask)
 
    end function find_angle
 
