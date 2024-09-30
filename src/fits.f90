@@ -7702,7 +7702,7 @@ contains
 
       ! further refine the angle with a bi-section method
       ! the angle is between [angle - step, angle + step], in radians
-      angle_max = bisect_angle(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad, b, w, gamma, mu, view, mask)
+      angle_max = bisect_angle_copilot(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad, b, w, gamma, mu, view, mask)
 
    end function find_angle
 
