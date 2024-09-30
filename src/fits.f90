@@ -7721,7 +7721,7 @@ contains
          return
       end if
 
-      do i = 1, 10
+      do i = 1, 20
          angle = 0.5*(angle1 + angle2)
          deriv = derivative(angle, b0, w, gamma, mu, view, mask)
 
