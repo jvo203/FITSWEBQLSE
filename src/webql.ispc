@@ -5,6 +5,11 @@ typedef unsigned int16 uint16_t;
 typedef unsigned int32 uint32_t;
 typedef unsigned int64 uint64_t;
 
+// test if FLT_MAX has been defined, if not define it
+#ifndef FLT_MAX
+#define FLT_MAX 3.402823466e+38F
+#endif
+
 /* FIXED-POINT COMPRESSION */
 #define BASE 4
 #define DIM 16
