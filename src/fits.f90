@@ -7576,7 +7576,7 @@ contains
    end subroutine rotate
 
    ! a correlation between the target viewport and the rotated line
-   function correlation(theta, b, w, gamma, mu, view, mask) result(corr)
+   pure function correlation(theta, b, w, gamma, mu, view, mask) result(corr)
       implicit none
 
       real(c_float), intent(in) :: theta, b, w, gamma, mu
@@ -7606,6 +7606,70 @@ contains
 
       return
    end function correlation
+
+   pure function bisect_angle_copilot(a, b, b0, w, gamma, mu, view, mask) result(angle)
+      implicit none
+
+      real(c_float), intent(in) :: a, b, b0, w, gamma, mu
+      real(c_float), dimension(:,:), intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+
+      real(c_float) :: angle, angle1, angle2
+      real(c_float) :: corr1, corr2
+
+      integer :: i
+
+      angle1 = a
+      angle2 = b
+
+      do i = 1, 10
+         angle = 0.5*(angle1 + angle2)
+         corr1 = correlation(angle1, b0, w, gamma, mu, view, mask)
+         corr2 = correlation(angle2, b0, w, gamma, mu, view, mask)
+
+         if (corr1 .gt. corr2) then
+            angle2 = angle
+         else
+            angle1 = angle
+         end if
+      end do
+
+      angle = 0.5*(angle1 + angle2)
+   end function bisect_angle_copilot
+
+   pure function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
+      implicit none
+
+      real(c_float), intent(in) :: a, b, b0, w, gamma, mu
+      real(c_float), dimension(:,:), intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+
+      real(c_float) :: angle, angle1, angle2
+      real(c_float) :: corr1, corr2, corr
+
+      integer :: i
+
+      angle1 = a
+      angle2 = b
+
+      corr1 = correlation(angle1, b0, w, gamma, mu, view, mask)
+      corr2 = correlation(angle2, b0, w, gamma, mu, view, mask)
+
+      do i = 1, 20
+         angle = 0.5*(angle1 + angle2)
+         corr = correlation(angle, b0, w, gamma, mu, view, mask)
+
+         if (corr .gt. corr1) then
+            angle1 = angle
+            corr1 = corr
+         else
+            angle2 = angle
+            corr2 = corr
+         end if
+      end do
+
+      angle = 0.5*(angle1 + angle2)
+   end function bisect_angle
 
    function find_angle(b, w, gamma, mu, view, mask) result(angle_max)
       implicit none
@@ -7638,7 +7702,7 @@ contains
 
       ! further refine the angle with a bi-section method
       ! the angle is between [angle - step, angle + step], in radians
-      ! angle_max = bisection(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad, b, w, gamma, mu, view, mask)
+      angle_max = bisect_angle(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad, b, w, gamma, mu, view, mask)
 
    end function find_angle
 
