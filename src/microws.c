@@ -2827,6 +2827,7 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
                     else
                         free(payload);
 #endif
+                    printf("[C] <write_ws_spectrum> sent a WebSocket message\n");
                 }
             }
         }
