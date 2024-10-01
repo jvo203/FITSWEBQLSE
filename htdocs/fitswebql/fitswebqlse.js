@@ -6169,7 +6169,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                         // X : uint32
                         // Y : uint32
-                        // THETA : float
+                        // THETA : float [rad]
                         var X = dv.getUint32(offset, endianness);
                         offset += 4;
 
