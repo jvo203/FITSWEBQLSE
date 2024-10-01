@@ -7861,6 +7861,9 @@ contains
 
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
          print *, 'theta:', theta , 'angle:', theta*180/3.1415926535897932384626433832795
+
+         ! y remains the same, x needs to be adjusted
+         x = x1 + int(nint(mu)) - 1
       end if
 
       if (req%image) then
