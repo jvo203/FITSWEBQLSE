@@ -1,8 +1,8 @@
 # 0. Homebrew
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# 1. gcc + gfortran
-    brew install gfortran
+# 1. gcc, gfortran, clang (llvm), and OpenMP
+    brew install gfortran gcc llvm libomp
 
 # 2. memory model
     -mcmodel=medium --> large
