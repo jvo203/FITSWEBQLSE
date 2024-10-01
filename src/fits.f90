@@ -1269,16 +1269,18 @@ module fits
          integer(c_int), value, intent(in) :: n, precision
       end subroutine write_ws_spectrum
 
-      ! void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, int precision);
-      subroutine write_ws_hds_spectra(session, seq_id, timestamp, elapsed, xspec, xmask, xlen, yspec, ymask, ylen, precision)&
+      ! void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, const int *x, const int *y, const float *theta, int precision);
+      subroutine write_ws_hds_spectra(session, seq_id, timestamp, elapsed, xspec, xmask, xlen, yspec, ymask, ylen,&
+      &x, y, theta, precision)&
       & BIND(C, name='write_ws_hds_spectra')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
          type(C_PTR), value :: session
          integer(c_int), intent(in) :: seq_id
-         real(c_float), intent(in) :: timestamp, elapsed
+         real(c_float), intent(in) :: timestamp, elapsed, theta
          type(C_PTR), value :: xspec, xmask, yspec, ymask
+         integer(c_int), intent(in) :: x, y
          integer(c_int), value, intent(in) :: xlen, ylen, precision
       end subroutine write_ws_hds_spectra
 
@@ -7878,7 +7880,7 @@ contains
 
       call write_ws_hds_spectra(req%session, req%seq_id, req%timestamp, elapsed,&
       &c_loc(xspec), c_loc(xmask), size(xspec),&
-      &c_loc(yspec), c_loc(ymask), size(yspec), precision)
+      &c_loc(yspec), c_loc(ymask), size(yspec), x, y, theta, precision)
 
       print *, 'realtime_hds_spectrum elapsed time:', elapsed, '[ms]'
 
