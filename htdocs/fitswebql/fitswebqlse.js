@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-09-19.0";
+    return "JS2024-10-01.0";
 }
 
 function uuidv4() {
@@ -6167,8 +6167,21 @@ async function open_websocket_connection(_datasetId, index) {
                         var yframe = new Uint8Array(received_msg, offset, ymask_len);
                         offset += ymask_len;
 
+                        // X : uint32
+                        // Y : uint32
+                        // THETA : float
+                        var X = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var Y = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var THETA = dv.getFloat32(offset, endianness);
+                        offset += 4;
+
                         /*console.log("HDS X-Y spectra: xlen:", xlen, "ylen:", ylen);
-                        console.log("HDS X-Y spectra: xcomp_len:", xcomp_len, "xmask_len:", xmask_len, "ycomp_len:", ycomp_len, "ymask_len:", ymask_len);*/
+                        console.log("HDS X-Y spectra: xcomp_len:", xcomp_len, "xmask_len:", xmask_len, "ycomp_len:", ycomp_len, "ymask_len:", ymask_len);
+                        console.log("HDS X-Y spectra: X:", X, "Y:", Y, "THETA:", THETA);*/
 
                         waitForModuleReady().then(() => {
                             // ZFP decoder part				

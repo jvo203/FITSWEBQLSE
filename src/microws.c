@@ -3015,8 +3015,12 @@ void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const f
 
         //  header
         size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
+
         // body
         msg_len += 6 * sizeof(uint32_t) + hds_size;
+
+        // x, y, theta
+        msg_len += 2 * sizeof(uint32_t) + sizeof(float);
 
         char *payload = NULL;
         size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
@@ -3024,6 +3028,9 @@ void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const f
 
         if (payload != NULL)
         {
+            uint32_t _x = (unsigned int)(*x);
+            uint32_t _y = (unsigned int)(*y);
+
             uint32_t id = (unsigned int)(*seq_id);
             uint32_t msg_type = 8;
             // 0 - spectrum, 1 - viewport,
@@ -3083,6 +3090,18 @@ void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const f
             // ycompressed_size
             memcpy((char *)payload + ws_offset, ycomp_mask, ycompressed_size);
             ws_offset += ycompressed_size;
+
+            // _x
+            memcpy((char *)payload + ws_offset, &_x, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // _y
+            memcpy((char *)payload + ws_offset, &_y, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // theta
+            memcpy((char *)payload + ws_offset, theta, sizeof(float));
+            ws_offset += sizeof(float);
 
             if (ws_offset != msg_len)
                 printf("[C] <write_ws_hds_spectra> size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
