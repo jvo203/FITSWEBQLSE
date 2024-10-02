@@ -2770,7 +2770,6 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
             // directly prepare and queue the WebSocket message
             if (zfpsize > 0)
             {
-                printf("[C] <write_ws_spectrum> preparing a WebSocket message\n");
                 size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + zfpsize;
 
                 char *payload = NULL;
@@ -2827,7 +2826,6 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
                     else
                         free(payload);
 #endif
-                    printf("[C] <write_ws_spectrum> sent a WebSocket message\n");
                 }
             }
         }
@@ -3237,7 +3235,6 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
     // directly prepare and queue the WebSocket message
     if (zfpsize > 0 && compressed_size > 0)
     {
-        printf("[C] <write_ws_viewport> preparing a WebSocket message\n");
         uint32_t view_width = width;
         uint32_t view_height = height;
         uint32_t pixels_len = zfpsize;
@@ -3322,7 +3319,6 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
             else
                 free(payload);
 #endif
-            printf("[C] <write_ws_viewport> sent a WebSocket message\n");
         }
     }
 

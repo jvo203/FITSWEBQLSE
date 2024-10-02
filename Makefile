@@ -288,7 +288,12 @@ endif
 	$(FORT) $(FLAGS) $(MOD) -o $@ -c $<
 
 fitswebqlse: $(OBJ)
+ifeq ($(UNAME_S),Darwin)
+	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBS) $(IPP) $(MKL) $(JEMALLOC)
+else
 	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBS) $(IPP) $(MKL)
+endif
+
 # $(TCMALLOC) # tcmalloc also seg. faults on small memory allocations; perhaps a buggy x265 library corrupts the heap?
 # $(JEMALLOC) # jemalloc apparently is still a bit buggy, causes segmentation faults
 
