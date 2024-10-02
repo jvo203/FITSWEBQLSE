@@ -7667,7 +7667,7 @@ contains
       return
    end function derivative
 
-   ! this Copilot-suggested function has a flaw
+   ! this GitHub Copilot-suggested function has a flaw
    ! for the best results a derivative of the correlation function should be used
    pure function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
       implicit none
