@@ -7732,7 +7732,6 @@ contains
             angle1 = angle
          else
             angle2 = angle
-            ! deriv2 = derivative(angle2, b0, w, gamma, mu, view, mask)
          end if
       end do
 
@@ -7862,10 +7861,13 @@ contains
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
 
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
-         print *, 'theta:', theta , 'angle:', theta*180/3.1415926535897932384626433832795
+         print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
+
+         x = max(1, x)
+         x = min(item%naxes(1), x)
       end if
 
       if (req%image) then
