@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-10-01.0";
+    return "JS2024-10-02.0";
 }
 
 function uuidv4() {
@@ -13536,6 +13536,9 @@ function setup_image_selection() {
     if (theme == 'bright')
         fillColour = 'black';
 
+    if (colourmap == "greyscale" || colourmap == "negative")
+        fillColour = "#C4A000";
+
     //sub-region selection rectangle
     svg.append("rect")
         .attr("id", "region")
@@ -13573,8 +13576,32 @@ function setup_image_selection() {
         .style("stroke-width", emStrokeWidth)
         .attr("opacity", 0.0);
 
-    if (colourmap == "greyscale" || colourmap == "negative")
-        fillColour = "#C4A000";
+    // Subaru HDS X-Y spectrum cross-hair
+    svg.append("line")
+        .attr("id", "xline")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", 0)
+        .attr("marker-start", "url(#head)")
+        .attr("marker-end", "url(#head)")
+        .style("stroke", fillColour)
+        .style("stroke-dasharray", ("1, 5, 1"))
+        .style("stroke-width", emStrokeWidth)
+        .attr("opacity", 0.0);
+
+    svg.append("line")
+        .attr("id", "yline")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", 0)
+        .attr("marker-start", "url(#head)")
+        .attr("marker-end", "url(#head)")
+        .style("stroke", fillColour)
+        .style("stroke-dasharray", ("1, 5, 1"))
+        .style("stroke-width", emStrokeWidth)
+        .attr("opacity", 0.0);
 
     if (zoom_shape == "square") {
         //zoom selection rectangle
