@@ -287,6 +287,7 @@ endif
 %.o: %.f90
 	$(FORT) $(FLAGS) $(MOD) -o $@ -c $<
 
+# due to a bug in the interaction between mimalloc and macOS Sequoia, reverted to jemalloc on Darwin
 fitswebqlse: $(OBJ)
 ifeq ($(UNAME_S),Darwin)
 	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBS) $(IPP) $(MKL) $(JEMALLOC)
