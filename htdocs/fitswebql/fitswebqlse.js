@@ -652,8 +652,8 @@ function fits2image(fitsData, image, elem, orig_x, orig_y) {
     return { x: x, y: y };
 }
 
-function plot_hds_crosshair(orig_x, orig_y, theta) {
-    console.log("plot_hds_crosshair:", orig_x, orig_y, theta);
+function plot_hds_crosshair(x0, y0, theta) {
+    // console.log("plot_hds_crosshair:", x0, y0, theta);
 
     if (mousedown)
         return;
@@ -679,26 +679,19 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
     var img_x = parseFloat(elem.getAttribute("x"));
     var img_y = parseFloat(elem.getAttribute("y"));
 
-    // first convert orig_x, orig_y from FITS to image coordinates
-    var image_point = fits2image(fitsData, image, elem, orig_x, orig_y);
-    let x0 = image_point.x;
-    let y0 = image_point.y;
-
-    console.log("x0:", x0, "y0:", y0);
-
     var x1, x2, y1, y2;
 
     // start with a non-rotated cross-hair in the original FITS coordinates
     // the X-axis
-    x1 = orig_x - fitsData.width;
-    y1 = orig_y;
+    x1 = x0 - fitsData.width;
+    y1 = y0;
 
-    x2 = orig_x + fitsData.width;
-    y2 = orig_y;
+    x2 = x0 + fitsData.width;
+    y2 = y0;
 
     // rotate the cross-hair
-    var p1 = rotate_point(x1, y1, orig_x, orig_y, -theta);
-    var p2 = rotate_point(x2, y2, orig_x, orig_y, -theta);
+    var p1 = rotate_point(x1, y1, x0, y0, -theta);
+    var p2 = rotate_point(x2, y2, x0, y0, -theta);
 
     // convert the rotated cross-hair to image coordinates
     p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
@@ -708,15 +701,15 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
     d3.select("#xline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 0.5);
 
     // the Y-axis
-    x1 = orig_x;
-    y1 = orig_y - fitsData.height;
+    x1 = x0;
+    y1 = y0 - fitsData.height;
 
-    x2 = orig_x;
-    y2 = orig_y + fitsData.height;
+    x2 = x0;
+    y2 = y0 + fitsData.height;
 
     // rotate the cross-hair
-    p1 = rotate_point(x1, y1, orig_x, orig_y, -theta);
-    p2 = rotate_point(x2, y2, orig_x, orig_y, -theta);
+    p1 = rotate_point(x1, y1, x0, y0, -theta);
+    p2 = rotate_point(x2, y2, x0, y0, -theta);
 
     // convert the rotated cross-hair to image coordinates
     p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
