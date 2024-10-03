@@ -660,7 +660,6 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
     var ay = (image_bounding_dims.height - 1) / (img_height - 0);
 
     let x0 = img_x + (x - image_bounding_dims.x1) / ax;
-    //var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect.getAttribute("y"));
     let y0 = img_y + ((image_bounding_dims.y1 + image_bounding_dims.height - 1) - y) / ay;
 
     console.log("x0:", x0, "y0:", y0);
@@ -669,12 +668,19 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
 
     // start with a non-rotated cross-hair
 
-    // update the xline
+    // the X-axis
     x1 = x0 - img_width;
     y1 = y0;
 
     x2 = x0 + img_width;
     y2 = y0;
+
+    // cap the x1 and x2 values
+    if (x1 < img_x)
+        x1 = img_x;
+
+    if (x2 > img_x + img_width)
+        x2 = img_x + img_width;
 
     /*var dx = img_width;
     var dy = img_height;
@@ -685,15 +691,24 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
     x2 = x0 + dx * Math.cos(theta);
     y2 = y0 + dy * Math.sin(theta);*/
 
+    // update the xline
     d3.select("#xline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1);
 
-    // update the yline
+    // the Y-axis
     x1 = x0;
     y1 = y0 - img_height;
 
     x2 = x0;
     y2 = y0 + img_height;
 
+    // cap the y1 and y2 values
+    if (y1 < img_y)
+        y1 = img_y;
+
+    if (y2 > img_y + img_height)
+        y2 = img_y + img_height;
+
+    // update the yline
     d3.select("#yline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1);
 }
 
