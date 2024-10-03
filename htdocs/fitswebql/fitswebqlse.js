@@ -623,6 +623,35 @@ function getStrokeStyle() {
     return style;
 }
 
+// a rotation transform of (px, py) by a theta angle around the point (alpha, beta)
+function rotate_point(px, py, alpha, beta, theta) {
+    const qx = Math.cos(theta) * (px - alpha) - Math.sin(theta) * (py - beta) + alpha;
+    const qy = Math.sin(theta) * (px - alpha) + Math.cos(theta) * (py - beta) + beta;
+
+    return { x: qx, y: qy };
+}
+
+// convert from FITS to image coordinates
+function fits2image(fitsData, image, elem, orig_x, orig_y) {
+    var image_bounding_dims = image.image_bounding_dims;
+
+    const elem_width = parseFloat(elem.getAttribute("width"));
+    const elem_height = parseFloat(elem.getAttribute("height"));
+    const elem_x = parseFloat(elem.getAttribute("x"));
+    const elem_y = parseFloat(elem.getAttribute("y"));
+
+    var x = orig_x * (image.width - 1) / (fitsData.width - 1);
+    var y = orig_y * (image.height - 1) / (fitsData.height - 1);
+
+    var ax = (image_bounding_dims.width - 1) / (elem_width - 0);
+    var ay = (image_bounding_dims.height - 1) / (elem_height - 0);
+
+    x = elem_x + (x - image_bounding_dims.x1) / ax;
+    y = elem_y + ((image_bounding_dims.y1 + image_bounding_dims.height - 1) - y) / ay;
+
+    return { x: x, y: y };
+}
+
 function plot_hds_crosshair(orig_x, orig_y, theta) {
     console.log("plot_hds_crosshair:", orig_x, orig_y, theta);
 
@@ -641,8 +670,6 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
     if (image == null)
         return;
 
-    var image_bounding_dims = image.image_bounding_dims;
-
     var elem = document.getElementById("image_rectangle");
     if (elem == null)
         return;
@@ -652,15 +679,10 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
     var img_x = parseFloat(elem.getAttribute("x"));
     var img_y = parseFloat(elem.getAttribute("y"));
 
-    // first convert orig_x, orig_y from FITS to image coordinates    
-    var x = orig_x * (image.width - 1) / (fitsData.width - 1);
-    var y = orig_y * (image.height - 1) / (fitsData.height - 1);
-
-    var ax = (image_bounding_dims.width - 1) / (img_width - 0);
-    var ay = (image_bounding_dims.height - 1) / (img_height - 0);
-
-    let x0 = img_x + (x - image_bounding_dims.x1) / ax;
-    let y0 = img_y + ((image_bounding_dims.y1 + image_bounding_dims.height - 1) - y) / ay;
+    // first convert orig_x, orig_y from FITS to image coordinates
+    var image_point = fits2image(fitsData, image, elem, orig_x, orig_y);
+    let x0 = image_point.x;
+    let y0 = image_point.y;
 
     console.log("x0:", x0, "y0:", y0);
 
@@ -6299,7 +6321,7 @@ async function open_websocket_connection(_datasetId, index) {
                                     // console.log("HDS X-Y spectra: elapsed: ", elapsed, "[ms]");
 
                                     if (!windowLeft) {
-                                        spectrum_stack[index - 1].push({ xspectrum: xspectrum, xmask: xmask, yspectrum: yspectrum, ymask: ymask, x0: X, y0: Y, angle: THETA, id: recv_seq_id });
+                                        spectrum_stack[index - 1].push({ xspectrum: xspectrum, xmask: xmask, yspectrum: yspectrum, ymask: ymask, x0: X - 1, y0: Y - 1, angle: THETA, id: recv_seq_id }); // -1 to convert from 1-based to 0-based
                                     };
                                 })
                                 .catch(e => console.error(e));
@@ -13813,7 +13835,7 @@ function setup_image_selection() {
                         plot_hds_spectrum(data.yspectrum, data.ymask, 1);
 
                         // update the cross-hair
-                        plot_hds_crosshair(data.x0 - 1, data.y0 - 1, data.angle); // -1 to convert from 1-based to 0-based
+                        plot_hds_crosshair(data.x0, data.y0, data.angle);
                     }
                 }
 
