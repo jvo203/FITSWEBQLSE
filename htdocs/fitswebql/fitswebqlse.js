@@ -688,50 +688,42 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
 
     var x1, x2, y1, y2;
 
-    // start with a non-rotated cross-hair
-
+    // start with a non-rotated cross-hair in the original FITS coordinates
     // the X-axis
-    x1 = x0 - img_width;
-    y1 = y0;
+    x1 = orig_x - fitsData.width;
+    y1 = orig_y;
 
-    x2 = x0 + img_width;
-    y2 = y0;
+    x2 = orig_x + fitsData.width;
+    y2 = orig_y;
 
-    // cap the x1 and x2 values
-    if (x1 < img_x)
-        x1 = img_x;
+    // rotate the cross-hair
+    var p1 = rotate_point(x1, y1, orig_x, orig_y, -theta);
+    var p2 = rotate_point(x2, y2, orig_x, orig_y, -theta);
 
-    if (x2 > img_x + img_width)
-        x2 = img_x + img_width;
-
-    /*var dx = img_width;
-    var dy = img_height;
-
-    x1 = x0 - dx * Math.cos(theta);
-    y1 = y0 - dy * Math.sin(theta);
-
-    x2 = x0 + dx * Math.cos(theta);
-    y2 = y0 + dy * Math.sin(theta);*/
+    // convert the rotated cross-hair to image coordinates
+    p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
+    p2 = fits2image(fitsData, image, elem, p2.x, p2.y);
 
     // update the xline
-    d3.select("#xline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 0.5);
+    d3.select("#xline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 0.5);
 
     // the Y-axis
-    x1 = x0;
-    y1 = y0 - img_height;
+    x1 = orig_x;
+    y1 = orig_y - fitsData.height;
 
-    x2 = x0;
-    y2 = y0 + img_height;
+    x2 = orig_x;
+    y2 = orig_y + fitsData.height;
 
-    // cap the y1 and y2 values
-    if (y1 < img_y)
-        y1 = img_y;
+    // rotate the cross-hair
+    p1 = rotate_point(x1, y1, orig_x, orig_y, -theta);
+    p2 = rotate_point(x2, y2, orig_x, orig_y, -theta);
 
-    if (y2 > img_y + img_height)
-        y2 = img_y + img_height;
+    // convert the rotated cross-hair to image coordinates
+    p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
+    p2 = fits2image(fitsData, image, elem, p2.x, p2.y);
 
     // update the yline
-    d3.select("#yline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 0.5);
+    d3.select("#yline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 0.5);
 }
 
 function plot_hds_spectrum(data, mask, index) {
