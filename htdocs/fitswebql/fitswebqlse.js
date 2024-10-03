@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-10-02.0";
+    return "JS2024-10-03.0";
 }
 
 function uuidv4() {
@@ -621,6 +621,80 @@ function getStrokeStyle() {
     }
 
     return style;
+}
+
+function plot_hds_crosshair(orig_x, orig_y, theta) {
+    console.log("plot_hds_crosshair:", orig_x, orig_y, theta);
+
+    if (mousedown)
+        return;
+
+    // check if theta is nan
+    if (isNaN(theta))
+        return;
+
+    var fitsData = fitsContainer[va_count - 1];
+    if (fitsData == null)
+        return;
+
+    var image = imageContainer[va_count - 1];
+    if (image == null)
+        return;
+
+    var image_bounding_dims = image.image_bounding_dims;
+
+    var elem = document.getElementById("image_rectangle");
+    if (elem == null)
+        return;
+
+    var img_width = parseFloat(elem.getAttribute("width"));
+    var img_height = parseFloat(elem.getAttribute("height"));
+    var img_x = parseFloat(elem.getAttribute("x"));
+    var img_y = parseFloat(elem.getAttribute("y"));
+
+    // first convert orig_x, orig_y from FITS to image coordinates    
+    var x = orig_x * (image.width - 1) / (fitsData.width - 1);
+    var y = orig_y * (image.height - 1) / (fitsData.height - 1);
+
+    var ax = (image_bounding_dims.width - 1) / (img_width - 0);
+    var ay = (image_bounding_dims.height - 1) / (img_height - 0);
+
+    let x0 = img_x + (x - image_bounding_dims.x1) / ax;
+    //var y = (image_bounding_dims.y1 + image_bounding_dims.height - 1) - ay * (mouse_position.y - rect.getAttribute("y"));
+    let y0 = img_y + ((image_bounding_dims.y1 + image_bounding_dims.height - 1) - y) / ay;
+
+    console.log("x0:", x0, "y0:", y0);
+
+    var x1, x2, y1, y2;
+
+    // start with a non-rotated cross-hair
+
+    // update the xline
+    x1 = x0 - img_width;
+    y1 = y0;
+
+    x2 = x0 + img_width;
+    y2 = y0;
+
+    /*var dx = img_width;
+    var dy = img_height;
+
+    x1 = x0 - dx * Math.cos(theta);
+    y1 = y0 - dy * Math.sin(theta);
+
+    x2 = x0 + dx * Math.cos(theta);
+    y2 = y0 + dy * Math.sin(theta);*/
+
+    d3.select("#xline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1);
+
+    // update the yline
+    x1 = x0;
+    y1 = y0 - img_height;
+
+    x2 = x0;
+    y2 = y0 + img_height;
+
+    d3.select("#yline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1);
 }
 
 function plot_hds_spectrum(data, mask, index) {
@@ -6210,7 +6284,7 @@ async function open_websocket_connection(_datasetId, index) {
                                     // console.log("HDS X-Y spectra: elapsed: ", elapsed, "[ms]");
 
                                     if (!windowLeft) {
-                                        spectrum_stack[index - 1].push({ xspectrum: xspectrum, xmask: xmask, yspectrum: yspectrum, ymask: ymask, id: recv_seq_id });
+                                        spectrum_stack[index - 1].push({ xspectrum: xspectrum, xmask: xmask, yspectrum: yspectrum, ymask: ymask, x0: X, y0: Y, angle: THETA, id: recv_seq_id });
                                     };
                                 })
                                 .catch(e => console.error(e));
@@ -13586,7 +13660,6 @@ function setup_image_selection() {
         .attr("marker-start", "url(#head)")
         .attr("marker-end", "url(#head)")
         .style("stroke", fillColour)
-        .style("stroke-dasharray", ("1, 5, 1"))
         .style("stroke-width", emStrokeWidth)
         .attr("opacity", 0.0);
 
@@ -13599,7 +13672,6 @@ function setup_image_selection() {
         .attr("marker-start", "url(#head)")
         .attr("marker-end", "url(#head)")
         .style("stroke", fillColour)
-        .style("stroke-dasharray", ("1, 5, 1"))
         .style("stroke-width", emStrokeWidth)
         .attr("opacity", 0.0);
 
@@ -13724,6 +13796,9 @@ function setup_image_selection() {
 
                         // Y direction
                         plot_hds_spectrum(data.yspectrum, data.ymask, 1);
+
+                        // update the cross-hair
+                        plot_hds_crosshair(data.x0 - 1, data.y0 - 1, data.angle); // -1 to convert from 1-based to 0-based
                     }
                 }
 
@@ -13884,6 +13959,21 @@ function setup_image_selection() {
                 .attr("opacity", 0.0);
 
             mouse_click_end = true;
+
+            // cancel the X-Y HDS spectrum cross-hair
+            d3.select("#xline")
+                .attr("x1", 0)
+                .attr("y1", 0)
+                .attr("x2", 0)
+                .attr("y2", 0)
+                .attr("opacity", 0.0);
+
+            d3.select("#yline")
+                .attr("x1", 0)
+                .attr("y1", 0)
+                .attr("x2", 0)
+                .attr("y2", 0)
+                .attr("opacity", 0.0);
 
             // clear the ViewportCanvas in WebGL
             if (viewport != null) {
