@@ -692,7 +692,7 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
     y2 = y0 + dy * Math.sin(theta);*/
 
     // update the xline
-    d3.select("#xline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1);
+    d3.select("#xline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 0.5);
 
     // the Y-axis
     x1 = x0;
@@ -709,7 +709,7 @@ function plot_hds_crosshair(orig_x, orig_y, theta) {
         y2 = img_y + img_height;
 
     // update the yline
-    d3.select("#yline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 1);
+    d3.select("#yline").attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2).attr("opacity", 0.5);
 }
 
 function plot_hds_spectrum(data, mask, index) {
