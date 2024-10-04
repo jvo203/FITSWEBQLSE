@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-10-04.1";
+    return "JS2024-10-05.0";
 }
 
 function uuidv4() {
@@ -694,14 +694,14 @@ function plot_hds_crosshair(x0, y0, theta) {
     // rotate the cross-hair
     var p1 = rotate_point(x1, y1, x0, y0, -theta);
     var p2 = rotate_point(x2, y2, x0, y0, -theta);
+    console.log("#xline p1:", p1, "p2:", p2);
 
     // convert the rotated cross-hair to image coordinates
     p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
     p2 = fits2image(fitsData, image, elem, p2.x, p2.y);
-    console.log("#xline p1:", p1, "p2:", p2);
 
     // update the xline
-    d3.select("#xline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 0.5);
+    d3.select("#xline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 1.0);
 
     // the Y-axis
     x1 = x0;
@@ -713,14 +713,14 @@ function plot_hds_crosshair(x0, y0, theta) {
     // rotate the cross-hair
     p1 = rotate_point(x1, y1, x0, y0, -theta);
     p2 = rotate_point(x2, y2, x0, y0, -theta);
+    console.log("#yline p1:", p1, "p2:", p2);
 
     // convert the rotated cross-hair to image coordinates
     p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
     p2 = fits2image(fitsData, image, elem, p2.x, p2.y);
-    console.log("#yline p1:", p1, "p2:", p2);
 
     // update the yline
-    d3.select("#yline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 0.5);
+    d3.select("#yline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 1.0);
 
     // set the HDS svg opacity
     d3.select("#hds_svg").attr("opacity", 1);
