@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-10-03.0";
+    return "JS2024-10-04.0";
 }
 
 function uuidv4() {
@@ -637,8 +637,8 @@ function fits2image(fitsData, image, elem, orig_x, orig_y) {
 
     const elem_width = parseFloat(elem.getAttribute("width"));
     const elem_height = parseFloat(elem.getAttribute("height"));
-    const elem_x = parseFloat(elem.getAttribute("x"));
-    const elem_y = parseFloat(elem.getAttribute("y"));
+    const elem_x = 0;//parseFloat(elem.getAttribute("x"));
+    const elem_y = 0;//parseFloat(elem.getAttribute("y"));
 
     var x = orig_x * (image.width - 1) / (fitsData.width - 1);
     var y = orig_y * (image.height - 1) / (fitsData.height - 1);
@@ -717,6 +717,9 @@ function plot_hds_crosshair(x0, y0, theta) {
 
     // update the yline
     d3.select("#yline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 0.5);
+
+    // set the HDS svg opacity
+    d3.select("#hds_svg").attr("opacity", 1);
 }
 
 function plot_hds_spectrum(data, mask, index) {
@@ -13635,6 +13638,15 @@ function setup_image_selection() {
     if (colourmap == "greyscale" || colourmap == "negative")
         fillColour = "#C4A000";
 
+    //svg image rectangle for zooming-in
+    var svg2 = svg.append("svg")
+        .attr("id", "hds_svg")
+        .attr("x", Math.round((width - img_width) / 2))
+        .attr("y", Math.round((height - img_height) / 2))
+        .attr("width", Math.round(img_width))
+        .attr("height", Math.round(img_height))
+        .attr("opacity", 0.0);
+
     //sub-region selection rectangle
     svg.append("rect")
         .attr("id", "region")
@@ -13673,7 +13685,7 @@ function setup_image_selection() {
         .attr("opacity", 0.0);
 
     // Subaru HDS X-Y spectrum cross-hair
-    svg.append("line")
+    svg2.append("line")
         .attr("id", "xline")
         .attr("x1", 0)
         .attr("y1", 0)
@@ -13685,7 +13697,7 @@ function setup_image_selection() {
         .style("stroke-width", emStrokeWidth)
         .attr("opacity", 0.0);
 
-    svg.append("line")
+    svg2.append("line")
         .attr("id", "yline")
         .attr("x1", 0)
         .attr("y1", 0)
@@ -13983,6 +13995,8 @@ function setup_image_selection() {
             mouse_click_end = true;
 
             // cancel the X-Y HDS spectrum cross-hair
+            d3.select("#hds_svg").attr("opacity", 0);
+
             d3.select("#xline")
                 .attr("x1", 0)
                 .attr("y1", 0)
