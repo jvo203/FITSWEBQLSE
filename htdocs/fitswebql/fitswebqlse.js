@@ -14580,6 +14580,7 @@ function setup_image_selection() {
                                     beam: zoom_shape,
                                     x: fitsX + 1,
                                     y: fitsY + 1,
+                                    tracking: peak_tracking,
                                     seq_id: sent_seq_id,
                                     timestamp: performance.now()
                                 };
@@ -16226,6 +16227,7 @@ function imageTimeout() {
                     beam: zoom_shape,
                     x: fitsX + 1,
                     y: fitsY + 1,
+                    tracking: peak_tracking,
                     seq_id: sent_seq_id,
                     timestamp: performance.now()
                 };
