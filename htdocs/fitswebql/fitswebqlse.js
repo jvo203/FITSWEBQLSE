@@ -9806,6 +9806,19 @@ function display_preferences(index) {
         })
         .html(htmlStr);
 
+    var htmlStr = peak_tracking ? '<span class="fas fa-check-square"></span> automatic peak tracking' : '<span class="far fa-square"></span> automatic peak tracking';
+    prefDropdown.append("li")
+        .append("a")
+        .attr("id", "peak_tracking")
+        .style('cursor', 'pointer')
+        .on("click", function () {
+            peak_tracking = !peak_tracking;
+            localStorage_write_boolean("peak_tracking", peak_tracking);
+            var htmlStr = peak_tracking ? '<span class="fas fa-check-square"></span> automatic peak tracking' : '<span class="far fa-square"></span> automatic peak tracking';
+            d3.select(this).html(htmlStr);
+        })
+        .html(htmlStr);
+
     var htmlStr = realtime_spectrum ? '<span class="fas fa-check-square"></span> realtime spectrum updates' : '<span class="far fa-square"></span> realtime spectrum updates';
     prefDropdown.append("li")
         .append("a")
@@ -15407,6 +15420,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 // console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
                                 if (!spectrum_view) {
+                                    d3.select("#peak_tracking").remove();
+
                                     process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
                                     if (has_json) {
@@ -15464,6 +15479,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         d3.select("#imageMenu").remove();
                                         d3.select("#splatMenu").remove();
                                         d3.select("#viewMenu").remove();
+                                        d3.select("#peak_tracking").remove();
                                         d3.select("#realtime_spectrum").remove();
                                         d3.select("#image_quality_li").remove();
 
@@ -20430,7 +20446,7 @@ async function mainRenderer() {
         }
 
         displayLimit = localStorage_read_number("displayLimit", 500);
-
+        peak_tracking = localStorage_read_boolean("peak_tracking", true);
         realtime_spectrum = localStorage_read_boolean("realtime_spectrum", true);
         realtime_video = localStorage_read_boolean("realtime_video", true);
         displayDownloadConfirmation = localStorage_read_boolean("displayDownloadConfirmation", true);
