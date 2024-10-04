@@ -696,6 +696,7 @@ function plot_hds_crosshair(x0, y0, theta) {
     // convert the rotated cross-hair to image coordinates
     p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
     p2 = fits2image(fitsData, image, elem, p2.x, p2.y);
+    console.log("#xline p1:", p1, "p2:", p2);
 
     // update the xline
     d3.select("#xline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 0.5);
@@ -714,6 +715,7 @@ function plot_hds_crosshair(x0, y0, theta) {
     // convert the rotated cross-hair to image coordinates
     p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
     p2 = fits2image(fitsData, image, elem, p2.x, p2.y);
+    console.log("#yline p1:", p1, "p2:", p2);
 
     // update the yline
     d3.select("#yline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 0.5);
