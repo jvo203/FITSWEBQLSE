@@ -120,6 +120,7 @@ struct image_spectrum_request
     float median;
     int x;
     int y;
+    bool tracking;
     int seq_id;
     float timestamp;
 

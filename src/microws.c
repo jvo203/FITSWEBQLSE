@@ -1233,6 +1233,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->median = NAN;
                 req->x = -1;
                 req->y = -1;
+                req->tracking = false;
                 req->seq_id = 0;
                 req->timestamp = 0.0;
                 req->session = NULL;
@@ -1339,6 +1340,11 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // 'y'
                     if (strncmp(frame_data + koff, "\"y\"", klen) == 0)
                         req->y = atoi2(frame_data + voff, vlen);
+
+                    // 'tracking'
+                    if (strncmp(frame_data + koff, "\"tracking\"", klen) == 0)
+                        if (strncmp(frame_data + voff, "true", vlen) == 0)
+                            req->tracking = true;
 
                     // 'seq_id'
                     if (strncmp(frame_data + koff, "\"seq_id\"", klen) == 0)

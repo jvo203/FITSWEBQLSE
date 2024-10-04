@@ -60,6 +60,7 @@ module fits
       real(c_double) :: frame_start, frame_end, ref_freq
       real(c_float) :: median
       integer(c_int) :: x, y
+      logical(kind=c_bool) :: tracking
       integer(c_int) :: seq_id
       real(c_float) :: timestamp
 
@@ -7851,7 +7852,7 @@ contains
       print *, 'x0:', x0, 'mu:', mu
 
       ! check the size of the viewport
-      if (size(viewport) .eq. 0 .or. ieee_is_nan(mu)) then
+      if ((.not. req%tracking) .or. (size(viewport) .eq. 0) .or. ieee_is_nan(mu)) then
          theta = 0.0
       else
          ! initial parameters for the Gaussian
