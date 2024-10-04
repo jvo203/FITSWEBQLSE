@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-10-04.0";
+    return "JS2024-10-04.1";
 }
 
 function uuidv4() {
@@ -681,12 +681,14 @@ function plot_hds_crosshair(x0, y0, theta) {
 
     var x1, x2, y1, y2;
 
-    // start with a non-rotated cross-hair in the original FITS coordinates
+    // take the largest dimension
+    var dim = Math.max(fitsData.width, fitsData.height);
+
     // the X-axis
-    x1 = x0 - fitsData.width;
+    x1 = x0 - dim;
     y1 = y0;
 
-    x2 = x0 + fitsData.width;
+    x2 = x0 + dim;
     y2 = y0;
 
     // rotate the cross-hair
@@ -703,10 +705,10 @@ function plot_hds_crosshair(x0, y0, theta) {
 
     // the Y-axis
     x1 = x0;
-    y1 = y0 - fitsData.height;
+    y1 = y0 - dim;
 
     x2 = x0;
-    y2 = y0 + fitsData.height;
+    y2 = y0 + dim;
 
     // rotate the cross-hair
     p1 = rotate_point(x1, y1, x0, y0, -theta);
