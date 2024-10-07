@@ -7775,6 +7775,83 @@ contains
 
    end function find_angle
 
+   subroutine trace_hds_spectrum(x1, y1, x2, y2, x0, y0, len, theta, view_pixels, view_mask, spectrum, mask)
+      implicit none
+
+      real(c_float), intent(in) :: x1, y1, x2, y2, x0, y0
+      integer, intent(in) :: len
+      real(c_float), intent(in) :: theta
+      real(c_float), dimension(:,:), intent(in) :: view_pixels
+      logical(kind=c_bool), dimension(:,:), intent(in) :: view_mask
+
+      real(c_float), dimension(:), allocatable, intent(out) :: spectrum
+      logical(kind=c_bool), dimension(:), allocatable, intent(out) :: mask
+
+      ! internal spectrum/mask arrays with length 'len'
+      real(c_float) :: line_pixels(len)
+      logical(kind=c_bool) :: line_mask(len)
+
+
+      real :: dx, dy, qx, qy, t, tx, ty, inc
+      integer :: x, y, prev_x, prev_y
+      integer :: count, nx, ny
+
+      ! the limits of the viewport
+      nx = size(view_pixels, 1)
+      ny = size(view_pixels, 2)
+
+      ! trace the line from (x1, y1) to (x2, y2) using a parameter t
+      prev_x = 0
+      prev_y = 0
+
+      dx = x2 - x1
+      dy = y2 - y1
+
+      inc = 1.0/real(len)
+      t = 0.0
+      count = 0
+
+      ! t goes from 0 to 1
+      do while (t .le. 1.0)
+         ! move along the line parametrised by a vector (dx, dy)
+         tx = x1 + t*dx
+         ty = y1 + t*dy
+
+         ! update the line parameter t
+         t = t + inc
+
+         call rotate(tx, ty, x0, y0, theta, qx, qy)
+
+         x = int(nint(qx))
+         y = int(nint(qy))
+
+         ! check the bounds
+         if ((x .lt. 1) .or. (x .gt. nx) .or. (y .lt. 1) .or. (y .gt. ny)) cycle
+
+         ! compare with the previous point
+         if ((x .eq. prev_x) .and. (y .eq. prev_y)) cycle
+
+         ! update the previous point
+         prev_x = x
+         prev_y = y
+
+         count = count + 1
+         line_pixels(count) = view_pixels(x, y)
+         line_mask(count) = view_mask(x, y)
+
+         ! print *, 'x:', x, 'y:', y, 't:', t, 'count:', count, 'pixel:', line_pixels(count), 'mask:', line_mask(count)
+      end do
+
+      print *, 'dx:', dx, 'dy:', dy, 'inc:', inc, 'count:', count
+
+      if (count .gt. 0) then
+         ! return the spectrum and mask
+         spectrum = line_pixels(1:count)
+         mask = line_mask(1:count)
+      end if
+
+   end subroutine trace_hds_spectrum
+
    subroutine realtime_hds_spectrum_request(item, req)
       use risk
       implicit none
@@ -7888,6 +7965,11 @@ contains
             call rotate(real(x2), real(y2), real(x), real(y), -theta, qx2, qy2)
             print *, 'X line qx1:', qx1, 'qy1:', qy1, 'qx2:', qx2, 'qy2:', qy2
 
+            if (allocated(xspec)) deallocate(xspec)
+            if (allocated(xmask)) deallocate(xmask)
+            call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
+            & 4*len, -theta, item%pixels, item%mask, xspec, xmask)
+
             ! the Y-axis
             x1 = x
             y1 = y - len
@@ -7900,6 +7982,10 @@ contains
             call rotate(real(x2), real(y2), real(x), real(y), -theta, qx2, qy2)
             print *, 'Y line qx1:', qx1, 'qy1:', qy1, 'qx2:', qx2, 'qy2:', qy2
 
+            if (allocated(yspec)) deallocate(yspec)
+            if (allocated(ymask)) deallocate(ymask)
+            call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
+            & 4*len, -theta, item%pixels, item%mask, yspec, ymask)
          end block
       end if
 
