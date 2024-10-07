@@ -7968,7 +7968,7 @@ contains
             if (allocated(xspec)) deallocate(xspec)
             if (allocated(xmask)) deallocate(xmask)
             call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
-            & 4*len, -theta, item%pixels, item%mask, xspec, xmask)
+            & 3*len, -theta, item%pixels, item%mask, xspec, xmask)
 
             ! the Y-axis
             x1 = x
@@ -7985,7 +7985,7 @@ contains
             if (allocated(yspec)) deallocate(yspec)
             if (allocated(ymask)) deallocate(ymask)
             call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
-            & 4*len, -theta, item%pixels, item%mask, yspec, ymask)
+            & 3*len, -theta, item%pixels, item%mask, yspec, ymask)
          end block
       end if
 
