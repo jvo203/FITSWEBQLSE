@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-10-05.0";
+    return "JS2024-10-07.0";
 }
 
 function uuidv4() {
@@ -694,7 +694,7 @@ function plot_hds_crosshair(x0, y0, theta) {
     // rotate the cross-hair
     var p1 = rotate_point(x1, y1, x0, y0, -theta);
     var p2 = rotate_point(x2, y2, x0, y0, -theta);
-    console.log("#xline p1:", p1, "p2:", p2);
+    // console.log("#xline p1:", p1, "p2:", p2);
 
     // convert the rotated cross-hair to image coordinates
     p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
@@ -713,7 +713,7 @@ function plot_hds_crosshair(x0, y0, theta) {
     // rotate the cross-hair
     p1 = rotate_point(x1, y1, x0, y0, -theta);
     p2 = rotate_point(x2, y2, x0, y0, -theta);
-    console.log("#yline p1:", p1, "p2:", p2);
+    // console.log("#yline p1:", p1, "p2:", p2);
 
     // convert the rotated cross-hair to image coordinates
     p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
