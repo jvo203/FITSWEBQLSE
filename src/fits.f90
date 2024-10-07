@@ -7869,6 +7869,38 @@ contains
 
          x = max(1, x)
          x = min(item%naxes(1), x)
+
+         block
+            integer :: len
+            real :: qx1, qx2, qy1, qy2
+
+            len = max(item%naxes(1), item%naxes(2))
+
+            ! the X-axis
+            x1 = x - len
+            y1 = y
+
+            x2 = x + len
+            y2 = y
+
+            ! rotate the line
+            call rotate(real(x1), real(y1), real(x), real(y), -theta, qx1, qy1)
+            call rotate(real(x2), real(y2), real(x), real(y), -theta, qx2, qy2)
+            print *, 'X line qx1:', qx1, 'qy1:', qy1, 'qx2:', qx2, 'qy2:', qy2
+
+            ! the Y-axis
+            x1 = x
+            y1 = y - len
+
+            x2 = x
+            y2 = y + len
+
+            ! rotate the line
+            call rotate(real(x1), real(y1), real(x), real(y), -theta, qx1, qy1)
+            call rotate(real(x2), real(y2), real(x), real(y), -theta, qx2, qy2)
+            print *, 'Y line qx1:', qx1, 'qy1:', qy1, 'qx2:', qx2, 'qy2:', qy2
+
+         end block
       end if
 
       if (req%image) then
