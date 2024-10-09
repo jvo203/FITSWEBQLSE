@@ -1,3 +1,7 @@
+## [5.1.12] - 2024-10-09
+
+* automatic peak detection & tracking in Subaru HDS 2D FITS spectra
+
 ## [5.1.11] - 2024-09-17
 
 * initial support for Subaru HDS 1D and 2D FITS spectra (including an integrated _*Atomic Spectra Database*_ from NIST with an optional _*redshift*_ support)
