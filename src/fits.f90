@@ -7760,7 +7760,7 @@ contains
          angle = real(i)*deg2rad
          corr = correlation(angle, b, w, gamma, mu, view, mask)
 
-         print *, 'angle [deg]:', i, 'correlation:', corr
+         ! print *, 'angle [deg]:', i, 'correlation:', corr
 
          if (corr .gt. max_corr) then
             max_corr = corr
@@ -7949,7 +7949,6 @@ contains
 
          block
             integer :: len
-            real :: qx1, qx2, qy1, qy2
 
             len = max(item%naxes(1), item%naxes(2))
 
@@ -7960,15 +7959,10 @@ contains
             x2 = x + len
             y2 = y
 
-            ! rotate the line
-            call rotate(real(x1), real(y1), real(x), real(y), -theta, qx1, qy1)
-            call rotate(real(x2), real(y2), real(x), real(y), -theta, qx2, qy2)
-            print *, 'X line qx1:', qx1, 'qy1:', qy1, 'qx2:', qx2, 'qy2:', qy2
-
             if (allocated(xspec)) deallocate(xspec)
             if (allocated(xmask)) deallocate(xmask)
             call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
-            & 3*len, -theta, item%pixels, item%mask, xspec, xmask)
+            & 4*len, -theta, item%pixels, item%mask, xspec, xmask)
 
             ! the Y-axis
             x1 = x
@@ -7977,15 +7971,10 @@ contains
             x2 = x
             y2 = y + len
 
-            ! rotate the line
-            call rotate(real(x1), real(y1), real(x), real(y), -theta, qx1, qy1)
-            call rotate(real(x2), real(y2), real(x), real(y), -theta, qx2, qy2)
-            print *, 'Y line qx1:', qx1, 'qy1:', qy1, 'qx2:', qx2, 'qy2:', qy2
-
             if (allocated(yspec)) deallocate(yspec)
             if (allocated(ymask)) deallocate(ymask)
             call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
-            & 3*len, -theta, item%pixels, item%mask, yspec, ymask)
+            & 4*len, -theta, item%pixels, item%mask, yspec, ymask)
          end block
       end if
 
