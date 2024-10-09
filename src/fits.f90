@@ -7952,6 +7952,9 @@ contains
 
             len = max(item%naxes(1), item%naxes(2))
 
+            !$omp parallel default(shared) private(x1,x2,y1,y2) num_threads(2)
+            !$omp single
+            !$omp task
             ! the X-axis
             x1 = x - len
             y1 = y
@@ -7963,7 +7966,11 @@ contains
             if (allocated(xmask)) deallocate(xmask)
             call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
             & 4*len, -theta, item%pixels, item%mask, xspec, xmask)
+            !$omp end task
+            !$omp end single
 
+            !$omp single
+            !$omp task
             ! the Y-axis
             x1 = x
             y1 = y - len
@@ -7975,6 +7982,9 @@ contains
             if (allocated(ymask)) deallocate(ymask)
             call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
             & 4*len, -theta, item%pixels, item%mask, yspec, ymask)
+            !$omp end task
+            !$omp end single
+            !$omp end parallel
          end block
       end if
 
