@@ -7530,15 +7530,15 @@ contains
       ! NaN by default
       centre = ieee_value(0.0, ieee_quiet_nan)
 
-      packed = pack(row, mask)
+      packed = pack(row, mask)      
 
       ! check the size of the packed row, if it's empty then return
       if (size(packed) .eq. 0) return
 
       mean = average(row)
-      threshold = mean + 3.0 * stdm(row, mean)
+      threshold = mean + 1.5 * stdm(row, mean) ! was 3.0 * std
 
-      print *, 'peaks threshold:', threshold
+      print *, 'peaks threshold:', threshold, 'max:', maxval(row), 'min:', minval(row)
 
       ! find the peaks
       call peak_detect(row, threshold, maxind, maxvals, minind, minvals)
