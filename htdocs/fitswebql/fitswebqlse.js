@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-10-07.0";
+    return "JS2024-10-18.0";
 }
 
 function uuidv4() {
@@ -33,7 +33,7 @@ const wasm_supported = (() => {
 
 console.log(wasm_supported ? "WebAssembly is supported" : "WebAssembly is not supported");
 
-const limit = 250; // Atomic Spectra Database lines number display limit
+const limit = 100; // Atomic Spectra Database lines number display limit
 
 String.prototype.insert_at = function (index, string) {
     return this.substr(0, index) + string + this.substr(index);
