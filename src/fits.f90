@@ -7669,24 +7669,25 @@ contains
    end function derivative
 
    ! a point (i, j) rotated by a theta angle around the point (x0, y0)
-   function rmse_gradient(i, j, x0, y0, theta, b, w, gamma, db, dw, dgamma, dtheta, dx0) result(y)
+   function rmse_gradient(i, j, x0, y0, theta, b, w, gamma, t, db, dw, dgamma, dtheta, dx0) result(y)
       implicit none
 
-      real, intent(in) :: i, j, x0, y0, theta, b, w, gamma
+      real, intent(in) :: i, j, x0, y0, theta, b, w, gamma, t
       real, intent(inout) :: db, dw, dgamma, dtheta, dx0
 
-      real :: y, inner, inner2, peak      
+      real :: y, inner, inner2, peak, error
 
       inner = (i - x0)*cos(theta) - (j - y0)*sin(theta)
       inner2 = inner**2
       peak = exp(-gamma * inner2)
-      y = b + w * peak      
+      y = b + w * peak
+      error = y - t
 
-      db = db + 1.0
-      dw = dw + peak
-      dgamma = dgamma - w * peak * inner2
-      dtheta = dtheta + 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))
-      dx0 = dx0 + 2.0 * gamma * w * peak * inner * cos(theta)
+      db = db + error
+      dw = dw + error * peak
+      dgamma = dgamma - error * w * peak * inner2
+      dtheta = dtheta + error * 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))
+      dx0 = dx0 + error * 2.0 * gamma * w * peak * inner * cos(theta)
 
    end function rmse_gradient
 
@@ -7702,7 +7703,7 @@ contains
       integer :: i, j, dimx, dimy, count
       real :: rmse, x0, y0, rotated      
 
-      rmse = 0.0
+      rmse = 0.0      
       count = 0
 
       db = 0.0
@@ -7721,7 +7722,7 @@ contains
          do i = 1, dimx
             if (mask(i, j)) then            
                ! call an integrated function: rotation + gradients
-               rotated = rmse_gradient(real(i), real(j), x0, y0, theta, b, w, gamma, db, dw, dgamma, dtheta, dmu)
+               rotated = rmse_gradient(real(i), real(j), x0, y0, theta, b, w, gamma, view(i, j), db, dw, dgamma, dtheta, dmu)               
                rmse = rmse + (view(i, j) - rotated)**2
                count = count + 1
             end if
