@@ -7668,6 +7668,28 @@ contains
       return
    end function derivative
 
+   ! a point (i, j) rotated by a theta angle around the point (x0, y0)
+   function rmse_gradient(i, j, x0, y0, theta, b, w, gamma, db, dw, dgamma, dtheta, dx0) result(y)
+      implicit none
+
+      real, intent(in) :: i, j, x0, y0, theta, b, w, gamma
+      real, intent(inout) :: db, dw, dgamma, dtheta, dx0
+
+      real :: y, inner, inner2, peak      
+
+      inner = (i - x0)*cos(theta) - (j - y0)*sin(theta)
+      inner2 = inner**2
+      peak = exp(-gamma * inner2)
+      y = b + w * peak      
+
+      db = db + 1.0
+      dw = dw + peak
+      dgamma = dgamma - w * peak * inner2
+      dtheta = dtheta + 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))
+      dx0 = dx0 + 2.0 * gamma * w * peak * inner * cos(theta)
+
+   end function rmse_gradient
+
    ! find the gradient of the RMS error function with respect to theta, b, w, gamma and mu
    pure function gradient(theta, b, w, gamma, mu, view, mask) result(rmse)
       implicit none
@@ -7677,7 +7699,7 @@ contains
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
       integer :: i, j, dimx, dimy
-      real :: rmse, qx, qy, x0, y0, rotated
+      real :: rmse, x0, y0, rotated
 
       rmse = 0.0
 
@@ -7691,7 +7713,7 @@ contains
          do i = 1, dimx
             if (mask(i, j)) then
                ! call rotate(real(i), real(j), x0, y0, theta, qx, qy)
-               ! rotated = gaussian(qx, b, w, gamma, mu)               
+               ! rotated = gaussian(qx, b, w, gamma, x0)               
                ! call an integrated function: rotated + gradients
                rmse = rmse + (view(i, j) - rotated)**2
             end if
