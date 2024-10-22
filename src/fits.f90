@@ -7668,39 +7668,40 @@ contains
       return
    end function derivative
 
-   ! this GitHub Copilot-suggested function has a flaw
-   ! for the best results a derivative of the correlation function should be used
-   pure function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
+   ! find the gradient of the RMS error function with respect to theta, b, w, gamma and mu
+   pure function gradient(theta, b, w, gamma, mu, view, mask) result(rmse)
       implicit none
 
-      real(c_float), intent(in) :: a, b, b0, w, gamma, mu
+      real(c_float), intent(in) :: theta, b, w, gamma, mu
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
-      real(c_float) :: angle, angle1, angle2
-      real(c_float) :: corr1, corr2
+      integer :: i, j, dimx, dimy
+      real :: rmse, qx, qy, x0, y0, rotated
 
-      integer :: i
+      rmse = 0.0
 
-      angle1 = a
-      angle2 = b
+      dimx = size(view, 1)
+      dimy = size(view, 2)
 
-      do i = 1, 10
-         angle = 0.5*(angle1 + angle2)
-         corr1 = correlation(angle1, b0, w, gamma, mu, view, mask)
-         corr2 = correlation(angle2, b0, w, gamma, mu, view, mask)
+      x0 = mu
+      y0 = real(dimy)/2
 
-         if (corr1 .gt. corr2) then
-            angle2 = angle
-         else
-            angle1 = angle
-         end if
+      do j = 1, dimy
+         do i = 1, dimx
+            if (mask(i, j)) then
+               ! call rotate(real(i), real(j), x0, y0, theta, qx, qy)
+               ! rotated = gaussian(qx, b, w, gamma, mu)               
+               ! call an integrated function: rotated + gradients
+               rmse = rmse + (view(i, j) - rotated)**2
+            end if
+         end do
       end do
 
-      angle = 0.5*(angle1 + angle2)
-   end function bisect_angle
+      return
+   end function gradient
 
-   pure function bisect_angle_derivative(a, b, b0, w, gamma, mu, view, mask) result(angle)
+   pure function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
       implicit none
 
       real(c_float), intent(in) :: a, b, b0, w, gamma, mu
@@ -7737,7 +7738,7 @@ contains
       end do
 
       angle = 0.5*(angle1 + angle2)
-   end function bisect_angle_derivative
+   end function bisect_angle
 
    function find_angle(b, w, gamma, mu, view, mask) result(angle_max)
       implicit none
@@ -7770,7 +7771,7 @@ contains
 
       ! further refine the angle with a bi-section method
       ! the angle is between [angle - step, angle + step], in radians
-      angle_max = bisect_angle_derivative(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad,&
+      angle_max = bisect_angle(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad,&
       & b, w, gamma, mu, view, mask)
 
    end function find_angle
