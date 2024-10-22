@@ -7691,17 +7691,25 @@ contains
    end function rmse_gradient
 
    ! find the gradient of the RMS error function with respect to theta, b, w, gamma and mu
-   pure function gradient(theta, b, w, gamma, mu, view, mask) result(rmse)
+   function gradient(theta, b, w, gamma, mu, db, dw, dgamma, dtheta, dmu, view, mask) result(rmse)
       implicit none
 
       real(c_float), intent(in) :: theta, b, w, gamma, mu
+      real(c_float), intent(out) :: db, dw, dgamma, dtheta, dmu
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
-      integer :: i, j, dimx, dimy
-      real :: rmse, x0, y0, rotated
+      integer :: i, j, dimx, dimy, count
+      real :: rmse, x0, y0, rotated      
 
       rmse = 0.0
+      count = 0
+
+      db = 0.0
+      dw = 0.0
+      dgamma = 0.0
+      dtheta = 0.0
+      dmu = 0.0      
 
       dimx = size(view, 1)
       dimy = size(view, 2)
@@ -7711,17 +7719,51 @@ contains
 
       do j = 1, dimy
          do i = 1, dimx
-            if (mask(i, j)) then
-               ! call rotate(real(i), real(j), x0, y0, theta, qx, qy)
-               ! rotated = gaussian(qx, b, w, gamma, x0)               
-               ! call an integrated function: rotated + gradients
+            if (mask(i, j)) then            
+               ! call an integrated function: rotation + gradients
+               rotated = rmse_gradient(real(i), real(j), x0, y0, theta, b, w, gamma, db, dw, dgamma, dtheta, dmu)
                rmse = rmse + (view(i, j) - rotated)**2
+               count = count + 1
             end if
          end do
       end do
 
-      return
+      if (count .gt. 0) then
+         rmse = sqrt(rmse/real(count))
+         db = db / real(count)
+         dw = dw / real(count)
+         dgamma = dgamma / real(count)
+         dtheta = dtheta / real(count)
+         dmu = dmu / real(count)
+      end if
    end function gradient
+
+   subroutine gradient_descent(b, w, gamma, mu, theta, view, mask, alpha, max_iter, tol)      
+      implicit none
+
+      real(c_float), intent(inout) :: b, w, gamma, mu, theta
+      real(c_float), intent(in) :: alpha, tol
+      real(c_float), dimension(:,:), intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      integer(c_int), intent(in) :: max_iter            
+      real(c_float) :: db, dw, dgamma, dtheta, dmu      
+      real(c_float) :: rmse, rmse1
+      integer :: iter      
+
+      do iter = 1, max_iter
+         rmse = gradient(theta, b, w, gamma, mu, db, dw, dgamma, dtheta, dmu, view, mask)
+         print *, 'iter:', iter, 'b:', b, 'w:', w, 'gamma:', gamma, 'mu:', mu, 'rmse:', rmse
+
+         ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
+
+         ! update the parameters
+         b = b + alpha * db
+         w = w + alpha * dw
+         gamma = gamma + alpha * dgamma         
+         mu = mu + alpha * dmu
+         theta = theta + alpha * dtheta
+      end do
+   end subroutine gradient_descent
 
    pure function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
       implicit none
@@ -7962,7 +8004,7 @@ contains
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
 
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
-         print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
+         print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795         
 
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
