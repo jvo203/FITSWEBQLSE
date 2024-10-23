@@ -7801,18 +7801,18 @@ contains
       integer(c_int), intent(in) :: max_iter            
       real(c_float), intent(in) :: b0, w0, gamma0, mu0, theta0
 
-      real(c_float) :: db, dw, dgamma, dtheta, dmu      
+      real(c_float) :: db, dw, alpha, dalpha, dtheta, dmu      
       real(c_float) :: rmse, rmse1
       integer :: iter
 
       b = b0
       w = w0
-      gamma = gamma0
+      alpha = log(gamma0)
       mu = mu0
       theta = theta0
 
       do iter = 1, max_iter
-         rmse = gradient(theta, b, w, gamma, mu, db, dw, dgamma, dtheta, dmu, view, mask)
+         rmse = gradient(theta, b, w, alpha, mu, db, dw, dalpha, dtheta, dmu, view, mask)
          print *, 'iter:', iter, 'b:', b, 'w:', w, 'gamma:', gamma, 'theta:', theta, 'mu:', mu, 'rmse:', rmse
 
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
@@ -7820,10 +7820,13 @@ contains
          ! update the parameters
          b = b - eta * db
          w = w - eta * dw
-         ! gamma = gamma - eta * dgamma         
+         ! gamma = gamma - eta * dgamma
+         alpha = alpha - (0.1 * eta) * dalpha
          ! mu = mu - eta * dmu
          ! theta = theta - eta * dtheta
       end do
+
+      gamma = exp(alpha)
    end subroutine gradient_descent
 
    function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
