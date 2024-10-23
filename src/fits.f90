@@ -7821,7 +7821,7 @@ contains
          b = b - eta * db
          w = w - eta * dw
          ! gamma = gamma - eta * dgamma
-         alpha = alpha - (0.1 * eta) * dalpha
+         alpha = alpha - eta * dalpha
          ! mu = mu - eta * dmu
          ! theta = theta - eta * dtheta
       end do
