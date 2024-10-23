@@ -7730,6 +7730,7 @@ contains
 
    ! find the gradient of the RMS error function with respect to theta, b, w, gamma and mu
    function gradient(theta, b, w, gamma, mu, db, dw, dgamma, dtheta, dmu, view, mask) result(rmse)
+      use omp_lib
       implicit none
 
       real(c_float), intent(in) :: theta, b, w, gamma, mu
@@ -7737,7 +7738,7 @@ contains
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
-      integer :: i, j, dimx, dimy, count
+      integer :: i, j, dimx, dimy, count, max_threads
       real :: rmse, x0, y0, rotated      
 
       rmse = 0.0      
@@ -7755,6 +7756,16 @@ contains
       x0 = mu
       y0 = real(dimy)/2
 
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+
+      ! use OpenMP to parallelize the loop, reducing the gradients
+
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(view, mask, dimx, dimy, x0, y0, b, w, gamma, theta)&
+      !$omp& PRIVATE(i, j, rotated)&
+      !$omp& REDUCTION(+:count, rmse, db, dw, dgamma, dtheta, dmu)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
       do j = 1, dimy
          do i = 1, dimx
             if (mask(i, j)) then
@@ -7766,6 +7777,8 @@ contains
             end if
          end do
       end do
+      !$omp END DO
+      !$omp END PARALLEL
 
       if (count .gt. 0) then
          rmse = sqrt(rmse/real(count))
@@ -7786,9 +7799,10 @@ contains
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
       integer(c_int), intent(in) :: max_iter            
       real(c_float), intent(in) :: b0, w0, gamma0, mu0, theta0
+
       real(c_float) :: db, dw, dgamma, dtheta, dmu      
       real(c_float) :: rmse, rmse1
-      integer :: iter      
+      integer :: iter
 
       b = b0
       w = w0
