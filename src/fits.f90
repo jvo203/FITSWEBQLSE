@@ -7551,6 +7551,17 @@ contains
       centre = find_nearest(maxind, x)
    end function find_peak
 
+   ! a point (i, j) rotated by a theta angle around the point (x0, y0)
+   pure function rotated_gaussian(i, j, x0, y0, b, w, gamma, theta) result(y)
+      implicit none
+
+      real(c_float), intent(in) :: i, j, x0, y0, theta, b, w, gamma
+      real(c_float) :: y, inner
+
+      inner = (i - x0)*cos(theta) - (j - y0)*sin(theta)
+      y = b + w * exp(-gamma * inner**2)
+   end function rotated_gaussian
+
    ! a single Gaussian activation function
    ! \[CapitalPhi][x_, b_, w_, \[Gamma]_, \[Mu]_] = b + w Exp[-\[Gamma] (x - \[Mu])^2]
    pure function gaussian(x, b, w, gamma, mu) result(y)
@@ -7603,15 +7614,16 @@ contains
    end subroutine rotate_derive
 
    ! a correlation between the target viewport and the rotated line
-   pure function correlation(theta, b, w, gamma, mu, view, mask) result(corr)
+   function correlation(theta, b, w, gamma, mu, view, mask) result(corr)
+      use omp_lib
       implicit none
 
       real(c_float), intent(in) :: theta, b, w, gamma, mu
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
-      integer :: i, j, dimx, dimy
-      real :: corr, qx, qy, x0, y0, rotated
+      integer :: i, j, dimx, dimy, max_threads
+      real :: corr, x0, y0
 
       corr = 0.0
 
@@ -7621,22 +7633,32 @@ contains
       x0 = mu
       y0 = real(dimy)/2
 
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+
+      ! use OpenMP to parallelize the loop, reducing +:corr
+
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(view, mask, dimx, dimy, x0, y0, b, w, gamma, theta)&
+      !$omp& PRIVATE(i, j)&
+      !$omp& REDUCTION(+:corr)&      
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
       do j = 1, dimy
          do i = 1, dimx
-            if (mask(i, j)) then
-               call rotate(real(i), real(j), x0, y0, theta, qx, qy)
-               rotated = gaussian(qx, b, w, gamma, mu)
-               corr = corr + view(i, j) * rotated
+            if (mask(i, j)) then               
+               corr = corr + view(i, j) * rotated_gaussian(real(i), real(j), x0, y0, b, w, gamma, theta)
             end if
          end do
       end do
+      !$omp END DO
+      !$omp END PARALLEL
 
       return
    end function correlation
 
    ! find the first derivative of the correlation function with respect to the angle theta
    function derivative_theta(theta, b, w, gamma, mu, view, mask) result(deriv)
-   use omp_lib
+      use omp_lib
       implicit none
 
       real(c_float), intent(in) :: theta, b, w, gamma, mu
