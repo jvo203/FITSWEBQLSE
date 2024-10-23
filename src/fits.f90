@@ -7703,17 +7703,18 @@ contains
    end function derivative_theta
 
    ! a point (i, j) rotated by a theta angle around the point (x0, y0)
-   function rmse_gradient(i, j, x0, y0, theta, b, w, gamma, t, db, dw, dgamma, dtheta, dx0) result(y)
+   function rmse_gradient(i, j, x0, y0, theta, b, w, alpha, t, db, dw, dalpha, dtheta, dx0) result(y)
       implicit none
 
-      real, intent(in) :: i, j, x0, y0, theta, b, w, gamma, t
-      real, intent(inout) :: db, dw, dgamma, dtheta, dx0
+      real, intent(in) :: i, j, x0, y0, theta, b, w, alpha, t
+      real, intent(inout) :: db, dw, dalpha, dtheta, dx0
 
-      real :: y, inner, inner2, peak, error
+      real :: y, inner, inner2, gamma, peak, error
 
       ! intermediate variables
       inner = (i - x0)*cos(theta) - (j - y0)*sin(theta)
       inner2 = inner**2
+      gamma = exp(alpha)
       peak = exp(-gamma * inner2)
 
       ! output and error
@@ -7722,7 +7723,7 @@ contains
 
       db = db + error
       dw = dw + error * peak
-      dgamma = dgamma - error * w * peak * inner2
+      dalpha = dalpha - error * w * peak * inner2 * gamma
       dtheta = dtheta + error * 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))
       dx0 = dx0 + error * 2.0 * gamma * w * peak * inner * cos(theta)
 
