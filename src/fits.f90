@@ -7803,8 +7803,8 @@ contains
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
 
          ! update the parameters
-         ! b = b - eta * db
-         ! w = w - eta * dw
+         b = b - eta * db
+         w = w - eta * dw
          ! gamma = gamma - eta * dgamma         
          ! mu = mu - eta * dmu
          ! theta = theta - eta * dtheta
@@ -8054,7 +8054,7 @@ contains
          print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795         
 
          ! refine the parameters with a gradient descent
-         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.01, 1, 0.001, b, w, gamma, mu, theta)
+         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 10, 0.001, b, w, gamma, mu, theta)
          ! print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu              
 
          ! y remains the same, x needs to be adjusted
