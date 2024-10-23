@@ -7530,7 +7530,7 @@ contains
       ! NaN by default
       centre = ieee_value(0.0, ieee_quiet_nan)
 
-      packed = pack(row, mask)      
+      packed = pack(row, mask)
 
       ! check the size of the packed row, if it's empty then return
       if (size(packed) .eq. 0) return
@@ -7640,12 +7640,12 @@ contains
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(view, mask, dimx, dimy, x0, y0, b, w, gamma, theta)&
       !$omp& PRIVATE(i, j)&
-      !$omp& REDUCTION(+:corr)&      
+      !$omp& REDUCTION(+:corr)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do j = 1, dimy
          do i = 1, dimx
-            if (mask(i, j)) then               
+            if (mask(i, j)) then
                corr = corr + view(i, j) * rotated_gaussian(real(i), real(j), x0, y0, b, w, gamma, theta)
             end if
          end do
@@ -7675,14 +7675,14 @@ contains
 
       x0 = mu
       y0 = real(dimy)/2
-      
+
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
 
       ! use OpenMP to parallelize the loop, reducing +:deriv
       !$omp PARALLEL DEFAULT(SHARED) SHARED(view, mask, dimx, dimy, x0, y0, theta, b, w, gamma, mu)&
       !$omp& PRIVATE(i, j, qx, qy, dqx, dqy, rotated_derive)&
-      !$omp& REDUCTION(+:deriv)&      
+      !$omp& REDUCTION(+:deriv)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do j = 1, dimy
@@ -7740,16 +7740,16 @@ contains
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
       integer :: i, j, dimx, dimy, count, max_threads
-      real :: rmse, x0, y0, rotated      
+      real :: rmse, x0, y0, rotated
 
-      rmse = 0.0      
+      rmse = 0.0
       count = 0
 
       db = 0.0
       dw = 0.0
       dalpha = 0.0
       dtheta = 0.0
-      dmu = 0.0      
+      dmu = 0.0
 
       dimx = size(view, 1)
       dimy = size(view, 2)
@@ -7794,14 +7794,14 @@ contains
    subroutine gradient_descent(b, w, gamma, mu, theta, view, mask, eta, max_iter, tol, b0, w0, gamma0, mu0, theta0)
       implicit none
 
-      real(c_float), intent(inout) :: b, w, gamma, mu, theta      
+      real(c_float), intent(inout) :: b, w, gamma, mu, theta
       real(c_float), intent(in) :: eta, tol
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
-      integer(c_int), intent(in) :: max_iter            
+      integer(c_int), intent(in) :: max_iter
       real(c_float), intent(in) :: b0, w0, gamma0, mu0, theta0
 
-      real(c_float) :: db, dw, alpha, dalpha, dtheta, dmu      
+      real(c_float) :: db, dw, alpha, dalpha, dtheta, dmu
       real(c_float) :: rmse, rmse1
       integer :: iter
 
@@ -7813,7 +7813,7 @@ contains
 
       do iter = 1, max_iter
          rmse = gradient(theta, b, w, alpha, mu, db, dw, dalpha, dtheta, dmu, view, mask)
-         print *, 'iter:', iter, 'b:', b, 'w:', w, 'gamma:', gamma, 'theta:', theta, 'mu:', mu, 'rmse:', rmse
+         print *, 'iter:', iter, 'b:', b, 'w:', w, 'alpha:', alpha, 'gamma:', exp(alpha), 'theta:', theta, 'mu:', mu, 'rmse:', rmse
 
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
 
@@ -8069,11 +8069,11 @@ contains
 
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
          ! theta = find_angle(b, w, gamma, x1 + mu - 1, item%pixels, item%mask) ! using the whole image
-         print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795         
+         print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
          ! refine the parameters with a gradient descent
          call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 10, 0.001, b, w, gamma, mu, theta)
-         ! print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu              
+         ! print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu
 
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
