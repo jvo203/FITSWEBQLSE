@@ -7659,7 +7659,7 @@ contains
 
       ! use OpenMP to parallelize the loop, reducing +:deriv
       !$omp PARALLEL DEFAULT(SHARED) SHARED(view, mask, dimx, dimy, x0, y0, theta, b, w, gamma, mu)&
-      !$omp& PRIVATE(i,j, qx, qy, dqx, dqy, rotated_derive)&
+      !$omp& PRIVATE(i, j, qx, qy, dqx, dqy, rotated_derive)&
       !$omp& REDUCTION(+:deriv)&      
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
