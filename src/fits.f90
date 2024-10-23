@@ -7739,11 +7739,11 @@ contains
       end if
    end function gradient
 
-   subroutine gradient_descent(b, w, gamma, mu, theta, view, mask, alpha, max_iter, tol)      
+   subroutine gradient_descent(b, w, gamma, mu, theta, view, mask, eta, max_iter, tol)      
       implicit none
 
       real(c_float), intent(inout) :: b, w, gamma, mu, theta
-      real(c_float), intent(in) :: alpha, tol
+      real(c_float), intent(in) :: eta, tol
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
       integer(c_int), intent(in) :: max_iter            
@@ -7758,11 +7758,11 @@ contains
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
 
          ! update the parameters
-         b = b + alpha * db
-         w = w + alpha * dw
-         gamma = gamma + alpha * dgamma         
-         mu = mu + alpha * dmu
-         theta = theta + alpha * dtheta
+         b = b + eta * db
+         w = w + eta * dw
+         gamma = gamma + eta * dgamma         
+         mu = mu + eta * dmu
+         theta = theta + eta * dtheta
       end do
    end subroutine gradient_descent
 
@@ -8006,6 +8006,9 @@ contains
 
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
          print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795         
+
+         ! refine the parameters further with a gradient descent
+         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.01, 100, 0.001)
 
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
