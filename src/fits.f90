@@ -7711,9 +7711,12 @@ contains
 
       real :: y, inner, inner2, peak, error
 
+      ! intermediate variables
       inner = (i - x0)*cos(theta) - (j - y0)*sin(theta)
       inner2 = inner**2
       peak = exp(-gamma * inner2)
+
+      ! output and error
       y = b + w * peak
       error = y - t
 
@@ -7758,7 +7761,7 @@ contains
                ! call an integrated function: rotation + gradients
                rotated = rmse_gradient(real(i), real(j), x0, y0, theta, b, w, gamma, view(i, j), db, dw, dgamma, dtheta, dmu)
 
-               rmse = rmse + (view(i, j) - rotated)**2
+               rmse = rmse + (rotated - view(i, j))**2
                count = count + 1
             end if
          end do
