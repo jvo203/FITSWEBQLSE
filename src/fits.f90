@@ -7635,14 +7635,15 @@ contains
    end function correlation
 
    ! find the first derivative of the correlation function with respect to the angle theta
-   pure function derivative(theta, b, w, gamma, mu, view, mask) result(deriv)
+   function derivative_theta(theta, b, w, gamma, mu, view, mask) result(deriv)
+   use omp_lib
       implicit none
 
       real(c_float), intent(in) :: theta, b, w, gamma, mu
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
-      integer :: i, j, dimx, dimy
+      integer :: i, j, dimx, dimy, max_threads
       real :: deriv, qx, qy, dqx, dqy, x0, y0, rotated_derive
 
       deriv = 0.0
@@ -7652,7 +7653,16 @@ contains
 
       x0 = mu
       y0 = real(dimy)/2
+      
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
 
+      ! use OpenMP to parallelize the loop, reducing +:deriv
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(view, mask, dimx, dimy, x0, y0, theta, b, w, gamma, mu)&
+      !$omp& PRIVATE(i,j, qx, qy, dqx, dqy, rotated_derive)&
+      !$omp& REDUCTION(+:deriv)&      
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
       do j = 1, dimy
          do i = 1, dimx
             if (mask(i, j)) then
@@ -7664,9 +7674,11 @@ contains
             end if
          end do
       end do
+      !$omp END DO
+      !$omp END PARALLEL
 
       return
-   end function derivative
+   end function derivative_theta
 
    ! a point (i, j) rotated by a theta angle around the point (x0, y0)
    function rmse_gradient(i, j, x0, y0, theta, b, w, gamma, t, db, dw, dgamma, dtheta, dx0) result(y)
@@ -7739,34 +7751,41 @@ contains
       end if
    end function gradient
 
-   subroutine gradient_descent(b, w, gamma, mu, theta, view, mask, eta, max_iter, tol)      
+   subroutine gradient_descent(b, w, gamma, mu, theta, view, mask, eta, max_iter, tol, b0, w0, gamma0, mu0, theta0)
       implicit none
 
-      real(c_float), intent(inout) :: b, w, gamma, mu, theta
+      real(c_float), intent(inout) :: b, w, gamma, mu, theta      
       real(c_float), intent(in) :: eta, tol
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
       integer(c_int), intent(in) :: max_iter            
+      real(c_float), intent(in) :: b0, w0, gamma0, mu0, theta0
       real(c_float) :: db, dw, dgamma, dtheta, dmu      
       real(c_float) :: rmse, rmse1
       integer :: iter      
 
+      b = b0
+      w = w0
+      gamma = gamma0
+      mu = mu0
+      theta = theta0
+
       do iter = 1, max_iter
          rmse = gradient(theta, b, w, gamma, mu, db, dw, dgamma, dtheta, dmu, view, mask)
-         print *, 'iter:', iter, 'b:', b, 'w:', w, 'gamma:', gamma, 'mu:', mu, 'rmse:', rmse
+         print *, 'iter:', iter, 'b:', b, 'w:', w, 'gamma:', gamma, 'theta:', theta, 'mu:', mu, 'rmse:', rmse
 
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
 
          ! update the parameters
-         b = b + eta * db
-         w = w + eta * dw
-         gamma = gamma + eta * dgamma         
-         mu = mu + eta * dmu
-         theta = theta + eta * dtheta
+         b = b - eta * db
+         w = w - eta * dw
+         ! gamma = gamma - eta * dgamma         
+         mu = mu - eta * dmu
+         ! theta = theta - eta * dtheta
       end do
    end subroutine gradient_descent
 
-   pure function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
+   function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
       implicit none
 
       real(c_float), intent(in) :: a, b, b0, w, gamma, mu
@@ -7781,8 +7800,8 @@ contains
       angle1 = a
       angle2 = b
 
-      deriv1 = derivative(angle1, b0, w, gamma, mu, view, mask)
-      deriv2 = derivative(angle2, b0, w, gamma, mu, view, mask)
+      deriv1 = derivative_theta(angle1, b0, w, gamma, mu, view, mask)
+      deriv2 = derivative_theta(angle2, b0, w, gamma, mu, view, mask)
 
       ! verify that the signs differ, if not return the mid-point
       if (sign(1.0, deriv1) .eq. sign(1.0, deriv2)) then
@@ -7792,7 +7811,7 @@ contains
 
       do i = 1, 20
          angle = 0.5*(angle1 + angle2)
-         deriv = derivative(angle, b0, w, gamma, mu, view, mask)
+         deriv = derivative_theta(angle, b0, w, gamma, mu, view, mask)
 
          ! examine the sign of the derivative at the mid-point
          if (sign(1.0, deriv1) .eq. sign(1.0, deriv)) then
@@ -8005,10 +8024,12 @@ contains
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
 
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
+         ! theta = find_angle(b, w, gamma, x1 + mu, item%pixels, item%mask) ! using the whole image
          print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795         
 
-         ! refine the parameters further with a gradient descent
-         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.01, 100, 0.001)
+         ! refine the parameters with a gradient descent
+         ! call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.01, 10, 0.001, b, w, gamma, mu, theta)         
+         ! print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu              
 
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
