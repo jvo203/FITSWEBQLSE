@@ -7732,9 +7732,10 @@ contains
 
       do j = 1, dimy
          do i = 1, dimx
-            if (mask(i, j)) then            
+            if (mask(i, j)) then
                ! call an integrated function: rotation + gradients
-               rotated = rmse_gradient(real(i), real(j), x0, y0, theta, b, w, gamma, view(i, j), db, dw, dgamma, dtheta, dmu)               
+               rotated = rmse_gradient(real(i), real(j), x0, y0, theta, b, w, gamma, view(i, j), db, dw, dgamma, dtheta, dmu)
+
                rmse = rmse + (view(i, j) - rotated)**2
                count = count + 1
             end if
@@ -7777,10 +7778,10 @@ contains
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
 
          ! update the parameters
-         b = b - eta * db
-         w = w - eta * dw
+         ! b = b - eta * db
+         ! w = w - eta * dw
          ! gamma = gamma - eta * dgamma         
-         mu = mu - eta * dmu
+         ! mu = mu - eta * dmu
          ! theta = theta - eta * dtheta
       end do
    end subroutine gradient_descent
@@ -8024,11 +8025,11 @@ contains
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
 
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
-         ! theta = find_angle(b, w, gamma, x1 + mu, item%pixels, item%mask) ! using the whole image
+         ! theta = find_angle(b, w, gamma, x1 + mu - 1, item%pixels, item%mask) ! using the whole image
          print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795         
 
          ! refine the parameters with a gradient descent
-         ! call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.01, 10, 0.001, b, w, gamma, mu, theta)         
+         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.01, 1, 0.001, b, w, gamma, mu, theta)
          ! print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu              
 
          ! y remains the same, x needs to be adjusted
